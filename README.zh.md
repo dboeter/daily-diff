@@ -280,7 +280,7 @@ infra_repos:
 | DeepSeek | `deepseek` | `DEEPSEEK_API_KEY` | `deepseek-v4-flash` |
 | Qwen | `qwen` | `DASHSCOPE_API_KEY` | `qwen-flash` |
 
-可通过 `ANTHROPIC_MODEL`、`OPENAI_MODEL`、`GITHUB_COPILOT_MODEL`、`OPENROUTER_MODEL`、`DEEPSEEK_MODEL` 或 `QWEN_MODEL` 分别覆盖默认模型名称；Qwen 的接入点可用 `DASHSCOPE_BASE_URL` 覆盖。
+可通过 `ANTHROPIC_MODEL`、`OPENAI_MODEL`、`GITHUB_COPILOT_MODEL`、`OPENROUTER_MODEL`、`DEEPSEEK_MODEL` 或 `QWEN_MODEL` 分别覆盖默认模型名称；Qwen 的接入点可用 `DASHSCOPE_BASE_URL` 覆盖。 OpenRouter 上的推理模型可设置 `OPENROUTER_REASONING_EFFORT`（如 `low`），避免推理耗尽全部输出 token。
 
 每日定时任务使用 `qwen` / `qwen-flash`。
 

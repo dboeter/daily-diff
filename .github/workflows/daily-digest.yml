@@ -85,6 +85,8 @@ jobs:
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
           # Free stealth model; if OpenRouter retires it, runs abort at the LLM health gate — swap the id here.
           OPENROUTER_MODEL: stealth/space-bunny-alpha
+          # Without this the reasoning model spends the whole token budget thinking and returns empty content.
+          OPENROUTER_REASONING_EFFORT: low
           PRODUCTHUNT_TOKEN: ${{ secrets.PRODUCTHUNT_TOKEN }}
           DIGEST_REPO: ${{ github.repository }}
         run: pnpm start

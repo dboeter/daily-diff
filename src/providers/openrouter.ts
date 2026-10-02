@@ -4,6 +4,9 @@
  * Env vars:
  *   OPENROUTER_API_KEY  - API key
  *   OPENROUTER_MODEL    - model name (default: anthropic/claude-sonnet-4)
+ *   OPENROUTER_REASONING_EFFORT - optional reasoning effort (e.g. "low"). Without it a
+ *                         reasoning model can spend the whole max_tokens budget on
+ *                         reasoning and return empty content (finish_reason "length").
  */
 
 import { OpenAICompatibleProvider } from "./openai-compatible.ts";
@@ -14,10 +17,12 @@ export class OpenRouterProvider extends OpenAICompatibleProvider {
   readonly name = "openrouter";
 
   constructor(opts?: { apiKey?: string; model?: string }) {
+    const effort = process.env["OPENROUTER_REASONING_EFFORT"];
     super({
       apiKey: opts?.apiKey ?? process.env["OPENROUTER_API_KEY"],
       baseURL: OPENROUTER_BASE_URL,
       model: opts?.model ?? process.env["OPENROUTER_MODEL"] ?? "anthropic/claude-sonnet-4",
+      extraBody: effort ? { reasoning: { effort } } : undefined,
     });
   }
 }

@@ -316,6 +316,17 @@ describe("OpenRouterProvider", () => {
     }),
   );
 
+  it(
+    "sends reasoning effort from OPENROUTER_REASONING_EFFORT",
+    withEnv({ OPENROUTER_REASONING_EFFORT: "low" }, async () => {
+      const mockCreate = await getOpenAIMockCreate();
+      mockCreate.mockResolvedValueOnce({ choices: [{ message: { content: "ok" } }] });
+
+      await new OpenRouterProvider({ apiKey: "test" }).call("prompt", 256);
+      expect(mockCreate).toHaveBeenLastCalledWith(expect.objectContaining({ reasoning: { effort: "low" } }));
+    }),
+  );
+
   it("throws on empty response", async () => {
     const mockCreate = await getOpenAIMockCreate();
     mockCreate.mockResolvedValueOnce({
