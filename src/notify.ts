@@ -15,12 +15,7 @@ import { pathToFileURL } from "node:url";
 import { NOTIFY_LABELS } from "./i18n.ts";
 import type { ReportHighlights } from "./prompts-data.ts";
 
-export interface Highlights {
-  zh: ReportHighlights;
-  en: ReportHighlights;
-}
-
-const PAGES_URL_DEFAULT = "https://duanyytop.github.io/agents-radar";
+const PAGES_URL_DEFAULT = "https://dboeter.github.io/daily-diff";
 
 function escapeHtml(s: string): string {
   return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
@@ -28,7 +23,7 @@ function escapeHtml(s: string): string {
 
 async function sendTelegram(text: string): Promise<void> {
   const BOT_TOKEN = process.env["TELEGRAM_BOT_TOKEN"] ?? "";
-  const CHAT_ID = process.env["TELEGRAM_CHAT_ID"] || "@agents_radar";
+  const CHAT_ID = process.env["TELEGRAM_CHAT_ID"] ?? "";
   const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
   const res = await fetch(url, {
     method: "POST",
@@ -50,32 +45,18 @@ export function buildMessage(
   date: string,
   reports: string[],
   pagesUrl?: string,
-  highlights?: Highlights | null,
+  highlights?: ReportHighlights | null,
 ): string {
   const PAGES_URL = (pagesUrl ?? process.env["PAGES_URL"] ?? PAGES_URL_DEFAULT).replace(/\/$/, "");
-  const ordered = reports.filter((r) => !r.endsWith("-en"));
-  const lines: string[] = [`📡 <b>agents-radar · ${date}</b>`];
+  const lines: string[] = [`📡 <b>Daily Diff · ${date}</b>`];
 
-  const zhHighlights = highlights?.zh ?? {};
-  const enHighlights = highlights?.en ?? {};
-
-  for (const r of ordered) {
-    const zhLabel = NOTIFY_LABELS[r]?.zh ?? r;
-    const zhUrl = `${PAGES_URL}/#${date}/${r}`;
-    const enKey = `${r}-en`;
-
+  for (const r of reports) {
+    const label = NOTIFY_LABELS[r] ?? r;
     lines.push(""); // blank line before each report section
-    if (reports.includes(enKey)) {
-      const enLabel = NOTIFY_LABELS[r]?.en ?? "EN";
-      const enUrl = `${PAGES_URL}/#${date}/${enKey}`;
-      lines.push(`• <a href="${zhUrl}">${zhLabel}</a>  ·  <a href="${enUrl}">${enLabel}</a>`);
-    } else {
-      lines.push(`• <a href="${zhUrl}">${zhLabel}</a>`);
-    }
+    lines.push(`• <a href="${PAGES_URL}/#${date}/${r}">${label}</a>`);
 
-    // Add highlights as indented sub-items. Fall back to en when a report's zh
-    // highlights are missing so a single-language failure never blanks the message.
-    const items = zhHighlights[r] ?? enHighlights[r];
+    // Add highlights as indented sub-items.
+    const items = highlights?.[r];
     if (items?.length) {
       for (const h of items) {
         lines.push(`  ◦ ${escapeHtml(h)}`);
@@ -91,6 +72,10 @@ async function main(): Promise<void> {
   const BOT_TOKEN = process.env["TELEGRAM_BOT_TOKEN"] ?? "";
   if (!BOT_TOKEN) {
     console.log("[notify] TELEGRAM_BOT_TOKEN not set — skipping.");
+    return;
+  }
+  if (!process.env["TELEGRAM_CHAT_ID"]) {
+    console.log("[notify] TELEGRAM_CHAT_ID not set — skipping.");
     return;
   }
 
@@ -111,11 +96,11 @@ async function main(): Promise<void> {
   const { date, reports } = latest;
 
   // Load highlights if available
-  let highlights: Highlights | null = null;
+  let highlights: ReportHighlights | null = null;
   const highlightsPath = path.join("digests", date, "highlights.json");
   if (fs.existsSync(highlightsPath)) {
     try {
-      highlights = JSON.parse(fs.readFileSync(highlightsPath, "utf-8")) as Highlights;
+      highlights = JSON.parse(fs.readFileSync(highlightsPath, "utf-8")) as ReportHighlights;
     } catch {
       console.log("[notify] Failed to parse highlights.json — sending without highlights.");
     }

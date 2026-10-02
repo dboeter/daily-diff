@@ -332,7 +332,8 @@ export async function fetchSkillsData(repo: string): Promise<{ prs: GitHubItem[]
 }
 
 const GITHUB_ISSUE_BODY_LIMIT = 65536;
-const TRUNCATION_NOTICE = "\n\n---\n> ⚠️ 内容超过 GitHub Issue 上限，完整报告见提交的 Markdown 文件。";
+const TRUNCATION_NOTICE =
+  "\n\n---\n> ⚠️ Content exceeds the GitHub Issue size limit; see the committed Markdown file for the full report.";
 
 /** GitHub label colors by label name. Default: "0075ca". */
 const LABEL_COLORS: Record<string, string> = {
@@ -340,20 +341,10 @@ const LABEL_COLORS: Record<string, string> = {
   trending: "f9a825",
   hn: "ff6600",
   ph: "da552f",
-  "digest-en": "1d76db",
-  "openclaw-en": "f472b6",
-  "web-en": "6366f1",
-  "trending-en": "fbbf24",
-  "hn-en": "fb923c",
-  "ph-en": "e8854a",
   arxiv: "b31b1b",
-  "arxiv-en": "d44a4a",
   hf: "ff9d00",
-  "hf-en": "ffb84d",
   community: "2563eb",
-  "community-en": "60a5fa",
   infra: "0891b2",
-  "infra-en": "22d3ee",
 };
 
 /**
@@ -382,7 +373,9 @@ function neutralizeGitHubRefs(text: string): string {
  * touched.
  */
 const DIGEST_ISSUE_LABELS = new Set([
-  ...Object.values(ISSUE_LABELS).flatMap((l) => [l.zh, l.en]),
+  ...Object.values(ISSUE_LABELS),
+  // Issues from the former bilingual pipeline carried "-en" labels; keep them closable.
+  ...Object.values(ISSUE_LABELS).map((l) => `${l}-en`),
   "weekly",
   "weekly-en",
   "monthly",

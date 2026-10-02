@@ -1,134 +1,66 @@
 {
-  "zh": {
-    "ai-cli": [
-      "AI CLI转向持久多智能体执行",
-      "会话连续性与上下文压缩占主导",
-      "Windows可靠性仍是主要弱点",
-      "MCP生命周期与后台任务可观测性增强",
-      "BYOK与自动化API推动融合",
-      "Claude Code发布稳定版v2.1.288"
-    ],
-    "ai-agents": [
-      "OpenClaw每日达496个议题和500个PR",
-      "OpenClaw优先稳定性而非功能扩张",
-      "Gateway v2026.8.35增强安全与模型支持",
-      "内存增长与SQLite争用需关注",
-      "重启恢复与进程泄漏仍有风险",
-      "Hermes、IronClaw、QwenPaw和ZeroClaw活跃"
-    ],
-    "ai-infra": [
-      "SGLang与llama.cpp变更量最大",
-      "SGLang发布v0.5.21，合并779个PR",
-      "新MoE支持DeepSeek、Qwen和GLM",
-      "KV缓存损坏影响推理可靠性",
-      "Blackwell与AMD支持仍是重点",
-      "网关新增策略、用量和流式控制"
-    ],
-    "ai-trending": [
-      "智能体基础设施主导今日开源热度",
-      "caveman将编码智能体令牌用量降低65%",
-      "context-mode目标减少98%输出",
-      "NVIDIA OpenShell今日新增584星标",
-      "Codegraph提升代码库理解能力",
-      "插件与持久记忆系统受到关注"
-    ],
-    "ai-web": [
-      "Anthropic推出1亿美元Claude Frontier Academy",
-      "Barclans计划为半数开发者采用Claude Code",
-      "生命科学访问扩展至Mythos和Opus",
-      "机器人研究聚焦近期经济可行性",
-      "Anthropic警告GLM-5.3带来的风险",
-      "OpenAI新增两项官方内容"
-    ],
-    "ai-hn": [
-      "Gemini 4 Argon以1683分领先",
-      "Gemini 4 Argon引发1167条HN评论",
-      "ChatGPT新Sites功能引发讨论",
-      "上下文架构成为研究焦点",
-      "智能体基准与不完全信息博弈突出",
-      "本地推理与编码智能体工具受关注"
-    ],
-    "ai-arxiv": [
-      "分层扩散模型改进并行解码",
-      "循环Transformer以极低成本提升解码",
-      "智能体研究聚焦长时程执行",
-      "工具使用误报挑战评估",
-      "机制可解释性重新受到关注",
-      "几何推理面向3D与分子任务"
-    ],
-    "ai-community": [
-      "AI安全测试主导开发者讨论",
-      "一项测试发现73%模型未能预警",
-      "智能体权限与可执行钩子受关注",
-      "轻量本地模型挑战昂贵托管LLM",
-      "开发者质疑智能体指令是否构成契约",
-      "AWS限额验证展示证据驱动工作流"
-    ]
-  },
-  "en": {
-    "ai-cli": [
-      "AI CLIs shift toward durable multi-agent execution",
-      "Session continuity and context compaction dominate",
-      "Windows reliability remains a major weakness",
-      "MCP lifecycle and background-task observability grow",
-      "BYOK and automation APIs drive convergence",
-      "Claude Code ships stable v2.1.288"
-    ],
-    "ai-agents": [
-      "OpenClaw reaches 496 issues and 500 PRs daily",
-      "OpenClaw prioritizes stability over feature expansion",
-      "Gateway v2026.8.35 adds security and model support",
-      "Memory growth and SQLite contention need attention",
-      "Restart recovery and process leaks remain risks",
-      "Hermes, IronClaw, QwenPaw and ZeroClaw stay active"
-    ],
-    "ai-infra": [
-      "SGLang and llama.cpp ship the largest change batches",
-      "SGLang releases v0.5.21 with 779 merged PRs",
-      "New MoE support targets DeepSeek, Qwen and GLM",
-      "KV-cache corruption challenges inference reliability",
-      "Blackwell and AMD support remain active priorities",
-      "Gateways gain policy, usage and streaming controls"
-    ],
-    "ai-trending": [
-      "Agent infrastructure dominates today's open-source momentum",
-      "caveman cuts coding-agent token usage by 65%",
-      "context-mode targets up to 98% output reduction",
-      "NVIDIA OpenShell gains 584 stars today",
-      "Codegraph improves repository understanding",
-      "Plugin and persistent-memory systems gain traction"
-    ],
-    "ai-web": [
-      "Anthropic launches a $100M Claude Frontier Academy",
-      "Barclans plans Claude Code for half its developers",
-      "Life Sciences access expands to Mythos and Opus",
-      "Robot research questions near-term economic viability",
-      "Anthropic warns about risks from GLM-5.3",
-      "OpenAI adds two new official content items"
-    ],
-    "ai-hn": [
-      "Gemini 4 Argon leads with 1,683 points",
-      "Gemini 4 Argon sparks 1,167 HN comments",
-      "ChatGPT's new Sites feature draws debate",
-      "Context architecture becomes a key research battleground",
-      "Agent benchmarks and imperfect-information games stand out",
-      "Local inference and coding-agent tools gain attention"
-    ],
-    "ai-arxiv": [
-      "Hierarchical diffusion models improve parallel decoding",
-      "Looped Transformers decode better at almost no cost",
-      "Agent research targets long-horizon execution",
-      "Tool-use false positives challenge evaluations",
-      "Mechanistic interpretability gains renewed attention",
-      "Geometric reasoning targets 3D and molecular tasks"
-    ],
-    "ai-community": [
-      "AI security testing dominates developer discussions",
-      "One test found 73% of models failed to alert",
-      "Agent permissions and enforceable hooks gain attention",
-      "Lightweight local models challenge expensive hosted LLMs",
-      "Developers question whether agent instructions are contracts",
-      "AWS limit verification shows evidence-based agent workflows"
-    ]
-  }
+  "ai-cli": [
+    "AI CLIs shift toward durable multi-agent execution",
+    "Session continuity and context compaction dominate",
+    "Windows reliability remains a major weakness",
+    "MCP lifecycle and background-task observability grow",
+    "BYOK and automation APIs drive convergence",
+    "Claude Code ships stable v2.1.288"
+  ],
+  "ai-agents": [
+    "OpenClaw reaches 496 issues and 500 PRs daily",
+    "OpenClaw prioritizes stability over feature expansion",
+    "Gateway v2026.8.35 adds security and model support",
+    "Memory growth and SQLite contention need attention",
+    "Restart recovery and process leaks remain risks",
+    "Hermes, IronClaw, QwenPaw and ZeroClaw stay active"
+  ],
+  "ai-infra": [
+    "SGLang and llama.cpp ship the largest change batches",
+    "SGLang releases v0.5.21 with 779 merged PRs",
+    "New MoE support targets DeepSeek, Qwen and GLM",
+    "KV-cache corruption challenges inference reliability",
+    "Blackwell and AMD support remain active priorities",
+    "Gateways gain policy, usage and streaming controls"
+  ],
+  "ai-trending": [
+    "Agent infrastructure dominates today's open-source momentum",
+    "caveman cuts coding-agent token usage by 65%",
+    "context-mode targets up to 98% output reduction",
+    "NVIDIA OpenShell gains 584 stars today",
+    "Codegraph improves repository understanding",
+    "Plugin and persistent-memory systems gain traction"
+  ],
+  "ai-web": [
+    "Anthropic launches a $100M Claude Frontier Academy",
+    "Barclans plans Claude Code for half its developers",
+    "Life Sciences access expands to Mythos and Opus",
+    "Robot research questions near-term economic viability",
+    "Anthropic warns about risks from GLM-5.3",
+    "OpenAI adds two new official content items"
+  ],
+  "ai-hn": [
+    "Gemini 4 Argon leads with 1,683 points",
+    "Gemini 4 Argon sparks 1,167 HN comments",
+    "ChatGPT's new Sites feature draws debate",
+    "Context architecture becomes a key research battleground",
+    "Agent benchmarks and imperfect-information games stand out",
+    "Local inference and coding-agent tools gain attention"
+  ],
+  "ai-arxiv": [
+    "Hierarchical diffusion models improve parallel decoding",
+    "Looped Transformers decode better at almost no cost",
+    "Agent research targets long-horizon execution",
+    "Tool-use false positives challenge evaluations",
+    "Mechanistic interpretability gains renewed attention",
+    "Geometric reasoning targets 3D and molecular tasks"
+  ],
+  "ai-community": [
+    "AI security testing dominates developer discussions",
+    "One test found 73% of models failed to alert",
+    "Agent permissions and enforceable hooks gain attention",
+    "Lightweight local models challenge expensive hosted LLMs",
+    "Developers question whether agent instructions are contracts",
+    "AWS limit verification shows evidence-based agent workflows"
+  ]
 }

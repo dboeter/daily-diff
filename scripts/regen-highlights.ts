@@ -15,7 +15,6 @@ import path from "node:path";
 import { callLlm, parseLlmJson } from "../src/report.ts";
 import { buildHighlightsPrompt, type ReportHighlights } from "../src/prompts-data.ts";
 import { buildMessage } from "../src/notify.ts";
-import type { Lang } from "../src/i18n.ts";
 
 const DATE = process.argv[2] && !process.argv[2].startsWith("-") ? process.argv[2] : null;
 const NOTIFY = process.argv.includes("--notify");
@@ -51,56 +50,37 @@ async function main() {
   ];
 
   // Read reports
-  const zhReports: Record<string, string> = {};
-  const enReports: Record<string, string> = {};
+  const reports: Record<string, string> = {};
   for (const id of reportIds) {
-    const zhPath = path.join(digestsDir, dateStr, `${id}.md`);
-    const enPath = path.join(digestsDir, dateStr, `${id}-en.md`);
-    if (fs.existsSync(zhPath)) zhReports[id] = fs.readFileSync(zhPath, "utf-8");
-    if (fs.existsSync(enPath)) enReports[id] = fs.readFileSync(enPath, "utf-8");
+    const reportPath = path.join(digestsDir, dateStr, `${id}.md`);
+    if (fs.existsSync(reportPath)) reports[id] = fs.readFileSync(reportPath, "utf-8");
   }
 
-  console.log(`  ZH reports: ${Object.keys(zhReports).length}, EN reports: ${Object.keys(enReports).length}`);
+  console.log(`  Reports: ${Object.keys(reports).length}`);
 
   // Generate highlights
-  const highlights: Record<Lang, ReportHighlights> = { zh: {}, en: {} };
-  const [zhRaw, enRaw] = await Promise.all([
-    callLlm(buildHighlightsPrompt(zhReports, "zh"), 2048),
-    callLlm(buildHighlightsPrompt(enReports, "en"), 2048),
-  ]);
-
+  let highlights: ReportHighlights = {};
   try {
-    highlights.zh = parseLlmJson<ReportHighlights>(zhRaw);
+    highlights = parseLlmJson<ReportHighlights>(await callLlm(buildHighlightsPrompt(reports), 2048));
   } catch (err) {
-    console.error(`  [highlights] zh parse failed: ${err}`);
+    console.error(`  [highlights] parse failed: ${err}`);
   }
-  try {
-    highlights.en = parseLlmJson<ReportHighlights>(enRaw);
-  } catch (err) {
-    console.error(`  [highlights] en parse failed: ${err}`);
-  }
-
-  // Backfill an empty language from the other so notifications never blank out.
-  if (Object.keys(highlights.zh).length === 0) highlights.zh = highlights.en;
-  else if (Object.keys(highlights.en).length === 0) highlights.en = highlights.zh;
 
   const outPath = path.join(digestsDir, dateStr, "highlights.json");
   fs.writeFileSync(outPath, JSON.stringify(highlights, null, 2) + "\n");
   console.log(`  Saved ${outPath}`);
-  console.log(`  ZH keys: ${Object.keys(highlights.zh).join(", ")}`);
-  console.log(`  EN keys: ${Object.keys(highlights.en).join(", ")}`);
+  console.log(`  Keys: ${Object.keys(highlights).join(", ")}`);
 
   if (NOTIFY) {
     const BOT_TOKEN = process.env["TELEGRAM_BOT_TOKEN"] ?? "";
-    const CHAT_ID = process.env["TELEGRAM_CHAT_ID"] || "@agents_radar";
+    const CHAT_ID = process.env["TELEGRAM_CHAT_ID"] ?? "";
 
     if (!BOT_TOKEN) {
       console.error("  TELEGRAM_BOT_TOKEN not set, cannot send notification.");
       process.exit(1);
     }
 
-    const allReports = [...Object.keys(zhReports), ...Object.keys(enReports).map((k) => `${k}-en`)];
-    const text = buildMessage(dateStr, allReports, undefined, highlights);
+    const text = buildMessage(dateStr, Object.keys(reports), undefined, highlights);
 
     console.log(`  Sending Telegram notification...`);
     const res = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {

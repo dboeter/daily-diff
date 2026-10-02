@@ -1,6 +1,6 @@
-# OpenClaw 生态日报 2026-10-03
+# OpenClaw Ecosystem Digest 2026-10-03
 
-> Issues: 496 | PRs: 500 | 覆盖项目: 5 个 | 生成时间: 2026-10-02 20:23 UTC
+> Issues: 496 | PRs: 500 | Projects covered: 5 | Generated: 2026-10-02 20:23 UTC
 
 - [OpenClaw](https://github.com/openclaw/openclaw)
 - [Hermes Agent](https://github.com/nousresearch/hermes-agent)
@@ -10,925 +10,951 @@
 
 ---
 
-## OpenClaw 项目深度报告
+## OpenClaw Deep Dive
 
-# OpenClaw 项目摘要 — 2026-10-03
+# OpenClaw Project Digest — 2026-10-03
 
-## 1. 今日概览
+## 1. Today's Overview
 
-OpenClaw 继续保持高度活跃，过去 24 小时内有 **496 个 issue** 和 **500 个 pull request** 获得更新；其中约三分之二仍处于开放或活跃状态。项目目前主要处于**稳定化阶段**，重点关注模型目录内存增长、gateway/SQLite 争用、重启恢复、进程泄漏和消息投递。近期发布了两个 `extended-stable` gateway 版本——**v2026.8.34** 和 **v2026.8.35**——主要涵盖关键安全、可靠性、性能和模型支持改进。P0/P1 报告以及需要通过 proof 才能合并的迁移/安全类 PR 数量较多，表明项目工程活动十分活跃，但运维和维护负担也在不断上升。
+OpenClaw remains highly active, with **496 issues** and **500 pull requests** updated in the last 24 hours; approximately two-thirds of each remain open or active. The project is primarily in a **stabilization phase**, with strong attention on model-catalog memory growth, gateway/SQLite contention, restart recovery, process leaks, and message delivery. Two `extended-stable` gateway releases were published—**v2026.8.34** and **v2026.8.35**—focused on critical security, reliability, performance, and model-support improvements. The volume of P0/P1 reports and proof-gated migration/security PRs suggests substantial engineering activity, but also a growing operational and maintenance burden.
 
-**活跃度评估：** 变更 churn 非常高；相比扩展新功能，稳定化和状态管理正确性目前占据更重要的位置。
+**Activity assessment:** Very high churn, with stabilization and state-management correctness outweighing feature expansion.
 
 ---
 
-## 2. 版本发布
+## 2. Releases
 
 ### [v2026.8.35](https://github.com/openclaw/openclaw/releases/tag/v2026.8.35)
 
-- 仅包含 Gateway 的 `extended-stable` 发布版本，相当于 OpenClaw 当前的 LTS 版本。
-- 基于 2026 年 8 月底的 OpenClaw 代码。
-- 包含：
-  - 关键安全更新。
-  - 可靠性和性能修复。
-  - 新模型支持。
+- Gateway-only `extended-stable` release, OpenClaw’s current equivalent to LTS.
+- Based on OpenClaw from the end of August 2026.
+- Includes:
+  - Critical security updates.
+  - Reliability and performance fixes.
+  - New model support.
 
 ### [v2026.8.34](https://github.com/openclaw/openclaw/releases/tag/v2026.8.34)
 
-- 同样是仅包含 Gateway 的 `extended-stable` 发布版本。
-- 涵盖相同范围的稳定化、安全、性能和模型支持改进。
+- Also a gateway-only `extended-stable` release.
+- Carries the same broad stabilization, security, performance, and model-support scope.
 
-### 发布评估
+### Release assessment
 
-现有发布说明未指出明确的 breaking change 或强制迁移步骤。不过，围绕 2026.9.x 的 issue backlog 反映出严重的内存、启动、provider 和持久化问题，因此运维人员应优先将 stable 分支视为风险较低的部署路径；对于对恢复能力敏感的安装环境，在升级前还应查看[2026.9.3/2026.9.4 升级与恢复跟踪 issue](https://github.com/openclaw/openclaw/issues/145252)。
-
----
-
-## 3. 项目进展
-
-从当前可见的 PR 集合来看，项目正在多个重要方向推进：
-
-- **Gateway 启动与会话生命周期**
-  - [PR #163690](https://github.com/openclaw/openclaw/pull/163690) 提议在验证数 GB 级别的 store 之前先打开 listener，并遵循 clean-close receipt。此举旨在解决启动缓慢问题，同时保持接入安全性。
-  - [PR #163763](https://github.com/openclaw/openclaw/pull/163763) 将长期闲置的 materialized session rows 降级，避免长期运行的 gateway 保留不必要的 session graph。
-
-- **模型目录 worker 性能**
-  - [PR #162226](https://github.com/openclaw/openclaw/pull/162226) 处理目录范围扩大后反复重载插件的问题。它与 catalog-worker 的内存和 CPU 报告直接相关，包括 [#159662](https://github.com/openclaw/openclaw/issues/159662)、[#160548](https://github.com/openclaw/openclaw/issues/160548) 和 [#161379](https://github.com/openclaw/openclaw/issues/161379)。
-  - [PR #157575](https://github.com/openclaw/openclaw/pull/157575) 处理 managed-gateway 的 heap 设置覆盖 worker 专属限制的问题。
-
-- **会话与状态正确性**
-  - [PR #163723](https://github.com/openclaw/openclaw/pull/163723) 淘汰尚未发布的 agent-session schema，降低不必要的迁移复杂度。
-  - [PR #162920](https://github.com/openclaw/openclaw/pull/162920) 将旧版 ACP session metadata 的迁移移入 Doctor。该 PR 被标记为 **needs proof**，并存在兼容性和安全边界风险。
-  - [PR #119055](https://github.com/openclaw/openclaw/pull/119055) 加强 Code Mode 的 continuation 和输入持久化，防止使用过期或不属于当前所有者的状态。
-  - [PR #112709](https://github.com/openclaw/openclaw/pull/112709) 提议以原子方式管理 TaskFlow 取消状态。
-
-- **Agent 上下文与用户体验**
-  - [PR #138084](https://github.com/openclaw/openclaw/pull/138084) 引入由 agent 请求触发的 `session_compact` 工具，使长期运行的 assistant 能在自动 token 压力出现之前归档已完成的话题。
-  - [PR #127389](https://github.com/openclaw/openclaw/pull/127389) 从普通聊天历史中隐藏内部 completion wake，以及生成媒体和 subagent 通知。
-  - [PR #163761](https://github.com/openclaw/openclaw/pull/163761) 修复多 agent Gateway 上的 Workboard Sessions board 问题。
-  - [PR #163762](https://github.com/openclaw/openclaw/pull/163762) 修复视频 widget 的滚动和首帧显示行为。
-
-- **平台能力**
-  - [PR #142954](https://github.com/openclaw/openclaw/pull/142954) 和 [PR #143216](https://github.com/openclaw/openclaw/pull/143216) 推进 Wear OS Gateway 对话、共享认证和 approvals。两者规模都较大，且涉及安全敏感改动。
-
-- **维护与重构**
-  - [PR #163759](https://github.com/openclaw/openclaw/pull/163759) 整合重复的 Telegram dispatch、delivery、callback 和 configuration plumbing。
-  - [PR #163186](https://github.com/openclaw/openclaw/pull/163186) 淘汰 7 月之前已废弃的 OAuth sidecar import。
-  - [PR #163752](https://github.com/openclaw/openclaw/pull/163752) 和 [PR #163737](https://github.com/openclaw/openclaw/pull/163737) 减少不必要的测试构建和受负载影响的 flaky 测试。
-
-总体来看，PR backlog 主要聚焦于**资源所有权、状态持久性、启动可用性和架构清理**，而不是广泛扩展新的 agent 功能。
+The supplied release notes do not identify explicit breaking changes or mandatory migration steps. However, the issue backlog around 2026.9.x highlights serious memory, startup, provider, and persistence problems, so operators should treat the stable line as the lower-risk deployment path and review the [2026.9.3/2026.9.4 upgrade and recovery tracking issue](https://github.com/openclaw/openclaw/issues/145252) before upgrading recovery-sensitive installations.
 
 ---
 
-## 4. 社区热点
+## 3. Project Progress
 
-当前讨论最活跃的 issue 包括：
+The visible PR set shows movement in several important areas:
 
-1. [Realtime voice 工作可能保留无上限的 provider 和 consult 状态 — #116201](https://github.com/openclaw/openclaw/issues/116201)  
-   **59 条评论。** Realtime voice 缺少明确的资源所有权边界；在 provider 较慢或流量突发时，已被取代的 consult 工作、大型 frame 和音频数据可能不断累积。这暴露出系统需要显式取消机制、缓冲限制和会话级资源核算。
+- **Gateway startup and session lifecycle**
+  - [PR #163690](https://github.com/openclaw/openclaw/pull/163690) proposes opening the listener before validating a multi-gigabyte store and honoring clean-close receipts. This directly targets slow startup while preserving admission safety.
+  - [PR #163763](https://github.com/openclaw/openclaw/pull/163763) demotes idle materialized session rows so long-lived gateways do not retain unnecessary session graphs.
 
-2. [Embedded prompt cache 在跨会话边界时失效 — #102175](https://github.com/openclaw/openclaw/issues/102175)  
-   **21 条评论。** 在 room event、compaction、recovery 和 Responses continuation 过程中，tool inventory 和 policy state 似乎会发生变化。用户需要可预测的缓存复用机制，尤其是对于长期运行的 embedded session。
+- **Model-catalog worker performance**
+  - [PR #162226](https://github.com/openclaw/openclaw/pull/162226) addresses repeated plugin reloads when the catalog scope grows. It is directly related to the catalog-worker memory and CPU reports, including [#159662](https://github.com/openclaw/openclaw/issues/159662), [#160548](https://github.com/openclaw/openclaw/issues/160548), and [#161379](https://github.com/openclaw/openclaw/issues/161379).
+  - [PR #157575](https://github.com/openclaw/openclaw/pull/157575) addresses managed-gateway heap settings overriding worker-specific limits.
 
-3. [升级至 2026.3.2 后 Vertex/Gemini 3.1 Pro Preview 失败 — #38327](https://github.com/openclaw/openclaw/issues/38327)  
-   **18 条评论。** 这是一个长期存在的 P0 provider 回归问题，会触发 `Cannot convert undefined or null to object`。尽管已有源码复现和明确的影响范围，但目前仍需要维护者审核并提供修复。
+- **Session and state correctness**
+  - [PR #163723](https://github.com/openclaw/openclaw/pull/163723) retires unshipped agent-session schemas, reducing unnecessary migration complexity.
+  - [PR #162920](https://github.com/openclaw/openclaw/pull/162920) moves legacy ACP session metadata migration into Doctor. It is marked **needs proof** and carries compatibility and security-boundary risk.
+  - [PR #119055](https://github.com/openclaw/openclaw/pull/119055) hardens Code Mode continuation and input persistence against stale or foreign ownership.
+  - [PR #112709](https://github.com/openclaw/openclaw/pull/112709) proposes atomic managed TaskFlow cancellation state.
 
-4. [Plugin-generation supersede 终止 system-agent turn — #139710](https://github.com/openclaw/openclaw/issues/139710)  
-   **18 条评论。** Hot reload 或 supersession 可能同时终止当前活动的 system-agent turn 和其 planner fallback，最终显示具有误导性的“unreachable inference”错误。
+- **Agent context and UX**
+  - [PR #138084](https://github.com/openclaw/openclaw/pull/138084) introduces an agent-requested `session_compact` tool, allowing long-running assistants to archive completed topics before automatic token pressure.
+  - [PR #127389](https://github.com/openclaw/openclaw/pull/127389) hides internal completion wakes and generated-media/subagent notifications from normal chat history.
+  - [PR #163761](https://github.com/openclaw/openclaw/pull/163761) fixes Workboard Sessions boards on multi-agent Gateways.
+  - [PR #163762](https://github.com/openclaw/openclaw/pull/163762) fixes scrolling and initial-frame behavior for video widgets.
 
-5. [Hook/tool 子进程未被回收 — #97616](https://github.com/openclaw/openclaw/issues/97616)  
-   **17 条评论。** 僵尸进程不断累积，与长期运行性能下降和可能的 crash loop 有关。
+- **Platform capabilities**
+  - [PR #142954](https://github.com/openclaw/openclaw/pull/142954) and [PR #143216](https://github.com/openclaw/openclaw/pull/143216) advance Wear OS Gateway conversations, shared authentication, and approvals. Both remain large and security-sensitive.
 
-6. [第二次运行挤掉进行中的 turn 并丢失回复 — #148707](https://github.com/openclaw/openclaw/issues/148707)  
-   **17 条评论。** 这是一个直接的 session authority 和消息丢失回归问题：被挤掉的 turn 会在没有重试或恢复的情况下终止。
+- **Maintenance and refactoring**
+  - [PR #163759](https://github.com/openclaw/openclaw/pull/163759) consolidates duplicated Telegram dispatch, delivery, callback, and configuration plumbing.
+  - [PR #163186](https://github.com/openclaw/openclaw/pull/163186) retires obsolete pre-July OAuth sidecar imports.
+  - [PR #163752](https://github.com/openclaw/openclaw/pull/163752) and [PR #163737](https://github.com/openclaw/openclaw/pull/163737) reduce unnecessary test builds and load-dependent flakiness.
 
-7. [Prepared-model-catalog worker 内存泄漏 — #159662](https://github.com/openclaw/openclaw/issues/159662)  
-   **14 条评论。** 报告估计，在不同 provider 和配置下，内存增长速度约为每小时 4–5 GB。目前已成为最明确的 gateway 级可靠性威胁之一。
-
-8. [2026.9.3/2026.9.4 升级与恢复可靠性跟踪 — #145252](https://github.com/openclaw/openclaw/issues/145252)  
-   **12 条评论。** 这一协调 issue 反映的是迁移、Doctor、rollback、restart 和 recovery 等多个层面的综合问题，而不是单一缺陷。
-
-### 社区的核心需求
-
-当前最主要的诉求并不是增加表层功能。用户和运维人员需要：
-
-- 明确的资源限制和可预测的清理机制。
-- 持久化的 single-writer 机制，或明确的状态所有权。
-- 在重启和 supersession 之后进行安全恢复。
-- 一致的 provider adapter 行为和缓存行为。
-- 更快、更安全的升级，以及可靠的 rollback。
-- 更好地查看已降级但仍可工作的组件。
+Overall, the PR backlog is strongly oriented toward **resource ownership, state durability, startup availability, and architectural cleanup**, rather than broad new-agent features.
 
 ---
 
-## 5. Bug 与稳定性
+## 4. Community Hot Topics
 
-### P0 — 紧急的发布或可用性风险
+The most discussed active issues are:
 
-- **[插件数量导致 Gateway 启动变慢 — #155859](https://github.com/openclaw/openclaw/issues/155859)**  
-  在插件较多的安装环境中，启动时间超过 120 秒的发布预算。**潜在相关 PR：**[#163690](https://github.com/openclaw/openclaw/pull/163690)，但该 PR 主要关注 store 验证，并未覆盖所有插件启动开销。
+1. [Realtime voice work can retain unbounded provider and consult state — #116201](https://github.com/openclaw/openclaw/issues/116201)  
+   **59 comments.** Realtime voice lacks hard ownership bounds, allowing superseded consult work, large frames, and audio data to accumulate under slow or bursty providers. This exposes a need for explicit cancellation, buffering limits, and session-level resource accounting.
 
-- **[Prepared-model-catalog worker 内存泄漏 — #159662](https://github.com/openclaw/openclaw/issues/159662)**  
-  报告称存在与 provider 无关的内存泄漏，增长速度约为每小时 4–5 GB。**相关 PR：**[#162226](https://github.com/openclaw/openclaw/pull/162226)。
+2. [Embedded prompt cache breaks across session boundaries — #102175](https://github.com/openclaw/openclaw/issues/102175)  
+   **21 comments.** Tool inventory and policy state appear to change across room events, compaction, recovery, and Responses continuations. Users need predictable cache reuse, especially for long-lived embedded sessions.
+
+3. [Vertex/Gemini 3.1 Pro Preview failure after 2026.3.2 — #38327](https://github.com/openclaw/openclaw/issues/38327)  
+   **18 comments.** A long-standing P0 provider regression produces `Cannot convert undefined or null to object`. Despite available source reproduction and clear impact, it still needs a maintainer-reviewed fix.
+
+4. [Plugin-generation supersede kills system-agent turn — #139710](https://github.com/openclaw/openclaw/issues/139710)  
+   **18 comments.** Hot reload or supersession can terminate both the active system-agent turn and its planner fallback, surfacing a misleading “unreachable inference” error.
+
+5. [Unreaped hook/tool child processes — #97616](https://github.com/openclaw/openclaw/issues/97616)  
+   **17 comments.** Zombie process accumulation is associated with long-term runtime degradation and possible crash loops.
+
+6. [Second run displaces an in-flight turn and loses the reply — #148707](https://github.com/openclaw/openclaw/issues/148707)  
+   **17 comments.** This is a direct session-authority and message-loss regression: the displaced turn terminates without retry or recovery.
+
+7. [Prepared-model-catalog worker leaks memory — #159662](https://github.com/openclaw/openclaw/issues/159662)  
+   **14 comments.** Reports estimate approximately 4–5 GB/hour of growth across providers and configurations. This is now one of the clearest gateway-wide reliability threats.
+
+8. [Upgrade and recovery reliability tracking for 2026.9.3/2026.9.4 — #145252](https://github.com/openclaw/openclaw/issues/145252)  
+   **12 comments.** The coordinated issue reflects broader problems involving migrations, Doctor, rollback, restart, and recovery rather than a single defect.
+
+### Underlying community needs
+
+The dominant demand is not for more surface-level features. Users and operators need:
+
+- Hard resource limits and predictable cleanup.
+- Durable single-writer or clearly owned session state.
+- Safe recovery after restarts and supersession.
+- Consistent provider adapters and cache behavior.
+- Faster, safer upgrades with reliable rollback.
+- Better visibility into degraded but still functioning components.
+
+---
+
+## 5. Bugs & Stability
+
+### P0 — urgent release or availability risk
+
+- **[Gateway startup is slowed by plugin count — #155859](https://github.com/openclaw/openclaw/issues/155859)**  
+  Startup exceeds the 120-second publication budget in plugin-heavy installations. **Potential related PR:** [#163690](https://github.com/openclaw/openclaw/pull/163690), though that focuses on store validation rather than all plugin startup cost.
+
+- **[Prepared-model-catalog worker memory leak — #159662](https://github.com/openclaw/openclaw/issues/159662)**  
+  Provider-agnostic leak reported at 4–5 GB/hour. **Related PR:** [#162226](https://github.com/openclaw/openclaw/pull/162226).
 
 - **[Gateway state-DB admission crash — #160521](https://github.com/openclaw/openclaw/issues/160521)**  
-  在 `reconcileActive` 期间，read-admission seal 和已关闭的 worker-environment inventory 会导致 unhandled rejection。目前尚未识别出明确的修复 PR。
+  Read-admission seal and closed worker-environment inventory lead to an unhandled rejection during `reconcileActive`. No clear fix PR is identified.
 
-- **[Subscription-auth billing cooldown 会持续约五小时 — #115642](https://github.com/openclaw/openclaw/issues/115642)**  
-  即使故障已经恢复，provider 仍可能在很长时间内处于禁用状态。用户提出的修复方案包括基于 probe 的恢复、缩短 usage-limit TTL，以及增加手动重置命令。
+- **[Subscription-auth billing cooldown persists for roughly five hours — #115642](https://github.com/openclaw/openclaw/issues/115642)**  
+  Outages can disable a provider long after recovery. Requested remedies include probe-based recovery, shorter usage-limit TTLs, and a manual reset command.
 
-- **[Main-session heap OOM 和 core-dump restart loop — #115424](https://github.com/openclaw/openclaw/issues/115424)**  
-  自动重启恢复会反复热恢复过大的 session，将单次崩溃变成持续的失败循环。
+- **[Main-session heap OOM and core-dump restart loop — #115424](https://github.com/openclaw/openclaw/issues/115424)**  
+  Automatic restart recovery repeatedly hot-resumes the oversized session, turning one crash into a persistent failure loop.
 
-- **[Desktop app 导致 Gateway 启动循环 — #115256](https://github.com/openclaw/openclaw/issues/115256)**  
-  据称，`doctor` 会建议执行某种修复，但 desktop app 随后会立即将其还原。
+- **[Desktop app boot-loops the Gateway — #115256](https://github.com/openclaw/openclaw/issues/115256)**  
+  `doctor` reportedly recommends a repair that the desktop app immediately reverts.
 
-### P1 — 高影响的可靠性、安全或数据丢失风险
+### P1 — high-impact reliability, security, or data-loss risk
 
-- **[子进程泄漏和僵尸进程累积 — #97616](https://github.com/openclaw/openclaw/issues/97616)**
-- **[同一 session 内发生挤占时丢失进行中的回复 — #148707](https://github.com/openclaw/openclaw/issues/148707)**
-- **[重启后 WhatsApp DM durable handoff 失败 — #161976](https://github.com/openclaw/openclaw/issues/161976)**
-- **[SQLite 争用导致约 33 秒的 event-loop stall — #117262](https://github.com/openclaw/openclaw/issues/117262)**
-- **[内存回收期间模型目录泄漏导致等待中的 turn 被终止 — #160548](https://github.com/openclaw/openclaw/issues/160548)**
-- **[目录刷新循环占满一个 CPU core — #161379](https://github.com/openclaw/openclaw/issues/161379)**
-- **[原地切换模型后 Codex 间歇性返回 403 — #162119](https://github.com/openclaw/openclaw/issues/162119)**
-- **[内部 reasoning 泄漏 — #91804](https://github.com/openclaw/openclaw/issues/91804)**
-- **[Telegram WebChat restart-recovery claim 回归问题 — #118839](https://github.com/openclaw/openclaw/issues/118839)**
-- **[Claude CLI subagent turn 在 transcript-writer rebinding 时失败 — #154572](https://github.com/openclaw/openclaw/issues/154572)**
+- **[Child-process leak and zombie accumulation — #97616](https://github.com/openclaw/openclaw/issues/97616)**
+- **[In-flight reply loss during same-session displacement — #148707](https://github.com/openclaw/openclaw/issues/148707)**
+- **[WhatsApp DM durable handoff failure after restart — #161976](https://github.com/openclaw/openclaw/issues/161976)**
+- **[SQLite contention causes roughly 33-second event-loop stalls — #117262](https://github.com/openclaw/openclaw/issues/117262)**
+- **[Model-catalog leak kills waiting turns during memory reclamation — #160548](https://github.com/openclaw/openclaw/issues/160548)**
+- **[Catalog refresh loop pins a CPU core — #161379](https://github.com/openclaw/openclaw/issues/161379)**
+- **[Codex intermittent 403 after in-place model switch — #162119](https://github.com/openclaw/openclaw/issues/162119)**
+- **[Internal reasoning leakage — #91804](https://github.com/openclaw/openclaw/issues/91804)**
+- **[Telegram WebChat restart-recovery claim regression — #118839](https://github.com/openclaw/openclaw/issues/118839)**
+- **[Claude CLI subagent turns fail transcript-writer rebinding — #154572](https://github.com/openclaw/openclaw/issues/154572)**
 
-### P2 — 重要的正确性和可用性问题
+### P2 — important correctness and usability issues
 
-- **[Realtime voice 保留无上限的状态 — #116201](https://github.com/openclaw/openclaw/issues/116201)**
-- **[跨 agent dreaming 污染身份和记忆 — #65374](https://github.com/openclaw/openclaw/issues/65374)**
-- **[Dreaming candidates 在晋升前被淘汰 — #150635](https://github.com/openclaw/openclaw/issues/150635)**
-- **[Dreaming ranker 与 applier 对资格判定不一致 — #121232](https://github.com/openclaw/openclaw/issues/121232)**
-- **[Telegram progress 重复显示初始 commentary — #116512](https://github.com/openclaw/openclaw/issues/116512)**
-- **[Matrix room 可能因 no-reply 和 stale replay 形成循环 — #114211](https://github.com/openclaw/openclaw/issues/114211)**
-- **[Claude CLI session limit 不会触发 fallback — #118793](https://github.com/openclaw/openclaw/issues/118793)**
-- **[使用 SecretRef/env credentials 时，Discord 报告状态降级 — #160610](https://github.com/openclaw/openclaw/issues/160610)**
+- **[Realtime voice retains unbounded state — #116201](https://github.com/openclaw/openclaw/issues/116201)**
+- **[Cross-agent dreaming contaminates identity and memory — #65374](https://github.com/openclaw/openclaw/issues/65374)**
+- **[Dreaming candidates are evicted before promotion — #150635](https://github.com/openclaw/openclaw/issues/150635)**
+- **[Dreaming ranker and applier disagree on eligibility — #121232](https://github.com/openclaw/openclaw/issues/121232)**
+- **[Telegram progress duplicates initial commentary — #116512](https://github.com/openclaw/openclaw/issues/116512)**
+- **[Matrix rooms can loop on no-reply and stale replay — #114211](https://github.com/openclaw/openclaw/issues/114211)**
+- **[Claude CLI session limits do not trigger fallback — #118793](https://github.com/openclaw/openclaw/issues/118793)**
+- **[Discord reports degraded status with SecretRef/env credentials — #160610](https://github.com/openclaw/openclaw/issues/160610)**
 
-### 值得关注的已关闭回归问题
+### Notable closed regressions
 
-- [普通工具文本退化为 image placeholder — #96857](https://github.com/openclaw/openclaw/issues/96857)
-- [Provider request schema 拒绝问题 — #108075](https://github.com/openclaw/openclaw/issues/108075)
-- [Control UI 导航回归问题 — #108182](https://github.com/openclaw/openclaw/issues/108182)
-- [Windows session creation 的 publication guard 失败 — #161953](https://github.com/openclaw/openclaw/pull/161953)
-- [Telegram DM reply fallback 回归问题 — #111519](https://github.com/openclaw/openclaw/issues/111519)
+- [Normal tool text degrading into image placeholders — #96857](https://github.com/openclaw/openclaw/issues/96857)
+- [Provider request-schema rejection — #108075](https://github.com/openclaw/openclaw/issues/108075)
+- [Control UI navigation regression — #108182](https://github.com/openclaw/openclaw/issues/108182)
+- [Windows session-creation publication guard failure — #161953](https://github.com/openclaw/openclaw/pull/161953)
+- [Telegram DM reply fallback regression — #111519](https://github.com/openclaw/openclaw/issues/111519)
 
-这些问题的关闭是积极信号，但所有权和发布授权类缺陷反复出现，说明围绕 restart、concurrency 和 durable handoff 的 regression testing 仍需加强。
+These closures are positive, but the high recurrence of ownership and publication-authority defects suggests that regression testing around restart, concurrency, and durable handoff needs strengthening.
 
 ---
 
-## 6. 功能请求与路线图信号
+## 6. Feature Requests & Roadmap Signals
 
-- **按 agent 配置 dreaming 控制 — [#67413](https://github.com/openclaw/openclaw/issues/67413)**  
-  请求中的控制项包括按 agent 禁用 dreaming、错开 workspace 执行时间，以及控制内存峰值。由于当前存在多个活跃的内存问题，该功能很可能在下一稳定化阶段得到处理。
+- **Per-agent dreaming controls — [#67413](https://github.com/openclaw/openclaw/issues/67413)**  
+  Requested controls include disabling dreaming per agent, staggering workspaces, and controlling memory spikes. The active memory bugs make this likely to be addressed in the next stabilization phase.
 
-- **由 agent 请求触发的上下文压缩 — [PR #138084](https://github.com/openclaw/openclaw/pull/138084)**  
-  这是一个有可能在近期落地的功能，因为它能直接减少长期 session 中的 token 浪费，并让 agent 更好地控制话题切换。目前该 PR 仍被标记为 **needs proof**。
+- **Agent-requested context compaction — [PR #138084](https://github.com/openclaw/openclaw/pull/138084)**  
+  A plausible near-term feature because it directly mitigates long-session token waste and gives agents better control over topic transitions. It is still marked **needs proof**.
 
 - **Provider-neutral memory runtime — [PR #162175](https://github.com/openclaw/openclaw/pull/162175)**  
-  允许不依赖 workspace 文件的 memory plugin 参与 recall。从扩展性的角度看，这具有重要战略意义，但同时涉及安全敏感和兼容性敏感的问题。
+  Allows memory plugins not backed by workspace files to participate in recall. This is strategically important for extensibility, though security-sensitive and compatibility-sensitive.
 
-- **Wear OS Gateway 对话和 approvals — [PR #143216](https://github.com/openclaw/openclaw/pull/143216)**  
-  这是一项较大的客户端平台扩展，依赖共享的 Gateway-client 工作。由于整个技术栈仍处于 draft 状态并受 proof 门控，因此不太可能立即发布。
+- **Wear OS Gateway conversations and approvals — [PR #143216](https://github.com/openclaw/openclaw/pull/143216)**  
+  A substantial client-platform expansion, dependent on shared Gateway-client work. It is not likely to ship immediately because the stack remains draft and proof-gated.
 
-- **macOS 后台启动模式 — [PR #163758](https://github.com/openclaw/openclaw/pull/163758)**  
-  新增 `--no-activate`，用于不应抢占焦点的自动化场景。该改动范围相对有限，并且有明确的个人 assistant 使用场景。
+- **macOS background launch mode — [PR #163758](https://github.com/openclaw/openclaw/pull/163758)**  
+  Adds `--no-activate` for automation that should not steal focus. This is relatively contained and has a clear personal-assistant use case.
 
-### 近期预测
+### Near-term prediction
 
-下一版本更可能重点关注：
+The next release is more likely to emphasize:
 
-1. 模型目录 worker 生命周期和内存上限。
-2. Gateway 启动、SQLite 和 restart-recovery 可靠性。
-3. 会话所有权和消息投递正确性。
-4. Memory core 隔离和调度。
-5. 较小的 UX 增强，例如 macOS 后台启动。
-
----
-
-## 7. 用户反馈摘要
-
-### 主要用户痛点
-
-- **回复出现丢失或重复。** 同一 session 内发生挤占、WhatsApp 重启 handoff、重复的 transcript writer 以及 subagent delivery 失败，使用户不再信任会话连续性。
-- **Gateway 消耗过多资源。** 已报告的症状包括 worker 占用数 GB 内存、CPU 被占满、僵尸进程、30 秒 event-loop stall 和反复 core dump。
-- **升级行为不够可预测。** 即使已有协调跟踪 issue，用户仍报告 2026.9.x 存在严重的启动、迁移、恢复、provider 和平台回归问题。
-- **Provider 行为仍不一致。** Vertex/Gemini、Codex、Claude CLI、OpenAI Responses 和 subscription-auth cooldown 故障都表明，需要加强 adapter 层面的规范符合性。
-- **Memory 功能尚不适合多 agent 场景安全使用。** 共享 dreaming corpus、身份污染、晋升前淘汰，以及 ranker/applier 判定不一致，阻碍了可靠的长期个性化。
-- **安全和隐私回归尤其容易损害信任。** 内部 reasoning 泄漏、跨 agent 记忆共享和 owner verification 失败都会直接影响用户信任。
-
-### 积极信号和用例方向
-
-- 用户正在多个平台上将 OpenClaw 部署为长期运行的个人 assistant，包括 WhatsApp、Telegram、Discord、Matrix、WebChat、WeChat、macOS、Android，以及计划中的 Wear OS。
-- 自动化正在成为重要用例，尤其是后台 app 启动、任务取消和多 agent Workboard 管理。
-- 多个已关闭 issue 表明，维护者能够响应明确且具体的回归问题；同时，proof-gated PR 也说明项目越来越重视安全边界和 durable state proof。
+1. Model-catalog worker lifecycle and memory bounds.
+2. Gateway startup, SQLite, and restart-recovery reliability.
+3. Session ownership and message-delivery correctness.
+4. Memory-core isolation and scheduling.
+5. Smaller UX additions such as background macOS launching.
 
 ---
 
-## 8. Backlog 观察
+## 7. User Feedback Summary
 
-### 长期无人回复或依赖维护工作的问题
+### Primary user pain points
 
-- **[Vertex/Gemini 回归问题，自 3 月起未解决 — #38327](https://github.com/openclaw/openclaw/issues/38327)**  
-  尽管已有源码复现且影响达到 P0 级别，但目前仍没有新的修复 PR，需要维护者明确负责。
+- **Replies are being lost or duplicated.** Same-session displacement, WhatsApp restart handoff, duplicate transcript writers, and failed subagent delivery make users distrust session continuity.
+- **Gateways consume excessive resources.** Reported symptoms include multi-gigabyte worker growth, CPU pinning, zombie processes, 30-second event-loop stalls, and repeated core dumps.
+- **Upgrades are not sufficiently predictable.** Users report severe 2026.9.x startup, migration, recovery, provider, and platform regressions despite a coordinated tracking issue.
+- **Provider behavior remains inconsistent.** Vertex/Gemini, Codex, Claude CLI, OpenAI Responses, and subscription-auth cooldown failures all suggest that adapter-level conformance needs strengthening.
+- **Memory features are not yet safe for multi-agent use.** Shared dreaming corpora, identity contamination, eviction-before-promotion, and ranker/applier disagreement are preventing reliable long-term personalization.
+- **Security and privacy regressions are especially damaging.** Internal reasoning leakage, cross-agent memory sharing, and owner-verification failures directly affect trust.
 
-- **[跨 agent dreaming 身份污染，自 4 月起未解决 — #65374](https://github.com/openclaw/openclaw/issues/65374)**  
-  该问题涉及安全、隐私和数据模型，需要产品层面作出明确决策。
+### Positive/use-case signals
 
-- **[按 agent 配置 dreaming 控制 — #67413](https://github.com/openclaw/openclaw/issues/67413)**  
-  这一较早提出的功能请求，如今已直接关联多个活跃的 memory 可靠性问题。
-
-- **[Codex 稳态 CPU 和辅助
+- Users are actively deploying OpenClaw as a long-running personal assistant across WhatsApp, Telegram, Discord, Matrix, WebChat, WeChat, macOS, Android, and planned Wear OS.
+- Automation is a growing use case, particularly background app launch, task cancellation, and multi-agent Workboard management.
+- Several closed issues indicate that maintainers are responsive to concrete regressions, while proof-gated PRs show increasing attention to security boundaries and durable-state proof.
 
 ---
 
-## 横向生态对比
+## 8. Backlog Watch
 
-# 跨项目生态比较 — 2026-10-03
+### Long-unanswered or maintenance-dependent issues
 
-## 1. 生态概览
+- **[Vertex/Gemini regression, open since March — #38327](https://github.com/openclaw/openclaw/issues/38327)**  
+  Despite source reproduction and P0 impact, it lacks a new fix PR and needs maintainer ownership.
 
-个人 AI agent 生态正在从功能扩张转向**生产级可靠性、状态完整性、资源治理和安全互操作性**。OpenClaw、Hermes Agent 和 ZeroClaw 的开发 churn 非常高，而 QwenPaw 正在处理一组规模较小的 WebUI、会话和多模态问题；IronClaw 在采样期间没有活动。对于所有活跃项目而言，共同的运维挑战是如何让长时间运行、多模态、多 agent 系统保持可观测、可信赖，而不只是具备能力。因此，近期最强的差异化因素将是生命周期管理——内存边界、取消、恢复、持久消息传递和可预测的 provider 行为——而不是再接入一个模型或聊天界面。
+- **[Cross-agent dreaming identity contamination, open since April — #65374](https://github.com/openclaw/openclaw/issues/65374)**  
+  Security, privacy, and data-model implications require an explicit product decision.
 
-## 2. 活动比较
+- **[Per-agent dreaming controls — #67413](https://github.com/openclaw/openclaw/issues/67413)**  
+  Older feature request now tied directly to multiple active memory-reliability issues.
 
-| 项目 | 更新的 Issues | 更新的 PRs | 发布状态 | 健康评分* |
+- **[Codex steady-state CPU and helper-process overhead — #84037](https://github.com/openclaw/openclaw/issues/84037)**  
+  Important for always-on personal-assistant deployments but requires profiling and maintainer prioritization.
+
+- **[Realtime voice resource bounds — #116201](https://github.com/openclaw/openclaw/issues/116201)**  
+  The highest-comment issue in the sample and still needs a live reproduction or ownership-bound design decision.
+
+- **[Matrix no-reply/restart loops — #114211](https://github.com/openclaw/openclaw/issues/114211)**  
+  High-impact room-agent behavior with security and session-state implications.
+
+- **[Desktop Gateway boot loop — #115256](https://github.com/openclaw/openclaw/issues/115256)**  
+  Stable-channel user impact despite being older; no replacement fix is evident in the supplied data.
+
+- **[Usage-cost cache lock can freeze permanently in containers — #114234](https://github.com/openclaw/openclaw/issues/114234)**  
+  Container-specific but operationally dangerous because PID reuse defeats ownership validation.
+
+### PRs requiring maintainer attention
+
+- [#162226](https://github.com/openclaw/openclaw/pull/162226) — model
+
+---
+
+## Cross-Ecosystem Comparison
+
+# Cross-Project Ecosystem Comparison — 2026-10-03
+
+## 1. Ecosystem Overview
+
+The personal AI agent ecosystem is moving from feature expansion toward **production-grade reliability, state integrity, resource governance, and secure interoperability**. OpenClaw, Hermes Agent, and ZeroClaw show very high development churn, while QwenPaw is addressing a smaller set of WebUI, session, and multimodal issues; IronClaw had no activity in the sampled period. Across active projects, the common operational challenge is keeping long-running, multimodal, multi-agent systems observable and trustworthy rather than merely capable. The strongest near-term differentiator is therefore lifecycle management—memory bounds, cancellation, recovery, durable messaging, and predictable provider behavior—rather than access to another model or chat interface.
+
+## 2. Activity Comparison
+
+| Project | Issues updated | PRs updated | Release status | Health score* |
 |---|---:|---:|---|---|
-| **OpenClaw** | 496 | 500 | 两个 `extended-stable` 版本：v2026.8.34 和 v2026.8.35 | **6.5/10** — 极其活跃，但稳定化和运维负载压力很大 |
-| **Hermes Agent** | 50 | 50 | 无发布 | **6.5/10** — 开发势头强劲，但存在会话、Desktop、Windows 和集成风险 |
-| **IronClaw** | 0 | 0 | 未报告发布 | **N/A** — 活动不足，无法评估当前健康状况 |
-| **QwenPaw** | 10 | 4 | 无发布 | **6.0/10** — 聚焦维护，但暴露了 beta 回归和会话缺陷 |
-| **ZeroClaw** | 50 | 50 | 无发布；多个修复目标为 v0.8.6 | **5.5/10** — 高度活跃且重视安全，但 48 个开放 PR 意味着更高的审查和发布风险 |
+| **OpenClaw** | 496 | 500 | Two `extended-stable` releases: v2026.8.34 and v2026.8.35 | **6.5/10** — extremely active, but under substantial stabilization and operational load |
+| **Hermes Agent** | 50 | 50 | No release | **6.5/10** — strong development momentum with session, Desktop, Windows, and integration risks |
+| **IronClaw** | 0 | 0 | No release reported | **N/A** — insufficient activity to assess current health |
+| **QwenPaw** | 10 | 4 | No release | **6.0/10** — focused maintenance, but exposed by a beta regression and session defects |
+| **ZeroClaw** | 50 | 50 | No release; multiple fixes targeted at v0.8.6 | **5.5/10** — highly active and security-conscious, but 48 open PRs imply elevated review and release risk |
 
-\*健康评分是根据活动、发布状态、Issue 严重程度和修复成熟度得出的定性评估，并非正式的项目指标。“更新的 Issues”和“更新的 PRs”衡量的是每日关注度，不一定代表仓库的净增长。
+\*Health scores are qualitative assessments derived from activity, release posture, issue severity, and remediation maturity—not formal project metrics. “Issues updated” and “PRs updated” measure daily attention, not necessarily net repository growth.
 
-## 3. OpenClaw 的定位
+## 3. OpenClaw's Position
 
-### 相比其他项目的优势
+### Advantages versus peers
 
-- **规模和生态广度：** OpenClaw 在采样期内的活动量遥遥领先，24 小时内 Issues 和 PRs 的合计更新接近 1,000 次。它的多渠道覆盖范围——WhatsApp、Telegram、Discord、Matrix、WebChat、WeChat、桌面端、移动端，以及计划中的 Wear OS 支持——比上述其他方案更广。
-- **成熟的稳定化渠道：** 两个仅针对 gateway 的 `extended-stable` 版本提供了风险更低的部署路径，并被明确定位为 OpenClaw 对应 LTS 的方案。
-- **深入的状态管理投入：** OpenClaw 正从架构层面处理启动准入、SQLite 争用、会话所有权、重启恢复、取消、provider 适配器和持久消息交接等问题。
-- **强大的扩展性发展方向：** 与 provider 无关的 memory runtime、由 agent 请求触发的上下文压缩、Workboard 多 agent 支持以及平台扩展，都表明它正在打造一个广泛的个人助理平台，而不是一个功能狭窄的 coding agent。
-- **广泛的运维反馈面：** Issue 数量庞大也说明其部署基础规模大、经过了充分的真实环境检验，尽管这也会增加维护成本。
+- **Scale and ecosystem breadth:** OpenClaw has by far the largest sampled activity volume, with nearly 1,000 combined issue and PR updates in 24 hours. Its multi-channel footprint—WhatsApp, Telegram, Discord, Matrix, WebChat, WeChat, desktop, mobile, and planned Wear OS support—is broader than the alternatives described.
+- **Mature stabilization channel:** The two gateway-only `extended-stable` releases provide a lower-risk deployment path explicitly positioned as OpenClaw’s equivalent to LTS.
+- **Deep state-management investment:** OpenClaw is addressing startup admission, SQLite contention, session ownership, restart recovery, cancellation, provider adapters, and durable message handoff at an architectural level.
+- **Strong extensibility trajectory:** Provider-neutral memory runtimes, agent-requested context compaction, Workboard multi-agent support, and platform expansion indicate a broad personal-assistant platform rather than a narrowly scoped coding agent.
+- **Large operational feedback surface:** Its high issue volume also indicates a large deployment base and strong real-world testing, although it raises maintenance costs.
 
-### 技术路线差异
+### Technical approach differences
 
-- **OpenClaw** 强调 always-on gateway、持久的多渠道会话、插件/provider 目录、持久化 memory 以及广泛的客户端形态。其主要挑战是如何控制一个成熟且有状态的平台内部复杂度。
-- **Hermes Agent** 重点关注 Desktop 可用性、远程 gateway 连接、skills、本地模型工作流、Google Workspace 以及跨 agent 协作。它采用的是一种更偏客户端和集成导向的架构。
-- **ZeroClaw** 强调本地和运行时控制：子进程内存限制、Windows 安全、协作式工具取消、ZeroCode/ACP 工作流、gateway 检查和委派策略。它看起来更偏运行时和运维导向。
-- **QwenPaw** 优先建设多 agent workspace 和 WebUI，近期工作涵盖 reload 生命周期、多模态感知、对话编辑和跨实例协调。
-- **IronClaw** 在所提供的每日数据中没有任何活动，因此无法有意义地区分其特点。
+- **OpenClaw** emphasizes an always-on gateway, durable multi-channel sessions, plugin/provider catalogs, persistent memory, and extensive client surfaces. Its main challenge is controlling complexity inside a mature, stateful platform.
+- **Hermes Agent** focuses heavily on Desktop usability, remote gateway connectivity, skills, local-model workflows, Google Workspace, and cross-agent collaboration. It is pursuing a more client- and integration-oriented architecture.
+- **ZeroClaw** emphasizes local/runtime control: subprocess memory limits, Windows security, cooperative tool cancellation, ZeroCode/ACP workflows, gateway inspection, and delegation policy. It appears more runtime- and operator-oriented.
+- **QwenPaw** prioritizes a multi-agent workspace and WebUI, with recent work on reload lifecycle, multimodal perception, conversation editing, and cross-instance coordination.
+- **IronClaw** cannot be meaningfully differentiated from the supplied daily data because it recorded no activity.
 
-### 社区规模比较
+### Community size comparison
 
-OpenClaw 明显拥有最广泛的可观测社区活动：最活跃的 Issues 拥有数十条评论，但其 Issue 和 PR 吞吐量大约是其他活跃项目的十倍。Hermes Agent 展现出最明显的战略讨论热度，尤其是在跨 gateway 协作和 Desktop 可靠性方面。ZeroClaw 与 QwenPaw 的讨论更集中于专业问题，而 IronClaw 当前没有提供任何发展势头信号。
+OpenClaw clearly has the broadest observable community activity: its busiest issues have tens of comments, but its issue and PR throughput is roughly ten times that of the other active projects. Hermes Agent has the strongest visible strategic discussion, particularly around cross-gateway collaboration and Desktop reliability. ZeroClaw and QwenPaw show concentrated specialist engagement, while IronClaw provides no current momentum signal.
 
-## 4. 共同的技术重点领域
+## 4. Shared Technical Focus Areas
 
-| 技术重点 | 涉及项目 | 正在形成的要求 |
+| Technical focus | Projects | Emerging requirement |
 |---|---|---|
-| **会话与对话完整性** | OpenClaw、Hermes Agent、QwenPaw | 防止对话轮次错位、重复回复、会话碎片化、会话亲和性错误，以及重启或 reload 后上下文丢失。 |
-| **明确的生命周期与恢复机制** | OpenClaw、Hermes Agent、QwenPaw、ZeroClaw | 确保取消、drain timeout、失败轮次持久化、重启恢复和终态状态都是确定且可见的。 |
-| **内存与资源边界** | OpenClaw、Hermes Agent、ZeroClaw | 对 worker、子进程、音频缓冲区、压缩 lineage 和持久化会话数据实施硬限制。 |
-| **Provider 与模型可靠性** | OpenClaw、Hermes Agent、ZeroClaw、QwenPaw | 标准化 provider 配置、fallback、上下文限制、缓存行为、模型切换和 timeout 语义。 |
-| **Desktop 与 gateway 连通性** | OpenClaw、Hermes Agent、ZeroClaw | 确保 private-CA TLS、WebSockets、backend 状态、reload 和 LAN 访问能够跨进程边界稳定工作。 |
-| **长时间运行的工具控制** | ZeroClaw、Hermes Agent、QwenPaw | 支持协作式取消、可配置的 deadline、实时状态信号以及可靠的进程清理。 |
-| **Skills 与插件正确性** | Hermes Agent、ZeroClaw、OpenClaw | 在不造成过高 prompt 成本的情况下改进发现机制，并确保检查工具能够反映真实的运行时可用性。 |
-| **多 agent 委派与互操作性** | Hermes Agent、OpenClaw、ZeroClaw、QwenPaw | 在保留身份、权限、来源和审批边界的前提下，增加跨 agent 或跨 gateway 的协作。 |
-| **安全与隐私** | OpenClaw、Hermes Agent、ZeroClaw | 加固 secret 存储、远程图片、Windows 路径解析、内存隔离、所有者验证和委派审批。 |
-| **运维可观测性** | 所有活跃项目 | 清晰区分已完成、失败、暂停、已取消、已截断、被阻塞和仍在运行的工作。 |
+| **Session and conversation integrity** | OpenClaw, Hermes Agent, QwenPaw | Prevent displaced turns, duplicate replies, session fragmentation, wrong-session affinity, and loss of context across restart or reload. |
+| **Explicit lifecycle and recovery** | OpenClaw, Hermes Agent, QwenPaw, ZeroClaw | Make cancellation, drain timeout, failed-turn persistence, restart recovery, and terminal status deterministic and visible. |
+| **Memory and resource bounds** | OpenClaw, Hermes Agent, ZeroClaw | Enforce hard limits for workers, subprocesses, audio buffers, compaction lineage, and persistent session data. |
+| **Provider and model reliability** | OpenClaw, Hermes Agent, ZeroClaw, QwenPaw | Standardize provider configuration, fallback, context limits, cache behavior, model switching, and timeout semantics. |
+| **Desktop and gateway connectivity** | OpenClaw, Hermes Agent, ZeroClaw | Make private-CA TLS, WebSockets, backend status, reload, and LAN access work consistently across process boundaries. |
+| **Long-running tool control** | ZeroClaw, Hermes Agent, QwenPaw | Support cooperative cancellation, configurable deadlines, live-status signaling, and reliable process cleanup. |
+| **Skills and plugin correctness** | Hermes Agent, ZeroClaw, OpenClaw | Improve discovery without excessive prompt cost and ensure inspection tools reflect actual runtime availability. |
+| **Multi-agent delegation and interoperability** | Hermes Agent, OpenClaw, ZeroClaw, QwenPaw | Add cross-agent or cross-gateway collaboration while preserving identity, permissions, provenance, and approval boundaries. |
+| **Security and privacy** | OpenClaw, Hermes Agent, ZeroClaw | Harden secret storage, remote images, Windows path parsing, memory isolation, owner verification, and delegated approvals. |
+| **Operational observability** | All active projects | Clearly distinguish completed, failed, paused, canceled, truncated, blocked, and still-running work. |
 
-最紧迫的共同要求是为**每一轮对话建立单写入者、所有权明确的生命周期模型**。消息投递、压缩、取消和恢复都依赖于运行时明确知道哪个 agent、客户端或 gateway 实例具有权威性。
+The most urgent shared requirement is a **single-writer, explicitly owned lifecycle model for every turn**. Message delivery, compaction, cancellation, and recovery all depend on the runtime knowing which agent, client, or gateway instance is authoritative.
 
-## 5. 差异化分析
+## 5. Differentiation Analysis
 
-### 功能重点
+### Feature focus
 
-- **OpenClaw：** 以持久 gateway 为核心的综合个人助理平台，覆盖大量消息渠道、模型/provider 扩展、memory、自动化和跨客户端访问。
-- **Hermes Agent：** 以 Desktop 为先的 agent 体验，支持远程 gateway、skills、本地模型生产力集成和跨 gateway 协作。
-- **ZeroClaw：** 关注运行时安全、子进程治理、ZeroCode/ACP 工作流、插件和 skill 完整性、gateway 检查以及本地/运维控制。
-- **QwenPaw：** 关注多 agent workspace UX、对话纠正与回滚、WebUI 一致性，以及内置的图像/视频/音频感知能力。
-- **IronClaw：** 在当前数据中没有明确的差异化信号。
+- **OpenClaw:** Broad personal-assistant platform centered on a persistent gateway, many messaging channels, model/provider extensibility, memory, automation, and cross-client access.
+- **Hermes Agent:** Desktop-first agent experience, remote gateway use, skills, local models, productivity integrations, and cross-gateway collaboration.
+- **ZeroClaw:** Runtime safety, subprocess governance, ZeroCode/ACP workflows, plugin and skill integrity, gateway inspection, and local/operator control.
+- **QwenPaw:** Multi-agent workspace UX, conversation correction and rollback, WebUI consistency, and built-in image/video/audio perception.
+- **IronClaw:** No current differentiation signal in the supplied data.
 
-### 目标用户
+### Target users
 
-- **OpenClaw：** 需要跨多个渠道和设备运行 always-on 助理的运维人员和个人用户。
-- **Hermes Agent：** Desktop 用户、开发者、远程 gateway 运维人员以及本地模型爱好者。
-- **ZeroClaw：** 需要对执行、安全、插件和进程实施明确控制的技术用户和运维人员。
-- **QwenPaw：** 构建本地或家用服务器多 agent workspace，且对 WebUI 有较强需求的用户。
-- **IronClaw：** 无法根据当前活动可靠推断。
+- **OpenClaw:** Operators and individuals running always-on assistants across many channels and devices.
+- **Hermes Agent:** Desktop users, developers, remote-gateway operators, and local-model enthusiasts.
+- **ZeroClaw:** Technical users and operators who require explicit controls over execution, security, plugins, and processes.
+- **QwenPaw:** Users building local or home-server multi-agent workspaces with strong WebUI needs.
+- **IronClaw:** Cannot be inferred reliably from current activity.
 
-### 技术架构
+### Technical architecture
 
-OpenClaw 的差异化优势在于成熟且高度互联的 gateway，以及持久化会话生态。Hermes 正在优化 Desktop、远程 gateway、集成和 skills 之间的边界。ZeroClaw 正在加强底层运行时和策略控制，包括子进程 watchdog 和委派审批路由。QwenPaw 当前更关注 workspace 状态、对话呈现和多模态工具，而不是分布式运行时基础设施。
+OpenClaw’s differentiator is a mature, highly connected gateway and durable session ecosystem. Hermes is optimizing the boundary between Desktop, remote gateways, integrations, and skills. ZeroClaw is applying stronger low-level runtime and policy controls, including subprocess watchdogs and delegation approval routing. QwenPaw is currently more focused on workspace state, conversation presentation, and multimodal tooling than on distributed runtime infrastructure.
 
-## 6. 社区发展势头与成熟度
+## 6. Community Momentum & Maturity
 
-### 快速迭代
+### Rapidly iterating
 
-- **OpenClaw：** 迭代速度最高，平台覆盖范围最广。它正在进行稳定化，而不只是继续扩张；memory、启动、持久化和投递正确性主导着其路线图。
-- **Hermes Agent：** 在协作、Desktop、skills 和本地推理方面创新强劲，但许多变更仍处于开放状态，也没有发布新版本。
-- **ZeroClaw：** 发布门控工作极其活跃，涵盖子进程限制、Windows secret 保护、取消、ACP 持久化和 provider 行为。大量开放 PR 也带来了审查风险。
+- **OpenClaw:** Highest velocity and broadest platform surface. It is stabilizing rather than merely expanding, with memory, startup, persistence, and delivery correctness dominating the roadmap.
+- **Hermes Agent:** Strong innovation across collaboration, Desktop, skills, and local inference, but many changes remain open and no new release was published.
+- **ZeroClaw:** Extremely active release-gating work, including subprocess limits, Windows secret protection, cancellation, ACP persistence, and provider behavior. The large open-PR count creates review risk.
 
-### 聚焦稳定化
+### Focused stabilization
 
-- **QwenPaw：** 工作量较低，但集中处理近期 beta 回归、会话碎片化、静默截断和 reload 清理问题。在扩大能力范围之前，需要发布一个可靠版本并完成回归测试。
-- **IronClaw：** 没有每日发展势头的证据；仅凭当前快照无法评估其成熟度和路线图。
+- **QwenPaw:** Lower volume but concentrated on a recent beta regression, fragmented conversations, silent truncation, and reload cleanup. It needs a dependable release and regression-test pass before broader capability expansion.
+- **IronClaw:** No evidence of daily momentum; current maturity and roadmap cannot be assessed from this snapshot.
 
-### 整体成熟度
+### Overall maturity
 
-作为**综合性部署平台**，OpenClaw 最为成熟，但其规模也暴露了更深层的可靠性技术债。Hermes 和 ZeroClaw 是非常活跃的挑战者，工程质量方向强劲，但也存在明显的发布和治理风险。QwenPaw 仍处于较早的运维加固阶段，而 IronClaw 的状态尚不确定。
+OpenClaw is the most mature as a **comprehensive deployed platform**, though its scale exposes deeper reliability debt. Hermes and ZeroClaw are highly active challengers with strong engineering direction but visible release and governance risks. QwenPaw is earlier in operational hardening, while IronClaw’s status remains indeterminate.
 
-## 7. 趋势信号
+## 7. Trend Signals
 
-1. **市场正在从 agent 能力转向 agent 可信度。**  
-   当前最重要的特性是持久身份、正确交接、可靠取消、可见的失败状态以及安全的重启行为。
+1. **The market is shifting from agent capability to agent trustworthiness.**  
+   The most important features are now durable identity, correct handoff, reliable cancellation, visible failure states, and safe restart behavior.
 
-2. **Always-on agent 需要严格的资源治理。**  
-   OpenClaw 的 catalog-worker 增长以及 ZeroClaw 报告的子进程 OOM 都表明，内存和 CPU 控制是生产环境的前置要求，而不是可选的优化项。
+2. **Always-on agents require hard resource governance.**  
+   OpenClaw’s catalog-worker growth and ZeroClaw’s subprocess OOM reports demonstrate that memory and CPU controls are production prerequisites, not optional optimizations.
 
-3. **多 agent 生态需要分布式信任。**  
-   Hermes 的跨 gateway 协作、OpenClaw 的委派控制、ZeroClaw 的审批路由，以及 QwenPaw 的跨实例提案，都指向 agent-to-agent 互操作性；但必须首先设计安全边界。
+3. **Multi-agent ecosystems require distributed trust.**  
+   Hermes’s cross-gateway collaboration, OpenClaw’s delegation controls, ZeroClaw’s approval routing, and QwenPaw’s inter-instance proposal all point toward agent-to-agent interoperability—but security boundaries must be designed first.
 
-4. **Skills 正在成为一等运行时子系统。**  
-   Hermes 正在处理 prompt 成本与可发现性之间的平衡，ZeroClaw 则在修复 skill 可见性和渠道一致性。趋势正转向可搜索索引、懒加载、具备来源追踪能力的 bundle，以及经过运行时验证的激活机制。
+4. **Skills are becoming a first-class runtime subsystem.**  
+   Hermes is addressing prompt cost versus discoverability, while ZeroClaw is fixing skill visibility and channel parity. The trend is toward searchable indexes, lazy loading, provenance-aware bundles, and runtime-verified activation.
 
-5. **多模态 agent 正在扩张，但缓冲区和生命周期控制仍然滞后。**  
-   QwenPaw 正在加入原生音频感知，OpenClaw 正在应对无界的实时语音状态，ZeroClaw 则在考虑一个与 backend 无关的语音 channel。音频支持将需要严格的缓冲、取消和会话统计机制。
+5. **Multimodal agents are expanding, but buffer and lifecycle controls lag.**  
+   QwenPaw is adding native audio perception, OpenClaw is confronting unbounded realtime-voice state, and ZeroClaw is considering a backend-neutral voice channel. Audio support will require strict buffering, cancellation, and session accounting.
 
-6. **本地和自托管推理仍具有重要的战略价值。**  
-   Hermes 用户希望获得多 GPU 支持，并能容忍慢模型行为；ZeroClaw 专注于本地运行时控制；QwenPaw 支持自定义模型。Provider 必须以不同于托管 API 的方式处理本地延迟、资源波动和 fallback。
+6. **Local and self-hosted inference remains strategically important.**  
+   Hermes users want multi-GPU support and tolerant slow-model behavior; ZeroClaw focuses on local runtime controls; QwenPaw supports custom models. Providers must handle local latency, resource variability, and fallbacks differently from hosted APIs.
 
-7. **Desktop 与 gateway 之间的边界正成为主要故障分界线。**  
-   private-CA 故障、重复渲染、误报 watchdog、错误的 backend 状态、LAN 回归和失效 WebSockets，都源于 UI、主进程、gateway 与存储之间的不一致。
+7. **Desktop and gateway boundaries are becoming a major fault line.**  
+   Private-CA failures, duplicate rendering, false watchdogs, incorrect backend status, LAN regressions, and stale WebSockets all stem from inconsistencies between UI, main process, gateway, and storage.
 
-8. **具备恢复安全性的配置和升级路径将成为成熟产品的差异化因素。**  
-   OpenClaw 的迁移/恢复跟踪，以及 Hermes 在更新、备份和 profile 处理方面的问题，都表明在升级过程中保留用户状态正在成为核心产品要求。
+8. **Recovery-safe configuration and upgrade paths will differentiate mature products.**  
+   OpenClaw’s migration/recovery tracking and Hermes’s update, backup, and profile-handling issues show that preserving user state through upgrades is becoming a core product requirement.
 
-9. **可操作的可观测性正在取代静默降级。**  
-   整个生态中越来越多的功能提案都要求提供 fallback 通知、任务阻塞原因、终态状态、资源警报和上下文使用量计量。Agent 开发者应将可观测性视为 agent API 的一部分，而不是仅供运维人员使用的附加功能。
+9. **Actionable observability is replacing silent degradation.**  
+   Feature proposals across the ecosystem increasingly request fallback notices, blocked-task reasons, terminal statuses, resource alerts, and context-usage meters. Agent developers should treat observability as part of the agent API, not an operator-only add-on.
 
-10. **获胜的架构将把自主性与明确控制结合起来。**  
-    用户希望 agent 能够跨设备和服务持续执行任务，同时也要求工具、权限、secrets、memory、委派和恢复具备明确边界。最强的项目正在逐渐趋同于这种组合，但整个生态尚未对其实现方式形成标准化。
+10. **The winning architecture will combine autonomy with explicit control.**  
+    Users want agents that can act continuously across devices and services, but they also demand dry boundaries for tools, permissions, secrets, memory, delegation, and recovery. The strongest projects are converging on that combination, though the ecosystem has not yet standardized how it should be implemented.
 
 ---
 
-## 同赛道项目详细报告
+## Peer Project Reports
 
 <details>
 <summary><strong>Hermes Agent</strong> — <a href="https://github.com/nousresearch/hermes-agent">nousresearch/hermes-agent</a></summary>
 
-# Hermes Agent 项目摘要 — 2026-10-03
+# Hermes Agent Project Digest — 2026-10-03
 
-## 1. 今日概览
+## 1. Today’s Overview
 
-过去 24 小时内，Hermes Agent 开发活动量很高，共更新了 **50 个 issue** 和 **50 个 pull request**。其中，**46 个 issue 仍处于开放或活跃状态，4 个已关闭**；**25 个 PR 处于开放状态，25 个已合并或关闭**。期间**没有新版本发布**，因此今天的工作重点显然不在版本发布，而是维护、可靠性、平台集成和架构改进。最值得关注的动向包括：持续推进跨 Agent 协作、会话完整性、网关/桌面端可靠性，以及降低技能的 token 成本。整体活动十分活跃，但高优先级回归问题和尚未解决的跨平台问题数量较多，表明当前发布面较为繁忙且可能存在不稳定风险。
+Hermes Agent had a high-volume development day, with **50 issues updated** and **50 pull requests updated** in the last 24 hours. Of the issues, **46 remained open or active and 4 were closed**; **25 PRs were open and 25 were merged or closed**. There were **no new releases**, so today’s work appears focused on maintenance, reliability, platform integration, and architectural improvements rather than a versioned rollout. The most significant signals are continued work on cross-agent collaboration, session integrity, gateway/desktop reliability, and reducing the token cost of skills. Overall activity is strong, but the number of high-priority regressions and open cross-platform issues indicates a busy and potentially fragile release surface.
 
-## 2. 版本发布
+## 2. Releases
 
-过去 24 小时内没有发布新版本。
+No new releases were published in the last 24 hours.
 
-## 3. 项目进展
+## 3. Project Progress
 
-### 已合并或关闭的 PR
+### Merged or closed PRs
 
-仓库共报告 **25 个已合并或关闭的 PR**，其中值得关注的变更包括：
+The repository reports **25 merged or closed PRs**, including the following notable changes:
 
-- **远程网关和私有 CA 连通性**
-  - [PR #103683 — bridge remote gateway WebSockets through the main process for private-CA trust](https://github.com/NousResearch/hermes-agent/pull/103683)，已关闭。
-  - [PR #57239 — trust macOS keychain and `NODE_EXTRA_CA_CERTS` for remote gateway TLS](https://github.com/NousResearch/hermes-agent/pull/57239)，开放中。
-  - [PR #128311 — dial remote gateway WebSockets through the main process for private-CA and LNA origins](https://github.com/NousResearch/hermes-agent/pull/128311)，开放中。
+- **Remote gateway and private-CA connectivity**
+  - [PR #103683 — bridge remote gateway WebSockets through the main process for private-CA trust](https://github.com/NousResearch/hermes-agent/pull/103683), closed.
+  - [PR #57239 — trust macOS keychain and `NODE_EXTRA_CA_CERTS` for remote gateway TLS](https://github.com/NousResearch/hermes-agent/pull/57239), open.
+  - [PR #128311 — dial remote gateway WebSockets through the main process for private-CA and LNA origins](https://github.com/NousResearch/hermes-agent/pull/128311), open.
   
-  这些变更针对的是 Desktop 到网关之间反复出现的问题：即使操作系统已信任远程证书，HTTPS 和 WebSocket 连接仍可能失败，因为 Chromium、Node 和主进程使用的证书信任路径可能不同。
+  These changes address a recurring Desktop-to-gateway problem: HTTPS and WebSocket connections can fail even when the remote certificate is trusted by the operating system, because Chromium, Node, and the main process may use different certificate paths.
 
-- **网关和自动化正确性**
-  - [PR #123564 — include the block reason in API-server wake turns](https://github.com/NousResearch/hermes-agent/pull/123564)，开放中。该变更可提升 Kanban/自动化的可观测性，确保被阻止的会话在唤醒时收到具体原因。
-  - [PR #130416 — give each Slack slash invocation its own ephemeral reply context](https://github.com/NousResearch/hermes-agent/pull/130416)，开放中。这应能防止异步斜杠命令调用之间发生回复路由冲突。
-  - [PR #125765 — allow `script_timeout_seconds=0` to disable the cron script deadline](https://github.com/NousResearch/hermes-agent/pull/125765)，开放中。这为长时间运行且支持检查点的任务提供了一种有文档说明的方式，使其不受默认一小时截止时间限制。
+- **Gateway and automation correctness**
+  - [PR #123564 — include the block reason in API-server wake turns](https://github.com/NousResearch/hermes-agent/pull/123564), open. This improves Kanban/automation observability by ensuring blocked sessions receive the reason they were woken.
+  - [PR #130416 — give each Slack slash invocation its own ephemeral reply context](https://github.com/NousResearch/hermes-agent/pull/130416), open. This should prevent reply-routing collisions between asynchronous slash-command invocations.
+  - [PR #125765 — allow `script_timeout_seconds=0` to disable the cron script deadline](https://github.com/NousResearch/hermes-agent/pull/125765), open. This gives long-running, checkpointed jobs a documented way to run without the default one-hour deadline.
 
-- **会话和 TUI 稳定性**
-  - [PR #128528 — tell clients that a quiet turn is still running](https://github.com/NousResearch/hermes-agent/pull/128528)，开放中。该变更旨在解决后端仍在运行但暂时无输出时，客户端误报“回复被截断”或超时的问题。
-  - [PR #130869 — prevent the TUI from crashing on `/queue rm` with an invalid index](https://github.com/NousResearch/hermes-agent/pull/130869)，开放中。
-  - [PR #131047 — reuse the main-turn OpenCode session key for auxiliary threads](https://github.com/NousResearch/hermes-agent/pull/131047)，开放中。
-  - [PR #131742 — allow fresh skill reads after patch no-match errors](https://github.com/NousResearch/hermes-agent/pull/131742)，开放中。这可改善 Agent 尝试编辑技能失败后，再次读取完整文件时的恢复能力。
+- **Session and TUI stability**
+  - [PR #128528 — tell clients that a quiet turn is still running](https://github.com/NousResearch/hermes-agent/pull/128528), open. This targets false “reply cut off” or timeout behavior when a backend remains active but is quiet.
+  - [PR #130869 — prevent the TUI from crashing on `/queue rm` with an invalid index](https://github.com/NousResearch/hermes-agent/pull/130869), open.
+  - [PR #131047 — reuse the main-turn OpenCode session key for auxiliary threads](https://github.com/NousResearch/hermes-agent/pull/131047), open.
+  - [PR #131742 — allow fresh skill reads after patch no-match errors](https://github.com/NousResearch/hermes-agent/pull/131742), open. This improves recovery when an agent attempts a failed skill edit and then tries to read the complete file again.
 
-- **安全和更新处理**
-  - [PR #131746 — scan lifecycle scripts named by Windows paths](https://github.com/NousResearch/hermes-agent/pull/131746)，开放中。该提案修复了一个与安全相关的解析缺陷：POSIX 风格分词可能错误解释 Windows 反斜杠路径。
-  - [PR #130878 — prevent implicit fetches for remote Markdown images](https://github.com/NousResearch/hermes-agent/pull/130878)，开放中。远程图片将改为显式链接，而不是自动加载外部资源。
-  - [PR #131741 — preserve a checkout’s own `maintenance.auto=false` setting during update](https://github.com/NousResearch/hermes-agent/pull/131741)，已关闭。
-  - [PR #86833 — bound the autostash restore prompt with a timeout](https://github.com/NousResearch/hermes-agent/pull/86833)，已关闭。这可防止无人值守的 `hermes update` 操作卡在交互式提示上。
+- **Security and update handling**
+  - [PR #131746 — scan lifecycle scripts named by Windows paths](https://github.com/NousResearch/hermes-agent/pull/131746), open. The proposal addresses a security-relevant parsing failure where POSIX-style tokenization can interpret Windows backslashes incorrectly.
+  - [PR #130878 — prevent implicit fetches for remote Markdown images](https://github.com/NousResearch/hermes-agent/pull/130878), open. Remote images would become explicit links rather than automatically loading external resources.
+  - [PR #131741 — preserve a checkout’s own `maintenance.auto=false` setting during update](https://github.com/NousResearch/hermes-agent/pull/131741), closed.
+  - [PR #86833 — bound the autostash restore prompt with a timeout](https://github.com/NousResearch/hermes-agent/pull/86833), closed. This prevents unattended `hermes update` operations from hanging at an interactive prompt.
 
-- **平台和易用性修复**
-  - [PR #131728 — add `activate.fish` for the fish shell](https://github.com/NousResearch/hermes-agent/pull/131728)，开放中。
-  - [PR #103683](https://github.com/NousResearch/hermes-agent/pull/103683) 和 [PR #25503 — correct Windows gateway runtime status detection](https://github.com/NousResearch/hermes-agent/pull/25503)，均已关闭。
-  - [PR #106042 — preserve replacement draft providers during Desktop cleanup](https://github.com/NousResearch/hermes-agent/pull/106042)，已关闭。
-  - [PR #66280 — handle Telegram live locations in the background](https://github.com/NousResearch/hermes-agent/pull/66280)，开放中。这将防止持续的位置更新淹没对话，同时保留对用户主动固定位置和场所的正常处理能力。
+- **Platform and usability fixes**
+  - [PR #131728 — add `activate.fish` for the fish shell](https://github.com/NousResearch/hermes-agent/pull/131728), open.
+  - [PR #103683](https://github.com/NousResearch/hermes-agent/pull/103683) and [PR #25503 — correct Windows gateway runtime status detection](https://github.com/NousResearch/hermes-agent/pull/25503), both closed.
+  - [PR #106042 — preserve replacement draft providers during Desktop cleanup](https://github.com/NousResearch/hermes-agent/pull/106042), closed.
+  - [PR #66280 — handle Telegram live locations in the background](https://github.com/NousResearch/hermes-agent/pull/66280), open. This would prevent continuous location updates from flooding the conversation while retaining normal handling for deliberate pins and venues.
 
-### 反映当前工作重点的开放 PR
+### Open PRs indicating active work
 
-其余开放 PR 仍在持续推进以下方向：
+The remaining open PRs continue to target:
 
-- 静默轮次的存活信号和会话状态正确性。
-- Slack 和 Telegram 消息投递。
-- Kanban 自动化和被阻止任务的传播。
-- Windows 安装、更新和终端行为。
-- 技能检索、编辑和提示词效率。
-- Desktop 渲染、安全性和远程网关兼容性。
+- Quiet-turn liveness signaling and session-state correctness.
+- Slack and Telegram message delivery.
+- Kanban automation and blocked-task propagation.
+- Windows installation, update, and terminal behavior.
+- Skills retrieval, editing, and prompt efficiency.
+- Desktop rendering, security, and remote-gateway compatibility.
 
-## 4. 社区热点
+## 4. Community Hot Topics
 
-### 跨网关的 Agent 协作
+### Cross-agent collaboration across gateways
 
-按评论数计算，最活跃的 issue 是 [Issue #97681 — Let Bots collaborate across gateways](https://github.com/NousResearch/hermes-agent/issues/97681)，共有 **33 条评论和 4 个赞**。该提案希望让 Hermes Bots 能够跨机器协作，并最终支持跨所有者协作，同时保持模型、工具、内存、凭据和部署控制权的独立归属。
+The most active issue by comment volume is [Issue #97681 — Let Bots collaborate across gateways](https://github.com/NousResearch/hermes-agent/issues/97681), with **33 comments and 4 likes**. The proposal is for Hermes Bots to collaborate across machines—and eventually across owners—while preserving separate ownership of models, tools, memory, credentials, and deployment control.
 
-这表明社区对 Hermes 从单一个人 Agent 演进为分布式 Agent 生态抱有强烈兴趣。其核心设计挑战不只是进程间消息传递，还包括安全委派、身份、权限、上下文传输、故障恢复以及清晰的权责边界。
+This indicates strong interest in Hermes evolving from a single personal agent into a distributed agent ecosystem. The main design challenge is not merely inter-process messaging; it is secure delegation, identity, permissions, context transfer, failure recovery, and clear ownership boundaries.
 
-### Desktop 重复回复与慢模型误报失败
+### Desktop duplicate replies and slow-model false failures
 
-两个高度活跃的 P1 issue 与 Desktop/会话可靠性有关：
+Two highly active P1 issues concern Desktop/session reliability:
 
-- [Issue #123801 — macOS Desktop renders duplicate assistant replies](https://github.com/NousResearch/hermes-agent/issues/123801)，**22 条评论和 1 个赞**。
-- [Issue #125306 — 45-second live-turn silence watchdog produces misleading “reply was cut off” messages](https://github.com/NousResearch/hermes-agent/issues/125306)，**7 条评论和 2 个赞**。
+- [Issue #123801 — macOS Desktop renders duplicate assistant replies](https://github.com/NousResearch/hermes-agent/issues/123801), **22 comments and 1 like**.
+- [Issue #125306 — 45-second live-turn silence watchdog produces misleading “reply was cut off” messages](https://github.com/NousResearch/hermes-agent/issues/125306), **7 comments and 2 likes**.
 
-这些报告共同反映出后端存活状态、已存储消息状态和 Desktop 展示层之间存在更广泛的断层。运行缓慢的自托管模型可能被误判为失败；即便实际上只有一条 Assistant 消息记录和一次完成事件，会话仍可能在界面上被渲染两次。相关修复 PR [#128528](https://github.com/NousResearch/hermes-agent/pull/128528) 直接处理了静默轮次的存活判断，但重复渲染问题可能仍需单独修复持久化层到渲染层的去重逻辑。
+Together, these reports point to a broader gap between backend liveness, stored message state, and Desktop presentation. A slow self-hosted model can be incorrectly treated as failed, while a session can be rendered twice even when only one assistant row and one completion exist. The requested fix PR [#128528](https://github.com/NousResearch/hermes-agent/pull/128528) directly addresses quiet-turn liveness, but duplicate rendering may still require a separate persistence-to-renderer deduplication fix.
 
-### 技能可扩展性与提示词成本
+### Skills scalability and prompt cost
 
-多个 issue 和 PR 都聚焦于不断膨胀的技能上下文：
+Several issues and PRs focus on the growing skills context:
 
-- [Issue #2045 — lazy skill loading](https://github.com/NousResearch/hermes-agent/issues/2045)，**10 条评论和 4 个赞**。
-- [Issue #17649 — semantic skill retrieval with SQLite FTS5](https://github.com/NousResearch/hermes-agent/issues/17649)，**5 条评论和 1 个赞**。
-- [Issue #102811 — skills prompt forces over-eager skill loading](https://github.com/NousResearch/hermes-agent/issues/102811)，**4 条评论**。
-- [Issue #71481 — names-only skills index breaks spontaneous discovery](https://github.com/NousResearch/hermes-agent/issues/71481)，**2 条评论**。
-- [PR #131742 — fresh skill reads after patch errors](https://github.com/NousResearch/hermes-agent/pull/131742)，开放中。
+- [Issue #2045 — lazy skill loading](https://github.com/NousResearch/hermes-agent/issues/2045), **10 comments and 4 likes**.
+- [Issue #17649 — semantic skill retrieval with SQLite FTS5](https://github.com/NousResearch/hermes-agent/issues/17649), **5 comments and 1 like**.
+- [Issue #102811 — skills prompt forces over-eager skill loading](https://github.com/NousResearch/hermes-agent/issues/102811), **4 comments**.
+- [Issue #71481 — names-only skills index breaks spontaneous discovery](https://github.com/NousResearch/hermes-agent/issues/71481), **2 comments**.
+- [PR #131742 — fresh skill reads after patch errors](https://github.com/NousResearch/hermes-agent/pull/131742), open.
 
-其核心需求是在减少提示词膨胀的同时，确保技能仍然可被发现。讨论揭示了一个权衡：紧凑索引可以节省 token，但移除描述后，模型可能无法意识到相关技能的存在。这很可能成为未来版本的一个重点设计方向。
+The underlying need is to reduce prompt bloat without making skills undiscoverable. The discussion exposes a tradeoff: compact indexes save tokens, but removing descriptions may prevent the model from realizing that a relevant skill exists. This is a likely design priority for a future version.
 
-### Google Workspace 集成
+### Google Workspace integration
 
-Google Workspace 技能已经引发多项具体的质量问题报告：
+The Google Workspace skill is producing several concrete quality reports:
 
-- [Issue #35560 — documented setup flags do not exist](https://github.com/NousResearch/hermes-agent/issues/35560)，**6 条评论和 1 个赞**。
-- [Issue #131711 — empty Gmail searches return non-JSON from the Python backend](https://github.com/NousResearch/hermes-agent/issues/131711)，**4 条评论**。
-- [Issue #43054 — Gmail retrieval drops forwarded and nested MIME bodies](https://github.com/NousResearch/hermes-agent/issues/43054)，**4 条评论**。
+- [Issue #35560 — documented setup flags do not exist](https://github.com/NousResearch/hermes-agent/issues/35560), **6 comments and 1 like**.
+- [Issue #131711 — empty Gmail searches return non-JSON from the Python backend](https://github.com/NousResearch/hermes-agent/issues/131711), **4 comments**.
+- [Issue #43054 — Gmail retrieval drops forwarded and nested MIME bodies](https://github.com/NousResearch/hermes-agent/issues/43054), **4 comments**.
 
-这些并非孤立的外观问题，而是会影响安装可靠性、输出一致性以及真实邮件的处理能力。这一模式表明，该技能在多个后端和 MIME 结构之间缺乏充分的契约测试。
+These are not isolated cosmetic issues. They affect setup reliability, output consistency, and the ability to process real-world email. The pattern suggests insufficient contract testing across the skill’s multiple backends and MIME structures.
 
-### 高关注度的分发方式和本地模型需求
+### High-interest distribution and local-model requests
 
-- [Issue #38519 — Hermes Desktop frontend-only installation](https://github.com/NousResearch/hermes-agent/issues/38519)，**8 条评论和 16 个赞**。
-- [Issue #118418 — detect and use multi-GPU VRAM in the local runtime](https://github.com/NousResearch/hermes-agent/issues/118418)，**2 条评论**。
+- [Issue #38519 — Hermes Desktop frontend-only installation](https://github.com/NousResearch/hermes-agent/issues/38519), **8 comments and 16 likes**.
+- [Issue #118418 — detect and use multi-GPU VRAM in the local runtime](https://github.com/NousResearch/hermes-agent/issues/118418), **2 comments**.
 
-仅安装前端的需求在 issue 列表中获得了最强烈的反响，表明用户希望更清晰地拆分 Desktop 客户端与常驻网关/Agent 基础设施。多 GPU 需求则反映出用户希望将 Hermes 作为功能强大的本地模型前端使用，尤其是用于运行更大的模型和更长的上下文。
+The frontend-only request has the strongest reaction signal in the issue list, indicating demand for a cleaner split between Desktop client and always-on gateway/agent infrastructure. The multi-GPU request reflects a desire to use Hermes as a capable local-model frontend, particularly for larger models and longer contexts.
 
-## 5. Bug 与稳定性
+## 5. Bugs & Stability
 
-### P0/P1 或会话状态风险
+### P0/P1 or session-state risks
 
-1. **会话压缩损坏风险 — P0**
-   - [PR #129759 — retain guarded auto-prune lineages](https://github.com/NousResearch/hermes-agent/pull/129759)，开放中。
-   - 问题在于，自动裁剪可能删除已压缩的祖先节点，却只保留一个较旧的末端节点，从而形成损坏的压缩链，可能威胁长时间运行会话的完整性。
-   - 相关开放 issue [Issue #131412 — oversized OpenAI Codex sessions cannot be compacted](https://github.com/NousResearch/hermes-agent/issues/131412) 指出，受保护的尾部历史会占满所有可压缩内容，同时 `middle_window_tokens` 仍为零。
-   - **评估：**优先级很高，因为这属于数据完整性和会话连续性风险。
+1. **Session compression corruption risk — P0**
+   - [PR #129759 — retain guarded auto-prune lineages](https://github.com/NousResearch/hermes-agent/pull/129759), open.
+   - The issue is that auto-pruning can remove compressed ancestors while preserving only an old tip, leaving a broken compression lineage. This can threaten long-running session integrity.
+   - A related open issue, [Issue #131412 — oversized OpenAI Codex sessions cannot be compacted](https://github.com/NousResearch/hermes-agent/issues/131412), reports that protected tail history consumes all compressible content while `middle_window_tokens` remains zero.
+   - **Assessment:** high priority because these are data-integrity and session-continuity risks.
 
-2. **macOS Desktop 重复显示 Assistant 回复 — P1**
-   - [Issue #123801](https://github.com/NousResearch/hermes-agent/issues/123801)。
-   - 即使只持久化了一条记录和一次完成事件，Assistant 消息仍可能在界面上被重复渲染。这会损害用户信任，也可能使用户或 Agent 将其误认为重复执行。
-   - **修复状态：**现有数据中尚未发现直接修复该问题的 PR；相关存活状态工作见 [PR #128528](https://github.com/NousResearch/hermes-agent/pull/128528)。
+2. **macOS Desktop duplicate assistant replies — P1**
+   - [Issue #123801](https://github.com/NousResearch/hermes-agent/issues/123801).
+   - A single persisted row and completion can still result in duplicate rendered assistant messages. This may affect user trust and can also cause agents or users to interpret the response as repeated execution.
+   - **Fix status:** no direct fix PR is identified in the supplied data; related liveness work is present in [PR #128528](https://github.com/NousResearch/hermes-agent/pull/128528).
 
-3. **慢模型被误报超时 — P1**
-   - [Issue #125306](https://github.com/NousResearch/hermes-agent/issues/125306)。
-   - Desktop 看门狗假定静默 45 秒即表示任务失败，这对自托管模型和长时间推理而言并不安全。
-   - **修复状态：**[PR #128528](https://github.com/NousResearch/hermes-agent/pull/128528) 与此问题直接相关，应优先处理。
+3. **False timeout for slow models — P1**
+   - [Issue #125306](https://github.com/NousResearch/hermes-agent/issues/125306).
+   - The Desktop watchdog assumes a 45-second silence means failure, which is unsafe for self-hosted models and long-running inference.
+   - **Fix status:** [PR #128528](https://github.com/NousResearch/hermes-agent/pull/128528) is directly relevant and should be prioritized.
 
-4. **OpenCode 会话亲和性 Bug**
-   - [Issue #115000](https://github.com/NousResearch/hermes-agent/issues/115000)，由 [PR #131047](https://github.com/NousResearch/hermes-agent/pull/131047) 处理。
-   - 辅助线程可能复用错误或过期的 `x-opencode-session` key，从而造成上下文错误关联。
+4. **OpenCode session affinity bug**
+   - [Issue #115000](https://github.com/NousResearch/hermes-agent/issues/115000), addressed by [PR #131047](https://github.com/NousResearch/hermes-agent/pull/131047).
+   - Auxiliary threads may reuse the wrong or stale `x-opencode-session` key, risking context misassociation.
 
-5. **与安全相关的 Windows 生命周期命令解析**
-   - [PR #131746](https://github.com/NousResearch/hermes-agent/pull/131746)。
-   - Windows 路径解析错误可能导致生命周期命令绕过预期的脚本扫描。应从安全角度进行审查，并针对 POSIX 和 Windows 命令形式补充测试。
+5. **Security-relevant Windows lifecycle command parsing**
+   - [PR #131746](https://github.com/NousResearch/hermes-agent/pull/131746).
+   - Incorrect parsing of Windows paths could allow a lifecycle command to evade intended script scanning. This should receive security-focused review and tests across POSIX and Windows command forms.
 
-### P2 可靠性与兼容性问题
+### P2 reliability and compatibility issues
 
-- [Issue #131681 — `pilk==0.2.4` missing from `exclude-newer`](https://github.com/NousResearch/hermes-agent/issues/131681)，导致在缺少上传时间元数据的镜像中，插件工作区无法完成依赖解析。
-- [Issue #124526 — non-ASCII Windows usernames break `uv` path resolution](https://github.com/NousResearch/hermes-agent/issues/124526)，影响 CLI 和 Desktop 安装。
-- [Issue #120888 — full backup can run indefinitely during concurrent writes](https://github.com/NousResearch/hermes-agent/issues/120888)。
-- [Issue #131736 — Windows Desktop reports backend failure while another PID remains active](https://github.com/NousResearch/hermes-agent/issues/131736)。
-- [Issue #131657 — Desktop Artifacts reads remote sessions without `connection_id`](https://github.com/NousResearch/hermes-agent/issues/131657)，导致已注册的远程会话返回 404。
-- [Issue #131659 — a dangling Windows symlink/junction breaks the entire Dashboard Files listing](https://github.com/NousResearch/hermes-agent/issues/131659)。
-- [Issue #75444 — auto-decomposer can re-dispatch escalated triage tasks indefinitely](https://github.com/NousResearch/hermes-agent/issues/75444)。
-- [Issue #43054 — nested/forwarded email bodies are dropped](https://github.com/NousResearch/hermes-agent/issues/43054)。
-- [Issue #119033 — Feishu typing reactions notify the user on every turn](https://github.com/NousResearch/hermes-agent/issues/119033)。
-- [Issue #131738 — Slack SVG attachments are incorrectly reported as scope/auth failures](https://github.com/NousResearch/hermes-agent/issues/131738)。
-- [Issue #131739 — tool-output filenames are linkified and replaced with third-party page titles](https://github.com/NousResearch/hermes-agent/issues/131739)。
-- [Issue #131070 — Desktop workspace selection lacks expected context-menu actions on Windows](https://github.com/NousResearch/hermes-agent/issues/131070)。
-- [Issue #131663 — malformed tool-call garbage can flood the chat and stop the agent](https://github.com/NousResearch/hermes-agent/issues/131663)。
+- [Issue #131681 — `pilk==0.2.4` missing from `exclude-newer`](https://github.com/NousResearch/hermes-agent/issues/131681), causing plugin workspaces to be unsatisfiable on mirrors without upload-time metadata.
+- [Issue #124526 — non-ASCII Windows usernames break `uv` path resolution](https://github.com/NousResearch/hermes-agent/issues/124526), affecting CLI installation and Desktop installation.
+- [Issue #120888 — full backup can run indefinitely during concurrent writes](https://github.com/NousResearch/hermes-agent/issues/120888).
+- [Issue #131736 — Windows Desktop reports backend failure while another PID remains active](https://github.com/NousResearch/hermes-agent/issues/131736).
+- [Issue #131657 — Desktop Artifacts reads remote sessions without `connection_id`](https://github.com/NousResearch/hermes-agent/issues/131657), causing registered remote sessions to return 404s.
+- [Issue #131659 — a dangling Windows symlink/junction breaks the entire Dashboard Files listing](https://github.com/NousResearch/hermes-agent/issues/131659).
+- [Issue #75444 — auto-decomposer can re-dispatch escalated triage tasks indefinitely](https://github.com/NousResearch/hermes-agent/issues/75444).
+- [Issue #43054 — nested/forwarded email bodies are dropped](https://github.com/NousResearch/hermes-agent/issues/43054).
+- [Issue #119033 — Feishu typing reactions notify the user on every turn](https://github.com/NousResearch/hermes-agent/issues/119033).
+- [Issue #131738 — Slack SVG attachments are incorrectly reported as scope/auth failures](https://github.com/NousResearch/hermes-agent/issues/131738).
+- [Issue #131739 — tool-output filenames are linkified and replaced with third-party page titles](https://github.com/NousResearch/hermes-agent/issues/131739).
+- [Issue #131070 — Desktop workspace selection lacks expected context-menu actions on Windows](https://github.com/NousResearch/hermes-agent/issues/131070).
+- [Issue #131663 — malformed tool-call garbage can flood the chat and stop the agent](https://github.com/NousResearch/hermes-agent/issues/131663).
 
-这些报告覆盖范围广泛，说明 Desktop、Windows、网关集成和会话持久化仍是主要稳定性热点。
+The breadth of these reports suggests that Desktop, Windows, gateway integrations, and session persistence remain the main stability hotspots.
 
-## 6. 功能请求与路线图信号
+## 6. Feature Requests & Roadmap Signals
 
-### 最有可能进入近期路线图的候选项
+### Most likely near-term roadmap candidates
 
-- **跨网关和跨所有者协作**
-  - [Issue #97681](https://github.com/NousResearch/hermes-agent/issues/97681)。
-  - 这是数据中最强的战略信号，不过分布式身份和权限要求意味着它更可能以分阶段基础设施的形式交付，而非随单个版本一次性推出。
+- **Cross-gateway and cross-owner collaboration**
+  - [Issue #97681](https://github.com/NousResearch/hermes-agent/issues/97681).
+  - This is the strongest strategic signal in the data, though its distributed-identity and permission requirements make it more likely to arrive as staged infrastructure than a single release.
 
-- **异步 A2A 任务执行**
-  - [Issue #91687 — A2A long jobs should return a task ID](https://github.com/NousResearch/hermes-agent/issues/91687)。
-  - 返回 task ID 并支持后续结果获取，可以解决当前 120–300 秒同步超时限制，也很适合在近期网关/插件版本中落地。
+- **Asynchronous A2A task execution**
+  - [Issue #91687 — A2A long jobs should return a task ID](https://github.com/NousResearch/hermes-agent/issues/91687).
+  - Returning task IDs and enabling later result retrieval would address the current 120–300 second synchronous timeout limitation and is well suited to a near-term gateway/plugin release.
 
-- **高效技能发现**
-  - [Issue #2045](https://github.com/NousResearch/hermes-agent/issues/2045)、[Issue #17649](https://github.com/NousResearch/hermes-agent/issues/17649) 和 [Issue #102811](https://github.com/NousResearch/hermes-agent/issues/102811)。
-  - 一个可能的方向是采用混合系统：紧凑的可搜索索引、按需扩展元数据，以及显式检索工具。主要设计风险是如何保留模型对技能的自主发现能力。
+- **Efficient skill discovery**
+  - [Issue #2045](https://github.com/NousResearch/hermes-agent/issues/2045), [Issue #17649](https://github.com/NousResearch/hermes-agent/issues/17649), and [Issue #102811](https://github.com/NousResearch/hermes-agent/issues/102811).
+  - A likely direction is a hybrid system: compact searchable index, on-demand metadata expansion, and explicit retrieval tools. The main design risk is preserving spontaneous discovery.
 
-- **Desktop 仅前端安装**
-  - [Issue #38519](https://github.com/NousResearch/hermes-agent/issues/38519)。
-  - 鉴于该需求获得了 16 个赞，且远程 Agent 使用场景明确，它可能很快演变为一种实用的打包或配置调整。
+- **Desktop frontend-only installation**
+  - [Issue #38519](https://github.com/NousResearch/hermes-agent/issues/38519).
+  - Given the 16 likes and clear remote-agent use case, this could become a practical packaging/configuration change soon.
 
-- **更好的本地模型支持**
-  - [Issue #118418](https://github.com/NousResearch/hermes-agent/issues/118418)。
-  - 多 GPU 显存检测和上下文处理将提升 Hermes 作为本地推理客户端的吸引力，但需要在不同运行时和硬件上进行谨慎测试。
+- **Better local-model support**
+  - [Issue #118418](https://github.com/NousResearch/hermes-agent/issues/118418).
+  - Multi-GPU VRAM detection and context handling would improve Hermes’s appeal as a local inference client, though it requires careful testing across runtimes and hardware.
 
-- **Profile 级心跳**
-  - [Issue #130197](https://github.com/NousResearch/hermes-agent/issues/130197)。
-  - 这项能力将把会话心跳扩展到 Profile 范围，并使其具备上下文感知能力。
+- **Profile-level heartbeat**
+  - [Issue #130197](https://github.com/NousResearch/hermes-agent/issues/130197).
+  - This would extend session heartbeats into profile-scoped, context-aware automation.
 
-### 可能性较低或更长期的项目
+### Lower-probability or longer-term items
 
-- [Issue #36002 — per-auxiliary fallback policy tiers](https://github.com/NousResearch/hermes-agent/issues/36002)，战略意义重要，但可能需要对可靠性策略进行更大规模的重新设计。
-- [Issue #130197](https://github.com/NousResearch/hermes-agent/issues/130197)，依赖于一致且连贯的 Profile 和会话上下文语义。
-- [Issue #118418](https://github.com/NousResearch/hermes-agent/issues/118418)，可能需要针对不同运行时进行超出 CLI/UI 层的修改。
+- [Issue #36002 — per-auxiliary fallback policy tiers](https://github.com/NousResearch/hermes-agent/issues/36002), which is strategically important but likely requires a larger reliability policy redesign.
+- [Issue #130197](https://github.com/NousResearch/hermes-agent/issues/130197), which depends on coherent profile and session context semantics.
+- [Issue #118418](https://github.com/NousResearch/hermes-agent/issues/118418), which may require runtime-specific changes beyond the CLI/UI layer.
 
-## 7. 用户反馈汇总
+## 7. User Feedback Summary
 
-### 积极信号
+### Positive signals
 
-- 用户投入了大量讨论时间，跨网关协作 issue 获得了 **33 条评论**，Desktop 重复回复 issue 获得了 **22 条评论**。
-- 仅安装前端的需求获得了 **16 个赞**，表明社区强烈希望采用更灵活的部署模式。
-- 以猫为主题的原生记忆提供商提案 [PR #131744](https://github.com/NousResearch/hermes-agent/pull/131744)，也说明生态系统正在积极探索持久化和语义记忆。
-- Telegram 实时位置支持、fish 激活和 OpenCode 会话处理等进展表明，贡献者正在拓宽 Hermes 的使用边界，使其不再局限于核心 Desktop 体验。
+- Users are investing significant discussion time in the project, with **33 comments** on cross-gateway collaboration and **22 comments** on duplicate Desktop replies.
+- The frontend-only installation request received **16 likes**, indicating strong demand for a more flexible deployment model.
+- The proposal for a cat-themed native memory provider, [PR #131744](https://github.com/NousResearch/hermes-agent/pull/131744), also shows active ecosystem experimentation around persistent and semantic memory.
+- Telegram live-location support, fish activation, and OpenCode session handling indicate contributors are broadening Hermes’s usability beyond its core Desktop experience.
 
-### 主要不满来源
+### Main sources of dissatisfaction
 
-- **静默失败或误导性失败：**慢模型被判定为回复被截断、消息重复出现、远程会话无法找到，以及后端状态报告错误。
-- **Windows 使用阻力：**非 ASCII 用户名、PTY 控制台窗口、右键菜单、符号链接、网关检测和更新行为等问题引发了大量报告。
-- **集成脆弱性：**Slack、Feishu、Telegram
+- **Silent or misleading failures:** slow models are declared cut off, duplicate messages appear, remote sessions are not found, and backend status is reported incorrectly.
+- **Windows friction:** non-ASCII usernames, PTY console windows, context menus, symlinks, gateway detection, and update behavior generate multiple reports.
+- **Integration fragility:** Slack, Feishu, Telegram, Google Workspace, and remote gateways exhibit message-routing, attachment, MIME, and TLS problems.
+- **Configuration complexity:** users struggle with installation topology, profile inheritance, local model detection, cron timeout semantics, and skill prompt behavior.
+- **Skill discoverability versus efficiency:** the community wants lower token usage, but some users report that compact indexes make relevant skills harder to discover.
+- **Automation loop failures:** Kanban tasks can bounce indefinitely through triage, and blocked wake messages may omit the reason for
 
 </details>
 
 <details>
 <summary><strong>IronClaw</strong> — <a href="https://github.com/nearai/ironclaw">nearai/ironclaw</a></summary>
 
-过去24小时无活动。
+No activity in the last 24 hours.
 
 </details>
 
 <details>
 <summary><strong>QwenPaw</strong> — <a href="https://github.com/agentscope-ai/QwenPaw">agentscope-ai/QwenPaw</a></summary>
 
-# QwenPaw 项目摘要 — 2026-10-03
+# QwenPaw Project Digest — 2026-10-03
 
-## 1. 今日概览
+## 1. Today’s Overview
 
-过去 24 小时内，QwenPaw 共记录 **10 个更新的 Issue 和 4 个更新的 Pull Request**，**没有 Issue 或 PR 被关闭/合并**，也**没有新版本发布**。项目活动主要集中在提升故障可见性、清理 Agent 生命周期，以及完善内置多模态工具等方面。目前仍有多个高影响范围的 Bug 处于开放状态，包括影响局域网访问的 V2.2.2.beta4 会话页面回归问题、第三方模型不可见问题，以及 WebUI 中的会话碎片化问题。总体来看，项目贡献者参与度较高，但当前仍有大量开放的可靠性问题报告和尚未合并的修复，说明近期需要开展稳定化工作。
+QwenPaw recorded **10 updated issues and 4 updated pull requests** in the last 24 hours, with **no issues or PRs closed/merged** and **no new releases**. Activity was concentrated around improving failure visibility, agent lifecycle cleanup, and built-in multimodal tooling. Several high-impact bugs remain open, including a V2.2.2.beta4 conversation-page regression affecting LAN access, third-party model visibility failures, and conversation fragmentation in the WebUI. Overall, the project is showing strong contributor engagement, but the current mix of open reliability reports and unmerged fixes suggests near-term stabilization work is needed.
 
-## 3. 项目进展
+## 3. Project Progress
 
-今天没有 Pull Request 被合并或关闭。不过，仍有 4 个开放 PR 推进了项目的可靠性和能力建设：
+No pull requests were merged or closed today. Nevertheless, four open PRs advanced the project’s reliability and capabilities:
 
 - **[PR #8084 — Refuse oversized prompts and surface empty model replies](https://github.com/agentscope-ai/QwenPaw/pull/8084)**  
-  增加对超出模型有效上下文窗口的提示词的保护，并尝试显式呈现空白的模型响应，避免房间在无提示的情况下静默失败。该 PR 直接应对了 HTTP 请求成功但返回零个生成 token 的风险，尤其是在接近上下文限制时。
+  Adds protection against prompts that exceed the model’s effective context window and attempts to expose empty provider responses rather than allowing rooms to fail silently. This directly addresses the risk of successful HTTP responses containing zero generated tokens near the context limit.
 
 - **[PR #8079 — Cancel in-flight runs when reload drain time expires](https://github.com/agentscope-ai/QwenPaw/pull/8079)**  
-  旨在修复 [Issue #8076](https://github.com/agentscope-ai/QwenPaw/issues/8076)。该方案可以避免长时间清理后旧 Agent 实例被静默遗弃，同时向房间发送通知并取消剩余轮次。
+  Intended to fix [Issue #8076](https://github.com/agentscope-ai/QwenPaw/issues/8076). The proposal prevents old agent instances from being abandoned silently after prolonged cleanup, while notifying the room and canceling remaining turns.
 
 - **[PR #8083 — Add `view_audio` built-in tool](https://github.com/agentscope-ai/QwenPaw/pull/8083)**  
-  首次贡献者提交的实现，在现有 `view_image` 和 `view_video` 工具的基础上增加了原生音频理解能力。它回应了 [Issue #8081](https://github.com/agentscope-ai/QwenPaw/issues/8081) 中对应的功能请求。
+  A first-time-contributor submission adding native audio understanding alongside the existing `view_image` and `view_video` tools. It addresses the corresponding feature request in [Issue #8081](https://github.com/agentscope-ai/QwenPaw/issues/8081).
 
 - **[PR #7936 — Complete Chinese access-control username translation](https://github.com/agentscope-ai/QwenPaw/pull/7936)**  
-  补充中文环境缺失的 `channels.username` 本地化键，使中文界面与其他已发布的语言版本保持一致。这个 PR 改动很小，但能够提升界面的一致性。
+  Adds the missing `channels.username` localization key for Chinese, aligning the Chinese UI with the other shipped locales. The PR is small but improves interface consistency.
 
-**评估：** 最有意义的进展在于让异常的 Agent 行为变得可见、可恢复。不过，这些变更目前都尚未合并，因此尚不能确认用户已通过已发布的版本享受到这些改进。
+**Assessment:** The most meaningful progress is around making abnormal agent behavior visible and recoverable. However, none of these changes has yet been merged, so users are not confirmed to benefit from them in a published release.
 
-## 4. 社区热点
+## 4. Community Hot Topics
 
-### 最活跃 Issue：消息编辑、撤回和工作区回滚
+### Most active issue: message editing, retraction, and workspace rollback
 
 - **[Issue #7997 — Support message retraction/editing and workspace rollback in WebUI](https://github.com/agentscope-ai/QwenPaw/issues/7997)**  
-  **8 条评论**，是今日各项议题中讨论数量最多的。该请求涵盖编辑或撤回历史用户消息、截断后续对话历史，以及选择性恢复文件快照。这表明用户希望在不手动重建聊天或撤销工作区变更的情况下纠正错误，将对话状态与文件系统状态关联起来。
+  **8 comments**, the highest discussion count among today’s items. The request covers editing or retracting prior user messages, truncating downstream conversation history, and optionally restoring file snapshots. This indicates that users need to correct mistakes without manually rebuilding a chat or reverting workspace changes, linking conversational state with filesystem state.
 
-### 最活跃的功能讨论：用户消息的 Markdown 渲染
+### Most active feature discussion: Markdown rendering for user messages
 
 - **[Issue #2975 — Render user-entered session messages as Markdown](https://github.com/agentscope-ai/QwenPaw/issues/2975)**  
-  **4 条评论**，最后活动时间为 10 月 2 日。报告指出，助手响应和用户消息之间存在差异：用户输入的 Markdown 会以原始语法显示。对于代码片段、结构化列表、技术说明以及文档类输入，这个问题尤其突出。
+  **4 comments**, with activity updated on October 2. The report identifies a disparity between assistant responses and user messages: user-authored Markdown appears as raw syntax. This is especially important for code snippets, structured lists, technical explanations, and document-like input.
 
-### 第三方 Agent 集成缺陷
+### Third-party agent integration defects
 
 - **[Issue #8077 — Qoder custom models unavailable and context meter hidden](https://github.com/agentscope-ai/QwenPaw/issues/8077)**  
-  **2 条评论。** 据报告，Qoder 第三方 Agent 存在 3 个相互关联的缺陷：自定义模型不可见或无法使用、后端配置丢失，以及上下文使用量计量器被隐藏。多个问题集中在同一个适配器上，说明 QwenPaw 与第三方 Agent 运行框架之间需要加强集成测试和契约验证。
+  **2 comments.** Three related defects reportedly affect the Qoder third-party agent: custom models are invisible or unusable, backend configuration is dropped, and the context-usage meter is hidden. The concentration of defects in one adapter suggests a need for broader integration testing and contract validation between QwenPaw and third-party agent harnesses.
 
-### Agent 重载生命周期
+### Agent reload lifecycle
 
 - **[Issue #8076 — Reload abandons in-flight turns after drain timeout](https://github.com/agentscope-ai/QwenPaw/issues/8076)**  
-  **1 条评论**，并在 **[PR #8079](https://github.com/agentscope-ai/QwenPaw/pull/8079)** 中提出了修复方案。讨论重点是过长的清理时间预算——在所述实现中最长可达 24 小时——以及由此导致用户可能收不到房间通知或取消信号的可能性。
+  **1 comment**, with a proposed fix in **[PR #8079](https://github.com/agentscope-ai/QwenPaw/pull/8079)**. Discussion focuses on the long cleanup budget—up to 24 hours in the described implementation—and the resulting possibility that users receive no room notification or cancellation signal.
 
-**核心需求：** 当前社区最突出的诉求并不只是增加更多功能，而是实现可信的状态管理：准确的对话历史、可预测的 WebUI 渲染、可见的截断错误、可靠的第三方模型配置，以及确定性的 Agent 清理。
+**Underlying needs:** The most prominent community demand is not merely additional features, but trustworthy state management: accurate conversation history, predictable WebUI rendering, visible truncation errors, reliable third-party model configuration, and deterministic agent cleanup.
 
-## 5. Bug 与稳定性
+## 5. Bugs & Stability
 
-### 高严重度：升级 Beta 后无法通过局域网访问会话页面
+### High severity: conversation page inaccessible on LAN after beta upgrade
 
 - **[Issue #8073 — V2.2.2.beta4 unable to access conversation page](https://github.com/agentscope-ai/QwenPaw/issues/8073)**  
-  该问题在从 V2.2.1 升级到 V2.2.2.beta4 后被报告。从其他设备通过局域网访问本地服务时，会话页面无法打开，但据称本地访问正常。  
-  **影响：** 这可能是一个影响远程访问以及家庭/服务器部署的版本回归问题。  
-  **修复 PR：** 暂未发现。  
-  **优先级：** 紧急；这是一个影响范围较大的 Beta 版本回归问题。
+  Reported after upgrading from V2.2.1 to V2.2.2.beta4. The conversation page fails for other devices accessing local services over the LAN, while local access reportedly works.  
+  **Impact:** A likely release regression affecting remote and household/server deployments.  
+  **Fix PR:** None identified.  
+  **Priority:** Urgent; this is a beta-version regression with broad access implications.
 
-### 高严重度：会话被拆分到多个 UI 页面
+### High severity: conversation split into multiple UI pages
 
 - **[Issue #8078 — `chat_with_agent` messages registered as separate chats](https://github.com/agentscope-ai/QwenPaw/issues/8078)**  
-  报告称，跨会话的 Agent 消息被注册为独立聊天，导致一个逻辑会话碎片化为多个页面。报告基于 V2.2.2b4，既影响用户体验，也影响对话状态的连续性。  
-  **影响：** 破坏会话完整性，可能使多 Agent 工作流难以追踪或恢复。  
-  **修复 PR：** 暂未发现。
+  Reports that cross-session agent messages are registered as independent chats, causing one logical session to fragment into multiple pages. The report was produced on V2.2.2b4 and affects both user experience and continuity of conversation state.  
+  **Impact:** Breaks session integrity and may make multi-agent workflows difficult to follow or recover.  
+  **Fix PR:** None identified.
 
-### 高严重度：上下文窗口溢出可能静默失败
+### High severity: context-window overflow may fail silently
 
 - **[Issue #8085 — Surface `finish_reason="length"` when output is truncated](https://github.com/agentscope-ai/QwenPaw/issues/8085)**  
-  当前，由于输出限制而导致的生成截断会丢失停止原因，导致用户无法区分完整答案和在句子中途结束的响应。  
-  **影响：** 静默数据丢失或答案不完整的情况可能被误认为是正常完成。  
-  **相关 PR：**[PR #8084](https://github.com/agentscope-ai/QwenPaw/pull/8084) 处理了超大提示词和空白回复问题，但可能尚未完全实现 Issue #8085 所要求的具体 `finish_reason="length"` 行为。
+  Generation cutoffs caused by output limits currently drop the stop reason, leaving users unable to distinguish a complete answer from a response that ended mid-sentence.  
+  **Impact:** Silent data loss or incomplete answers can be mistaken for successful completions.  
+  **Related PR:** **[PR #8084](https://github.com/agentscope-ai/QwenPaw/pull/8084)** addresses oversized prompts and empty replies, but may not fully implement the specific `finish_reason="length"` behavior requested in Issue #8085.
 
-### 中高严重度：Qoder 第三方集成失败
+### Medium-high severity: third-party Qoder integration failures
 
 - **[Issue #8077 — Qoder custom models invisible/unusable and context meter hidden](https://github.com/agentscope-ai/QwenPaw/issues/8077)**  
-  涉及配置丢失、自定义模型不可用，以及使用情况不可见等问题。  
-  **影响：** Qoder 无法可靠地使用自定义模型，同时用户也无法获取关键的上下文容量信息。  
-  **修复 PR：** 暂未发现。
+  Combines configuration loss, unavailable custom models, and missing usage visibility.  
+  **Impact:** Qoder cannot be used reliably with custom models, and users lack key context-capacity information.  
+  **Fix PR:** None identified.
 
-### 中严重度：Agent 重载可能导致任务继续运行或被静默丢弃
+### Medium severity: agent reload may leave work running or silently discarded
 
 - **[Issue #8076 — Reload drain timeout abandons in-flight turns](https://github.com/agentscope-ai/QwenPaw/issues/8076)**  
-  可能持续较长时间的清理过程，最终导致正在执行的任务在没有房间级通知的情况下被遗弃。  
-  **修复 PR：**[PR #8079](https://github.com/agentscope-ai/QwenPaw/pull/8079) 仍处于开放状态，并直接针对该行为提出修复。
+  Potentially lengthy cleanup can end with in-flight work being abandoned without room-level notification.  
+  **Fix PR:** **[PR #8079](https://github.com/agentscope-ai/QwenPaw/pull/8079)** is open and directly targets this behavior.
 
-**稳定性评估：** Beta 回归、会话路由/状态碎片化、静默截断和第三方集成失败等问题叠加，意味着项目近期稳定性风险较高。相关定向修复 PR 的出现是一个积极信号，但由于这些 PR 尚未合并，且没有新版本发布，修复目前还无法交付给用户。
+**Stability assessment:** The combination of a beta regression, session-routing/state fragmentation, silent truncation, and third-party integration failures indicates elevated near-term stability risk. The presence of targeted fix PRs is positive, but their open status and the absence of a new release mean remediation is not yet available to users.
 
-## 6. 功能请求与路线图信号
+## 6. Feature Requests & Roadmap Signals
 
-### 原生音频理解
+### Native audio understanding
 
 - **[Issue #8081 — Add `view_audio` built-in tool](https://github.com/agentscope-ai/QwenPaw/issues/8081)**
 - **[PR #8083 — Implement `view_audio`](https://github.com/agentscope-ai/QwenPaw/pull/8083)**
 
-这是目前最明确的近期路线图候选项，因为具体实现已经进入审查阶段。该功能将音频处理纳入与图像和视频相同的直接感知模型，减少对外部转录工具和脚本的依赖。
+This is the clearest near-term roadmap candidate because a concrete implementation is already under review. It would bring audio handling into the same direct perception model as images and video, reducing reliance on external transcription and scripting.
 
-**预测：** 如果该 PR 能通过审查和集成测试，很可能会出现在近期发布的版本中。
+**Prediction:** Likely to appear in a near-term release if the PR passes review and integration testing.
 
-### 消息编辑、撤回和可选的工作区回滚
+### Message editing, retraction, and optional workspace rollback
 
 - **[Issue #7997](https://github.com/agentscope-ai/QwenPaw/issues/7997)**
 
-这不是一项小型的 UI 增强，而是一项涉及状态管理的复杂功能。它需要协调聊天历史截断、上下文重建、快照恢复，以及潜在的多 Agent 状态。尽管该 Issue 在当前所有开放 Issue 中社区参与度最高，但目前尚未列出对应的实现 PR。
+This is a substantial state-management feature rather than a small UI enhancement. It must coordinate chat-history truncation, context rebuilding, snapshot restoration, and potentially multi-agent state. It has the highest community engagement among current issues, but no implementation PR is listed.
 
-**预测：** 该功能有可能成为路线图重点，但仍需要进行设计工作，短期内不太可能出现在下一个补丁版本中。
+**Prediction:** Plausible roadmap priority, though likely to require design work and may not be expected in the next patch release.
 
-### 用户消息的 Markdown 渲染
+### Markdown rendering for user messages
 
 - **[Issue #2975](https://github.com/agentscope-ai/QwenPaw/issues/2975)**
 
-该请求解决了一个明显的一致性缺口。对于前端而言，实现难度相对较低，但需要确保安全的 HTML 清理，以及对代码块和粘贴内容进行一致处理。
+The request addresses a visible consistency gap and should be relatively straightforward for the frontend, subject to safe HTML sanitization and consistent handling of code blocks and pasted content.
 
-**预测：** 这是一个适合快速发布的 WebUI 易用性改进候选项，不过目前没有正在进行的 PR。
+**Prediction:** A reasonable candidate for a quick WebUI usability update, although no active PR is shown.
 
-### 跨机器 Agent 发现与委派
+### Cross-machine agent discovery and delegation
 
 - **[Issue #8080 — Inter-instance agent communication](https://github.com/agentscope-ai/QwenPaw/issues/8080)**
 
-该提案将现有多 Agent 能力扩展到单个实例或工作区之外，支持自动发现、任务委派，以及跨机器传输知识或记忆。目标是覆盖家庭服务器、办公设备和云端 GPU 主机。
+The proposal extends current multi-agent capabilities beyond one instance or workspace through automatic discovery, task delegation, and knowledge or memory transfer across machines. It targets home servers, office devices, and cloud GPU hosts.
 
-**预测：** 这更像是长期的战略方向，而不是下一版本的即时功能。认证、发现机制、信任模型、数据一致性和安全性都需要先行设计。
+**Prediction:** Strategic long-term direction rather than an immediate next-version feature. Authentication, discovery, trust, data consistency, and security would need to be designed first.
 
-### 完善心跳机制文档
+### Better heartbeat documentation
 
 - **[Issue #8082 — Document heartbeat silence, concurrency, and `AGENTS.md` behavior](https://github.com/agentscope-ai/QwenPaw/issues/8082)**
 
-该请求关注的是当前配置文档未能充分解释的运行时语义。这很可能是一项低成本的文档改进，有助于用户理解预期的静默、任务重叠、并发以及心跳集成行为。
+The request concerns runtime semantics that are not adequately explained by the current configuration documentation. This is likely a low-cost documentation improvement and may help users understand expected silence, overlap, concurrency, and heartbeat integration.
 
-**预测：** 这是一项仅涉及文档的改动，适合在近期维护更新中发布。
+**Prediction:** Documentation-only change suitable for an immediate maintenance update.
 
-## 7. 用户反馈摘要
+## 7. User Feedback Summary
 
-用户的反馈呈现出较为复杂的使用体验：
+Users are reporting a mixed experience:
 
-- **升级 Beta 后远程访问可靠性不足：** V2.2.2.beta4 无法从其他局域网设备打开会话，这对将 QwenPaw 部署在家庭服务器或共享机器上的用户来说，是一个明显的回归问题。
-- **对话状态难以信赖：** 用户希望一次会话在 Agent 通信过程中始终保持连贯，但 `chat_with_agent` 可能会创建独立的 UI 页面。
-- **故障状态不够可见：** 静默截断、空白回复和被遗弃的重载任务，使用户难以判断工作究竟是完成、失败，还是仍在运行。
-- **WebUI 功能对等性不完整：** 助手响应支持丰富的 Markdown，但用户消息不支持，导致技术内容展示效果较差。
-- **第三方集成缺乏可靠配置：** Qoder 的自定义模型可能无法显示或保留，上下文使用情况也会被隐藏。
-- **多模态工作流支持不均衡：** 目前已有图像和视频工具，但音频处理仍需要间接的变通方法。
-- **纠错与恢复是重要使用场景：** 消息撤回、历史重写和工作区回滚，反映出用户对安全实验的需求，尤其是在编码 Agent 可能修改文件的情况下。
+- **Remote access reliability is weak after beta upgrades:** The inability to open conversations from another LAN device in V2.2.2.beta4 is a significant regression for users operating QwenPaw on home servers or shared machines.
+- **Conversation state is difficult to trust:** Users need a single session to remain coherent when agents communicate, yet `chat_with_agent` can create separate UI pages.
+- **Failure states are insufficiently visible:** Silent truncation, empty replies, and abandoned reloads make it difficult to know whether work completed, failed, or was still running.
+- **WebUI parity is incomplete:** Assistant responses support rich Markdown, but user messages do not, leading to poor presentation of technical content.
+- **Third-party integrations lack dependable configuration:** Qoder custom models may not be surfaced or preserved, and context usage is hidden.
+- **Multimodal workflows are uneven:** Image and video tools exist, while audio requires indirect workarounds.
+- **Correction and recovery are important use cases:** Message retraction, history rewriting, and workspace rollback reflect a need for safe experimentation, especially for coding agents that can modify files.
 
-总体而言，用户的反馈体现了对 Agent 工作区的高要求：用户希望它具备可恢复性、可观测性、跨设备一致性，并能够支持丰富的技术内容和多模态输入。
+Overall, the feedback points to a high level of expectation for an agent workspace: users want it to be recoverable, observable, consistent across devices, and capable of supporting rich technical and multimodal inputs.
 
-## 8. 待办事项观察
+## 8. Backlog Watch
 
 - **[Issue #2975 — Markdown rendering for user messages](https://github.com/agentscope-ai/QwenPaw/issues/2975)**  
-  创建于 4 月 6 日，至今仍未关闭。虽然范围相对较小，但问题已经持续数月，并影响技术用户的日常使用。它是清理积压或推动实现的强力候选项。
+  Created on April 6 and still open. Although relatively small, it has persisted for months and affects everyday usability for technical users. It is a strong candidate for backlog cleanup or implementation.
 
 - **[Issue #7997 — Message editing/retraction and workspace rollback](https://github.com/agentscope-ai/QwenPaw/issues/7997)**  
-  创建于 9 月 27 日，目前已有 8 条评论，既是近期提出，也具有较高参与度。维护者应明确功能范围和架构预期，避免讨论在实现开始前陷入停滞。
+  Created on September 27 with eight comments, making it both recent and high-engagement. Maintainers should clarify scope and architectural expectations so discussion does not stall before implementation begins.
 
 - **[PR #7936 — Chinese access-control username localization](https://github.com/agentscope-ai/QwenPaw/pull/7936)**  
-  自 9 月 22 日起一直处于开放状态。该改动规模小、范围独立且风险较低，但在此期间获得了更多关注的较新 PR 仍不断进入处理流程。维护者进行一次审查，即可快速补上这一明显的本地化缺口。
+  Open since September 22. The change is small, isolated, and likely low-risk, but it has remained pending while newer PRs receive attention. A maintainer review could quickly remove a visible localization gap.
 
 - **[Issue #8073 — V2.2.2.beta4 LAN conversation access regression](https://github.com/agentscope-ai/QwenPaw/issues/8073)**  
-  需要及时分诊和优先级评估，因为该问题似乎与最新 Beta 版本有关，并可能影响部署流程。目前尚未发现对应的修复方案。
+  Requires prompt triage because it appears tied to the latest beta and may affect deployment workflows. No corresponding fix is identified.
 
 - **[Issue #8078 — Session fragmentation in `chat_with_agent`](https://github.com/agentscope-ai/QwenPaw/issues/8078)**  
-  这是一个核心状态一致性缺陷，可能削弱多 Agent 的可用性。应与会话路由和聊天注册测试一并进行分诊。
+  A core state-consistency defect that could undermine multi-agent usability. It should be triaged alongside session-routing and conversation-registration tests.
 
-- **[PR #8084](https://github.com/agentscope-ai/QwenPaw/pull/8084)、[PR #8079](https://github.com/agentscope-ai/QwenPaw/pull/8079) 和 [PR #8083](https://github.com/agentscope-ai/QwenPaw/pull/8083)**  
-  这些开放 PR 是当前提升稳定性和功能能力最直接的机会。及时进行审查、回归测试和发布规划，将有助于把社区活动转化为用户可见的产品进展。
-
----
+- **[PR #8084](https://github.com/agentscope-ai/QwenPaw/pull/8084), [PR #8079](https://github.com/agentscope-ai/QwenPaw/pull/8079), and [PR #8083](https://github.com/agentscope-ai/QwenPaw/pull/8083)**  
+  These open PRs represent the most immediate opportunities to improve stability and capability. Prompt review, regression testing, and release planning would convert current community activity into user-visible progress.
 
 </details>
 
 <details>
 <summary><strong>ZeroClaw</strong> — <a href="https://github.com/zeroclaw-labs/zeroclaw">zeroclaw-labs/zeroclaw</a></summary>
 
-# ZeroClaw 项目摘要 — 2026-10-03
+# ZeroClaw Project Digest — 2026-10-03
 
-## 1. 今日概览
+## 1. Today’s Overview
 
-ZeroClaw 开发活动非常活跃：过去 24 小时内共更新了 **50 个 issue** 和 **50 个 pull request**，目前有 **47 个 issue 处于开放/活跃状态**，以及 **48 个 PR 处于开放状态**。工作重点集中在 **安全加固、运行时可靠性、provider 兼容性、ZeroCode/ACP 行为、agent 委派和 skills**。虽然没有发布新版本，但有多项开放中的修复明确以 **v0.8.6** 为目标，表明项目正在积极进行发布门控工作。整体健康状况为 **活跃但风险较高**，仍有多个高严重度及安全敏感变更等待合并或 maintainer 审查。
+ZeroClaw shows high development activity: **50 issues** and **50 pull requests** were updated in the last 24 hours, with **47 issues open/active** and **48 PRs open**. The work is concentrated around **security hardening, runtime reliability, provider compatibility, ZeroCode/ACP behavior, agent delegation, and skills**. No new release was published, but several open fixes are explicitly targeted at **v0.8.6**, indicating active release-gating work. Overall health is **active but high-risk**, with multiple high-severity and security-sensitive changes still awaiting merge or maintainer review.
 
-## 2. 发布
+## 2. Releases
 
-提供的数据中没有新的 ZeroClaw 版本发布。
+No new ZeroClaw release was published in the supplied data.
 
-不过，仓库中包含多项标记为面向 **v0.8.6** 的变更，包括：
+The repository nevertheless contains multiple changes labeled for **v0.8.6**, including:
 
-- [PR #11219](https://github.com/zeroclaw-labs/zeroclaw/pull/11219)：为新建的本地 ZeroCode session 恢复启动目录。
-- [PR #11456](https://github.com/zeroclaw-labs/zeroclaw/pull/11456)：增加可选启用的 subprocess 内存 watchdog。
-- [PR #11451](https://github.com/zeroclaw-labs/zeroclaw/pull/11451)：在创建 Windows secret key 文件时为其提供保护。
-- [Issue #11387](https://github.com/zeroclaw-labs/zeroclaw/issues/11387)：ZeroCode 启动目录处理出现回归。
-- [Issue #11369](https://github.com/zeroclaw-labs/zeroclaw/issues/11369)：Docker 启动失败，升级中断后可能造成数据库搁置；该 issue 现已关闭。
-- [Issue #11336](https://github.com/zeroclaw-labs/zeroclaw/issues/11336)：插件验证错误地报告了 runtime 无法注册的插件。
-- [Issue #11333](https://github.com/zeroclaw-labs/zeroclaw/issues/11333)：Skill review 工具无法看到通过 `skill_bundles` 提供的 skills。
-- [Issue #11332](https://github.com/zeroclaw-labs/zeroclaw/issues/11332)：针对 channel、webhook 或 gateway turn 的 skill review 和 skill 创建流程不会运行。
+- [PR #11219](https://github.com/zeroclaw-labs/zeroclaw/pull/11219): Restore the launch directory for fresh local ZeroCode sessions.
+- [PR #11456](https://github.com/zeroclaw-labs/zeroclaw/pull/11456): Add an opt-in subprocess memory watchdog.
+- [PR #11451](https://github.com/zeroclaw-labs/zeroclaw/pull/11451): Protect Windows secret key files at creation.
+- [Issue #11387](https://github.com/zeroclaw-labs/zeroclaw/issues/11387): Regression in ZeroCode’s launch-directory handling.
+- [Issue #11369](https://github.com/zeroclaw-labs/zeroclaw/issues/11369): Docker startup failure and possible database stranding after interrupted upgrades; this issue is now closed.
+- [Issue #11336](https://github.com/zeroclaw-labs/zeroclaw/issues/11336): Plugin verification incorrectly reports plugins that the runtime cannot register.
+- [Issue #11333](https://github.com/zeroclaw-labs/zeroclaw/issues/11333): Skill review tools cannot see skills supplied through `skill_bundles`.
+- [Issue #11332](https://github.com/zeroclaw-labs/zeroclaw/issues/11332): Skill review and creation do not run for channel, webhook, or gateway turns.
 
-## 3. 项目进展
+## 3. Project Progress
 
-提供的 PR 列表显示有 **48 个开放中的 PR**，并报告有 **2 个 PR 已合并或关闭**，但显示的前 20 条详情中并未包含这两个已合并/关闭的 PR。因此，无法仅凭现有数据确定今天完成合并的具体变更。
+The supplied PR list shows **48 open PRs** and reports that **2 PRs were merged or closed**, but the two merged/closed PRs are not included in the displayed top-20 details. Therefore, the exact changes merged today cannot be identified from this data.
 
-当前推动项目能力和稳定性提升的重要开放工作包括：
+The most significant open work advancing project capabilities and stability includes:
 
-### 运行时与安全
+### Runtime and security
 
-- [PR #11456](https://github.com/zeroclaw-labs/zeroclaw/pull/11456)：增加可选启用的 shell 和 skill subprocess 内存 watchdog，跨可见的后代进程跟踪常驻内存，并在超过配置上限时终止其所属进程。该工作直接推进了记录生产环境 OOM 事件的 [Issue #6916](https://github.com/zeroclaw-labs/zeroclaw/issues/6916)。
-- [PR #11451](https://github.com/zeroclaw-labs/zeroclaw/pull/11451)：在创建 secret key 文件时应用权限受限的 Windows ACL，继续推进 [Issue #9460](https://github.com/zeroclaw-labs/zeroclaw/issues/9460) 所跟踪的安全工作。
-- [PR #11469](https://github.com/zeroclaw-labs/zeroclaw/pull/11469)：修复不同 host operating system 之间的 null device 识别问题，使 Windows session 能够安全地处理 POSIX null device path。
-- [PR #11465](https://github.com/zeroclaw-labs/zeroclaw/pull/11465)：向 tools 暴露 cooperative cancellation context，解决 [Issue #5836](https://github.com/zeroclaw-labs/zeroclaw/issues/5836) 中描述的长时间运行 tool 无法取消的问题。
-- [PR #11458](https://github.com/zeroclaw-labs/zeroclaw/pull/11458)：通过 ownership、link、mode 和 regular-file 检查，加强用于 memory audit 卫生管理的 SQLite admission。
+- [PR #11456](https://github.com/zeroclaw-labs/zeroclaw/pull/11456): Adds an opt-in shell and skill subprocess memory watchdog, tracking resident memory across visible descendants and terminating the owned process when the configured limit is exceeded. This directly advances [Issue #6916](https://github.com/zeroclaw-labs/zeroclaw/issues/6916), which documents production OOM incidents.
+- [PR #11451](https://github.com/zeroclaw-labs/zeroclaw/pull/11451): Implements restrictive Windows ACLs for secret key files at creation time, continuing the security work tracked by [Issue #9460](https://github.com/zeroclaw-labs/zeroclaw/issues/9460).
+- [PR #11469](https://github.com/zeroclaw-labs/zeroclaw/pull/11469): Fixes null-device recognition across host operating systems, allowing Windows sessions to evaluate POSIX null-device paths safely.
+- [PR #11465](https://github.com/zeroclaw-labs/zeroclaw/pull/11465): Exposes cooperative cancellation context to tools, addressing the long-running tool cancellation gap described in [Issue #5836](https://github.com/zeroclaw-labs/zeroclaw/issues/5836).
+- [PR #11458](https://github.com/zeroclaw-labs/zeroclaw/pull/11458): Hardens SQLite admission for memory audit hygiene using ownership, link, mode, and regular-file checks.
 
-### ZeroCode、ACP 与 Gateway
+### ZeroCode, ACP, and gateway
 
-- [PR #11219](https://github.com/zeroclaw-labs/zeroclaw/pull/11219)：为新建和重启的本地 ZeroCode Chat 与 Code session 恢复启动目录。这似乎是针对 [Issue #11387](https://github.com/zeroclaw-labs/zeroclaw/issues/11387) 中回归问题的修复。
-- [PR #11457](https://github.com/zeroclaw-labs/zeroclaw/pull/11457)：为当前聚焦的 ZeroCode session 增加不会取消任务的 F5 刷新流程，保留草稿、附件、队列、选中项和阅读位置。
-- [PR #11431](https://github.com/zeroclaw-labs/zeroclaw/pull/11431)：关闭 gateway reload 淘汰旧实例后遗留的 chat WebSocket connection。
-- [PR #11459](https://github.com/zeroclaw-labs/zeroclaw/pull/11459)：在 ZeroCode 中集中管理 transcript layout cache，确保 row、line、screen、footer、copy 和 URL index 保持一致。
-- [PR #11460](https://github.com/zeroclaw-labs/zeroclaw/pull/11460)：在 ZeroCode Config interface 中增加 provider alias 重命名功能，对应 [Issue #7468](https://github.com/zeroclaw-labs/zeroclaw/issues/7468)。
+- [PR #11219](https://github.com/zeroclaw-labs/zeroclaw/pull/11219): Restores the launch directory for fresh and restarted local ZeroCode Chat and Code sessions. This is the apparent fix for the regression in [Issue #11387](https://github.com/zeroclaw-labs/zeroclaw/issues/11387).
+- [PR #11457](https://github.com/zeroclaw-labs/zeroclaw/pull/11457): Adds a non-canceling F5 refresh flow for the focused ZeroCode session, preserving drafts, attachments, queues, selection, and reading position.
+- [PR #11431](https://github.com/zeroclaw-labs/zeroclaw/pull/11431): Closes chat WebSocket connections left behind when gateway reloads retire an instance.
+- [PR #11459](https://github.com/zeroclaw-labs/zeroclaw/pull/11459): Centralizes transcript layout caching in ZeroCode to keep row, line, screen, footer, copy, and URL indexes consistent.
+- [PR #11460](https://github.com/zeroclaw-labs/zeroclaw/pull/11460): Adds provider-alias renaming in the ZeroCode Config interface, corresponding to [Issue #7468](https://github.com/zeroclaw-labs/zeroclaw/issues/7468).
 
-### Agent、委派与配置
+### Agent, delegation, and configuration
 
-- [PR #11462](https://github.com/zeroclaw-labs/zeroclaw/pull/11462)：将独立 delegate 的审批请求路由至目标 operator 配置的 approval route，推进 [Issue #7743](https://github.com/zeroclaw-labs/zeroclaw/issues/7743)。
-- [PR #11467](https://github.com/zeroclaw-labs/zeroclaw/pull/11467)：增加可选启用的 single-tool provider rounds，旨在简化不支持并行或完整 tool-call 行为的 provider 下的 tool execution。
-- [PR #11466](https://github.com/zeroclaw-labs/zeroclaw/pull/11466)：增加 per-target 配置应用结果，提高设置被接受或拒绝情况的可见性。
-- [PR #11464](https://github.com/zeroclaw-labs/zeroclaw/pull/11464)：增加可选启用的 model fallback 通知，提供 `off`、`redacted` 和 `detailed` 三种模式，对应 [Issue #7883](https://github.com/zeroclaw-labs/zeroclaw/issues/7883)。
-- [PR #11438](https://github.com/zeroclaw-labs/zeroclaw/pull/11438) 和 [PR #11441](https://github.com/zeroclaw-labs/zeroclaw/pull/11441)：推进 RFC #6954，将 cron `main` jobs 绑定到创建它们的 conversation。这两项变更是 stacked changes，仍需依赖关系审查和批准。
+- [PR #11462](https://github.com/zeroclaw-labs/zeroclaw/pull/11462): Routes independent delegate approvals to the target operator’s configured approval route, advancing [Issue #7743](https://github.com/zeroclaw-labs/zeroclaw/issues/7743).
+- [PR #11467](https://github.com/zeroclaw-labs/zeroclaw/pull/11467): Adds opt-in single-tool provider rounds, intended to simplify tool execution under providers that do not support parallel or full tool-call behavior.
+- [PR #11466](https://github.com/zeroclaw-labs/zeroclaw/pull/11466): Adds per-target configuration application results, improving visibility into which settings were accepted or rejected.
+- [PR #11464](https://github.com/zeroclaw-labs/zeroclaw/pull/11464): Adds opt-in model fallback notices with `off`, `redacted`, and `detailed` modes, corresponding to [Issue #7883](https://github.com/zeroclaw-labs/zeroclaw/issues/7883).
+- [PR #11438](https://github.com/zeroclaw-labs/zeroclaw/pull/11438) and [PR #11441](https://github.com/zeroclaw-labs/zeroclaw/pull/11441): Advance RFC #6954 by binding cron `main` jobs to the conversation in which they were created. These are stacked changes and still require dependency review and approval.
 
-## 4. 社区热点
+## 4. Community Hot Topics
 
-按评论数量计算，最活跃的 issue 是 maintainer decision queue：
+The most active issue by comment volume is the maintainer decision queue:
 
-1. [Issue #8692](https://github.com/zeroclaw-labs/zeroclaw/issues/8692) — **15 条评论**  
-   该 tracker 汇总了 RFC、design decision、release-policy question，以及需要 maintainer 或 code owner 关注的 issues。其高活跃度表明项目存在大量待处理的设计审查任务，而非单一的 feature request。背后的核心需求是明确的治理机制：减少架构 proposal 的歧义，并防止高风险变更在没有明确 decision owner 的情况下继续推进。
+1. [Issue #8692](https://github.com/zeroclaw-labs/zeroclaw/issues/8692) — **15 comments**  
+   This tracker consolidates RFCs, design decisions, release-policy questions, and issues requiring maintainer or code-owner attention. Its high activity suggests a substantial design-review backlog rather than a single feature request. The underlying need is clear governance: reduce ambiguity around architecture proposals and prevent high-risk changes from progressing without an explicit decision owner.
 
-其他讨论热度较高的 issues 包括：
+Other highly discussed issues include:
 
-- [Issue #11387](https://github.com/zeroclaw-labs/zeroclaw/issues/11387) — **5 条评论**  
-  报告 ZeroCode working-directory handling 反复出现回归。该问题影响显著，因为 agents 可能在非预期 workspace 中运行，进而影响 file operation、repository context 和用户信任。
-- [Issue #7943](https://github.com/zeroclaw-labs/zeroclaw/issues/7943) — **5 条评论**  
-  提议构建一个与 backend 无关的 realtime voice-host channel，由 ZeroClaw 作为 LLM/RAG/MCP layer，通过 text 和 control events 进行工作。这反映出市场对 voice interaction 的需求，同时避免将 core agent 与特定 ASR、VAD 或 playback stack 绑定。
-- [Issue #6916](https://github.com/zeroclaw-labs/zeroclaw/issues/6916) — **4 条评论**  
-  报告 subprocess 在已有 output 和 timeout limit 的情况下仍会无界消耗内存。讨论重点集中在生产可靠性和 container-level OOM 风险。
-- [Issue #11296](https://github.com/zeroclaw-labs/zeroclaw/issues/11296) — **4 条评论**  
-  报告 llama.cpp 和 custom compatible provider 在发现 models 时错误处理 URL。
-- [Issue #5836](https://github.com/zeroclaw-labs/zeroclaw/issues/5836) — **3 条评论**  
-  请求为长时间运行的 tools 增加 cooperative cancellation，并指出 agent-loop cancellation 与实际 tool termination 之间存在缺口。
-- [Issue #7743](https://github.com/zeroclaw-labs/zeroclaw/issues/7743) — **3 条评论**  
-  提议为 independent delegate handoff 默认拒绝转发审批，以加强 agents 之间的安全性和 policy isolation。
-- [Issue #7468](https://github.com/zeroclaw-labs/zeroclaw/issues/7468) — **3 条评论**  
-  请求在 ZeroCode 中重命名 non-agent aliases；这是一个影响 provider、agent 和 MCP 配置的 usability issue。
-- [Issue #11336](https://github.com/zeroclaw-labs/zeroclaw/issues/11336) — **3 条评论**  
-  报告 plugin inspection command 可能在 runtime 拒绝插件时仍声称该插件加载成功。
+- [Issue #11387](https://github.com/zeroclaw-labs/zeroclaw/issues/11387) — **5 comments**  
+  Reports a repeated regression in ZeroCode’s working-directory handling. The impact is significant because agents may operate in an unexpected workspace, affecting file operations, repository context, and user trust.
+- [Issue #7943](https://github.com/zeroclaw-labs/zeroclaw/issues/7943) — **5 comments**  
+  Proposes a backend-agnostic realtime voice-host channel, with ZeroClaw acting as the LLM/RAG/MCP layer over text and control events. This reflects demand for voice interaction without coupling the core agent to a specific ASR, VAD, or playback stack.
+- [Issue #6916](https://github.com/zeroclaw-labs/zeroclaw/issues/6916) — **4 comments**  
+  Reports unbounded memory consumption by subprocesses despite existing output and timeout limits. The discussion is driven by production reliability and container-level OOM risk.
+- [Issue #11296](https://github.com/zeroclaw-labs/zeroclaw/issues/11296) — **4 comments**  
+  Reports incorrect URL handling for llama.cpp and custom compatible providers when discovering models.
+- [Issue #5836](https://github.com/zeroclaw-labs/zeroclaw/issues/5836) — **3 comments**  
+  Requests cooperative cancellation for long-running tools, highlighting a gap between agent-loop cancellation and actual tool termination.
+- [Issue #7743](https://github.com/zeroclaw-labs/zeroclaw/issues/7743) — **3 comments**  
+  Proposes deny-by-default approval forwarding for independent delegate handoffs, addressing security and policy isolation between agents.
+- [Issue #7468](https://github.com/zeroclaw-labs/zeroclaw/issues/7468) — **3 comments**  
+  Requests renaming non-agent aliases in ZeroCode, a usability issue affecting provider, agent, and MCP configuration.
+- [Issue #11336](https://github.com/zeroclaw-labs/zeroclaw/issues/11336) — **3 comments**  
+  Reports that plugin inspection commands can claim a plugin loads successfully even when the runtime rejects it.
 
-这些讨论反映出的主要社区需求包括：
+The main community needs emerging from these discussions are:
 
-- **可预测的执行上下文**：用户需要 session 保持正确的工作目录和 filesystem context。
-- **安全的长时执行**：取消、内存限制和 failure cleanup 必须一致地应用于 tools 和 subprocesses。
-- **透明的 fallback 行为**：operators 需要在 providers 切换 models 时获得可见性。
-- **策略正确性**：delegated agents 和 plugins 的行为必须与用户能够检查的配置一致。
-- **可运维的可观测性**：ZeroCode、ACP、channels 和 gateway paths 需要一致地展示 subagent activity、tool results 和 failed turns。
+- **Predictable execution context**: users need sessions to retain the correct working directory and filesystem context.
+- **Safe long-running execution**: cancellation, memory limits, and failure cleanup must apply consistently to tools and subprocesses.
+- **Transparent fallback behavior**: operators need visibility when providers switch models.
+- **Policy correctness**: delegated agents and plugins need behavior that matches the configuration users can inspect.
+- **Operational inspectability**: ZeroCode, ACP, channels, and gateway paths need consistent visibility into subagent activity, tool results, and failed turns.
 
-## 5. Bug 与稳定性
+## 5. Bugs & Stability
 
-### 最高严重度
+### Highest severity
 
-1. **ZeroCode/RPC channel workflow 阻塞 — [Issue #10225](https://github.com/zeroclaw-labs/zeroclaw/issues/10225)**  
-   严重度：**S1 / workflow blocked**  
-   ZeroCode Code/RPC sessions 无法通过 channel-backed tools 访问已配置的 channels。daemon 可以轮询 channels，但 agent tool access 似乎不可用。提供的 PR 列表中没有显示直接对应的修复。
+1. **ZeroCode/RPC channel workflow blockage — [Issue #10225](https://github.com/zeroclaw-labs/zeroclaw/issues/10225)**  
+   Severity: **S1 / workflow blocked**  
+   ZeroCode Code/RPC sessions cannot reach configured channels through channel-backed tools. The daemon can poll channels, but agent tool access appears unavailable. No directly matching fix is shown in the supplied PR list.
 
-2. **失败的 ACP turn 未能持久化 — [Issue #10673](https://github.com/zeroclaw-labs/zeroclaw/issues/10673)**  
-   严重度：**S1 / workflow blocked**  
-   通过 ZeroCode Code pane 发起的失败 turns，可能不会在 daemon RPC path 上持久化。这可能掩盖失败情况，并增加 recovery 或 debugging 的难度。该 issue 仍处于开放和处理中。
+2. **Failed ACP turn persistence — [Issue #10673](https://github.com/zeroclaw-labs/zeroclaw/issues/10673)**  
+   Severity: **S1 / workflow blocked**  
+   Failed turns reached through ZeroCode’s Code pane may not be persisted on the daemon RPC path. This can obscure failures and complicate recovery or debugging. The issue remains open and in progress.
 
-3. **Docker 启动失败及数据库搁置 — [Issue #11369](https://github.com/zeroclaw-labs/zeroclaw/issues/11369)**  
-   严重度：**S1**，现已**关闭**  
-   从 `master` 构建的 images 可能在启动时退出，因为 daemon 在加载配置前锁定了 data directory，随后又因配置的路径不同而拒绝运行。该 issue 还指出，升级中断后可能出现数据库搁置。其关闭状态表明问题已得到解决，但提供的 PR 子集中未标明确切的 merged fix。
+3. **Docker startup failure and database stranding — [Issue #11369](https://github.com/zeroclaw-labs/zeroclaw/issues/11369)**  
+   Severity: **S1**, now **closed**  
+   Images built from `master` could exit at startup because the daemon locked a data directory before configuration loading and then rejected a differing configured path. The issue also identified possible database stranding after interrupted upgrades. Its closed status indicates resolution, though the exact merged fix is not identified in the provided PR subset.
 
-### 高影响回归与可靠性问题
+### High-impact regressions and reliability issues
 
-4. **ZeroCode 启动目录回归 — [Issue #11387](https://github.com/zeroclaw-labs/zeroclaw/issues/11387)**  
-   严重度：**S2 / degraded behavior**  
-   新建 sessions 会忽略 shell launch directory，转而使用 configured agent workspace。该回归与 [PR #11219](https://github.com/zeroclaw-labs/zeroclaw/pull/11219) 相关，目前该 PR 仍未关闭。
+4. **ZeroCode launch-directory regression — [Issue #11387](https://github.com/zeroclaw-labs/zeroclaw/issues/11387)**  
+   Severity: **S2 / degraded behavior**  
+   Fresh sessions ignore the shell launch directory and use the configured agent workspace. The regression is associated with [PR #11219](https://github.com/zeroclaw-labs/zeroclaw/pull/11219), which is still open.
 
-5. **Plugin verification/runtime 不一致 — [Issue #11336](https://github.com/zeroclaw-labs/zeroclaw/issues/11336)**  
-   严重度：**S2 / degraded behavior**  
-   `plugin info` 和 `plugin list --verify` 可能会将某个 plugin 报告为 `[loads]`，但 runtime 实际会拒绝注册它，因为必需的配置值缺少 schema。这会造成 diagnostic output 与实际 availability 之间的危险偏差。
+5. **Plugin verification/runtime mismatch — [Issue #11336](https://github.com/zeroclaw-labs/zeroclaw/issues/11336)**  
+   Severity: **S2 / degraded behavior**  
+   `plugin info` and `plugin list --verify` may report `[loads]` for a plugin that the runtime refuses to register because required configuration values lack a schema. This creates a dangerous gap between diagnostic output and actual availability.
 
-6. **Skill bundle review 不可见 — [Issue #11333](https://github.com/zeroclaw-labs/zeroclaw/issues/11333)**  
-   严重度：**S2 / degraded behavior**  
-   通过 `skill_bundles` 加载的 skills 无法被 `skills_list` 和 `skill_view` 等 skill review tools 访问。
+6. **Skill bundle review blindness — [Issue #11333](https://github.com/zeroclaw-labs/zeroclaw/issues/11333)**  
+   Severity: **S2 / degraded behavior**  
+   Skills loaded through `skill_bundles` are unavailable to skill review tools such as `skills_list` and `skill_view`.
 
-7. **Non-CLI channels 缺少 learning loop — [Issue #11332](https://github.com/zeroclaw-labs/zeroclaw/issues/11332)**  
-   严重度：**S2 / degraded behavior**  
-   即使相关功能已启用，针对 Matrix、webhook、gateway/web UI 以及其他由 channel 驱动的 turns，skill review 和 skill creation 仍不会运行。
+7. **Missing learning loop on non-CLI channels — [Issue #11332](https://github.com/zeroclaw-labs/zeroclaw/issues/11332)**  
+   Severity: **S2 / degraded behavior**  
+   Skill review and creation do not run for Matrix, webhook, gateway/web UI, and other channel-driven turns, despite being enabled.
 
-8. **Custom provider 与 llama.cpp provider URL 解析问题 — [Issue #11296](https://github.com/zeroclaw-labs/zeroclaw/issues/11296)**  
-   严重度：**S3**  
-   compatible providers 在获取 models 时可能忽略配置的 URI，尤其是在通过 routers 访问时。相关开放工作 [PR #11468](https://github.com/zeroclaw-labs/zeroclaw/pull/11468) 处理的是 reasoning controls，而不是此处报告的 URL 问题。
+8. **Custom and llama.cpp provider URL resolution — [Issue #11296](https://github.com/zeroclaw-labs/zeroclaw/issues/11296)**  
+   Severity: **S3**  
+   Compatible providers may ignore the configured URI when fetching models, especially through routers. Related open work is [PR #11468](https://github.com/zeroclaw-labs/zeroclaw/pull/11468), which addresses reasoning controls rather than the reported URL issue.
 
-9. **Windows Ctrl+C 行为 — [Issue #9028](https://github.com/zeroclaw-labs/zeroclaw/issues/9028)**  
-   严重度：**S2**  
-   在 Windows CLI 中，Ctrl+C 会触发类似强制退出的终止行为，并返回 exit code `1073741510`，而不是作为正常 interrupt 处理。
+9. **Windows Ctrl+C behavior — [Issue #9028](https://github.com/zeroclaw-labs/zeroclaw/issues/9028)**  
+   Severity: **S2**  
+   Ctrl+C causes a force-quit-style termination in the Windows CLI, returning exit code `1073741510`, rather than behaving as a normal interrupt.
 
-10. **Gateway reload 遗留 WebSocket connections — [PR #11431](https://github.com/zeroclaw-labs/zeroclaw/pull/11431)**  
-    这是一项稳定性修复，而不是新报告的 issue。完成 reload 的 gateway instances 可能会让 upgraded chat sockets 继续连接到已淘汰的旧 instances。
+10. **Gateway reload leaves WebSockets open — [PR #11431](https://github.com/zeroclaw-labs/zeroclaw/pull/11431)**  
+    This is a stability fix rather than a newly reported issue. Reloaded gateway instances can leave upgraded chat sockets attached to retired instances.
 
-11. **Agent context exhaustion 缺少 terminal status — [Issue #8758](https://github.com/zeroclaw-labs/zeroclaw/issues/8758)**  
-    严重度：**S2**  
-    Agents 可能因 context pressure 停止，却没有明确报告任务已完成、已暂停，还是无法继续。
+11. **Agent context exhaustion lacks terminal status — [Issue #8758](https://github.com/zeroclaw-labs/zeroclaw/issues/8758)**  
+    Severity: **S2**  
+    Agents may stop after context pressure without clearly reporting whether the task completed, was paused, or cannot continue.
 
-12. **ZeroCode queue 静默暂停 — [Issue #10741](https://github.com/zeroclaw-labs/zeroclaw/issues/10741)**  
-    严重度：**S2**  
-    如果预期的 terminal notification 缺失，看似正常的 response 可能导致 queued work 悄然暂停。
+12. **Silent ZeroCode queue pause — [Issue #10741](https://github.com/zeroclaw-labs/zeroclaw/issues/10741)**  
+    Severity: **S2**  
+    A normal-looking response can leave queued work silently paused when the expected terminal notification is missing.
 
-## 6. Feature Requests 与路线图信号
+## 6. Feature Requests & Roadmap Signals
 
-### 下一版本的潜在候选内容
+### Likely candidates for the next release
 
-以下变更具有明显的 release-planning 信号，因为它们已经在开放中的 PRs 中实现，和/或被标记为 v0.8.6 的目标内容：
+The following changes have strong release-planning signals because they are already implemented in open PRs and/or tagged for v0.8.6:
 
-- **Subprocess 内存控制** — [PR #11456](https://github.com/zeroclaw-labs/zeroclaw/pull/11456) / [Issue #6916](https://github.com/zeroclaw-labs/zeroclaw/issues/6916)
-- **恢复 ZeroCode 启动目录** — [PR #11219](https://github.com/zeroclaw-labs/zeroclaw/pull/11219) / [Issue #11387](https://github.com/zeroclaw-labs/zeroclaw/issues/11387)
-- **Windows secret-file 保护** — [PR #11451](https://github.com/zeroclaw-labs/zeroclaw/pull/11451) / [Issue #9460](https://github.com/zeroclaw-labs/zeroclaw/issues/9460)
-- **Plugin verification 正确性** — [Issue #11336](https://github.com/zeroclaw-labs/zeroclaw/issues/11336)
-- **Skill bundle review 支持** — [Issue #11333](https://github.com/zeroclaw-labs/zeroclaw/issues/11333)
-- **Channel/gateway skill-learning 一致性** — [Issue #11332](https://github.com/zeroclaw-labs/zeroclaw/issues/11332)
+- **Subprocess memory controls** — [PR #11456](https://github.com/zeroclaw-labs/zeroclaw/pull/11456) / [Issue #6916](https://github.com/zeroclaw-labs/zeroclaw/issues/6916)
+- **ZeroCode launch-directory restoration** — [PR #11219](https://github.com/zeroclaw-labs/zeroclaw/pull/11219) / [Issue #11387](https://github.com/zeroclaw-labs/zeroclaw/issues/11387)
+- **Windows secret-file protection** — [PR #11451](https://github.com/zeroclaw-labs/zeroclaw/pull/11451) / [Issue #9460](https://github.com/zeroclaw-labs/zeroclaw/issues/9460)
+- **Plugin verification correctness** — [Issue #11336](https://github.com/zeroclaw-labs/zeroclaw/issues/11336)
+- **Skill bundle review support** — [Issue #11333](https://github.com/zeroclaw-labs/zeroclaw/issues/11333)
+- **Channel/gateway skill-learning parity** — [Issue #11332](https://github.com/zeroclaw-labs/zeroclaw/issues/11332)
 
-### 中期路线图信号
+### Medium-term roadmap signals
 
 - **Realtime voice-host channel** — [Issue #7943](https://github.com/zeroclaw-labs/zeroclaw/issues/7943)  
-  一个与 backend 无关的 WebSocket voice interface 可能成为一项重要的 channel capability，但目前仍处于搁置状态，需要做出架构决策。
+  A backend-agnostic WebSocket voice interface could become a major channel capability, but it remains parked and requires architectural decisions.
 - **A2A protocol crate** — [Issue #11254](https://github.com/zeroclaw-labs/zeroclaw/issues/11254)  
-  提议中的 `zeroclaw-a2a` crate 表明项目正持续投入标准化 agent-to-agent interoperability。
-- **Knowledge corpus 与 document RAG** — [Issue #11235](https://github.com/zeroclaw-labs/zeroclaw/issues/11235)  
-  该 RFC 提议提供由 operator 管理的 document retrieval，可应用于 local documentation、security references 和 tool knowledge。
+  The proposed `zeroclaw-a2a` crate signals continued investment in standardized agent-to-agent interoperability.
+- **Knowledge corpus and document RAG** — [Issue #11235](https://github.com/zeroclaw-labs/zeroclaw/issues/11235)  
+  The RFC proposes operator-managed document retrieval, with potential applications in local documentation, security references, and tool knowledge.
 - **Standalone gateway process** — [Issue #11002](https://github.com/zeroclaw-labs/zeroclaw/issues/11002)  
-  将 `zeroclaw-gw` 拆分为可选的 IPC client，是迈向 headless 和独立部署 web deployments 的一项重大架构调整。目前该工作处于阻塞状态，目标版本为 v0.9.0。
-- **明确的 session lifecycle semantics** — [Issue #10293](https://github.com/zeroclaw-labs/zeroclaw/issues/10293)  
-  项目正在评估是否应弃用 `sessions_send`，转而采用更准确、且具备 provenance awareness 的 history operation。
-- **Eval harness 内存覆盖** — [Issue #9226](https://github.com/zeroclaw-labs/zeroclaw/issues/9226)  
-  增加 memory seeding 和 side
+  Separating `zeroclaw-gw` into an optional IPC client is a significant architectural step toward headless and independently deployed web deployments. It is currently blocked and targeted at v0.9.0.
+- **Explicit session lifecycle semantics** — [Issue #10293](https://github.com/zeroclaw-labs/zeroclaw/issues/10293)  
+  The project is evaluating whether `sessions_send` should be deprecated in favor of a more truthful, provenance-aware history operation.
+- **Eval harness memory coverage** — [Issue #9226](https://github.com/zeroclaw-labs/zeroclaw/issues/9226)  
+  Adding memory seeding and side-effect graders would improve the project’s ability to test persistent-agent behavior.
+
+The roadmap therefore appears to be moving in three directions: **hardening operational safety**, **improving ZeroCode/ACP and channel consistency**, and **expanding agent interoperability and knowledge capabilities**.
+
+## 7. User Feedback Summary
+
+### User pain points
+
+- **Unexpected working directories are a major trust issue.** Users expect local ZeroCode sessions to operate where they were launched, not silently switch to a configured workspace. This is documented in [Issue #11387](
 
 </details>
 
 ---
-*本日报由 [agents-radar](https://github.com/dboeter/daily-diff) 自动生成。*
+*This digest is auto-generated by [Daily Diff](https://github.com/dboeter/daily-diff).*

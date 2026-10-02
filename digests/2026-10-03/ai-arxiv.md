@@ -1,71 +1,71 @@
-# ArXiv AI 研究日报 2026-10-03
+# ArXiv AI Research Digest 2026-10-03
 
-> 数据来源: [ArXiv](https://arxiv.org/) (cs.AI, cs.CL, cs.LG) | 共 50 篇论文 | 生成时间: 2026-10-02 20:23 UTC
+> Source: [ArXiv](https://arxiv.org/) (cs.AI, cs.CL, cs.LG) | 50 papers | Generated: 2026-10-02 20:23 UTC
 
 ---
 
-# ArXiv AI 研究摘要
+# ArXiv AI Research Digest
 
-## 1. 今日亮点
+## 1. Today's Highlights
 
-- 今日投稿的重点在于提升 AI 系统能力的同时降低推理与训练成本，并在优化后的 LLM 微调、循环解码、扩散生成和实时虚拟形象动画等方面取得了显著进展。  
-- 智能体研究正从静态基准测试表现，转向长程执行、上下文记忆管理、工具使用、具身适应，以及交互环境中的可验证行为。  
-- 多篇论文探讨了评测与可靠性的基础性问题，包括机制可解释性、工具使用误报、基准有效性，以及“恢复模型内部机制”与“单纯改善下游预测”之间的区别。  
-- 结构化表示与几何推理仍是活跃的发展方向，尤其体现在分子建模、3D 生成、3D 空间推理和多模态科学发现领域。  
+- Today’s submissions emphasize making AI systems more capable while reducing inference and training costs, with notable advances in optimized LLM fine-tuning, recurrent decoding, diffusion generation, and real-time avatar animation.  
+- Agent research is shifting from static benchmark performance toward long-horizon execution, contextual memory management, tool use, embodied adaptation, and verifiable behavior in interactive environments.  
+- Several papers address fundamental evaluation and reliability issues, including mechanistic interpretability, tool-use false positives, benchmark validity, and the distinction between recovering model mechanisms and merely improving downstream predictions.  
+- Structured representations and geometric reasoning remain active areas of development, particularly for molecular modeling, 3D generation, 3D spatial reasoning, and multimodal scientific discovery.  
 
-## 2. 重点论文
+## 2. Key Papers
 
-### 🧠 大语言模型（架构、训练、对齐、评测）
+### 🧠 Large Language Models (architecture, training, alignment, evaluation)
 
-| 论文 | 作者 | 摘要 |
+| Paper | Authors | Summary |
 | :--- | :--- | :--- |
-| [Hierarchical Continuous Diffusion Language Models](http://arxiv.org/abs/2610.02193v1) | Hui Ren 等 | 论文提出分层连续扩散语言模型，在保留全局依赖关系和约束满足能力的同时改进并行 token 解码。其重要性在于，针对离散扩散语言模型的一项核心弱点：独立采样的 token 边缘分布可能导致输出不连贯。 |
-| [Decoding Looped Transformers Better for (Almost) Free](http://arxiv.org/abs/2610.02185v1) | Weihao Liu 等 | 该工作利用不同循环深度产生的中间表示来改进 looped Transformer 的解码，而不是直接丢弃较早的中间状态。这种方法可能无需大幅扩大模型或增加架构改动，就能提升推理质量。 |
-| [SFT Learns Better Than You Think](http://arxiv.org/abs/2610.02140v1) | Aayush Karan 等 | 研究重新审视了“监督微调不如强化学习”的假设，表明基于采样的 SFT 能够带来更强的泛化能力和能力迁移。研究结果挑战了传统的后训练实践，并提示 SFT 与 RL 之间的区别可能没有人们通常认为的那么根本。 |
-| [Trust the Direction, Search the Step: Zero-and-First-Order Methods for LLM Fine-Tuning](http://arxiv.org/abs/2610.02190v1) | Cristian McGee 等 | 作者将零阶与一阶优化结合起来，在大规模神经网络训练中分离方向估计与步长选择。这一方法能够更充分地利用低成本的方向信息，同时谨慎控制激进的参数更新，从而有望提升微调的稳定性和效率。 |
+| [Hierarchical Continuous Diffusion Language Models](http://arxiv.org/abs/2610.02193v1) | Hui Ren et al. | The paper introduces hierarchical continuous diffusion language models to improve parallel token decoding while preserving global dependencies and constraint satisfaction. It matters because it targets a central weakness of discrete diffusion language models, where independently sampled token marginals can produce incoherent outputs. |
+| [Decoding Looped Transformers Better for (Almost) Free](http://arxiv.org/abs/2610.02185v1) | Weihao Liu et al. | This work improves decoding of looped Transformers by exploiting intermediate representations produced at different recurrent depths rather than discarding earlier states. The approach may increase inference quality without requiring a substantially larger model or additional architectural changes. |
+| [SFT Learns Better Than You Think](http://arxiv.org/abs/2610.02140v1) | Aayush Karan et al. | The study revisits the assumption that supervised fine-tuning is inferior to reinforcement learning, showing that sampling-based SFT can provide stronger generalization and capability transfer. The findings challenge standard post-training practice and suggest that the distinction between SFT and RL may be less fundamental than commonly assumed. |
+| [Trust the Direction, Search the Step: Zero-and-First-Order Methods for LLM Fine-Tuning](http://arxiv.org/abs/2610.02190v1) | Cristian McGee et al. | The authors combine zero- and first-order optimization to decouple direction estimation from step-size selection in large-scale neural-network training. This could improve fine-tuning stability and efficiency by making better use of cheap directional information while carefully controlling aggressive updates. |
 
-### 🤖 智能体与推理（规划、工具使用、多智能体、思维链）
+### 🤖 Agents & Reasoning (planning, tool use, multi-agent, chain-of-thought)
 
-| 论文 | 作者 | 摘要 |
+| Paper | Authors | Summary |
 | :--- | :--- | :--- |
-| [Reconstruct, Practice, Go Real: Guided Self-Improvement for Embodied Agents](http://arxiv.org/abs/2610.02204v1) | Yen-Jen Wang 等 | RPG 提出一个通过重构、练习和迁移至真实环境来实现机器人执行系统自主改进的框架。其价值在于，旨在减少为具身智能体设计技能、奖励以及感知—控制集成所需的大量人工投入。 |
-| [KaliBench: A Fine-Grained Benchmark for Cybersecurity Tool Use on Kali Linux with Runtime-Free Verifiable Rewards](http://arxiv.org/abs/2610.02206v1) | Pengfei Li 等 | KaliBench 通过无需运行时环境且可验证的奖励，评测 LLM 是否能够将网络安全意图转化为可执行的 Kali Linux 工具调用。与知识问答或不透明的端到端智能体任务相比，该基准能够更直接地衡量工具使用能力。 |
-| [AutoCompact: Learning When to Compact Context in Long-Horizon Coding Agents](http://arxiv.org/abs/2610.02163v1) | Xuan Zhang 等 | AutoCompact 学习编码智能体在仓库级软件工程轨迹中何时以及如何压缩上下文。它针对长程智能体中的一项核心实践问题：陈旧的探索内容会消耗上下文，同时关键的工作状态又必须得到保留。 |
-| [VISTA: A Visual Harness for Reasoning in an Interactive World](http://arxiv.org/abs/2610.02200v1) | Qiushi Han 等 | VISTA 提供了一个视觉交互 harness，使通用多模态模型能够在交互环境中进行长程感知与行动。这项工作表明，多模态推理失败可能很大程度上源于视觉接口不足，而非模型完全缺乏底层推理能力。 |
-| [From Knowledge Access to Source Learning: Developing Source-Specific Competence](http://arxiv.org/abs/2610.02150v1) | Lucheng Fu 等 | 论文将持续使用外部来源重新定义为“来源学习”问题，而不只是检索与组织问题。这一区别对于需要在多次知识密集型任务中不断积累特定来源能力、而不是每次都从头处理交互的智能体而言非常重要。 |
+| [Reconstruct, Practice, Go Real: Guided Self-Improvement for Embodied Agents](http://arxiv.org/abs/2610.02204v1) | Yen-Jen Wang et al. | RPG presents a framework for autonomous improvement of robot execution systems through reconstruction, practice, and transfer to real environments. It matters because it seeks to reduce the substantial human effort required to design skills, rewards, and perception-control integrations for embodied agents. |
+| [KaliBench: A Fine-Grained Benchmark for Cybersecurity Tool Use on Kali Linux with Runtime-Free Verifiable Rewards](http://arxiv.org/abs/2610.02206v1) | Pengfei Li et al. | KaliBench evaluates whether LLMs can translate cybersecurity intents into executable Kali Linux tool invocations using runtime-free, verifiable rewards. The benchmark provides a more operational measure of tool-use competence than knowledge questions or opaque end-to-end agent tasks. |
+| [AutoCompact: Learning When to Compact Context in Long-Horizon Coding Agents](http://arxiv.org/abs/2610.02163v1) | Xuan Zhang et al. | AutoCompact learns when and what information coding agents should compact during repository-level software engineering trajectories. It addresses a central practical problem in long-horizon agents: stale exploration consumes context while important working state must be preserved. |
+| [VISTA: A Visual Harness for Reasoning in an Interactive World](http://arxiv.org/abs/2610.02200v1) | Qiushi Han et al. | VISTA provides a visual interaction harness that gives a general-purpose multimodal model long-horizon perception and action in interactive environments. The work suggests that much of multimodal reasoning failure may arise from inadequate visual interfaces rather than a complete absence of underlying reasoning ability. |
+| [From Knowledge Access to Source Learning: Developing Source-Specific Competence](http://arxiv.org/abs/2610.02150v1) | Lucheng Fu et al. | The paper reframes persistent external-source use as a source-learning problem rather than merely a retrieval and organization problem. This distinction is important for agents that must accumulate source-specific competence across repeated knowledge-intensive tasks instead of repeatedly treating every interaction from scratch. |
 
-### 🔧 方法与框架（新技术、基准、效率改进）
+### 🔧 Methods & Frameworks (new techniques, benchmarks, efficiency improvements)
 
-| 论文 | 作者 | 摘要 |
+| Paper | Authors | Summary |
 | :--- | :--- | :--- |
-| [TACO: Ternary Absolute-max Column-wise One-sparse Optimizer for LLM Fine-Tuning](http://arxiv.org/abs/2610.02199v1) | Jichao Jiang 等 | TACO 提出一种高度压缩的三值优化器，在保留稠密一阶信息的同时，降低 LLM 全参数微调的内存开销。它针对的是一项关键部署限制：在大规模训练中，优化器状态的内存占用往往超过模型参数本身。 |
-| [FERPO: Forward Entropy-Regularized Policy Optimization](http://arxiv.org/abs/2610.02198v1) | Sebastian Sanokowski 等 | FERPO 使用前向熵对策略优化进行正则化，以解决 critic 价值预测准确但动作梯度估计无益之间的不匹配问题。该方法尤其适用于连续控制强化学习，因为不准确的动作导数可能削弱原本准确的回报模型。 |
-| [SoftServe: A Scalable Quasi-Newton Method for Deep Learning](http://arxiv.org/abs/2610.02182v1) | Joohwan Ko 等 | SoftServe 开发了一系列拟牛顿方法，旨在超大规模、 非凸神经网络参数空间中仍保持实用性。如果证明有效，它或许能够比传统一阶方法提供更快、更稳定的优化，同时无需依赖可处理的小规模曲率近似。 |
-| [Local Support Learning](http://arxiv.org/abs/2610.02126v1) | Assaf Ben-Kish 等 | 论文从几何角度研究灾难性遗忘，并提出一种基于各权重矩阵输入空间中更新局部支撑集的保持目标。其重要性在于，标准梯度更新可能改变微调期间未直接观测区域之外的行为，从而导致预训练能力出现意外退化。 |
-| [DMAD: Distribution Matching as Adversarial Distillation for Fast Visual Generation](http://arxiv.org/abs/2610.02188v1) | Zhengming Yu 等 | DMAD 在分布匹配蒸馏中以对抗式形式取代辅助扩散模型拟合，以实现快速视觉生成。该方法旨在减少训练少步视觉生成器所需的内存和计算量，同时保持分布质量。 |
+| [TACO: Ternary Absolute-max Column-wise One-sparse Optimizer for LLM Fine-Tuning](http://arxiv.org/abs/2610.02199v1) | Jichao Jiang et al. | TACO introduces a highly compressed ternary optimizer designed to reduce the memory overhead of full-parameter LLM fine-tuning while retaining dense, first-order information. It targets a central deployment constraint because optimizer states often consume more memory than model parameters in large-scale training. |
+| [FERPO: Forward Entropy-Regularized Policy Optimization](http://arxiv.org/abs/2610.02198v1) | Sebastian Sanokowski et al. | FERPO regularizes policy optimization using forward entropy to address the mismatch between accurate critic value prediction and useful action-gradient estimation. The method is particularly relevant to continuous-control reinforcement learning, where poor action derivatives can undermine otherwise accurate return models. |
+| [SoftServe: A Scalable Quasi-Newton Method for Deep Learning](http://arxiv.org/abs/2610.02182v1) | Joohwan Ko et al. | SoftServe develops a family of quasi-Newton methods intended to remain practical for non-convex, extremely large neural-network parameter spaces. If effective, it could provide faster and more stable optimization than conventional first-order approaches without requiring tractable small-scale curvature approximations. |
+| [Local Support Learning](http://arxiv.org/abs/2610.02126v1) | Assaf Ben-Kish et al. | The paper studies catastrophic forgetting geometrically and proposes a retention objective based on the local support of updates in the input space of each weight matrix. It matters because standard gradient updates may change behavior outside the regions that were directly observed during fine-tuning, causing unexpected degradation of pretrained capabilities. |
+| [DMAD: Distribution Matching as Adversarial Distillation for Fast Visual Generation](http://arxiv.org/abs/2610.02188v1) | Zhengming Yu et al. | DMAD replaces auxiliary diffusion-model fitting in distribution-matching distillation with an adversarial formulation for fast visual generation. The method seeks to reduce the memory and computation needed to train few-step visual generators while preserving distribution quality. |
 
-### 📊 应用（特定领域、多模态、代码生成）
+### 📊 Applications (domain-specific, multimodal, code generation)
 
-| 论文 | 作者 | 摘要 |
+| Paper | Authors | Summary |
 | :--- | :--- | :--- |
-| [Embedding Prediction Helps Image Generation](http://arxiv.org/abs/2610.02203v1) | Sihan Xu 等 | NEPA 训练 Transformer 在基于扩散的图像生成过程中预测不断演化的条件嵌入，而不是在每个去噪步骤重复使用同一个文本或类别嵌入。该方法探索了动态内部条件是否能够提升生成质量，并可能为组织扩散 Transformer 的计算方式提供一种新思路。 |
-| [Higher-Order Molecular Grammars for Generative and Foundation Models in Chemistry](http://arxiv.org/abs/2610.02186v1) | Yiming Huang 等 | 论文提出高阶分子语法，在化学领域的生成模型和基础模型中显式编码环系、重复 motif 以及其他非序列拓扑结构。其重要性在于，传统序列和图表示可能使模型难以学习并推理具有重要化学意义的高阶结构。 |
-| [GeoLatent: Geometry-Guided Latent Structuring with Routed Optimization for 3D Reasoning](http://arxiv.org/abs/2610.02091v1) | Yakun Zhu 等 | GeoLatent 使用几何引导的连续潜在表示和 routed optimization，改进从 2D 图像进行 3D 空间推理的能力。它针对离散中间几何 token 的局限，力求对连续空间关系进行更丰富的表示。 |
+| [Embedding Prediction Helps Image Generation](http://arxiv.org/abs/2610.02203v1) | Sihan Xu et al. | NEPA trains a Transformer to predict evolving condition embeddings during diffusion-based image generation instead of reusing a single text or class embedding at every denoising step. The approach explores whether dynamic internal conditioning can improve generation quality and may offer a new way to structure diffusion-transformer computation. |
+| [Higher-Order Molecular Grammars for Generative and Foundation Models in Chemistry](http://arxiv.org/abs/2610.02186v1) | Yiming Huang et al. | The paper introduces higher-order molecular grammars that explicitly encode ring systems, recurring motifs, and other non-sequential topology in generative and foundation models for chemistry. It matters because conventional sequence and graph representations can make chemically important higher-order structures difficult to learn and reason over. |
+| [GeoLatent: Geometry-Guided Latent Structuring with Routed Optimization for 3D Reasoning](http://arxiv.org/abs/2610.02091v1) | Yakun Zhu et al. | GeoLatent uses geometry-guided continuous latent representations and routed optimization to improve 3D spatial reasoning from 2D images. It targets the limitations of discrete intermediate-geometry tokens and seeks a richer representation of continuous spatial relations. |
 
-## 3. 研究趋势信号
+## 3. Research Trend Signal
 
-这些投稿表明，AI 正从“以规模为中心”广泛转向**结构化能力与可 operational reliability**。在语言建模方面，研究方法正在改进信息的组织、解码、优化和保留方式；分层扩散、循环解码、基于采样的 SFT 以及局部支撑目标，都在解决低效或失效模式，而不是简单地增加参数量。智能体研究同样日益呈现基础设施化趋势，更加强调上下文压缩、来源学习、交互式视觉 harness、可执行工具评测和自主具身练习。在生成建模、3D 视觉、化学和生物学领域，高阶表示与几何感知表示正在取代纯粹的 token 化或序列式表述。一个反复出现的核心问题是评测有效性：基准测试伪影、工具使用误报、依赖优化过程的可解释性，以及对评测协议的敏感性，都表明，日益复杂的系统需要同等严谨的测量。
+The submissions point to a broad move from scale-centered AI toward **structured capability and operational reliability**. In language modeling, methods are improving how information is organized, decoded, optimized, and retained; hierarchical diffusion, looped decoding, sampling-based SFT, and local-support objectives all target inefficiencies or failure modes rather than simply increasing parameter count. Agent research is similarly becoming more infrastructural, emphasizing context compression, source learning, interactive visual harnesses, executable tool evaluation, and autonomous embodied practice. Across generative modeling, 3D vision, chemistry, and biology, higher-order and geometry-aware representations are replacing purely tokenized or sequence-based formulations. A recurring concern is evaluation validity: benchmark artifacts, false-positive tool-use claims, optimization-dependent interpretability, and protocol sensitivity suggest that increasingly sophisticated systems require equally careful measurement.
 
-## 4. 值得深入阅读
+## 4. Worth Deep Reading
 
 1. **[Hierarchical Continuous Diffusion Language Models](http://arxiv.org/abs/2610.02193v1)**  
-   对于从事非自回归生成的读者而言，这项工作尤其重要，因为它直接解决了 token 独立性和全局一致性这两个并行扩散语言模型的核心限制。其对分层连续 latent 的处理，也可能影响未来多模态与结构化生成的架构设计。
+   This is especially important for readers working on non-autoregressive generation because it directly addresses token-independence and global consistency, two central limitations of parallel diffusion language models. Its treatment of hierarchical continuous latents may also influence future multimodal and structured-generation architectures.
 
 2. **[Reconstruct, Practice, Go Real: Guided Self-Improvement for Embodied Agents](http://arxiv.org/abs/2610.02204v1)**  
-   RPG 为减少具身 AI 中的人工工程负担提供了一套具体议程。对重构、练习和真实世界部署的区分，不仅对机器人研究人员有帮助，也适用于研究自主技能获取与自我改进的读者。
+   RPG offers a concrete agenda for reducing the manual engineering burden of embodied AI. The distinction between reconstruction, practice, and real-world deployment makes it useful not only to robotics researchers but also to anyone studying autonomous skill acquisition and self-improvement.
 
 3. **[KaliBench: A Fine-Grained Benchmark for Cybersecurity Tool Use on Kali Linux with Runtime-Free Verifiable Rewards](http://arxiv.org/abs/2610.02206v1)**  
-   该基准的突出之处在于，它评测的是可执行行为，而非表面上的答案正确性。其无需运行时环境且可验证的设计，可能为其他高风险领域的工具使用基准提供有用范式，同时也能够揭示模型是否能够可靠地将自然语言意图转化为可执行命令。
+   This benchmark is notable for evaluating executable behavior rather than superficial answer correctness. Its runtime-free verifiable design could provide a useful template for tool-use benchmarks in other high-stakes domains, while also exposing whether models can reliably translate natural-language intent into operational commands.
 
 ---
-*本日报由 [agents-radar](https://github.com/dboeter/daily-diff) 自动生成。*
+*This digest is auto-generated by [Daily Diff](https://github.com/dboeter/daily-diff).*

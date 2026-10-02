@@ -4,7 +4,7 @@
 
 import type { RepoConfig, RepoFetch } from "./github.ts";
 import type { RepoDigest } from "./prompts.ts";
-import { type Lang, CLI_REPORT, OPENCLAW_REPORT, INFRA_REPORT } from "./i18n.ts";
+import { CLI_REPORT, OPENCLAW_REPORT, INFRA_REPORT } from "./i18n.ts";
 
 // ---------------------------------------------------------------------------
 // CLI Report
@@ -18,18 +18,17 @@ export function buildCliReportContent(
   dateStr: string,
   footer: string,
   skillsRepo: string,
-  lang: Lang = "zh",
 ): string {
   const repoLinks =
     cliDigests.map((d) => `- [${d.config.name}](https://github.com/${d.config.repo})`).join("\n") +
     `\n- [Claude Code Skills](https://github.com/${skillsRepo})`;
 
-  const title = `# ${CLI_REPORT.title[lang]} ${dateStr}\n\n`;
-  const meta = CLI_REPORT.meta(utcStr, cliDigests.length, lang);
+  const title = `# ${CLI_REPORT.title} ${dateStr}\n\n`;
+  const meta = CLI_REPORT.meta(utcStr, cliDigests.length);
 
   const skillsSection =
-    `## ${CLI_REPORT.skillsHeading[lang]}\n\n` +
-    `> ${CLI_REPORT.skillsSource[lang]}: [anthropics/skills](https://github.com/${skillsRepo})\n\n` +
+    `## ${CLI_REPORT.skillsHeading}\n\n` +
+    `> ${CLI_REPORT.skillsSource}: [anthropics/skills](https://github.com/${skillsRepo})\n\n` +
     `${skillsSummary}\n\n---\n\n`;
 
   const toolSections = cliDigests
@@ -51,10 +50,10 @@ export function buildCliReportContent(
     meta +
     `${repoLinks}\n\n` +
     `---\n\n` +
-    `## ${CLI_REPORT.comparison[lang]}\n\n` +
+    `## ${CLI_REPORT.comparison}\n\n` +
     comparison +
     `\n\n---\n\n` +
-    `## ${CLI_REPORT.detail[lang]}\n\n` +
+    `## ${CLI_REPORT.detail}\n\n` +
     toolSections +
     footer
   );
@@ -70,7 +69,6 @@ export function buildInfraReportContent(
   utcStr: string,
   dateStr: string,
   footer: string,
-  lang: Lang = "zh",
 ): string {
   const repoLinks = infraDigests
     .map((d) => `- [${d.config.name}](https://github.com/${d.config.repo})`)
@@ -90,14 +88,14 @@ export function buildInfraReportContent(
     .join("\n\n");
 
   return (
-    `# ${INFRA_REPORT.title[lang]} ${dateStr}\n\n` +
-    INFRA_REPORT.meta(utcStr, infraDigests.length, lang) +
+    `# ${INFRA_REPORT.title} ${dateStr}\n\n` +
+    INFRA_REPORT.meta(utcStr, infraDigests.length) +
     `${repoLinks}\n\n` +
     `---\n\n` +
-    `## ${INFRA_REPORT.comparison[lang]}\n\n` +
+    `## ${INFRA_REPORT.comparison}\n\n` +
     comparison +
     `\n\n---\n\n` +
-    `## ${INFRA_REPORT.detail[lang]}\n\n` +
+    `## ${INFRA_REPORT.detail}\n\n` +
     projectSections +
     footer
   );
@@ -117,7 +115,6 @@ export function buildOpenclawReportContent(
   footer: string,
   openclaw: RepoConfig,
   openclawPeers: RepoConfig[],
-  lang: Lang = "zh",
 ): string {
   const { issues, prs } = fetchedOpenclaw;
 
@@ -138,24 +135,21 @@ export function buildOpenclawReportContent(
     )
     .join("\n\n");
 
-  const title = `# ${OPENCLAW_REPORT.title[lang]} ${dateStr}\n\n`;
-  const meta =
-    lang === "en"
-      ? `> Issues: ${issues.length} | PRs: ${prs.length} | Projects covered: ${1 + openclawPeers.length} | Generated: ${utcStr} UTC\n\n`
-      : `> Issues: ${issues.length} | PRs: ${prs.length} | 覆盖项目: ${1 + openclawPeers.length} 个 | 生成时间: ${utcStr} UTC\n\n`;
+  const title = `# ${OPENCLAW_REPORT.title} ${dateStr}\n\n`;
+  const meta = `> Issues: ${issues.length} | PRs: ${prs.length} | Projects covered: ${1 + openclawPeers.length} | Generated: ${utcStr} UTC\n\n`;
 
   return (
     title +
     meta +
     `${peersRepoLinks}\n\n` +
     `---\n\n` +
-    `## ${OPENCLAW_REPORT.deepDive[lang]}\n\n` +
+    `## ${OPENCLAW_REPORT.deepDive}\n\n` +
     openclawSummary +
     `\n\n---\n\n` +
-    `## ${OPENCLAW_REPORT.comparison[lang]}\n\n` +
+    `## ${OPENCLAW_REPORT.comparison}\n\n` +
     peersComparison +
     `\n\n---\n\n` +
-    `## ${OPENCLAW_REPORT.peers[lang]}\n\n` +
+    `## ${OPENCLAW_REPORT.peers}\n\n` +
     peerDetailSections +
     footer
   );

@@ -1,7 +1,7 @@
 /**
- * agents-radar MCP Server — Cloudflare Worker
+ * Daily Diff MCP Server — Cloudflare Worker
  *
- * Exposes agents-radar digest data as MCP tools so any MCP-compatible
+ * Exposes Daily Diff digest data as MCP tools so any MCP-compatible
  * client (Claude Desktop, OpenClaw, etc.) can query the latest AI ecosystem reports.
  *
  * Tools:
@@ -11,23 +11,19 @@
  *   search        — keyword search across recent reports
  */
 
-const PAGES_URL = "https://duanyytop.github.io/agents-radar";
+const PAGES_URL = "https://dboeter.github.io/daily-diff";
 
 const REPORT_LABELS: Record<string, string> = {
-  "ai-cli": "AI CLI Tools Digest (ZH)",
-  "ai-cli-en": "AI CLI Tools Digest (EN)",
-  "ai-agents": "AI Agents Ecosystem (ZH)",
-  "ai-agents-en": "AI Agents Ecosystem (EN)",
-  "ai-web": "Official AI Content (ZH)",
-  "ai-web-en": "Official AI Content (EN)",
-  "ai-trending": "GitHub AI Trends (ZH)",
-  "ai-trending-en": "GitHub AI Trends (EN)",
-  "ai-hn": "Hacker News AI Community (ZH)",
-  "ai-hn-en": "Hacker News AI Community (EN)",
-  "ai-weekly": "Weekly Rollup (ZH)",
-  "ai-weekly-en": "Weekly Rollup (EN)",
-  "ai-monthly": "Monthly Rollup (ZH)",
-  "ai-monthly-en": "Monthly Rollup (EN)",
+  "ai-cli": "AI CLI Tools Digest",
+  "ai-agents": "AI Agents Ecosystem",
+  "ai-infra": "AI Infrastructure",
+  "ai-web": "Official AI Content",
+  "ai-trending": "GitHub AI Trends",
+  "ai-hn": "Hacker News AI Community",
+  "ai-ph": "Product Hunt AI Products",
+  "ai-arxiv": "ArXiv AI Research",
+  "ai-hf": "Hugging Face Trending Models",
+  "ai-community": "Tech Community AI",
 };
 
 interface ManifestDate {
@@ -85,7 +81,7 @@ async function toolGetReport(args: Record<string, unknown>): Promise<string> {
 }
 
 async function toolGetLatest(args: Record<string, unknown>): Promise<string> {
-  const type = String(args["type"] ?? "ai-cli-en").trim();
+  const type = String(args["type"] ?? "ai-cli").trim();
   const { dates } = await fetchManifest();
   for (const { date, reports } of dates) {
     if (reports.includes(type)) {
@@ -108,10 +104,8 @@ async function toolSearch(args: Record<string, unknown>): Promise<string> {
 
   await Promise.all(
     slice.map(async ({ date, reports }) => {
-      // Skip -en duplicates and rollups to avoid redundant noise
-      const targets = reports.filter(
-        (r) => !r.endsWith("-en") && !r.includes("weekly") && !r.includes("monthly"),
-      );
+      // Skip rollups to avoid redundant noise
+      const targets = reports.filter((r) => !r.includes("weekly") && !r.includes("monthly"));
       await Promise.all(
         targets.map(async (type) => {
           try {
@@ -144,7 +138,7 @@ const TOOLS = [
   {
     name: "list_reports",
     description:
-      "List available digest dates and report types from agents-radar. Returns the last N days of available reports.",
+      "List available digest dates and report types from Daily Diff. Returns the last N days of available reports.",
     inputSchema: {
       type: "object",
       properties: {
@@ -154,7 +148,7 @@ const TOOLS = [
   },
   {
     name: "get_report",
-    description: "Fetch the full content of a specific agents-radar digest report.",
+    description: "Fetch the full content of a specific Daily Diff digest report.",
     inputSchema: {
       type: "object",
       properties: {
@@ -162,7 +156,7 @@ const TOOLS = [
         type: {
           type: "string",
           description:
-            "Report type: ai-cli-en, ai-agents-en, ai-web-en, ai-trending-en, ai-hn-en, ai-weekly-en, ai-monthly-en (drop -en suffix for Chinese versions)",
+            "Report type: ai-cli, ai-agents, ai-infra, ai-web, ai-trending, ai-hn, ai-ph, ai-arxiv, ai-hf, ai-community",
         },
       },
       required: ["date", "type"],
@@ -176,14 +170,14 @@ const TOOLS = [
       properties: {
         type: {
           type: "string",
-          description: "Report type (default: ai-cli-en). Use list_reports to see all available types.",
+          description: "Report type (default: ai-cli). Use list_reports to see all available types.",
         },
       },
     },
   },
   {
     name: "search",
-    description: "Search for a keyword or phrase across recent agents-radar digest reports.",
+    description: "Search for a keyword or phrase across recent Daily Diff digest reports.",
     inputSchema: {
       type: "object",
       properties: {
@@ -215,7 +209,7 @@ async function handleMcp(body: unknown): Promise<unknown> {
           result: {
             protocolVersion: "2024-11-05",
             capabilities: { tools: {} },
-            serverInfo: { name: "agents-radar", version: "1.0.0" },
+            serverInfo: { name: "daily-diff", version: "1.0.0" },
           },
         };
 
@@ -281,7 +275,7 @@ export default {
     // Health check
     if (request.method === "GET" && url.pathname === "/") {
       return Response.json(
-        { name: "agents-radar-mcp", status: "ok", tools: TOOLS.map((t) => t.name) },
+        { name: "daily-diff-mcp", status: "ok", tools: TOOLS.map((t) => t.name) },
         { headers: CORS },
       );
     }

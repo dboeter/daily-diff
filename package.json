@@ -1,5 +1,5 @@
 {
-  "name": "agents-radar",
+  "name": "daily-diff",
   "version": "1.0.0",
   "type": "module",
   "packageManager": "pnpm@9.15.9",
@@ -12,7 +12,6 @@
     "format:check": "prettier --check src",
     "manifest": "tsx src/generate-manifest.ts",
     "notify": "tsx src/notify.ts",
-    "notify:feishu": "tsx src/feishu.ts",
     "close-stale": "tsx src/close-stale-issues.ts",
     "test": "vitest run",
     "test:watch": "vitest",

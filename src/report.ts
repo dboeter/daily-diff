@@ -4,8 +4,7 @@
 
 import fs from "node:fs";
 import path from "node:path";
-import { type Lang, FOOTER } from "./i18n.ts";
-import { buildTranslationPrompt } from "./prompts.ts";
+import { FOOTER } from "./i18n.ts";
 import { sleep } from "./date.ts";
 
 // ---------------------------------------------------------------------------
@@ -57,9 +56,8 @@ function releaseSlot(): void {
 // Health accounting
 //
 // Every caller of callLlm() degrades gracefully — a failed summary becomes a
-// "generation failed" notice, a failed translation falls back to English. That
-// is right per report and wrong for the run as a whole: on 2026-09-03 all ~30
-// calls failed, and the pipeline cheerfully published a digest of placeholders
+// "generation failed" notice. That is right per report and wrong for the run
+// as a whole: on 2026-09-03 all ~30 calls failed, and the pipeline cheerfully published a digest of placeholders
 // and reported success. These counters let main() tell "one report is thin"
 // apart from "the provider was down", and abort in the second case.
 // ---------------------------------------------------------------------------
@@ -225,35 +223,6 @@ export async function callLlm(prompt: string, maxTokens = LLM_TOKENS_DEFAULT): P
   }
 }
 
-// ---------------------------------------------------------------------------
-// Translation
-// ---------------------------------------------------------------------------
-
-/**
- * Translate a finished English report body into Chinese.
- *
- * Report bodies are generated once in English and translated from there. The
- * previous design ran the whole pipeline twice — once per language — over the
- * same GitHub/API data, which doubled the bill for identical information. A
- * translation prompt carries only the finished report instead of the raw item
- * dump, so it costs a fraction of the input tokens.
- *
- * `maxTokens` should match the budget the English body was generated with, or
- * a long report gets truncated mid-translation.
- *
- * Falls back to the English text on failure: a Chinese report that is partly
- * English still carries the day's information, an empty one carries none.
- */
-export async function translateToZh(text: string, maxTokens = LLM_TOKENS_DEFAULT): Promise<string> {
-  if (!text.trim()) return text;
-  try {
-    return await callLlm(buildTranslationPrompt(text), maxTokens);
-  } catch (err) {
-    console.error(`[translate] Failed, falling back to English: ${err}`);
-    return text;
-  }
-}
-
 // Matches ASCII control characters U+0000–U+001F. Built from a string so no
 // literal control character appears in the source (keeps it readable + lint-clean).
 // eslint-disable-next-line no-control-regex
@@ -269,7 +238,7 @@ const CONTROL_CHARS = new RegExp("[\\u0000-\\u001F]", "g");
  *
  * If the strict parse still fails, the payload is repaired once (drop any prose
  * wrapper around the JSON, strip trailing commas) and retried — a single stray
- * character (e.g. a trailing comma before `}`) used to wipe an entire language's
+ * character (e.g. a trailing comma before `}`) used to wipe an entire
  * highlights.json.
  */
 export function parseLlmJson<T = unknown>(raw: string): T {
@@ -312,8 +281,8 @@ export function saveFile(content: string, ...segments: string[]): string {
   return filepath;
 }
 
-export function autoGenFooter(lang: Lang = "zh"): string {
+export function autoGenFooter(): string {
   const digestRepo = process.env["DIGEST_REPO"] ?? "";
   if (!digestRepo) return "";
-  return `\n\n---\n*${FOOTER.autoGen[lang]} [agents-radar](https://github.com/${digestRepo})${lang === "en" ? "." : " 自动生成。"}*`;
+  return `\n\n---\n*${FOOTER.autoGen} [Daily Diff](https://github.com/${digestRepo}).*`;
 }

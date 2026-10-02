@@ -101,7 +101,7 @@ function toHnStory(item: HnFirebaseItem, hnRank: number): HnStory {
 export async function fetchHnData(): Promise<HnData> {
   try {
     const topResp = await fetch(HN_TOPSTORIES_URL, {
-      headers: { "User-Agent": "agents-radar/1.0" },
+      headers: { "User-Agent": "daily-diff/1.0" },
     });
     if (!topResp.ok) {
       console.error(`  [hn] topstories: HTTP ${topResp.status}`);
@@ -116,7 +116,7 @@ export async function fetchHnData(): Promise<HnData> {
       const items = await Promise.all(
         batchIds.map(async (id): Promise<HnFirebaseItem | null> => {
           const resp = await fetch(HN_ITEM_URL(id), {
-            headers: { "User-Agent": "agents-radar/1.0" },
+            headers: { "User-Agent": "daily-diff/1.0" },
           });
           if (!resp.ok) {
             console.error(`  [hn] item ${id}: HTTP ${resp.status}`);

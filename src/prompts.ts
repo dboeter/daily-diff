@@ -3,7 +3,6 @@
  */
 
 import type { RepoConfig, GitHubItem, GitHubRelease, GitHubDiscussion } from "./github.ts";
-import type { Lang } from "./i18n.ts";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -22,22 +21,19 @@ export interface RepoDigest {
 // Formatting
 // ---------------------------------------------------------------------------
 
-export function formatItem(item: GitHubItem, lang: Lang = "zh"): string {
+export function formatItem(item: GitHubItem): string {
   const labels = item.labels.map((l) => l.name).join(", ");
   const labelStr = labels ? ` [${labels}]` : "";
   const body = (item.body ?? "").replace(/\n/g, " ").trim().slice(0, 300);
   const ellipsis = (item.body ?? "").length > 300 ? "..." : "";
-  const t =
-    lang === "en"
-      ? {
-          author: "Author",
-          created: "Created",
-          updated: "Updated",
-          comments: "Comments",
-          url: "URL",
-          summary: "Summary",
-        }
-      : { author: "作者", created: "创建", updated: "更新", comments: "评论", url: "链接", summary: "摘要" };
+  const t = {
+    author: "Author",
+    created: "Created",
+    updated: "Updated",
+    comments: "Comments",
+    url: "URL",
+    summary: "Summary",
+  };
   // Extract "owner/repo" from html_url to avoid full GitHub URLs that trigger cross-references
   const repoSlug = item.html_url.replace(/^https:\/\/github\.com\//, "").replace(/\/(issues|pull)\/\d+$/, "");
   const itemKind = item.html_url.includes("/pull/") ? "PR" : "Issue";
@@ -50,14 +46,11 @@ export function formatItem(item: GitHubItem, lang: Lang = "zh"): string {
   ].join("\n");
 }
 
-export function formatDiscussion(d: GitHubDiscussion, lang: Lang = "zh"): string {
+export function formatDiscussion(d: GitHubDiscussion): string {
   const body = (d.body ?? "").replace(/\n/g, " ").trim().slice(0, 300);
   const ellipsis = (d.body ?? "").length > 300 ? "..." : "";
-  const t =
-    lang === "en"
-      ? { author: "Author", created: "Created", updated: "Updated", comments: "Comments", url: "URL" }
-      : { author: "作者", created: "创建", updated: "更新", comments: "评论", url: "链接" };
-  const answered = d.answered ? (lang === "en" ? " [ANSWERED]" : " [已解决]") : "";
+  const t = { author: "Author", created: "Created", updated: "Updated", comments: "Comments", url: "URL" };
+  const answered = d.answered ? " [ANSWERED]" : "";
   // Same URL-shortening as formatItem: keep "owner/repo" only, so the rendered
   // issue body never contains a full github.com link that triggers back-refs.
   const repoSlug = d.html_url.replace(/^https:\/\/github\.com\//, "").replace(/\/discussions\/\d+$/, "");
@@ -65,7 +58,7 @@ export function formatDiscussion(d: GitHubDiscussion, lang: Lang = "zh"): string
     `#${d.number} [${d.category}]${answered} ${d.title}`,
     `  ${t.author}: ${d.author} | ${t.created}: ${d.created_at.slice(0, 10)} | ${t.updated}: ${d.updated_at.slice(0, 10)} | ${t.comments}: ${d.comments} | 👍: ${d.upvotes}`,
     `  ${t.url}: ${repoSlug} Discussion #${d.number}`,
-    `  ${lang === "en" ? "Summary" : "摘要"}: ${body}${ellipsis}`,
+    `  ${"Summary"}: ${body}${ellipsis}`,
   ].join("\n");
 }
 
@@ -96,26 +89,16 @@ export function topDiscussions(items: GitHubDiscussion[], n: number): GitHubDisc
 /** What the top-N sample was ranked by, so the note doesn't misstate the sort. */
 export type SampleBy = "comments" | "engagement";
 
-const SAMPLE_BY_TEXT: Record<SampleBy, Record<Lang, string>> = {
-  comments: { en: "comment count", zh: "评论数" },
-  engagement: { en: "comments + upvotes", zh: "评论数 + 点赞数" },
+const SAMPLE_BY_TEXT: Record<SampleBy, string> = {
+  comments: "comment count",
+  engagement: "comments + upvotes",
 };
 
-export function sampleNote(
-  total: number,
-  sampled: number,
-  lang: Lang = "zh",
-  by: SampleBy = "comments",
-): string {
-  const criterion = SAMPLE_BY_TEXT[by][lang];
-  if (lang === "en") {
-    return total > sampled
-      ? `(Total: ${total} items; showing top ${sampled} by ${criterion})`
-      : `(Total: ${total} items)`;
-  }
+export function sampleNote(total: number, sampled: number, by: SampleBy = "comments"): string {
+  const criterion = SAMPLE_BY_TEXT[by];
   return total > sampled
-    ? `（共 ${total} 条，以下展示${criterion}最多的 ${sampled} 条）`
-    : `（共 ${total} 条）`;
+    ? `(Total: ${total} items; showing top ${sampled} by ${criterion})`
+    : `(Total: ${total} items)`;
 }
 
 // ---------------------------------------------------------------------------
@@ -129,36 +112,29 @@ export function buildCliPrompt(
   releases: GitHubRelease[],
   discussions: GitHubDiscussion[],
   dateStr: string,
-  lang: Lang = "zh",
 ): string {
   const sampledIssues = topN(issues, CLI_ISSUE_LIMIT);
   const sampledPrs = topN(prs, CLI_PR_LIMIT);
   const sampledDiscussions = topDiscussions(discussions, CLI_DISCUSSION_LIMIT);
 
-  const issuesText =
-    sampledIssues.map((i) => formatItem(i, lang)).join("\n") || (lang === "en" ? "None" : "无");
-  const prsText = sampledPrs.map((p) => formatItem(p, lang)).join("\n") || (lang === "en" ? "None" : "无");
+  const issuesText = sampledIssues.map((i) => formatItem(i)).join("\n") || "None";
+  const prsText = sampledPrs.map((p) => formatItem(p)).join("\n") || "None";
   const releasesText = releases.length
     ? releases.map((r) => `- ${r.tag_name}: ${r.name}\n  ${(r.body ?? "").slice(0, 300)}`).join("\n")
-    : lang === "en"
-      ? "None"
-      : "无";
+    : "None";
 
-  const issueNote = sampleNote(issues.length, sampledIssues.length, lang);
-  const prNote = sampleNote(prs.length, sampledPrs.length, lang);
+  const issueNote = sampleNote(issues.length, sampledIssues.length);
+  const prNote = sampleNote(prs.length, sampledPrs.length);
 
   // Repos without discussions enabled get no section at all, rather than an
   // empty one the model would feel obliged to comment on.
   const discussionsSection = sampledDiscussions.length
-    ? (lang === "en"
-        ? `\n## Latest Discussions (updated in last 24h)${sampleNote(discussions.length, sampledDiscussions.length, lang, "engagement")}\n`
-        : `\n## 最新 Discussions（过去24小时内更新）${sampleNote(discussions.length, sampledDiscussions.length, lang, "engagement")}\n`) +
-      sampledDiscussions.map((d) => formatDiscussion(d, lang)).join("\n") +
+    ? `\n## Latest Discussions (updated in last 24h)${sampleNote(discussions.length, sampledDiscussions.length, "engagement")}\n` +
+      sampledDiscussions.map((d) => formatDiscussion(d)).join("\n") +
       "\n"
     : "";
 
-  if (lang === "en") {
-    return `You are a technical analyst focused on AI developer tools. Based on the following GitHub data, generate the ${cfg.name} community digest for ${dateStr}.
+  return `You are a technical analyst focused on AI developer tools. Based on the following GitHub data, generate the ${cfg.name} community digest for ${dateStr}.
 
 # Data source: github.com/${cfg.repo}
 
@@ -185,35 +161,6 @@ Generate a structured English digest with the following sections:
 
 Style: concise and professional, suited for technical developers. Include GitHub links for each item.
 `;
-  }
-
-  return `你是一位专注于 AI 开发工具的技术分析师。请根据以下 GitHub 数据，生成 ${dateStr} 的 ${cfg.name} 社区动态日报。
-
-# 数据来源: github.com/${cfg.repo}
-
-## 最新 Releases（过去24小时）
-${releasesText}
-
-## 最新 Issues（过去24小时内更新）${issueNote}
-${issuesText}
-
-## 最新 Pull Requests（过去24小时内更新）${prNote}
-${prsText}
-${discussionsSection}
----
-
-请生成一份结构清晰的中文日报，包含以下部分：
-
-1. **今日速览** - 用2-3句话概括今天最重要的动态
-2. **版本发布** - 如有新版本，总结更新内容；无则省略
-3. **社区热点 Issues** - 挑选 10 个最值得关注的 Issue，说明为什么重要、社区反应如何
-4. **重要 PR 进展** - 挑选 10 个重要的 PR，说明功能或修复内容
-5. **热门 Discussions** - 挑选最多 10 个值得关注的 Discussion，按分区（Ideas / Q&A / Show and tell）归类。若未提供 Discussions 数据则整节省略
-6. **功能需求趋势** - 从所有 Issues 与 Discussions 中提炼出社区最关注的功能方向（如 IDE 集成、性能、新模型支持等）
-7. **开发者关注点** - 总结开发者反馈中的痛点或高频需求
-
-语言要求：简洁专业，适合技术开发者阅读。每个条目附上 GitHub 链接。
-`;
 }
 
 const INFRA_ISSUE_LIMIT = 30;
@@ -225,23 +172,21 @@ export function buildInfraPrompt(
   prs: GitHubItem[],
   releases: GitHubRelease[],
   dateStr: string,
-  lang: Lang = "zh",
 ): string {
   const sampledIssues = topN(issues, INFRA_ISSUE_LIMIT);
   const sampledPrs = topN(prs, INFRA_PR_LIMIT);
 
-  const noneStr = lang === "en" ? "None" : "无";
-  const issuesText = sampledIssues.map((i) => formatItem(i, lang)).join("\n") || noneStr;
-  const prsText = sampledPrs.map((p) => formatItem(p, lang)).join("\n") || noneStr;
+  const noneStr = "None";
+  const issuesText = sampledIssues.map((i) => formatItem(i)).join("\n") || noneStr;
+  const prsText = sampledPrs.map((p) => formatItem(p)).join("\n") || noneStr;
   const releasesText = releases.length
     ? releases.map((r) => `- ${r.tag_name}: ${r.name}\n  ${(r.body ?? "").slice(0, 300)}`).join("\n")
     : noneStr;
 
-  const issueNote = sampleNote(issues.length, sampledIssues.length, lang);
-  const prNote = sampleNote(prs.length, sampledPrs.length, lang);
+  const issueNote = sampleNote(issues.length, sampledIssues.length);
+  const prNote = sampleNote(prs.length, sampledPrs.length);
 
-  if (lang === "en") {
-    return `You are a technical analyst focused on AI infrastructure — inference engines, model serving, LLM gateways and fine-tuning frameworks. Based on the following GitHub data, generate the ${cfg.name} digest for ${dateStr}.
+  return `You are a technical analyst focused on AI infrastructure — inference engines, model serving, LLM gateways and fine-tuning frameworks. Based on the following GitHub data, generate the ${cfg.name} digest for ${dateStr}.
 
 # Data source: github.com/${cfg.repo}
 
@@ -267,42 +212,10 @@ Generate a structured English digest with the following sections:
 
 Style: concise and professional, suited for infrastructure engineers. Include GitHub links for each item.
 `;
-  }
-
-  return `你是一位专注于 AI 基础设施（推理引擎、模型服务、LLM 网关、微调框架）的技术分析师。请根据以下 GitHub 数据，生成 ${dateStr} 的 ${cfg.name} 动态日报。
-
-# 数据来源: github.com/${cfg.repo}
-
-## 最新 Releases（过去24小时）
-${releasesText}
-
-## 最新 Issues（过去24小时内更新）${issueNote}
-${issuesText}
-
-## 最新 Pull Requests（过去24小时内更新）${prNote}
-${prsText}
-
----
-
-请生成一份结构清晰的中文日报，包含以下部分：
-
-1. **今日速览** - 用2-3句话概括今天最重要的动态
-2. **版本发布与破坏性变更** - 新版本、API/配置变更、迁移注意事项；无则省略
-3. **新模型与硬件支持** - 新增支持的模型、架构、后端（CUDA/ROCm/Metal/CPU）、量化格式
-4. **性能与优化** - 已落地或进行中的吞吐、延迟、显存、算子优化，有具体数字时请引用
-5. **稳定性与回归** - 今日报告的崩溃、正确性 Bug、回归问题，按严重程度排列，标注是否已有 fix PR
-6. **对应用开发者的意义** - 对在此项目之上构建 Agent/应用的开发者有什么实际影响
-
-语言要求：简洁专业，适合基础设施工程师阅读。每个条目附上 GitHub 链接。
-`;
 }
 
-export function buildInfraComparisonPrompt(
-  digests: RepoDigest[],
-  dateStr: string,
-  lang: Lang = "zh",
-): string {
-  const noActivityStr = lang === "en" ? "No activity in the last 24 hours." : "过去24小时无活动。";
+export function buildInfraComparisonPrompt(digests: RepoDigest[], dateStr: string): string {
+  const noActivityStr = "No activity in the last 24 hours.";
 
   const sections = digests
     .map((d) => {
@@ -312,8 +225,7 @@ export function buildInfraComparisonPrompt(
     })
     .join("\n\n---\n\n");
 
-  if (lang === "en") {
-    return `You are a senior analyst of the AI infrastructure ecosystem — inference engines, model serving, LLM gateways and fine-tuning frameworks. The following are ${dateStr} digest summaries for each project:
+  return `You are a senior analyst of the AI infrastructure ecosystem — inference engines, model serving, LLM gateways and fine-tuning frameworks. The following are ${dateStr} digest summaries for each project:
 
 ${sections}
 
@@ -330,25 +242,6 @@ Generate a cross-project comparison report in English with these sections:
 
 Style: concise and professional, data-backed, suited for infrastructure engineers and technical decision-makers.
 `;
-  }
-
-  return `你是一位专注于 AI 基础设施（推理引擎、模型服务、LLM 网关、微调框架）生态的资深技术分析师。以下是 ${dateStr} 各项目的动态摘要：
-
-${sections}
-
----
-
-请基于上述各项目的动态，生成一份横向对比分析报告，包含以下部分：
-
-1. **生态全景** - 用3-5句话概括当前 AI 基础设施整体态势
-2. **各项目活跃度对比** - 以表格形式汇总各项目今日的 Issues 数、PR 数、Release 情况
-3. **模型支持竞速** - 哪些项目支持了哪些新模型/新架构，谁跑在前面
-4. **性能优化前沿** - 优化火力集中在哪些方向（KV cache、批处理、量化、分布式推理、算子）
-5. **分层定位差异** - 这些项目在分层上的差异：推理引擎 vs 本地运行时 vs 网关 vs 训练/微调
-6. **值得关注的趋势信号** - 从今日动态中提炼行业趋势，以及 Agent/应用开发者应当关注什么
-
-语言要求：简洁专业，有数据支撑，适合基础设施工程师和技术决策者阅读。
-`;
 }
 
 const PEER_ISSUE_LIMIT = 30;
@@ -362,7 +255,6 @@ export function buildPeerPrompt(
   dateStr: string,
   issueLimit = PEER_ISSUE_LIMIT,
   prLimit = PEER_PR_LIMIT,
-  lang: Lang = "zh",
 ): string {
   const totalIssues = issues.length;
   const totalPrs = prs.length;
@@ -370,9 +262,9 @@ export function buildPeerPrompt(
   const sampledIssues = topN(issues, issueLimit);
   const sampledPrs = topN(prs, prLimit);
 
-  const noneStr = lang === "en" ? "None" : "无";
-  const issuesText = sampledIssues.map((i) => formatItem(i, lang)).join("\n") || noneStr;
-  const prsText = sampledPrs.map((p) => formatItem(p, lang)).join("\n") || noneStr;
+  const noneStr = "None";
+  const issuesText = sampledIssues.map((i) => formatItem(i)).join("\n") || noneStr;
+  const prsText = sampledPrs.map((p) => formatItem(p)).join("\n") || noneStr;
   const releasesText = releases.length
     ? releases.map((r) => `- ${r.tag_name}: ${r.name}\n  ${(r.body ?? "").slice(0, 300)}`).join("\n")
     : noneStr;
@@ -382,11 +274,10 @@ export function buildPeerPrompt(
   const openPrs = prs.filter((p) => p.state === "open").length;
   const mergedPrs = prs.filter((p) => p.state === "closed").length;
 
-  const issueSampleNote = sampleNote(totalIssues, sampledIssues.length, lang);
-  const prSampleNote = sampleNote(totalPrs, sampledPrs.length, lang);
+  const issueSampleNote = sampleNote(totalIssues, sampledIssues.length);
+  const prSampleNote = sampleNote(totalPrs, sampledPrs.length);
 
-  if (lang === "en") {
-    return `You are an analyst of AI agent and personal AI assistant open-source projects. Based on the following GitHub data from ${cfg.name} (github.com/${cfg.repo}), generate a project digest for ${dateStr}.
+  return `You are an analyst of AI agent and personal AI assistant open-source projects. Based on the following GitHub data from ${cfg.name} (github.com/${cfg.repo}), generate a project digest for ${dateStr}.
 
 # Data Overview
 - Issues updated in last 24h: ${totalIssues} (open/active: ${openIssues}, closed: ${closedIssues})
@@ -417,53 +308,16 @@ Generate a structured English ${cfg.name} project digest with the following sect
 
 Style: objective, data-driven, highlighting project health. Include GitHub links for each item.
 `;
-  }
-
-  return `你是一位 AI 智能体与个人 AI 助手领域开源项目分析师。请根据以下来自 ${cfg.name} (github.com/${cfg.repo}) 的 GitHub 数据，生成 ${dateStr} 的项目动态日报。
-
-# 数据概览
-- 过去24小时 Issues 更新：${totalIssues} 条（新开/活跃: ${openIssues}，已关闭: ${closedIssues}）
-- 过去24小时 PR 更新：${totalPrs} 条（待合并: ${openPrs}，已合并/关闭: ${mergedPrs}）
-- 新版本发布：${releases.length} 个
-
-## 最新 Releases
-${releasesText}
-
-## 最新 Issues ${issueSampleNote}
-${issuesText}
-
-## 最新 Pull Requests ${prSampleNote}
-${prsText}
-
----
-
-请生成一份结构清晰的 ${cfg.name} 项目日报，包含以下部分：
-
-1. **今日速览** - 用3-5句话概括项目今日整体状态，包括活跃度评估
-2. **版本发布** - 如有新版本，详细说明更新内容、破坏性变更、迁移注意事项；无则省略
-3. **项目进展** - 今日合并/关闭的重要 PR，说明推进了哪些功能或修复，项目整体向前迈进了多少
-4. **社区热点** - 今日讨论最活跃、评论最多、反应最多的 Issues/PRs（附链接），分析背后的诉求
-5. **Bug 与稳定性** - 今日报告的 Bug、崩溃、回归问题，按严重程度排列，标注是否已有 fix PR
-6. **功能请求与路线图信号** - 用户提出的新功能需求，结合已有 PR 判断哪些可能被纳入下一版本
-7. **用户反馈摘要** - 从 Issues 评论中提炼真实用户痛点、使用场景、满意/不满意的地方
-8. **待处理积压** - 长期未响应的重要 Issue 或 PR，提醒维护者关注
-
-语言要求：客观专业，数据驱动，突出项目健康度。每个条目附上 GitHub 链接。
-`;
 }
 
 export function buildPeersComparisonPrompt(
   openclawDigest: RepoDigest,
   peerDigests: RepoDigest[],
   dateStr: string,
-  lang: Lang = "zh",
 ): string {
-  const noActivityStr = lang === "en" ? "No activity in the last 24 hours." : "过去24小时无活动。";
+  const noActivityStr = "No activity in the last 24 hours.";
 
-  const openclawSection =
-    lang === "en"
-      ? `## OpenClaw (core reference, github.com/${openclawDigest.config.repo})\n${openclawDigest.summary}`
-      : `## OpenClaw（核心参照，github.com/${openclawDigest.config.repo}）\n${openclawDigest.summary}`;
+  const openclawSection = `## OpenClaw (core reference, github.com/${openclawDigest.config.repo})\n${openclawDigest.summary}`;
 
   const peerSections = peerDigests
     .map((d) => {
@@ -473,8 +327,7 @@ export function buildPeersComparisonPrompt(
     })
     .join("\n\n---\n\n");
 
-  if (lang === "en") {
-    return `You are a senior analyst of the AI agent and personal AI assistant open-source ecosystem. The following are ${dateStr} community digest summaries for each project.
+  return `You are a senior analyst of the AI agent and personal AI assistant open-source ecosystem. The following are ${dateStr} community digest summaries for each project.
 
 ${openclawSection}
 
@@ -496,47 +349,17 @@ Generate a cross-project comparison report in English with these sections:
 
 Style: concise and professional, data-backed, suited for technical decision-makers and developers.
 `;
-  }
-
-  return `你是一位专注于 AI 智能体与个人 AI 助手开源生态的资深技术分析师。以下是 ${dateStr} 各开源项目的社区动态摘要。
-
-${openclawSection}
-
----
-
-${peerSections}
-
----
-
-请基于上述各项目的动态，生成一份横向对比分析报告，包含以下部分：
-
-1. **生态全景** - 用3-5句话概括个人 AI 助手/自主智能体开源生态整体态势
-2. **各项目活跃度对比** - 以表格形式汇总各项目今日的 Issues 数、PR 数、Release 情况及健康度评估
-3. **OpenClaw 在生态中的定位** - 与同类相比的优势、技术路线差异、社区规模对比
-4. **共同关注的技术方向** - 多项目共同涌现的需求（注明涉及哪些项目、具体诉求）
-5. **差异化定位分析** - 功能侧重、目标用户、技术架构的关键差异
-6. **社区热度与成熟度** - 活跃度分层，哪些处于快速迭代阶段，哪些在质量巩固阶段
-7. **值得关注的趋势信号** - 从社区反馈中提炼行业趋势，对 AI 智能体开发者的参考价值
-
-语言要求：简洁专业，有数据支撑，适合技术决策者和开发者阅读。
-`;
 }
 
-export function buildSkillsPrompt(
-  prs: GitHubItem[],
-  issues: GitHubItem[],
-  dateStr: string,
-  lang: Lang = "zh",
-): string {
+export function buildSkillsPrompt(prs: GitHubItem[], issues: GitHubItem[], dateStr: string): string {
   const topPrs = topN(prs, 20);
   const topIssues = topN(issues, 15);
 
-  const noneStr = lang === "en" ? "None" : "无";
-  const prsText = topPrs.map((p) => formatItem(p, lang)).join("\n") || noneStr;
-  const issuesText = topIssues.map((i) => formatItem(i, lang)).join("\n") || noneStr;
+  const noneStr = "None";
+  const prsText = topPrs.map((p) => formatItem(p)).join("\n") || noneStr;
+  const issuesText = topIssues.map((i) => formatItem(i)).join("\n") || noneStr;
 
-  if (lang === "en") {
-    return `You are a technical analyst focused on the Claude Code ecosystem. The following data is from github.com/anthropics/skills (official Claude Code Skills repository). Analyze the community's most-watched Skills activity (data as of ${dateStr}).
+  return `You are a technical analyst focused on the Claude Code ecosystem. The following data is from github.com/anthropics/skills (official Claude Code Skills repository). Analyze the community's most-watched Skills activity (data as of ${dateStr}).
 
 ## Repository Context
 anthropics/skills is the official Claude Code Skills collection. Each PR typically represents a new or improved Skill. The community proposes new Skills and reports issues via Issues; PRs represent actual Skill submissions.
@@ -558,34 +381,10 @@ Generate a Claude Code Skills community highlights report in English with these 
 
 Style: concise and professional, include GitHub links for each item.
 `;
-  }
-
-  return `你是一位专注于 Claude Code 生态的技术分析师。以下是来自 github.com/anthropics/skills（Claude Code Skills 官方仓库）的数据，请分析社区最关注的 Skills 动态（数据截止 ${dateStr}）。
-
-## 仓库说明
-anthropics/skills 是 Claude Code 官方 Skills 集合仓库，每个 PR 通常对应一个新增或改进的 Skill。社区通过 Issues 提出新 Skill 需求或反馈问题，PR 则代表实际提交的 Skill。
-
-## 热门 Pull Requests（按评论数排序，共 ${prs.length} 条，展示前 ${topPrs.length} 条）
-${prsText}
-
-## 社区 Issues（按评论数排序，共 ${issues.length} 条，展示前 ${topIssues.length} 条）
-${issuesText}
-
----
-
-请生成一份 Claude Code Skills 社区热点报告，包含以下部分：
-
-1. **热门 Skills 排行** - 列出评论/关注度最高的 5~8 个 Skills（PR），说明每个 Skill 的功能、社区讨论热点及当前状态（open/merged/draft）
-2. **社区需求趋势** - 从 Issues 中提炼社区最期待的新 Skill 方向（如工作流自动化、代码审查、测试生成、文档等）
-3. **高潜力待合并 Skills** - 评论活跃但尚未合并的 PR，这些 Skills 可能近期落地
-4. **Skills 生态洞察** - 一句话总结：当前社区在 Skills 层面最集中的诉求是什么
-
-语言要求：简洁专业，每个条目附上 GitHub 链接。
-`;
 }
 
-export function buildComparisonPrompt(digests: RepoDigest[], dateStr: string, lang: Lang = "zh"): string {
-  const noActivityStr = lang === "en" ? "No activity in the last 24 hours." : "过去24小时无活动。";
+export function buildComparisonPrompt(digests: RepoDigest[], dateStr: string): string {
+  const noActivityStr = "No activity in the last 24 hours.";
 
   const sections = digests
     .map((d) => {
@@ -595,8 +394,7 @@ export function buildComparisonPrompt(digests: RepoDigest[], dateStr: string, la
     })
     .join("\n\n---\n\n");
 
-  if (lang === "en") {
-    return `You are a senior technical analyst of the AI developer tools ecosystem. The following are ${dateStr} community digest summaries for each major AI CLI tool:
+  return `You are a senior technical analyst of the AI developer tools ecosystem. The following are ${dateStr} community digest summaries for each major AI CLI tool:
 
 ${sections}
 
@@ -613,64 +411,4 @@ Generate a cross-tool comparison report in English with these sections:
 
 Style: concise and professional, data-backed, suited for technical decision-makers and developers.
 `;
-  }
-
-  return `你是一位专注于 AI 开发工具生态的资深技术分析师。以下是 ${dateStr} 各主流 AI CLI 工具的社区动态摘要：
-
-${sections}
-
----
-
-请基于上述各工具的动态，生成一份横向对比分析报告，包含以下部分：
-
-1. **生态全景** - 用3-5句话概括当前 AI CLI 工具整体发展态势
-2. **各工具活跃度对比** - 以表格形式汇总各工具今日的 Issues 数、PR 数、Discussions 数、Release 情况。部分仓库上游关闭了 Issues/PR，仅以 Discussions 作为社区渠道，这类请标注 "N/A"，不要判定为不活跃
-3. **共同关注的功能方向** - 多个工具社区都在关注的需求（说明哪些工具、具体诉求）
-4. **差异化定位分析** - 各工具在功能侧重、目标用户、技术路线上的差异
-5. **社区热度与成熟度** - 哪些工具社区更活跃，哪些处于快速迭代阶段
-6. **值得关注的趋势信号** - 从社区反馈中提炼出的行业趋势，对开发者有何参考价值
-
-语言要求：简洁专业，有数据支撑，适合技术决策者和开发者阅读。
-`;
-}
-
-// ---------------------------------------------------------------------------
-// Translation
-// ---------------------------------------------------------------------------
-// Every report body is generated once in English, then translated to Chinese.
-// Generating both languages from the raw GitHub/API data doubled the LLM bill
-// for identical information; a translation pass costs a fraction of the input
-// tokens because its prompt is the finished report, not the source data.
-
-/** Prompt that translates a finished English report body into Chinese. */
-export function buildTranslationPrompt(text: string): string {
-  return `Translate the following English technical report into Simplified Chinese.
-
-${text}
-
----
-
-Rules:
-- Output ONLY the translation. No preamble, no explanation, no markdown fences around the whole output.
-- Preserve the Markdown structure exactly: headings, tables (including column alignment rows), lists, blockquotes, bold/italic, horizontal rules, emoji.
-- Keep URLs, link targets, code spans, code blocks, numbers and dates verbatim.
-- Keep project names, repository slugs, usernames, version tags, file paths and API/config identifiers in their original form — do not translate them.
-- Issue/PR references like #12345 and their link text stay as-is.
-- Use natural technical Chinese, the register of a Chinese developer newsletter — not a literal word-for-word rendering.`;
-}
-
-/** Prompt that translates the string values of a JSON object into Chinese. */
-export function buildJsonTranslationPrompt(json: string): string {
-  return `Translate the string values in the following JSON into Simplified Chinese.
-
-${json}
-
----
-
-Rules:
-- Return ONLY valid JSON. No markdown fences, no explanation.
-- Keep every key exactly as-is. Keep the array lengths and nesting identical.
-- Translate only the string values.
-- Keep project names, repository slugs, version tags and numbers in their original form.
-- Each translated string must stay under 30 Chinese characters.`;
 }

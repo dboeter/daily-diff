@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<html lang="zh-CN" data-theme="dark">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>📡 agents-radar</title>
+  <title>📡 Daily Diff</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
-  <link rel="alternate" type="application/rss+xml" title="agents-radar RSS" href="./feed.xml">
+  <link rel="alternate" type="application/rss+xml" title="Daily Diff RSS" href="./feed.xml">
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/dompurify@3/dist/purify.min.js"></script>
   <style>
@@ -149,17 +149,6 @@
     }
     .rpt-btn:hover { background: var(--bg-hover); color: var(--text); }
     .rpt-btn.active { color: var(--accent); border-left-color: var(--accent); background: var(--accent-bg); }
-    .rpt-row { display: flex; align-items: center; padding: 5px 14px 5px 26px; }
-    .rpt-label { flex: 1; font-size: 13px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .lang-btns { display: flex; gap: 3px; flex-shrink: 0; }
-    .lang-btn {
-      background: none; border: 1px solid var(--dim); color: var(--dim);
-      padding: 2px 7px; border-radius: 3px; cursor: pointer;
-      font-family: inherit; font-size: 11px; letter-spacing: 0.06em;
-      transition: border-color 0.1s, color 0.1s;
-    }
-    .lang-btn:hover { border-color: var(--muted); color: var(--muted); }
-    .lang-btn.active { border-color: var(--accent); color: var(--accent); background: var(--accent-bg); }
 
     /* ── Content ── */
     #cwrap { flex: 1; overflow-y: auto; }
@@ -225,7 +214,6 @@
       #hdr { padding: 0 12px; }
       .hdr-right { gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
       .hdr-btn { padding: 4px 8px; }
-      .hdr-join { display: none; }
       .hdr-icon { display: none; }
       #rssLink { display: none; }
       body { overflow: auto; }
@@ -257,7 +245,7 @@
   <div id="hdr">
     <div class="brand">
       <span class="brand-icon">📡</span>
-      <span>agents-<em>radar</em></span>
+      <span>daily-<em>diff</em></span>
     </div>
     <div class="hdr-right">
       <div class="signal"></div>
@@ -266,8 +254,6 @@
           <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z"/>
         </svg>
       </a>
-      <a class="hdr-btn" href="https://t.me/agents_radar" target="_blank" rel="noopener noreferrer" title="Join Telegram"><span class="hdr-icon">✈</span><span class="hdr-join">Join</span>Telegram</a>
-      <a class="hdr-btn" href="https://applink.feishu.cn/client/chat/chatter/add_by_link?link_token=478g7865-04a8-4fab-a7f8-23af85ba927b" target="_blank" rel="noopener noreferrer" title="Join Feishu Group"><span class="hdr-icon">◈</span><span class="hdr-join">Join</span>Feishu<span class="hdr-join">Group</span></a>
       <a id="rssLink" class="hdr-btn" href="./feed.xml" title="RSS Feed"><span class="hdr-icon">⊕</span>RSS</a>
       <button id="themeBtn" class="hdr-btn"><span class="hdr-icon">◐</span><span class="hdr-label">LIGHT</span></button>
     </div>
@@ -276,11 +262,11 @@
   <div id="body">
     <div id="sidebar">
       <div id="mob-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">
-        ☰ &nbsp;选择报告
+        ☰ &nbsp;Select report
       </div>
       <div class="side-label">REPORTS</div>
       <div class="search-wrap">
-        <input id="searchInput" type="search" placeholder="搜索全文，如 Claude">
+        <input id="searchInput" type="search" placeholder="Search all reports, e.g. Claude">
         <div id="searchStatus"></div>
       </div>
       <div id="nav"></div>
@@ -288,7 +274,7 @@
 
     <div id="cwrap">
       <div id="content">
-        <div class="msg"><div class="msg-icon">📡</div><div>正在加载…</div></div>
+        <div class="msg"><div class="msg-icon">📡</div><div>Loading…</div></div>
       </div>
     </div>
   </div>
@@ -313,26 +299,16 @@ function renderMarkdown(raw) {
 }
 
 const LABELS = {
-  'ai-cli':          'AI CLI 工具',
-  'ai-cli-en':       'AI CLI Tools',
-  'ai-agents':       'AI Agents 生态',
-  'ai-agents-en':    'AI Agents Ecosystem',
-  'ai-infra':        'AI 基础设施',
-  'ai-infra-en':     'AI Infrastructure',
-  'ai-web':          'OpenAI & Anthropic 官网动态',
-  'ai-web-en':       'OpenAI & Anthropic Updates',
-  'ai-trending':     'GitHub AI 趋势',
-  'ai-trending-en':  'GitHub AI Trends',
-  'ai-hn':           'HN 社区动态',
-  'ai-hn-en':        'HN Community Digest',
-  'ai-ph':           'Product Hunt AI',
-  'ai-ph-en':        'Product Hunt AI',
-  'ai-arxiv':        'ArXiv AI 研究',
-  'ai-arxiv-en':     'ArXiv AI Research',
-  'ai-hf':           'HF 热门模型',
-  'ai-hf-en':        'HF Trending Models',
-  'ai-community':    '技术社区 AI',
-  'ai-community-en': 'Tech Community AI',
+  'ai-cli':       'AI CLI Tools',
+  'ai-agents':    'AI Agents Ecosystem',
+  'ai-infra':     'AI Infrastructure',
+  'ai-web':       'OpenAI & Anthropic Updates',
+  'ai-trending':  'GitHub AI Trends',
+  'ai-hn':        'HN Community Digest',
+  'ai-ph':        'Product Hunt AI',
+  'ai-arxiv':     'ArXiv AI Research',
+  'ai-hf':        'HF Trending Models',
+  'ai-community': 'Tech Community AI',
 };
 
 // ── Theme ──
@@ -395,9 +371,9 @@ function applyDateSearch(query) {
   if (!needle) {
     setSearchStatus('');
   } else if (!searchReady) {
-    setSearchStatus('正在建立索引…');
+    setSearchStatus('Building index…');
   } else {
-    setSearchStatus(`匹配 ${hits} 天`);
+    setSearchStatus(`${hits} day(s) matched`);
   }
 }
 
@@ -435,7 +411,7 @@ async function buildSearchIndex(dates) {
 
 function initSearch(dates) {
   searchReady = false;
-  setSearchStatus('索引准备中…');
+  setSearchStatus('Preparing index…');
 
   buildSearchIndex(dates).then((index) => {
     searchIndex = index;
@@ -466,15 +442,14 @@ async function loadReport(date, report, push = true) {
 
   // Sync sidebar
   document.querySelectorAll('.rpt-btn').forEach(b => b.classList.toggle('active', b.dataset.key === key));
-  document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('active', b.dataset.key === key));
   document.querySelectorAll('.date-hdr').forEach(h => {
     const grp = h.closest('.date-group');
-    const hasActive = grp.querySelector('.rpt-btn.active') || grp.querySelector('.lang-btn.active');
+    const hasActive = grp.querySelector('.rpt-btn.active');
     h.classList.toggle('lit', !!hasActive);
   });
   document.querySelectorAll('.month-hdr').forEach(h => {
     const mGrp = h.closest('.month-group');
-    const hasActive = mGrp.querySelector('.lang-btn.active') || mGrp.querySelector('.rpt-btn.active');
+    const hasActive = mGrp.querySelector('.rpt-btn.active');
     h.classList.toggle('lit', !!hasActive);
   });
   document.querySelectorAll('.date-group').forEach(g => {
@@ -530,7 +505,7 @@ async function loadReport(date, report, push = true) {
     // the early-return above turns every further click into a silent no-op
     // and the only way out is loading a different report first.
     currentKey = null;
-    setContent(`<div class="msg"><div class="msg-icon">⚠️</div><div>加载失败：${e.message}</div></div>`);
+    setContent(`<div class="msg"><div class="msg-icon">⚠️</div><div>Failed to load: ${e.message}</div></div>`);
   }
 }
 
@@ -554,47 +529,13 @@ function buildDateGroup(date, reports, isFirst) {
   const list = document.createElement('div');
   list.className = 'rpt-list';
 
-  const baseReports = reports.filter(r => !r.endsWith('-en'));
-  baseReports.forEach(r => {
-    const enKey = r + '-en';
-    const hasEn = reports.includes(enKey);
-
-    if (hasEn) {
-      const row = document.createElement('div');
-      row.className = 'rpt-row';
-
-      const label = document.createElement('span');
-      label.className = 'rpt-label';
-      const baseLabel = LABELS[r] || r;
-      label.textContent = baseLabel;
-      label.title = baseLabel;
-
-      const btns = document.createElement('div');
-      btns.className = 'lang-btns';
-
-      const zhBtn = document.createElement('button');
-      zhBtn.className = 'lang-btn';
-      zhBtn.dataset.key = `${date}/${r}`;
-      zhBtn.textContent = 'ZH';
-      zhBtn.onclick = () => loadReport(date, r);
-
-      const enBtn = document.createElement('button');
-      enBtn.className = 'lang-btn';
-      enBtn.dataset.key = `${date}/${enKey}`;
-      enBtn.textContent = 'EN';
-      enBtn.onclick = () => loadReport(date, enKey);
-
-      btns.append(zhBtn, enBtn);
-      row.append(label, btns);
-      list.appendChild(row);
-    } else {
-      const btn = document.createElement('button');
-      btn.className = 'rpt-btn';
-      btn.dataset.key = `${date}/${r}`;
-      btn.textContent = LABELS[r] || r;
-      btn.onclick = () => loadReport(date, r);
-      list.appendChild(btn);
-    }
+  reports.forEach(r => {
+    const btn = document.createElement('button');
+    btn.className = 'rpt-btn';
+    btn.dataset.key = `${date}/${r}`;
+    btn.textContent = LABELS[r] || r;
+    btn.onclick = () => loadReport(date, r);
+    list.appendChild(btn);
   });
 
   grp.append(hdr, list);
@@ -675,7 +616,7 @@ window.addEventListener('popstate', () => {
   } catch (e) {
     document.getElementById('nav').innerHTML =
       '<div class="msg" style="height:80px;font-size:10px">⚠️ ' + e.message + '</div>';
-    setContent('<div class="msg"><div class="msg-icon">📡</div><div>无法加载 manifest.json</div></div>');
+    setContent('<div class="msg"><div class="msg-icon">📡</div><div>Unable to load manifest.json</div></div>');
   }
 })();
 </script>

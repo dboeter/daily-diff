@@ -1,14 +1,9 @@
 /**
  * Report saver functions — LLM call + file save + optional GitHub issue.
  * Extracted from index.ts for separation of concerns.
- *
- * Each saver emits both languages. The body is generated once in English and
- * translated to Chinese (see `bilingualBody`), so a saver owns the whole
- * bilingual output for its report instead of being called once per language.
  */
 
 import {
-  type Lang,
   WEB_REPORT,
   TRENDING_REPORT,
   HN_REPORT,
@@ -26,14 +21,7 @@ import {
   buildHfPrompt,
   buildCommunityPrompt,
 } from "./prompts-data.ts";
-import {
-  callLlm,
-  translateToZh,
-  saveFile,
-  autoGenFooter,
-  LLM_TOKENS_WEB,
-  LLM_TOKENS_LISTING,
-} from "./report.ts";
+import { callLlm, saveFile, autoGenFooter, LLM_TOKENS_WEB, LLM_TOKENS_LISTING } from "./report.ts";
 import { createGitHubIssue } from "./github.ts";
 import { saveWebState, type WebFetchResult, type WebState } from "./web.ts";
 import type { HnData } from "./hn.ts";
@@ -43,23 +31,6 @@ import type { ArxivData } from "./arxiv.ts";
 import type { HfData } from "./hf.ts";
 import type { DevtoData } from "./devto.ts";
 import type { LobstersData } from "./lobsters.ts";
-
-/** Output languages, in the order reports are written. */
-export const LANGS = ["zh", "en"] as const;
-
-/** A report body in both languages. */
-export type BilingualBody = Record<Lang, string>;
-
-/**
- * Generate a report body once in English, then translate it to Chinese.
- * Throws if the English generation fails — there is nothing to save then.
- * A failed translation degrades to English rather than throwing.
- */
-async function bilingualBody(enPrompt: string, maxTokens: number): Promise<BilingualBody> {
-  const en = await callLlm(enPrompt, maxTokens);
-  const zh = await translateToZh(en, maxTokens);
-  return { en, zh };
-}
 
 // ---------------------------------------------------------------------------
 // Web report
@@ -75,9 +46,9 @@ export async function saveWebReport(
   const hasNewContent = webResults.some((r) => r.newItems.length > 0);
 
   if (hasNewContent) {
-    console.log("  [web] Calling LLM for web content report (EN) + translation (ZH)...");
+    console.log("  [web] Calling LLM for web content report...");
     try {
-      const summary = await bilingualBody(buildWebReportPrompt(webResults, dateStr, "en"), LLM_TOKENS_WEB);
+      const summary = await callLlm(buildWebReportPrompt(webResults, dateStr), LLM_TOKENS_WEB);
       const isFirstRun = webResults.some((r) => r.isFirstRun);
       const totalNew = webResults.reduce((sum, r) => sum + r.newItems.length, 0);
 
@@ -86,31 +57,25 @@ export async function saveWebReport(
       const openaiNew = webResults.find((r) => r.site === "openai")?.newItems.length ?? 0;
       const openaiTotal = webResults.find((r) => r.site === "openai")?.totalDiscovered ?? 0;
 
-      for (const lang of LANGS) {
-        const fileName = lang === "en" ? "ai-web-en.md" : "ai-web.md";
-        const mode = isFirstRun ? WEB_REPORT.firstCrawl[lang] : WEB_REPORT.todayUpdate[lang];
+      const fileName = "ai-web.md";
+      const mode = isFirstRun ? WEB_REPORT.firstCrawl : WEB_REPORT.todayUpdate;
 
-        const webTitle = `# ${WEB_REPORT.title[lang]} ${dateStr}\n\n`;
-        const webMeta = `> ${mode} | ${WEB_REPORT.newContent(totalNew, lang)} | ${WEB_REPORT.generated(utcStr, lang)}\n\n`;
-        const webSources =
-          lang === "en"
-            ? `${WEB_REPORT.sourcesHeader[lang]}\n` +
-              `- Anthropic: [anthropic.com](https://www.anthropic.com) — ${anthropicNew} new articles (sitemap total: ${anthropicTotal})\n` +
-              `- OpenAI: [openai.com](https://openai.com) — ${openaiNew} new articles (sitemap total: ${openaiTotal})\n\n`
-            : `${WEB_REPORT.sourcesHeader[lang]}\n` +
-              `- Anthropic: [anthropic.com](https://www.anthropic.com) — 新增 ${anthropicNew} 篇（sitemap 共 ${anthropicTotal} 条）\n` +
-              `- OpenAI: [openai.com](https://openai.com) — 新增 ${openaiNew} 篇（sitemap 共 ${openaiTotal} 条）\n\n`;
+      const webTitle = `# ${WEB_REPORT.title} ${dateStr}\n\n`;
+      const webMeta = `> ${mode} | ${WEB_REPORT.newContent(totalNew)} | ${WEB_REPORT.generated(utcStr)}\n\n`;
+      const webSources =
+        `${WEB_REPORT.sourcesHeader}\n` +
+        `- Anthropic: [anthropic.com](https://www.anthropic.com) — ${anthropicNew} new articles (sitemap total: ${anthropicTotal})\n` +
+        `- OpenAI: [openai.com](https://openai.com) — ${openaiNew} new articles (sitemap total: ${openaiTotal})\n\n`;
 
-        const webContent = webTitle + webMeta + webSources + `---\n\n` + summary[lang] + autoGenFooter(lang);
+      const webContent = webTitle + webMeta + webSources + `---\n\n` + summary + autoGenFooter();
 
-        console.log(`  Saved ${saveFile(webContent, dateStr, fileName)}`);
+      console.log(`  Saved ${saveFile(webContent, dateStr, fileName)}`);
 
-        if (digestRepo) {
-          const issueTitle = WEB_REPORT.issueTitle(dateStr, isFirstRun, lang);
-          const webLabel = ISSUE_LABELS.web[lang];
-          const webUrl = await createGitHubIssue(issueTitle, webContent, webLabel);
-          console.log(`  Created web issue (${lang}): ${webUrl}`);
-        }
+      if (digestRepo) {
+        const issueTitle = WEB_REPORT.issueTitle(dateStr, isFirstRun);
+        const webLabel = ISSUE_LABELS.web;
+        const webUrl = await createGitHubIssue(issueTitle, webContent, webLabel);
+        console.log(`  Created web issue: ${webUrl}`);
       }
     } catch (err) {
       console.error(`  [web] Report generation failed: ${err}`);
@@ -129,7 +94,7 @@ export async function saveWebReport(
 
 export async function saveTrendingReport(
   trendingData: TrendingData,
-  trendingSummary: BilingualBody,
+  trendingSummary: string,
   utcStr: string,
   dateStr: string,
   digestRepo: string,
@@ -140,22 +105,20 @@ export async function saveTrendingReport(
     return;
   }
 
-  for (const lang of LANGS) {
-    const fileName = lang === "en" ? "ai-trending-en.md" : "ai-trending.md";
-    const header =
-      `# ${TRENDING_REPORT.title[lang]} ${dateStr}\n\n` +
-      `> ${TRENDING_REPORT.sources[lang]} | ${lang === "en" ? "Generated" : "生成时间"}: ${utcStr} UTC\n\n---\n\n`;
+  const fileName = "ai-trending.md";
+  const header =
+    `# ${TRENDING_REPORT.title} ${dateStr}\n\n` +
+    `> ${TRENDING_REPORT.sources} | Generated: ${utcStr} UTC\n\n---\n\n`;
 
-    const trendingContent = header + trendingSummary[lang] + autoGenFooter(lang);
+  const trendingContent = header + trendingSummary + autoGenFooter();
 
-    console.log(`  Saved ${saveFile(trendingContent, dateStr, fileName)}`);
+  console.log(`  Saved ${saveFile(trendingContent, dateStr, fileName)}`);
 
-    if (digestRepo) {
-      const trendingTitle = TRENDING_REPORT.issueTitle(dateStr, lang);
-      const trendingLabel = ISSUE_LABELS.trending[lang];
-      const trendingUrl = await createGitHubIssue(trendingTitle, trendingContent, trendingLabel);
-      console.log(`  Created trending issue (${lang}): ${trendingUrl}`);
-    }
+  if (digestRepo) {
+    const trendingTitle = TRENDING_REPORT.issueTitle(dateStr);
+    const trendingLabel = ISSUE_LABELS.trending;
+    const trendingUrl = await createGitHubIssue(trendingTitle, trendingContent, trendingLabel);
+    console.log(`  Created trending issue: ${trendingUrl}`);
   }
 }
 
@@ -174,33 +137,26 @@ export async function saveHnReport(
     return;
   }
 
-  console.log("  [hn] Calling LLM for HN report (EN) + translation (ZH)...");
+  console.log("  [hn] Calling LLM for HN report...");
   try {
-    const summary = await bilingualBody(buildHnPrompt(hnData, dateStr, "en"), LLM_TOKENS_LISTING);
+    const summary = await callLlm(buildHnPrompt(hnData, dateStr), LLM_TOKENS_LISTING);
 
-    for (const lang of LANGS) {
-      const fileName = lang === "en" ? "ai-hn-en.md" : "ai-hn.md";
-      const header =
-        lang === "en"
-          ? `# ${HN_REPORT.title[lang]} ${dateStr}\n\n` +
-            `> Source: [Hacker News](https://news.ycombinator.com/) | ` +
-            `${hnData.stories.length} stories | Generated: ${utcStr} UTC\n\n` +
-            `---\n\n`
-          : `# ${HN_REPORT.title[lang]} ${dateStr}\n\n` +
-            `> 数据来源: [Hacker News](https://news.ycombinator.com/) | ` +
-            `共 ${hnData.stories.length} 条 | 生成时间: ${utcStr} UTC\n\n` +
-            `---\n\n`;
+    const fileName = "ai-hn.md";
+    const header =
+      `# ${HN_REPORT.title} ${dateStr}\n\n` +
+      `> Source: [Hacker News](https://news.ycombinator.com/) | ` +
+      `${hnData.stories.length} stories | Generated: ${utcStr} UTC\n\n` +
+      `---\n\n`;
 
-      const hnContent = header + summary[lang] + autoGenFooter(lang);
+    const hnContent = header + summary + autoGenFooter();
 
-      console.log(`  Saved ${saveFile(hnContent, dateStr, fileName)}`);
+    console.log(`  Saved ${saveFile(hnContent, dateStr, fileName)}`);
 
-      if (digestRepo) {
-        const hnTitle = HN_REPORT.issueTitle(dateStr, lang);
-        const hnLabel = ISSUE_LABELS.hn[lang];
-        const hnUrl = await createGitHubIssue(hnTitle, hnContent, hnLabel);
-        console.log(`  Created HN issue (${lang}): ${hnUrl}`);
-      }
+    if (digestRepo) {
+      const hnTitle = HN_REPORT.issueTitle(dateStr);
+      const hnLabel = ISSUE_LABELS.hn;
+      const hnUrl = await createGitHubIssue(hnTitle, hnContent, hnLabel);
+      console.log(`  Created HN issue: ${hnUrl}`);
     }
   } catch (err) {
     console.error(`  [hn] Report generation failed: ${err}`);
@@ -222,33 +178,26 @@ export async function savePhReport(
     return;
   }
 
-  console.log("  [ph] Calling LLM for Product Hunt report (EN) + translation (ZH)...");
+  console.log("  [ph] Calling LLM for Product Hunt report...");
   try {
-    const summary = await bilingualBody(buildPhPrompt(phData, dateStr, "en"), LLM_TOKENS_LISTING);
+    const summary = await callLlm(buildPhPrompt(phData, dateStr), LLM_TOKENS_LISTING);
 
-    for (const lang of LANGS) {
-      const fileName = lang === "en" ? "ai-ph-en.md" : "ai-ph.md";
-      const header =
-        lang === "en"
-          ? `# ${PH_REPORT.title[lang]} ${dateStr}\n\n` +
-            `> Source: [Product Hunt](https://www.producthunt.com/) | ` +
-            `${phData.products.length} products | Generated: ${utcStr} UTC\n\n` +
-            `---\n\n`
-          : `# ${PH_REPORT.title[lang]} ${dateStr}\n\n` +
-            `> 数据来源: [Product Hunt](https://www.producthunt.com/) | ` +
-            `共 ${phData.products.length} 个产品 | 生成时间: ${utcStr} UTC\n\n` +
-            `---\n\n`;
+    const fileName = "ai-ph.md";
+    const header =
+      `# ${PH_REPORT.title} ${dateStr}\n\n` +
+      `> Source: [Product Hunt](https://www.producthunt.com/) | ` +
+      `${phData.products.length} products | Generated: ${utcStr} UTC\n\n` +
+      `---\n\n`;
 
-      const phContent = header + summary[lang] + autoGenFooter(lang);
+    const phContent = header + summary + autoGenFooter();
 
-      console.log(`  Saved ${saveFile(phContent, dateStr, fileName)}`);
+    console.log(`  Saved ${saveFile(phContent, dateStr, fileName)}`);
 
-      if (digestRepo) {
-        const phTitle = PH_REPORT.issueTitle(dateStr, lang);
-        const phLabel = ISSUE_LABELS.ph[lang];
-        const phUrl = await createGitHubIssue(phTitle, phContent, phLabel);
-        console.log(`  Created PH issue (${lang}): ${phUrl}`);
-      }
+    if (digestRepo) {
+      const phTitle = PH_REPORT.issueTitle(dateStr);
+      const phLabel = ISSUE_LABELS.ph;
+      const phUrl = await createGitHubIssue(phTitle, phContent, phLabel);
+      console.log(`  Created PH issue: ${phUrl}`);
     }
   } catch (err) {
     console.error(`  [ph] Report generation failed: ${err}`);
@@ -270,33 +219,26 @@ export async function saveArxivReport(
     return;
   }
 
-  console.log("  [arxiv] Calling LLM for ArXiv report (EN) + translation (ZH)...");
+  console.log("  [arxiv] Calling LLM for ArXiv report...");
   try {
-    const summary = await bilingualBody(buildArxivPrompt(arxivData, dateStr, "en"), LLM_TOKENS_LISTING);
+    const summary = await callLlm(buildArxivPrompt(arxivData, dateStr), LLM_TOKENS_LISTING);
 
-    for (const lang of LANGS) {
-      const fileName = lang === "en" ? "ai-arxiv-en.md" : "ai-arxiv.md";
-      const header =
-        lang === "en"
-          ? `# ${ARXIV_REPORT.title[lang]} ${dateStr}\n\n` +
-            `> Source: [ArXiv](https://arxiv.org/) (cs.AI, cs.CL, cs.LG) | ` +
-            `${arxivData.papers.length} papers | Generated: ${utcStr} UTC\n\n` +
-            `---\n\n`
-          : `# ${ARXIV_REPORT.title[lang]} ${dateStr}\n\n` +
-            `> 数据来源: [ArXiv](https://arxiv.org/) (cs.AI, cs.CL, cs.LG) | ` +
-            `共 ${arxivData.papers.length} 篇论文 | 生成时间: ${utcStr} UTC\n\n` +
-            `---\n\n`;
+    const fileName = "ai-arxiv.md";
+    const header =
+      `# ${ARXIV_REPORT.title} ${dateStr}\n\n` +
+      `> Source: [ArXiv](https://arxiv.org/) (cs.AI, cs.CL, cs.LG) | ` +
+      `${arxivData.papers.length} papers | Generated: ${utcStr} UTC\n\n` +
+      `---\n\n`;
 
-      const content = header + summary[lang] + autoGenFooter(lang);
+    const content = header + summary + autoGenFooter();
 
-      console.log(`  Saved ${saveFile(content, dateStr, fileName)}`);
+    console.log(`  Saved ${saveFile(content, dateStr, fileName)}`);
 
-      if (digestRepo) {
-        const title = ARXIV_REPORT.issueTitle(dateStr, lang);
-        const label = ISSUE_LABELS.arxiv[lang];
-        const url = await createGitHubIssue(title, content, label);
-        console.log(`  Created ArXiv issue (${lang}): ${url}`);
-      }
+    if (digestRepo) {
+      const title = ARXIV_REPORT.issueTitle(dateStr);
+      const label = ISSUE_LABELS.arxiv;
+      const url = await createGitHubIssue(title, content, label);
+      console.log(`  Created ArXiv issue: ${url}`);
     }
   } catch (err) {
     console.error(`  [arxiv] Report generation failed: ${err}`);
@@ -318,33 +260,26 @@ export async function saveHfReport(
     return;
   }
 
-  console.log("  [hf] Calling LLM for Hugging Face report (EN) + translation (ZH)...");
+  console.log("  [hf] Calling LLM for Hugging Face report...");
   try {
-    const summary = await bilingualBody(buildHfPrompt(hfData, dateStr, "en"), LLM_TOKENS_LISTING);
+    const summary = await callLlm(buildHfPrompt(hfData, dateStr), LLM_TOKENS_LISTING);
 
-    for (const lang of LANGS) {
-      const fileName = lang === "en" ? "ai-hf-en.md" : "ai-hf.md";
-      const header =
-        lang === "en"
-          ? `# ${HF_REPORT.title[lang]} ${dateStr}\n\n` +
-            `> Source: [Hugging Face Hub](https://huggingface.co/) | ` +
-            `${hfData.models.length} models | Generated: ${utcStr} UTC\n\n` +
-            `---\n\n`
-          : `# ${HF_REPORT.title[lang]} ${dateStr}\n\n` +
-            `> 数据来源: [Hugging Face Hub](https://huggingface.co/) | ` +
-            `共 ${hfData.models.length} 个模型 | 生成时间: ${utcStr} UTC\n\n` +
-            `---\n\n`;
+    const fileName = "ai-hf.md";
+    const header =
+      `# ${HF_REPORT.title} ${dateStr}\n\n` +
+      `> Source: [Hugging Face Hub](https://huggingface.co/) | ` +
+      `${hfData.models.length} models | Generated: ${utcStr} UTC\n\n` +
+      `---\n\n`;
 
-      const content = header + summary[lang] + autoGenFooter(lang);
+    const content = header + summary + autoGenFooter();
 
-      console.log(`  Saved ${saveFile(content, dateStr, fileName)}`);
+    console.log(`  Saved ${saveFile(content, dateStr, fileName)}`);
 
-      if (digestRepo) {
-        const title = HF_REPORT.issueTitle(dateStr, lang);
-        const label = ISSUE_LABELS.hf[lang];
-        const url = await createGitHubIssue(title, content, label);
-        console.log(`  Created HF issue (${lang}): ${url}`);
-      }
+    if (digestRepo) {
+      const title = HF_REPORT.issueTitle(dateStr);
+      const label = ISSUE_LABELS.hf;
+      const url = await createGitHubIssue(title, content, label);
+      console.log(`  Created HF issue: ${url}`);
     }
   } catch (err) {
     console.error(`  [hf] Report generation failed: ${err}`);
@@ -368,36 +303,27 @@ export async function saveCommunityReport(
     return;
   }
 
-  console.log("  [community] Calling LLM for community report (EN) + translation (ZH)...");
+  console.log("  [community] Calling LLM for community report...");
   try {
-    const summary = await bilingualBody(
-      buildCommunityPrompt(devtoData, lobstersData, dateStr, "en"),
-      LLM_TOKENS_LISTING,
-    );
+    const summary = await callLlm(buildCommunityPrompt(devtoData, lobstersData, dateStr), LLM_TOKENS_LISTING);
     const devtoCount = devtoData.articles.length;
     const lobstersCount = lobstersData.stories.length;
 
-    for (const lang of LANGS) {
-      const fileName = lang === "en" ? "ai-community-en.md" : "ai-community.md";
-      const header =
-        lang === "en"
-          ? `# ${COMMUNITY_REPORT.title[lang]} ${dateStr}\n\n` +
-            `> Sources: [Dev.to](https://dev.to/) (${devtoCount} articles) + [Lobste.rs](https://lobste.rs/) (${lobstersCount} stories) | Generated: ${utcStr} UTC\n\n` +
-            `---\n\n`
-          : `# ${COMMUNITY_REPORT.title[lang]} ${dateStr}\n\n` +
-            `> 数据来源: [Dev.to](https://dev.to/) (${devtoCount} 篇) + [Lobste.rs](https://lobste.rs/) (${lobstersCount} 条) | 生成时间: ${utcStr} UTC\n\n` +
-            `---\n\n`;
+    const fileName = "ai-community.md";
+    const header =
+      `# ${COMMUNITY_REPORT.title} ${dateStr}\n\n` +
+      `> Sources: [Dev.to](https://dev.to/) (${devtoCount} articles) + [Lobste.rs](https://lobste.rs/) (${lobstersCount} stories) | Generated: ${utcStr} UTC\n\n` +
+      `---\n\n`;
 
-      const content = header + summary[lang] + autoGenFooter(lang);
+    const content = header + summary + autoGenFooter();
 
-      console.log(`  Saved ${saveFile(content, dateStr, fileName)}`);
+    console.log(`  Saved ${saveFile(content, dateStr, fileName)}`);
 
-      if (digestRepo) {
-        const title = COMMUNITY_REPORT.issueTitle(dateStr, lang);
-        const label = ISSUE_LABELS.community[lang];
-        const url = await createGitHubIssue(title, content, label);
-        console.log(`  Created community issue (${lang}): ${url}`);
-      }
+    if (digestRepo) {
+      const title = COMMUNITY_REPORT.issueTitle(dateStr);
+      const label = ISSUE_LABELS.community;
+      const url = await createGitHubIssue(title, content, label);
+      console.log(`  Created community issue: ${url}`);
     }
   } catch (err) {
     console.error(`  [community] Report generation failed: ${err}`);

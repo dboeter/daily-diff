@@ -23,7 +23,6 @@ import {
   isConnectionError,
   isRetryable,
   callLlm,
-  translateToZh,
   saveFile,
   autoGenFooter,
   parseLlmJson,
@@ -135,19 +134,12 @@ describe("autoGenFooter", () => {
     expect(autoGenFooter()).toBe("");
   });
 
-  it("returns Chinese footer when DIGEST_REPO is set", () => {
+  it("returns footer when DIGEST_REPO is set", () => {
     process.env["DIGEST_REPO"] = "user/repo";
-    const result = autoGenFooter("zh");
-    expect(result).toContain("agents-radar");
-    expect(result).toContain("github.com/user/repo");
-    expect(result).toContain("自动生成");
-  });
-
-  it("returns English footer when lang is en", () => {
-    process.env["DIGEST_REPO"] = "user/repo";
-    const result = autoGenFooter("en");
+    const result = autoGenFooter();
     expect(result).toContain("auto-generated");
-    expect(result).toContain("agents-radar");
+    expect(result).toContain("Daily Diff");
+    expect(result).toContain("github.com/user/repo");
   });
 });
 
@@ -183,7 +175,7 @@ describe("parseLlmJson", () => {
   });
 
   it("tolerates a trailing comma before a closing brace", () => {
-    // The exact failure that wiped zh highlights on 2026-07-07:
+    // The exact failure that wiped highlights on 2026-07-07:
     // "Expected double-quoted property name in JSON" from a trailing comma.
     const raw = '{"a": [1, 2,], "b": 3,}';
     expect(() => JSON.parse(raw)).toThrow();
@@ -453,56 +445,6 @@ describe("llm health accounting", () => {
 
     expect(llmStats).toEqual({ attempted: 2, failed: 1 });
     expect(llmFailureRatio()).toBe(0.5);
-  });
-
-  it("counts failures swallowed by translateToZh", async () => {
-    // translateToZh falls back to English rather than rethrowing, so without
-    // accounting inside callLlm a translation outage would leave no trace.
-    vi.spyOn(console, "error").mockImplementation(() => {});
-    mockCall.mockRejectedValueOnce(new Error("nope"));
-
-    expect(await translateToZh("English body")).toBe("English body");
-    expect(llmStats).toEqual({ attempted: 1, failed: 1 });
-    expect(llmFailureRatio()).toBe(1);
-  });
-});
-
-// ---------------------------------------------------------------------------
-// translateToZh
-// ---------------------------------------------------------------------------
-
-describe("translateToZh", () => {
-  beforeEach(() => {
-    mockCall.mockReset();
-  });
-
-  it("sends the English body through the translation prompt", async () => {
-    mockCall.mockResolvedValue("中文报告");
-    const out = await translateToZh("# English report");
-    expect(out).toBe("中文报告");
-    expect(mockCall).toHaveBeenCalledTimes(1);
-    const prompt = mockCall.mock.calls[0]![0];
-    expect(prompt).toContain("Simplified Chinese");
-    expect(prompt).toContain("# English report");
-  });
-
-  it("passes the caller's token budget through", async () => {
-    mockCall.mockResolvedValue("中文");
-    await translateToZh("body", 6144);
-    expect(mockCall.mock.calls[0]![1]).toBe(6144);
-  });
-
-  it("skips the LLM entirely for empty input", async () => {
-    const out = await translateToZh("   ");
-    expect(out).toBe("   ");
-    expect(mockCall).not.toHaveBeenCalled();
-  });
-
-  it("falls back to the English text when the call fails", async () => {
-    vi.spyOn(console, "error").mockImplementation(() => {});
-    mockCall.mockRejectedValue(new Error("boom"));
-    const out = await translateToZh("English body");
-    expect(out).toBe("English body");
   });
 });
 

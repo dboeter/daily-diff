@@ -10,31 +10,19 @@ const SITE_URL = "https://dboeter.github.io/daily-diff";
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 const REPORT_FILES = [
   "ai-cli",
-  "ai-cli-en",
   "ai-agents",
-  "ai-agents-en",
   "ai-infra",
-  "ai-infra-en",
   "ai-web",
-  "ai-web-en",
   "ai-trending",
-  "ai-trending-en",
   "ai-hn",
-  "ai-hn-en",
   "ai-ph",
-  "ai-ph-en",
   "ai-arxiv",
-  "ai-arxiv-en",
   "ai-hf",
-  "ai-hf-en",
   "ai-community",
-  "ai-community-en",
   // Rollups are no longer generated — listed only so archived reports stay
   // reachable from the sidebar and RSS feed.
   "ai-weekly",
-  "ai-weekly-en",
   "ai-monthly",
-  "ai-monthly-en",
 ] as const;
 const MAX_FEED_ITEMS = 30;
 
@@ -159,10 +147,10 @@ async function main(): Promise<void> {
     `<?xml version="1.0" encoding="UTF-8"?>\n` +
     `<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">\n` +
     `  <channel>\n` +
-    `    <title>agents-radar</title>\n` +
+    `    <title>Daily Diff</title>\n` +
     `    <link>${SITE_URL}</link>\n` +
-    `    <description>AI 开源生态每日简报 · Daily AI ecosystem digest</description>\n` +
-    `    <language>zh-CN</language>\n` +
+    `    <description>Daily AI ecosystem digest</description>\n` +
+    `    <language>en</language>\n` +
     `    <atom:link href="${SITE_URL}/feed.xml" rel="self" type="application/rss+xml"/>\n` +
     `    <lastBuildDate>${buildDate}</lastBuildDate>\n` +
     itemsXml +

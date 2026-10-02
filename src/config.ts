@@ -1,5 +1,5 @@
 /**
- * Loads and validates agents-radar configuration from config.yml.
+ * Loads and validates Daily Diff configuration from config.yml.
  * Falls back to built-in defaults if the file is missing or a section is absent.
  */
 
