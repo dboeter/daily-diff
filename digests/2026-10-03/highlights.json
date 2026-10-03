@@ -1,66 +1,66 @@
 {
   "ai-cli": [
     "Claude Code v2.1.288 released",
-    "Codex shipped four v0.162.0 Rust alphas",
-    "Gemini CLI v0.64.0 nightly released",
-    "Copilot CLI shipped three patches",
-    "AI CLIs add sandboxing and MCP support",
-    "Session and context issues remain widespread"
+    "Codex ships three Rust alphas",
+    "Gemini CLI and Qwen Code release nightlies",
+    "Copilot CLI ships three prereleases",
+    "Agent tools prioritize durable multi-agent execution",
+    "Reliability and safety controls dominate CLI development"
   ],
   "ai-agents": [
-    "OpenClaw v2026.9.8 released",
-    "OpenClaw added gateway-only extended-stable v2026.8.35",
-    "OpenClaw saw 500 issues and 500 PRs",
-    "OpenClaw merged or closed 216 PRs",
-    "SQLite, memory, and cleanup risks remain",
-    "Hermes, IronClaw, QwenPaw, and ZeroClaw tracked"
+    "OpenClaw v2026.9.8 includes 58 commits",
+    "OpenClaw has 337 open issues and 276 PRs",
+    "SQLite growth and locking remain key risks",
+    "Security fix limits reusable worker data retention",
+    "CLI conversation retention gains a fix",
+    "MCP pagination and fallback visibility improve"
   ],
   "ai-infra": [
-    "llama.cpp shipped 20 builds, b11351–b11370",
-    "vLLM advanced hybrid KV-cache optimization",
-    "SGLang targeted sparse attention and decoding",
-    "LiteLLM improved routing and stream validation",
-    "Unsloth expanded preference and RL fine-tuning",
-    "Pinned, workload-tested deployments are increasingly vital"
+    "llama.cpp ships builds b11366–b11378",
+    "llama.cpp adds Clef model support",
+    "SGLang CI reports one broken and six flaky jobs",
+    "vLLM targets DeepSeek-V4-P1 support",
+    "Ollama awaits its llama.cpp upgrade",
+    "Unsloth advances FastFlowLM NPU and audio models"
   ],
   "ai-trending": [
-    "NVIDIA OpenShell gained 594 stars today",
-    "context-mode gained 282 stars today",
-    "OpenShell offers private agent runtimes",
-    "Agent harnesses and skills dominate trends",
-    "Codegraph gained 98 stars today",
-    "Context tools target lower inference costs"
+    "ECC gained 954 stars today",
+    "Agent harnesses dominate today's trending projects",
+    "Agent-Reach drives interest in external access",
+    "browser-use highlights agentic browsing demand",
+    "LangChain, RAGFlow and LlamaIndex stay active",
+    "Context optimization projects draw strong interest"
   ],
   "ai-web": [
-    "Anthropic launched a $100M Frontier Academy",
-    "Anthropic aims for 10,000 Frontier engineers",
-    "Barclans plans Claude Code for 50% of developers",
-    "Barclans targets majority adoption in 2027",
-    "Anthropic opened Mythos for life sciences",
-    "Robot task exposure remains cost constrained"
+    "Anthropic launches $100M Frontier Academy",
+    "Frontier Academy targets 10,000 engineers by 2027",
+    "Barclays plans 50% Claude Code adoption in 2026",
+    "Claude expands into life sciences applications",
+    "Anthropic studies robots' physical-task exposure",
+    "Anthropic warns about autonomous cyber risks"
   ],
   "ai-hn": [
-    "Gemini 4 Argon scored 1,687 HN points",
-    "Gemini 4 Argon drew 1,174 comments",
-    "ChatGPT Sites scored 261 points",
-    "ds4 local-LLM project scored 226 points",
-    "FLUX 3 Image scored 334 points",
-    "AI beat the strongest known Stratego player"
+    "Gemini 4 Argon scores 1,688 on Hacker News",
+    "Gemini 4 Argon sparks 1,174 comments",
+    "Kolibri is an open-weight German-English LLM",
+    "DwarfStar gains attention for local LLM deployment",
+    "FLUX 3 Image drives open-model discussion",
+    "Agent routing and inference optimization trend upward"
   ],
   "ai-arxiv": [
-    "Researchers diagnosed and repaired math reasoning",
-    "Looped Transformers improved nearly free",
-    "New work targets low-memory fine-tuning",
-    "Recurrent decoding improves Transformer efficiency",
-    "Agents focus on verifiable tool use",
-    "Robotics work targets humanoid tool use"
+    "Diffusion LMs add hierarchical continuous decoding",
+    "TACO targets memory-efficient LLM fine-tuning",
+    "Research targets context compaction for long horizons",
+    "Agent work shifts toward verifiable tool outcomes",
+    "Studies advance controllable high-resolution 3D generation",
+    "Interpretability research questions benchmark-specific effects"
   ],
   "ai-community": [
-    "Poisoned-test failures hit 73% of aware models",
-    "AI coding agents fuel project proliferation",
-    "Hooks beat instructions for execution limits",
-    "A 1.7B coding agent targets local use",
-    "Gemma 4 inference ran on one TPU",
-    "Constrained permissions remain essential"
+    "866 commits in five weeks outpaced understanding",
+    "AI coding makes project switching too easy",
+    "Agent-generated tests can conceal serious errors",
+    "Local-model memory planning gains attention",
+    "Developers rethink token-cost and inference planning",
+    "Autonomous pipelines shape new agent workflows"
   ]
 }
