@@ -27,8 +27,6 @@ Browse all historical digests in a clean, dark-themed interface — no login req
 
 When `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID` are set, a message is pushed after each run. It links to all reports for that day plus the Web UI and RSS feed.
 
-<img src="assets/telegram.jpg" width="300" alt="Telegram notification">
-
 ## RSS Feed
 
 **[https://dboeter.github.io/daily-diff/feed.xml](https://dboeter.github.io/daily-diff/feed.xml)**
