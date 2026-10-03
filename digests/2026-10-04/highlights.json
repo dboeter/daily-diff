@@ -1,0 +1,20 @@
+{
+  "ai-cli": [
+    "Claude Code cloud sessions now bundle `gh api`, fixing GitHub workflows that lacked the CLI."
+  ],
+  "ai-infra": [
+    "llama.cpp adds Ling 3.0 JSON-schema support and OpenVINO 2026.4.1, broadening structured local inference."
+  ],
+  "ai-trending": [
+    "Agent-Reach gives agents one CLI for searching and reading X, Reddit, YouTube, GitHub, Bilibili and Xiaohongshu.",
+    "Caveman compresses coding-agent interactions, claiming 65% lower token use through terser output."
+  ],
+  "ai-hn": [
+    "Pi pod runs Pi coding agents in sandboxes on your own server, keeping agent execution self-hosted and isolated.",
+    "Offrun centralizes multiple coding agents and development environments in one workspace for easier orchestration."
+  ],
+  "ai-community": [
+    "AI reviewer agents can approve a permanently ineffective test, so independent adversarial review remains necessary.",
+    "Agent timeouts can hide completed side effects, requiring idempotency, request IDs and status reconciliation."
+  ]
+}
