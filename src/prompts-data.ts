@@ -185,31 +185,59 @@ export interface ReportHighlights {
   [reportId: string]: string[];
 }
 
+// Telegram rejects messages over 4096 chars (after HTML entity parsing). Up to
+// 10 reports × HIGHLIGHTS_MAX_PER_REPORT × HIGHLIGHT_MAX_CHARS ≈ 2.8k, plus
+// section labels, keeps the worst case under that limit.
+const HIGHLIGHTS_MAX_PER_REPORT = 2;
+const HIGHLIGHT_MAX_CHARS = 140;
+// Repo reports open with a link list and an activity-count table; a 2000-char
+// window ended there, so the model only had counts to work with ("3
+// prereleases", "337 open issues"). 8000 reaches through the comparison prose.
+const HIGHLIGHTS_EXCERPT_CHARS = 8000;
+
 export function buildHighlightsPrompt(
   reportContents: Record<string, string>,
-  itemsPerReport: number = 6,
+  maxPerReport: number = HIGHLIGHTS_MAX_PER_REPORT,
 ): string {
   const sections = Object.entries(reportContents)
-    .map(([id, content]) => `## [${id}]\n\n${content.slice(0, 2000)}`)
+    .map(([id, content]) => `## [${id}]\n\n${content.slice(0, HIGHLIGHTS_EXCERPT_CHARS)}`)
     .join("\n\n---\n\n");
 
-  return `You are a concise news editor. The following are today's AI ecosystem report excerpts, each labeled with a report ID.
+  // The count is a maximum, not a quota, and the exclusion list is explicit: a
+  // fixed 6-per-report quota padded every section with routine noise
+  // ("2 nightly builds", "200 commits", star counts).
+  return `You are a selective news editor. The following are today's AI ecosystem report excerpts, each labeled with a report ID. The reader is a developer who wants to know what actually changed in the AI tooling world today and why it matters to them.
 
 ${sections}
 
 ---
 
-For each report, extract ${itemsPerReport} of the most noteworthy highlights — the kind that would make a reader want to click through. Each highlight should be a single short sentence (under 60 characters).
+For each report, pick AT MOST ${maxPerReport} highlights that a developer would genuinely care about. Fewer is better than filler: return 1 or 0 when only 1 or 0 items qualify.
+
+Each highlight is one sentence of at most ${HIGHLIGHT_MAX_CHARS} characters that says what happened AND why it matters (the concrete change, capability or consequence).
+Good: "Claude Code adds background subagents, so long refactors keep running while you keep chatting"
+Bad: "Claude Code v2.1.288 released" (no content)  ·  "Copilot CLI ships three prereleases" (routine)
+
+Qualifies:
+- A user-visible feature, breaking change, or deprecation, named concretely
+- A security fix or vulnerability with real impact
+- Support for a specific new model or hardware platform
+- A concrete announcement, launch, paper result, or project with a clear new capability
+- A discussion with a specific, non-obvious takeaway
+
+Never include:
+- Routine releases: nightlies, alphas, prereleases, build-number ranges, or a version number without saying what it changes
+- Raw counts: commits, issues, PRs, open items, stars, comments, points
+- CI status, flaky tests, pending upgrades, "in progress" or "targets" items with no shipped result
+- Generic trend statements ("X dominates", "Y remains active", "Z gains attention")
 
 Return ONLY valid JSON, no markdown fences, no explanation. Format:
-{"ai-cli":["highlight 1","highlight 2",...],"ai-agents":["highlight 1","highlight 2",...],...}
+{"ai-cli":["highlight 1",...],"ai-agents":["highlight 1",...],...}
 
 Rules:
 - Use the exact report IDs from the [brackets] above as keys
-- Only include reports that have meaningful content (skip reports with failure messages or no activity)
-- ${itemsPerReport} highlights per report, each under 60 characters
-- Focus on: new releases, notable features, trending projects, key discussions
-- Be specific: include project names, version numbers, star counts where relevant`;
+- Omit a report's key entirely when nothing in it qualifies, or when it contains only failure messages
+- At most ${maxPerReport} highlights per report, each at most ${HIGHLIGHT_MAX_CHARS} characters`;
 }
 
 export function buildHnPrompt(data: HnData, dateStr: string): string {
