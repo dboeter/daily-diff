@@ -40,6 +40,7 @@ async function main() {
   const reportIds = [
     "ai-cli",
     "ai-agents",
+    "ai-infra",
     "ai-web",
     "ai-trending",
     "ai-hn",
