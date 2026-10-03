@@ -23,8 +23,6 @@ A GitHub Actions workflow that runs every morning at 07:00 CST. It aggregates AI
 
 Browse all historical digests in a clean, dark-themed interface — no login required. Reports are rendered from the Markdown files in this repo via GitHub Pages.
 
-![Web UI](assets/web-en.png)
-
 ## Telegram Notifications
 
 When `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID` are set, a message is pushed after each run. It links to all reports for that day plus the Web UI and RSS feed.
