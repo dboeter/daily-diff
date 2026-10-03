@@ -1,6 +1,6 @@
 {
   "anthropic": {
-    "lastChecked": "2026-10-02T20:23:15.340Z",
+    "lastChecked": "2026-10-03T08:33:20.848Z",
     "seenUrls": {
       "https://www.anthropic.com/news/responsible-scaling-policy-v3": "2026-02-25T23:57:06.000Z",
       "https://www.anthropic.com/research/deprecation-updates-opus-3": "2026-09-09T21:14:42.000Z",
@@ -471,7 +471,7 @@
     }
   },
   "openai": {
-    "lastChecked": "2026-10-02T20:23:13.684Z",
+    "lastChecked": "2026-10-03T08:33:23.137Z",
     "seenUrls": {
       "https://openai.com/index/arvind-kc-chief-people-officer/": "2026-10-01T16:06:05.611Z",
       "https://openai.com/index/put-ai-to-work-for-your-product-team/": "2026-10-01T16:06:13.817Z",
@@ -1261,7 +1261,7 @@
       "https://openai.com/index/gpt-6-astra/": "2026-10-01T18:53:03.432Z",
       "https://openai.com/index/safety-overview-gpt-6-astra/": "2026-10-01T18:53:05.844Z",
       "https://openai.com/index/an-alien-mind/": "2026-10-01T18:53:01.274Z",
-      "https://openai.com/index/research-acceleration-view-inside-openai/": "2026-10-02T06:22:59.055Z",
+      "https://openai.com/index/research-acceleration-view-inside-openai/": "2026-10-03T05:19:35.379Z",
       "https://openai.com/index/supporting-journalism-from-classrooms-to-newsrooms/": "2026-10-01T18:52:54.495Z",
       "https://openai.com/index/introducing-chatgpt-images-2-5/": "2026-10-01T21:06:11.737Z",
       "https://openai.com/index/teen-development-research-grants/": "2026-10-01T18:52:58.658Z",
@@ -1350,12 +1350,12 @@
       "https://openai.com/index/chatgpt-ads-expands-southeast-asia-taiwan/": "2026-09-24T02:01:30.125Z",
       "https://openai.com/index/how-we-will-do-better-for-australia/": "2026-10-01T18:53:13.706Z",
       "https://openai.com/index/lenfest-ai-collaborative-expansion/": "2026-10-01T19:50:46.348Z",
-      "https://openai.com/index/introducing-gpt-6-1-sol/": "2026-10-02T19:20:10.375Z",
+      "https://openai.com/index/introducing-gpt-6-1-sol/": "2026-10-03T08:24:25.284Z",
       "https://openai.com/index/introducing-dots/": "2026-10-02T15:50:32.018Z",
       "https://openai.com/index/devday-2026-recap/": "2026-10-01T13:49:58.099Z",
       "https://openai.com/index/towards-safety-cases-for-frontier-ai-training/": "2026-09-29T07:16:26.222Z",
-      "https://openai.com/index/practical-guide-building-gpt-6/": "2026-10-02T20:16:17.350Z",
-      "https://openai.com/index/albertsons-reimagining-retail/": "2026-10-02T18:23:45.124Z"
+      "https://openai.com/index/practical-guide-building-gpt-6/": "2026-10-03T08:22:12.662Z",
+      "https://openai.com/index/albertsons-reimagining-retail/": "2026-10-03T00:25:53.012Z"
     }
   }
 }
