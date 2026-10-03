@@ -3,6 +3,7 @@ import {
   buildCliReportContent,
   buildOpenclawReportContent,
   buildInfraReportContent,
+  extractTldr,
 } from "../report-builders.ts";
 import type { RepoDigest } from "../prompts.ts";
 import type { GitHubItem, GitHubRelease } from "../github.ts";
@@ -192,5 +193,53 @@ describe("buildInfraReportContent", () => {
     expect(result).toContain("Projects covered: 1");
     expect(result).toContain("Cross-Project Comparison");
     expect(result).toContain("Per-Project Reports");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Brief (GitHub issue) variant
+// ---------------------------------------------------------------------------
+
+describe("extractTldr", () => {
+  it("takes the TL;DR bullets and stops at the next heading", () => {
+    const summary = "## 1. TL;DR\n\n- one\n* two\n\n## 2. Releases\n\n- not this";
+    expect(extractTldr(summary)).toBe("- one\n- two");
+  });
+
+  it("caps at 3 bullets and normalizes numbered items", () => {
+    expect(extractTldr("**TL;DR**\n1. a\n2. b\n3. c\n4. d")).toBe("- a\n- b\n- c");
+  });
+
+  it("falls back to the first bullets when there is no TL;DR section", () => {
+    expect(extractTldr("## Highlights\n- x\n- y")).toBe("- x\n- y");
+  });
+
+  it("returns a fixed notice unchanged", () => {
+    expect(extractTldr("No activity in the last 24 hours.")).toBe("No activity in the last 24 hours.");
+  });
+});
+
+describe("brief variant", () => {
+  const summary = "## 1. TL;DR\n- headline\n\n## 2. Stability\n- long detail";
+
+  it("infra: shows TL;DR bullets and a full-report link instead of per-project detail", () => {
+    const result = buildInfraReportContent(
+      [makeDigest({ summary })],
+      "comparison",
+      "",
+      "2026-03-09",
+      "",
+      "https://example.com/ai-infra.md",
+    );
+    expect(result).toContain("comparison");
+    expect(result).toContain("- headline");
+    expect(result).toContain("(https://example.com/ai-infra.md)");
+    expect(result).not.toContain("long detail");
+    expect(result).not.toContain("<details>");
+  });
+
+  it("full variant is unchanged when no URL is given", () => {
+    const result = buildInfraReportContent([makeDigest({ summary })], "comparison", "", "2026-03-09", "");
+    expect(result).toContain("long detail");
   });
 });

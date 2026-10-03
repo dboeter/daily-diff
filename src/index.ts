@@ -426,27 +426,37 @@ async function main(): Promise<void> {
 
   // 4. Build + save all reports
   const ft = autoGenFooter();
-  const cliContent = buildCliReportContent(
-    summaries.cliDigests,
-    summaries.skillsSummary,
-    comparison,
-    utcStr,
-    dateStr,
-    ft,
-    CLAUDE_SKILLS_REPO,
-  );
-  const openclawContent = buildOpenclawReportContent(
-    fetchedOpenclaw,
-    summaries.peerDigests,
-    summaries.openclawSummary,
-    peersComparison,
-    utcStr,
-    dateStr,
-    ft,
-    OPENCLAW,
-    OPENCLAW_PEERS,
-  );
-  const infraContent = buildInfraReportContent(summaries.infraDigests, infraComparison, utcStr, dateStr, ft);
+  // Called without a URL for the full report on disk; with the committed file's
+  // URL for the brief GitHub issue variant (comparison + per-project TL;DR).
+  const buildCli = (fullReportUrl?: string) =>
+    buildCliReportContent(
+      summaries.cliDigests,
+      summaries.skillsSummary,
+      comparison,
+      utcStr,
+      dateStr,
+      ft,
+      CLAUDE_SKILLS_REPO,
+      fullReportUrl,
+    );
+  const buildOpenclaw = (fullReportUrl?: string) =>
+    buildOpenclawReportContent(
+      fetchedOpenclaw,
+      summaries.peerDigests,
+      summaries.openclawSummary,
+      peersComparison,
+      utcStr,
+      dateStr,
+      ft,
+      OPENCLAW,
+      OPENCLAW_PEERS,
+      fullReportUrl,
+    );
+  const buildInfra = (fullReportUrl?: string) =>
+    buildInfraReportContent(summaries.infraDigests, infraComparison, utcStr, dateStr, ft, fullReportUrl);
+  const cliContent = buildCli();
+  const openclawContent = buildOpenclaw();
+  const infraContent = buildInfra();
 
   console.log(`  Saved ${saveFile(cliContent, dateStr, "ai-cli.md")}`);
   console.log(`  Saved ${saveFile(openclawContent, dateStr, "ai-agents.md")}`);
@@ -534,17 +544,26 @@ async function main(): Promise<void> {
 
   // 6. Create GitHub issues for CLI + OpenClaw + infra
   if (digestRepo) {
-    const cliUrl = await createGitHubIssue(CLI_ISSUE_TITLE(dateStr), cliContent, ISSUE_LABELS.cli);
+    const fileUrl = (file: string) => `https://github.com/${digestRepo}/blob/main/digests/${dateStr}/${file}`;
+    const cliUrl = await createGitHubIssue(
+      CLI_ISSUE_TITLE(dateStr),
+      buildCli(fileUrl("ai-cli.md")),
+      ISSUE_LABELS.cli,
+    );
     console.log(`  Created CLI issue: ${cliUrl}`);
 
     const ocUrl = await createGitHubIssue(
       OPENCLAW_ISSUE_TITLE(dateStr),
-      openclawContent,
+      buildOpenclaw(fileUrl("ai-agents.md")),
       ISSUE_LABELS.openclaw,
     );
     console.log(`  Created OpenClaw issue: ${ocUrl}`);
 
-    const infraUrl = await createGitHubIssue(INFRA_ISSUE_TITLE(dateStr), infraContent, ISSUE_LABELS.infra);
+    const infraUrl = await createGitHubIssue(
+      INFRA_ISSUE_TITLE(dateStr),
+      buildInfra(fileUrl("ai-infra.md")),
+      ISSUE_LABELS.infra,
+    );
     console.log(`  Created infra issue: ${infraUrl}`);
   }
 

@@ -72,6 +72,15 @@ const CLI_PR_LIMIT = 20;
 // discussion list is the entire report, not a supplement to them.
 const CLI_DISCUSSION_LIMIT = 40;
 
+// Without explicit caps the model wrote 10–12 KB per project, pushing the CLI,
+// agents and infra reports to 77–114 KB — past GitHub's 64 KB issue body limit.
+// The per-repo "TL;DR" section is also what extractTldr() lifts into the issue.
+const REPO_LENGTH_RULE =
+  "Length: at most ~300 words in total. Use at most 3 bullets per section, one or two sentences each. " +
+  "Omit any section that has nothing notable today instead of writing filler.";
+const COMPARISON_LENGTH_RULE =
+  "Length: at most ~450 words in total. Keep the comparison table; every other section gets at most 3 short bullets or 2 sentences.";
+
 /** Sort by comment count desc, take top N. */
 export function topN(items: GitHubItem[], n: number): GitHubItem[] {
   return [...items].sort((a, b) => b.comments - a.comments).slice(0, n);
@@ -151,15 +160,16 @@ ${discussionsSection}
 
 Generate a structured English digest with the following sections:
 
-1. **Today's Highlights** - 2-3 sentences summarizing the most important updates
+1. **TL;DR** - Exactly 3 bullets, one sentence each: the most important things that happened today
 2. **Releases** - If new versions exist, summarize changes; omit if none
-3. **Hot Issues** - Pick 10 noteworthy Issues, explain why they matter and community reaction
-4. **Key PR Progress** - Pick 10 important PRs, describe features or fixes
-5. **Hot Discussions** - Pick up to 10 noteworthy Discussions, grouped by category (Ideas / Q&A / Show and tell). Omit this section entirely if no discussion data was provided
+3. **Hot Issues** - Pick up to 3 noteworthy Issues, explain why they matter and community reaction
+4. **Key PR Progress** - Pick up to 3 important PRs, describe features or fixes
+5. **Hot Discussions** - Pick up to 3 noteworthy Discussions, grouped by category (Ideas / Q&A / Show and tell). Omit this section entirely if no discussion data was provided
 6. **Feature Request Trends** - Distill the most-requested feature directions from all Issues and Discussions
 7. **Developer Pain Points** - Summarize recurring developer frustrations or high-frequency requests
 
 Style: concise and professional, suited for technical developers. Include GitHub links for each item.
+${REPO_LENGTH_RULE}
 `;
 }
 
@@ -203,7 +213,7 @@ ${prsText}
 
 Generate a structured English digest with the following sections:
 
-1. **Today's Highlights** - 2-3 sentences summarizing the most important updates
+1. **TL;DR** - Exactly 3 bullets, one sentence each: the most important things that happened today
 2. **Releases & Breaking Changes** - New versions, API/config changes, migration notes; omit if none
 3. **New Model & Hardware Support** - Newly supported models, architectures, backends (CUDA/ROCm/Metal/CPU), quantization formats
 4. **Performance & Optimization** - Throughput, latency, memory and kernel work landed or in progress, with concrete numbers when available
@@ -211,6 +221,7 @@ Generate a structured English digest with the following sections:
 6. **What This Means for Application Developers** - Practical takeaways for people building agents/apps on top of this project
 
 Style: concise and professional, suited for infrastructure engineers. Include GitHub links for each item.
+${REPO_LENGTH_RULE}
 `;
 }
 
@@ -241,6 +252,7 @@ Generate a cross-project comparison report in English with these sections:
 6. **Trend Signals** - Industry trends extracted from today's activity, and what agent/application developers should watch
 
 Style: concise and professional, data-backed, suited for infrastructure engineers and technical decision-makers.
+${COMPARISON_LENGTH_RULE}
 `;
 }
 
@@ -297,16 +309,18 @@ ${prsText}
 
 Generate a structured English ${cfg.name} project digest with the following sections:
 
-1. **Today's Overview** - 3-5 sentences summarizing project status, including activity assessment
-2. **Releases** - If new versions exist, detail changes, breaking changes, migration notes; omit if none
-3. **Project Progress** - Merged/closed PRs today, what features advanced or were fixed
-4. **Community Hot Topics** - Most active Issues/PRs with most comments/reactions (with links), analyze underlying needs
-5. **Bugs & Stability** - Bugs, crashes, regressions reported today, ranked by severity, note if fix PRs exist
-6. **Feature Requests & Roadmap Signals** - User-requested features, predict which might be in next version
-7. **User Feedback Summary** - Real user pain points, use cases, satisfaction/dissatisfaction
-8. **Backlog Watch** - Long-unanswered important Issues or PRs needing maintainer attention
+1. **TL;DR** - Exactly 3 bullets, one sentence each: the most important things that happened today
+2. **Today's Overview** - 2-3 sentences on project status, including activity assessment
+3. **Releases** - If new versions exist, detail changes, breaking changes, migration notes; omit if none
+4. **Project Progress** - Merged/closed PRs today, what features advanced or were fixed
+5. **Community Hot Topics** - Most active Issues/PRs with most comments/reactions (with links), analyze underlying needs
+6. **Bugs & Stability** - Bugs, crashes, regressions reported today, ranked by severity, note if fix PRs exist
+7. **Feature Requests & Roadmap Signals** - User-requested features, predict which might be in next version
+8. **User Feedback Summary** - Real user pain points, use cases, satisfaction/dissatisfaction
+9. **Backlog Watch** - Long-unanswered important Issues or PRs needing maintainer attention
 
 Style: objective, data-driven, highlighting project health. Include GitHub links for each item.
+${REPO_LENGTH_RULE}
 `;
 }
 
@@ -348,6 +362,7 @@ Generate a cross-project comparison report in English with these sections:
 7. **Trend Signals** - Industry trends extracted from community feedback, value for AI agent developers
 
 Style: concise and professional, data-backed, suited for technical decision-makers and developers.
+${COMPARISON_LENGTH_RULE}
 `;
 }
 
@@ -374,12 +389,13 @@ ${issuesText}
 
 Generate a Claude Code Skills community highlights report in English with these sections:
 
-1. **Top Skills Ranking** - List the 5-8 most-discussed Skills (PRs) by comments/attention, describe each Skill's functionality, discussion highlights, and current status (open/merged/draft)
+1. **Top Skills Ranking** - List the 3-5 most-discussed Skills (PRs) by comments/attention, describe each Skill's functionality, discussion highlights, and current status (open/merged/draft)
 2. **Community Demand Trends** - From Issues, distill the most-anticipated new Skill directions (e.g. workflow automation, code review, test generation, documentation)
 3. **High-Potential Pending Skills** - Active-comment PRs not yet merged; these Skills may land soon
 4. **Skills Ecosystem Insight** - One-sentence summary: what is the community's most concentrated demand at the Skills level?
 
 Style: concise and professional, include GitHub links for each item.
+${REPO_LENGTH_RULE}
 `;
 }
 
@@ -410,5 +426,6 @@ Generate a cross-tool comparison report in English with these sections:
 6. **Trend Signals** - Industry trends from community feedback, reference value for developers
 
 Style: concise and professional, data-backed, suited for technical decision-makers and developers.
+${COMPARISON_LENGTH_RULE}
 `;
 }
