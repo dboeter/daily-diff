@@ -1,0 +1,26 @@
+{
+  "ai-agents": [
+    "Claude Code fixes terminal hangs, nested-shell approvals and symlinked IDE access, improving managed coding-agent reliability.",
+    "Pi adds per-thinking-level temperature and top_p settings, giving OpenAI-compatible users finer control over model behavior."
+  ],
+  "ai-hn": [
+    "Gemini 4 Argon launched, drawing major developer interest around Google's latest frontier-model capabilities.",
+    "SCM adds local AI search across macOS photos and video frames, useful for private semantic media retrieval."
+  ],
+  "ai-infra": [
+    "SGLang adds DeepSeek-V4.1 Flash, GigaChat 3.5 and IQuest-Q1 support, expanding deployable model choices.",
+    "LiteLLM adds cosign signing and verification guidance for Docker images, improving supply-chain provenance checks."
+  ],
+  "ai-trending": [
+    "Openrig launches persistent orchestration for Claude Code, Codex and Pi, connecting agents through shared roles and context.",
+    "OpenAgentCore offers a self-hosted Go implementation of the OpenAI Agents API, reducing runtime lock-in."
+  ],
+  "ai-community": [
+    "Developers highlight slopsquatting risk: plausible AI-invented package names let attackers register malicious dependencies.",
+    "AWS demonstrates auditable agent governance with hard blocks, PII redaction and exportable EU AI Act evidence."
+  ],
+  "ai-hf": [
+    "Phonon-2 packages Parakeet-based ASR for MLX and Apple Silicon, simplifying local speech recognition on Macs.",
+    "Nemotron-3-Diarization combines voice activity and speaker analysis with GGUF support for deployment."
+  ]
+}
