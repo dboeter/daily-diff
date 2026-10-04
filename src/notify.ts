@@ -17,6 +17,18 @@ import type { ReportHighlights } from "./prompts-data.ts";
 
 const PAGES_URL_DEFAULT = "https://dboeter.github.io/daily-diff";
 
+export function resolvePagesUrl(override?: string): string {
+  if (override) return override.replace(/\/$/, "");
+  const envUrl = process.env["PAGES_URL"];
+  if (envUrl) return envUrl.replace(/\/$/, "");
+  const ghaRepo = process.env["GITHUB_REPOSITORY"];
+  if (ghaRepo) {
+    const [owner, repo] = ghaRepo.split("/");
+    if (owner && repo) return `https://${owner}.github.io/${repo}`;
+  }
+  return PAGES_URL_DEFAULT;
+}
+
 function escapeHtml(s: string): string {
   return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
@@ -47,7 +59,7 @@ export function buildMessage(
   pagesUrl?: string,
   highlights?: ReportHighlights | null,
 ): string {
-  const PAGES_URL = (pagesUrl ?? process.env["PAGES_URL"] ?? PAGES_URL_DEFAULT).replace(/\/$/, "");
+  const PAGES_URL = resolvePagesUrl(pagesUrl);
   const lines: string[] = [`📡 <b>Daily Diff · ${date}</b>`];
 
   for (const r of reports) {

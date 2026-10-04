@@ -1,8 +1,44 @@
 import { describe, it, expect, afterEach } from "vitest";
-import { buildMessage } from "../notify.ts";
+import { buildMessage, resolvePagesUrl } from "../notify.ts";
 import type { ReportHighlights } from "../prompts-data.ts";
 
 const BASE_URL = "https://example.com/radar";
+
+describe("resolvePagesUrl", () => {
+  const origPagesUrl = process.env["PAGES_URL"];
+  const origGhaRepo = process.env["GITHUB_REPOSITORY"];
+
+  afterEach(() => {
+    if (origPagesUrl !== undefined) process.env["PAGES_URL"] = origPagesUrl;
+    else delete process.env["PAGES_URL"];
+    if (origGhaRepo !== undefined) process.env["GITHUB_REPOSITORY"] = origGhaRepo;
+    else delete process.env["GITHUB_REPOSITORY"];
+  });
+
+  it("prioritizes explicit argument override", () => {
+    process.env["PAGES_URL"] = "https://env.example.com/";
+    process.env["GITHUB_REPOSITORY"] = "owner/repo";
+    expect(resolvePagesUrl("https://override.example.com/")).toBe("https://override.example.com");
+  });
+
+  it("reads PAGES_URL environment variable when override is omitted", () => {
+    delete process.env["GITHUB_REPOSITORY"];
+    process.env["PAGES_URL"] = "https://env.example.com/";
+    expect(resolvePagesUrl()).toBe("https://env.example.com");
+  });
+
+  it("derives GitHub Pages URL from GITHUB_REPOSITORY if PAGES_URL is not set", () => {
+    delete process.env["PAGES_URL"];
+    process.env["GITHUB_REPOSITORY"] = "octocat/hello-world";
+    expect(resolvePagesUrl()).toBe("https://octocat.github.io/hello-world");
+  });
+
+  it("falls back to default URL when neither is set", () => {
+    delete process.env["PAGES_URL"];
+    delete process.env["GITHUB_REPOSITORY"];
+    expect(resolvePagesUrl()).toBe("https://dboeter.github.io/daily-diff");
+  });
+});
 
 describe("buildMessage", () => {
   const origPagesUrl = process.env["PAGES_URL"];

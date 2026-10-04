@@ -421,7 +421,18 @@ function initSearch(dates) {
   });
 }
 
+let allDates = null;
+let searchInitialized = false;
+
+function ensureSearchIndex() {
+  if (searchInitialized || !allDates) return;
+  searchInitialized = true;
+  initSearch(allDates);
+}
+
+searchInput.addEventListener('focus', ensureSearchIndex);
 searchInput.addEventListener('input', () => {
+  ensureSearchIndex();
   searchQuery = searchInput.value;
   clearTimeout(searchDebounce);
   searchDebounce = setTimeout(() => applyDateSearch(searchQuery), 120);
@@ -596,12 +607,9 @@ window.addEventListener('popstate', () => {
     const { dates } = await res.json();
     if (!dates?.length) throw new Error('manifest is empty');
 
+    allDates = dates;
     buildNav(dates);
 
-    // Load the visible report BEFORE kicking off search indexing. Indexing
-    // fetches every report across every date; doing it first would flood the
-    // connection pool and cause the primary content fetch to fail on initial
-    // load (the "Failed to fetch" seen on external deep-links / refresh).
     const hash = getHash();
     const first = dates[0];
     if (hash && dates.find(d => d.date === hash.date && d.reports.includes(hash.report))) {
@@ -611,8 +619,6 @@ window.addEventListener('popstate', () => {
       history.replaceState(null, '', `#${first.date}/${r0}`);
       await loadReport(first.date, r0, false);
     }
-
-    initSearch(dates);
   } catch (e) {
     document.getElementById('nav').innerHTML =
       '<div class="msg" style="height:80px;font-size:10px">⚠️ ' + e.message + '</div>';

@@ -36,7 +36,7 @@ const API_URL = "https://huggingface.co/api/models";
 // Response type
 // ---------------------------------------------------------------------------
 
-interface HfApiModel {
+export interface HfApiModel {
   _id: string;
   id: string;
   author?: string;
@@ -45,6 +45,19 @@ interface HfApiModel {
   tags?: string[];
   pipeline_tag?: string;
   lastModified?: string;
+}
+
+export function toHfModel(m: HfApiModel): HfModel {
+  return {
+    id: m.id,
+    author: m.author ?? m.id.split("/")[0] ?? "unknown",
+    likes: m.likes,
+    downloads: m.downloads,
+    tags: m.tags ?? [],
+    pipelineTag: m.pipeline_tag ?? "",
+    lastModified: m.lastModified ?? "",
+    url: `https://huggingface.co/${m.id}`,
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -71,17 +84,7 @@ export async function fetchHfData(): Promise<HfData> {
     }
 
     const raw = (await resp.json()) as HfApiModel[];
-
-    const models: HfModel[] = raw.map((m) => ({
-      id: m.id,
-      author: m.author ?? m.id.split("/")[0] ?? "unknown",
-      likes: m.likes,
-      downloads: m.downloads,
-      tags: m.tags ?? [],
-      pipelineTag: m.pipeline_tag ?? "",
-      lastModified: m.lastModified ?? "",
-      url: `https://huggingface.co/${m.id}`,
-    }));
+    const models: HfModel[] = raw.map(toHfModel);
 
     console.log(`  [hf] ${models.length} trending models`);
     return { models, fetchSuccess: models.length > 0 };

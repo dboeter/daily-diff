@@ -43,13 +43,13 @@ const REQUEST_DELAY_MS = 3000;
 // XML helpers (lightweight, no dependency)
 // ---------------------------------------------------------------------------
 
-function extractTag(xml: string, tag: string): string {
+export function extractTag(xml: string, tag: string): string {
   const re = new RegExp(`<${tag}[^>]*>([\\s\\S]*?)</${tag}>`);
   const m = xml.match(re);
   return m ? m[1]!.trim() : "";
 }
 
-function extractAllTags(xml: string, tag: string): string[] {
+export function extractAllTags(xml: string, tag: string): string[] {
   const re = new RegExp(`<${tag}[^>]*>([\\s\\S]*?)</${tag}>`, "g");
   const results: string[] = [];
   let m: RegExpExecArray | null;
@@ -59,7 +59,7 @@ function extractAllTags(xml: string, tag: string): string[] {
   return results;
 }
 
-function extractAttr(xml: string, tag: string, attr: string): string[] {
+export function extractAttr(xml: string, tag: string, attr: string): string[] {
   const re = new RegExp(`<${tag}[^>]*${attr}="([^"]*)"[^>]*/?>`, "g");
   const results: string[] = [];
   let m: RegExpExecArray | null;
@@ -69,7 +69,7 @@ function extractAttr(xml: string, tag: string, attr: string): string[] {
   return results;
 }
 
-function extractLinkHref(xml: string, rel: string): string {
+export function extractLinkHref(xml: string, rel: string): string {
   const re = new RegExp(`<link[^>]*rel="${rel}"[^>]*href="([^"]*)"[^>]*/?>`, "g");
   const m = re.exec(xml);
   return m ? m[1]! : "";
@@ -79,7 +79,7 @@ function extractLinkHref(xml: string, rel: string): string {
 // Parse
 // ---------------------------------------------------------------------------
 
-function parseEntry(entryXml: string): ArxivPaper | null {
+export function parseEntry(entryXml: string): ArxivPaper | null {
   const id = extractTag(entryXml, "id");
   if (!id) return null;
 
@@ -94,6 +94,16 @@ function parseEntry(entryXml: string): ArxivPaper | null {
   const pdfUrl = extractLinkHref(entryXml, "related") || id.replace("/abs/", "/pdf/");
 
   return { id, title, summary, authors, published, updated, categories, url, pdfUrl };
+}
+
+export function parseArxivEntries(xml: string): ArxivPaper[] {
+  const entryBlocks = xml.split("<entry>").slice(1);
+  const papers: ArxivPaper[] = [];
+  for (const block of entryBlocks) {
+    const paper = parseEntry("<entry>" + block);
+    if (paper) papers.push(paper);
+  }
+  return papers;
 }
 
 // ---------------------------------------------------------------------------
@@ -129,17 +139,14 @@ export async function fetchArxivData(): Promise<ArxivData> {
       }
 
       const xml = await resp.text();
-
-      // Split into entries
-      const entryBlocks = xml.split("<entry>").slice(1);
-      for (const block of entryBlocks) {
-        const paper = parseEntry("<entry>" + block);
-        if (paper && !seen.has(paper.id)) {
+      const parsedPapers = parseArxivEntries(xml);
+      for (const paper of parsedPapers) {
+        if (!seen.has(paper.id)) {
           seen.set(paper.id, paper);
         }
       }
 
-      console.log(`  [arxiv] ${cat}: ${entryBlocks.length} papers`);
+      console.log(`  [arxiv] ${cat}: ${parsedPapers.length} papers`);
     } catch (err) {
       console.error(`  [arxiv] ${cat}: ${err}`);
     }
