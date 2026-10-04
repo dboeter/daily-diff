@@ -287,6 +287,27 @@ describe("buildTrendingPrompt", () => {
     expect(result).toContain("+100 today");
   });
 
+  it("omits the total when the scraped star count is 0", () => {
+    const data: TrendingData = {
+      trendingRepos: [
+        {
+          fullName: "org/repo",
+          description: "",
+          language: "",
+          todayStars: 408,
+          totalStars: 0,
+          forks: 0,
+          url: "https://github.com/org/repo",
+        },
+      ],
+      searchRepos: [],
+      trendingFetchSuccess: true,
+    };
+    const result = buildTrendingPrompt(data, "2026-03-09");
+    expect(result).toContain("- [org/repo](https://github.com/org/repo) (+408 today)");
+    expect(result).not.toContain("⭐0");
+  });
+
   it("shows fetch failure message when trending fails", () => {
     const data: TrendingData = { trendingRepos: [], searchRepos: [], trendingFetchSuccess: false };
     const result = buildTrendingPrompt(data, "2026-03-09");

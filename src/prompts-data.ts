@@ -20,7 +20,8 @@ export function buildTrendingPrompt(data: TrendingData, dateStr: string): string
             (r) =>
               `- [${r.fullName}](${r.url})` +
               (r.language ? ` [${r.language}]` : "") +
-              ` ⭐${r.totalStars.toLocaleString()}` +
+              // 0 means the scrape missed the count (no trending repo has 0 stars); omit it rather than publish ⭐0
+              (r.totalStars > 0 ? ` ⭐${r.totalStars.toLocaleString()}` : "") +
               (r.todayStars > 0 ? ` (+${r.todayStars} today)` : "") +
               (r.forks > 0 ? ` 🍴${r.forks.toLocaleString()}` : "") +
               (r.description ? `\n  ${r.description}` : ""),
@@ -82,7 +83,7 @@ Generate a structured AI Open Source Trends Report in English:
 
    - **Project**: repo name as a Markdown link to its GitHub URL
    - **Lang**: primary language (leave blank if unknown)
-   - **Stars**: total stars, plus today's new stars in parentheses when available (e.g. "86,392 (+1,851)"); copy the numbers from the input verbatim, do not recompute
+   - **Stars**: total stars, plus today's new stars in parentheses when available (e.g. "86,392 (+1,851)"); if the input has no total, show only today's count (e.g. "(+1,851)"); copy the numbers from the input verbatim, do not recompute
    - **Summary**: 2 sentences — what the project is and why it's worth attention today, including any standout data point or momentum signal
    - List 3-8 projects per category; omit a category's table entirely if no project falls under it
 
