@@ -13,7 +13,7 @@ import { sleep } from "./date.ts";
 
 export const LLM_TOKENS_DEFAULT = 4096;
 export const LLM_TOKENS_TRENDING = 6144;
-/** Table-formatted listing reports (HN, PH, ArXiv, HF, Community) need extra
+/** Table-formatted listing reports (HN, ArXiv, HF, Community) need extra
  *  headroom for the multi-row tables plus 2-sentence summaries. */
 export const LLM_TOKENS_LISTING = 6144;
 export const LLM_TOKENS_WEB = 8192;

@@ -11,7 +11,7 @@ export interface TrendingRepo {
   description: string;
   language: string;
   /** Stars gained in the scraped period: today, or this week on the weekly run. */
-  todayStars: number;
+  periodStars: number;
   totalStars: number;
   forks: number;
   url: string;
@@ -74,8 +74,8 @@ export function parseTrendingHtml(html: string): TrendingRepo[] {
       const language = langMatch?.[1] ? langMatch[1].replace(/<[^>]+>/g, "").trim() : "";
 
       // stars gained in the period ("1,234 stars today" / "… this week")
-      const todayMatch = block.match(/([\d,]+)\s+stars?\s+(?:today|this week)/i);
-      const todayStars = todayMatch?.[1] ? parseInt(todayMatch[1].replace(/,/g, ""), 10) : 0;
+      const periodMatch = block.match(/([\d,]+)\s+stars?\s+(?:today|this week)/i);
+      const periodStars = periodMatch?.[1] ? parseInt(periodMatch[1].replace(/,/g, ""), 10) : 0;
 
       // total stars — look for link with /stargazers. The octicon is a nested
       // <svg><path d="…"/></svg>, so skip arbitrary markup but never past </a>.
@@ -90,7 +90,7 @@ export function parseTrendingHtml(html: string): TrendingRepo[] {
         fullName,
         description,
         language,
-        todayStars,
+        periodStars,
         totalStars,
         forks,
         url: `https://github.com/${fullName}`,

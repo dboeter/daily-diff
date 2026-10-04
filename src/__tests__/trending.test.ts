@@ -61,7 +61,7 @@ describe("parseTrendingHtml", () => {
       fullName: "owner1/repo-alpha",
       description: "A fast inference engine for large models.",
       language: "Python",
-      todayStars: 523,
+      periodStars: 523,
       totalStars: 12500,
       forks: 1234,
       url: "https://github.com/owner1/repo-alpha",
@@ -71,7 +71,7 @@ describe("parseTrendingHtml", () => {
       fullName: "owner2/repo-beta",
       description: "Rust-based developer CLI.",
       language: "Rust",
-      todayStars: 88,
+      periodStars: 88,
       totalStars: 850,
       forks: 42,
       url: "https://github.com/owner2/repo-beta",
@@ -89,7 +89,7 @@ describe("parseTrendingHtml", () => {
         <span class="d-inline-block float-sm-right">1,204 stars this week</span>
       </article>
     `;
-    expect(parseTrendingHtml(html)[0]?.todayStars).toBe(1204);
+    expect(parseTrendingHtml(html)[0]?.periodStars).toBe(1204);
   });
 
   it("handles articles with missing optional fields gracefully", () => {
@@ -103,7 +103,7 @@ describe("parseTrendingHtml", () => {
     expect(repos[0]?.fullName).toBe("owner/minimal");
     expect(repos[0]?.description).toBe("");
     expect(repos[0]?.language).toBe("");
-    expect(repos[0]?.todayStars).toBe(0);
+    expect(repos[0]?.periodStars).toBe(0);
     expect(repos[0]?.totalStars).toBe(0);
     expect(repos[0]?.forks).toBe(0);
   });

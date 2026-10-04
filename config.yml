@@ -8,8 +8,9 @@
 # engagement or a regression/security label) and news: HN, Anthropic/OpenAI and
 # GitHub Trending items that mention it. Issue and PR churn is not reported.
 # Each entry requires: id (slug), repo (owner/repo), name (display name).
-# Optional keywords: terms to match in news items. Without them the display
-# name and repo name are used. Set them when the name is a common word.
+# Optional keywords: terms to match in news items. They replace the display
+# name and repo name (the full owner/repo always matches). Set them when the
+# name is a common word.
 
 agents:
   - id: claude-code

@@ -29,29 +29,38 @@ function escapeRegex(s: string): string {
   return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
-/** The terms an agent is matched by: explicit keywords, else name and repo name. */
+/**
+ * The terms an agent is matched by: the full "owner/repo", plus explicit
+ * keywords, else name and repo name. Keywords replace the short names rather
+ * than adding to them, because a short name can be an ordinary word (Pi's
+ * "pi"); the full repo path is always distinctive, so it is always included.
+ */
 export function agentTerms(cfg: RepoConfig): string[] {
-  if (cfg.keywords?.length) return cfg.keywords;
+  if (cfg.keywords?.length) return [...new Set([...cfg.keywords, cfg.repo])];
   const repoName = cfg.repo.split("/")[1] ?? cfg.repo;
-  return [...new Set([cfg.name, repoName])];
+  return [...new Set([cfg.name, repoName, cfg.repo])];
 }
 
 /**
- * Whole-word, case-insensitive matcher for an agent's terms. Spaces and hyphens
- * inside a term are interchangeable and optional, so "claude code" matches
- * "Claude Code", "claude-code" and "ClaudeCode". The boundaries also reject a
- * neighbouring "-" or "/", which keeps "pi" from matching inside "api" or
- * "raspberry-pi".
+ * Whole-word, case-insensitive matcher for an agent's terms. Spaces, hyphens
+ * and slashes inside a term are interchangeable and optional, so "claude code"
+ * matches "Claude Code", "claude-code" and "ClaudeCode", and "openai/codex"
+ * matches "openai codex" (how trending repo names reach the matcher). The start
+ * boundary also rejects a preceding "-" or "/", which keeps a term from
+ * matching inside "raspberry-pi"; a following "-" is allowed, so
+ * "Claude Code-powered" and "earendil-works" still match. "Raspberry Pi" is
+ * rejected outright: Pi's "pi agent" keyword would otherwise match
+ * "Raspberry Pi agent".
  */
 export function agentMatcher(cfg: RepoConfig): RegExp {
   const alternatives = agentTerms(cfg).map((t) =>
     t
       .trim()
-      .split(/[\s-]+/)
+      .split(/[\s/-]+/)
       .map(escapeRegex)
-      .join("[\\s-]?"),
+      .join("[\\s/-]?"),
   );
-  return new RegExp(`(?<![\\w/-])(?:${alternatives.join("|")})(?![\\w/-])`, "i");
+  return new RegExp(`(?<![\\w/-])(?<!raspberry[\\s-]?)(?:${alternatives.join("|")})(?![\\w/])`, "i");
 }
 
 /** Flatten the fetched sources into one list of candidate news items. */
@@ -88,7 +97,7 @@ export function collectNewsItems(sources: NewsSources): { item: NewsItem; text: 
         source: "GitHub Trending",
         title: `${r.fullName}${r.description ? ` — ${r.description}` : ""}`,
         url: r.url,
-        detail: `+${r.todayStars} stars on GitHub Trending`,
+        detail: `+${r.periodStars} stars on GitHub Trending`,
       },
       text: `${r.fullName.replace("/", " ")} ${r.description}`,
     });

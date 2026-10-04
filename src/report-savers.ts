@@ -112,7 +112,7 @@ export async function saveTrendingReport(
   // "what's popular" genre as trending repos, so it rides along here.
   const skillsSection =
     `\n\n---\n\n## ${TRENDING_REPORT.skillsHeading}\n\n` +
-    `> Source: [${skills.repo}](https://github.com/${skills.repo})\n\n` +
+    `${TRENDING_REPORT.skillsSource(skills.repo)}\n\n` +
     skills.summary;
 
   const trendingContent = header + trendingSummary + skillsSection + autoGenFooter();

@@ -50,6 +50,7 @@ export const TRENDING_REPORT = {
   title: "AI Open Source Trends Weekly",
   sources: "Sources: GitHub Trending + GitHub Search API",
   skillsHeading: "Claude Code Skills Highlights",
+  skillsSource: (repo: string) => `> Source: [${repo}](https://github.com/${repo})`,
   issueTitle: (dateStr: string) => `📈 AI Open Source Trends Weekly ${dateStr}`,
 } as const;
 
@@ -67,7 +68,7 @@ export const ARXIV_REPORT = {
 // download-ranked list barely moves day to day, so the titles say "weekly".
 export const HF_REPORT = {
   title: "Hugging Face Trending Models Weekly",
-  issueTitle: (dateStr: string) => `🤗 Hugging Face Trending Models ${dateStr}`,
+  issueTitle: (dateStr: string) => `🤗 Hugging Face Trending Models Weekly ${dateStr}`,
 } as const;
 
 // Weekly since October 2026.

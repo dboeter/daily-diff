@@ -1,6 +1,6 @@
 # Daily Diff
 
-A GitHub Actions workflow that runs every morning at 07:00 CST. It aggregates AI ecosystem signals from 9 data sources, then publishes English digests as GitHub Issues and committed Markdown files: a daily set (agents, Hacker News, ArXiv, official web content) and a weekly set on Mondays (infrastructure, trending, community, Hugging Face).
+A GitHub Actions workflow that runs every morning at 06:37 CST. It aggregates AI ecosystem signals from 9 data sources, then publishes English digests as GitHub Issues and committed Markdown files: a daily set (agents, Hacker News, ArXiv, official web content) and a weekly set on Mondays (infrastructure, trending, community, Hugging Face).
 
 ### Data Sources
 

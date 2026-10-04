@@ -25,7 +25,8 @@ export function weekdayOf(dateStr: string): number {
 }
 
 /**
- * Trending, Community, Infra, Hugging Face and Skills run weekly, not daily —
+ * The reports in WEEKLY_ISSUE_LABELS (github.ts), plus the Skills section of
+ * the trending report, run weekly, not daily —
  * both the fetch and the report, except that Trending is still fetched daily
  * for the agents report's news matching. Sampled over September 2026, the daily
  * editions mostly repeated themselves: 54% of trending links and 45% of

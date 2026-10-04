@@ -21,7 +21,7 @@ export function buildTrendingPrompt(data: TrendingData, dateStr: string): string
               (r.language ? ` [${r.language}]` : "") +
               // 0 means the scrape missed the count (no trending repo has 0 stars); omit it rather than publish ⭐0
               (r.totalStars > 0 ? ` ⭐${r.totalStars.toLocaleString()}` : "") +
-              (r.todayStars > 0 ? ` (+${r.todayStars} this week)` : "") +
+              (r.periodStars > 0 ? ` (+${r.periodStars} this week)` : "") +
               (r.forks > 0 ? ` 🍴${r.forks.toLocaleString()}` : "") +
               (r.description ? `\n  ${r.description}` : ""),
           )

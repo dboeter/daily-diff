@@ -37,17 +37,16 @@ async function main() {
 
   console.log(`Regenerating highlights for ${dateStr}...`);
 
+  // Same order as main(): daily reports, then the weekly ones.
   const reportIds = [
-    "ai-cli",
     "ai-agents",
-    "ai-infra",
     "ai-web",
-    "ai-trending",
     "ai-hn",
-    "ai-ph",
     "ai-arxiv",
-    "ai-hf",
+    "ai-infra",
+    "ai-trending",
     "ai-community",
+    "ai-hf",
   ];
 
   // Read reports

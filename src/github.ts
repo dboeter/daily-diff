@@ -100,7 +100,9 @@ export async function fetchRecentReleases(repo: string, since: Date): Promise<Gi
  * as ordinary releases (Qwen Code and Gemini CLI nightlies, Codex
  * `rust-v…-alpha.N`), so the API's `prerelease` flag alone misses them.
  */
-const PRERELEASE_TAG = /nightly|alpha|beta|preview|canary|[-.]rc\.?\d*\b|[-.]dev\b/i;
+// "rc" and "dev" may follow a digit with no separator (PEP 440: v0.11.0rc1,
+// v0.5.0.dev3), but never a letter, so "src" or "arc" in a tag is not a match.
+const PRERELEASE_TAG = /nightly|alpha|beta|preview|canary|(?<=[-.\d])rc\.?\d*\b|[-.]dev\d*\b/i;
 
 export function isPrerelease(r: GitHubRelease): boolean {
   return r.prerelease || PRERELEASE_TAG.test(r.tag_name);
@@ -279,8 +281,11 @@ function isDigestIssue(i: OpenIssue): boolean {
   return i.pull_request === undefined && i.labels.some((l) => DIGEST_ISSUE_LABELS.has(l.name));
 }
 
-/** Labels of the reports that run weekly (see WEEKLY_REPORT_WEEKDAY in date.ts). */
-const WEEKLY_ISSUE_LABELS = new Set<string>([
+/**
+ * Labels of the reports that run weekly (see WEEKLY_REPORT_WEEKDAY in date.ts).
+ * The one list of weekly reports: index.ts derives its report IDs from it.
+ */
+export const WEEKLY_ISSUE_LABELS = new Set<string>([
   ISSUE_LABELS.infra,
   ISSUE_LABELS.trending,
   ISSUE_LABELS.community,

@@ -35,13 +35,18 @@ describe("isPrerelease", () => {
     "v3.0.0-rc.2",
     "v1.0.0-preview",
     "v0.5.0.dev",
+    "v0.11.0rc1",
+    "v0.5.0.dev3",
   ])("treats an unflagged %s as a prerelease", (tag) => {
     expect(isPrerelease(release(tag))).toBe(true);
   });
 
-  it.each(["v2.1.288", "v1.0.92-3", "b11379", "v2026.9.8", "rust-v0.162.0"])("treats %s as stable", (tag) => {
-    expect(isPrerelease(release(tag))).toBe(false);
-  });
+  it.each(["v2.1.288", "v1.0.92-3", "b11379", "v2026.9.8", "rust-v0.162.0", "src-v1.0.0", "v1.0.0-arc"])(
+    "treats %s as stable",
+    (tag) => {
+      expect(isPrerelease(release(tag))).toBe(false);
+    },
+  );
 });
 
 // ---------------------------------------------------------------------------

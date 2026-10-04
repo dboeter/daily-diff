@@ -19,6 +19,7 @@ import {
   isPrerelease,
   fetchSkillsData,
   createGitHubIssue,
+  WEEKLY_ISSUE_LABELS,
 } from "./github.ts";
 import {
   type DigestScope,
@@ -110,11 +111,6 @@ async function fetchProject(cfg: RepoConfig, since: Date): Promise<ProjectFetch>
   }
 }
 
-/** Stand-in for a source that is weekly and not due today. */
-function skipped<T>(value: T): Promise<T> {
-  return Promise.resolve(value);
-}
-
 async function fetchAllData(
   now: Date,
   webState: WebState,
@@ -157,7 +153,7 @@ async function fetchAllData(
     Promise.all(AGENTS.map((cfg) => fetchProject(cfg, daySince))),
     weekly
       ? Promise.all(INFRA_REPOS.map((cfg) => fetchProject(cfg, weekSince)))
-      : skipped<ProjectFetch[]>([]),
+      : Promise.resolve<ProjectFetch[]>([]),
     weekly
       ? fetchSkillsData(CLAUDE_SKILLS_REPO)
           .then((d) => {
@@ -168,7 +164,7 @@ async function fetchAllData(
             console.error(`  [claude-code-skills] fetch failed: ${err}`);
             return noSkills;
           })
-      : skipped(noSkills),
+      : Promise.resolve(noSkills),
     Promise.all([
       fetchSiteContent("anthropic", webState).catch((err): WebFetchResult => {
         console.error(`  [web/anthropic] fetch failed: ${err}`);
@@ -198,13 +194,13 @@ async function fetchAllData(
     fetchArxivData().catch((): ArxivData => ({ papers: [], fetchSuccess: false })),
     weekly
       ? fetchHfData().catch((): HfData => ({ models: [], fetchSuccess: false }))
-      : skipped<HfData>({ models: [], fetchSuccess: false }),
+      : Promise.resolve<HfData>({ models: [], fetchSuccess: false }),
     weekly
       ? fetchDevtoData().catch((): DevtoData => ({ articles: [], fetchSuccess: false }))
-      : skipped<DevtoData>({ articles: [], fetchSuccess: false }),
+      : Promise.resolve<DevtoData>({ articles: [], fetchSuccess: false }),
     weekly
       ? fetchLobstersData().catch((): LobstersData => ({ stories: [], fetchSuccess: false }))
-      : skipped<LobstersData>({ stories: [], fetchSuccess: false }),
+      : Promise.resolve<LobstersData>({ stories: [], fetchSuccess: false }),
   ]);
 
   return {
@@ -260,13 +256,13 @@ function summarizeProjects(
 const AGENTS_SCOPE: DigestScope = {
   subject: "AI coding agents and personal AI assistants",
   window: "last 24h",
-  period: "today",
+  period: AGENTS_REPORT.period,
 };
 
 const INFRA_SCOPE: DigestScope = {
   subject: "AI infrastructure — inference engines, model serving, LLM gateways and fine-tuning frameworks",
   window: "last 7 days",
-  period: "this week",
+  period: INFRA_REPORT.period,
 };
 
 /** Every LLM-generated report body. The weekly ones are empty on other days. */
@@ -290,14 +286,14 @@ async function generateSummaries(
     summarizeProjects("agents", agentActivities, AGENTS_SCOPE, dateStr, MSG.agentsNoActivity),
     weekly
       ? summarizeProjects("infra", infraActivities, INFRA_SCOPE, dateStr, MSG.infraNoActivity)
-      : skipped(""),
+      : Promise.resolve(""),
     weekly
       ? summarize(
           "claude-code-skills",
           buildSkillsPrompt(skillsData.prs, skillsData.issues, dateStr),
           MSG.skillsFailed,
         )
-      : skipped(""),
+      : Promise.resolve(""),
     (async () => {
       if (!weekly) return "";
       const hasData = trendingData.trendingRepos.length > 0 || trendingData.searchRepos.length > 0;
@@ -321,7 +317,7 @@ async function generateSummaries(
 // ---------------------------------------------------------------------------
 
 /** Reports that only exist on the weekly run, in highlights order. */
-const WEEKLY_REPORT_IDS = ["ai-infra", "ai-trending", "ai-community", "ai-hf"] as const;
+const WEEKLY_REPORT_IDS = [...WEEKLY_ISSUE_LABELS].map((label) => `ai-${label}`);
 
 /**
  * Pause between the two highlights attempts when the first one died on a
@@ -401,18 +397,17 @@ async function main(): Promise<void> {
   });
   console.log(`  Saved ${saveFile(agentsContent, dateStr, "ai-agents.md")}`);
 
-  const infraContent = weekly
-    ? buildProjectReportContent({
-        title: INFRA_REPORT.title,
-        dateStr,
-        utcStr,
-        activities: infraActivities,
-        summary: summaries.infraSummary,
-        period: INFRA_REPORT.period,
-        footer: ft,
-      })
-    : "";
+  let infraContent = "";
   if (weekly) {
+    infraContent = buildProjectReportContent({
+      title: INFRA_REPORT.title,
+      dateStr,
+      utcStr,
+      activities: infraActivities,
+      summary: summaries.infraSummary,
+      period: INFRA_REPORT.period,
+      footer: ft,
+    });
     console.log(`  Saved ${saveFile(infraContent, dateStr, "ai-infra.md")}`);
   } else {
     console.log("  [weekly] Infra, trending, community and HF reports — not scheduled today, skipping.");

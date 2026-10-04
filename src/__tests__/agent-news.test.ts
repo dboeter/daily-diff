@@ -42,12 +42,12 @@ const matches = (cfg: RepoConfig, text: string) => agentMatcher(cfg).test(text);
 // ---------------------------------------------------------------------------
 
 describe("agentTerms", () => {
-  it("uses the display name and repo name by default", () => {
-    expect(agentTerms(openclaw)).toEqual(["OpenClaw", "openclaw"]);
+  it("uses the display name, repo name and full repo by default", () => {
+    expect(agentTerms(openclaw)).toEqual(["OpenClaw", "openclaw", "openclaw/openclaw"]);
   });
 
-  it("uses only the keywords when set", () => {
-    expect(agentTerms(pi)).toEqual(["pi coding agent", "pi agent", "earendil"]);
+  it("uses the keywords instead of the short names when set, plus the full repo", () => {
+    expect(agentTerms(pi)).toEqual(["pi coding agent", "pi agent", "earendil", "earendil-works/pi"]);
   });
 });
 
@@ -60,6 +60,17 @@ describe("agentMatcher", () => {
 
   it("is case-insensitive", () => {
     expect(matches(openclaw, "OPENCLAW 2026.9 is out")).toBe(true);
+  });
+
+  it("matches a name followed by a hyphen", () => {
+    expect(matches(claudeCode, "Claude Code-powered review bot")).toBe(true);
+    expect(matches(pi, "earendil-works pi")).toBe(true);
+  });
+
+  it("matches the full owner/repo, with a slash or as trending text", () => {
+    const codex: RepoConfig = { id: "codex", repo: "openai/codex", name: "Codex", keywords: ["codex"] };
+    expect(matches(codex, "Fork of openai/codex with MCP support")).toBe(true);
+    expect(matches(pi, "Patches for earendil-works/pi")).toBe(true);
   });
 
   it("does not match inside a longer word", () => {
@@ -75,6 +86,7 @@ describe("agentMatcher", () => {
     expect(matches(pi, "A new API for agents")).toBe(false);
     expect(matches(pi, "Running Llama on a Raspberry Pi 5")).toBe(false);
     expect(matches(pi, "raspberry-pi agent cluster")).toBe(false);
+    expect(matches(pi, "Building a Raspberry Pi agent for home automation")).toBe(false);
     expect(matches(pi, "Computing pi to a trillion digits")).toBe(false);
   });
 });
@@ -133,7 +145,7 @@ describe("matchAgentNews", () => {
           fullName: "someone/cc-skills",
           description: "A skill pack for Claude Code",
           language: "TypeScript",
-          todayStars: 300,
+          periodStars: 300,
           totalStars: 1000,
           forks: 10,
           url: "https://github.com/someone/cc-skills",

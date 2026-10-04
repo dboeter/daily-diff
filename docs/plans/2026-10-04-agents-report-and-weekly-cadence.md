@@ -23,6 +23,13 @@ Status: Done · Created 2026-10-04 · Decisions confirmed 2026-10-04 · Implemen
 - Function names: `buildProjectDigestPrompt` / `buildProjectReportContent`
   (shared by agents and infra) instead of `buildAgentsPrompt` /
   `buildAgentsReportContent`.
+- **Prompt shape:** per-agent sections are `##` headings, not `###` — the
+  report has no other `##` level under its `#` title, so `###` would skip one.
+  The overview is "3–5 sentences" instead of "≤150 words": models follow a
+  sentence count more reliably than a word cap.
+- **News matching:** `keywords` replace the display name and repo name rather
+  than adding to them (adding them back would bring bare "pi" back). The full
+  `owner/repo` always matches, so `openai/codex` mentions are not lost.
 - **Not done:** the live dry run with an LLM (no API key in the dev shell).
   Verified instead: typecheck, lint, format, 265 tests, and a live fetch of
   releases / hot issues / news for all 12 agents without LLM calls.
