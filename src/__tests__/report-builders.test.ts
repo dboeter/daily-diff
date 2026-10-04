@@ -1,12 +1,7 @@
 import { describe, it, expect } from "vitest";
-import {
-  buildCliReportContent,
-  buildOpenclawReportContent,
-  buildInfraReportContent,
-  extractTldr,
-} from "../report-builders.ts";
-import type { RepoDigest } from "../prompts.ts";
-import type { GitHubItem, GitHubRelease } from "../github.ts";
+import { buildProjectReportContent, buildInfraReportContent, extractTldr } from "../report-builders.ts";
+import type { ProjectActivity, RepoDigest } from "../prompts.ts";
+import type { GitHubRelease } from "../github.ts";
 
 // ---------------------------------------------------------------------------
 // Fixtures
@@ -18,137 +13,69 @@ function makeDigest(overrides: Partial<RepoDigest> = {}): RepoDigest {
     issues: [],
     prs: [],
     releases: [],
-    discussions: [],
     summary: "Test summary content",
     ...overrides,
   };
 }
 
 // ---------------------------------------------------------------------------
-// buildCliReportContent
+// buildProjectReportContent
 // ---------------------------------------------------------------------------
 
-describe("buildCliReportContent", () => {
-  it("includes title, meta, and all sections", () => {
-    const digests = [
-      makeDigest({ config: { id: "claude-code", repo: "anthropics/claude-code", name: "Claude Code" } }),
-      makeDigest({ config: { id: "codex", repo: "openai/codex", name: "OpenAI Codex" } }),
-    ];
-    const result = buildCliReportContent(
-      digests,
-      "Skills summary",
-      "Comparison content",
-      "2026-03-09 00:00",
-      "2026-03-09",
-      "\n---\nfooter",
-      "anthropics/skills",
-    );
+function makeActivity(id: string, overrides: Partial<ProjectActivity> = {}): ProjectActivity {
+  return {
+    config: { id, repo: `org/${id}`, name: id.toUpperCase() },
+    releases: [],
+    prereleaseCount: 0,
+    hotIssues: [],
+    news: [],
+    ...overrides,
+  };
+}
 
-    expect(result).toContain("# AI CLI Tools Community Digest 2026-03-09");
-    expect(result).toContain("Tools covered: 2");
-    expect(result).toContain("[Claude Code](https://github.com/anthropics/claude-code)");
-    expect(result).toContain("[Claude Code Skills](https://github.com/anthropics/skills)");
-    expect(result).toContain("Cross-Tool Comparison");
-    expect(result).toContain("Comparison content");
-    expect(result).toContain("Skills summary");
-    expect(result).toContain("footer");
+const stableRelease: GitHubRelease = {
+  tag_name: "v1",
+  name: "v1",
+  published_at: "2026-10-04T00:00:00Z",
+  prerelease: false,
+};
+
+describe("buildProjectReportContent", () => {
+  const input = {
+    title: "AI Agents Digest",
+    dateStr: "2026-10-04",
+    utcStr: "2026-10-03 22:50",
+    summary: "## Overview\nLLM_BODY",
+    period: "today",
+    footer: "FOOTER",
+    activities: [
+      makeActivity("alpha", { releases: [stableRelease], prereleaseCount: 2 }),
+      makeActivity("beta", { prereleaseCount: 5 }),
+      makeActivity("gamma"),
+    ],
+  };
+
+  it("renders title, counts, the LLM body and the footer", () => {
+    const result = buildProjectReportContent(input);
+    expect(result).toContain("# AI Agents Digest 2026-10-04");
+    expect(result).toContain(
+      "Projects: 3 | Active today: 1 | Stable releases: 1 | Prereleases (not covered): 7",
+    );
+    expect(result).toContain("LLM_BODY");
+    expect(result.endsWith("FOOTER")).toBe(true);
   });
 
-  it("includes title and meta in English", () => {
-    const digests = [makeDigest()];
-    const result = buildCliReportContent(
-      digests,
-      "Skills",
-      "Comparison",
-      "2026-03-09 00:00",
-      "2026-03-09",
-      "",
-      "anthropics/skills",
+  it("lists quiet projects in one line, prerelease-only ones included", () => {
+    const result = buildProjectReportContent(input);
+    expect(result).toContain(
+      "**Quiet today:** [BETA](https://github.com/org/beta), [GAMMA](https://github.com/org/gamma)",
     );
-    expect(result).toContain("# AI CLI Tools Community Digest 2026-03-09");
-    expect(result).toContain("Cross-Tool Comparison");
+    expect(result).not.toContain("[ALPHA]");
   });
 
-  it("nests skills section inside claude-code details only", () => {
-    const digests = [
-      makeDigest({ config: { id: "claude-code", repo: "anthropics/claude-code", name: "Claude Code" } }),
-      makeDigest({ config: { id: "codex", repo: "openai/codex", name: "Codex" } }),
-    ];
-    const result = buildCliReportContent(
-      digests,
-      "SKILLS_CONTENT",
-      "comparison",
-      "",
-      "",
-      "",
-      "anthropics/skills",
-    );
-
-    // Skills should appear inside claude-code details
-    const claudeIdx = result.indexOf("Claude Code");
-    const skillsIdx = result.indexOf("SKILLS_CONTENT");
-    expect(skillsIdx).toBeGreaterThan(claudeIdx);
-    // Skills should not appear after codex section
-    expect(result.split("SKILLS_CONTENT")).toHaveLength(2); // appears exactly once
-  });
-});
-
-// ---------------------------------------------------------------------------
-// buildOpenclawReportContent
-// ---------------------------------------------------------------------------
-
-describe("buildOpenclawReportContent", () => {
-  it("includes all sections", () => {
-    const openclaw = { id: "openclaw", repo: "openclaw/openclaw", name: "OpenClaw" };
-    const peers = [{ id: "peer1", repo: "org/peer1", name: "Peer1" }];
-    const peerDigests = [makeDigest({ config: peers[0] })];
-    const fetchedOpenclaw = {
-      cfg: openclaw,
-      issues: [{ number: 1 } as unknown as GitHubItem],
-      prs: [] as GitHubItem[],
-      releases: [] as GitHubRelease[],
-      discussions: [],
-    };
-
-    const result = buildOpenclawReportContent(
-      fetchedOpenclaw,
-      peerDigests,
-      "OpenClaw summary",
-      "Peers comparison",
-      "2026-03-09 00:00",
-      "2026-03-09",
-      "\nfooter",
-      openclaw,
-      peers,
-    );
-
-    expect(result).toContain("# OpenClaw Ecosystem Digest 2026-03-09");
-    expect(result).toContain("Issues: 1");
-    expect(result).toContain("Projects covered: 2");
-    expect(result).toContain("[OpenClaw](https://github.com/openclaw/openclaw)");
-    expect(result).toContain("[Peer1](https://github.com/org/peer1)");
-    expect(result).toContain("OpenClaw Deep Dive");
-    expect(result).toContain("Cross-Ecosystem Comparison");
-    expect(result).toContain("Peer Project Reports");
-    expect(result).toContain("footer");
-  });
-
-  it("renders in English", () => {
-    const openclaw = { id: "openclaw", repo: "openclaw/openclaw", name: "OpenClaw" };
-    const result = buildOpenclawReportContent(
-      { cfg: openclaw, issues: [], prs: [], releases: [], discussions: [] },
-      [],
-      "summary",
-      "comparison",
-      "",
-      "2026-03-09",
-      "",
-      openclaw,
-      [],
-    );
-    expect(result).toContain("# OpenClaw Ecosystem Digest 2026-03-09");
-    expect(result).toContain("OpenClaw Deep Dive");
-    expect(result).toContain("Cross-Ecosystem Comparison");
+  it("omits the quiet line when every project was active", () => {
+    const result = buildProjectReportContent({ ...input, activities: [input.activities[0]!] });
+    expect(result).not.toContain("Quiet today");
   });
 });
 

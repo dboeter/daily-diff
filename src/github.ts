@@ -23,11 +23,10 @@ export interface RepoConfig {
    */
   paginated?: boolean;
   /**
-   * Also fetch GitHub Discussions (GraphQL). Enable only for repos whose
-   * discussion board is actually active — most tracked repos have it enabled
-   * but dormant, and the extra call would just burn GraphQL quota.
+   * Terms matchAgentNews looks for in news items. Defaults to the display name
+   * and repo name; set this when the name is a common word (e.g. "Pi").
    */
-  discussions?: boolean;
+  keywords?: string[];
 }
 
 export interface GitHubUser {
@@ -62,21 +61,7 @@ export interface GitHubRelease {
   name: string;
   body?: string | null;
   published_at: string;
-}
-
-export interface GitHubDiscussion {
-  number: number;
-  title: string;
-  body?: string | null;
-  category: string;
-  author: string;
-  created_at: string;
-  updated_at: string;
-  comments: number;
-  upvotes: number;
-  /** True when the thread has an accepted answer (Q&A categories only). */
-  answered: boolean;
-  html_url: string;
+  prerelease: boolean;
 }
 
 export interface RepoFetch {
@@ -84,7 +69,6 @@ export interface RepoFetch {
   issues: GitHubItem[];
   prs: GitHubItem[];
   releases: GitHubRelease[];
-  discussions: GitHubDiscussion[];
 }
 
 // ---------------------------------------------------------------------------
@@ -171,129 +155,95 @@ export async function fetchRecentItems(
   return all;
 }
 
+/**
+ * Releases published since `since`, newest first. 100 is the API maximum: a
+ * weekly window on llama.cpp, which tags several builds a day, already runs to
+ * 35–70 releases.
+ */
 export async function fetchRecentReleases(repo: string, since: Date): Promise<GitHubRelease[]> {
   const releases = await githubGet<GitHubRelease[]>(`https://api.github.com/repos/${repo}/releases`, {
-    per_page: "10",
+    per_page: "100",
   });
   return releases.filter((r) => new Date(r.published_at) >= since);
 }
 
-interface DiscussionNode {
-  number: number;
-  title: string;
-  body?: string | null;
-  createdAt: string;
-  updatedAt: string;
-  upvoteCount: number;
-  url: string;
-  answer: { id: string } | null;
-  category: { name: string } | null;
-  author: { login: string } | null;
-  comments: { totalCount: number };
-}
-
-interface DiscussionsResponse {
-  data?: {
-    repository?: {
-      discussions?: {
-        pageInfo: { hasNextPage: boolean; endCursor: string | null };
-        nodes: DiscussionNode[];
-      } | null;
-    } | null;
-  };
-  errors?: { message: string }[];
-}
-
-const DISCUSSIONS_QUERY = `
-query($owner: String!, $name: String!, $after: String) {
-  repository(owner: $owner, name: $name) {
-    discussions(first: 100, after: $after, orderBy: {field: UPDATED_AT, direction: DESC}) {
-      pageInfo { hasNextPage endCursor }
-      nodes {
-        number
-        title
-        body
-        createdAt
-        updatedAt
-        upvoteCount
-        url
-        answer { id }
-        category { name }
-        author { login }
-        comments { totalCount }
-      }
-    }
-  }
-}`;
-
-/** Discussion bodies are trimmed at fetch time — prompts only ever show a snippet. */
-const DISCUSSION_BODY_LIMIT = 500;
-
 /**
- * Higher than MAX_PAGES: a repo with Issues/PRs disabled routes its entire
- * community through Discussions, so a day's worth easily exceeds 500 threads.
- * GraphQL pages are cheap (~1 rate-limit point each) and the loop still stops
- * as soon as a page ends before `since`.
+ * Tags that mark a preview build. Several projects publish nightlies and alphas
+ * as ordinary releases (Qwen Code and Gemini CLI nightlies, Codex
+ * `rust-v…-alpha.N`), so the API's `prerelease` flag alone misses them.
  */
-const MAX_DISCUSSION_PAGES = 20;
+const PRERELEASE_TAG = /nightly|alpha|beta|preview|canary|[-.]rc\.?\d*\b|[-.]dev\b/i;
 
-function toDiscussion(n: DiscussionNode): GitHubDiscussion {
-  return {
-    number: n.number,
-    title: n.title,
-    body: (n.body ?? "").slice(0, DISCUSSION_BODY_LIMIT),
-    category: n.category?.name ?? "General",
-    author: n.author?.login ?? "ghost",
-    created_at: n.createdAt,
-    updated_at: n.updatedAt,
-    comments: n.comments.totalCount,
-    upvotes: n.upvoteCount,
-    answered: n.answer !== null,
-    html_url: n.url,
-  };
+export function isPrerelease(r: GitHubRelease): boolean {
+  return r.prerelease || PRERELEASE_TAG.test(r.tag_name);
 }
 
 /**
- * Fetch discussions updated since `since`, newest first.
- * Discussions have no REST endpoint, so this goes through GraphQL.
- * Paginates until a page ends before `since` or MAX_DISCUSSION_PAGES is reached.
+ * Minimum comments + 👍 for an issue to count as hot. Measured 2026-10-04 on
+ * the issues opened in the previous week: the ones worth reporting (Claude
+ * Code auto-mode classifier failures, Codex Remote pairing loops, OpenCode
+ * free-tier errors) sat at 11–98, routine bug reports at 0–9.
  */
-export async function fetchRecentDiscussions(repo: string, since: Date): Promise<GitHubDiscussion[]> {
-  const [owner, name] = repo.split("/");
-  if (!owner || !name) throw new Error(`Invalid repo slug: ${repo}`);
+export const HOT_ISSUE_MIN_ENGAGEMENT = 10;
+/**
+ * Lower bar for an issue labelled as a regression or security problem — the
+ * label is a maintainer's severity signal, but an issue nobody has reacted to
+ * is still not news.
+ */
+export const HOT_ISSUE_MIN_ENGAGEMENT_LABELLED = 3;
+/** Hot issues reported per repo, so one noisy tracker cannot flood the report. */
+export const HOT_ISSUES_PER_REPO = 2;
+/** Matched against each label name, so "area:security" and "type: regression" count. */
+const HOT_LABEL = /regression|security/i;
+/**
+ * Minimum look-back for an issue's creation date. Engagement takes days to
+ * build: on 2026-10-04 not one tracked agent had an issue opened in the last
+ * 24h with 10+ comments and 👍, while the previous week had dozens. 48h finds
+ * them at the cost of an issue appearing in at most two daily reports.
+ */
+export const HOT_ISSUE_MIN_WINDOW_MS = 48 * 60 * 60 * 1000;
 
-  const all: GitHubDiscussion[] = [];
-  let after: string | null = null;
+export function issueEngagement(i: GitHubItem): number {
+  return i.comments + (i.reactions?.["+1"] ?? 0);
+}
 
-  for (let page = 0; page < MAX_DISCUSSION_PAGES; page++) {
-    const resp = await fetch("https://api.github.com/graphql", {
-      method: "POST",
-      headers: { ...headers(), "Content-Type": "application/json" },
-      body: JSON.stringify({
-        query: DISCUSSIONS_QUERY,
-        variables: { owner, name, after },
-      }),
-    });
-    if (!resp.ok) throw new Error(`GitHub GraphQL error ${resp.status} (${repo}): ${await resp.text()}`);
+function isHot(i: GitHubItem): boolean {
+  const labelled = i.labels.some((l) => HOT_LABEL.test(l.name));
+  return issueEngagement(i) >= (labelled ? HOT_ISSUE_MIN_ENGAGEMENT_LABELLED : HOT_ISSUE_MIN_ENGAGEMENT);
+}
 
-    const json = (await resp.json()) as DiscussionsResponse;
-    // GraphQL reports failures with HTTP 200 and an `errors` array
-    if (json.errors?.length) {
-      throw new Error(`GitHub GraphQL error (${repo}): ${json.errors.map((e) => e.message).join("; ")}`);
-    }
+/**
+ * Pick the hot issues from a list: opened since `createdSince` and past the
+ * engagement bar. Highest engagement first, capped at HOT_ISSUES_PER_REPO.
+ * Long-running mega-threads are excluded by the creation date — they would
+ * otherwise top the list every day.
+ */
+export function selectHotIssues(items: GitHubItem[], createdSince: Date): GitHubItem[] {
+  return items
+    .filter((i) => !i.pull_request && new Date(i.created_at) >= createdSince && isHot(i))
+    .sort((a, b) => issueEngagement(b) - issueEngagement(a))
+    .slice(0, HOT_ISSUES_PER_REPO);
+}
 
-    const conn = json.data?.repository?.discussions;
-    if (!conn || conn.nodes.length === 0) break;
-
-    all.push(...conn.nodes.filter((n) => new Date(n.updatedAt) >= since).map(toDiscussion));
-
-    const last = conn.nodes[conn.nodes.length - 1];
-    if (last && new Date(last.updatedAt) < since) break;
-    if (!conn.pageInfo.hasNextPage) break;
-    after = conn.pageInfo.endCursor;
-  }
-
-  return all;
+/**
+ * Hot issues for a repo, in one request: the 50 most-commented issues opened
+ * since `since` (widened to HOT_ISSUE_MIN_WINDOW_MS), via the search API — the
+ * issues list endpoint can only filter by update time, and its top-commented
+ * page is all months-old mega-threads.
+ *
+ * Search allows 30 requests a minute, shared with the trending fetch's 6 topic
+ * queries: 18 on a daily run, 24 on the weekly one. Close to the limit, so a
+ * caller should treat a failure here as "no hot issues", not a failed repo.
+ */
+export async function fetchHotIssues(repo: string, since: Date): Promise<GitHubItem[]> {
+  const createdSince = new Date(Math.min(since.getTime(), Date.now() - HOT_ISSUE_MIN_WINDOW_MS));
+  const result = await githubGet<{ items: GitHubItem[] }>("https://api.github.com/search/issues", {
+    q: `repo:${repo} is:issue created:>=${createdSince.toISOString().slice(0, 19)}Z`,
+    sort: "comments",
+    order: "desc",
+    per_page: "50",
+  });
+  return selectHotIssues(result.items, createdSince);
 }
 
 export async function ensureLabel(name: string, color: string): Promise<void> {
@@ -337,7 +287,7 @@ const TRUNCATION_NOTICE =
 
 /** GitHub label colors by label name. Default: "0075ca". */
 const LABEL_COLORS: Record<string, string> = {
-  openclaw: "e11d48",
+  agents: "e11d48",
   trending: "f9a825",
   hn: "ff6600",
   ph: "da552f",
@@ -376,6 +326,11 @@ const DIGEST_ISSUE_LABELS = new Set([
   ...Object.values(ISSUE_LABELS),
   // Issues from the former bilingual pipeline carried "-en" labels; keep them closable.
   ...Object.values(ISSUE_LABELS).map((l) => `${l}-en`),
+  // The CLI and OpenClaw reports were merged into the agents report.
+  "digest",
+  "digest-en",
+  "openclaw",
+  "openclaw-en",
   "weekly",
   "weekly-en",
   "monthly",

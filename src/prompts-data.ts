@@ -233,7 +233,7 @@ Never include:
 - Generic trend statements ("X dominates", "Y remains active", "Z gains attention")
 
 Return ONLY valid JSON, no markdown fences, no explanation. Format:
-{"ai-cli":["highlight 1",...],"ai-agents":["highlight 1",...],...}
+{"ai-agents":["highlight 1",...],"ai-hn":["highlight 1",...],...}
 
 Rules:
 - Use the exact report IDs from the [brackets] above as keys

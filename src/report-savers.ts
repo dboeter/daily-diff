@@ -95,6 +95,7 @@ export async function saveWebReport(
 export async function saveTrendingReport(
   trendingData: TrendingData,
   trendingSummary: string,
+  skills: { summary: string; repo: string },
   utcStr: string,
   dateStr: string,
   digestRepo: string,
@@ -110,7 +111,14 @@ export async function saveTrendingReport(
     `# ${TRENDING_REPORT.title} ${dateStr}\n\n` +
     `> ${TRENDING_REPORT.sources} | Generated: ${utcStr} UTC\n\n---\n\n`;
 
-  const trendingContent = header + trendingSummary + autoGenFooter();
+  // Skills ranks the community's most-discussed Claude Code skills — the same
+  // "what's popular" genre as trending repos, so it rides along here.
+  const skillsSection =
+    `\n\n---\n\n## ${TRENDING_REPORT.skillsHeading}\n\n` +
+    `> Source: [${skills.repo}](https://github.com/${skills.repo})\n\n` +
+    skills.summary;
+
+  const trendingContent = header + trendingSummary + skillsSection + autoGenFooter();
 
   console.log(`  Saved ${saveFile(trendingContent, dateStr, fileName)}`);
 

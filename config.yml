@@ -2,56 +2,44 @@
 # Edit this file to customize which repositories are tracked.
 # Changes take effect on the next workflow run.
 
-# ── AI CLI tools ──────────────────────────────────────────────────────────────
-# Tracked for per-tool digests and cross-tool comparison.
-# Each entry requires: id (filename slug), repo (owner/repo), name (display name).
-# Set paginated: true for high-volume repos with many daily updates.
-# Set discussions: true to also pull GitHub Discussions (GraphQL). Enable only
-# where the board is actually active — most repos have it on but dormant.
+# ── AI agents ─────────────────────────────────────────────────────────────────
+# Coding agents and personal AI assistants, CLI or not, in one daily report.
+# Each agent is covered by its stable releases, a few hot issues (high
+# engagement or a regression/security label) and news: HN, Anthropic/OpenAI and
+# GitHub Trending items that mention it. Issue and PR churn is not reported.
+# Each entry requires: id (slug), repo (owner/repo), name (display name).
+# Optional keywords: terms to match in news items. Without them the display
+# name and repo name are used. Set them when the name is a common word.
 
-cli_repos:
+agents:
   - id: claude-code
     repo: anthropics/claude-code
     name: Claude Code
   - id: codex
     repo: openai/codex
     name: OpenAI Codex
-    discussions: true
+    keywords: [codex]
   - id: gemini-cli
     repo: google-gemini/gemini-cli
     name: Gemini CLI
   - id: copilot-cli
     repo: github/copilot-cli
     name: GitHub Copilot CLI
+    keywords: [copilot cli]
   - id: opencode
     repo: anomalyco/opencode
     name: OpenCode
   - id: pi
     repo: earendil-works/pi
     name: Pi
-    discussions: true
+    # "pi" alone matches Raspberry Pi and every other use of the word.
+    keywords: [pi coding agent, pi agent, earendil]
   - id: qwen-code
     repo: QwenLM/qwen-code
     name: Qwen Code
-
-# ── Claude Code Skills ────────────────────────────────────────────────────────
-# Tracked separately without a date filter, sorted by community engagement.
-
-skills_repo: anthropics/skills
-
-# ── OpenClaw (primary focus project) ─────────────────────────────────────────
-# Tracked with a dedicated deep-dive report. Set paginated: true for high-volume repos.
-
-openclaw:
-  id: openclaw
-  repo: openclaw/openclaw
-  name: OpenClaw
-  paginated: true
-
-# ── OpenClaw peer projects ────────────────────────────────────────────────────
-# Tracked alongside OpenClaw for cross-ecosystem comparison.
-
-openclaw_peers:
+  - id: openclaw
+    repo: openclaw/openclaw
+    name: OpenClaw
   - id: hermes-agent
     repo: nousresearch/hermes-agent
     name: Hermes Agent
@@ -64,6 +52,11 @@ openclaw_peers:
   - id: zeroclaw
     repo: zeroclaw-labs/zeroclaw
     name: ZeroClaw
+
+# ── Claude Code Skills ────────────────────────────────────────────────────────
+# Tracked separately without a date filter, sorted by community engagement.
+
+skills_repo: anthropics/skills
 
 # ── AI infrastructure ─────────────────────────────────────────────────────────
 # Inference engines, gateways and fine-tuning frameworks that the agent/CLI

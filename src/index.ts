@@ -1,5 +1,5 @@
 /**
- * Daily Diff: daily digest for AI CLI tools and OpenClaw.
+ * Daily Diff: daily digest for AI agents and the AI open-source ecosystem.
  *
  * Env vars:
  *   LLM_PROVIDER        - "anthropic" | "openai" | "github-copilot" | "openrouter" (default: anthropic)
@@ -13,23 +13,25 @@ import fs from "node:fs";
 import path from "node:path";
 import {
   type GitHubItem,
+  type RepoConfig,
   type RepoFetch,
   fetchRecentItems,
   fetchRecentReleases,
-  fetchRecentDiscussions,
+  fetchHotIssues,
+  isPrerelease,
   fetchSkillsData,
   createGitHubIssue,
 } from "./github.ts";
 import {
   type RepoDigest,
-  buildCliPrompt,
-  buildPeerPrompt,
+  type ProjectActivity,
   buildInfraPrompt,
-  buildComparisonPrompt,
   buildInfraComparisonPrompt,
-  buildPeersComparisonPrompt,
+  buildProjectDigestPrompt,
   buildSkillsPrompt,
+  hasActivity,
 } from "./prompts.ts";
+import { matchAgentNews } from "./agent-news.ts";
 import { buildTrendingPrompt, buildHighlightsPrompt, type ReportHighlights } from "./prompts-data.ts";
 import {
   callLlm,
@@ -37,16 +39,13 @@ import {
   saveFile,
   autoGenFooter,
   LLM_TOKENS_TRENDING,
+  LLM_TOKENS_LISTING,
   assertLlmHealthy,
   reportLlmHealth,
   llmHealthLine,
   isConnectionError,
 } from "./report.ts";
-import {
-  buildCliReportContent,
-  buildOpenclawReportContent,
-  buildInfraReportContent,
-} from "./report-builders.ts";
+import { buildProjectReportContent, buildInfraReportContent } from "./report-builders.ts";
 import {
   saveWebReport,
   saveTrendingReport,
@@ -66,19 +65,13 @@ import { fetchDevtoData, type DevtoData } from "./devto.ts";
 import { fetchLobstersData, type LobstersData } from "./lobsters.ts";
 import { loadConfig } from "./config.ts";
 import { toCstDateStr, toUtcStr, weekdayOf, sleep } from "./date.ts";
-import { MSG, ISSUE_LABELS, CLI_ISSUE_TITLE, OPENCLAW_ISSUE_TITLE, INFRA_ISSUE_TITLE } from "./i18n.ts";
+import { MSG, ISSUE_LABELS, AGENTS_REPORT, INFRA_ISSUE_TITLE } from "./i18n.ts";
 
 // ---------------------------------------------------------------------------
 // Repo config — loaded from config.yml, falls back to built-in defaults
 // ---------------------------------------------------------------------------
 
-const {
-  cliRepos: CLI_REPOS,
-  skillsRepo: CLAUDE_SKILLS_REPO,
-  openclaw: OPENCLAW,
-  openclawPeers: OPENCLAW_PEERS,
-  infraRepos: INFRA_REPOS,
-} = loadConfig();
+const { agents: AGENTS, skillsRepo: CLAUDE_SKILLS_REPO, infraRepos: INFRA_REPOS } = loadConfig();
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -94,11 +87,39 @@ function requireEnv(name: string): string {
 // Phase 1: Fetch
 // ---------------------------------------------------------------------------
 
+/** An agent's releases and hot issues; news is matched after every source is in. */
+type AgentFetch = Omit<ProjectActivity, "news">;
+
+/** Stable releases and hot issues for one agent. A failed fetch reads as a quiet day. */
+async function fetchAgent(cfg: RepoConfig, since: Date): Promise<AgentFetch> {
+  try {
+    const [releases, hotIssues] = await Promise.all([
+      fetchRecentReleases(cfg.repo, since),
+      // Search API, rate-limited separately from releases: a failure here must
+      // not discard the releases.
+      fetchHotIssues(cfg.repo, since).catch((err): GitHubItem[] => {
+        console.error(`  [${cfg.id}] hot issues fetch failed: ${err}`);
+        return [];
+      }),
+    ]);
+    const stable = releases.filter((r) => !isPrerelease(r));
+    console.log(
+      `  [${cfg.id}] releases: ${stable.length} stable + ${releases.length - stable.length} pre, ` +
+        `hot issues: ${hotIssues.length}`,
+    );
+    return { config: cfg, releases: stable, prereleaseCount: releases.length - stable.length, hotIssues };
+  } catch (err) {
+    console.error(`  [${cfg.id}] fetch failed: ${err}`);
+    return { config: cfg, releases: [], prereleaseCount: 0, hotIssues: [] };
+  }
+}
+
 async function fetchAllData(
   since: Date,
   webState: WebState,
   fetchHf: boolean,
 ): Promise<{
+  agentFetches: AgentFetch[];
   fetched: RepoFetch[];
   skillsData: { prs: GitHubItem[]; issues: GitHubItem[] };
   webResults: WebFetchResult[];
@@ -110,13 +131,13 @@ async function fetchAllData(
   devtoData: DevtoData;
   lobstersData: LobstersData;
 }> {
-  const allConfigs = [...CLI_REPOS, OPENCLAW, ...OPENCLAW_PEERS, ...INFRA_REPOS];
   console.log(
-    `  Tracking: ${allConfigs.map((r) => r.id).join(", ")}, claude-code-skills, web, hn, ph, arxiv, ` +
+    `  Tracking: ${[...AGENTS, ...INFRA_REPOS].map((r) => r.id).join(", ")}, claude-code-skills, web, hn, ph, arxiv, ` +
       `${fetchHf ? "hf, " : ""}devto, lobsters`,
   );
 
   const [
+    agentFetches,
     fetched,
     skillsData,
     webResults,
@@ -128,24 +149,23 @@ async function fetchAllData(
     devtoData,
     lobstersData,
   ] = await Promise.all([
+    Promise.all(AGENTS.map((cfg) => fetchAgent(cfg, since))),
     Promise.all(
-      allConfigs.map(async (cfg) => {
+      INFRA_REPOS.map(async (cfg) => {
         try {
-          const [issuesRaw, prs, releases, discussions] = await Promise.all([
+          const [issuesRaw, prs, releases] = await Promise.all([
             fetchRecentItems(cfg, "issues", since),
             fetchRecentItems(cfg, "pulls", since),
             fetchRecentReleases(cfg.repo, since),
-            cfg.discussions ? fetchRecentDiscussions(cfg.repo, since) : Promise.resolve([]),
           ]);
           const issues = issuesRaw.filter((i) => !i.pull_request);
           console.log(
-            `  [${cfg.id}] issues: ${issues.length}, prs: ${prs.length}, releases: ${releases.length}` +
-              (cfg.discussions ? `, discussions: ${discussions.length}` : ""),
+            `  [${cfg.id}] issues: ${issues.length}, prs: ${prs.length}, releases: ${releases.length}`,
           );
-          return { cfg, issues, prs, releases, discussions };
+          return { cfg, issues, prs, releases };
         } catch (err) {
           console.error(`  [${cfg.id}] fetch failed: ${err}`);
-          return { cfg, issues: [], prs: [], releases: [], discussions: [] };
+          return { cfg, issues: [], prs: [], releases: [] };
         }
       }),
     ),
@@ -192,6 +212,7 @@ async function fetchAllData(
   ]);
 
   return {
+    agentFetches,
     fetched,
     skillsData,
     webResults,
@@ -222,35 +243,37 @@ async function summarize(id: string, prompt: string, failMsg: string, maxTokens?
 
 /** Summarize a repo's activity, returning a RepoDigest. Skips LLM if no data. */
 async function summarizeRepo(
-  { cfg, issues, prs, releases, discussions }: RepoFetch,
+  { cfg, issues, prs, releases }: RepoFetch,
   prompt: string,
   noActivityMsg: string,
   failMsg: string,
 ): Promise<RepoDigest> {
-  if (!issues.length && !prs.length && !releases.length && !discussions.length) {
+  if (!issues.length && !prs.length && !releases.length) {
     console.log(`  [${cfg.id}] No activity, skipping LLM call`);
-    return { config: cfg, issues, prs, releases, discussions, summary: noActivityMsg };
+    return { config: cfg, issues, prs, releases, summary: noActivityMsg };
   }
   const summary = await summarize(cfg.id, prompt, failMsg);
-  return { config: cfg, issues, prs, releases, discussions, summary };
+  return { config: cfg, issues, prs, releases, summary };
 }
+
+const AGENTS_SCOPE = {
+  subject: "AI coding agents and personal AI assistants",
+  window: "last 24h",
+  period: "today",
+} as const;
 
 /** Every LLM-generated report body. */
 interface Summaries {
-  cliDigests: RepoDigest[];
-  openclawSummary: string;
+  agentsSummary: string;
   skillsSummary: string;
-  peerDigests: RepoDigest[];
   infraDigests: RepoDigest[];
   trendingSummary: string;
 }
 
 /** Generate every report body. */
 async function generateSummaries(
-  fetchedCli: RepoFetch[],
-  fetchedOpenclaw: RepoFetch,
+  agentActivities: ProjectActivity[],
   skillsData: { prs: GitHubItem[]; issues: GitHubItem[] },
-  fetchedPeers: RepoFetch[],
   fetchedInfra: RepoFetch[],
   trendingData: TrendingData,
   dateStr: string,
@@ -258,62 +281,42 @@ async function generateSummaries(
   const noActivity = MSG.noActivity;
   const fail = MSG.summaryFailed;
 
-  const [cliDigests, openclawSummary, skillsSummary, peerDigests, infraDigests, trendingSummary] =
-    await Promise.all([
-      Promise.all(
-        fetchedCli.map((f) =>
-          summarizeRepo(
-            f,
-            buildCliPrompt(f.cfg, f.issues, f.prs, f.releases, f.discussions, dateStr),
-            noActivity,
-            fail,
-          ),
-        ),
-      ),
-      summarizeRepo(
-        fetchedOpenclaw,
-        buildPeerPrompt(
-          fetchedOpenclaw.cfg,
-          fetchedOpenclaw.issues,
-          fetchedOpenclaw.prs,
-          fetchedOpenclaw.releases,
-          dateStr,
-          50,
-          30,
-        ),
-        noActivity,
-        fail,
-      ).then((d) => d.summary),
-      summarize(
-        "claude-code-skills",
-        buildSkillsPrompt(skillsData.prs, skillsData.issues, dateStr),
-        MSG.skillsFailed,
-      ),
-      Promise.all(
-        fetchedPeers.map((f) =>
-          summarizeRepo(f, buildPeerPrompt(f.cfg, f.issues, f.prs, f.releases, dateStr), noActivity, fail),
-        ),
-      ),
-      Promise.all(
-        fetchedInfra.map((f) =>
-          summarizeRepo(f, buildInfraPrompt(f.cfg, f.issues, f.prs, f.releases, dateStr), noActivity, fail),
-        ),
-      ),
-      (async () => {
-        const hasData = trendingData.trendingRepos.length > 0 || trendingData.searchRepos.length > 0;
-        if (!hasData) {
-          return MSG.trendingNoData;
-        }
-        return summarize(
-          "trending",
-          buildTrendingPrompt(trendingData, dateStr),
-          MSG.trendingFailed,
-          LLM_TOKENS_TRENDING,
-        );
-      })(),
-    ]);
+  const activeAgents = agentActivities.filter(hasActivity);
 
-  return { cliDigests, openclawSummary, skillsSummary, peerDigests, infraDigests, trendingSummary };
+  const [agentsSummary, skillsSummary, infraDigests, trendingSummary] = await Promise.all([
+    activeAgents.length
+      ? summarize(
+          "agents",
+          buildProjectDigestPrompt(activeAgents, AGENTS_SCOPE, dateStr),
+          MSG.summaryFailed,
+          LLM_TOKENS_LISTING,
+        )
+      : Promise.resolve(MSG.agentsNoActivity),
+    summarize(
+      "claude-code-skills",
+      buildSkillsPrompt(skillsData.prs, skillsData.issues, dateStr),
+      MSG.skillsFailed,
+    ),
+    Promise.all(
+      fetchedInfra.map((f) =>
+        summarizeRepo(f, buildInfraPrompt(f.cfg, f.issues, f.prs, f.releases, dateStr), noActivity, fail),
+      ),
+    ),
+    (async () => {
+      const hasData = trendingData.trendingRepos.length > 0 || trendingData.searchRepos.length > 0;
+      if (!hasData) {
+        return MSG.trendingNoData;
+      }
+      return summarize(
+        "trending",
+        buildTrendingPrompt(trendingData, dateStr),
+        MSG.trendingFailed,
+        LLM_TOKENS_TRENDING,
+      );
+    })(),
+  ]);
+
+  return { agentsSummary, skillsSummary, infraDigests, trendingSummary };
 }
 
 // ---------------------------------------------------------------------------
@@ -356,6 +359,7 @@ async function main(): Promise<void> {
   // 1. Fetch all data in parallel
   const webState = loadWebState();
   const {
+    agentFetches,
     fetched,
     skillsData,
     webResults,
@@ -368,98 +372,53 @@ async function main(): Promise<void> {
     lobstersData,
   } = await fetchAllData(since, webState, isHfWeek);
 
-  const peerIds = new Set(OPENCLAW_PEERS.map((p) => p.id));
-  const infraIds = new Set(INFRA_REPOS.map((r) => r.id));
-  const fetchedCli = fetched.filter(
-    (f) => f.cfg.id !== OPENCLAW.id && !peerIds.has(f.cfg.id) && !infraIds.has(f.cfg.id),
-  );
-  const fetchedOpenclaw = fetched.find((f) => f.cfg.id === OPENCLAW.id)!;
-  const fetchedPeers = fetched.filter((f) => peerIds.has(f.cfg.id));
-  const fetchedInfra = fetched.filter((f) => infraIds.has(f.cfg.id));
+  // Agent news is matched against the other sources' data, so it waits for them.
+  const agentNews = matchAgentNews(AGENTS, { hn: hnData, web: webResults, trending: trendingData });
+  const agentActivities: ProjectActivity[] = agentFetches.map((f) => ({
+    ...f,
+    news: agentNews.get(f.config.id) ?? [],
+  }));
 
   // 2. Generate every report body
   console.log("  Generating summaries...");
-  const summaries = await generateSummaries(
-    fetchedCli,
-    fetchedOpenclaw,
-    skillsData,
-    fetchedPeers,
-    fetchedInfra,
-    trendingData,
-    dateStr,
-  );
+  const summaries = await generateSummaries(agentActivities, skillsData, fetched, trendingData, dateStr);
 
   // First gate: ~20 calls have run by now, enough to tell an outage from a
   // flaky report. Bailing here costs nothing — no file has been written yet.
   assertLlmHealthy("summary");
 
-  // 3. Generate cross-repo comparisons
-  console.log("  Calling LLM for comparative analyses...");
-  const openclawDigest: RepoDigest = {
-    config: OPENCLAW,
-    issues: fetchedOpenclaw.issues,
-    prs: fetchedOpenclaw.prs,
-    releases: fetchedOpenclaw.releases,
-    discussions: fetchedOpenclaw.discussions,
-    summary: summaries.openclawSummary,
-  };
-
+  // 3. Generate the infra cross-repo comparison
+  console.log("  Calling LLM for infra comparison...");
   // Routed through summarize() so a failed comparison degrades to a fixed
   // notice, the same way a failed per-repo summary does. These calls used to be
   // bare: on 2026-08-28 the provider was unreachable, and the rejection here
   // aborted main() — discarding every summary already generated along with the
   // HN, ArXiv, Product Hunt, trending and web reports, whose data had all been
   // fetched successfully and which have nothing to do with a comparison.
-  const [comparison, peersComparison, infraComparison] = await Promise.all([
-    summarize("cli-comparison", buildComparisonPrompt(summaries.cliDigests, dateStr), MSG.comparisonFailed),
-    summarize(
-      "peers-comparison",
-      buildPeersComparisonPrompt(openclawDigest, summaries.peerDigests, dateStr),
-      MSG.comparisonFailed,
-    ),
-    summarize(
-      "infra-comparison",
-      buildInfraComparisonPrompt(summaries.infraDigests, dateStr),
-      MSG.comparisonFailed,
-    ),
-  ]);
+  const infraComparison = await summarize(
+    "infra-comparison",
+    buildInfraComparisonPrompt(summaries.infraDigests, dateStr),
+    MSG.comparisonFailed,
+  );
 
   // 4. Build + save all reports
   const ft = autoGenFooter();
   // Called without a URL for the full report on disk; with the committed file's
   // URL for the brief GitHub issue variant (comparison + per-project TL;DR).
-  const buildCli = (fullReportUrl?: string) =>
-    buildCliReportContent(
-      summaries.cliDigests,
-      summaries.skillsSummary,
-      comparison,
-      utcStr,
-      dateStr,
-      ft,
-      CLAUDE_SKILLS_REPO,
-      fullReportUrl,
-    );
-  const buildOpenclaw = (fullReportUrl?: string) =>
-    buildOpenclawReportContent(
-      fetchedOpenclaw,
-      summaries.peerDigests,
-      summaries.openclawSummary,
-      peersComparison,
-      utcStr,
-      dateStr,
-      ft,
-      OPENCLAW,
-      OPENCLAW_PEERS,
-      fullReportUrl,
-    );
+  const agentsContent = buildProjectReportContent({
+    title: AGENTS_REPORT.title,
+    dateStr,
+    utcStr,
+    activities: agentActivities,
+    summary: summaries.agentsSummary,
+    period: AGENTS_REPORT.period,
+    footer: ft,
+  });
   const buildInfra = (fullReportUrl?: string) =>
     buildInfraReportContent(summaries.infraDigests, infraComparison, utcStr, dateStr, ft, fullReportUrl);
-  const cliContent = buildCli();
-  const openclawContent = buildOpenclaw();
   const infraContent = buildInfra();
 
-  console.log(`  Saved ${saveFile(cliContent, dateStr, "ai-cli.md")}`);
-  console.log(`  Saved ${saveFile(openclawContent, dateStr, "ai-agents.md")}`);
+  console.log(`  Saved ${saveFile(agentsContent, dateStr, "ai-agents.md")}`);
   console.log(`  Saved ${saveFile(infraContent, dateStr, "ai-infra.md")}`);
 
   if (!isHfWeek) {
@@ -468,7 +427,14 @@ async function main(): Promise<void> {
 
   await Promise.all([
     saveWebReport(webResults, webState, utcStr, dateStr, digestRepo),
-    saveTrendingReport(trendingData, summaries.trendingSummary, utcStr, dateStr, digestRepo),
+    saveTrendingReport(
+      trendingData,
+      summaries.trendingSummary,
+      { summary: summaries.skillsSummary, repo: CLAUDE_SKILLS_REPO },
+      utcStr,
+      dateStr,
+      digestRepo,
+    ),
     saveHnReport(hnData, utcStr, dateStr, digestRepo),
     savePhReport(phData, utcStr, dateStr, digestRepo),
     saveArxivReport(arxivData, utcStr, dateStr, digestRepo),
@@ -489,8 +455,7 @@ async function main(): Promise<void> {
   };
 
   const reports: Record<string, string> = {
-    "ai-cli": cliContent,
-    "ai-agents": openclawContent,
+    "ai-agents": agentsContent,
     "ai-infra": infraContent,
   };
   for (const id of [
@@ -542,22 +507,15 @@ async function main(): Promise<void> {
   const highlightsPath = saveFile(JSON.stringify(highlights, null, 2), dateStr, "highlights.json");
   console.log(`  Saved ${highlightsPath}`);
 
-  // 6. Create GitHub issues for CLI + OpenClaw + infra
+  // 6. Create GitHub issues for agents + infra
   if (digestRepo) {
     const fileUrl = (file: string) => `https://github.com/${digestRepo}/blob/main/digests/${dateStr}/${file}`;
-    const cliUrl = await createGitHubIssue(
-      CLI_ISSUE_TITLE(dateStr),
-      buildCli(fileUrl("ai-cli.md")),
-      ISSUE_LABELS.cli,
+    const agentsUrl = await createGitHubIssue(
+      AGENTS_REPORT.issueTitle(dateStr),
+      agentsContent,
+      ISSUE_LABELS.agents,
     );
-    console.log(`  Created CLI issue: ${cliUrl}`);
-
-    const ocUrl = await createGitHubIssue(
-      OPENCLAW_ISSUE_TITLE(dateStr),
-      buildOpenclaw(fileUrl("ai-agents.md")),
-      ISSUE_LABELS.openclaw,
-    );
-    console.log(`  Created OpenClaw issue: ${ocUrl}`);
+    console.log(`  Created agents issue: ${agentsUrl}`);
 
     const infraUrl = await createGitHubIssue(
       INFRA_ISSUE_TITLE(dateStr),

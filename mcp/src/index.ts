@@ -14,8 +14,7 @@
 const PAGES_URL = "https://dboeter.github.io/daily-diff";
 
 const REPORT_LABELS: Record<string, string> = {
-  "ai-cli": "AI CLI Tools Digest",
-  "ai-agents": "AI Agents Ecosystem",
+  "ai-agents": "AI Agents Digest",
   "ai-infra": "AI Infrastructure",
   "ai-web": "Official AI Content",
   "ai-trending": "GitHub AI Trends",
@@ -24,6 +23,8 @@ const REPORT_LABELS: Record<string, string> = {
   "ai-arxiv": "ArXiv AI Research",
   "ai-hf": "Hugging Face Trending Models",
   "ai-community": "Tech Community AI",
+  // Archive only: merged into ai-agents in October 2026.
+  "ai-cli": "AI CLI Tools Digest",
 };
 
 interface ManifestDate {
@@ -81,7 +82,7 @@ async function toolGetReport(args: Record<string, unknown>): Promise<string> {
 }
 
 async function toolGetLatest(args: Record<string, unknown>): Promise<string> {
-  const type = String(args["type"] ?? "ai-cli").trim();
+  const type = String(args["type"] ?? "ai-agents").trim();
   const { dates } = await fetchManifest();
   for (const { date, reports } of dates) {
     if (reports.includes(type)) {
@@ -156,7 +157,7 @@ const TOOLS = [
         type: {
           type: "string",
           description:
-            "Report type: ai-cli, ai-agents, ai-infra, ai-web, ai-trending, ai-hn, ai-ph, ai-arxiv, ai-hf, ai-community",
+            "Report type: ai-agents, ai-infra, ai-web, ai-trending, ai-hn, ai-ph, ai-arxiv, ai-hf, ai-community (archive: ai-cli)",
         },
       },
       required: ["date", "type"],
@@ -170,7 +171,7 @@ const TOOLS = [
       properties: {
         type: {
           type: "string",
-          description: "Report type (default: ai-cli). Use list_reports to see all available types.",
+          description: "Report type (default: ai-agents). Use list_reports to see all available types.",
         },
       },
     },

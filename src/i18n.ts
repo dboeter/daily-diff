@@ -8,6 +8,7 @@
 
 export const MSG = {
   noActivity: "No activity in the last 24 hours.",
+  agentsNoActivity: "No stable releases, hot issues or news mentions today.",
   summaryFailed: "⚠️ Summary generation failed.",
   skillsFailed: "⚠️ Skills summary generation failed.",
   trendingNoData: "⚠️ Trending data unavailable, unable to generate report.",
@@ -19,20 +20,11 @@ export const MSG = {
 // Report headers & labels (used in report-builders.ts, index.ts)
 // ---------------------------------------------------------------------------
 
-export const CLI_REPORT = {
-  title: "AI CLI Tools Community Digest",
-  meta: (utcStr: string, count: number) => `> Generated: ${utcStr} UTC | Tools covered: ${count}\n\n`,
-  skillsHeading: "Claude Code Skills Highlights",
-  skillsSource: "Source",
-  comparison: "Cross-Tool Comparison",
-  detail: "Per-Tool Reports",
-} as const;
-
-export const OPENCLAW_REPORT = {
-  title: "OpenClaw Ecosystem Digest",
-  deepDive: "OpenClaw Deep Dive",
-  comparison: "Cross-Ecosystem Comparison",
-  peers: "Peer Project Reports",
+// Replaced the separate CLI and OpenClaw-ecosystem reports in October 2026.
+export const AGENTS_REPORT = {
+  title: "AI Agents Digest",
+  period: "today",
+  issueTitle: (dateStr: string) => `🤖 AI Agents Digest ${dateStr}`,
 } as const;
 
 export const INFRA_REPORT = {
@@ -56,6 +48,7 @@ export const WEB_REPORT = {
 export const TRENDING_REPORT = {
   title: "AI Open Source Trends",
   sources: "Sources: GitHub Trending + GitHub Search API",
+  skillsHeading: "Claude Code Skills Highlights",
   issueTitle: (dateStr: string) => `📈 AI Open Source Trends ${dateStr}`,
 } as const;
 
@@ -87,8 +80,7 @@ export const COMMUNITY_REPORT = {
 } as const;
 
 export const ISSUE_LABELS = {
-  cli: "digest",
-  openclaw: "openclaw",
+  agents: "agents",
   infra: "infra",
   web: "web",
   trending: "trending",
@@ -98,10 +90,6 @@ export const ISSUE_LABELS = {
   hf: "hf",
   community: "community",
 } as const;
-
-export const CLI_ISSUE_TITLE = (dateStr: string) => `📊 AI CLI Tools Digest ${dateStr}`;
-
-export const OPENCLAW_ISSUE_TITLE = (dateStr: string) => `🦞 OpenClaw Ecosystem Digest ${dateStr}`;
 
 export const INFRA_ISSUE_TITLE = (dateStr: string) => `⚙️ AI Infrastructure Digest ${dateStr}`;
 
@@ -118,8 +106,7 @@ export const FOOTER = {
 // ---------------------------------------------------------------------------
 
 export const REPORT_LABELS: Record<string, string> = {
-  "ai-cli": "AI CLI Tools Digest",
-  "ai-agents": "AI Agents Ecosystem Digest",
+  "ai-agents": "AI Agents Digest",
   "ai-infra": "AI Infrastructure Digest",
   "ai-web": "Official AI Content Report",
   "ai-trending": "AI Open Source Trends",
@@ -128,6 +115,8 @@ export const REPORT_LABELS: Record<string, string> = {
   "ai-arxiv": "ArXiv AI Research Digest",
   "ai-hf": "Hugging Face Trending Models Weekly",
   "ai-community": "Tech Community AI Digest",
+  // Merged into ai-agents in October 2026; kept so archived reports keep a title.
+  "ai-cli": "AI CLI Tools Digest",
   // Weekly/monthly rollups are no longer generated; kept so archived reports
   // still render a proper title in the sidebar and RSS feed.
   "ai-weekly": "AI Tools Weekly Digest",
@@ -139,8 +128,7 @@ export const REPORT_LABELS: Record<string, string> = {
 // ---------------------------------------------------------------------------
 
 export const NOTIFY_LABELS: Record<string, string> = {
-  "ai-cli": "AI CLI Tools",
-  "ai-agents": "AI Agents Ecosystem",
+  "ai-agents": "AI Agents",
   "ai-infra": "AI Infrastructure",
   "ai-web": "Official Updates",
   "ai-trending": "GitHub Trends",

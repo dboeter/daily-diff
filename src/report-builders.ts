@@ -2,9 +2,8 @@
  * Report content builders — extracted from index.ts for testability.
  */
 
-import type { RepoConfig, RepoFetch } from "./github.ts";
-import type { RepoDigest } from "./prompts.ts";
-import { CLI_REPORT, OPENCLAW_REPORT, INFRA_REPORT } from "./i18n.ts";
+import type { ProjectActivity, RepoDigest } from "./prompts.ts";
+import { INFRA_REPORT } from "./i18n.ts";
 
 // ---------------------------------------------------------------------------
 // Brief (GitHub issue) variant
@@ -47,56 +46,44 @@ function fullReportLink(url: string): string {
 }
 
 // ---------------------------------------------------------------------------
-// CLI Report
+// Project digest (agents report)
 // ---------------------------------------------------------------------------
 
-export function buildCliReportContent(
-  cliDigests: RepoDigest[],
-  skillsSummary: string,
-  comparison: string,
-  utcStr: string,
-  dateStr: string,
-  footer: string,
-  skillsRepo: string,
-  fullReportUrl?: string,
-): string {
-  const repoLinks =
-    cliDigests.map((d) => `- [${d.config.name}](https://github.com/${d.config.repo})`).join("\n") +
-    `\n- [Claude Code Skills](https://github.com/${skillsRepo})`;
+export interface ProjectReportInput {
+  title: string;
+  dateStr: string;
+  utcStr: string;
+  /** Every tracked project, active or not, in config order. */
+  activities: ProjectActivity[];
+  /** LLM output: overview plus one section per active project. */
+  summary: string;
+  /** Label for the quiet-projects line, e.g. "today". */
+  period: string;
+  footer: string;
+}
 
-  const title = `# ${CLI_REPORT.title} ${dateStr}\n\n`;
-  const meta = CLI_REPORT.meta(utcStr, cliDigests.length);
-
-  const skillsSection =
-    `## ${CLI_REPORT.skillsHeading}\n\n` +
-    `> ${CLI_REPORT.skillsSource}: [anthropics/skills](https://github.com/${skillsRepo})\n\n` +
-    `${skillsSummary}\n\n---\n\n`;
-
-  const toolSections = cliDigests
-    .map((d) => {
-      const skills = d.config.id === "claude-code" ? skillsSection : "";
-      return [
-        `<details>`,
-        `<summary><strong>${d.config.name}</strong> — <a href="https://github.com/${d.config.repo}">${d.config.repo}</a></summary>`,
-        ``,
-        skills + d.summary,
-        ``,
-        `</details>`,
-      ].join("\n");
-    })
-    .join("\n\n");
+/**
+ * Release-focused report. Quiet projects are listed in one line at the end
+ * rather than each getting a "no activity" section. Small enough to post as
+ * the GitHub issue body unchanged, so there is no brief variant.
+ */
+export function buildProjectReportContent(r: ProjectReportInput): string {
+  const releases = r.activities.reduce((n, a) => n + a.releases.length, 0);
+  const prereleases = r.activities.reduce((n, a) => n + a.prereleaseCount, 0);
+  const quiet = r.activities.filter(
+    (a) => a.releases.length === 0 && a.hotIssues.length === 0 && a.news.length === 0,
+  );
+  const link = (a: ProjectActivity) => `[${a.config.name}](https://github.com/${a.config.repo})`;
 
   return (
-    title +
-    meta +
-    `${repoLinks}\n\n` +
+    `# ${r.title} ${r.dateStr}\n\n` +
+    `> Generated: ${r.utcStr} UTC | Projects: ${r.activities.length} | ` +
+    `Active ${r.period}: ${r.activities.length - quiet.length} | ` +
+    `Stable releases: ${releases} | Prereleases (not covered): ${prereleases}\n\n` +
     `---\n\n` +
-    `## ${CLI_REPORT.comparison}\n\n` +
-    comparison +
-    `\n\n---\n\n` +
-    `## ${CLI_REPORT.detail}\n\n` +
-    (fullReportUrl ? fullReportLink(fullReportUrl) + briefSections(cliDigests) : toolSections) +
-    footer
+    r.summary +
+    (quiet.length ? `\n\n---\n\n**Quiet ${r.period}:** ${quiet.map(link).join(", ")}` : "") +
+    r.footer
   );
 }
 
@@ -139,61 +126,6 @@ export function buildInfraReportContent(
     `\n\n---\n\n` +
     `## ${INFRA_REPORT.detail}\n\n` +
     (fullReportUrl ? fullReportLink(fullReportUrl) + briefSections(infraDigests) : projectSections) +
-    footer
-  );
-}
-
-// ---------------------------------------------------------------------------
-// OpenClaw Report
-// ---------------------------------------------------------------------------
-
-export function buildOpenclawReportContent(
-  fetchedOpenclaw: RepoFetch,
-  peerDigests: RepoDigest[],
-  openclawSummary: string,
-  peersComparison: string,
-  utcStr: string,
-  dateStr: string,
-  footer: string,
-  openclaw: RepoConfig,
-  openclawPeers: RepoConfig[],
-  fullReportUrl?: string,
-): string {
-  const { issues, prs } = fetchedOpenclaw;
-
-  const peersRepoLinks =
-    `- [OpenClaw](https://github.com/${openclaw.repo})\n` +
-    openclawPeers.map((p) => `- [${p.name}](https://github.com/${p.repo})`).join("\n");
-
-  const peerDetailSections = peerDigests
-    .map((d) =>
-      [
-        `<details>`,
-        `<summary><strong>${d.config.name}</strong> — <a href="https://github.com/${d.config.repo}">${d.config.repo}</a></summary>`,
-        ``,
-        d.summary,
-        ``,
-        `</details>`,
-      ].join("\n"),
-    )
-    .join("\n\n");
-
-  const title = `# ${OPENCLAW_REPORT.title} ${dateStr}\n\n`;
-  const meta = `> Issues: ${issues.length} | PRs: ${prs.length} | Projects covered: ${1 + openclawPeers.length} | Generated: ${utcStr} UTC\n\n`;
-
-  return (
-    title +
-    meta +
-    `${peersRepoLinks}\n\n` +
-    `---\n\n` +
-    `## ${OPENCLAW_REPORT.deepDive}\n\n` +
-    (fullReportUrl ? fullReportLink(fullReportUrl) + extractTldr(openclawSummary) : openclawSummary) +
-    `\n\n---\n\n` +
-    `## ${OPENCLAW_REPORT.comparison}\n\n` +
-    peersComparison +
-    `\n\n---\n\n` +
-    `## ${OPENCLAW_REPORT.peers}\n\n` +
-    (fullReportUrl ? briefSections(peerDigests) : peerDetailSections) +
     footer
   );
 }
