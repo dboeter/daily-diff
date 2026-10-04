@@ -6,11 +6,91 @@
 
 import type { WebFetchResult } from "./web.ts";
 import type { TrendingData } from "./trending.ts";
+import { momentumRatio } from "./npm.ts";
 import type { HnData } from "./hn.ts";
 import type { ArxivData } from "./arxiv.ts";
 import type { HfData } from "./hf.ts";
 import type { DevtoData } from "./devto.ts";
 import type { LobstersData } from "./lobsters.ts";
+/** 13_694_514_725_528 → "13.69T". OpenRouter token counts span 10^9–10^13. */
+function formatTokens(n: number): string {
+  if (n >= 1e12) return `${(n / 1e12).toFixed(2)}T`;
+  if (n >= 1e9) return `${(n / 1e9).toFixed(1)}B`;
+  return `${(n / 1e6).toFixed(1)}M`;
+}
+
+const rankStr = (r: number | null) => (r === null ? "—" : `#${r}`);
+
+/** Agent & coding-tool sources (OpenRouter apps, npm). Empty string when none has data. */
+function buildAgentRadarData(data: TrendingData): string {
+  const { openrouter, npm } = data;
+  const sections: string[] = [];
+
+  if (openrouter.apps.length > 0) {
+    const rows = openrouter.apps.map(
+      (a) =>
+        `- ${a.url ? `[${a.title}](${a.url})` : a.title}` +
+        ` | rank day ${rankStr(a.dayRank)} / week ${rankStr(a.weekRank)} / month ${rankStr(a.monthRank)}` +
+        (a.weekTokens > 0 ? ` | ${formatTokens(a.weekTokens)} tokens/week` : "") +
+        (a.growthPercent !== null ? ` | 📈 +${a.growthPercent}% (OpenRouter trending)` : "") +
+        ` | listed ${a.createdAt.slice(0, 10)}` +
+        (a.categories.length > 0 ? ` | ${a.categories.join(", ")}` : "") +
+        (a.description ? `\n  ${a.description}` : ""),
+    );
+    sections.push(
+      `## OpenRouter Apps (${openrouter.apps.length} apps — trending, agent categories, recently listed)\n` +
+        `Ranks are by tokens among the top 200 apps for that period ("—" = not in that top 200). ` +
+        `Ranked this week but absent from the month list means newly popular.\n` +
+        rows.join("\n"),
+    );
+  }
+
+  const npmRow = (p: (typeof npm.top)[number]) =>
+    `- [${p.name}](${p.url}) | ${p.weekly.toLocaleString()}/week, ${p.monthly.toLocaleString()}/month` +
+    ` | momentum ${momentumRatio(p).toFixed(1)}x | last publish ${p.lastPublish}` +
+    (p.description ? `\n  ${p.description}` : "");
+  if (npm.rising.length > 0) {
+    sections.push(
+      `## npm Rising Coding-Agent Packages (${npm.rising.length})\n` +
+        `Momentum = weekly downloads vs. the monthly run rate (1.0x steady, ~4.3x first published this week).\n` +
+        npm.rising.map(npmRow).join("\n"),
+    );
+  }
+  if (npm.top.length > 0) {
+    sections.push(
+      `## npm Top Coding-Agent Packages by Weekly Downloads (${npm.top.length})\n` +
+        npm.top.map(npmRow).join("\n"),
+    );
+  }
+
+  return sections.join("\n\n---\n\n");
+}
+
+/** OpenRouter model usage. Empty string when there is no model data. */
+function buildModelUsageData(data: TrendingData): string {
+  const { topModels, topModelsDate, newModels } = data.openrouter;
+  const sections: string[] = [];
+  if (topModels.length > 0) {
+    sections.push(
+      `## OpenRouter Top Models by Tokens (${topModelsDate})\n` +
+        topModels.map((m, i) => `${i + 1}. ${m.slug} — ${formatTokens(m.tokens)} tokens`).join("\n"),
+    );
+  }
+  if (newModels.length > 0) {
+    sections.push(
+      `## Models Newly Listed on OpenRouter (last 8 days)\n` +
+        newModels
+          .map(
+            (m) =>
+              `- ${m.name} (\`${m.id}\`) | listed ${m.created} | ${m.contextLength.toLocaleString()} ctx` +
+              (m.description ? `\n  ${m.description.slice(0, 300)}` : ""),
+          )
+          .join("\n"),
+    );
+  }
+  return sections.join("\n\n---\n\n");
+}
+
 export function buildTrendingPrompt(data: TrendingData, dateStr: string): string {
   const trendingSection =
     data.trendingFetchSuccess && data.trendingRepos.length > 0
@@ -42,12 +122,15 @@ export function buildTrendingPrompt(data: TrendingData, dateStr: string): string
           .join("\n")
       : "(No search results)";
 
+  const radarData = buildAgentRadarData(data);
+  const modelData = buildModelUsageData(data);
+
   return `You are a technical analyst focused on the AI open-source ecosystem. The following is GitHub AI-related trending repository data for the week ending ${dateStr}. Please filter for AI relevance, categorize, and analyze trends.
 
 ## Data Sources
 - **Trending List** (github.com/trending?since=weekly, this week's stars most reliable): weekly hot list with stars gained this week
-- **Topic Search** (GitHub Search API, topic tags): AI-related projects active in last 7 days, grouped by topic
-
+- **Topic Search** (GitHub Search API, topic tags): AI-related projects active in last 7 days, grouped by topic; \`new:*\` topics are repos created in the last 14 days
+${radarData ? "- **OpenRouter Apps** (openrouter.ai/apps): apps ranked by LLM tokens routed through OpenRouter — a usage signal, not a popularity vote\n- **npm** (registry search, coding-agent keywords): download counts; easily inflated by CI and bots\n" : ""}${modelData ? "- **OpenRouter Models**: token usage per model and newly listed models\n" : ""}
 ---
 
 ## GitHub Trending This Week (${data.trendingRepos.length} repositories)
@@ -59,7 +142,7 @@ ${trendingSection}
 ${searchSection}
 
 ---
-
+${radarData ? `\n${radarData}\n\n---\n` : ""}${modelData ? `\n${modelData}\n\n---\n` : ""}
 Generate a structured AI Open Source Trends Report in English:
 
 **Step 1 (Filter)**: From the above data, select projects clearly related to AI/ML (exclude unrelated general tools, frontend frameworks, games, etc.). Skip non-AI trending repos.
@@ -74,7 +157,23 @@ Generate a structured AI Open Source Trends Report in English:
 **Step 3 (Output Report)** with these sections:
 
 1. **This Week's Highlights** — 3-5 sentences on the most noteworthy AI open-source developments this week
+${
+  radarData
+    ? `
+1b. **🚀 Agent & Coding Tool Radar** — the goal is spotting upcoming or new agents and agentic coding tools. Render one **Markdown table**:
 
+   | Tool | Source | Signal | Summary |
+   | :--- | :--- | :--- | :--- |
+
+   - **Tool**: name as a Markdown link (OpenRouter origin URL, npm page, or GitHub repo)
+   - **Source**: OpenRouter, npm, GitHub, or several when a tool shows up in more than one
+   - **Signal**: the momentum data copied verbatim (e.g. "week #12 / month —", "+776%", "12,560/week, 4.2x"); prefix "🆕" when the tool is new — listed or created recently, ranked this week but absent from the month list, or npm momentum ≥ 3x
+   - **Summary**: 2 sentences — what it is and why it is worth watching
+   - Only agents and agentic coding tools (CLI agents, IDE agents, personal/cloud agents, agent harnesses). Exclude plugins, extensions, MCP servers, skills, proxies and routers unless the package *is* the agent; exclude games, roleplay and chat frontends
+   - Prefer new and rising tools over established leaders; 6-12 rows. Omit this section if nothing qualifies
+`
+    : ""
+}
 2. **Top Projects by Category** — For each category, render a **Markdown table** with exactly these columns:
 
    | Project | Lang | Stars (total / this week) | Summary |
@@ -92,8 +191,14 @@ Generate a structured AI Open Source Trends Report in English:
    - Connection to recent LLM releases / industry events
 
 4. **Community Hot Spots** — Bullet list of 3-5 specific projects or directions worth developer focus, with brief reasoning
-
-Style: English, professional and concise, must include GitHub links for every project.
+${
+  modelData
+    ? `
+5. **Model Usage on OpenRouter** — 3-5 bullets: which models lead token usage, notable newcomers in the top list, and any newly listed models worth trying for agentic work. Copy token figures verbatim.
+`
+    : ""
+}
+Style: English, professional and concise, must include a link for every project or tool.
 `;
 }
 

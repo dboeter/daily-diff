@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import { agentMatcher, agentTerms, matchAgentNews, NEWS_PER_AGENT } from "../agent-news.ts";
 import type { RepoConfig } from "../github.ts";
 import type { HnData, HnStory } from "../hn.ts";
-import type { TrendingData } from "../trending.ts";
+import { EMPTY_NPM, EMPTY_OPENROUTER, type TrendingData } from "../trending.ts";
 import type { WebFetchResult } from "../web.ts";
 
 // ---------------------------------------------------------------------------
@@ -140,6 +140,8 @@ describe("matchAgentNews", () => {
   it("matches trending repos by name and description", () => {
     const trending: TrendingData = {
       trendingFetchSuccess: true,
+      openrouter: EMPTY_OPENROUTER,
+      npm: EMPTY_NPM,
       trendingRepos: [
         {
           fullName: "someone/cc-skills",

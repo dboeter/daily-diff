@@ -48,10 +48,21 @@ export const WEB_REPORT = {
 // cadence-neutral because the archive holds daily editions too.
 export const TRENDING_REPORT = {
   title: "AI Open Source Trends Weekly",
-  sources: "Sources: GitHub Trending + GitHub Search API",
+  sources: "Sources: GitHub Trending + GitHub Search API + OpenRouter + npm",
   skillsHeading: "Claude Code Skills Highlights",
   skillsSource: (repo: string) => `> Source: [${repo}](https://github.com/${repo})`,
   issueTitle: (dateStr: string) => `📈 AI Open Source Trends Weekly ${dateStr}`,
+} as const;
+
+// Rendered daily at the top of the agents report (buildStealthSection).
+export const STEALTH_SECTION = {
+  title: "🕵️ Stealth Models on OpenRouter",
+  none: "No stealth models listed on OpenRouter today.",
+  unavailable: "⚠️ OpenRouter model catalog unavailable — stealth model status unknown.",
+  header: "| Model | Listed | Expires | Status |\n| :--- | :--- | :--- | :--- |",
+  isNew: "🆕 new",
+  expiring: (days: number) => (days <= 0 ? "⏳ expires today" : `⏳ expires in ${days}d`),
+  live: "live",
 } as const;
 
 export const HN_REPORT = {

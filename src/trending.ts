@@ -1,6 +1,11 @@
 /**
- * GitHub trending and AI topic search data fetching.
+ * Trending data: GitHub trending and AI topic search (daily, for agent news;
+ * weekly for the trending report), plus OpenRouter app/model popularity and
+ * npm coding-agent downloads on the weekly run.
  */
+
+import { fetchOpenRouterData, type OpenRouterData } from "./openrouter.ts";
+import { fetchNpmData, type NpmData } from "./npm.ts";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -31,12 +36,36 @@ export interface TrendingData {
   trendingRepos: TrendingRepo[];
   searchRepos: SearchRepo[];
   trendingFetchSuccess: boolean;
+  /** Weekly run only; EMPTY_OPENROUTER on daily runs. */
+  openrouter: OpenRouterData;
+  /** Weekly run only; EMPTY_NPM on daily runs. */
+  npm: NpmData;
+}
+
+export const EMPTY_OPENROUTER: OpenRouterData = {
+  apps: [],
+  topModels: [],
+  topModelsDate: "",
+  newModels: [],
+  fetchSuccess: false,
+};
+export const EMPTY_NPM: NpmData = { rising: [], top: [], fetchSuccess: false };
+
+/** True when any source produced data — the report is skipped only if all failed. */
+export function hasTrendingData(data: TrendingData): boolean {
+  return (
+    data.trendingRepos.length > 0 ||
+    data.searchRepos.length > 0 ||
+    data.openrouter.fetchSuccess ||
+    data.npm.fetchSuccess
+  );
 }
 
 // ---------------------------------------------------------------------------
 // Constants
 // ---------------------------------------------------------------------------
 
+/** Repos active (pushed) in the last 7 days, by stars. Favors established repos. */
 const SEARCH_QUERIES = [
   { q: "topic:llm", label: "llm" },
   { q: "topic:ai-agent", label: "ai-agent" },
@@ -44,6 +73,17 @@ const SEARCH_QUERIES = [
   { q: "topic:vector-database", label: "vector-db" },
   { q: "topic:large-language-model", label: "llm-model" },
   { q: "topic:machine-learning", label: "ml" },
+];
+
+/**
+ * Weekly run only. Repos created in the last 14 days, by stars — surfaces new
+ * agents that the pushed-based queries rank below old, high-star repos.
+ * `claude-code` and `mcp` are left out: their new repos are mostly plugins and
+ * MCP servers. Weekly-only because search quota is shared with fetchHotIssues.
+ */
+const NEW_REPO_QUERIES = [
+  { q: "topic:coding-agent", label: "new:coding-agent" },
+  { q: "topic:agentic-coding", label: "new:agentic-coding" },
 ];
 
 // ---------------------------------------------------------------------------
@@ -151,7 +191,8 @@ interface SearchApiResponse {
   items: SearchApiItem[];
 }
 
-async function searchAiRepos(sevenDaysAgo: string): Promise<SearchRepo[]> {
+/** `fourteenDaysAgo` null skips the new-repo queries. */
+async function searchAiRepos(sevenDaysAgo: string, fourteenDaysAgo: string | null): Promise<SearchRepo[]> {
   const token = process.env["GITHUB_TOKEN"] ?? "";
   const headers: Record<string, string> = {
     Accept: "application/vnd.github+json",
@@ -162,39 +203,53 @@ async function searchAiRepos(sevenDaysAgo: string): Promise<SearchRepo[]> {
   const seen = new Set<string>();
   const all: SearchRepo[] = [];
 
-  await Promise.all(
-    SEARCH_QUERIES.map(async ({ q, label }) => {
+  // New-repo queries first: dedupe keeps the first label, and `new:*` is the signal worth keeping.
+  const queries = [
+    ...(fourteenDaysAgo
+      ? NEW_REPO_QUERIES.map((s) => ({ ...s, q: `${s.q}+created:>${fourteenDaysAgo}` }))
+      : []),
+    ...SEARCH_QUERIES.map((s) => ({ ...s, q: `${s.q}+pushed:>${sevenDaysAgo}` })),
+  ];
+
+  // Fetch in parallel, dedupe afterwards in query order so labels don't depend on response timing.
+  const results = await Promise.all(
+    queries.map(async ({ q, label }) => {
       try {
-        const query = `${q}+pushed:>${sevenDaysAgo}&sort=stars&order=desc`;
+        const query = `${q}&sort=stars&order=desc`;
         const url = `https://api.github.com/search/repositories?q=${query}&per_page=15`;
         const resp = await fetch(url, { headers });
         if (!resp.ok) {
           console.error(`  [trending/search] "${label}": HTTP ${resp.status}`);
-          return;
+          return [];
         }
         const data = (await resp.json()) as SearchApiResponse;
-        let added = 0;
-        for (const item of data.items ?? []) {
-          if (!seen.has(item.full_name)) {
-            seen.add(item.full_name);
-            all.push({
-              fullName: item.full_name,
-              description: item.description,
-              language: item.language,
-              stargazersCount: item.stargazers_count,
-              pushedAt: item.pushed_at,
-              url: item.html_url,
-              searchQuery: label,
-            });
-            added++;
-          }
-        }
-        console.log(`  [trending/search] "${label}": ${added} new repos`);
+        return data.items ?? [];
       } catch (err) {
         console.error(`  [trending/search] "${label}": ${err}`);
+        return [];
       }
     }),
   );
+
+  queries.forEach(({ label }, i) => {
+    let added = 0;
+    for (const item of results[i]!) {
+      if (!seen.has(item.full_name)) {
+        seen.add(item.full_name);
+        all.push({
+          fullName: item.full_name,
+          description: item.description,
+          language: item.language,
+          stargazersCount: item.stargazers_count,
+          pushedAt: item.pushed_at,
+          url: item.html_url,
+          searchQuery: label,
+        });
+        added++;
+      }
+    }
+    console.log(`  [trending/search] "${label}": ${added} new repos`);
+  });
 
   return all;
 }
@@ -210,12 +265,15 @@ async function searchAiRepos(sevenDaysAgo: string): Promise<SearchRepo[]> {
 export type TrendingPeriod = "daily" | "weekly";
 
 export async function fetchTrendingData(period: TrendingPeriod = "daily"): Promise<TrendingData> {
-  const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+  const daysAgo = (n: number) => new Date(Date.now() - n * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+  const weekly = period === "weekly";
 
-  const [{ repos: trendingRepos, success }, searchRepos] = await Promise.all([
+  const [{ repos: trendingRepos, success }, searchRepos, openrouter, npm] = await Promise.all([
     fetchGitHubTrending(period),
-    searchAiRepos(sevenDaysAgo),
+    searchAiRepos(daysAgo(7), weekly ? daysAgo(14) : null),
+    weekly ? fetchOpenRouterData().catch((): OpenRouterData => EMPTY_OPENROUTER) : EMPTY_OPENROUTER,
+    weekly ? fetchNpmData().catch((): NpmData => EMPTY_NPM) : EMPTY_NPM,
   ]);
 
-  return { trendingRepos, searchRepos, trendingFetchSuccess: success };
+  return { trendingRepos, searchRepos, trendingFetchSuccess: success, openrouter, npm };
 }

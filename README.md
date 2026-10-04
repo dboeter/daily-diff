@@ -1,6 +1,6 @@
 # Daily Diff
 
-A GitHub Actions workflow that runs every morning at 06:37 CST. It aggregates AI ecosystem signals from 9 data sources, then publishes English digests as GitHub Issues and committed Markdown files: a daily set (agents, Hacker News, ArXiv, official web content) and a weekly set on Mondays (infrastructure, trending, community, Hugging Face).
+A GitHub Actions workflow that runs every morning at 06:37 CST. It aggregates AI ecosystem signals from 11 data sources, then publishes English digests as GitHub Issues and committed Markdown files: a daily set (agents, Hacker News, ArXiv, official web content) and a weekly set on Mondays (infrastructure, trending, community, Hugging Face).
 
 ### Data Sources
 
@@ -9,6 +9,8 @@ A GitHub Actions workflow that runs every morning at 06:37 CST. It aggregates AI
 | [GitHub Repos](https://github.com)                                | API                                               | Stable releases and hot issues from 18 tracked agent and infra repos |
 | [Claude Code Skills](https://github.com/anthropics/skills)        | API                                               | Trending skills sorted by community engagement — **weekly**          |
 | [GitHub Trending](https://github.com/trending)                    | HTML + API                                        | Weekly trending repos + AI topic search (7-day window) — **weekly**  |
+| [OpenRouter](https://openrouter.ai/apps)                          | HTML (RSC payload) + Models API                   | Agent app usage, top/new models — **weekly**; stealth models daily   |
+| [npm](https://www.npmjs.com)                                      | Registry search API                               | Coding-agent packages by downloads and momentum — **weekly**         |
 | [Hacker News](https://news.ycombinator.com)                       | [Firebase API](https://github.com/HackerNews/API) | Top AI stories from last 24h via topstories scanning                 |
 | [ArXiv](https://arxiv.org)                                        | [ArXiv API](https://export.arxiv.org/api/query)   | Latest papers from cs.AI, cs.CL, cs.LG (last 48h)                    |
 | [Hugging Face](https://huggingface.co)                            | [Hub API](https://huggingface.co/api/models)      | 30 trending models sorted by weekly likes — **weekly**, Mondays only |
@@ -144,8 +146,13 @@ The inference and serving layer the agents run on top of. Weekly report on the s
 | --------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
 | [github.com/trending](https://github.com/trending?since=weekly) | This week's trending repos — parsed from HTML; includes the stars gained this week                                                            |
 | GitHub Search API                                               | Repos active in the last 7 days matching 6 AI topics: `llm`, `ai-agent`, `rag`, `vector-database`, `large-language-model`, `machine-learning` |
+| GitHub Search API (new repos)                                   | Repos _created_ in the last 14 days tagged `coding-agent` or `agentic-coding`                                                                 |
+| [OpenRouter](https://openrouter.ai/apps)                        | Apps ranked by tokens (top 200 per day/week/month) + OpenRouter's trending list; top models by tokens; models listed in the last 8 days       |
+| [npm](https://www.npmjs.com)                                    | Packages tagged `coding-agent`, `agentic-coding`, `cli-agent`; split into top by weekly downloads and rising (weekly well above monthly rate) |
 
 The LLM filters out non-AI repos from the trending list, classifies the rest by dimension (AI infrastructure / agents / applications / models / RAG), and extracts trend signals. The report ends with a Claude Code Skills section: [anthropics/skills](https://github.com/anthropics/skills) PRs and issues, fetched without a date filter and sorted by popularity.
+
+OpenRouter, npm and the new-repo search feed an **Agent & Coding Tool Radar** table aimed at spotting new agents and agentic coding tools early.
 
 The daily trending list is still fetched every day, for the agents report's news matching.
 
@@ -312,6 +319,8 @@ A shared state file `digests/web-state.json` tracks which web URLs have been see
 ```
 Generated | Projects: 12 | Active today: N | Stable releases: N | Prereleases (not covered): N
 
+## 🕵️ Stealth Models on OpenRouter   — agents report only; deterministic table, 🆕 new / ⏳ expiring
+
 ## Overview
   3-5 sentences: what shipped, what broke, what got attention
 
@@ -337,9 +346,10 @@ Notable details
 `ai-trending.md` structure:
 
 ```
-Sources: GitHub Trending + GitHub Search API
+Sources: GitHub Trending + GitHub Search API + OpenRouter + npm
 
 This week's highlights
+Agent & coding tool radar (OpenRouter / npm / GitHub, new tools flagged 🆕)
 Top repos by dimension
   🔧 AI Infrastructure  — frameworks / SDKs / inference engines / CLIs
   🤖 AI Agents          — agent frameworks / multi-agent / automation
@@ -348,6 +358,7 @@ Top repos by dimension
   🔍 RAG & Knowledge    — vector databases / retrieval augmentation
 Trend signal analysis
 Community focus
+Model usage on OpenRouter (top models by tokens + newly listed)
 Claude Code Skills highlights
 ```
 

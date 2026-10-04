@@ -42,7 +42,7 @@ import {
   llmHealthLine,
   isConnectionError,
 } from "./report.ts";
-import { buildProjectReportContent } from "./report-builders.ts";
+import { buildProjectReportContent, buildStealthSection } from "./report-builders.ts";
 import {
   saveWebReport,
   saveTrendingReport,
@@ -52,7 +52,14 @@ import {
   saveCommunityReport,
 } from "./report-savers.ts";
 import { loadWebState, fetchSiteContent, type WebFetchResult, type WebState } from "./web.ts";
-import { fetchTrendingData, type TrendingData } from "./trending.ts";
+import {
+  fetchTrendingData,
+  hasTrendingData,
+  EMPTY_NPM,
+  EMPTY_OPENROUTER,
+  type TrendingData,
+} from "./trending.ts";
+import { fetchStealthModels, type OpenRouterStealthModel } from "./openrouter.ts";
 import { fetchHnData, type HnData } from "./hn.ts";
 import { fetchArxivData, type ArxivData } from "./arxiv.ts";
 import { fetchHfData, type HfData } from "./hf.ts";
@@ -126,6 +133,7 @@ async function fetchAllData(
   hfData: HfData;
   devtoData: DevtoData;
   lobstersData: LobstersData;
+  stealthModels: OpenRouterStealthModel[] | null;
 }> {
   const daySince = new Date(now.getTime() - DAY_MS);
   const weekSince = new Date(now.getTime() - 7 * DAY_MS);
@@ -149,6 +157,7 @@ async function fetchAllData(
     hfData,
     devtoData,
     lobstersData,
+    stealthModels,
   ] = await Promise.all([
     Promise.all(AGENTS.map((cfg) => fetchProject(cfg, daySince))),
     weekly
@@ -188,6 +197,8 @@ async function fetchAllData(
         trendingRepos: [],
         searchRepos: [],
         trendingFetchSuccess: false,
+        openrouter: EMPTY_OPENROUTER,
+        npm: EMPTY_NPM,
       }),
     ),
     fetchHnData().catch((): HnData => ({ stories: [], fetchSuccess: false })),
@@ -201,6 +212,8 @@ async function fetchAllData(
     weekly
       ? fetchLobstersData().catch((): LobstersData => ({ stories: [], fetchSuccess: false }))
       : Promise.resolve<LobstersData>({ stories: [], fetchSuccess: false }),
+    // Daily, unlike the rest of OpenRouter: stealth models are free for a short window.
+    fetchStealthModels(),
   ]);
 
   return {
@@ -214,6 +227,7 @@ async function fetchAllData(
     hfData,
     devtoData,
     lobstersData,
+    stealthModels,
   };
 }
 
@@ -296,8 +310,7 @@ async function generateSummaries(
       : Promise.resolve(""),
     (async () => {
       if (!weekly) return "";
-      const hasData = trendingData.trendingRepos.length > 0 || trendingData.searchRepos.length > 0;
-      if (!hasData) {
+      if (!hasTrendingData(trendingData)) {
         return MSG.trendingNoData;
       }
       return summarize(
@@ -354,6 +367,7 @@ async function main(): Promise<void> {
     hfData,
     devtoData,
     lobstersData,
+    stealthModels,
   } = await fetchAllData(now, webState, weekly);
 
   // Agent news is matched against the other sources' data, so it waits for them.
@@ -393,6 +407,7 @@ async function main(): Promise<void> {
     activities: agentActivities,
     summary: summaries.agentsSummary,
     period: AGENTS_REPORT.period,
+    preamble: buildStealthSection(stealthModels),
     footer: ft,
   });
   console.log(`  Saved ${saveFile(agentsContent, dateStr, "ai-agents.md")}`);

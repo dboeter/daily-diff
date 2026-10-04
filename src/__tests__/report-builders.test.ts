@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { buildProjectReportContent } from "../report-builders.ts";
+import { buildProjectReportContent, buildStealthSection } from "../report-builders.ts";
 import type { ProjectActivity } from "../prompts.ts";
 import type { GitHubRelease } from "../github.ts";
 
@@ -65,6 +65,44 @@ describe("buildProjectReportContent", () => {
   it("omits the quiet line when every project was active", () => {
     const result = buildProjectReportContent({ ...input, activities: [input.activities[0]!] });
     expect(result).not.toContain("Quiet today");
+  });
+
+  it("renders the preamble between the header and the LLM body", () => {
+    const result = buildProjectReportContent({ ...input, preamble: "PREAMBLE\n\n---\n\n" });
+    expect(result).toMatch(
+      /Prereleases \(not covered\): 7\n\n---\n\nPREAMBLE\n\n---\n\n## Overview\nLLM_BODY/,
+    );
+  });
+});
+
+// ---------------------------------------------------------------------------
+// buildStealthSection
+// ---------------------------------------------------------------------------
+
+describe("buildStealthSection", () => {
+  const now = Date.parse("2026-10-04T22:37:00Z");
+  const model = (created: string, expires: string | null) => ({
+    id: "stealth/space-bunny-alpha",
+    name: "Space Bunny Alpha",
+    created,
+    expires,
+  });
+
+  it("flags new and soon-expiring models", () => {
+    const out = buildStealthSection([model("2026-10-03", "2026-10-05")], now);
+    expect(out).toContain("## 🕵️ Stealth Models on OpenRouter");
+    expect(out).toContain(
+      "| [Space Bunny Alpha](https://openrouter.ai/stealth/space-bunny-alpha) `stealth/space-bunny-alpha` | 2026-10-03 | 2026-10-05 | 🆕 new, ⏳ expires in 1d |",
+    );
+  });
+
+  it("marks an established model without a near expiry as live", () => {
+    expect(buildStealthSection([model("2026-09-23", null)], now)).toContain("| 2026-09-23 | — | live |");
+  });
+
+  it("says so when no stealth model is listed or the catalog failed", () => {
+    expect(buildStealthSection([], now)).toContain("No stealth models listed");
+    expect(buildStealthSection(null, now)).toContain("catalog unavailable");
   });
 });
 

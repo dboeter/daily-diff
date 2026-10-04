@@ -23,7 +23,7 @@ import { callLlm, saveFile, autoGenFooter, LLM_TOKENS_WEB, LLM_TOKENS_LISTING } 
 import { createGitHubIssue } from "./github.ts";
 import { saveWebState, type WebFetchResult, type WebState } from "./web.ts";
 import type { HnData } from "./hn.ts";
-import type { TrendingData } from "./trending.ts";
+import { hasTrendingData, type TrendingData } from "./trending.ts";
 import type { ArxivData } from "./arxiv.ts";
 import type { HfData } from "./hf.ts";
 import type { DevtoData } from "./devto.ts";
@@ -97,8 +97,7 @@ export async function saveTrendingReport(
   dateStr: string,
   digestRepo: string,
 ): Promise<void> {
-  const hasData = trendingData.trendingRepos.length > 0 || trendingData.searchRepos.length > 0;
-  if (!hasData) {
+  if (!hasTrendingData(trendingData)) {
     console.log("  [trending] No data available, skipping report.");
     return;
   }

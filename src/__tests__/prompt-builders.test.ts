@@ -7,7 +7,7 @@ import {
 } from "../prompts.ts";
 import { buildTrendingPrompt, buildWebReportPrompt, buildHnPrompt } from "../prompts-data.ts";
 import type { RepoConfig, GitHubItem, GitHubRelease } from "../github.ts";
-import type { TrendingData } from "../trending.ts";
+import { EMPTY_NPM, EMPTY_OPENROUTER, type TrendingData } from "../trending.ts";
 import type { HnData } from "../hn.ts";
 import type { WebFetchResult } from "../web.ts";
 
@@ -151,6 +151,8 @@ describe("buildTrendingPrompt", () => {
       ],
       searchRepos: [],
       trendingFetchSuccess: true,
+      openrouter: EMPTY_OPENROUTER,
+      npm: EMPTY_NPM,
     };
     const result = buildTrendingPrompt(data, "2026-03-09");
     expect(result).toContain("org/repo");
@@ -174,6 +176,8 @@ describe("buildTrendingPrompt", () => {
       ],
       searchRepos: [],
       trendingFetchSuccess: true,
+      openrouter: EMPTY_OPENROUTER,
+      npm: EMPTY_NPM,
     };
     const result = buildTrendingPrompt(data, "2026-03-09");
     expect(result).toContain("- [org/repo](https://github.com/org/repo) (+408 this week)");
@@ -181,7 +185,13 @@ describe("buildTrendingPrompt", () => {
   });
 
   it("shows fetch failure message when trending fails", () => {
-    const data: TrendingData = { trendingRepos: [], searchRepos: [], trendingFetchSuccess: false };
+    const data: TrendingData = {
+      trendingRepos: [],
+      searchRepos: [],
+      trendingFetchSuccess: false,
+      openrouter: EMPTY_OPENROUTER,
+      npm: EMPTY_NPM,
+    };
     const result = buildTrendingPrompt(data, "2026-03-09");
     expect(result).toContain("Unable to fetch");
   });
@@ -201,10 +211,87 @@ describe("buildTrendingPrompt", () => {
         },
       ],
       trendingFetchSuccess: false,
+      openrouter: EMPTY_OPENROUTER,
+      npm: EMPTY_NPM,
     };
     const result = buildTrendingPrompt(data, "2026-03-09");
     expect(result).toContain("[topic:ai-agent]");
     expect(result).toContain("1,000");
+  });
+
+  it("omits the radar and model sections when OpenRouter and npm have no data", () => {
+    const data: TrendingData = {
+      trendingRepos: [],
+      searchRepos: [],
+      trendingFetchSuccess: false,
+      openrouter: EMPTY_OPENROUTER,
+      npm: EMPTY_NPM,
+    };
+    const result = buildTrendingPrompt(data, "2026-03-09");
+    expect(result).not.toContain("Agent & Coding Tool Radar");
+    expect(result).not.toContain("OpenRouter");
+    expect(result).not.toContain("npm");
+  });
+
+  it("renders OpenRouter apps, models and npm packages with the radar section", () => {
+    const data: TrendingData = {
+      trendingRepos: [],
+      searchRepos: [],
+      trendingFetchSuccess: false,
+      openrouter: {
+        apps: [
+          {
+            appId: 1,
+            title: "Kimi Code CLI",
+            description: "A coding agent",
+            url: "https://kimi.example",
+            categories: ["cli-agent"],
+            createdAt: "2026-02-28T00:00:00Z",
+            weekTokens: 13_694_514_725_528,
+            dayRank: 12,
+            weekRank: 110,
+            monthRank: null,
+            growthPercent: 776,
+          },
+        ],
+        topModels: [{ slug: "deepseek/deepseek-v4.1-flash", tokens: 25_630_000_000_000 }],
+        topModelsDate: "2026-03-08",
+        newModels: [
+          {
+            id: "inclusionai/ling-3.1-flash",
+            name: "Ling 3.1 Flash",
+            description: "MoE",
+            created: "2026-03-08",
+            contextLength: 262_144,
+          },
+        ],
+        fetchSuccess: true,
+      },
+      npm: {
+        rising: [
+          {
+            name: "nano-coder",
+            description: "A 6MB coding agent",
+            weekly: 12_560,
+            monthly: 12_859,
+            url: "https://www.npmjs.com/package/nano-coder",
+            lastPublish: "2026-03-07",
+          },
+        ],
+        top: [],
+        fetchSuccess: true,
+      },
+    };
+    const result = buildTrendingPrompt(data, "2026-03-09");
+    expect(result).toContain("Agent & Coding Tool Radar");
+    expect(result).toContain("- [Kimi Code CLI](https://kimi.example) | rank day #12 / week #110 / month —");
+    expect(result).toContain("13.69T tokens/week");
+    expect(result).toContain("+776% (OpenRouter trending)");
+    expect(result).toContain("deepseek/deepseek-v4.1-flash — 25.63T tokens");
+    expect(result).toContain("Ling 3.1 Flash (`inclusionai/ling-3.1-flash`)");
+    expect(result).toContain("12,560/week, 12,859/month | momentum 4.2x");
+    expect(result).toContain("Model Usage on OpenRouter");
+    expect(result).not.toContain("npm Top Coding-Agent");
   });
 });
 

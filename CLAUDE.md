@@ -50,7 +50,7 @@ export ANTHROPIC_API_KEY=sk-ant-xxxxx
 
 The pipeline runs in four sequential phases, each implemented as a named async function in `src/index.ts`:
 
-1. **`fetchAllData`** — all network I/O in parallel. Daily: releases + hot issues for the 12 agents, Anthropic/OpenAI sitemaps, GitHub Trending (HTML + Search API, for agent news), Hacker News Firebase API, ArXiv API. Weekly only (`isWeeklyRun`): releases + hot issues for the 6 infra repos, Claude Code Skills, Hugging Face Hub API, Dev.to Forem API, Lobste.rs JSON API.
+1. **`fetchAllData`** — all network I/O in parallel. Daily: releases + hot issues for the 12 agents, Anthropic/OpenAI sitemaps, GitHub Trending (HTML + Search API, for agent news), Hacker News Firebase API, ArXiv API, OpenRouter model catalog (stealth models). Weekly only (`isWeeklyRun`): releases + hot issues for the 6 infra repos, Claude Code Skills, OpenRouter apps/rankings, npm registry search, Hugging Face Hub API, Dev.to Forem API, Lobste.rs JSON API.
 2. **News matching** — `matchAgentNews` (`src/agent-news.ts`) assigns HN, web and trending items to the agents they name.
 3. **`generateSummaries`** — one LLM call for the agents report; on the weekly run also infra, skills and trending. Rate-limited to 5 concurrent requests by a queue in `src/report.ts`.
 4. **Save phase** — `buildProjectReportContent` (in `src/report-builders.ts`) builds the agents and infra Markdown; the `saveXxxReport` functions (in `src/report-savers.ts`) generate their body, write the file and create the GitHub Issue.
@@ -80,7 +80,9 @@ The pipeline runs in four sequential phases, each implemented as a named async f
 | `src/providers/qwen.ts`              | `QwenProvider` — extends `OpenAICompatibleProvider`; Alibaba Model Studio                                                                                                                         |
 | `src/providers/index.ts`             | `createProvider` factory + barrel re-exports                                                                                                                                                      |
 | `src/web.ts`                         | Sitemap-based web content fetching; state persisted to `digests/web-state.json`                                                                                                                   |
-| `src/trending.ts`                    | GitHub Trending HTML scraper (`since=daily`, or `weekly` on the weekly run) + Search API topic queries                                                                                            |
+| `src/trending.ts`                    | GitHub Trending HTML scraper (`since=daily`, or `weekly` on the weekly run) + Search API topic queries; on the weekly run also composes OpenRouter + npm; `hasTrendingData` gates the report      |
+| `src/openrouter.ts`                  | OpenRouter app + model popularity scraped from the `/apps` and `/rankings` RSC payload; new models and `fetchStealthModels` via `/api/v1/models`                                                   |
+| `src/npm.ts`                         | npm coding-agent packages via registry search; `rankNpmPackages` splits rising (download momentum) from top                                                                                      |
 | `src/hn.ts`                          | Hacker News top AI stories via Firebase API (top 500 scanned in batches of 50, regex-filtered)                                                                                                    |
 | `src/arxiv.ts`                       | ArXiv AI papers via API Atom feed (cs.AI, cs.CL, cs.LG)                                                                                                                                           |
 | `src/hf.ts`                          | Hugging Face Hub trending models via Hub API (weekly)                                                                                                                                             |
@@ -96,12 +98,12 @@ Files written to `digests/YYYY-MM-DD/`:
 
 | File              | Label       | Notes                                                           |
 | ----------------- | ----------- | --------------------------------------------------------------- |
-| `ai-agents.md`    | `agents`    | Daily, always generated                                         |
+| `ai-agents.md`    | `agents`    | Daily, always generated; opens with the stealth-model table     |
 | `ai-hn.md`        | `hn`        | Daily, skipped if fetch fails                                   |
 | `ai-arxiv.md`     | `arxiv`     | Daily, skipped if fetch fails                                   |
 | `ai-web.md`       | `web`       | Daily, skipped if no new sitemap content                        |
 | `ai-infra.md`     | `infra`     | **Weekly**, always generated on the weekly run                  |
-| `ai-trending.md`  | `trending`  | **Weekly**, skipped if both data sources fail; ends with Skills |
+| `ai-trending.md`  | `trending`  | **Weekly**, skipped if all data sources fail; ends with Skills  |
 | `ai-community.md` | `community` | **Weekly**, skipped if both Dev.to and Lobsters fail            |
 | `ai-hf.md`        | `hf`        | **Weekly**                                                      |
 
@@ -113,7 +115,10 @@ Weekly = on `WEEKLY_REPORT_WEEKDAY` (Monday, CST) or when `DIGEST_FORCE_WEEKLY=1
 - **INFRA_REPOS** (6, weekly): vllm, sglang, llama-cpp, ollama, litellm, unsloth — inference engines, gateway and fine-tuning layer
 - **CLAUDE_SKILLS_REPO** (weekly, in `ai-trending`): anthropics/skills — no date filter, sorted by popularity
 - **Web**: anthropic.com + openai.com via sitemap, state in `digests/web-state.json`
-- **Trending**: github.com/trending (HTML) + GitHub Search API (6 AI topics, 7-day window). Fetched daily for agent news; the report is weekly and scrapes `since=weekly` that day.
+- **Trending**: github.com/trending (HTML) + GitHub Search API (6 AI topics, 7-day window). Fetched daily for agent news; the report is weekly and scrapes `since=weekly` that day. The weekly run adds `coding-agent`/`agentic-coding` repos _created_ in 14 days (weekly-only because search quota is shared with `fetchHotIssues`), OpenRouter and npm; these feed an "Agent & Coding Tool Radar" section aimed at spotting new agents.
+  - **OpenRouter** has no usage API. `/apps` and `/rankings` embed their data in the Next.js RSC payload (`self.__next_f.push` chunks), parsed by `extractRscPayload` + `extractJsonArray`. `/apps` carries the top 200 apps for day/week/month plus a `trending` list with `growthPercent`; category pages load client-side, so apps outside those lists are invisible. The scrape breaks silently when the frontend changes — watch for `[openrouter] Parsed 0 apps` in the log.
+  - **npm** uses the `downloads.weekly`/`monthly` already in the registry search response (the downloads API rejects scoped packages in bulk). Counts are gameable and the keywords match plugins/MCP servers too; the prompt tells the LLM to filter those.
+- **Stealth models** (daily, top of `ai-agents`): `isStealthModel` matches a `stealth/` id prefix, or a description saying "cloaked"/"anonymous"/"stealth" … "model", in the official `/api/v1/models` catalog. `buildStealthSection` (`src/report-builders.ts`) renders it deterministically — not by the LLM — via the `preamble` of `buildProjectReportContent`. It always appears: 🆕 = listed within 2 days, ⏳ = `expiration_date` within 3 days, and "catalog unavailable" is distinct from "none listed". The cron itself runs on a stealth model, so a ⏳ on that row means `OPENROUTER_MODEL` needs replacing.
 - **HN**: Firebase API (`/v0/topstories.json`) — scans top 500 stories in batches of 50, filters for AI keywords, top 30 by points
 - **ArXiv**: ArXiv API (Atom XML) — queries cs.AI, cs.CL, cs.LG categories for the newest papers from the last 48h
 - **Community** (weekly): Dev.to (5 AI tags, top of the week) + Lobste.rs (`/t/ai.json`, `/t/ml.json`, last 7 days) — technical articles and community discussions
@@ -130,7 +135,7 @@ Weekly = on `WEEKLY_REPORT_WEEKDAY` (Monday, CST) or when `DIGEST_FORCE_WEEKLY=1
   - `fetchHotIssues` uses the search API (the issues list can only filter by update time). Hot = opened in the window (widened to at least 48h — engagement takes days to build) and `comments + 👍` ≥ 10, or ≥ 3 with a regression/security label; max 2 per repo. Search allows 30 requests/minute, shared with trending's 6 topic queries; a failed hot-issue fetch degrades to none, it never discards the releases.
   - `matchAgentNews` drops an item that names 3+ agents: it is a compatibility list ("works with Claude Code, Codex, OpenCode…"), not news.
   - One LLM call per report over the active projects; quiet projects are listed in one line by `buildProjectReportContent`. The issue body is the full report (no brief variant).
-- `callLlm(prompt, maxTokens?)` defaults to 4096 tokens. Web report uses 8192, trending uses 6144. The agents/infra reports and the table-formatted listing reports (HN, ArXiv, HF, Community) use `LLM_TOKENS_LISTING` = 6144.
+- `callLlm(prompt, maxTokens?)` defaults to 4096 tokens. Web and trending reports use 8192. The agents/infra reports and the table-formatted listing reports (HN, ArXiv, HF, Community) use `LLM_TOKENS_LISTING` = 6144.
 - The Skills prompt carries a hard length cap (`REPO_LENGTH_RULE`, ~300 words, max 3 bullets per section). Before such caps the old per-repo reports ran 77–114 KB and hit GitHub's 64 KB issue body limit.
 - Data-source listing reports (Trending, HN, ArXiv, HF, Community) render their item lists as **Markdown tables** (not bullet lists). Numeric columns are copied verbatim from the fetched data; the summary column is 2 sentences. Tables already have CSS in `index.html` and render natively in GitHub Issues too.
 - `callLlm` retries on two error classes, with separate budgets; the concurrency slot is released during every wait.
