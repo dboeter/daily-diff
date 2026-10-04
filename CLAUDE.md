@@ -47,7 +47,7 @@ export ANTHROPIC_API_KEY=sk-ant-xxxxx
 
 The pipeline runs in four sequential phases, each implemented as a named async function in `src/index.ts`:
 
-1. **`fetchAllData`** — all network I/O in parallel: GitHub API (issues/PRs/releases) for 18 repos, Claude Code Skills, Anthropic/OpenAI sitemaps, GitHub Trending HTML + Search API, Hacker News Algolia API.
+1. **`fetchAllData`** — all network I/O in parallel: GitHub API (issues/PRs/releases) for 18 repos, Claude Code Skills, Anthropic/OpenAI sitemaps, GitHub Trending HTML + Search API, Hacker News Firebase API, Product Hunt GraphQL API, ArXiv API, Dev.to Forem API, Lobste.rs JSON API, and weekly Hugging Face Hub API.
 2. **`generateSummaries`** — per-repo LLM calls, all in parallel, rate-limited to 5 concurrent requests by a queue in `src/report.ts`.
 3. **Comparisons** — three LLM calls (cross-tool CLI, OpenClaw cross-ecosystem, infra).
 4. **Save phase** — `buildCliReportContent` / `buildOpenclawReportContent` / `buildInfraReportContent` (in `src/report-builders.ts`) build Markdown strings; the `saveXxxReport` functions (in `src/report-savers.ts`) generate their body, write the file and create the GitHub Issue.
@@ -61,10 +61,10 @@ The pipeline runs in four sequential phases, each implemented as a named async f
 | `src/github.ts`                      | GitHub API helpers: `fetchRecentItems`, `fetchRecentReleases`, `fetchRecentDiscussions` (GraphQL), `fetchSkillsData`, `createGitHubIssue`; shared `RepoFetch` type                                      |
 | `src/config.ts`                      | Loads `config.yml` into `RadarConfig` (`cliRepos`, `skillsRepo`, `openclaw`, `openclawPeers`, `infraRepos`); built-in defaults when a section is missing                                                |
 | `src/prompts.ts`                     | LLM prompt builders for repo reports: `buildCliPrompt`, `buildPeerPrompt`, `buildInfraPrompt`, `buildComparisonPrompt`, `buildInfraComparisonPrompt`, `buildPeersComparisonPrompt`, `buildSkillsPrompt` |
-| `src/prompts-data.ts`                | LLM prompt builders for data-source reports: `buildTrendingPrompt`, `buildWebReportPrompt`, `buildHnPrompt`                                                                                             |
-| `src/report.ts`                      | `callLlm` (with concurrency limiter), `saveFile`, `autoGenFooter` (uses i18n), LLM token budget constants                                                                                               |
+| `src/prompts-data.ts`                | LLM prompt builders for data-source reports: `buildTrendingPrompt`, `buildWebReportPrompt`, `buildHnPrompt`, `buildPhPrompt`, `buildArxivPrompt`, `buildHfPrompt`, `buildCommunityPrompt`, `buildHighlightsPrompt` |
+| `src/report.ts`                      | `callLlm` (with concurrency limiter), `saveFile`, `autoGenFooter` (uses i18n), LLM token budget constants, LLM health accounting and outage gates                                                       |
 | `src/report-builders.ts`             | `buildCliReportContent`, `buildOpenclawReportContent`, `buildInfraReportContent` — assemble final Markdown strings for CLI, OpenClaw and infra reports                                                  |
-| `src/report-savers.ts`               | `saveWebReport`, `saveTrendingReport`, `saveHnReport`, … — LLM call + file save + optional GitHub issue                                                                                                 |
+| `src/report-savers.ts`               | `saveWebReport`, `saveTrendingReport`, `saveHnReport`, `savePhReport`, `saveArxivReport`, `saveHfReport`, `saveCommunityReport` — LLM call + file save + optional GitHub issue                           |
 | `src/date.ts`                        | Date and timing utilities: `toCstDateStr`, `toUtcStr`, `weekdayOf`, `sleep`                                                                                                                             |
 | `src/providers/types.ts`             | `LlmProvider` interface, `ProviderName` type, `VALID_PROVIDER_NAMES`                                                                                                                                    |
 | `src/providers/openai-compatible.ts` | `OpenAICompatibleProvider` — shared base class for OpenAI-compatible providers                                                                                                                          |
@@ -77,22 +77,32 @@ The pipeline runs in four sequential phases, each implemented as a named async f
 | `src/providers/index.ts`             | `createProvider` factory + barrel re-exports                                                                                                                                                            |
 | `src/web.ts`                         | Sitemap-based web content fetching; state persisted to `digests/web-state.json`                                                                                                                         |
 | `src/trending.ts`                    | GitHub Trending HTML scraper + Search API topic queries                                                                                                                                                 |
-| `src/hn.ts`                          | Hacker News top AI stories via Algolia HN Search API                                                                                                                                                    |
+| `src/hn.ts`                          | Hacker News top AI stories via Firebase API (top 500 scanned in batches of 50, regex-filtered)                                                                                                          |
+| `src/ph.ts`                          | Product Hunt AI products via GraphQL API                                                                                                                                                                |
+| `src/arxiv.ts`                       | ArXiv AI papers via API Atom feed (cs.AI, cs.CL, cs.LG)                                                                                                                                                 |
+| `src/hf.ts`                          | Hugging Face Hub trending models via Hub API (weekly)                                                                                                                                                   |
+| `src/devto.ts`                       | Dev.to top AI articles via Forem API                                                                                                                                                                    |
+| `src/lobsters.ts`                    | Lobste.rs AI/ML stories via JSON endpoints                                                                                                                                                              |
+| `src/notify.ts`                      | Telegram notification sender (`pnpm notify`)                                                                                                                                                            |
+| `src/close-stale-issues.ts`          | Auto-closer for superseded daily digest issues (`pnpm close-stale`)                                                                                                                                      |
 | `src/generate-manifest.ts`           | Generates `manifest.json` (sidebar data for Web UI) and `feed.xml` (RSS 2.0 feed)                                                                                                                       |
 
 ## Report outputs
 
 Files written to `digests/YYYY-MM-DD/`:
 
-| File             | Label      | Notes                                                  |
-| ---------------- | ---------- | ------------------------------------------------------ |
-| `ai-cli.md`      | `digest`   | Always generated                                       |
-| `ai-agents.md`   | `openclaw` | Always generated                                       |
-| `ai-infra.md`    | `infra`    | Always generated                                       |
-| `ai-web.md`      | `web`      | Skipped if no new sitemap content                      |
-| `ai-trending.md` | `trending` | Skipped if both data sources fail                      |
-| `ai-hn.md`       | `hn`       | Skipped if Algolia fetch fails                         |
-| `ai-hf.md`       | `hf`       | **Weekly** — only on `HF_REPORT_WEEKDAY` (Monday, CST) |
+| File              | Label       | Notes                                                  |
+| ----------------- | ----------- | ------------------------------------------------------ |
+| `ai-cli.md`       | `digest`    | Always generated                                       |
+| `ai-agents.md`    | `openclaw`  | Always generated                                       |
+| `ai-infra.md`     | `infra`     | Always generated                                       |
+| `ai-web.md`       | `web`       | Skipped if no new sitemap content                      |
+| `ai-trending.md`  | `trending`  | Skipped if both data sources fail                      |
+| `ai-hn.md`        | `hn`        | Skipped if fetch fails                                 |
+| `ai-ph.md`        | `ph`        | Skipped if fetch fails or no token                     |
+| `ai-arxiv.md`     | `arxiv`     | Skipped if fetch fails                                 |
+| `ai-community.md` | `community` | Skipped if both Dev.to and Lobsters fail               |
+| `ai-hf.md`        | `hf`        | **Weekly** — only on `HF_REPORT_WEEKDAY` (Monday, CST) |
 
 ## Tracked sources
 
@@ -103,7 +113,10 @@ Files written to `digests/YYYY-MM-DD/`:
 - **CLAUDE_SKILLS_REPO**: anthropics/skills — no date filter, sorted by popularity
 - **Web**: anthropic.com + openai.com via sitemap, state in `digests/web-state.json`
 - **Trending**: github.com/trending (HTML) + GitHub Search API (6 AI topics, 7-day window)
-- **HN**: Algolia HN Search API — 6 parallel queries, top-30 AI stories by points, last 24h
+- **HN**: Firebase API (`/v0/topstories.json`) — scans top 500 stories in batches of 50, filters for AI keywords, top 30 by points
+- **PH**: Product Hunt GraphQL API — yesterday's top products filtered by AI topic tags
+- **ArXiv**: ArXiv API (Atom XML) — queries cs.AI, cs.CL, cs.LG categories for the newest papers from the last 48h
+- **Community**: Dev.to (5 AI tags) + Lobste.rs (`/t/ai.json`, `/t/ml.json`) — technical articles and community discussions
 - **HF**: Hugging Face Hub trending models — **weekly**, gated on `HF_REPORT_WEEKDAY` in `src/index.ts`. The Hub list is ranked by cumulative downloads and 90.5% of a day's models carried over from the previous day, so daily generation was re-summarizing the same table. The fetch is gated too, not just the report.
 
 ## Key conventions

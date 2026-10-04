@@ -76,12 +76,13 @@ export function parseTrendingHtml(html: string): TrendingRepo[] {
       const todayMatch = block.match(/([\d,]+)\s+stars?\s+today/i);
       const todayStars = todayMatch?.[1] ? parseInt(todayMatch[1].replace(/,/g, ""), 10) : 0;
 
-      // total stars — look for link with /stargazers
-      const totalMatch = block.match(/href="\/[^"]+\/stargazers"[^>]*>[\s\S]*?([\d,]+)\s*<\/a>/);
+      // total stars — look for link with /stargazers. The octicon is a nested
+      // <svg><path d="…"/></svg>, so skip arbitrary markup but never past </a>.
+      const totalMatch = block.match(/href="\/[^"]+\/stargazers"[^>]*>(?:(?!<\/a>)[\s\S])*?([\d,]+)\s*<\/a>/);
       const totalStars = totalMatch?.[1] ? parseInt(totalMatch[1].replace(/,/g, ""), 10) : 0;
 
       // forks
-      const forkMatch = block.match(/href="\/[^"]+\/forks"[^>]*>[\s\S]*?([\d,]+)\s*<\/a>/);
+      const forkMatch = block.match(/href="\/[^"]+\/forks"[^>]*>(?:(?!<\/a>)[\s\S])*?([\d,]+)\s*<\/a>/);
       const forks = forkMatch?.[1] ? parseInt(forkMatch[1].replace(/,/g, ""), 10) : 0;
 
       repos.push({

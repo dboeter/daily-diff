@@ -16,10 +16,10 @@ const SAMPLE_HTML = `
           <span itemprop="programmingLanguage">Python</span>
         </span>
         <a href="/owner1/repo-alpha/stargazers" class="LinkLink--muted d-inline-block mr-3">
-          <svg class="octicon"></svg> 12,500
+          <svg class="octicon"><path d="M8 .25a.75.75 0 0 1 .673.418l1.882 3.815"></path></svg> 12,500
         </a>
         <a href="/owner1/repo-alpha/forks" class="LinkLink--muted d-inline-block mr-3">
-          <svg class="octicon"></svg> 1,234
+          <svg class="octicon"><path d="M8 .25a.75.75 0 0 1 .673.418l1.882 3.815"></path></svg> 1,234
         </a>
         <span class="d-inline-block float-sm-right">
           523 stars today
@@ -38,10 +38,10 @@ const SAMPLE_HTML = `
           <span itemprop="programmingLanguage">Rust</span>
         </span>
         <a href="/owner2/repo-beta/stargazers" class="LinkLink--muted d-inline-block mr-3">
-          <svg class="octicon"></svg> 850
+          <svg class="octicon"><path d="M8 .25a.75.75 0 0 1 .673.418l1.882 3.815"></path></svg> 850
         </a>
         <a href="/owner2/repo-beta/forks" class="LinkLink--muted d-inline-block mr-3">
-          <svg class="octicon"></svg> 42
+          <svg class="octicon"><path d="M8 .25a.75.75 0 0 1 .673.418l1.882 3.815"></path></svg> 42
         </a>
         <span class="d-inline-block float-sm-right">
           88 stars today
@@ -96,5 +96,18 @@ describe("parseTrendingHtml", () => {
     expect(repos[0]?.todayStars).toBe(0);
     expect(repos[0]?.totalStars).toBe(0);
     expect(repos[0]?.forks).toBe(0);
+  });
+
+  it("does not read the forks count as total stars when the stargazers link has no number", () => {
+    const html = `
+      <article class="Box-row">
+        <h2><a href="/owner/nostars">owner / nostars</a></h2>
+        <a href="/owner/nostars/stargazers"><svg><path d="M8 .25a.75"></path></svg></a>
+        <a href="/owner/nostars/forks"><svg><path d="M5 5.372v.878"></path></svg> 77</a>
+      </article>
+    `;
+    const repos = parseTrendingHtml(html);
+    expect(repos[0]?.totalStars).toBe(0);
+    expect(repos[0]?.forks).toBe(77);
   });
 });
