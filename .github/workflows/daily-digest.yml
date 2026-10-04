@@ -88,8 +88,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           LLM_PROVIDER: openrouter
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
-          # Free stealth model; if OpenRouter retires it, runs abort at the LLM health gate — swap the id here.
-          OPENROUTER_MODEL: stealth/space-bunny-alpha
+          # Free model; if OpenRouter retires it, runs abort at the LLM health gate — swap the id here.
+          OPENROUTER_MODEL: nvidia/nemotron-3-ultra-550b-a55b:free
           # Without this the reasoning model spends the whole token budget thinking and returns empty content.
           OPENROUTER_REASONING_EFFORT: low
           DIGEST_REPO: ${{ github.repository }}
