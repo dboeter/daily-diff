@@ -1,6 +1,31 @@
 # Plan: unified Agents report + daily/weekly cadence split
 
-Status: Pending · Created 2026-10-04 · Decisions confirmed 2026-10-04
+Status: Done · Created 2026-10-04 · Decisions confirmed 2026-10-04 · Implemented in
+`2bbc37c` (agents report) and `e531737` (weekly cadence + drops) on branch
+`feat/agents-report-weekly-cadence`
+
+## Deviations from the plan (found while implementing)
+
+- **Hot issues:** a 24h creation window found 0 hot issues across all 12
+  agents on 2026-10-04 (engagement takes days to build). The window is widened
+  to at least 48h and fetched via the search API (the issues list endpoint can
+  only filter by update time). Labels lower the bar to 3 instead of bypassing
+  it. An issue can appear in two consecutive daily reports.
+- **News:** items naming 3+ agents are dropped — trending "works with Claude
+  Code, Codex, OpenCode…" repos filled every agent's news slots.
+- **LLM health gate:** `LLM_MIN_SAMPLES` lowered 5 → 3. The plan assumed the
+  second gate would still arm on daily runs; with 3–4 calls per daily run it
+  would not have.
+- **Trending:** scrapes `since=weekly` on the weekly run, so the weekly report
+  is not built from one day's list. Skills moved to `ai-trending` in part 1.
+- **Weekly gate** lives in `src/date.ts` (`isWeeklyRun`) so it is testable;
+  the workflow gained a `force_weekly` dispatch input.
+- Function names: `buildProjectDigestPrompt` / `buildProjectReportContent`
+  (shared by agents and infra) instead of `buildAgentsPrompt` /
+  `buildAgentsReportContent`.
+- **Not done:** the live dry run with an LLM (no API key in the dev shell).
+  Verified instead: typecheck, lint, format, 265 tests, and a live fetch of
+  releases / hot issues / news for all 12 agents without LLM calls.
 
 ## Why
 
