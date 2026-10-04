@@ -122,7 +122,8 @@ jobs:
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-          PAGES_URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}
+          # PAGES_URL deliberately unset: scheduled runs have no github.event.repository,
+          # so notify.ts derives the URL from GITHUB_REPOSITORY instead.
         run: pnpm notify
 
       - name: Close stale issues

@@ -38,7 +38,7 @@ const TAGS = ["ai", "llm", "machinelearning", "openai", "langchain"];
 // Response type
 // ---------------------------------------------------------------------------
 
-interface DevtoApiArticle {
+export interface DevtoApiArticle {
   id: number;
   title: string;
   description: string;
@@ -49,6 +49,21 @@ interface DevtoApiArticle {
   reading_time_minutes: number;
   tag_list: string[];
   user: { name: string };
+}
+
+export function toDevtoArticle(a: DevtoApiArticle): DevtoArticle {
+  return {
+    id: a.id,
+    title: a.title,
+    description: a.description,
+    url: a.url,
+    publishedAt: a.published_at,
+    positiveReactionsCount: a.positive_reactions_count,
+    commentsCount: a.comments_count,
+    readingTimeMinutes: a.reading_time_minutes,
+    tags: a.tag_list,
+    user: a.user.name,
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -80,18 +95,7 @@ export async function fetchDevtoData(): Promise<DevtoData> {
           const raw = (await resp.json()) as DevtoApiArticle[];
           for (const a of raw) {
             if (!seen.has(a.id)) {
-              seen.set(a.id, {
-                id: a.id,
-                title: a.title,
-                description: a.description,
-                url: a.url,
-                publishedAt: a.published_at,
-                positiveReactionsCount: a.positive_reactions_count,
-                commentsCount: a.comments_count,
-                readingTimeMinutes: a.reading_time_minutes,
-                tags: a.tag_list,
-                user: a.user.name,
-              });
+              seen.set(a.id, toDevtoArticle(a));
             }
           }
         } catch (err) {

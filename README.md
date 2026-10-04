@@ -4,18 +4,18 @@ A GitHub Actions workflow that runs every morning at 07:00 CST. It aggregates AI
 
 ### Data Sources
 
-| Source                                                            | Type                                            | Data                                                                 |
-| ----------------------------------------------------------------- | ----------------------------------------------- | -------------------------------------------------------------------- |
-| [GitHub Repos](https://github.com)                                | API                                             | Issues, PRs, releases from 18 tracked AI tool repos                  |
-| [Claude Code Skills](https://github.com/anthropics/skills)        | API                                             | Trending skills sorted by community engagement                       |
-| [GitHub Trending](https://github.com/trending)                    | HTML + API                                      | Daily trending repos + AI topic search (7-day window)                |
-| [Hacker News](https://news.ycombinator.com)                       | [Algolia API](https://hn.algolia.com/api)       | Top 30 AI stories from last 24h, 6 parallel queries                  |
-| [Product Hunt](https://www.producthunt.com)                       | GraphQL API                                     | Yesterday's top AI products by votes                                 |
-| [ArXiv](https://arxiv.org)                                        | [ArXiv API](https://export.arxiv.org/api/query) | Latest papers from cs.AI, cs.CL, cs.LG (last 48h)                    |
-| [Hugging Face](https://huggingface.co)                            | [Hub API](https://huggingface.co/api/models)    | 30 trending models sorted by weekly likes — **weekly**, Mondays only |
-| [Dev.to](https://dev.to)                                          | [Forem API](https://dev.to/api)                 | Top AI/LLM articles from 5 tags                                      |
-| [Lobste.rs](https://lobste.rs)                                    | JSON API                                        | AI/ML tagged stories from last 7 days                                |
-| [Anthropic](https://anthropic.com) + [OpenAI](https://openai.com) | Sitemap                                         | New articles detected via `lastmod` diff                             |
+| Source                                                            | Type                                              | Data                                                                 |
+| ----------------------------------------------------------------- | ------------------------------------------------- | -------------------------------------------------------------------- |
+| [GitHub Repos](https://github.com)                                | API                                               | Issues, PRs, releases from 18 tracked AI tool repos                  |
+| [Claude Code Skills](https://github.com/anthropics/skills)        | API                                               | Trending skills sorted by community engagement                       |
+| [GitHub Trending](https://github.com/trending)                    | HTML + API                                        | Daily trending repos + AI topic search (7-day window)                |
+| [Hacker News](https://news.ycombinator.com)                       | [Firebase API](https://github.com/HackerNews/API) | Top AI stories from last 24h via topstories scanning                 |
+| [Product Hunt](https://www.producthunt.com)                       | GraphQL API                                       | Yesterday's top AI products by votes                                 |
+| [ArXiv](https://arxiv.org)                                        | [ArXiv API](https://export.arxiv.org/api/query)   | Latest papers from cs.AI, cs.CL, cs.LG (last 48h)                    |
+| [Hugging Face](https://huggingface.co)                            | [Hub API](https://huggingface.co/api/models)      | 30 trending models sorted by weekly likes — **weekly**, Mondays only |
+| [Dev.to](https://dev.to)                                          | [Forem API](https://dev.to/api)                   | Top AI/LLM articles from 5 tags                                      |
+| [Lobste.rs](https://lobste.rs)                                    | JSON API                                          | AI/ML tagged stories from last 7 days                                |
+| [Anthropic](https://anthropic.com) + [OpenAI](https://openai.com) | Sitemap                                           | New articles detected via `lastmod` diff                             |
 
 ## Web UI
 
@@ -164,7 +164,7 @@ The LLM filters out non-AI repos from the trending list, classifies the rest by 
 
 ### Hacker News
 
-Top AI stories from the last 24 hours, fetched via the [Algolia HN Search API](https://hn.algolia.com/api). Six queries run in parallel (`AI`, `LLM`, `Claude`, `OpenAI`, `Anthropic`, `machine learning`), results are deduplicated and ranked by points. The top 30 stories are passed to the LLM for analysis.
+Top AI stories from the last 24 hours, fetched from the official [Firebase API](https://github.com/HackerNews/API). The top 500 stories are scanned in batches of 50, filtered for AI-related keywords, and ranked by score. The top stories are passed to the LLM for analysis.
 
 ### Official web content (sitemap-based)
 

@@ -35,7 +35,7 @@ const TAG_URLS = ["https://lobste.rs/t/ai.json", "https://lobste.rs/t/ml.json"];
 // Response type
 // ---------------------------------------------------------------------------
 
-interface LobstersApiStory {
+export interface LobstersApiStory {
   short_id: string;
   title: string;
   url: string;
@@ -45,6 +45,19 @@ interface LobstersApiStory {
   submitter_user: { username: string };
   created_at: string;
   tags: string[];
+}
+
+export function toLobstersStory(s: LobstersApiStory): LobstersStory {
+  return {
+    title: s.title,
+    url: s.url || s.comments_url,
+    commentsUrl: s.comments_url,
+    score: s.score,
+    commentCount: s.comment_count,
+    author: s.submitter_user.username,
+    publishedAt: s.created_at,
+    tags: s.tags,
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -70,16 +83,7 @@ export async function fetchLobstersData(): Promise<LobstersData> {
           const raw = (await resp.json()) as LobstersApiStory[];
           for (const s of raw) {
             if (!seen.has(s.short_id)) {
-              seen.set(s.short_id, {
-                title: s.title,
-                url: s.url || s.comments_url,
-                commentsUrl: s.comments_url,
-                score: s.score,
-                commentCount: s.comment_count,
-                author: s.submitter_user.username,
-                publishedAt: s.created_at,
-                tags: s.tags,
-              });
+              seen.set(s.short_id, toLobstersStory(s));
             }
           }
         } catch (err) {

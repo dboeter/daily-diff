@@ -35,7 +35,7 @@ const PH_FETCH_COUNT = 20; // PH API complexity limit caps this at ~20
 const API_URL = "https://api.producthunt.com/v2/api/graphql";
 
 /** AI-related topic slugs — products with any of these are included. */
-const AI_TOPIC_SLUGS = new Set([
+export const AI_TOPIC_SLUGS = new Set([
   "artificial-intelligence",
   "machine-learning",
   "ai",
@@ -104,6 +104,33 @@ interface PhResponse {
 // Fetch
 // ---------------------------------------------------------------------------
 
+export function parsePhEdges(edges: Array<{ node: PhNode }>, maxProducts = PH_TOP_PRODUCTS): PhProduct[] {
+  const allProducts: PhProduct[] = [];
+  for (const edge of edges) {
+    const node = edge.node;
+    const topicSlugs = node.topics?.edges?.map((e) => e.node.slug) ?? [];
+    const topicNames = node.topics?.edges?.map((e) => e.node.name) ?? [];
+
+    // Filter: keep only products with at least one AI-related topic
+    const isAiRelated = topicSlugs.some((slug) => AI_TOPIC_SLUGS.has(slug));
+    if (!isAiRelated) continue;
+
+    allProducts.push({
+      id: node.id,
+      name: node.name,
+      tagline: node.tagline,
+      url: node.url,
+      website: node.website || node.url,
+      votesCount: node.votesCount,
+      commentsCount: node.commentsCount,
+      createdAt: node.createdAt,
+      topics: topicNames,
+    });
+  }
+
+  return allProducts.sort((a, b) => b.votesCount - a.votesCount).slice(0, maxProducts);
+}
+
 export async function fetchPhData(): Promise<PhData> {
   const token = process.env["PRODUCTHUNT_TOKEN"] ?? "";
   if (!token) {
@@ -146,32 +173,10 @@ export async function fetchPhData(): Promise<PhData> {
       return { products: [], fetchSuccess: false };
     }
 
-    const allProducts: PhProduct[] = [];
-    for (const edge of json.data?.posts?.edges ?? []) {
-      const node = edge.node;
-      const topicSlugs = node.topics?.edges?.map((e) => e.node.slug) ?? [];
-      const topicNames = node.topics?.edges?.map((e) => e.node.name) ?? [];
+    const rawEdges = json.data?.posts?.edges ?? [];
+    const products = parsePhEdges(rawEdges);
 
-      // Filter: keep only products with at least one AI-related topic
-      const isAiRelated = topicSlugs.some((slug) => AI_TOPIC_SLUGS.has(slug));
-      if (!isAiRelated) continue;
-
-      allProducts.push({
-        id: node.id,
-        name: node.name,
-        tagline: node.tagline,
-        url: node.url,
-        website: node.website || node.url,
-        votesCount: node.votesCount,
-        commentsCount: node.commentsCount,
-        createdAt: node.createdAt,
-        topics: topicNames,
-      });
-    }
-
-    const products = allProducts.sort((a, b) => b.votesCount - a.votesCount).slice(0, PH_TOP_PRODUCTS);
-
-    console.log(`  [ph] ${products.length} AI products (from ${json.data?.posts?.edges?.length ?? 0} total)`);
+    console.log(`  [ph] ${products.length} AI products (from ${rawEdges.length} total)`);
     return { products, fetchSuccess: products.length > 0 };
   } catch (err) {
     console.error(`  [ph] fetch failed: ${err}`);
