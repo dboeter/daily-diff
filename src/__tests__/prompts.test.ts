@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
-import { formatItem, formatDiscussion, topN, topDiscussions, sampleNote } from "../prompts.ts";
-import type { GitHubItem, GitHubDiscussion } from "../github.ts";
+import { formatItem, topN } from "../prompts.ts";
+import type { GitHubItem } from "../github.ts";
 
 // ---------------------------------------------------------------------------
 // Test helpers
@@ -121,95 +121,5 @@ describe("topN", () => {
 });
 
 // ---------------------------------------------------------------------------
-// sampleNote
-// ---------------------------------------------------------------------------
-
-describe("sampleNote", () => {
-  it("shows sampled note when total > sampled", () => {
-    const result = sampleNote(50, 20);
-    expect(result).toBe("(Total: 50 items; showing top 20 by comment count)");
-  });
-
-  it("shows total-only note when total <= sampled", () => {
-    expect(sampleNote(8, 8)).toBe("(Total: 8 items)");
-    expect(sampleNote(5, 10)).toBe("(Total: 5 items)");
-  });
-
-  it("names the engagement criterion when sampling discussions", () => {
-    expect(sampleNote(100, 25, "engagement")).toBe(
-      "(Total: 100 items; showing top 25 by comments + upvotes)",
-    );
-  });
-});
-
-// ---------------------------------------------------------------------------
 // formatDiscussion
 // ---------------------------------------------------------------------------
-
-function makeDiscussion(overrides: Partial<GitHubDiscussion> = {}): GitHubDiscussion {
-  return {
-    number: 42,
-    title: "Add a Pro plan",
-    body: "Some discussion body",
-    category: "Ideas",
-    author: "alice",
-    created_at: "2026-03-09T00:00:00Z",
-    updated_at: "2026-03-09T12:00:00Z",
-    comments: 4,
-    upvotes: 16,
-    answered: false,
-    html_url: "https://github.com/org/repo/discussions/42",
-    ...overrides,
-  };
-}
-
-describe("formatDiscussion", () => {
-  it("formats a discussion", () => {
-    const result = formatDiscussion(makeDiscussion());
-    expect(result).toContain("#42 [Ideas]");
-    expect(result).toContain("Add a Pro plan");
-    expect(result).toContain("Author: alice");
-    expect(result).toContain("Comments: 4");
-    expect(result).toContain("👍: 16");
-    expect(result).toContain("URL: org/repo Discussion #42");
-    expect(result).toContain("Summary: Some discussion body");
-  });
-
-  it("flags answered threads", () => {
-    expect(formatDiscussion(makeDiscussion({ answered: true }))).toContain("[ANSWERED]");
-  });
-
-  it("never emits a full github.com URL", () => {
-    expect(formatDiscussion(makeDiscussion())).not.toContain("https://github.com");
-  });
-
-  it("truncates long bodies", () => {
-    const result = formatDiscussion(makeDiscussion({ body: "x".repeat(400) }));
-    expect(result).toContain("...");
-    expect(result).not.toContain("x".repeat(301));
-  });
-});
-
-// ---------------------------------------------------------------------------
-// topDiscussions
-// ---------------------------------------------------------------------------
-
-describe("topDiscussions", () => {
-  it("ranks by comments + upvotes combined", () => {
-    const items = [
-      makeDiscussion({ number: 1, comments: 0, upvotes: 20 }),
-      makeDiscussion({ number: 2, comments: 30, upvotes: 0 }),
-      makeDiscussion({ number: 3, comments: 5, upvotes: 5 }),
-    ];
-    expect(topDiscussions(items, 3).map((d) => d.number)).toEqual([2, 1, 3]);
-  });
-
-  it("takes at most n items and does not mutate the input", () => {
-    const items = [
-      makeDiscussion({ number: 1, comments: 1, upvotes: 0 }),
-      makeDiscussion({ number: 2, comments: 9, upvotes: 0 }),
-    ];
-    expect(topDiscussions(items, 1).map((d) => d.number)).toEqual([2]);
-    expect(items.map((d) => d.number)).toEqual([1, 2]);
-  });
-});

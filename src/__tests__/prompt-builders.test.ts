@@ -1,16 +1,12 @@
 import { describe, it, expect } from "vitest";
 import {
-  buildCliPrompt,
-  buildPeerPrompt,
-  buildInfraPrompt,
-  buildComparisonPrompt,
-  buildInfraComparisonPrompt,
-  buildPeersComparisonPrompt,
+  buildProjectDigestPrompt,
   buildSkillsPrompt,
+  hasActivity,
+  type ProjectActivity,
 } from "../prompts.ts";
 import { buildTrendingPrompt, buildWebReportPrompt, buildHnPrompt } from "../prompts-data.ts";
-import type { RepoConfig, GitHubItem, GitHubRelease, GitHubDiscussion } from "../github.ts";
-import type { RepoDigest } from "../prompts.ts";
+import type { RepoConfig, GitHubItem, GitHubRelease } from "../github.ts";
 import type { TrendingData } from "../trending.ts";
 import type { HnData } from "../hn.ts";
 import type { WebFetchResult } from "../web.ts";
@@ -38,206 +34,82 @@ function makeItem(overrides: Partial<GitHubItem> = {}): GitHubItem {
   };
 }
 
-function makeDiscussion(overrides: Partial<GitHubDiscussion> = {}): GitHubDiscussion {
-  return {
-    number: 42,
-    title: "Discussion title",
-    body: "Discussion body",
-    category: "Ideas",
-    author: "alice",
-    created_at: "2026-03-09T00:00:00Z",
-    updated_at: "2026-03-09T12:00:00Z",
-    comments: 4,
-    upvotes: 16,
-    answered: false,
-    html_url: "https://github.com/org/test/discussions/42",
-    ...overrides,
-  };
-}
-
 const release: GitHubRelease = {
   tag_name: "v1.0.0",
   name: "Release 1.0",
   body: "Release notes",
   published_at: "2026-03-09T00:00:00Z",
+  prerelease: false,
 };
 
-function makeDigest(overrides: Partial<RepoDigest> = {}): RepoDigest {
-  return {
-    config: cfg,
-    issues: [],
-    prs: [],
-    releases: [],
-    discussions: [],
-    summary: "Summary",
-    ...overrides,
-  };
+// ---------------------------------------------------------------------------
+// buildProjectDigestPrompt
+// ---------------------------------------------------------------------------
+
+function makeActivity(overrides: Partial<ProjectActivity> = {}): ProjectActivity {
+  return { config: cfg, releases: [], prereleaseCount: 0, hotIssues: [], news: [], ...overrides };
 }
 
-// ---------------------------------------------------------------------------
-// buildCliPrompt
-// ---------------------------------------------------------------------------
+const scope = { subject: "AI coding agents", window: "last 24h", period: "today" };
 
-describe("buildCliPrompt", () => {
-  it("includes repo, date and release data", () => {
-    const result = buildCliPrompt(cfg, [makeItem()], [makeItem()], [release], [], "2026-03-09");
-    expect(result).toContain("technical analyst");
-    expect(result).toContain("TestTool");
-    expect(result).toContain("2026-03-09");
-    expect(result).toContain("org/test");
-    expect(result).toContain("v1.0.0");
+describe("hasActivity", () => {
+  it("is false for a project with nothing but prereleases", () => {
+    expect(hasActivity(makeActivity({ prereleaseCount: 3 }))).toBe(false);
   });
 
-  it("asks for the standard sections", () => {
-    const result = buildCliPrompt(cfg, [makeItem()], [], [], [], "2026-03-09");
-    expect(result).toContain("Hot Issues");
+  it("is true for a release, a hot issue or a news item", () => {
+    expect(hasActivity(makeActivity({ releases: [release] }))).toBe(true);
+    expect(hasActivity(makeActivity({ hotIssues: [makeItem()] }))).toBe(true);
+    expect(
+      hasActivity(makeActivity({ news: [{ source: "Hacker News", title: "t", url: "u", detail: "d" }] })),
+    ).toBe(true);
   });
+});
 
-  it("shows None when no data", () => {
-    const result = buildCliPrompt(cfg, [], [], [], [], "2026-03-09");
-    expect(result).toContain("None");
-  });
-
-  it("includes sample notes when items exceed limit", () => {
-    const items = Array.from({ length: 50 }, (_, i) => makeItem({ number: i, comments: i }));
-    const result = buildCliPrompt(cfg, items, [], [], [], "2026-03-09");
-    expect(result).toContain("Total: 50 items; showing top 30");
-  });
-
-  it("omits the Discussions section when there is no discussion data", () => {
-    const result = buildCliPrompt(cfg, [makeItem()], [], [], [], "2026-03-09");
-    expect(result).not.toContain("Latest Discussions");
-  });
-
-  it("renders the Discussions section when data is present", () => {
-    const result = buildCliPrompt(cfg, [], [], [], [makeDiscussion()], "2026-03-09");
-    expect(result).toContain("Latest Discussions");
-    expect(result).toContain("#42 [Ideas]");
-    expect(result).toContain("Hot Discussions");
-  });
-
-  it("samples discussions by engagement when they exceed the limit", () => {
-    const items = Array.from({ length: 60 }, (_, i) =>
-      makeDiscussion({ number: i, comments: 0, upvotes: i }),
+describe("buildProjectDigestPrompt", () => {
+  it("includes releases with their tag URL, hot issues and news", () => {
+    const prompt = buildProjectDigestPrompt(
+      [
+        makeActivity({
+          releases: [release],
+          hotIssues: [makeItem({ title: "Crash on start" })],
+          news: [{ source: "Hacker News", title: "TestTool 1.0", url: "https://hn/1", detail: "9 points" }],
+        }),
+      ],
+      scope,
+      "2026-10-04",
     );
-    const result = buildCliPrompt(cfg, [], [], [], items, "2026-03-09");
-    expect(result).toContain("Total: 60 items; showing top 40 by comments + upvotes");
-    // Highest-upvoted kept, lowest dropped
-    expect(result).toContain("#59 [Ideas]");
-    expect(result).not.toContain("#0 [Ideas]");
-  });
-});
-
-// ---------------------------------------------------------------------------
-// buildPeerPrompt
-// ---------------------------------------------------------------------------
-
-describe("buildPeerPrompt", () => {
-  it("includes data overview section", () => {
-    const issues = [makeItem({ state: "open" }), makeItem({ state: "closed" })];
-    const result = buildPeerPrompt(cfg, issues, [makeItem()], [release], "2026-03-09");
-    expect(result).toContain("Data Overview");
-    expect(result).toContain("open/active: 1");
-    expect(result).toContain("closed: 1");
+    expect(prompt).toContain("## TestTool (github.com/org/test)");
+    expect(prompt).toContain("https://github.com/org/test/releases/tag/v1.0.0");
+    expect(prompt).toContain("Release notes");
+    expect(prompt).toContain("Crash on start");
+    expect(prompt).toContain("[Hacker News] TestTool 1.0 — https://hn/1 (9 points)");
+    expect(prompt).toContain("2026-10-04 (last 24h)");
+    expect(prompt).toContain("AI coding agents");
   });
 
-  it("shows None when no data", () => {
-    const result = buildPeerPrompt(cfg, [], [], [], "2026-03-09", 30, 20);
-    expect(result).toContain("Data Overview");
-    expect(result).toContain("None");
-  });
-});
-
-// ---------------------------------------------------------------------------
-// buildInfraPrompt
-// ---------------------------------------------------------------------------
-
-describe("buildInfraPrompt", () => {
-  it("includes repo and release data", () => {
-    const result = buildInfraPrompt(cfg, [makeItem()], [makeItem()], [release], "2026-03-09");
-    expect(result).toContain("AI infrastructure");
-    expect(result).toContain("New Model & Hardware Support");
-    expect(result).toContain("TestTool");
-    expect(result).toContain("v1.0.0");
+  it("never sends prereleases to the model", () => {
+    const prompt = buildProjectDigestPrompt(
+      [makeActivity({ releases: [release], prereleaseCount: 4 })],
+      scope,
+      "d",
+    );
+    expect(prompt).not.toMatch(/prerelease/i);
   });
 
-  it("shows None when a section has no data", () => {
-    const result = buildInfraPrompt(cfg, [makeItem()], [], [], "2026-03-09");
-    expect(result).toContain("None");
+  it("caps the releases shown and notes the total", () => {
+    const releases = Array.from({ length: 14 }, (_, i) => ({ ...release, tag_name: `b${100 - i}` }));
+    const prompt = buildProjectDigestPrompt([makeActivity({ releases })], scope, "d");
+    expect(prompt).toContain("(14 stable releases; showing newest 10)");
+    expect(prompt).toContain("b100");
+    expect(prompt).not.toContain("b87");
   });
 
-  it("includes sample notes when items exceed limit", () => {
-    const items = Array.from({ length: 50 }, (_, i) => makeItem({ number: i, comments: i }));
-    const result = buildInfraPrompt(cfg, items, [], [], "2026-03-09");
-    expect(result).toContain("Total: 50 items; showing top 30");
-  });
-});
-
-// ---------------------------------------------------------------------------
-// buildInfraComparisonPrompt
-// ---------------------------------------------------------------------------
-
-describe("buildInfraComparisonPrompt", () => {
-  it("includes all digest summaries when they have data", () => {
-    const digests = [
-      makeDigest({ config: { ...cfg, name: "vLLM" }, summary: "Summary A", issues: [makeItem()] }),
-      makeDigest({ config: { ...cfg, name: "Ollama" }, summary: "Summary B", prs: [makeItem()] }),
-    ];
-    const result = buildInfraComparisonPrompt(digests, "2026-03-09");
-    expect(result).toContain("Model Support Race");
-    expect(result).toContain("vLLM");
-    expect(result).toContain("Summary A");
-    expect(result).toContain("Ollama");
-    expect(result).toContain("Summary B");
-  });
-
-  it("shows no-activity for empty digests", () => {
-    const result = buildInfraComparisonPrompt([makeDigest({ summary: "Summary" })], "2026-03-09");
-    expect(result).toContain("No activity in the last 24 hours.");
-  });
-});
-
-// ---------------------------------------------------------------------------
-// buildComparisonPrompt
-// ---------------------------------------------------------------------------
-
-describe("buildComparisonPrompt", () => {
-  it("includes all digest summaries when they have data", () => {
-    const digests = [
-      makeDigest({ config: { ...cfg, name: "Tool A" }, summary: "Summary A", issues: [makeItem()] }),
-      makeDigest({ config: { ...cfg, name: "Tool B" }, summary: "Summary B", prs: [makeItem()] }),
-    ];
-    const result = buildComparisonPrompt(digests, "2026-03-09");
-    expect(result).toContain("Tool A");
-    expect(result).toContain("Summary A");
-    expect(result).toContain("Tool B");
-    expect(result).toContain("Summary B");
-  });
-
-  it("shows no-activity for empty digests", () => {
-    const digests = [makeDigest({ summary: "Summary" })]; // no issues/prs/releases
-    const result = buildComparisonPrompt(digests, "2026-03-09");
-    expect(result).toContain("No activity in the last 24 hours.");
-  });
-});
-
-// ---------------------------------------------------------------------------
-// buildPeersComparisonPrompt
-// ---------------------------------------------------------------------------
-
-describe("buildPeersComparisonPrompt", () => {
-  it("includes openclaw and peer sections", () => {
-    const openclawDigest = makeDigest({
-      config: { id: "openclaw", repo: "openclaw/openclaw", name: "OpenClaw" },
-      summary: "OC summary",
-    });
-    const peerDigests = [
-      makeDigest({ config: { ...cfg, name: "Peer" }, summary: "Peer summary", issues: [makeItem()] }),
-    ];
-    const result = buildPeersComparisonPrompt(openclawDigest, peerDigests, "2026-03-09");
-    expect(result).toContain("OpenClaw (core reference");
-    expect(result).toContain("OC summary");
-    expect(result).toContain("Peer summary");
+  it("asks for an overview and one section per project", () => {
+    const prompt = buildProjectDigestPrompt([makeActivity({ releases: [release] })], scope, "d");
+    expect(prompt).toContain("## Overview");
+    expect(prompt).toContain("## <Project name>");
+    expect(prompt).toContain("today");
   });
 });
 
@@ -271,7 +143,7 @@ describe("buildTrendingPrompt", () => {
           fullName: "org/repo",
           description: "desc",
           language: "Python",
-          todayStars: 100,
+          periodStars: 100,
           totalStars: 5000,
           forks: 200,
           url: "https://github.com/org/repo",
@@ -284,7 +156,7 @@ describe("buildTrendingPrompt", () => {
     expect(result).toContain("org/repo");
     expect(result).toContain("Python");
     expect(result).toContain("5,000");
-    expect(result).toContain("+100 today");
+    expect(result).toContain("+100 this week");
   });
 
   it("omits the total when the scraped star count is 0", () => {
@@ -294,7 +166,7 @@ describe("buildTrendingPrompt", () => {
           fullName: "org/repo",
           description: "",
           language: "",
-          todayStars: 408,
+          periodStars: 408,
           totalStars: 0,
           forks: 0,
           url: "https://github.com/org/repo",
@@ -304,7 +176,7 @@ describe("buildTrendingPrompt", () => {
       trendingFetchSuccess: true,
     };
     const result = buildTrendingPrompt(data, "2026-03-09");
-    expect(result).toContain("- [org/repo](https://github.com/org/repo) (+408 today)");
+    expect(result).toContain("- [org/repo](https://github.com/org/repo) (+408 this week)");
     expect(result).not.toContain("⭐0");
   });
 

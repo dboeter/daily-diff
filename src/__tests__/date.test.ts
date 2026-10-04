@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { toCstDateStr, toUtcStr, weekdayOf } from "../date.ts";
+import { toCstDateStr, toUtcStr, weekdayOf, isWeeklyRun } from "../date.ts";
 
 describe("toCstDateStr", () => {
   it("shifts a late-UTC timestamp to the next CST day", () => {
@@ -30,5 +30,20 @@ describe("weekdayOf", () => {
   it("reads the date string as UTC, not local time", () => {
     // A local-time parse would shift the day in negative-offset time zones.
     expect(weekdayOf("2026-08-27")).toBe(4); // Thursday
+  });
+});
+
+describe("isWeeklyRun", () => {
+  it("is true on Monday (CST date)", () => {
+    expect(isWeeklyRun("2026-10-05")).toBe(true);
+  });
+
+  it("is false on other days", () => {
+    expect(isWeeklyRun("2026-10-04")).toBe(false);
+    expect(isWeeklyRun("2026-10-06")).toBe(false);
+  });
+
+  it("can be forced on any day", () => {
+    expect(isWeeklyRun("2026-10-04", true)).toBe(true);
   });
 });

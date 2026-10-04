@@ -1,20 +1,19 @@
 # Daily Diff
 
-A GitHub Actions workflow that runs every morning at 07:00 CST. It aggregates AI ecosystem signals from 10 data sources, then publishes English daily digests as GitHub Issues and committed Markdown files.
+A GitHub Actions workflow that runs every morning at 06:37 CST. It aggregates AI ecosystem signals from 9 data sources, then publishes English digests as GitHub Issues and committed Markdown files: a daily set (agents, Hacker News, ArXiv, official web content) and a weekly set on Mondays (infrastructure, trending, community, Hugging Face).
 
 ### Data Sources
 
 | Source                                                            | Type                                              | Data                                                                 |
 | ----------------------------------------------------------------- | ------------------------------------------------- | -------------------------------------------------------------------- |
-| [GitHub Repos](https://github.com)                                | API                                               | Issues, PRs, releases from 18 tracked AI tool repos                  |
-| [Claude Code Skills](https://github.com/anthropics/skills)        | API                                               | Trending skills sorted by community engagement                       |
-| [GitHub Trending](https://github.com/trending)                    | HTML + API                                        | Daily trending repos + AI topic search (7-day window)                |
+| [GitHub Repos](https://github.com)                                | API                                               | Stable releases and hot issues from 18 tracked agent and infra repos |
+| [Claude Code Skills](https://github.com/anthropics/skills)        | API                                               | Trending skills sorted by community engagement — **weekly**          |
+| [GitHub Trending](https://github.com/trending)                    | HTML + API                                        | Weekly trending repos + AI topic search (7-day window) — **weekly**  |
 | [Hacker News](https://news.ycombinator.com)                       | [Firebase API](https://github.com/HackerNews/API) | Top AI stories from last 24h via topstories scanning                 |
-| [Product Hunt](https://www.producthunt.com)                       | GraphQL API                                       | Yesterday's top AI products by votes                                 |
 | [ArXiv](https://arxiv.org)                                        | [ArXiv API](https://export.arxiv.org/api/query)   | Latest papers from cs.AI, cs.CL, cs.LG (last 48h)                    |
 | [Hugging Face](https://huggingface.co)                            | [Hub API](https://huggingface.co/api/models)      | 30 trending models sorted by weekly likes — **weekly**, Mondays only |
-| [Dev.to](https://dev.to)                                          | [Forem API](https://dev.to/api)                   | Top AI/LLM articles from 5 tags                                      |
-| [Lobste.rs](https://lobste.rs)                                    | JSON API                                          | AI/ML tagged stories from last 7 days                                |
+| [Dev.to](https://dev.to)                                          | [Forem API](https://dev.to/api)                   | Top AI/LLM articles of the week from 5 tags — **weekly**             |
+| [Lobste.rs](https://lobste.rs)                                    | JSON API                                          | AI/ML tagged stories from last 7 days — **weekly**                   |
 | [Anthropic](https://anthropic.com) + [OpenAI](https://openai.com) | Sitemap                                           | New articles detected via `lastmod` diff                             |
 
 ## Web UI
@@ -62,7 +61,7 @@ A [Model Context Protocol](https://modelcontextprotocol.io) server that exposes 
 
 Restart Claude Desktop after saving. You can then ask Claude things like:
 
-- _"What's the latest in AI CLI tools?"_ → calls `get_latest`
+- _"What's the latest in AI coding agents?"_ → calls `get_latest`
 - _"Search for Claude Code mentions this week"_ → calls `search`
 - _"Show me the AI trending report for 2026-03-05"_ → calls `get_report`
 
@@ -87,7 +86,7 @@ Or add it manually to `~/.openclaw/openclaw.json`:
 
 You can then ask OpenClaw things like:
 
-- _"What's the latest in AI CLI tools?"_ → calls `get_latest`
+- _"What's the latest in AI coding agents?"_ → calls `get_latest`
 - _"Search for Claude Code mentions this week"_ → calls `search`
 - _"Show me the AI trending report for 2026-03-05"_ → calls `get_report`
 
@@ -101,44 +100,34 @@ wrangler deploy
 
 ## Tracked sources
 
-### AI CLI tools (GitHub)
+### AI agents (GitHub) — daily
 
-| Tool               | Repository                                                              |
-| ------------------ | ----------------------------------------------------------------------- |
-| Claude Code        | [anthropics/claude-code](https://github.com/anthropics/claude-code)     |
-| OpenAI Codex       | [openai/codex](https://github.com/openai/codex)                         |
-| Gemini CLI         | [google-gemini/gemini-cli](https://github.com/google-gemini/gemini-cli) |
-| GitHub Copilot CLI | [github/copilot-cli](https://github.com/github/copilot-cli)             |
-| OpenCode           | [anomalyco/opencode](https://github.com/anomalyco/opencode)             |
-| Pi                 | [earendil-works/pi](https://github.com/earendil-works/pi)               |
-| Qwen Code          | [QwenLM/qwen-code](https://github.com/QwenLM/qwen-code)                 |
+Coding agents and personal AI assistants, CLI or not, in one daily report. Issue and PR churn is not reported; each agent is covered by:
 
-Repos marked `discussions: true` in `config.yml` (Codex, Pi) also have their GitHub Discussions
-pulled in.
+- **Stable releases** from the last 24h. Nightlies, alphas and release candidates are detected (API flag or tag pattern) and only counted.
+- **Hot issues**: opened in the last 48h with 10+ comments and 👍 combined (3+ when labelled regression or security), at most 2 per agent.
+- **News**: Hacker News stories, new Anthropic/OpenAI pages and GitHub Trending repos that name the agent. An item naming three or more agents is treated as a compatibility list and skipped.
 
-### Claude Code Skills (GitHub)
+Agents with none of these are listed in one "Quiet today" line.
 
-| Source             | Repository                                                |
-| ------------------ | --------------------------------------------------------- |
-| Claude Code Skills | [anthropics/skills](https://github.com/anthropics/skills) |
+| Agent              | Repository                                                                |
+| ------------------ | ------------------------------------------------------------------------- |
+| Claude Code        | [anthropics/claude-code](https://github.com/anthropics/claude-code)       |
+| OpenAI Codex       | [openai/codex](https://github.com/openai/codex)                           |
+| Gemini CLI         | [google-gemini/gemini-cli](https://github.com/google-gemini/gemini-cli)   |
+| GitHub Copilot CLI | [github/copilot-cli](https://github.com/github/copilot-cli)               |
+| OpenCode           | [anomalyco/opencode](https://github.com/anomalyco/opencode)               |
+| Pi                 | [earendil-works/pi](https://github.com/earendil-works/pi)                 |
+| Qwen Code          | [QwenLM/qwen-code](https://github.com/QwenLM/qwen-code)                   |
+| OpenClaw           | [openclaw/openclaw](https://github.com/openclaw/openclaw)                 |
+| Hermes Agent       | [nousresearch/hermes-agent](https://github.com/nousresearch/hermes-agent) |
+| IronClaw           | [nearai/ironclaw](https://github.com/nearai/ironclaw)                     |
+| QwenPaw            | [agentscope-ai/QwenPaw](https://github.com/agentscope-ai/QwenPaw)         |
+| ZeroClaw           | [zeroclaw-labs/zeroclaw](https://github.com/zeroclaw-labs/zeroclaw)       |
 
-PRs and issues are fetched without a date filter and sorted by popularity (comment count), so the report always reflects the most actively discussed skills — not just the newest.
+### AI infrastructure (GitHub) — weekly
 
-### OpenClaw + AI agent ecosystem (GitHub)
-
-OpenClaw is tracked as the primary reference project, alongside several peer projects in the personal AI assistant / autonomous agent space for cross-ecosystem comparison.
-
-| Project      | Repository                                                                | Stars  |
-| ------------ | ------------------------------------------------------------------------- | ------ |
-| OpenClaw     | [openclaw/openclaw](https://github.com/openclaw/openclaw)                 | 387.8k |
-| Hermes Agent | [nousresearch/hermes-agent](https://github.com/nousresearch/hermes-agent) | 237.0k |
-| QwenPaw      | [agentscope-ai/QwenPaw](https://github.com/agentscope-ai/QwenPaw)         | 34.5k  |
-| ZeroClaw     | [zeroclaw-labs/zeroclaw](https://github.com/zeroclaw-labs/zeroclaw)       | 32.7k  |
-| IronClaw     | [nearai/ironclaw](https://github.com/nearai/ironclaw)                     | 12.6k  |
-
-### AI infrastructure (GitHub)
-
-The inference and serving layer the agent/CLI tools run on top of — tracked in a dedicated report with its own cross-project comparison.
+The inference and serving layer the agents run on top of. Weekly report on the same pipeline as the agents report — stable releases and hot issues of the last 7 days, without news matching.
 
 | Project   | Repository                                                  | Layer            | Stars  |
 | --------- | ----------------------------------------------------------- | ---------------- | ------ |
@@ -149,18 +138,16 @@ The inference and serving layer the agent/CLI tools run on top of — tracked in
 | LiteLLM   | [BerriAI/litellm](https://github.com/BerriAI/litellm)       | LLM gateway      | 55.0k  |
 | SGLang    | [sgl-project/sglang](https://github.com/sgl-project/sglang) | Serving engine   | 30.9k  |
 
-Summaries focus on new model/hardware support, performance work, breaking changes, and what each change means for developers building on top of these projects.
+### GitHub AI Trending — weekly
 
-### GitHub AI Trending
+| Source                                                          | Details                                                                                                                                       |
+| --------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| [github.com/trending](https://github.com/trending?since=weekly) | This week's trending repos — parsed from HTML; includes the stars gained this week                                                            |
+| GitHub Search API                                               | Repos active in the last 7 days matching 6 AI topics: `llm`, `ai-agent`, `rag`, `vector-database`, `large-language-model`, `machine-learning` |
 
-Two data sources are fetched in parallel every day:
+The LLM filters out non-AI repos from the trending list, classifies the rest by dimension (AI infrastructure / agents / applications / models / RAG), and extracts trend signals. The report ends with a Claude Code Skills section: [anthropics/skills](https://github.com/anthropics/skills) PRs and issues, fetched without a date filter and sorted by popularity.
 
-| Source                                                         | Details                                                                                                                                       |
-| -------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| [github.com/trending](https://github.com/trending?since=daily) | Today's trending repos — parsed from HTML; includes today's new star count                                                                    |
-| GitHub Search API                                              | Repos active in the last 7 days matching 6 AI topics: `llm`, `ai-agent`, `rag`, `vector-database`, `large-language-model`, `machine-learning` |
-
-The LLM filters out non-AI repos from the trending list, classifies the rest by dimension (AI infrastructure / agents / applications / models / RAG), and extracts trend signals.
+The daily trending list is still fetched every day, for the agents report's news matching.
 
 ### Hacker News
 
@@ -177,17 +164,14 @@ New articles are detected by comparing sitemap `lastmod` timestamps against a pe
 
 ## Features
 
-- Fetches issues, pull requests, and releases updated in the last 24 hours across all tracked repos
-- Tracks trending Claude Code Skills — sorted by community engagement, not recency
-- Generates a per-tool summary for each CLI repository and a cross-tool comparative analysis
-- Generates a deep OpenClaw project report plus a cross-ecosystem comparison against 4 peer projects
-- Tracks 6 AI infrastructure projects (inference engines, gateways, fine-tuning) with a dedicated report and cross-project comparison
-- Scrapes official Anthropic and OpenAI web content via sitemaps; detects new articles incrementally
-- Monitors GitHub Trending daily + searches 6 AI topic tags; classifies repos by dimension and extracts trend signals
-- Fetches top-30 AI stories from Hacker News (last 24h, ranked by points); generates community sentiment report
-- Publishes GitHub Issues for each report type; commits Markdown files to `digests/YYYY-MM-DD/`
-- Runs on a daily schedule via GitHub Actions; supports manual triggering
+- **Daily:** one agents report — stable releases, hot issues and news for 12 coding agents and AI assistants, in one LLM call
+- **Daily:** Hacker News AI stories, new ArXiv papers, and new Anthropic/OpenAI web content (sitemap-based, incremental)
+- **Weekly (Mondays):** AI infrastructure releases and hot issues, GitHub AI trending + Claude Code Skills, Dev.to + Lobste.rs community digest, Hugging Face trending models
+- Publishes a GitHub Issue per report; commits Markdown files to `digests/YYYY-MM-DD/`
+- Runs via GitHub Actions; supports manual triggering, with an option to force the weekly reports
 - All tracked repositories are configurable via `config.yml` — no code changes needed
+
+The weekly split exists because the daily editions of those reports mostly repeated themselves: sampled over September 2026, 54% of trending links and 45% of community links were already in the previous day's report, and on a given day 5 of 6 infra projects shipped no release. Product Hunt was dropped at the same time — mostly consumer apps, a poor fit for the audience.
 
 ## Setup
 
@@ -198,24 +182,18 @@ New articles are detected by comparing sitemap `lastmod` timestamps against a pe
 Edit `config.yml` in the repo root to add, remove, or replace the tracked repositories. The file is fully commented. No code changes are needed — the pipeline reads it on every run and falls back to built-in defaults if the file is absent.
 
 ```yaml
-# Add a new CLI tool
-cli_repos:
-  - id: my-tool
-    repo: owner/my-ai-cli
-    name: My AI Tool
-
-# Add a new peer project to the OpenClaw ecosystem comparison
-openclaw_peers:
+# Add a new agent
+agents:
   - id: my-agent
     repo: owner/my-agent
     name: My Agent
+    keywords: [my agent] # optional: news match terms; defaults to name + repo name
 
 # Add a new AI infrastructure project
 infra_repos:
   - id: my-engine
     repo: owner/my-engine
     name: My Engine
-    paginated: true # for repos with >100 daily issue/PR updates
 ```
 
 ### 3. Add Secrets
@@ -250,7 +228,7 @@ Go to **Settings → Secrets and variables → Actions** and add:
 
 Confirm the workflow is enabled in the **Actions** tab.
 
-To test immediately, go to **Actions → Daily Diff → Run workflow**.
+To test immediately, go to **Actions → Daily Diff → Run workflow**. Tick **force_weekly** to also generate the weekly reports on a non-Monday (e.g. to redo a missed Monday).
 
 > **First run note**: The web content step will fetch up to 50 articles (25 per site) and may take a few extra minutes. Subsequent runs are fast — only new articles are processed.
 
@@ -303,6 +281,7 @@ export ANTHROPIC_API_KEY=sk-ant-xxxxxxxx
 # export DASHSCOPE_API_KEY=sk-xxxxxxxx
 
 export DIGEST_REPO=your-username/daily-diff  # optional; omit to only write files
+# export DIGEST_FORCE_WEEKLY=1               # optional; also run the weekly reports today
 
 pnpm start
 ```
@@ -311,80 +290,35 @@ pnpm start
 
 Files are written to `digests/YYYY-MM-DD/`:
 
-| File              | Content                                                                                                         | GitHub Issue label |
-| ----------------- | --------------------------------------------------------------------------------------------------------------- | ------------------ |
-| `ai-cli.md`       | CLI digest — cross-tool comparison + per-tool details                                                           | `digest`           |
-| `ai-agents.md`    | OpenClaw deep report + cross-ecosystem comparison + 4 peer details                                              | `openclaw`         |
-| `ai-infra.md`     | AI infrastructure digest — cross-project comparison + per-project details                                       | `infra`            |
-| `ai-web.md`       | Official web content report (only written when new content exists)                                              | `web`              |
-| `ai-trending.md`  | GitHub AI trending report — repos classified by dimension + trend signals (only written when data is available) | `trending`         |
-| `ai-hn.md`        | Hacker News AI community digest — top stories + sentiment analysis (only written when fetch succeeds)           | `hn`               |
-| `ai-ph.md`        | Product Hunt AI products digest (only written when `PRODUCTHUNT_TOKEN` is set and data is available)            | `ph`               |
-| `ai-arxiv.md`     | ArXiv AI research digest — key papers from cs.AI/cs.CL/cs.LG                                                    | `arxiv`            |
-| `ai-hf.md`        | Hugging Face trending models digest — sorted by weekly likes (**weekly**: written on Mondays only)              | `hf`               |
-| `ai-community.md` | Tech community AI digest — Dev.to articles + Lobste.rs stories combined                                         | `community`        |
+| File              | Content                                                                                               | Cadence | GitHub Issue label |
+| ----------------- | ----------------------------------------------------------------------------------------------------- | ------- | ------------------ |
+| `ai-agents.md`    | AI agents digest — overview + per-agent releases, news and hot issues                                 | daily   | `agents`           |
+| `ai-hn.md`        | Hacker News AI community digest — top stories + sentiment analysis (only written when fetch succeeds) | daily   | `hn`               |
+| `ai-arxiv.md`     | ArXiv AI research digest — key papers from cs.AI/cs.CL/cs.LG                                          | daily   | `arxiv`            |
+| `ai-web.md`       | Official web content report (only written when new content exists)                                    | daily   | `web`              |
+| `ai-infra.md`     | AI infrastructure weekly — overview + per-project releases and hot issues                             | weekly  | `infra`            |
+| `ai-trending.md`  | GitHub AI trending report — repos classified by dimension + trend signals + Claude Code Skills        | weekly  | `trending`         |
+| `ai-community.md` | Tech community AI weekly — Dev.to articles + Lobste.rs stories combined                               | weekly  | `community`        |
+| `ai-hf.md`        | Hugging Face trending models digest — sorted by weekly likes                                          | weekly  | `hf`               |
+
+Archived days also contain `ai-cli.md` (the CLI report, merged into `ai-agents.md` in October 2026) and `ai-ph.md` (Product Hunt, dropped in October 2026). Before October 2026, `ai-agents.md` was the OpenClaw ecosystem report.
 
 A shared state file `digests/web-state.json` tracks which web URLs have been seen; it is committed alongside the daily digests.
 
 ---
 
-`ai-cli.md` structure:
+`ai-agents.md` structure (`ai-infra.md` is the same, over a week):
 
 ```
-## Cross-Tool Comparison
-  Ecosystem overview / Activity comparison table / Shared themes / Differentiation / Trend signals
+Generated | Projects: 12 | Active today: N | Stable releases: N | Prereleases (not covered): N
 
-## Per-Tool Reports
-  <details> Claude Code    — [Claude Code Skills Highlights]
-                             Top skills / Community demand trends / High-potential pending skills
-                             ---
-                             Today's summary / Hot issues / PR progress / Trends
-  <details> OpenAI Codex   — Today's summary / Hot issues / PR progress / Trends
-  <details> Gemini CLI     — ...
-  <details> GitHub Copilot CLI — ...
-  <details> OpenCode       — ...
-  <details> Pi             — ...
-  <details> Qwen Code      — ...
-```
+## Overview
+  3-5 sentences: what shipped, what broke, what got attention
 
-`ai-agents.md` structure:
+## <Agent>            — one section per active agent, at most 3 bullets
+  Release / News / Hot issue
 
-```
-Issues: N | PRs: N | Projects covered: 5
-
-## OpenClaw Deep Dive
-  Today's summary / Releases / Project progress / Community highlights /
-  Bug stability / Feature requests / User feedback / Backlog
-
-## Cross-Ecosystem Comparison
-  Ecosystem overview / Activity table / OpenClaw positioning /
-  Shared technical directions / Differentiation / Community maturity / Trend signals
-
-## Peer Project Reports
-  <details> ZeroClaw     — Today's summary / Releases / Progress / ... (8 sections)
-  <details> Hermes Agent — ...
-  <details> IronClaw     — ...
-  <details> QwenPaw      — ...
-```
-
-`ai-infra.md` structure:
-
-```
-Projects covered: 6
-
-## Cross-Project Comparison
-  Ecosystem overview / Activity table / Model support race /
-  Performance frontier / Layer positioning / Trend signals
-
-## Per-Project Reports
-  <details> vLLM       — Today's highlights / Releases & breaking changes /
-                         New model & hardware support / Performance & optimization /
-                         Stability & regressions / What it means for app developers
-  <details> SGLang     — ...
-  <details> llama.cpp  — ...
-  <details> Ollama     — ...
-  <details> LiteLLM    — ...
-  <details> Unsloth    — ...
+Quiet today: <agents with nothing to report>
 ```
 
 `ai-web.md` structure:
@@ -405,7 +339,7 @@ Notable details
 ```
 Sources: GitHub Trending + GitHub Search API
 
-Today's summary
+This week's highlights
 Top repos by dimension
   🔧 AI Infrastructure  — frameworks / SDKs / inference engines / CLIs
   🤖 AI Agents          — agent frameworks / multi-agent / automation
@@ -414,6 +348,7 @@ Top repos by dimension
   🔍 RAG & Knowledge    — vector databases / retrieval augmentation
 Trend signal analysis
 Community focus
+Claude Code Skills highlights
 ```
 
 `ai-hn.md` structure:
@@ -431,9 +366,9 @@ Community sentiment signals
 Worth reading
 ```
 
-Historical digests are stored in [`digests/`](./digests/). Published issues are tagged by type: [`digest`](../../issues?q=is%3Aissue+label%3Adigest) · [`openclaw`](../../issues?q=is%3Aissue+label%3Aopenclaw) · [`web`](../../issues?q=is%3Aissue+label%3Aweb) · [`trending`](../../issues?q=is%3Aissue+label%3Atrending) · [`hn`](../../issues?q=is%3Aissue+label%3Ahn) · [`ph`](../../issues?q=is%3Aissue+label%3Aph) · [`arxiv`](../../issues?q=is%3Aissue+label%3Aarxiv) · [`hf`](../../issues?q=is%3Aissue+label%3Ahf) · [`community`](../../issues?q=is%3Aissue+label%3Acommunity).
+Historical digests are stored in [`digests/`](./digests/). Published issues are tagged by type: [`agents`](../../issues?q=is%3Aissue+label%3Aagents) · [`infra`](../../issues?q=is%3Aissue+label%3Ainfra) · [`web`](../../issues?q=is%3Aissue+label%3Aweb) · [`trending`](../../issues?q=is%3Aissue+label%3Atrending) · [`hn`](../../issues?q=is%3Aissue+label%3Ahn) · [`arxiv`](../../issues?q=is%3Aissue+label%3Aarxiv) · [`hf`](../../issues?q=is%3Aissue+label%3Ahf) · [`community`](../../issues?q=is%3Aissue+label%3Acommunity). Older issues also carry the retired labels [`digest`](../../issues?q=is%3Aissue+label%3Adigest) (CLI), [`openclaw`](../../issues?q=is%3Aissue+label%3Aopenclaw) and [`ph`](../../issues?q=is%3Aissue+label%3Aph).
 
-Only the most recent day's issues are left open — `pnpm close-stale` closes everything older on each run, so the issue list stays at roughly one day's worth instead of thousands. Nothing is deleted: the label links above include closed issues, and the full archive also lives under `digests/` and in the Web UI. Issues without a digest label, and pull requests, are never touched.
+Only the most recent issues are left open — `pnpm close-stale` closes everything older on each run, so the issue list stays at roughly one day's worth instead of thousands. Daily reports keep the newest day open; each weekly report keeps its newest edition open until the next Monday. Nothing is deleted: the label links above include closed issues, and the full archive also lives under `digests/` and in the Web UI. Issues without a digest label, and pull requests, are never touched.
 
 Weekly and monthly rollup reports were discontinued in July 2026; past ones remain browsable under `digests/` and in the Web UI.
 

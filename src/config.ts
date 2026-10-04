@@ -16,65 +16,60 @@ interface RawRepoEntry {
   id: string;
   repo: string;
   name: string;
-  paginated?: boolean;
-  discussions?: boolean;
+  keywords?: string[];
 }
 
 interface RawConfig {
-  cli_repos?: RawRepoEntry[];
+  agents?: RawRepoEntry[];
   skills_repo?: string;
-  openclaw?: RawRepoEntry;
-  openclaw_peers?: RawRepoEntry[];
   infra_repos?: RawRepoEntry[];
 }
 
 export interface RadarConfig {
-  cliRepos: RepoConfig[];
+  agents: RepoConfig[];
   skillsRepo: string;
-  openclaw: RepoConfig;
-  openclawPeers: RepoConfig[];
   infraRepos: RepoConfig[];
 }
 
 // ---------------------------------------------------------------------------
-// Defaults (mirrors the original hard-coded values)
+// Defaults (mirrors config.yml)
 // ---------------------------------------------------------------------------
 
-const DEFAULT_CLI_REPOS: RepoConfig[] = [
+// Coding agents and personal AI assistants, CLI or not. Keywords are the terms
+// matchAgentNews looks for in HN/web/trending items; without them it uses the
+// display name and repo name. Pi needs explicit keywords: "pi" alone matches
+// Raspberry Pi and every other use of the word.
+const DEFAULT_AGENTS: RepoConfig[] = [
   { id: "claude-code", repo: "anthropics/claude-code", name: "Claude Code" },
-  { id: "codex", repo: "openai/codex", name: "OpenAI Codex", discussions: true },
+  { id: "codex", repo: "openai/codex", name: "OpenAI Codex", keywords: ["codex"] },
   { id: "gemini-cli", repo: "google-gemini/gemini-cli", name: "Gemini CLI" },
-  { id: "copilot-cli", repo: "github/copilot-cli", name: "GitHub Copilot CLI" },
+  { id: "copilot-cli", repo: "github/copilot-cli", name: "GitHub Copilot CLI", keywords: ["copilot cli"] },
   { id: "opencode", repo: "anomalyco/opencode", name: "OpenCode" },
-  { id: "pi", repo: "earendil-works/pi", name: "Pi", discussions: true },
+  {
+    id: "pi",
+    repo: "earendil-works/pi",
+    name: "Pi",
+    keywords: ["pi coding agent", "pi agent", "earendil"],
+  },
   { id: "qwen-code", repo: "QwenLM/qwen-code", name: "Qwen Code" },
-];
-
-const DEFAULT_SKILLS_REPO = "anthropics/skills";
-
-const DEFAULT_OPENCLAW: RepoConfig = {
-  id: "openclaw",
-  repo: "openclaw/openclaw",
-  name: "OpenClaw",
-  paginated: true,
-};
-
-const DEFAULT_OPENCLAW_PEERS: RepoConfig[] = [
+  { id: "openclaw", repo: "openclaw/openclaw", name: "OpenClaw" },
   { id: "hermes-agent", repo: "nousresearch/hermes-agent", name: "Hermes Agent" },
   { id: "ironclaw", repo: "nearai/ironclaw", name: "IronClaw" },
   { id: "qwenpaw", repo: "agentscope-ai/QwenPaw", name: "QwenPaw" },
   { id: "zeroclaw", repo: "zeroclaw-labs/zeroclaw", name: "ZeroClaw" },
 ];
 
-// Inference engines, gateways and fine-tuning frameworks — the layer the CLI
-// agents run on top of. High daily volume, so most are paginated.
+const DEFAULT_SKILLS_REPO = "anthropics/skills";
+
+// Inference engines, gateways and fine-tuning frameworks — the layer the
+// agents run on top of. Reported weekly.
 const DEFAULT_INFRA_REPOS: RepoConfig[] = [
-  { id: "vllm", repo: "vllm-project/vllm", name: "vLLM", paginated: true },
-  { id: "sglang", repo: "sgl-project/sglang", name: "SGLang", paginated: true },
-  { id: "llama-cpp", repo: "ggml-org/llama.cpp", name: "llama.cpp", paginated: true },
+  { id: "vllm", repo: "vllm-project/vllm", name: "vLLM" },
+  { id: "sglang", repo: "sgl-project/sglang", name: "SGLang" },
+  { id: "llama-cpp", repo: "ggml-org/llama.cpp", name: "llama.cpp" },
   { id: "ollama", repo: "ollama/ollama", name: "Ollama" },
-  { id: "litellm", repo: "BerriAI/litellm", name: "LiteLLM", paginated: true },
-  { id: "unsloth", repo: "unslothai/unsloth", name: "Unsloth", paginated: true },
+  { id: "litellm", repo: "BerriAI/litellm", name: "LiteLLM" },
+  { id: "unsloth", repo: "unslothai/unsloth", name: "Unsloth" },
 ];
 
 // ---------------------------------------------------------------------------
@@ -86,8 +81,7 @@ export function toRepoConfig(e: RawRepoEntry): RepoConfig {
     id: e.id,
     repo: e.repo,
     name: e.name,
-    ...(e.paginated ? { paginated: true } : {}),
-    ...(e.discussions ? { discussions: true } : {}),
+    ...(e.keywords?.length ? { keywords: e.keywords.map(String) } : {}),
   };
 }
 
@@ -96,33 +90,18 @@ export function loadConfig(configPath = "config.yml"): RadarConfig {
 
   if (!fs.existsSync(resolved)) {
     console.log(`[config] ${configPath} not found — using built-in defaults.`);
-    return {
-      cliRepos: DEFAULT_CLI_REPOS,
-      skillsRepo: DEFAULT_SKILLS_REPO,
-      openclaw: DEFAULT_OPENCLAW,
-      openclawPeers: DEFAULT_OPENCLAW_PEERS,
-      infraRepos: DEFAULT_INFRA_REPOS,
-    };
+    return { agents: DEFAULT_AGENTS, skillsRepo: DEFAULT_SKILLS_REPO, infraRepos: DEFAULT_INFRA_REPOS };
   }
 
   const raw = yaml.load(fs.readFileSync(resolved, "utf-8")) as RawConfig;
 
-  const cliRepos =
-    Array.isArray(raw?.cli_repos) && raw.cli_repos.length > 0
-      ? raw.cli_repos.map(toRepoConfig)
-      : DEFAULT_CLI_REPOS;
+  const agents =
+    Array.isArray(raw?.agents) && raw.agents.length > 0 ? raw.agents.map(toRepoConfig) : DEFAULT_AGENTS;
 
   const skillsRepo =
     typeof raw?.skills_repo === "string" && raw.skills_repo.trim()
       ? raw.skills_repo.trim()
       : DEFAULT_SKILLS_REPO;
-
-  const openclaw = raw?.openclaw?.id && raw.openclaw.repo ? toRepoConfig(raw.openclaw) : DEFAULT_OPENCLAW;
-
-  const openclawPeers =
-    Array.isArray(raw?.openclaw_peers) && raw.openclaw_peers.length > 0
-      ? raw.openclaw_peers.map(toRepoConfig)
-      : DEFAULT_OPENCLAW_PEERS;
 
   const infraRepos =
     Array.isArray(raw?.infra_repos) && raw.infra_repos.length > 0
@@ -130,9 +109,8 @@ export function loadConfig(configPath = "config.yml"): RadarConfig {
       : DEFAULT_INFRA_REPOS;
 
   console.log(
-    `[config] Loaded from ${configPath}: ` +
-      `${cliRepos.length} CLI repos, ${openclawPeers.length} OpenClaw peers, ${infraRepos.length} infra repos`,
+    `[config] Loaded from ${configPath}: ` + `${agents.length} agents, ${infraRepos.length} infra repos`,
   );
 
-  return { cliRepos, skillsRepo, openclaw, openclawPeers, infraRepos };
+  return { agents, skillsRepo, infraRepos };
 }

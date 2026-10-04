@@ -7,7 +7,6 @@
 import type { WebFetchResult } from "./web.ts";
 import type { TrendingData } from "./trending.ts";
 import type { HnData } from "./hn.ts";
-import type { PhData } from "./ph.ts";
 import type { ArxivData } from "./arxiv.ts";
 import type { HfData } from "./hf.ts";
 import type { DevtoData } from "./devto.ts";
@@ -22,12 +21,12 @@ export function buildTrendingPrompt(data: TrendingData, dateStr: string): string
               (r.language ? ` [${r.language}]` : "") +
               // 0 means the scrape missed the count (no trending repo has 0 stars); omit it rather than publish ⭐0
               (r.totalStars > 0 ? ` ⭐${r.totalStars.toLocaleString()}` : "") +
-              (r.todayStars > 0 ? ` (+${r.todayStars} today)` : "") +
+              (r.periodStars > 0 ? ` (+${r.periodStars} this week)` : "") +
               (r.forks > 0 ? ` 🍴${r.forks.toLocaleString()}` : "") +
               (r.description ? `\n  ${r.description}` : ""),
           )
           .join("\n")
-      : "(Unable to fetch today's GitHub Trending list)";
+      : "(Unable to fetch this week's GitHub Trending list)";
 
   const searchSection =
     data.searchRepos.length > 0
@@ -43,15 +42,15 @@ export function buildTrendingPrompt(data: TrendingData, dateStr: string): string
           .join("\n")
       : "(No search results)";
 
-  return `You are a technical analyst focused on the AI open-source ecosystem. The following is ${dateStr} GitHub AI-related trending repository data. Please filter for AI relevance, categorize, and analyze trends.
+  return `You are a technical analyst focused on the AI open-source ecosystem. The following is GitHub AI-related trending repository data for the week ending ${dateStr}. Please filter for AI relevance, categorize, and analyze trends.
 
 ## Data Sources
-- **Trending List** (github.com/trending, today's stars most reliable): Real-time hot list with today's new stars
+- **Trending List** (github.com/trending?since=weekly, this week's stars most reliable): weekly hot list with stars gained this week
 - **Topic Search** (GitHub Search API, topic tags): AI-related projects active in last 7 days, grouped by topic
 
 ---
 
-## GitHub Today's Trending (${data.trendingRepos.length} repositories)
+## GitHub Trending This Week (${data.trendingRepos.length} repositories)
 ${trendingSection}
 
 ---
@@ -74,20 +73,20 @@ Generate a structured AI Open Source Trends Report in English:
 
 **Step 3 (Output Report)** with these sections:
 
-1. **Today's Highlights** — 3-5 sentences on the most noteworthy AI open-source developments today
+1. **This Week's Highlights** — 3-5 sentences on the most noteworthy AI open-source developments this week
 
 2. **Top Projects by Category** — For each category, render a **Markdown table** with exactly these columns:
 
-   | Project | Lang | Stars (total / today) | Summary |
+   | Project | Lang | Stars (total / this week) | Summary |
    | :--- | :--- | ---: | :--- |
 
    - **Project**: repo name as a Markdown link to its GitHub URL
    - **Lang**: primary language (leave blank if unknown)
-   - **Stars**: total stars, plus today's new stars in parentheses when available (e.g. "86,392 (+1,851)"); if the input has no total, show only today's count (e.g. "(+1,851)"); copy the numbers from the input verbatim, do not recompute
-   - **Summary**: 2 sentences — what the project is and why it's worth attention today, including any standout data point or momentum signal
+   - **Stars**: total stars, plus this week's new stars in parentheses when available (e.g. "86,392 (+1,851)"); if the input has no total, show only this week's count (e.g. "(+1,851)"); copy the numbers from the input verbatim, do not recompute
+   - **Summary**: 2 sentences — what the project is and why it's worth attention this week, including any standout data point or momentum signal
    - List 3-8 projects per category; omit a category's table entirely if no project falls under it
 
-3. **Trend Signal Analysis** — 200-300 words, distill from today's hot list:
+3. **Trend Signal Analysis** — 200-300 words, distill from this week's hot list:
    - Which type of AI tool is getting explosive community attention?
    - Any new tech stacks or directions appearing for the first time?
    - Connection to recent LLM releases / industry events
@@ -233,7 +232,7 @@ Never include:
 - Generic trend statements ("X dominates", "Y remains active", "Z gains attention")
 
 Return ONLY valid JSON, no markdown fences, no explanation. Format:
-{"ai-cli":["highlight 1",...],"ai-agents":["highlight 1",...],...}
+{"ai-agents":["highlight 1",...],"ai-hn":["highlight 1",...],...}
 
 Rules:
 - Use the exact report IDs from the [brackets] above as keys
@@ -286,57 +285,6 @@ Generate a structured Hacker News AI Community Digest in English:
    - Compared to last cycle, any notable shift in focus?
 
 4. **Worth Deep Reading** — List 2-3 pieces most worth developers/researchers reading in depth, with brief reasoning
-
-Style: English, concise and professional, preserve all original links.
-`;
-}
-
-export function buildPhPrompt(data: PhData, dateStr: string): string {
-  const productsText = data.products
-    .map(
-      (p, i) =>
-        `${i + 1}. **${p.name}** — ${p.tagline}\n` +
-        `   Product Hunt: ${p.url}\n` +
-        `   Website: ${p.website}\n` +
-        `   Votes: ${p.votesCount} | Comments: ${p.commentsCount} | Topics: ${p.topics.join(", ")}`,
-    )
-    .join("\n\n");
-
-  return `You are an AI product analyst. The following are AI-related products launched on Product Hunt in the past 24 hours as of ${dateStr} (sorted by votes, ${data.products.length} total):
-
----
-
-${productsText}
-
----
-
-Generate a structured Product Hunt AI Products Digest in English:
-
-1. **Today's Highlights** — 3-5 sentences on the most notable AI product launches and trends on Product Hunt today
-
-2. **Top Products** — Organized by category, render a **Markdown table** per category with exactly these columns:
-
-   | Product | Votes | Comments | Summary |
-   | :--- | ---: | ---: | :--- |
-
-   - **Product**: product name as a Markdown link to its Product Hunt page, followed by " · [site](website-url)" when a website is available
-   - **Votes / Comments**: copy the numbers from the input verbatim
-   - **Summary**: 2 sentences — the tagline plus what problem it solves and what makes it stand out
-   - Select the most representative products per category; omit a category's table if empty
-
-   Categories:
-   - 🤖 AI Agents & Assistants (chatbots, copilots, autonomous agents)
-   - 🛠️ Developer Tools (APIs, SDKs, coding tools, dev infrastructure)
-   - 📊 AI Applications (vertical products, SaaS tools powered by AI)
-   - 🎨 Creative & Content (image/video/text generation, design tools)
-   - 🔧 Infrastructure & Models (model serving, fine-tuning, MLOps)
-
-3. **Market Signal** — 100-200 words analyzing today's Product Hunt AI launch patterns:
-   - Which categories are most crowded?
-   - Any innovative approaches or novel use cases?
-   - Open-source vs closed-source trend among launches
-
-4. **Worth Trying** — List 2-3 products most worth developers trying out, with brief reasoning
 
 Style: English, concise and professional, preserve all original links.
 `;
@@ -485,7 +433,7 @@ export function buildCommunityPrompt(devto: DevtoData, lobsters: LobstersData, d
           .join("\n\n")
       : "(No Lobste.rs stories available)";
 
-  return `You are a tech community analyst. The following are AI-related content from Dev.to and Lobste.rs as of ${dateStr}:
+  return `You are a tech community analyst. The following are this week's top AI-related content from Dev.to and Lobste.rs (week ending ${dateStr}):
 
 ## Dev.to Articles (${devto.articles.length} articles)
 
@@ -499,9 +447,9 @@ ${lobstersText}
 
 ---
 
-Generate a structured Tech Community AI Digest in English:
+Generate a structured Tech Community AI Weekly in English:
 
-1. **Today's Highlights** — 3-5 sentences on the most discussed AI topics across these communities today
+1. **This Week's Highlights** — 3-5 sentences on the most discussed AI topics across these communities this week
 
 2. **Dev.to Highlights** — Select 5-10 most valuable articles as a **Markdown table**:
 

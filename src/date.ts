@@ -23,3 +23,24 @@ export function sleep(ms: number): Promise<void> {
 export function weekdayOf(dateStr: string): number {
   return new Date(`${dateStr}T00:00:00Z`).getUTCDay();
 }
+
+/**
+ * The reports in WEEKLY_ISSUE_LABELS (github.ts), plus the Skills section of
+ * the trending report, run weekly, not daily —
+ * both the fetch and the report, except that Trending is still fetched daily
+ * for the agents report's news matching. Sampled over September 2026, the daily
+ * editions mostly repeated themselves: 54% of trending links and 45% of
+ * community links were in the previous day's report, and the HF list (ranked by
+ * cumulative downloads) carried over 90.5% of its models. Infra is weekly
+ * because on a given day 5 of 6 projects shipped no release.
+ * 1 = Monday, against the CST date the digest folder is named for.
+ */
+export const WEEKLY_REPORT_WEEKDAY = 1;
+
+/**
+ * Set DIGEST_FORCE_WEEKLY=1 to run the weekly reports on any day — for testing
+ * the weekly path, or regenerating a missed Monday via workflow_dispatch.
+ */
+export function isWeeklyRun(dateStr: string, force = false): boolean {
+  return force || weekdayOf(dateStr) === WEEKLY_REPORT_WEEKDAY;
+}

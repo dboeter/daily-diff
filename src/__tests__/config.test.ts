@@ -12,24 +12,14 @@ describe("toRepoConfig", () => {
     expect(result).toEqual({ id: "test", repo: "org/test", name: "Test" });
   });
 
-  it("includes paginated when true", () => {
-    const result = toRepoConfig({ id: "test", repo: "org/test", name: "Test", paginated: true });
-    expect(result).toEqual({ id: "test", repo: "org/test", name: "Test", paginated: true });
+  it("includes keywords when non-empty", () => {
+    const result = toRepoConfig({ id: "pi", repo: "org/pi", name: "Pi", keywords: ["pi agent"] });
+    expect(result).toEqual({ id: "pi", repo: "org/pi", name: "Pi", keywords: ["pi agent"] });
   });
 
-  it("omits paginated when false", () => {
-    const result = toRepoConfig({ id: "test", repo: "org/test", name: "Test", paginated: false });
-    expect(result).not.toHaveProperty("paginated");
-  });
-
-  it("includes discussions when true", () => {
-    const result = toRepoConfig({ id: "test", repo: "org/test", name: "Test", discussions: true });
-    expect(result).toEqual({ id: "test", repo: "org/test", name: "Test", discussions: true });
-  });
-
-  it("omits discussions when false", () => {
-    const result = toRepoConfig({ id: "test", repo: "org/test", name: "Test", discussions: false });
-    expect(result).not.toHaveProperty("discussions");
+  it("omits keywords when empty", () => {
+    const result = toRepoConfig({ id: "test", repo: "org/test", name: "Test", keywords: [] });
+    expect(result).not.toHaveProperty("keywords");
   });
 });
 
@@ -45,10 +35,8 @@ describe("loadConfig", () => {
   it("returns defaults when config file does not exist", () => {
     vi.spyOn(fs, "existsSync").mockReturnValue(false);
     const config = loadConfig("/nonexistent/config.yml");
-    expect(config.cliRepos.length).toBeGreaterThan(0);
+    expect(config.agents.map((a) => a.id)).toContain("openclaw");
     expect(config.skillsRepo).toBe("anthropics/skills");
-    expect(config.openclaw.id).toBe("openclaw");
-    expect(config.openclawPeers.length).toBeGreaterThan(0);
     expect(config.infraRepos.length).toBeGreaterThan(0);
   });
 
@@ -59,11 +47,10 @@ infra_repos:
   - id: custom-engine
     repo: org/custom-engine
     name: Custom Engine
-    paginated: true
 `);
     const config = loadConfig("test.yml");
     expect(config.infraRepos).toEqual([
-      { id: "custom-engine", repo: "org/custom-engine", name: "Custom Engine", paginated: true },
+      { id: "custom-engine", repo: "org/custom-engine", name: "Custom Engine" },
     ]);
   });
 
@@ -75,27 +62,29 @@ infra_repos:
     expect(config.infraRepos[0]!.id).toBe("vllm");
   });
 
-  it("loads cli_repos from valid YAML", () => {
+  it("loads agents from valid YAML", () => {
     vi.spyOn(fs, "existsSync").mockReturnValue(true);
     vi.spyOn(fs, "readFileSync").mockReturnValue(`
-cli_repos:
+agents:
   - id: custom
     repo: org/custom
     name: Custom Tool
+    keywords: [custom tool]
 skills_repo: custom/skills
 `);
     const config = loadConfig("test.yml");
-    expect(config.cliRepos).toHaveLength(1);
-    expect(config.cliRepos[0]!.id).toBe("custom");
+    expect(config.agents).toEqual([
+      { id: "custom", repo: "org/custom", name: "Custom Tool", keywords: ["custom tool"] },
+    ]);
     expect(config.skillsRepo).toBe("custom/skills");
   });
 
-  it("falls back to defaults for empty cli_repos", () => {
+  it("falls back to defaults for empty agents", () => {
     vi.spyOn(fs, "existsSync").mockReturnValue(true);
-    vi.spyOn(fs, "readFileSync").mockReturnValue("cli_repos: []");
+    vi.spyOn(fs, "readFileSync").mockReturnValue("agents: []");
     const config = loadConfig("test.yml");
-    expect(config.cliRepos.length).toBeGreaterThan(0);
-    expect(config.cliRepos[0]!.id).toBe("claude-code");
+    expect(config.agents.length).toBeGreaterThan(0);
+    expect(config.agents[0]!.id).toBe("claude-code");
   });
 
   it("falls back to defaults for empty skills_repo", () => {
@@ -103,25 +92,5 @@ skills_repo: custom/skills
     vi.spyOn(fs, "readFileSync").mockReturnValue("skills_repo: ''");
     const config = loadConfig("test.yml");
     expect(config.skillsRepo).toBe("anthropics/skills");
-  });
-
-  it("parses openclaw from YAML", () => {
-    vi.spyOn(fs, "existsSync").mockReturnValue(true);
-    vi.spyOn(fs, "readFileSync").mockReturnValue(`
-openclaw:
-  id: myclaw
-  repo: org/myclaw
-  name: MyClaw
-  paginated: true
-`);
-    const config = loadConfig("test.yml");
-    expect(config.openclaw).toEqual({ id: "myclaw", repo: "org/myclaw", name: "MyClaw", paginated: true });
-  });
-
-  it("falls back to default openclaw when incomplete", () => {
-    vi.spyOn(fs, "existsSync").mockReturnValue(true);
-    vi.spyOn(fs, "readFileSync").mockReturnValue("openclaw:\n  id: partial\n");
-    const config = loadConfig("test.yml");
-    expect(config.openclaw.id).toBe("openclaw"); // default
   });
 });

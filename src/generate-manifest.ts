@@ -9,18 +9,19 @@ const FEED_PATH = "feed.xml";
 const SITE_URL = "https://dboeter.github.io/daily-diff";
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 const REPORT_FILES = [
-  "ai-cli",
   "ai-agents",
   "ai-infra",
   "ai-web",
   "ai-trending",
   "ai-hn",
-  "ai-ph",
   "ai-arxiv",
   "ai-hf",
   "ai-community",
-  // Rollups are no longer generated — listed only so archived reports stay
+  // No longer generated (October 2026: ai-cli merged into ai-agents, ai-ph
+  // dropped; rollups removed earlier) — listed only so archived reports stay
   // reachable from the sidebar and RSS feed.
+  "ai-cli",
+  "ai-ph",
   "ai-weekly",
   "ai-monthly",
 ] as const;

@@ -1,13 +1,11 @@
 import { describe, it, expect } from "vitest";
 import {
-  CLI_REPORT,
   WEB_REPORT,
   TRENDING_REPORT,
   HN_REPORT,
   ISSUE_LABELS,
-  CLI_ISSUE_TITLE,
-  OPENCLAW_ISSUE_TITLE,
-  INFRA_ISSUE_TITLE,
+  AGENTS_REPORT,
+  INFRA_REPORT,
   NOTIFY_LABELS,
   REPORT_LABELS,
 } from "../i18n.ts";
@@ -17,18 +15,14 @@ import {
 // ---------------------------------------------------------------------------
 
 describe("issue title functions", () => {
-  it("CLI_ISSUE_TITLE includes title and date", () => {
-    expect(CLI_ISSUE_TITLE("2026-03-12")).toContain("AI CLI Tools Digest");
-    expect(CLI_ISSUE_TITLE("2026-03-12")).toContain("2026-03-12");
+  it("AGENTS_REPORT.issueTitle includes title and date", () => {
+    expect(AGENTS_REPORT.issueTitle("2026-03-12")).toContain("AI Agents Digest");
+    expect(AGENTS_REPORT.issueTitle("2026-03-12")).toContain("2026-03-12");
   });
 
-  it("OPENCLAW_ISSUE_TITLE includes title", () => {
-    expect(OPENCLAW_ISSUE_TITLE("2026-03-12")).toContain("OpenClaw Ecosystem Digest");
-  });
-
-  it("INFRA_ISSUE_TITLE includes title and date", () => {
-    expect(INFRA_ISSUE_TITLE("2026-03-12")).toContain("AI Infrastructure Digest");
-    expect(INFRA_ISSUE_TITLE("2026-03-12")).toContain("2026-03-12");
+  it("INFRA_REPORT.issueTitle includes title and date", () => {
+    expect(INFRA_REPORT.issueTitle("2026-03-12")).toContain("AI Infrastructure Weekly");
+    expect(INFRA_REPORT.issueTitle("2026-03-12")).toContain("2026-03-12");
   });
 
   it("WEB_REPORT.issueTitle includes first crawl flag", () => {
@@ -50,12 +44,6 @@ describe("issue title functions", () => {
 // ---------------------------------------------------------------------------
 
 describe("dynamic content helpers", () => {
-  it("CLI_REPORT.meta produces metadata", () => {
-    const meta = CLI_REPORT.meta("12:00", 5);
-    expect(meta).toContain("12:00");
-    expect(meta).toContain("Tools covered: 5");
-  });
-
   it("WEB_REPORT.newContent formats count", () => {
     expect(WEB_REPORT.newContent(10)).toContain("10 articles");
   });
@@ -71,8 +59,7 @@ describe("dynamic content helpers", () => {
 
 describe("ISSUE_LABELS", () => {
   it("maps report types to label names", () => {
-    expect(ISSUE_LABELS.cli).toBe("digest");
-    expect(ISSUE_LABELS.openclaw).toBe("openclaw");
+    expect(ISSUE_LABELS.agents).toBe("agents");
     expect(ISSUE_LABELS.infra).toBe("infra");
     expect(ISSUE_LABELS.trending).toBe("trending");
     expect(ISSUE_LABELS.hn).toBe("hn");
@@ -87,6 +74,11 @@ describe("REPORT_LABELS", () => {
   it("covers the infra report", () => {
     expect(REPORT_LABELS["ai-infra"]).toBe("AI Infrastructure Digest");
   });
+
+  it("keeps the merged CLI report for archived days", () => {
+    expect(REPORT_LABELS["ai-cli"]).toBeTruthy();
+    expect(REPORT_LABELS["ai-agents"]).toBe("AI Agents Digest");
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -95,7 +87,7 @@ describe("REPORT_LABELS", () => {
 
 describe("NOTIFY_LABELS", () => {
   it("covers all report types", () => {
-    const expected = ["ai-cli", "ai-agents", "ai-infra", "ai-web", "ai-trending", "ai-hn"];
+    const expected = ["ai-agents", "ai-infra", "ai-web", "ai-trending", "ai-hn"];
     for (const key of expected) {
       expect(NOTIFY_LABELS[key]).toBeTruthy();
     }

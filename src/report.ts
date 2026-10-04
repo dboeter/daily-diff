@@ -13,7 +13,7 @@ import { sleep } from "./date.ts";
 
 export const LLM_TOKENS_DEFAULT = 4096;
 export const LLM_TOKENS_TRENDING = 6144;
-/** Table-formatted listing reports (HN, PH, ArXiv, HF, Community) need extra
+/** Table-formatted listing reports (HN, ArXiv, HF, Community) need extra
  *  headroom for the multi-row tables plus 2-sentence summaries. */
 export const LLM_TOKENS_LISTING = 6144;
 export const LLM_TOKENS_WEB = 8192;
@@ -83,10 +83,13 @@ export function resetLlmStats(): void {
 const LLM_ABORT_RATIO = 0.5;
 
 /**
- * Below this many calls the ratio is meaningless — two failures out of three on
- * a very quiet day must not kill a run that had almost nothing to summarize.
+ * Below this many calls the ratio is meaningless. Was 5 when a run made ~30
+ * calls; since October 2026 a daily run makes only 3–4 (agents, HN, ArXiv, and
+ * web when there is new content), so 5 would never arm the gate on six days
+ * out of seven. At 3, losing 2 of the 3 core daily reports aborts the run — by
+ * then the day is mostly placeholders anyway.
  */
-const LLM_MIN_SAMPLES = 5;
+const LLM_MIN_SAMPLES = 3;
 
 export function llmHealthLine(): string {
   const { attempted, failed } = llmStats;
