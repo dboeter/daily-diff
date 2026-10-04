@@ -12,16 +12,6 @@ describe("toRepoConfig", () => {
     expect(result).toEqual({ id: "test", repo: "org/test", name: "Test" });
   });
 
-  it("includes paginated when true", () => {
-    const result = toRepoConfig({ id: "test", repo: "org/test", name: "Test", paginated: true });
-    expect(result).toEqual({ id: "test", repo: "org/test", name: "Test", paginated: true });
-  });
-
-  it("omits paginated when false", () => {
-    const result = toRepoConfig({ id: "test", repo: "org/test", name: "Test", paginated: false });
-    expect(result).not.toHaveProperty("paginated");
-  });
-
   it("includes keywords when non-empty", () => {
     const result = toRepoConfig({ id: "pi", repo: "org/pi", name: "Pi", keywords: ["pi agent"] });
     expect(result).toEqual({ id: "pi", repo: "org/pi", name: "Pi", keywords: ["pi agent"] });
@@ -57,11 +47,10 @@ infra_repos:
   - id: custom-engine
     repo: org/custom-engine
     name: Custom Engine
-    paginated: true
 `);
     const config = loadConfig("test.yml");
     expect(config.infraRepos).toEqual([
-      { id: "custom-engine", repo: "org/custom-engine", name: "Custom Engine", paginated: true },
+      { id: "custom-engine", repo: "org/custom-engine", name: "Custom Engine" },
     ]);
   });
 

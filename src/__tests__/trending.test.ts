@@ -82,6 +82,16 @@ describe("parseTrendingHtml", () => {
     expect(parseTrendingHtml("<html><body>No articles here</body></html>")).toEqual([]);
   });
 
+  it("reads the stars gained this week from the weekly page", () => {
+    const html = `
+      <article class="Box-row">
+        <h2><a href="/owner/weekly">owner / weekly</a></h2>
+        <span class="d-inline-block float-sm-right">1,204 stars this week</span>
+      </article>
+    `;
+    expect(parseTrendingHtml(html)[0]?.todayStars).toBe(1204);
+  });
+
   it("handles articles with missing optional fields gracefully", () => {
     const minimalHtml = `
       <article class="Box-row">

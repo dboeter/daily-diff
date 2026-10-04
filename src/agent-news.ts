@@ -88,7 +88,7 @@ export function collectNewsItems(sources: NewsSources): { item: NewsItem; text: 
         source: "GitHub Trending",
         title: `${r.fullName}${r.description ? ` — ${r.description}` : ""}`,
         url: r.url,
-        detail: `+${r.todayStars} stars today`,
+        detail: `+${r.todayStars} stars on GitHub Trending`,
       },
       text: `${r.fullName.replace("/", " ")} ${r.description}`,
     });

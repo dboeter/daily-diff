@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { formatItem, topN, sampleNote } from "../prompts.ts";
+import { formatItem, topN } from "../prompts.ts";
 import type { GitHubItem } from "../github.ts";
 
 // ---------------------------------------------------------------------------
@@ -117,22 +117,6 @@ describe("topN", () => {
 
   it("returns empty array for empty input", () => {
     expect(topN([], 3)).toEqual([]);
-  });
-});
-
-// ---------------------------------------------------------------------------
-// sampleNote
-// ---------------------------------------------------------------------------
-
-describe("sampleNote", () => {
-  it("shows sampled note when total > sampled", () => {
-    const result = sampleNote(50, 20);
-    expect(result).toBe("(Total: 50 items; showing top 20 by comment count)");
-  });
-
-  it("shows total-only note when total <= sampled", () => {
-    expect(sampleNote(8, 8)).toBe("(Total: 8 items)");
-    expect(sampleNote(5, 10)).toBe("(Total: 5 items)");
   });
 });
 

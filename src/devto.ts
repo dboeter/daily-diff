@@ -80,7 +80,8 @@ export async function fetchDevtoData(): Promise<DevtoData> {
           const params = new URLSearchParams({
             tag,
             per_page: String(DEVTO_PER_PAGE),
-            top: "1", // top articles from the past 1 day
+            // The community report is weekly: top articles of the past 7 days.
+            top: "7",
           });
 
           const resp = await fetch(`${API_URL}?${params}`, {

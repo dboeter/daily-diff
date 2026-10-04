@@ -16,7 +16,6 @@ interface RawRepoEntry {
   id: string;
   repo: string;
   name: string;
-  paginated?: boolean;
   keywords?: string[];
 }
 
@@ -62,15 +61,15 @@ const DEFAULT_AGENTS: RepoConfig[] = [
 
 const DEFAULT_SKILLS_REPO = "anthropics/skills";
 
-// Inference engines, gateways and fine-tuning frameworks — the layer the CLI
-// agents run on top of. High daily volume, so most are paginated.
+// Inference engines, gateways and fine-tuning frameworks — the layer the
+// agents run on top of. Reported weekly.
 const DEFAULT_INFRA_REPOS: RepoConfig[] = [
-  { id: "vllm", repo: "vllm-project/vllm", name: "vLLM", paginated: true },
-  { id: "sglang", repo: "sgl-project/sglang", name: "SGLang", paginated: true },
-  { id: "llama-cpp", repo: "ggml-org/llama.cpp", name: "llama.cpp", paginated: true },
+  { id: "vllm", repo: "vllm-project/vllm", name: "vLLM" },
+  { id: "sglang", repo: "sgl-project/sglang", name: "SGLang" },
+  { id: "llama-cpp", repo: "ggml-org/llama.cpp", name: "llama.cpp" },
   { id: "ollama", repo: "ollama/ollama", name: "Ollama" },
-  { id: "litellm", repo: "BerriAI/litellm", name: "LiteLLM", paginated: true },
-  { id: "unsloth", repo: "unslothai/unsloth", name: "Unsloth", paginated: true },
+  { id: "litellm", repo: "BerriAI/litellm", name: "LiteLLM" },
+  { id: "unsloth", repo: "unslothai/unsloth", name: "Unsloth" },
 ];
 
 // ---------------------------------------------------------------------------
@@ -82,7 +81,6 @@ export function toRepoConfig(e: RawRepoEntry): RepoConfig {
     id: e.id,
     repo: e.repo,
     name: e.name,
-    ...(e.paginated ? { paginated: true } : {}),
     ...(e.keywords?.length ? { keywords: e.keywords.map(String) } : {}),
   };
 }

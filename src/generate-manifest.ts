@@ -14,14 +14,14 @@ const REPORT_FILES = [
   "ai-web",
   "ai-trending",
   "ai-hn",
-  "ai-ph",
   "ai-arxiv",
   "ai-hf",
   "ai-community",
-  // No longer generated (ai-cli merged into ai-agents in October 2026; rollups
-  // removed) — listed only so archived reports stay reachable from the sidebar
-  // and RSS feed.
+  // No longer generated (October 2026: ai-cli merged into ai-agents, ai-ph
+  // dropped; rollups removed earlier) — listed only so archived reports stay
+  // reachable from the sidebar and RSS feed.
   "ai-cli",
+  "ai-ph",
   "ai-weekly",
   "ai-monthly",
 ] as const;

@@ -19,12 +19,12 @@ const REPORT_LABELS: Record<string, string> = {
   "ai-web": "Official AI Content",
   "ai-trending": "GitHub AI Trends",
   "ai-hn": "Hacker News AI Community",
-  "ai-ph": "Product Hunt AI Products",
   "ai-arxiv": "ArXiv AI Research",
   "ai-hf": "Hugging Face Trending Models",
   "ai-community": "Tech Community AI",
-  // Archive only: merged into ai-agents in October 2026.
+  // Archive only: no longer generated since October 2026.
   "ai-cli": "AI CLI Tools Digest",
+  "ai-ph": "Product Hunt AI Products",
 };
 
 interface ManifestDate {
@@ -157,7 +157,7 @@ const TOOLS = [
         type: {
           type: "string",
           description:
-            "Report type: ai-agents, ai-infra, ai-web, ai-trending, ai-hn, ai-ph, ai-arxiv, ai-hf, ai-community (archive: ai-cli)",
+            "Report type: ai-agents, ai-infra, ai-web, ai-trending, ai-hn, ai-arxiv, ai-hf, ai-community (archive: ai-cli, ai-ph)",
         },
       },
       required: ["date", "type"],

@@ -7,7 +7,6 @@ import {
   WEB_REPORT,
   TRENDING_REPORT,
   HN_REPORT,
-  PH_REPORT,
   ARXIV_REPORT,
   HF_REPORT,
   COMMUNITY_REPORT,
@@ -16,7 +15,6 @@ import {
 import {
   buildWebReportPrompt,
   buildHnPrompt,
-  buildPhPrompt,
   buildArxivPrompt,
   buildHfPrompt,
   buildCommunityPrompt,
@@ -25,7 +23,6 @@ import { callLlm, saveFile, autoGenFooter, LLM_TOKENS_WEB, LLM_TOKENS_LISTING } 
 import { createGitHubIssue } from "./github.ts";
 import { saveWebState, type WebFetchResult, type WebState } from "./web.ts";
 import type { HnData } from "./hn.ts";
-import type { PhData } from "./ph.ts";
 import type { TrendingData } from "./trending.ts";
 import type { ArxivData } from "./arxiv.ts";
 import type { HfData } from "./hf.ts";
@@ -172,47 +169,6 @@ export async function saveHnReport(
 }
 
 // ---------------------------------------------------------------------------
-// Product Hunt
-// ---------------------------------------------------------------------------
-
-export async function savePhReport(
-  phData: PhData,
-  utcStr: string,
-  dateStr: string,
-  digestRepo: string,
-): Promise<void> {
-  if (!phData.fetchSuccess) {
-    console.log("  [ph] No data available, skipping report.");
-    return;
-  }
-
-  console.log("  [ph] Calling LLM for Product Hunt report...");
-  try {
-    const summary = await callLlm(buildPhPrompt(phData, dateStr), LLM_TOKENS_LISTING);
-
-    const fileName = "ai-ph.md";
-    const header =
-      `# ${PH_REPORT.title} ${dateStr}\n\n` +
-      `> Source: [Product Hunt](https://www.producthunt.com/) | ` +
-      `${phData.products.length} products | Generated: ${utcStr} UTC\n\n` +
-      `---\n\n`;
-
-    const phContent = header + summary + autoGenFooter();
-
-    console.log(`  Saved ${saveFile(phContent, dateStr, fileName)}`);
-
-    if (digestRepo) {
-      const phTitle = PH_REPORT.issueTitle(dateStr);
-      const phLabel = ISSUE_LABELS.ph;
-      const phUrl = await createGitHubIssue(phTitle, phContent, phLabel);
-      console.log(`  Created PH issue: ${phUrl}`);
-    }
-  } catch (err) {
-    console.error(`  [ph] Report generation failed: ${err}`);
-  }
-}
-
-// ---------------------------------------------------------------------------
 // ArXiv report
 // ---------------------------------------------------------------------------
 
@@ -254,7 +210,7 @@ export async function saveArxivReport(
 }
 
 // ---------------------------------------------------------------------------
-// Hugging Face report — weekly, see HF_REPORT_WEEKDAY in index.ts
+// Hugging Face report — weekly, see WEEKLY_REPORT_WEEKDAY in date.ts
 // ---------------------------------------------------------------------------
 
 export async function saveHfReport(

@@ -7,13 +7,12 @@
 // ---------------------------------------------------------------------------
 
 export const MSG = {
-  noActivity: "No activity in the last 24 hours.",
   agentsNoActivity: "No stable releases, hot issues or news mentions today.",
+  infraNoActivity: "No stable releases or hot issues this week.",
   summaryFailed: "⚠️ Summary generation failed.",
   skillsFailed: "⚠️ Skills summary generation failed.",
   trendingNoData: "⚠️ Trending data unavailable, unable to generate report.",
   trendingFailed: "⚠️ Trending report generation failed.",
-  comparisonFailed: "⚠️ Comparative analysis generation failed.",
 } as const;
 
 // ---------------------------------------------------------------------------
@@ -27,11 +26,11 @@ export const AGENTS_REPORT = {
   issueTitle: (dateStr: string) => `🤖 AI Agents Digest ${dateStr}`,
 } as const;
 
+// Weekly since October 2026 (see WEEKLY_REPORT_WEEKDAY in date.ts).
 export const INFRA_REPORT = {
-  title: "AI Infrastructure Digest",
-  meta: (utcStr: string, count: number) => `> Generated: ${utcStr} UTC | Projects covered: ${count}\n\n`,
-  comparison: "Cross-Project Comparison",
-  detail: "Per-Project Reports",
+  title: "AI Infrastructure Weekly",
+  period: "this week",
+  issueTitle: (dateStr: string) => `⚙️ AI Infrastructure Weekly ${dateStr}`,
 } as const;
 
 export const WEB_REPORT = {
@@ -45,11 +44,13 @@ export const WEB_REPORT = {
     `🌐 Official AI Content Report ${dateStr}${isFirstRun ? " (First Crawl)" : ""}`,
 } as const;
 
+// Weekly since October 2026. The sidebar/RSS labels in REPORT_LABELS stay
+// cadence-neutral because the archive holds daily editions too.
 export const TRENDING_REPORT = {
-  title: "AI Open Source Trends",
+  title: "AI Open Source Trends Weekly",
   sources: "Sources: GitHub Trending + GitHub Search API",
   skillsHeading: "Claude Code Skills Highlights",
-  issueTitle: (dateStr: string) => `📈 AI Open Source Trends ${dateStr}`,
+  issueTitle: (dateStr: string) => `📈 AI Open Source Trends Weekly ${dateStr}`,
 } as const;
 
 export const HN_REPORT = {
@@ -57,26 +58,22 @@ export const HN_REPORT = {
   issueTitle: (dateStr: string) => `📰 Hacker News AI Digest ${dateStr}`,
 } as const;
 
-export const PH_REPORT = {
-  title: "Product Hunt AI Products Digest",
-  issueTitle: (dateStr: string) => `🚀 Product Hunt AI Digest ${dateStr}`,
-} as const;
-
 export const ARXIV_REPORT = {
   title: "ArXiv AI Research Digest",
   issueTitle: (dateStr: string) => `📚 ArXiv AI Research Digest ${dateStr}`,
 } as const;
 
-// The HF report runs weekly (see HF_REPORT_WEEKDAY in index.ts) — the Hub's
+// The HF report runs weekly (see WEEKLY_REPORT_WEEKDAY in date.ts) — the Hub's
 // download-ranked list barely moves day to day, so the titles say "weekly".
 export const HF_REPORT = {
   title: "Hugging Face Trending Models Weekly",
   issueTitle: (dateStr: string) => `🤗 Hugging Face Trending Models ${dateStr}`,
 } as const;
 
+// Weekly since October 2026.
 export const COMMUNITY_REPORT = {
-  title: "Tech Community AI Digest",
-  issueTitle: (dateStr: string) => `💬 Tech Community AI Digest ${dateStr}`,
+  title: "Tech Community AI Weekly",
+  issueTitle: (dateStr: string) => `💬 Tech Community AI Weekly ${dateStr}`,
 } as const;
 
 export const ISSUE_LABELS = {
@@ -85,13 +82,10 @@ export const ISSUE_LABELS = {
   web: "web",
   trending: "trending",
   hn: "hn",
-  ph: "ph",
   arxiv: "arxiv",
   hf: "hf",
   community: "community",
 } as const;
-
-export const INFRA_ISSUE_TITLE = (dateStr: string) => `⚙️ AI Infrastructure Digest ${dateStr}`;
 
 // ---------------------------------------------------------------------------
 // Footer (used in report.ts)
@@ -111,12 +105,13 @@ export const REPORT_LABELS: Record<string, string> = {
   "ai-web": "Official AI Content Report",
   "ai-trending": "AI Open Source Trends",
   "ai-hn": "Hacker News AI Community Digest",
-  "ai-ph": "Product Hunt AI Products Digest",
   "ai-arxiv": "ArXiv AI Research Digest",
   "ai-hf": "Hugging Face Trending Models Weekly",
   "ai-community": "Tech Community AI Digest",
-  // Merged into ai-agents in October 2026; kept so archived reports keep a title.
+  // No longer generated (October 2026: ai-cli merged into ai-agents, ai-ph
+  // dropped); kept so archived reports keep a title.
   "ai-cli": "AI CLI Tools Digest",
+  "ai-ph": "Product Hunt AI Products Digest",
   // Weekly/monthly rollups are no longer generated; kept so archived reports
   // still render a proper title in the sidebar and RSS feed.
   "ai-weekly": "AI Tools Weekly Digest",
@@ -133,7 +128,6 @@ export const NOTIFY_LABELS: Record<string, string> = {
   "ai-web": "Official Updates",
   "ai-trending": "GitHub Trends",
   "ai-hn": "HN Community",
-  "ai-ph": "Product Hunt",
   "ai-arxiv": "ArXiv Research",
   "ai-hf": "HF Models",
   "ai-community": "Tech Community",

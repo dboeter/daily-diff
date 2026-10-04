@@ -262,6 +262,42 @@ describe("closeSupersededIssues", () => {
     expect(closed).toEqual([]);
   });
 
+  it("keeps the newest weekly issue open through the week", async () => {
+    // Monday 2026-10-05 CST: weekly infra + trending, and the daily agents report.
+    // By Thursday's run, only the daily report is superseded.
+    const { closed } = mockIssues([
+      { number: 1, created_at: "2026-10-04T22:40:00Z", labels: ["agents"] },
+      { number: 2, created_at: "2026-10-04T22:41:00Z", labels: ["infra"] },
+      { number: 3, created_at: "2026-10-04T22:41:00Z", labels: ["trending"] },
+      { number: 4, created_at: "2026-10-07T22:40:00Z", labels: ["agents"] },
+    ]);
+
+    expect(await closeSupersededIssues()).toBe(1);
+    expect(closed).toEqual([1]);
+  });
+
+  it("closes a weekly issue once the next week's edition is open", async () => {
+    const { closed } = mockIssues([
+      { number: 1, created_at: "2026-09-27T22:41:00Z", labels: ["infra"] },
+      { number: 2, created_at: "2026-10-04T22:41:00Z", labels: ["infra"] },
+      { number: 3, created_at: "2026-10-04T22:40:00Z", labels: ["agents"] },
+    ]);
+
+    expect(await closeSupersededIssues()).toBe(1);
+    expect(closed).toEqual([1]);
+  });
+
+  it("still closes issues of the merged CLI and OpenClaw reports", async () => {
+    const { closed } = mockIssues([
+      { number: 1, created_at: "2026-10-02T22:40:00Z", labels: ["digest"] },
+      { number: 2, created_at: "2026-10-02T22:40:00Z", labels: ["openclaw"] },
+      { number: 3, created_at: "2026-10-04T22:40:00Z", labels: ["agents"] },
+    ]);
+
+    expect(await closeSupersededIssues()).toBe(2);
+    expect(closed.sort()).toEqual([1, 2]);
+  });
+
   it("is a no-op when DIGEST_REPO is unset", async () => {
     delete process.env["DIGEST_REPO"];
     const fetchSpy = vi.spyOn(globalThis, "fetch");

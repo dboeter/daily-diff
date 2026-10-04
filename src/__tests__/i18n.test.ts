@@ -5,7 +5,7 @@ import {
   HN_REPORT,
   ISSUE_LABELS,
   AGENTS_REPORT,
-  INFRA_ISSUE_TITLE,
+  INFRA_REPORT,
   NOTIFY_LABELS,
   REPORT_LABELS,
 } from "../i18n.ts";
@@ -20,9 +20,9 @@ describe("issue title functions", () => {
     expect(AGENTS_REPORT.issueTitle("2026-03-12")).toContain("2026-03-12");
   });
 
-  it("INFRA_ISSUE_TITLE includes title and date", () => {
-    expect(INFRA_ISSUE_TITLE("2026-03-12")).toContain("AI Infrastructure Digest");
-    expect(INFRA_ISSUE_TITLE("2026-03-12")).toContain("2026-03-12");
+  it("INFRA_REPORT.issueTitle includes title and date", () => {
+    expect(INFRA_REPORT.issueTitle("2026-03-12")).toContain("AI Infrastructure Weekly");
+    expect(INFRA_REPORT.issueTitle("2026-03-12")).toContain("2026-03-12");
   });
 
   it("WEB_REPORT.issueTitle includes first crawl flag", () => {

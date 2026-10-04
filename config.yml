@@ -54,35 +54,32 @@ agents:
     name: ZeroClaw
 
 # ── Claude Code Skills ────────────────────────────────────────────────────────
-# Tracked separately without a date filter, sorted by community engagement.
+# No date filter, sorted by community engagement. A section of the weekly
+# ai-trending report.
 
 skills_repo: anthropics/skills
 
 # ── AI infrastructure ─────────────────────────────────────────────────────────
-# Inference engines, gateways and fine-tuning frameworks that the agent/CLI
-# layer runs on top of. Tracked in a dedicated ai-infra report.
+# Inference engines, gateways and fine-tuning frameworks that the agents run on
+# top of. Weekly ai-infra report: stable releases and hot issues of the last 7
+# days, same pipeline as the agents report (no news matching).
 
 infra_repos:
   - id: vllm
     repo: vllm-project/vllm
     name: vLLM
-    paginated: true
   - id: sglang
     repo: sgl-project/sglang
     name: SGLang
-    paginated: true
   - id: llama-cpp
     repo: ggml-org/llama.cpp
     name: llama.cpp
-    paginated: true
   - id: ollama
     repo: ollama/ollama
     name: Ollama
   - id: litellm
     repo: BerriAI/litellm
     name: LiteLLM
-    paginated: true
   - id: unsloth
     repo: unslothai/unsloth
     name: Unsloth
-    paginated: true

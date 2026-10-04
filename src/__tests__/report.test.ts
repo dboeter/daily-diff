@@ -467,9 +467,19 @@ describe("assertLlmHealthy", () => {
   });
 
   it("passes below the minimum sample size even at 100% failure", () => {
-    // A very quiet day may make only a handful of calls; 2/4 must not kill it.
-    record(4, 4);
+    // After the summary phase a daily run has made one or two calls.
+    record(2, 2);
     expect(() => assertLlmHealthy("summary")).not.toThrow();
+  });
+
+  it("throws on a daily run that lost 2 of its 3 calls", () => {
+    record(3, 2);
+    expect(() => assertLlmHealthy("report")).toThrow(/appears to be down/);
+  });
+
+  it("passes a daily run that lost 1 of its 3 calls", () => {
+    record(3, 1);
+    expect(() => assertLlmHealthy("report")).not.toThrow();
   });
 
   it("passes at the ordinary noise floor", () => {

@@ -18,11 +18,6 @@ export interface RepoConfig {
   /** Human-readable display name */
   name: string;
   /**
-   * Fetch multiple pages until items older than `since` are reached.
-   * Use for high-volume repos with many daily updates.
-   */
-  paginated?: boolean;
-  /**
    * Terms matchAgentNews looks for in news items. Defaults to the display name
    * and repo name; set this when the name is a common word (e.g. "Pi").
    */
@@ -64,19 +59,9 @@ export interface GitHubRelease {
   prerelease: boolean;
 }
 
-export interface RepoFetch {
-  cfg: RepoConfig;
-  issues: GitHubItem[];
-  prs: GitHubItem[];
-  releases: GitHubRelease[];
-}
-
 // ---------------------------------------------------------------------------
 // Internals
 // ---------------------------------------------------------------------------
-
-/** Maximum pages to fetch for paginated repos (100 items/page). */
-const MAX_PAGES = 5;
 
 function headers(): Record<string, string> {
   return {
@@ -94,66 +79,9 @@ async function githubGet<T>(url: string, params: Record<string, string> = {}): P
   return resp.json() as Promise<T>;
 }
 
-async function fetchItemPage(
-  repo: string,
-  itemType: "issues" | "pulls",
-  since: Date,
-  page: number,
-): Promise<GitHubItem[]> {
-  const params: Record<string, string> = {
-    state: "all",
-    sort: "updated",
-    direction: "desc",
-    per_page: "100",
-    page: String(page),
-  };
-  // /pulls does not support `since`; filter client-side instead
-  if (itemType === "issues") params["since"] = since.toISOString();
-
-  const items = await githubGet<GitHubItem[]>(`https://api.github.com/repos/${repo}/${itemType}`, params);
-  return itemType === "pulls" ? items.filter((i) => new Date(i.updated_at) >= since) : items;
-}
-
 // ---------------------------------------------------------------------------
 // Exports
 // ---------------------------------------------------------------------------
-
-/**
- * Fetch items updated since `since`.
- * Paginated repos: keeps fetching until a page ends before `since` or MAX_PAGES reached.
- * Regular repos: single page of 50.
- */
-export async function fetchRecentItems(
-  cfg: RepoConfig,
-  itemType: "issues" | "pulls",
-  since: Date,
-): Promise<GitHubItem[]> {
-  if (!cfg.paginated) {
-    const params: Record<string, string> = {
-      state: "all",
-      sort: "updated",
-      direction: "desc",
-      per_page: "50",
-    };
-    if (itemType === "issues") params["since"] = since.toISOString();
-    const items = await githubGet<GitHubItem[]>(
-      `https://api.github.com/repos/${cfg.repo}/${itemType}`,
-      params,
-    );
-    return itemType === "pulls" ? items.filter((i) => new Date(i.updated_at) >= since) : items;
-  }
-
-  const all: GitHubItem[] = [];
-  for (let page = 1; page <= MAX_PAGES; page++) {
-    const items = await fetchItemPage(cfg.repo, itemType, since, page);
-    if (items.length === 0) break;
-    all.push(...items);
-    const last = items[items.length - 1];
-    if (last && new Date(last.updated_at) < since) break;
-    if (items.length < 100) break;
-  }
-  return all;
-}
 
 /**
  * Releases published since `since`, newest first. 100 is the API maximum: a
@@ -290,7 +218,6 @@ const LABEL_COLORS: Record<string, string> = {
   agents: "e11d48",
   trending: "f9a825",
   hn: "ff6600",
-  ph: "da552f",
   arxiv: "b31b1b",
   hf: "ff9d00",
   community: "2563eb",
@@ -326,11 +253,14 @@ const DIGEST_ISSUE_LABELS = new Set([
   ...Object.values(ISSUE_LABELS),
   // Issues from the former bilingual pipeline carried "-en" labels; keep them closable.
   ...Object.values(ISSUE_LABELS).map((l) => `${l}-en`),
-  // The CLI and OpenClaw reports were merged into the agents report.
+  // Discontinued in October 2026: CLI and OpenClaw were merged into the agents
+  // report, Product Hunt was dropped.
   "digest",
   "digest-en",
   "openclaw",
   "openclaw-en",
+  "ph",
+  "ph-en",
   "weekly",
   "weekly-en",
   "monthly",
@@ -349,13 +279,31 @@ function isDigestIssue(i: OpenIssue): boolean {
   return i.pull_request === undefined && i.labels.some((l) => DIGEST_ISSUE_LABELS.has(l.name));
 }
 
+/** Labels of the reports that run weekly (see WEEKLY_REPORT_WEEKDAY in date.ts). */
+const WEEKLY_ISSUE_LABELS = new Set<string>([
+  ISSUE_LABELS.infra,
+  ISSUE_LABELS.trending,
+  ISSUE_LABELS.community,
+  ISSUE_LABELS.hf,
+]);
+
+/**
+ * Daily issues are retained as one group; each weekly report is its own group,
+ * so Monday's weekly issues stay open through the week instead of being closed
+ * by Tuesday's daily run.
+ */
+function retentionGroup(i: OpenIssue): string {
+  return i.labels.find((l) => WEEKLY_ISSUE_LABELS.has(l.name))?.name ?? "daily";
+}
+
 /** Stop paginating well before a runaway loop could exhaust the rate limit. */
 const MAX_ISSUE_PAGES = 50;
 /** Closes are spaced out: GitHub throttles bursts of mutating requests. */
 const CLOSE_BATCH = 10;
 
 /**
- * Close every digest issue except those from the most recent digest day.
+ * Close every digest issue except those from the most recent digest day — per
+ * retention group: all daily reports together, each weekly report on its own.
  *
  * The retained day is derived from the newest digest issue that is actually
  * open, not from today's date: when a run fails, yesterday's reports stay up
@@ -386,13 +334,19 @@ export async function closeSupersededIssues(): Promise<number> {
   const digestIssues = open.filter(isDigestIssue);
   if (digestIssues.length === 0) return 0;
 
-  const keepDate = digestIssues
-    .map((i) => toCstDateStr(new Date(i.created_at)))
-    .reduce((a, b) => (a > b ? a : b));
-  const toClose = digestIssues.filter((i) => toCstDateStr(new Date(i.created_at)) !== keepDate);
+  const keepDate = new Map<string, string>();
+  for (const i of digestIssues) {
+    const group = retentionGroup(i);
+    const day = toCstDateStr(new Date(i.created_at));
+    if (day > (keepDate.get(group) ?? "")) keepDate.set(group, day);
+  }
+  const toClose = digestIssues.filter(
+    (i) => toCstDateStr(new Date(i.created_at)) !== keepDate.get(retentionGroup(i)),
+  );
   if (toClose.length === 0) return 0;
 
-  console.log(`[github] Keeping ${digestIssues.length - toClose.length} issue(s) from ${keepDate}.`);
+  const kept = [...keepDate].map(([group, day]) => `${group} ${day}`).join(", ");
+  console.log(`[github] Keeping ${digestIssues.length - toClose.length} issue(s): ${kept}.`);
 
   let closed = 0;
   for (let i = 0; i < toClose.length; i += CLOSE_BATCH) {

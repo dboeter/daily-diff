@@ -13,6 +13,11 @@ on:
     # have, under DeepSeek's peak/off-peak scheme).
     - cron: "37 22 * * *"
   workflow_dispatch:
+    inputs:
+      force_weekly:
+        description: "Also generate the weekly reports (infra, trending, community, HF) — e.g. to redo a missed Monday"
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -87,8 +92,8 @@ jobs:
           OPENROUTER_MODEL: stealth/space-bunny-alpha
           # Without this the reasoning model spends the whole token budget thinking and returns empty content.
           OPENROUTER_REASONING_EFFORT: low
-          PRODUCTHUNT_TOKEN: ${{ secrets.PRODUCTHUNT_TOKEN }}
           DIGEST_REPO: ${{ github.repository }}
+          DIGEST_FORCE_WEEKLY: ${{ inputs.force_weekly && '1' || '' }}
         run: pnpm start
 
       - name: Commit digest files

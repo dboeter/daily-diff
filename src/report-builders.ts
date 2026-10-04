@@ -2,51 +2,10 @@
  * Report content builders — extracted from index.ts for testability.
  */
 
-import type { ProjectActivity, RepoDigest } from "./prompts.ts";
-import { INFRA_REPORT } from "./i18n.ts";
+import type { ProjectActivity } from "./prompts.ts";
 
 // ---------------------------------------------------------------------------
-// Brief (GitHub issue) variant
-// ---------------------------------------------------------------------------
-// When a builder gets `fullReportUrl`, it renders the brief variant used for
-// GitHub issues: the comparison plus each project's TL;DR bullets, with a link
-// to the committed full report. The full variant is what lands on disk and the
-// web UI.
-
-/**
- * The bullets of a summary's "TL;DR" section (see the per-repo prompts), capped
- * at `max`. Falls back to the first bullets anywhere, then to the first line —
- * which covers the fixed "no activity" / "summary failed" notices.
- */
-export function extractTldr(summary: string, max = 3): string {
-  const lines = summary.split("\n");
-  const start = lines.findIndex((l) => /TL;?DR/i.test(l));
-  const scope = start >= 0 ? lines.slice(start + 1) : lines;
-  const bullets: string[] = [];
-  for (const line of scope) {
-    const t = line.trim();
-    if (start >= 0 && /^#{1,6}\s/.test(t)) break;
-    const m = /^(?:[-*]|\d+\.)\s+(.*)$/.exec(t);
-    if (m) bullets.push(`- ${m[1]}`);
-    if (bullets.length >= max) break;
-  }
-  if (bullets.length) return bullets.join("\n");
-  if (start >= 0) return extractTldr(lines.slice(start + 1).join("\n"), max);
-  return lines.find((l) => l.trim() && !l.trim().startsWith("#"))?.trim() ?? "";
-}
-
-function briefSections(digests: RepoDigest[]): string {
-  return digests
-    .map((d) => `**[${d.config.name}](https://github.com/${d.config.repo})**\n\n${extractTldr(d.summary)}`)
-    .join("\n\n");
-}
-
-function fullReportLink(url: string): string {
-  return `> 📄 Per-project details: [full report](${url})\n\n`;
-}
-
-// ---------------------------------------------------------------------------
-// Project digest (agents report)
+// Project digest (daily agents report, weekly infra report)
 // ---------------------------------------------------------------------------
 
 export interface ProjectReportInput {
@@ -84,48 +43,5 @@ export function buildProjectReportContent(r: ProjectReportInput): string {
     r.summary +
     (quiet.length ? `\n\n---\n\n**Quiet ${r.period}:** ${quiet.map(link).join(", ")}` : "") +
     r.footer
-  );
-}
-
-// ---------------------------------------------------------------------------
-// Infra Report
-// ---------------------------------------------------------------------------
-
-export function buildInfraReportContent(
-  infraDigests: RepoDigest[],
-  comparison: string,
-  utcStr: string,
-  dateStr: string,
-  footer: string,
-  fullReportUrl?: string,
-): string {
-  const repoLinks = infraDigests
-    .map((d) => `- [${d.config.name}](https://github.com/${d.config.repo})`)
-    .join("\n");
-
-  const projectSections = infraDigests
-    .map((d) =>
-      [
-        `<details>`,
-        `<summary><strong>${d.config.name}</strong> — <a href="https://github.com/${d.config.repo}">${d.config.repo}</a></summary>`,
-        ``,
-        d.summary,
-        ``,
-        `</details>`,
-      ].join("\n"),
-    )
-    .join("\n\n");
-
-  return (
-    `# ${INFRA_REPORT.title} ${dateStr}\n\n` +
-    INFRA_REPORT.meta(utcStr, infraDigests.length) +
-    `${repoLinks}\n\n` +
-    `---\n\n` +
-    `## ${INFRA_REPORT.comparison}\n\n` +
-    comparison +
-    `\n\n---\n\n` +
-    `## ${INFRA_REPORT.detail}\n\n` +
-    (fullReportUrl ? fullReportLink(fullReportUrl) + briefSections(infraDigests) : projectSections) +
-    footer
   );
 }

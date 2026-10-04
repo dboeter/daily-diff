@@ -10,6 +10,7 @@ export interface TrendingRepo {
   fullName: string;
   description: string;
   language: string;
+  /** Stars gained in the scraped period: today, or this week on the weekly run. */
   todayStars: number;
   totalStars: number;
   forks: number;
@@ -72,8 +73,8 @@ export function parseTrendingHtml(html: string): TrendingRepo[] {
       const langMatch = block.match(/<span[^>]+itemprop="programmingLanguage"[^>]*>([\s\S]*?)<\/span>/);
       const language = langMatch?.[1] ? langMatch[1].replace(/<[^>]+>/g, "").trim() : "";
 
-      // today stars
-      const todayMatch = block.match(/([\d,]+)\s+stars?\s+today/i);
+      // stars gained in the period ("1,234 stars today" / "… this week")
+      const todayMatch = block.match(/([\d,]+)\s+stars?\s+(?:today|this week)/i);
       const todayStars = todayMatch?.[1] ? parseInt(todayMatch[1].replace(/,/g, ""), 10) : 0;
 
       // total stars — look for link with /stargazers. The octicon is a nested
@@ -102,9 +103,11 @@ export function parseTrendingHtml(html: string): TrendingRepo[] {
   return repos;
 }
 
-async function fetchGitHubTrending(): Promise<{ repos: TrendingRepo[]; success: boolean }> {
+async function fetchGitHubTrending(
+  period: TrendingPeriod,
+): Promise<{ repos: TrendingRepo[]; success: boolean }> {
   try {
-    const resp = await fetch("https://github.com/trending?since=daily&spoken_language_code=", {
+    const resp = await fetch(`https://github.com/trending?since=${period}&spoken_language_code=`, {
       headers: {
         "User-Agent": "Mozilla/5.0 (compatible; daily-diff/1.0)",
         Accept: "text/html",
@@ -200,11 +203,17 @@ async function searchAiRepos(sevenDaysAgo: string): Promise<SearchRepo[]> {
 // Export
 // ---------------------------------------------------------------------------
 
-export async function fetchTrendingData(): Promise<TrendingData> {
+/**
+ * "daily" feeds the agents report's news matching; "weekly" (on the weekly run)
+ * also feeds the trending report, which would otherwise summarize one day's list.
+ */
+export type TrendingPeriod = "daily" | "weekly";
+
+export async function fetchTrendingData(period: TrendingPeriod = "daily"): Promise<TrendingData> {
   const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
 
   const [{ repos: trendingRepos, success }, searchRepos] = await Promise.all([
-    fetchGitHubTrending(),
+    fetchGitHubTrending(period),
     searchAiRepos(sevenDaysAgo),
   ]);
 

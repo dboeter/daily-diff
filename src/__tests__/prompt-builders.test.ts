@@ -1,7 +1,5 @@
 import { describe, it, expect } from "vitest";
 import {
-  buildInfraPrompt,
-  buildInfraComparisonPrompt,
   buildProjectDigestPrompt,
   buildSkillsPrompt,
   hasActivity,
@@ -9,7 +7,6 @@ import {
 } from "../prompts.ts";
 import { buildTrendingPrompt, buildWebReportPrompt, buildHnPrompt } from "../prompts-data.ts";
 import type { RepoConfig, GitHubItem, GitHubRelease } from "../github.ts";
-import type { RepoDigest } from "../prompts.ts";
 import type { TrendingData } from "../trending.ts";
 import type { HnData } from "../hn.ts";
 import type { WebFetchResult } from "../web.ts";
@@ -44,17 +41,6 @@ const release: GitHubRelease = {
   published_at: "2026-03-09T00:00:00Z",
   prerelease: false,
 };
-
-function makeDigest(overrides: Partial<RepoDigest> = {}): RepoDigest {
-  return {
-    config: cfg,
-    issues: [],
-    prs: [],
-    releases: [],
-    summary: "Summary",
-    ...overrides,
-  };
-}
 
 // ---------------------------------------------------------------------------
 // buildProjectDigestPrompt
@@ -128,55 +114,6 @@ describe("buildProjectDigestPrompt", () => {
 });
 
 // ---------------------------------------------------------------------------
-// buildInfraPrompt
-// ---------------------------------------------------------------------------
-
-describe("buildInfraPrompt", () => {
-  it("includes repo and release data", () => {
-    const result = buildInfraPrompt(cfg, [makeItem()], [makeItem()], [release], "2026-03-09");
-    expect(result).toContain("AI infrastructure");
-    expect(result).toContain("New Model & Hardware Support");
-    expect(result).toContain("TestTool");
-    expect(result).toContain("v1.0.0");
-  });
-
-  it("shows None when a section has no data", () => {
-    const result = buildInfraPrompt(cfg, [makeItem()], [], [], "2026-03-09");
-    expect(result).toContain("None");
-  });
-
-  it("includes sample notes when items exceed limit", () => {
-    const items = Array.from({ length: 50 }, (_, i) => makeItem({ number: i, comments: i }));
-    const result = buildInfraPrompt(cfg, items, [], [], "2026-03-09");
-    expect(result).toContain("Total: 50 items; showing top 30");
-  });
-});
-
-// ---------------------------------------------------------------------------
-// buildInfraComparisonPrompt
-// ---------------------------------------------------------------------------
-
-describe("buildInfraComparisonPrompt", () => {
-  it("includes all digest summaries when they have data", () => {
-    const digests = [
-      makeDigest({ config: { ...cfg, name: "vLLM" }, summary: "Summary A", issues: [makeItem()] }),
-      makeDigest({ config: { ...cfg, name: "Ollama" }, summary: "Summary B", prs: [makeItem()] }),
-    ];
-    const result = buildInfraComparisonPrompt(digests, "2026-03-09");
-    expect(result).toContain("Model Support Race");
-    expect(result).toContain("vLLM");
-    expect(result).toContain("Summary A");
-    expect(result).toContain("Ollama");
-    expect(result).toContain("Summary B");
-  });
-
-  it("shows no-activity for empty digests", () => {
-    const result = buildInfraComparisonPrompt([makeDigest({ summary: "Summary" })], "2026-03-09");
-    expect(result).toContain("No activity in the last 24 hours.");
-  });
-});
-
-// ---------------------------------------------------------------------------
 // buildSkillsPrompt
 // ---------------------------------------------------------------------------
 
@@ -219,7 +156,7 @@ describe("buildTrendingPrompt", () => {
     expect(result).toContain("org/repo");
     expect(result).toContain("Python");
     expect(result).toContain("5,000");
-    expect(result).toContain("+100 today");
+    expect(result).toContain("+100 this week");
   });
 
   it("omits the total when the scraped star count is 0", () => {
@@ -239,7 +176,7 @@ describe("buildTrendingPrompt", () => {
       trendingFetchSuccess: true,
     };
     const result = buildTrendingPrompt(data, "2026-03-09");
-    expect(result).toContain("- [org/repo](https://github.com/org/repo) (+408 today)");
+    expect(result).toContain("- [org/repo](https://github.com/org/repo) (+408 this week)");
     expect(result).not.toContain("⭐0");
   });
 
