@@ -92,6 +92,8 @@ jobs:
           OPENROUTER_MODEL: nvidia/nemotron-3-ultra-550b-a55b:free
           # Without this the reasoning model spends the whole token budget thinking and returns empty content.
           OPENROUTER_REASONING_EFFORT: low
+          # Jev relevance ranking for the ArXiv report (~$0.02/day); unset falls back to recency.
+          TYPESAFE_API_KEY: ${{ secrets.TYPESAFE_API_KEY }}
           DIGEST_REPO: ${{ github.repository }}
           DIGEST_FORCE_WEEKLY: ${{ inputs.force_weekly && '1' || '' }}
         run: pnpm start

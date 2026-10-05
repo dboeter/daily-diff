@@ -6,6 +6,9 @@ import {
   extractLinkHref,
   parseEntry,
   parseArxivEntries,
+  expectedLevel,
+  rankByRelevance,
+  type ArxivPaper,
 } from "../arxiv.ts";
 
 const SAMPLE_ENTRY_XML = `
@@ -107,5 +110,48 @@ describe("parseArxivEntries", () => {
 
   it("returns empty array for feeds with no entries", () => {
     expect(parseArxivEntries("<feed><title>Empty</title></feed>")).toEqual([]);
+  });
+});
+
+describe("Jev relevance ranking", () => {
+  const paper = (id: string): ArxivPaper => ({
+    id,
+    title: id,
+    summary: "",
+    authors: [],
+    published: "",
+    updated: "",
+    categories: [],
+    url: id,
+    pdfUrl: id,
+  });
+
+  it("takes the expected level over the probabilities", () => {
+    expect(expectedLevel({ score: 3, probabilities: { "0": 0.5, "3": 0.5 } })).toBe(1.5);
+    expect(expectedLevel({ score: 2 })).toBe(2);
+    expect(() => expectedLevel({ score: 3, probabilities: { "Off-topic": 1 } })).toThrow(
+      /Unexpected Jev answer/,
+    );
+  });
+
+  it("sorts most relevant first, keeps input order on ties, and puts failed papers last", async () => {
+    const scores: Record<string, number> = { a: 1, b: 3, d: 1 };
+    const ranked = await rankByRelevance(
+      [paper("a"), paper("b"), paper("c"), paper("d")],
+      "key",
+      async (p) => {
+        if (!(p.id in scores)) throw new Error("HTTP 529");
+        return scores[p.id]!;
+      },
+    );
+    expect(ranked?.map((p) => p.id)).toEqual(["b", "a", "d", "c"]);
+  });
+
+  it("returns null when most scoring calls fail", async () => {
+    const ranked = await rankByRelevance([paper("a"), paper("b"), paper("c")], "key", async (p) => {
+      if (p.id !== "a") throw new Error("HTTP 401");
+      return 1;
+    });
+    expect(ranked).toBeNull();
   });
 });

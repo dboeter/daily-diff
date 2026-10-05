@@ -12,7 +12,7 @@ A GitHub Actions workflow that runs every morning at 06:37 CST. It aggregates AI
 | [OpenRouter](https://openrouter.ai/apps)                          | HTML (RSC payload) + Models API                   | Agent app usage, top/new models — **weekly**; stealth models daily   |
 | [npm](https://www.npmjs.com)                                      | Registry search API                               | Coding-agent packages by downloads and momentum — **weekly**         |
 | [Hacker News](https://news.ycombinator.com)                       | [Firebase API](https://github.com/HackerNews/API) | Top AI stories from last 24h via topstories scanning                 |
-| [ArXiv](https://arxiv.org)                                        | [ArXiv API](https://export.arxiv.org/api/query)   | Latest papers from cs.AI, cs.CL, cs.LG (last 48h)                    |
+| [ArXiv](https://arxiv.org)                                        | [ArXiv API](https://export.arxiv.org/api/query)   | Papers from cs.AI, cs.CL, cs.LG (last 48h), ranked by Jev relevance  |
 | [Hugging Face](https://huggingface.co)                            | [Hub API](https://huggingface.co/api/models)      | 30 trending models sorted by weekly likes — **weekly**, Mondays only |
 | [Dev.to](https://dev.to)                                          | [Forem API](https://dev.to/api)                   | Top AI/LLM articles of the week from 5 tags — **weekly**             |
 | [Lobste.rs](https://lobste.rs)                                    | JSON API                                          | AI/ML tagged stories from last 7 days — **weekly**                   |
@@ -217,6 +217,7 @@ Go to **Settings → Secrets and variables → Actions** and add:
 | `OPENROUTER_API_KEY` | if OpenRouter | OpenRouter API key                                                                                            |
 | `DEEPSEEK_API_KEY`   | if DeepSeek   | DeepSeek API key                                                                                              |
 | `DASHSCOPE_API_KEY`  | if Qwen       | Alibaba Model Studio API key                                                                                  |
+| `TYPESAFE_API_KEY`   | optional      | [TypeSafe](https://typesafe.ai) key. If set, ArXiv papers are ranked by Jev relevance instead of recency      |
 | `TELEGRAM_BOT_TOKEN` | optional      | Telegram bot token from [@BotFather](https://t.me/BotFather). If set, a message is sent after each digest run |
 | `TELEGRAM_CHAT_ID`   | optional      | Telegram chat/channel/group ID to send notifications to                                                       |
 
@@ -289,6 +290,7 @@ export ANTHROPIC_API_KEY=sk-ant-xxxxxxxx
 
 export DIGEST_REPO=your-username/daily-diff  # optional; omit to only write files
 # export DIGEST_FORCE_WEEKLY=1               # optional; also run the weekly reports today
+# export TYPESAFE_API_KEY=xxxxx              # optional; rank ArXiv papers by Jev relevance
 
 pnpm start
 ```

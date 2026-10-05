@@ -410,12 +410,16 @@ export function buildArxivPrompt(data: ArxivData, dateStr: string): string {
         `   Link: ${p.url}\n` +
         `   Authors: ${authors} | Categories: ${cats}\n` +
         `   Published: ${p.published.slice(0, 10)}\n` +
-        `   Abstract: ${p.summary.slice(0, 300)}${p.summary.length > 300 ? "..." : ""}`
+        `   Abstract: ${p.summary}`
       );
     })
     .join("\n\n");
 
-  return `You are an AI research analyst. The following are recent AI-related papers from ArXiv as of ${dateStr} (${data.papers.length} papers from cs.AI, cs.CL, cs.LG):
+  const order =
+    data.rankedBy === "jev"
+      ? "pre-selected for relevance to LLM and agent practitioners, most relevant first"
+      : "the most recent submissions";
+  return `You are an AI research analyst. The following are recent AI-related papers from ArXiv as of ${dateStr} (${data.papers.length} papers from cs.AI, cs.CL, cs.LG, ${order}):
 
 ---
 

@@ -42,6 +42,9 @@ export ANTHROPIC_API_KEY=sk-ant-xxxxx
 # Qwen (Alibaba Model Studio)
 # export DASHSCOPE_API_KEY=sk-xxxxx
 
+# Jev relevance ranking for the ArXiv report (omit to rank by recency)
+# export TYPESAFE_API_KEY=xxxxx
+
 # Run the weekly reports (infra, trending, community, HF) on a non-Monday
 # export DIGEST_FORCE_WEEKLY=1
 ```
@@ -84,7 +87,7 @@ The pipeline runs in four sequential phases, each implemented as a named async f
 | `src/openrouter.ts`                  | OpenRouter app + model popularity scraped from the `/apps` and `/rankings` RSC payload; new models and `fetchStealthModels` via `/api/v1/models`                                                   |
 | `src/npm.ts`                         | npm coding-agent packages via registry search; `rankNpmPackages` splits rising (download momentum) from top                                                                                      |
 | `src/hn.ts`                          | Hacker News top AI stories via Firebase API (top 500 scanned in batches of 50, regex-filtered)                                                                                                    |
-| `src/arxiv.ts`                       | ArXiv AI papers via API Atom feed (cs.AI, cs.CL, cs.LG)                                                                                                                                           |
+| `src/arxiv.ts`                       | ArXiv AI papers via API Atom feed (cs.AI, cs.CL, cs.LG); `rankByRelevance` scores them with Jev                                                                                                   |
 | `src/hf.ts`                          | Hugging Face Hub trending models via Hub API (weekly)                                                                                                                                             |
 | `src/devto.ts`                       | Dev.to top AI articles of the week via Forem API (`top=7`)                                                                                                                                        |
 | `src/lobsters.ts`                    | Lobste.rs AI/ML stories via JSON endpoints                                                                                                                                                        |
@@ -120,7 +123,7 @@ Weekly = on `WEEKLY_REPORT_WEEKDAY` (Monday, CST) or when `DIGEST_FORCE_WEEKLY=1
   - **npm** uses the `downloads.weekly`/`monthly` already in the registry search response (the downloads API rejects scoped packages in bulk). Counts are gameable and the keywords match plugins/MCP servers too; the prompt tells the LLM to filter those.
 - **Stealth models** (daily, top of `ai-agents`): `isStealthModel` matches a `stealth/` id prefix, or a description saying "cloaked"/"anonymous"/"stealth" … "model", in the official `/api/v1/models` catalog. `buildStealthSection` (`src/report-builders.ts`) renders it deterministically — not by the LLM — via the `preamble` of `buildProjectReportContent`. It always appears: 🆕 = listed within 2 days, ⏳ = `expiration_date` within 3 days, and "catalog unavailable" is distinct from "none listed". If the cron is ever moved back onto a stealth model, a ⏳ on that row means `OPENROUTER_MODEL` needs replacing.
 - **HN**: Firebase API (`/v0/topstories.json`) — scans top 500 stories in batches of 50, filters for AI keywords, top 30 by points
-- **ArXiv**: ArXiv API (Atom XML) — queries cs.AI, cs.CL, cs.LG categories for the newest papers from the last 48h
+- **ArXiv**: ArXiv API (Atom XML) — newest 300 per category from cs.AI, cs.CL, cs.LG, filtered to the last 48h, then ranked by relevance with TypeSafe's Jev (`POST api.typesafe.ai/v1/systemone`, one `score` question per paper, `TYPESAFE_API_KEY`); the top 40 go to the prompt with full abstracts. Jev is not a chat model, so it bypasses `callLlm` and `llmStats`. No key, or more than half the scoring calls failing, falls back to the 40 most recent. Before October 2026 the report took the newest 50, a few hours of submissions.
 - **Community** (weekly): Dev.to (5 AI tags, top of the week) + Lobste.rs (`/t/ai.json`, `/t/ml.json`, last 7 days) — technical articles and community discussions
 - **HF**: Hugging Face Hub trending models — **weekly**. The Hub list is ranked by cumulative downloads and 90.5% of a day's models carried over from the previous day, so daily generation was re-summarizing the same table.
 

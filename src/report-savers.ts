@@ -190,7 +190,8 @@ export async function saveArxivReport(
     const header =
       `# ${ARXIV_REPORT.title} ${dateStr}\n\n` +
       `> Source: [ArXiv](https://arxiv.org/) (cs.AI, cs.CL, cs.LG) | ` +
-      `${arxivData.papers.length} papers | Generated: ${utcStr} UTC\n\n` +
+      `${arxivData.papers.length} papers${arxivData.rankedBy === "jev" ? " ranked by [Jev](https://typesafe.ai) relevance" : ""} | ` +
+      `Generated: ${utcStr} UTC\n\n` +
       `---\n\n`;
 
     const content = header + summary + autoGenFooter();
