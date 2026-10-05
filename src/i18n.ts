@@ -47,11 +47,11 @@ export const WEB_REPORT = {
 // Weekly since October 2026. The sidebar/RSS labels in REPORT_LABELS stay
 // cadence-neutral because the archive holds daily editions too.
 export const TRENDING_REPORT = {
-  title: "AI Open Source Trends Weekly",
+  title: "Agent & AI Coding Trends Weekly",
   sources: "Sources: GitHub Trending + GitHub Search API + OpenRouter + npm",
   skillsHeading: "Claude Code Skills Highlights",
   skillsSource: (repo: string) => `> Source: [${repo}](https://github.com/${repo})`,
-  issueTitle: (dateStr: string) => `📈 AI Open Source Trends Weekly ${dateStr}`,
+  issueTitle: (dateStr: string) => `📈 Agent & AI Coding Trends Weekly ${dateStr}`,
 } as const;
 
 // Rendered daily at the top of the agents report (buildStealthSection).
@@ -115,7 +115,7 @@ export const REPORT_LABELS: Record<string, string> = {
   "ai-agents": "AI Agents Digest",
   "ai-infra": "AI Infrastructure Digest",
   "ai-web": "Official AI Content Report",
-  "ai-trending": "AI Open Source Trends",
+  "ai-trending": "Agent & AI Coding Trends",
   "ai-hn": "Hacker News AI Community Digest",
   "ai-arxiv": "ArXiv AI Research Digest",
   "ai-hf": "Hugging Face Trending Models Weekly",

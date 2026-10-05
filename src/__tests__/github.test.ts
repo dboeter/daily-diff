@@ -135,7 +135,9 @@ describe("fetchHotIssues", () => {
     vi.useFakeTimers({ now: new Date("2026-10-04T22:37:00Z") });
     const fetchSpy = mockSearch([issue({ number: 7, comments: 12, created_at: "2026-10-03T01:00:00Z" })]);
 
-    const hot = await fetchHotIssues("org/repo", new Date("2026-09-27T22:37:00Z"));
+    const pending = fetchHotIssues("org/repo", new Date("2026-09-27T22:37:00Z"));
+    await vi.runAllTimersAsync(); // searchSlot spacing from the previous test
+    const hot = await pending;
 
     const url = new URL(String(fetchSpy.mock.calls[0]![0]));
     expect(url.pathname).toBe("/search/issues");
@@ -149,7 +151,9 @@ describe("fetchHotIssues", () => {
     vi.useFakeTimers({ now: new Date("2026-10-04T22:37:00Z") });
     const fetchSpy = mockSearch([issue({ number: 8, comments: 15, created_at: "2026-10-03T01:00:00Z" })]);
 
-    const hot = await fetchHotIssues("org/repo", new Date("2026-10-03T22:37:00Z"));
+    const pending = fetchHotIssues("org/repo", new Date("2026-10-03T22:37:00Z"));
+    await vi.runAllTimersAsync(); // searchSlot spacing from the previous test
+    const hot = await pending;
 
     const q = new URL(String(fetchSpy.mock.calls[0]![0])).searchParams.get("q");
     expect(q).toContain("created:>=2026-10-02T22:37:00Z");

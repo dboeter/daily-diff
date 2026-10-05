@@ -125,11 +125,13 @@ export function buildTrendingPrompt(data: TrendingData, dateStr: string): string
   const radarData = buildAgentRadarData(data);
   const modelData = buildModelUsageData(data);
 
-  return `You are a technical analyst focused on the AI open-source ecosystem. The following is GitHub AI-related trending repository data for the week ending ${dateStr}. Please filter for AI relevance, categorize, and analyze trends.
+  return `You are a technical analyst covering AI coding tools, agents and agent harnesses. The following is GitHub trending repository data for the week ending ${dateStr}. Filter it down to agent and AI-coding projects, categorize them, and analyze trends.
+
+Scope: this report is about agents, not AI in general. Model weights, training and fine-tuning, inference engines, RAG pipelines, vector databases and chat frontends are out of scope unless the project is built specifically for agents.
 
 ## Data Sources
 - **Trending List** (github.com/trending?since=weekly, this week's stars most reliable): weekly hot list with stars gained this week
-- **Topic Search** (GitHub Search API, topic tags): AI-related projects active in last 7 days, grouped by topic; \`new:*\` topics are repos created in the last 14 days
+- **Topic Search** (GitHub Search API, topic tags): agent, harness and AI-coding projects active in last 7 days, grouped by topic; \`new:*\` topics are repos created in the last 14 days
 ${radarData ? "- **OpenRouter Apps** (openrouter.ai/apps): apps ranked by LLM tokens routed through OpenRouter — a usage signal, not a popularity vote\n- **npm** (registry search, coding-agent keywords): download counts; easily inflated by CI and bots\n" : ""}${modelData ? "- **OpenRouter Models**: token usage per model and newly listed models\n" : ""}
 ---
 
@@ -138,25 +140,25 @@ ${trendingSection}
 
 ---
 
-## AI Topic Search Results (${data.searchRepos.length} repositories, deduplicated)
+## Agent Topic Search Results (${data.searchRepos.length} repositories, deduplicated)
 ${searchSection}
 
 ---
 ${radarData ? `\n${radarData}\n\n---\n` : ""}${modelData ? `\n${modelData}\n\n---\n` : ""}
-Generate a structured AI Open Source Trends Report in English:
+Generate a structured Agent & AI Coding Trends Report in English:
 
-**Step 1 (Filter)**: From the above data, select projects clearly related to AI/ML (exclude unrelated general tools, frontend frameworks, games, etc.). Skip non-AI trending repos.
+**Step 1 (Filter)**: From the above data, keep only agents, agent harnesses and frameworks, multi-agent/orchestration systems, AI coding tools, and tooling built for agents (memory, context, skills, sandboxes, cost tracking). Drop everything else, including general AI/ML projects that are out of scope (see Scope above), non-AI trending repos, and awesome-lists or tutorials unless they are the week's clear standout.
 
 **Step 2 (Categorize)**: Group filtered projects into these categories (a project can belong to multiple; pick the primary one):
-- 🔧 AI Infrastructure (frameworks, SDKs, inference engines, dev tools, CLI)
-- 🤖 AI Agents / Workflows (agent frameworks, automation, multi-agent systems)
-- 📦 AI Applications (specific apps, vertical solutions)
-- 🧠 LLMs / Training (model weights, training frameworks, fine-tuning tools)
-- 🔍 RAG / Knowledge (vector databases, retrieval-augmented generation, knowledge management)
+- 🧑‍💻 Coding Agents (CLI, IDE and cloud agents that write code)
+- 🧰 Agent Harnesses & Frameworks (harnesses, SDKs, runtimes for building agents)
+- 🕸️ Multi-Agent & Orchestration (swarms, supervisors, running and coordinating many agents)
+- 🔌 Agent Tooling (memory, context management, skills, MCP servers, sandboxes, token/cost tools)
+- 🤖 Other Agents (personal assistants, research, browser and vertical agents)
 
 **Step 3 (Output Report)** with these sections:
 
-1. **This Week's Highlights** — 3-5 sentences on the most noteworthy AI open-source developments this week
+1. **This Week's Highlights** — 3-5 sentences on the most noteworthy agent and AI-coding open-source developments this week
 ${
   radarData
     ? `
@@ -186,9 +188,9 @@ ${
    - List 3-8 projects per category; omit a category's table entirely if no project falls under it
 
 3. **Trend Signal Analysis** — 200-300 words, distill from this week's hot list:
-   - Which type of AI tool is getting explosive community attention?
-   - Any new tech stacks or directions appearing for the first time?
-   - Connection to recent LLM releases / industry events
+   - Which kind of agent or coding tool is getting explosive community attention?
+   - Any new harness patterns, orchestration approaches or directions appearing for the first time?
+   - Connection to recent agent, coding-tool or model releases
 
 4. **Community Hot Spots** — Bullet list of 3-5 specific projects or directions worth developer focus, with brief reasoning
 ${

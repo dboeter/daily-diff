@@ -6,6 +6,7 @@
 
 import { fetchOpenRouterData, type OpenRouterData } from "./openrouter.ts";
 import { fetchNpmData, type NpmData } from "./npm.ts";
+import { searchSlot } from "./github.ts";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -65,25 +66,31 @@ export function hasTrendingData(data: TrendingData): boolean {
 // Constants
 // ---------------------------------------------------------------------------
 
-/** Repos active (pushed) in the last 7 days, by stars. Favors established repos. */
+/**
+ * Repos active (pushed) in the last 7 days, by stars. Favors established repos.
+ * Dedupe keeps the first query's label, so the specific agent topics go before
+ * the broad `ai-agent`, which tags the same repos. Each query adds ~2 s to
+ * the fetch phase: searchSlot paces the search API's 30 requests a minute.
+ */
 const SEARCH_QUERIES = [
-  { q: "topic:llm", label: "llm" },
+  { q: "topic:harness", label: "harness" },
+  { q: "topic:agent-harness", label: "agent-harness" },
+  { q: "topic:ai-coding", label: "ai-coding" },
+  { q: "topic:multi-agent", label: "multi-agent" },
+  { q: "topic:agent-orchestration", label: "agent-orchestration" },
   { q: "topic:ai-agent", label: "ai-agent" },
-  { q: "topic:rag", label: "rag" },
-  { q: "topic:vector-database", label: "vector-db" },
-  { q: "topic:large-language-model", label: "llm-model" },
-  { q: "topic:machine-learning", label: "ml" },
 ];
 
 /**
  * Weekly run only. Repos created in the last 14 days, by stars — surfaces new
  * agents that the pushed-based queries rank below old, high-star repos.
  * `claude-code` and `mcp` are left out: their new repos are mostly plugins and
- * MCP servers. Weekly-only because search quota is shared with fetchHotIssues.
+ * MCP servers.
  */
 const NEW_REPO_QUERIES = [
   { q: "topic:coding-agent", label: "new:coding-agent" },
   { q: "topic:agentic-coding", label: "new:agentic-coding" },
+  { q: "topic:harness", label: "new:harness" },
 ];
 
 // ---------------------------------------------------------------------------
@@ -215,6 +222,7 @@ async function searchAiRepos(sevenDaysAgo: string, fourteenDaysAgo: string | nul
   const results = await Promise.all(
     queries.map(async ({ q, label }) => {
       try {
+        await searchSlot();
         const query = `${q}&sort=stars&order=desc`;
         const url = `https://api.github.com/search/repositories?q=${query}&per_page=15`;
         const resp = await fetch(url, { headers });

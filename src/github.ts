@@ -84,6 +84,23 @@ async function githubGet<T>(url: string, params: Record<string, string> = {}): P
 // ---------------------------------------------------------------------------
 
 /**
+ * The search API allows 30 requests a minute, shared by fetchHotIssues and the
+ * trending topic queries. Spacing every search call SEARCH_INTERVAL_MS apart
+ * keeps any 60 s window under 30, however many repos and topics there are, at
+ * the cost of ~2 s of fetch-phase time per query.
+ */
+const SEARCH_INTERVAL_MS = 2100;
+let nextSearchAt = 0;
+
+/** Wait for this caller's turn at the search API. Call right before each search request. */
+export async function searchSlot(): Promise<void> {
+  const now = Date.now();
+  const at = Math.max(now, nextSearchAt);
+  nextSearchAt = at + SEARCH_INTERVAL_MS;
+  if (at > now) await sleep(at - now);
+}
+
+/**
  * Releases published since `since`, newest first. 100 is the API maximum: a
  * weekly window on llama.cpp, which tags several builds a day, already runs to
  * 35–70 releases.
@@ -161,12 +178,12 @@ export function selectHotIssues(items: GitHubItem[], createdSince: Date): GitHub
  * issues list endpoint can only filter by update time, and its top-commented
  * page is all months-old mega-threads.
  *
- * Search allows 30 requests a minute, shared with the trending fetch's 6 topic
- * queries: 18 on a daily run, 24 on the weekly one. Close to the limit, so a
- * caller should treat a failure here as "no hot issues", not a failed repo.
+ * Paced by searchSlot. A failure should still be treated as "no hot issues",
+ * not a failed repo.
  */
 export async function fetchHotIssues(repo: string, since: Date): Promise<GitHubItem[]> {
   const createdSince = new Date(Math.min(since.getTime(), Date.now() - HOT_ISSUE_MIN_WINDOW_MS));
+  await searchSlot();
   const result = await githubGet<{ items: GitHubItem[] }>("https://api.github.com/search/issues", {
     q: `repo:${repo} is:issue created:>=${createdSince.toISOString().slice(0, 19)}Z`,
     sort: "comments",

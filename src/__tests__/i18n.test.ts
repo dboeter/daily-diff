@@ -31,7 +31,7 @@ describe("issue title functions", () => {
   });
 
   it("TRENDING_REPORT.issueTitle includes title", () => {
-    expect(TRENDING_REPORT.issueTitle("2026-03-12")).toContain("Open Source Trends");
+    expect(TRENDING_REPORT.issueTitle("2026-03-12")).toContain("Agent & AI Coding Trends");
   });
 
   it("HN_REPORT.issueTitle includes title", () => {
