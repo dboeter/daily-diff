@@ -6,7 +6,8 @@ import {
   extractLinkHref,
   parseEntry,
   parseArxivEntries,
-  expectedLevel,
+  relevanceOf,
+  retryDelayMs,
   rankByRelevance,
   type ArxivPaper,
 } from "../arxiv.ts";
@@ -126,12 +127,27 @@ describe("Jev relevance ranking", () => {
     pdfUrl: id,
   });
 
-  it("takes the expected level over the probabilities", () => {
-    expect(expectedLevel({ score: 3, probabilities: { "0": 0.5, "3": 0.5 } })).toBe(1.5);
-    expect(expectedLevel({ score: 2 })).toBe(2);
-    expect(() => expectedLevel({ score: 3, probabilities: { "Off-topic": 1 } })).toThrow(
-      /Unexpected Jev answer/,
-    );
+  it("weighs the Jev answers into one relevance in 0–1", () => {
+    const answers = (llm: number, agents: number, practical: number) => ({
+      about_llms: { noul: llm },
+      about_agents_or_code: { noul: agents },
+      practical: { score: practical },
+    });
+    expect(relevanceOf(answers(1, 1, 2))).toBe(1);
+    expect(relevanceOf(answers(0, 0, 0))).toBe(0);
+    expect(relevanceOf(answers(1, 0, 1))).toBe(0.625);
+    expect(() =>
+      relevanceOf({ about_llms: { noul: 1 } } as unknown as Parameters<typeof relevanceOf>[0]),
+    ).toThrow();
+    expect(() => relevanceOf(answers(1, 1, Number.NaN))).toThrow(/Unexpected Jev answers/);
+  });
+
+  it("honors retry-after and otherwise backs off exponentially, capped", () => {
+    expect(retryDelayMs("2", 0)).toBe(2000);
+    expect(retryDelayMs("600", 0)).toBe(10_000);
+    expect(retryDelayMs(null, 0)).toBe(1000);
+    expect(retryDelayMs(null, 2)).toBe(4000);
+    expect(retryDelayMs("Wed, 21 Oct 2026 07:28:00 GMT", 1)).toBe(2000);
   });
 
   it("sorts most relevant first, keeps input order on ties, and puts failed papers last", async () => {

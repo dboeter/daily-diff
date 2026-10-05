@@ -127,40 +127,101 @@ export function parseArxivEntries(xml: string): ArxivPaper[] {
 // ---------------------------------------------------------------------------
 
 const JEV_URL = "https://api.typesafe.ai/v1/systemone";
-/** Well under the documented 1,200 requests/minute. */
-const JEV_CONCURRENCY = 10;
+/**
+ * The Models page lists 80 requests/second and warns the limit can change without
+ * notice; at ~100 ms a call, 5 workers stay near 50/s.
+ */
+const JEV_CONCURRENCY = 5;
 /** Above this fraction of failed scoring calls the ranking is noise — fall back to recency. */
 const JEV_MAX_FAILURE_RATIO = 0.5;
-const JEV_RETRY_MS = 2000;
+const JEV_MAX_RETRIES = 3;
+const JEV_RETRY_BASE_MS = 1000;
+const JEV_RETRY_MAX_MS = 10_000;
 
-const RELEVANCE_QUESTION = {
-  type: "score",
-  instructions:
-    "How relevant is this paper to engineers who build or use LLMs and AI coding agents? " +
-    "Relevant: agents, tool use, code generation, LLM training, alignment and evaluation, " +
-    "reasoning, inference efficiency.",
-  criteria: [
-    "Off-topic: not about LLMs or agents",
-    "Tangential: machine learning, but not LLM or agent work",
-    "Relevant: LLM or agent research a practitioner would note",
-    "Must-read: likely to change how practitioners build or use LLMs or agents",
-  ],
+/**
+ * Composite scoring: each question judges one property of the paper and
+ * `relevanceOf` weighs them in code. One broad "how relevant is this?" question
+ * hid several judgments and asked Jev to guess what an audience cares about —
+ * an indirection the Jev 1.13 docs list as a failure mode. All three run in one
+ * request, in parallel.
+ */
+const RELEVANCE_QUESTIONS = {
+  about_llms: {
+    type: "noul",
+    instructions:
+      "Is the paper described by `title` and `abstract` about large language models or LLM-based agents?",
+    criteria: {
+      true: "The paper trains, evaluates, analyzes, serves, or builds a system on large language models or LLM-based agents",
+      false:
+        "The paper is about other machine learning, such as vision-only models, reinforcement learning without a language model, tabular data, or theory that involves no language model",
+    },
+  },
+  about_agents_or_code: {
+    type: "noul",
+    instructions:
+      "Is the paper described by `title` and `abstract` about AI agents, tool use, or code generation?",
+    criteria: {
+      true: "The paper studies systems that act in multiple steps, call tools or APIs, or write, repair, or review code",
+      false: "The paper studies models that answer in a single step without tools, and not code",
+    },
+  },
+  practical: {
+    type: "score",
+    instructions: "How directly can an engineer apply the result in `abstract`?",
+    criteria: [
+      {
+        what: "No practical takeaway",
+        examples: ["a convergence proof", "a generalization bound with no new algorithm"],
+      },
+      {
+        what: "A finding or benchmark worth knowing, but no method to adopt",
+        examples: ["a benchmark showing agents fail on long tasks", "an analysis of why models hallucinate"],
+      },
+      {
+        what: "A method, tool, or technique an engineer can adopt",
+        examples: [
+          "a fine-tuning or prompting recipe",
+          "a KV-cache compression that speeds up serving",
+          "an agent memory or planning design",
+        ],
+      },
+    ],
+  },
 };
 
-interface JevScoreAnswer {
-  score: number;
-  probabilities?: Record<string, number>;
+/** Weights for `relevanceOf`. LLM fit dominates so an off-topic paper sinks however practical it is. */
+const RELEVANCE_WEIGHTS = { about_llms: 0.5, about_agents_or_code: 0.25, practical: 0.25 };
+/** Top level of the `practical` score, to normalize it to 0–1. */
+const PRACTICAL_MAX_LEVEL = RELEVANCE_QUESTIONS.practical.criteria.length - 1;
+
+interface JevAnswers {
+  about_llms: { noul: number };
+  about_agents_or_code: { noul: number };
+  /** `score` is already the probability-weighted level (Σ level × p), between 0 and the top level. */
+  practical: { score: number };
 }
 
-/** Expected level over the answer's probabilities — finer-grained than the argmax `score`, so ties are rarer. */
-export function expectedLevel(answer: JevScoreAnswer): number {
-  const level = answer.probabilities
-    ? Object.entries(answer.probabilities).reduce((sum, [level, p]) => sum + Number(level) * p, 0)
-    : answer.score;
+/** Weighted relevance in 0–1. */
+export function relevanceOf(answers: JevAnswers): number {
+  const value =
+    RELEVANCE_WEIGHTS.about_llms * answers.about_llms.noul +
+    RELEVANCE_WEIGHTS.about_agents_or_code * answers.about_agents_or_code.noul +
+    (RELEVANCE_WEIGHTS.practical * answers.practical.score) / PRACTICAL_MAX_LEVEL;
   // Throw rather than return NaN: a NaN score would sort arbitrarily yet count as a
   // success, so a changed response shape would never trip the recency fallback.
-  if (!Number.isFinite(level)) throw new Error(`Unexpected Jev answer: ${JSON.stringify(answer)}`);
-  return level;
+  if (!Number.isFinite(value)) throw new Error(`Unexpected Jev answers: ${JSON.stringify(answers)}`);
+  return value;
+}
+
+/** Wait before retry `attempt` (0-based): the `retry-after` seconds when sent, else exponential backoff. */
+export function retryDelayMs(retryAfter: string | null, attempt: number): number {
+  const seconds = Number(retryAfter);
+  // retry-after may also be an HTTP date; Number() makes that NaN and it falls back to backoff.
+  const ms =
+    retryAfter && Number.isFinite(seconds) && seconds >= 0
+      ? seconds * 1000
+      : JEV_RETRY_BASE_MS * 2 ** attempt;
+  return Math.min(ms, JEV_RETRY_MAX_MS);
 }
 
 export async function scorePaper(paper: ArxivPaper, apiKey: string): Promise<number> {
@@ -171,19 +232,23 @@ export async function scorePaper(paper: ArxivPaper, apiKey: string): Promise<num
       body: JSON.stringify({
         model: "jev-latest",
         state: { title: paper.title, abstract: paper.summary, categories: paper.categories },
-        questions: { relevance: RELEVANCE_QUESTION },
+        questions: RELEVANCE_QUESTIONS,
       }),
     });
   let resp = await request();
-  // 429 = rate limited, 529 = overloaded; the docs ask for a retry after a delay. One is
-  // enough: a paper that still fails sorts last, and a broad outage trips the recency fallback.
-  if (resp.status === 429 || resp.status === 529) {
-    await sleep(JEV_RETRY_MS);
+  // 429 = rate limited, 529 = overloaded; the docs ask for exponential backoff. A paper
+  // that still fails sorts last, and a broad outage trips the recency fallback.
+  for (
+    let attempt = 0;
+    (resp.status === 429 || resp.status === 529) && attempt < JEV_MAX_RETRIES;
+    attempt++
+  ) {
+    await sleep(retryDelayMs(resp.headers.get("retry-after"), attempt));
     resp = await request();
   }
   if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-  const body = (await resp.json()) as { answers: { relevance: JevScoreAnswer } };
-  return expectedLevel(body.answers.relevance);
+  const body = (await resp.json()) as { answers: JevAnswers };
+  return relevanceOf(body.answers);
 }
 
 /**
