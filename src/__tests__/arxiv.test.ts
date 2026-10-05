@@ -10,6 +10,8 @@ import {
   hasCodeLink,
   retryDelayMs,
   rankByRelevance,
+  submissionCutoff,
+  nextArxivState,
   buildRankingFile,
   type JevScore,
   type ArxivPaper,
@@ -220,5 +222,47 @@ describe("Jev relevance ranking", () => {
         code_released: false,
       },
     ]);
+  });
+});
+
+describe("ArXiv pool cutoff", () => {
+  const now = new Date("2026-10-05T22:37:00Z");
+  const state = {
+    date: "2026-10-05",
+    cutoff: "2026-10-01T18:00:00.000Z",
+    newest: "2026-10-02T17:59:00.000Z",
+  };
+
+  it("takes what was submitted after the newest paper the previous run saw", () => {
+    expect(submissionCutoff(state, "2026-10-06", now)).toBe(Date.parse(state.newest));
+  });
+
+  it("reuses the previous cutoff when the same day is re-run", () => {
+    expect(submissionCutoff(state, "2026-10-05", now)).toBe(Date.parse(state.cutoff));
+  });
+
+  it("falls back to 48 h without usable state", () => {
+    const fallback = now.getTime() - 48 * 60 * 60 * 1000;
+    expect(submissionCutoff(null, "2026-10-06", now)).toBe(fallback);
+    expect(submissionCutoff({ ...state, newest: "garbage" }, "2026-10-06", now)).toBe(fallback);
+  });
+
+  it("records the newest submission in the pool, and nothing for an empty pool", () => {
+    const paper = (published: string): ArxivPaper => ({
+      id: published,
+      title: "",
+      summary: "",
+      authors: [],
+      published,
+      updated: published,
+      categories: [],
+      url: "",
+      pdfUrl: "",
+    });
+    const cutoff = Date.parse("2026-10-02T17:59:00Z");
+    expect(nextArxivState([], cutoff, "2026-10-06")).toBeUndefined();
+    expect(
+      nextArxivState([paper("2026-10-05T10:00:00Z"), paper("2026-10-05T17:30:00Z")], cutoff, "2026-10-06"),
+    ).toEqual({ date: "2026-10-06", cutoff: "2026-10-02T17:59:00.000Z", newest: "2026-10-05T17:30:00.000Z" });
   });
 });

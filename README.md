@@ -12,7 +12,7 @@ A GitHub Actions workflow that runs every morning at 06:37 CST. It aggregates AI
 | [OpenRouter](https://openrouter.ai/apps)                          | HTML (RSC payload) + Models API                   | Agent app usage, top/new models — **weekly**; stealth models daily   |
 | [npm](https://www.npmjs.com)                                      | Registry search API                               | Coding-agent packages by downloads and momentum — **weekly**         |
 | [Hacker News](https://news.ycombinator.com)                       | [Firebase API](https://github.com/HackerNews/API) | Top AI stories from last 24h via topstories scanning                 |
-| [ArXiv](https://arxiv.org)                                        | [ArXiv API](https://export.arxiv.org/api/query)   | Papers from cs.AI, cs.CL, cs.LG (last 48h), ranked by Jev relevance  |
+| [ArXiv](https://arxiv.org)                                        | [ArXiv API](https://export.arxiv.org/api/query)   | Papers from cs.AI, cs.CL, cs.LG (new since the last run), ranked by Jev relevance  |
 | [Hugging Face](https://huggingface.co)                            | [Hub API](https://huggingface.co/api/models)      | 30 trending models sorted by weekly likes — **weekly**, Mondays only |
 | [Dev.to](https://dev.to)                                          | [Forem API](https://dev.to/api)                   | Top AI/LLM articles of the week from 5 tags — **weekly**             |
 | [Lobste.rs](https://lobste.rs)                                    | JSON API                                          | AI/ML tagged stories from last 7 days — **weekly**                   |
@@ -142,13 +142,13 @@ The inference and serving layer the agents run on top of. Weekly report on the s
 
 ### GitHub AI Trending — weekly
 
-| Source                                                          | Details                                                                                                                                       |
-| --------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| [github.com/trending](https://github.com/trending?since=weekly) | This week's trending repos — parsed from HTML; includes the stars gained this week                                                            |
-| GitHub Search API                                               | Repos active in the last 7 days matching 6 AI topics: `llm`, `ai-agent`, `rag`, `vector-database`, `large-language-model`, `machine-learning` |
-| GitHub Search API (new repos)                                   | Repos _created_ in the last 14 days tagged `coding-agent` or `agentic-coding`                                                                 |
-| [OpenRouter](https://openrouter.ai/apps)                        | Apps ranked by tokens (top 200 per day/week/month) + OpenRouter's trending list; top models by tokens; models listed in the last 8 days       |
-| [npm](https://www.npmjs.com)                                    | Packages tagged `coding-agent`, `agentic-coding`, `cli-agent`; split into top by weekly downloads and rising (weekly well above monthly rate) |
+| Source                                                          | Details                                                                                                                                                             |
+| --------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [github.com/trending](https://github.com/trending?since=weekly) | This week's trending repos — parsed from HTML; includes the stars gained this week                                                                                  |
+| GitHub Search API                                               | Repos active in the last 7 days matching 8 agent/AI topics: `harness`, `agent-harness`, `ai-coding`, `multi-agent`, `agent-orchestration`, `ai-agent`, `llm`, `rag` |
+| GitHub Search API (new repos)                                   | Repos _created_ in the last 14 days tagged `coding-agent` or `agentic-coding`                                                                                       |
+| [OpenRouter](https://openrouter.ai/apps)                        | Apps ranked by tokens (top 200 per day/week/month) + OpenRouter's trending list; top models by tokens; models listed in the last 8 days                             |
+| [npm](https://www.npmjs.com)                                    | Packages tagged `coding-agent`, `agentic-coding`, `cli-agent`; split into top by weekly downloads and rising (weekly well above monthly rate)                       |
 
 The LLM filters out non-AI repos from the trending list, classifies the rest by dimension (AI infrastructure / agents / applications / models / RAG), and extracts trend signals. The report ends with a Claude Code Skills section: [anthropics/skills](https://github.com/anthropics/skills) PRs and issues, fetched without a date filter and sorted by popularity.
 

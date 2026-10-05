@@ -2,10 +2,14 @@
  * ArXiv AI papers fetched via the ArXiv API (Atom feed).
  *
  * Strategy: query cs.AI + cs.CL + cs.LG categories for the newest papers,
- * sorted by submission date, filtered to last 48h, then ranked by relevance
- * with TypeSafe's Jev decision model when `TYPESAFE_API_KEY` is set (recency
+ * sorted by submission date, keep those submitted after the newest paper the
+ * previous run saw (`digests/arxiv-state.json`), then rank by relevance with
+ * TypeSafe's Jev decision model when `TYPESAFE_API_KEY` is set (recency
  * otherwise).
  */
+
+import fs from "node:fs";
+import path from "node:path";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -30,6 +34,18 @@ export interface ArxivData {
   rankedBy: "jev" | "recency";
   /** `buildRankingFile` output when ranked by Jev, saved next to the report. */
   rankingFile?: string;
+  /** State to save once the report is written; absent when there were no new papers. */
+  nextState?: ArxivState;
+}
+
+/** `digests/arxiv-state.json`: where the previous run's pool ended. */
+export interface ArxivState {
+  /** CST date of the run that wrote this. */
+  date: string;
+  /** Submission-time lower bound that run used (ISO). */
+  cutoff: string;
+  /** Newest submission time in that run's pool (ISO). */
+  newest: string;
 }
 
 // ---------------------------------------------------------------------------
@@ -37,11 +53,18 @@ export interface ArxivData {
 // ---------------------------------------------------------------------------
 
 /**
- * Papers fetched per category. The three categories see several hundred
+ * Papers per API request. The three categories see several hundred
  * submissions a day; at the old 50 the pool covered a few hours, so the report
  * was an arbitrary recency slice whatever the ranking.
  */
-const ARXIV_FETCH_PER_CATEGORY = 300;
+const ARXIV_PAGE_SIZE = 300;
+/**
+ * Pages per category. One page reaches back about a day in cs.AI and cs.LG, and
+ * the Monday batch holds three days of submissions (Friday afternoon to Monday).
+ * Measured 2026-10-05: four pages reach back 77–82 h across three weekdays, so
+ * they cover the lighter weekend span; the cap only bounds a run after a gap.
+ */
+const ARXIV_MAX_PAGES = 4;
 /** Papers handed to the digest prompt (with full abstracts). */
 export const ARXIV_PROMPT_PAPERS = 40;
 const API_URL = "https://export.arxiv.org/api/query";
@@ -430,63 +453,108 @@ async function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-export async function fetchArxivData(): Promise<ArxivData> {
+const STATE_FILE = path.join("digests", "arxiv-state.json");
+/** Pool window when there is no state yet. */
+const FIRST_RUN_WINDOW_MS = 48 * 60 * 60 * 1000;
+
+export function loadArxivState(): ArxivState | null {
+  try {
+    return JSON.parse(fs.readFileSync(STATE_FILE, "utf-8")) as ArxivState;
+  } catch {
+    return null;
+  }
+}
+
+export function saveArxivState(state: ArxivState): void {
+  fs.mkdirSync(path.dirname(STATE_FILE), { recursive: true });
+  fs.writeFileSync(STATE_FILE, JSON.stringify(state, null, 2) + "\n", "utf-8");
+}
+
+/**
+ * Lower bound on submission time for this run's pool (epoch ms).
+ *
+ * Not a fixed window from the run time: arXiv announces Sun–Thu at 20:00 ET,
+ * each batch holding submissions up to 14:00 ET the day before, so the newest
+ * paper the 22:37 UTC run can see is already 28–76 h old. The old 48 h window
+ * skipped the Tuesday report every week, never showed the Thursday–Friday batch,
+ * and clipped every other batch. Taking everything submitted after the newest
+ * paper the previous run saw shows each batch exactly once.
+ */
+export function submissionCutoff(state: ArxivState | null, dateStr: string, now: Date): number {
+  // A re-run of the same day (workflow_dispatch) regenerates from the same pool.
+  const cutoff = state ? Date.parse(state.date === dateStr ? state.cutoff : state.newest) : NaN;
+  return Number.isFinite(cutoff) ? cutoff : now.getTime() - FIRST_RUN_WINDOW_MS;
+}
+
+/** State after this run, or undefined when the pool is empty (nothing new to record). */
+export function nextArxivState(pool: ArxivPaper[], cutoff: number, dateStr: string): ArxivState | undefined {
+  if (pool.length === 0) return undefined;
+  const newest = Math.max(...pool.map((p) => Date.parse(p.published)));
+  return { date: dateStr, cutoff: new Date(cutoff).toISOString(), newest: new Date(newest).toISOString() };
+}
+
+export async function fetchArxivData(dateStr: string, state = loadArxivState()): Promise<ArxivData> {
+  const cutoff = submissionCutoff(state, dateStr, new Date());
   const seen = new Map<string, ArxivPaper>();
+  let requests = 0;
 
-  for (let i = 0; i < CATEGORIES.length; i++) {
-    const cat = CATEGORIES[i]!;
-    if (i > 0) await sleep(REQUEST_DELAY_MS);
+  for (const cat of CATEGORIES) {
+    for (let page = 0; page < ARXIV_MAX_PAGES; page++) {
+      if (requests++ > 0) await sleep(REQUEST_DELAY_MS);
+      try {
+        const params = new URLSearchParams({
+          search_query: `cat:${cat}`,
+          sortBy: "submittedDate",
+          sortOrder: "descending",
+          start: String(page * ARXIV_PAGE_SIZE),
+          max_results: String(ARXIV_PAGE_SIZE),
+        });
 
-    try {
-      const params = new URLSearchParams({
-        search_query: `cat:${cat}`,
-        sortBy: "submittedDate",
-        sortOrder: "descending",
-        max_results: String(ARXIV_FETCH_PER_CATEGORY),
-      });
+        const resp = await fetch(`${API_URL}?${params}`, {
+          headers: { "User-Agent": "daily-diff/1.0" },
+        });
 
-      const resp = await fetch(`${API_URL}?${params}`, {
-        headers: { "User-Agent": "daily-diff/1.0" },
-      });
-
-      if (!resp.ok) {
-        console.error(`  [arxiv] ${cat}: HTTP ${resp.status}`);
-        continue;
-      }
-
-      const xml = await resp.text();
-      const parsedPapers = parseArxivEntries(xml);
-      for (const paper of parsedPapers) {
-        if (!seen.has(paper.id)) {
-          seen.set(paper.id, paper);
+        if (!resp.ok) {
+          console.error(`  [arxiv] ${cat} page ${page + 1}: HTTP ${resp.status}`);
+          break;
         }
-      }
 
-      console.log(`  [arxiv] ${cat}: ${parsedPapers.length} papers`);
-    } catch (err) {
-      console.error(`  [arxiv] ${cat}: ${err}`);
+        const parsedPapers = parseArxivEntries(await resp.text());
+        for (const paper of parsedPapers) {
+          if (!seen.has(paper.id)) seen.set(paper.id, paper);
+        }
+        console.log(`  [arxiv] ${cat} page ${page + 1}: ${parsedPapers.length} papers`);
+
+        // Sorted newest first: stop once the page reaches the cutoff or runs out.
+        const oldest = parsedPapers.at(-1);
+        if (parsedPapers.length < ARXIV_PAGE_SIZE || !oldest || Date.parse(oldest.published) <= cutoff) break;
+      } catch (err) {
+        console.error(`  [arxiv] ${cat} page ${page + 1}: ${err}`);
+        break;
+      }
     }
   }
 
-  // Filter to last 48h (ArXiv has a ~1-day publishing delay, so 24h would miss today's batch)
-  const cutoff = Date.now() - 48 * 60 * 60 * 1000;
   const recent = [...seen.values()]
-    .filter((p) => new Date(p.published).getTime() > cutoff)
-    .sort((a, b) => new Date(b.published).getTime() - new Date(a.published).getTime());
+    .filter((p) => Date.parse(p.published) > cutoff)
+    .sort((a, b) => Date.parse(b.published) - Date.parse(a.published));
 
   const apiKey = process.env["TYPESAFE_API_KEY"];
   const ranked = apiKey ? await rankByRelevance(recent, apiKey) : null;
   if (apiKey && !ranked) console.error("  [arxiv] Too many Jev failures — falling back to recency");
   const papers = (ranked ? ranked.map((r) => r.paper) : recent).slice(0, ARXIV_PROMPT_PAPERS);
   const rankedBy = ranked ? "jev" : "recency";
+  const nextState = nextArxivState(recent, cutoff, dateStr);
 
   console.log(
-    `  [arxiv] ${papers.length} papers by ${rankedBy} (from ${recent.length} in 48h, ${seen.size} unique)`,
+    `  [arxiv] ${papers.length} papers by ${rankedBy} ` +
+      `(from ${recent.length} submitted after ${new Date(cutoff).toISOString()}, ${seen.size} unique)`,
   );
   return {
     papers,
     fetchSuccess: papers.length > 0,
     rankedBy,
     ...(ranked ? { rankingFile: buildRankingFile(ranked) } : {}),
+    ...(nextState ? { nextState } : {}),
   };
 }

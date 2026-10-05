@@ -202,7 +202,9 @@ async function fetchAllData(
       }),
     ),
     fetchHnData().catch((): HnData => ({ stories: [], fetchSuccess: false })),
-    fetchArxivData().catch((): ArxivData => ({ papers: [], fetchSuccess: false, rankedBy: "recency" })),
+    fetchArxivData(toCstDateStr(now)).catch(
+      (): ArxivData => ({ papers: [], fetchSuccess: false, rankedBy: "recency" }),
+    ),
     weekly
       ? fetchHfData().catch((): HfData => ({ models: [], fetchSuccess: false }))
       : Promise.resolve<HfData>({ models: [], fetchSuccess: false }),

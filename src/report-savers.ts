@@ -24,7 +24,7 @@ import { createGitHubIssue } from "./github.ts";
 import { saveWebState, type WebFetchResult, type WebState } from "./web.ts";
 import type { HnData } from "./hn.ts";
 import { hasTrendingData, type TrendingData } from "./trending.ts";
-import type { ArxivData } from "./arxiv.ts";
+import { saveArxivState, type ArxivData } from "./arxiv.ts";
 import type { HfData } from "./hf.ts";
 import type { DevtoData } from "./devto.ts";
 import type { LobstersData } from "./lobsters.ts";
@@ -202,6 +202,8 @@ export async function saveArxivReport(
     const content = header + summary + autoGenFooter();
 
     console.log(`  Saved ${saveFile(content, dateStr, fileName)}`);
+    // Only once the report exists: after a failed report the next run takes this pool too.
+    if (arxivData.nextState) saveArxivState(arxivData.nextState);
 
     if (digestRepo) {
       const title = ARXIV_REPORT.issueTitle(dateStr);
