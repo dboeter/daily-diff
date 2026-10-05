@@ -28,6 +28,8 @@ export interface ArxivData {
   fetchSuccess: boolean;
   /** How `papers` was cut down from the 48h pool. */
   rankedBy: "jev" | "recency";
+  /** `buildRankingFile` output when ranked by Jev, saved next to the report. */
+  rankingFile?: string;
 }
 
 // ---------------------------------------------------------------------------
@@ -151,15 +153,35 @@ const JEV_RETRY_MAX_MS = 10_000;
  * practitioner can use.
  */
 const RELEVANCE_QUESTIONS = {
+  // A Score, not a noul: a paper can be partly about LLMs, and a noul near 0.5
+  // means "unsure", not "partly". On 100 papers the old noul put such papers at
+  // 0.4–0.65; the Score puts them on level 1 with high confidence.
   about_llms: {
-    type: "noul",
-    instructions:
-      "Is the paper described by `title` and `abstract` about large language models or LLM-based agents?",
-    criteria: {
-      true: "The paper trains, evaluates, analyzes, serves, or builds a system on large language models or LLM-based agents",
-      false:
-        "The paper is about other machine learning, such as vision-only models, reinforcement learning without a language model, tabular data, or theory that involves no language model",
-    },
+    type: "score",
+    instructions: "How central are large language models to the paper described by `title` and `abstract`?",
+    criteria: [
+      {
+        what: "No language model is involved",
+        examples: ["image classification", "reinforcement learning for robot control", "optimization theory"],
+      },
+      {
+        what: "A language model is one component or tool, not the subject of the paper",
+        examples: [
+          "a vision-language model study focused on the visual encoder",
+          "an LLM used to label data for a non-language task",
+          "a method shown on LLMs among other model types",
+        ],
+      },
+      {
+        what: "Large language models or LLM-based agents are the subject of the paper",
+        examples: [
+          "fine-tuning an LLM",
+          "evaluating LLM reasoning",
+          "an LLM agent framework",
+          "serving or compressing LLMs",
+        ],
+      },
+    ],
   },
   about_agents_or_code: {
     type: "noul",
@@ -184,13 +206,13 @@ const RELEVANCE_QUESTIONS = {
       },
     },
   },
-  // Only meaningful when the paper proposes a technique; `relevanceOf` gates it
-  // on `proposes_technique`. One noul asking both read "no technique" and
-  // "needs training" as the same no, and left a third of papers undecided.
+  // Speculative: only meaningful when the paper proposes a technique, so the
+  // premise is stated and `relevanceOf` gates the answer on `proposes_technique`.
+  // One noul asking both read "no technique" and "needs training" as the same no.
   works_without_training: {
     type: "noul",
     instructions:
-      "Is the technique proposed in `abstract` applied to existing models without training or fine-tuning them?",
+      "If the paper in `abstract` proposes a technique, is that technique applied to existing models without training or fine-tuning them?",
     criteria: {
       true: {
         what: "The technique is applied at inference or integration time",
@@ -225,7 +247,7 @@ const RELEVANCE_QUESTIONS = {
 
 /**
  * Weights for `relevanceOf`, summing to 1. LLM fit is half, so an off-topic paper
- * (at most 0.5) never outranks an LLM paper (at least 0.5).
+ * (at most 0.5) never outranks a paper about LLMs (at least 0.5).
  */
 const RELEVANCE_WEIGHTS = {
   about_llms: 0.5,
@@ -235,6 +257,8 @@ const RELEVANCE_WEIGHTS = {
   widely_used_models: 0.1,
   code_released: 0.1,
 };
+/** Top level of the `about_llms` score, to normalize it to 0–1. */
+const ABOUT_LLMS_MAX_LEVEL = RELEVANCE_QUESTIONS.about_llms.criteria.length - 1;
 
 /**
  * A code or model link in the abstract. A regex, not a Jev question: the
@@ -246,8 +270,9 @@ export function hasCodeLink(abstract: string): boolean {
   return CODE_LINK_RE.test(abstract);
 }
 
-interface JevAnswers {
-  about_llms: { noul: number };
+export interface JevAnswers {
+  /** `score` is the probability-weighted level (Σ level × p), between 0 and the top level. */
+  about_llms: { score: number };
   about_agents_or_code: { noul: number };
   proposes_technique: { noul: number };
   works_without_training: { noul: number };
@@ -257,7 +282,7 @@ interface JevAnswers {
 /** Weighted relevance in 0–1. */
 export function relevanceOf(answers: JevAnswers, codeReleased: boolean): number {
   const value =
-    RELEVANCE_WEIGHTS.about_llms * answers.about_llms.noul +
+    (RELEVANCE_WEIGHTS.about_llms * answers.about_llms.score) / ABOUT_LLMS_MAX_LEVEL +
     RELEVANCE_WEIGHTS.about_agents_or_code * answers.about_agents_or_code.noul +
     RELEVANCE_WEIGHTS.training_free_technique *
       answers.proposes_technique.noul *
@@ -281,14 +306,24 @@ export function retryDelayMs(retryAfter: string | null, attempt: number): number
   return Math.min(ms, JEV_RETRY_MAX_MS);
 }
 
-export async function scorePaper(paper: ArxivPaper, apiKey: string): Promise<number> {
+/** One paper's Jev result: the composite and the raw judgments it came from, kept so the weights can be retuned without rerunning inference. */
+export interface JevScore {
+  relevance: number;
+  answers: JevAnswers;
+  codeReleased: boolean;
+  /** Versioned model that answered — `jev-latest` is an alias that moves. */
+  model: string;
+}
+
+export async function scorePaper(paper: ArxivPaper, apiKey: string): Promise<JevScore> {
   const request = (): Promise<Response> =>
     fetch(JEV_URL, {
       method: "POST",
       headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
       body: JSON.stringify({
         model: "jev-latest",
-        state: { title: paper.title, abstract: paper.summary, categories: paper.categories },
+        // No `categories`: no question reads them, and unused state costs accuracy.
+        state: { title: paper.title, abstract: paper.summary },
         questions: RELEVANCE_QUESTIONS,
       }),
     });
@@ -304,8 +339,20 @@ export async function scorePaper(paper: ArxivPaper, apiKey: string): Promise<num
     resp = await request();
   }
   if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-  const body = (await resp.json()) as { answers: JevAnswers };
-  return relevanceOf(body.answers, hasCodeLink(paper.summary));
+  const body = (await resp.json()) as { model: string; answers: JevAnswers };
+  const codeReleased = hasCodeLink(paper.summary);
+  return {
+    relevance: relevanceOf(body.answers, codeReleased),
+    answers: body.answers,
+    codeReleased,
+    model: body.model,
+  };
+}
+
+export interface RankedPaper {
+  paper: ArxivPaper;
+  /** null when the scoring call failed. */
+  jev: JevScore | null;
 }
 
 /**
@@ -316,9 +363,9 @@ export async function scorePaper(paper: ArxivPaper, apiKey: string): Promise<num
 export async function rankByRelevance(
   papers: ArxivPaper[],
   apiKey: string,
-  score: (paper: ArxivPaper, apiKey: string) => Promise<number> = scorePaper,
-): Promise<ArxivPaper[] | null> {
-  const scores = new Array<number>(papers.length).fill(-1);
+  score: (paper: ArxivPaper, apiKey: string) => Promise<JevScore> = scorePaper,
+): Promise<RankedPaper[] | null> {
+  const scores = new Array<JevScore | null>(papers.length).fill(null);
   let failed = 0;
   let next = 0;
   const worker = async (): Promise<void> => {
@@ -337,9 +384,42 @@ export async function rankByRelevance(
   console.log(`  [arxiv] Jev scored ${papers.length - failed}/${papers.length} papers`);
   if (papers.length > 0 && failed / papers.length > JEV_MAX_FAILURE_RATIO) return null;
   return papers
-    .map((paper, i) => ({ paper, score: scores[i]! }))
-    .sort((a, b) => b.score - a.score)
-    .map((s) => s.paper);
+    .map((paper, i): RankedPaper => ({ paper, jev: scores[i] ?? null }))
+    .sort((a, b) => (b.jev?.relevance ?? -1) - (a.jev?.relevance ?? -1));
+}
+
+/** Papers kept in the ranking file — the prompt's 40 plus the next tier, for tuning. */
+const RANKING_FILE_PAPERS = 100;
+
+/**
+ * The ranking file: per-paper raw judgments for the top of the ranking, one
+ * paper per line. Kept so a misranked paper can be traced to an answer or a
+ * weight, and so weights can be retuned on past days without rerunning Jev.
+ */
+export function buildRankingFile(ranked: RankedPaper[]): string {
+  const rows = ranked
+    .slice(0, RANKING_FILE_PAPERS)
+    .flatMap(({ paper, jev }) => (jev ? [{ paper, jev }] : []))
+    .map(({ paper, jev }) => {
+      const a = jev.answers;
+      const round = (n: number): number => Math.round(n * 1000) / 1000;
+      return JSON.stringify({
+        id: paper.id,
+        title: paper.title,
+        relevance: round(jev.relevance),
+        about_llms: round(a.about_llms.score),
+        about_agents_or_code: round(a.about_agents_or_code.noul),
+        proposes_technique: round(a.proposes_technique.noul),
+        works_without_training: round(a.works_without_training.noul),
+        widely_used_models: round(a.widely_used_models.noul),
+        code_released: jev.codeReleased,
+      });
+    });
+  const models = [...new Set(ranked.flatMap((r) => (r.jev ? [r.jev.model] : [])))];
+  return (
+    `{\n"models": ${JSON.stringify(models)},\n"weights": ${JSON.stringify(RELEVANCE_WEIGHTS)},\n` +
+    `"papers": [\n${rows.join(",\n")}\n]\n}\n`
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -397,11 +477,16 @@ export async function fetchArxivData(): Promise<ArxivData> {
   const apiKey = process.env["TYPESAFE_API_KEY"];
   const ranked = apiKey ? await rankByRelevance(recent, apiKey) : null;
   if (apiKey && !ranked) console.error("  [arxiv] Too many Jev failures — falling back to recency");
-  const papers = (ranked ?? recent).slice(0, ARXIV_PROMPT_PAPERS);
+  const papers = (ranked ? ranked.map((r) => r.paper) : recent).slice(0, ARXIV_PROMPT_PAPERS);
   const rankedBy = ranked ? "jev" : "recency";
 
   console.log(
     `  [arxiv] ${papers.length} papers by ${rankedBy} (from ${recent.length} in 48h, ${seen.size} unique)`,
   );
-  return { papers, fetchSuccess: papers.length > 0, rankedBy };
+  return {
+    papers,
+    fetchSuccess: papers.length > 0,
+    rankedBy,
+    ...(ranked ? { rankingFile: buildRankingFile(ranked) } : {}),
+  };
 }

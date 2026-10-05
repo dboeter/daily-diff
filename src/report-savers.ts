@@ -182,6 +182,11 @@ export async function saveArxivReport(
     return;
   }
 
+  // Written before the LLM call: the ranking is useful for tuning even when the report fails.
+  if (arxivData.rankingFile) {
+    console.log(`  Saved ${saveFile(arxivData.rankingFile, dateStr, "arxiv-ranking.json")}`);
+  }
+
   console.log("  [arxiv] Calling LLM for ArXiv report...");
   try {
     const summary = await callLlm(buildArxivPrompt(arxivData, dateStr), LLM_TOKENS_LISTING);

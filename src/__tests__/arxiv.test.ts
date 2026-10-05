@@ -10,6 +10,8 @@ import {
   hasCodeLink,
   retryDelayMs,
   rankByRelevance,
+  buildRankingFile,
+  type JevScore,
   type ArxivPaper,
 } from "../arxiv.ts";
 
@@ -128,25 +130,35 @@ describe("Jev relevance ranking", () => {
     pdfUrl: id,
   });
 
+  /** `llm` is the about_llms Score level, 0–2; the rest are nouls. */
+  const answers = (llm: number, agents: number, noTraining: number, wide: number, technique = 1) => ({
+    about_llms: { score: llm },
+    about_agents_or_code: { noul: agents },
+    proposes_technique: { noul: technique },
+    works_without_training: { noul: noTraining },
+    widely_used_models: { noul: wide },
+  });
+  const jev = (relevance: number): JevScore => ({
+    relevance,
+    answers: answers(2, 0.5, 0.123456, 0),
+    codeReleased: false,
+    model: "jev-1.13.0",
+  });
+
   it("weighs the Jev answers and the code link into one relevance in 0–1", () => {
-    const answers = (llm: number, agents: number, noTraining: number, wide: number, technique = 1) => ({
-      about_llms: { noul: llm },
-      about_agents_or_code: { noul: agents },
-      proposes_technique: { noul: technique },
-      works_without_training: { noul: noTraining },
-      widely_used_models: { noul: wide },
-    });
-    expect(relevanceOf(answers(1, 1, 1, 1), true)).toBeCloseTo(1);
+    expect(relevanceOf(answers(2, 1, 1, 1), true)).toBeCloseTo(1);
     expect(relevanceOf(answers(0, 0, 0, 0), false)).toBe(0);
-    // LLM fit is half the weight: an off-topic paper never outranks an LLM paper.
+    // LLM fit is half the weight: an off-topic paper never outranks a paper about LLMs.
     expect(relevanceOf(answers(0, 1, 1, 1), true)).toBeCloseTo(0.5);
-    expect(relevanceOf(answers(1, 0, 0, 0), false)).toBeCloseTo(0.5);
+    expect(relevanceOf(answers(2, 0, 0, 0), false)).toBeCloseTo(0.5);
+    // A paper where an LLM is one component gets half the LLM weight.
+    expect(relevanceOf(answers(1, 0, 0, 0), false)).toBeCloseTo(0.25);
     // "Without training" counts only for a paper that proposes a technique.
-    expect(relevanceOf(answers(1, 0, 1, 0, 0), false)).toBeCloseTo(0.5);
+    expect(relevanceOf(answers(2, 0, 1, 0, 0), false)).toBeCloseTo(0.5);
     expect(() =>
       relevanceOf({ about_llms: { noul: 1 } } as unknown as Parameters<typeof relevanceOf>[0], false),
     ).toThrow();
-    expect(() => relevanceOf(answers(1, 1, 1, Number.NaN), false)).toThrow(/Unexpected Jev answers/);
+    expect(() => relevanceOf(answers(2, 1, 1, Number.NaN), false)).toThrow(/Unexpected Jev answers/);
   });
 
   it("detects code and model links in an abstract", () => {
@@ -171,17 +183,42 @@ describe("Jev relevance ranking", () => {
       "key",
       async (p) => {
         if (!(p.id in scores)) throw new Error("HTTP 529");
-        return scores[p.id]!;
+        return jev(scores[p.id]!);
       },
     );
-    expect(ranked?.map((p) => p.id)).toEqual(["b", "a", "d", "c"]);
+    expect(ranked?.map((r) => r.paper.id)).toEqual(["b", "a", "d", "c"]);
+    expect(ranked?.at(-1)?.jev).toBeNull();
   });
 
   it("returns null when most scoring calls fail", async () => {
     const ranked = await rankByRelevance([paper("a"), paper("b"), paper("c")], "key", async (p) => {
       if (p.id !== "a") throw new Error("HTTP 401");
-      return 1;
+      return jev(1);
     });
     expect(ranked).toBeNull();
+  });
+
+  it("writes the raw judgments of scored papers to the ranking file", () => {
+    const file = JSON.parse(
+      buildRankingFile([
+        { paper: paper("a"), jev: jev(0.9) },
+        { paper: paper("b"), jev: null },
+      ]),
+    );
+    expect(file.models).toEqual(["jev-1.13.0"]);
+    expect(file.weights.about_llms).toBe(0.5);
+    expect(file.papers).toEqual([
+      {
+        id: "a",
+        title: "a",
+        relevance: 0.9,
+        about_llms: 2,
+        about_agents_or_code: 0.5,
+        proposes_technique: 1,
+        works_without_training: 0.123,
+        widely_used_models: 0,
+        code_released: false,
+      },
+    ]);
   });
 });
