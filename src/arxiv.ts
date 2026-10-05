@@ -142,8 +142,13 @@ const JEV_RETRY_MAX_MS = 10_000;
  * Composite scoring: each question judges one property of the paper and
  * `relevanceOf` weighs them in code. One broad "how relevant is this?" question
  * hid several judgments and asked Jev to guess what an audience cares about —
- * an indirection the Jev 1.13 docs list as a failure mode. All three run in one
- * request, in parallel.
+ * an indirection the Jev 1.13 docs list as a failure mode. All questions run in
+ * one request, in parallel.
+ *
+ * `about_llms` and `about_agents_or_code` sort topic. On their own they leave
+ * roughly one paper in six near the top score, more than the 40 the prompt
+ * takes, so the others separate papers within that group by what a
+ * practitioner can use.
  */
 const RELEVANCE_QUESTIONS = {
   about_llms: {
@@ -165,48 +170,100 @@ const RELEVANCE_QUESTIONS = {
       false: "The paper studies models that answer in a single step without tools, and not code",
     },
   },
-  practical: {
-    type: "score",
-    instructions: "How directly can an engineer apply the result in `abstract`?",
-    criteria: [
-      {
-        what: "No practical takeaway",
-        examples: ["a convergence proof", "a generalization bound with no new algorithm"],
+  proposes_technique: {
+    type: "noul",
+    instructions: "Does the paper in `abstract` propose a new technique, method, or system?",
+    criteria: {
+      true: {
+        what: "The paper contributes a method, algorithm, system, or tool",
+        examples: ["a decoding method", "a fine-tuning recipe", "an agent framework"],
       },
-      {
-        what: "A finding or benchmark worth knowing, but no method to adopt",
-        examples: ["a benchmark showing agents fail on long tasks", "an analysis of why models hallucinate"],
+      false: {
+        what: "The paper contributes only a benchmark, dataset, survey, or analysis of existing methods",
+        examples: ["a new benchmark", "a survey", "a study of why models fail"],
       },
-      {
-        what: "A method, tool, or technique an engineer can adopt",
+    },
+  },
+  // Only meaningful when the paper proposes a technique; `relevanceOf` gates it
+  // on `proposes_technique`. One noul asking both read "no technique" and
+  // "needs training" as the same no, and left a third of papers undecided.
+  works_without_training: {
+    type: "noul",
+    instructions:
+      "Is the technique proposed in `abstract` applied to existing models without training or fine-tuning them?",
+    criteria: {
+      true: {
+        what: "The technique is applied at inference or integration time",
         examples: [
-          "a fine-tuning or prompting recipe",
-          "a KV-cache compression that speeds up serving",
-          "an agent memory or planning design",
+          "a prompting or decoding method",
+          "KV-cache compression",
+          "a retrieval pipeline",
+          "an agent scaffold or tool",
         ],
       },
-    ],
+      false: {
+        what: "The technique needs pre-training or fine-tuning",
+        examples: ["a fine-tuning recipe", "a new architecture trained from scratch"],
+      },
+    },
+  },
+  widely_used_models: {
+    type: "noul",
+    instructions: "Does `abstract` report results on widely used large language models?",
+    criteria: {
+      true: {
+        what: "Results on a current widely used model family",
+        examples: ["GPT-4o", "Claude", "Gemini", "Llama 3", "Qwen", "DeepSeek", "Mistral", "Gemma"],
+      },
+      false: {
+        what: "Results only on small, older, custom, or unnamed models, or no model results",
+        examples: ["GPT-2", "BERT", "a 100M-parameter model trained by the authors"],
+      },
+    },
   },
 };
 
-/** Weights for `relevanceOf`. LLM fit dominates so an off-topic paper sinks however practical it is. */
-const RELEVANCE_WEIGHTS = { about_llms: 0.5, about_agents_or_code: 0.25, practical: 0.25 };
-/** Top level of the `practical` score, to normalize it to 0–1. */
-const PRACTICAL_MAX_LEVEL = RELEVANCE_QUESTIONS.practical.criteria.length - 1;
+/**
+ * Weights for `relevanceOf`, summing to 1. LLM fit is half, so an off-topic paper
+ * (at most 0.5) never outranks an LLM paper (at least 0.5).
+ */
+const RELEVANCE_WEIGHTS = {
+  about_llms: 0.5,
+  about_agents_or_code: 0.2,
+  /** Applies to proposes_technique × works_without_training: a training-free technique. */
+  training_free_technique: 0.1,
+  widely_used_models: 0.1,
+  code_released: 0.1,
+};
+
+/**
+ * A code or model link in the abstract. A regex, not a Jev question: the
+ * TypeSafe docs say to keep in code whatever code can decide exactly.
+ */
+const CODE_LINK_RE = /\b(github\.(com|io)|gitlab\.com|huggingface\.co)\//i;
+
+export function hasCodeLink(abstract: string): boolean {
+  return CODE_LINK_RE.test(abstract);
+}
 
 interface JevAnswers {
   about_llms: { noul: number };
   about_agents_or_code: { noul: number };
-  /** `score` is already the probability-weighted level (Σ level × p), between 0 and the top level. */
-  practical: { score: number };
+  proposes_technique: { noul: number };
+  works_without_training: { noul: number };
+  widely_used_models: { noul: number };
 }
 
 /** Weighted relevance in 0–1. */
-export function relevanceOf(answers: JevAnswers): number {
+export function relevanceOf(answers: JevAnswers, codeReleased: boolean): number {
   const value =
     RELEVANCE_WEIGHTS.about_llms * answers.about_llms.noul +
     RELEVANCE_WEIGHTS.about_agents_or_code * answers.about_agents_or_code.noul +
-    (RELEVANCE_WEIGHTS.practical * answers.practical.score) / PRACTICAL_MAX_LEVEL;
+    RELEVANCE_WEIGHTS.training_free_technique *
+      answers.proposes_technique.noul *
+      answers.works_without_training.noul +
+    RELEVANCE_WEIGHTS.widely_used_models * answers.widely_used_models.noul +
+    (codeReleased ? RELEVANCE_WEIGHTS.code_released : 0);
   // Throw rather than return NaN: a NaN score would sort arbitrarily yet count as a
   // success, so a changed response shape would never trip the recency fallback.
   if (!Number.isFinite(value)) throw new Error(`Unexpected Jev answers: ${JSON.stringify(answers)}`);
@@ -248,7 +305,7 @@ export async function scorePaper(paper: ArxivPaper, apiKey: string): Promise<num
   }
   if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
   const body = (await resp.json()) as { answers: JevAnswers };
-  return relevanceOf(body.answers);
+  return relevanceOf(body.answers, hasCodeLink(paper.summary));
 }
 
 /**

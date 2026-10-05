@@ -7,6 +7,7 @@ import {
   parseEntry,
   parseArxivEntries,
   relevanceOf,
+  hasCodeLink,
   retryDelayMs,
   rankByRelevance,
   type ArxivPaper,
@@ -127,19 +128,32 @@ describe("Jev relevance ranking", () => {
     pdfUrl: id,
   });
 
-  it("weighs the Jev answers into one relevance in 0–1", () => {
-    const answers = (llm: number, agents: number, practical: number) => ({
+  it("weighs the Jev answers and the code link into one relevance in 0–1", () => {
+    const answers = (llm: number, agents: number, noTraining: number, wide: number, technique = 1) => ({
       about_llms: { noul: llm },
       about_agents_or_code: { noul: agents },
-      practical: { score: practical },
+      proposes_technique: { noul: technique },
+      works_without_training: { noul: noTraining },
+      widely_used_models: { noul: wide },
     });
-    expect(relevanceOf(answers(1, 1, 2))).toBe(1);
-    expect(relevanceOf(answers(0, 0, 0))).toBe(0);
-    expect(relevanceOf(answers(1, 0, 1))).toBe(0.625);
+    expect(relevanceOf(answers(1, 1, 1, 1), true)).toBeCloseTo(1);
+    expect(relevanceOf(answers(0, 0, 0, 0), false)).toBe(0);
+    // LLM fit is half the weight: an off-topic paper never outranks an LLM paper.
+    expect(relevanceOf(answers(0, 1, 1, 1), true)).toBeCloseTo(0.5);
+    expect(relevanceOf(answers(1, 0, 0, 0), false)).toBeCloseTo(0.5);
+    // "Without training" counts only for a paper that proposes a technique.
+    expect(relevanceOf(answers(1, 0, 1, 0, 0), false)).toBeCloseTo(0.5);
     expect(() =>
-      relevanceOf({ about_llms: { noul: 1 } } as unknown as Parameters<typeof relevanceOf>[0]),
+      relevanceOf({ about_llms: { noul: 1 } } as unknown as Parameters<typeof relevanceOf>[0], false),
     ).toThrow();
-    expect(() => relevanceOf(answers(1, 1, Number.NaN))).toThrow(/Unexpected Jev answers/);
+    expect(() => relevanceOf(answers(1, 1, 1, Number.NaN), false)).toThrow(/Unexpected Jev answers/);
+  });
+
+  it("detects code and model links in an abstract", () => {
+    expect(hasCodeLink("Code is available at https://github.com/org/repo.")).toBe(true);
+    expect(hasCodeLink("Project page: https://org.github.io/proj/")).toBe(true);
+    expect(hasCodeLink("Weights at huggingface.co/org/model")).toBe(true);
+    expect(hasCodeLink("We discuss GitHub issues as a data source.")).toBe(false);
   });
 
   it("honors retry-after and otherwise backs off exponentially, capped", () => {
