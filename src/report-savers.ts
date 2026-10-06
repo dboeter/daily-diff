@@ -24,6 +24,7 @@ import { createGitHubIssue } from "./github.ts";
 import { saveWebState, type WebFetchResult, type WebState } from "./web.ts";
 import type { HnData } from "./hn.ts";
 import type { TrendingData } from "./trending.ts";
+import { saveMatchState } from "./trending-jev.ts";
 import { parseRowSummaries, renderTrendingTables, spliceTrendingProse } from "./report-builders.ts";
 import { saveArxivState, type ArxivData } from "./arxiv.ts";
 import type { HfData } from "./hf.ts";
@@ -121,6 +122,11 @@ export async function saveTrendingReport(
     header + spliceTrendingProse(trending.prose, tables) + skillsSection + autoGenFooter();
 
   console.log(`  Saved ${saveFile(trendingContent, dateStr, fileName)}`);
+  // Only once the report exists, like the ArXiv state.
+  if (report.rankingFile) {
+    console.log(`  Saved ${saveFile(report.rankingFile, dateStr, "trending-ranking.json")}`);
+  }
+  if (report.nextMatches) saveMatchState(report.nextMatches);
 
   if (digestRepo) {
     const trendingTitle = TRENDING_REPORT.issueTitle(dateStr);

@@ -13,7 +13,7 @@ import type { SearchRepo, TrendingRepo } from "./trending.ts";
 import { formatTokens, type OpenRouterApp } from "./openrouter.ts";
 import { momentumRatio, type NpmData, type NpmPackage } from "./npm.ts";
 import { toCstDateStr } from "./date.ts";
-import { onRadar, type Classification } from "./trending-jev.ts";
+import { onRadar, type Classification, type MatchState } from "./trending-jev.ts";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -72,6 +72,10 @@ export interface TrendingReportData {
   /** Fixed CATEGORIES order, empty ones omitted. */
   categories: { category: Category; rows: Numbered<GithubRow>[] }[];
   classifiedBy: "jev" | "topics";
+  /** `buildTrendingRankingFile` output when Jev classified or matched, saved next to the report. */
+  rankingFile?: string;
+  /** Match state to save once the report is written; absent when the file could not be read. */
+  nextMatches?: MatchState;
 }
 
 // ---------------------------------------------------------------------------
@@ -378,17 +382,11 @@ export function urlMerge(rows: RadarRow[]): RadarRow[] {
 // Selection and numbering
 // ---------------------------------------------------------------------------
 
-/**
- * Apply scope, merge, cap and number the rows. New repos are Radar-only: the
- * category tables are the established projects, ranked by this week's stars,
- * so the two tables never share an item.
- */
-export function selectTrendingReport(
-  githubRows: GithubRow[],
+/** The Radar-eligible candidates considered for merging, before any merge. */
+export function radarPool(
   radarCandidates: RadarRow[],
   classifications: Map<string, Classification>,
-  classifiedBy: TrendingReportData["classifiedBy"],
-): TrendingReportData {
+): RadarRow[] {
   // An unclassified candidate is dropped: nothing vouches for its scope.
   const eligible = radarCandidates.filter((r) => {
     const c = classifications.get(r.keys[0]!);
@@ -397,13 +395,27 @@ export function selectTrendingReport(
   const fresh = eligible.filter((r) => r.isNew);
   const established = eligible.filter((r) => !r.isNew);
   // 🆕 first, capped; established next; leftover 🆕 backfill a short established list.
-  const pool = [...fresh.slice(0, RADAR_POOL_NEW), ...established, ...fresh.slice(RADAR_POOL_NEW)].slice(
+  return [...fresh.slice(0, RADAR_POOL_NEW), ...established, ...fresh.slice(RADAR_POOL_NEW)].slice(
     0,
     RADAR_POOL,
   );
+}
 
+/**
+ * Apply scope, merge, cap and number the rows. New repos are Radar-only: the
+ * category tables are the established projects, ranked by this week's stars,
+ * so the two tables never share an item. `links` are the saved cross-source
+ * matches (`matchLinks`), applied after the URL merge.
+ */
+export function selectTrendingReport(
+  githubRows: GithubRow[],
+  radarCandidates: RadarRow[],
+  classifications: Map<string, Classification>,
+  classifiedBy: TrendingReportData["classifiedBy"],
+  links: [string, string][] = [],
+): TrendingReportData {
   // A merged row is 🆕 when any member is, so split again after merging.
-  const merged = urlMerge(pool);
+  const merged = mergeRows(urlMerge(radarPool(radarCandidates, classifications)), links);
   const mergedFresh = merged.filter((r) => r.isNew);
   const mergedEstablished = merged.filter((r) => !r.isNew);
   const freshCount = Math.min(

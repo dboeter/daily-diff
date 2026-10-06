@@ -276,11 +276,13 @@ made only once.
   4. In steady state that is a few calls a week. The first run makes one per
      OpenRouter app in the pool, at most about 15.
 - **Request:**
-  - The state holds the app's `{ title, description, url }` and the new
-    candidates (`{ key, name, description, url }`).
+  - The state holds the app's `{ title, description, url }`.
   - Two **Choice** questions, `npm_match` and `github_match`, are asked
     together. Each lists that source's new candidates plus `none` ("none of
-    these is the same product").
+    these is the same product"). Each candidate is an option keyed by its
+    candidate key, with `{ name, description, url }` as its description.
+    (Changed in commit 2b: the draft put the candidates in the state, but
+    the Choice docs say the model reads option names and descriptions.)
   - It is a separate request from the classification, because the ArXiv code
     notes that extra state fields lower Jev's accuracy on questions that don't
     read them.

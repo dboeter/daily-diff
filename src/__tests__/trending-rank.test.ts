@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import {
   buildRadarCandidates,
   mergeRows,
+  radarPool,
   rankGithubRepos,
   selectTrendingReport,
   summaryRows,
@@ -495,6 +496,14 @@ describe("selectTrendingReport", () => {
     expect(report.radar.map((r) => r.keys[0])).toEqual(["npm:p2"]);
   });
 
+  it("applies cross-source links after the URL merge", () => {
+    const candidates = npmCandidates(4);
+    const report = selectTrendingReport([], candidates, allInScope(candidates), "jev", [
+      ["npm:p0", "npm:p3"],
+    ]);
+    expect(report.radar.map((r) => r.keys)).toEqual([["npm:p0", "npm:p3"], ["npm:p1"], ["npm:p2"]]);
+  });
+
   it("groups category rows in fixed order, caps them at 8 and omits empty categories", () => {
     const github = rankGithubRepos(
       [],
@@ -604,6 +613,25 @@ describe("selectTrendingReport", () => {
     expect(summaries.map((s) => s.n)).toEqual([1, 2, 3]);
     expect(summaries[0]!.facts).toBe("Source: GitHub | Signal: 🆕 50");
     expect(summaries[2]).toEqual({ n: 3, name: "g/old", description: "", facts: "Stars: 10" });
+  });
+});
+
+describe("radarPool", () => {
+  it("keeps eligible candidates unmerged, 🆕 first and capped at 20, the pool at 30", () => {
+    const fresh = buildRadarCandidates(
+      [],
+      npmData(Array.from({ length: 25 }, (_, i) => pkg(`n${i}`, { weekly: 4000, monthly: 4000 }))),
+      [],
+      DATE,
+    );
+    const established = buildRadarCandidates([], npmData([], [pkg("e0"), pkg("e1")]), [], DATE);
+    const candidates = [...fresh, ...established];
+    const classifications = allInScope(candidates);
+    classifications.set("npm:n0", { category: null, standalone: 0.1 });
+    const pool = radarPool(candidates, classifications);
+    expect(pool).toHaveLength(26);
+    expect(pool.map((r) => r.keys[0]).slice(19, 22)).toEqual(["npm:n20", "npm:e0", "npm:e1"]);
+    expect(pool.at(-1)!.keys).toEqual(["npm:n24"]);
   });
 });
 

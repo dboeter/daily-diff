@@ -11,11 +11,24 @@ import {
   buildRadarCandidates,
   npmKey,
   openrouterKey,
+  radarPool,
   rankGithubRepos,
   selectTrendingReport,
+  urlMerge,
   type TrendingReportData,
 } from "./trending-rank.ts";
-import { fallbackClassification, type ClassifyItem } from "./trending-jev.ts";
+import {
+  buildTrendingRankingFile,
+  classifyItems,
+  fallbackClassification,
+  loadMatchState,
+  matchApps,
+  type AskJev,
+  type ClassifyItem,
+  type MatchState,
+  type MatchTrace,
+} from "./trending-jev.ts";
+import { askJev } from "./jev.ts";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -312,12 +325,15 @@ export async function fetchTrendingData(period: TrendingPeriod, dateStr: string)
 }
 
 /**
- * Rank, classify and select the weekly report's rows. Async so Jev
- * classification can slot in without changing the call site.
+ * Rank, classify, match and select the weekly report's rows. The defaults are
+ * the production inputs; tests inject the key, the match state and `ask`.
  */
 export async function composeTrendingReport(
   data: TrendingData,
   dateStr: string,
+  apiKey = process.env["TYPESAFE_API_KEY"],
+  matchState: MatchState | null = loadMatchState(),
+  ask: AskJev = askJev,
 ): Promise<TrendingReportData> {
   const githubRows = rankGithubRepos(data.trendingRepos, data.searchRepos, dateStr);
   const candidates = buildRadarCandidates(data.openrouter.apps, data.npm, githubRows, dateStr);
@@ -332,13 +348,42 @@ export async function composeTrendingReport(
       (pkg): ClassifyItem => ({ kind: "npm", key: npmKey(pkg), pkg }),
     ),
   ];
-  const classifications = new Map(items.map((item) => [item.key, fallbackClassification(item)]));
-  console.log(`  [trending] Classified ${classifications.size} items by topic labels (fallback)`);
+  const byJev = apiKey ? await classifyItems(items, apiKey, ask) : null;
+  const classifiedBy = byJev ? "jev" : "topics";
+  const classifications = byJev ?? new Map(items.map((item) => [item.key, fallbackClassification(item)]));
+  if (byJev) console.log(`  [trending] Classified ${classifications.size} items by Jev`);
+  else
+    console.log(
+      `  [trending] Classified ${classifications.size} items by topic labels ` +
+        `(fallback: ${apiKey ? "too many Jev failures" : "no TYPESAFE_API_KEY"})`,
+    );
 
-  const report = selectTrendingReport(githubRows, candidates, classifications, "topics");
+  // Matching needs a readable state file; without one (null) it is skipped and nothing is saved.
+  let links: [string, string][] = [];
+  let nextMatches: MatchState | undefined;
+  let matchTrace: MatchTrace[] = [];
+  let matchModels: string[] = [];
+  let matchCalled = false;
+  if (matchState !== null) {
+    const pool = radarPool(candidates, classifications);
+    const m = await matchApps(urlMerge(pool), pool, matchState, apiKey, dateStr, ask);
+    ({ links, trace: matchTrace, models: matchModels, called: matchCalled } = m);
+    nextMatches = m.state;
+    console.log(`  [trending] Cross-source matches applied: ${links.length}`);
+  }
+
+  const report = selectTrendingReport(githubRows, candidates, classifications, classifiedBy, links);
   console.log(
     `  [trending] Radar: ${report.radar.length} rows | ` +
       (report.categories.map((c) => `${c.category}: ${c.rows.length}`).join(", ") || "no category rows"),
   );
-  return report;
+  const rankingFile =
+    classifiedBy === "jev" || matchCalled
+      ? buildTrendingRankingFile(items, classifications, classifiedBy, matchTrace, matchModels)
+      : undefined;
+  return {
+    ...report,
+    ...(rankingFile !== undefined ? { rankingFile } : {}),
+    ...(nextMatches !== undefined ? { nextMatches } : {}),
+  };
 }
