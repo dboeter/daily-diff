@@ -10,6 +10,8 @@
 
 import fs from "node:fs";
 import path from "node:path";
+import { sleep } from "./date.ts";
+import { askJev, jevFailedTooOften, mapJev } from "./jev.ts";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -143,25 +145,8 @@ export function parseArxivEntries(xml: string): ArxivPaper[] {
 }
 
 // ---------------------------------------------------------------------------
-// Relevance ranking (Jev)
-//
-// Jev is not a chat model: POST /v1/systemone takes a `state` and typed
-// questions and returns probabilities. It is called directly rather than through
-// callLlm — it is not an LlmProvider, and ~600 calls a day would swamp the
-// llmStats health gate that is calibrated for 3–4 report calls.
+// Relevance ranking (Jev) — the client is in jev.ts
 // ---------------------------------------------------------------------------
-
-const JEV_URL = "https://api.typesafe.ai/v1/systemone";
-/**
- * The Models page lists 80 requests/second and warns the limit can change without
- * notice; at ~100 ms a call, 5 workers stay near 50/s.
- */
-const JEV_CONCURRENCY = 5;
-/** Above this fraction of failed scoring calls the ranking is noise — fall back to recency. */
-const JEV_MAX_FAILURE_RATIO = 0.5;
-const JEV_MAX_RETRIES = 3;
-const JEV_RETRY_BASE_MS = 1000;
-const JEV_RETRY_MAX_MS = 10_000;
 
 /**
  * Composite scoring: each question judges one property of the paper and
@@ -318,17 +303,6 @@ export function relevanceOf(answers: JevAnswers, codeReleased: boolean): number 
   return value;
 }
 
-/** Wait before retry `attempt` (0-based): the `retry-after` seconds when sent, else exponential backoff. */
-export function retryDelayMs(retryAfter: string | null, attempt: number): number {
-  const seconds = Number(retryAfter);
-  // retry-after may also be an HTTP date; Number() makes that NaN and it falls back to backoff.
-  const ms =
-    retryAfter && Number.isFinite(seconds) && seconds >= 0
-      ? seconds * 1000
-      : JEV_RETRY_BASE_MS * 2 ** attempt;
-  return Math.min(ms, JEV_RETRY_MAX_MS);
-}
-
 /** One paper's Jev result: the composite and the raw judgments it came from, kept so the weights can be retuned without rerunning inference. */
 export interface JevScore {
   relevance: number;
@@ -339,37 +313,14 @@ export interface JevScore {
 }
 
 export async function scorePaper(paper: ArxivPaper, apiKey: string): Promise<JevScore> {
-  const request = (): Promise<Response> =>
-    fetch(JEV_URL, {
-      method: "POST",
-      headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
-      body: JSON.stringify({
-        model: "jev-latest",
-        // No `categories`: no question reads them, and unused state costs accuracy.
-        state: { title: paper.title, abstract: paper.summary },
-        questions: RELEVANCE_QUESTIONS,
-      }),
-    });
-  let resp = await request();
-  // 429 = rate limited, 529 = overloaded; the docs ask for exponential backoff. A paper
-  // that still fails sorts last, and a broad outage trips the recency fallback.
-  for (
-    let attempt = 0;
-    (resp.status === 429 || resp.status === 529) && attempt < JEV_MAX_RETRIES;
-    attempt++
-  ) {
-    await sleep(retryDelayMs(resp.headers.get("retry-after"), attempt));
-    resp = await request();
-  }
-  if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-  const body = (await resp.json()) as { model: string; answers: JevAnswers };
+  // No `categories`: no question reads them, and unused state costs accuracy.
+  const { model, answers } = await askJev<JevAnswers>(
+    { title: paper.title, abstract: paper.summary },
+    RELEVANCE_QUESTIONS,
+    apiKey,
+  );
   const codeReleased = hasCodeLink(paper.summary);
-  return {
-    relevance: relevanceOf(body.answers, codeReleased),
-    answers: body.answers,
-    codeReleased,
-    model: body.model,
-  };
+  return { relevance: relevanceOf(answers, codeReleased), answers, codeReleased, model };
 }
 
 export interface RankedPaper {
@@ -388,26 +339,11 @@ export async function rankByRelevance(
   apiKey: string,
   score: (paper: ArxivPaper, apiKey: string) => Promise<JevScore> = scorePaper,
 ): Promise<RankedPaper[] | null> {
-  const scores = new Array<JevScore | null>(papers.length).fill(null);
-  let failed = 0;
-  let next = 0;
-  const worker = async (): Promise<void> => {
-    while (next < papers.length) {
-      const i = next++;
-      try {
-        scores[i] = await score(papers[i]!, apiKey);
-      } catch (err) {
-        failed++;
-        if (failed === 1) console.error(`  [arxiv] Jev scoring failed: ${err}`);
-      }
-    }
-  };
-  await Promise.all(Array.from({ length: Math.min(JEV_CONCURRENCY, papers.length) }, worker));
-
-  console.log(`  [arxiv] Jev scored ${papers.length - failed}/${papers.length} papers`);
-  if (papers.length > 0 && failed / papers.length > JEV_MAX_FAILURE_RATIO) return null;
+  // scorePaper throws on an unexpected answer shape (relevanceOf), which mapJev counts as a failure.
+  const { results, failed } = await mapJev(papers, (paper) => score(paper, apiKey), "arxiv");
+  if (jevFailedTooOften(failed, papers.length)) return null;
   return papers
-    .map((paper, i): RankedPaper => ({ paper, jev: scores[i] ?? null }))
+    .map((paper, i): RankedPaper => ({ paper, jev: results[i] ?? null }))
     .sort((a, b) => (b.jev?.relevance ?? -1) - (a.jev?.relevance ?? -1));
 }
 
@@ -448,10 +384,6 @@ export function buildRankingFile(ranked: RankedPaper[]): string {
 // ---------------------------------------------------------------------------
 // Fetch
 // ---------------------------------------------------------------------------
-
-async function sleep(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
 
 const STATE_FILE = path.join("digests", "arxiv-state.json");
 /** Pool window when there is no state yet. */
