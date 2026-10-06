@@ -25,6 +25,7 @@ import { saveWebState, type WebFetchResult, type WebState } from "./web.ts";
 import type { HnData } from "./hn.ts";
 import type { TrendingData } from "./trending.ts";
 import { saveMatchState } from "./trending-jev.ts";
+import { saveStarHistory } from "./trending-rank.ts";
 import { parseRowSummaries, renderTrendingTables, spliceTrendingProse } from "./report-builders.ts";
 import { saveArxivState, type ArxivData } from "./arxiv.ts";
 import type { HfData } from "./hf.ts";
@@ -127,6 +128,7 @@ export async function saveTrendingReport(
     console.log(`  Saved ${saveFile(report.rankingFile, dateStr, "trending-ranking.json")}`);
   }
   if (report.nextMatches) saveMatchState(report.nextMatches);
+  if (report.nextStarHistory) saveStarHistory(report.nextStarHistory);
 
   if (digestRepo) {
     const trendingTitle = TRENDING_REPORT.issueTitle(dateStr);

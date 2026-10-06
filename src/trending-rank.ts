@@ -1,5 +1,6 @@
 /**
- * Selection, ranking and numbering for the weekly trending report — pure, no I/O.
+ * Selection, ranking and numbering for the weekly trending report — pure, except
+ * for loading and saving the star history (`digests/trending-state.json`).
  *
  * Code decides which items appear, in which order, with which 🆕 flag and
  * which numbers; the LLM only writes the per-row summaries and the prose
@@ -9,6 +10,8 @@
  * item (`trending-jev.ts`).
  */
 
+import fs from "node:fs";
+import path from "node:path";
 import type { SearchRepo, TrendingRepo } from "./trending.ts";
 import { formatTokens, type OpenRouterApp } from "./openrouter.ts";
 import { momentumRatio, type NpmData, type NpmPackage } from "./npm.ts";
@@ -76,6 +79,14 @@ export interface TrendingReportData {
   rankingFile?: string;
   /** Match state to save once the report is written; absent when the file could not be read. */
   nextMatches?: MatchState;
+  /** Star history to save once the report is written. */
+  nextStarHistory?: StarHistory;
+}
+
+/** `digests/trending-state.json`: [CST date, total stars] points per repo, oldest first. */
+export interface StarHistory {
+  /** Key: `fullName` lowercased — GitHub names are case-insensitive, and the trending page and search may differ in case. */
+  repos: Record<string, [string, number][]>;
 }
 
 // ---------------------------------------------------------------------------
@@ -120,6 +131,14 @@ const RADAR_NEW_MAX = 8;
 /** Rows per category table; the old prompt asked for 3–8. */
 const CATEGORY_MAX = 8;
 
+/**
+ * Star-history points older than this many days are pruned. Five weekly runs
+ * leave a baseline even after one missed Monday, and keep the file ≲ 30 KB.
+ */
+const STAR_HISTORY_DAYS = 35;
+
+export const STAR_HISTORY_FILE = path.join("digests", "trending-state.json");
+
 const DAY_MS = 24 * 60 * 60 * 1000;
 
 const fmt = (n: number) => n.toLocaleString("en-US");
@@ -129,11 +148,83 @@ export const githubKey = (fullName: string) => `github:${fullName}`;
 export const openrouterKey = (app: OpenRouterApp) => `openrouter:${app.appId}`;
 export const npmKey = (pkg: NpmPackage) => `npm:${pkg.name}`;
 
+/** Whole days between two CST dates (`YYYY-MM-DD`). */
+const daysBetween = (from: string, to: string) => Math.round((Date.parse(to) - Date.parse(from)) / DAY_MS);
+
 /** Whole days from the CST date of `iso` to `dateStr`; null when `iso` is missing or unparseable. */
 function ageDays(iso: string | undefined, dateStr: string): number | null {
   const t = iso ? Date.parse(iso) : NaN;
   if (Number.isNaN(t)) return null;
   return Math.round((Date.parse(dateStr) - Date.parse(toCstDateStr(new Date(t)))) / DAY_MS);
+}
+
+// ---------------------------------------------------------------------------
+// Star history
+// ---------------------------------------------------------------------------
+
+export function loadStarHistory(file = STAR_HISTORY_FILE): StarHistory {
+  if (!fs.existsSync(file)) return { repos: {} };
+  try {
+    const parsed = JSON.parse(fs.readFileSync(file, "utf-8")) as Partial<StarHistory> | null;
+    if (typeof parsed?.repos !== "object" || parsed.repos === null || Array.isArray(parsed.repos)) {
+      throw new Error("no `repos` object");
+    }
+    return parsed as StarHistory;
+  } catch (err) {
+    // Unlike the match file, starting over is safe: the history is never
+    // hand-edited, and losing it costs one week of warm-up, not a decision.
+    console.error(`  [trending] Cannot read ${file}, star history starts over: ${err}`);
+    return { repos: {} };
+  }
+}
+
+/**
+ * One repo per line: `JSON.stringify(_, null, 2)` puts every date and star
+ * count on its own line, which makes the file several times longer.
+ */
+export function saveStarHistory(history: StarHistory, file = STAR_HISTORY_FILE): void {
+  const lines = Object.entries(history.repos).map(
+    ([name, points]) => `    ${JSON.stringify(name)}: ${JSON.stringify(points)}`,
+  );
+  const body = lines.length > 0 ? `{\n${lines.join(",\n")}\n  }` : "{}";
+  fs.mkdirSync(path.dirname(file), { recursive: true });
+  fs.writeFileSync(file, `{\n  "repos": ${body}\n}\n`, "utf-8");
+}
+
+/**
+ * The newest point dated before `dateStr`. Today's points are ignored, so a
+ * same-day re-run computes the same deltas (as `submissionCutoff` does for ArXiv).
+ */
+export function starBaseline(
+  history: StarHistory,
+  fullName: string,
+  dateStr: string,
+): { date: string; stars: number } | null {
+  const before = (history.repos[fullName.toLowerCase()] ?? []).filter(([date]) => date < dateStr);
+  const last = before.at(-1);
+  return last ? { date: last[0], stars: last[1] } : null;
+}
+
+/** History after this run: today's points recorded or replaced, unseen repos carried forward, old points pruned. */
+export function nextStarHistory(history: StarHistory, githubRows: GithubRow[], dateStr: string): StarHistory {
+  const repos: Record<string, [string, number][]> = {};
+  for (const [name, points] of Object.entries(history.repos)) {
+    repos[name] = points.filter(([date]) => date !== dateStr);
+  }
+  // totalStars 0 means the trending scrape missed the count, not a repo with no stars.
+  for (const row of githubRows.filter((r) => r.totalStars > 0)) {
+    const name = row.fullName.toLowerCase();
+    repos[name] = [...(repos[name] ?? []), [dateStr, row.totalStars]];
+  }
+  // Repos not seen this run are kept: they drop out of a top-15 search result and come back.
+  const next: StarHistory = { repos: {} };
+  for (const [name, points] of Object.entries(repos)) {
+    const kept = points
+      .filter(([date]) => daysBetween(date, dateStr) <= STAR_HISTORY_DAYS)
+      .sort((a, b) => a[0].localeCompare(b[0]));
+    if (kept.length > 0) next.repos[name] = kept;
+  }
+  return next;
 }
 
 // ---------------------------------------------------------------------------
@@ -145,6 +236,7 @@ export function rankGithubRepos(
   trendingRepos: TrendingRepo[],
   searchRepos: SearchRepo[],
   dateStr: string,
+  history: StarHistory = { repos: {} },
 ): GithubRow[] {
   // GitHub names are case-insensitive; the two sources may differ in case.
   const searchByName = new Map(searchRepos.map((s) => [s.fullName.toLowerCase(), s]));
@@ -161,10 +253,14 @@ export function rankGithubRepos(
     const periodStars = t?.periodStars ?? 0;
     const age = ageDays(s?.createdAt, dateStr);
     const newRepo = age !== null && age <= NEW_REPO_DAYS;
+    const baseline = totalStars > 0 ? starBaseline(history, fullName, dateStr) : null;
+    const days = baseline ? daysBetween(baseline.date, dateStr) : 0;
 
     // perWeek precedence, first match wins:
     //   1. trending `periodStars` > 0 — GitHub's own "this week" count;
-    //   2. (reserved: the star-history delta, a later commit);
+    //   2. star-history delta — the gain since the newest point before today,
+    //      scaled to a week; it outranks 3 because a measured gain beats an
+    //      extrapolation from the creation date;
     //   3. new repo — its whole star count is this fortnight's, scaled to a week
     //      (only orders the Radar: new repos stay off the category tables);
     //   4. otherwise null — no momentum signal, sorted after every other row.
@@ -173,6 +269,11 @@ export function rankGithubRepos(
     if (periodStars > 0) {
       perWeek = periodStars;
       starsCell = totalStars > 0 ? `${fmt(totalStars)} (+${fmt(periodStars)})` : `(+${fmt(periodStars)})`;
+    } else if (baseline && days > 0) {
+      const delta = totalStars - baseline.stars;
+      perWeek = (delta * 7) / days;
+      const gain = `${delta >= 0 ? "+" : ""}${fmt(delta)}`;
+      starsCell = `${fmt(totalStars)} (${days === 7 ? gain : `${gain} in ${days} ${days === 1 ? "day" : "days"}`})`;
     } else if (newRepo) {
       perWeek = (totalStars * 7) / Math.max(age, 1);
       starsCell = `${fmt(totalStars)} (new, ${age} ${age === 1 ? "day" : "days"})`;

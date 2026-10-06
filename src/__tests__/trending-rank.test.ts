@@ -1,17 +1,31 @@
 import { describe, it, expect } from "vitest";
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
 import {
   buildRadarCandidates,
+  loadStarHistory,
   mergeRows,
+  nextStarHistory,
   radarPool,
   rankGithubRepos,
   selectTrendingReport,
+  saveStarHistory,
+  starBaseline,
   summaryRows,
   urlMerge,
   type GithubRow,
   type RadarRow,
+  type StarHistory,
 } from "../trending-rank.ts";
-import type { Classification } from "../trending-jev.ts";
-import type { SearchRepo, TrendingRepo } from "../trending.ts";
+import type { AskJev, Classification } from "../trending-jev.ts";
+import {
+  composeTrendingReport,
+  EMPTY_NPM,
+  EMPTY_OPENROUTER,
+  type SearchRepo,
+  type TrendingRepo,
+} from "../trending.ts";
 import type { OpenRouterApp } from "../openrouter.ts";
 import type { NpmData, NpmPackage } from "../npm.ts";
 
@@ -659,6 +673,182 @@ describe("summaryRows", () => {
         facts: "Source: OpenRouter; npm | Signal: week #10 / month #20; 1,000/week, 1.1x",
       },
       { n: 2, name: "t/x", description: "Desc", facts: "Language: Rust | Stars: 70 (+7)" },
+    ]);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Star history
+// ---------------------------------------------------------------------------
+
+/** DATE is 2026-10-05: one week back is 2026-09-28, four days back 2026-10-01. */
+const hist = (repos: StarHistory["repos"]): StarHistory => ({ repos });
+
+describe("starBaseline", () => {
+  const h = hist({
+    "a/x": [
+      ["2026-09-21", 100],
+      ["2026-09-28", 200],
+      [DATE, 300],
+    ],
+  });
+
+  it("takes the newest point before today and ignores today's", () => {
+    expect(starBaseline(h, "A/X", DATE)).toEqual({ date: "2026-09-28", stars: 200 });
+  });
+
+  it("is null without points before today", () => {
+    expect(starBaseline(h, "b/y", DATE)).toBeNull();
+    expect(starBaseline(h, "a/x", "2026-09-21")).toBeNull();
+  });
+});
+
+describe("rankGithubRepos with star history", () => {
+  const h = hist({ "a/x": [["2026-09-28", 85_580]], "b/y": [["2026-10-01", 85_580]] });
+
+  it("uses the delta over exactly a week", () => {
+    const [row] = rankGithubRepos([], [search("a/x", { stargazersCount: 86_392 })], DATE, h);
+    expect(row).toMatchObject({ starsCell: "86,392 (+812)", perWeek: 812 });
+  });
+
+  it("scales a delta over another span to a week and names the days", () => {
+    const [row] = rankGithubRepos([], [search("b/y", { stargazersCount: 86_392 })], DATE, h);
+    expect(row).toMatchObject({ starsCell: "86,392 (+812 in 4 days)", perWeek: (812 * 7) / 4 });
+    const oneDay = hist({ "a/x": [["2026-10-04", 86_380]] });
+    const [next] = rankGithubRepos([], [search("a/x", { stargazersCount: 86_392 })], DATE, oneDay);
+    expect(next).toMatchObject({ starsCell: "86,392 (+12 in 1 day)", perWeek: 84 });
+  });
+
+  it("looks the repo up case-insensitively", () => {
+    const [row] = rankGithubRepos([], [search("A/X", { stargazersCount: 86_392 })], DATE, h);
+    expect(row!.perWeek).toBe(812);
+  });
+
+  it("shows a negative delta with its sign", () => {
+    const [row] = rankGithubRepos([], [search("a/x", { stargazersCount: 85_568 })], DATE, h);
+    expect(row).toMatchObject({ starsCell: "85,568 (-12)", perWeek: -12 });
+  });
+
+  it("prefers trending periodStars over the delta", () => {
+    const [row] = rankGithubRepos(
+      [trending("a/x", { periodStars: 50, totalStars: 86_392 })],
+      [search("a/x", { stargazersCount: 86_392 })],
+      DATE,
+      h,
+    );
+    expect(row).toMatchObject({ starsCell: "86,392 (+50)", perWeek: 50 });
+  });
+
+  it("prefers the delta over new-repo scaling", () => {
+    const [row] = rankGithubRepos(
+      [],
+      [search("n/new", { stargazersCount: 300, createdAt: "2026-09-27T00:00:00Z" })],
+      DATE,
+      hist({ "n/new": [["2026-10-01", 200]] }),
+    );
+    expect(row).toMatchObject({ starsCell: "300 (+100 in 4 days)", perWeek: 175, isNew: true });
+  });
+
+  it("computes no delta when the star count is unknown", () => {
+    const [row] = rankGithubRepos([trending("a/x", { totalStars: 0 })], [], DATE, h);
+    expect(row).toMatchObject({ starsCell: "0", perWeek: null });
+  });
+});
+
+describe("nextStarHistory", () => {
+  const row = (fullName: string, totalStars: number) =>
+    rankGithubRepos([], [search(fullName, { stargazersCount: totalStars })], DATE)[0]!;
+
+  it("records rows with stars and skips a missed count", () => {
+    const next = nextStarHistory(hist({}), [row("A/X", 10), row("b/y", 0)], DATE);
+    expect(next).toEqual(hist({ "a/x": [[DATE, 10]] }));
+  });
+
+  it("replaces today's point, so a same-day re-run is idempotent", () => {
+    const h = hist({ "a/x": [["2026-09-28", 85_580]] });
+    const repos = [search("a/x", { stargazersCount: 86_392 })];
+    const first = nextStarHistory(h, rankGithubRepos([], repos, DATE, h), DATE);
+    const rerunRows = rankGithubRepos([], repos, DATE, first);
+    expect(rerunRows[0]!.perWeek).toBe(812);
+    expect(nextStarHistory(first, rerunRows, DATE)).toEqual(first);
+    expect(first.repos["a/x"]).toEqual([
+      ["2026-09-28", 85_580],
+      [DATE, 86_392],
+    ]);
+  });
+
+  it("carries forward unseen repos and prunes points older than 35 days", () => {
+    const h = hist({
+      "old/gone": [["2026-08-30", 5]],
+      "a/x": [
+        ["2026-08-30", 1],
+        ["2026-08-31", 2],
+      ],
+      "b/y": [["2026-09-28", 7]],
+    });
+    expect(nextStarHistory(h, [], DATE)).toEqual(
+      hist({ "a/x": [["2026-08-31", 2]], "b/y": [["2026-09-28", 7]] }),
+    );
+  });
+});
+
+describe("loadStarHistory / saveStarHistory", () => {
+  const tmp = () => fs.mkdtempSync(path.join(os.tmpdir(), "trending-state-"));
+
+  it("reads back what saveStarHistory wrote, one repo per line", () => {
+    const file = path.join(tmp(), "sub", "s.json");
+    const h = hist({
+      "a/x": [
+        ["2026-09-28", 1],
+        [DATE, 2],
+      ],
+      "b/y": [[DATE, 3]],
+    });
+    saveStarHistory(h, file);
+    const text = fs.readFileSync(file, "utf-8");
+    expect(text.split("\n")).toHaveLength(7);
+    expect(text).toContain('"a/x": [["2026-09-28",1],["2026-10-05",2]],');
+    expect(loadStarHistory(file)).toEqual(h);
+    saveStarHistory(hist({}), file);
+    expect(loadStarHistory(file)).toEqual(hist({}));
+  });
+
+  it("returns an empty history for a missing, invalid or repos-less file", () => {
+    const dir = tmp();
+    expect(loadStarHistory(path.join(dir, "none.json"))).toEqual(hist({}));
+    const file = path.join(dir, "s.json");
+    fs.writeFileSync(file, "{ not json");
+    expect(loadStarHistory(file)).toEqual(hist({}));
+    fs.writeFileSync(file, "{}");
+    expect(loadStarHistory(file)).toEqual(hist({}));
+  });
+});
+
+describe("composeTrendingReport with star history", () => {
+  const notCalled: AskJev = async () => {
+    throw new Error("Jev called without a key");
+  };
+
+  it("ranks a search repo by its delta and returns the next history", async () => {
+    const data = {
+      trendingRepos: [],
+      searchRepos: [
+        search("big/agent", { stargazersCount: 9_000 }),
+        search("small/agent", { stargazersCount: 600 }),
+      ],
+      trendingFetchSuccess: true,
+      openrouter: EMPTY_OPENROUTER,
+      npm: EMPTY_NPM,
+    };
+    const h = hist({ "big/agent": [["2026-09-28", 8_990]], "small/agent": [["2026-09-28", 400]] });
+    const report = await composeTrendingReport(data, DATE, "", null, notCalled, h);
+    expect(report.categories.flatMap((c) => c.rows.map((r) => [r.fullName, r.starsCell]))).toEqual([
+      ["small/agent", "600 (+200)"],
+      ["big/agent", "9,000 (+10)"],
+    ]);
+    expect(report.nextStarHistory?.repos["small/agent"]).toEqual([
+      ["2026-09-28", 400],
+      [DATE, 600],
     ]);
   });
 });

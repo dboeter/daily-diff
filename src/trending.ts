@@ -9,12 +9,15 @@ import { fetchNpmData, type NpmData } from "./npm.ts";
 import { searchSlot } from "./github.ts";
 import {
   buildRadarCandidates,
+  loadStarHistory,
+  nextStarHistory,
   npmKey,
   openrouterKey,
   radarPool,
   rankGithubRepos,
   selectTrendingReport,
   urlMerge,
+  type StarHistory,
   type TrendingReportData,
 } from "./trending-rank.ts";
 import {
@@ -326,7 +329,7 @@ export async function fetchTrendingData(period: TrendingPeriod, dateStr: string)
 
 /**
  * Rank, classify, match and select the weekly report's rows. The defaults are
- * the production inputs; tests inject the key, the match state and `ask`.
+ * the production inputs; tests inject the key, the match state, `ask` and the star history.
  */
 export async function composeTrendingReport(
   data: TrendingData,
@@ -334,8 +337,10 @@ export async function composeTrendingReport(
   apiKey = process.env["TYPESAFE_API_KEY"],
   matchState: MatchState | null = loadMatchState(),
   ask: AskJev = askJev,
+  // Weekly only: daily runs never compose, so they never read or write the file.
+  history: StarHistory = loadStarHistory(),
 ): Promise<TrendingReportData> {
-  const githubRows = rankGithubRepos(data.trendingRepos, data.searchRepos, dateStr);
+  const githubRows = rankGithubRepos(data.trendingRepos, data.searchRepos, dateStr, history);
   const candidates = buildRadarCandidates(data.openrouter.apps, data.npm, githubRows, dateStr);
 
   // Every GitHub row is classified: the new ones are Radar candidates, the rest category rows.
@@ -385,5 +390,6 @@ export async function composeTrendingReport(
     ...report,
     ...(rankingFile !== undefined ? { rankingFile } : {}),
     ...(nextMatches !== undefined ? { nextMatches } : {}),
+    nextStarHistory: nextStarHistory(history, githubRows, dateStr),
   };
 }

@@ -472,7 +472,7 @@ describe("composeTrendingReport", () => {
   const saved = (): MatchState => ({ apps: { "1": entry({ npm: "@kilocode/cli" }) } });
 
   it("lets Jev decide scope and Radar, and merges a saved match into one Radar row", async () => {
-    const report = await composeTrendingReport(data, DATE, "key", saved(), ask);
+    const report = await composeTrendingReport(data, DATE, "key", saved(), ask, { repos: {} });
     expect(report.classifiedBy).toBe("jev");
     expect(report.radar.map((r) => r.keys)).toEqual([["openrouter:1", "npm:@kilocode/cli"]]);
     expect(report.categories.map((c) => [c.category, c.rows.map((r) => r.fullName)])).toEqual([
@@ -491,13 +491,13 @@ describe("composeTrendingReport", () => {
   });
 
   it("skips matching and saves no state when the match file is unreadable", async () => {
-    const report = await composeTrendingReport(data, DATE, "key", null, ask);
+    const report = await composeTrendingReport(data, DATE, "key", null, ask, { repos: {} });
     expect(report.radar.map((r) => r.keys)).toEqual([["openrouter:1"], ["npm:@kilocode/cli"]]);
     expect(report.nextMatches).toBeUndefined();
   });
 
   it("falls back to topic labels without a key and writes no ranking file", async () => {
-    const report = await composeTrendingReport(data, DATE, "", saved(), notCalled);
+    const report = await composeTrendingReport(data, DATE, "", saved(), notCalled, { repos: {} });
     expect(report.classifiedBy).toBe("topics");
     expect(report.rankingFile).toBeUndefined();
     expect(report.radar[0]!.keys).toEqual(["openrouter:1", "npm:@kilocode/cli"]);

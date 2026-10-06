@@ -1,8 +1,10 @@
 # Plan: build the trending report in code: ranking, Jev classification, star history
 
-Status: Draft · Created 2026-10-06 · Decisions confirmed 2026-10-06:
+Status: Done · Created 2026-10-06 · Decisions confirmed 2026-10-06:
 code renders the tables, Tier B is included, and Tier C accepts one week of
-warm-up.
+warm-up. Implemented on branch `feat/trending-in-code` in `9880a32` (Jev
+client), `ad58f7e` (Tier A), `4ef17b4` (Tier B) and the Tier C commit that
+sets this status.
 
 ## Why
 
@@ -36,10 +38,10 @@ in code. ArXiv uses Jev for atomic judgments, keeps its weights in code
 (`relevanceOf`), writes a trace file (`arxiv-ranking.json`) and persists state
 (`arxiv-state.json`).
 
-## Amended 2026-10-06, after the live render check
+## Deviations from the plan (found while implementing)
 
 A live weekly fetch (topic fallback, no LLM) showed two problems with the
-rules below, and both were changed in commit 2a:
+rules below. Both were changed in commit 2a (decided 2026-10-06):
 
 - **The category tables filled with new repos.** Every new repo got a
   stars-per-week figure, and established search repos had none until the star
@@ -52,6 +54,26 @@ rules below, and both were changed in commit 2a:
   an 8-star repo created that day sixth. Now at most 8 of the 12 rows and 20
   of the 30-row pool are 🆕, and a new GitHub repo needs at least 25 stars
   (`NEW_REPO_MIN_STARS`; the LLM's new-repo picks on 2026-10-05 had 27–168).
+
+Smaller deviations:
+
+- **Match candidates are Choice options**, not state, because the model
+  reads option names and descriptions (see Cross-source matching).
+- **A single failed classification call** falls back to the topic label for
+  that item. Only more than half failing sends the whole run to the fallback.
+- **One tool, one app.** A candidate saved as another app's match is not
+  offered, and when two apps pick the same candidate in one run, the first
+  in pool order keeps it and the second rejects its offered candidates.
+- **The trace lists every classified item**, not a top slice like ArXiv's
+  100: a misclassified out-of-scope repo never reaches the report, so it is
+  the main thing to trace.
+- **An unreadable star history starts over**, unlike the match file. It is
+  never hand-edited, so losing it costs a week of warm-up, not a decision.
+- **A malformed match answer counts as a failed call**, so it records
+  nothing rather than rejecting every candidate.
+- The prose prompt no longer asks for links to recent releases: the model
+  sees only the tables and the model data.
+- The live Jev check (Done-conditions) had not run when this status was set.
 
 ## Design
 
