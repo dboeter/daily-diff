@@ -94,6 +94,13 @@ const NEW_MODEL_DAYS = 8;
 
 const HEADERS = { "User-Agent": "Mozilla/5.0 (compatible; daily-diff/1.0)" };
 
+/** 13_694_514_725_528 → "13.69T". OpenRouter token counts span 10^9–10^13. */
+export function formatTokens(n: number): string {
+  if (n >= 1e12) return `${(n / 1e12).toFixed(2)}T`;
+  if (n >= 1e9) return `${(n / 1e9).toFixed(1)}B`;
+  return `${(n / 1e6).toFixed(1)}M`;
+}
+
 // ---------------------------------------------------------------------------
 // RSC payload parsing
 // ---------------------------------------------------------------------------

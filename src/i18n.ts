@@ -11,7 +11,6 @@ export const MSG = {
   infraNoActivity: "No stable releases or hot issues this week.",
   summaryFailed: "⚠️ Summary generation failed.",
   skillsFailed: "⚠️ Skills summary generation failed.",
-  trendingNoData: "⚠️ Trending data unavailable, unable to generate report.",
   trendingFailed: "⚠️ Trending report generation failed.",
 } as const;
 
@@ -52,6 +51,22 @@ export const TRENDING_REPORT = {
   skillsHeading: "Claude Code Skills Highlights",
   skillsSource: (repo: string) => `> Source: [${repo}](https://github.com/${repo})`,
   issueTitle: (dateStr: string) => `📈 Agent & AI Coding Trends Weekly ${dateStr}`,
+  // Tables rendered in code (renderTrendingTables); the prose headings are handed to the LLM.
+  radarHeading: "🚀 Agent & Coding Tool Radar",
+  radarHeader: "| Tool | Source | Signal | Summary |\n| :--- | :--- | :--- | :--- |",
+  categoriesHeading: "Top Projects by Category",
+  categoryHeader: "| Project | Lang | Stars (total / this week) | Summary |\n| :--- | :--- | ---: | :--- |",
+  categoryTitles: {
+    coding_agent: "🧑‍💻 Coding Agents",
+    harness_framework: "🧰 Agent Harnesses & Frameworks",
+    multi_agent: "🕸️ Multi-Agent & Orchestration",
+    agent_tooling: "🔌 Agent Tooling",
+    other_agent: "🤖 Other Agents",
+  },
+  highlightsHeading: "This Week's Highlights",
+  trendsHeading: "Trend Signal Analysis",
+  hotSpotsHeading: "Community Hot Spots",
+  modelUsageHeading: "Model Usage on OpenRouter",
 } as const;
 
 // Rendered daily at the top of the agents report (buildStealthSection).

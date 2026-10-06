@@ -5,7 +5,8 @@
 import { hasActivity, type ProjectActivity } from "./prompts.ts";
 import { escapeRegex } from "./agent-news.ts";
 import type { OpenRouterStealthModel } from "./openrouter.ts";
-import { STEALTH_SECTION } from "./i18n.ts";
+import type { TrendingReportData } from "./trending-rank.ts";
+import { STEALTH_SECTION, TRENDING_REPORT } from "./i18n.ts";
 
 // ---------------------------------------------------------------------------
 // Project digest (daily agents report, weekly infra report)
@@ -97,4 +98,91 @@ export function buildStealthSection(models: OpenRouterStealthModel[] | null, now
     body = `${S.header}\n${rows.join("\n")}`;
   }
   return `## ${S.title}\n\n${body}\n\n---\n\n`;
+}
+
+// ---------------------------------------------------------------------------
+// Trending tables (weekly)
+// ---------------------------------------------------------------------------
+
+/** Where the prose LLM call leaves room for the code-rendered tables. */
+export const TRENDING_TABLES_MARKER = "<!-- tables -->";
+
+/**
+ * A row with no LLM summary shows its description instead, cut to about two
+ * lines of a table cell so one long README blurb does not stretch the table.
+ */
+const DESCRIPTION_FALLBACK_CHARS = 160;
+
+/**
+ * Parse the summaries call's `N: text` lines. Tolerant of the list styles
+ * models drift into (`3.`, `3)`, `- 3:`, `**3:**`); lines without a leading
+ * number or with no text are ignored, and the first line for a number wins.
+ */
+export function parseRowSummaries(text: string): Map<number, string> {
+  const summaries = new Map<number, string>();
+  for (const line of text.split("\n")) {
+    // `.` must not be followed by a digit, so "3.5x growth" is not row 3.
+    const m = line.match(/^\s*(?:[-*+]\s+)?\**\s*(\d+)\s*\**\s*(?::|\)|\.(?!\d))\s*\**\s*(.*?)\s*$/);
+    if (!m || !m[2]) continue;
+    const n = Number(m[1]);
+    if (!summaries.has(n)) summaries.set(n, m[2]);
+  }
+  return summaries;
+}
+
+/** Table cell text: one line, pipes escaped. */
+const cell = (s: string) => s.replace(/\r?\n/g, " ").replace(/\|/g, "\\|").trim();
+
+function descriptionFallback(description: string): string {
+  const d = description.replace(/\s+/g, " ").trim();
+  if (!d) return "—";
+  if (d.length <= DESCRIPTION_FALLBACK_CHARS) return d;
+  const cut = d.slice(0, DESCRIPTION_FALLBACK_CHARS);
+  const space = cut.lastIndexOf(" ");
+  return `${(space > 0 ? cut.slice(0, space) : cut).trimEnd()}…`;
+}
+
+/** The Radar and category tables; "" when both are empty. */
+export function renderTrendingTables(report: TrendingReportData, summaries: Map<number, string>): string {
+  const T = TRENDING_REPORT;
+  const summary = (n: number, description: string) =>
+    cell(summaries.get(n) ?? descriptionFallback(description));
+  const link = (name: string, url: string) => (url ? `[${cell(name)}](${cell(url)})` : cell(name));
+  const blocks: string[] = [];
+
+  if (report.radar.length > 0) {
+    const rows = report.radar.map(
+      (r) =>
+        `| ${link(r.name, r.url)} | ${cell(r.sources.join("; "))} | ${cell(r.signals.join("; "))} | ` +
+        `${summary(r.n, r.description)} |`,
+    );
+    blocks.push(`## ${T.radarHeading}`, `${T.radarHeader}\n${rows.join("\n")}`);
+  }
+
+  if (report.categories.length > 0) {
+    blocks.push(`## ${T.categoriesHeading}`);
+    for (const { category, rows } of report.categories) {
+      const lines = rows.map(
+        (r) =>
+          `| ${link(r.fullName, r.url)} | ${cell(r.language)} | ${cell(r.starsCell)} | ` +
+          `${summary(r.n, r.description)} |`,
+      );
+      blocks.push(`### ${T.categoryTitles[category]}`, `${T.categoryHeader}\n${lines.join("\n")}`);
+    }
+  }
+
+  return blocks.join("\n\n");
+}
+
+/** Put the tables where the prose left the marker; after the prose when the model dropped it. */
+export function spliceTrendingProse(prose: string, tables: string): string {
+  const lines = prose.split("\n");
+  const i = lines.findIndex((l) => l.trim() === TRENDING_TABLES_MARKER);
+  if (i === -1) return tables ? `${prose.trimEnd()}\n\n${tables}` : prose;
+  const before = lines.slice(0, i).join("\n").trimEnd();
+  const after = lines
+    .slice(i + 1)
+    .join("\n")
+    .trimStart();
+  return [before, tables, after].filter(Boolean).join("\n\n");
 }

@@ -5,7 +5,14 @@ import {
   hasActivity,
   type ProjectActivity,
 } from "../prompts.ts";
-import { buildTrendingPrompt, buildWebReportPrompt, buildHnPrompt } from "../prompts-data.ts";
+import {
+  buildTrendingSummariesPrompt,
+  buildTrendingProsePrompt,
+  buildWebReportPrompt,
+  buildHnPrompt,
+} from "../prompts-data.ts";
+import { TRENDING_TABLES_MARKER } from "../report-builders.ts";
+import { TRENDING_REPORT } from "../i18n.ts";
 import type { RepoConfig, GitHubItem, GitHubRelease } from "../github.ts";
 import { EMPTY_NPM, EMPTY_OPENROUTER, type TrendingData } from "../trending.ts";
 import type { HnData } from "../hn.ts";
@@ -138,166 +145,90 @@ describe("buildSkillsPrompt", () => {
 });
 
 // ---------------------------------------------------------------------------
-// buildTrendingPrompt
+// buildTrendingSummariesPrompt / buildTrendingProsePrompt
 // ---------------------------------------------------------------------------
 
-describe("buildTrendingPrompt", () => {
-  it("includes trending repos", () => {
-    const data: TrendingData = {
-      trendingRepos: [
-        {
-          fullName: "org/repo",
-          description: "desc",
-          language: "Python",
-          periodStars: 100,
-          totalStars: 5000,
-          forks: 200,
-          url: "https://github.com/org/repo",
-        },
-      ],
-      searchRepos: [],
-      trendingFetchSuccess: true,
-      openrouter: EMPTY_OPENROUTER,
-      npm: EMPTY_NPM,
-    };
-    const result = buildTrendingPrompt(data, "2026-03-09");
-    expect(result).toContain("org/repo");
-    expect(result).toContain("Python");
-    expect(result).toContain("5,000");
-    expect(result).toContain("+100 this week");
+const noTrending: TrendingData = {
+  trendingRepos: [],
+  searchRepos: [],
+  trendingFetchSuccess: false,
+  openrouter: EMPTY_OPENROUTER,
+  npm: EMPTY_NPM,
+};
+
+describe("buildTrendingSummariesPrompt", () => {
+  const rows = [
+    {
+      n: 1,
+      name: "nano-coder",
+      description: "A 6MB coding agent",
+      facts: "Source: npm | Signal: 🆕 12,560/week, 4.2x",
+    },
+    { n: 2, name: "org/repo", description: "", facts: "Stars: 86,392 (+1,851)" },
+  ];
+
+  it("lists each row with its number, description and facts", () => {
+    const result = buildTrendingSummariesPrompt(rows, "2026-10-05");
+    expect(result).toContain(
+      "1. nano-coder — A 6MB coding agent — Source: npm | Signal: 🆕 12,560/week, 4.2x",
+    );
+    expect(result).toContain("2. org/repo — (no description) — Stars: 86,392 (+1,851)");
   });
 
-  it("omits the total when the scraped star count is 0", () => {
-    const data: TrendingData = {
-      trendingRepos: [
-        {
-          fullName: "org/repo",
-          description: "",
-          language: "",
-          periodStars: 408,
-          totalStars: 0,
-          forks: 0,
-          url: "https://github.com/org/repo",
-        },
-      ],
-      searchRepos: [],
-      trendingFetchSuccess: true,
-      openrouter: EMPTY_OPENROUTER,
-      npm: EMPTY_NPM,
-    };
-    const result = buildTrendingPrompt(data, "2026-03-09");
-    expect(result).toContain("- [org/repo](https://github.com/org/repo) (+408 this week)");
-    expect(result).not.toContain("⭐0");
+  it("asks for one `N: <2 sentences>` line per row and nothing else", () => {
+    const result = buildTrendingSummariesPrompt(rows, "2026-10-05");
+    expect(result).toContain("`N: <2 sentences>`");
+    expect(result).toContain("2 lines in total");
+    expect(result).toContain("No other text");
+    expect(result).toContain("Do not invent");
+  });
+});
+
+describe("buildTrendingProsePrompt", () => {
+  it("includes the tables, the marker instruction and the section headings in order", () => {
+    const result = buildTrendingProsePrompt("| Tool |\n| :--- |", noTrending, "2026-10-05");
+    expect(result).toContain("| Tool |");
+    expect(result).toContain(`\`${TRENDING_TABLES_MARKER}\` exactly once`);
+    const order = [
+      TRENDING_REPORT.highlightsHeading,
+      TRENDING_TABLES_MARKER,
+      TRENDING_REPORT.trendsHeading,
+      TRENDING_REPORT.hotSpotsHeading,
+    ].map((s) => result.indexOf(s));
+    expect(order.every((i) => i >= 0)).toBe(true);
+    expect([...order].sort((a, b) => a - b)).toEqual(order);
+    expect(result).toContain("Do not reproduce or alter the tables");
   });
 
-  it("shows fetch failure message when trending fails", () => {
-    const data: TrendingData = {
-      trendingRepos: [],
-      searchRepos: [],
-      trendingFetchSuccess: false,
-      openrouter: EMPTY_OPENROUTER,
-      npm: EMPTY_NPM,
-    };
-    const result = buildTrendingPrompt(data, "2026-03-09");
-    expect(result).toContain("Unable to fetch");
+  it("omits the model-usage section without model data", () => {
+    const result = buildTrendingProsePrompt("", noTrending, "2026-10-05");
+    expect(result).not.toContain(TRENDING_REPORT.modelUsageHeading);
+    expect(result).toContain("No projects were selected");
   });
 
-  it("includes search repos with topic tag", () => {
+  it("adds the model-usage section and data when OpenRouter has models", () => {
     const data: TrendingData = {
-      trendingRepos: [],
-      searchRepos: [
-        {
-          fullName: "ai/agent",
-          description: "An AI agent",
-          language: "TypeScript",
-          stargazersCount: 1000,
-          pushedAt: "2026-03-08",
-          url: "https://github.com/ai/agent",
-          searchQuery: "ai-agent",
-        },
-      ],
-      trendingFetchSuccess: false,
-      openrouter: EMPTY_OPENROUTER,
-      npm: EMPTY_NPM,
-    };
-    const result = buildTrendingPrompt(data, "2026-03-09");
-    expect(result).toContain("[topic:ai-agent]");
-    expect(result).toContain("1,000");
-  });
-
-  it("omits the radar and model sections when OpenRouter and npm have no data", () => {
-    const data: TrendingData = {
-      trendingRepos: [],
-      searchRepos: [],
-      trendingFetchSuccess: false,
-      openrouter: EMPTY_OPENROUTER,
-      npm: EMPTY_NPM,
-    };
-    const result = buildTrendingPrompt(data, "2026-03-09");
-    expect(result).not.toContain("Agent & Coding Tool Radar");
-    expect(result).not.toContain("OpenRouter");
-    expect(result).not.toContain("npm");
-  });
-
-  it("renders OpenRouter apps, models and npm packages with the radar section", () => {
-    const data: TrendingData = {
-      trendingRepos: [],
-      searchRepos: [],
-      trendingFetchSuccess: false,
+      ...noTrending,
       openrouter: {
-        apps: [
-          {
-            appId: 1,
-            title: "Kimi Code CLI",
-            description: "A coding agent",
-            url: "https://kimi.example",
-            categories: ["cli-agent"],
-            createdAt: "2026-02-28T00:00:00Z",
-            weekTokens: 13_694_514_725_528,
-            dayRank: 12,
-            weekRank: 110,
-            monthRank: null,
-            growthPercent: 776,
-          },
-        ],
+        ...EMPTY_OPENROUTER,
         topModels: [{ slug: "deepseek/deepseek-v4.1-flash", tokens: 25_630_000_000_000 }],
-        topModelsDate: "2026-03-08",
+        topModelsDate: "2026-10-04",
         newModels: [
           {
             id: "inclusionai/ling-3.1-flash",
             name: "Ling 3.1 Flash",
             description: "MoE",
-            created: "2026-03-08",
+            created: "2026-10-04",
             contextLength: 262_144,
           },
         ],
         fetchSuccess: true,
       },
-      npm: {
-        rising: [
-          {
-            name: "nano-coder",
-            description: "A 6MB coding agent",
-            weekly: 12_560,
-            monthly: 12_859,
-            url: "https://www.npmjs.com/package/nano-coder",
-            lastPublish: "2026-03-07",
-          },
-        ],
-        top: [],
-        fetchSuccess: true,
-      },
     };
-    const result = buildTrendingPrompt(data, "2026-03-09");
-    expect(result).toContain("Agent & Coding Tool Radar");
-    expect(result).toContain("- [Kimi Code CLI](https://kimi.example) | rank day #12 / week #110 / month —");
-    expect(result).toContain("13.69T tokens/week");
-    expect(result).toContain("+776% (OpenRouter trending)");
+    const result = buildTrendingProsePrompt("", data, "2026-10-05");
+    expect(result).toContain(`## ${TRENDING_REPORT.modelUsageHeading}`);
     expect(result).toContain("deepseek/deepseek-v4.1-flash — 25.63T tokens");
     expect(result).toContain("Ling 3.1 Flash (`inclusionai/ling-3.1-flash`)");
-    expect(result).toContain("12,560/week, 12,859/month | momentum 4.2x");
-    expect(result).toContain("Model Usage on OpenRouter");
-    expect(result).not.toContain("npm Top Coding-Agent");
   });
 });
 

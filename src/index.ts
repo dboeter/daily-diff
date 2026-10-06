@@ -29,20 +29,25 @@ import {
   hasActivity,
 } from "./prompts.ts";
 import { matchAgentNews } from "./agent-news.ts";
-import { buildTrendingPrompt, buildHighlightsPrompt, type ReportHighlights } from "./prompts-data.ts";
+import {
+  buildTrendingSummariesPrompt,
+  buildTrendingProsePrompt,
+  buildHighlightsPrompt,
+  type ReportHighlights,
+} from "./prompts-data.ts";
 import {
   callLlm,
   parseLlmJson,
   saveFile,
   autoGenFooter,
-  LLM_TOKENS_TRENDING,
   LLM_TOKENS_LISTING,
   assertLlmHealthy,
   reportLlmHealth,
   llmHealthLine,
   isConnectionError,
 } from "./report.ts";
-import { buildProjectReportContent, buildStealthSection } from "./report-builders.ts";
+import { buildProjectReportContent, buildStealthSection, renderTrendingTables } from "./report-builders.ts";
+import { summaryRows } from "./trending-rank.ts";
 import {
   saveWebReport,
   saveTrendingReport,
@@ -52,13 +57,7 @@ import {
   saveCommunityReport,
 } from "./report-savers.ts";
 import { loadWebState, fetchSiteContent, type WebFetchResult, type WebState } from "./web.ts";
-import {
-  fetchTrendingData,
-  hasTrendingData,
-  EMPTY_NPM,
-  EMPTY_OPENROUTER,
-  type TrendingData,
-} from "./trending.ts";
+import { fetchTrendingData, EMPTY_NPM, EMPTY_OPENROUTER, type TrendingData } from "./trending.ts";
 import { fetchStealthModels, type OpenRouterStealthModel } from "./openrouter.ts";
 import { fetchHnData, type HnData } from "./hn.ts";
 import { fetchArxivData, type ArxivData } from "./arxiv.ts";
@@ -192,7 +191,7 @@ async function fetchAllData(
     ]),
     // Fetched every day — the agents report matches trending repos as news —
     // but only reported weekly.
-    fetchTrendingData(weekly ? "weekly" : "daily").catch(
+    fetchTrendingData(weekly ? "weekly" : "daily", toCstDateStr(now)).catch(
       (): TrendingData => ({
         trendingRepos: [],
         searchRepos: [],
@@ -286,7 +285,8 @@ interface Summaries {
   agentsSummary: string;
   infraSummary: string;
   skillsSummary: string;
-  trendingSummary: string;
+  /** Weekly trending: the per-row summaries (`N: text` lines) and the prose around the tables. */
+  trending: { summaries: string; prose: string };
 }
 
 /** Generate every report body. */
@@ -298,7 +298,9 @@ async function generateSummaries(
   dateStr: string,
   weekly: boolean,
 ): Promise<Summaries> {
-  const [agentsSummary, infraSummary, skillsSummary, trendingSummary] = await Promise.all([
+  const report = trendingData.report;
+  const rows = report ? summaryRows(report) : [];
+  const [agentsSummary, infraSummary, skillsSummary, trendingSummaries, trendingProse] = await Promise.all([
     summarizeProjects("agents", agentActivities, AGENTS_SCOPE, dateStr, MSG.agentsNoActivity),
     weekly
       ? summarizeProjects("infra", infraActivities, INFRA_SCOPE, dateStr, MSG.infraNoActivity)
@@ -310,21 +312,28 @@ async function generateSummaries(
           MSG.skillsFailed,
         )
       : Promise.resolve(""),
-    (async () => {
-      if (!weekly) return "";
-      if (!hasTrendingData(trendingData)) {
-        return MSG.trendingNoData;
-      }
-      return summarize(
-        "trending",
-        buildTrendingPrompt(trendingData, dateStr),
-        MSG.trendingFailed,
-        LLM_TOKENS_TRENDING,
-      );
-    })(),
+    // Trending: code ranks and renders the tables; one call writes the row
+    // summaries, the other the prose around the tables. A failed summaries
+    // call is "": the rows fall back to their descriptions.
+    report && rows.length > 0
+      ? summarize("trending-summaries", buildTrendingSummariesPrompt(rows, dateStr), "", LLM_TOKENS_LISTING)
+      : Promise.resolve(""),
+    report
+      ? summarize(
+          "trending",
+          buildTrendingProsePrompt(renderTrendingTables(report, new Map()), trendingData, dateStr),
+          MSG.trendingFailed,
+          LLM_TOKENS_LISTING,
+        )
+      : Promise.resolve(""),
   ]);
 
-  return { agentsSummary, infraSummary, skillsSummary, trendingSummary };
+  return {
+    agentsSummary,
+    infraSummary,
+    skillsSummary,
+    trending: { summaries: trendingSummaries, prose: trendingProse },
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -395,9 +404,10 @@ async function main(): Promise<void> {
   );
 
   // First gate. On a daily run only the agents call has happened by now, below
-  // LLM_MIN_SAMPLES, so this only arms on the weekly run (4 calls); the second
-  // gate, after the savers, covers every run. Bailing here costs nothing — no
-  // file has been written yet.
+  // LLM_MIN_SAMPLES, so this only arms on the weekly run (5 calls: agents, infra,
+  // skills, trending summaries, trending prose); the second gate, after the
+  // savers, covers every run. Bailing here costs nothing — no file has been
+  // written yet.
   assertLlmHealthy("summary");
 
   // 3. Build + save all reports
@@ -438,7 +448,7 @@ async function main(): Promise<void> {
       ? [
           saveTrendingReport(
             trendingData,
-            summaries.trendingSummary,
+            summaries.trending,
             { summary: summaries.skillsSummary, repo: CLAUDE_SKILLS_REPO },
             utcStr,
             dateStr,

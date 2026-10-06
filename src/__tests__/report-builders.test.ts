@@ -1,5 +1,14 @@
 import { describe, it, expect } from "vitest";
-import { buildProjectReportContent, buildStealthSection } from "../report-builders.ts";
+import {
+  buildProjectReportContent,
+  buildStealthSection,
+  parseRowSummaries,
+  renderTrendingTables,
+  spliceTrendingProse,
+  TRENDING_TABLES_MARKER,
+} from "../report-builders.ts";
+import type { TrendingReportData } from "../trending-rank.ts";
+import { TRENDING_REPORT } from "../i18n.ts";
 import type { ProjectActivity } from "../prompts.ts";
 import type { GitHubRelease } from "../github.ts";
 
@@ -133,3 +142,145 @@ describe("buildStealthSection", () => {
 // ---------------------------------------------------------------------------
 // Brief (GitHub issue) variant
 // ---------------------------------------------------------------------------
+
+// ---------------------------------------------------------------------------
+// Trending tables
+// ---------------------------------------------------------------------------
+
+describe("parseRowSummaries", () => {
+  it("accepts the common numbering styles", () => {
+    const parsed = parseRowSummaries(
+      ["1: one.", "2. two.", "3) three.", "- 4: four.", "**5:** five.", "  6 :  six.  "].join("\n"),
+    );
+    expect([...parsed.entries()]).toEqual([
+      [1, "one."],
+      [2, "two."],
+      [3, "three."],
+      [4, "four."],
+      [5, "five."],
+      [6, "six."],
+    ]);
+  });
+
+  it("ignores lines without a leading number or text, and keeps the first occurrence", () => {
+    const parsed = parseRowSummaries(
+      [
+        "Here are the summaries:",
+        "",
+        "7:",
+        "3.5x growth this week",
+        "8: first.",
+        "8: second.",
+        "## 9: no",
+      ].join("\n"),
+    );
+    expect([...parsed.entries()]).toEqual([[8, "first."]]);
+  });
+});
+
+function trendingReport(over: Partial<TrendingReportData> = {}): TrendingReportData {
+  return {
+    radar: [
+      {
+        n: 1,
+        keys: ["openrouter:1", "npm:kilo"],
+        name: "Kilo",
+        url: "https://kilo.ai/",
+        description: "",
+        sources: ["OpenRouter", "npm"],
+        signals: ["🆕 week #3 / month —", "1,000/week, 4.3x"],
+        isNew: true,
+        links: [],
+      },
+      {
+        n: 2,
+        keys: ["npm:bare"],
+        name: "bare",
+        url: "",
+        description: "A | piped\ndescription",
+        sources: ["npm"],
+        signals: ["10/week, 1.0x"],
+        isNew: false,
+        links: [],
+      },
+    ],
+    categories: [
+      {
+        category: "coding_agent",
+        rows: [
+          {
+            n: 3,
+            key: "github:o/r",
+            fullName: "o/r",
+            url: "https://github.com/o/r",
+            description: "word ".repeat(60),
+            language: "Rust",
+            totalStars: 100,
+            perWeek: 7,
+            starsCell: "100 (+7)",
+            isNew: false,
+          },
+        ],
+      },
+    ],
+    classifiedBy: "topics",
+    ...over,
+  };
+}
+
+describe("renderTrendingTables", () => {
+  it("renders both sections with summaries, falling back to descriptions", () => {
+    const md = renderTrendingTables(trendingReport(), new Map([[1, "Kilo is | an agent."]]));
+    expect(md).toContain(`## ${TRENDING_REPORT.radarHeading}\n\n${TRENDING_REPORT.radarHeader}\n`);
+    expect(md).toContain(
+      "| [Kilo](https://kilo.ai/) | OpenRouter; npm | 🆕 week #3 / month —; 1,000/week, 4.3x | Kilo is \\| an agent. |",
+    );
+    // No url → plain name; pipe and newline escaped in the description fallback.
+    expect(md).toContain("| bare | npm | 10/week, 1.0x | A \\| piped description |");
+    expect(md).toContain(
+      `## ${TRENDING_REPORT.categoriesHeading}\n\n### ${TRENDING_REPORT.categoryTitles.coding_agent}`,
+    );
+    // Long description cut at a word boundary under 160 chars.
+    const row = md.split("\n").find((l) => l.startsWith("| [o/r]"))!;
+    expect(row).toMatch(
+      /^\| \[o\/r\]\(https:\/\/github\.com\/o\/r\) \| Rust \| 100 \(\+7\) \| (word ){31}word… \|$/,
+    );
+    expect(md).not.toContain("---\n\n");
+  });
+
+  it("shows — when there is neither summary nor description", () => {
+    const md = renderTrendingTables(trendingReport(), new Map());
+    expect(md).toContain(
+      "| [Kilo](https://kilo.ai/) | OpenRouter; npm | 🆕 week #3 / month —; 1,000/week, 4.3x | — |",
+    );
+  });
+
+  it("omits empty sections and returns empty when both are", () => {
+    const noRadar = renderTrendingTables(trendingReport({ radar: [] }), new Map());
+    expect(noRadar).not.toContain(TRENDING_REPORT.radarHeading);
+    expect(noRadar.startsWith(`## ${TRENDING_REPORT.categoriesHeading}`)).toBe(true);
+    const noCategories = renderTrendingTables(trendingReport({ categories: [] }), new Map());
+    expect(noCategories).not.toContain(TRENDING_REPORT.categoriesHeading);
+    expect(renderTrendingTables(trendingReport({ radar: [], categories: [] }), new Map())).toBe("");
+  });
+});
+
+describe("spliceTrendingProse", () => {
+  it("replaces the marker line with the tables", () => {
+    const prose = `## Highlights\n\nText.\n\n${TRENDING_TABLES_MARKER}\n\n## Trends\n\nMore.`;
+    expect(spliceTrendingProse(prose, "TABLES")).toBe(
+      "## Highlights\n\nText.\n\nTABLES\n\n## Trends\n\nMore.",
+    );
+  });
+
+  it("appends the tables when the marker is missing", () => {
+    expect(spliceTrendingProse("## Highlights\n\nText.\n", "TABLES")).toBe(
+      "## Highlights\n\nText.\n\nTABLES",
+    );
+  });
+
+  it("drops the marker when there are no tables", () => {
+    const prose = `A.\n\n${TRENDING_TABLES_MARKER}\n\nB.`;
+    expect(spliceTrendingProse(prose, "")).toBe("A.\n\nB.");
+  });
+});

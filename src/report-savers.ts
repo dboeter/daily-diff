@@ -23,7 +23,8 @@ import { callLlm, saveFile, autoGenFooter, LLM_TOKENS_WEB, LLM_TOKENS_LISTING } 
 import { createGitHubIssue } from "./github.ts";
 import { saveWebState, type WebFetchResult, type WebState } from "./web.ts";
 import type { HnData } from "./hn.ts";
-import { hasTrendingData, type TrendingData } from "./trending.ts";
+import type { TrendingData } from "./trending.ts";
+import { parseRowSummaries, renderTrendingTables, spliceTrendingProse } from "./report-builders.ts";
 import { saveArxivState, type ArxivData } from "./arxiv.ts";
 import type { HfData } from "./hf.ts";
 import type { DevtoData } from "./devto.ts";
@@ -91,14 +92,15 @@ export async function saveWebReport(
 
 export async function saveTrendingReport(
   trendingData: TrendingData,
-  trendingSummary: string,
+  trending: { summaries: string; prose: string },
   skills: { summary: string; repo: string },
   utcStr: string,
   dateStr: string,
   digestRepo: string,
 ): Promise<void> {
-  if (!hasTrendingData(trendingData)) {
-    console.log("  [trending] No data available, skipping report.");
+  const report = trendingData.report;
+  if (report === undefined) {
+    console.log("  [trending] No ranked data, skipping report.");
     return;
   }
 
@@ -114,7 +116,9 @@ export async function saveTrendingReport(
     `${TRENDING_REPORT.skillsSource(skills.repo)}\n\n` +
     skills.summary;
 
-  const trendingContent = header + trendingSummary + skillsSection + autoGenFooter();
+  const tables = renderTrendingTables(report, parseRowSummaries(trending.summaries));
+  const trendingContent =
+    header + spliceTrendingProse(trending.prose, tables) + skillsSection + autoGenFooter();
 
   console.log(`  Saved ${saveFile(trendingContent, dateStr, fileName)}`);
 

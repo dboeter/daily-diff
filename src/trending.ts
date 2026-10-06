@@ -7,6 +7,15 @@
 import { fetchOpenRouterData, type OpenRouterData } from "./openrouter.ts";
 import { fetchNpmData, type NpmData } from "./npm.ts";
 import { searchSlot } from "./github.ts";
+import {
+  buildRadarCandidates,
+  npmKey,
+  openrouterKey,
+  rankGithubRepos,
+  selectTrendingReport,
+  type TrendingReportData,
+} from "./trending-rank.ts";
+import { fallbackClassification, type ClassifyItem } from "./trending-jev.ts";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -29,6 +38,7 @@ export interface SearchRepo {
   language: string | null;
   stargazersCount: number;
   pushedAt: string;
+  createdAt: string;
   url: string;
   searchQuery: string;
 }
@@ -41,6 +51,8 @@ export interface TrendingData {
   openrouter: OpenRouterData;
   /** Weekly run only; EMPTY_NPM on daily runs. */
   npm: NpmData;
+  /** Ranked and selected report rows; weekly run only, undefined on daily runs or when ranking failed. */
+  report?: TrendingReportData;
 }
 
 export const EMPTY_OPENROUTER: OpenRouterData = {
@@ -191,6 +203,7 @@ interface SearchApiItem {
   language: string | null;
   stargazers_count: number;
   pushed_at: string;
+  created_at: string;
   html_url: string;
 }
 
@@ -250,6 +263,7 @@ async function searchAiRepos(sevenDaysAgo: string, fourteenDaysAgo: string | nul
           language: item.language,
           stargazersCount: item.stargazers_count,
           pushedAt: item.pushed_at,
+          createdAt: item.created_at,
           url: item.html_url,
           searchQuery: label,
         });
@@ -272,7 +286,7 @@ async function searchAiRepos(sevenDaysAgo: string, fourteenDaysAgo: string | nul
  */
 export type TrendingPeriod = "daily" | "weekly";
 
-export async function fetchTrendingData(period: TrendingPeriod = "daily"): Promise<TrendingData> {
+export async function fetchTrendingData(period: TrendingPeriod, dateStr: string): Promise<TrendingData> {
   const daysAgo = (n: number) => new Date(Date.now() - n * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
   const weekly = period === "weekly";
 
@@ -283,5 +297,48 @@ export async function fetchTrendingData(period: TrendingPeriod = "daily"): Promi
     weekly ? fetchNpmData().catch((): NpmData => EMPTY_NPM) : EMPTY_NPM,
   ]);
 
-  return { trendingRepos, searchRepos, trendingFetchSuccess: success, openrouter, npm };
+  const data: TrendingData = { trendingRepos, searchRepos, trendingFetchSuccess: success, openrouter, npm };
+  if (!weekly || !hasTrendingData(data)) return data;
+
+  // Caught here, not left to the caller: index.ts wraps fetchTrendingData in
+  // `.catch(() => empty)`, so a throw would also wipe trendingRepos and
+  // searchRepos — Monday's agent news.
+  try {
+    return { ...data, report: await composeTrendingReport(data, dateStr) };
+  } catch (err) {
+    console.error(`  [trending] ranking failed: ${err}`);
+    return data;
+  }
+}
+
+/**
+ * Rank, classify and select the weekly report's rows. Async so Jev
+ * classification can slot in without changing the call site.
+ */
+export async function composeTrendingReport(
+  data: TrendingData,
+  dateStr: string,
+): Promise<TrendingReportData> {
+  const githubRows = rankGithubRepos(data.trendingRepos, data.searchRepos, dateStr);
+  const candidates = buildRadarCandidates(data.openrouter.apps, data.npm, githubRows, dateStr);
+
+  // Every GitHub row is classified: the new ones are Radar candidates, the rest category rows.
+  const items: ClassifyItem[] = [
+    ...githubRows.map((row): ClassifyItem => ({ kind: "github", key: row.key, row })),
+    ...data.openrouter.apps.map(
+      (app): ClassifyItem => ({ kind: "openrouter", key: openrouterKey(app), app }),
+    ),
+    ...[...data.npm.rising, ...data.npm.top].map(
+      (pkg): ClassifyItem => ({ kind: "npm", key: npmKey(pkg), pkg }),
+    ),
+  ];
+  const classifications = new Map(items.map((item) => [item.key, fallbackClassification(item)]));
+  console.log(`  [trending] Classified ${classifications.size} items by topic labels (fallback)`);
+
+  const report = selectTrendingReport(githubRows, candidates, classifications, "topics");
+  console.log(
+    `  [trending] Radar: ${report.radar.length} rows | ` +
+      (report.categories.map((c) => `${c.category}: ${c.rows.length}`).join(", ") || "no category rows"),
+  );
+  return report;
 }

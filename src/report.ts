@@ -12,7 +12,6 @@ import { sleep } from "./date.ts";
 // ---------------------------------------------------------------------------
 
 export const LLM_TOKENS_DEFAULT = 4096;
-export const LLM_TOKENS_TRENDING = 8192;
 /** Table-formatted listing reports (HN, ArXiv, HF, Community) need extra
  *  headroom for the multi-row tables plus 2-sentence summaries. */
 export const LLM_TOKENS_LISTING = 6144;

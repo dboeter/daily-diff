@@ -146,13 +146,15 @@ The inference and serving layer the agents run on top of. Weekly report on the s
 | --------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
 | [github.com/trending](https://github.com/trending?since=weekly) | This week's trending repos — parsed from HTML; includes the stars gained this week                                                                 |
 | GitHub Search API                                               | Repos active in the last 7 days matching 6 agent topics: `harness`, `agent-harness`, `ai-coding`, `multi-agent`, `agent-orchestration`, `ai-agent` |
-| GitHub Search API (new repos)                                   | Repos _created_ in the last 14 days tagged `coding-agent` or `agentic-coding`                                                                      |
+| GitHub Search API (new repos)                                   | Repos _created_ in the last 14 days tagged `coding-agent`, `agentic-coding` or `harness`                                                           |
 | [OpenRouter](https://openrouter.ai/apps)                        | Apps ranked by tokens (top 200 per day/week/month) + OpenRouter's trending list; top models by tokens; models listed in the last 8 days            |
 | [npm](https://www.npmjs.com)                                    | Packages tagged `coding-agent`, `agentic-coding`, `cli-agent`; split into top by weekly downloads and rising (weekly well above monthly rate)      |
 
-The LLM keeps only agent, harness and AI-coding repos (general AI/ML such as model weights, inference engines and RAG is out of scope), classifies them (coding agents / harnesses & frameworks / multi-agent & orchestration / agent tooling / other agents), and extracts trend signals. The report ends with a Claude Code Skills section: [anthropics/skills](https://github.com/anthropics/skills) PRs and issues, fetched without a date filter and sorted by popularity.
+Code builds the tables, not the LLM. The category tables hold established repos, sorted by the stars they gained this week on the trending page, then by total stars. Each repo's search topic decides whether it is in scope and which category it lands in (coding agents / harnesses & frameworks / multi-agent & orchestration / agent tooling / other agents); a trending repo that no agent topic search returned is left out. Each category shows at most 8 repos.
 
-OpenRouter, npm and the new-repo search feed an **Agent & Coding Tool Radar** table aimed at spotting new agents and agentic coding tools early.
+OpenRouter, npm and the new-repo search feed an **Agent & Coding Tool Radar** table aimed at spotting new agents and agentic coding tools early. New tools come first (🆕: listed on OpenRouter in the last 14 days or ranked this week but not this month, npm downloads at 3x the monthly rate, or a GitHub repo created in the last 14 days with at least 25 stars), but they take at most 8 of the 12 rows, so the week's established leaders still show. Rows that share a GitHub repo or a website become one row.
+
+The LLM writes a two-sentence summary for each row and the prose sections around the tables: highlights, trend signals, community hot spots and model usage. The report ends with a Claude Code Skills section: [anthropics/skills](https://github.com/anthropics/skills) PRs and issues, fetched without a date filter and sorted by popularity.
 
 The daily trending list is still fetched every day, for the agents report's news matching.
 
@@ -352,14 +354,14 @@ Sources: GitHub Trending + GitHub Search API + OpenRouter + npm
 
 This week's highlights
 Agent & coding tool radar (OpenRouter / npm / GitHub, new tools flagged 🆕)
-Top repos by dimension
+Top projects by category
   🧑‍💻 Coding Agents               — CLI / IDE / cloud agents that write code
   🧰 Agent Harnesses & Frameworks — harnesses / SDKs / agent runtimes
   🕸️ Multi-Agent & Orchestration  — swarms / supervisors / many-agent coordination
   🔌 Agent Tooling               — memory / context / skills / MCP / sandboxes / cost
   🤖 Other Agents                — personal / research / browser / vertical agents
 Trend signal analysis
-Community focus
+Community hot spots
 Model usage on OpenRouter (top models by tokens + newly listed)
 Claude Code Skills highlights
 ```

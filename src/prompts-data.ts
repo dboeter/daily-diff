@@ -6,65 +6,15 @@
 
 import type { WebFetchResult } from "./web.ts";
 import type { TrendingData } from "./trending.ts";
-import { momentumRatio } from "./npm.ts";
+import type { summaryRows } from "./trending-rank.ts";
+import { formatTokens } from "./openrouter.ts";
+import { TRENDING_REPORT } from "./i18n.ts";
+import { TRENDING_TABLES_MARKER } from "./report-builders.ts";
 import type { HnData } from "./hn.ts";
 import type { ArxivData } from "./arxiv.ts";
 import type { HfData } from "./hf.ts";
 import type { DevtoData } from "./devto.ts";
 import type { LobstersData } from "./lobsters.ts";
-/** 13_694_514_725_528 → "13.69T". OpenRouter token counts span 10^9–10^13. */
-function formatTokens(n: number): string {
-  if (n >= 1e12) return `${(n / 1e12).toFixed(2)}T`;
-  if (n >= 1e9) return `${(n / 1e9).toFixed(1)}B`;
-  return `${(n / 1e6).toFixed(1)}M`;
-}
-
-const rankStr = (r: number | null) => (r === null ? "—" : `#${r}`);
-
-/** Agent & coding-tool sources (OpenRouter apps, npm). Empty string when none has data. */
-function buildAgentRadarData(data: TrendingData): string {
-  const { openrouter, npm } = data;
-  const sections: string[] = [];
-
-  if (openrouter.apps.length > 0) {
-    const rows = openrouter.apps.map(
-      (a) =>
-        `- ${a.url ? `[${a.title}](${a.url})` : a.title}` +
-        ` | rank day ${rankStr(a.dayRank)} / week ${rankStr(a.weekRank)} / month ${rankStr(a.monthRank)}` +
-        (a.weekTokens > 0 ? ` | ${formatTokens(a.weekTokens)} tokens/week` : "") +
-        (a.growthPercent !== null ? ` | 📈 +${a.growthPercent}% (OpenRouter trending)` : "") +
-        ` | listed ${a.createdAt.slice(0, 10)}` +
-        (a.categories.length > 0 ? ` | ${a.categories.join(", ")}` : "") +
-        (a.description ? `\n  ${a.description}` : ""),
-    );
-    sections.push(
-      `## OpenRouter Apps (${openrouter.apps.length} apps — trending, agent categories, recently listed)\n` +
-        `Ranks are by tokens among the top 200 apps for that period ("—" = not in that top 200). ` +
-        `Ranked this week but absent from the month list means newly popular.\n` +
-        rows.join("\n"),
-    );
-  }
-
-  const npmRow = (p: (typeof npm.top)[number]) =>
-    `- [${p.name}](${p.url}) | ${p.weekly.toLocaleString()}/week, ${p.monthly.toLocaleString()}/month` +
-    ` | momentum ${momentumRatio(p).toFixed(1)}x | last publish ${p.lastPublish}` +
-    (p.description ? `\n  ${p.description}` : "");
-  if (npm.rising.length > 0) {
-    sections.push(
-      `## npm Rising Coding-Agent Packages (${npm.rising.length})\n` +
-        `Momentum = weekly downloads vs. the monthly run rate (1.0x steady, ~4.3x first published this week).\n` +
-        npm.rising.map(npmRow).join("\n"),
-    );
-  }
-  if (npm.top.length > 0) {
-    sections.push(
-      `## npm Top Coding-Agent Packages by Weekly Downloads (${npm.top.length})\n` +
-        npm.top.map(npmRow).join("\n"),
-    );
-  }
-
-  return sections.join("\n\n---\n\n");
-}
 
 /** OpenRouter model usage. Empty string when there is no model data. */
 function buildModelUsageData(data: TrendingData): string {
@@ -91,116 +41,52 @@ function buildModelUsageData(data: TrendingData): string {
   return sections.join("\n\n---\n\n");
 }
 
-export function buildTrendingPrompt(data: TrendingData, dateStr: string): string {
-  const trendingSection =
-    data.trendingFetchSuccess && data.trendingRepos.length > 0
-      ? data.trendingRepos
-          .map(
-            (r) =>
-              `- [${r.fullName}](${r.url})` +
-              (r.language ? ` [${r.language}]` : "") +
-              // 0 means the scrape missed the count (no trending repo has 0 stars); omit it rather than publish ⭐0
-              (r.totalStars > 0 ? ` ⭐${r.totalStars.toLocaleString()}` : "") +
-              (r.periodStars > 0 ? ` (+${r.periodStars} this week)` : "") +
-              (r.forks > 0 ? ` 🍴${r.forks.toLocaleString()}` : "") +
-              (r.description ? `\n  ${r.description}` : ""),
-          )
-          .join("\n")
-      : "(Unable to fetch this week's GitHub Trending list)";
+/**
+ * Weekly trending, call 1 of 2: one 2-sentence summary per numbered table row.
+ * The rows were selected and ranked in code; parseRowSummaries reads the reply.
+ */
+export function buildTrendingSummariesPrompt(rows: ReturnType<typeof summaryRows>, dateStr: string): string {
+  const list = rows
+    .map((r) => `${r.n}. ${r.name} — ${r.description || "(no description)"} — ${r.facts}`)
+    .join("\n");
+  return `You are a technical analyst covering AI coding tools, agents and agent harnesses. Below are ${rows.length} numbered projects and tools from the agent & AI coding trends report for the week ending ${dateStr}, each with its description and the facts measured this week.
 
-  const searchSection =
-    data.searchRepos.length > 0
-      ? data.searchRepos
-          .map(
-            (r) =>
-              `- [${r.fullName}](${r.url})` +
-              (r.language ? ` [${r.language}]` : "") +
-              ` ⭐${r.stargazersCount.toLocaleString()}` +
-              ` [topic:${r.searchQuery}]` +
-              (r.description ? `\n  ${r.description}` : ""),
-          )
-          .join("\n")
-      : "(No search results)";
+${list}
 
-  const radarData = buildAgentRadarData(data);
+For every numbered item write exactly one line in the form \`N: <2 sentences>\` — what it is and why it is worth attention this week.
+- Ground every sentence only in the given description and facts. Do not invent features, users, releases or numbers.
+- If the description is empty, say only what the name and the facts show.
+- Output one line per item, ${rows.length} lines in total, in the given order. No other text: no headings, no introduction, no blank lines.
+- English.
+`;
+}
+
+/**
+ * Weekly trending, call 2 of 2: the prose sections around the code-rendered
+ * tables. The model places TRENDING_TABLES_MARKER where spliceTrendingProse
+ * inserts the tables.
+ */
+export function buildTrendingProsePrompt(tablesMd: string, data: TrendingData, dateStr: string): string {
+  const T = TRENDING_REPORT;
   const modelData = buildModelUsageData(data);
+  return `You are a technical analyst covering AI coding tools, agents and agent harnesses. Below are this week's tables for the agent & AI coding trends report, week ending ${dateStr}. They were selected and ranked in code from GitHub Trending (weekly), GitHub topic search, OpenRouter app rankings and npm downloads; the Summary column holds the project descriptions.
 
-  return `You are a technical analyst covering AI coding tools, agents and agent harnesses. The following is GitHub trending repository data for the week ending ${dateStr}. Filter it down to agent and AI-coding projects, categorize them, and analyze trends.
-
-Scope: this report is about agents, not AI in general. Model weights, training and fine-tuning, inference engines, RAG pipelines, vector databases and chat frontends are out of scope unless the project is built specifically for agents.
-
-## Data Sources
-- **Trending List** (github.com/trending?since=weekly, this week's stars most reliable): weekly hot list with stars gained this week
-- **Topic Search** (GitHub Search API, topic tags): agent, harness and AI-coding projects active in last 7 days, grouped by topic; \`new:*\` topics are repos created in the last 14 days
-${radarData ? "- **OpenRouter Apps** (openrouter.ai/apps): apps ranked by LLM tokens routed through OpenRouter — a usage signal, not a popularity vote\n- **npm** (registry search, coding-agent keywords): download counts; easily inflated by CI and bots\n" : ""}${modelData ? "- **OpenRouter Models**: token usage per model and newly listed models\n" : ""}
+${tablesMd || "(No projects were selected this week.)"}
+${modelData ? `\n---\n\n${modelData}\n` : ""}
 ---
 
-## GitHub Trending This Week (${data.trendingRepos.length} repositories)
-${trendingSection}
+Write the prose sections of the report, in this order:
 
----
-
-## Agent Topic Search Results (${data.searchRepos.length} repositories, deduplicated)
-${searchSection}
-
----
-${radarData ? `\n${radarData}\n\n---\n` : ""}${modelData ? `\n${modelData}\n\n---\n` : ""}
-Generate a structured Agent & AI Coding Trends Report in English:
-
-**Step 1 (Filter)**: From the above data, keep only agents, agent harnesses and frameworks, multi-agent/orchestration systems, AI coding tools, and tooling built for agents (memory, context, skills, sandboxes, cost tracking). Drop everything else, including general AI/ML projects that are out of scope (see Scope above), non-AI trending repos, and awesome-lists or tutorials unless they are the week's clear standout.
-
-**Step 2 (Categorize)**: Group filtered projects into these categories (a project can belong to multiple; pick the primary one):
-- 🧑‍💻 Coding Agents (CLI, IDE and cloud agents that write code)
-- 🧰 Agent Harnesses & Frameworks (harnesses, SDKs, runtimes for building agents)
-- 🕸️ Multi-Agent & Orchestration (swarms, supervisors, running and coordinating many agents)
-- 🔌 Agent Tooling (memory, context management, skills, MCP servers, sandboxes, token/cost tools)
-- 🤖 Other Agents (personal assistants, research, browser and vertical agents)
-
-**Step 3 (Output Report)** with these sections:
-
-1. **This Week's Highlights** — 3-5 sentences on the most noteworthy agent and AI-coding open-source developments this week
-${
-  radarData
-    ? `
-1b. **🚀 Agent & Coding Tool Radar** — the goal is spotting upcoming or new agents and agentic coding tools. Render one **Markdown table**:
-
-   | Tool | Source | Signal | Summary |
-   | :--- | :--- | :--- | :--- |
-
-   - **Tool**: name as a Markdown link (OpenRouter origin URL, npm page, or GitHub repo)
-   - **Source**: OpenRouter, npm, GitHub, or several when a tool shows up in more than one
-   - **Signal**: the momentum data copied verbatim (e.g. "week #12 / month —", "+776%", "12,560/week, 4.2x"); prefix "🆕" when the tool is new — listed or created recently, ranked this week but absent from the month list, or npm momentum ≥ 3x
-   - **Summary**: 2 sentences — what it is and why it is worth watching
-   - Only agents and agentic coding tools (CLI agents, IDE agents, personal/cloud agents, agent harnesses). Exclude plugins, extensions, MCP servers, skills, proxies and routers unless the package *is* the agent; exclude games, roleplay and chat frontends
-   - Prefer new and rising tools over established leaders; 6-12 rows. Omit this section if nothing qualifies
-`
-    : ""
-}
-2. **Top Projects by Category** — For each category, render a **Markdown table** with exactly these columns:
-
-   | Project | Lang | Stars (total / this week) | Summary |
-   | :--- | :--- | ---: | :--- |
-
-   - **Project**: repo name as a Markdown link to its GitHub URL
-   - **Lang**: primary language (leave blank if unknown)
-   - **Stars**: total stars, plus this week's new stars in parentheses when available (e.g. "86,392 (+1,851)"); if the input has no total, show only this week's count (e.g. "(+1,851)"); copy the numbers from the input verbatim, do not recompute
-   - **Summary**: 2 sentences — what the project is and why it's worth attention this week, including any standout data point or momentum signal
-   - List 3-8 projects per category; omit a category's table entirely if no project falls under it
-
-3. **Trend Signal Analysis** — 200-300 words, distill from this week's hot list:
-   - Which kind of agent or coding tool is getting explosive community attention?
-   - Any new harness patterns, orchestration approaches or directions appearing for the first time?
-   - Connection to recent agent, coding-tool or model releases
-
-4. **Community Hot Spots** — Bullet list of 3-5 specific projects or directions worth developer focus, with brief reasoning
-${
-  modelData
-    ? `
-5. **Model Usage on OpenRouter** — 3-5 bullets: which models lead token usage, notable newcomers in the top list, and any newly listed models worth trying for agentic work. Copy token figures verbatim.
-`
-    : ""
-}
-Style: English, professional and concise, must include a link for every project or tool.
+1. \`## ${T.highlightsHeading}\` — 3-5 sentences on the most noteworthy agent and AI-coding developments this week.
+2. The line \`${TRENDING_TABLES_MARKER}\` exactly once, on its own line. The tables are inserted there.
+3. \`## ${T.trendsHeading}\` — 200-300 words: which kinds of agent or coding tool are getting attention, and any new harness or orchestration patterns.
+4. \`## ${T.hotSpotsHeading}\` — 3-5 bullets: specific projects or directions worth developer focus, with brief reasoning.
+${modelData ? `5. \`## ${T.modelUsageHeading}\` — 3-5 bullets: which models lead token usage, notable newcomers in the top list, and newly listed models worth trying for agentic work. Copy token figures verbatim.\n` : ""}
+Rules:
+- Do not reproduce or alter the tables.
+- Base every claim on the tables and the data above. They show descriptions and counts only, so do not describe releases, adoption or community reactions they do not show.
+- Mention only projects that appear in the tables${modelData ? " or in the model data" : ""}, and link every project you mention.
+- English, professional and concise.
 `;
 }
 
