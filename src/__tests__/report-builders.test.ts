@@ -62,6 +62,30 @@ describe("buildProjectReportContent", () => {
     expect(result).not.toContain("[ALPHA]");
   });
 
+  it("counts a project the summary left out as quiet", () => {
+    const news = [{ source: "GitHub Search", title: "works with BETA", url: "u", detail: "d" }];
+    const result = buildProjectReportContent({
+      ...input,
+      summary: "## Overview\nBODY\n\n## ALPHA\n- release\n\n## BETA pod\n- not BETA's section",
+      activities: [input.activities[0]!, makeActivity("beta", { news }), makeActivity("gamma")],
+    });
+    expect(result).toContain("Active today: 1 |");
+    expect(result).toContain(
+      "**Quiet today:** [BETA](https://github.com/org/beta), [GAMMA](https://github.com/org/gamma)",
+    );
+  });
+
+  it("keeps projects with data active when the summary has no project section", () => {
+    const news = [{ source: "Hacker News", title: "BETA 2.0", url: "u", detail: "d" }];
+    const result = buildProjectReportContent({
+      ...input,
+      summary: "Summary generation failed.",
+      activities: [input.activities[0]!, makeActivity("beta", { news }), makeActivity("gamma")],
+    });
+    expect(result).toContain("Active today: 2 |");
+    expect(result).toContain("**Quiet today:** [GAMMA](https://github.com/org/gamma)");
+  });
+
   it("omits the quiet line when every project was active", () => {
     const result = buildProjectReportContent({ ...input, activities: [input.activities[0]!] });
     expect(result).not.toContain("Quiet today");

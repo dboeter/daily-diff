@@ -25,7 +25,7 @@ export interface NewsSources {
 /** News items per agent, so one viral thread cannot crowd out the rest. */
 export const NEWS_PER_AGENT = 5;
 
-function escapeRegex(s: string): string {
+export function escapeRegex(s: string): string {
   return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
@@ -128,16 +128,27 @@ export const MAX_AGENTS_PER_ITEM = 2;
  * News items per agent id. An item naming one or two agents is listed under
  * each; one naming more is dropped (see MAX_AGENTS_PER_ITEM). Items keep source
  * order (HN rank, then web, then trending) and are de-duplicated by URL.
+ *
+ * An agent's own repo in the GitHub Search results is not news about it: the
+ * topic queries sort by stars, so a large agent repo (QwenPaw, 35k stars) is
+ * returned every day. On GitHub Trending its own repo still counts — trending
+ * there is a daily event.
  */
 export function matchAgentNews(agents: RepoConfig[], sources: NewsSources): Map<string, NewsItem[]> {
-  const matchers = agents.map((cfg) => ({ id: cfg.id, re: agentMatcher(cfg) }));
+  const matchers = agents.map((cfg) => ({
+    id: cfg.id,
+    re: agentMatcher(cfg),
+    ownUrl: `https://github.com/${cfg.repo}`.toLowerCase(),
+  }));
   const result = new Map<string, NewsItem[]>(agents.map((cfg) => [cfg.id, []]));
   const seen = new Set<string>();
 
   for (const { item, text } of collectNewsItems(sources)) {
     if (seen.has(item.url)) continue;
     seen.add(item.url);
-    const hits = matchers.filter((m) => m.re.test(text));
+    const ownSearchResult = (m: { ownUrl: string }) =>
+      item.source === "GitHub Search" && item.url.toLowerCase() === m.ownUrl;
+    const hits = matchers.filter((m) => m.re.test(text) && !ownSearchResult(m));
     if (hits.length === 0 || hits.length > MAX_AGENTS_PER_ITEM) continue;
     for (const { id } of hits) {
       const list = result.get(id)!;

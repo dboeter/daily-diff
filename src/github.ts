@@ -71,12 +71,38 @@ function headers(): Record<string, string> {
   };
 }
 
-async function githubGet<T>(url: string, params: Record<string, string> = {}): Promise<T> {
+/** Retries after a dropped connection; waits GET_RETRY_MS, then twice that. */
+const GET_RETRIES = 2;
+const GET_RETRY_MS = 2000;
+
+/**
+ * GET with retries on network failures only. On 2026-10-06 the connection
+ * dropped mid-body (`TypeError: terminated`, thrown by `resp.json()`) and the
+ * run lost a Codex stable release. undici throws TypeError for both that and a
+ * failed connect; an HTTP error status or bad JSON fails again on retry.
+ *
+ * `slot` runs before every attempt: search calls pass searchSlot, so a retry
+ * keeps to the search rate limit too.
+ */
+async function githubGet<T>(
+  url: string,
+  params: Record<string, string> = {},
+  slot?: () => Promise<void>,
+): Promise<T> {
   const u = new URL(url);
   for (const [k, v] of Object.entries(params)) u.searchParams.set(k, v);
-  const resp = await fetch(u.toString(), { headers: headers() });
-  if (!resp.ok) throw new Error(`GitHub API error ${resp.status} (${url}): ${await resp.text()}`);
-  return resp.json() as Promise<T>;
+  for (let attempt = 0; ; attempt++) {
+    await slot?.();
+    try {
+      const resp = await fetch(u.toString(), { headers: headers() });
+      if (!resp.ok) throw new Error(`GitHub API error ${resp.status} (${url}): ${await resp.text()}`);
+      return (await resp.json()) as T;
+    } catch (err) {
+      if (!(err instanceof TypeError) || attempt >= GET_RETRIES) throw err;
+      console.error(`  [github] ${err} — retry ${attempt + 1}/${GET_RETRIES} (${url})`);
+      await sleep(GET_RETRY_MS * 2 ** attempt);
+    }
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -183,13 +209,16 @@ export function selectHotIssues(items: GitHubItem[], createdSince: Date): GitHub
  */
 export async function fetchHotIssues(repo: string, since: Date): Promise<GitHubItem[]> {
   const createdSince = new Date(Math.min(since.getTime(), Date.now() - HOT_ISSUE_MIN_WINDOW_MS));
-  await searchSlot();
-  const result = await githubGet<{ items: GitHubItem[] }>("https://api.github.com/search/issues", {
-    q: `repo:${repo} is:issue created:>=${createdSince.toISOString().slice(0, 19)}Z`,
-    sort: "comments",
-    order: "desc",
-    per_page: "50",
-  });
+  const result = await githubGet<{ items: GitHubItem[] }>(
+    "https://api.github.com/search/issues",
+    {
+      q: `repo:${repo} is:issue created:>=${createdSince.toISOString().slice(0, 19)}Z`,
+      sort: "comments",
+      order: "desc",
+      per_page: "50",
+    },
+    searchSlot,
+  );
   return selectHotIssues(result.items, createdSince);
 }
 

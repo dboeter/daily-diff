@@ -111,6 +111,12 @@ describe("buildProjectDigestPrompt", () => {
     expect(prompt).toContain("## <Project name>");
     expect(prompt).toContain("today");
   });
+
+  it("lets the model leave out a project whose items it skipped", () => {
+    const prompt = buildProjectDigestPrompt([makeActivity({ releases: [release] })], scope, "d");
+    expect(prompt).toContain("that has something left to report");
+    expect(prompt).toContain("leave out its section entirely");
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -383,5 +389,12 @@ describe("buildHnPrompt", () => {
     expect(result).toContain("Score: 10");
     expect(result).toContain("Comments: 2");
     expect(result).toContain("Hacker News");
+  });
+
+  it("does not ask for comment-thread content the model never sees", () => {
+    const result = buildHnPrompt({ stories: [], fetchSuccess: true }, "2026-10-06");
+    expect(result).toContain("not the article and not the comment thread");
+    expect(result).toContain("Do not describe the comments");
+    expect(result).not.toMatch(/typical reaction|last cycle/);
   });
 });

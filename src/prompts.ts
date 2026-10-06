@@ -140,7 +140,7 @@ Write the report in English with exactly this structure:
 ## Overview
 3–5 sentences on the most important changes across these projects ${scope.period}: what shipped, what broke, what got attention. Name projects. No counts of issues, PRs or stars.
 
-Then one section per project above, in the order given, headed \`## <Project name>\`, with at most 3 bullets, one or two sentences each:
+Then one section per project above that has something left to report, in the order given, headed \`## <Project name>\`, with at most 3 bullets, one or two sentences each:
 - **Release**: what the stable release(s) change for users — features, breaking changes, fixes that matter. Link the release. Several releases in a range: summarize the range, do not list each one.
 - **News**: what the news item says about the project and why it matters. Link it.
 - **Hot issue**: what users are hitting and how serious it is. Link the issue (https://github.com/<repo>/issues/<number>).
@@ -148,6 +148,7 @@ Then one section per project above, in the order given, headed \`## <Project nam
 Rules:
 - Use only the data above. Omit a bullet type that has no data; never write "no release today" or similar.
 - A news item may mention a project only in passing: skip it unless the project is its actual subject.
+- If every item for a project is skipped, leave out its section entirely; the report lists it as quiet.
 - Style: concise and concrete, for developers who use these tools.
 `;
 }

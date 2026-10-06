@@ -358,7 +358,7 @@ export function buildHnPrompt(data: HnData, dateStr: string): string {
     )
     .join("\n\n");
 
-  return `You are an AI industry news analyst. The following are AI-related posts from the current Hacker News topstories feed as of ${dateStr} (ordered by HN rank, ${data.stories.length} total):
+  return `You are an AI industry news analyst. The following are AI-related posts from the current Hacker News topstories feed as of ${dateStr} (ordered by HN rank, ${data.stories.length} total). You have only each story's title, link and counts — not the article and not the comment thread:
 
 ---
 
@@ -368,7 +368,7 @@ ${storiesText}
 
 Generate a structured Hacker News AI Community Digest in English:
 
-1. **Today's Highlights** — 3-5 sentences on the hottest AI discussion topics and community sentiment on HN today
+1. **Today's Highlights** — 3-5 sentences on the hottest AI topics on HN today, judged by score and comment count
 
 2. **Top News & Discussions** — Organized by category, render a **Markdown table** per category with exactly these columns:
 
@@ -377,7 +377,7 @@ Generate a structured Hacker News AI Community Digest in English:
 
    - **Title**: title as a Markdown link to the original article, followed by a " · [HN](discussion-url)" link to the HN thread
    - **Score / Comments**: copy the numbers from the input verbatim
-   - **Summary**: 2 sentences — why this matters and what the community's typical reaction is
+   - **Summary**: 2 sentences — what the item is and why it matters to developers. Do not describe the comments: you have not read them. If the title does not say what the item is, do not guess
    - Select the 2-5 most representative items per category; omit a category's table if empty
 
    Categories:
@@ -386,10 +386,9 @@ Generate a structured Hacker News AI Community Digest in English:
    - 🏢 Industry News (company news, funding, product launches)
    - 💬 Opinions & Debates (notable Ask HN, Show HN, or hot discussion threads)
 
-3. **Community Sentiment Signal** — 100-200 words analyzing today's HN AI discussion mood and focus:
+3. **Community Sentiment Signal** — 100-200 words on today's HN AI focus, from the titles and counts alone:
    - Which topics are most active (high score + high comments)?
-   - Any clear points of controversy or consensus?
-   - Compared to last cycle, any notable shift in focus?
+   - Which stories draw far more comments than points — a sign of a contested topic?
 
 4. **Worth Deep Reading** — List 2-3 pieces most worth developers/researchers reading in depth, with brief reasoning
 

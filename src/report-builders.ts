@@ -2,7 +2,8 @@
  * Report content builders — extracted from index.ts for testability.
  */
 
-import type { ProjectActivity } from "./prompts.ts";
+import { hasActivity, type ProjectActivity } from "./prompts.ts";
+import { escapeRegex } from "./agent-news.ts";
 import type { OpenRouterStealthModel } from "./openrouter.ts";
 import { STEALTH_SECTION } from "./i18n.ts";
 
@@ -29,13 +30,22 @@ export interface ProjectReportInput {
  * Release-focused report. Quiet projects are listed in one line at the end
  * rather than each getting a "no activity" section. Small enough to post as
  * the GitHub issue body unchanged, so there is no brief variant.
+ *
+ * Quiet is decided by the summary, not only the data: the model leaves out a
+ * project whose only news mentions it in passing, and such a project is quiet
+ * too. A summary with no project section at all is a failure notice, so then
+ * the data decides.
  */
 export function buildProjectReportContent(r: ProjectReportInput): string {
   const releases = r.activities.reduce((n, a) => n + a.releases.length, 0);
   const prereleases = r.activities.reduce((n, a) => n + a.prereleaseCount, 0);
-  const quiet = r.activities.filter(
-    (a) => a.releases.length === 0 && a.hotIssues.length === 0 && a.news.length === 0,
+  const withData = r.activities.filter(hasActivity);
+  // Line-anchored, so "## Pi pod" in a summary does not count as a Pi section.
+  const covered = withData.filter((a) =>
+    new RegExp(`^##\\s+${escapeRegex(a.config.name)}\\s*$`, "m").test(r.summary),
   );
+  const active = covered.length > 0 ? covered : withData;
+  const quiet = r.activities.filter((a) => !active.includes(a));
   const link = (a: ProjectActivity) => `[${a.config.name}](https://github.com/${a.config.repo})`;
 
   return (

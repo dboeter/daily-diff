@@ -155,19 +155,57 @@ describe("matchAgentNews", () => {
       ],
       searchRepos: [
         {
-          fullName: "openclaw/openclaw",
-          description: null,
+          fullName: "someone/claw-memory",
+          description: "Long-term memory for OpenClaw",
           language: "TypeScript",
-          stargazersCount: 90000,
+          stargazersCount: 900,
           pushedAt: "2026-10-04",
-          url: "https://github.com/openclaw/openclaw",
+          url: "https://github.com/someone/claw-memory",
           searchQuery: "ai-agent",
         },
       ],
     };
     const news = matchAgentNews([claudeCode, openclaw], { trending });
     expect(news.get("claude-code")!.map((n) => n.url)).toEqual(["https://github.com/someone/cc-skills"]);
-    expect(news.get("openclaw")!.map((n) => n.url)).toEqual(["https://github.com/openclaw/openclaw"]);
+    expect(news.get("openclaw")!.map((n) => n.url)).toEqual(["https://github.com/someone/claw-memory"]);
+  });
+
+  it("skips an agent's own repo in search results, not on GitHub Trending", () => {
+    const trending: TrendingData = {
+      trendingFetchSuccess: true,
+      openrouter: EMPTY_OPENROUTER,
+      npm: EMPTY_NPM,
+      trendingRepos: [],
+      searchRepos: [
+        {
+          fullName: "openclaw/openclaw",
+          description: null,
+          language: "TypeScript",
+          stargazersCount: 90000,
+          pushedAt: "2026-10-04",
+          url: "https://github.com/OpenClaw/OpenClaw",
+          searchQuery: "ai-agent",
+        },
+      ],
+    };
+    expect(matchAgentNews([openclaw], { trending }).get("openclaw")).toEqual([]);
+
+    trending.trendingRepos = [
+      {
+        fullName: "openclaw/openclaw",
+        description: "",
+        language: "TypeScript",
+        periodStars: 800,
+        totalStars: 90000,
+        forks: 10,
+        url: "https://github.com/openclaw/openclaw",
+      },
+    ];
+    expect(
+      matchAgentNews([openclaw], { trending })
+        .get("openclaw")!
+        .map((n) => n.source),
+    ).toEqual(["GitHub Trending"]);
   });
 
   it("de-duplicates by URL and caps the list per agent", () => {

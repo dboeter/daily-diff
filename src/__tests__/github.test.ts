@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import {
   closeSupersededIssues,
   fetchHotIssues,
+  fetchRecentReleases,
   isPrerelease,
   selectHotIssues,
   type GitHubItem,
@@ -159,6 +160,35 @@ describe("fetchHotIssues", () => {
     expect(q).toContain("created:>=2026-10-02T22:37:00Z");
     expect(hot.map((i) => i.number)).toEqual([8]);
     vi.useRealTimers();
+  });
+});
+
+describe("fetchRecentReleases", () => {
+  it("retries a connection dropped mid-body", async () => {
+    vi.useFakeTimers({ now: new Date("2026-10-06T02:26:00Z") });
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    const fetchSpy = vi
+      .spyOn(globalThis, "fetch")
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.reject(new TypeError("terminated")),
+      } as Response)
+      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve([release("v2")]) } as Response);
+
+    const pending = fetchRecentReleases("org/repo", SINCE);
+    await vi.runAllTimersAsync();
+    expect((await pending).map((r) => r.tag_name)).toEqual(["v2"]);
+    expect(fetchSpy).toHaveBeenCalledTimes(2);
+    vi.useRealTimers();
+  });
+
+  it("does not retry an HTTP error", async () => {
+    const fetchSpy = vi
+      .spyOn(globalThis, "fetch")
+      .mockResolvedValue({ ok: false, status: 404, text: () => Promise.resolve("Not Found") } as Response);
+
+    await expect(fetchRecentReleases("org/repo", SINCE)).rejects.toThrow("GitHub API error 404");
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
   });
 });
 
