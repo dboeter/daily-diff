@@ -6,7 +6,594 @@
     <description>Daily AI ecosystem digest</description>
     <language>en</language>
     <atom:link href="https://dboeter.github.io/daily-diff/feed.xml" rel="self" type="application/rss+xml"/>
-    <lastBuildDate>Sun, 04 Oct 2026 20:37:35 +0000</lastBuildDate>
+    <lastBuildDate>Tue, 06 Oct 2026 02:32:07 +0000</lastBuildDate>
+    <item>
+      <title>AI Agents Digest 2026-10-06</title>
+      <link>https://dboeter.github.io/daily-diff/#2026-10-06/ai-agents</link>
+      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-10-06/ai-agents</guid>
+      <pubDate>Tue, 06 Oct 2026 00:00:00 +0000</pubDate>
+      <description>AI Agents Digest 2026-10-06 Generated: 2026-10-06 02:26 UTC | Projects: 12 | Active today: 9 | Stable releases: 7 | Prereleases (not covered): 5 🕵️ Stealth Models on OpenRouter No stealth models listed on OpenRouter today. Overview Claude Code shipped v2.1.290 with hook enhancements for server tool visibility and sub-agent permission tracking. GitHub Copilot CLI v1.0.92 added configuration subcommands, an environment picker, and MCP connection fixes. Pi released v1.0.4 with tool pattern filters...</description>
+      <content:encoded><![CDATA[<h1>AI Agents Digest 2026-10-06</h1>
+<blockquote>
+<p>Generated: 2026-10-06 02:26 UTC | Projects: 12 | Active today: 9 | Stable releases: 7 | Prereleases (not covered): 5</p>
+</blockquote>
+<hr>
+<h2>🕵️ Stealth Models on OpenRouter</h2>
+<p>No stealth models listed on OpenRouter today.</p>
+<hr>
+<h2>Overview</h2>
+<p>Claude Code shipped v2.1.290 with hook enhancements for server tool visibility and sub-agent permission tracking. GitHub Copilot CLI v1.0.92 added configuration subcommands, an environment picker, and MCP connection fixes. Pi released v1.0.4 with tool pattern filters and v1.0.3 with Azure Foundry support. Qwen Code v0.25.0 introduced local workspace-agent collaboration and broker provider controls, while tracking Kubernetes runtime progress and a hosted-session file-access issue. OpenClaw users report a workspace promotion failure and multi-agent team breakdowns on the claude-cli runtime. Hermes Agent faces a credential cooldown bug that benches keys for days after a single 429. ZeroClaw&#39;s quickstart fails on Android/Termux due to config persistence.</p>
+<h2>Claude Code</h2>
+<ul>
+<li><strong>Release</strong>: v2.1.290 adds <code>serverToolUses</code> to the <code>turn.step</code> hook result so mods can see the advisor&#39;s tool calls with IDs, names, inputs, and timing; <code>agentId</code> is now included in <code>tool.check</code> events to distinguish sub-agent permission checks; <code>ceiling</code> field added to hook questions and verdicts. <a href="https://github.com/anthropics/claude-code/releases/tag/v2.1.290">https://github.com/anthropics/claude-code/releases/tag/v2.1.290</a></li>
+<li><strong>News</strong>: A Hacker News thread (31 points, 22 comments) features an engineer describing Claude Code as making their job &quot;soul-sucking,&quot; sparking discussion on AI-assisted coding burnout. <a href="https://news.ycombinator.com/item?id=49971473">https://news.ycombinator.com/item?id=49971473</a></li>
+</ul>
+<h2>OpenAI Codex</h2>
+<p><em>(No releases, news, or hot issues meeting criteria.)</em></p>
+<h2>GitHub Copilot CLI</h2>
+<ul>
+<li><strong>Release</strong>: v1.0.92 introduces <code>copilot config</code> subcommands to list, read, set, and remove settings; adds a pre-conversation Ctrl+E environment picker for local vs. cloud runs; enables silent token renewal for Entra-protected MCP servers; fixes legacy HTTP+SSE MCP connections that hung on unacknowledged POSTs. <a href="https://github.com/github/copilot-cli/releases/tag/v1.0.92">https://github.com/github/copilot-cli/releases/tag/v1.0.92</a></li>
+</ul>
+<h2>Pi</h2>
+<ul>
+<li><strong>Release</strong>: v1.0.4 adds tool pattern support (<code>--tools</code>, <code>--exclude-tools</code> accept <code>*</code> wildcards) and <code>--no-mcp</code> to disable MCP for a single run; v1.0.3 adds Azure Foundry Chat Completions via the <code>azure</code> provider and saves codemode images to files. <a href="https://github.com/earendil-works/pi/releases/tag/v1.0.4">https://github.com/earendil-works/pi/releases/tag/v1.0.4</a></li>
+<li><strong>News</strong>: Show HN post (119 points, 47 comments) introduces Pi pod, a way to run the Pi coding agent in sandboxes on your own server. <a href="https://news.ycombinator.com/item?id=49937304">https://news.ycombinator.com/item?id=49937304</a></li>
+</ul>
+<h2>Qwen Code</h2>
+<ul>
+<li><strong>Release</strong>: v0.25.0 adds local workspace-agent collaboration with a generic Broker provider and versioned worker contract; SDK TypeScript v0.1.18 and Desktop v0.25.0 bundle the CLI. <a href="https://github.com/QwenLM/qwen-code/releases/tag/v0.25.0">https://github.com/QwenLM/qwen-code/releases/tag/v0.25.0</a></li>
+<li><strong>Hot issue</strong>: #13395 tracks remaining Kubernetes tool-runtime implementation, portability, and acceptance gates under proposal #12380. <a href="https://github.com/QwenLM/qwen-code/issues/13395">https://github.com/QwenLM/qwen-code/issues/13395</a></li>
+<li><strong>Hot issue</strong>: #13426 requests a safe way for hosted workspace sessions to read linked dependencies outside the session directory but inside the workspace mount (e.g., monorepo setups). <a href="https://github.com/QwenLM/qwen-code/issues/13426">https://github.com/QwenLM/qwen-code/issues/13426</a></li>
+</ul>
+<h2>OpenClaw</h2>
+<ul>
+<li><strong>Hot issue</strong>: #164923 reports one workspace promotes 0/512 short-term candidates while siblings promote 50–90%, even with all thresholds overridden to zero; filters structurally reject raw conversation-turn snippets. <a href="https://github.com/openclaw/openclaw/issues/164923">https://github.com/openclaw/openclaw/issues/164923</a></li>
+<li><strong>Hot issue</strong>: #164972 documents multi-agent team failures on the <code>claude-cli</code> runtime: coordinator/specialist delegation breaks across visibility modes (agent/tree/all), with failures appearing as successes. <a href="https://github.com/openclaw/openclaw/issues/164972">https://github.com/openclaw/openclaw/issues/164972</a></li>
+</ul>
+<h2>Hermes Agent</h2>
+<ul>
+<li><strong>Hot issue</strong>: #132817 describes a pain cluster where a single transient 429/entitlement cooldown benches a credential for hours to days with no reset-time probe, no visibility into cooldown state, and no in-product pointer to <code>hermes auth reset</code> (13 reports this week). <a href="https://github.com/NousResearch/hermes-agent/issues/132817">https://github.com/NousResearch/hermes-agent/issues/132817</a></li>
+</ul>
+<h2>QwenPaw</h2>
+<p><em>(No releases, news, or hot issues meeting criteria.)</em></p>
+<h2>ZeroClaw</h2>
+<ul>
+<li><strong>Hot issue</strong>: #11525 reports <code>quickstart</code> fails on Android 16/Termux (aarch64) with &quot;Unable to persist config&quot; and no agent created; workflow blocked on mobile. <a href="https://github.com/zeroclaw-labs/zeroclaw/issues/11525">https://github.com/zeroclaw-labs/zeroclaw/issues/11525</a></li>
+</ul>
+<hr>
+<p><strong>Quiet today:</strong> <a href="https://github.com/google-gemini/gemini-cli">Gemini CLI</a>, <a href="https://github.com/anomalyco/opencode">OpenCode</a>, <a href="https://github.com/nearai/ironclaw">IronClaw</a></p>
+<hr>
+<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
+]]></content:encoded>
+    </item>
+    <item>
+      <title>Official AI Content Report 2026-10-06</title>
+      <link>https://dboeter.github.io/daily-diff/#2026-10-06/ai-web</link>
+      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-10-06/ai-web</guid>
+      <pubDate>Tue, 06 Oct 2026 00:00:00 +0000</pubDate>
+      <description>Official AI Content Report 2026-10-06 Today&amp;#39;s update | New content: 3 articles | Generated: 2026-10-06 02:26 UTC Sources: Anthropic: anthropic.com — 1 new articles (sitemap total: 455) OpenAI: openai.com — 2 new articles (sitemap total: 1049) AI Official Content Tracking Report Crawl Date: 2026-10-06Reporting Period: Incremental update (2026-10-05 publications)Sources: Anthropic (anthropic.com), OpenAI (openai.com) 1. Today&amp;#39;s Highlights Anthropic published a landmark research study intro...</description>
+      <content:encoded><![CDATA[<h1>Official AI Content Report 2026-10-06</h1>
+<blockquote>
+<p>Today&#39;s update | New content: 3 articles | Generated: 2026-10-06 02:26 UTC</p>
+</blockquote>
+<p>Sources:</p>
+<ul>
+<li>Anthropic: <a href="https://www.anthropic.com">anthropic.com</a> — 1 new articles (sitemap total: 455)</li>
+<li>OpenAI: <a href="https://openai.com">openai.com</a> — 2 new articles (sitemap total: 1049)</li>
+</ul>
+<hr>
+<h1>AI Official Content Tracking Report</h1>
+<p><strong>Crawl Date:</strong> 2026-10-06<br><strong>Reporting Period:</strong> Incremental update (2026-10-05 publications)<br><strong>Sources:</strong> Anthropic (anthropic.com), OpenAI (openai.com)</p>
+<hr>
+<h2>1. Today&#39;s Highlights</h2>
+<p>Anthropic published a landmark research study introducing a <strong>Robot Exposure Index</strong> that quantifies the economic automation potential of physical robots across the US labor market, revealing that while robots can technically perform ~75% of physical tasks (34% of working hours), they are cost-competitive for only 0.3% of job tasks today—with a projected 40-year timeline to reach 10% cost-parity. OpenAI released two index-page updates signaling dual strategic thrusts: <strong>monetization infrastructure</strong> (a new ChatGPT ads format and measurement framework) and <strong>regulatory compliance tooling</strong> (EU text provenance capabilities, likely tied to AI Act transparency obligations). Together, these releases frame a clear divergence: Anthropic is investing in deep, long-horizon economic research on physical AI, while OpenAI is operationalizing commercial and compliance product features for immediate developer and enterprise deployment.</p>
+<hr>
+<h2>2. Anthropic / Claude Content Highlights</h2>
+<h3>Research</h3>
+<p><strong>Title:</strong> <a href="https://www.anthropic.com/research/what-work-can-robots-do">Can we predict the jobs robots will do? / What work can robots do?</a><br><strong>Published:</strong> 2026-10-05 (paper dated Sep 30, 2026)<br><strong>Category:</strong> Research / Economics<br><strong>Format:</strong> Web article with PDF download</p>
+<p><strong>Core Insights:</strong></p>
+<ul>
+<li><strong>New Metric – Robot Exposure Index:</strong> Anthropic introduces a task-level index measuring the fraction of job tasks that <em>currently available</em> autonomous physical robots can perform in controlled environments. The index separates <em>technical feasibility</em> from <em>economic viability</em>.</li>
+<li><strong>Feasibility vs. Cost Reality:</strong> Robots can perform <del>75% of physical tasks (constituting 34% of total US working hours), but are cost-competitive with human labor for only <strong>0.3% of job tasks</strong> at current prices. Historical price-decline trends suggest a **</del>40-year horizon** before that share reaches 10%.</li>
+<li><strong>Demographic Exposure Gradient:</strong> Workers in high-exposure roles are disproportionately <strong>male, less educated, and lower paid</strong> (e.g., driving, warehousing). Roles requiring high interpersonal skill or unstructured physical dexterity (nursing, general repair) show near-zero exposure.</li>
+<li><strong>Complementarity with LLMs:</strong> ~80% of all job tasks (by working time) are exposed to <em>either</em> robots <em>or</em> LLMs, with minimal overlap—robots handle physical work, LLMs handle cognitive work. The residual unexposed labor is heavily interpersonal or requires physical skills robots lack.</li>
+<li><strong>Historical Labor Market Signal:</strong> Over the past 50 years, occupations with higher robot exposure have experienced <strong>greater declines in wages and employment</strong>, and the exposure intensity itself has grown ~2% per year as robot capabilities expand.</li>
+</ul>
+<p><strong>Strategic Significance:</strong> This work positions Anthropic as a thought leader on the <em>economics of physical AI</em>, providing a rigorous, data-driven counter-narrative to hype-driven automation forecasts. The 40-year cost-parity horizon is a critical planning parameter for enterprise automation roadmaps and public policy.</p>
+<hr>
+<h2>3. OpenAI Content Highlights</h2>
+<blockquote>
+<p>⚠️ <strong>Data Limitation Notice:</strong> The OpenAI crawl returned <strong>metadata only</strong> (URL slugs and category tags). No article bodies, excerpts, or publication timestamps beyond the crawl date were available. The analyses below are limited to objective URL enumeration. No speculative summaries are provided.</p>
+</blockquote>
+<h3>Index / Product &amp; Policy Updates</h3>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>URL</th>
+<th>Category (per crawl)</th>
+<th>Inferred Focus (from slug)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td><a href="https://openai.com/index/new-chatgpt-ads-format-and-measurement/">https://openai.com/index/new-chatgpt-ads-format-and-measurement/</a></td>
+<td>index</td>
+<td><strong>Monetization / Ads Infrastructure</strong> – Likely announces a new advertising format for ChatGPT surfaces and associated measurement/attribution tooling for advertisers.</td>
+</tr>
+<tr>
+<td>2</td>
+<td><a href="https://openai.com/index/eu-text-provenance/">https://openai.com/index/eu-text-provenance/</a></td>
+<td>index</td>
+<td><strong>Regulatory Compliance / AI Act Readiness</strong> – Likely details text provenance / watermarking features to meet EU AI Act transparency obligations for AI-generated content.</td>
+</tr>
+</tbody></table>
+<p><strong>Action Required:</strong> Full content retrieval needed for substantive analysis. Recommend monitoring these URLs for article body publication or pressing OpenAI comms for press-kit access.</p>
+<hr>
+<h2>4. Strategic Signal Analysis</h2>
+<h3>Anthropic – Technical Priorities</h3>
+<ul>
+<li><strong>Research Leadership in Physical AI Economics:</strong> The Robot Exposure Index continues Anthropic’s pattern of publishing high-impact, methodology-first research (cf. <em>Claude 3.5 Sonnet</em> benchmarks, <em>AI Safety Level</em> frameworks). The focus on <em>cost curves</em> and <em>demographic distributional effects</em> signals a priority on <strong>responsible scaling narratives</strong> that inform policy and enterprise buying committees.</li>
+<li><strong>Long-Horizon Safety &amp; Societal Impact:</strong> By framing automation as a 40-year economic transition rather than an imminent disruption, Anthropic sets an agenda that favors <strong>gradualist, evidence-based governance</strong>—differentiating from AGI-soon narratives.</li>
+</ul>
+<h3>OpenAI – Technical Priorities</h3>
+<ul>
+<li><strong>Commercialization Velocity:</strong> The “ads format and measurement” update confirms OpenAI is building a <strong>first-party ad stack</strong> for ChatGPT, moving beyond subscription/API revenue. This implies new developer surfaces (ad SDKs, placement APIs) and enterprise concerns (brand safety, data usage).</li>
+<li><strong>Regulatory-First Product Engineering:</strong> “EU text provenance” indicates shipping <strong>compliance-native features</strong> (watermarking, provenance metadata, opt-out tooling) directly into the model/output layer. This reduces integration burden for EU-facing enterprises and sets a de facto standard.</li>
+</ul>
+<h3>Competitive Dynamics</h3>
+<table>
+<thead>
+<tr>
+<th>Dimension</th>
+<th>Anthropic</th>
+<th>OpenAI</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Agenda Setting</strong></td>
+<td>Defines the <em>research vocabulary</em> for physical AI economics (exposure indices, cost-parity horizons).</td>
+<td>Defines the <em>commercial &amp; compliance vocabulary</em> for LLM deployment (ads, provenance, enterprise controls).</td>
+</tr>
+<tr>
+<td><strong>Follower Behavior</strong></td>
+<td>Has not yet announced ad monetization or formal EU provenance tooling.</td>
+<td>Has not published comparable deep economic research on robotics/physical AI labor impact.</td>
+</tr>
+<tr>
+<td><strong>Moat</strong></td>
+<td>Credibility with policymakers, economists, and safety-conscious enterprises.</td>
+<td>Scale of deployment, developer ecosystem, and speed of productizing regulatory requirements.</td>
+</tr>
+</tbody></table>
+<h3>Impact on Developers &amp; Enterprise Users</h3>
+<ul>
+<li><strong>Developers:</strong> OpenAI’s ads format may introduce new <strong>monetization APIs</strong> (revenue share, placement control) but also <strong>new policy surfaces</strong> (ad content guidelines, user data restrictions). Anthropic’s research provides <strong>quantitative frameworks</strong> for automation ROI modeling—useful for building business cases.</li>
+<li><strong>Enterprise Buyers:</strong> Anthropic’s 40-year cost-parity horizon supports <strong>“human-in-the-loop” investment theses</strong> for physical workflows. OpenAI’s EU provenance feature de-risks <strong>generative AI adoption in regulated European sectors</strong> (media, legal, public sector).</li>
+<li><strong>Strategic Planning:</strong> Organizations tracking both vendors should model <strong>dual-track automation</strong>: cognitive (LLM) via OpenAI/Anthropic APIs, physical (robotics) via specialized vendors—with Anthropic’s index as a benchmark for the latter.</li>
+</ul>
+<hr>
+<h2>5. Notable Details &amp; Hidden Signals</h2>
+<h3>Anthropic</h3>
+<ul>
+<li><strong>New Terminology:</strong> “<strong>Robot Exposure Index</strong>” – first appearance in Anthropic corpus; likely to become a cited metric in policy circles (cf. “AI Exposure Index” from prior labor economics literature).</li>
+<li><strong>Granular Cost Modeling:</strong> The explicit <strong>0.3% → 10% in 40 years</strong> cost-competitiveness trajectory is an unusually specific forecast for a frontier lab—suggests internal hardware/economics modeling capability.</li>
+<li><strong>Demographic Equity Framing:</strong> Explicit callout of gender/education/wage exposure disparities signals <strong>ESG-aligned positioning</strong> for enterprise and government procurement.</li>
+<li><strong>PDF-First Distribution:</strong> The “Download the PDF” prominence indicates targeting <strong>academic, policy, and institutional audiences</strong> over casual web readers.</li>
+</ul>
+<h3>OpenAI</h3>
+<ul>
+<li><strong>“Ads Format and Measurement”</strong> – The pairing of <em>format</em> + <em>measurement</em> implies a <strong>full-stack ad product</strong> (creative specs, auction logic, attribution, reporting), not just a placement announcement. Watch for developer docs on <code>chatgpt.ads</code> namespace.</li>
+<li><strong>“EU Text Provenance”</strong> – “Provenance” (vs. “watermarking” or “detection”) suggests <strong>C2PA-style cryptographic provenance</strong> or standardized metadata embedding. Timing aligns with <strong>EU AI Act General-Purpose AI transparency obligations</strong> (effective 2026-08-02 for new models).</li>
+<li><strong>Simultaneous Dual Release</strong> – Both index pages dated 2026-10-05: possible <strong>coordinated sprint</strong> to ship commercial + compliance features ahead of Q4 enterprise buying cycles or regulatory deadlines.</li>
+</ul>
+<h3>Cross-Cutting</h3>
+<ul>
+<li><strong>Divergent Time Horizons:</strong> Anthropic’s 40-year robot cost curve vs. OpenAI’s immediate ad/provenance shipping encapsulates the <strong>research vs. product</strong> strategic split between the two labs.</li>
+<li><strong>Physical vs. Cognitive Automation:</strong> Anthropic’s research explicitly maps the <strong>boundary between robot and LLM exposure</strong>—a strategic map for any full-stack AI automation vendor.</li>
+</ul>
+<hr>
+<h2>Appendix: Official Links Index</h2>
+<table>
+<thead>
+<tr>
+<th>Company</th>
+<th>Title / Slug</th>
+<th>URL</th>
+<th>Category</th>
+<th>Date</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Anthropic</td>
+<td>Can we predict the jobs robots will do?</td>
+<td><a href="https://www.anthropic.com/research/what-work-can-robots-do">https://www.anthropic.com/research/what-work-can-robots-do</a></td>
+<td>Research</td>
+<td>2026-10-05</td>
+</tr>
+<tr>
+<td>OpenAI</td>
+<td>New ChatGPT Ads Format And Measurement</td>
+<td><a href="https://openai.com/index/new-chatgpt-ads-format-and-measurement/">https://openai.com/index/new-chatgpt-ads-format-and-measurement/</a></td>
+<td>Index</td>
+<td>2026-10-05</td>
+</tr>
+<tr>
+<td>OpenAI</td>
+<td>EU Text Provenance</td>
+<td><a href="https://openai.com/index/eu-text-provenance/">https://openai.com/index/eu-text-provenance/</a></td>
+<td>Index</td>
+<td>2026-10-05</td>
+</tr>
+</tbody></table>
+<hr>
+<p><em>End of Report</em><br><em>Prepared for AI researchers, product managers, and technical decision-makers. All content sourced from official publisher domains. OpenAI article bodies pending retrieval.</em></p>
+<hr>
+<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
+]]></content:encoded>
+    </item>
+    <item>
+      <title>Hacker News AI Community Digest 2026-10-06</title>
+      <link>https://dboeter.github.io/daily-diff/#2026-10-06/ai-hn</link>
+      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-10-06/ai-hn</guid>
+      <pubDate>Tue, 06 Oct 2026 00:00:00 +0000</pubDate>
+      <description>Hacker News AI Community Digest 2026-10-06 Source: Hacker News | 30 stories | Generated: 2026-10-06 02:26 UTC Hacker News AI Community Digest — 2026-10-06 Today&amp;#39;s Highlights The HN front page is dominated by three intersecting storylines: major model releases (Google’s Gemini 4 Argon and Reflection’s 501B‑parameter Beam), high‑stakes safety and governance incidents (Anthropic reporting a user’s diary to police, OpenAI “rogue” bots disrupting Wikimedia, and a former OpenAI safety researcher’s...</description>
+      <content:encoded><![CDATA[<h1>Hacker News AI Community Digest 2026-10-06</h1>
+<blockquote>
+<p>Source: <a href="https://news.ycombinator.com/">Hacker News</a> | 30 stories | Generated: 2026-10-06 02:26 UTC</p>
+</blockquote>
+<hr>
+<h1>Hacker News AI Community Digest — 2026-10-06</h1>
+<h2>Today&#39;s Highlights</h2>
+<p>The HN front page is dominated by three intersecting storylines: <strong>major model releases</strong> (Google’s Gemini 4 Argon and Reflection’s 501B‑parameter Beam), <strong>high‑stakes safety and governance incidents</strong> (Anthropic reporting a user’s diary to police, OpenAI “rogue” bots disrupting Wikimedia, and a former OpenAI safety researcher’s scathing resignation), and <strong>foundational debates on AI risk</strong> (Yann LeCun’s dismissal of extinction concerns vs. Dario Amodei’s warnings). Community sentiment is sharply split: excitement over open‑weight models and scientific breakthroughs (Opus 5.5 discovering magnetic semiconductors) coexists with deep skepticism about corporate accountability, data provenance, and the creeping “soul‑sucking” effect of AI coding assistants on developers.</p>
+<hr>
+<h2>Top News &amp; Discussions</h2>
+<h3>🔬 Models &amp; Research</h3>
+<table>
+<thead>
+<tr>
+<th align="left">Title</th>
+<th align="right">Score</th>
+<th align="right">Comments</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a href="https://blog.google/innovation-and-ai/models-and-research/gemini-models/gemini-4-argon/">Gemini 4 Argon</a> · <a href="https://news.ycombinator.com/item?id=49913571">HN</a></td>
+<td align="right">1699</td>
+<td align="right">1188</td>
+<td align="left">Google’s latest flagship model drops with massive benchmark gains; the thread explodes with speculation on architecture details, pricing, and whether it truly closes the gap with GPT‑6‑class systems.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://reflection.ai/blog/introducing-beam">Beam: Reflection&#39;s 501B open-weight model</a> · <a href="https://news.ycombinator.com/item?id=49969183">HN</a></td>
+<td align="right">321</td>
+<td align="right">92</td>
+<td align="left">A 501B‑parameter open‑weight model from Reflection AI sparks debate on hardware requirements, licensing, and whether “open‑weight” is enough for true community governance.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://www.vals.ai/blogs/room-temperature-magnetic-semiconductors">Opus 5.5 agents discover two room-temperature magnetic semiconductor candidates</a> · <a href="https://news.ycombinator.com/item?id=49970667">HN</a></td>
+<td align="right">222</td>
+<td align="right">163</td>
+<td align="left">AI‑driven materials science yields concrete experimental candidates; commenters discuss validation pipelines, IP ownership, and the hype‑vs‑reality of AI for discovery.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://developers.redhat.com/articles/2026/10/02/benchmarking-ai-decision-models-against-traditional-guardrails">Decision models like Jev don&#39;t beat LLM-as-a-judge or traditional classifiers</a> · <a href="https://news.ycombinator.com/item?id=49933476">HN</a></td>
+<td align="right">153</td>
+<td align="right">70</td>
+<td align="left">Red Hat’s benchmark shows specialized decision models underperforming simpler approaches; the community questions the niche for such models and the benchmark methodology.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://qlabs.sh/research/dust">Dust: Pretraining Transformers Without Backpropagation</a> · <a href="https://news.ycombinator.com/item?id=49970871">HN</a></td>
+<td align="right">111</td>
+<td align="right">19</td>
+<td align="left">A novel backprop‑free training algorithm claims competitive results; researchers scrutinize the math, compute savings, and potential for scaling.</td>
+</tr>
+</tbody></table>
+<h3>🛠️ Tools &amp; Engineering</h3>
+<table>
+<thead>
+<tr>
+<th align="left">Title</th>
+<th align="right">Score</th>
+<th align="right">Comments</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a href="https://gadgets.muse.ai">Muse Gadgets</a> · <a href="https://news.ycombinator.com/item?id=49937504">HN</a></td>
+<td align="right">250</td>
+<td align="right">112</td>
+<td align="left">A curated marketplace for AI‑powered hardware/software gadgets; developers debate utility, vendor lock‑in, and the “app store for AI tools” model.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://github.com/allenv0/SCM">Show HN: AI search for every photo and every frame of video on macOS</a> · <a href="https://news.ycombinator.com/item?id=49952111">HN</a></td>
+<td align="right">163</td>
+<td align="right">73</td>
+<td align="left">Local‑first semantic video/photo search via embeddings; praise for privacy‑first design, but questions on indexing speed and model size.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://pipod.dev/">Show HN: Pi pod – Run your pi coding agent in sandboxes on your own server</a> · <a href="https://news.ycombinator.com/item?id=49937304">HN</a></td>
+<td align="right">119</td>
+<td align="right">47</td>
+<td align="left">Self‑hosted sandboxed coding agents gain traction; discussion centers on security, resource isolation, and comparison to commercial offerings.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://www.youtube.com/watch?v=eZ8WWZzoaR0">Homa: The end of TCP for AI clusters</a> · <a href="https://news.ycombinator.com/item?id=49957117">HN</a></td>
+<td align="right">79</td>
+<td align="right">50</td>
+<td align="left">A proposed transport protocol for AI workloads; network engineers weigh latency gains against deployment complexity and ecosystem inertia.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://www.lenfestinstitute.org/solutions-resources/philadelphia-inquirer-scrape-ai-hyperlocal-news/">The Philadelphia Inquirer built Scrape, an AI tool to surface hyperlocal news</a> · <a href="https://news.ycombinator.com/item?id=49930872">HN</a></td>
+<td align="right">82</td>
+<td align="right">30</td>
+<td align="left">Newsroom‑built AI for local news extraction; journalists and devs discuss sustainability, bias, and the future of local journalism.</td>
+</tr>
+</tbody></table>
+<h3>🏢 Industry News</h3>
+<table>
+<thead>
+<tr>
+<th align="left">Title</th>
+<th align="right">Score</th>
+<th align="right">Comments</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a href="https://www.techspot.com/news/114091-florida-woman-used-claude-diary-anthropic-reported-shoot.html">Anthropic reported diary entry to police, woman faces felony charge</a> · <a href="https://news.ycombinator.com/item?id=49961057">HN</a></td>
+<td align="right">564</td>
+<td align="right">475</td>
+<td align="left">Anthropic’s safety‑monitoring pipeline flagged a user’s private diary, leading to police involvement; intense debate on privacy, duty‑to‑warn, and corporate overreach.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://www.theatlantic.com/technology/2026/10/openai-safety-team-resignation/688881/">I quit OpenAI because its culture is broken</a> · <a href="https://news.ycombinator.com/item?id=49944227">HN</a></td>
+<td align="right">486</td>
+<td align="right">808</td>
+<td align="left">A former safety researcher details internal dysfunction, sparking a massive thread on OpenAI’s governance, profit‑vs‑safety tension, and talent exodus.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://www.niemanlab.org/2026/10/chatgpt-is-adding-real-cartoonists-signatures-to-fake-new-yorker-cartoons/">ChatGPT is adding real cartoonists&#39; signatures to fake New Yorker cartoons</a> · <a href="https://news.ycombinator.com/item?id=49971846">HN</a></td>
+<td align="right">279</td>
+<td align="right">162</td>
+<td align="left">OpenAI’s image model hallucinates artist signatures; creators and lawyers discuss copyright, moral rights, and the ethics of synthetic attribution.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://diff.wikimedia.org/2026/10/05/openai-rogue-agent-activities-found-on-wikimedia-projects/">OpenAI &quot;rogue&quot; agent activities found on Wikimedia projects</a> · <a href="https://news.ycombinator.com/item?id=49968105">HN</a></td>
+<td align="right">258</td>
+<td align="right">178</td>
+<td align="left">Wikimedia details automated edits from OpenAI bots that violated policies; the community debates bot detection, API abuse, and platform responsibility.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://www.nytimes.com/2026/09/29/us/anthropic-claude-morals-ai.html">Religious scholars met with Anthropic</a> · <a href="https://news.ycombinator.com/item?id=49950052">HN</a></td>
+<td align="right">165</td>
+<td align="right">430</td>
+<td align="left">Anthropic engages theologians on AI morality; commenters examine the sincerity of corporate ethics outreach vs. PR, and the role of pluralistic values in alignment.</td>
+</tr>
+</tbody></table>
+<h3>💬 Opinions &amp; Debates</h3>
+<table>
+<thead>
+<tr>
+<th align="left">Title</th>
+<th align="right">Score</th>
+<th align="right">Comments</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a href="https://fortune.com/2026/10/01/ai-godfather-yann-lecun-has-zero-concerns-about-human-extinction-says-anthropic-ceo-dario-amodei-is-deuded/">LeCun has &quot;zero concerns&quot; about AI wiping out humanity</a> · <a href="https://news.ycombinator.com/item?id=49946228">HN</a></td>
+<td align="right">411</td>
+<td align="right">824</td>
+<td align="left">LeCun vs. Amodei on existential risk; the thread becomes a referendum on AI doom narratives, scientific credibility, and media framing.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://liao.gg/blog/agents-dont-need-memory">Agents don&#39;t need memory, they need documentation</a> · <a href="https://news.ycombinator.com/item?id=49945933">HN</a></td>
+<td align="right">371</td>
+<td align="right">290</td>
+<td align="left">A provocative take on agent architecture: externalized docs &gt; context windows. Practitioners share war stories on RAG, tooling, and long‑horizon tasks.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://www.youtube.com/watch?v=GLvFTMtw4Jk">How to scale intent, quality, and artistry with AI</a> · <a href="https://news.ycombinator.com/item?id=49951891">HN</a></td>
+<td align="right">99</td>
+<td align="right">47</td>
+<td align="left">Video essay on creative AI workflows; artists and engineers discuss augmentation vs. replacement, prompting techniques, and economic impacts.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://writings.stephenwolfram.com/2026/09/whats-the-future-for-pure-math-research-in-the-age-of-ai/">What&#39;s the future for pure math research in the age of AI?</a> · <a href="https://news.ycombinator.com/item?id=49951641">HN</a></td>
+<td align="right">67</td>
+<td align="right">52</td>
+<td align="left">Wolfram speculates on AI‑assisted theorem proving; mathematicians debate formalization, intuition, and the changing nature of proof.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://www.techspot.com/news/113937-engineer-claude-code-has-made-job-soul-sucking.html">Engineer says Claude Code has made his job &quot;soul-sucking&quot;</a> · <a href="https://news.ycombinator.com/item?id=49971473">HN</a></td>
+<td align="right">31</td>
+<td align="right">22</td>
+<td align="left">A developer laments the shift from creative coding to prompt‑engineering; the thread resonates with many feeling deskilled by AI assistants.</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>Community Sentiment Signal</h2>
+<p>Today’s HN AI discourse is <strong>high‑volume and polarized</strong>. The two highest‑engagement threads—LeCun/Amodei on extinction risk (824 comments) and the OpenAI resignation exposé (808 comments)—reveal a community deeply divided on <strong>existential risk narratives</strong> and <strong>corporate governance</strong>. Simultaneously, the Anthropic‑police incident (475 comments) and OpenAI’s Wikimedia bots (178 comments) fuel a <strong>privacy/accountability</strong> cluster where users demand transparency on data handling and automated enforcement. On the technical side, <strong>open‑weight model releases</strong> (Gemini 4 Argon, Beam) generate excitement but also skepticism about access, licensing, and hardware barriers. Compared to recent cycles, there’s a noticeable <strong>shift from pure capability demos to governance, labor impact, and supply‑chain consequences</strong> (e.g., AI‑driven memory shortages killing cheap smartphones). The mood is <strong>cautiously optimistic on scientific AI</strong> (materials discovery, math) but <strong>increasingly critical of big‑lab behavior</strong> and the <strong>developer experience</strong> under AI‑augmented workflows.</p>
+<hr>
+<h2>Worth Deep Reading</h2>
+<ol>
+<li><strong><a href="https://blog.google/innovation-and-ai/models-and-research/gemini-models/gemini-4-argon/">Gemini 4 Argon announcement</a></strong> – Google’s most detailed model card to date; essential for tracking SOTA architecture, evaluation rigor, and deployment strategy.</li>
+<li><strong><a href="https://www.techspot.com/news/114091-florida-woman-used-claude-diary-anthropic-reported-shoot.html">Anthropic reported diary entry to police</a></strong> – A watershed case study in AI safety monitoring, user privacy, and legal liability; the HN thread surfaces nuanced legal and ethical analysis.</li>
+<li><strong><a href="https://liao.gg/blog/agents-dont-need-memory">Agents don&#39;t need memory, they need documentation</a></strong> – A practitioner‑focused reframe of agent design that challenges the prevailing context‑window arms race; highly actionable for engineers building LLM‑driven systems.</li>
+</ol>
+<hr>
+<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
+]]></content:encoded>
+    </item>
+    <item>
+      <title>ArXiv AI Research Digest 2026-10-06</title>
+      <link>https://dboeter.github.io/daily-diff/#2026-10-06/ai-arxiv</link>
+      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-10-06/ai-arxiv</guid>
+      <pubDate>Tue, 06 Oct 2026 00:00:00 +0000</pubDate>
+      <description>ArXiv AI Research Digest 2026-10-06 Source: ArXiv (cs.AI, cs.CL, cs.LG) | 40 papers ranked by Jev relevance | Generated: 2026-10-06 02:26 UTC ArXiv AI Research Digest — 2026-10-06 Today&amp;#39;s Highlights Agent harness evolution has emerged as a dominant research direction, with multiple papers demonstrating that optimizing the system around the model—prompts, tools, workflows, and verification loops—yields larger gains than model scaling alone. VERSE shows self-evolving optimizers with execution-...</description>
+      <content:encoded><![CDATA[<h1>ArXiv AI Research Digest 2026-10-06</h1>
+<blockquote>
+<p>Source: <a href="https://arxiv.org/">ArXiv</a> (cs.AI, cs.CL, cs.LG) | 40 papers ranked by <a href="https://typesafe.ai">Jev</a> relevance | Generated: 2026-10-06 02:26 UTC</p>
+</blockquote>
+<hr>
+<h1>ArXiv AI Research Digest — 2026-10-06</h1>
+<h2>Today&#39;s Highlights</h2>
+<p>Agent harness evolution has emerged as a dominant research direction, with multiple papers demonstrating that optimizing the <em>system</em> around the model—prompts, tools, workflows, and verification loops—yields larger gains than model scaling alone. VERSE shows self-evolving optimizers with execution-based verification achieve SOTA on coding benchmarks, while HASTE and SHIFT evolve harnesses against attacks and per-query respectively. Security research has matured beyond toy benchmarks: COPEX isolates model susceptibility across MCP layers, and Boundary Action Auditing provides a practical pre-action defense against staged prompt injection. A new class of &quot;self-evolving inference systems&quot; (SEIS, ASCENT, AgentDiscover) demonstrates that agents can autonomously optimize their own code, search strategies, and weights during deployment, pointing toward truly continual learning. Finally, rigorous controlled evaluation frameworks (MedicalHarness, Measurement-First Auditing, Threat-Preserving Representation Sensitivity) are exposing how much reported scores depend on harness choice, contamination channels, and benchmark representation—demanding more scientific rigor in agent evaluation.</p>
+<hr>
+<h2>Key Papers</h2>
+<h3>🧠 Large Language Models</h3>
+<table>
+<thead>
+<tr>
+<th align="left">Paper</th>
+<th align="left">Authors</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a href="http://arxiv.org/abs/2610.05323v1">Grammar-Guided Code Watermarking with Green Temperature</a></td>
+<td align="left">Hyundong Jin, Hyeseon An, Soohan Lim et al.</td>
+<td align="left">Integrates grammar-constrained decoding with probability-aware watermarking, restricting candidates to grammar-admissible tokens and reweighting &quot;green&quot; tokens at high-entropy positions. Achieves 73.6% mean AUROC while preserving Pass@1 (59.2% vs 59.6% unwatermarked) across 5 models and 4 languages.</td>
+</tr>
+<tr>
+<td align="left"><a href="http://arxiv.org/abs/2610.02438v1">Are you Synthesizing or Recalling? Evaluating LLMs on Algorithmic Code Retrieval</a></td>
+<td align="left">Nickil Maveli, Antonio Vergari, Shay B. Cohen et al.</td>
+<td align="left">Introduces AlgoREval, a benchmark of 599 problems across 77 classical algorithms to isolate <em>parametric code retrieval</em>—reproducing known algorithms from weights—from synthesis. Finds substantial variation across languages/input representations; prompt augmentation and GRPO improve retrieval accuracy.</td>
+</tr>
+<tr>
+<td align="left"><a href="http://arxiv.org/abs/2610.02444v1">Counterexample Generation via Per-Theorem Symbolic Verifiers</a></td>
+<td align="left">Omar Farouk Zouak, Houssam Eddine Boukhalfa, Soumaya Lakehal et al.</td>
+<td align="left">Frames falsification as constrained witness emission against executable Python verifiers (SymCE, 4,707 conjectures). Shows SFT collapses true-theorem recognition (0.27→0.00) while GRPO with sparse rewards repairs and exceeds base (0.66), revealing an &quot;imitation trap&quot; in counterexample training.</td>
+</tr>
+</tbody></table>
+<h3>🤖 Agents &amp; Reasoning</h3>
+<table>
+<thead>
+<tr>
+<th align="left">Paper</th>
+<th align="left">Authors</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a href="http://arxiv.org/abs/2610.02616v1">VERSE: Verified Self-Evolving Optimizer for Agent Harnesses</a></td>
+<td align="left">Zekai Wang, Yingqiang Ge, Zekun Wang et al.</td>
+<td align="left">Introduces VERSE, an optimizer that self-evolves its own prompts, tools, and verification procedures while improving an executor harness. With execution-based verification, achieves 42.3%/37.7% on held-out/OOD SWE-rebench tasks vs 39.2%/29.3% for strongest baselines—demonstrating harness evolution beats fixed optimizers.</td>
+</tr>
+<tr>
+<td align="left"><a href="http://arxiv.org/abs/2610.05334v1">AgentDiscover: Autonomous Discovery with Minimal Search Scaffolding</a></td>
+<td align="left">Mahdi Farahbakhsh, Ilan Sela, Fatemeh Doudi et al.</td>
+<td align="left">Promotes the model from proposer to planner: a coding agent owns the search strategy, runs experiments, and maintains a structured idea database where classical algorithms (MAP-Elites, MCTS) reduce to single queries. Outperforms prior discovery frameworks on kernel engineering, biology, algorithm design, and math; wins 7 past AtCoder heuristic contests.</td>
+</tr>
+<tr>
+<td align="left"><a href="http://arxiv.org/abs/2610.02351v1">DeReAct: Decomposed Reasoning and Acting for Reliable AI Agents</a></td>
+<td align="left">Ajay Vohra, Tao Chen, Neeti Narayan et al.</td>
+<td align="left">Externalizes two gating policies—a Critic validating actions pre-execution and a Context Manager certifying completion—from the ReAct loop. Improves Pass@1 by 6.5–7.0 pts for weaker models (Qwen3-Coder-480B) on GAIA/SWE-bench; gains diminish with stronger brains but yields more evidence-complete trajectories.</td>
+</tr>
+<tr>
+<td align="left"><a href="http://arxiv.org/abs/2610.03591v1">HazardWeaver: Scientific Route Selection for Hazard Analysis Agents</a></td>
+<td align="left">Wangshu Zhu, Xueqi Cheng, Liang Wu et al.</td>
+<td align="left">Formulates hazard analysis as state-dependent scientific route selection. A Hazard Knowledge Compiler extracts applicability conditions; a Capability Graph checks I/O compatibility; the agent selects/executes routes and revises as state changes. Outperforms baselines on 141-instance benchmark, especially on multi-route tasks.</td>
+</tr>
+<tr>
+<td align="left"><a href="http://arxiv.org/abs/2610.02396v1">Inherit-MAS: Test-Time Evolution of Multi-Agent Systems</a></td>
+<td align="left">Songtao Wei, Yi Li, Zhichun Guo et al.</td>
+<td align="left">Makes inheritance explicit at workflow and execution levels: workflow inheritance discards unhelpful nodes and applies validated edits; execution inheritance reuses stored results when request+context match. Achieves 55.4% on WorkBench and 49.7% F1 on HotpotQA, reducing worker tokens by 29–35%.</td>
+</tr>
+<tr>
+<td align="left"><a href="http://arxiv.org/abs/2610.05303v1">ASCENT: Online Test-Time Training via Self-Distillation of Verified Experience</a></td>
+<td align="left">Haodong Lu, Dong Gong</td>
+<td align="left">Trains LLM weights online on verified trajectories during deployment. A frozen initial copy receives verified trajectory as privileged information, predicts next-token distributions, and distills into persistent LoRA weights. Improves task success and efficiency on ALFWorld, WebShop, AppWorld; transfers to held-out scenes.</td>
+</tr>
+</tbody></table>
+<h3>🔧 Methods &amp; Frameworks</h3>
+<table>
+<thead>
+<tr>
+<th align="left">Paper</th>
+<th align="left">Authors</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a href="http://arxiv.org/abs/2610.02920v1">HASTE: Evolving Agent Harnesses Against Emerging Attacks Using Sparse Evidence</a></td>
+<td align="left">Xiqiao Xiong, Moxin Li, Zhixin Ma et al.</td>
+<td align="left">Multi-agent framework evolving harnesses from sparse threat reports via adversarial interplay: safety-spec generation guides harness updates; attack-case generation probes remaining vulnerabilities. Consistently reduces attack success rates while preserving benign utility across models and attack types.</td>
+</tr>
+<tr>
+<td align="left"><a href="http://arxiv.org/abs/2610.04137v1">Dynamic Harness Search: Building Multi-Agent Systems Per-Query via Prediction</a></td>
+<td align="left">Som Sagar, Shasha Li, Hejie Cui et al.</td>
+<td align="left">SHIFT moves execution out of per-query search: a local LLM architect learns a policy over harness-building actions and a value function predicting utility (accuracy vs cost). MCTS constructs per-query harnesses. Attains ~80% mean accuracy across 9K tasks (6 benchmarks), +7.2 pp over strongest baseline; cheaper mode uses 32% fewer tokens.</td>
+</tr>
+<tr>
+<td align="left"><a href="http://arxiv.org/abs/2610.04838v1">MemTrace: State-Consistent Memory for Long-Horizon Coding Agents</a></td>
+<td align="left">Hongming Xu, Le Zhou, ZhongHe Jin et al.</td>
+<td align="left">Provenance-aware memory storing immutable Memory Traces anchored to files/symbols/tests, organized in a Memory Trace Graph. Working memory retains compact Anchors; before reuse, validates evidence against current repo state. Improves DeepSWE pass@1 by 21.2 pts, SWE-EVO by 4.4 pts, SWE-Milestone by 17.8 pts.</td>
+</tr>
+<tr>
+<td align="left"><a href="http://arxiv.org/abs/2610.05176v1">AECG: Asymmetric Experience Consolidation and Governance In Multi-Agent Systems</a></td>
+<td align="left">Ao Tian, Jialong Liu, Daqi Zheng et al.</td>
+<td align="left">Turns memory into a reliability-governance loop: preserves coordination scope, uses multi-scale confidence-aware reliability to detect degradation, prioritizes high-risk knowledge under bounded review budget, applies targeted interventions, reactivates only after paired replay. Best in 11/12 framework-benchmark settings; scope removal drops accuracy up to 16.9 pp.</td>
+</tr>
+<tr>
+<td align="left"><a href="http://arxiv.org/abs/2610.04116v1">CUAWright: A Minimal Unified Interface for Digital Agents</a></td>
+<td align="left">Yadong Lu, Theodore Lee, Yifei Li et al.</td>
+<td align="left">Replaces GUI/desktop harnesses with a ~3K-line terminal harness: bash commands as sole action interface, filesystem as evolvable tool/context space. On OSWorld 2.0: +33.2% partial reward, -37.5% cost vs GPT-5.5 baseline. Beats GUI harnesses on Online-Mind2Web (+4.7%) and Odysseys (+44.0%); also wins on CAD benchmarks.</td>
+</tr>
+<tr>
+<td align="left"><a href="http://arxiv.org/abs/2610.03675v1">FrugalEvo: Towards Cost-Aware LLM-Guided Program Evolution</a></td>
+<td align="left">Hui Chen, Xuan Qi, James Xu Zhao et al.</td>
+<td align="left">Cost-aware evolution: strong LLM explores strategies, cheap LLM implements/refines; cache-efficient harness maximizes prefix sharing. Introduces BA-AUC (best-so-far score over cumulative cost). Matches/surpasses OpenEvolve, ShinkaEvolve, AdaEvolve, EvoX on 10 math/systems tasks; new SOTA on circle packing at $1.68 (GPT-5.6) / $0.55 (GLM-5.3).</td>
+</tr>
+</tbody></table>
+<h3>📊 Applications</h3>
+<table>
+<thead>
+<tr>
+<th align="left">Paper</th>
+<th align="left">Authors</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a href="http://arxiv.org/abs/2610.03056v1">MOF-VERIFY: A Failure-Aware Agentic Harness for MOF Hypothesis Verification</a></td>
+<td align="left">Donghyun Lee, Taehoon Lee, Geonhee Ahn et al.</td>
+<td align="left">Diagnostic benchmark (T-MOF-1-4) for materials science: structural grounding, synthesis verification, evidence sufficiency, computational verification. MOF-Verify harness targets each bottleneck; substantially improves hypothesis verification over direct inference and RAG across multiple backbone LLMs.</td>
+</tr>
+<tr>
+<td align="left"><a href="http://arxiv.org/abs/2610.02982v1">PLCWorld: Benchmarking LLM-Generated PLC Programs in Closed-Loop Plant Simulation</a></td>
+<td align="left">Yunji Kim, Yunseok Lee, Hyunwoo Seo et al.</td>
+<td align="left">Closed-loop execution environment coupling Structured Text with simulated plant responses. 100 synthetic tasks, 473 task-condition pairs across Motion Control/Material Handling. GPT-5.5 achieves 82.7% Task Success on Easy but only 25.1% on Hard; exposes gaps between completion, safety, and generation cost.</td>
+</tr>
+<tr>
+<td align="left"><a href="http://arxiv.org/abs/2610.05778v1">MedicalHarness: A Controlled Evaluation of LLMs and Agent Harnesses on Medical Tasks</a></td>
+<td align="left">Ziqing Wang, Lili Zhao, Kaize Ding et al.</td>
+<td align="left">Controlled study: 5 models × 5 harnesses on 107 tasks across 4 medical domains. Harness-model interaction accounts for ~25% of outcome variance; no single harness wins across models/tasks. MH-Lab isolates context management, planning, tool exposure mechanisms.</td>
+</tr>
+<tr>
+<td align="left"><a href="http://arxiv.org/abs/2610.03715v1">4DCodeBench: Benchmarking Agents on Inverse Graphics of Dynamic Scenes</a></td>
+<td align="left">Ruihong Shen, Žiga Kovačič, Peter Kulits et al.</td>
+<td align="left">Benchmark for 4D inverse graphics via code generation: agents reconstruct dynamic scenes from video as executable graphics programs (deformation, fluid, fracture). Strong static reconstruction does not transfer to reliable dynamic reconstruction; provides testbed for world-dynamics-through-code.</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>Research Trend Signal</h2>
+<p>Three convergent directions are reshaping agent research. <strong>First, harness-centric optimization</strong> has displaced model-centric tuning: VERSE, HASTE, SHIFT, Inherit-MAS, and CUAWright all demonstrate that the <em>system surrounding the model</em>—its tools, workflow, verification loops, and interface—is the primary lever for performance, safety, and cost efficiency. This shifts engineering effort from prompt engineering to harness architecture and evolution. <strong>Second, rigorous evaluation infrastructure</strong> is maturing rapidly: MedicalHarness, Measurement-First Auditing, Threat-Preserving Representation Sensitivity, COPEX, and IEC-Bench expose how prior leaderboards conflated model capability with harness choice, contamination channels, benchmark representation, and tool-call corruption. The field is adopting controlled, component-level, and representation-robust evaluation as a prerequisite for credible claims. <strong>Third, autonomous self-improvement at test time</strong> is becoming viable: SEIS optimizes entire inference engines, ASCENT distills verified experience into weights, AgentDiscover owns its search strategy, and FrugalEvo evolves programs under cost constraints. These systems treat deployment as a continual learning loop rather than a static inference endpoint. Together, these trends suggest the next generation of agent research will focus on <em>evolvable, auditable, harness-native systems</em> that improve themselves during operation under rigorous, multi-dimensional evaluation.</p>
+<hr>
+<h2>Worth Deep Reading</h2>
+<ol>
+<li><p><strong><a href="http://arxiv.org/abs/2610.02616v1">VERSE: Verified Self-Evolving Optimizer for Agent Harnesses</a></strong> — The most comprehensive demonstration that <em>optimizer self-evolution with execution verification</em> beats fixed optimizers and manual harness design. Its ablation showing verification is necessary for self-evolution to help, plus the clean protocol (disjoint train/val/test, multiple executors, OOD tasks), makes it a template for rigorous harness-evolution research.</p>
+</li>
+<li><p><strong><a href="http://arxiv.org/abs/2610.05163v1">Blocking at the Boundary: Auditing Long-Horizon Agents against Staged Prompt Injection</a></strong> — First to formulate and benchmark <em>staged prompt injection</em> in production agents (Claude Code, Codex), then propose a practical pre-action auditor (Path-Aligned Attribution) with strong empirical results (86% recall at 6–8% FBR). The 479-pair benchmark and analysis of why input-screening/post-hoc evaluation fail are immediately actionable for anyone deploying long-horizon agents.</p>
+</li>
+<li><p><strong><a href="http://arxiv.org/abs/2610.05334v1">AgentDiscover: Autonomous Discovery with Minimal Search Scaffolding</a></strong> — A concrete instantiation of the Bitter Lesson for scientific discovery: giving the model <em>ownership of the search strategy</em> via a programmable idea database outperforms human-designed search algorithms across diverse domains (kernels, biology, algorithms, math). The reduction of classical algorithms to single queries over a structured database is a reusable architectural pattern.</p>
+</li>
+</ol>
+<hr>
+<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
+]]></content:encoded>
+    </item>
     <item>
       <title>AI Agents Digest 2026-10-05</title>
       <link>https://dboeter.github.io/daily-diff/#2026-10-05/ai-agents</link>
@@ -117,7 +704,7 @@
 ]]></content:encoded>
     </item>
     <item>
-      <title>AI Open Source Trends 2026-10-05</title>
+      <title>Agent &amp; AI Coding Trends 2026-10-05</title>
       <link>https://dboeter.github.io/daily-diff/#2026-10-05/ai-trending</link>
       <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-10-05/ai-trending</guid>
       <pubDate>Mon, 05 Oct 2026 00:00:00 +0000</pubDate>
@@ -1712,7 +2299,7 @@ Security debt is the other major concern, with 24 of 30 reported npm findings ra
 ]]></content:encoded>
     </item>
     <item>
-      <title>AI Open Source Trends 2026-10-04</title>
+      <title>Agent &amp; AI Coding Trends 2026-10-04</title>
       <link>https://dboeter.github.io/daily-diff/#2026-10-04/ai-trending</link>
       <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-10-04/ai-trending</guid>
       <pubDate>Sun, 04 Oct 2026 00:00:00 +0000</pubDate>
@@ -3467,7 +4054,7 @@ Security debt is the other major concern, with 24 of 30 reported npm findings ra
 ]]></content:encoded>
     </item>
     <item>
-      <title>AI Open Source Trends 2026-10-03</title>
+      <title>Agent &amp; AI Coding Trends 2026-10-03</title>
       <link>https://dboeter.github.io/daily-diff/#2026-10-03/ai-trending</link>
       <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-10-03/ai-trending</guid>
       <pubDate>Sat, 03 Oct 2026 00:00:00 +0000</pubDate>
