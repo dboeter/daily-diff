@@ -1,0 +1,18 @@
+{
+  "ai-agents": [
+    "Claude Code v2.1.290 exposes sub-agent tool calls in hooks via `serverToolUses` and `agentId`, letting you audit and control multi-agent workflows",
+    "GitHub Copilot CLI v1.0.92 adds `copilot config` commands, a Ctrl+E environment picker for local/cloud runs, and fixes MCP connection hangs"
+  ],
+  "ai-web": [
+    "OpenAI launches ChatGPT ads format and measurement framework, signaling new monetization APIs and policy surfaces for developers",
+    "OpenAI ships EU text provenance tooling for AI Act compliance, de-risking generative AI adoption in regulated European sectors"
+  ],
+  "ai-hn": [
+    "Google releases Gemini 4 Argon with massive benchmark gains, closing gap with GPT-6-class systems for developers to build on",
+    "Reflection AI open-weights 501B-parameter Beam model, sparking debate on hardware needs and true community governance"
+  ],
+  "ai-arxiv": [
+    "VERSE demonstrates self-evolving agent harnesses with execution verification beat fixed optimizers, hitting 42.3% on SWE-rebench coding tasks",
+    "MemTrace adds provenance-aware immutable memory traces for long-horizon coding agents, boosting DeepSWE pass@1 by 21.2 points"
+  ]
+}
