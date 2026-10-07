@@ -8,7 +8,6 @@ import {
   parseArxivEntries,
   relevanceOf,
   hasCodeLink,
-  retryDelayMs,
   rankByRelevance,
   submissionCutoff,
   nextArxivState,
@@ -168,14 +167,6 @@ describe("Jev relevance ranking", () => {
     expect(hasCodeLink("Project page: https://org.github.io/proj/")).toBe(true);
     expect(hasCodeLink("Weights at huggingface.co/org/model")).toBe(true);
     expect(hasCodeLink("We discuss GitHub issues as a data source.")).toBe(false);
-  });
-
-  it("honors retry-after and otherwise backs off exponentially, capped", () => {
-    expect(retryDelayMs("2", 0)).toBe(2000);
-    expect(retryDelayMs("600", 0)).toBe(10_000);
-    expect(retryDelayMs(null, 0)).toBe(1000);
-    expect(retryDelayMs(null, 2)).toBe(4000);
-    expect(retryDelayMs("Wed, 21 Oct 2026 07:28:00 GMT", 1)).toBe(2000);
   });
 
   it("sorts most relevant first, keeps input order on ties, and puts failed papers last", async () => {

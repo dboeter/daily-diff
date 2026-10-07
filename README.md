@@ -146,13 +146,15 @@ The inference and serving layer the agents run on top of. Weekly report on the s
 | --------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
 | [github.com/trending](https://github.com/trending?since=weekly) | This week's trending repos — parsed from HTML; includes the stars gained this week                                                                 |
 | GitHub Search API                                               | Repos active in the last 7 days matching 6 agent topics: `harness`, `agent-harness`, `ai-coding`, `multi-agent`, `agent-orchestration`, `ai-agent` |
-| GitHub Search API (new repos)                                   | Repos _created_ in the last 14 days tagged `coding-agent` or `agentic-coding`                                                                      |
+| GitHub Search API (new repos)                                   | Repos _created_ in the last 14 days tagged `coding-agent`, `agentic-coding` or `harness`                                                           |
 | [OpenRouter](https://openrouter.ai/apps)                        | Apps ranked by tokens (top 200 per day/week/month) + OpenRouter's trending list; top models by tokens; models listed in the last 8 days            |
 | [npm](https://www.npmjs.com)                                    | Packages tagged `coding-agent`, `agentic-coding`, `cli-agent`; split into top by weekly downloads and rising (weekly well above monthly rate)      |
 
-The LLM keeps only agent, harness and AI-coding repos (general AI/ML such as model weights, inference engines and RAG is out of scope), classifies them (coding agents / harnesses & frameworks / multi-agent & orchestration / agent tooling / other agents), and extracts trend signals. The report ends with a Claude Code Skills section: [anthropics/skills](https://github.com/anthropics/skills) PRs and issues, fetched without a date filter and sorted by popularity.
+Code builds the tables, not the LLM. The category tables hold established repos, sorted by the stars they gained this week: GitHub's own weekly count for repos on the trending page, otherwise the difference from last week's count, kept in `digests/trending-state.json`. Repos with neither sort by total stars. [Jev](https://typesafe.ai) decides whether each item is in scope and which category it lands in (coding agents / harnesses & frameworks / multi-agent & orchestration / agent tooling / other agents), and whether it is an agent itself rather than a plugin or MCP server. Each item is judged once: the verdicts are saved in `digests/trending-classifications.json` and reused every week, unless the item's description changes. Without a `TYPESAFE_API_KEY` the repo's search topic decides instead for items not judged before, and a trending repo that no agent topic search returned is left out. Each category shows at most 8 repos.
 
-OpenRouter, npm and the new-repo search feed an **Agent & Coding Tool Radar** table aimed at spotting new agents and agentic coding tools early.
+OpenRouter, npm and the new-repo search feed an **Agent & Coding Tool Radar** table aimed at spotting new agents and agentic coding tools early. New tools come first (🆕: listed on OpenRouter in the last 14 days or ranked this week but not this month, npm downloads at 3x the monthly rate, or a GitHub repo created in the last 14 days with at least 25 stars), but they take at most 8 of the 12 rows, so the week's established leaders still show. Rows that share a GitHub repo or a website become one row, and Jev matches an OpenRouter app to its npm package or GitHub repo. Each match is decided once and saved in `digests/trending-matches.json`, which you can edit by hand.
+
+The LLM writes a two-sentence summary for each row and the prose sections around the tables: highlights, trend signals, community hot spots and model usage. The report ends with a Claude Code Skills section: [anthropics/skills](https://github.com/anthropics/skills) PRs and issues, fetched without a date filter and sorted by popularity.
 
 The daily trending list is still fetched every day, for the agents report's news matching.
 
@@ -207,19 +209,19 @@ infra_repos:
 
 Go to **Settings → Secrets and variables → Actions** and add:
 
-| Secret               | Required      | Description                                                                                                   |
-| -------------------- | ------------- | ------------------------------------------------------------------------------------------------------------- |
-| `LLM_PROVIDER`       | optional      | `anthropic` (default), `openai`, `github-copilot`, `openrouter`, `deepseek`, or `qwen`                        |
-| `ANTHROPIC_API_KEY`  | if Anthropic  | API key — works with both Anthropic and Kimi Code                                                             |
-| `ANTHROPIC_BASE_URL` | optional      | API endpoint override. Set to `https://api.kimi.com/coding/` for Kimi Code; leave unset for Anthropic         |
-| `OPENAI_API_KEY`     | if OpenAI     | OpenAI API key                                                                                                |
-| `OPENAI_BASE_URL`    | optional      | OpenAI endpoint override                                                                                      |
-| `OPENROUTER_API_KEY` | if OpenRouter | OpenRouter API key                                                                                            |
-| `DEEPSEEK_API_KEY`   | if DeepSeek   | DeepSeek API key                                                                                              |
-| `DASHSCOPE_API_KEY`  | if Qwen       | Alibaba Model Studio API key                                                                                  |
-| `TYPESAFE_API_KEY`   | optional      | [TypeSafe](https://typesafe.ai) key. If set, ArXiv papers are ranked by Jev relevance instead of recency      |
-| `TELEGRAM_BOT_TOKEN` | optional      | Telegram bot token from [@BotFather](https://t.me/BotFather). If set, a message is sent after each digest run |
-| `TELEGRAM_CHAT_ID`   | optional      | Telegram chat/channel/group ID to send notifications to                                                       |
+| Secret               | Required      | Description                                                                                                                                                                                                             |
+| -------------------- | ------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `LLM_PROVIDER`       | optional      | `anthropic` (default), `openai`, `github-copilot`, `openrouter`, `deepseek`, or `qwen`                                                                                                                                  |
+| `ANTHROPIC_API_KEY`  | if Anthropic  | API key — works with both Anthropic and Kimi Code                                                                                                                                                                       |
+| `ANTHROPIC_BASE_URL` | optional      | API endpoint override. Set to `https://api.kimi.com/coding/` for Kimi Code; leave unset for Anthropic                                                                                                                   |
+| `OPENAI_API_KEY`     | if OpenAI     | OpenAI API key                                                                                                                                                                                                          |
+| `OPENAI_BASE_URL`    | optional      | OpenAI endpoint override                                                                                                                                                                                                |
+| `OPENROUTER_API_KEY` | if OpenRouter | OpenRouter API key                                                                                                                                                                                                      |
+| `DEEPSEEK_API_KEY`   | if DeepSeek   | DeepSeek API key                                                                                                                                                                                                        |
+| `DASHSCOPE_API_KEY`  | if Qwen       | Alibaba Model Studio API key                                                                                                                                                                                            |
+| `TYPESAFE_API_KEY`   | optional      | [TypeSafe](https://typesafe.ai) key. If set, ArXiv papers are ranked by Jev relevance instead of recency, and Jev decides the trending report's scope, categories and cross-source matches instead of the search topics |
+| `TELEGRAM_BOT_TOKEN` | optional      | Telegram bot token from [@BotFather](https://t.me/BotFather). If set, a message is sent after each digest run                                                                                                           |
+| `TELEGRAM_CHAT_ID`   | optional      | Telegram chat/channel/group ID to send notifications to                                                                                                                                                                 |
 
 > `GITHUB_TOKEN` is provided automatically by GitHub Actions. When using `github-copilot` as the provider, the same `GITHUB_TOKEN` is used for LLM calls.
 
@@ -290,7 +292,7 @@ export ANTHROPIC_API_KEY=sk-ant-xxxxxxxx
 
 export DIGEST_REPO=your-username/daily-diff  # optional; omit to only write files
 # export DIGEST_FORCE_WEEKLY=1               # optional; also run the weekly reports today
-# export TYPESAFE_API_KEY=xxxxx              # optional; rank ArXiv papers by Jev relevance
+# export TYPESAFE_API_KEY=xxxxx              # optional; Jev for ArXiv ranking and trending scope
 
 pnpm start
 ```
@@ -352,14 +354,14 @@ Sources: GitHub Trending + GitHub Search API + OpenRouter + npm
 
 This week's highlights
 Agent & coding tool radar (OpenRouter / npm / GitHub, new tools flagged 🆕)
-Top repos by dimension
+Top projects by category
   🧑‍💻 Coding Agents               — CLI / IDE / cloud agents that write code
   🧰 Agent Harnesses & Frameworks — harnesses / SDKs / agent runtimes
   🕸️ Multi-Agent & Orchestration  — swarms / supervisors / many-agent coordination
   🔌 Agent Tooling               — memory / context / skills / MCP / sandboxes / cost
   🤖 Other Agents                — personal / research / browser / vertical agents
 Trend signal analysis
-Community focus
+Community hot spots
 Model usage on OpenRouter (top models by tokens + newly listed)
 Claude Code Skills highlights
 ```

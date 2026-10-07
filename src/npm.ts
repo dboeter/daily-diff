@@ -21,6 +21,10 @@ export interface NpmPackage {
   monthly: number;
   url: string;
   lastPublish: string;
+  /** Source repository URL as published (often `git+https://…/x.git`); a trending merge key. */
+  repository?: string;
+  /** Project homepage; a trending merge key. */
+  homepage?: string;
 }
 
 export interface NpmData {
@@ -37,7 +41,7 @@ export interface NpmSearchObject {
     name: string;
     description?: string;
     date?: string;
-    links?: { npm?: string };
+    links?: { npm?: string; repository?: string; homepage?: string };
   };
 }
 
@@ -69,13 +73,16 @@ export function rankNpmPackages(objects: NpmSearchObject[]): Omit<NpmData, "fetc
   for (const o of objects) {
     const name = o.package.name;
     if (byName.has(name)) continue;
+    const links = o.package.links;
     byName.set(name, {
       name,
       description: o.package.description ?? "",
       weekly: o.downloads?.weekly ?? 0,
       monthly: o.downloads?.monthly ?? 0,
-      url: o.package.links?.npm ?? `https://www.npmjs.com/package/${name}`,
+      url: links?.npm ?? `https://www.npmjs.com/package/${name}`,
       lastPublish: (o.package.date ?? "").slice(0, 10),
+      ...(links?.repository ? { repository: links.repository } : {}),
+      ...(links?.homepage ? { homepage: links.homepage } : {}),
     });
   }
 
