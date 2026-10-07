@@ -6,7 +6,615 @@
     <description>Daily AI ecosystem digest</description>
     <language>en</language>
     <atom:link href="https://dboeter.github.io/daily-diff/feed.xml" rel="self" type="application/rss+xml"/>
-    <lastBuildDate>Tue, 06 Oct 2026 02:32:07 +0000</lastBuildDate>
+    <lastBuildDate>Wed, 07 Oct 2026 01:50:41 +0000</lastBuildDate>
+    <item>
+      <title>AI Agents Digest 2026-10-07</title>
+      <link>https://dboeter.github.io/daily-diff/#2026-10-07/ai-agents</link>
+      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-10-07/ai-agents</guid>
+      <pubDate>Wed, 07 Oct 2026 00:00:00 +0000</pubDate>
+      <description>AI Agents Digest 2026-10-07 Generated: 2026-10-07 01:45 UTC | Projects: 12 | Active today: 8 | Stable releases: 4 | Prereleases (not covered): 9 🕵️ Stealth Models on OpenRouter No stealth models listed on OpenRouter today. Overview Claude Code shipped two patch releases adding a marketplace install flag, an effort parameter for sub-agents, and fixes for session persistence bugs. OpenAI published a deep dive on optimizing Codex for long-running tasks. Gemini CLI improved connection recovery with...</description>
+      <content:encoded><![CDATA[<h1>AI Agents Digest 2026-10-07</h1>
+<blockquote>
+<p>Generated: 2026-10-07 01:45 UTC | Projects: 12 | Active today: 8 | Stable releases: 4 | Prereleases (not covered): 9</p>
+</blockquote>
+<hr>
+<h2>🕵️ Stealth Models on OpenRouter</h2>
+<p>No stealth models listed on OpenRouter today.</p>
+<hr>
+<h2>Overview</h2>
+<p>Claude Code shipped two patch releases adding a marketplace install flag, an effort parameter for sub-agents, and fixes for session persistence bugs. OpenAI published a deep dive on optimizing Codex for long-running tasks. Gemini CLI improved connection recovery with a retry progress indicator. OpenCode added canonical redirects and fixed xAI image handling. Pi users report direct OpenAI connections ignoring manual usage-limit resets. Qwen Code has two security issues: an environment-variable override bypassing file-ownership checks and an unescaped approval-dialog path vulnerable to control-character injection. OpenClaw faces a ZFS-related rename failure on QNAP and intermittent credential substitution failures in its egress proxy. Hermes Agent’s review pipeline is stalling approved PRs, and its dashboard OAuth login breaks on gzip-encoded token responses.</p>
+<h2>Claude Code</h2>
+<ul>
+<li><strong>Release</strong>: v2.1.292 adds <code>--marketplace &lt;source&gt;</code> to <code>claude plugin install</code> (auto-adds marketplace under policy checks) and an <code>effort</code> parameter to the Agent tool for controlling sub-agent compute; v2.1.291 fixes regressions where cloud sessions dropped permission-prompt answers and lost trailing messages on quit. <a href="https://github.com/anthropics/claude-code/releases/tag/v2.1.292">https://github.com/anthropics/claude-code/releases/tag/v2.1.292</a></li>
+<li><strong>News</strong>: Hacker News discussion argues the “suggested message” feature reveals the model—not the developer—is becoming the primary customer of Claude Code. <a href="https://news.ycombinator.com/item?id=49981905">https://news.ycombinator.com/item?id=49981905</a></li>
+</ul>
+<h2>OpenAI Codex</h2>
+<ul>
+<li><strong>News</strong>: OpenAI’s “Codex Maxxing Long Running Work” post details techniques for keeping Codex agents productive over extended sessions, including context management and tool-use patterns. <a href="https://openai.com/index/codex-maxxing-long-running-work/">https://openai.com/index/codex-maxxing-long-running-work/</a></li>
+</ul>
+<h2>Gemini CLI</h2>
+<ul>
+<li><strong>Release</strong>: v0.63.0 adds a visible retry progress indicator during connection recovery, improving observability when the CLI reconnects after network interruptions. <a href="https://github.com/google-gemini/gemini-cli/releases/tag/v0.63.0">https://github.com/google-gemini/gemini-cli/releases/tag/v0.63.0</a></li>
+</ul>
+<h2>OpenCode</h2>
+<ul>
+<li><strong>Release</strong>: v1.18.35 introduces canonical redirects and JSON/Markdown output formats for agent-readable stats; fixes xAI tool results to include supported images while skipping unsupported formats. <a href="https://github.com/anomalyco/opencode/releases/tag/v1.18.35">https://github.com/anomalyco/opencode/releases/tag/v1.18.35</a></li>
+</ul>
+<h2>Pi</h2>
+<ul>
+<li><strong>Hot issue</strong>: Direct OpenAI connections fail to recognize a banked usage-limit reset on ChatGPT Pro 100 plans; workaround requires logging out and back in via <code>openai-codex</code>. <a href="https://github.com/earendil-works/pi/issues/10480">https://github.com/earendil-works/pi/issues/10480</a></li>
+</ul>
+<h2>Qwen Code</h2>
+<ul>
+<li><strong>Hot issue</strong>: <code>QWEN_CODE_SYSTEM_SETTINGS_PATH</code>/<code>QWEN_CODE_SYSTEM_DEFAULTS_PATH</code> environment overrides are honored without verifying file ownership, allowing potential configuration hijacking. <a href="https://github.com/QwenLM/qwen-code/issues/13513">https://github.com/QwenLM/qwen-code/issues/13513</a></li>
+<li><strong>Hot issue</strong>: The managed approval dialog’s primary content path (<code>tool.args</code>) lacks bidirectional/control-character escaping, opening a UI spoofing vector in the web shell. <a href="https://github.com/QwenLM/qwen-code/issues/13517">https://github.com/QwenLM/qwen-code/issues/13517</a></li>
+</ul>
+<h2>OpenClaw</h2>
+<ul>
+<li><strong>Hot issue</strong>: <code>fs-safe</code> no-replace root move returns <code>EINVAL</code> on QNAP ZFS-backed shares while plain <code>renameat2(RENAME_NOREPLACE)</code> succeeds, blocking state-directory operations on that platform. <a href="https://github.com/openclaw/openclaw/issues/165617">https://github.com/openclaw/openclaw/issues/165617</a></li>
+<li><strong>Hot issue</strong>: Egress proxy sentinel substitution intermittently fails—upstream API calls reach targets with unsubstituted or stale credentials (401 errors)—and self-heals only after hours. <a href="https://github.com/openclaw/openclaw/issues/166137">https://github.com/openclaw/openclaw/issues/166137</a></li>
+</ul>
+<h2>Hermes Agent</h2>
+<ul>
+<li><strong>Hot issue</strong>: Repository bot review pipeline stalls approved PRs indefinitely; contributors report merges blocked by silent, outdated review loops. <a href="https://github.com/NousResearch/hermes-agent/issues/134008">https://github.com/NousResearch/hermes-agent/issues/134008</a></li>
+<li><strong>Hot issue</strong>: Dashboard OAuth login crashes with HTTP 503 when the token response is gzip-encoded due to an incorrect header check during decompression. <a href="https://github.com/NousResearch/hermes-agent/issues/134128">https://github.com/NousResearch/hermes-agent/issues/134128</a></li>
+</ul>
+<hr>
+<p><strong>Quiet today:</strong> <a href="https://github.com/github/copilot-cli">GitHub Copilot CLI</a>, <a href="https://github.com/nearai/ironclaw">IronClaw</a>, <a href="https://github.com/agentscope-ai/QwenPaw">QwenPaw</a>, <a href="https://github.com/zeroclaw-labs/zeroclaw">ZeroClaw</a></p>
+<hr>
+<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
+]]></content:encoded>
+    </item>
+    <item>
+      <title>Official AI Content Report 2026-10-07</title>
+      <link>https://dboeter.github.io/daily-diff/#2026-10-07/ai-web</link>
+      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-10-07/ai-web</guid>
+      <pubDate>Wed, 07 Oct 2026 00:00:00 +0000</pubDate>
+      <description>Official AI Content Report 2026-10-07 Today&amp;#39;s update | New content: 9 articles | Generated: 2026-10-07 01:45 UTC Sources: Anthropic: anthropic.com — 1 new articles (sitemap total: 456) OpenAI: openai.com — 8 new articles (sitemap total: 1058) AI Official Content Tracking Report — 2026-10-07 1. Today&amp;#39;s Highlights Anthropic has formally expanded its Cyber Verification Program (CVP) into a three‑tiered access framework, granting vetted security professionals reduced safeguards on its most c...</description>
+      <content:encoded><![CDATA[<h1>Official AI Content Report 2026-10-07</h1>
+<blockquote>
+<p>Today&#39;s update | New content: 9 articles | Generated: 2026-10-07 01:45 UTC</p>
+</blockquote>
+<p>Sources:</p>
+<ul>
+<li>Anthropic: <a href="https://www.anthropic.com">anthropic.com</a> — 1 new articles (sitemap total: 456)</li>
+<li>OpenAI: <a href="https://openai.com">openai.com</a> — 8 new articles (sitemap total: 1058)</li>
+</ul>
+<hr>
+<h1>AI Official Content Tracking Report — 2026-10-07</h1>
+<hr>
+<h2>1. Today&#39;s Highlights</h2>
+<p>Anthropic has formally expanded its <strong>Cyber Verification Program (CVP)</strong> into a three‑tiered access framework, granting vetted security professionals reduced safeguards on its most capable models—including <strong>Claude Opus 5.5, Sonnet 5.5, and Mythos 5.1</strong>—to accelerate defensive cybersecurity work while maintaining strict eligibility controls. OpenAI published eight new index‑page entries on 6–7 October, covering topics such as computer‑use tooling with Ironclad, mathematical reasoning progress, an Atlassian partnership, enterprise AI value frameworks, agentic‑era investment guidance, Codex long‑running workflows, and a builders’ guide for GPT‑5.6; however, only URL slugs are available, so substantive content cannot be assessed. The simultaneous cadence suggests both labs are tightening the loop between frontier model releases and specialized, high‑trust deployment channels—Anthropic via a formal verification program, OpenAI via a burst of ecosystem‑oriented announcements.</p>
+<hr>
+<h2>2. Anthropic / Claude Content Highlights</h2>
+<h3>News</h3>
+<p><strong>Expanding the Cyber Verification Program</strong><br><em>Published: 2026‑10‑06</em> | <a href="https://www.anthropic.com/news/cyber-verification-program">https://www.anthropic.com/news/cyber-verification-program</a></p>
+<ul>
+<li>Anthropic restructures its Cyber Verification Program into <strong>three distinct access tiers</strong>, allowing security teams to apply for the level of capability that matches their workflow—ranging from standard reduced‑safeguard access to the highest tier that includes <strong>Claude Mythos 5.1</strong> (previously limited to Project Glasswing participants).  </li>
+<li>The program explicitly addresses the <strong>dual‑use nature of cyber capabilities</strong>: general‑availability models retain conservative safeguards, while vetted defenders gain “advanced cyber capabilities and reduced blocking classifiers” to find and remediate vulnerabilities faster.  </li>
+<li>Eligibility is gated through an application process; approved organizations receive access to <strong>Opus 5.5, Sonnet 5.5, Mythos 5.1, and future frontier models</strong>, signaling Anthropic’s intent to make its newest model families available to high‑trust security partners at launch.  </li>
+<li>This expansion follows a six‑month pilot (Project Glasswing + original CVP) and positions Anthropic as a <strong>primary AI supplier for critical‑infrastructure defense teams</strong>, potentially creating a moat in the enterprise security market.</li>
+</ul>
+<hr>
+<h2>3. OpenAI Content Highlights</h2>
+<blockquote>
+<p>⚠️ <strong>Data Limitation:</strong> The OpenAI crawl returned only <strong>metadata‑only index pages</strong> (category <code>index</code>). Titles are derived from URL slugs; no article text, summaries, or structured content were captured. The entries below list the URLs and categories objectively. <strong>No speculative summaries are provided.</strong></p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>Date</th>
+<th>URL</th>
+<th>Category (as crawled)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>2026‑10‑07</td>
+<td><a href="https://openai.com/index/advancing-computer-use-with-ironclad/">https://openai.com/index/advancing-computer-use-with-ironclad/</a></td>
+<td>index</td>
+</tr>
+<tr>
+<td>2026‑10‑07</td>
+<td><a href="https://openai.com/index/sharing-ai-progress-in-mathematics/">https://openai.com/index/sharing-ai-progress-in-mathematics/</a></td>
+<td>index</td>
+</tr>
+<tr>
+<td>2026‑10‑07</td>
+<td><a href="https://openai.com/index/sharing-ai-progress-in-mathematics/">https://openai.com/index/sharing-ai-progress-in-mathematics/</a></td>
+<td>index (duplicate entry)</td>
+</tr>
+<tr>
+<td>2026‑10‑06</td>
+<td><a href="https://openai.com/index/atlassian-partnership/">https://openai.com/index/atlassian-partnership/</a></td>
+<td>index</td>
+</tr>
+<tr>
+<td>2026‑10‑06</td>
+<td><a href="https://openai.com/index/the-five-ai-value-models-driving-business-reinvention/">https://openai.com/index/the-five-ai-value-models-driving-business-reinvention/</a></td>
+<td>index</td>
+</tr>
+<tr>
+<td>2026‑10‑06</td>
+<td><a href="https://openai.com/index/managing-ai-investments-in-agentic-era/">https://openai.com/index/managing-ai-investments-in-agentic-era/</a></td>
+<td>index</td>
+</tr>
+<tr>
+<td>2026‑10‑06</td>
+<td><a href="https://openai.com/index/codex-maxxing-long-running-work/">https://openai.com/index/codex-maxxing-long-running-work/</a></td>
+<td>index</td>
+</tr>
+<tr>
+<td>2026‑10‑06</td>
+<td><a href="https://openai.com/index/builders-guide-to-gpt-5-6/">https://openai.com/index/builders-guide-to-gpt-5-6/</a></td>
+<td>index</td>
+</tr>
+</tbody></table>
+<p><em>Because full article bodies are unavailable, strategic interpretation of these items must await content retrieval.</em></p>
+<hr>
+<h2>4. Strategic Signal Analysis</h2>
+<h3>Anthropic – Technical Priorities</h3>
+<table>
+<thead>
+<tr>
+<th>Dimension</th>
+<th>Signal</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Model Capabilities</strong></td>
+<td>Rolling out <strong>Opus 5.5, Sonnet 5.5, Mythos 5.1</strong> to verified defenders indicates a <strong>tiered‑release strategy</strong> where the most powerful models are first exposed to high‑trust, safety‑critical users.</td>
+</tr>
+<tr>
+<td><strong>Safety / Alignment</strong></td>
+<td>The CVP’s <strong>three‑tier safeguard reduction</strong> demonstrates a pragmatic approach to dual‑use risk: conservative defaults for general public, calibrated relaxation for vetted professionals.</td>
+</tr>
+<tr>
+<td><strong>Productization</strong></td>
+<td>Formalizing a <strong>partner program with application gating</strong> moves Anthropic toward an enterprise‑grade sales motion (security‑focused SKU).</td>
+</tr>
+<tr>
+<td><strong>Ecosystem</strong></td>
+<td>Explicit mention of <strong>Project Glasswing</strong> alumni suggests a growing <strong>community of critical‑software stewards</strong> who receive early model access.</td>
+</tr>
+</tbody></table>
+<h3>OpenAI – Technical Priorities (inferred from titles only)</h3>
+<table>
+<thead>
+<tr>
+<th>Dimension</th>
+<th>Signal</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Model Capabilities</strong></td>
+<td>“Builders Guide to GPT‑5.6” implies a <strong>new model version (5.6)</strong> is either released or imminent, with developer‑focused documentation.</td>
+</tr>
+<tr>
+<td><strong>Productization</strong></td>
+<td>“Atlassian Partnership”, “Codex Maxxing Long Running Work”, and “Advancing Computer Use With Ironclad” point to <strong>deep integrations with developer tooling (Jira/Confluence, Codex agents, computer‑use automation)</strong>.</td>
+</tr>
+<tr>
+<td><strong>Enterprise / Business</strong></td>
+<td>“Five AI Value Models Driving Business Reinvention” and “Managing AI Investments in Agentic Era” target <strong>C‑suite / IT investment decision‑makers</strong>.</td>
+</tr>
+<tr>
+<td><strong>Research</strong></td>
+<td>“Sharing AI Progress in Mathematics” (duplicate) suggests a <strong>research milestone in formal reasoning / theorem proving</strong>.</td>
+</tr>
+</tbody></table>
+<h3>Competitive Dynamics</h3>
+<ul>
+<li><strong>Agenda‑Setting:</strong> Anthropic is <strong>leading on structured, safety‑gated access for high‑risk domains</strong> (cybersecurity), creating a template for regulated‑industry deployment. OpenAI appears to be <strong>broadening its ecosystem footprint</strong> (partnerships, enterprise frameworks, developer tooling) around a presumed GPT‑5.6 release.</li>
+<li><strong>Following:</strong> OpenAI’s burst of index pages mirrors Anthropic’s earlier “partner program” announcements—both are converging on <strong>tiered access + ecosystem enablement</strong> as the go‑to‑market model for frontier models.</li>
+<li><strong>Differentiation:</strong> Anthropic leans <strong>vertical (security)</strong>; OpenAI leans <strong>horizontal (developer platform + enterprise consulting narrative)</strong>.</li>
+</ul>
+<h3>Impact on Developers &amp; Enterprise Users</h3>
+<ul>
+<li><strong>Developers:</strong> Anthropic’s CVP offers a <strong>clear path to unblocked cyber tooling</strong> for qualified teams; OpenAI’s “Codex Maxxing” and “Computer Use” items hint at <strong>more autonomous, long‑running agent workflows</strong>—critical for AI‑native devops.</li>
+<li><strong>Enterprise Buyers:</strong> Anthropic provides a <strong>compliance‑ready, audit‑friendly program</strong> for regulated sectors. OpenAI’s “Five AI Value Models” and “Managing AI Investments” content aims to <strong>shape procurement narratives</strong> and justify large‑scale agentic deployments.</li>
+<li><strong>Risk:</strong> Both approaches concentrate powerful capabilities behind <strong>application gates</strong>, potentially slowing broad innovation but reducing misuse surface.</li>
+</ul>
+<hr>
+<h2>5. Notable Details &amp; Hidden Signals</h2>
+<table>
+<thead>
+<tr>
+<th>Signal</th>
+<th>Source</th>
+<th>Interpretation</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>“Claude Mythos 5.1”</strong> appears in a public announcement for the first time.</td>
+<td>Anthropic CVP</td>
+<td>Mythos line (previously Glasswing‑only) is now a <strong>named, versioned model family</strong> positioned for defensive cyber use.</td>
+</tr>
+<tr>
+<td><strong>Three‑tier CVP structure</strong> (vs. prior binary access).</td>
+<td>Anthropic CVP</td>
+<td>Indicates <strong>maturing partner management</strong>—likely mapping to pricing/SLA tiers (e.g., Standard, Professional, Critical‑Infrastructure).</td>
+</tr>
+<tr>
+<td><strong>“GPT‑5.6”</strong> in URL slug.</td>
+<td>OpenAI Builders Guide</td>
+<td>Suggests <strong>incremental model versioning</strong> (5 → 5.5 → 5.6) rather than a major 6.0 jump; may reflect a <strong>rapid‑iteration release cadence</strong>.</td>
+</tr>
+<tr>
+<td><strong>Duplicate “Sharing AI Progress in Mathematics”</strong> entry.</td>
+<td>OpenAI index</td>
+<td>Could signal a <strong>two‑part release</strong> (e.g., research paper + blog) or a crawl artifact; worth monitoring for a formal math‑reasoning benchmark drop.</td>
+</tr>
+<tr>
+<td><strong>“Ironclad”</strong> in “Advancing Computer Use With Ironclad”.</td>
+<td>OpenAI index</td>
+<td>“Ironclad” is a <strong>contract‑lifecycle platform</strong>; partnership may demonstrate <strong>computer‑use agents handling legal/document workflows</strong>—a high‑value enterprise use case.</td>
+</tr>
+<tr>
+<td><strong>“Agentic Era”</strong> phrasing in two titles.</td>
+<td>OpenAI index</td>
+<td>OpenAI is <strong>codifying “agentic” as a market category</strong>, positioning itself as the thought leader for autonomous‑agent ROI.</td>
+</tr>
+<tr>
+<td><strong>No “research” or “safety” category tags</strong> in OpenAI crawl (all <code>index</code>).</td>
+<td>OpenAI crawl</td>
+<td>May reflect a <strong>consolidated communications strategy</strong> where research, product, and safety updates share a single publishing pipeline.</td>
+</tr>
+<tr>
+<td><strong>Timing cluster: 6–7 Oct</strong> for 8 OpenAI items vs. single Anthropic item on 6 Oct.</td>
+<td>Both</td>
+<td>OpenAI appears to be <strong>batching announcements</strong> around a possible event (e.g., DevDay, partner summit) or model launch window.</td>
+</tr>
+</tbody></table>
+<hr>
+<p><strong>End of Report</strong> — All links are official and directly sourced from the crawled content. For OpenAI items, full analysis requires retrieving the article bodies; the current metadata‑only view limits depth but reveals clear thematic clusters.</p>
+<hr>
+<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
+]]></content:encoded>
+    </item>
+    <item>
+      <title>Hacker News AI Community Digest 2026-10-07</title>
+      <link>https://dboeter.github.io/daily-diff/#2026-10-07/ai-hn</link>
+      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-10-07/ai-hn</guid>
+      <pubDate>Wed, 07 Oct 2026 00:00:00 +0000</pubDate>
+      <description>Hacker News AI Community Digest 2026-10-07 Source: Hacker News | 30 stories | Generated: 2026-10-07 01:45 UTC Hacker News AI Community Digest — 2026-10-07 1. Today&amp;#39;s Highlights Mistral Large 4 dominates the front page with the highest score (1,590) and comment count (964), signaling intense community interest in the latest frontier model release. OpenAI’s mathematics progress post and the Opus 5.5 agents’ discovery of room-temperature magnetic semiconductors highlight AI’s growing role in fo...</description>
+      <content:encoded><![CDATA[<h1>Hacker News AI Community Digest 2026-10-07</h1>
+<blockquote>
+<p>Source: <a href="https://news.ycombinator.com/">Hacker News</a> | 30 stories | Generated: 2026-10-07 01:45 UTC</p>
+</blockquote>
+<hr>
+<h1>Hacker News AI Community Digest — 2026-10-07</h1>
+<h2>1. Today&#39;s Highlights</h2>
+<p>Mistral Large 4 dominates the front page with the highest score (1,590) and comment count (964), signaling intense community interest in the latest frontier model release. OpenAI’s mathematics progress post and the Opus 5.5 agents’ discovery of room-temperature magnetic semiconductors highlight AI’s growing role in formal reasoning and scientific discovery. A major privacy and policy debate erupted after Anthropic reported a user’s diary entry to police, drawing 651 comments. Meanwhile, ChatGPT’s use of real cartoonists’ signatures on AI-generated New Yorker cartoons sparked a heated copyright discussion (541 points, 405 comments). Open-source hardware also surged: OpenTPU, an AI accelerator “developed by AI,” attracted 299 comments on 233 points, reflecting strong engineering curiosity.</p>
+<h2>2. Top News &amp; Discussions</h2>
+<h3>🔬 Models &amp; Research</h3>
+<table>
+<thead>
+<tr>
+<th align="left">Title</th>
+<th align="right">Score</th>
+<th align="right">Comments</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a href="https://mistral.ai/news/mistral-large-4/">Mistral Large 4</a> · <a href="https://news.ycombinator.com/item?id=49977979">HN</a></td>
+<td align="right">1590</td>
+<td align="right">964</td>
+<td align="left">Mistral AI releases its newest flagship model, positioning it as a top-tier competitor in the LLM landscape. Developers are scrutinizing benchmarks, licensing, and API access.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://reflection.ai/blog/introducing-beam">Beam: Reflection&#39;s 501B open-weight model</a> · <a href="https://news.ycombinator.com/item?id=49969183">HN</a></td>
+<td align="right">541</td>
+<td align="right">168</td>
+<td align="left">Reflection AI unveils a 501B parameter open-weight model, offering a massive new resource for research and fine-tuning. The release rekindles debate on open vs. closed model strategies.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://www.vals.ai/blogs/room-temperature-magnetic-semiconductors">Opus 5.5 agents discover two room-temperature magnetic semiconductor candidates</a> · <a href="https://news.ycombinator.com/item?id=49970667">HN</a></td>
+<td align="right">482</td>
+<td align="right">325</td>
+<td align="left">AI agents autonomously identified novel materials with potential for spintronics, demonstrating AI-driven scientific discovery at a practical scale.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://openai.com/index/sharing-ai-progress-in-mathematics/">Sharing AI progress in mathematics</a> · <a href="https://news.ycombinator.com/item?id=49984923">HN</a></td>
+<td align="right">413</td>
+<td align="right">337</td>
+<td align="left">OpenAI details advances in AI-assisted theorem proving and formal verification, releasing tools and benchmarks that push the frontier of mathematical reasoning.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://qlabs.sh/research/dust">Dust: Pretraining Transformers Without Backpropagation</a> · <a href="https://news.ycombinator.com/item?id=49970871">HN</a></td>
+<td align="right">272</td>
+<td align="right">79</td>
+<td align="left">A novel pretraining method eliminates backpropagation, potentially reducing compute and memory demands. The approach could reshape how large models are trained.</td>
+</tr>
+</tbody></table>
+<h3>🛠️ Tools &amp; Engineering</h3>
+<table>
+<thead>
+<tr>
+<th align="left">Title</th>
+<th align="right">Score</th>
+<th align="right">Comments</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a href="https://github.com/FeSens/openTPU">OpenTPU – An open-source AI accelerator, developed by AI</a> · <a href="https://news.ycombinator.com/item?id=49980715">HN</a></td>
+<td align="right">233</td>
+<td align="right">299</td>
+<td align="left">A fully open-source TPU design generated with AI assistance, aiming to democratize custom AI hardware. The project drew intense technical scrutiny and collaboration interest.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://github.com/allenv0/SCM">Show HN: AI search for every photo and every frame of video on macOS</a> · <a href="https://news.ycombinator.com/item?id=49952111">HN</a></td>
+<td align="right">175</td>
+<td align="right">73</td>
+<td align="left">A local-first semantic search tool for media files on macOS, showcasing practical on-device multimodal embedding deployment.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://developers.openai.com/api/docs/guides/decisions">Decisions API is in public beta</a> · <a href="https://news.ycombinator.com/item?id=49984025">HN</a></td>
+<td align="right">140</td>
+<td align="right">57</td>
+<td align="left">OpenAI launches a structured decision-making API, enabling developers to build reliable, auditable agent workflows with built-in guardrails.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://www.zohaib.cc/blog/smartest-claude-code-feature">Claude Code’s suggested message feature: I think the real customer is the model</a> · <a href="https://news.ycombinator.com/item?id=49981905">HN</a></td>
+<td align="right">92</td>
+<td align="right">50</td>
+<td align="left">Analysis of a new Claude Code feature that lets the model propose its next user message, revealing a shift toward model-driven development loops.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://penguin-mail.com/">Penguin Mail – open-source Rust email client for Linux with AI</a> · <a href="https://news.ycombinator.com/item?id=49984716">HN</a></td>
+<td align="right">63</td>
+<td align="right">22</td>
+<td align="left">A privacy-focused, Rust-based email client integrating local AI for sorting and drafting, highlighting the trend of AI-enhanced desktop applications.</td>
+</tr>
+</tbody></table>
+<h3>🏢 Industry News</h3>
+<table>
+<thead>
+<tr>
+<th align="left">Title</th>
+<th align="right">Score</th>
+<th align="right">Comments</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a href="https://www.techspot.com/news/114091-florida-woman-used-claude-diary-anthropic-reported-shoot.html">Anthropic reported diary entry to police, woman faces felony charge</a> · <a href="https://news.ycombinator.com/item?id=49961057">HN</a></td>
+<td align="right">811</td>
+<td align="right">651</td>
+<td align="left">Anthropic’s safety systems flagged a user’s private diary content, leading to law enforcement involvement. The case ignites debate on AI monitoring, user privacy, and corporate responsibility.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://www.niemanlab.org/2026/10/chatgpt-is-adding-real-cartoonists-signatures-to-fake-new-yorker-cartoons/">ChatGPT is adding real cartoonists&#39; signatures to fake New Yorker cartoons</a> · <a href="https://news.ycombinator.com/item?id=49971846">HN</a></td>
+<td align="right">541</td>
+<td align="right">405</td>
+<td align="left">OpenAI’s image model reproduces recognizable artist signatures, raising urgent copyright, attribution, and ethical questions for generative media.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://www.techspot.com/news/114111-utah-become-first-state-ai-examine-patients-prescribe.html">Utah to let AI examine patients and prescribe medication without human oversight</a> · <a href="https://news.ycombinator.com/item?id=49981197">HN</a></td>
+<td align="right">66</td>
+<td align="right">93</td>
+<td align="left">Utah becomes the first U.S. state to authorize fully autonomous AI clinical decision-making, a landmark regulatory move with profound liability and safety implications.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://www.lenfestinstitute.org/solutions-resources/philadelphia-inquirer-scrape-ai-hyperlocal-news/">The Philadelphia Inquirer built Scrape, an AI tool to surface hyperlocal news</a> · <a href="https://news.ycombinator.com/item?id=49930872">HN</a></td>
+<td align="right">86</td>
+<td align="right">30</td>
+<td align="left">A major newspaper deploys AI to extract structured hyperlocal data from public records, illustrating AI’s growing role in local journalism sustainability.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://www.reuters.com/world/south-koreas-lee-says-ai-appears-have-been-used-bank-hacks-2026-10-06/">South Korea says AI agents appear to have been used to hack the country&#39;s banks</a> · <a href="https://news.ycombinator.com/item?id=49985861">HN</a></td>
+<td align="right">28</td>
+<td align="right">3</td>
+<td align="left">Official attribution of a bank cyberattack to AI agents marks a potential escalation in AI-enabled offensive cyber operations.</td>
+</tr>
+</tbody></table>
+<h3>💬 Opinions &amp; Debates</h3>
+<table>
+<thead>
+<tr>
+<th align="left">Title</th>
+<th align="right">Score</th>
+<th align="right">Comments</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a href="https://developers.redhat.com/articles/2026/10/02/benchmarking-ai-decision-models-against-traditional-guardrails">Decision models like Jev don&#39;t beat LLM-as-a-judge or traditional classifiers</a> · <a href="https://news.ycombinator.com/item?id=49933476">HN</a></td>
+<td align="right">161</td>
+<td align="right">75</td>
+<td align="left">Red Hat benchmarks show specialized decision models underperform compared to LLM-as-a-judge and classic classifiers, challenging a recent architectural trend.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://www.youtube.com/watch?v=GLvFTMtw4Jk">How to scale intent, quality, and artistry with AI [video]</a> · <a href="https://news.ycombinator.com/item?id=49951891">HN</a></td>
+<td align="right">101</td>
+<td align="right">49</td>
+<td align="left">A deep-dive presentation on maintaining creative control and quality when integrating generative AI into professional creative pipelines.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://edworkingpapers.com/ai26-1551">AI tutoring with Khanmigo in a two-year school experiment</a> · <a href="https://news.ycombinator.com/item?id=49972419">HN</a></td>
+<td align="right">71</td>
+<td align="right">67</td>
+<td align="left">A rigorous two-year study of Khan Academy’s AI tutor measures learning outcomes, engagement, and equity impacts in real classrooms.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://blue-continuum.com/the-man-who-listens-to-whales">Using A.I. to decode communication of sperm whales</a> · <a href="https://news.ycombinator.com/item?id=49952464">HN</a></td>
+<td align="right">86</td>
+<td align="right">67</td>
+<td align="left">Researchers apply large audio models to cetacean communication, offering a fascinating case study of multimodal AI in bioacoustics.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://vaughanhilts.me/2026/10/05/llms-immensely-helped-my-rsi.html">LLMs may have helped my RSI</a> · <a href="https://news.ycombinator.com/item?id=49973644">HN</a></td>
+<td align="right">37</td>
+<td align="right">22</td>
+<td align="left">A developer shares how voice-driven coding with LLMs reduced repetitive strain injury, highlighting an unexpected accessibility benefit.</td>
+</tr>
+</tbody></table>
+<h2>3. Community Sentiment Signal</h2>
+<p>Today’s HN AI discourse centers on three poles: <strong>frontier model releases</strong> (Mistral Large 4, Beam 501B), <strong>AI safety and policy flashpoints</strong> (Anthropic’s police report, Utah’s autonomous prescribing, ChatGPT signature controversy), and <strong>AI for hard science</strong> (Opus 5.5 materials discovery, OpenAI math progress). The highest comment-to-score ratios reveal the most contested topics: Utah’s AI prescribing law (93 comments / 66 points = 1.41), OpenTPU (299/233 = 1.28), and the Anthropic privacy incident (651/811 = 0.80). These threads indicate deep community anxiety about regulatory capture, hardware centralization, and the boundaries of AI surveillance. Conversely, model release threads (Mistral, Beam) show high absolute engagement but lower controversy ratios, suggesting excitement tempered by technical evaluation. The strong showing of open-source hardware (OpenTPU) and local-first tools (macOS media search) signals a persistent counter-current against API-dependent architectures.</p>
+<h2>4. Worth Deep Reading</h2>
+<ol>
+<li><strong><a href="https://mistral.ai/news/mistral-large-4/">Mistral Large 4</a></strong> — The highest-engagement post today; essential for anyone tracking SOTA model capabilities, licensing terms, and the competitive landscape.</li>
+<li><strong><a href="https://qlabs.sh/research/dust">Dust: Pretraining Transformers Without Backpropagation</a></strong> — A potentially paradigm-shifting training method; the paper and code merit close study for researchers exploring compute-efficient pretraining.</li>
+<li><strong><a href="https://www.vals.ai/blogs/room-temperature-magnetic-semiconductors">Opus 5.5 agents discover two room-temperature magnetic semiconductor candidates</a></strong> — A concrete, validated example of autonomous AI-driven materials discovery; the methodology and agent architecture are directly relevant to R&amp;D teams.</li>
+</ol>
+<hr>
+<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
+]]></content:encoded>
+    </item>
+    <item>
+      <title>ArXiv AI Research Digest 2026-10-07</title>
+      <link>https://dboeter.github.io/daily-diff/#2026-10-07/ai-arxiv</link>
+      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-10-07/ai-arxiv</guid>
+      <pubDate>Wed, 07 Oct 2026 00:00:00 +0000</pubDate>
+      <description>ArXiv AI Research Digest 2026-10-07 Source: ArXiv (cs.AI, cs.CL, cs.LG) | 40 papers ranked by Jev relevance | Generated: 2026-10-07 01:45 UTC ArXiv AI Research Digest — 2026-10-07 Today&amp;#39;s Highlights The past week reveals a decisive shift toward agent infrastructure and orchestration as the primary bottleneck for reliable LLM deployment. Three convergent directions stand out: (1) memory and experience reuse — DAEDALUS and MemCo demonstrate that agents can bootstrap useful memory from self-gen...</description>
+      <content:encoded><![CDATA[<h1>ArXiv AI Research Digest 2026-10-07</h1>
+<blockquote>
+<p>Source: <a href="https://arxiv.org/">ArXiv</a> (cs.AI, cs.CL, cs.LG) | 40 papers ranked by <a href="https://typesafe.ai">Jev</a> relevance | Generated: 2026-10-07 01:45 UTC</p>
+</blockquote>
+<hr>
+<h1>ArXiv AI Research Digest — 2026-10-07</h1>
+<h2>Today&#39;s Highlights</h2>
+<p>The past week reveals a decisive shift toward <strong>agent infrastructure and orchestration</strong> as the primary bottleneck for reliable LLM deployment. Three convergent directions stand out: (1) <strong>memory and experience reuse</strong> — DAEDALUS and MemCo demonstrate that agents can bootstrap useful memory from self-generated practice or cross-agent collaboration without human-labeled trajectories, closing the gap to oracle-supervised baselines at lower inference cost; (2) <strong>harness-level coordination</strong> — AECP, Nerveplane, HERA, and the HEAR protocol move critical safety, scheduling, and serving decisions out of model prompts into verifiable execution layers, yielding 15–28% absolute gains in pass rates and 1.6–2.5× serving speedups; (3) <strong>structured confidence and stopping</strong> — CRGs, POLAR, and STEPGATE replace heuristic early-stopping with auditable, calibrated decision criteria, enabling small models to recover most of the performance gap to large backends at 30% cloud escalation. Together, these works signal that the next capability leap will come from <strong>systems engineering around the model</strong>, not model scaling alone.</p>
+<hr>
+<h2>Key Papers</h2>
+<h3>🤖 Agents &amp; Reasoning</h3>
+<table>
+<thead>
+<tr>
+<th align="left">Paper</th>
+<th align="left">Authors</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a href="http://arxiv.org/abs/2610.08048v1">DAEDALUS: Bootstrapping Agent Memory from Self-Generated Tasks</a></td>
+<td align="left">Edy, Conti, Xing et al.</td>
+<td align="left">An explorer–solver loop generates its own practice tasks, derives heuristics from solver failures, and validates them through repeated success — building a reusable memory bank without any human tasks or oracle verifiers. Improves success rates by up to 15.9 pp and pass⁵ by 2.2× across AppWorld, τ²-bench, and AutomationBench, matching supervised-memory baselines at lower inference cost.</td>
+</tr>
+<tr>
+<td align="left"><a href="http://arxiv.org/abs/2610.07376v1">MemCo: Memory-Centric Collaboration for Generalizing LLM Agents to Unseen Environments</a></td>
+<td align="left">Liao, Liu, Ward et al.</td>
+<td align="left">Maintains complementary local (environment-specific) and global (transferable workflow) memory spaces, routing relevant memories by the agent’s current state and decision phase. Outperforms both isolated-memory and naive shared-memory baselines on interactive decision-making benchmarks, reducing redundant exploration.</td>
+</tr>
+<tr>
+<td align="left"><a href="http://arxiv.org/abs/2610.07787v1">OOPMAS: Object-Oriented Multi-Agent Systems for Query-Level Workflow Generation</a></td>
+<td align="left">Cheng, Chen, Cheng et al.</td>
+<td align="left">Generates both the agent set and coordination workflow per query using object-oriented agent definitions and a dynamic skill library that accumulates lessons across optimization rounds — no gradients needed. Achieves 89.6% accuracy on a mixed code/math/QA benchmark, +18.1 pp over the strongest baseline, with consistent scaling across four LLM backbones.</td>
+</tr>
+<tr>
+<td align="left"><a href="http://arxiv.org/abs/2610.07948v1">Confidence Reasoning Graphs: Structured Confidence Estimation for LLM Agents</a></td>
+<td align="left">King, Bayat, Bussotti et al.</td>
+<td align="left">Decomposes “task accomplished” into contextualized sub-claims grounded in trajectory evidence, estimates confidence per claim, and aggregates into a calibrated overall score — no privileged model access or training data required. Yields better-calibrated confidence and stronger risk-aware decisions than verbalized, sampling, and white-box baselines across three benchmarks and three agent frameworks.</td>
+</tr>
+<tr>
+<td align="left"><a href="http://arxiv.org/abs/2610.07261v1">Verifying Coordination in Parallel Coding Agents: NP-Bench and a Scheduling Planner</a></td>
+<td align="left">Muku</td>
+<td align="left">Recasts multi-agent coordination as upfront scheduling: partition work by declared scope, order merges along producer→consumer graph. The Nerveplane planner lifts clean integration from 1/9 to 9/9 scenarios, cuts merge conflicts 13→0, and rescues breaking-contract changes that reactive baselines miss entirely. Cross-session memory drops repeated-mistake rate to 0.00 on strong and weak models alike.</td>
+</tr>
+<tr>
+<td align="left"><a href="http://arxiv.org/abs/2610.07625v1">Stateless Language Agents: Scaling Long-Horizon Automated Research</a></td>
+<td align="left">Zhang, Ji, Sun et al.</td>
+<td align="left">Harness owns durable research state (candidates + outcomes); agents are stateless, receiving fresh, role-specific contexts per invocation. An Advisor assigns concrete experiments to parallel Workers. SLA beats three recent frameworks on SWE, kernel optimization, and algorithm design at up to 1B tokens, reaching the strongest kernel baseline with 84% fewer tokens.</td>
+</tr>
+<tr>
+<td align="left"><a href="http://arxiv.org/abs/2610.07447v1">Fork-and-Flush: Escaping Idea Basins in Autoresearch Agents</a></td>
+<td align="left">Cai, Ziakas, Kontonis et al.</td>
+<td align="left">Periodic intervention forks the agent into parallel trajectories inheriting the workspace but with fresh chat contexts; continues from the highest-scoring fork. On 13 long-horizon research/engineering tasks, outperforms single-run and best-of-N baselines by 66% and 44% relative improvement under equal compute.</td>
+</tr>
+</tbody></table>
+<h3>🔧 Methods &amp; Frameworks</h3>
+<table>
+<thead>
+<tr>
+<th align="left">Paper</th>
+<th align="left">Authors</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a href="http://arxiv.org/abs/2610.07086v1">SchemaFill: Efficient LLM Tool Calling via Slot-Parallel Speculative Decoding</a></td>
+<td align="left">Chen, Li, Zhan et al.</td>
+<td align="left">Generates future slot values concurrently as candidates, verifies them under the actual output prefix, and commits only verified tokens — achieving up to 4.05× end-to-end throughput over autoregressive decoding on Glaive and BFCL without requiring advance knowledge of call sequence.</td>
+</tr>
+<tr>
+<td align="left"><a href="http://arxiv.org/abs/2610.06481v1">AECP: Artifact-Exclusive Communication Protocol for Multi-Agent Code Generation</a></td>
+<td align="left">Xue, Wang, Li et al.</td>
+<td align="left">Forces agents to communicate exclusively through structured artifacts; the harness supplies findings on access, screens implementations for interface mismatches, and requires revisits on revision. Improves test pass rate by 28.2% and reduces wall time by 16.5% vs. free-form messaging; blocks malicious instruction relay from 95%→0% reach and 40%→0% action.</td>
+</tr>
+<tr>
+<td align="left"><a href="http://arxiv.org/abs/2610.07863v1">ReFold: Training-Free Reversible Inter-Turn Context Folding for Long-Horizon Agents</a></td>
+<td align="left">Su, Tian, Zhang et al.</td>
+<td align="left">A rendering layer that compresses only the model’s view by removing redundant content (stubbed) and folding finished turns (one-line notes) — all strictly reversible. Plug-and-play across ReAct harnesses; reduces token consumption 2.5×, halves KV-cache memory, avoids 92% of forced compactions, and cuts inference cost 3.4× under concurrent serving.</td>
+</tr>
+<tr>
+<td align="left"><a href="http://arxiv.org/abs/2610.06563v1">HERA: Harness-Environment Co-Evolution for Reliable Agentic Abstention</a></td>
+<td align="left">Luo, Wen, Yang et al.</td>
+<td align="left">Co-evolves the harness and environment: controlled mutations create feasible/infeasible task pairs; harness adapts to previous failures. Evolved harness improves abstention accuracy 61.7%→83.3% and feasible-task completion 68.3%→76.7%, transfers across 19 LLMs (+15.3 pp abstention avg.), enabling small models to match large ones at ~85% lower cost.</td>
+</tr>
+</tbody></table>
+<h3>📊 Applications</h3>
+<table>
+<thead>
+<tr>
+<th align="left">Paper</th>
+<th align="left">Authors</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a href="http://arxiv.org/abs/2610.07832v1">Harness Engineering for Software Engineering via Modular Executable Dev-Primitives</a></td>
+<td align="left">Jin, Li, Kuang et al.</td>
+<td align="left">Dev-Primitives pair repository artifacts with resident LLMs, giving artifacts agent-native interfaces for reasoning, communication, and self-modification. HERMES instantiates them at repo scale with dependency-aware activation and bug diagnosis. Outperforms matched baselines by 12.4% avg. on four SWE benchmarks; with Qwen3-8B primitives stays within 4.5% of GPT-5.6 Sol while cutting inference cost 26.2%.</td>
+</tr>
+<tr>
+<td align="left"><a href="http://arxiv.org/abs/2610.06672v1">VideoTapestry: Query-Adaptive Memory Refinement for Multi-Agent Long-Video Understanding</a></td>
+<td align="left">Liu, Yin, Feng et al.</td>
+<td align="left">Preconstructs hierarchical video memory (global narrative → event structure → fine-grained evidence); specialized agents per level refine memory via coarse-to-fine, query-driven retrieval. Beats direct GPT-5.5 inference by +17.2% (LVBench), +14.9% (LongVideoBench), +9.8% (Video-MME), +7.0% (EgoSchema) — SOTA among all competitors.</td>
+</tr>
+<tr>
+<td align="left"><a href="http://arxiv.org/abs/2610.07898v1">FC-SWE: Failure-Conditioned RL for Long-Horizon Software Engineering Agents</a></td>
+<td align="left">Liufu, Hu, Jing et al.</td>
+<td align="left">After a patch fails, restores repo state and uses failed patch + verifier feedback as context for a recovery trajectory. Adapts GRPO with trajectory-local rewards and active-set advantage estimation. Achieves 41.7% Resolved@1 and 52.8% Resolved@2 on SWE-bench Verified (vs. 38.9%/48.5% GRPO), reaching 70.7% Resolved@11 at test time.</td>
+</tr>
+</tbody></table>
+<h3>🧠 Large Language Models</h3>
+<table>
+<thead>
+<tr>
+<th align="left">Paper</th>
+<th align="left">Authors</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a href="http://arxiv.org/abs/2610.06064v1">TrustMI: Causally controlling how assistants trust their users</a></td>
+<td align="left">Lasnier, Froger, Lasbordes et al.</td>
+<td align="left">Defines trust as willingness to accept vulnerability; learns steering matrices from 2,000 contrastive conversation pairs (ability/benevolence/integrity). Steering changes trust decisions monotonically in both directions across six models from three families, and extends to safety settings (harmful requests, prompt injections, insider threats) while preserving benign-task performance.</td>
+</tr>
+<tr>
+<td align="left"><a href="http://arxiv.org/abs/2610.08018v1">Structured but Silent: Probing Capability Requirements in LLM Hidden States</a></td>
+<td align="left">Choo, Song, Kang et al.</td>
+<td align="left">Shows that fine-grained tool capability requirements (Source, Transformation, World Effect → 8 classes) are linearly decodable from pre-generation hidden states with high accuracy across four open-weight LLM families — yet the same models fail to reliably verbalize these classifications. Exposes a representation-to-verbalization gap: capabilities are “structured but silent.”</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>Research Trend Signal</h2>
+<p>Three meta-patterns emerge from this batch. <strong>First, harness-centric design is replacing prompt-centric design.</strong> AECP, Nerveplane, HERA, HEAR, and ReFold all move coordination, scheduling, safety, serving, and context management into the execution layer where they can be verified, versioned, and optimized independently of model weights. This yields consistent gains (15–28% pass-rate lifts, 1.6–2.5× serving speedups) that transfer across model families — a leverage point prompt engineering cannot match. <strong>Second, memory is being re-factored from monolithic context into structured, multi-granular stores with explicit routing.</strong> DAEDALUS, MemCo, VideoTapestry, and SLA all separate durable state (owned by the harness) from ephemeral agent context, and they route memories by <em>decision phase</em> and <em>abstraction level</em> rather than recency. This directly addresses the “context explosion vs. amnesia” trade-off that plagues long-horizon agents. <strong>Third, confidence and stopping are becoming first-class, auditable system outputs.</strong> CRGs, POLAR, STEPGATE, and the “judged useless, queried anyway” finding collectively show that models’ internal evidence judgments are poorly coupled to their actions — and that lightweight, structured interventions (integration steps, reversibility ontologies, step-level escalation) can close this gap without retraining. The next wave will likely combine these: <strong>harnesses that maintain structured memory, schedule work proactively, and expose calibrated confidence/stopping signals to both humans and downstream automation.</strong></p>
+<hr>
+<h2>Worth Deep Reading</h2>
+<ol>
+<li><p><strong>DAEDALUS</strong> (Paper 1) — The cleanest demonstration yet that <em>self-generated practice + heuristic validation</em> can replace human-curated training tasks for agent memory. The explorer–solver loop, difficulty adaptation, and consolidation pipeline are directly implementable; the finding that generated tasks serve as proxy benchmarks for model ranking is a bonus for evaluation infrastructure.</p>
+</li>
+<li><p><strong>AECP</strong> (Paper 3) — A rare paper that simultaneously improves <em>correctness</em> (+28.2% test pass), <em>efficiency</em> (−16.5% wall time), and <em>security</em> (malicious relay 95%→0%) by moving coordination into the harness. The artifact-exclusive protocol is a concrete, adoptable pattern for any multi-agent code-generation system.</p>
+</li>
+<li><p><strong>Stateless Language Agents</strong> (Paper 28) — Reframing long-horizon research as “stateful search with stateless agents” is a principled architecture that explains why prior frameworks plateau (history duplication, context drift, implicit role conflation). The 84% token reduction to match the strongest kernel baseline, plus the ablation showing focused contexts and explicit assignments compound over full runs, makes a compelling case for harness-owned state as the default paradigm.</p>
+</li>
+</ol>
+<hr>
+<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
+]]></content:encoded>
+    </item>
     <item>
       <title>AI Agents Digest 2026-10-06</title>
       <link>https://dboeter.github.io/daily-diff/#2026-10-06/ai-agents</link>
