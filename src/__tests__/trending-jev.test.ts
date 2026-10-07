@@ -176,6 +176,24 @@ describe("classifyItems", () => {
     expect(result?.get("npm:b")).toEqual({ category: null, standalone: null });
     expect(result?.get("npm:a")?.category).toBe("coding_agent");
   });
+
+  it("skips Jev for apps OpenRouter tags as agents, not for broad tags or untagged apps", async () => {
+    const app = (appId: number, categories: string[]): ClassifyItem => ({
+      kind: "openrouter",
+      key: `openrouter:${appId}`,
+      app: { appId, title: `App ${appId}`, description: "", categories } as unknown as OpenRouterApp,
+    });
+    const ask = vi.fn(classifyAnswer("out_of_scope", 0.1));
+    const result = await classifyItems(
+      [app(1, ["cli-agent"]), app(2, ["programming-app"]), app(3, [])],
+      "key",
+      ask,
+    );
+    expect(ask.mock.calls.map((c) => (c[0] as { name: string }).name)).toEqual(["App 2", "App 3"]);
+    expect(result?.get("openrouter:1")).toEqual({ category: null, standalone: null });
+    expect(result?.get("openrouter:2")?.category).toBe("out_of_scope");
+    expect(result?.get("openrouter:3")?.category).toBe("out_of_scope");
+  });
 });
 
 // ---------------------------------------------------------------------------

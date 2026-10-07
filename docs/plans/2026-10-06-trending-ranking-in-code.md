@@ -3,8 +3,7 @@
 Status: Done · Created 2026-10-06 · Decisions confirmed 2026-10-06:
 code renders the tables, Tier B is included, and Tier C accepts one week of
 warm-up. Implemented on branch `feat/trending-in-code` in `9880a32` (Jev
-client), `ad58f7e` (Tier A), `4ef17b4` (Tier B) and the Tier C commit that
-sets this status.
+client), `ad58f7e` (Tier A), `4ef17b4` (Tier B) and `fad1744` (Tier C).
 
 ## Why
 
@@ -73,7 +72,20 @@ Smaller deviations:
   nothing rather than rejecting every candidate.
 - The prose prompt no longer asks for links to recent releases: the model
   sees only the tables and the model data.
-- The live Jev check (Done-conditions) had not run when this status was set.
+- **OpenRouter apps tagged as agents skip Jev.** The live Jev check
+  (2026-10-07) put 14 of 37 apps tagged `cli-agent`, `ide-extension`,
+  `cloud-agent` or `personal-agent` out of scope, goose, Crush and Command
+  Code among them: most have no description, so Jev saw a bare name. Those
+  four tags now settle scope. Untagged apps, which are on the list only for
+  being new or trending, and the broad `programming-app` and
+  `native-app-builder` tags still go to Jev.
+- **Live Jev check, 2026-10-07:** 208/208 classification calls and 15/15
+  match calls answered, so candidate keys such as `npm:@scope/name` work as
+  Choice options. Scope picks were sound for GitHub and npm (awesome-lists,
+  `claude-proxy`, platform binaries out; `@tanstack/ai-sandbox` off the Radar
+  at 0.21 standalone). No match was made: every app's best pick was `none`,
+  correctly, because the Kilo Code, pi and Hermes repos are established
+  repos, which sit in the category tables and never enter the Radar pool.
 
 ## Design
 

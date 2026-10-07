@@ -242,17 +242,36 @@ export async function classifyItem(
   };
 }
 
+/**
+ * OpenRouter's own app tags that settle scope, so these apps skip Jev. Most
+ * tagged apps have no description, and on 2026-10-07 Jev, reading a bare name,
+ * put 14 of 37 tagged apps out of scope (goose, Crush, Command Code among them)
+ * and scored Roo Code 0.15 as standalone. `programming-app` and
+ * `native-app-builder` are left to Jev: they also tag gateways (Portkey) and
+ * game engines (GDevelop). Untagged apps are on the list only for being new or
+ * trending (`selectAgentApps`), and need judging too.
+ */
+const AGENT_APP_TAGS = new Set(["cli-agent", "ide-extension", "cloud-agent", "personal-agent"]);
+
+/** An OpenRouter app OpenRouter itself tags as an agent: in scope and on the Radar without Jev. */
+export function isTaggedAgentApp(item: ClassifyItem): boolean {
+  return item.kind === "openrouter" && item.app.categories.some((c) => AGENT_APP_TAGS.has(c));
+}
+
 /** Jev classification by item key; null when too many calls failed for the answers to mean anything. */
 export async function classifyItems(
   items: ClassifyItem[],
   apiKey: string,
   ask: AskJev = askJev,
 ): Promise<Map<string, Classification> | null> {
-  const { results, failed } = await mapJev(items, (item) => classifyItem(item, apiKey, ask), "trending");
-  if (jevFailedTooOften(failed, items.length)) return null;
-  // A single failed call falls back for that item only: it should neither drop
-  // the item (unclassified = off the Radar) nor send the whole run to the fallback.
-  return new Map(items.map((item, i) => [item.key, results[i] ?? fallbackClassification(item)]));
+  const asked = items.filter((item) => !isTaggedAgentApp(item));
+  const { results, failed } = await mapJev(asked, (item) => classifyItem(item, apiKey, ask), "trending");
+  if (jevFailedTooOften(failed, asked.length)) return null;
+  const byKey = new Map(asked.map((item, i) => [item.key, results[i]]));
+  // Tagged apps get the fallback's verdict: in scope, standalone unknown. A
+  // single failed call also falls back for that item only: it should neither
+  // drop the item (unclassified = off the Radar) nor send the whole run to the fallback.
+  return new Map(items.map((item) => [item.key, byKey.get(item.key) ?? fallbackClassification(item)]));
 }
 
 // ---------------------------------------------------------------------------
