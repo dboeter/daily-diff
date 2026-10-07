@@ -5,10 +5,12 @@
  * a `Classification`: from Jev (`classifyItems`) when `TYPESAFE_API_KEY` is set,
  * else from `fallbackClassification`, which reads the GitHub topic query that
  * found a repo. The policy functions (`inScope`, `onRadar`) are the same either
- * way. Jev also matches OpenRouter apps to npm/GitHub rows that URL merging
- * missed; those decisions are saved in `digests/trending-matches.json`.
+ * way. Jev's verdicts are saved in `digests/trending-classifications.json`, so
+ * each item is asked once. Jev also matches OpenRouter apps to npm/GitHub rows
+ * that URL merging missed; those decisions are saved in `digests/trending-matches.json`.
  */
 
+import { createHash } from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import { askJev, jevFailedTooOften, mapJev } from "./jev.ts";
@@ -29,6 +31,8 @@ export interface Classification {
   probabilities?: Record<string, number>;
   /** Jev only: the versioned model that answered. */
   model?: string;
+  /** Saved verdicts only: the CST date Jev decided it, or "by hand". */
+  decided?: string;
 }
 
 /** One item to classify; `key` is the item key used in `RadarRow.keys` and `GithubRow.key`. */
@@ -195,18 +199,22 @@ const SOURCE_NAMES: Record<ClassifyItem["kind"], string> = {
   npm: "npm package",
 };
 
+/** The name and description Jev reads. */
+function itemText(item: ClassifyItem): [name: string, description: string] {
+  return item.kind === "github"
+    ? [item.row.fullName, item.row.description]
+    : item.kind === "openrouter"
+      ? [item.app.title, item.app.description]
+      : [item.pkg.name, item.pkg.description];
+}
+
 /**
  * Only what the questions read: unused state costs accuracy (see `scorePaper`),
  * so no language and no URL. An empty description is omitted rather than sent
  * as "". `topic` drops the `new:` prefix, an internal label for the creation-date query.
  */
 function classifyState(item: ClassifyItem): object {
-  const [name, description] =
-    item.kind === "github"
-      ? [item.row.fullName, item.row.description]
-      : item.kind === "openrouter"
-        ? [item.app.title, item.app.description]
-        : [item.pkg.name, item.pkg.description];
+  const [name, description] = itemText(item);
   const topic = item.kind === "github" ? item.row.topic?.replace(/^new:/, "") : undefined;
   return {
     name,
@@ -615,6 +623,153 @@ export async function matchApps(
 }
 
 // ---------------------------------------------------------------------------
+// Classification cache, digests/trending-classifications.json
+// ---------------------------------------------------------------------------
+
+/**
+ * `digests/trending-classifications.json`: Jev's verdict per item, so each item
+ * is asked once instead of every week. A project's scope does not change while
+ * its description stays the same. Hand-editable; see CLAUDE.md.
+ */
+export interface ClassifyCache {
+  /** Key: the item key, GitHub keys lowercased (`normKey`). */
+  items: Record<string, ClassifyEntry>;
+}
+
+export interface ClassifyEntry {
+  /** For readers only. */
+  name: string;
+  category: Category | "out_of_scope";
+  standalone: number | null;
+  /**
+   * Hash of the description Jev read. A changed description is asked again: a
+   * new repo first seen with an empty or placeholder description would
+   * otherwise stay out of scope. Absent = keep the verdict regardless (a hand fix).
+   */
+  desc?: string;
+  /** CST date Jev answered; absent on a hand-added entry. */
+  decided?: string;
+  model?: string;
+  /** CST date the item was last on one of the report's lists. */
+  lastSeen: string;
+}
+
+export const CLASSIFY_FILE = path.join("digests", "trending-classifications.json");
+/** An item off every list this long is dropped, which keeps the file bounded; if it returns, it costs one call. */
+export const CLASSIFY_UNSEEN_DAYS = 180;
+
+/**
+ * Letters and digits only: the trending page scrape keeps HTML entities and
+ * line breaks the search API does not, and a repo moving between the two
+ * must not count as a changed description.
+ */
+const descHash = (item: ClassifyItem): string =>
+  createHash("sha1")
+    .update(
+      itemText(item)[1]
+        .replace(/&#?\w+;/g, "")
+        .toLowerCase()
+        .replace(/[^\p{L}\p{N}]+/gu, ""),
+    )
+    .digest("hex")
+    .slice(0, 8);
+
+/** Missing file → empty cache. Unreadable or malformed → null: every item is asked and nothing is saved. */
+export function loadClassifyCache(file = CLASSIFY_FILE): ClassifyCache | null {
+  if (!fs.existsSync(file)) return { items: {} };
+  try {
+    const parsed = JSON.parse(fs.readFileSync(file, "utf-8")) as Partial<ClassifyCache> | null;
+    if (typeof parsed?.items !== "object" || parsed.items === null || Array.isArray(parsed.items)) {
+      throw new Error("no `items` object");
+    }
+    return parsed as ClassifyCache;
+  } catch (err) {
+    // As with the match file: an empty cache saved after the report would overwrite a hand edit.
+    console.error(`  [trending] Cannot read ${file}, every item is asked: ${err}`);
+    return null;
+  }
+}
+
+/** One item per line, like the star history: ~200 items a week would make a pretty-printed file long. */
+export function saveClassifyCache(cache: ClassifyCache, file = CLASSIFY_FILE): void {
+  const lines = Object.entries(cache.items).map(
+    ([key, e]) => `    ${JSON.stringify(key)}: ${JSON.stringify(e)}`,
+  );
+  const body = lines.length > 0 ? `{\n${lines.join(",\n")}\n  }` : "{}";
+  fs.mkdirSync(path.dirname(file), { recursive: true });
+  fs.writeFileSync(file, `{\n  "items": ${body}\n}\n`, "utf-8");
+}
+
+/** The saved verdicts that still hold for `items`, by item key. */
+export function cachedClassifications(
+  cache: ClassifyCache,
+  items: ClassifyItem[],
+): Map<string, Classification> {
+  const hits = new Map<string, Classification>();
+  for (const item of items) {
+    // The tags settle scope, so they beat a verdict saved before the app was tagged.
+    if (isTaggedAgentApp(item)) continue;
+    const e = cache.items[normKey(item.key)];
+    if (!e || (e.desc !== undefined && e.desc !== descHash(item))) continue;
+    // A hand edit with a typo is asked again rather than shown under an unknown category.
+    if (
+      !Object.hasOwn(CLASSIFY_QUESTIONS.category.criteria, e.category) ||
+      (e.standalone !== null && !Number.isFinite(e.standalone))
+    ) {
+      console.error(`  [trending] Invalid saved classification for ${item.key}, asking again`);
+      continue;
+    }
+    hits.set(item.key, {
+      category: e.category,
+      standalone: e.standalone,
+      ...(e.model ? { model: e.model } : {}),
+      decided: e.decided ?? "by hand",
+    });
+  }
+  return hits;
+}
+
+/**
+ * The cache after this run: Jev's new answers saved, every classified item
+ * marked seen, items unseen for CLASSIFY_UNSEEN_DAYS dropped. A verdict without
+ * a model (a tagged app, a failed call, the topic fallback) is never saved, so a
+ * later run never reads a topic-label guess as Jev's.
+ */
+export function nextClassifyCache(
+  cache: ClassifyCache,
+  items: ClassifyItem[],
+  classifications: Map<string, Classification>,
+  dateStr: string,
+): ClassifyCache {
+  const next = { ...cache.items };
+  for (const item of items) {
+    const key = normKey(item.key);
+    const c = classifications.get(item.key);
+    if (c?.model !== undefined && c.decided === undefined && c.category !== null) {
+      next[key] = {
+        name: itemText(item)[0],
+        category: c.category,
+        standalone: c.standalone === null ? null : Math.round(c.standalone * 1000) / 1000,
+        desc: descHash(item),
+        decided: dateStr,
+        model: c.model,
+        lastSeen: dateStr,
+      };
+    } else if (next[key]) {
+      // Spread, not rebuilt: a hand edit keeps its fields.
+      next[key] = { ...next[key], lastSeen: dateStr };
+    }
+  }
+  return {
+    items: Object.fromEntries(
+      Object.entries(next).filter(
+        ([, e]) => (Date.parse(dateStr) - Date.parse(e.lastSeen)) / DAY_MS <= CLASSIFY_UNSEEN_DAYS,
+      ),
+    ),
+  };
+}
+
+// ---------------------------------------------------------------------------
 // Trace
 // ---------------------------------------------------------------------------
 
@@ -635,12 +790,7 @@ export function buildTrendingRankingFile(
     p && Object.fromEntries(Object.entries(p).map(([k, v]) => [k, round(v)]));
   const itemLines = items.map((item) => {
     const c = classifications.get(item.key);
-    const name =
-      item.kind === "github"
-        ? item.row.fullName
-        : item.kind === "openrouter"
-          ? item.app.title
-          : item.pkg.name;
+    const [name] = itemText(item);
     const perWeek = item.kind === "github" ? item.row.perWeek : null;
     return JSON.stringify({
       key: item.key,
@@ -649,6 +799,8 @@ export function buildTrendingRankingFile(
       probabilities: roundAll(c?.probabilities),
       standalone: c?.standalone == null ? null : round(c.standalone),
       perWeek: perWeek === null ? null : round(perWeek),
+      // A saved verdict has no probabilities here; they are in the trace of the run that decided it.
+      ...(c?.decided ? { decided: c.decided } : {}),
     });
   });
   const matchLines = matches.map((m) => JSON.stringify({ ...m, probabilities: roundAll(m.probabilities) }));

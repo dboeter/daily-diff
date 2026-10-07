@@ -841,7 +841,7 @@ describe("composeTrendingReport with star history", () => {
       npm: EMPTY_NPM,
     };
     const h = hist({ "big/agent": [["2026-09-28", 8_990]], "small/agent": [["2026-09-28", 400]] });
-    const report = await composeTrendingReport(data, DATE, "", null, notCalled, h);
+    const report = await composeTrendingReport(data, DATE, "", null, notCalled, h, { items: {} });
     expect(report.categories.flatMap((c) => c.rows.map((r) => [r.fullName, r.starsCell]))).toEqual([
       ["small/agent", "600 (+200)"],
       ["big/agent", "9,000 (+10)"],

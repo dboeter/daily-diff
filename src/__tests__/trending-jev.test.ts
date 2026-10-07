@@ -5,19 +5,24 @@ import { describe, it, expect, vi } from "vitest";
 import {
   applyMatchAnswers,
   buildTrendingRankingFile,
+  cachedClassifications,
   classifyItem,
   classifyItems,
   fallbackClassification,
   inScope,
+  loadClassifyCache,
   loadMatchState,
   matchApps,
+  nextClassifyCache,
   onRadar,
   pendingMatchQuestions,
   pruneMatchState,
+  saveClassifyCache,
   saveMatchState,
   STANDALONE_MIN_NOUL,
   type AskJev,
   type Classification,
+  type ClassifyCache,
   type ClassifyItem,
   type MatchState,
 } from "../trending-jev.ts";
@@ -433,6 +438,143 @@ describe("loadMatchState", () => {
 });
 
 // ---------------------------------------------------------------------------
+// Classification cache
+// ---------------------------------------------------------------------------
+
+describe("classification cache", () => {
+  const npmItem = (name: string, description = ""): ClassifyItem => ({
+    kind: "npm",
+    key: `npm:${name}`,
+    pkg: { name, description } as NpmPackage,
+  });
+  const jev = (category: Classification["category"], standalone: number): Classification => ({
+    category,
+    standalone,
+    probabilities: { [String(category)]: 0.9 },
+    model: MODEL,
+  });
+  const saveAnswers = (items: ClassifyItem[], answers: Classification[]) =>
+    nextClassifyCache({ items: {} }, items, new Map(items.map((item, i) => [item.key, answers[i]!])), DATE);
+  const handFix = {
+    name: "o/r",
+    category: "out_of_scope" as const,
+    standalone: null,
+    lastSeen: daysBefore(30),
+  };
+
+  it("saves a Jev answer and reuses it while the description is unchanged", () => {
+    const item = npmItem("a", "An agent");
+    const cache = saveAnswers([item], [jev("coding_agent", 0.81234)]);
+    expect(cache.items["npm:a"]).toEqual({
+      name: "a",
+      category: "coding_agent",
+      standalone: 0.812,
+      desc: expect.stringMatching(/^[0-9a-f]{8}$/),
+      decided: DATE,
+      model: MODEL,
+      lastSeen: DATE,
+    });
+    const hits = cachedClassifications(cache, [item]);
+    expect(hits.get("npm:a")).toEqual({
+      category: "coding_agent",
+      standalone: 0.812,
+      model: MODEL,
+      decided: DATE,
+    });
+    // A same-day re-run rewrites the same file.
+    expect(nextClassifyCache(cache, [item], hits, DATE)).toEqual(cache);
+    expect(cachedClassifications(cache, [npmItem("a", "A different project now")]).size).toBe(0);
+  });
+
+  it("ignores entities, case and whitespace in the description, as the trending scrape and search differ", () => {
+    const cache = saveAnswers(
+      [npmItem("a", "Claude Code & Codex: a harness")],
+      [jev("harness_framework", 0.9)],
+    );
+    expect(cachedClassifications(cache, [npmItem("a", "Claude Code &amp; Codex:\n  a harness")]).size).toBe(
+      1,
+    );
+  });
+
+  it("lets OpenRouter's agent tags beat a verdict saved before the app was tagged", () => {
+    const app = (categories: string[]): ClassifyItem => ({
+      kind: "openrouter",
+      key: "openrouter:7",
+      app: { appId: 7, title: "Crush", description: "", categories } as unknown as OpenRouterApp,
+    });
+    const cache = saveAnswers([app([])], [jev("out_of_scope", 0.2)]);
+    expect(cachedClassifications(cache, [app([])]).size).toBe(1);
+    expect(cachedClassifications(cache, [app(["cli-agent"])]).size).toBe(0);
+  });
+
+  it("never saves a verdict without a model: tagged apps, failed calls, the topic fallback", () => {
+    const cache = saveAnswers(
+      [npmItem("a"), githubItem("ai-agent")],
+      [
+        { category: null, standalone: null },
+        { category: "other_agent", standalone: null },
+      ],
+    );
+    expect(cache.items).toEqual({});
+  });
+
+  it("keeps a hand fix without desc, compares GitHub keys case-insensitively, and asks again on a bad category", () => {
+    const cache: ClassifyCache = {
+      items: {
+        "github:o/r": handFix,
+        "npm:typo": { ...handFix, name: "typo", category: "coding-agent" as never },
+      },
+    };
+    const item: ClassifyItem = {
+      kind: "github",
+      key: "github:O/R",
+      row: { ...githubRow("ai-agent"), key: "github:O/R", fullName: "O/R", description: "anything" },
+    };
+    vi.spyOn(console, "error").mockImplementationOnce(() => {});
+    const hits = cachedClassifications(cache, [item, npmItem("typo")]);
+    expect(hits.get("github:O/R")).toEqual({
+      category: "out_of_scope",
+      standalone: null,
+      decided: "by hand",
+    });
+    expect(hits.has("npm:typo")).toBe(false);
+  });
+
+  it("marks hits seen without rewriting them and drops items unseen for 180 days", () => {
+    const cache: ClassifyCache = {
+      items: {
+        "github:o/r": handFix,
+        "npm:old": { ...handFix, name: "old", lastSeen: daysBefore(181) },
+        "npm:kept": { ...handFix, name: "kept", lastSeen: daysBefore(180) },
+      },
+    };
+    const items = [githubItem("ai-agent")];
+    expect(nextClassifyCache(cache, items, cachedClassifications(cache, items), DATE).items).toEqual({
+      "github:o/r": { ...handFix, lastSeen: DATE },
+      "npm:kept": cache.items["npm:kept"],
+    });
+  });
+
+  it("reads back what it saved, one item per line; a missing file is empty, an invalid one null", () => {
+    const file = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "trending-classify-")), "c.json");
+    expect(loadClassifyCache(file)).toEqual({ items: {} });
+    const cache = saveAnswers(
+      [npmItem("a"), npmItem("b")],
+      [jev("coding_agent", 0.9), jev("out_of_scope", 0.1)],
+    );
+    saveClassifyCache(cache, file);
+    const lines = fs.readFileSync(file, "utf-8").split("\n");
+    expect(lines.filter((l) => l.startsWith('    "npm:'))).toHaveLength(2);
+    expect(lines).toHaveLength(7); // "{", "items" line, 2 items, "}", "}", "" after the final newline
+    expect(loadClassifyCache(file)).toEqual(cache);
+    fs.writeFileSync(file, "{ not json");
+    expect(loadClassifyCache(file)).toBeNull();
+    fs.writeFileSync(file, '{"items": []}');
+    expect(loadClassifyCache(file)).toBeNull();
+  });
+});
+
+// ---------------------------------------------------------------------------
 // Composition
 // ---------------------------------------------------------------------------
 
@@ -489,8 +631,10 @@ describe("composeTrendingReport", () => {
   };
   const saved = (): MatchState => ({ apps: { "1": entry({ npm: "@kilocode/cli" }) } });
 
+  const noCache = (): ClassifyCache => ({ items: {} });
+
   it("lets Jev decide scope and Radar, and merges a saved match into one Radar row", async () => {
-    const report = await composeTrendingReport(data, DATE, "key", saved(), ask, { repos: {} });
+    const report = await composeTrendingReport(data, DATE, "key", saved(), ask, { repos: {} }, noCache());
     expect(report.classifiedBy).toBe("jev");
     expect(report.radar.map((r) => r.keys)).toEqual([["openrouter:1", "npm:@kilocode/cli"]]);
     expect(report.categories.map((c) => [c.category, c.rows.map((r) => r.fullName)])).toEqual([
@@ -509,16 +653,57 @@ describe("composeTrendingReport", () => {
   });
 
   it("skips matching and saves no state when the match file is unreadable", async () => {
-    const report = await composeTrendingReport(data, DATE, "key", null, ask, { repos: {} });
+    const report = await composeTrendingReport(data, DATE, "key", null, ask, { repos: {} }, noCache());
     expect(report.radar.map((r) => r.keys)).toEqual([["openrouter:1"], ["npm:@kilocode/cli"]]);
     expect(report.nextMatches).toBeUndefined();
   });
 
   it("falls back to topic labels without a key and writes no ranking file", async () => {
-    const report = await composeTrendingReport(data, DATE, "", saved(), notCalled, { repos: {} });
+    const report = await composeTrendingReport(data, DATE, "", saved(), notCalled, { repos: {} }, noCache());
     expect(report.classifiedBy).toBe("topics");
     expect(report.rankingFile).toBeUndefined();
     expect(report.radar[0]!.keys).toEqual(["openrouter:1", "npm:@kilocode/cli"]);
+    expect(report.nextClassifications).toEqual(noCache());
+  });
+
+  it("asks Jev only about items missing from the classification cache, and uses saved verdicts without a key", async () => {
+    const first = await composeTrendingReport(data, DATE, "key", null, ask, { repos: {} }, noCache());
+    expect(Object.keys(first.nextClassifications!.items)).toHaveLength(5);
+
+    const counted = vi.fn(ask);
+    const second = await composeTrendingReport(
+      data,
+      DATE,
+      "key",
+      null,
+      counted,
+      { repos: {} },
+      first.nextClassifications!,
+    );
+    expect(counted).not.toHaveBeenCalled();
+    expect(second.classifiedBy).toBe("jev");
+    expect([second.radar, second.categories]).toEqual([first.radar, first.categories]);
+    expect(second.nextClassifications).toEqual(first.nextClassifications);
+    expect(JSON.parse(second.rankingFile!).items[0]).toMatchObject({ key: "github:a/agent", decided: DATE });
+
+    // The topic fallback would put b/weights (topic ai-agent) in other_agent; the saved verdict keeps it out.
+    const keyless = await composeTrendingReport(
+      data,
+      DATE,
+      "",
+      null,
+      notCalled,
+      { repos: {} },
+      first.nextClassifications!,
+    );
+    expect(keyless.categories).toEqual(first.categories);
+  });
+
+  it("asks every item and saves no cache when the cache file is unreadable", async () => {
+    const counted = vi.fn(ask);
+    const report = await composeTrendingReport(data, DATE, "key", null, counted, { repos: {} }, null);
+    expect(counted).toHaveBeenCalledTimes(5);
+    expect(report.nextClassifications).toBeUndefined();
   });
 });
 

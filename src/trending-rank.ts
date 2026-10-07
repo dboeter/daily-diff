@@ -16,7 +16,7 @@ import type { SearchRepo, TrendingRepo } from "./trending.ts";
 import { formatTokens, type OpenRouterApp } from "./openrouter.ts";
 import { momentumRatio, type NpmData, type NpmPackage } from "./npm.ts";
 import { toCstDateStr } from "./date.ts";
-import { onRadar, type Classification, type MatchState } from "./trending-jev.ts";
+import { onRadar, type Classification, type ClassifyCache, type MatchState } from "./trending-jev.ts";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -79,6 +79,8 @@ export interface TrendingReportData {
   rankingFile?: string;
   /** Match state to save once the report is written; absent when the file could not be read. */
   nextMatches?: MatchState;
+  /** Classification cache to save once the report is written; absent when the file could not be read. */
+  nextClassifications?: ClassifyCache;
   /** Star history to save once the report is written. */
   nextStarHistory?: StarHistory;
 }

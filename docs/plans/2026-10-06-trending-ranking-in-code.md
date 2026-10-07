@@ -79,6 +79,19 @@ Smaller deviations:
   four tags now settle scope. Untagged apps, which are on the list only for
   being new or trending, and the broad `programming-app` and
   `native-app-builder` tags still go to Jev.
+- **Classifications are cached** in `digests/trending-classifications.json`
+  (decided 2026-10-07): the plan asked Jev about every item every week,
+  about 200 calls, though a project's scope does not change. An item is
+  asked once, and again only when its description changes, so a new repo
+  first seen with a placeholder description is not out of scope for good.
+  Saved verdicts are used even without a key or when the new calls fail.
+  Fallback verdicts and tagged apps are never saved, and an agent tag beats
+  a verdict saved before the app was tagged. A file that fails to parse
+  means every item is asked and nothing is saved, the same as the match
+  file. The 50% failure rule now counts only the items asked: on a week
+  with few new items, two failed calls can send those items to the topic
+  fallback, and that run writes no `trending-ranking.json`. They are asked
+  again the next week.
 - **Live Jev check, 2026-10-07:** 208/208 classification calls and 15/15
   match calls answered, so candidate keys such as `npm:@scope/name` work as
   Choice options. Scope picks were sound for GitHub and npm (awesome-lists,

@@ -22,11 +22,16 @@ import {
 } from "./trending-rank.ts";
 import {
   buildTrendingRankingFile,
+  cachedClassifications,
   classifyItems,
   fallbackClassification,
+  loadClassifyCache,
   loadMatchState,
   matchApps,
+  nextClassifyCache,
   type AskJev,
+  type Classification,
+  type ClassifyCache,
   type ClassifyItem,
   type MatchState,
   type MatchTrace,
@@ -329,7 +334,8 @@ export async function fetchTrendingData(period: TrendingPeriod, dateStr: string)
 
 /**
  * Rank, classify, match and select the weekly report's rows. The defaults are
- * the production inputs; tests inject the key, the match state, `ask` and the star history.
+ * the production inputs; tests inject the key, the match state, `ask`, the star
+ * history and the classification cache.
  */
 export async function composeTrendingReport(
   data: TrendingData,
@@ -339,6 +345,8 @@ export async function composeTrendingReport(
   ask: AskJev = askJev,
   // Weekly only: daily runs never compose, so they never read or write the file.
   history: StarHistory = loadStarHistory(),
+  // Null (unreadable file): every item is asked and the file is left as it is.
+  classifyCache: ClassifyCache | null = loadClassifyCache(),
 ): Promise<TrendingReportData> {
   const githubRows = rankGithubRepos(data.trendingRepos, data.searchRepos, dateStr, history);
   const candidates = buildRadarCandidates(data.openrouter.apps, data.npm, githubRows, dateStr);
@@ -353,15 +361,26 @@ export async function composeTrendingReport(
       (pkg): ClassifyItem => ({ kind: "npm", key: npmKey(pkg), pkg }),
     ),
   ];
-  const byJev = apiKey ? await classifyItems(items, apiKey, ask) : null;
+  // Saved verdicts are Jev's, so they hold without a key or when this run's calls
+  // fail; only the rest is asked, and `classifiedBy` describes those.
+  const saved = classifyCache
+    ? cachedClassifications(classifyCache, items)
+    : new Map<string, Classification>();
+  const asked = items.filter((item) => !saved.has(item.key));
+  const byJev = apiKey ? await classifyItems(asked, apiKey, ask) : null;
   const classifiedBy = byJev ? "jev" : "topics";
-  const classifications = byJev ?? new Map(items.map((item) => [item.key, fallbackClassification(item)]));
-  if (byJev) console.log(`  [trending] Classified ${classifications.size} items by Jev`);
-  else
-    console.log(
-      `  [trending] Classified ${classifications.size} items by topic labels ` +
-        `(fallback: ${apiKey ? "too many Jev failures" : "no TYPESAFE_API_KEY"})`,
-    );
+  const classifications = new Map(
+    items.map((item) => [
+      item.key,
+      saved.get(item.key) ?? byJev?.get(item.key) ?? fallbackClassification(item),
+    ]),
+  );
+  console.log(
+    `  [trending] Classified ${classifications.size} items: ${saved.size} saved, the rest ` +
+      (byJev
+        ? "by Jev"
+        : `by topic labels (fallback: ${apiKey ? "too many Jev failures" : "no TYPESAFE_API_KEY"})`),
+  );
 
   // Matching needs a readable state file; without one (null) it is skipped and nothing is saved.
   let links: [string, string][] = [];
@@ -390,6 +409,9 @@ export async function composeTrendingReport(
     ...report,
     ...(rankingFile !== undefined ? { rankingFile } : {}),
     ...(nextMatches !== undefined ? { nextMatches } : {}),
+    ...(classifyCache
+      ? { nextClassifications: nextClassifyCache(classifyCache, items, classifications, dateStr) }
+      : {}),
     nextStarHistory: nextStarHistory(history, githubRows, dateStr),
   };
 }
