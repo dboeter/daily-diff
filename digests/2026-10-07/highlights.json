@@ -1,0 +1,18 @@
+{
+  "ai-agents": [
+    "Qwen Code has two security vulnerabilities: environment-variable overrides bypass file-ownership checks (config hijacking) and unescaped control characters in approval dialogs enable UI spoofing in the web shell",
+    "Claude Code v2.1.292 adds `--marketplace <source>` flag for plugin installs and an `effort` parameter to control sub-agent compute budget for background tasks"
+  ],
+  "ai-web": [
+    "Anthropic expands Cyber Verification Program to three tiers, granting vetted security teams reduced-safeguard access to Opus 5.5, Sonnet 5.5, and Mythos 5.1",
+    "OpenAI publishes a builders guide for GPT-5.6 alongside seven other ecosystem posts, signaling an imminent model release with developer-focused documentation"
+  ],
+  "ai-hn": [
+    "Mistral Large 4 released as a new flagship open-weight competitor, drawing intense benchmark and licensing scrutiny from developers",
+    "OpenAI launches Decisions API in public beta, enabling structured, auditable agent workflows with built-in guardrails for reliable decision-making"
+  ],
+  "ai-arxiv": [
+    "DAEDALUS lets agents bootstrap reusable memory from self-generated practice tasks, matching supervised baselines with 15.9pp higher success and 2.2x pass^5 at lower inference cost",
+    "SchemaFill achieves 4.05x throughput on tool calling via slot-parallel speculative decoding, verifying future slot values concurrently without knowing call sequence ahead of time"
+  ]
+}
