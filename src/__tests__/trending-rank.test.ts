@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
@@ -19,6 +19,7 @@ import {
   type StarHistory,
 } from "../trending-rank.ts";
 import type { AskJev, Classification } from "../trending-jev.ts";
+import { GitHubApiError } from "../github.ts";
 import {
   composeTrendingReport,
   EMPTY_NPM,
@@ -34,6 +35,8 @@ import type { NpmData, NpmPackage } from "../npm.ts";
 // ---------------------------------------------------------------------------
 
 const DATE = "2026-10-05";
+/** A creation date 4 days before DATE: a new repo whose stars are all this week's. */
+const NEW = "2026-10-01T00:00:00Z";
 
 function trending(fullName: string, o: Partial<TrendingRepo> = {}): TrendingRepo {
   return {
@@ -57,7 +60,7 @@ function search(fullName: string, o: Partial<SearchRepo> = {}): SearchRepo {
     pushedAt: "2026-10-04T00:00:00Z",
     createdAt: "2024-01-01T00:00:00Z",
     url: `https://github.com/${fullName}`,
-    searchQuery: "ai-agent",
+    searchQuery: "coding-agent",
     ...o,
   };
 }
@@ -132,40 +135,73 @@ describe("rankGithubRepos", () => {
       language: "Rust",
       description: "from trending",
       topic: "harness",
-      perWeek: 50,
-      starsCell: "1,000 (+50)",
+      gain: 50,
+      starsCell: "1,000 (+50, +5.3%)",
     });
     // Trending total missing (0) → search total; empty trending fields fall back too.
     expect(rows[1]).toMatchObject({
       totalStars: 500,
       language: "Go",
       description: "from search",
-      starsCell: "500 (+10)",
+      starsCell: "500 (+10, +2%)",
     });
   });
 
-  it("applies the perWeek precedence and sorts the null tail by total stars", () => {
+  it("takes the gain from the trending page, the star history, the age, then the history API", () => {
     const rows = rankGithubRepos(
       [trending("t/week", { periodStars: 300, totalStars: 86_392 })],
       [
         search("s/old-small", { stargazersCount: 100 }),
         search("s/old-big", { stargazersCount: 86_392 }),
-        // Created 7 days ago: 900 stars → 900/week.
-        search("s/new", { stargazersCount: 900, createdAt: "2026-09-28T00:00:00Z" }),
+        search("s/snap", { stargazersCount: 1200 }),
+        // Created 5 days ago: every star is this week's.
+        search("s/new", { stargazersCount: 900, createdAt: "2026-09-30T00:00:00Z" }),
+        // A week old: some stars may predate the window, so it needs the API.
+        search("s/week-old", { stargazersCount: 800, createdAt: "2026-09-28T00:00:00Z" }),
+        search("s/fetched", { stargazersCount: 5000 }),
         // New and on the trending page: GitHub's own count wins.
         search("t/week", { createdAt: "2026-10-01T00:00:00Z" }),
-        // Created today: age 0 counts as 1 day.
-        search("s/today", { stargazersCount: 10, createdAt: "2026-10-05T01:00:00Z" }),
       ],
       DATE,
+      hist({ "s/snap": [["2026-09-28", 1000]], "t/week": [["2026-09-28", 1]] }),
+      new Map([
+        ["s/fetched", 120],
+        ["s/snap", 1],
+      ]),
     );
-    expect(rows.map((r) => [r.fullName, r.perWeek])).toEqual([
+    expect(rows.map((r) => [r.fullName, r.gain])).toEqual([
       ["s/new", 900],
       ["t/week", 300],
-      ["s/today", 70],
+      ["s/snap", 200],
+      ["s/fetched", 120],
       ["s/old-big", null],
+      ["s/week-old", null],
       ["s/old-small", null],
     ]);
+  });
+
+  it("computes a relative gain only over a baseline of at least 100 stars", () => {
+    const rows = rankGithubRepos(
+      [],
+      [
+        search("s/big", { stargazersCount: 10_000 }),
+        search("s/edge", { stargazersCount: 150 }),
+        search("s/under", { stargazersCount: 149 }),
+        search("s/new", { stargazersCount: 300, createdAt: "2026-10-03T00:00:00Z" }),
+      ],
+      DATE,
+      undefined,
+      new Map([
+        ["s/big", 812],
+        ["s/edge", 50],
+        ["s/under", 50],
+      ]),
+    );
+    const row = (name: string) => rows.find((r) => r.fullName === name)!;
+    expect(row("s/big").relative).toBeCloseTo(812 / 9188);
+    expect(row("s/edge").relative).toBe(0.5);
+    expect(row("s/under").relative).toBeNull();
+    expect(row("s/new").relative).toBeNull();
   });
 
   it("formats each stars cell", () => {
@@ -175,36 +211,43 @@ describe("rankGithubRepos", () => {
         trending("t/no-total", { periodStars: 1851 }),
       ],
       [
-        search("s/new", { stargazersCount: 1240, createdAt: "2026-09-26T12:00:00Z" }),
-        search("s/one", { stargazersCount: 5, createdAt: "2026-10-04T00:00:00Z" }),
+        search("s/new", { stargazersCount: 1240, createdAt: "2026-10-01T12:00:00Z" }),
+        search("s/fast", { stargazersCount: 400 }),
+        search("s/down", { stargazersCount: 1000 }),
+        search("s/flat", { stargazersCount: 100_000 }),
         search("s/old", { stargazersCount: 86_392 }),
       ],
       DATE,
+      undefined,
+      new Map([
+        ["s/fast", 200],
+        ["s/down", -3],
+        ["s/flat", 0],
+      ]),
     );
     const cell = (name: string) => rows.find((r) => r.fullName === name)!.starsCell;
-    expect(cell("t/full")).toBe("86,392 (+1,851)");
+    expect(cell("t/full")).toBe("86,392 (+1,851, +2.2%)");
     expect(cell("t/no-total")).toBe("(+1,851)");
-    expect(cell("s/new")).toBe("1,240 (new, 9 days)");
-    expect(cell("s/one")).toBe("5 (new, 1 day)");
+    expect(cell("s/new")).toBe("1,240 (+1,240)");
+    expect(cell("s/fast")).toBe("400 (+200, +100%)");
+    expect(cell("s/down")).toBe("1,000 (-3, -0.3%)");
+    expect(cell("s/flat")).toBe("100,000 (+0, 0%)");
     expect(cell("s/old")).toBe("86,392");
   });
 
-  it("dates creation in CST and flags repos up to 14 days old or from a new:* query", () => {
+  it("dates creation in CST and flags repos up to 14 days old", () => {
     const rows = rankGithubRepos(
       [],
       [
         // 2026-09-20T20:00Z is 2026-09-21 in CST: 14 days.
         search("s/edge", { createdAt: "2026-09-20T20:00:00Z" }),
         search("s/old", { createdAt: "2026-09-20T10:00:00Z" }),
-        search("s/new-query", { searchQuery: "new:harness" }),
       ],
       DATE,
     );
     const row = (name: string) => rows.find((r) => r.fullName === name)!;
-    expect(row("s/edge").isNew).toBe(true);
-    expect(row("s/edge").starsCell).toBe("0 (new, 14 days)");
+    expect(row("s/edge")).toMatchObject({ isNew: true, gain: null, starsCell: "0" });
     expect(row("s/old").isNew).toBe(false);
-    expect(row("s/new-query")).toMatchObject({ isNew: true, perWeek: null });
   });
 
   it("leaves topic unset for trending-page-only repos", () => {
@@ -267,6 +310,8 @@ describe("buildRadarCandidates", () => {
       [],
       [search("s/new", { stargazersCount: 1240, createdAt: "2026-09-26T00:00:00Z" }), search("s/old")],
       DATE,
+      undefined,
+      new Map([["s/new", 1000]]),
     );
     const rows = buildRadarCandidates([], NO_NPM, github, DATE);
     expect(rows).toHaveLength(1);
@@ -274,7 +319,7 @@ describe("buildRadarCandidates", () => {
       keys: ["github:s/new"],
       name: "s/new",
       sources: ["GitHub"],
-      signals: ["🆕 1,240 (new, 9 days)"],
+      signals: ["🆕 1,240 (+1,000, +417%)"],
       isNew: true,
     });
   });
@@ -283,8 +328,8 @@ describe("buildRadarCandidates", () => {
     const github = rankGithubRepos(
       [],
       [
-        search("s/small", { searchQuery: "new:coding-agent", stargazersCount: 24 }),
-        search("s/big", { searchQuery: "new:coding-agent", stargazersCount: 25 }),
+        search("s/small", { createdAt: NEW, stargazersCount: 24 }),
+        search("s/big", { createdAt: NEW, stargazersCount: 25 }),
       ],
       DATE,
     );
@@ -292,11 +337,7 @@ describe("buildRadarCandidates", () => {
   });
 
   it("orders 🆕 first, then by relative position, ties OpenRouter > npm > GitHub", () => {
-    const github = rankGithubRepos(
-      [],
-      [search("g/new", { searchQuery: "new:harness", stargazersCount: 30 })],
-      DATE,
-    );
+    const github = rankGithubRepos([], [search("g/new", { createdAt: NEW, stargazersCount: 30 })], DATE);
     const rows = buildRadarCandidates(
       [app(1), app(2)],
       npmData([pkg("p-new", { weekly: 1000, monthly: 1000 })], [pkg("p1"), pkg("p2"), pkg("p3")]),
@@ -323,7 +364,7 @@ describe("urlMerge", () => {
   it("merges an npm package with the GitHub repo its repository URL names", () => {
     const github = rankGithubRepos(
       [],
-      [search("Kilo-Org/kilocode", { searchQuery: "new:coding-agent", stargazersCount: 30 })],
+      [search("Kilo-Org/kilocode", { createdAt: NEW, stargazersCount: 30 })],
       DATE,
     );
     const rows = urlMerge(
@@ -340,7 +381,7 @@ describe("urlMerge", () => {
       keys: ["github:Kilo-Org/kilocode", "npm:@kilocode/cli"],
       name: "Kilo-Org/kilocode",
       sources: ["GitHub", "npm"],
-      signals: ["🆕 30", "1,000/week, 1.1x"],
+      signals: ["🆕 30 (+30)", "1,000/week, 1.1x"],
       isNew: true,
     });
   });
@@ -386,7 +427,7 @@ describe("urlMerge", () => {
   it("merges transitively, at the earliest member's position, joining sources and signals", () => {
     const github = rankGithubRepos(
       [],
-      [search("kilo-org/kilocode", { searchQuery: "new:coding-agent", stargazersCount: 30 })],
+      [search("kilo-org/kilocode", { createdAt: NEW, stargazersCount: 30 })],
       DATE,
     );
     const rows = urlMerge(
@@ -539,6 +580,64 @@ describe("selectTrendingReport", () => {
     expect(report.categories[1]!.rows[0]!.n).toBe(9);
   });
 
+  it("alternates the top absolute and the top relative gains in a category", () => {
+    // Absolute: big1 > big2 > big3 > mid > small1 > small2; relative: small1 > small2 > mid > the bigs.
+    const sizes: [string, number, number][] = [
+      ["big1", 100_000, 900],
+      ["big2", 90_000, 800],
+      ["big3", 80_000, 700],
+      ["mid", 2_000, 400],
+      ["small1", 300, 200],
+      ["small2", 250, 150],
+      ["none", 50_000, -1],
+    ];
+    const github = rankGithubRepos(
+      [],
+      sizes.map(([name, stars]) => search(`c/${name}`, { stargazersCount: stars })),
+      DATE,
+      undefined,
+      new Map(sizes.filter(([, , gain]) => gain >= 0).map(([name, , gain]) => [`c/${name}`, gain])),
+    );
+    const coding: Classification = { category: "coding_agent", standalone: null };
+    const report = selectTrendingReport(github, [], new Map(github.map((r) => [r.key, coding])), "jev");
+    expect(report.categories[0]!.rows.map((r) => r.fullName)).toEqual([
+      "c/big1",
+      "c/small1",
+      "c/big2",
+      "c/small2",
+      "c/big3",
+      "c/mid",
+      "c/none",
+    ]);
+  });
+
+  it("needs a gain of at least 50 stars for a relative pick", () => {
+    const gains: [string, number, number][] = [
+      ...Array.from({ length: 8 }, (_, i): [string, number, number] => [
+        `big${i + 1}`,
+        100_000,
+        900 - i * 100,
+      ]),
+      // +50% and +36%, both above every big repo's relative gain.
+      ["fifty", 150, 50],
+      ["tiny", 150, 40],
+    ];
+    const github = rankGithubRepos(
+      [],
+      gains.map(([name, stars]) => search(`c/${name}`, { stargazersCount: stars })),
+      DATE,
+      undefined,
+      new Map(gains.map(([name, , gain]) => [`c/${name}`, gain])),
+    );
+    const coding: Classification = { category: "coding_agent", standalone: null };
+    const report = selectTrendingReport(github, [], new Map(github.map((r) => [r.key, coding])), "jev");
+    expect(report.categories[0]!.rows.map((r) => r.fullName)).toEqual([
+      "c/big1",
+      "c/fifty",
+      ...Array.from({ length: 6 }, (_, i) => `c/big${i + 2}`),
+    ]);
+  });
+
   /** `count` npm candidates named `${prefix}${i}`; momentum 4.3x (🆕) when `fresh`. */
   const npmRun = (prefix: string, count: number, fresh: boolean) =>
     Array.from({ length: count }, (_, i) =>
@@ -604,7 +703,7 @@ describe("selectTrendingReport", () => {
     const github = rankGithubRepos(
       [],
       [
-        search("g/new", { searchQuery: "new:coding-agent", stargazersCount: 50 }),
+        search("g/new", { stargazersCount: 50, createdAt: "2026-10-01T00:00:00Z" }),
         search("g/old", { stargazersCount: 10 }),
       ],
       DATE,
@@ -625,7 +724,7 @@ describe("selectTrendingReport", () => {
 
     const summaries = summaryRows(report);
     expect(summaries.map((s) => s.n)).toEqual([1, 2, 3]);
-    expect(summaries[0]!.facts).toBe("Source: GitHub | Signal: 🆕 50");
+    expect(summaries[0]!.facts).toBe("Source: GitHub | Signal: 🆕 50 (+50)");
     expect(summaries[2]).toEqual({ n: 3, name: "g/old", description: "", facts: "Stars: 10" });
   });
 });
@@ -687,19 +786,20 @@ const hist = (repos: StarHistory["repos"]): StarHistory => ({ repos });
 describe("starBaseline", () => {
   const h = hist({
     "a/x": [
-      ["2026-09-21", 100],
+      ["2026-09-27", 100],
       ["2026-09-28", 200],
+      ["2026-10-01", 250],
       [DATE, 300],
     ],
   });
 
-  it("takes the newest point before today and ignores today's", () => {
-    expect(starBaseline(h, "A/X", DATE)).toEqual({ date: "2026-09-28", stars: 200 });
+  it("takes the point from exactly a week ago, ignoring newer ones", () => {
+    expect(starBaseline(h, "A/X", DATE)).toBe(200);
   });
 
-  it("is null without points before today", () => {
+  it("is null without a point from exactly a week ago", () => {
     expect(starBaseline(h, "b/y", DATE)).toBeNull();
-    expect(starBaseline(h, "a/x", "2026-09-21")).toBeNull();
+    expect(starBaseline(hist({ "a/x": [["2026-10-01", 250]] }), "a/x", DATE)).toBeNull();
   });
 });
 
@@ -708,25 +808,22 @@ describe("rankGithubRepos with star history", () => {
 
   it("uses the delta over exactly a week", () => {
     const [row] = rankGithubRepos([], [search("a/x", { stargazersCount: 86_392 })], DATE, h);
-    expect(row).toMatchObject({ starsCell: "86,392 (+812)", perWeek: 812 });
+    expect(row).toMatchObject({ starsCell: "86,392 (+812, +0.9%)", gain: 812 });
   });
 
-  it("scales a delta over another span to a week and names the days", () => {
+  it("ignores a point from another span", () => {
     const [row] = rankGithubRepos([], [search("b/y", { stargazersCount: 86_392 })], DATE, h);
-    expect(row).toMatchObject({ starsCell: "86,392 (+812 in 4 days)", perWeek: (812 * 7) / 4 });
-    const oneDay = hist({ "a/x": [["2026-10-04", 86_380]] });
-    const [next] = rankGithubRepos([], [search("a/x", { stargazersCount: 86_392 })], DATE, oneDay);
-    expect(next).toMatchObject({ starsCell: "86,392 (+12 in 1 day)", perWeek: 84 });
+    expect(row).toMatchObject({ starsCell: "86,392", gain: null });
   });
 
   it("looks the repo up case-insensitively", () => {
     const [row] = rankGithubRepos([], [search("A/X", { stargazersCount: 86_392 })], DATE, h);
-    expect(row!.perWeek).toBe(812);
+    expect(row!.gain).toBe(812);
   });
 
   it("shows a negative delta with its sign", () => {
     const [row] = rankGithubRepos([], [search("a/x", { stargazersCount: 85_568 })], DATE, h);
-    expect(row).toMatchObject({ starsCell: "85,568 (-12)", perWeek: -12 });
+    expect(row).toMatchObject({ starsCell: "85,568 (-12, 0%)", gain: -12 });
   });
 
   it("prefers trending periodStars over the delta", () => {
@@ -736,22 +833,12 @@ describe("rankGithubRepos with star history", () => {
       DATE,
       h,
     );
-    expect(row).toMatchObject({ starsCell: "86,392 (+50)", perWeek: 50 });
-  });
-
-  it("prefers the delta over new-repo scaling", () => {
-    const [row] = rankGithubRepos(
-      [],
-      [search("n/new", { stargazersCount: 300, createdAt: "2026-09-27T00:00:00Z" })],
-      DATE,
-      hist({ "n/new": [["2026-10-01", 200]] }),
-    );
-    expect(row).toMatchObject({ starsCell: "300 (+100 in 4 days)", perWeek: 175, isNew: true });
+    expect(row).toMatchObject({ starsCell: "86,392 (+50, +0.1%)", gain: 50 });
   });
 
   it("computes no delta when the star count is unknown", () => {
     const [row] = rankGithubRepos([trending("a/x", { totalStars: 0 })], [], DATE, h);
-    expect(row).toMatchObject({ starsCell: "0", perWeek: null });
+    expect(row).toMatchObject({ starsCell: "0", gain: null });
   });
 });
 
@@ -769,7 +856,7 @@ describe("nextStarHistory", () => {
     const repos = [search("a/x", { stargazersCount: 86_392 })];
     const first = nextStarHistory(h, rankGithubRepos([], repos, DATE, h), DATE);
     const rerunRows = rankGithubRepos([], repos, DATE, first);
-    expect(rerunRows[0]!.perWeek).toBe(812);
+    expect(rerunRows[0]!.gain).toBe(812);
     expect(nextStarHistory(first, rerunRows, DATE)).toEqual(first);
     expect(first.repos["a/x"]).toEqual([
       ["2026-09-28", 85_580],
@@ -777,17 +864,17 @@ describe("nextStarHistory", () => {
     ]);
   });
 
-  it("carries forward unseen repos and prunes points older than 35 days", () => {
+  it("carries forward unseen repos and prunes points older than 7 days", () => {
     const h = hist({
-      "old/gone": [["2026-08-30", 5]],
+      "old/gone": [["2026-09-27", 5]],
       "a/x": [
-        ["2026-08-30", 1],
-        ["2026-08-31", 2],
+        ["2026-09-27", 1],
+        ["2026-09-28", 2],
       ],
-      "b/y": [["2026-09-28", 7]],
+      "b/y": [["2026-10-01", 7]],
     });
     expect(nextStarHistory(h, [], DATE)).toEqual(
-      hist({ "a/x": [["2026-08-31", 2]], "b/y": [["2026-09-28", 7]] }),
+      hist({ "a/x": [["2026-09-28", 2]], "b/y": [["2026-10-01", 7]] }),
     );
   });
 });
@@ -828,27 +915,108 @@ describe("composeTrendingReport with star history", () => {
   const notCalled: AskJev = async () => {
     throw new Error("Jev called without a key");
   };
+  const noFetch = async (): Promise<number> => {
+    throw new Error("history API called");
+  };
+  const data = (searchRepos: SearchRepo[]) => ({
+    trendingRepos: [],
+    searchRepos,
+    trendingFetchSuccess: true,
+    openrouter: EMPTY_OPENROUTER,
+    npm: EMPTY_NPM,
+  });
+  const cells = (report: { categories: { rows: GithubRow[] }[] }) =>
+    report.categories.flatMap((c) => c.rows.map((r) => [r.fullName, r.starsCell]));
 
-  it("ranks a search repo by its delta and returns the next history", async () => {
-    const data = {
-      trendingRepos: [],
-      searchRepos: [
+  it("ranks search repos by their deltas and returns the next history", async () => {
+    const h = hist({ "big/agent": [["2026-09-28", 8_990]], "small/agent": [["2026-09-28", 400]] });
+    const report = await composeTrendingReport(
+      data([
         search("big/agent", { stargazersCount: 9_000 }),
         search("small/agent", { stargazersCount: 600 }),
-      ],
-      trendingFetchSuccess: true,
-      openrouter: EMPTY_OPENROUTER,
-      npm: EMPTY_NPM,
-    };
-    const h = hist({ "big/agent": [["2026-09-28", 8_990]], "small/agent": [["2026-09-28", 400]] });
-    const report = await composeTrendingReport(data, DATE, "", null, notCalled, h, { items: {} });
-    expect(report.categories.flatMap((c) => c.rows.map((r) => [r.fullName, r.starsCell]))).toEqual([
-      ["small/agent", "600 (+200)"],
-      ["big/agent", "9,000 (+10)"],
+      ]),
+      DATE,
+      "",
+      null,
+      notCalled,
+      h,
+      { items: {} },
+      noFetch,
+    );
+    expect(cells(report)).toEqual([
+      ["small/agent", "600 (+200, +50%)"],
+      ["big/agent", "9,000 (+10, +0.1%)"],
     ]);
     expect(report.nextStarHistory?.repos["small/agent"]).toEqual([
       ["2026-09-28", 400],
       [DATE, 600],
     ]);
+  });
+
+  it("asks the history API only about rows that could reach the report, new ones first", async () => {
+    const asked: string[] = [];
+    const gains: Record<string, number> = { "big/agent": 50, "small/agent": 150, "new/agent": 30 };
+    const fetchGain = async (repo: string) => {
+      asked.push(repo);
+      return gains[repo]!;
+    };
+    const report = await composeTrendingReport(
+      data([
+        search("snap/agent", { stargazersCount: 9_000 }),
+        search("big/agent", { stargazersCount: 5_000 }),
+        search("small/agent", { stargazersCount: 300 }),
+        // The topic fallback puts an unknown label out of scope.
+        search("off/topic", { stargazersCount: 7_000, searchQuery: "llm" }),
+        // Ten days old: too old to count every star, so it needs the API.
+        search("new/agent", { stargazersCount: 40, createdAt: "2026-09-25T00:00:00Z" }),
+        // Under NEW_REPO_MIN_STARS: never on the Radar.
+        search("tiny/new", { stargazersCount: 10, createdAt: "2026-09-25T00:00:00Z" }),
+      ]),
+      DATE,
+      "",
+      null,
+      notCalled,
+      hist({ "snap/agent": [["2026-09-28", 8_000]] }),
+      { items: {} },
+      fetchGain,
+    );
+    expect(asked).toEqual(["new/agent", "big/agent", "small/agent"]);
+    expect(cells(report)).toEqual([
+      ["snap/agent", "9,000 (+1,000, +13%)"],
+      ["small/agent", "300 (+150, +100%)"],
+      ["big/agent", "5,000 (+50, +1%)"],
+    ]);
+    expect(report.radar.map((r) => r.signals)).toEqual([["🆕 40 (+30)"]]);
+  });
+
+  it("skips a failed repo, and stops at a rate limit", async () => {
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    const repos = [
+      search("a/agent", { stargazersCount: 3_000 }),
+      search("b/agent", { stargazersCount: 2_000 }),
+      search("c/agent", { stargazersCount: 1_000 }),
+    ];
+    const fetchGain = vi.fn(async (repo: string) => {
+      if (repo === "a/agent") throw new GitHubApiError(404, "gone");
+      if (repo === "b/agent") throw new GitHubApiError(403, "rate limited");
+      return 10;
+    });
+    const report = await composeTrendingReport(
+      data(repos),
+      DATE,
+      "",
+      null,
+      notCalled,
+      hist({}),
+      { items: {} },
+      fetchGain,
+    );
+    expect(fetchGain.mock.calls.map(([repo]) => repo)).toEqual(["a/agent", "b/agent"]);
+    expect(cells(report)).toEqual([
+      ["a/agent", "3,000"],
+      ["b/agent", "2,000"],
+      ["c/agent", "1,000"],
+    ]);
+    vi.restoreAllMocks();
   });
 });

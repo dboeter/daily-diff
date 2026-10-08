@@ -6,17 +6,20 @@
 
 import { fetchOpenRouterData, type OpenRouterData } from "./openrouter.ts";
 import { fetchNpmData, type NpmData } from "./npm.ts";
-import { searchSlot } from "./github.ts";
+import { fetchWeeklyStarGain, GitHubApiError, searchSlot } from "./github.ts";
 import {
   buildRadarCandidates,
   loadStarHistory,
+  NEW_REPO_MIN_STARS,
   nextStarHistory,
   npmKey,
   openrouterKey,
   radarPool,
   rankGithubRepos,
+  RELATIVE_MIN_BASELINE,
   selectTrendingReport,
   urlMerge,
+  type GithubRow,
   type StarHistory,
   type TrendingReportData,
 } from "./trending-rank.ts";
@@ -25,10 +28,12 @@ import {
   cachedClassifications,
   classifyItems,
   fallbackClassification,
+  inScope,
   loadClassifyCache,
   loadMatchState,
   matchApps,
   nextClassifyCache,
+  onRadar,
   type AskJev,
   type Classification,
   type ClassifyCache,
@@ -100,31 +105,39 @@ export function hasTrendingData(data: TrendingData): boolean {
 // ---------------------------------------------------------------------------
 
 /**
- * Repos active (pushed) in the last 7 days, by stars. Favors established repos.
- * Dedupe keeps the first query's label, so the specific agent topics go before
- * the broad `ai-agent`, which tags the same repos. Each query adds ~2 s to
- * the fetch phase: searchSlot paces the search API's 30 requests a minute.
+ * Agent topics searched, most specific first: dedupe keeps the first query's
+ * label, the fallback category (`TOPIC_CATEGORIES`). `ai-agent` and
+ * `multi-agent` were dropped on 2026-10-07: their top repos were stock bots,
+ * slide generators and RAG apps. `claude-code` and `mcp` are left out: their
+ * repos are mostly plugins and MCP servers. Each request adds ~2 s to the fetch
+ * phase: searchSlot paces the search API's 30 requests a minute.
  */
-const SEARCH_QUERIES = [
-  { q: "topic:harness", label: "harness" },
-  { q: "topic:agent-harness", label: "agent-harness" },
-  { q: "topic:ai-coding", label: "ai-coding" },
-  { q: "topic:multi-agent", label: "multi-agent" },
-  { q: "topic:agent-orchestration", label: "agent-orchestration" },
-  { q: "topic:ai-agent", label: "ai-agent" },
+const SEARCH_TOPICS = [
+  "coding-agent",
+  "agentic-coding",
+  "ai-coding",
+  "agent-harness",
+  "harness",
+  "agent-orchestration",
 ];
 
 /**
- * Weekly run only. Repos created in the last 14 days, by stars — surfaces new
- * agents that the pushed-based queries rank below old, high-star repos.
- * `claude-code` and `mcp` are left out: their new repos are mostly plugins and
- * MCP servers.
+ * Weekly pages of 100 per established-repo query. On 2026-10-07 the largest,
+ * `coding-agent`, had 188 repos with 100+ stars pushed that week; all six topics
+ * gave 565 unique repos from 16 requests.
  */
-const NEW_REPO_QUERIES = [
-  { q: "topic:coding-agent", label: "new:coding-agent" },
-  { q: "topic:agentic-coding", label: "new:agentic-coding" },
-  { q: "topic:harness", label: "new:harness" },
-];
+const MAX_SEARCH_PAGES = 3;
+/** Daily runs only feed agent news, which needs the top repos, not the whole pool. */
+const DAILY_PER_TOPIC = 15;
+
+/**
+ * History-API calls per weekly run. The Actions GITHUB_TOKEN allows 1,000 core
+ * requests an hour per repository and the rest of the run makes ~60–80 (releases,
+ * skills, issues, labels, close-stale), so 500 never starves issue creation.
+ * Only the first run, or one after a missed Monday, comes near it: otherwise the
+ * star history covers every repo seen the week before.
+ */
+const MAX_STAR_HISTORY_CALLS = 500;
 
 // ---------------------------------------------------------------------------
 // GitHub Trending HTML fetch
@@ -232,8 +245,29 @@ interface SearchApiResponse {
   items: SearchApiItem[];
 }
 
-/** `fourteenDaysAgo` null skips the new-repo queries. */
-async function searchAiRepos(sevenDaysAgo: string, fourteenDaysAgo: string | null): Promise<SearchRepo[]> {
+interface SearchQuery {
+  q: string;
+  /** The topic, kept as `searchQuery`. */
+  label: string;
+  /** For the log: the topic, plus "(new)" for the creation-date query. */
+  name: string;
+  perPage: number;
+  maxPages: number;
+}
+
+/**
+ * Weekly (`fourteenDaysAgo` set): per topic, repos created in 14 days with
+ * NEW_REPO_MIN_STARS (the Radar's new agents) and repos pushed in 7 days with
+ * RELATIVE_MIN_BASELINE stars, every page (the category tables' pool, wide
+ * enough that a mid-size repo with a big week is in it). Sorted by total
+ * stars, the pushed query alone is an all-time leaderboard: it needs the
+ * second query for new repos and the star gain to rank. Daily: the top
+ * DAILY_PER_TOPIC pushed repos per topic, for agent news.
+ */
+export async function searchAiRepos(
+  sevenDaysAgo: string,
+  fourteenDaysAgo: string | null,
+): Promise<SearchRepo[]> {
   const token = process.env["GITHUB_TOKEN"] ?? "";
   const headers: Record<string, string> = {
     Accept: "application/vnd.github+json",
@@ -241,39 +275,65 @@ async function searchAiRepos(sevenDaysAgo: string, fourteenDaysAgo: string | nul
   };
   if (token) headers["Authorization"] = `Bearer ${token}`;
 
-  const seen = new Set<string>();
-  const all: SearchRepo[] = [];
-
-  // New-repo queries first: dedupe keeps the first label, and `new:*` is the signal worth keeping.
-  const queries = [
-    ...(fourteenDaysAgo
-      ? NEW_REPO_QUERIES.map((s) => ({ ...s, q: `${s.q}+created:>${fourteenDaysAgo}` }))
-      : []),
-    ...SEARCH_QUERIES.map((s) => ({ ...s, q: `${s.q}+pushed:>${sevenDaysAgo}` })),
-  ];
-
-  // Fetch in parallel, dedupe afterwards in query order so labels don't depend on response timing.
-  const results = await Promise.all(
-    queries.map(async ({ q, label }) => {
-      try {
-        await searchSlot();
-        const query = `${q}&sort=stars&order=desc`;
-        const url = `https://api.github.com/search/repositories?q=${query}&per_page=15`;
-        const resp = await fetch(url, { headers });
-        if (!resp.ok) {
-          console.error(`  [trending/search] "${label}": HTTP ${resp.status}`);
-          return [];
-        }
-        const data = (await resp.json()) as SearchApiResponse;
-        return data.items ?? [];
-      } catch (err) {
-        console.error(`  [trending/search] "${label}": ${err}`);
-        return [];
-      }
-    }),
+  const queries: SearchQuery[] = SEARCH_TOPICS.flatMap((topic): SearchQuery[] =>
+    fourteenDaysAgo
+      ? [
+          {
+            q: `topic:${topic}+created:>${fourteenDaysAgo}+stars:>=${NEW_REPO_MIN_STARS}`,
+            label: topic,
+            name: `${topic} (new)`,
+            perPage: 100,
+            maxPages: 1,
+          },
+          {
+            q: `topic:${topic}+pushed:>${sevenDaysAgo}+stars:>=${RELATIVE_MIN_BASELINE}`,
+            label: topic,
+            name: topic,
+            perPage: 100,
+            maxPages: MAX_SEARCH_PAGES,
+          },
+        ]
+      : [
+          {
+            q: `topic:${topic}+pushed:>${sevenDaysAgo}`,
+            label: topic,
+            name: topic,
+            perPage: DAILY_PER_TOPIC,
+            maxPages: 1,
+          },
+        ],
   );
 
-  queries.forEach(({ label }, i) => {
+  // A short page is the last one. A failed page keeps the pages before it.
+  const searchPages = async ({ q, name, perPage, maxPages }: SearchQuery): Promise<SearchApiItem[]> => {
+    const items: SearchApiItem[] = [];
+    try {
+      for (let page = 1; page <= maxPages; page++) {
+        await searchSlot();
+        const url =
+          `https://api.github.com/search/repositories?q=${q}&sort=stars&order=desc` +
+          `&per_page=${perPage}&page=${page}`;
+        const resp = await fetch(url, { headers });
+        if (!resp.ok) {
+          console.error(`  [trending/search] "${name}" page ${page}: HTTP ${resp.status}`);
+          break;
+        }
+        const pageItems = ((await resp.json()) as SearchApiResponse).items ?? [];
+        items.push(...pageItems);
+        if (pageItems.length < perPage) break;
+      }
+    } catch (err) {
+      console.error(`  [trending/search] "${name}": ${err}`);
+    }
+    return items;
+  };
+
+  // Fetch in parallel, dedupe afterwards in query order so labels don't depend on response timing.
+  const results = await Promise.all(queries.map(searchPages));
+
+  const seen = new Set<string>();
+  const all: SearchRepo[] = [];
+  queries.forEach(({ label, name }, i) => {
     let added = 0;
     for (const item of results[i]!) {
       if (!seen.has(item.full_name)) {
@@ -291,7 +351,7 @@ async function searchAiRepos(sevenDaysAgo: string, fourteenDaysAgo: string | nul
         added++;
       }
     }
-    console.log(`  [trending/search] "${label}": ${added} new repos`);
+    console.log(`  [trending/search] "${name}": ${added} new repos`);
   });
 
   return all;
@@ -333,9 +393,52 @@ export async function fetchTrendingData(period: TrendingPeriod, dateStr: string)
 }
 
 /**
+ * History-API gains for the rows nothing else measured that could reach the
+ * report: new repos the Radar would show, established repos in scope. One call
+ * at a time (the endpoint answers 422 when "spammed"), new rows first, then by
+ * total stars, at most MAX_STAR_HISTORY_CALLS.
+ */
+async function fetchMissingGains(
+  rows: GithubRow[],
+  classifications: Map<string, Classification>,
+  fetchGain: (repo: string) => Promise<number>,
+): Promise<Map<string, number>> {
+  const reachesReport = (r: GithubRow) => {
+    const c = classifications.get(r.key);
+    if (c === undefined) return false;
+    return r.isNew ? r.totalStars >= NEW_REPO_MIN_STARS && onRadar(c) : inScope(c);
+  };
+  // Rows without a gain come sorted by total stars (`rankGithubRepos`).
+  const missing = rows.filter((r) => r.gain === null && reachesReport(r));
+  const queue = [...missing.filter((r) => r.isNew), ...missing.filter((r) => !r.isNew)];
+
+  const fetched = new Map<string, number>();
+  let failed = 0;
+  let tried = 0;
+  for (const row of queue.slice(0, MAX_STAR_HISTORY_CALLS)) {
+    tried++;
+    try {
+      fetched.set(row.fullName.toLowerCase(), await fetchGain(row.fullName));
+    } catch (err) {
+      failed++;
+      console.error(`  [trending] star history ${row.fullName}: ${err}`);
+      // A rate limit or a "spammed" 422 fails every later call too, and each one spends quota.
+      if (err instanceof GitHubApiError && [403, 422, 429].includes(err.status)) break;
+    }
+  }
+  const known = rows.filter((r) => r.gain !== null).length;
+  console.log(
+    `  [trending] Star gains: ${known} from the trending page, star history or age; ` +
+      `${fetched.size} fetched, ${failed} failed, ${queue.length - tried} not tried ` +
+      `(${rows.length - known - queue.length} cannot reach the report)`,
+  );
+  return fetched;
+}
+
+/**
  * Rank, classify, match and select the weekly report's rows. The defaults are
  * the production inputs; tests inject the key, the match state, `ask`, the star
- * history and the classification cache.
+ * history, the classification cache and `fetchGain`.
  */
 export async function composeTrendingReport(
   data: TrendingData,
@@ -347,13 +450,13 @@ export async function composeTrendingReport(
   history: StarHistory = loadStarHistory(),
   // Null (unreadable file): every item is asked and the file is left as it is.
   classifyCache: ClassifyCache | null = loadClassifyCache(),
+  fetchGain: (repo: string) => Promise<number> = fetchWeeklyStarGain,
 ): Promise<TrendingReportData> {
-  const githubRows = rankGithubRepos(data.trendingRepos, data.searchRepos, dateStr, history);
-  const candidates = buildRadarCandidates(data.openrouter.apps, data.npm, githubRows, dateStr);
-
-  // Every GitHub row is classified: the new ones are Radar candidates, the rest category rows.
-  const items: ClassifyItem[] = [
-    ...githubRows.map((row): ClassifyItem => ({ kind: "github", key: row.key, row })),
+  // Every GitHub row is classified: the new ones are Radar candidates, the rest
+  // category rows. Classified before the gains are complete, so the history API
+  // is only asked about rows in scope; a verdict is saved, a gain is not.
+  const itemsFor = (rows: GithubRow[]): ClassifyItem[] => [
+    ...rows.map((row): ClassifyItem => ({ kind: "github", key: row.key, row })),
     ...data.openrouter.apps.map(
       (app): ClassifyItem => ({ kind: "openrouter", key: openrouterKey(app), app }),
     ),
@@ -361,16 +464,18 @@ export async function composeTrendingReport(
       (pkg): ClassifyItem => ({ kind: "npm", key: npmKey(pkg), pkg }),
     ),
   ];
+  const firstRows = rankGithubRepos(data.trendingRepos, data.searchRepos, dateStr, history);
+  const firstItems = itemsFor(firstRows);
   // Saved verdicts are Jev's, so they hold without a key or when this run's calls
   // fail; only the rest is asked, and `classifiedBy` describes those.
   const saved = classifyCache
-    ? cachedClassifications(classifyCache, items)
+    ? cachedClassifications(classifyCache, firstItems)
     : new Map<string, Classification>();
-  const asked = items.filter((item) => !saved.has(item.key));
+  const asked = firstItems.filter((item) => !saved.has(item.key));
   const byJev = apiKey ? await classifyItems(asked, apiKey, ask) : null;
   const classifiedBy = byJev ? "jev" : "topics";
   const classifications = new Map(
-    items.map((item) => [
+    firstItems.map((item) => [
       item.key,
       saved.get(item.key) ?? byJev?.get(item.key) ?? fallbackClassification(item),
     ]),
@@ -381,6 +486,15 @@ export async function composeTrendingReport(
         ? "by Jev"
         : `by topic labels (fallback: ${apiKey ? "too many Jev failures" : "no TYPESAFE_API_KEY"})`),
   );
+
+  const fetched = await fetchMissingGains(firstRows, classifications, fetchGain);
+  const githubRows =
+    fetched.size > 0
+      ? rankGithubRepos(data.trendingRepos, data.searchRepos, dateStr, history, fetched)
+      : firstRows;
+  // The trace and the cache read the final rows' gains.
+  const items = itemsFor(githubRows);
+  const candidates = buildRadarCandidates(data.openrouter.apps, data.npm, githubRows, dateStr);
 
   // Matching needs a readable state file; without one (null) it is skipped and nothing is saved.
   let links: [string, string][] = [];

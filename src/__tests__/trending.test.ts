@@ -1,5 +1,5 @@
-import { describe, expect, it } from "vitest";
-import { parseTrendingHtml } from "../trending.ts";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { parseTrendingHtml, searchAiRepos } from "../trending.ts";
 
 const SAMPLE_HTML = `
 <main>
@@ -119,5 +119,69 @@ describe("parseTrendingHtml", () => {
     const repos = parseTrendingHtml(html);
     expect(repos[0]?.totalStars).toBe(0);
     expect(repos[0]?.forks).toBe(77);
+  });
+});
+
+describe("searchAiRepos", () => {
+  afterEach(() => {
+    vi.useRealTimers();
+    vi.restoreAllMocks();
+  });
+
+  const item = (full_name: string) => ({
+    full_name,
+    description: null,
+    language: null,
+    stargazers_count: 100,
+    pushed_at: "2026-10-07T00:00:00Z",
+    created_at: "2025-01-01T00:00:00Z",
+    html_url: `https://github.com/${full_name}`,
+  });
+
+  /** Mock the search API; `pages` maps "<q> page <n>" to that page's repo names. */
+  function mockSearch(pages: Record<string, string[]> = {}): string[] {
+    const urls: string[] = [];
+    vi.spyOn(console, "log").mockImplementation(() => {});
+    vi.spyOn(globalThis, "fetch").mockImplementation(async (input) => {
+      const url = new URL(String(input));
+      urls.push(String(input));
+      const names = pages[`${url.searchParams.get("q")} page ${url.searchParams.get("page")}`] ?? [];
+      return { ok: true, json: async () => ({ items: names.map(item) }) } as Response;
+    });
+    return urls;
+  }
+
+  /** searchSlot spaces calls 2.1 s apart: run them on fake timers. */
+  async function run(fourteenDaysAgo: string | null) {
+    vi.useFakeTimers();
+    const pending = searchAiRepos("2026-09-30", fourteenDaysAgo);
+    await vi.runAllTimersAsync();
+    return pending;
+  }
+
+  it("daily: one page of the top 15 pushed repos per topic", async () => {
+    const urls = mockSearch({ "topic:coding-agent pushed:>2026-09-30 page 1": ["a/one"] });
+    const repos = await run(null);
+    expect(urls).toHaveLength(6);
+    expect(urls.every((u) => u.includes("&per_page=15&page=1"))).toBe(true);
+    expect(urls.some((u) => u.includes("created:"))).toBe(false);
+    expect(repos.map((r) => [r.fullName, r.searchQuery])).toEqual([["a/one", "coding-agent"]]);
+  });
+
+  it("weekly: new and established queries per topic, paging while pages are full", async () => {
+    const full = Array.from({ length: 100 }, (_, i) => `full/r${i}`);
+    const urls = mockSearch({
+      "topic:coding-agent created:>2026-09-23 stars:>=25 page 1": ["n/new"],
+      "topic:coding-agent pushed:>2026-09-30 stars:>=100 page 1": full,
+      "topic:coding-agent pushed:>2026-09-30 stars:>=100 page 2": ["p/two", "n/new"],
+      "topic:ai-coding pushed:>2026-09-30 stars:>=100 page 1": ["p/two", "c/three"],
+    });
+    const repos = await run("2026-09-23");
+    // 6 topics × 2 queries, plus page 2 of the one full page.
+    expect(urls).toHaveLength(13);
+    expect(urls.every((u) => u.includes("&per_page=100&"))).toBe(true);
+    expect(repos).toHaveLength(103);
+    expect(repos[0]).toMatchObject({ fullName: "n/new", searchQuery: "coding-agent" });
+    expect(repos.at(-1)).toMatchObject({ fullName: "c/three", searchQuery: "ai-coding" });
   });
 });

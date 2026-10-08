@@ -39,7 +39,8 @@ function githubRow(topic?: string): GithubRow {
     description: "",
     language: "",
     totalStars: 0,
-    perWeek: null,
+    gain: null,
+    relative: null,
     starsCell: "0",
     isNew: false,
     ...(topic !== undefined ? { topic } : {}),
@@ -51,15 +52,12 @@ const classify = (topic?: string) =>
 
 describe("fallbackClassification", () => {
   it.each([
-    ["harness", "harness_framework"],
-    ["agent-harness", "harness_framework"],
-    ["new:harness", "harness_framework"],
+    ["coding-agent", "coding_agent"],
+    ["agentic-coding", "coding_agent"],
     ["ai-coding", "coding_agent"],
-    ["new:coding-agent", "coding_agent"],
-    ["new:agentic-coding", "coding_agent"],
-    ["multi-agent", "multi_agent"],
+    ["agent-harness", "harness_framework"],
+    ["harness", "harness_framework"],
     ["agent-orchestration", "multi_agent"],
-    ["ai-agent", "other_agent"],
   ])("maps topic %s to %s with standalone unknown", (topic, category) => {
     expect(classify(topic)).toEqual({ category, standalone: null });
   });
@@ -69,8 +67,8 @@ describe("fallbackClassification", () => {
     expect(classify()).toEqual({ category: "out_of_scope", standalone: null });
   });
 
-  it("keeps new:* repos on the Radar", () => {
-    expect(onRadar(classify("new:coding-agent"))).toBe(true);
+  it("keeps topic-search repos on the Radar", () => {
+    expect(onRadar(classify("coding-agent"))).toBe(true);
   });
 
   it("keeps OpenRouter apps and npm packages in scope with unknown category", () => {
@@ -137,9 +135,9 @@ describe("classifyItem", () => {
     });
   });
 
-  it("sends the topic without new: and omits an empty description", async () => {
+  it("sends the topic and omits an empty description", async () => {
     const ask = vi.fn(classifyAnswer("coding_agent", 1));
-    await classifyItem(githubItem("new:coding-agent"), "key", ask);
+    await classifyItem(githubItem("coding-agent"), "key", ask);
     expect(ask.mock.calls[0]![0]).toEqual({
       name: "o/r",
       source: "GitHub repository",
@@ -587,7 +585,7 @@ describe("composeTrendingReport", () => {
     pushedAt: "2026-10-04T00:00:00Z",
     createdAt: "2024-01-01T00:00:00Z",
     url: `https://github.com/${fullName}`,
-    searchQuery: "ai-agent",
+    searchQuery: "coding-agent",
   });
   const npmPkg = (name: string) =>
     ({ name, description: "", weekly: 1000, monthly: 4000, url: "", lastPublish: DATE }) as NpmPackage;
@@ -632,9 +630,20 @@ describe("composeTrendingReport", () => {
   const saved = (): MatchState => ({ apps: { "1": entry({ npm: "@kilocode/cli" }) } });
 
   const noCache = (): ClassifyCache => ({ items: {} });
+  /** Stands in for the history API, which would be asked about a/agent. */
+  const zeroGain = async () => 0;
 
   it("lets Jev decide scope and Radar, and merges a saved match into one Radar row", async () => {
-    const report = await composeTrendingReport(data, DATE, "key", saved(), ask, { repos: {} }, noCache());
+    const report = await composeTrendingReport(
+      data,
+      DATE,
+      "key",
+      saved(),
+      ask,
+      { repos: {} },
+      noCache(),
+      zeroGain,
+    );
     expect(report.classifiedBy).toBe("jev");
     expect(report.radar.map((r) => r.keys)).toEqual([["openrouter:1", "npm:@kilocode/cli"]]);
     expect(report.categories.map((c) => [c.category, c.rows.map((r) => r.fullName)])).toEqual([
@@ -653,13 +662,31 @@ describe("composeTrendingReport", () => {
   });
 
   it("skips matching and saves no state when the match file is unreadable", async () => {
-    const report = await composeTrendingReport(data, DATE, "key", null, ask, { repos: {} }, noCache());
+    const report = await composeTrendingReport(
+      data,
+      DATE,
+      "key",
+      null,
+      ask,
+      { repos: {} },
+      noCache(),
+      zeroGain,
+    );
     expect(report.radar.map((r) => r.keys)).toEqual([["openrouter:1"], ["npm:@kilocode/cli"]]);
     expect(report.nextMatches).toBeUndefined();
   });
 
   it("falls back to topic labels without a key and writes no ranking file", async () => {
-    const report = await composeTrendingReport(data, DATE, "", saved(), notCalled, { repos: {} }, noCache());
+    const report = await composeTrendingReport(
+      data,
+      DATE,
+      "",
+      saved(),
+      notCalled,
+      { repos: {} },
+      noCache(),
+      zeroGain,
+    );
     expect(report.classifiedBy).toBe("topics");
     expect(report.rankingFile).toBeUndefined();
     expect(report.radar[0]!.keys).toEqual(["openrouter:1", "npm:@kilocode/cli"]);
@@ -667,7 +694,16 @@ describe("composeTrendingReport", () => {
   });
 
   it("asks Jev only about items missing from the classification cache, and uses saved verdicts without a key", async () => {
-    const first = await composeTrendingReport(data, DATE, "key", null, ask, { repos: {} }, noCache());
+    const first = await composeTrendingReport(
+      data,
+      DATE,
+      "key",
+      null,
+      ask,
+      { repos: {} },
+      noCache(),
+      zeroGain,
+    );
     expect(Object.keys(first.nextClassifications!.items)).toHaveLength(5);
 
     const counted = vi.fn(ask);
@@ -679,6 +715,7 @@ describe("composeTrendingReport", () => {
       counted,
       { repos: {} },
       first.nextClassifications!,
+      zeroGain,
     );
     expect(counted).not.toHaveBeenCalled();
     expect(second.classifiedBy).toBe("jev");
@@ -686,7 +723,7 @@ describe("composeTrendingReport", () => {
     expect(second.nextClassifications).toEqual(first.nextClassifications);
     expect(JSON.parse(second.rankingFile!).items[0]).toMatchObject({ key: "github:a/agent", decided: DATE });
 
-    // The topic fallback would put b/weights (topic ai-agent) in other_agent; the saved verdict keeps it out.
+    // The topic fallback would put b/weights (topic coding-agent) in coding_agent; the saved verdict keeps it out.
     const keyless = await composeTrendingReport(
       data,
       DATE,
@@ -695,13 +732,23 @@ describe("composeTrendingReport", () => {
       notCalled,
       { repos: {} },
       first.nextClassifications!,
+      zeroGain,
     );
     expect(keyless.categories).toEqual(first.categories);
   });
 
   it("asks every item and saves no cache when the cache file is unreadable", async () => {
     const counted = vi.fn(ask);
-    const report = await composeTrendingReport(data, DATE, "key", null, counted, { repos: {} }, null);
+    const report = await composeTrendingReport(
+      data,
+      DATE,
+      "key",
+      null,
+      counted,
+      { repos: {} },
+      null,
+      zeroGain,
+    );
     expect(counted).toHaveBeenCalledTimes(5);
     expect(report.nextClassifications).toBeUndefined();
   });
@@ -713,7 +760,7 @@ describe("composeTrendingReport", () => {
 
 describe("buildTrendingRankingFile", () => {
   it("writes every item and match on its own line, rounded to 3 decimals", () => {
-    const row = { ...githubRow("ai-agent"), perWeek: 12.34567 };
+    const row = { ...githubRow("coding-agent"), gain: 812, relative: 0.0712345 };
     const items: ClassifyItem[] = [
       { kind: "github", key: row.key, row },
       { kind: "npm", key: "npm:x", pkg: { name: "x" } as NpmPackage },
@@ -760,9 +807,10 @@ describe("buildTrendingRankingFile", () => {
         category: "coding_agent",
         probabilities: { coding_agent: 0.988 },
         standalone: 0.812,
-        perWeek: 12.346,
+        gain: 812,
+        relative: 0.071,
       },
-      { key: "npm:x", name: "x", category: null, standalone: null, perWeek: null },
+      { key: "npm:x", name: "x", category: null, standalone: null, gain: null, relative: null },
     ]);
     expect(parsed.matches[0].probabilities).toEqual({ none: 0.333 });
   });

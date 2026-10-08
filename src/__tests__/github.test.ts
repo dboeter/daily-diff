@@ -3,6 +3,9 @@ import {
   closeSupersededIssues,
   fetchHotIssues,
   fetchRecentReleases,
+  fetchWeeklyStarGain,
+  gainFromHistory,
+  GitHubApiError,
   isPrerelease,
   selectHotIssues,
   type GitHubItem,
@@ -189,6 +192,70 @@ describe("fetchRecentReleases", () => {
 
     await expect(fetchRecentReleases("org/repo", SINCE)).rejects.toThrow("GitHub API error 404");
     expect(fetchSpy).toHaveBeenCalledTimes(1);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// gainFromHistory / fetchWeeklyStarGain
+// ---------------------------------------------------------------------------
+
+/** Epoch seconds of a UTC date. */
+const weekOf = (date: string) => Date.parse(`${date}T00:00:00Z`) / 1000;
+
+describe("gainFromHistory", () => {
+  // Sunday 2026-10-11 22:37 UTC, the weekly run: the window is Sun 10-04 .. Sat 10-10.
+  const NOW = new Date("2026-10-11T22:37:00Z");
+
+  it("sums the 7 complete days before today across the week boundary", () => {
+    const weeks = [
+      { week: weekOf("2026-10-11"), total: 50, days: [50, 0, 0, 0, 0, 0, 0] },
+      { week: weekOf("2026-10-04"), total: 28, days: [1, 2, 3, 4, 5, 6, 7] },
+    ];
+    expect(gainFromHistory(weeks, NOW)).toBe(28);
+  });
+
+  it("takes the tail of last week when run mid-week", () => {
+    const weeks = [
+      { week: weekOf("2026-10-11"), total: 6, days: [1, 2, 3, 0, 0, 0, 0] },
+      { week: weekOf("2026-10-04"), total: 28, days: [1, 2, 3, 4, 5, 6, 7] },
+    ];
+    // Wednesday 10-14: Wed 10-07 .. Tue 10-13 = 4+5+6+7 + 1+2+3.
+    expect(gainFromHistory(weeks, new Date("2026-10-14T12:00:00Z"))).toBe(28);
+  });
+
+  it("handles a repo created this week, with a single bucket", () => {
+    const weeks = [{ week: weekOf("2026-10-04"), total: 9, days: [0, 0, 0, 0, 4, 5, 0] }];
+    expect(gainFromHistory(weeks, NOW)).toBe(9);
+  });
+
+  it("tolerates week starts off UTC midnight", () => {
+    const weeks = [{ week: weekOf("2026-10-04") + 7 * 3600, total: 7, days: [1, 1, 1, 1, 1, 1, 1] }];
+    expect(gainFromHistory(weeks, NOW)).toBe(7);
+  });
+});
+
+describe("fetchWeeklyStarGain", () => {
+  it("asks for the two newest buckets and sums the window", async () => {
+    const fetchSpy = vi.spyOn(globalThis, "fetch").mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve([{ week: weekOf("2026-10-04"), total: 3, days: [1, 1, 1, 0, 0, 0, 0] }]),
+    } as Response);
+
+    expect(await fetchWeeklyStarGain("org/repo", new Date("2026-10-11T22:37:00Z"))).toBe(3);
+    const url = new URL(String(fetchSpy.mock.calls[0]![0]));
+    expect(url.pathname).toBe("/repos/org/repo/stargazers/history");
+    expect(url.searchParams.get("per_page")).toBe("2");
+  });
+
+  it("throws a GitHubApiError carrying the status", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValue({
+      ok: false,
+      status: 422,
+      text: () => Promise.resolve("spammed"),
+    } as Response);
+
+    await expect(fetchWeeklyStarGain("org/repo")).rejects.toMatchObject({ status: 422 });
+    await expect(fetchWeeklyStarGain("org/repo")).rejects.toBeInstanceOf(GitHubApiError);
   });
 });
 
