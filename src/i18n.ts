@@ -55,7 +55,8 @@ export const TRENDING_REPORT = {
   radarHeading: "🚀 Agent & Coding Tool Radar",
   radarHeader: "| Tool | Source | Signal | Summary |\n| :--- | :--- | :--- | :--- |",
   categoriesHeading: "Top Projects by Category",
-  categoryHeader: "| Project | Lang | Stars (total / this week) | Summary |\n| :--- | :--- | ---: | :--- |",
+  categoryHeader:
+    "| Project | Lang | Stars (total / this week, %) | Summary |\n| :--- | :--- | ---: | :--- |",
   categoryTitles: {
     coding_agent: "🧑‍💻 Coding Agents",
     harness_framework: "🧰 Agent Harnesses & Frameworks",

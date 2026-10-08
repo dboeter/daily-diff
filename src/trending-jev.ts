@@ -15,6 +15,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { askJev, jevFailedTooOften, mapJev } from "./jev.ts";
 import type { Category, GithubRow, RadarRow } from "./trending-rank.ts";
+import type { SearchTopic } from "./trending.ts";
 import type { OpenRouterApp } from "./openrouter.ts";
 import type { NpmPackage } from "./npm.ts";
 
@@ -67,22 +68,19 @@ export function onRadar(c: Classification): boolean {
 // ---------------------------------------------------------------------------
 
 /**
- * Search-query label → category. The labels are the `SEARCH_QUERIES` and
- * `NEW_REPO_QUERIES` labels in `trending.ts`; each topic was chosen for one
- * kind of project, so the label is a fair first guess at the category. A label
- * missing here (a query added later) reads as out of scope until it is mapped.
+ * Search topic → category, for every `SEARCH_TOPICS` entry in `trending.ts`
+ * (tsc checks both ways); each topic was chosen for one kind of project, so it
+ * is a fair first guess at the category. Typed by string for the lookup: a
+ * test row can carry any topic, which reads as out of scope.
  */
 const TOPIC_CATEGORIES: Record<string, Category> = {
-  harness: "harness_framework",
-  "agent-harness": "harness_framework",
-  "new:harness": "harness_framework",
+  "coding-agent": "coding_agent",
+  "agentic-coding": "coding_agent",
   "ai-coding": "coding_agent",
-  "new:coding-agent": "coding_agent",
-  "new:agentic-coding": "coding_agent",
-  "multi-agent": "multi_agent",
+  "agent-harness": "harness_framework",
+  harness: "harness_framework",
   "agent-orchestration": "multi_agent",
-  "ai-agent": "other_agent",
-};
+} satisfies Record<SearchTopic, Category>;
 
 /** Deterministic classification from what the fetch already knows, used when Jev is unavailable. */
 export function fallbackClassification(item: ClassifyItem): Classification {
@@ -91,7 +89,7 @@ export function fallbackClassification(item: ClassifyItem): Classification {
     // mostly not about agents, and nothing else vouches for the repo.
     const topic = item.row.topic;
     const category = topic !== undefined ? (TOPIC_CATEGORIES[topic] ?? "out_of_scope") : "out_of_scope";
-    // standalone unknown, so `new:*` repos stay on the Radar.
+    // standalone unknown, so new repos from a topic search stay on the Radar.
     return { category, standalone: null };
   }
   // OpenRouter's agent categories and the npm coding-agent keywords already
@@ -211,11 +209,11 @@ function itemText(item: ClassifyItem): [name: string, description: string] {
 /**
  * Only what the questions read: unused state costs accuracy (see `scorePaper`),
  * so no language and no URL. An empty description is omitted rather than sent
- * as "". `topic` drops the `new:` prefix, an internal label for the creation-date query.
+ * as "".
  */
 function classifyState(item: ClassifyItem): object {
   const [name, description] = itemText(item);
-  const topic = item.kind === "github" ? item.row.topic?.replace(/^new:/, "") : undefined;
+  const topic = item.kind === "github" ? item.row.topic : undefined;
   return {
     name,
     ...(description ? { description } : {}),
@@ -791,14 +789,16 @@ export function buildTrendingRankingFile(
   const itemLines = items.map((item) => {
     const c = classifications.get(item.key);
     const [name] = itemText(item);
-    const perWeek = item.kind === "github" ? item.row.perWeek : null;
+    const row = item.kind === "github" ? item.row : null;
     return JSON.stringify({
       key: item.key,
       name,
       category: c?.category ?? null,
       probabilities: roundAll(c?.probabilities),
       standalone: c?.standalone == null ? null : round(c.standalone),
-      perWeek: perWeek === null ? null : round(perWeek),
+      gain: row?.gain ?? null,
+      gainFrom: row?.gainFrom ?? null,
+      relative: row?.relative == null ? null : round(row.relative),
       // A saved verdict has no probabilities here; they are in the trace of the run that decided it.
       ...(c?.decided ? { decided: c.decided } : {}),
     });

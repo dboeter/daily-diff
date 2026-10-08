@@ -71,6 +71,15 @@ function headers(): Record<string, string> {
   };
 }
 
+/** An HTTP error status from the API; `status` lets callers tell a rate limit from a missing repo. */
+export class GitHubApiError extends Error {
+  readonly status: number;
+  constructor(status: number, message: string) {
+    super(message);
+    this.status = status;
+  }
+}
+
 /** Retries after a dropped connection; waits GET_RETRY_MS, then twice that. */
 const GET_RETRIES = 2;
 const GET_RETRY_MS = 2000;
@@ -84,7 +93,7 @@ const GET_RETRY_MS = 2000;
  * `slot` runs before every attempt: search calls pass searchSlot, so a retry
  * keeps to the search rate limit too.
  */
-async function githubGet<T>(
+export async function githubGet<T>(
   url: string,
   params: Record<string, string> = {},
   slot?: () => Promise<void>,
@@ -95,7 +104,12 @@ async function githubGet<T>(
     await slot?.();
     try {
       const resp = await fetch(u.toString(), { headers: headers() });
-      if (!resp.ok) throw new Error(`GitHub API error ${resp.status} (${url}): ${await resp.text()}`);
+      if (!resp.ok) {
+        throw new GitHubApiError(
+          resp.status,
+          `GitHub API error ${resp.status} (${url}): ${await resp.text()}`,
+        );
+      }
       return (await resp.json()) as T;
     } catch (err) {
       if (!(err instanceof TypeError) || attempt >= GET_RETRIES) throw err;
@@ -113,7 +127,7 @@ async function githubGet<T>(
  * The search API allows 30 requests a minute, shared by fetchHotIssues and the
  * trending topic queries. Spacing every search call SEARCH_INTERVAL_MS apart
  * keeps any 60 s window under 30, however many repos and topics there are, at
- * the cost of ~2 s of fetch-phase time per query.
+ * the cost of ~2 s of fetch-phase time per request.
  */
 const SEARCH_INTERVAL_MS = 2100;
 let nextSearchAt = 0;
@@ -220,6 +234,55 @@ export async function fetchHotIssues(repo: string, since: Date): Promise<GitHubI
     searchSlot,
   );
   return selectHotIssues(result.items, createdSince);
+}
+
+/** One `stargazers/history` bucket: a calendar week from Sunday, newest bucket first. */
+export interface StarHistoryWeek {
+  /** Week start, epoch seconds. */
+  week: number;
+  total: number;
+  /** Stars per day, Sunday first. */
+  days: number[];
+}
+
+/** The gain window in days, the trending page's "this week". */
+export const STAR_GAIN_DAYS = 7;
+
+const DAY_S = 24 * 60 * 60;
+
+/**
+ * Stars in the STAR_GAIN_DAYS complete days before `now`'s UTC day; today is
+ * still running. The series starts at the repo's creation week, so a repo
+ * created this week has one bucket, and missing days count 0.
+ */
+export function gainFromHistory(weeks: StarHistoryWeek[], now: Date): number {
+  const today = Math.floor(now.getTime() / 1000 / DAY_S);
+  let gain = 0;
+  for (const w of weeks) {
+    // Rounded, not floored: the docs say week starts need not be UTC midnight.
+    const start = Math.round(w.week / DAY_S);
+    w.days.forEach((stars, i) => {
+      const day = start + i;
+      if (day >= today - STAR_GAIN_DAYS && day < today) gain += stars;
+    });
+  }
+  return gain;
+}
+
+/**
+ * Stars `repo` gained in the last week, from one core-API request: the two
+ * newest buckets cover STAR_GAIN_DAYS from any weekday. The bucket totals sum
+ * to `stargazers_count` (cli/cli on 2026-10-08), so the gain is exact. The
+ * endpoint answers 422 when "spammed": callers make these calls one at a time.
+ */
+export async function fetchWeeklyStarGain(repo: string, now = new Date()): Promise<number> {
+  const weeks = await githubGet<StarHistoryWeek[]>(
+    `https://api.github.com/repos/${repo}/stargazers/history`,
+    {
+      per_page: "2",
+    },
+  );
+  return gainFromHistory(weeks, now);
 }
 
 export async function ensureLabel(name: string, color: string): Promise<void> {

@@ -16,7 +16,14 @@ import type { SearchRepo, TrendingRepo } from "./trending.ts";
 import { formatTokens, type OpenRouterApp } from "./openrouter.ts";
 import { momentumRatio, type NpmData, type NpmPackage } from "./npm.ts";
 import { toCstDateStr } from "./date.ts";
-import { onRadar, type Classification, type ClassifyCache, type MatchState } from "./trending-jev.ts";
+import { STAR_GAIN_DAYS } from "./github.ts";
+import {
+  inScope,
+  onRadar,
+  type Classification,
+  type ClassifyCache,
+  type MatchState,
+} from "./trending-jev.ts";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -42,13 +49,20 @@ export interface GithubRow {
   language: string;
   /** 0 = unknown (trending scrape miss). */
   totalStars: number;
-  /** Sort key, stars per week; null = no momentum signal. */
-  perWeek: number | null;
+  /** Sort key: stars gained in the last STAR_GAIN_DAYS; null = unknown, sorted after every other row. */
+  gain: number | null;
+  /** Where `gain` came from (`rankGithubRepos`); null with it. */
+  gainFrom: GainSource | null;
+  /** `gain` over the stars a week ago; null when unknown or that baseline is under RELATIVE_MIN_BASELINE. */
+  relative: number | null;
   starsCell: string;
   isNew: boolean;
-  /** Search `searchQuery` label; absent for trending-page-only repos. */
+  /** The search topic that found it; absent for trending-page-only repos. */
   topic?: string;
 }
+
+/** The trending page, the 7-day star-history point, the repo's age, or the history API. */
+export type GainSource = "trending" | "snapshot" | "age" | "api";
 
 export type RadarSource = "OpenRouter" | "npm" | "GitHub";
 
@@ -95,8 +109,8 @@ export interface StarHistory {
 // Constants
 // ---------------------------------------------------------------------------
 
-/** Matches the `new:*` search queries' 14-day `created:` window. */
-const NEW_REPO_DAYS = 14;
+/** The topic search's `created:` window uses it too. */
+export const NEW_REPO_DAYS = 14;
 /**
  * An OpenRouter app listed this recently is new. Same window as new repos, so
  * "new" means the same across the Radar's sources.
@@ -109,11 +123,24 @@ const NEW_LISTING_DAYS = 14;
 const NPM_NEW_MIN_RATIO = 3;
 
 /**
- * A new repo below this many stars stays off the Radar. The age scaling of
- * `perWeek` put an 8-star repo created that day above week-old repos on the
- * 2026-10-06 live check; the LLM's new-repo picks on 2026-10-05 had 27–168 stars.
+ * A new repo below this many stars stays off the Radar, and the `created:`
+ * search asks for no fewer. On the 2026-10-06 live check an 8-star repo created
+ * that day ranked above week-old repos; the LLM's new-repo picks on 2026-10-05
+ * had 27–168 stars.
  */
-const NEW_REPO_MIN_STARS = 25;
+export const NEW_REPO_MIN_STARS = 25;
+/**
+ * A relative gain needs at least this many stars a week ago: below it, 8 → 16
+ * stars reads as +100%. The established-repo search asks for this many stars
+ * now, since a repo with fewer cannot have had more a week ago.
+ */
+export const RELATIVE_MIN_BASELINE = 100;
+/**
+ * A row enters a category table through its relative gain only with at least
+ * this many new stars. On the 2026-10-08 live check a +22-star week
+ * (138 stars, +19%) took a multi-agent slot that way.
+ */
+const RELATIVE_MIN_GAIN = 50;
 
 /** In-scope candidates considered for merging. Merging happens before the cap, so a merged tool takes one slot. */
 const RADAR_POOL = 30;
@@ -134,10 +161,10 @@ const RADAR_NEW_MAX = 8;
 const CATEGORY_MAX = 8;
 
 /**
- * Star-history points older than this many days are pruned. Five weekly runs
- * leave a baseline even after one missed Monday, and keep the file ≲ 30 KB.
+ * Star-history points older than this are pruned: a gain is only read from the
+ * point exactly STAR_GAIN_DAYS old (`starBaseline`), so older points are never used.
  */
-const STAR_HISTORY_DAYS = 35;
+const STAR_HISTORY_DAYS = STAR_GAIN_DAYS;
 
 export const STAR_HISTORY_FILE = path.join("digests", "trending-state.json");
 
@@ -174,7 +201,7 @@ export function loadStarHistory(file = STAR_HISTORY_FILE): StarHistory {
     return parsed as StarHistory;
   } catch (err) {
     // Unlike the match file, starting over is safe: the history is never
-    // hand-edited, and losing it costs one week of warm-up, not a decision.
+    // hand-edited, and losing it costs one run of history-API calls, not a decision.
     console.error(`  [trending] Cannot read ${file}, star history starts over: ${err}`);
     return { repos: {} };
   }
@@ -194,17 +221,17 @@ export function saveStarHistory(history: StarHistory, file = STAR_HISTORY_FILE):
 }
 
 /**
- * The newest point dated before `dateStr`. Today's points are ignored, so a
- * same-day re-run computes the same deltas (as `submissionCutoff` does for ArXiv).
+ * Total stars at the point dated exactly STAR_GAIN_DAYS before `dateStr`, so
+ * the delta covers the same week as the history API and the trending page. A
+ * forced mid-week run cannot shorten next Monday's window, and a same-day
+ * re-run computes the same deltas. Null without such a point: the gain then
+ * comes from the history API.
  */
-export function starBaseline(
-  history: StarHistory,
-  fullName: string,
-  dateStr: string,
-): { date: string; stars: number } | null {
-  const before = (history.repos[fullName.toLowerCase()] ?? []).filter(([date]) => date < dateStr);
-  const last = before.at(-1);
-  return last ? { date: last[0], stars: last[1] } : null;
+export function starBaseline(history: StarHistory, fullName: string, dateStr: string): number | null {
+  const point = (history.repos[fullName.toLowerCase()] ?? []).find(
+    ([date]) => daysBetween(date, dateStr) === STAR_GAIN_DAYS,
+  );
+  return point ? point[1] : null;
 }
 
 /** History after this run: today's points recorded or replaced, unseen repos carried forward, old points pruned. */
@@ -218,7 +245,7 @@ export function nextStarHistory(history: StarHistory, githubRows: GithubRow[], d
     const name = row.fullName.toLowerCase();
     repos[name] = [...(repos[name] ?? []), [dateStr, row.totalStars]];
   }
-  // Repos not seen this run are kept: they drop out of a top-15 search result and come back.
+  // Repos not seen this run are kept until pruned: a forced mid-week run must not drop Monday's points.
   const next: StarHistory = { repos: {} };
   for (const [name, points] of Object.entries(repos)) {
     const kept = points
@@ -233,12 +260,25 @@ export function nextStarHistory(history: StarHistory, githubRows: GithubRow[], d
 // GitHub rows
 // ---------------------------------------------------------------------------
 
-/** Merge the trending page and topic search by repo and sort by stars per week. */
+/** "+7.1%" below 10%, "+40%" from there: the big repos gain fractions of a percent. */
+function fmtPercent(ratio: number): string {
+  const p = ratio * 100;
+  // Rounding a tiny loss gives -0, which prints as "0".
+  const v = Math.abs(p) >= 10 ? Math.round(p) : Math.round(p * 10) / 10;
+  return `${v > 0 ? "+" : ""}${v}%`;
+}
+
+/**
+ * Merge the trending page and topic search by repo and sort by this week's
+ * star gain. `fetched` holds history-API gains by lowercased name, for the
+ * rows nothing else measures (`composeTrendingReport` asks for those only).
+ */
 export function rankGithubRepos(
   trendingRepos: TrendingRepo[],
   searchRepos: SearchRepo[],
   dateStr: string,
   history: StarHistory = { repos: {} },
+  fetched: Map<string, number> = new Map(),
 ): GithubRow[] {
   // GitHub names are case-insensitive; the two sources may differ in case.
   const searchByName = new Map(searchRepos.map((s) => [s.fullName.toLowerCase(), s]));
@@ -254,37 +294,34 @@ export function rankGithubRepos(
     const totalStars = t && t.totalStars > 0 ? t.totalStars : (s?.stargazersCount ?? 0);
     const periodStars = t?.periodStars ?? 0;
     const age = ageDays(s?.createdAt, dateStr);
-    const newRepo = age !== null && age <= NEW_REPO_DAYS;
     const baseline = totalStars > 0 ? starBaseline(history, fullName, dateStr) : null;
-    const days = baseline ? daysBetween(baseline.date, dateStr) : 0;
 
-    // perWeek precedence, first match wins:
-    //   1. trending `periodStars` > 0 — GitHub's own "this week" count;
-    //   2. star-history delta — the gain since the newest point before today,
-    //      scaled to a week; it outranks 3 because a measured gain beats an
-    //      extrapolation from the creation date;
-    //   3. new repo — its whole star count is this fortnight's, scaled to a week
-    //      (only orders the Radar: new repos stay off the category tables);
-    //   4. otherwise null — no momentum signal, sorted after every other row.
-    let perWeek: number | null;
-    let starsCell: string;
-    if (periodStars > 0) {
-      perWeek = periodStars;
-      starsCell = totalStars > 0 ? `${fmt(totalStars)} (+${fmt(periodStars)})` : `(+${fmt(periodStars)})`;
-    } else if (baseline && days > 0) {
-      const delta = totalStars - baseline.stars;
-      perWeek = (delta * 7) / days;
-      const gain = `${delta >= 0 ? "+" : ""}${fmt(delta)}`;
-      starsCell = `${fmt(totalStars)} (${days === 7 ? gain : `${gain} in ${days} ${days === 1 ? "day" : "days"}`})`;
-    } else if (newRepo) {
-      perWeek = (totalStars * 7) / Math.max(age, 1);
-      starsCell = `${fmt(totalStars)} (new, ${age} ${age === 1 ? "day" : "days"})`;
-    } else {
-      perWeek = null;
-      starsCell = fmt(totalStars);
-    }
+    // Gain sources, first match wins; each counts the same week:
+    //   1. trending `periodStars` > 0 — GitHub's own "this week";
+    //   2. the star-history point from exactly a week ago;
+    //   3. a repo created less than a week ago — every star it has; one
+    //      created on the CST date a week back can predate the previous
+    //      weekly run, so its count could overshoot and it goes to the API;
+    //   4. `fetched` — the stargazers/history API;
+    //   5. otherwise null, sorted after every other row.
+    const apiGain = fetched.get(fullName.toLowerCase());
+    let gain: number | null = null;
+    let gainFrom: GainSource | null = null;
+    if (periodStars > 0) [gain, gainFrom] = [periodStars, "trending"];
+    else if (baseline !== null) [gain, gainFrom] = [totalStars - baseline, "snapshot"];
+    else if (age !== null && age < STAR_GAIN_DAYS) [gain, gainFrom] = [totalStars, "age"];
+    else if (apiGain !== undefined) [gain, gainFrom] = [apiGain, "api"];
 
-    const topic = s?.searchQuery;
+    // A trending scrape miss (totalStars 0) leaves no baseline, so no relative gain.
+    const before = gain === null ? 0 : totalStars - gain;
+    const relative = gain !== null && before >= RELATIVE_MIN_BASELINE ? gain / before : null;
+    const total = totalStars > 0 ? fmt(totalStars) : "";
+    const starsCell =
+      gain === null
+        ? fmt(totalStars)
+        : `${total} (${gain >= 0 ? "+" : ""}${fmt(gain)}${relative !== null ? `, ${fmtPercent(relative)}` : ""})`.trim();
+
+    const topic = s?.topic;
     return {
       key: githubKey(fullName),
       fullName,
@@ -292,21 +329,23 @@ export function rankGithubRepos(
       description: t?.description || s?.description || "",
       language: t?.language || s?.language || "",
       totalStars,
-      perWeek,
+      gain,
+      gainFrom,
+      relative,
       starsCell,
-      isNew: newRepo || (topic?.startsWith("new:") ?? false),
+      isNew: age !== null && age <= NEW_REPO_DAYS,
       ...(topic !== undefined ? { topic } : {}),
     };
   });
 
   // Stable sort: input order (trending page first) breaks ties.
   return rows.sort((a, b) => {
-    if (a.perWeek === null || b.perWeek === null) {
-      if (a.perWeek !== null) return -1;
-      if (b.perWeek !== null) return 1;
+    if (a.gain === null || b.gain === null) {
+      if (a.gain !== null) return -1;
+      if (b.gain !== null) return 1;
       return b.totalStars - a.totalStars;
     }
-    return b.perWeek - a.perWeek;
+    return b.gain - a.gain;
   });
 }
 
@@ -392,20 +431,18 @@ export function buildRadarCandidates(
     }),
   );
 
-  const githubRadarRows = githubRows
-    .filter((r) => r.isNew && r.totalStars >= NEW_REPO_MIN_STARS)
-    .map((r) =>
-      row({
-        keys: [r.key],
-        name: r.fullName,
-        url: r.url,
-        description: r.description,
-        sources: ["GitHub"],
-        signal: r.starsCell,
-        isNew: true,
-        links: linksOf(`repo:${r.fullName.toLowerCase()}`),
-      }),
-    );
+  const githubRadarRows = githubRows.filter(isRadarRepo).map((r) =>
+    row({
+      keys: [r.key],
+      name: r.fullName,
+      url: r.url,
+      description: r.description,
+      sources: ["GitHub"],
+      signal: r.starsCell,
+      isNew: true,
+      links: linksOf(`repo:${r.fullName.toLowerCase()}`),
+    }),
+  );
 
   // Ranks, stars and download ratios are not comparable across sources, so no
   // combined score is invented: 🆕 first, then each row's relative position in
@@ -505,6 +542,42 @@ export function radarPool(
 }
 
 /**
+ * Up to CATEGORY_MAX rows, alternating the top by absolute gain (`rows` comes
+ * sorted by it) with the top by relative gain: the biggest movers and the
+ * fastest-growing smaller repos, with no combined score (see
+ * `buildRadarCandidates`). A row without a relative gain, or with fewer than
+ * RELATIVE_MIN_GAIN new stars, enters through the absolute list only.
+ */
+function interleaveGains(rows: GithubRow[]): GithubRow[] {
+  const byRelative = rows
+    // `relative` is only set alongside a gain (`rankGithubRepos`).
+    .filter((r) => r.relative !== null && r.gain! >= RELATIVE_MIN_GAIN)
+    .sort((a, b) => b.relative! - a.relative!);
+  const picked = new Map<string, GithubRow>();
+  for (let i = 0; i < rows.length && picked.size < CATEGORY_MAX; i++) {
+    for (const r of [rows[i], byRelative[i]]) {
+      if (r && !picked.has(r.key) && picked.size < CATEGORY_MAX) picked.set(r.key, r);
+    }
+  }
+  return [...picked.values()];
+}
+
+/** New repos the Radar can list (`buildRadarCandidates`); `radarPool` then applies `onRadar`. */
+export function isRadarRepo(r: GithubRow): boolean {
+  return r.isNew && r.totalStars >= NEW_REPO_MIN_STARS;
+}
+
+/**
+ * Whether `selectTrendingReport` can show the row: a Radar repo that passes
+ * `onRadar`, or an established repo in scope (the category tables).
+ * `fetchMissingGains` asks the history API only about these.
+ */
+export function reachesReport(r: GithubRow, c: Classification | undefined): boolean {
+  if (c === undefined) return false;
+  return r.isNew ? isRadarRepo(r) && onRadar(c) : inScope(c);
+}
+
+/**
  * Apply scope, merge, cap and number the rows. New repos are Radar-only: the
  * category tables are the established projects, ranked by this week's stars,
  * so the two tables never share an item. `links` are the saved cross-source
@@ -533,9 +606,9 @@ export function selectTrendingReport(
 
   const categories = CATEGORIES.map((category) => ({
     category,
-    rows: githubRows
-      .filter((r) => !r.isNew && classifications.get(r.key)?.category === category)
-      .slice(0, CATEGORY_MAX),
+    rows: interleaveGains(
+      githubRows.filter((r) => !r.isNew && classifications.get(r.key)?.category === category),
+    ),
   }))
     .filter((g) => g.rows.length > 0)
     .map((g) => ({ category: g.category, rows: g.rows.map((r) => ({ ...r, n: ++n })) }));
