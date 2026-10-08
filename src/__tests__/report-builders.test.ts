@@ -217,6 +217,7 @@ function trendingReport(over: Partial<TrendingReportData> = {}): TrendingReportD
             language: "Rust",
             totalStars: 100,
             gain: 7,
+            gainFrom: "trending",
             relative: null,
             starsCell: "100 (+7)",
             isNew: false,

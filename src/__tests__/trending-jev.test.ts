@@ -40,6 +40,7 @@ function githubRow(topic?: string): GithubRow {
     language: "",
     totalStars: 0,
     gain: null,
+    gainFrom: null,
     relative: null,
     starsCell: "0",
     isNew: false,
@@ -585,7 +586,7 @@ describe("composeTrendingReport", () => {
     pushedAt: "2026-10-04T00:00:00Z",
     createdAt: "2024-01-01T00:00:00Z",
     url: `https://github.com/${fullName}`,
-    searchQuery: "coding-agent",
+    topic: "coding-agent",
   });
   const npmPkg = (name: string) =>
     ({ name, description: "", weekly: 1000, monthly: 4000, url: "", lastPublish: DATE }) as NpmPackage;
@@ -634,16 +635,14 @@ describe("composeTrendingReport", () => {
   const zeroGain = async () => 0;
 
   it("lets Jev decide scope and Radar, and merges a saved match into one Radar row", async () => {
-    const report = await composeTrendingReport(
-      data,
-      DATE,
-      "key",
-      saved(),
+    const report = await composeTrendingReport(data, DATE, {
+      apiKey: "key",
+      matchState: saved(),
       ask,
-      { repos: {} },
-      noCache(),
-      zeroGain,
-    );
+      history: { repos: {} },
+      classifyCache: noCache(),
+      fetchGain: zeroGain,
+    });
     expect(report.classifiedBy).toBe("jev");
     expect(report.radar.map((r) => r.keys)).toEqual([["openrouter:1", "npm:@kilocode/cli"]]);
     expect(report.categories.map((c) => [c.category, c.rows.map((r) => r.fullName)])).toEqual([
@@ -662,31 +661,27 @@ describe("composeTrendingReport", () => {
   });
 
   it("skips matching and saves no state when the match file is unreadable", async () => {
-    const report = await composeTrendingReport(
-      data,
-      DATE,
-      "key",
-      null,
+    const report = await composeTrendingReport(data, DATE, {
+      apiKey: "key",
+      matchState: null,
       ask,
-      { repos: {} },
-      noCache(),
-      zeroGain,
-    );
+      history: { repos: {} },
+      classifyCache: noCache(),
+      fetchGain: zeroGain,
+    });
     expect(report.radar.map((r) => r.keys)).toEqual([["openrouter:1"], ["npm:@kilocode/cli"]]);
     expect(report.nextMatches).toBeUndefined();
   });
 
   it("falls back to topic labels without a key and writes no ranking file", async () => {
-    const report = await composeTrendingReport(
-      data,
-      DATE,
-      "",
-      saved(),
-      notCalled,
-      { repos: {} },
-      noCache(),
-      zeroGain,
-    );
+    const report = await composeTrendingReport(data, DATE, {
+      apiKey: "",
+      matchState: saved(),
+      ask: notCalled,
+      history: { repos: {} },
+      classifyCache: noCache(),
+      fetchGain: zeroGain,
+    });
     expect(report.classifiedBy).toBe("topics");
     expect(report.rankingFile).toBeUndefined();
     expect(report.radar[0]!.keys).toEqual(["openrouter:1", "npm:@kilocode/cli"]);
@@ -694,29 +689,25 @@ describe("composeTrendingReport", () => {
   });
 
   it("asks Jev only about items missing from the classification cache, and uses saved verdicts without a key", async () => {
-    const first = await composeTrendingReport(
-      data,
-      DATE,
-      "key",
-      null,
+    const first = await composeTrendingReport(data, DATE, {
+      apiKey: "key",
+      matchState: null,
       ask,
-      { repos: {} },
-      noCache(),
-      zeroGain,
-    );
+      history: { repos: {} },
+      classifyCache: noCache(),
+      fetchGain: zeroGain,
+    });
     expect(Object.keys(first.nextClassifications!.items)).toHaveLength(5);
 
     const counted = vi.fn(ask);
-    const second = await composeTrendingReport(
-      data,
-      DATE,
-      "key",
-      null,
-      counted,
-      { repos: {} },
-      first.nextClassifications!,
-      zeroGain,
-    );
+    const second = await composeTrendingReport(data, DATE, {
+      apiKey: "key",
+      matchState: null,
+      ask: counted,
+      history: { repos: {} },
+      classifyCache: first.nextClassifications!,
+      fetchGain: zeroGain,
+    });
     expect(counted).not.toHaveBeenCalled();
     expect(second.classifiedBy).toBe("jev");
     expect([second.radar, second.categories]).toEqual([first.radar, first.categories]);
@@ -724,31 +715,27 @@ describe("composeTrendingReport", () => {
     expect(JSON.parse(second.rankingFile!).items[0]).toMatchObject({ key: "github:a/agent", decided: DATE });
 
     // The topic fallback would put b/weights (topic coding-agent) in coding_agent; the saved verdict keeps it out.
-    const keyless = await composeTrendingReport(
-      data,
-      DATE,
-      "",
-      null,
-      notCalled,
-      { repos: {} },
-      first.nextClassifications!,
-      zeroGain,
-    );
+    const keyless = await composeTrendingReport(data, DATE, {
+      apiKey: "",
+      matchState: null,
+      ask: notCalled,
+      history: { repos: {} },
+      classifyCache: first.nextClassifications!,
+      fetchGain: zeroGain,
+    });
     expect(keyless.categories).toEqual(first.categories);
   });
 
   it("asks every item and saves no cache when the cache file is unreadable", async () => {
     const counted = vi.fn(ask);
-    const report = await composeTrendingReport(
-      data,
-      DATE,
-      "key",
-      null,
-      counted,
-      { repos: {} },
-      null,
-      zeroGain,
-    );
+    const report = await composeTrendingReport(data, DATE, {
+      apiKey: "key",
+      matchState: null,
+      ask: counted,
+      history: { repos: {} },
+      classifyCache: null,
+      fetchGain: zeroGain,
+    });
     expect(counted).toHaveBeenCalledTimes(5);
     expect(report.nextClassifications).toBeUndefined();
   });
@@ -760,7 +747,7 @@ describe("composeTrendingReport", () => {
 
 describe("buildTrendingRankingFile", () => {
   it("writes every item and match on its own line, rounded to 3 decimals", () => {
-    const row = { ...githubRow("coding-agent"), gain: 812, relative: 0.0712345 };
+    const row = { ...githubRow("coding-agent"), gain: 812, gainFrom: "api" as const, relative: 0.0712345 };
     const items: ClassifyItem[] = [
       { kind: "github", key: row.key, row },
       { kind: "npm", key: "npm:x", pkg: { name: "x" } as NpmPackage },
@@ -808,9 +795,18 @@ describe("buildTrendingRankingFile", () => {
         probabilities: { coding_agent: 0.988 },
         standalone: 0.812,
         gain: 812,
+        gainFrom: "api",
         relative: 0.071,
       },
-      { key: "npm:x", name: "x", category: null, standalone: null, gain: null, relative: null },
+      {
+        key: "npm:x",
+        name: "x",
+        category: null,
+        standalone: null,
+        gain: null,
+        gainFrom: null,
+        relative: null,
+      },
     ]);
     expect(parsed.matches[0].probabilities).toEqual({ none: 0.333 });
   });

@@ -15,6 +15,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { askJev, jevFailedTooOften, mapJev } from "./jev.ts";
 import type { Category, GithubRow, RadarRow } from "./trending-rank.ts";
+import type { SearchTopic } from "./trending.ts";
 import type { OpenRouterApp } from "./openrouter.ts";
 import type { NpmPackage } from "./npm.ts";
 
@@ -67,10 +68,10 @@ export function onRadar(c: Classification): boolean {
 // ---------------------------------------------------------------------------
 
 /**
- * Search topic → category. The labels are the `SEARCH_TOPICS` in
- * `trending.ts`; each topic was chosen for one kind of project, so the label is
- * a fair first guess at the category. A label missing here (a topic added
- * later) reads as out of scope until it is mapped.
+ * Search topic → category, for every `SEARCH_TOPICS` entry in `trending.ts`
+ * (tsc checks both ways); each topic was chosen for one kind of project, so it
+ * is a fair first guess at the category. Typed by string for the lookup: a
+ * test row can carry any topic, which reads as out of scope.
  */
 const TOPIC_CATEGORIES: Record<string, Category> = {
   "coding-agent": "coding_agent",
@@ -79,7 +80,7 @@ const TOPIC_CATEGORIES: Record<string, Category> = {
   "agent-harness": "harness_framework",
   harness: "harness_framework",
   "agent-orchestration": "multi_agent",
-};
+} satisfies Record<SearchTopic, Category>;
 
 /** Deterministic classification from what the fetch already knows, used when Jev is unavailable. */
 export function fallbackClassification(item: ClassifyItem): Classification {
@@ -796,6 +797,7 @@ export function buildTrendingRankingFile(
       probabilities: roundAll(c?.probabilities),
       standalone: c?.standalone == null ? null : round(c.standalone),
       gain: row?.gain ?? null,
+      gainFrom: row?.gainFrom ?? null,
       relative: row?.relative == null ? null : round(row.relative),
       // A saved verdict has no probabilities here; they are in the trace of the run that decided it.
       ...(c?.decided ? { decided: c.decided } : {}),

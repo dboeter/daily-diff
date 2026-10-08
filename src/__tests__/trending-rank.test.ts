@@ -9,6 +9,7 @@ import {
   nextStarHistory,
   radarPool,
   rankGithubRepos,
+  reachesReport,
   selectTrendingReport,
   saveStarHistory,
   starBaseline,
@@ -60,7 +61,7 @@ function search(fullName: string, o: Partial<SearchRepo> = {}): SearchRepo {
     pushedAt: "2026-10-04T00:00:00Z",
     createdAt: "2024-01-01T00:00:00Z",
     url: `https://github.com/${fullName}`,
-    searchQuery: "coding-agent",
+    topic: "coding-agent",
     ...o,
   };
 }
@@ -123,7 +124,7 @@ describe("rankGithubRepos", () => {
         trending("b/y", { periodStars: 10 }),
       ],
       [
-        search("A/X", { stargazersCount: 999, searchQuery: "harness", language: "Go", description: "s" }),
+        search("A/X", { stargazersCount: 999, topic: "harness", language: "Go", description: "s" }),
         search("b/y", { stargazersCount: 500, language: "Go", description: "from search" }),
       ],
       DATE,
@@ -169,14 +170,14 @@ describe("rankGithubRepos", () => {
         ["s/snap", 1],
       ]),
     );
-    expect(rows.map((r) => [r.fullName, r.gain])).toEqual([
-      ["s/new", 900],
-      ["t/week", 300],
-      ["s/snap", 200],
-      ["s/fetched", 120],
-      ["s/old-big", null],
-      ["s/week-old", null],
-      ["s/old-small", null],
+    expect(rows.map((r) => [r.fullName, r.gain, r.gainFrom])).toEqual([
+      ["s/new", 900, "age"],
+      ["t/week", 300, "trending"],
+      ["s/snap", 200, "snapshot"],
+      ["s/fetched", 120, "api"],
+      ["s/old-big", null, null],
+      ["s/week-old", null, null],
+      ["s/old-small", null, null],
     ]);
   });
 
@@ -727,6 +728,48 @@ describe("selectTrendingReport", () => {
     expect(summaries[0]!.facts).toBe("Source: GitHub | Signal: 🆕 50 (+50)");
     expect(summaries[2]).toEqual({ n: 3, name: "g/old", description: "", facts: "Stars: 10" });
   });
+
+  it("shows exactly the GitHub rows reachesReport accepts, the ones the history API is asked about", () => {
+    const github = rankGithubRepos(
+      [],
+      [
+        search("g/radar", { stargazersCount: 50, createdAt: NEW }),
+        // New and in scope, but under 25 stars.
+        search("g/tiny", { stargazersCount: 10, createdAt: NEW }),
+        // New and in scope, but not a standalone tool.
+        search("g/plugin", { stargazersCount: 60, createdAt: NEW }),
+        search("g/table", { stargazersCount: 500 }),
+        search("g/off", { stargazersCount: 900 }),
+      ],
+      DATE,
+      hist({}),
+      new Map([
+        ["g/table", 80],
+        ["g/off", 90],
+      ]),
+    );
+    const coding: Classification = { category: "coding_agent", standalone: null };
+    const classifications = new Map<string, Classification>([
+      ["github:g/radar", coding],
+      ["github:g/tiny", coding],
+      ["github:g/plugin", { category: "coding_agent", standalone: 0.1 }],
+      ["github:g/table", coding],
+      ["github:g/off", { category: "out_of_scope", standalone: null }],
+    ]);
+    const candidates = buildRadarCandidates([], NO_NPM, github, DATE);
+    const report = selectTrendingReport(github, candidates, classifications, "jev");
+    const shown = [
+      ...report.radar.flatMap((r) => r.keys),
+      ...report.categories.flatMap((c) => c.rows.map((r) => r.key)),
+    ];
+    expect(shown.sort()).toEqual(["github:g/radar", "github:g/table"]);
+    expect(
+      github
+        .filter((r) => reachesReport(r, classifications.get(r.key)))
+        .map((r) => r.key)
+        .sort(),
+    ).toEqual(shown);
+  });
 });
 
 describe("radarPool", () => {
@@ -752,7 +795,7 @@ describe("summaryRows", () => {
   it("lists language and stars for GitHub rows, joined sources and signals for Radar rows", () => {
     const github: GithubRow[] = rankGithubRepos(
       [trending("t/x", { periodStars: 7, totalStars: 70, language: "Rust", description: "Desc" })],
-      [search("t/x", { searchQuery: "harness" })],
+      [search("t/x", { topic: "harness" })],
       DATE,
     );
     const merged = mergeRows(
@@ -936,12 +979,14 @@ describe("composeTrendingReport with star history", () => {
         search("small/agent", { stargazersCount: 600 }),
       ]),
       DATE,
-      "",
-      null,
-      notCalled,
-      h,
-      { items: {} },
-      noFetch,
+      {
+        apiKey: "",
+        matchState: null,
+        ask: notCalled,
+        history: h,
+        classifyCache: { items: {} },
+        fetchGain: noFetch,
+      },
     );
     expect(cells(report)).toEqual([
       ["small/agent", "600 (+200, +50%)"],
@@ -966,19 +1011,21 @@ describe("composeTrendingReport with star history", () => {
         search("big/agent", { stargazersCount: 5_000 }),
         search("small/agent", { stargazersCount: 300 }),
         // The topic fallback puts an unknown label out of scope.
-        search("off/topic", { stargazersCount: 7_000, searchQuery: "llm" }),
+        search("off/topic", { stargazersCount: 7_000, topic: "llm" }),
         // Ten days old: too old to count every star, so it needs the API.
         search("new/agent", { stargazersCount: 40, createdAt: "2026-09-25T00:00:00Z" }),
         // Under NEW_REPO_MIN_STARS: never on the Radar.
         search("tiny/new", { stargazersCount: 10, createdAt: "2026-09-25T00:00:00Z" }),
       ]),
       DATE,
-      "",
-      null,
-      notCalled,
-      hist({ "snap/agent": [["2026-09-28", 8_000]] }),
-      { items: {} },
-      fetchGain,
+      {
+        apiKey: "",
+        matchState: null,
+        ask: notCalled,
+        history: hist({ "snap/agent": [["2026-09-28", 8_000]] }),
+        classifyCache: { items: {} },
+        fetchGain,
+      },
     );
     expect(asked).toEqual(["new/agent", "big/agent", "small/agent"]);
     expect(cells(report)).toEqual([
@@ -991,6 +1038,7 @@ describe("composeTrendingReport with star history", () => {
 
   it("skips a failed repo, and stops at a rate limit", async () => {
     vi.spyOn(console, "error").mockImplementation(() => {});
+    const logs = vi.spyOn(console, "log").mockImplementation(() => {});
     const repos = [
       search("a/agent", { stargazersCount: 3_000 }),
       search("b/agent", { stargazersCount: 2_000 }),
@@ -1001,17 +1049,19 @@ describe("composeTrendingReport with star history", () => {
       if (repo === "b/agent") throw new GitHubApiError(403, "rate limited");
       return 10;
     });
-    const report = await composeTrendingReport(
-      data(repos),
-      DATE,
-      "",
-      null,
-      notCalled,
-      hist({}),
-      { items: {} },
+    const report = await composeTrendingReport(data(repos), DATE, {
+      apiKey: "",
+      matchState: null,
+      ask: notCalled,
+      history: hist({}),
+      classifyCache: { items: {} },
       fetchGain,
-    );
+    });
     expect(fetchGain.mock.calls.map(([repo]) => repo)).toEqual(["a/agent", "b/agent"]);
+    expect(logs).toHaveBeenCalledWith(
+      "  [trending] Star gains: 0 trending page, 0 snapshot, 0 created this week; history API: 2 calls, " +
+        "2 failed, 0 over the cap, 1 skipped after a rate limit; 0 cannot reach the report",
+    );
     expect(cells(report)).toEqual([
       ["a/agent", "3,000"],
       ["b/agent", "2,000"],

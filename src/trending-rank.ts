@@ -17,7 +17,13 @@ import { formatTokens, type OpenRouterApp } from "./openrouter.ts";
 import { momentumRatio, type NpmData, type NpmPackage } from "./npm.ts";
 import { toCstDateStr } from "./date.ts";
 import { STAR_GAIN_DAYS } from "./github.ts";
-import { onRadar, type Classification, type ClassifyCache, type MatchState } from "./trending-jev.ts";
+import {
+  inScope,
+  onRadar,
+  type Classification,
+  type ClassifyCache,
+  type MatchState,
+} from "./trending-jev.ts";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -45,13 +51,18 @@ export interface GithubRow {
   totalStars: number;
   /** Sort key: stars gained in the last STAR_GAIN_DAYS; null = unknown, sorted after every other row. */
   gain: number | null;
+  /** Where `gain` came from (`rankGithubRepos`); null with it. */
+  gainFrom: GainSource | null;
   /** `gain` over the stars a week ago; null when unknown or that baseline is under RELATIVE_MIN_BASELINE. */
   relative: number | null;
   starsCell: string;
   isNew: boolean;
-  /** Search `searchQuery` label; absent for trending-page-only repos. */
+  /** The search topic that found it; absent for trending-page-only repos. */
   topic?: string;
 }
+
+/** The trending page, the 7-day star-history point, the repo's age, or the history API. */
+export type GainSource = "trending" | "snapshot" | "age" | "api";
 
 export type RadarSource = "OpenRouter" | "npm" | "GitHub";
 
@@ -98,8 +109,8 @@ export interface StarHistory {
 // Constants
 // ---------------------------------------------------------------------------
 
-/** Matches the topic search's 14-day `created:` window. */
-const NEW_REPO_DAYS = 14;
+/** The topic search's `created:` window uses it too. */
+export const NEW_REPO_DAYS = 14;
 /**
  * An OpenRouter app listed this recently is new. Same window as new repos, so
  * "new" means the same across the Radar's sources.
@@ -288,14 +299,18 @@ export function rankGithubRepos(
     // Gain sources, first match wins; each counts the same week:
     //   1. trending `periodStars` > 0 — GitHub's own "this week";
     //   2. the star-history point from exactly a week ago;
-    //   3. a repo created less than a week ago — every star it has;
+    //   3. a repo created less than a week ago — every star it has; one
+    //      created on the CST date a week back can predate the previous
+    //      weekly run, so its count could overshoot and it goes to the API;
     //   4. `fetched` — the stargazers/history API;
     //   5. otherwise null, sorted after every other row.
-    let gain: number | null;
-    if (periodStars > 0) gain = periodStars;
-    else if (baseline !== null) gain = totalStars - baseline;
-    else if (age !== null && age < STAR_GAIN_DAYS) gain = totalStars;
-    else gain = fetched.get(fullName.toLowerCase()) ?? null;
+    const apiGain = fetched.get(fullName.toLowerCase());
+    let gain: number | null = null;
+    let gainFrom: GainSource | null = null;
+    if (periodStars > 0) [gain, gainFrom] = [periodStars, "trending"];
+    else if (baseline !== null) [gain, gainFrom] = [totalStars - baseline, "snapshot"];
+    else if (age !== null && age < STAR_GAIN_DAYS) [gain, gainFrom] = [totalStars, "age"];
+    else if (apiGain !== undefined) [gain, gainFrom] = [apiGain, "api"];
 
     // A trending scrape miss (totalStars 0) leaves no baseline, so no relative gain.
     const before = gain === null ? 0 : totalStars - gain;
@@ -306,7 +321,7 @@ export function rankGithubRepos(
         ? fmt(totalStars)
         : `${total} (${gain >= 0 ? "+" : ""}${fmt(gain)}${relative !== null ? `, ${fmtPercent(relative)}` : ""})`.trim();
 
-    const topic = s?.searchQuery;
+    const topic = s?.topic;
     return {
       key: githubKey(fullName),
       fullName,
@@ -315,6 +330,7 @@ export function rankGithubRepos(
       language: t?.language || s?.language || "",
       totalStars,
       gain,
+      gainFrom,
       relative,
       starsCell,
       isNew: age !== null && age <= NEW_REPO_DAYS,
@@ -415,20 +431,18 @@ export function buildRadarCandidates(
     }),
   );
 
-  const githubRadarRows = githubRows
-    .filter((r) => r.isNew && r.totalStars >= NEW_REPO_MIN_STARS)
-    .map((r) =>
-      row({
-        keys: [r.key],
-        name: r.fullName,
-        url: r.url,
-        description: r.description,
-        sources: ["GitHub"],
-        signal: r.starsCell,
-        isNew: true,
-        links: linksOf(`repo:${r.fullName.toLowerCase()}`),
-      }),
-    );
+  const githubRadarRows = githubRows.filter(isRadarRepo).map((r) =>
+    row({
+      keys: [r.key],
+      name: r.fullName,
+      url: r.url,
+      description: r.description,
+      sources: ["GitHub"],
+      signal: r.starsCell,
+      isNew: true,
+      links: linksOf(`repo:${r.fullName.toLowerCase()}`),
+    }),
+  );
 
   // Ranks, stars and download ratios are not comparable across sources, so no
   // combined score is invented: 🆕 first, then each row's relative position in
@@ -536,6 +550,7 @@ export function radarPool(
  */
 function interleaveGains(rows: GithubRow[]): GithubRow[] {
   const byRelative = rows
+    // `relative` is only set alongside a gain (`rankGithubRepos`).
     .filter((r) => r.relative !== null && r.gain! >= RELATIVE_MIN_GAIN)
     .sort((a, b) => b.relative! - a.relative!);
   const picked = new Map<string, GithubRow>();
@@ -545,6 +560,21 @@ function interleaveGains(rows: GithubRow[]): GithubRow[] {
     }
   }
   return [...picked.values()];
+}
+
+/** New repos the Radar can list (`buildRadarCandidates`); `radarPool` then applies `onRadar`. */
+export function isRadarRepo(r: GithubRow): boolean {
+  return r.isNew && r.totalStars >= NEW_REPO_MIN_STARS;
+}
+
+/**
+ * Whether `selectTrendingReport` can show the row: a Radar repo that passes
+ * `onRadar`, or an established repo in scope (the category tables).
+ * `fetchMissingGains` asks the history API only about these.
+ */
+export function reachesReport(r: GithubRow, c: Classification | undefined): boolean {
+  if (c === undefined) return false;
+  return r.isNew ? isRadarRepo(r) && onRadar(c) : inScope(c);
 }
 
 /**

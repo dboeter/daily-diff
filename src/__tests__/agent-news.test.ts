@@ -162,7 +162,7 @@ describe("matchAgentNews", () => {
           pushedAt: "2026-10-04",
           createdAt: "2025-01-01T00:00:00Z",
           url: "https://github.com/someone/claw-memory",
-          searchQuery: "ai-agent",
+          topic: "ai-agent",
         },
       ],
     };
@@ -186,7 +186,7 @@ describe("matchAgentNews", () => {
           pushedAt: "2026-10-04",
           createdAt: "2025-01-01T00:00:00Z",
           url: "https://github.com/OpenClaw/OpenClaw",
-          searchQuery: "ai-agent",
+          topic: "ai-agent",
         },
       ],
     };

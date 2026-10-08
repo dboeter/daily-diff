@@ -164,8 +164,8 @@ describe("searchAiRepos", () => {
     const repos = await run(null);
     expect(urls).toHaveLength(6);
     expect(urls.every((u) => u.includes("&per_page=15&page=1"))).toBe(true);
-    expect(urls.some((u) => u.includes("created:"))).toBe(false);
-    expect(repos.map((r) => [r.fullName, r.searchQuery])).toEqual([["a/one", "coding-agent"]]);
+    expect(urls.some((u) => new URL(u).searchParams.get("q")!.includes("created:"))).toBe(false);
+    expect(repos.map((r) => [r.fullName, r.topic])).toEqual([["a/one", "coding-agent"]]);
   });
 
   it("weekly: new and established queries per topic, paging while pages are full", async () => {
@@ -181,7 +181,29 @@ describe("searchAiRepos", () => {
     expect(urls).toHaveLength(13);
     expect(urls.every((u) => u.includes("&per_page=100&"))).toBe(true);
     expect(repos).toHaveLength(103);
-    expect(repos[0]).toMatchObject({ fullName: "n/new", searchQuery: "coding-agent" });
-    expect(repos.at(-1)).toMatchObject({ fullName: "c/three", searchQuery: "ai-coding" });
+    expect(repos[0]).toMatchObject({ fullName: "n/new", topic: "coding-agent" });
+    expect(repos.at(-1)).toMatchObject({ fullName: "c/three", topic: "ai-coding" });
+  });
+
+  it("retries a dropped connection, and keeps the pages before a failed one", async () => {
+    vi.spyOn(console, "log").mockImplementation(() => {});
+    const errors = vi.spyOn(console, "error").mockImplementation(() => {});
+    const pushed = "topic:coding-agent pushed:>2026-09-30 stars:>=100";
+    const full = Array.from({ length: 100 }, (_, i) => `full/r${i}`);
+    let attempts = 0;
+    vi.spyOn(globalThis, "fetch").mockImplementation(async (input) => {
+      const url = new URL(String(input));
+      const at = `${url.searchParams.get("q")} page ${url.searchParams.get("page")}`;
+      if (at === `${pushed} page 1` && attempts++ === 0) throw new TypeError("terminated");
+      if (at === `${pushed} page 2`) return { ok: false, status: 500, text: async () => "" } as Response;
+      const names = at === `${pushed} page 1` ? full : [];
+      return { ok: true, json: async () => ({ items: names.map(item) }) } as Response;
+    });
+    const repos = await run("2026-09-23");
+    expect(attempts).toBe(2);
+    expect(repos).toHaveLength(100);
+    expect(errors).toHaveBeenCalledWith(
+      expect.stringContaining('"coding-agent" page 2: Error: GitHub API error 500'),
+    );
   });
 });

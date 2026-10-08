@@ -93,7 +93,7 @@ const GET_RETRY_MS = 2000;
  * `slot` runs before every attempt: search calls pass searchSlot, so a retry
  * keeps to the search rate limit too.
  */
-async function githubGet<T>(
+export async function githubGet<T>(
   url: string,
   params: Record<string, string> = {},
   slot?: () => Promise<void>,
@@ -127,7 +127,7 @@ async function githubGet<T>(
  * The search API allows 30 requests a minute, shared by fetchHotIssues and the
  * trending topic queries. Spacing every search call SEARCH_INTERVAL_MS apart
  * keeps any 60 s window under 30, however many repos and topics there are, at
- * the cost of ~2 s of fetch-phase time per query.
+ * the cost of ~2 s of fetch-phase time per request.
  */
 const SEARCH_INTERVAL_MS = 2100;
 let nextSearchAt = 0;
