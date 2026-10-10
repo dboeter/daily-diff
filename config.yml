@@ -23,10 +23,9 @@ agents:
   - id: gemini-cli
     repo: google-gemini/gemini-cli
     name: Gemini CLI
-  - id: copilot-cli
-    repo: github/copilot-cli
-    name: GitHub Copilot CLI
-    keywords: [copilot cli]
+  - id: kilo-code
+    repo: Kilo-Org/kilocode
+    name: Kilo Code
   - id: opencode
     repo: anomalyco/opencode
     name: OpenCode
@@ -35,24 +34,28 @@ agents:
     name: Pi
     # "pi" alone matches Raspberry Pi and every other use of the word.
     keywords: [pi coding agent, pi agent, earendil]
-  - id: qwen-code
-    repo: QwenLM/qwen-code
-    name: Qwen Code
-  - id: openclaw
-    repo: openclaw/openclaw
-    name: OpenClaw
+  - id: oh-my-pi
+    repo: can1357/oh-my-pi
+    name: Oh My Pi
+    # No "omp" keyword: it is also Oh My Posh.
+  - id: jcode
+    repo: 1jehuang/jcode
+    name: jcode
+  - id: cline
+    repo: cline/cline
+    name: Cline
+  - id: command-code
+    repo: CommandCodeAI/command-code
+    name: Command Code
+    # Publishes no GitHub releases: covered by hot issues and news only.
+  - id: deepseek-harness
+    repo: deepseek-ai/deepseek-harness
+    name: DeepSeek Harness
+    # Issues are disabled and every release so far is an alpha/rc, which the
+    # report skips: covered by news only until a stable release ships.
   - id: hermes-agent
     repo: nousresearch/hermes-agent
     name: Hermes Agent
-  - id: ironclaw
-    repo: nearai/ironclaw
-    name: IronClaw
-  - id: qwenpaw
-    repo: agentscope-ai/QwenPaw
-    name: QwenPaw
-  - id: zeroclaw
-    repo: zeroclaw-labs/zeroclaw
-    name: ZeroClaw
 
 # ── Claude Code Skills ────────────────────────────────────────────────────────
 # No date filter, sorted by community engagement. A section of the weekly
@@ -60,27 +63,22 @@ agents:
 
 skills_repo: anthropics/skills
 
-# ── AI infrastructure ─────────────────────────────────────────────────────────
-# Inference engines, gateways and fine-tuning frameworks that the agents run on
-# top of. Weekly ai-infra report: stable releases and hot issues of the last 7
-# days, same pipeline as the agents report (no news matching).
+# ── Agent tooling ─────────────────────────────────────────────────────────────
+# Sandboxes, session multiplexers and context tools that the agents run inside
+# or alongside. Weekly ai-infra report: stable releases and hot issues of the
+# last 7 days, same pipeline as the agents report (no news matching). Until
+# 2026-10-10 this section tracked inference engines (vLLM, llama.cpp, Ollama…).
 
 infra_repos:
-  - id: vllm
-    repo: vllm-project/vllm
-    name: vLLM
-  - id: sglang
-    repo: sgl-project/sglang
-    name: SGLang
-  - id: llama-cpp
-    repo: ggml-org/llama.cpp
-    name: llama.cpp
-  - id: ollama
-    repo: ollama/ollama
-    name: Ollama
-  - id: litellm
-    repo: BerriAI/litellm
-    name: LiteLLM
-  - id: unsloth
-    repo: unslothai/unsloth
-    name: Unsloth
+  - id: openshell
+    repo: NVIDIA/OpenShell
+    name: OpenShell
+  - id: herdr
+    repo: herdrdev/herdr
+    name: herdr
+  - id: context-mode
+    repo: mksglu/context-mode
+    name: context-mode
+  - id: agent-deck
+    repo: asheshgoplani/agent-deck
+    name: Agent Deck

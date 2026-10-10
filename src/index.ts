@@ -275,7 +275,7 @@ const AGENTS_SCOPE: DigestScope = {
 };
 
 const INFRA_SCOPE: DigestScope = {
-  subject: "AI infrastructure — inference engines, model serving, LLM gateways and fine-tuning frameworks",
+  subject: "AI agent tooling — agent sandboxes, terminal session multiplexers and context-management tools",
   window: "last 7 days",
   period: INFRA_REPORT.period,
 };
@@ -388,8 +388,7 @@ async function main(): Promise<void> {
     news: agentNews.get(f.config.id) ?? [],
   }));
   // Infra is reported on releases and hot issues alone: the news sources are
-  // daily snapshots, and infra project names ("vLLM", "Ollama") already show up
-  // in the HN report.
+  // daily snapshots.
   const infraActivities: ProjectActivity[] = infraFetches.map((f) => ({ ...f, news: [] }));
 
   // 2. Generate every report body

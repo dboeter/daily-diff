@@ -112,33 +112,31 @@ Coding agents and personal AI assistants, CLI or not, in one daily report. Issue
 
 Agents with none of these are listed in one "Quiet today" line.
 
-| Agent              | Repository                                                                |
-| ------------------ | ------------------------------------------------------------------------- |
-| Claude Code        | [anthropics/claude-code](https://github.com/anthropics/claude-code)       |
-| OpenAI Codex       | [openai/codex](https://github.com/openai/codex)                           |
-| Gemini CLI         | [google-gemini/gemini-cli](https://github.com/google-gemini/gemini-cli)   |
-| GitHub Copilot CLI | [github/copilot-cli](https://github.com/github/copilot-cli)               |
-| OpenCode           | [anomalyco/opencode](https://github.com/anomalyco/opencode)               |
-| Pi                 | [earendil-works/pi](https://github.com/earendil-works/pi)                 |
-| Qwen Code          | [QwenLM/qwen-code](https://github.com/QwenLM/qwen-code)                   |
-| OpenClaw           | [openclaw/openclaw](https://github.com/openclaw/openclaw)                 |
-| Hermes Agent       | [nousresearch/hermes-agent](https://github.com/nousresearch/hermes-agent) |
-| IronClaw           | [nearai/ironclaw](https://github.com/nearai/ironclaw)                     |
-| QwenPaw            | [agentscope-ai/QwenPaw](https://github.com/agentscope-ai/QwenPaw)         |
-| ZeroClaw           | [zeroclaw-labs/zeroclaw](https://github.com/zeroclaw-labs/zeroclaw)       |
+| Agent            | Repository                                                                      |
+| ---------------- | ------------------------------------------------------------------------------- |
+| Claude Code      | [anthropics/claude-code](https://github.com/anthropics/claude-code)             |
+| OpenAI Codex     | [openai/codex](https://github.com/openai/codex)                                 |
+| Gemini CLI       | [google-gemini/gemini-cli](https://github.com/google-gemini/gemini-cli)         |
+| Kilo Code        | [Kilo-Org/kilocode](https://github.com/Kilo-Org/kilocode)                       |
+| OpenCode         | [anomalyco/opencode](https://github.com/anomalyco/opencode)                     |
+| Pi               | [earendil-works/pi](https://github.com/earendil-works/pi)                       |
+| Oh My Pi         | [can1357/oh-my-pi](https://github.com/can1357/oh-my-pi)                         |
+| jcode            | [1jehuang/jcode](https://github.com/1jehuang/jcode)                             |
+| Cline            | [cline/cline](https://github.com/cline/cline)                                   |
+| Command Code     | [CommandCodeAI/command-code](https://github.com/CommandCodeAI/command-code)     |
+| DeepSeek Harness | [deepseek-ai/deepseek-harness](https://github.com/deepseek-ai/deepseek-harness) |
+| Hermes Agent     | [nousresearch/hermes-agent](https://github.com/nousresearch/hermes-agent)       |
 
-### AI infrastructure (GitHub) — weekly
+### Agent tooling (GitHub) — weekly
 
-The inference and serving layer the agents run on top of. Weekly report on the same pipeline as the agents report — stable releases and hot issues of the last 7 days, without news matching.
+The sandboxes, session multiplexers and context tools the agents run inside or alongside. Weekly report (`ai-infra`, "Agent Tooling Weekly") on the same pipeline as the agents report — stable releases and hot issues of the last 7 days, without news matching. Until 2026-10-10 it tracked inference engines (vLLM, llama.cpp, Ollama…).
 
-| Project   | Repository                                                  | Layer            | Stars  |
-| --------- | ----------------------------------------------------------- | ---------------- | ------ |
-| Ollama    | [ollama/ollama](https://github.com/ollama/ollama)           | Local runtime    | 177.2k |
-| llama.cpp | [ggml-org/llama.cpp](https://github.com/ggml-org/llama.cpp) | Inference engine | 121.9k |
-| vLLM      | [vllm-project/vllm](https://github.com/vllm-project/vllm)   | Serving engine   | 87.5k  |
-| Unsloth   | [unslothai/unsloth](https://github.com/unslothai/unsloth)   | Fine-tuning      | 69.0k  |
-| LiteLLM   | [BerriAI/litellm](https://github.com/BerriAI/litellm)       | LLM gateway      | 55.0k  |
-| SGLang    | [sgl-project/sglang](https://github.com/sgl-project/sglang) | Serving engine   | 30.9k  |
+| Project      | Repository                                                              | Layer             | Stars |
+| ------------ | ----------------------------------------------------------------------- | ----------------- | ----- |
+| herdr        | [herdrdev/herdr](https://github.com/herdrdev/herdr)                     | Agent multiplexer | 43.2k |
+| context-mode | [mksglu/context-mode](https://github.com/mksglu/context-mode)           | Context tool      | 26.2k |
+| OpenShell    | [NVIDIA/OpenShell](https://github.com/NVIDIA/OpenShell)                 | Agent sandbox     | 15.7k |
+| Agent Deck   | [asheshgoplani/agent-deck](https://github.com/asheshgoplani/agent-deck) | Session manager   | 1.1k  |
 
 ### GitHub AI Trending — weekly
 
@@ -174,7 +172,7 @@ New articles are detected by comparing sitemap `lastmod` timestamps against a pe
 
 - **Daily:** one agents report — stable releases, hot issues and news for 12 coding agents and AI assistants, in one LLM call
 - **Daily:** Hacker News AI stories, new ArXiv papers, and new Anthropic/OpenAI web content (sitemap-based, incremental)
-- **Weekly (Mondays):** AI infrastructure releases and hot issues, GitHub AI trending + Claude Code Skills, Dev.to + Lobste.rs community digest, Hugging Face trending models
+- **Weekly (Mondays):** agent tooling releases and hot issues, GitHub AI trending + Claude Code Skills, Dev.to + Lobste.rs community digest, Hugging Face trending models
 - Publishes a GitHub Issue per report; commits Markdown files to `digests/YYYY-MM-DD/`
 - Runs via GitHub Actions; supports manual triggering, with an option to force the weekly reports
 - All tracked repositories are configurable via `config.yml` — no code changes needed
@@ -197,11 +195,11 @@ agents:
     name: My Agent
     keywords: [my agent] # optional: news match terms; defaults to name + repo name
 
-# Add a new AI infrastructure project
+# Add a new agent tooling project
 infra_repos:
-  - id: my-engine
-    repo: owner/my-engine
-    name: My Engine
+  - id: my-tool
+    repo: owner/my-tool
+    name: My Tool
 ```
 
 ### 3. Add Secrets
@@ -306,7 +304,7 @@ Files are written to `digests/YYYY-MM-DD/`:
 | `ai-hn.md`        | Hacker News AI community digest — top stories + sentiment analysis (only written when fetch succeeds) | daily   | `hn`               |
 | `ai-arxiv.md`     | ArXiv AI research digest — key papers from cs.AI/cs.CL/cs.LG                                          | daily   | `arxiv`            |
 | `ai-web.md`       | Official web content report (only written when new content exists)                                    | daily   | `web`              |
-| `ai-infra.md`     | AI infrastructure weekly — overview + per-project releases and hot issues                             | weekly  | `infra`            |
+| `ai-infra.md`     | Agent tooling weekly — overview + per-project releases and hot issues                                 | weekly  | `infra`            |
 | `ai-trending.md`  | GitHub agent & AI-coding trending report — repos by category + trend signals + Claude Code Skills     | weekly  | `trending`         |
 | `ai-community.md` | Tech community AI weekly — Dev.to articles + Lobste.rs stories combined                               | weekly  | `community`        |
 | `ai-hf.md`        | Hugging Face trending models digest — sorted by weekly likes                                          | weekly  | `hf`               |

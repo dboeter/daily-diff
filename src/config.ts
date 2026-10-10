@@ -43,7 +43,7 @@ const DEFAULT_AGENTS: RepoConfig[] = [
   { id: "claude-code", repo: "anthropics/claude-code", name: "Claude Code" },
   { id: "codex", repo: "openai/codex", name: "OpenAI Codex", keywords: ["codex"] },
   { id: "gemini-cli", repo: "google-gemini/gemini-cli", name: "Gemini CLI" },
-  { id: "copilot-cli", repo: "github/copilot-cli", name: "GitHub Copilot CLI", keywords: ["copilot cli"] },
+  { id: "kilo-code", repo: "Kilo-Org/kilocode", name: "Kilo Code" },
   { id: "opencode", repo: "anomalyco/opencode", name: "OpenCode" },
   {
     id: "pi",
@@ -51,25 +51,23 @@ const DEFAULT_AGENTS: RepoConfig[] = [
     name: "Pi",
     keywords: ["pi coding agent", "pi agent", "earendil"],
   },
-  { id: "qwen-code", repo: "QwenLM/qwen-code", name: "Qwen Code" },
-  { id: "openclaw", repo: "openclaw/openclaw", name: "OpenClaw" },
+  { id: "oh-my-pi", repo: "can1357/oh-my-pi", name: "Oh My Pi" },
+  { id: "jcode", repo: "1jehuang/jcode", name: "jcode" },
+  { id: "cline", repo: "cline/cline", name: "Cline" },
+  { id: "command-code", repo: "CommandCodeAI/command-code", name: "Command Code" },
+  { id: "deepseek-harness", repo: "deepseek-ai/deepseek-harness", name: "DeepSeek Harness" },
   { id: "hermes-agent", repo: "nousresearch/hermes-agent", name: "Hermes Agent" },
-  { id: "ironclaw", repo: "nearai/ironclaw", name: "IronClaw" },
-  { id: "qwenpaw", repo: "agentscope-ai/QwenPaw", name: "QwenPaw" },
-  { id: "zeroclaw", repo: "zeroclaw-labs/zeroclaw", name: "ZeroClaw" },
 ];
 
 const DEFAULT_SKILLS_REPO = "anthropics/skills";
 
-// Inference engines, gateways and fine-tuning frameworks — the layer the
-// agents run on top of. Reported weekly.
+// Sandboxes, session multiplexers and context tools the agents run inside or
+// alongside. Reported weekly.
 const DEFAULT_INFRA_REPOS: RepoConfig[] = [
-  { id: "vllm", repo: "vllm-project/vllm", name: "vLLM" },
-  { id: "sglang", repo: "sgl-project/sglang", name: "SGLang" },
-  { id: "llama-cpp", repo: "ggml-org/llama.cpp", name: "llama.cpp" },
-  { id: "ollama", repo: "ollama/ollama", name: "Ollama" },
-  { id: "litellm", repo: "BerriAI/litellm", name: "LiteLLM" },
-  { id: "unsloth", repo: "unslothai/unsloth", name: "Unsloth" },
+  { id: "openshell", repo: "NVIDIA/OpenShell", name: "OpenShell" },
+  { id: "herdr", repo: "herdrdev/herdr", name: "herdr" },
+  { id: "context-mode", repo: "mksglu/context-mode", name: "context-mode" },
+  { id: "agent-deck", repo: "asheshgoplani/agent-deck", name: "Agent Deck" },
 ];
 
 // ---------------------------------------------------------------------------

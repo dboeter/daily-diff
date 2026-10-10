@@ -25,11 +25,13 @@ export const AGENTS_REPORT = {
   issueTitle: (dateStr: string) => `🤖 AI Agents Digest ${dateStr}`,
 } as const;
 
-// Weekly since October 2026 (see WEEKLY_REPORT_WEEKDAY in date.ts).
+// Weekly since October 2026 (see WEEKLY_REPORT_WEEKDAY in date.ts). Covers
+// agent tooling since 2026-10-10; the "AI Infrastructure" archive labels in
+// REPORT_LABELS stay because older ai-infra files cover inference engines.
 export const INFRA_REPORT = {
-  title: "AI Infrastructure Weekly",
+  title: "Agent Tooling Weekly",
   period: "this week",
-  issueTitle: (dateStr: string) => `⚙️ AI Infrastructure Weekly ${dateStr}`,
+  issueTitle: (dateStr: string) => `⚙️ Agent Tooling Weekly ${dateStr}`,
 } as const;
 
 export const WEB_REPORT = {

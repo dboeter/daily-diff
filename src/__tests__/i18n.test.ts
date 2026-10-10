@@ -21,7 +21,7 @@ describe("issue title functions", () => {
   });
 
   it("INFRA_REPORT.issueTitle includes title and date", () => {
-    expect(INFRA_REPORT.issueTitle("2026-03-12")).toContain("AI Infrastructure Weekly");
+    expect(INFRA_REPORT.issueTitle("2026-03-12")).toContain("Agent Tooling Weekly");
     expect(INFRA_REPORT.issueTitle("2026-03-12")).toContain("2026-03-12");
   });
 

@@ -50,7 +50,7 @@ export ANTHROPIC_API_KEY=sk-ant-xxxxx
 
 The pipeline runs in four sequential phases, each implemented as a named async function in `src/index.ts`:
 
-1. **`fetchAllData`** — all network I/O in parallel. Daily: releases + hot issues for the 12 agents, Anthropic/OpenAI sitemaps, GitHub Trending (HTML + Search API, for agent news), Hacker News Firebase API, ArXiv API, OpenRouter model catalog (stealth models). Weekly only (`isWeeklyRun`): releases + hot issues for the 6 infra repos, Claude Code Skills, OpenRouter apps/rankings, npm registry search, Hugging Face Hub API, Dev.to Forem API, Lobste.rs JSON API.
+1. **`fetchAllData`** — all network I/O in parallel. Daily: releases + hot issues for the 12 agents, Anthropic/OpenAI sitemaps, GitHub Trending (HTML + Search API, for agent news), Hacker News Firebase API, ArXiv API, OpenRouter model catalog (stealth models). Weekly only (`isWeeklyRun`): releases + hot issues for the 4 infra repos, Claude Code Skills, OpenRouter apps/rankings, npm registry search, Hugging Face Hub API, Dev.to Forem API, Lobste.rs JSON API.
 2. **News matching** — `matchAgentNews` (`src/agent-news.ts`) assigns HN, web and trending items to the agents they name.
 3. **`generateSummaries`** — one LLM call for the agents report; on the weekly run also infra, skills and trending. Rate-limited to 5 concurrent requests by a queue in `src/report.ts`.
 4. **Save phase** — `buildProjectReportContent` (in `src/report-builders.ts`) builds the agents and infra Markdown; the `saveXxxReport` functions (in `src/report-savers.ts`) generate their body, write the file and create the GitHub Issue.
@@ -111,8 +111,8 @@ Weekly = on `WEEKLY_REPORT_WEEKDAY` (Monday, CST) or when `DIGEST_FORCE_WEEKLY=1
 
 ## Tracked sources
 
-- **AGENTS** (12, daily): claude-code, codex, gemini-cli, copilot-cli, opencode, pi, qwen-code, openclaw, hermes-agent, ironclaw, qwenpaw, zeroclaw. One list, CLI or not — the CLI/OpenClaw split was merged in October 2026. Optional `keywords` per agent set the news-match terms (Pi needs them: "pi" alone matches Raspberry Pi).
-- **INFRA_REPOS** (6, weekly): vllm, sglang, llama-cpp, ollama, litellm, unsloth — inference engines, gateway and fine-tuning layer
+- **AGENTS** (12, daily): claude-code, codex, gemini-cli, kilo-code, opencode, pi, oh-my-pi, jcode, cline, command-code, deepseek-harness, hermes-agent. On 2026-10-10 Qwen Code, OpenClaw, IronClaw, QwenPaw, ZeroClaw and Copilot CLI were dropped (unused by the maintainer); Kilo Code, Oh My Pi, jcode, Cline, Command Code and DeepSeek Harness were added. Command Code publishes no GitHub releases, and DeepSeek Harness has issues disabled and only alpha/rc releases, so news is their main signal. One list, CLI or not — the CLI/OpenClaw split was merged in October 2026. Optional `keywords` per agent set the news-match terms (Pi needs them: "pi" alone matches Raspberry Pi).
+- **INFRA_REPOS** (4, weekly): openshell, herdr, context-mode, agent-deck — agent tooling (sandbox, session multiplexers, context tool). Until 2026-10-10 the section tracked inference engines (vllm, sglang, llama-cpp, ollama, litellm, unsloth); the `ai-infra` id, `infra` label and "AI Infrastructure" archive label stay, the report title is "Agent Tooling Weekly". context-mode publishes few releases and agent-deck rarely reaches the hot-issue bar, so both are often quiet.
 - **CLAUDE_SKILLS_REPO** (weekly, in `ai-trending`): anthropics/skills — no date filter, sorted by popularity
 - **Web**: anthropic.com + openai.com via sitemap, state in `digests/web-state.json`
 - **Trending**: github.com/trending (HTML) + GitHub Search API (6 AI topics, 7-day window). Fetched daily for agent news; the report is weekly and scrapes `since=weekly` that day. The weekly run adds `coding-agent`/`agentic-coding` repos _created_ in 14 days (weekly-only because search quota is shared with `fetchHotIssues`), OpenRouter and npm; these feed an "Agent & Coding Tool Radar" section aimed at spotting new agents.
@@ -152,7 +152,7 @@ Weekly = on `WEEKLY_REPORT_WEEKDAY` (Monday, CST) or when `DIGEST_FORCE_WEEKLY=1
 - GitHub issue label colors are defined in `LABEL_COLORS` in `src/github.ts`. Add new labels there.
 - Web state (`digests/web-state.json`) is committed to git on every run. It is the source of truth for which URLs have been seen. `saveWebReport` writes it once at the end, regardless of whether a report was generated.
 - Tracked repos are pruned when they go quiet. (Since October 2026 a quiet agent costs nothing — it lands in the report's "Quiet today" line — so pruning is less pressing.) Removed August 2026 after an activity audit:
-  - `deepseek-harness` — Issues/PRs disabled upstream and the Discussions board dormant: 13/13 days of zero data.
+  - `deepseek-harness` — Issues/PRs disabled upstream and the Discussions board dormant: 13/13 days of zero data. Re-added 2026-10-10 at the maintainer's request, now that the report also matches news.
   - `zeptoclaw`, `nullclaw` — no upstream push for 30+ days; 90% and 50% of days had no activity at all.
   - `nanobot`, `nanoclaw`, `lobsterai`, `codewhale` — 17–37 items per 24h, well under the 30-issue + 20-PR prompt sample, so the model was padding a full 8-section report out of a handful of items.
   - `picoclaw`, `moltis` — removed by maintainer decision alongside the above.

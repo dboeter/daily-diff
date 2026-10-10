@@ -35,7 +35,7 @@ describe("loadConfig", () => {
   it("returns defaults when config file does not exist", () => {
     vi.spyOn(fs, "existsSync").mockReturnValue(false);
     const config = loadConfig("/nonexistent/config.yml");
-    expect(config.agents.map((a) => a.id)).toContain("openclaw");
+    expect(config.agents.map((a) => a.id)).toContain("claude-code");
     expect(config.skillsRepo).toBe("anthropics/skills");
     expect(config.infraRepos.length).toBeGreaterThan(0);
   });
@@ -59,7 +59,7 @@ infra_repos:
     vi.spyOn(fs, "readFileSync").mockReturnValue("infra_repos: []");
     const config = loadConfig("test.yml");
     expect(config.infraRepos.length).toBeGreaterThan(0);
-    expect(config.infraRepos[0]!.id).toBe("vllm");
+    expect(config.infraRepos[0]!.id).toBe("openshell");
   });
 
   it("loads agents from valid YAML", () => {
