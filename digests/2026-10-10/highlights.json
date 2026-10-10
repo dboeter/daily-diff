@@ -1,0 +1,18 @@
+{
+  "ai-agents": [
+    "GitHub Copilot CLI v1.0.95 adds native Microsoft Entra authentication on macOS, eliminating browser fallback for enterprise logins",
+    "Qwen Code daemon git worktree guard vulnerability allows heredoc bodies to execute as shell code — a security exploit"
+  ],
+  "ai-web": [
+    "Anthropic launches OSS Scanner: free opt-in security scans for open-source projects, already found 29,000+ candidate vulnerabilities",
+    "Anthropic commits $150M over 3 years to Genesis Mission, deploying Claude across 15+ US science agencies with API credits"
+  ],
+  "ai-hn": [
+    "Mistral Large 4 releases as latest open-weight flagship model for developers to benchmark against closed alternatives",
+    "OpenAI withdraws three mathematical results days after announcing breakthrough, raising verification concerns for AI proofs"
+  ],
+  "ai-arxiv": [
+    "NOMOS compiles natural-language policies into statically verified tool-call gates achieving zero attack success on banking benchmarks",
+    "TestJack reveals 34.4% of coding-agent solutions passing fixed unit tests actually violate task requirements"
+  ]
+}
