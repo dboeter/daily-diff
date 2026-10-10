@@ -191,19 +191,19 @@ async function fetchAllData(
     ]),
     // Fetched every day — the agents report matches trending repos as news —
     // but only reported weekly.
-    fetchTrendingData(weekly ? "weekly" : "daily", toCstDateStr(now)).catch(
-      (): TrendingData => ({
-        trendingRepos: [],
-        searchRepos: [],
-        trendingFetchSuccess: false,
-        openrouter: EMPTY_OPENROUTER,
-        npm: EMPTY_NPM,
-      }),
-    ),
+    fetchTrendingData(weekly ? "weekly" : "daily", toCstDateStr(now)).catch((): TrendingData => ({
+      trendingRepos: [],
+      searchRepos: [],
+      trendingFetchSuccess: false,
+      openrouter: EMPTY_OPENROUTER,
+      npm: EMPTY_NPM,
+    })),
     fetchHnData().catch((): HnData => ({ stories: [], fetchSuccess: false })),
-    fetchArxivData(toCstDateStr(now)).catch(
-      (): ArxivData => ({ papers: [], fetchSuccess: false, rankedBy: "recency" }),
-    ),
+    fetchArxivData(toCstDateStr(now)).catch((): ArxivData => ({
+      papers: [],
+      fetchSuccess: false,
+      rankedBy: "recency",
+    })),
     weekly
       ? fetchHfData().catch((): HfData => ({ models: [], fetchSuccess: false }))
       : Promise.resolve<HfData>({ models: [], fetchSuccess: false }),

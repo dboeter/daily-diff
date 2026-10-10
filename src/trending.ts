@@ -462,12 +462,16 @@ export async function composeTrendingReport(
   // is only asked about rows in scope; a verdict is saved, a gain is not.
   const itemsFor = (rows: GithubRow[]): ClassifyItem[] => [
     ...rows.map((row): ClassifyItem => ({ kind: "github", key: row.key, row })),
-    ...data.openrouter.apps.map(
-      (app): ClassifyItem => ({ kind: "openrouter", key: openrouterKey(app), app }),
-    ),
-    ...[...data.npm.rising, ...data.npm.top].map(
-      (pkg): ClassifyItem => ({ kind: "npm", key: npmKey(pkg), pkg }),
-    ),
+    ...data.openrouter.apps.map((app): ClassifyItem => ({
+      kind: "openrouter",
+      key: openrouterKey(app),
+      app,
+    })),
+    ...[...data.npm.rising, ...data.npm.top].map((pkg): ClassifyItem => ({
+      kind: "npm",
+      key: npmKey(pkg),
+      pkg,
+    })),
   ];
   const firstRows = rankGithubRepos(data.trendingRepos, data.searchRepos, dateStr, history);
   const firstItems = itemsFor(firstRows);
