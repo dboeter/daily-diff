@@ -336,6 +336,20 @@ describe("OpenRouterProvider", () => {
     const p = new OpenRouterProvider({ apiKey: "k" });
     await expect(p.call("prompt", 100)).rejects.toThrow("Unexpected empty response from openrouter");
   });
+
+  it("throws the body's error when a 2xx response has no choices", async () => {
+    const mockCreate = await getOpenAIMockCreate();
+    mockCreate.mockResolvedValueOnce({
+      error: { code: 429, message: "Rate limit exceeded: free-models-per-min" },
+    });
+
+    const p = new OpenRouterProvider({ apiKey: "test-key" });
+    const err = await p.call("prompt", 100).catch((e: unknown) => e);
+    expect(String(err)).toContain("openrouter returned no choices");
+    expect(String(err)).toContain("free-models-per-min");
+    // report.ts's is429 matches "429" anywhere in the message.
+    expect(String(err)).toContain("429");
+  });
 });
 
 // ---------------------------------------------------------------------------

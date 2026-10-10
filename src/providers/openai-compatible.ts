@@ -35,6 +35,14 @@ export abstract class OpenAICompatibleProvider implements LlmProvider {
       max_completion_tokens: maxTokens,
       messages: [{ role: "user", content: prompt }],
     });
+    // OpenRouter can answer 2xx with `{ error: { code, message } }` and no `choices`
+    // (2026-10-08/09: web and HN died on `choices[0]` with the reason lost). Put the
+    // body's error in the message: it shows in the log, and a body-level 429
+    // matches `is429` in report.ts, so it rides the retry ladder.
+    if (!Array.isArray(response.choices)) {
+      const body = JSON.stringify((response as { error?: unknown }).error ?? response);
+      throw new Error(`${this.name} returned no choices: ${body.slice(0, 500)}`);
+    }
     const text = response.choices[0]?.message?.content;
     if (!text) throw new Error(`Unexpected empty response from ${this.name}`);
     return text;
