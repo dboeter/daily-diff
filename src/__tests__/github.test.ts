@@ -180,9 +180,36 @@ describe("fetchRecentReleases", () => {
 
     const pending = fetchRecentReleases("org/repo", SINCE);
     await vi.runAllTimersAsync();
-    expect((await pending).map((r) => r.tag_name)).toEqual(["v2"]);
+    expect((await pending).recent.map((r) => r.tag_name)).toEqual(["v2"]);
     expect(fetchSpy).toHaveBeenCalledTimes(2);
     vi.useRealTimers();
+  });
+
+  function respond(releases: GitHubRelease[]) {
+    vi.spyOn(globalThis, "fetch").mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve(releases),
+    } as Response);
+  }
+
+  it("keeps only the releases published in the window", async () => {
+    respond([release("v2"), { ...release("v1"), published_at: "2026-10-01T00:00:00Z" }]);
+    expect((await fetchRecentReleases("org/repo", SINCE)).recent.map((r) => r.tag_name)).toEqual(["v2"]);
+  });
+
+  it("flags a repo whose whole history is prereleases", async () => {
+    respond([release("dsh-v0.2.1-alpha.2"), release("dsh-v0.2.0-rc.1", true)]);
+    expect((await fetchRecentReleases("org/repo", SINCE)).noStableYet).toBe(true);
+  });
+
+  it("does not flag a repo with a stable release, even one outside the window", async () => {
+    respond([release("v2.0.0-rc.1"), { ...release("v1.0.0"), published_at: "2026-01-01T00:00:00Z" }]);
+    expect((await fetchRecentReleases("org/repo", SINCE)).noStableYet).toBe(false);
+  });
+
+  it("does not flag a full page of prereleases: the stable one may be on the next page", async () => {
+    respond(Array.from({ length: 100 }, (_, i) => release(`rust-v0.${i}.0-alpha.1`)));
+    expect((await fetchRecentReleases("org/repo", SINCE)).noStableYet).toBe(false);
   });
 
   it("does not retry an HTTP error", async () => {

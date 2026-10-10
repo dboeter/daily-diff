@@ -14,7 +14,12 @@ export interface ProjectActivity {
   config: RepoConfig;
   /** Stable releases only, newest first. */
   releases: GitHubRelease[];
-  /** Nightlies, alphas, RCs — counted in the report header, never sent to the model. */
+  /**
+   * Newest prereleases in the window, only for a project that has never
+   * shipped a stable release; the model reports the notable ones.
+   */
+  previews: GitHubRelease[];
+  /** Nightlies, alphas, RCs not in `previews` — counted in the report header, never sent to the model. */
   prereleaseCount: number;
   hotIssues: GitHubItem[];
   news: NewsItem[];
@@ -78,14 +83,33 @@ export function topN(items: GitHubItem[], n: number): GitHubItem[] {
 // Prompts
 // ---------------------------------------------------------------------------
 
-/** A project with no stable release, hot issue or news item is left out of the prompt. */
+/** A project with no stable release, previewed prerelease, hot issue or news item is left out of the prompt. */
 export function hasActivity(a: ProjectActivity): boolean {
-  return a.releases.length > 0 || a.hotIssues.length > 0 || a.news.length > 0;
+  return a.releases.length > 0 || a.previews.length > 0 || a.hotIssues.length > 0 || a.news.length > 0;
 }
 
 /** Newest stable releases shown per project; llama.cpp alone tags 35–70 a week. */
 const RELEASES_PER_PROJECT = 10;
 const RELEASE_BODY_CHARS = 400;
+// A prerelease is reported only if its notes show notable features, so the
+// model needs more of them. DeepSeek Harness notes run 4–19 KB, Chinese first
+// behind "[English](#en-…)" anchor links and <h3> tags: at 400 characters the
+// model saw the anchors and half a heading.
+const PREVIEW_BODY_CHARS = 1500;
+
+/** Release notes on one line, without HTML tags and in-page anchor links. */
+export function previewNotes(body: string | null | undefined): string {
+  return (body ?? "")
+    .replace(/<[^>]*>/g, " ")
+    .replace(/\[[^\]]*\]\(#[^)]*\)/g, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, PREVIEW_BODY_CHARS);
+}
+
+function formatRelease(r: GitHubRelease, repo: string, notes: string): string {
+  return `- ${r.tag_name}${r.name && r.name !== r.tag_name ? ` (${r.name})` : ""} — https://github.com/${repo}/releases/tag/${r.tag_name}\n  ${notes || "(no release notes)"}`;
+}
 
 function formatProject(a: ProjectActivity): string {
   const { config: cfg } = a;
@@ -96,19 +120,24 @@ function formatProject(a: ProjectActivity): string {
       : "";
   const releases = shown.length
     ? shown
-        .map((r) => {
-          const body = (r.body ?? "").replace(/\s+/g, " ").trim().slice(0, RELEASE_BODY_CHARS);
-          return `- ${r.tag_name}${r.name && r.name !== r.tag_name ? ` (${r.name})` : ""} — https://github.com/${cfg.repo}/releases/tag/${r.tag_name}\n  ${body || "(no release notes)"}`;
-        })
+        .map((r) =>
+          formatRelease(r, cfg.repo, (r.body ?? "").replace(/\s+/g, " ").trim().slice(0, RELEASE_BODY_CHARS)),
+        )
         .join("\n")
     : "None";
+  // Only for a project without a stable release, so every other project's
+  // section reads as before.
+  const previews = a.previews.length
+    ? `\n\n### Prereleases (no stable release yet)\n` +
+      a.previews.map((r) => formatRelease(r, cfg.repo, previewNotes(r.body))).join("\n")
+    : "";
   const issues = a.hotIssues.map((i) => formatItem(i)).join("\n") || "None";
   const news = a.news.map((n) => `- [${n.source}] ${n.title} — ${n.url} (${n.detail})`).join("\n") || "None";
 
   return `## ${cfg.name} (github.com/${cfg.repo})
 
 ### Stable releases${releaseNote}
-${releases}
+${releases}${previews}
 
 ### Hot issues
 ${issues}
@@ -118,7 +147,8 @@ ${news}`;
 }
 
 /**
- * One prompt for every active project: stable releases, hot issues and news.
+ * One prompt for every active project: stable releases (or, for a project without one yet,
+ * its prereleases), hot issues and news.
  * Issue and PR churn is deliberately absent — it produced most of the filler
  * in the old per-repo reports ("X remains focused on…").
  */
@@ -129,7 +159,7 @@ export function buildProjectDigestPrompt(
 ): string {
   const sections = active.map(formatProject).join("\n\n---\n\n");
 
-  return `You are a technical editor covering ${scope.subject}. Below is the data for ${dateStr} (${scope.window}) for every project that had a stable release, a hot issue, or a news mention. Projects with nothing are already excluded.
+  return `You are a technical editor covering ${scope.subject}. Below is the data for ${dateStr} (${scope.window}) for every project that had a stable release, a prerelease (projects without a stable release yet), a hot issue, or a news mention. Projects with nothing are already excluded.
 
 ${sections}
 
@@ -142,6 +172,7 @@ Write the report in English with exactly this structure:
 
 Then one section per project above that has something left to report, in the order given, headed \`## <Project name>\`, with at most 3 bullets, one or two sentences each:
 - **Release**: what the stable release(s) change for users — features, breaking changes, fixes that matter. Link the release. Several releases in a range: summarize the range, do not list each one.
+- **Prerelease**: only from a "Prereleases (no stable release yet)" list, and only when it adds notable features or breaking changes; skip routine alpha/rc bumps. Say it is a prerelease and link it.
 - **News**: what the news item says about the project and why it matters. Link it.
 - **Hot issue**: what users are hitting and how serious it is. Link the issue (https://github.com/<repo>/issues/<number>).
 

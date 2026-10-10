@@ -51,8 +51,8 @@ agents:
   - id: deepseek-harness
     repo: deepseek-ai/deepseek-harness
     name: DeepSeek Harness
-    # Issues are disabled and every release so far is an alpha/rc, which the
-    # report skips: covered by news only until a stable release ships.
+    # Issues are disabled and every release so far is an alpha/rc. Until a
+    # stable release ships, the report covers its notable prereleases.
   - id: hermes-agent
     repo: nousresearch/hermes-agent
     name: Hermes Agent

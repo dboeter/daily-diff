@@ -140,16 +140,28 @@ export async function searchSlot(): Promise<void> {
   if (at > now) await sleep(at - now);
 }
 
-/**
- * Releases published since `since`, newest first. 100 is the API maximum: a
- * weekly window on llama.cpp, which tags several builds a day, already runs to
- * 35–70 releases.
- */
-export async function fetchRecentReleases(repo: string, since: Date): Promise<GitHubRelease[]> {
+/** The API maximum: a weekly window on llama.cpp, which tags several builds a day, already runs to 35–70 releases. */
+const RELEASES_PAGE = 100;
+
+export interface RecentReleases {
+  /** Published since `since`, newest first. */
+  recent: GitHubRelease[];
+  /**
+   * The repo has never published a stable release: its whole history fit in
+   * one page and none of it was stable. A full page of prereleases cannot tell
+   * (Codex runs ~86 alphas per 100 releases), so it reads as false.
+   */
+  noStableYet: boolean;
+}
+
+export async function fetchRecentReleases(repo: string, since: Date): Promise<RecentReleases> {
   const releases = await githubGet<GitHubRelease[]>(`https://api.github.com/repos/${repo}/releases`, {
-    per_page: "100",
+    per_page: String(RELEASES_PAGE),
   });
-  return releases.filter((r) => new Date(r.published_at) >= since);
+  return {
+    recent: releases.filter((r) => new Date(r.published_at) >= since),
+    noStableYet: releases.length < RELEASES_PAGE && releases.every(isPrerelease),
+  };
 }
 
 /**

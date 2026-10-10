@@ -93,10 +93,18 @@ const DAY_MS = 24 * 60 * 60 * 1000;
 /** A project's releases and hot issues; agent news is matched after every source is in. */
 type ProjectFetch = Omit<ProjectActivity, "news">;
 
+/**
+ * Prereleases sent to the model per project that has never shipped a stable
+ * release. Without them DeepSeek Harness, alpha/rc only, never showed a
+ * release at all, while 0.2 added a lot of features; the model reports only
+ * the notable ones. The daily window holds 0–1 of its prereleases.
+ */
+const PREVIEWS_PER_PROJECT = 3;
+
 /** Stable releases and hot issues for one project. A failed fetch reads as a quiet period. */
 async function fetchProject(cfg: RepoConfig, since: Date): Promise<ProjectFetch> {
   try {
-    const [releases, hotIssues] = await Promise.all([
+    const [{ recent: releases, noStableYet }, hotIssues] = await Promise.all([
       fetchRecentReleases(cfg.repo, since),
       // Search API, rate-limited separately from releases: a failure here must
       // not discard the releases.
@@ -106,14 +114,21 @@ async function fetchProject(cfg: RepoConfig, since: Date): Promise<ProjectFetch>
       }),
     ]);
     const stable = releases.filter((r) => !isPrerelease(r));
+    const previews = noStableYet ? releases.slice(0, PREVIEWS_PER_PROJECT) : [];
     console.log(
-      `  [${cfg.id}] releases: ${stable.length} stable + ${releases.length - stable.length} pre, ` +
-        `hot issues: ${hotIssues.length}`,
+      `  [${cfg.id}] releases: ${stable.length} stable + ${releases.length - stable.length} pre` +
+        `${noStableYet ? ` (no stable release yet, ${previews.length} sent)` : ""}, hot issues: ${hotIssues.length}`,
     );
-    return { config: cfg, releases: stable, prereleaseCount: releases.length - stable.length, hotIssues };
+    return {
+      config: cfg,
+      releases: stable,
+      previews,
+      prereleaseCount: releases.length - stable.length - previews.length,
+      hotIssues,
+    };
   } catch (err) {
     console.error(`  [${cfg.id}] fetch failed: ${err}`);
-    return { config: cfg, releases: [], prereleaseCount: 0, hotIssues: [] };
+    return { config: cfg, releases: [], previews: [], prereleaseCount: 0, hotIssues: [] };
   }
 }
 

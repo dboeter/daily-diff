@@ -24,6 +24,7 @@ function makeActivity(id: string, overrides: Partial<ProjectActivity> = {}): Pro
   return {
     config: { id, repo: `org/${id}`, name: id.toUpperCase() },
     releases: [],
+    previews: [],
     prereleaseCount: 0,
     hotIssues: [],
     news: [],

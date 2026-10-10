@@ -3,6 +3,7 @@ import {
   buildProjectDigestPrompt,
   buildSkillsPrompt,
   hasActivity,
+  previewNotes,
   type ProjectActivity,
 } from "../prompts.ts";
 import {
@@ -54,7 +55,15 @@ const release: GitHubRelease = {
 // ---------------------------------------------------------------------------
 
 function makeActivity(overrides: Partial<ProjectActivity> = {}): ProjectActivity {
-  return { config: cfg, releases: [], prereleaseCount: 0, hotIssues: [], news: [], ...overrides };
+  return {
+    config: cfg,
+    releases: [],
+    previews: [],
+    prereleaseCount: 0,
+    hotIssues: [],
+    news: [],
+    ...overrides,
+  };
 }
 
 const scope = { subject: "AI coding agents", window: "last 24h", period: "today" };
@@ -64,8 +73,9 @@ describe("hasActivity", () => {
     expect(hasActivity(makeActivity({ prereleaseCount: 3 }))).toBe(false);
   });
 
-  it("is true for a release, a hot issue or a news item", () => {
+  it("is true for a release, a previewed prerelease, a hot issue or a news item", () => {
     expect(hasActivity(makeActivity({ releases: [release] }))).toBe(true);
+    expect(hasActivity(makeActivity({ previews: [{ ...release, prerelease: true }] }))).toBe(true);
     expect(hasActivity(makeActivity({ hotIssues: [makeItem()] }))).toBe(true);
     expect(
       hasActivity(makeActivity({ news: [{ source: "Hacker News", title: "t", url: "u", detail: "d" }] })),
@@ -95,13 +105,32 @@ describe("buildProjectDigestPrompt", () => {
     expect(prompt).toContain("AI coding agents");
   });
 
-  it("never sends prereleases to the model", () => {
+  it("sends no prerelease list for a project that has a stable release", () => {
     const prompt = buildProjectDigestPrompt(
       [makeActivity({ releases: [release], prereleaseCount: 4 })],
       scope,
       "d",
     );
-    expect(prompt).not.toMatch(/prerelease/i);
+    expect(prompt).not.toContain("### Prereleases");
+  });
+
+  it("lists the prereleases of a project without a stable release, with longer, cleaned notes", () => {
+    const features = "New plugin manager and Claude Code mods compatibility layer. ".repeat(15);
+    const preview: GitHubRelease = {
+      tag_name: "dsh-v0.2.0-rc.1",
+      name: "dsh-v0.2.0-rc.1",
+      body: `[中文](#cn-v0.2.0-rc.1) | [English](#en-v0.2.0-rc.1)\n<h3 id="en-v0.2.0-rc.1">New features</h3>\n${features}`,
+      published_at: "2026-09-28T00:00:00Z",
+      prerelease: true,
+    };
+    const prompt = buildProjectDigestPrompt([makeActivity({ previews: [preview] })], scope, "d");
+    expect(prompt).toContain("### Prereleases (no stable release yet)");
+    expect(prompt).toContain("https://github.com/org/test/releases/tag/dsh-v0.2.0-rc.1");
+    expect(prompt).toContain("New features New plugin manager");
+    expect(prompt).not.toContain("<h3");
+    expect(prompt).not.toContain("(#en-");
+    expect(previewNotes(preview.body).length).toBeGreaterThan(400);
+    expect(prompt).toContain("skip routine alpha/rc bumps");
   });
 
   it("caps the releases shown and notes the total", () => {

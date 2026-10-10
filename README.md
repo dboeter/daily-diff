@@ -106,7 +106,7 @@ wrangler deploy
 
 Coding agents and personal AI assistants, CLI or not, in one daily report. Issue and PR churn is not reported; each agent is covered by:
 
-- **Stable releases** from the last 24h. Nightlies, alphas and release candidates are detected (API flag or tag pattern) and only counted.
+- **Stable releases** from the last 24h. Nightlies, alphas and release candidates are detected (API flag or tag pattern) and only counted — except for an agent that has never shipped a stable release (DeepSeek Harness): its prereleases are covered when they add notable features.
 - **Hot issues**: opened in the last 48h with 10+ comments and 👍 combined (3+ when labelled regression or security), at most 2 per agent.
 - **News**: Hacker News stories, new Anthropic/OpenAI pages and GitHub Trending repos that name the agent. An item naming three or more agents is treated as a compatibility list and skipped.
 
