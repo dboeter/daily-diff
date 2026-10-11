@@ -1,5 +1,5 @@
 {
-  "generated": "2026-10-10T22:27:12.859Z",
+  "generated": "2026-10-11T01:14:42.762Z",
   "labels": {
     "ai-agents": "AI Agents Digest",
     "ai-infra": "AI Infrastructure Digest",
@@ -15,6 +15,14 @@
     "ai-monthly": "AI Tools Monthly Digest"
   },
   "dates": [
+    {
+      "date": "2026-10-11",
+      "reports": [
+        "ai-agents",
+        "ai-web",
+        "ai-hn"
+      ]
+    },
     {
       "date": "2026-10-10",
       "reports": [
