@@ -36,3 +36,6 @@ jobs:
 
       - name: Test
         run: pnpm test
+
+      - name: README tracked-repo tables match config.yml
+        run: pnpm readme --check

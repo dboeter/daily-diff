@@ -98,7 +98,12 @@ jobs:
           DIGEST_FORCE_WEEKLY: ${{ inputs.force_weekly && '1' || '' }}
         run: pnpm start
 
-      - name: Commit digest files
+      # One push per run: every push to main starts a Pages build, and when the
+      # digest and the manifest were pushed seconds apart Pages cancelled the
+      # first build on every run. The pull comes before `pnpm manifest`, so the
+      # rebase only replays digests/ (which only this workflow writes) and the
+      # manifest covers whatever landed on main during the run.
+      - name: Commit and push digest, manifest and feed
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
@@ -109,21 +114,14 @@ jobs:
             # CST date, matching the digests/YYYY-MM-DD/ folder produced by toCstDateStr
             DATE=$(TZ=Asia/Shanghai date +%Y-%m-%d)
             git commit -m "digest: ${DATE} daily digest"
-            git pull --rebase
-            git push
           fi
-
-      - name: Update web manifest
-        run: pnpm manifest
-
-      - name: Commit manifest and feed
-        run: |
+          git pull --rebase
+          pnpm manifest
           git add manifest.json feed.xml
           if ! git diff --cached --quiet; then
             git commit -m "chore: update manifest.json"
-            git pull --rebase
-            git push
           fi
+          git push
 
       - name: Send Telegram notification
         env:

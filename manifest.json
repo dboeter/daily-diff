@@ -1,5 +1,19 @@
 {
-  "generated": "2026-10-10T01:57:58.108Z",
+  "generated": "2026-10-10T22:27:12.859Z",
+  "labels": {
+    "ai-agents": "AI Agents Digest",
+    "ai-infra": "AI Infrastructure Digest",
+    "ai-web": "Official AI Content Report",
+    "ai-trending": "Agent & AI Coding Trends",
+    "ai-hn": "Hacker News AI Community Digest",
+    "ai-arxiv": "ArXiv AI Research Digest",
+    "ai-hf": "Hugging Face Trending Models",
+    "ai-community": "Tech Community AI Digest",
+    "ai-cli": "AI CLI Tools Digest",
+    "ai-ph": "Product Hunt AI Products Digest",
+    "ai-weekly": "AI Tools Weekly Digest",
+    "ai-monthly": "AI Tools Monthly Digest"
+  },
   "dates": [
     {
       "date": "2026-10-10",

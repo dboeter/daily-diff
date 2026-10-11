@@ -1,61 +1,72 @@
 # Daily Diff configuration
-# Edit this file to customize which repositories are tracked.
-# Changes take effect on the next workflow run.
+# Edit this file to customize which repositories are tracked, then run
+# `pnpm readme` to refresh the tracked-repo tables in README.md (pre-commit and
+# CI fail while they are stale). Changes take effect on the next workflow run.
+# Every section is required: the run stops with an error instead of falling
+# back to a built-in list.
+#
+# agents and infra are report sections:
+#   title    report heading and GitHub issue title (date appended)
+#   subject  what the projects are; the LLM prompt reads "You are a technical
+#            editor covering <subject>", and README.md shows it
+#   repos    the tracked repositories
 
-# ── AI agents ─────────────────────────────────────────────────────────────────
-# Coding agents and personal AI assistants, CLI or not, in one daily report.
-# Each agent is covered by its stable releases, a few hot issues (high
+# ── Agents ────────────────────────────────────────────────────────────────────
+# One daily report. Each agent is covered by its stable releases, a few hot issues (high
 # engagement or a regression/security label) and news: HN, Anthropic/OpenAI and
 # GitHub Trending items that mention it. Issue and PR churn is not reported.
-# Each entry requires: id (slug), repo (owner/repo), name (display name).
+# Each repo requires: id (slug), repo (owner/repo), name (display name).
 # Optional keywords: terms to match in news items. They replace the display
 # name and repo name (the full owner/repo always matches). Set them when the
 # name is a common word.
 
 agents:
-  - id: claude-code
-    repo: anthropics/claude-code
-    name: Claude Code
-  - id: codex
-    repo: openai/codex
-    name: OpenAI Codex
-    keywords: [codex]
-  - id: gemini-cli
-    repo: google-gemini/gemini-cli
-    name: Gemini CLI
-  - id: kilo-code
-    repo: Kilo-Org/kilocode
-    name: Kilo Code
-  - id: opencode
-    repo: anomalyco/opencode
-    name: OpenCode
-  - id: pi
-    repo: earendil-works/pi
-    name: Pi
-    # "pi" alone matches Raspberry Pi and every other use of the word.
-    keywords: [pi coding agent, pi agent, earendil]
-  - id: oh-my-pi
-    repo: can1357/oh-my-pi
-    name: Oh My Pi
-    # No "omp" keyword: it is also Oh My Posh.
-  - id: jcode
-    repo: 1jehuang/jcode
-    name: jcode
-  - id: cline
-    repo: cline/cline
-    name: Cline
-  - id: command-code
-    repo: CommandCodeAI/command-code
-    name: Command Code
-    # Publishes no GitHub releases: covered by hot issues and news only.
-  - id: deepseek-harness
-    repo: deepseek-ai/deepseek-harness
-    name: DeepSeek Harness
-    # Issues are disabled and every release so far is an alpha/rc. Until a
-    # stable release ships, the report covers its notable prereleases.
-  - id: hermes-agent
-    repo: nousresearch/hermes-agent
-    name: Hermes Agent
+  title: AI Agents Digest
+  subject: AI coding agents and personal AI assistants
+  repos:
+    - id: claude-code
+      repo: anthropics/claude-code
+      name: Claude Code
+    - id: codex
+      repo: openai/codex
+      name: OpenAI Codex
+      keywords: [codex]
+    - id: gemini-cli
+      repo: google-gemini/gemini-cli
+      name: Gemini CLI
+    - id: kilo-code
+      repo: Kilo-Org/kilocode
+      name: Kilo Code
+    - id: opencode
+      repo: anomalyco/opencode
+      name: OpenCode
+    - id: pi
+      repo: earendil-works/pi
+      name: Pi
+      # "pi" alone matches Raspberry Pi and every other use of the word.
+      keywords: [pi coding agent, pi agent, earendil]
+    - id: oh-my-pi
+      repo: can1357/oh-my-pi
+      name: Oh My Pi
+      # No "omp" keyword: it is also Oh My Posh.
+    - id: jcode
+      repo: 1jehuang/jcode
+      name: jcode
+    - id: cline
+      repo: cline/cline
+      name: Cline
+    - id: command-code
+      repo: CommandCodeAI/command-code
+      name: Command Code
+      # Publishes no GitHub releases: covered by hot issues and news only.
+    - id: deepseek-harness
+      repo: deepseek-ai/deepseek-harness
+      name: DeepSeek Harness
+      # Issues are disabled and every release so far is an alpha/rc. Until a
+      # stable release ships, the report covers its notable prereleases.
+    - id: hermes-agent
+      repo: nousresearch/hermes-agent
+      name: Hermes Agent
 
 # ── Claude Code Skills ────────────────────────────────────────────────────────
 # No date filter, sorted by community engagement. A section of the weekly
@@ -63,22 +74,26 @@ agents:
 
 skills_repo: anthropics/skills
 
-# ── Agent tooling ─────────────────────────────────────────────────────────────
-# Sandboxes, session multiplexers and context tools that the agents run inside
-# or alongside. Weekly ai-infra report: stable releases and hot issues of the
-# last 7 days, same pipeline as the agents report (no news matching). Until
-# 2026-10-10 this section tracked inference engines (vLLM, llama.cpp, Ollama…).
+# ── Infra ─────────────────────────────────────────────────────────────────────
+# Weekly ai-infra report: stable releases and hot issues of the last 7 days,
+# same pipeline as the agents report (no news matching). Until 2026-10-10 this
+# section tracked inference engines (vLLM, llama.cpp, Ollama…).
 
-infra_repos:
-  - id: openshell
-    repo: NVIDIA/OpenShell
-    name: OpenShell
-  - id: herdr
-    repo: herdrdev/herdr
-    name: herdr
-  - id: context-mode
-    repo: mksglu/context-mode
-    name: context-mode
-  - id: agent-deck
-    repo: asheshgoplani/agent-deck
-    name: Agent Deck
+infra:
+  title: Agent Tooling Weekly
+  subject: AI agent tooling — agent sandboxes, terminal session multiplexers and context-management tools
+  repos:
+    - id: openshell
+      repo: NVIDIA/OpenShell
+      name: OpenShell
+    - id: herdr
+      repo: herdrdev/herdr
+      name: herdr
+    - id: context-mode
+      repo: mksglu/context-mode
+      name: context-mode
+      # Publishes few releases: often quiet.
+    - id: agent-deck
+      repo: asheshgoplani/agent-deck
+      name: Agent Deck
+      # Rarely reaches the hot-issue bar: often quiet.

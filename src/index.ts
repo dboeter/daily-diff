@@ -64,15 +64,18 @@ import { fetchArxivData, type ArxivData } from "./arxiv.ts";
 import { fetchHfData, type HfData } from "./hf.ts";
 import { fetchDevtoData, type DevtoData } from "./devto.ts";
 import { fetchLobstersData, type LobstersData } from "./lobsters.ts";
-import { loadConfig } from "./config.ts";
+import { loadConfig, type SectionKey } from "./config.ts";
 import { toCstDateStr, toUtcStr, isWeeklyRun, sleep } from "./date.ts";
-import { MSG, ISSUE_LABELS, AGENTS_REPORT, INFRA_REPORT } from "./i18n.ts";
+import { MSG, ISSUE_LABELS, PROJECT_REPORTS, projectIssueTitle } from "./i18n.ts";
 
 // ---------------------------------------------------------------------------
-// Repo config — loaded from config.yml, falls back to built-in defaults
+// Repo config — loaded from config.yml (throws when a section is missing)
 // ---------------------------------------------------------------------------
 
-const { agents: AGENTS, skillsRepo: CLAUDE_SKILLS_REPO, infraRepos: INFRA_REPOS } = loadConfig();
+const CONFIG = loadConfig();
+const AGENTS = CONFIG.agents.repos;
+const INFRA_REPOS = CONFIG.infra.repos;
+const CLAUDE_SKILLS_REPO = CONFIG.skillsRepo;
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -262,11 +265,16 @@ async function summarize(id: string, prompt: string, failMsg: string, maxTokens?
   }
 }
 
+/** Prompt wording for a section report: its subject from config.yml, its cadence from i18n. */
+function sectionScope(key: SectionKey): DigestScope {
+  const { window, period } = PROJECT_REPORTS[key];
+  return { subject: CONFIG[key].subject, window, period };
+}
+
 /** One LLM call over every active project; a fixed notice when none was active. */
 function summarizeProjects(
-  id: string,
+  id: SectionKey,
   activities: ProjectActivity[],
-  scope: DigestScope,
   dateStr: string,
   noActivityMsg: string,
 ): Promise<string> {
@@ -277,23 +285,11 @@ function summarizeProjects(
   }
   return summarize(
     id,
-    buildProjectDigestPrompt(active, scope, dateStr),
+    buildProjectDigestPrompt(active, sectionScope(id), dateStr),
     MSG.summaryFailed,
     LLM_TOKENS_LISTING,
   );
 }
-
-const AGENTS_SCOPE: DigestScope = {
-  subject: "AI coding agents and personal AI assistants",
-  window: "last 24h",
-  period: AGENTS_REPORT.period,
-};
-
-const INFRA_SCOPE: DigestScope = {
-  subject: "AI agent tooling — agent sandboxes, terminal session multiplexers and context-management tools",
-  window: "last 7 days",
-  period: INFRA_REPORT.period,
-};
 
 /** Every LLM-generated report body. The weekly ones are empty on other days. */
 interface Summaries {
@@ -316,10 +312,8 @@ async function generateSummaries(
   const report = trendingData.report;
   const rows = report ? summaryRows(report) : [];
   const [agentsSummary, infraSummary, skillsSummary, trendingSummaries, trendingProse] = await Promise.all([
-    summarizeProjects("agents", agentActivities, AGENTS_SCOPE, dateStr, MSG.agentsNoActivity),
-    weekly
-      ? summarizeProjects("infra", infraActivities, INFRA_SCOPE, dateStr, MSG.infraNoActivity)
-      : Promise.resolve(""),
+    summarizeProjects("agents", agentActivities, dateStr, MSG.agentsNoActivity),
+    weekly ? summarizeProjects("infra", infraActivities, dateStr, MSG.infraNoActivity) : Promise.resolve(""),
     weekly
       ? summarize(
           "claude-code-skills",
@@ -427,12 +421,12 @@ async function main(): Promise<void> {
   // 3. Build + save all reports
   const ft = autoGenFooter();
   const agentsContent = buildProjectReportContent({
-    title: AGENTS_REPORT.title,
+    title: CONFIG.agents.title,
     dateStr,
     utcStr,
     activities: agentActivities,
     summary: summaries.agentsSummary,
-    period: AGENTS_REPORT.period,
+    period: PROJECT_REPORTS.agents.period,
     preamble: buildStealthSection(stealthModels),
     footer: ft,
   });
@@ -441,12 +435,12 @@ async function main(): Promise<void> {
   let infraContent = "";
   if (weekly) {
     infraContent = buildProjectReportContent({
-      title: INFRA_REPORT.title,
+      title: CONFIG.infra.title,
       dateStr,
       utcStr,
       activities: infraActivities,
       summary: summaries.infraSummary,
-      period: INFRA_REPORT.period,
+      period: PROJECT_REPORTS.infra.period,
       footer: ft,
     });
     console.log(`  Saved ${saveFile(infraContent, dateStr, "ai-infra.md")}`);
@@ -532,7 +526,7 @@ async function main(): Promise<void> {
   // 5. Create GitHub issues for agents (+ infra on the weekly run)
   if (digestRepo) {
     const agentsUrl = await createGitHubIssue(
-      AGENTS_REPORT.issueTitle(dateStr),
+      projectIssueTitle("agents", CONFIG.agents.title, dateStr),
       agentsContent,
       ISSUE_LABELS.agents,
     );
@@ -540,7 +534,7 @@ async function main(): Promise<void> {
 
     if (weekly) {
       const infraUrl = await createGitHubIssue(
-        INFRA_REPORT.issueTitle(dateStr),
+        projectIssueTitle("infra", CONFIG.infra.title, dateStr),
         infraContent,
         ISSUE_LABELS.infra,
       );

@@ -13,26 +13,14 @@
 
 const PAGES_URL = "https://dboeter.github.io/daily-diff";
 
-const REPORT_LABELS: Record<string, string> = {
-  "ai-agents": "AI Agents Digest",
-  "ai-infra": "AI Infrastructure",
-  "ai-web": "Official AI Content",
-  "ai-trending": "GitHub AI Trends",
-  "ai-hn": "Hacker News AI Community",
-  "ai-arxiv": "ArXiv AI Research",
-  "ai-hf": "Hugging Face Trending Models",
-  "ai-community": "Tech Community AI",
-  // Archive only: no longer generated since October 2026.
-  "ai-cli": "AI CLI Tools Digest",
-  "ai-ph": "Product Hunt AI Products",
-};
-
 interface ManifestDate {
   date: string;
   reports: string[];
 }
 
 interface Manifest {
+  /** Report id → label, written from REPORT_LABELS in src/i18n.ts. */
+  labels?: Record<string, string>;
   dates: ManifestDate[];
 }
 
@@ -62,12 +50,12 @@ async function fetchReport(date: string, type: string): Promise<string> {
 
 async function toolListReports(args: Record<string, unknown>): Promise<string> {
   const days = Math.min(Number(args["days"] ?? 7), 30);
-  const { dates } = await fetchManifest();
+  const { dates, labels = {} } = await fetchManifest();
   const slice = dates.slice(0, days);
 
   const lines = slice.map(({ date, reports }) => {
-    const labels = reports.map((r) => `${r} (${REPORT_LABELS[r] ?? r})`).join(", ");
-    return `• ${date}: ${labels}`;
+    const reportList = reports.map((r) => `${r} (${labels[r] ?? r})`).join(", ");
+    return `• ${date}: ${reportList}`;
   });
 
   return `Available reports — last ${slice.length} day(s):\n\n${lines.join("\n")}`;
@@ -83,11 +71,11 @@ async function toolGetReport(args: Record<string, unknown>): Promise<string> {
 
 async function toolGetLatest(args: Record<string, unknown>): Promise<string> {
   const type = String(args["type"] ?? "ai-agents").trim();
-  const { dates } = await fetchManifest();
+  const { dates, labels = {} } = await fetchManifest();
   for (const { date, reports } of dates) {
     if (reports.includes(type)) {
       const content = await fetchReport(date, type);
-      return `# ${date} — ${REPORT_LABELS[type] ?? type}\n\n${content}`;
+      return `# ${date} — ${labels[type] ?? type}\n\n${content}`;
     }
   }
   throw new Error(`No report found for type: ${type}`);

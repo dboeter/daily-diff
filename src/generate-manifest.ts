@@ -34,6 +34,8 @@ interface DateEntry {
 
 interface Manifest {
   generated: string;
+  /** Report id → label, so the sidebar and the MCP server need no copy of REPORT_LABELS. */
+  labels: Record<string, string>;
   dates: DateEntry[];
 }
 
@@ -103,6 +105,7 @@ async function main(): Promise<void> {
 
   const manifest: Manifest = {
     generated: new Date().toISOString(),
+    labels: Object.fromEntries(REPORT_FILES.map((r) => [r, REPORT_LABELS[r] ?? r])),
     dates: entries,
   };
 

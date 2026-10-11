@@ -6,7 +6,7 @@ A GitHub Actions workflow that runs every morning at 06:37 CST. It aggregates AI
 
 | Source                                                            | Type                                              | Data                                                                              |
 | ----------------------------------------------------------------- | ------------------------------------------------- | --------------------------------------------------------------------------------- |
-| [GitHub Repos](https://github.com)                                | API                                               | Stable releases and hot issues from 18 tracked agent and infra repos              |
+| [GitHub Repos](https://github.com)                                | API                                               | Stable releases and hot issues from the agent and infra repos in `config.yml`     |
 | [Claude Code Skills](https://github.com/anthropics/skills)        | API                                               | Trending skills sorted by community engagement — **weekly**                       |
 | [GitHub Trending](https://github.com/trending)                    | HTML + API                                        | Weekly trending repos + AI topic search (7-day window) — **weekly**               |
 | [OpenRouter](https://openrouter.ai/apps)                          | HTML (RSC payload) + Models API                   | Agent app usage, top/new models — **weekly**; stealth models daily                |
@@ -102,17 +102,22 @@ wrangler deploy
 
 ## Tracked sources
 
-### AI agents (GitHub) — daily
+### Agents (GitHub) — daily
 
-Coding agents and personal AI assistants, CLI or not, in one daily report. Issue and PR churn is not reported; each agent is covered by:
+The `agents` section of `config.yml`, in one daily report. Issue and PR churn is not reported; each agent is covered by:
 
-- **Stable releases** from the last 24h. Nightlies, alphas and release candidates are detected (API flag or tag pattern) and only counted — except for an agent that has never shipped a stable release (DeepSeek Harness): its prereleases are covered when they add notable features.
+- **Stable releases** from the last 24h. Nightlies, alphas and release candidates are detected (API flag or tag pattern) and only counted — except for an agent that has never shipped a stable release: its prereleases are covered when they add notable features.
 - **Hot issues**: opened in the last 48h with 10+ comments and 👍 combined (3+ when labelled regression or security), at most 2 per agent.
 - **News**: Hacker News stories, new Anthropic/OpenAI pages and GitHub Trending repos that name the agent. An item naming three or more agents is treated as a compatibility list and skipped.
 
 Agents with none of these are listed in one "Quiet today" line.
 
-| Agent            | Repository                                                                      |
+<!-- tracked:agents -->
+<!-- generated from config.yml: edit config.yml, then run pnpm readme -->
+
+**AI Agents Digest**: AI coding agents and personal AI assistants.
+
+| Project          | Repository                                                                      |
 | ---------------- | ------------------------------------------------------------------------------- |
 | Claude Code      | [anthropics/claude-code](https://github.com/anthropics/claude-code)             |
 | OpenAI Codex     | [openai/codex](https://github.com/openai/codex)                                 |
@@ -127,16 +132,25 @@ Agents with none of these are listed in one "Quiet today" line.
 | DeepSeek Harness | [deepseek-ai/deepseek-harness](https://github.com/deepseek-ai/deepseek-harness) |
 | Hermes Agent     | [nousresearch/hermes-agent](https://github.com/nousresearch/hermes-agent)       |
 
-### Agent tooling (GitHub) — weekly
+<!-- /tracked:agents -->
 
-The sandboxes, session multiplexers and context tools the agents run inside or alongside. Weekly report (`ai-infra`, "Agent Tooling Weekly") on the same pipeline as the agents report — stable releases and hot issues of the last 7 days, without news matching. Until 2026-10-10 it tracked inference engines (vLLM, llama.cpp, Ollama…).
+### Infra projects (GitHub) — weekly
 
-| Project      | Repository                                                              | Layer             | Stars |
-| ------------ | ----------------------------------------------------------------------- | ----------------- | ----- |
-| herdr        | [herdrdev/herdr](https://github.com/herdrdev/herdr)                     | Agent multiplexer | 43.2k |
-| context-mode | [mksglu/context-mode](https://github.com/mksglu/context-mode)           | Context tool      | 26.2k |
-| OpenShell    | [NVIDIA/OpenShell](https://github.com/NVIDIA/OpenShell)                 | Agent sandbox     | 15.7k |
-| Agent Deck   | [asheshgoplani/agent-deck](https://github.com/asheshgoplani/agent-deck) | Session manager   | 1.1k  |
+The `infra` section of `config.yml`, in a weekly report (`ai-infra`) on the same pipeline as the agents report — stable releases and hot issues of the last 7 days, without news matching. Until 2026-10-10 it tracked inference engines (vLLM, llama.cpp, Ollama…).
+
+<!-- tracked:infra -->
+<!-- generated from config.yml: edit config.yml, then run pnpm readme -->
+
+**Agent Tooling Weekly**: AI agent tooling — agent sandboxes, terminal session multiplexers and context-management tools.
+
+| Project      | Repository                                                              |
+| ------------ | ----------------------------------------------------------------------- |
+| OpenShell    | [NVIDIA/OpenShell](https://github.com/NVIDIA/OpenShell)                 |
+| herdr        | [herdrdev/herdr](https://github.com/herdrdev/herdr)                     |
+| context-mode | [mksglu/context-mode](https://github.com/mksglu/context-mode)           |
+| Agent Deck   | [asheshgoplani/agent-deck](https://github.com/asheshgoplani/agent-deck) |
+
+<!-- /tracked:infra -->
 
 ### GitHub AI Trending — weekly
 
@@ -170,9 +184,9 @@ New articles are detected by comparing sitemap `lastmod` timestamps against a pe
 
 ## Features
 
-- **Daily:** one agents report — stable releases, hot issues and news for 12 coding agents and AI assistants, in one LLM call
+- **Daily:** one agents report — stable releases, hot issues and news for the `agents` repos in `config.yml`, in one LLM call
 - **Daily:** Hacker News AI stories, new ArXiv papers, and new Anthropic/OpenAI web content (sitemap-based, incremental)
-- **Weekly (Mondays):** agent tooling releases and hot issues, GitHub AI trending + Claude Code Skills, Dev.to + Lobste.rs community digest, Hugging Face trending models
+- **Weekly (Mondays):** releases and hot issues of the `infra` projects, GitHub AI trending + Claude Code Skills, Dev.to + Lobste.rs community digest, Hugging Face trending models
 - Publishes a GitHub Issue per report; commits Markdown files to `digests/YYYY-MM-DD/`
 - Runs via GitHub Actions; supports manual triggering, with an option to force the weekly reports
 - All tracked repositories are configurable via `config.yml` — no code changes needed
@@ -185,21 +199,27 @@ The weekly split exists because the daily editions of those reports mostly repea
 
 ### 2. Customize `config.yml` (optional)
 
-Edit `config.yml` in the repo root to add, remove, or replace the tracked repositories. The file is fully commented. No code changes are needed — the pipeline reads it on every run and falls back to built-in defaults if the file is absent.
+Edit `config.yml` in the repo root to add, remove, or replace the tracked repositories. The file is fully commented. No code changes are needed — the pipeline reads it on every run and stops with an error if the file or a section is missing. Each report section also sets its `title` (report heading and issue title) and `subject` (what the projects are, for the LLM prompt). After editing, run `pnpm readme` to refresh the tracked-repo tables above; the pre-commit hook and CI fail while they are stale.
 
 ```yaml
-# Add a new agent
 agents:
-  - id: my-agent
-    repo: owner/my-agent
-    name: My Agent
-    keywords: [my agent] # optional: news match terms; defaults to name + repo name
+  title: My Agents Report # report heading and issue title
+  subject: what the projects are, for the LLM prompt
+  repos:
+    # Add a new agent
+    - id: my-agent
+      repo: owner/my-agent
+      name: My Agent
+      keywords: [my agent] # optional: news match terms; defaults to name + repo name
 
-# Add a new agent tooling project
-infra_repos:
-  - id: my-tool
-    repo: owner/my-tool
-    name: My Tool
+infra:
+  title: My Weekly Report
+  subject: what the projects are, for the LLM prompt
+  repos:
+    # Add a new weekly project
+    - id: my-tool
+      repo: owner/my-tool
+      name: My Tool
 ```
 
 ### 3. Add Secrets
@@ -292,6 +312,8 @@ export DIGEST_REPO=your-username/daily-diff  # optional; omit to only write file
 # export TYPESAFE_API_KEY=xxxxx              # optional; Jev for ArXiv ranking and trending scope
 
 pnpm start
+
+pnpm readme   # after editing config.yml: refresh the tracked-repo tables in this README
 ```
 
 ## Output format
@@ -304,7 +326,7 @@ Files are written to `digests/YYYY-MM-DD/`:
 | `ai-hn.md`        | Hacker News AI community digest — top stories + sentiment analysis (only written when fetch succeeds) | daily   | `hn`               |
 | `ai-arxiv.md`     | ArXiv AI research digest — key papers from cs.AI/cs.CL/cs.LG                                          | daily   | `arxiv`            |
 | `ai-web.md`       | Official web content report (only written when new content exists)                                    | daily   | `web`              |
-| `ai-infra.md`     | Agent tooling weekly — overview + per-project releases and hot issues                                 | weekly  | `infra`            |
+| `ai-infra.md`     | Weekly report on the `infra` projects — overview + per-project releases and hot issues                | weekly  | `infra`            |
 | `ai-trending.md`  | GitHub agent & AI-coding trending report — repos by category + trend signals + Claude Code Skills     | weekly  | `trending`         |
 | `ai-community.md` | Tech community AI weekly — Dev.to articles + Lobste.rs stories combined                               | weekly  | `community`        |
 | `ai-hf.md`        | Hugging Face trending models digest — sorted by weekly likes                                          | weekly  | `hf`               |
@@ -318,7 +340,7 @@ A shared state file `digests/web-state.json` tracks which web URLs have been see
 `ai-agents.md` structure (`ai-infra.md` is the same, over a week):
 
 ```
-Generated | Projects: 12 | Active today: N | Stable releases: N | Prereleases (not covered): N
+Generated | Projects: N | Active today: N | Stable releases: N | Prereleases (not covered): N
 
 ## 🕵️ Stealth Models on OpenRouter   — agents report only; deterministic table, 🆕 new / ⏳ expiring
 

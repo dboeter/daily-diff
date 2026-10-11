@@ -32,65 +32,80 @@ describe("loadConfig", () => {
     vi.restoreAllMocks();
   });
 
-  it("returns defaults when config file does not exist", () => {
-    vi.spyOn(fs, "existsSync").mockReturnValue(false);
-    const config = loadConfig("/nonexistent/config.yml");
-    expect(config.agents.map((a) => a.id)).toContain("claude-code");
-    expect(config.skillsRepo).toBe("anthropics/skills");
-    expect(config.infraRepos.length).toBeGreaterThan(0);
-  });
-
-  it("loads infra_repos from valid YAML", () => {
-    vi.spyOn(fs, "existsSync").mockReturnValue(true);
-    vi.spyOn(fs, "readFileSync").mockReturnValue(`
-infra_repos:
-  - id: custom-engine
-    repo: org/custom-engine
-    name: Custom Engine
-`);
-    const config = loadConfig("test.yml");
-    expect(config.infraRepos).toEqual([
-      { id: "custom-engine", repo: "org/custom-engine", name: "Custom Engine" },
-    ]);
-  });
-
-  it("falls back to defaults for empty infra_repos", () => {
-    vi.spyOn(fs, "existsSync").mockReturnValue(true);
-    vi.spyOn(fs, "readFileSync").mockReturnValue("infra_repos: []");
-    const config = loadConfig("test.yml");
-    expect(config.infraRepos.length).toBeGreaterThan(0);
-    expect(config.infraRepos[0]!.id).toBe("openshell");
-  });
-
-  it("loads agents from valid YAML", () => {
-    vi.spyOn(fs, "existsSync").mockReturnValue(true);
-    vi.spyOn(fs, "readFileSync").mockReturnValue(`
+  const VALID = `
 agents:
-  - id: custom
-    repo: org/custom
-    name: Custom Tool
-    keywords: [custom tool]
+  title: Agents Title
+  subject: agents subject
+  repos:
+    - id: custom
+      repo: org/custom
+      name: Custom Tool
+      keywords: [custom tool]
 skills_repo: custom/skills
-`);
-    const config = loadConfig("test.yml");
-    expect(config.agents).toEqual([
-      { id: "custom", repo: "org/custom", name: "Custom Tool", keywords: ["custom tool"] },
-    ]);
-    expect(config.skillsRepo).toBe("custom/skills");
+infra:
+  title: Infra Title
+  subject: infra subject
+  repos:
+    - id: custom-engine
+      repo: org/custom-engine
+      name: Custom Engine
+`;
+
+  function load(yamlText: string) {
+    vi.spyOn(fs, "existsSync").mockReturnValue(true);
+    vi.spyOn(fs, "readFileSync").mockReturnValue(yamlText);
+    return loadConfig("test.yml");
+  }
+
+  it("loads both sections and skills_repo from valid YAML", () => {
+    expect(load(VALID)).toEqual({
+      agents: {
+        title: "Agents Title",
+        subject: "agents subject",
+        repos: [{ id: "custom", repo: "org/custom", name: "Custom Tool", keywords: ["custom tool"] }],
+      },
+      skillsRepo: "custom/skills",
+      infra: {
+        title: "Infra Title",
+        subject: "infra subject",
+        repos: [{ id: "custom-engine", repo: "org/custom-engine", name: "Custom Engine" }],
+      },
+    });
   });
 
-  it("falls back to defaults for empty agents", () => {
-    vi.spyOn(fs, "existsSync").mockReturnValue(true);
-    vi.spyOn(fs, "readFileSync").mockReturnValue("agents: []");
-    const config = loadConfig("test.yml");
-    expect(config.agents.length).toBeGreaterThan(0);
-    expect(config.agents[0]!.id).toBe("claude-code");
+  it("throws when the file does not exist", () => {
+    vi.spyOn(fs, "existsSync").mockReturnValue(false);
+    expect(() => loadConfig("/nonexistent/config.yml")).toThrow("not found");
   });
 
-  it("falls back to defaults for empty skills_repo", () => {
-    vi.spyOn(fs, "existsSync").mockReturnValue(true);
-    vi.spyOn(fs, "readFileSync").mockReturnValue("skills_repo: ''");
-    const config = loadConfig("test.yml");
-    expect(config.skillsRepo).toBe("anthropics/skills");
+  it("throws when a section is missing", () => {
+    expect(() => load(VALID.replace(/infra:[\s\S]*$/, ""))).toThrow('missing section "infra"');
+  });
+
+  it("throws when repos is empty", () => {
+    expect(() =>
+      load(VALID.replace(/repos:\n {4}- id: custom\n[\s\S]*?skills_repo/, "repos: []\nskills_repo")),
+    ).toThrow("agents.repos must be a non-empty list");
+  });
+
+  it("throws when title or subject is missing", () => {
+    expect(() => load(VALID.replace("  title: Infra Title\n", ""))).toThrow(
+      "infra.title must be a non-empty string",
+    );
+    expect(() => load(VALID.replace("  subject: agents subject\n", ""))).toThrow(
+      "agents.subject must be a non-empty string",
+    );
+  });
+
+  it("throws when a repo entry lacks a field", () => {
+    expect(() => load(VALID.replace("      name: Custom Engine\n", ""))).toThrow(
+      "infra.repos[0] needs id, repo and name",
+    );
+  });
+
+  it("throws when skills_repo is empty", () => {
+    expect(() => load(VALID.replace("skills_repo: custom/skills", "skills_repo: ''"))).toThrow(
+      "skills_repo must be a non-empty string",
+    );
   });
 });

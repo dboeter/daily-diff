@@ -627,7 +627,7 @@ export async function matchApps(
 /**
  * `digests/trending-classifications.json`: Jev's verdict per item, so each item
  * is asked once instead of every week. A project's scope does not change while
- * its description stays the same. Hand-editable; see CLAUDE.md.
+ * its description stays the same. Hand-editable; see AGENTS.md.
  */
 export interface ClassifyCache {
   /** Key: the item key, GitHub keys lowercased (`normKey`). */

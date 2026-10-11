@@ -4,8 +4,7 @@ import {
   TRENDING_REPORT,
   HN_REPORT,
   ISSUE_LABELS,
-  AGENTS_REPORT,
-  INFRA_REPORT,
+  projectIssueTitle,
   NOTIFY_LABELS,
   REPORT_LABELS,
 } from "../i18n.ts";
@@ -15,14 +14,9 @@ import {
 // ---------------------------------------------------------------------------
 
 describe("issue title functions", () => {
-  it("AGENTS_REPORT.issueTitle includes title and date", () => {
-    expect(AGENTS_REPORT.issueTitle("2026-03-12")).toContain("AI Agents Digest");
-    expect(AGENTS_REPORT.issueTitle("2026-03-12")).toContain("2026-03-12");
-  });
-
-  it("INFRA_REPORT.issueTitle includes title and date", () => {
-    expect(INFRA_REPORT.issueTitle("2026-03-12")).toContain("Agent Tooling Weekly");
-    expect(INFRA_REPORT.issueTitle("2026-03-12")).toContain("2026-03-12");
+  it("projectIssueTitle prefixes the section emoji to the config title and date", () => {
+    expect(projectIssueTitle("agents", "Agents Title", "2026-03-12")).toBe("🤖 Agents Title 2026-03-12");
+    expect(projectIssueTitle("infra", "Infra Title", "2026-03-12")).toBe("⚙️ Infra Title 2026-03-12");
   });
 
   it("WEB_REPORT.issueTitle includes first crawl flag", () => {

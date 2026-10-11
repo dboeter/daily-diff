@@ -1,6 +1,9 @@
 /**
  * Centralized report strings: titles, labels, footers and status messages.
+ * The agents and infra report titles are the exception: config.yml.
  */
+
+import type { SectionKey } from "./config.ts";
 
 // ---------------------------------------------------------------------------
 // Status & error messages (used in index.ts)
@@ -18,21 +21,24 @@ export const MSG = {
 // Report headers & labels (used in report-builders.ts, index.ts)
 // ---------------------------------------------------------------------------
 
-// Replaced the separate CLI and OpenClaw-ecosystem reports in October 2026.
-export const AGENTS_REPORT = {
-  title: "AI Agents Digest",
-  period: "today",
-  issueTitle: (dateStr: string) => `🤖 AI Agents Digest ${dateStr}`,
-} as const;
+/**
+ * The config.yml report sections (agents, infra). What a section covers, its
+ * title and LLM subject, lives in config.yml next to its repos, so re-scoping
+ * it is a config edit. These strings follow from its cadence and stay here;
+ * so do the REPORT_LABELS archive labels below.
+ */
+export const PROJECT_REPORTS = {
+  // Replaced the separate CLI and OpenClaw-ecosystem reports in October 2026.
+  agents: { emoji: "🤖", window: "last 24h", period: "today" },
+  // Weekly since October 2026 (see WEEKLY_REPORT_WEEKDAY in date.ts). Covers
+  // agent tooling since 2026-10-10; the "AI Infrastructure" archive labels in
+  // REPORT_LABELS stay because older ai-infra files cover inference engines.
+  infra: { emoji: "⚙️", window: "last 7 days", period: "this week" },
+} as const satisfies Record<SectionKey, { emoji: string; window: string; period: string }>;
 
-// Weekly since October 2026 (see WEEKLY_REPORT_WEEKDAY in date.ts). Covers
-// agent tooling since 2026-10-10; the "AI Infrastructure" archive labels in
-// REPORT_LABELS stay because older ai-infra files cover inference engines.
-export const INFRA_REPORT = {
-  title: "Agent Tooling Weekly",
-  period: "this week",
-  issueTitle: (dateStr: string) => `⚙️ Agent Tooling Weekly ${dateStr}`,
-} as const;
+/** GitHub issue title of a section report; `title` is the section's `title` in config.yml. */
+export const projectIssueTitle = (key: SectionKey, title: string, dateStr: string) =>
+  `${PROJECT_REPORTS[key].emoji} ${title} ${dateStr}`;
 
 export const WEB_REPORT = {
   title: "Official AI Content Report",
@@ -126,7 +132,8 @@ export const FOOTER = {
 } as const;
 
 // ---------------------------------------------------------------------------
-// Report labels for manifest/RSS (used in generate-manifest.ts)
+// Report labels: RSS item titles, and published in manifest.json (`labels`) for
+// the sidebar (index.html) and the MCP server (mcp/src/index.ts). The only copy.
 // ---------------------------------------------------------------------------
 
 export const REPORT_LABELS: Record<string, string> = {
@@ -136,7 +143,7 @@ export const REPORT_LABELS: Record<string, string> = {
   "ai-trending": "Agent & AI Coding Trends",
   "ai-hn": "Hacker News AI Community Digest",
   "ai-arxiv": "ArXiv AI Research Digest",
-  "ai-hf": "Hugging Face Trending Models Weekly",
+  "ai-hf": "Hugging Face Trending Models",
   "ai-community": "Tech Community AI Digest",
   // No longer generated (October 2026: ai-cli merged into ai-agents, ai-ph
   // dropped); kept so archived reports keep a title.

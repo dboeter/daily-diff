@@ -1,6 +1,7 @@
 /**
- * Loads and validates Daily Diff configuration from config.yml.
- * Falls back to built-in defaults if the file is missing or a section is absent.
+ * Loads and validates Daily Diff configuration from config.yml, the only list
+ * of tracked repos. There are no built-in defaults: a missing file or section
+ * throws, so a typo cannot silently swap in a stale list.
  */
 
 import fs from "node:fs";
@@ -19,56 +20,33 @@ interface RawRepoEntry {
   keywords?: string[];
 }
 
-interface RawConfig {
-  agents?: RawRepoEntry[];
-  skills_repo?: string;
-  infra_repos?: RawRepoEntry[];
+interface RawSection {
+  title?: unknown;
+  subject?: unknown;
+  repos?: unknown;
 }
 
-export interface RadarConfig {
-  agents: RepoConfig[];
+/**
+ * The config.yml sections that are reports over a list of repos. Adding one here
+ * adds it to the loader, `RadarConfig` and the README tables (`src/readme.ts`).
+ */
+export const SECTION_KEYS = ["agents", "infra"] as const;
+export type SectionKey = (typeof SECTION_KEYS)[number];
+
+type RawConfig = Partial<Record<SectionKey, RawSection>> & { skills_repo?: unknown };
+
+/** A report over a list of repos: the daily agents report or the weekly infra one. */
+export interface SectionConfig {
+  /** Report heading and GitHub issue title, e.g. "AI Agents Digest". */
+  title: string;
+  /** What the projects are, for the LLM prompt and README.md. */
+  subject: string;
+  repos: RepoConfig[];
+}
+
+export interface RadarConfig extends Record<SectionKey, SectionConfig> {
   skillsRepo: string;
-  infraRepos: RepoConfig[];
 }
-
-// ---------------------------------------------------------------------------
-// Defaults (mirrors config.yml)
-// ---------------------------------------------------------------------------
-
-// Coding agents and personal AI assistants, CLI or not. Keywords are the terms
-// matchAgentNews looks for in HN/web/trending items; without them it uses the
-// display name and repo name. Pi needs explicit keywords: "pi" alone matches
-// Raspberry Pi and every other use of the word.
-const DEFAULT_AGENTS: RepoConfig[] = [
-  { id: "claude-code", repo: "anthropics/claude-code", name: "Claude Code" },
-  { id: "codex", repo: "openai/codex", name: "OpenAI Codex", keywords: ["codex"] },
-  { id: "gemini-cli", repo: "google-gemini/gemini-cli", name: "Gemini CLI" },
-  { id: "kilo-code", repo: "Kilo-Org/kilocode", name: "Kilo Code" },
-  { id: "opencode", repo: "anomalyco/opencode", name: "OpenCode" },
-  {
-    id: "pi",
-    repo: "earendil-works/pi",
-    name: "Pi",
-    keywords: ["pi coding agent", "pi agent", "earendil"],
-  },
-  { id: "oh-my-pi", repo: "can1357/oh-my-pi", name: "Oh My Pi" },
-  { id: "jcode", repo: "1jehuang/jcode", name: "jcode" },
-  { id: "cline", repo: "cline/cline", name: "Cline" },
-  { id: "command-code", repo: "CommandCodeAI/command-code", name: "Command Code" },
-  { id: "deepseek-harness", repo: "deepseek-ai/deepseek-harness", name: "DeepSeek Harness" },
-  { id: "hermes-agent", repo: "nousresearch/hermes-agent", name: "Hermes Agent" },
-];
-
-const DEFAULT_SKILLS_REPO = "anthropics/skills";
-
-// Sandboxes, session multiplexers and context tools the agents run inside or
-// alongside. Reported weekly.
-const DEFAULT_INFRA_REPOS: RepoConfig[] = [
-  { id: "openshell", repo: "NVIDIA/OpenShell", name: "OpenShell" },
-  { id: "herdr", repo: "herdrdev/herdr", name: "herdr" },
-  { id: "context-mode", repo: "mksglu/context-mode", name: "context-mode" },
-  { id: "agent-deck", repo: "asheshgoplani/agent-deck", name: "Agent Deck" },
-];
 
 // ---------------------------------------------------------------------------
 // Loader
@@ -83,32 +61,42 @@ export function toRepoConfig(e: RawRepoEntry): RepoConfig {
   };
 }
 
+function nonEmptyString(value: unknown): value is string {
+  return typeof value === "string" && value.trim() !== "";
+}
+
+function toSection(raw: RawSection | undefined, key: string, file: string): SectionConfig {
+  if (!raw || typeof raw !== "object") throw new Error(`${file}: missing section "${key}"`);
+  const { title, subject, repos } = raw;
+  if (!nonEmptyString(title)) throw new Error(`${file}: ${key}.title must be a non-empty string`);
+  if (!nonEmptyString(subject)) throw new Error(`${file}: ${key}.subject must be a non-empty string`);
+  if (!Array.isArray(repos) || repos.length === 0) {
+    throw new Error(`${file}: ${key}.repos must be a non-empty list`);
+  }
+  const entries: RawRepoEntry[] = repos;
+  entries.forEach((e, i) => {
+    if (!nonEmptyString(e?.id) || !nonEmptyString(e.repo) || !nonEmptyString(e.name)) {
+      throw new Error(`${file}: ${key}.repos[${i}] needs id, repo and name`);
+    }
+  });
+  return { title: title.trim(), subject: subject.trim(), repos: entries.map(toRepoConfig) };
+}
+
 export function loadConfig(configPath = "config.yml"): RadarConfig {
   const resolved = path.resolve(configPath);
+  if (!fs.existsSync(resolved)) throw new Error(`${configPath} not found`);
 
-  if (!fs.existsSync(resolved)) {
-    console.log(`[config] ${configPath} not found — using built-in defaults.`);
-    return { agents: DEFAULT_AGENTS, skillsRepo: DEFAULT_SKILLS_REPO, infraRepos: DEFAULT_INFRA_REPOS };
-  }
+  const raw = (yaml.load(fs.readFileSync(resolved, "utf-8")) ?? {}) as RawConfig;
 
-  const raw = yaml.load(fs.readFileSync(resolved, "utf-8")) as RawConfig;
+  const sections = Object.fromEntries(
+    SECTION_KEYS.map((key) => [key, toSection(raw[key], key, configPath)]),
+  ) as Record<SectionKey, SectionConfig>;
+  if (!nonEmptyString(raw.skills_repo))
+    throw new Error(`${configPath}: skills_repo must be a non-empty string`);
+  const skillsRepo = raw.skills_repo.trim();
 
-  const agents =
-    Array.isArray(raw?.agents) && raw.agents.length > 0 ? raw.agents.map(toRepoConfig) : DEFAULT_AGENTS;
+  const counts = SECTION_KEYS.map((key) => `${sections[key].repos.length} ${key}`).join(", ");
+  console.log(`[config] Loaded from ${configPath}: ${counts}`);
 
-  const skillsRepo =
-    typeof raw?.skills_repo === "string" && raw.skills_repo.trim()
-      ? raw.skills_repo.trim()
-      : DEFAULT_SKILLS_REPO;
-
-  const infraRepos =
-    Array.isArray(raw?.infra_repos) && raw.infra_repos.length > 0
-      ? raw.infra_repos.map(toRepoConfig)
-      : DEFAULT_INFRA_REPOS;
-
-  console.log(
-    `[config] Loaded from ${configPath}: ` + `${agents.length} agents, ${infraRepos.length} infra repos`,
-  );
-
-  return { agents, skillsRepo, infraRepos };
+  return { ...sections, skillsRepo };
 }

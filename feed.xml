@@ -6,7 +6,7 @@
     <description>Daily AI ecosystem digest</description>
     <language>en</language>
     <atom:link href="https://dboeter.github.io/daily-diff/feed.xml" rel="self" type="application/rss+xml"/>
-    <lastBuildDate>Sat, 10 Oct 2026 01:57:58 +0000</lastBuildDate>
+    <lastBuildDate>Sat, 10 Oct 2026 22:27:12 +0000</lastBuildDate>
     <item>
       <title>AI Agents Digest 2026-10-10</title>
       <link>https://dboeter.github.io/daily-diff/#2026-10-10/ai-agents</link>
@@ -2749,7 +2749,7 @@
 ]]></content:encoded>
     </item>
     <item>
-      <title>Hugging Face Trending Models Weekly 2026-10-05</title>
+      <title>Hugging Face Trending Models 2026-10-05</title>
       <link>https://dboeter.github.io/daily-diff/#2026-10-05/ai-hf</link>
       <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-10-05/ai-hf</guid>
       <pubDate>Mon, 05 Oct 2026 00:00:00 +0000</pubDate>
