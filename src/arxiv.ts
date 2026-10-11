@@ -407,7 +407,7 @@ export function saveArxivState(state: ArxivState): void {
  *
  * Not a fixed window from the run time: arXiv announces Sun–Thu at 20:00 ET,
  * each batch holding submissions up to 14:00 ET the day before, so the newest
- * paper the 22:37 UTC run can see is already 28–76 h old. The old 48 h window
+ * paper the nightly run can see is already more than a day old. The old 48 h window
  * skipped the Tuesday report every week, never showed the Thursday–Friday batch,
  * and clipped every other batch. Taking everything submitted after the newest
  * paper the previous run saw shows each batch exactly once.

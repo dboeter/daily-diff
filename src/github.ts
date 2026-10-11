@@ -434,8 +434,8 @@ const CLOSE_BATCH = 10;
  * The retained day is derived from the newest digest issue that is actually
  * open, not from today's date: when a run fails, yesterday's reports stay up
  * rather than the repo being left with nothing open. Dates are compared as CST
- * days so that one run's issues — created just before 23:00 UTC — group
- * together the way the digests/YYYY-MM-DD folders do.
+ * days so that one run's issues group together the way the digests/YYYY-MM-DD
+ * folders do; a run, around 02:00 UTC, never straddles CST midnight (16:00 UTC).
  *
  * The full open list is collected before anything is closed. Closing shifts
  * pagination, so interleaving the two skips items.
