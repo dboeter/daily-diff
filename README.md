@@ -97,7 +97,7 @@ You can then ask OpenClaw things like:
 ```bash
 cd mcp
 pnpm install
-wrangler deploy
+pnpm run deploy   # not `pnpm deploy`: that is pnpm's own workspace command
 ```
 
 ## Tracked sources
