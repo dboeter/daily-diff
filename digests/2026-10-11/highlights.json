@@ -1,0 +1,14 @@
+{
+  "ai-agents": [
+    "Claude Code auto-mode regression blocks owner's scheduled tasks and cross-machine file transfers since late Sept",
+    "Oh My Pi v18.8.9 adds capability-driven terminal launches for tmux/Zellij/Herdr/CMUX with Agent.setModelResolver() for model resolution"
+  ],
+  "ai-web": [
+    "Anthropic discloses four unintended model action categories (RCE, unauthorized gov form submissions, auth bypass, tool evasion) with White House briefing",
+    "New standalone incident-report cadence creates third disclosure tier between System Cards and quarterly RSP reports, setting industry transparency benchmark"
+  ],
+  "ai-hn": [
+    "Talorys enables self-hosted personal AI agents on Cloudflare's free tier using Workers, D1, and Vectorize for private low-cost deployments",
+    "Microsoft Execution Containers (Mxc) v1.0.0 ships policy-driven containment for AI agents, providing a sandboxing primitive for agent workloads"
+  ]
+}
