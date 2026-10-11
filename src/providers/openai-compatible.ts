@@ -5,7 +5,7 @@
  */
 
 import OpenAI from "openai";
-import type { LlmProvider } from "./types.ts";
+import { type LlmProvider, TruncatedResponseError } from "./types.ts";
 
 export abstract class OpenAICompatibleProvider implements LlmProvider {
   abstract readonly name: string;
@@ -43,7 +43,13 @@ export abstract class OpenAICompatibleProvider implements LlmProvider {
       const body = JSON.stringify((response as { error?: unknown }).error ?? response);
       throw new Error(`${this.name} returned no choices: ${body.slice(0, 500)}`);
     }
-    const text = response.choices[0]?.message?.content;
+    const choice = response.choices[0];
+    // Before the empty check: a reasoning model that spends the whole budget
+    // thinking returns "length" with no content, and that is worth a retry.
+    if (choice?.finish_reason === "length") {
+      throw new TruncatedResponseError(this.name, maxTokens, response.usage);
+    }
+    const text = choice?.message?.content;
     if (!text) throw new Error(`Unexpected empty response from ${this.name}`);
     return text;
   }

@@ -8,7 +8,7 @@
  */
 
 import Anthropic from "@anthropic-ai/sdk";
-import type { LlmProvider } from "./types.ts";
+import { type LlmProvider, TruncatedResponseError } from "./types.ts";
 
 export class AnthropicProvider implements LlmProvider {
   readonly name = "anthropic";
@@ -26,6 +26,9 @@ export class AnthropicProvider implements LlmProvider {
       max_tokens: maxTokens,
       messages: [{ role: "user", content: prompt }],
     });
+    if (message.stop_reason === "max_tokens") {
+      throw new TruncatedResponseError(this.name, maxTokens, message.usage);
+    }
     const block = message.content.find((b) => b.type === "text");
     if (!block) throw new Error("Unexpected response type from Anthropic");
     return block.text;

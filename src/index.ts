@@ -503,7 +503,7 @@ async function main(): Promise<void> {
   const attemptJson = async (prompt: string): Promise<ReportHighlights> => {
     for (let attempt = 1; attempt <= 2; attempt++) {
       try {
-        return parseLlmJson<ReportHighlights>(await callLlm(prompt, 2048));
+        return parseLlmJson<ReportHighlights>(await callLlm(prompt));
       } catch (err) {
         const tag = attempt < 2 ? "retrying" : "giving up";
         console.error(`  [highlights] attempt ${attempt} failed (${tag}): ${err}`);

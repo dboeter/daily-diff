@@ -7,6 +7,9 @@
  *   OPENROUTER_REASONING_EFFORT - optional reasoning effort (e.g. "low"). Without it a
  *                         reasoning model can spend the whole max_tokens budget on
  *                         reasoning and return empty content (finish_reason "length").
+ *                         Reasoning counts against max_tokens even at "low", so a long
+ *                         report can still be cut off; callLlm then retries once with
+ *                         double the budget (TruncatedResponseError).
  */
 
 import { OpenAICompatibleProvider } from "./openai-compatible.ts";

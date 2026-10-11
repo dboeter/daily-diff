@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import fs from "node:fs";
+import { TruncatedResponseError } from "../providers/index.ts";
 
 // ---------------------------------------------------------------------------
 // Mock provider — intercepts createProvider() so the module-level `provider`
@@ -268,12 +269,12 @@ describe("callLlm", () => {
     expect(mockCall).toHaveBeenCalledWith("hello", 2048);
   });
 
-  it("uses default maxTokens of 4096", async () => {
+  it("uses default maxTokens of 8192", async () => {
     mockCall.mockResolvedValueOnce("ok");
 
     await callLlm("prompt");
 
-    expect(mockCall).toHaveBeenCalledWith("prompt", 4096);
+    expect(mockCall).toHaveBeenCalledWith("prompt", 8192);
   });
 
   it("retries on 429 with exponential backoff", async () => {
@@ -331,6 +332,23 @@ describe("callLlm", () => {
 
     await expect(callLlm("prompt")).rejects.toThrow("server error");
     expect(mockCall).toHaveBeenCalledOnce();
+  });
+
+  it("retries a cut-off response once with double the budget", async () => {
+    mockCall.mockRejectedValueOnce(new TruncatedResponseError("mock", 6144));
+    mockCall.mockResolvedValueOnce("full report");
+
+    expect(await callLlm("prompt", 6144)).toBe("full report");
+    expect(mockCall.mock.calls.map((c) => c[1])).toEqual([6144, 12288]);
+    expect(llmStats).toEqual({ attempted: 1, failed: 0 });
+  });
+
+  it("fails after a second cut-off response", async () => {
+    mockCall.mockRejectedValue(new TruncatedResponseError("mock", 1024));
+
+    await expect(callLlm("prompt", 1024)).rejects.toBeInstanceOf(TruncatedResponseError);
+    expect(mockCall).toHaveBeenCalledTimes(2);
+    expect(llmStats).toEqual({ attempted: 1, failed: 1 });
   });
 
   it("does not leak concurrency slots on 429 retries", async () => {

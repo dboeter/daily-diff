@@ -7,6 +7,7 @@ import {
   QwenProvider,
   createProvider,
   VALID_PROVIDER_NAMES,
+  TruncatedResponseError,
   type LlmProvider,
 } from "../providers/index.ts";
 
@@ -191,6 +192,19 @@ describe("AnthropicProvider", () => {
     const p = new AnthropicProvider();
     await expect(p.call("prompt", 100)).rejects.toThrow("Unexpected response type from Anthropic");
   });
+
+  it("throws TruncatedResponseError when it stops at max_tokens, even with text", async () => {
+    const mockCreate = await getAnthropicMockCreate();
+    mockCreate.mockResolvedValueOnce({
+      content: [{ type: "text", text: "| row 1 |\n| row 2, cut" }],
+      stop_reason: "max_tokens",
+      usage: { output_tokens: 100 },
+    });
+
+    const err = await new AnthropicProvider().call("prompt", 100).catch((e: unknown) => e);
+    expect(err).toBeInstanceOf(TruncatedResponseError);
+    expect((err as TruncatedResponseError).maxTokens).toBe(100);
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -335,6 +349,30 @@ describe("OpenRouterProvider", () => {
 
     const p = new OpenRouterProvider({ apiKey: "k" });
     await expect(p.call("prompt", 100)).rejects.toThrow("Unexpected empty response from openrouter");
+  });
+
+  it("throws TruncatedResponseError on finish_reason length, even with content", async () => {
+    const mockCreate = await getOpenAIMockCreate();
+    mockCreate.mockResolvedValueOnce({
+      choices: [{ message: { content: "| row 1 |\n| row 2, cut" }, finish_reason: "length" }],
+      usage: { completion_tokens: 100, completion_tokens_details: { reasoning_tokens: 80 } },
+    });
+
+    const p = new OpenRouterProvider({ apiKey: "test-key" });
+    const err = await p.call("prompt", 100).catch((e: unknown) => e);
+    expect(err).toBeInstanceOf(TruncatedResponseError);
+    // The usage goes in the message, so the log shows how much went to reasoning.
+    expect(String(err)).toContain('"reasoning_tokens":80');
+  });
+
+  it("throws TruncatedResponseError, not the empty-response error, when reasoning used the whole budget", async () => {
+    const mockCreate = await getOpenAIMockCreate();
+    mockCreate.mockResolvedValueOnce({
+      choices: [{ message: { content: null }, finish_reason: "length" }],
+    });
+
+    const p = new OpenRouterProvider({ apiKey: "test-key" });
+    await expect(p.call("prompt", 100)).rejects.toBeInstanceOf(TruncatedResponseError);
   });
 
   it("throws the body's error when a 2xx response has no choices", async () => {

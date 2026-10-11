@@ -11,12 +11,17 @@ import { sleep } from "./date.ts";
 // LLM token budget constants
 // ---------------------------------------------------------------------------
 
-export const LLM_TOKENS_DEFAULT = 4096;
+// Ceilings, not targets: the prompts cap the length. They are high because the
+// daily run's free OpenRouter reasoning model spends part of max_tokens on
+// reasoning (on 2026-10-11 the HN report was cut off at the old 6144). 16384 is
+// the output cap of gpt-4o, the OpenAI and Copilot default; higher budgets would
+// make those providers reject the request.
+export const LLM_TOKENS_DEFAULT = 8192;
 /** Table-formatted listing reports (HN, ArXiv, HF, Community) need extra
  *  headroom for the multi-row tables plus 2-sentence summaries. */
-export const LLM_TOKENS_LISTING = 6144;
-export const LLM_TOKENS_WEB = 8192;
-import { type LlmProvider, createProvider } from "./providers/index.ts";
+export const LLM_TOKENS_LISTING = 16384;
+export const LLM_TOKENS_WEB = 16384;
+import { type LlmProvider, createProvider, TruncatedResponseError } from "./providers/index.ts";
 
 const provider: LlmProvider = createProvider();
 
@@ -200,12 +205,23 @@ export function isRetryable(err: unknown): boolean {
 
 export async function callLlm(prompt: string, maxTokens = LLM_TOKENS_DEFAULT): Promise<string> {
   llmStats.attempted++;
-  for (let attempt = 0; ; attempt++) {
+  let budget = maxTokens;
+  for (let attempt = 0; ;) {
     await acquireSlot();
     let released = false;
     try {
-      return await provider.call(prompt, maxTokens);
+      return await provider.call(prompt, budget);
     } catch (err) {
+      // A cut-off response gets one retry at double the budget, apart from the
+      // 429/connection ladder: a second cut-off fails the call rather than
+      // publishing a report that stops mid-table (HN, 2026-10-11).
+      if (err instanceof TruncatedResponseError && budget === maxTokens) {
+        releaseSlot();
+        released = true;
+        budget = maxTokens * 2;
+        console.error(`[llm] ${err.message} — retrying once with max_tokens=${budget}...`);
+        continue;
+      }
       const rateLimited = is429(err);
       const maxRetries = rateLimited ? MAX_RETRIES_429 : MAX_RETRIES_CONNECTION;
       if (attempt < maxRetries && isRetryable(err)) {
@@ -214,6 +230,7 @@ export async function callLlm(prompt: string, maxTokens = LLM_TOKENS_DEFAULT): P
         const wait = Math.min(RETRY_BASE_MS * 2 ** attempt, RETRY_MAX_MS);
         const reason = rateLimited ? "429" : "connection error";
         console.error(`[llm] ${reason} — retry ${attempt + 1}/${maxRetries} in ${wait / 1000}s...`);
+        attempt++;
         await sleep(wait);
         continue;
       }
