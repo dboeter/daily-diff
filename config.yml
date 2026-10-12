@@ -5,14 +5,14 @@
 # Every section is required: the run stops with an error instead of falling
 # back to a built-in list.
 #
-# agents and infra are report sections:
-#   title    report heading and GitHub issue title (date appended)
+# agents and infra are the two sections of the daily agents report:
+#   title    the section's heading in the report
 #   subject  what the projects are; the LLM prompt reads "You are a technical
 #            editor covering <subject>", and README.md shows it
 #   repos    the tracked repositories
 
 # ── Agents ────────────────────────────────────────────────────────────────────
-# One daily report. Each agent is covered by its stable releases, a few hot issues (high
+# The first section of the daily agents report. Each agent is covered by its stable releases, a few hot issues (high
 # engagement or a regression/security label) and news: HN, Anthropic/OpenAI and
 # GitHub Trending items that mention it. Issue and PR churn is not reported.
 # Each repo requires: id (slug), repo (owner/repo), name (display name).
@@ -21,7 +21,7 @@
 # name is a common word.
 
 agents:
-  title: AI Agents Digest
+  title: Coding Agents & Assistants
   subject: AI coding agents and personal AI assistants
   repos:
     - id: claude-code
@@ -75,12 +75,12 @@ agents:
 skills_repo: anthropics/skills
 
 # ── Infra ─────────────────────────────────────────────────────────────────────
-# Weekly ai-infra report: stable releases and hot issues of the last 7 days,
-# same pipeline as the agents report (no news matching). Until 2026-10-10 this
-# section tracked inference engines (vLLM, llama.cpp, Ollama…).
+# The second section of the daily agents report, same pipeline: stable releases,
+# hot issues and news. A weekly report of its own until October 2026. Until
+# 2026-10-10 this section tracked inference engines (vLLM, llama.cpp, Ollama…).
 
 infra:
-  title: Agent Tooling Weekly
+  title: Agent Tooling
   subject: AI agent tooling — agent sandboxes, terminal session multiplexers and context-management tools
   repos:
     - id: openshell

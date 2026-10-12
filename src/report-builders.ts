@@ -9,55 +9,78 @@ import type { TrendingReportData } from "./trending-rank.ts";
 import { STEALTH_SECTION, TRENDING_REPORT } from "./i18n.ts";
 
 // ---------------------------------------------------------------------------
-// Project digest (daily agents report, weekly infra report)
+// Project digest (daily agents report: the agents and infra config sections)
 // ---------------------------------------------------------------------------
+
+/** One config section's projects, under its own heading. */
+export interface ProjectGroup {
+  /** The section's `title` in config.yml, rendered as its `##` heading. */
+  title: string;
+  /** Every tracked project, active or not, in config order. */
+  activities: ProjectActivity[];
+  /** LLM output: overview plus one `## <Project>` section per active project. */
+  summary: string;
+}
 
 export interface ProjectReportInput {
   title: string;
   dateStr: string;
   utcStr: string;
-  /** Every tracked project, active or not, in config order. */
-  activities: ProjectActivity[];
-  /** LLM output: overview plus one section per active project. */
-  summary: string;
+  groups: ProjectGroup[];
   /** Label for the quiet-projects line, e.g. "today". */
   period: string;
-  /** Markdown rendered between the header and the summary, ending with its own separator. */
+  /** Markdown rendered between the header and the groups, ending with its own separator. */
   preamble?: string;
   footer: string;
 }
 
 /**
- * Release-focused report. Quiet projects are listed in one line at the end
- * rather than each getting a "no activity" section. Small enough to post as
- * the GitHub issue body unchanged, so there is no brief variant.
- *
- * Quiet is decided by the summary, not only the data: the model leaves out a
- * project whose only news mentions it in passing, and such a project is quiet
- * too. A summary with no project section at all is a failure notice, so then
- * the data decides.
+ * The projects in a group that count as quiet. Quiet is decided by the
+ * summary, not only the data: the model leaves out a project whose only news
+ * mentions it in passing, and such a project is quiet too. A summary with no
+ * project section at all is a failure notice, so then the data decides.
  */
-export function buildProjectReportContent(r: ProjectReportInput): string {
-  const releases = r.activities.reduce((n, a) => n + a.releases.length, 0);
-  const prereleases = r.activities.reduce((n, a) => n + a.prereleaseCount, 0);
-  const withData = r.activities.filter(hasActivity);
+function quietProjects(g: ProjectGroup): ProjectActivity[] {
+  const withData = g.activities.filter(hasActivity);
   // Line-anchored, so "## Pi pod" in a summary does not count as a Pi section.
   const covered = withData.filter((a) =>
-    new RegExp(`^##\\s+${escapeRegex(a.config.name)}\\s*$`, "m").test(r.summary),
+    new RegExp(`^##\\s+${escapeRegex(a.config.name)}\\s*$`, "m").test(g.summary),
   );
   const active = covered.length > 0 ? covered : withData;
-  const quiet = r.activities.filter((a) => !active.includes(a));
+  return g.activities.filter((a) => !active.includes(a));
+}
+
+/**
+ * Release-focused report, one `##` section per config group (coding agents,
+ * agent tooling), the LLM's sections nested below it. Quiet projects are
+ * listed in one line per group rather than each getting a "no activity"
+ * section. Small enough to post as the GitHub issue body unchanged, so there
+ * is no brief variant.
+ */
+export function buildProjectReportContent(r: ProjectReportInput): string {
+  const all = r.groups.flatMap((g) => g.activities);
+  const releases = all.reduce((n, a) => n + a.releases.length, 0);
+  const prereleases = all.reduce((n, a) => n + a.prereleaseCount, 0);
   const link = (a: ProjectActivity) => `[${a.config.name}](https://github.com/${a.config.repo})`;
+  let quietCount = 0;
+  const sections = r.groups.map((g) => {
+    const quiet = quietProjects(g);
+    quietCount += quiet.length;
+    return (
+      `## ${g.title}\n\n` +
+      nestHeadings(g.summary, 3) +
+      (quiet.length ? `\n\n**Quiet ${r.period}:** ${quiet.map(link).join(", ")}` : "")
+    );
+  });
 
   return (
     `# ${r.title} ${r.dateStr}\n\n` +
-    `> Generated: ${r.utcStr} UTC | Projects: ${r.activities.length} | ` +
-    `Active ${r.period}: ${r.activities.length - quiet.length} | ` +
+    `> Generated: ${r.utcStr} UTC | Projects: ${all.length} | ` +
+    `Active ${r.period}: ${all.length - quietCount} | ` +
     `Stable releases: ${releases} | Prereleases (not covered): ${prereleases}\n\n` +
     `---\n\n` +
     (r.preamble ?? "") +
-    r.summary +
-    (quiet.length ? `\n\n---\n\n**Quiet ${r.period}:** ${quiet.map(link).join(", ")}` : "") +
+    sections.join("\n\n---\n\n") +
     r.footer
   );
 }

@@ -9,7 +9,7 @@ import type { NewsItem } from "./agent-news.ts";
 // Types
 // ---------------------------------------------------------------------------
 
-/** One project's input to the release-focused digest (agents daily, infra weekly). */
+/** One project's input to the release-focused digest (agents and infra, daily). */
 export interface ProjectActivity {
   config: RepoConfig;
   /** Stable releases only, newest first. */
@@ -25,7 +25,7 @@ export interface ProjectActivity {
   news: NewsItem[];
 }
 
-/** Wording that differs between the daily agents and weekly infra digests. */
+/** Wording that differs between the agents and infra sections. */
 export interface DigestScope {
   /** What the projects are, e.g. "AI coding agents and personal AI assistants". */
   subject: string;

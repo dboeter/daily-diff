@@ -42,27 +42,32 @@ const stableRelease: GitHubRelease = {
 };
 
 describe("buildProjectReportContent", () => {
-  const input = {
-    title: "AI Agents Digest",
-    dateStr: "2026-10-04",
-    utcStr: "2026-10-03 22:50",
+  const agents = {
+    title: "Coding Agents",
     summary: "## Overview\nLLM_BODY",
-    period: "today",
-    footer: "FOOTER",
     activities: [
       makeActivity("alpha", { releases: [stableRelease], prereleaseCount: 2 }),
       makeActivity("beta", { prereleaseCount: 5 }),
       makeActivity("gamma"),
     ],
   };
+  const input = {
+    title: "AI Agents",
+    dateStr: "2026-10-04",
+    utcStr: "2026-10-03 22:50",
+    period: "today",
+    footer: "FOOTER",
+    groups: [agents],
+  };
+  const withAgents = (g: Partial<typeof agents>) => ({ ...input, groups: [{ ...agents, ...g }] });
 
-  it("renders title, counts, the LLM body and the footer", () => {
+  it("renders title, counts, the group heading, the LLM body and the footer", () => {
     const result = buildProjectReportContent(input);
-    expect(result).toContain("# AI Agents Digest 2026-10-04");
+    expect(result).toContain("# AI Agents 2026-10-04");
     expect(result).toContain(
       "Projects: 3 | Active today: 1 | Stable releases: 1 | Prereleases (not covered): 7",
     );
-    expect(result).toContain("LLM_BODY");
+    expect(result).toContain("## Coding Agents\n\n### Overview\nLLM_BODY");
     expect(result.endsWith("FOOTER")).toBe(true);
   });
 
@@ -76,11 +81,12 @@ describe("buildProjectReportContent", () => {
 
   it("counts a project the summary left out as quiet", () => {
     const news = [{ source: "GitHub Search", title: "works with BETA", url: "u", detail: "d" }];
-    const result = buildProjectReportContent({
-      ...input,
-      summary: "## Overview\nBODY\n\n## ALPHA\n- release\n\n## BETA pod\n- not BETA's section",
-      activities: [input.activities[0]!, makeActivity("beta", { news }), makeActivity("gamma")],
-    });
+    const result = buildProjectReportContent(
+      withAgents({
+        summary: "## Overview\nBODY\n\n## ALPHA\n- release\n\n## BETA pod\n- not BETA's section",
+        activities: [agents.activities[0]!, makeActivity("beta", { news }), makeActivity("gamma")],
+      }),
+    );
     expect(result).toContain("Active today: 1 |");
     expect(result).toContain(
       "**Quiet today:** [BETA](https://github.com/org/beta), [GAMMA](https://github.com/org/gamma)",
@@ -89,25 +95,41 @@ describe("buildProjectReportContent", () => {
 
   it("keeps projects with data active when the summary has no project section", () => {
     const news = [{ source: "Hacker News", title: "BETA 2.0", url: "u", detail: "d" }];
-    const result = buildProjectReportContent({
-      ...input,
-      summary: "Summary generation failed.",
-      activities: [input.activities[0]!, makeActivity("beta", { news }), makeActivity("gamma")],
-    });
+    const result = buildProjectReportContent(
+      withAgents({
+        summary: "Summary generation failed.",
+        activities: [agents.activities[0]!, makeActivity("beta", { news }), makeActivity("gamma")],
+      }),
+    );
     expect(result).toContain("Active today: 2 |");
     expect(result).toContain("**Quiet today:** [GAMMA](https://github.com/org/gamma)");
   });
 
   it("omits the quiet line when every project was active", () => {
-    const result = buildProjectReportContent({ ...input, activities: [input.activities[0]!] });
+    const result = buildProjectReportContent(withAgents({ activities: [agents.activities[0]!] }));
     expect(result).not.toContain("Quiet today");
   });
 
-  it("renders the preamble between the header and the LLM body", () => {
+  it("renders the preamble between the header and the groups", () => {
     const result = buildProjectReportContent({ ...input, preamble: "PREAMBLE\n\n---\n\n" });
-    expect(result).toMatch(
-      /Prereleases \(not covered\): 7\n\n---\n\nPREAMBLE\n\n---\n\n## Overview\nLLM_BODY/,
-    );
+    expect(result).toMatch(/Prereleases \(not covered\): 7\n\n---\n\nPREAMBLE\n\n---\n\n## Coding Agents\n/);
+  });
+
+  it("renders each group under its own heading with its own quiet line; the header counts all", () => {
+    const tooling = {
+      title: "Agent Tooling",
+      summary: "## Overview\nTOOLS\n\n## DELTA\n- release",
+      activities: [makeActivity("delta", { releases: [stableRelease] }), makeActivity("eps")],
+    };
+    const result = buildProjectReportContent({ ...input, groups: [agents, tooling] });
+    expect(result).toContain("Projects: 5 | Active today: 2 | Stable releases: 2 |");
+    const agentsAt = result.indexOf("## Coding Agents\n");
+    const toolingAt = result.indexOf("## Agent Tooling\n");
+    expect(agentsAt).toBeGreaterThan(-1);
+    expect(toolingAt).toBeGreaterThan(agentsAt);
+    expect(result.indexOf("[GAMMA]")).toBeLessThan(toolingAt);
+    expect(result.slice(toolingAt)).toContain("### DELTA\n- release");
+    expect(result.slice(toolingAt)).toContain("**Quiet today:** [EPS](https://github.com/org/eps)");
   });
 });
 

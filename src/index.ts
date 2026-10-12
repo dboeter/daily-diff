@@ -158,12 +158,9 @@ async function fetchAllData(
   stealthModels: OpenRouterStealthModel[] | null;
 }> {
   const daySince = new Date(now.getTime() - DAY_MS);
-  const weekSince = new Date(now.getTime() - 7 * DAY_MS);
   console.log(
-    `  Tracking daily: ${AGENTS.map((r) => r.id).join(", ")}, web, hn, arxiv, trending (news only)` +
-      (weekly
-        ? ` | weekly: ${INFRA_REPOS.map((r) => r.id).join(", ")}, skills, trending, hf, devto, lobsters`
-        : ""),
+    `  Tracking daily: ${[...AGENTS, ...INFRA_REPOS].map((r) => r.id).join(", ")}, web, hn, arxiv, trending (news only)` +
+      (weekly ? " | weekly: skills, trending, hf, devto, lobsters" : ""),
   );
 
   const noSkills = { prs: [] as GitHubItem[], issues: [] as GitHubItem[] };
@@ -182,9 +179,7 @@ async function fetchAllData(
     stealthModels,
   ] = await Promise.all([
     Promise.all(AGENTS.map((cfg) => fetchProject(cfg, daySince))),
-    weekly
-      ? Promise.all(INFRA_REPOS.map((cfg) => fetchProject(cfg, weekSince)))
-      : Promise.resolve<ProjectFetch[]>([]),
+    Promise.all(INFRA_REPOS.map((cfg) => fetchProject(cfg, daySince))),
     weekly
       ? fetchSkillsData(CLAUDE_SKILLS_REPO)
           .then((d) => {
@@ -277,16 +272,11 @@ function sectionScope(key: SectionKey): DigestScope {
 }
 
 /** One LLM call over every active project; a fixed notice when none was active. */
-function summarizeProjects(
-  id: SectionKey,
-  activities: ProjectActivity[],
-  dateStr: string,
-  noActivityMsg: string,
-): Promise<string> {
+function summarizeProjects(id: SectionKey, activities: ProjectActivity[], dateStr: string): Promise<string> {
   const active = activities.filter(hasActivity);
   if (!active.length) {
     console.log(`  [${id}] No releases, hot issues or news, skipping LLM call`);
-    return Promise.resolve(noActivityMsg);
+    return Promise.resolve(MSG.projectsNoActivity);
   }
   return summarize(
     id,
@@ -317,8 +307,8 @@ async function generateSummaries(
   const report = trendingData.report;
   const rows = report ? summaryRows(report) : [];
   const [agentsSummary, infraSummary, skillsSummary, trendingSummaries, trendingProse] = await Promise.all([
-    summarizeProjects("agents", agentActivities, dateStr, MSG.agentsNoActivity),
-    weekly ? summarizeProjects("infra", infraActivities, dateStr, MSG.infraNoActivity) : Promise.resolve(""),
+    summarizeProjects("agents", agentActivities, dateStr),
+    summarizeProjects("infra", infraActivities, dateStr),
     weekly
       ? summarize(
           "claude-code-skills",
@@ -396,14 +386,15 @@ async function main(): Promise<void> {
   } = await fetchAllData(now, webState, weekly);
 
   // Agent news is matched against the other sources' data, so it waits for them.
-  const agentNews = matchAgentNews(AGENTS, { hn: hnData, web: webResults, trending: trendingData });
-  const agentActivities: ProjectActivity[] = agentFetches.map((f) => ({
-    ...f,
-    news: agentNews.get(f.config.id) ?? [],
-  }));
-  // Infra is reported on releases and hot issues alone: the news sources are
-  // daily snapshots.
-  const infraActivities: ProjectActivity[] = infraFetches.map((f) => ({ ...f, news: [] }));
+  // Agents and tooling in one pass: an item naming 3+ of them is a compatibility list.
+  const agentNews = matchAgentNews([...AGENTS, ...INFRA_REPOS], {
+    hn: hnData,
+    web: webResults,
+    trending: trendingData,
+  });
+  const withNews = (f: ProjectFetch): ProjectActivity => ({ ...f, news: agentNews.get(f.config.id) ?? [] });
+  const agentActivities = agentFetches.map(withNews);
+  const infraActivities = infraFetches.map(withNews);
 
   // 2. Generate every report body
   console.log("  Generating summaries...");
@@ -416,42 +407,29 @@ async function main(): Promise<void> {
     weekly,
   );
 
-  // First gate. On a daily run only the agents call has happened by now, below
-  // LLM_MIN_SAMPLES, so this only arms on the weekly run (5 calls: agents, infra,
-  // skills, trending summaries, trending prose); the second gate, after the
+  // First gate. On a daily run at most the agents and infra calls have happened
+  // by now, below LLM_MIN_SAMPLES, so this only arms on the weekly run (5 calls:
+  // agents, infra, skills, trending summaries, trending prose); the second gate, after the
   // savers, covers every run. Bailing here costs nothing — no file has been
   // written yet.
   assertLlmHealthy("summary");
 
   // 3. Build + save all reports
-  const ft = autoGenFooter();
+  // The infra section is a group in the agents report since October 2026.
   const agentsContent = buildProjectReportContent({
     title: REPORTS["ai-agents"].name,
     dateStr,
     utcStr,
-    activities: agentActivities,
-    summary: summaries.agentsSummary,
+    groups: [
+      { title: CONFIG.agents.title, activities: agentActivities, summary: summaries.agentsSummary },
+      { title: CONFIG.infra.title, activities: infraActivities, summary: summaries.infraSummary },
+    ],
     period: PROJECT_REPORTS.agents.period,
     preamble: buildStealthSection(stealthModels),
-    footer: ft,
+    footer: autoGenFooter(),
   });
   console.log(`  Saved ${saveFile(agentsContent, dateStr, "ai-agents.md")}`);
-
-  let infraContent = "";
-  if (weekly) {
-    infraContent = buildProjectReportContent({
-      title: REPORTS["ai-infra"].name,
-      dateStr,
-      utcStr,
-      activities: infraActivities,
-      summary: summaries.infraSummary,
-      period: PROJECT_REPORTS.infra.period,
-      footer: ft,
-    });
-    console.log(`  Saved ${saveFile(infraContent, dateStr, "ai-infra.md")}`);
-  } else {
-    console.log("  [weekly] Infra, trending, community and HF reports — not scheduled today, skipping.");
-  }
+  if (!weekly) console.log("  [weekly] Trending, community and HF reports — not scheduled today, skipping.");
 
   await Promise.all([
     saveWebReport(webResults, webState, utcStr, dateStr, digestRepo),
@@ -528,7 +506,7 @@ async function main(): Promise<void> {
   const highlightsPath = saveFile(JSON.stringify(highlights, null, 2), dateStr, "highlights.json");
   console.log(`  Saved ${highlightsPath}`);
 
-  // 5. Create GitHub issues for agents (+ infra on the weekly run)
+  // 5. Create the GitHub issue for agents
   if (digestRepo) {
     const agentsUrl = await createGitHubIssue(
       reportIssueTitle("ai-agents", dateStr),
@@ -536,15 +514,6 @@ async function main(): Promise<void> {
       ISSUE_LABELS.agents,
     );
     console.log(`  Created agents issue: ${agentsUrl}`);
-
-    if (weekly) {
-      const infraUrl = await createGitHubIssue(
-        reportIssueTitle("ai-infra", dateStr),
-        infraContent,
-        ISSUE_LABELS.infra,
-      );
-      console.log(`  Created infra issue: ${infraUrl}`);
-    }
   }
 
   reportLlmHealth();

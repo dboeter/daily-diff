@@ -9,8 +9,7 @@ import type { SectionKey } from "./config.ts";
 // ---------------------------------------------------------------------------
 
 export const MSG = {
-  agentsNoActivity: "No stable releases, hot issues or news mentions today.",
-  infraNoActivity: "No stable releases or hot issues this week.",
+  projectsNoActivity: "No stable releases, hot issues or news mentions today.",
   summaryFailed: "⚠️ Summary generation failed.",
   skillsFailed: "⚠️ Skills summary generation failed.",
   trendingFailed: "⚠️ Trending report generation failed.",
@@ -29,7 +28,6 @@ export const MSG = {
  */
 export const REPORTS = {
   "ai-agents": { emoji: "🤖", name: "AI Agents" },
-  "ai-infra": { emoji: "⚙️", name: "Agent Tooling" },
   "ai-web": { emoji: "🌐", name: "Lab Announcements" },
   "ai-trending": { emoji: "📈", name: "Agent & AI Coding Trends" },
   "ai-hn": { emoji: "💬", name: "AI Discussions" },
@@ -56,10 +54,9 @@ export const reportIssueTitle = (id: ReportId, dateStr: string) =>
 export const PROJECT_REPORTS = {
   // Replaced the separate CLI and OpenClaw-ecosystem reports in October 2026.
   agents: { window: "last 24h", period: "today" },
-  // Weekly since October 2026 (see WEEKLY_REPORT_WEEKDAY in date.ts). Covers
-  // agent tooling since 2026-10-10; the "AI Infrastructure" archive labels in
-  // REPORT_LABELS stay because older ai-infra files cover inference engines.
-  infra: { window: "last 7 days", period: "this week" },
+  // A group in the agents report since October 2026; a weekly report of its
+  // own before that, which mostly listed quiet projects.
+  infra: { window: "last 24h", period: "today" },
 } as const satisfies Record<SectionKey, { window: string; period: string }>;
 
 export const WEB_REPORT = {
@@ -118,7 +115,6 @@ export const STEALTH_SECTION = {
 
 export const ISSUE_LABELS = {
   agents: "agents",
-  infra: "infra",
   web: "web",
   trending: "trending",
   hn: "hn",
@@ -143,6 +139,9 @@ export const FOOTER = {
 
 export const REPORT_LABELS: Record<string, string> = {
   ...Object.fromEntries(LIVE_REPORT_IDS.map((id) => [id, REPORTS[id].name])),
+  // Weekly until October 2026, then folded into ai-agents. The older files
+  // cover inference engines, hence the label.
+  "ai-infra": "AI Infrastructure Digest",
   // No longer generated (October 2026: ai-cli merged into ai-agents, ai-ph
   // dropped); kept so archived reports keep a title.
   "ai-cli": "AI CLI Tools Digest",

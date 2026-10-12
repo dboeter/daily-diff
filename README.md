@@ -115,7 +115,7 @@ Agents with none of these are listed in one "Quiet today" line.
 <!-- tracked:agents -->
 <!-- generated from config.yml: edit config.yml, then run pnpm readme -->
 
-**AI Agents Digest**: AI coding agents and personal AI assistants.
+**Coding Agents & Assistants**: AI coding agents and personal AI assistants.
 
 | Project          | Repository                                                                      |
 | ---------------- | ------------------------------------------------------------------------------- |
@@ -141,7 +141,7 @@ The `infra` section of `config.yml`, in a weekly report (`ai-infra`) on the same
 <!-- tracked:infra -->
 <!-- generated from config.yml: edit config.yml, then run pnpm readme -->
 
-**Agent Tooling Weekly**: AI agent tooling — agent sandboxes, terminal session multiplexers and context-management tools.
+**Agent Tooling**: AI agent tooling — agent sandboxes, terminal session multiplexers and context-management tools.
 
 | Project      | Repository                                                              |
 | ------------ | ----------------------------------------------------------------------- |

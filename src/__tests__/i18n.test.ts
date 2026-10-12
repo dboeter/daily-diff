@@ -56,7 +56,6 @@ describe("dynamic content helpers", () => {
 describe("ISSUE_LABELS", () => {
   it("maps report types to label names", () => {
     expect(ISSUE_LABELS.agents).toBe("agents");
-    expect(ISSUE_LABELS.infra).toBe("infra");
     expect(ISSUE_LABELS.trending).toBe("trending");
     expect(ISSUE_LABELS.hn).toBe("hn");
   });
