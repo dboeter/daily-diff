@@ -17,7 +17,7 @@ import { sleep } from "./date.ts";
 // the output cap of gpt-4o, the OpenAI and Copilot default; higher budgets would
 // make those providers reject the request.
 export const LLM_TOKENS_DEFAULT = 8192;
-/** Table-formatted listing reports (HN, ArXiv, HF, Community) need extra
+/** Table-formatted listing reports (discussions, ArXiv, HF) need extra
  *  headroom for the multi-row tables plus 2-sentence summaries. */
 export const LLM_TOKENS_LISTING = 16384;
 export const LLM_TOKENS_WEB = 16384;

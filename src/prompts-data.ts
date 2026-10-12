@@ -236,31 +236,42 @@ Rules:
 - At most ${maxPerReport} highlights per report, each at most ${HIGHLIGHT_MAX_CHARS} characters`;
 }
 
-export function buildHnPrompt(data: HnData, dateStr: string): string {
-  const storiesText = data.stories
-    .map(
-      (s, i) =>
-        `${i + 1}. **${s.title}**\n` +
-        `   Link: ${s.url}\n` +
-        `   Discussion: ${s.hnUrl}\n` +
-        `   HN Rank: ${s.hnRank ?? i + 1} | Score: ${s.points} | Comments: ${s.comments} | Author: ${s.author} | Time: ${s.createdAt.slice(0, 16)}`,
-    )
-    .join("\n\n");
+/** The discussions report's sources. Dev.to and Lobste.rs are fetched on the weekly run only. */
+export interface DiscussionsData {
+  hn: HnData;
+  devto: DevtoData;
+  lobsters: LobstersData;
+}
 
-  return `You are an AI industry news analyst. The following are AI-related posts from the current Hacker News topstories feed as of ${dateStr} (ordered by HN rank, ${data.stories.length} total). You have only each story's title, link and counts — not the article and not the comment thread:
+/**
+ * The discussions report: Hacker News daily, plus Dev.to and Lobste.rs on the
+ * weekly run — one report since October 2026, when the weekly community
+ * report was folded in. A source that failed or was not fetched gets neither
+ * input nor section.
+ */
+export function buildDiscussionsPrompt(data: DiscussionsData, dateStr: string): string {
+  const { hn, devto, lobsters } = data;
+  const hasHn = hn.fetchSuccess && hn.stories.length > 0;
+  const hasDevto = devto.fetchSuccess && devto.articles.length > 0;
+  const hasLobsters = lobsters.fetchSuccess && lobsters.stories.length > 0;
+  const weekly = hasDevto || hasLobsters;
 
----
-
-${storiesText}
-
----
-
-Write the report in English with these sections. ${NO_TITLE_RULE}
-
-## ${SECTIONS.highlights}
-3-5 sentences on the hottest AI topics on HN today, judged by score and comment count.
-
-## Top Stories
+  const inputs: string[] = [];
+  const sections: string[] = [];
+  if (hasHn || !weekly) {
+    inputs.push(
+      `## Hacker News (current topstories feed, ${hn.stories.length} AI stories, ordered by HN rank)\n\n` +
+        hn.stories
+          .map(
+            (s, i) =>
+              `${i + 1}. **${s.title}**\n` +
+              `   Link: ${s.url}\n` +
+              `   Discussion: ${s.hnUrl}\n` +
+              `   HN Rank: ${s.hnRank ?? i + 1} | Score: ${s.points} | Comments: ${s.comments} | Author: ${s.author} | Time: ${s.createdAt.slice(0, 16)}`,
+          )
+          .join("\n\n"),
+    );
+    sections.push(`## Hacker News
 Organized by category: a \`### <category>\` heading per category, each followed by a **Markdown table** with exactly these columns:
 
    | Title | Score | Comments | Summary |
@@ -275,15 +286,79 @@ Organized by category: a \`### <category>\` heading per category, each followed 
    - 🔬 Models & Research (new model releases, papers, benchmarks)
    - 🛠️ Tools & Engineering (open-source projects, frameworks, engineering practices)
    - 🏢 Industry News (company news, funding, product launches)
-   - 💬 Opinions & Debates (notable Ask HN, Show HN, or hot discussion threads)
+   - 💬 Opinions & Debates (notable Ask HN, Show HN, or hot discussion threads)`);
+  }
+  if (hasDevto) {
+    inputs.push(
+      `## Dev.to (top AI articles of the week, ${devto.articles.length} articles)\n\n` +
+        devto.articles
+          .map(
+            (a, i) =>
+              `${i + 1}. **${a.title}**\n` +
+              `   Link: ${a.url}\n` +
+              `   Author: ${a.user} | Reactions: ${a.positiveReactionsCount} | Comments: ${a.commentsCount} | Reading: ${a.readingTimeMinutes} min\n` +
+              `   Tags: ${a.tags.join(", ")}\n` +
+              `   ${a.description}`,
+          )
+          .join("\n\n"),
+    );
+    sections.push(`## Dev.to
+The 5-10 most valuable articles as a **Markdown table**:
+
+   | Article | Reactions | Comments | Summary |
+   | :--- | ---: | ---: | :--- |
+
+   - **Article**: title as a Markdown link
+   - **Reactions / Comments**: copy the numbers from the input verbatim
+   - **Summary**: 2 sentences — the key takeaway for developers`);
+  }
+  if (hasLobsters) {
+    inputs.push(
+      `## Lobste.rs (AI/ML stories of the last 7 days, ${lobsters.stories.length} stories)\n\n` +
+        lobsters.stories
+          .map(
+            (s, i) =>
+              `${i + 1}. **${s.title}**\n` +
+              `   Link: ${s.url}\n` +
+              `   Discussion: ${s.commentsUrl}\n` +
+              `   Score: ${s.score} | Comments: ${s.commentCount} | Author: ${s.author} | Tags: ${s.tags.join(", ")}`,
+          )
+          .join("\n\n"),
+    );
+    sections.push(`## Lobste.rs
+The 3-8 most notable stories as a **Markdown table**:
+
+   | Story | Score | Comments | Summary |
+   | :--- | ---: | ---: | :--- |
+
+   - **Story**: title as a Markdown link, followed by " · [discuss](discussion-url)"
+   - **Score / Comments**: copy the numbers from the input verbatim
+   - **Summary**: 2 sentences — why it's worth reading`);
+  }
+
+  const when = weekly ? "today on Hacker News and this week on Dev.to and Lobste.rs" : "today on Hacker News";
+  return `You are an AI industry news analyst. The following are AI-related posts from developer communities as of ${dateStr}. You have only each item's title, link, counts and (for Dev.to) description — not the article and not the comment thread:
+
+---
+
+${inputs.join("\n\n---\n\n")}
+
+---
+
+Write the report in English with these sections. ${NO_TITLE_RULE}
+
+## ${SECTIONS.highlights}
+3-5 sentences on the hottest AI topics ${when}, judged by score and comment count.
+
+${sections.join("\n\n")}
 
 ## ${SECTIONS.signals}
-100-200 words on today's HN AI focus, from the titles and counts alone:
+100-200 words on what developers are discussing, from the titles and counts alone:
    - Which topics are most active (high score + high comments)?
-   - Which stories draw far more comments than points — a sign of a contested topic?
+   - Which stories draw far more comments than points — a sign of a contested topic?${weekly ? "\n   - Practical concerns, tutorials or patterns that recur across the communities" : ""}
 
 ## ${SECTIONS.worthALook}
-2-3 pieces most worth developers/researchers reading in depth, with brief reasoning.
+2-3 pieces most worth reading in depth, with brief reasoning.
 
 Style: English, concise and professional, preserve all original links.
 `;
@@ -409,89 +484,5 @@ Organized by category: a \`### <category>\` heading per category, each followed 
 2-3 models most worth trying or studying, with reasoning.
 
 Style: English, concise and professional, preserve all HuggingFace links.
-`;
-}
-
-// ---------------------------------------------------------------------------
-// Community prompt (Dev.to + Lobste.rs combined)
-// ---------------------------------------------------------------------------
-
-export function buildCommunityPrompt(devto: DevtoData, lobsters: LobstersData, dateStr: string): string {
-  const devtoText =
-    devto.articles.length > 0
-      ? devto.articles
-          .map(
-            (a, i) =>
-              `${i + 1}. **${a.title}**\n` +
-              `   Link: ${a.url}\n` +
-              `   Author: ${a.user} | Reactions: ${a.positiveReactionsCount} | Comments: ${a.commentsCount} | Reading: ${a.readingTimeMinutes} min\n` +
-              `   Tags: ${a.tags.join(", ")}\n` +
-              `   ${a.description}`,
-          )
-          .join("\n\n")
-      : "(No Dev.to articles available)";
-
-  const lobstersText =
-    lobsters.stories.length > 0
-      ? lobsters.stories
-          .map(
-            (s, i) =>
-              `${i + 1}. **${s.title}**\n` +
-              `   Link: ${s.url}\n` +
-              `   Discussion: ${s.commentsUrl}\n` +
-              `   Score: ${s.score} | Comments: ${s.commentCount} | Author: ${s.author} | Tags: ${s.tags.join(", ")}`,
-          )
-          .join("\n\n")
-      : "(No Lobste.rs stories available)";
-
-  return `You are a tech community analyst. The following are this week's top AI-related content from Dev.to and Lobste.rs (week ending ${dateStr}):
-
-## Dev.to Articles (${devto.articles.length} articles)
-
-${devtoText}
-
----
-
-## Lobste.rs Stories (${lobsters.stories.length} stories)
-
-${lobstersText}
-
----
-
-Write the report in English with these sections. ${NO_TITLE_RULE}
-
-## ${SECTIONS.highlights}
-3-5 sentences on the most discussed AI topics across these communities this week.
-
-## Dev.to
-The 5-10 most valuable articles as a **Markdown table**:
-
-   | Article | Reactions | Comments | Summary |
-   | :--- | ---: | ---: | :--- |
-
-   - **Article**: title as a Markdown link
-   - **Reactions / Comments**: copy the numbers from the input verbatim
-   - **Summary**: 2 sentences — the key takeaway for developers
-
-## Lobste.rs
-The 3-8 most notable stories as a **Markdown table**:
-
-   | Story | Score | Comments | Summary |
-   | :--- | ---: | ---: | :--- |
-
-   - **Story**: title as a Markdown link, followed by " · [discuss](discussion-url)"
-   - **Score / Comments**: copy the numbers from the input verbatim
-   - **Summary**: 2 sentences — why it's worth reading
-
-## ${SECTIONS.signals}
-100-200 words on what these communities are talking about:
-   - Common themes across both platforms
-   - Practical concerns developers have about AI tools
-   - Emerging tutorials, patterns, or best practices
-
-## ${SECTIONS.worthALook}
-2-3 articles or stories most worth reading in depth.
-
-Style: English, concise and developer-friendly, preserve all original links.
 `;
 }

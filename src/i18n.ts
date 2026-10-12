@@ -33,7 +33,6 @@ export const REPORTS = {
   "ai-hn": { emoji: "💬", name: "AI Discussions" },
   "ai-arxiv": { emoji: "📚", name: "AI Research" },
   "ai-hf": { emoji: "🧠", name: "AI Models" },
-  "ai-community": { emoji: "🗣️", name: "Tech Community" },
 } as const satisfies Record<string, { emoji: string; name: string }>;
 
 export type ReportId = keyof typeof REPORTS;
@@ -120,7 +119,6 @@ export const ISSUE_LABELS = {
   hn: "hn",
   arxiv: "arxiv",
   hf: "hf",
-  community: "community",
 } as const;
 
 // ---------------------------------------------------------------------------
@@ -142,6 +140,8 @@ export const REPORT_LABELS: Record<string, string> = {
   // Weekly until October 2026, then folded into ai-agents. The older files
   // cover inference engines, hence the label.
   "ai-infra": "AI Infrastructure Digest",
+  // Weekly until October 2026, then folded into the discussions report (ai-hn).
+  "ai-community": "Tech Community AI Digest",
   // No longer generated (October 2026: ai-cli merged into ai-agents, ai-ph
   // dropped); kept so archived reports keep a title.
   "ai-cli": "AI CLI Tools Digest",

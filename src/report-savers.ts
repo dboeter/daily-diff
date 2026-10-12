@@ -6,15 +6,14 @@
 import { WEB_REPORT, TRENDING_REPORT, ISSUE_LABELS, reportHeading, reportIssueTitle } from "./i18n.ts";
 import {
   buildWebReportPrompt,
-  buildHnPrompt,
+  buildDiscussionsPrompt,
   buildArxivPrompt,
   buildHfPrompt,
-  buildCommunityPrompt,
+  type DiscussionsData,
 } from "./prompts-data.ts";
 import { callLlm, saveFile, autoGenFooter, LLM_TOKENS_WEB, LLM_TOKENS_LISTING } from "./report.ts";
 import { createGitHubIssue } from "./github.ts";
 import { saveWebState, type WebFetchResult, type WebState } from "./web.ts";
-import type { HnData } from "./hn.ts";
 import type { TrendingData } from "./trending.ts";
 import { saveClassifyCache, saveMatchState } from "./trending-jev.ts";
 import { saveStarHistory } from "./trending-rank.ts";
@@ -27,8 +26,6 @@ import {
 } from "./report-builders.ts";
 import { saveArxivState, type ArxivData } from "./arxiv.ts";
 import type { HfData } from "./hf.ts";
-import type { DevtoData } from "./devto.ts";
-import type { LobstersData } from "./lobsters.ts";
 
 // ---------------------------------------------------------------------------
 // Web report
@@ -141,43 +138,46 @@ export async function saveTrendingReport(
 }
 
 // ---------------------------------------------------------------------------
-// Hacker News report
+// Discussions report (Hacker News daily; Dev.to + Lobste.rs on the weekly run)
 // ---------------------------------------------------------------------------
 
-export async function saveHnReport(
-  hnData: HnData,
+export async function saveDiscussionsReport(
+  data: DiscussionsData,
   utcStr: string,
   dateStr: string,
   digestRepo: string,
 ): Promise<void> {
-  if (!hnData.fetchSuccess) {
-    console.log("  [hn] No data available, skipping report.");
+  const { hn, devto, lobsters } = data;
+  const sources = [
+    hn.fetchSuccess && `[Hacker News](https://news.ycombinator.com/) (${hn.stories.length} stories)`,
+    devto.fetchSuccess && `[Dev.to](https://dev.to/) (${devto.articles.length} articles)`,
+    lobsters.fetchSuccess && `[Lobste.rs](https://lobste.rs/) (${lobsters.stories.length} stories)`,
+  ].filter(Boolean);
+  if (sources.length === 0) {
+    console.log("  [discussions] No data available, skipping report.");
     return;
   }
 
-  console.log("  [hn] Calling LLM for HN report...");
+  console.log("  [discussions] Calling LLM for discussions report...");
   try {
-    const summary = stripModelTitle(await callLlm(buildHnPrompt(hnData, dateStr), LLM_TOKENS_LISTING));
+    const summary = stripModelTitle(await callLlm(buildDiscussionsPrompt(data, dateStr), LLM_TOKENS_LISTING));
 
     const fileName = "ai-hn.md";
     const header =
       `${reportHeading("ai-hn", dateStr)}\n\n` +
-      `> Source: [Hacker News](https://news.ycombinator.com/) | ` +
-      `${hnData.stories.length} stories | Generated: ${utcStr} UTC\n\n` +
+      `> Sources: ${sources.join(" + ")} | Generated: ${utcStr} UTC\n\n` +
       `---\n\n`;
 
-    const hnContent = header + summary + autoGenFooter();
+    const content = header + summary + autoGenFooter();
 
-    console.log(`  Saved ${saveFile(hnContent, dateStr, fileName)}`);
+    console.log(`  Saved ${saveFile(content, dateStr, fileName)}`);
 
     if (digestRepo) {
-      const hnTitle = reportIssueTitle("ai-hn", dateStr);
-      const hnLabel = ISSUE_LABELS.hn;
-      const hnUrl = await createGitHubIssue(hnTitle, hnContent, hnLabel);
-      console.log(`  Created HN issue: ${hnUrl}`);
+      const url = await createGitHubIssue(reportIssueTitle("ai-hn", dateStr), content, ISSUE_LABELS.hn);
+      console.log(`  Created discussions issue: ${url}`);
     }
   } catch (err) {
-    console.error(`  [hn] Report generation failed: ${err}`);
+    console.error(`  [discussions] Report generation failed: ${err}`);
   }
 }
 
@@ -268,51 +268,5 @@ export async function saveHfReport(
     }
   } catch (err) {
     console.error(`  [hf] Report generation failed: ${err}`);
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Community report (Dev.to + Lobste.rs)
-// ---------------------------------------------------------------------------
-
-export async function saveCommunityReport(
-  devtoData: DevtoData,
-  lobstersData: LobstersData,
-  utcStr: string,
-  dateStr: string,
-  digestRepo: string,
-): Promise<void> {
-  const hasData = devtoData.fetchSuccess || lobstersData.fetchSuccess;
-  if (!hasData) {
-    console.log("  [community] No data available, skipping report.");
-    return;
-  }
-
-  console.log("  [community] Calling LLM for community report...");
-  try {
-    const summary = stripModelTitle(
-      await callLlm(buildCommunityPrompt(devtoData, lobstersData, dateStr), LLM_TOKENS_LISTING),
-    );
-    const devtoCount = devtoData.articles.length;
-    const lobstersCount = lobstersData.stories.length;
-
-    const fileName = "ai-community.md";
-    const header =
-      `${reportHeading("ai-community", dateStr)}\n\n` +
-      `> Sources: [Dev.to](https://dev.to/) (${devtoCount} articles) + [Lobste.rs](https://lobste.rs/) (${lobstersCount} stories) | Generated: ${utcStr} UTC\n\n` +
-      `---\n\n`;
-
-    const content = header + summary + autoGenFooter();
-
-    console.log(`  Saved ${saveFile(content, dateStr, fileName)}`);
-
-    if (digestRepo) {
-      const title = reportIssueTitle("ai-community", dateStr);
-      const label = ISSUE_LABELS.community;
-      const url = await createGitHubIssue(title, content, label);
-      console.log(`  Created community issue: ${url}`);
-    }
-  } catch (err) {
-    console.error(`  [community] Report generation failed: ${err}`);
   }
 }

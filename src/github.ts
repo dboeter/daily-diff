@@ -343,7 +343,6 @@ const LABEL_COLORS: Record<string, string> = {
   hn: "ff6600",
   arxiv: "b31b1b",
   hf: "ff9d00",
-  community: "2563eb",
 };
 
 /**
@@ -383,10 +382,13 @@ const DIGEST_ISSUE_LABELS = new Set([
   "openclaw-en",
   "ph",
   "ph-en",
-  // Folded into the agents report in October 2026. Not weekly any more, so an
-  // open infra issue falls in the daily group and is closed by the next run.
+  // Folded into the agents and discussions reports in October 2026. Not weekly
+  // any more, so an open issue falls in the daily group and is closed by the
+  // next run.
   "infra",
   "infra-en",
+  "community",
+  "community-en",
   "weekly",
   "weekly-en",
   "monthly",
@@ -409,11 +411,7 @@ function isDigestIssue(i: OpenIssue): boolean {
  * Labels of the reports that run weekly (see WEEKLY_REPORT_WEEKDAY in date.ts).
  * The one list of weekly reports: index.ts derives its report IDs from it.
  */
-export const WEEKLY_ISSUE_LABELS = new Set<string>([
-  ISSUE_LABELS.trending,
-  ISSUE_LABELS.community,
-  ISSUE_LABELS.hf,
-]);
+export const WEEKLY_ISSUE_LABELS = new Set<string>([ISSUE_LABELS.trending, ISSUE_LABELS.hf]);
 
 /**
  * Daily issues are retained as one group; each weekly report is its own group,

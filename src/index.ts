@@ -56,10 +56,9 @@ import { summaryRows } from "./trending-rank.ts";
 import {
   saveWebReport,
   saveTrendingReport,
-  saveHnReport,
+  saveDiscussionsReport,
   saveArxivReport,
   saveHfReport,
-  saveCommunityReport,
 } from "./report-savers.ts";
 import { loadWebState, fetchSiteContent, type WebFetchResult, type WebState } from "./web.ts";
 import { fetchTrendingData, EMPTY_NPM, EMPTY_OPENROUTER, type TrendingData } from "./trending.ts";
@@ -429,11 +428,17 @@ async function main(): Promise<void> {
     footer: autoGenFooter(),
   });
   console.log(`  Saved ${saveFile(agentsContent, dateStr, "ai-agents.md")}`);
-  if (!weekly) console.log("  [weekly] Trending, community and HF reports — not scheduled today, skipping.");
+  if (!weekly)
+    console.log("  [weekly] Trending and HF reports, Dev.to and Lobste.rs — not scheduled today, skipping.");
 
   await Promise.all([
     saveWebReport(webResults, webState, utcStr, dateStr, digestRepo),
-    saveHnReport(hnData, utcStr, dateStr, digestRepo),
+    saveDiscussionsReport(
+      { hn: hnData, devto: devtoData, lobsters: lobstersData },
+      utcStr,
+      dateStr,
+      digestRepo,
+    ),
     saveArxivReport(arxivData, utcStr, dateStr, digestRepo),
     ...(weekly
       ? [
@@ -445,7 +450,6 @@ async function main(): Promise<void> {
             dateStr,
             digestRepo,
           ),
-          saveCommunityReport(devtoData, lobstersData, utcStr, dateStr, digestRepo),
           saveHfReport(hfData, utcStr, dateStr, digestRepo),
         ]
       : []),

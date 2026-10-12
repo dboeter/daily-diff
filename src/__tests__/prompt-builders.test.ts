@@ -10,16 +10,17 @@ import {
   buildTrendingSummariesPrompt,
   buildTrendingProsePrompt,
   buildWebReportPrompt,
-  buildHnPrompt,
+  buildDiscussionsPrompt,
   buildArxivPrompt,
   buildHfPrompt,
-  buildCommunityPrompt,
 } from "../prompts-data.ts";
 import { TRENDING_TABLES_MARKER } from "../report-builders.ts";
 import { SECTIONS, TRENDING_REPORT } from "../i18n.ts";
 import type { RepoConfig, GitHubItem, GitHubRelease } from "../github.ts";
 import { EMPTY_NPM, EMPTY_OPENROUTER, type TrendingData } from "../trending.ts";
 import type { HnData } from "../hn.ts";
+import type { DevtoData } from "../devto.ts";
+import type { LobstersData } from "../lobsters.ts";
 import type { WebFetchResult } from "../web.ts";
 
 // ---------------------------------------------------------------------------
@@ -305,7 +306,12 @@ describe("buildWebReportPrompt", () => {
 // buildHnPrompt
 // ---------------------------------------------------------------------------
 
-describe("buildHnPrompt", () => {
+const noDevto: DevtoData = { articles: [], fetchSuccess: false };
+const noLobsters: LobstersData = { stories: [], fetchSuccess: false };
+const buildHnPrompt = (hn: HnData, dateStr: string) =>
+  buildDiscussionsPrompt({ hn, devto: noDevto, lobsters: noLobsters }, dateStr);
+
+describe("buildDiscussionsPrompt", () => {
   it("includes stories with metadata", () => {
     const data: HnData = {
       stories: [
@@ -351,6 +357,38 @@ describe("buildHnPrompt", () => {
     expect(result).toContain("Hacker News");
   });
 
+  it("asks for Dev.to and Lobste.rs only when the weekly run fetched them", () => {
+    const daily = buildHnPrompt({ stories: [], fetchSuccess: true }, "2026-10-12");
+    expect(daily).toContain("## Hacker News\n");
+    expect(daily).not.toMatch(/## Dev\.to|## Lobste\.rs/);
+
+    const devto: DevtoData = {
+      fetchSuccess: true,
+      articles: [
+        {
+          id: 1,
+          title: "MCP lesson",
+          url: "https://dev.to/a/mcp",
+          description: "d",
+          user: "u",
+          positiveReactionsCount: 78,
+          commentsCount: 85,
+          readingTimeMinutes: 5,
+          tags: ["ai"],
+          publishedAt: "2026-10-10T00:00:00Z",
+        },
+      ],
+    };
+    const weekly = buildDiscussionsPrompt(
+      { hn: { stories: [], fetchSuccess: false }, devto, lobsters: noLobsters },
+      "2026-10-12",
+    );
+    expect(weekly).toContain("MCP lesson");
+    expect(weekly).toContain("## Dev.to\n");
+    expect(weekly).not.toContain("## Hacker News\n");
+    expect(weekly).not.toContain("## Lobste.rs\n");
+  });
+
   it("does not ask for comment-thread content the model never sees", () => {
     const result = buildHnPrompt({ stories: [], fetchSuccess: true }, "2026-10-06");
     expect(result).toContain("not the article and not the comment thread");
@@ -371,9 +409,12 @@ describe("listing report layout", () => {
     hn: buildHnPrompt({ stories: [], fetchSuccess: true }, "2026-10-12"),
     arxiv: buildArxivPrompt({ papers: [], fetchSuccess: true, rankedBy: "recency" }, "2026-10-12"),
     hf: buildHfPrompt({ models: [], fetchSuccess: true }, "2026-10-12"),
-    community: buildCommunityPrompt(
-      { articles: [], fetchSuccess: true },
-      { stories: [], fetchSuccess: true },
+    weekly: buildDiscussionsPrompt(
+      {
+        hn: { stories: [], fetchSuccess: true },
+        devto: { articles: [], fetchSuccess: true },
+        lobsters: { stories: [], fetchSuccess: true },
+      },
       "2026-10-12",
     ),
     web: buildWebReportPrompt(web, "2026-10-12"),
@@ -386,7 +427,7 @@ describe("listing report layout", () => {
     expect(p.indexOf(`## ${SECTIONS.signals}\n`)).toBeGreaterThan(h);
   });
 
-  it.each(["hn", "arxiv", "hf", "community"])("%s: ends with Worth a Look", (id) => {
+  it.each(["hn", "arxiv", "hf", "weekly"])("%s: ends with Worth a Look", (id) => {
     const p = prompts[id]!;
     expect(p.indexOf(`## ${SECTIONS.worthALook}\n`)).toBeGreaterThan(p.indexOf(`## ${SECTIONS.signals}\n`));
   });
