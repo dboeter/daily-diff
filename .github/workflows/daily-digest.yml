@@ -2,16 +2,20 @@ name: Daily Diff
 
 on:
   schedule:
-    # 22:37 UTC daily = 06:37 CST (UTC+8) the next day. A ~20 min run started
-    # then lands the digest around 07:00 CST, which is when it is expected.
+    # The digest is wanted by 05:00 Amsterdam time, but GitHub creates this
+    # workflow's scheduled runs 2.5–4 h late: 2h32m–3h50m on every run from
+    # 2026-09-29 to 10-11, when the cron was 22:37 UTC. So the cron is set at
+    # 01:07, which lands the start around 03:40–05:00. If the delay changes,
+    # move the cron, not the timezone. GitHub applies Amsterdam's DST itself.
+    # Report dates and the Monday weekly run are CST, the same calendar day
+    # as Amsterdam at that hour.
     #
     # The minute is deliberately off the hour. GitHub queues scheduled runs and
     # drops them under load, and the :00 slot is the most contended one. At
-    # "0 23 * * *" this workflow degraded badly in August 2026: the 08-26 run
-    # was dispatched 5h07m late and the 08-27 run was never created at all.
-    # qwen-flash has flat pricing, so moving the slot costs nothing (it would
-    # have, under DeepSeek's peak/off-peak scheme).
-    - cron: "37 22 * * *"
+    # "0 23 * * *" (UTC) this workflow degraded badly in August 2026: the 08-26
+    # run was dispatched 5h07m late and the 08-27 run was never created at all.
+    - cron: "7 1 * * *"
+      timezone: "Europe/Amsterdam"
   workflow_dispatch:
     inputs:
       force_weekly:

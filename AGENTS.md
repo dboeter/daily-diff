@@ -2,7 +2,7 @@
 
 ## Project overview
 
-Daily Diff is a daily digest generator for the AI open-source ecosystem. A GitHub Actions cron job runs at 22:37 UTC (06:37 CST next day) and produces English reports, published as GitHub Issues and committed Markdown files. Most reports are daily; a weekly set runs on Mondays (CST).
+Daily Diff is a daily digest generator for the AI open-source ecosystem. A GitHub Actions cron job is set for 01:07 Europe/Amsterdam (GitHub starts it 2.5–4 h late, so the digest lands by about 05:00 Amsterdam time) and produces English reports, published as GitHub Issues and committed Markdown files. Most reports are daily; a weekly set runs on Mondays (CST).
 
 ## Commands
 
@@ -29,19 +29,11 @@ export LLM_PROVIDER=anthropic   # anthropic | openai | github-copilot | openrout
 # Anthropic (default)
 export ANTHROPIC_API_KEY=sk-ant-xxxxx
 
-# OpenAI
-# export OPENAI_API_KEY=sk-xxxxx
-
-# GitHub Copilot — uses GITHUB_TOKEN
-
 # OpenRouter
 # export OPENROUTER_API_KEY=sk-or-xxxxx
 
 # DeepSeek
 # export DEEPSEEK_API_KEY=sk-xxxxx
-
-# Qwen (Alibaba Model Studio)
-# export DASHSCOPE_API_KEY=sk-xxxxx
 
 # Jev: ArXiv relevance ranking, trending scope and cross-source matching
 # (omit: ArXiv ranks by recency, trending falls back to search topic labels)
@@ -124,7 +116,7 @@ Weekly = on `WEEKLY_REPORT_WEEKDAY` (Monday, CST) or when `DIGEST_FORCE_WEEKLY=1
 - **Infra** (weekly): `infra.repos` in `config.yml` — agent tooling since 2026-10-10 (sandbox, session multiplexers, context tool). Until then the section tracked inference engines (vllm, sglang, llama-cpp, ollama, litellm, unsloth); the `ai-infra` id, `infra` label and "AI Infrastructure" archive label stay, and the report title comes from `infra.title`.
 - **CLAUDE_SKILLS_REPO** (weekly, in `ai-trending`): anthropics/skills — no date filter, sorted by popularity
 - **Web**: anthropic.com + openai.com via sitemap, state in `digests/web-state.json`
-- **Trending**: github.com/trending (HTML) + GitHub Search API over 6 agent topics (`SEARCH_TOPICS`: `coding-agent`, `agentic-coding`, `ai-coding`, `agent-harness`, `harness`, `agent-orchestration`). Fetched daily for agent news (top 15 pushed in 7 days per topic); the report is weekly and scrapes `since=weekly` that day. The weekly run searches each topic twice, 100 per page: repos _created_ in 14 days with 25+ stars, and every repo pushed in 7 days with 100+ stars (up to 3 pages) — 16 requests, 565 unique repos on 2026-10-07. Sorted by total stars, the pushed query alone was an all-time leaderboard, top 15 per topic; `ai-agent` and `multi-agent` were dropped that day (stock bots, slide generators, RAG apps). It also adds OpenRouter and npm; with the new repos these feed an "Agent & Coding Tool Radar" section aimed at spotting new agents.
+- **Trending**: github.com/trending (HTML) + GitHub Search API over 6 agent topics (`SEARCH_TOPICS`: `coding-agent`, `agentic-coding`, `ai-coding`, `agent-harness`, `harness`, `agent-orchestration`). Fetched daily for agent news (top 15 pushed in 7 days per topic); the report is weekly and scrapes `since=weekly` that day. The weekly run searches each topic twice, 100 per page: repos _created_ in 14 days with 25+ stars, and every repo pushed in 7 days with 100+ stars (up to 3 pages) — 16 requests, 565 unique repos on 2026-10-07. Sorted by total stars, the pushed query alone was an all-time leaderboard, top 15 per topic; `ai-agent` and `multi-agent` were dropped that day (stock bots, slide generators, RAG apps). It also adds OpenRouter and npm; with the new repos these feed an "Agent & Coding Tool Radar" section of standalone agents and coding tools worth watching.
   - **Code renders the tables** (`composeTrendingReport`, `src/trending-rank.ts`); the LLM writes only a 2-sentence summary per numbered row (`N: text` lines) and the prose around the tables, which it marks with `<!-- tables -->`. A missing summary line shows the description, truncated; a missing marker puts the tables after the prose. The old single prompt chose scope, category, order and 🆕 itself, and topic-search repos had no momentum figure at all.
   - GitHub rows are sorted by the stars gained in the last 7 days, from the first source that has it: the trending page's weekly gain, the delta against the star-history point from exactly 7 days ago, every star of a repo created less than 7 days ago, else `GET /repos/{o}/{r}/stargazers/history` (`fetchWeeklyStarGain`), else none (sorted after the rest, by total stars). The relative gain is the gain over the stars a week ago, only when that baseline is 100+ (`RELATIVE_MIN_BASELINE`), else 8 → 16 stars reads as +100%. Cells read `12,345 (+812, +7.1%)`.
   - The star history API returns weekly buckets of daily star counts that sum to `stargazers_count`, so the gain is exact; `per_page=2` covers 7 days from any weekday. `composeTrendingReport` asks it only for rows still without a gain that could reach the report (established repos in scope, new repos with 25+ stars that pass `onRadar`), so it classifies before it fetches: a verdict is saved, a gain is not. Calls run one at a time (the endpoint answers 422 when "spammed"), stop at the first 403/422/429, and are capped at 500 (`MAX_STAR_HISTORY_CALLS`): the Actions `GITHUB_TOKEN` allows 1,000 core requests an hour per repository and the rest of the run makes ~60–80. The stargazer list endpoints no longer work (REST 404, GraphQL empty, 2026-10-07).
@@ -139,7 +131,7 @@ Weekly = on `WEEKLY_REPORT_WEEKDAY` (Monday, CST) or when `DIGEST_FORCE_WEEKLY=1
   - **npm** uses the `downloads.weekly`/`monthly` already in the registry search response (the downloads API rejects scoped packages in bulk). Counts are gameable and the keywords match plugins/MCP servers too; the prompt tells the LLM to filter those.
 - **Stealth models** (daily, top of `ai-agents`): `isStealthModel` matches a `stealth/` id prefix, or a description saying "cloaked"/"anonymous"/"stealth" … "model", in the official `/api/v1/models` catalog. `buildStealthSection` (`src/report-builders.ts`) renders it deterministically — not by the LLM — via the `preamble` of `buildProjectReportContent`. It always appears: 🆕 = listed within 2 days, ⏳ = `expiration_date` within 3 days, and "catalog unavailable" is distinct from "none listed". If the cron is ever moved back onto a stealth model, a ⏳ on that row means `OPENROUTER_MODEL` needs replacing.
 - **HN**: Firebase API (`/v0/topstories.json`) — scans top 500 stories in batches of 50, filters for AI keywords, top 30 by points. The model sees titles and counts only, so the prompt forbids describing comment threads; before 2026-10-06 it asked for "the community's typical reaction" and every summary made one up.
-- **ArXiv**: ArXiv API (Atom XML) — cs.AI, cs.CL, cs.LG sorted by submission date, paged 300 at a time (max 4 pages per category) back to the newest paper the previous run saw — `digests/arxiv-state.json`, written only once the report is saved, committed like `web-state.json`; a same-day re-run reuses the previous cutoff, and with no state it falls back to 48h — then ranked by relevance with TypeSafe's Jev (`POST api.typesafe.ai/v1/systemone`, one request per paper, `TYPESAFE_API_KEY`); the request asks five atomic questions — how central LLMs are (score, 0–2: a paper can be partly about LLMs, which a noul near 0.5 can't express), and nouls for agents/tool use/code, proposes a technique, works without training, results on widely used models — and `relevanceOf` weighs them in code: 0.5 LLM centrality, 0.2 agents, 0.1 widely used models, 0.1 for technique × without training (the second only means something when there is a technique) with 0.1 more for a code link in the abstract (`hasCodeLink`, a regex) — TypeSafe's composite-scoring pattern. The topic nouls alone left about one paper in six tied near the top score; the other three spread that group out. The raw answers for the top 100 papers and the model version go to `digests/YYYY-MM-DD/arxiv-ranking.json` (one paper per line, ~30 KB), so a misranked paper can be traced and the weights retuned without rerunning Jev; it is not a report and is not in `REPORT_FILES`; the top 40 go to the prompt with full abstracts. Jev is not a chat model, so it bypasses `callLlm` and `llmStats`. No key, or more than half the scoring calls failing, falls back to the 40 most recent. The state replaced a fixed 48h window from the run time: arXiv announces Sun–Thu at 20:00 ET with submissions up to 14:00 ET the day before, so the 22:37 UTC run only sees papers 28–76h old. The window skipped the Tuesday (CST) report every week, never showed the Thursday–Friday batch, and clipped the first ~4.5h of every other batch. There is still no ArXiv report on Sunday and Monday (CST): arXiv announces nothing new before those runs. Before October 2026 the report took the newest 50, a few hours of submissions.
+- **ArXiv**: ArXiv API (Atom XML) — cs.AI, cs.CL, cs.LG sorted by submission date, paged 300 at a time (max 4 pages per category) back to the newest paper the previous run saw — `digests/arxiv-state.json`, written only once the report is saved, committed like `web-state.json`; a same-day re-run reuses the previous cutoff, and with no state it falls back to 48h — then ranked by relevance with TypeSafe's Jev (`POST api.typesafe.ai/v1/systemone`, one request per paper, `TYPESAFE_API_KEY`); the request asks five atomic questions — how central LLMs are (score, 0–2: a paper can be partly about LLMs, which a noul near 0.5 can't express), and nouls for agents/tool use/code, proposes a technique, works without training, results on widely used models — and `relevanceOf` weighs them in code: 0.5 LLM centrality, 0.2 agents, 0.1 widely used models, 0.1 for technique × without training (the second only means something when there is a technique) with 0.1 more for a code link in the abstract (`hasCodeLink`, a regex) — TypeSafe's composite-scoring pattern. The topic nouls alone left about one paper in six tied near the top score; the other three spread that group out. The raw answers for the top 100 papers and the model version go to `digests/YYYY-MM-DD/arxiv-ranking.json` (one paper per line, ~30 KB), so a misranked paper can be traced and the weights retuned without rerunning Jev; it is not a report and is not in `REPORT_FILES`; the top 40 go to the prompt with full abstracts. Jev is not a chat model, so it bypasses `callLlm` and `llmStats`. No key, or more than half the scoring calls failing, falls back to the 40 most recent. The state replaced a fixed 48h window from the run time: arXiv announces Sun–Thu at 20:00 ET with submissions up to 14:00 ET the day before, so the nightly run only sees papers more than a day old. The window skipped the Tuesday (CST) report every week, never showed the Thursday–Friday batch, and clipped the first ~4.5h of every other batch. There is still no ArXiv report on days when arXiv announced nothing since the previous run: Sunday and Monday (CST) with the cron at 22:37 UTC; the 2026-10-11 move to 01:07 Amsterdam time can shift those days. Before October 2026 the report took the newest 50, a few hours of submissions.
 - **Community** (weekly): Dev.to (5 AI tags, top of the week) + Lobste.rs (`/t/ai.json`, `/t/ml.json`, last 7 days) — technical articles and community discussions
 - **HF**: Hugging Face Hub trending models — **weekly**. The Hub list is ranked by cumulative downloads and 90.5% of a day's models carried over from the previous day, so daily generation was re-summarizing the same table.
 
@@ -197,3 +189,17 @@ Weekly = on `WEEKLY_REPORT_WEEKDAY` (Monday, CST) or when `DIGEST_FORCE_WEEKLY=1
 7. Add the report ID and label to `REPORT_LABELS` in `src/i18n.ts` (the sidebar and MCP server get it via `manifest.json`).
 8. Add the report file name to `REPORT_FILES` in `src/generate-manifest.ts`.
 9. Update README.md and this file.
+
+## Agent skills
+
+### Issue tracker
+
+Work issues live as local markdown under `.scratch/<feature>/` (GitHub Issues are reserved for the published digests). See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+The five default role strings (`needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`), recorded as a `Status:` line in each issue file. See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context: `GLOSSARY.md` and `docs/adr/` at the repo root, created lazily. See `docs/agents/domain.md`.

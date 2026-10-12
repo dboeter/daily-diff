@@ -1,6 +1,6 @@
 # Daily Diff
 
-A GitHub Actions workflow that runs every morning at 06:37 CST. It aggregates AI ecosystem signals from 11 data sources, then publishes English digests as GitHub Issues and committed Markdown files: a daily set (agents, Hacker News, ArXiv, official web content) and a weekly set on Mondays (infrastructure, trending, community, Hugging Face).
+A GitHub Actions workflow that runs every night, landing the digest by about 05:00 Amsterdam time. It aggregates AI ecosystem signals from 11 data sources, then publishes English digests as GitHub Issues and committed Markdown files: a daily set (agents, Hacker News, ArXiv, official web content) and a weekly set on Mondays (infrastructure, trending, community, Hugging Face).
 
 ### Data Sources
 
@@ -163,7 +163,7 @@ The `infra` section of `config.yml`, in a weekly report (`ai-infra`) on the same
 
 Code builds the tables, not the LLM. The category tables hold established repos and alternate between the biggest star gains this week and the biggest relative gains (repos that had at least 100 stars a week ago and gained at least 50), so a fast-growing smaller repo shows next to the big movers. The weekly gain is GitHub's own count for repos on the trending page, otherwise the difference from last week's count in `digests/trending-state.json`. Repos missing from last week's count get it from GitHub's [star history API](https://docs.github.com/en/rest/activity/starring#get-repository-star-history), one request each, at most 500 per run. [Jev](https://typesafe.ai) decides whether each item is in scope and which category it lands in (coding agents / harnesses & frameworks / multi-agent & orchestration / agent tooling / other agents), and whether it is an agent itself rather than a plugin or MCP server. Each item is judged once: the verdicts are saved in `digests/trending-classifications.json` and reused every week, unless the item's description changes. Without a `TYPESAFE_API_KEY` the repo's search topic decides instead for items not judged before, and a trending repo that no agent topic search returned is left out. Each category shows at most 8 repos.
 
-OpenRouter, npm and the new-repo search feed an **Agent & Coding Tool Radar** table aimed at spotting new agents and agentic coding tools early. New tools come first (🆕: listed on OpenRouter in the last 14 days or ranked this week but not this month, npm downloads at 3x the monthly rate, or a GitHub repo created in the last 14 days with at least 25 stars), but they take at most 8 of the 12 rows, so the week's established leaders still show. Rows that share a GitHub repo or a website become one row, and Jev matches an OpenRouter app to its npm package or GitHub repo. Each match is decided once and saved in `digests/trending-matches.json`, which you can edit by hand.
+OpenRouter, npm and the new-repo search feed an **Agent & Coding Tool Radar** table of standalone agents and coding tools worth watching. New tools come first (🆕: listed on OpenRouter in the last 14 days or ranked this week but not this month, npm downloads at 3x the monthly rate, or a GitHub repo created in the last 14 days with at least 25 stars), but they take at most 8 of the 12 rows, so the week's established leaders still show. Rows that share a GitHub repo or a website become one row, and Jev matches an OpenRouter app to its npm package or GitHub repo. Each match is decided once and saved in `digests/trending-matches.json`, which you can edit by hand.
 
 The LLM writes a two-sentence summary for each row and the prose sections around the tables: highlights, trend signals, community hot spots and model usage. The report ends with a Claude Code Skills section: [anthropics/skills](https://github.com/anthropics/skills) PRs and issues, fetched without a date filter and sorted by popularity.
 
@@ -408,13 +408,15 @@ Weekly and monthly rollup reports were discontinued in July 2026; past ones rema
 
 ## Schedule
 
-| Workflow     | Cron          | UTC         | CST            |
-| ------------ | ------------- | ----------- | -------------- |
-| Daily digest | `37 22 * * *` | 22:37 daily | 06:37 next day |
+| Workflow     | Cron        | Time zone          | Expected start |
+| ------------ | ----------- | ------------------ | -------------- |
+| Daily digest | `7 1 * * *` | `Europe/Amsterdam` | 03:40–05:00    |
 
-To change the schedule, edit the cron expression in `.github/workflows/daily-digest.yml`.
+To change the schedule, edit the cron expression in `.github/workflows/daily-digest.yml`. GitHub applies the time zone's daylight saving time itself.
 
-GitHub's scheduled runs are queued, not guaranteed — typical delay for this workflow is 10-15 minutes, so a 06:37 CST start lands the digest around 07:00 CST. The minute is off the hour on purpose: the `:00` slot is the most contended, and while this workflow sat at `0 23 * * *` the delays degraded from minutes to hours (the 2026-08-26 run was dispatched 5h07m late, and the 2026-08-27 run was never created at all).
+GitHub's scheduled runs are queued, not guaranteed. From 2026-09-29 to 10-11, with the cron at 22:37 UTC, every run of this workflow started 2h32m–3h50m late, so the cron is set about 4 hours before the digest is wanted (05:00 Amsterdam time). If the delay changes, move the cron. The minute is off the hour on purpose: the `:00` slot is the most contended, and while this workflow sat at `0 23 * * *` (UTC) the delays degraded from minutes to hours (the 2026-08-26 run was dispatched 5h07m late, and the 2026-08-27 run was never created at all).
+
+Report dates (`digests/YYYY-MM-DD`) and the Monday weekly run use CST (UTC+8), which at that hour is the same calendar day as Amsterdam.
 
 When a scheduled run is late enough that you dispatch a catch-up run manually, the two would otherwise both build the same day's digest and open a duplicate set of issues. Two guards prevent that: a `concurrency: daily-digest` group serializes overlapping runs, and a `guard` job skips any **scheduled** run whose `digests/YYYY-MM-DD` folder (CST date) is already committed. Manual `workflow_dispatch` runs always proceed, so you can still force a regeneration.
 
