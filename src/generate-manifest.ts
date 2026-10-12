@@ -1,7 +1,7 @@
 import fs from "fs";
 import path from "path";
 import { marked } from "marked";
-import { REPORT_LABELS } from "./i18n.ts";
+import { LIVE_REPORT_IDS, REPORT_LABELS } from "./i18n.ts";
 
 const DIGESTS_DIR = "digests";
 const MANIFEST_PATH = "manifest.json";
@@ -9,22 +9,19 @@ const FEED_PATH = "feed.xml";
 const SITE_URL = "https://dboeter.github.io/daily-diff";
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 const REPORT_FILES = [
-  "ai-agents",
+  // Live reports, in REPORTS (reading) order: the sidebar lists them this way.
+  ...LIVE_REPORT_IDS,
+  // No longer generated — listed only so archived reports stay reachable from
+  // the sidebar and RSS feed. October 2026: ai-cli merged into ai-agents, ai-ph
+  // dropped, ai-infra folded into ai-agents, ai-community into ai-hn; the
+  // rollups were removed earlier.
   "ai-infra",
-  "ai-web",
-  "ai-trending",
-  "ai-hn",
-  "ai-arxiv",
-  "ai-hf",
   "ai-community",
-  // No longer generated (October 2026: ai-cli merged into ai-agents, ai-ph
-  // dropped; rollups removed earlier) — listed only so archived reports stay
-  // reachable from the sidebar and RSS feed.
   "ai-cli",
   "ai-ph",
   "ai-weekly",
   "ai-monthly",
-] as const;
+];
 const MAX_FEED_ITEMS = 30;
 
 interface DateEntry {

@@ -9,8 +9,6 @@
  * Provider-specific env vars — see src/providers/ for full list.
  */
 
-import fs from "node:fs";
-import path from "node:path";
 import {
   type GitHubItem,
   type RepoConfig,
@@ -19,7 +17,6 @@ import {
   isPrerelease,
   fetchSkillsData,
   createGitHubIssue,
-  WEEKLY_ISSUE_LABELS,
 } from "./github.ts";
 import {
   type DigestScope,
@@ -50,7 +47,9 @@ import {
   buildProjectReportContent,
   buildStealthSection,
   renderTrendingTables,
+  renderReportBar,
   stripModelTitle,
+  withReportBar,
 } from "./report-builders.ts";
 import { summaryRows } from "./trending-rank.ts";
 import {
@@ -59,6 +58,7 @@ import {
   saveDiscussionsReport,
   saveArxivReport,
   saveHfReport,
+  type SavedReport,
 } from "./report-savers.ts";
 import { loadWebState, fetchSiteContent, type WebFetchResult, type WebState } from "./web.ts";
 import { fetchTrendingData, EMPTY_NPM, EMPTY_OPENROUTER, type TrendingData } from "./trending.ts";
@@ -69,6 +69,7 @@ import { fetchHfData, type HfData } from "./hf.ts";
 import { fetchDevtoData, type DevtoData } from "./devto.ts";
 import { fetchLobstersData, type LobstersData } from "./lobsters.ts";
 import { loadConfig, type SectionKey } from "./config.ts";
+import { resolvePagesUrl } from "./notify.ts";
 import { toCstDateStr, toUtcStr, isWeeklyRun, sleep } from "./date.ts";
 import { MSG, ISSUE_LABELS, PROJECT_REPORTS, REPORTS, reportIssueTitle } from "./i18n.ts";
 
@@ -343,9 +344,6 @@ async function generateSummaries(
 // Main
 // ---------------------------------------------------------------------------
 
-/** Reports that only exist on the weekly run, in highlights order. */
-const WEEKLY_REPORT_IDS = [...WEEKLY_ISSUE_LABELS].map((label) => `ai-${label}`);
-
 /**
  * Pause between the two highlights attempts when the first one died on a
  * connection failure. Long enough that attempt 2 lands outside the outage that
@@ -413,33 +411,32 @@ async function main(): Promise<void> {
   // written yet.
   assertLlmHealthy("summary");
 
-  // 3. Build + save all reports
+  // 3. Build every report
   // The infra section is a group in the agents report since October 2026.
-  const agentsContent = buildProjectReportContent({
-    title: REPORTS["ai-agents"].name,
-    dateStr,
-    utcStr,
-    groups: [
-      { title: CONFIG.agents.title, activities: agentActivities, summary: summaries.agentsSummary },
-      { title: CONFIG.infra.title, activities: infraActivities, summary: summaries.infraSummary },
-    ],
-    period: PROJECT_REPORTS.agents.period,
-    preamble: buildStealthSection(stealthModels),
-    footer: autoGenFooter(),
-  });
-  console.log(`  Saved ${saveFile(agentsContent, dateStr, "ai-agents.md")}`);
+  const agents: SavedReport = {
+    id: "ai-agents",
+    content: buildProjectReportContent({
+      title: REPORTS["ai-agents"].name,
+      dateStr,
+      utcStr,
+      groups: [
+        { title: CONFIG.agents.title, activities: agentActivities, summary: summaries.agentsSummary },
+        { title: CONFIG.infra.title, activities: infraActivities, summary: summaries.infraSummary },
+      ],
+      period: PROJECT_REPORTS.agents.period,
+      preamble: buildStealthSection(stealthModels),
+      footer: autoGenFooter(),
+    }),
+    issueTitle: reportIssueTitle("ai-agents", dateStr),
+    label: ISSUE_LABELS.agents,
+  };
   if (!weekly)
     console.log("  [weekly] Trending and HF reports, Dev.to and Lobste.rs — not scheduled today, skipping.");
 
-  await Promise.all([
-    saveWebReport(webResults, webState, utcStr, dateStr, digestRepo),
-    saveDiscussionsReport(
-      { hn: hnData, devto: devtoData, lobsters: lobstersData },
-      utcStr,
-      dateStr,
-      digestRepo,
-    ),
-    saveArxivReport(arxivData, utcStr, dateStr, digestRepo),
+  const built = await Promise.all([
+    saveWebReport(webResults, webState, utcStr, dateStr),
+    saveDiscussionsReport({ hn: hnData, devto: devtoData, lobsters: lobstersData }, utcStr, dateStr),
+    saveArxivReport(arxivData, utcStr, dateStr),
     ...(weekly
       ? [
           saveTrendingReport(
@@ -448,32 +445,32 @@ async function main(): Promise<void> {
             { summary: summaries.skillsSummary, repo: CLAUDE_SKILLS_REPO },
             utcStr,
             dateStr,
-            digestRepo,
           ),
-          saveHfReport(hfData, trendingData.openrouter, utcStr, dateStr, digestRepo),
+          saveHfReport(hfData, trendingData.openrouter, utcStr, dateStr),
         ]
       : []),
   ]);
+  // A builder returns null when its source failed or its LLM call did.
+  const saved = [agents, ...built.filter((r): r is SavedReport => r !== null)];
 
   // Second gate: an outage that starts *after* the first gate would otherwise
-  // sail straight through — the savers each swallow their own failure and just
-  // skip a report. Files are on disk by now, but the failing exit skips the
-  // commit step, so they are never published.
+  // sail straight through — the builders each swallow their own failure and
+  // just skip a report. No report file or issue exists yet; state files may,
+  // but the failing exit skips the commit step, so they are never published.
   assertLlmHealthy("report");
 
-  // 4. Generate highlights for Telegram notification
-  const readReport = (name: string): string | undefined => {
-    const p = path.join("digests", dateStr, name);
-    return fs.existsSync(p) ? fs.readFileSync(p, "utf-8") : undefined;
-  };
+  // The highlights pass reads the bodies, not the link bars.
+  const reports: Record<string, string> = Object.fromEntries(saved.map((r) => [r.id, r.content]));
 
-  const reports: Record<string, string> = { "ai-agents": agentsContent };
-  // Savers skip a report when its source failed, so read back what was written.
-  for (const id of ["ai-web", "ai-hn", "ai-arxiv", ...(weekly ? WEEKLY_REPORT_IDS : [])]) {
-    const content = readReport(`${id}.md`);
-    if (content) reports[id] = content;
+  // Each report links the others the day produced, so the bar waits for all of them.
+  const pagesUrl = resolvePagesUrl();
+  const ids = saved.map((r) => r.id);
+  for (const r of saved) {
+    r.content = withReportBar(r.content, renderReportBar(r.id, ids, dateStr, pagesUrl));
+    console.log(`  Saved ${saveFile(r.content, dateStr, `${r.id}.md`)}`);
   }
 
+  // 4. Generate highlights for Telegram notification
   console.log("  Generating highlights for Telegram...");
   // The highlights pass parses JSON and retries once: the LLM occasionally
   // emits slightly malformed JSON that repairJson can't fix (seen 2026-07-13:
@@ -510,14 +507,12 @@ async function main(): Promise<void> {
   const highlightsPath = saveFile(JSON.stringify(highlights, null, 2), dateStr, "highlights.json");
   console.log(`  Saved ${highlightsPath}`);
 
-  // 5. Create the GitHub issue for agents
+  // 5. Create the GitHub issues
   if (digestRepo) {
-    const agentsUrl = await createGitHubIssue(
-      reportIssueTitle("ai-agents", dateStr),
-      agentsContent,
-      ISSUE_LABELS.agents,
-    );
-    console.log(`  Created agents issue: ${agentsUrl}`);
+    for (const r of saved) {
+      const url = await createGitHubIssue(r.issueTitle, r.content, r.label);
+      console.log(`  Created ${r.id} issue: ${url}`);
+    }
   }
 
   reportLlmHealth();

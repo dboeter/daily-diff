@@ -409,7 +409,7 @@ function isDigestIssue(i: OpenIssue): boolean {
 
 /**
  * Labels of the reports that run weekly (see WEEKLY_REPORT_WEEKDAY in date.ts).
- * The one list of weekly reports: index.ts derives its report IDs from it.
+ * The one list of weekly reports.
  */
 export const WEEKLY_ISSUE_LABELS = new Set<string>([ISSUE_LABELS.trending, ISSUE_LABELS.hf]);
 

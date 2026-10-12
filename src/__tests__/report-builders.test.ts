@@ -7,6 +7,8 @@ import {
   spliceTrendingProse,
   stripModelTitle,
   nestHeadings,
+  renderReportBar,
+  withReportBar,
   TRENDING_TABLES_MARKER,
 } from "../report-builders.ts";
 import type { TrendingReportData } from "../trending-rank.ts";
@@ -356,5 +358,28 @@ describe("nestHeadings", () => {
 
   it("caps at level 6", () => {
     expect(nestHeadings("## A\n###### B", 4)).toBe("#### A\n###### B");
+  });
+});
+
+describe("report bar", () => {
+  const url = "https://example.com/dd";
+
+  it("links the day's other reports and the overview; the current one is bold, unlinked", () => {
+    const bar = renderReportBar("ai-hn", ["ai-agents", "ai-hn", "ai-arxiv"], "2026-10-12", url);
+    expect(bar).toBe(
+      `[📅 Overview](${url}/#2026-10-12) · [🤖 AI Agents](${url}/#2026-10-12/ai-agents) · ` +
+        `**💬 AI Discussions** · [📚 AI Research](${url}/#2026-10-12/ai-arxiv)`,
+    );
+  });
+
+  it("orders the links like REPORTS, whatever order the reports were saved in", () => {
+    const bar = renderReportBar("ai-agents", ["ai-arxiv", "ai-agents"], "2026-10-12", url);
+    expect(bar.indexOf("AI Agents")).toBeLessThan(bar.indexOf("AI Research"));
+  });
+
+  it("goes under the H1", () => {
+    expect(withReportBar("# T 2026-10-12\n\n> meta\n\nbody", "BAR")).toBe(
+      "# T 2026-10-12\n\nBAR\n\n> meta\n\nbody",
+    );
   });
 });

@@ -1,9 +1,17 @@
 /**
- * Report saver functions — LLM call + file save + optional GitHub issue.
- * Extracted from index.ts for separation of concerns.
+ * Report builders for the data-source reports: LLM call + report Markdown.
+ * main() writes the files and opens the issues once every report is in, so
+ * each report's bar can link the others.
  */
 
-import { WEB_REPORT, TRENDING_REPORT, ISSUE_LABELS, reportHeading, reportIssueTitle } from "./i18n.ts";
+import {
+  WEB_REPORT,
+  TRENDING_REPORT,
+  ISSUE_LABELS,
+  reportHeading,
+  reportIssueTitle,
+  type ReportId,
+} from "./i18n.ts";
 import {
   buildWebReportPrompt,
   buildDiscussionsPrompt,
@@ -12,7 +20,6 @@ import {
   type DiscussionsData,
 } from "./prompts-data.ts";
 import { callLlm, saveFile, autoGenFooter, LLM_TOKENS_WEB, LLM_TOKENS_LISTING } from "./report.ts";
-import { createGitHubIssue } from "./github.ts";
 import { saveWebState, type WebFetchResult, type WebState } from "./web.ts";
 import type { TrendingData } from "./trending.ts";
 import { saveClassifyCache, saveMatchState } from "./trending-jev.ts";
@@ -28,6 +35,14 @@ import { saveArxivState, type ArxivData } from "./arxiv.ts";
 import type { HfData } from "./hf.ts";
 import type { OpenRouterData } from "./openrouter.ts";
 
+/** A finished report: its file and GitHub issue are written by main(). */
+export interface SavedReport {
+  id: ReportId;
+  content: string;
+  issueTitle: string;
+  label: string;
+}
+
 // ---------------------------------------------------------------------------
 // Web report
 // ---------------------------------------------------------------------------
@@ -37,9 +52,9 @@ export async function saveWebReport(
   webState: WebState,
   utcStr: string,
   dateStr: string,
-  digestRepo: string,
-): Promise<void> {
+): Promise<SavedReport | null> {
   const hasNewContent = webResults.some((r) => r.newItems.length > 0);
+  let saved: SavedReport | null = null;
 
   if (hasNewContent) {
     console.log("  [web] Calling LLM for web content report...");
@@ -55,7 +70,6 @@ export async function saveWebReport(
       const openaiNew = webResults.find((r) => r.site === "openai")?.newItems.length ?? 0;
       const openaiTotal = webResults.find((r) => r.site === "openai")?.totalDiscovered ?? 0;
 
-      const fileName = "ai-web.md";
       const mode = isFirstRun ? WEB_REPORT.firstCrawl : WEB_REPORT.todayUpdate;
 
       const webTitle = `${reportHeading("ai-web", dateStr)}\n\n`;
@@ -67,14 +81,12 @@ export async function saveWebReport(
 
       const webContent = webTitle + webMeta + webSources + `---\n\n` + summary + autoGenFooter();
 
-      console.log(`  Saved ${saveFile(webContent, dateStr, fileName)}`);
-
-      if (digestRepo) {
-        const issueTitle = WEB_REPORT.issueTitle(dateStr, isFirstRun);
-        const webLabel = ISSUE_LABELS.web;
-        const webUrl = await createGitHubIssue(issueTitle, webContent, webLabel);
-        console.log(`  Created web issue: ${webUrl}`);
-      }
+      saved = {
+        id: "ai-web",
+        content: webContent,
+        issueTitle: WEB_REPORT.issueTitle(dateStr, isFirstRun),
+        label: ISSUE_LABELS.web,
+      };
     } catch (err) {
       console.error(`  [web] Report generation failed: ${err}`);
     }
@@ -84,6 +96,7 @@ export async function saveWebReport(
 
   saveWebState(webState);
   console.log("  [web] State saved.");
+  return saved;
 }
 
 // ---------------------------------------------------------------------------
@@ -96,15 +109,13 @@ export async function saveTrendingReport(
   skills: { summary: string; repo: string },
   utcStr: string,
   dateStr: string,
-  digestRepo: string,
-): Promise<void> {
+): Promise<SavedReport | null> {
   const report = trendingData.report;
   if (report === undefined) {
     console.log("  [trending] No ranked data, skipping report.");
-    return;
+    return null;
   }
 
-  const fileName = "ai-trending.md";
   const header =
     `${reportHeading("ai-trending", dateStr)}\n\n` +
     `> ${TRENDING_REPORT.sources} | Generated: ${utcStr} UTC\n\n---\n\n`;
@@ -121,7 +132,6 @@ export async function saveTrendingReport(
   const trendingContent =
     header + spliceTrendingProse(trending.prose, tables) + skillsSection + autoGenFooter();
 
-  console.log(`  Saved ${saveFile(trendingContent, dateStr, fileName)}`);
   // Only once the report exists, like the ArXiv state.
   if (report.rankingFile) {
     console.log(`  Saved ${saveFile(report.rankingFile, dateStr, "trending-ranking.json")}`);
@@ -130,12 +140,12 @@ export async function saveTrendingReport(
   if (report.nextClassifications) saveClassifyCache(report.nextClassifications);
   if (report.nextStarHistory) saveStarHistory(report.nextStarHistory);
 
-  if (digestRepo) {
-    const trendingTitle = reportIssueTitle("ai-trending", dateStr);
-    const trendingLabel = ISSUE_LABELS.trending;
-    const trendingUrl = await createGitHubIssue(trendingTitle, trendingContent, trendingLabel);
-    console.log(`  Created trending issue: ${trendingUrl}`);
-  }
+  return {
+    id: "ai-trending",
+    content: trendingContent,
+    issueTitle: reportIssueTitle("ai-trending", dateStr),
+    label: ISSUE_LABELS.trending,
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -146,8 +156,7 @@ export async function saveDiscussionsReport(
   data: DiscussionsData,
   utcStr: string,
   dateStr: string,
-  digestRepo: string,
-): Promise<void> {
+): Promise<SavedReport | null> {
   const { hn, devto, lobsters } = data;
   const sources = [
     hn.fetchSuccess && `[Hacker News](https://news.ycombinator.com/) (${hn.stories.length} stories)`,
@@ -156,29 +165,23 @@ export async function saveDiscussionsReport(
   ].filter(Boolean);
   if (sources.length === 0) {
     console.log("  [discussions] No data available, skipping report.");
-    return;
+    return null;
   }
 
   console.log("  [discussions] Calling LLM for discussions report...");
   try {
     const summary = stripModelTitle(await callLlm(buildDiscussionsPrompt(data, dateStr), LLM_TOKENS_LISTING));
 
-    const fileName = "ai-hn.md";
     const header =
       `${reportHeading("ai-hn", dateStr)}\n\n` +
       `> Sources: ${sources.join(" + ")} | Generated: ${utcStr} UTC\n\n` +
       `---\n\n`;
 
     const content = header + summary + autoGenFooter();
-
-    console.log(`  Saved ${saveFile(content, dateStr, fileName)}`);
-
-    if (digestRepo) {
-      const url = await createGitHubIssue(reportIssueTitle("ai-hn", dateStr), content, ISSUE_LABELS.hn);
-      console.log(`  Created discussions issue: ${url}`);
-    }
+    return { id: "ai-hn", content, issueTitle: reportIssueTitle("ai-hn", dateStr), label: ISSUE_LABELS.hn };
   } catch (err) {
     console.error(`  [discussions] Report generation failed: ${err}`);
+    return null;
   }
 }
 
@@ -190,11 +193,10 @@ export async function saveArxivReport(
   arxivData: ArxivData,
   utcStr: string,
   dateStr: string,
-  digestRepo: string,
-): Promise<void> {
+): Promise<SavedReport | null> {
   if (!arxivData.fetchSuccess) {
     console.log("  [arxiv] No data available, skipping report.");
-    return;
+    return null;
   }
 
   // Written before the LLM call: the ranking is useful for tuning even when the report fails.
@@ -206,7 +208,6 @@ export async function saveArxivReport(
   try {
     const summary = stripModelTitle(await callLlm(buildArxivPrompt(arxivData, dateStr), LLM_TOKENS_LISTING));
 
-    const fileName = "ai-arxiv.md";
     const header =
       `${reportHeading("ai-arxiv", dateStr)}\n\n` +
       `> Source: [ArXiv](https://arxiv.org/) (cs.AI, cs.CL, cs.LG) | ` +
@@ -215,19 +216,17 @@ export async function saveArxivReport(
       `---\n\n`;
 
     const content = header + summary + autoGenFooter();
-
-    console.log(`  Saved ${saveFile(content, dateStr, fileName)}`);
     // Only once the report exists: after a failed report the next run takes this pool too.
     if (arxivData.nextState) saveArxivState(arxivData.nextState);
-
-    if (digestRepo) {
-      const title = reportIssueTitle("ai-arxiv", dateStr);
-      const label = ISSUE_LABELS.arxiv;
-      const url = await createGitHubIssue(title, content, label);
-      console.log(`  Created ArXiv issue: ${url}`);
-    }
+    return {
+      id: "ai-arxiv",
+      content,
+      issueTitle: reportIssueTitle("ai-arxiv", dateStr),
+      label: ISSUE_LABELS.arxiv,
+    };
   } catch (err) {
     console.error(`  [arxiv] Report generation failed: ${err}`);
+    return null;
   }
 }
 
@@ -240,8 +239,7 @@ export async function saveHfReport(
   openrouter: OpenRouterData,
   utcStr: string,
   dateStr: string,
-  digestRepo: string,
-): Promise<void> {
+): Promise<SavedReport | null> {
   const hasOpenRouter = openrouter.topModels.length > 0 || openrouter.newModels.length > 0;
   const sources = [
     hfData.fetchSuccess && `[Hugging Face Hub](https://huggingface.co/) (${hfData.models.length} models)`,
@@ -249,7 +247,7 @@ export async function saveHfReport(
   ].filter(Boolean);
   if (sources.length === 0) {
     console.log("  [models] No data available, skipping report.");
-    return;
+    return null;
   }
 
   console.log("  [models] Calling LLM for models report...");
@@ -258,23 +256,15 @@ export async function saveHfReport(
       await callLlm(buildHfPrompt(hfData, openrouter, dateStr), LLM_TOKENS_LISTING),
     );
 
-    const fileName = "ai-hf.md";
     const header =
       `${reportHeading("ai-hf", dateStr)}\n\n` +
       `> Sources: ${sources.join(" + ")} | Generated: ${utcStr} UTC\n\n` +
       `---\n\n`;
 
     const content = header + summary + autoGenFooter();
-
-    console.log(`  Saved ${saveFile(content, dateStr, fileName)}`);
-
-    if (digestRepo) {
-      const title = reportIssueTitle("ai-hf", dateStr);
-      const label = ISSUE_LABELS.hf;
-      const url = await createGitHubIssue(title, content, label);
-      console.log(`  Created models issue: ${url}`);
-    }
+    return { id: "ai-hf", content, issueTitle: reportIssueTitle("ai-hf", dateStr), label: ISSUE_LABELS.hf };
   } catch (err) {
     console.error(`  [models] Report generation failed: ${err}`);
+    return null;
   }
 }

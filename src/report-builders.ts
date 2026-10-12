@@ -6,7 +6,14 @@ import { hasActivity, type ProjectActivity } from "./prompts.ts";
 import { escapeRegex } from "./agent-news.ts";
 import type { OpenRouterStealthModel } from "./openrouter.ts";
 import type { TrendingReportData } from "./trending-rank.ts";
-import { STEALTH_SECTION, TRENDING_REPORT } from "./i18n.ts";
+import {
+  LIVE_REPORT_IDS,
+  OVERVIEW,
+  REPORTS,
+  STEALTH_SECTION,
+  TRENDING_REPORT,
+  type ReportId,
+} from "./i18n.ts";
 
 // ---------------------------------------------------------------------------
 // Project digest (daily agents report: the agents and infra config sections)
@@ -83,6 +90,35 @@ export function buildProjectReportContent(r: ProjectReportInput): string {
     sections.join("\n\n---\n\n") +
     r.footer
   );
+}
+
+// ---------------------------------------------------------------------------
+// Report bar: links between the day's reports
+// ---------------------------------------------------------------------------
+
+/**
+ * One line linking the day's overview and its other reports, in REPORTS
+ * order. Absolute Pages URLs, so it works in the GitHub issue copy too.
+ * Before October 2026 a report linked to nothing: the sidebar was the only
+ * way between reports.
+ */
+export function renderReportBar(
+  current: ReportId,
+  ids: ReportId[],
+  dateStr: string,
+  pagesUrl: string,
+): string {
+  const links = LIVE_REPORT_IDS.filter((id) => ids.includes(id)).map((id) => {
+    const label = `${REPORTS[id].emoji} ${REPORTS[id].name}`;
+    return id === current ? `**${label}**` : `[${label}](${pagesUrl}/#${dateStr}/${id})`;
+  });
+  return [`[${OVERVIEW.emoji} ${OVERVIEW.name}](${pagesUrl}/#${dateStr})`, ...links].join(" · ");
+}
+
+/** Put the report bar under the report's H1. */
+export function withReportBar(content: string, bar: string): string {
+  const i = content.indexOf("\n");
+  return i === -1 ? `${content}\n\n${bar}` : `${content.slice(0, i)}\n\n${bar}${content.slice(i)}`;
 }
 
 // ---------------------------------------------------------------------------
