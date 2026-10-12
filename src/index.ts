@@ -46,7 +46,12 @@ import {
   llmHealthLine,
   isConnectionError,
 } from "./report.ts";
-import { buildProjectReportContent, buildStealthSection, renderTrendingTables } from "./report-builders.ts";
+import {
+  buildProjectReportContent,
+  buildStealthSection,
+  renderTrendingTables,
+  stripModelTitle,
+} from "./report-builders.ts";
 import { summaryRows } from "./trending-rank.ts";
 import {
   saveWebReport,
@@ -258,7 +263,7 @@ async function fetchAllData(
 async function summarize(id: string, prompt: string, failMsg: string, maxTokens?: number): Promise<string> {
   console.log(`  [${id}] Calling LLM for summary...`);
   try {
-    return await callLlm(prompt, maxTokens);
+    return stripModelTitle(await callLlm(prompt, maxTokens));
   } catch (err) {
     console.error(`  [${id}] LLM call failed: ${err}`);
     return failMsg;

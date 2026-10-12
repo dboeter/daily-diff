@@ -5,6 +5,7 @@ import {
   parseRowSummaries,
   renderTrendingTables,
   spliceTrendingProse,
+  stripModelTitle,
   TRENDING_TABLES_MARKER,
 } from "../report-builders.ts";
 import type { TrendingReportData } from "../trending-rank.ts";
@@ -285,5 +286,37 @@ describe("spliceTrendingProse", () => {
   it("drops the marker when there are no tables", () => {
     const prose = `A.\n\n${TRENDING_TABLES_MARKER}\n\nB.`;
     expect(spliceTrendingProse(prose, "")).toBe("A.\n\nB.");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// stripModelTitle
+// ---------------------------------------------------------------------------
+
+describe("stripModelTitle", () => {
+  it("drops the model's own H1: code renders the report's", () => {
+    const md = "# Hacker News AI Community Digest — 2026-10-12\n\n## Today's Highlights\n\nText.";
+    expect(stripModelTitle(md)).toBe("## Today's Highlights\n\nText.");
+  });
+
+  it("drops the web report's title block and its rule", () => {
+    const md =
+      "# AI Official Content Tracking Report\n**Date:** 2026-10-11  \n" +
+      "**Source:** Anthropic & OpenAI  \n**Type:** Incremental Update  \n\n---\n\n## Highlights\n\nText.";
+    expect(stripModelTitle(md)).toBe("## Highlights\n\nText.");
+  });
+
+  it("demotes a later H1 instead of dropping its section", () => {
+    expect(stripModelTitle("## A\n\n# B\n\nText.")).toBe("## A\n\n## B\n\nText.");
+  });
+
+  it("leaves a body without a title alone, including a leading rule", () => {
+    expect(stripModelTitle("## A\n\nText.")).toBe("## A\n\nText.");
+    expect(stripModelTitle("Plain text.\n\n---\n\nMore.")).toBe("Plain text.\n\n---\n\nMore.");
+  });
+
+  it("does not touch # inside code fences", () => {
+    const md = "## A\n\n```sh\n# a comment\n```";
+    expect(stripModelTitle(md)).toBe(md);
   });
 });

@@ -63,6 +63,45 @@ export function buildProjectReportContent(r: ProjectReportInput): string {
 }
 
 // ---------------------------------------------------------------------------
+// LLM body clean-up
+// ---------------------------------------------------------------------------
+
+/** A `**Date:** …` style line of a title block the model writes under its H1. */
+const TITLE_BLOCK_LINE = /^\*\*[\w /]+:\*\*/;
+
+/**
+ * Remove the title the model writes at the top of a report body: code renders
+ * the report's H1 and metadata line. Before October 2026 five reports carried
+ * two H1s ("# Hacker News AI Community Digest 2026-10-12" from code, then the
+ * model's "… — 2026-10-12"), and the web report a `**Date:**` … `**Type:**` block
+ * as well. A later H1 is demoted to H2, keeping its section.
+ */
+export function stripModelTitle(md: string): string {
+  const lines = md.split("\n");
+  let i = 0;
+  const skipBlank = () => {
+    while (i < lines.length && lines[i]!.trim() === "") i++;
+  };
+  skipBlank();
+  if (/^#\s/.test(lines[i] ?? "")) {
+    i++;
+    while (i < lines.length && (lines[i]!.trim() === "" || TITLE_BLOCK_LINE.test(lines[i]!))) i++;
+    if (/^-{3,}\s*$/.test(lines[i] ?? "")) {
+      i++;
+      skipBlank();
+    }
+  }
+  let inFence = false;
+  return lines
+    .slice(i)
+    .map((line) => {
+      if (/^\s*```/.test(line)) inFence = !inFence;
+      return !inFence && /^#\s/.test(line) ? `#${line}` : line;
+    })
+    .join("\n");
+}
+
+// ---------------------------------------------------------------------------
 // Stealth models (daily, top of the agents report)
 // ---------------------------------------------------------------------------
 

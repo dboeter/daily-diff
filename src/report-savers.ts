@@ -18,7 +18,12 @@ import type { HnData } from "./hn.ts";
 import type { TrendingData } from "./trending.ts";
 import { saveClassifyCache, saveMatchState } from "./trending-jev.ts";
 import { saveStarHistory } from "./trending-rank.ts";
-import { parseRowSummaries, renderTrendingTables, spliceTrendingProse } from "./report-builders.ts";
+import {
+  parseRowSummaries,
+  renderTrendingTables,
+  spliceTrendingProse,
+  stripModelTitle,
+} from "./report-builders.ts";
 import { saveArxivState, type ArxivData } from "./arxiv.ts";
 import type { HfData } from "./hf.ts";
 import type { DevtoData } from "./devto.ts";
@@ -40,7 +45,9 @@ export async function saveWebReport(
   if (hasNewContent) {
     console.log("  [web] Calling LLM for web content report...");
     try {
-      const summary = await callLlm(buildWebReportPrompt(webResults, dateStr), LLM_TOKENS_WEB);
+      const summary = stripModelTitle(
+        await callLlm(buildWebReportPrompt(webResults, dateStr), LLM_TOKENS_WEB),
+      );
       const isFirstRun = webResults.some((r) => r.isFirstRun);
       const totalNew = webResults.reduce((sum, r) => sum + r.newItems.length, 0);
 
@@ -148,7 +155,7 @@ export async function saveHnReport(
 
   console.log("  [hn] Calling LLM for HN report...");
   try {
-    const summary = await callLlm(buildHnPrompt(hnData, dateStr), LLM_TOKENS_LISTING);
+    const summary = stripModelTitle(await callLlm(buildHnPrompt(hnData, dateStr), LLM_TOKENS_LISTING));
 
     const fileName = "ai-hn.md";
     const header =
@@ -194,7 +201,7 @@ export async function saveArxivReport(
 
   console.log("  [arxiv] Calling LLM for ArXiv report...");
   try {
-    const summary = await callLlm(buildArxivPrompt(arxivData, dateStr), LLM_TOKENS_LISTING);
+    const summary = stripModelTitle(await callLlm(buildArxivPrompt(arxivData, dateStr), LLM_TOKENS_LISTING));
 
     const fileName = "ai-arxiv.md";
     const header =
@@ -238,7 +245,7 @@ export async function saveHfReport(
 
   console.log("  [hf] Calling LLM for Hugging Face report...");
   try {
-    const summary = await callLlm(buildHfPrompt(hfData, dateStr), LLM_TOKENS_LISTING);
+    const summary = stripModelTitle(await callLlm(buildHfPrompt(hfData, dateStr), LLM_TOKENS_LISTING));
 
     const fileName = "ai-hf.md";
     const header =
@@ -281,7 +288,9 @@ export async function saveCommunityReport(
 
   console.log("  [community] Calling LLM for community report...");
   try {
-    const summary = await callLlm(buildCommunityPrompt(devtoData, lobstersData, dateStr), LLM_TOKENS_LISTING);
+    const summary = stripModelTitle(
+      await callLlm(buildCommunityPrompt(devtoData, lobstersData, dateStr), LLM_TOKENS_LISTING),
+    );
     const devtoCount = devtoData.articles.length;
     const lobstersCount = lobstersData.stories.length;
 
