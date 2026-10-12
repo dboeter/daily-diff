@@ -1,0 +1,29 @@
+{
+  "ai-agents": [
+    "OpenCode v1.19.0 adds `opencode upgrade --major` migration path to v2 and OpenAI `ultrafast` tier support, easing major version upgrades and unlocking faster model access",
+    "jcode v0.95.0 routes new models (grok-4.7, gpt-6-luna) via Responses API and exposes turn-level token usage in hooks, giving developers observability and access to latest models"
+  ],
+  "ai-hn": [
+    "Mistral Large 4 released as new open-weight flagship with significant reasoning, coding, and multilingual gains, giving developers a strong European alternative to closed APIs",
+    "Microsoft Execution Containers v1.0.0 launches policy-driven containers for safe AI agent isolation, addressing a core enterprise blocker for running untrusted agent code at scale"
+  ],
+  "ai-arxiv": [
+    "LongHarness introduces stateful evidence management that lifts GLM-5.3-Flash from 15.8% to 60.2% on 100M-token corpora, unlocking practical corpus-scale reasoning for agents",
+    "Evo² co-evolves model weights and agent harness via dual-role policy, reaching 82.1% Polyglot and 48.3% SWE-bench Verified with harnesses that transfer across tasks and models"
+  ],
+  "ai-infra": [
+    "OpenShell v0.1.3 makes cluster-scoped RBAC optional in Helm and fixes supervisor to preserve session retries during startup, simplifying cluster auth and improving session resilience"
+  ],
+  "ai-trending": [
+    "@ai-matrx/coding-sessions surges 3.5x to 35K weekly downloads by driving your own Claude Code/Codex subscriptions without API keys and taking over existing chats",
+    "strands-agents/box launches Rust sandbox with OS-level isolation, default-deny networking, and credential injection keeping secrets outside the agent"
+  ],
+  "ai-community": [
+    "Passing a file path instead of inlining 756 numbers raised tool-call accuracy from 44% to 89% with ¼ the tokens, a concrete MCP data-passing lesson for agent developers",
+    "OpenAI Decisions API integrated with Strands Agents enables structured choice (not chat) for deterministic agent routing, a new pattern for reliable tool orchestration"
+  ],
+  "ai-hf": [
+    "Lightricks LTX-2.5 emerges as leading open video generation model (image-to-video, text-to-video, video-to-video editing) with 1.7M downloads, giving developers SOTA video capabilities locally",
+    "Unsloth's Qwen3.8-27B-GGUF hits 6.5M downloads as the gold-standard quantization for running 27B multimodal models on-device"
+  ]
+}
