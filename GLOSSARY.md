@@ -18,10 +18,10 @@ The set of reports of one cadence published for one day; there is a Daily Digest
 _Avoid_: Edition, run output
 
 **Daily Digest**:
-The digest published every day: Agents, HN, ArXiv and Web.
+The digest published every day: Agents, Discussions, ArXiv and Web.
 
 **Weekly Digest**:
-The digest published once a week, alongside that day's Daily Digest: Infra, Trending, Community and HF.
+The digest published once a week, alongside that day's Daily Digest: Trending and Models. The same run adds Dev.to and Lobste.rs to that day's Discussions report.
 _Avoid_: Weekly rollup (the retired summary of a week's daily digests)
 
 **Report**:
@@ -41,13 +41,20 @@ The fixed text that stands in for a summary the LLM failed to produce; not the s
 _Avoid_: Placeholder
 
 **Highlights**:
-The few items from a digest picked for the notification message.
+The few items from a digest picked for the notification message and the web UI's day Overview. Not the `## Highlights` section a report opens with, which is part of its Summary.
 _Avoid_: Summary, brief
+
+**Overview**:
+The web UI page for one day: each report's Highlights under a link to the report.
+
+**Report Bar**:
+The line under a report's title linking the day's Overview and its other reports.
+_Avoid_: Nav, menu
 
 ### Tracking
 
 **Tracked Project**:
-One named entry on the Agents or Infra list, followed for its releases, hot issues and news whether or not its repo has any.
+One named entry on the Agents or Infra list (the two sections of the Agents report), followed for its releases, hot issues and news whether or not its repo has any.
 _Avoid_: Repo, agent (for a list entry)
 
 **Repo**:
