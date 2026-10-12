@@ -3,7 +3,7 @@
  * Reads GITHUB_TOKEN and DIGEST_REPO from environment at call time.
  */
 
-import { ISSUE_LABELS } from "./i18n.ts";
+import { ISSUE_LABELS, WEEKLY_REPORT_IDS } from "./i18n.ts";
 import { toCstDateStr, sleep } from "./date.ts";
 
 // ---------------------------------------------------------------------------
@@ -407,11 +407,8 @@ function isDigestIssue(i: OpenIssue): boolean {
   return i.pull_request === undefined && i.labels.some((l) => DIGEST_ISSUE_LABELS.has(l.name));
 }
 
-/**
- * Labels of the reports that run weekly (see WEEKLY_REPORT_WEEKDAY in date.ts).
- * The one list of weekly reports.
- */
-export const WEEKLY_ISSUE_LABELS = new Set<string>([ISSUE_LABELS.trending, ISSUE_LABELS.hf]);
+/** Labels of the weekly reports: a report's label is its id without "ai-". */
+export const WEEKLY_ISSUE_LABELS = new Set<string>(WEEKLY_REPORT_IDS.map((id) => id.replace(/^ai-/, "")));
 
 /**
  * Daily issues are retained as one group; each weekly report is its own group,

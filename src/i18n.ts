@@ -39,6 +39,13 @@ export const REPORTS = {
 export type ReportId = keyof typeof REPORTS;
 export const LIVE_REPORT_IDS = Object.keys(REPORTS) as ReportId[];
 
+/**
+ * The reports that run weekly (see WEEKLY_REPORT_WEEKDAY in date.ts); the
+ * rest are daily. The one list: the issue retention groups (github.ts) and the
+ * sidebar's "This week" group (manifest.json `weekly`) derive from it.
+ */
+export const WEEKLY_REPORT_IDS: ReportId[] = ["ai-trending", "ai-hf"];
+
 /** A report file's H1. */
 export const reportHeading = (id: ReportId, dateStr: string) => `# ${REPORTS[id].name} ${dateStr}`;
 

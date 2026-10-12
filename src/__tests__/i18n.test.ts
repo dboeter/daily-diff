@@ -5,6 +5,7 @@ import {
   REPORTS,
   LIVE_REPORT_IDS,
   REPORT_LABELS,
+  WEEKLY_REPORT_IDS,
   reportHeading,
   reportIssueTitle,
 } from "../i18n.ts";
@@ -68,5 +69,14 @@ describe("ISSUE_LABELS", () => {
 describe("REPORT_LABELS", () => {
   it("keeps the retired reports for archived days", () => {
     for (const id of ["ai-cli", "ai-ph", "ai-weekly", "ai-monthly"]) expect(REPORT_LABELS[id]).toBeTruthy();
+  });
+});
+
+describe("WEEKLY_REPORT_IDS", () => {
+  it("names live reports whose issue label is the id without ai-", () => {
+    for (const id of WEEKLY_REPORT_IDS) {
+      expect(LIVE_REPORT_IDS).toContain(id);
+      expect(Object.values(ISSUE_LABELS)).toContain(id.replace(/^ai-/, ""));
+    }
   });
 });

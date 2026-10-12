@@ -1,7 +1,7 @@
 import fs from "fs";
 import path from "path";
 import { marked } from "marked";
-import { LIVE_REPORT_IDS, REPORT_LABELS } from "./i18n.ts";
+import { LIVE_REPORT_IDS, REPORT_LABELS, WEEKLY_REPORT_IDS } from "./i18n.ts";
 
 const DIGESTS_DIR = "digests";
 const MANIFEST_PATH = "manifest.json";
@@ -33,6 +33,8 @@ interface Manifest {
   generated: string;
   /** Report id → label, so the sidebar and the MCP server need no copy of REPORT_LABELS. */
   labels: Record<string, string>;
+  /** The weekly report ids, for the sidebar's "This week" group. */
+  weekly: string[];
   dates: DateEntry[];
 }
 
@@ -103,6 +105,7 @@ async function main(): Promise<void> {
   const manifest: Manifest = {
     generated: new Date().toISOString(),
     labels: Object.fromEntries(REPORT_FILES.map((r) => [r, REPORT_LABELS[r] ?? r])),
+    weekly: WEEKLY_REPORT_IDS,
     dates: entries,
   };
 
