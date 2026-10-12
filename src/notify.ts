@@ -12,7 +12,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
-import { NOTIFY_LABELS } from "./i18n.ts";
+import { REPORT_LABELS } from "./i18n.ts";
 import type { ReportHighlights } from "./prompts-data.ts";
 
 const PAGES_URL_DEFAULT = "https://dboeter.github.io/daily-diff";
@@ -63,7 +63,7 @@ export function buildMessage(
   const lines: string[] = [`📡 <b>Daily Diff · ${date}</b>`];
 
   for (const r of reports) {
-    const label = NOTIFY_LABELS[r] ?? r;
+    const label = REPORT_LABELS[r] ?? r;
     lines.push(""); // blank line before each report section
     lines.push(`• <a href="${PAGES_URL}/#${date}/${r}">${label}</a>`);
 

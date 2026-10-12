@@ -3,15 +3,7 @@
  * Extracted from index.ts for separation of concerns.
  */
 
-import {
-  WEB_REPORT,
-  TRENDING_REPORT,
-  HN_REPORT,
-  ARXIV_REPORT,
-  HF_REPORT,
-  COMMUNITY_REPORT,
-  ISSUE_LABELS,
-} from "./i18n.ts";
+import { WEB_REPORT, TRENDING_REPORT, ISSUE_LABELS, reportHeading, reportIssueTitle } from "./i18n.ts";
 import {
   buildWebReportPrompt,
   buildHnPrompt,
@@ -60,7 +52,7 @@ export async function saveWebReport(
       const fileName = "ai-web.md";
       const mode = isFirstRun ? WEB_REPORT.firstCrawl : WEB_REPORT.todayUpdate;
 
-      const webTitle = `# ${WEB_REPORT.title} ${dateStr}\n\n`;
+      const webTitle = `${reportHeading("ai-web", dateStr)}\n\n`;
       const webMeta = `> ${mode} | ${WEB_REPORT.newContent(totalNew)} | ${WEB_REPORT.generated(utcStr)}\n\n`;
       const webSources =
         `${WEB_REPORT.sourcesHeader}\n` +
@@ -108,7 +100,7 @@ export async function saveTrendingReport(
 
   const fileName = "ai-trending.md";
   const header =
-    `# ${TRENDING_REPORT.title} ${dateStr}\n\n` +
+    `${reportHeading("ai-trending", dateStr)}\n\n` +
     `> ${TRENDING_REPORT.sources} | Generated: ${utcStr} UTC\n\n---\n\n`;
 
   // Skills ranks the community's most-discussed Claude Code skills — the same
@@ -132,7 +124,7 @@ export async function saveTrendingReport(
   if (report.nextStarHistory) saveStarHistory(report.nextStarHistory);
 
   if (digestRepo) {
-    const trendingTitle = TRENDING_REPORT.issueTitle(dateStr);
+    const trendingTitle = reportIssueTitle("ai-trending", dateStr);
     const trendingLabel = ISSUE_LABELS.trending;
     const trendingUrl = await createGitHubIssue(trendingTitle, trendingContent, trendingLabel);
     console.log(`  Created trending issue: ${trendingUrl}`);
@@ -160,7 +152,7 @@ export async function saveHnReport(
 
     const fileName = "ai-hn.md";
     const header =
-      `# ${HN_REPORT.title} ${dateStr}\n\n` +
+      `${reportHeading("ai-hn", dateStr)}\n\n` +
       `> Source: [Hacker News](https://news.ycombinator.com/) | ` +
       `${hnData.stories.length} stories | Generated: ${utcStr} UTC\n\n` +
       `---\n\n`;
@@ -170,7 +162,7 @@ export async function saveHnReport(
     console.log(`  Saved ${saveFile(hnContent, dateStr, fileName)}`);
 
     if (digestRepo) {
-      const hnTitle = HN_REPORT.issueTitle(dateStr);
+      const hnTitle = reportIssueTitle("ai-hn", dateStr);
       const hnLabel = ISSUE_LABELS.hn;
       const hnUrl = await createGitHubIssue(hnTitle, hnContent, hnLabel);
       console.log(`  Created HN issue: ${hnUrl}`);
@@ -206,7 +198,7 @@ export async function saveArxivReport(
 
     const fileName = "ai-arxiv.md";
     const header =
-      `# ${ARXIV_REPORT.title} ${dateStr}\n\n` +
+      `${reportHeading("ai-arxiv", dateStr)}\n\n` +
       `> Source: [ArXiv](https://arxiv.org/) (cs.AI, cs.CL, cs.LG) | ` +
       `${arxivData.papers.length} papers${arxivData.rankedBy === "jev" ? " ranked by [Jev](https://typesafe.ai) relevance" : ""} | ` +
       `Generated: ${utcStr} UTC\n\n` +
@@ -219,7 +211,7 @@ export async function saveArxivReport(
     if (arxivData.nextState) saveArxivState(arxivData.nextState);
 
     if (digestRepo) {
-      const title = ARXIV_REPORT.issueTitle(dateStr);
+      const title = reportIssueTitle("ai-arxiv", dateStr);
       const label = ISSUE_LABELS.arxiv;
       const url = await createGitHubIssue(title, content, label);
       console.log(`  Created ArXiv issue: ${url}`);
@@ -250,7 +242,7 @@ export async function saveHfReport(
 
     const fileName = "ai-hf.md";
     const header =
-      `# ${HF_REPORT.title} ${dateStr}\n\n` +
+      `${reportHeading("ai-hf", dateStr)}\n\n` +
       `> Source: [Hugging Face Hub](https://huggingface.co/) | ` +
       `${hfData.models.length} models | Generated: ${utcStr} UTC\n\n` +
       `---\n\n`;
@@ -260,7 +252,7 @@ export async function saveHfReport(
     console.log(`  Saved ${saveFile(content, dateStr, fileName)}`);
 
     if (digestRepo) {
-      const title = HF_REPORT.issueTitle(dateStr);
+      const title = reportIssueTitle("ai-hf", dateStr);
       const label = ISSUE_LABELS.hf;
       const url = await createGitHubIssue(title, content, label);
       console.log(`  Created HF issue: ${url}`);
@@ -295,7 +287,7 @@ export async function saveCommunityReport(
 
     const fileName = "ai-community.md";
     const header =
-      `# ${COMMUNITY_REPORT.title} ${dateStr}\n\n` +
+      `${reportHeading("ai-community", dateStr)}\n\n` +
       `> Sources: [Dev.to](https://dev.to/) (${devtoCount} articles) + [Lobste.rs](https://lobste.rs/) (${lobstersCount} stories) | Generated: ${utcStr} UTC\n\n` +
       `---\n\n`;
 
@@ -304,7 +296,7 @@ export async function saveCommunityReport(
     console.log(`  Saved ${saveFile(content, dateStr, fileName)}`);
 
     if (digestRepo) {
-      const title = COMMUNITY_REPORT.issueTitle(dateStr);
+      const title = reportIssueTitle("ai-community", dateStr);
       const label = ISSUE_LABELS.community;
       const url = await createGitHubIssue(title, content, label);
       console.log(`  Created community issue: ${url}`);

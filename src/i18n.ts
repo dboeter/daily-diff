@@ -1,6 +1,5 @@
 /**
- * Centralized report strings: titles, labels, footers and status messages.
- * The agents and infra report titles are the exception: config.yml.
+ * Centralized report strings: report names, labels, footers and status messages.
  */
 
 import type { SectionKey } from "./config.ts";
@@ -22,43 +21,62 @@ export const MSG = {
 // ---------------------------------------------------------------------------
 
 /**
- * The config.yml report sections (agents, infra). What a section covers, its
- * title and LLM subject, lives in config.yml next to its repos, so re-scoping
- * it is a config edit. These strings follow from its cadence and stay here;
- * so do the REPORT_LABELS archive labels below.
+ * Report names. Each live report has one name: its H1, its GitHub issue title,
+ * its sidebar and RSS label and its Telegram label all derive from it. Until
+ * October 2026 a report could carry four different ones ("Agent Tooling
+ * Weekly" in the H1, "AI Infrastructure Digest" in the sidebar). Names stay
+ * cadence-neutral: the archive holds daily and weekly editions of a report.
+ */
+export const REPORTS = {
+  "ai-agents": { emoji: "🤖", name: "AI Agents" },
+  "ai-infra": { emoji: "⚙️", name: "Agent Tooling" },
+  "ai-web": { emoji: "🌐", name: "Lab Announcements" },
+  "ai-trending": { emoji: "📈", name: "Agent & AI Coding Trends" },
+  "ai-hn": { emoji: "💬", name: "AI Discussions" },
+  "ai-arxiv": { emoji: "📚", name: "AI Research" },
+  "ai-hf": { emoji: "🧠", name: "AI Models" },
+  "ai-community": { emoji: "🗣️", name: "Tech Community" },
+} as const satisfies Record<string, { emoji: string; name: string }>;
+
+export type ReportId = keyof typeof REPORTS;
+export const LIVE_REPORT_IDS = Object.keys(REPORTS) as ReportId[];
+
+/** A report file's H1. */
+export const reportHeading = (id: ReportId, dateStr: string) => `# ${REPORTS[id].name} ${dateStr}`;
+
+/** A report's GitHub issue title. */
+export const reportIssueTitle = (id: ReportId, dateStr: string) =>
+  `${REPORTS[id].emoji} ${REPORTS[id].name} ${dateStr}`;
+
+/**
+ * The config.yml report sections (agents, infra). What a section covers and
+ * its LLM subject live in config.yml next to its repos, so re-scoping it is a
+ * config edit. These strings follow from its cadence and stay here.
  */
 export const PROJECT_REPORTS = {
   // Replaced the separate CLI and OpenClaw-ecosystem reports in October 2026.
-  agents: { emoji: "🤖", window: "last 24h", period: "today" },
+  agents: { window: "last 24h", period: "today" },
   // Weekly since October 2026 (see WEEKLY_REPORT_WEEKDAY in date.ts). Covers
   // agent tooling since 2026-10-10; the "AI Infrastructure" archive labels in
   // REPORT_LABELS stay because older ai-infra files cover inference engines.
-  infra: { emoji: "⚙️", window: "last 7 days", period: "this week" },
-} as const satisfies Record<SectionKey, { emoji: string; window: string; period: string }>;
-
-/** GitHub issue title of a section report; `title` is the section's `title` in config.yml. */
-export const projectIssueTitle = (key: SectionKey, title: string, dateStr: string) =>
-  `${PROJECT_REPORTS[key].emoji} ${title} ${dateStr}`;
+  infra: { window: "last 7 days", period: "this week" },
+} as const satisfies Record<SectionKey, { window: string; period: string }>;
 
 export const WEB_REPORT = {
-  title: "Official AI Content Report",
   firstCrawl: "First full crawl",
   todayUpdate: "Today's update",
   newContent: (count: number) => `New content: ${count} articles`,
   generated: (utcStr: string) => `Generated: ${utcStr} UTC`,
   sourcesHeader: "Sources:",
   issueTitle: (dateStr: string, isFirstRun: boolean) =>
-    `🌐 Official AI Content Report ${dateStr}${isFirstRun ? " (First Crawl)" : ""}`,
+    `${reportIssueTitle("ai-web", dateStr)}${isFirstRun ? " (First Crawl)" : ""}`,
 } as const;
 
-// Weekly since October 2026. The sidebar/RSS labels in REPORT_LABELS stay
-// cadence-neutral because the archive holds daily editions too.
+// Weekly since October 2026.
 export const TRENDING_REPORT = {
-  title: "Agent & AI Coding Trends Weekly",
   sources: "Sources: GitHub Trending + GitHub Search API + OpenRouter + npm",
   skillsHeading: "Claude Code Skills Highlights",
   skillsSource: (repo: string) => `> Source: [${repo}](https://github.com/${repo})`,
-  issueTitle: (dateStr: string) => `📈 Agent & AI Coding Trends Weekly ${dateStr}`,
   // Tables rendered in code (renderTrendingTables); the prose headings are handed to the LLM.
   radarHeading: "🚀 Agent & Coding Tool Radar",
   radarHeader: "| Tool | Source | Signal | Summary |\n| :--- | :--- | :--- | :--- |",
@@ -89,29 +107,6 @@ export const STEALTH_SECTION = {
   live: "live",
 } as const;
 
-export const HN_REPORT = {
-  title: "Hacker News AI Community Digest",
-  issueTitle: (dateStr: string) => `📰 Hacker News AI Digest ${dateStr}`,
-} as const;
-
-export const ARXIV_REPORT = {
-  title: "ArXiv AI Research Digest",
-  issueTitle: (dateStr: string) => `📚 ArXiv AI Research Digest ${dateStr}`,
-} as const;
-
-// The HF report runs weekly (see WEEKLY_REPORT_WEEKDAY in date.ts) — the Hub's
-// download-ranked list barely moves day to day, so the titles say "weekly".
-export const HF_REPORT = {
-  title: "Hugging Face Trending Models Weekly",
-  issueTitle: (dateStr: string) => `🤗 Hugging Face Trending Models Weekly ${dateStr}`,
-} as const;
-
-// Weekly since October 2026.
-export const COMMUNITY_REPORT = {
-  title: "Tech Community AI Weekly",
-  issueTitle: (dateStr: string) => `💬 Tech Community AI Weekly ${dateStr}`,
-} as const;
-
 export const ISSUE_LABELS = {
   agents: "agents",
   infra: "infra",
@@ -132,19 +127,13 @@ export const FOOTER = {
 } as const;
 
 // ---------------------------------------------------------------------------
-// Report labels: RSS item titles, and published in manifest.json (`labels`) for
-// the sidebar (index.html) and the MCP server (mcp/src/index.ts). The only copy.
+// Report labels: RSS item titles, the Telegram message, and published in
+// manifest.json (`labels`) for the sidebar (index.html) and the MCP server
+// (mcp/src/index.ts). The live reports' names plus the retired ones.
 // ---------------------------------------------------------------------------
 
 export const REPORT_LABELS: Record<string, string> = {
-  "ai-agents": "AI Agents Digest",
-  "ai-infra": "AI Infrastructure Digest",
-  "ai-web": "Official AI Content Report",
-  "ai-trending": "Agent & AI Coding Trends",
-  "ai-hn": "Hacker News AI Community Digest",
-  "ai-arxiv": "ArXiv AI Research Digest",
-  "ai-hf": "Hugging Face Trending Models",
-  "ai-community": "Tech Community AI Digest",
+  ...Object.fromEntries(LIVE_REPORT_IDS.map((id) => [id, REPORTS[id].name])),
   // No longer generated (October 2026: ai-cli merged into ai-agents, ai-ph
   // dropped); kept so archived reports keep a title.
   "ai-cli": "AI CLI Tools Digest",
@@ -153,19 +142,4 @@ export const REPORT_LABELS: Record<string, string> = {
   // still render a proper title in the sidebar and RSS feed.
   "ai-weekly": "AI Tools Weekly Digest",
   "ai-monthly": "AI Tools Monthly Digest",
-};
-
-// ---------------------------------------------------------------------------
-// Telegram notification labels (used in notify.ts)
-// ---------------------------------------------------------------------------
-
-export const NOTIFY_LABELS: Record<string, string> = {
-  "ai-agents": "AI Agents",
-  "ai-infra": "AI Infrastructure",
-  "ai-web": "Official Updates",
-  "ai-trending": "GitHub Trends",
-  "ai-hn": "HN Community",
-  "ai-arxiv": "ArXiv Research",
-  "ai-hf": "HF Models",
-  "ai-community": "Tech Community",
 };

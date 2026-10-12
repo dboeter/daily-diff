@@ -1,6 +1,7 @@
 import { describe, it, expect, afterEach } from "vitest";
 import { buildMessage, resolvePagesUrl } from "../notify.ts";
 import type { ReportHighlights } from "../prompts-data.ts";
+import { REPORT_LABELS } from "../i18n.ts";
 
 const BASE_URL = "https://example.com/radar";
 
@@ -59,7 +60,7 @@ describe("buildMessage", () => {
     expect(msg).toContain(`${BASE_URL}/#2026-03-09/ai-agents`);
     expect(msg).toContain("AI Agents");
     expect(msg).toContain(`${BASE_URL}/#2026-03-09/ai-hn`);
-    expect(msg).toContain("HN Community");
+    expect(msg).toContain(REPORT_LABELS["ai-hn"]);
   });
 
   it("includes Web UI and RSS links", () => {

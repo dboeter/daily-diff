@@ -1,35 +1,37 @@
 import { describe, it, expect } from "vitest";
 import {
   WEB_REPORT,
-  TRENDING_REPORT,
-  HN_REPORT,
   ISSUE_LABELS,
-  projectIssueTitle,
-  NOTIFY_LABELS,
+  REPORTS,
+  LIVE_REPORT_IDS,
   REPORT_LABELS,
+  reportHeading,
+  reportIssueTitle,
 } from "../i18n.ts";
 
 // ---------------------------------------------------------------------------
-// Dynamic title functions
+// One name per report
 // ---------------------------------------------------------------------------
 
-describe("issue title functions", () => {
-  it("projectIssueTitle prefixes the section emoji to the config title and date", () => {
-    expect(projectIssueTitle("agents", "Agents Title", "2026-03-12")).toBe("🤖 Agents Title 2026-03-12");
-    expect(projectIssueTitle("infra", "Infra Title", "2026-03-12")).toBe("⚙️ Infra Title 2026-03-12");
+describe("report names", () => {
+  it("derives the H1, the issue title and the label from the one name", () => {
+    for (const id of LIVE_REPORT_IDS) {
+      const { emoji, name } = REPORTS[id];
+      expect(reportHeading(id, "2026-03-12")).toBe(`# ${name} 2026-03-12`);
+      expect(reportIssueTitle(id, "2026-03-12")).toBe(`${emoji} ${name} 2026-03-12`);
+      expect(REPORT_LABELS[id]).toBe(name);
+    }
   });
 
-  it("WEB_REPORT.issueTitle includes first crawl flag", () => {
-    expect(WEB_REPORT.issueTitle("2026-03-12", true)).toContain("First Crawl");
-    expect(WEB_REPORT.issueTitle("2026-03-12", false)).not.toContain("First Crawl");
+  it("keeps cadence words out of the names: the archive holds daily and weekly editions", () => {
+    for (const id of LIVE_REPORT_IDS) expect(REPORTS[id].name).not.toMatch(/daily|weekly|today/i);
   });
 
-  it("TRENDING_REPORT.issueTitle includes title", () => {
-    expect(TRENDING_REPORT.issueTitle("2026-03-12")).toContain("Agent & AI Coding Trends");
-  });
-
-  it("HN_REPORT.issueTitle includes title", () => {
-    expect(HN_REPORT.issueTitle("2026-03-12")).toContain("Hacker News");
+  it("flags the web report's first crawl in its issue title", () => {
+    expect(WEB_REPORT.issueTitle("2026-03-12", true)).toBe(
+      `${reportIssueTitle("ai-web", "2026-03-12")} (First Crawl)`,
+    );
+    expect(WEB_REPORT.issueTitle("2026-03-12", false)).toBe(reportIssueTitle("ai-web", "2026-03-12"));
   });
 });
 
@@ -65,25 +67,7 @@ describe("ISSUE_LABELS", () => {
 // ---------------------------------------------------------------------------
 
 describe("REPORT_LABELS", () => {
-  it("covers the infra report", () => {
-    expect(REPORT_LABELS["ai-infra"]).toBe("AI Infrastructure Digest");
-  });
-
-  it("keeps the merged CLI report for archived days", () => {
-    expect(REPORT_LABELS["ai-cli"]).toBeTruthy();
-    expect(REPORT_LABELS["ai-agents"]).toBe("AI Agents Digest");
-  });
-});
-
-// ---------------------------------------------------------------------------
-// NOTIFY_LABELS
-// ---------------------------------------------------------------------------
-
-describe("NOTIFY_LABELS", () => {
-  it("covers all report types", () => {
-    const expected = ["ai-agents", "ai-infra", "ai-web", "ai-trending", "ai-hn"];
-    for (const key of expected) {
-      expect(NOTIFY_LABELS[key]).toBeTruthy();
-    }
+  it("keeps the retired reports for archived days", () => {
+    for (const id of ["ai-cli", "ai-ph", "ai-weekly", "ai-monthly"]) expect(REPORT_LABELS[id]).toBeTruthy();
   });
 });

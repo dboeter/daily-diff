@@ -66,7 +66,7 @@ import { fetchDevtoData, type DevtoData } from "./devto.ts";
 import { fetchLobstersData, type LobstersData } from "./lobsters.ts";
 import { loadConfig, type SectionKey } from "./config.ts";
 import { toCstDateStr, toUtcStr, isWeeklyRun, sleep } from "./date.ts";
-import { MSG, ISSUE_LABELS, PROJECT_REPORTS, projectIssueTitle } from "./i18n.ts";
+import { MSG, ISSUE_LABELS, PROJECT_REPORTS, REPORTS, reportIssueTitle } from "./i18n.ts";
 
 // ---------------------------------------------------------------------------
 // Repo config — loaded from config.yml (throws when a section is missing)
@@ -421,7 +421,7 @@ async function main(): Promise<void> {
   // 3. Build + save all reports
   const ft = autoGenFooter();
   const agentsContent = buildProjectReportContent({
-    title: CONFIG.agents.title,
+    title: REPORTS["ai-agents"].name,
     dateStr,
     utcStr,
     activities: agentActivities,
@@ -435,7 +435,7 @@ async function main(): Promise<void> {
   let infraContent = "";
   if (weekly) {
     infraContent = buildProjectReportContent({
-      title: CONFIG.infra.title,
+      title: REPORTS["ai-infra"].name,
       dateStr,
       utcStr,
       activities: infraActivities,
@@ -526,7 +526,7 @@ async function main(): Promise<void> {
   // 5. Create GitHub issues for agents (+ infra on the weekly run)
   if (digestRepo) {
     const agentsUrl = await createGitHubIssue(
-      projectIssueTitle("agents", CONFIG.agents.title, dateStr),
+      reportIssueTitle("ai-agents", dateStr),
       agentsContent,
       ISSUE_LABELS.agents,
     );
@@ -534,7 +534,7 @@ async function main(): Promise<void> {
 
     if (weekly) {
       const infraUrl = await createGitHubIssue(
-        projectIssueTitle("infra", CONFIG.infra.title, dateStr),
+        reportIssueTitle("ai-infra", dateStr),
         infraContent,
         ISSUE_LABELS.infra,
       );
