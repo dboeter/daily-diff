@@ -88,9 +88,9 @@ const LLM_ABORT_RATIO = 0.5;
 
 /**
  * Below this many calls the ratio is meaningless. Was 5 when a run made ~30
- * calls; since October 2026 a daily run makes only 3–4 (agents, HN, ArXiv, and
- * web when there is new content), so 5 would never arm the gate on six days
- * out of seven. At 3, losing 2 of the 3 core daily reports aborts the run — by
+ * calls; since October 2026 a daily run makes only 3–5 (agents and infra when
+ * they had activity, discussions, ArXiv, and web when there is new content),
+ * so 5 would rarely arm the gate on six days out of seven. At 3, losing 2 of the 3 core daily reports aborts the run — by
  * then the day is mostly placeholders anyway.
  */
 const LLM_MIN_SAMPLES = 3;

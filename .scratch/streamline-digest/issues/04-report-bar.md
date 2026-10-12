@@ -10,3 +10,7 @@
 - [ ] Links point at the Pages hash routes (`#YYYY-MM-DD/<report>`), so they work from a GitHub Issue
 - [ ] Only reports actually generated that day appear
 - [ ] Tests
+
+## Comments
+
+- 2026-10-12, implementation: emoji + full name per link (see 01). The bar also links the day's Overview (05).

@@ -1,7 +1,6 @@
 import { describe, it, expect } from "vitest";
 import {
   WEB_REPORT,
-  ISSUE_LABELS,
   REPORTS,
   LIVE_REPORT_IDS,
   REPORT_LABELS,
@@ -51,18 +50,6 @@ describe("dynamic content helpers", () => {
 });
 
 // ---------------------------------------------------------------------------
-// ISSUE_LABELS
-// ---------------------------------------------------------------------------
-
-describe("ISSUE_LABELS", () => {
-  it("maps report types to label names", () => {
-    expect(ISSUE_LABELS.agents).toBe("agents");
-    expect(ISSUE_LABELS.trending).toBe("trending");
-    expect(ISSUE_LABELS.hn).toBe("hn");
-  });
-});
-
-// ---------------------------------------------------------------------------
 // REPORT_LABELS
 // ---------------------------------------------------------------------------
 
@@ -73,10 +60,12 @@ describe("REPORT_LABELS", () => {
 });
 
 describe("WEEKLY_REPORT_IDS", () => {
-  it("names live reports whose issue label is the id without ai-", () => {
-    for (const id of WEEKLY_REPORT_IDS) {
-      expect(LIVE_REPORT_IDS).toContain(id);
-      expect(Object.values(ISSUE_LABELS)).toContain(id.replace(/^ai-/, ""));
-    }
+  it("names live reports", () => {
+    for (const id of WEEKLY_REPORT_IDS) expect(LIVE_REPORT_IDS).toContain(id);
+  });
+
+  it("gives every live report its own issue label", () => {
+    const labels = LIVE_REPORT_IDS.map((id) => REPORTS[id].label);
+    expect(new Set(labels).size).toBe(labels.length);
   });
 });

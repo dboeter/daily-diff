@@ -12,7 +12,7 @@ import {
   buildWebReportPrompt,
   buildDiscussionsPrompt,
   buildArxivPrompt,
-  buildHfPrompt,
+  buildModelsPrompt,
 } from "../prompts-data.ts";
 import { TRENDING_TABLES_MARKER } from "../report-builders.ts";
 import { MODELS_REPORT, SECTIONS } from "../i18n.ts";
@@ -255,22 +255,22 @@ describe("buildTrendingProsePrompt", () => {
 });
 
 // ---------------------------------------------------------------------------
-// buildHfPrompt (the models report)
+// buildModelsPrompt (the models report)
 // ---------------------------------------------------------------------------
 
-describe("buildHfPrompt", () => {
+describe("buildModelsPrompt", () => {
   it("adds the OpenRouter section and data when OpenRouter has models", () => {
-    const result = buildHfPrompt({ models: [], fetchSuccess: true }, withModels, "2026-10-05");
+    const result = buildModelsPrompt({ models: [], fetchSuccess: true }, withModels, "2026-10-05");
     expect(result).toContain(`## ${MODELS_REPORT.openRouterHeading}\n`);
     expect(result).toContain("deepseek/deepseek-v4.1-flash — 25.63T tokens");
     expect(result).toContain("Ling 3.1 Flash (`inclusionai/ling-3.1-flash`)");
   });
 
   it("omits the OpenRouter section without model data, and the HF one without HF data", () => {
-    const hfOnly = buildHfPrompt({ models: [], fetchSuccess: true }, EMPTY_OPENROUTER, "2026-10-05");
+    const hfOnly = buildModelsPrompt({ models: [], fetchSuccess: true }, EMPTY_OPENROUTER, "2026-10-05");
     expect(hfOnly).not.toContain(`## ${MODELS_REPORT.openRouterHeading}`);
     expect(hfOnly).toContain(`## ${MODELS_REPORT.hfHeading}\n`);
-    const orOnly = buildHfPrompt({ models: [], fetchSuccess: false }, withModels, "2026-10-05");
+    const orOnly = buildModelsPrompt({ models: [], fetchSuccess: false }, withModels, "2026-10-05");
     expect(orOnly).not.toContain(`## ${MODELS_REPORT.hfHeading}`);
   });
 });
@@ -421,7 +421,7 @@ describe("listing report layout", () => {
   const prompts: Record<string, string> = {
     hn: buildHnPrompt({ stories: [], fetchSuccess: true }, "2026-10-12"),
     arxiv: buildArxivPrompt({ papers: [], fetchSuccess: true, rankedBy: "recency" }, "2026-10-12"),
-    hf: buildHfPrompt({ models: [], fetchSuccess: true }, withModels, "2026-10-12"),
+    hf: buildModelsPrompt({ models: [], fetchSuccess: true }, withModels, "2026-10-12"),
     weekly: buildDiscussionsPrompt(
       {
         hn: { stories: [], fetchSuccess: true },
@@ -440,7 +440,7 @@ describe("listing report layout", () => {
     expect(p.indexOf(`## ${SECTIONS.signals}\n`)).toBeGreaterThan(h);
   });
 
-  it.each(["hn", "arxiv", "hf", "weekly"])("%s: ends with Worth a Look", (id) => {
+  it.each(["hn", "arxiv", "hf", "weekly", "web"])("%s: ends with Worth a Look", (id) => {
     const p = prompts[id]!;
     expect(p.indexOf(`## ${SECTIONS.worthALook}\n`)).toBeGreaterThan(p.indexOf(`## ${SECTIONS.signals}\n`));
   });

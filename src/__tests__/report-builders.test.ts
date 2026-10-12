@@ -54,8 +54,7 @@ describe("buildProjectReportContent", () => {
     ],
   };
   const input = {
-    title: "AI Agents",
-    dateStr: "2026-10-04",
+    heading: "# AI Agents 2026-10-04",
     utcStr: "2026-10-03 22:50",
     period: "today",
     footer: "FOOTER",

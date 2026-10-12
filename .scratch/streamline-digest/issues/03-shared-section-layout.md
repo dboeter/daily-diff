@@ -11,3 +11,7 @@
 - [ ] Trending "Community Hot Spots" → "Worth watching"
 - [ ] Skills inside trending: its headings sit below the trending section (no H1/H2 that outranks "Claude Code Skills")
 - [ ] Prompt tests assert the headings
+
+## Comments
+
+- 2026-10-12, implementation: the closing section is "Worth a Look", not "Worth reading": it also lists models and repos. Web has it too, after review.

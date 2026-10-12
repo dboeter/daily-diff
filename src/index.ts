@@ -53,13 +53,13 @@ import {
 } from "./report-builders.ts";
 import { summaryRows } from "./trending-rank.ts";
 import {
-  saveWebReport,
-  saveTrendingReport,
-  saveDiscussionsReport,
-  saveArxivReport,
-  saveHfReport,
+  buildWebReport,
+  buildTrendingReport,
+  buildDiscussionsReport,
+  buildArxivReport,
+  buildModelsReport,
   type SavedReport,
-} from "./report-savers.ts";
+} from "./data-reports.ts";
 import { loadWebState, fetchSiteContent, type WebFetchResult, type WebState } from "./web.ts";
 import { fetchTrendingData, EMPTY_NPM, EMPTY_OPENROUTER, type TrendingData } from "./trending.ts";
 import { fetchStealthModels, type OpenRouterStealthModel } from "./openrouter.ts";
@@ -71,7 +71,7 @@ import { fetchLobstersData, type LobstersData } from "./lobsters.ts";
 import { loadConfig, type SectionKey } from "./config.ts";
 import { resolvePagesUrl } from "./notify.ts";
 import { toCstDateStr, toUtcStr, isWeeklyRun, sleep } from "./date.ts";
-import { MSG, ISSUE_LABELS, PROJECT_REPORTS, REPORTS, reportIssueTitle } from "./i18n.ts";
+import { MSG, PROJECT_SCOPE, REPORTS, reportHeading, reportIssueTitle } from "./i18n.ts";
 
 // ---------------------------------------------------------------------------
 // Repo config — loaded from config.yml (throws when a section is missing)
@@ -267,8 +267,7 @@ async function summarize(id: string, prompt: string, failMsg: string, maxTokens?
 
 /** Prompt wording for a section report: its subject from config.yml, its cadence from i18n. */
 function sectionScope(key: SectionKey): DigestScope {
-  const { window, period } = PROJECT_REPORTS[key];
-  return { subject: CONFIG[key].subject, window, period };
+  return { subject: CONFIG[key].subject, ...PROJECT_SCOPE };
 }
 
 /** One LLM call over every active project; a fixed notice when none was active. */
@@ -416,37 +415,34 @@ async function main(): Promise<void> {
   const agents: SavedReport = {
     id: "ai-agents",
     content: buildProjectReportContent({
-      title: REPORTS["ai-agents"].name,
-      dateStr,
+      heading: reportHeading("ai-agents", dateStr),
       utcStr,
       groups: [
         { title: CONFIG.agents.title, activities: agentActivities, summary: summaries.agentsSummary },
         { title: CONFIG.infra.title, activities: infraActivities, summary: summaries.infraSummary },
       ],
-      period: PROJECT_REPORTS.agents.period,
+      period: PROJECT_SCOPE.period,
       preamble: buildStealthSection(stealthModels),
       footer: autoGenFooter(),
     }),
-    issueTitle: reportIssueTitle("ai-agents", dateStr),
-    label: ISSUE_LABELS.agents,
   };
   if (!weekly)
     console.log("  [weekly] Trending and HF reports, Dev.to and Lobste.rs — not scheduled today, skipping.");
 
   const built = await Promise.all([
-    saveWebReport(webResults, webState, utcStr, dateStr),
-    saveDiscussionsReport({ hn: hnData, devto: devtoData, lobsters: lobstersData }, utcStr, dateStr),
-    saveArxivReport(arxivData, utcStr, dateStr),
+    buildWebReport(webResults, webState, utcStr, dateStr),
+    buildDiscussionsReport({ hn: hnData, devto: devtoData, lobsters: lobstersData }, utcStr, dateStr),
+    buildArxivReport(arxivData, utcStr, dateStr),
     ...(weekly
       ? [
-          saveTrendingReport(
+          buildTrendingReport(
             trendingData,
             summaries.trending,
             { summary: summaries.skillsSummary, repo: CLAUDE_SKILLS_REPO },
             utcStr,
             dateStr,
           ),
-          saveHfReport(hfData, trendingData.openrouter, utcStr, dateStr),
+          buildModelsReport(hfData, trendingData.openrouter, utcStr, dateStr),
         ]
       : []),
   ]);
@@ -510,7 +506,8 @@ async function main(): Promise<void> {
   // 5. Create the GitHub issues
   if (digestRepo) {
     for (const r of saved) {
-      const url = await createGitHubIssue(r.issueTitle, r.content, r.label);
+      const title = r.issueTitle ?? reportIssueTitle(r.id, dateStr);
+      const url = await createGitHubIssue(title, r.content, REPORTS[r.id].label);
       console.log(`  Created ${r.id} issue: ${url}`);
     }
   }

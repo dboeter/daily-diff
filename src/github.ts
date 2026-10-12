@@ -3,7 +3,7 @@
  * Reads GITHUB_TOKEN and DIGEST_REPO from environment at call time.
  */
 
-import { ISSUE_LABELS, WEEKLY_REPORT_IDS } from "./i18n.ts";
+import { LIVE_REPORT_IDS, REPORTS, WEEKLY_REPORT_IDS } from "./i18n.ts";
 import { toCstDateStr, sleep } from "./date.ts";
 
 // ---------------------------------------------------------------------------
@@ -371,9 +371,9 @@ function neutralizeGitHubRefs(text: string): string {
  * touched.
  */
 const DIGEST_ISSUE_LABELS = new Set([
-  ...Object.values(ISSUE_LABELS),
+  ...LIVE_REPORT_IDS.map((id) => REPORTS[id].label),
   // Issues from the former bilingual pipeline carried "-en" labels; keep them closable.
-  ...Object.values(ISSUE_LABELS).map((l) => `${l}-en`),
+  ...LIVE_REPORT_IDS.map((id) => `${REPORTS[id].label}-en`),
   // Discontinued in October 2026: CLI and OpenClaw were merged into the agents
   // report, Product Hunt was dropped.
   "digest",
@@ -407,8 +407,8 @@ function isDigestIssue(i: OpenIssue): boolean {
   return i.pull_request === undefined && i.labels.some((l) => DIGEST_ISSUE_LABELS.has(l.name));
 }
 
-/** Labels of the weekly reports: a report's label is its id without "ai-". */
-export const WEEKLY_ISSUE_LABELS = new Set<string>(WEEKLY_REPORT_IDS.map((id) => id.replace(/^ai-/, "")));
+/** Labels of the weekly reports. */
+export const WEEKLY_ISSUE_LABELS = new Set<string>(WEEKLY_REPORT_IDS.map((id) => REPORTS[id].label));
 
 /**
  * Daily issues are retained as one group; each weekly report is its own group,

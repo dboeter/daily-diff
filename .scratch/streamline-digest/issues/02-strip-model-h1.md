@@ -9,3 +9,7 @@
 - [ ] Any `#` heading the model emits is dropped, and a leading `**Date:**/**Source:**/**Type:**` block with it
 - [ ] Applied to every LLM-written report body
 - [ ] Unit tests on real-shaped Summaries (HN, web, Skills)
+
+## Comments
+
+- 2026-10-12, implementation: a leading model H1 (and its **Date:**/**Type:** block) is dropped; a later H1 is demoted to H2 instead, so its section's content is kept.

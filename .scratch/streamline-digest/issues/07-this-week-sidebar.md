@@ -8,3 +8,7 @@
 
 - [ ] Weekly report ids come from the manifest, not a hard-coded list in `index.html`
 - [ ] Shows the latest edition of each weekly report
+
+## Comments
+
+- 2026-10-12, review fix: an edition older than 7 days (missed Monday) drops out of This week.

@@ -30,8 +30,8 @@ export interface ProjectGroup {
 }
 
 export interface ProjectReportInput {
-  title: string;
-  dateStr: string;
+  /** The H1 line, from reportHeading. */
+  heading: string;
   utcStr: string;
   groups: ProjectGroup[];
   /** Label for the quiet-projects line, e.g. "today". */
@@ -81,7 +81,7 @@ export function buildProjectReportContent(r: ProjectReportInput): string {
   });
 
   return (
-    `# ${r.title} ${r.dateStr}\n\n` +
+    `${r.heading}\n\n` +
     `> Generated: ${r.utcStr} UTC | Projects: ${all.length} | ` +
     `Active ${r.period}: ${all.length - quietCount} | ` +
     `Stable releases: ${releases} | Prereleases (not covered): ${prereleases}\n\n` +

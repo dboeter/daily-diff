@@ -166,6 +166,9 @@ Based on both companies' release cadence and content focus:
 - Potential impact on developers and enterprise users
 - Hidden signals in titles, phrasing and timing: new terms, dense releases in one category, policy and safety developments
 
+## ${SECTIONS.worthALook}
+1-3 pieces most worth reading in full, with brief reasoning.
+
 ${isAnyFirstRun ? "## Content Landscape Overview\nFirst full crawl only: summarize the content category distribution for both companies and describe their content strategy style (academic-oriented vs product-oriented vs user stories, etc.)\n\n" : ""}Style: English, professional and detailed, suited for AI researchers, product managers, and technical decision-makers. Every item must include official links.
 `;
 }
@@ -435,7 +438,7 @@ Style: English, concise and professional, preserve all ArXiv links.
  * usage (in the trending report until October 2026). Either source alone is
  * enough for a report.
  */
-export function buildHfPrompt(data: HfData, openrouter: OpenRouterData, dateStr: string): string {
+export function buildModelsPrompt(data: HfData, openrouter: OpenRouterData, dateStr: string): string {
   const M = MODELS_REPORT;
   const hasHf = data.fetchSuccess;
   const modelData = buildModelUsageData(openrouter);
@@ -452,7 +455,7 @@ export function buildHfPrompt(data: HfData, openrouter: OpenRouterData, dateStr:
 
   const inputs = [
     hasHf
-      ? `# Hugging Face Hub trending models (${data.models.length}, sorted by weekly likes)\n\n${modelsText}`
+      ? `Hugging Face Hub trending models (${data.models.length}, sorted by weekly likes):\n\n${modelsText}`
       : "",
     modelData ? `OpenRouter:\n\n${modelData}` : "",
   ].filter(Boolean);

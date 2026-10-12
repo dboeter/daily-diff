@@ -2,8 +2,6 @@
  * Centralized report strings: report names, labels, footers and status messages.
  */
 
-import type { SectionKey } from "./config.ts";
-
 // ---------------------------------------------------------------------------
 // Status & error messages (used in index.ts)
 // ---------------------------------------------------------------------------
@@ -20,7 +18,7 @@ export const MSG = {
 // ---------------------------------------------------------------------------
 
 /**
- * Report names. Each live report has one name: its H1, its GitHub issue title,
+ * Report names and GitHub issue labels. Each live report has one name: its H1, its GitHub issue title,
  * its sidebar and RSS label and its Telegram label all derive from it. Until
  * October 2026 a report could carry four different ones ("Agent Tooling
  * Weekly" in the H1, "AI Infrastructure Digest" in the sidebar). Names stay
@@ -28,13 +26,13 @@ export const MSG = {
  */
 // In reading order: the report bar and the sidebar list them this way.
 export const REPORTS = {
-  "ai-agents": { emoji: "🤖", name: "AI Agents" },
-  "ai-hn": { emoji: "💬", name: "AI Discussions" },
-  "ai-arxiv": { emoji: "📚", name: "AI Research" },
-  "ai-web": { emoji: "🌐", name: "Lab Announcements" },
-  "ai-trending": { emoji: "📈", name: "Agent & AI Coding Trends" },
-  "ai-hf": { emoji: "🧠", name: "AI Models" },
-} as const satisfies Record<string, { emoji: string; name: string }>;
+  "ai-agents": { emoji: "🤖", name: "AI Agents", label: "agents" },
+  "ai-hn": { emoji: "💬", name: "AI Discussions", label: "hn" },
+  "ai-arxiv": { emoji: "📚", name: "AI Research", label: "arxiv" },
+  "ai-web": { emoji: "🌐", name: "Lab Announcements", label: "web" },
+  "ai-trending": { emoji: "📈", name: "Agent & AI Coding Trends", label: "trending" },
+  "ai-hf": { emoji: "🧠", name: "AI Models", label: "hf" },
+} as const satisfies Record<string, { emoji: string; name: string; label: string }>;
 
 export type ReportId = keyof typeof REPORTS;
 export const LIVE_REPORT_IDS = Object.keys(REPORTS) as ReportId[];
@@ -54,17 +52,12 @@ export const reportIssueTitle = (id: ReportId, dateStr: string) =>
   `${REPORTS[id].emoji} ${REPORTS[id].name} ${dateStr}`;
 
 /**
- * The config.yml report sections (agents, infra). What a section covers and
- * its LLM subject live in config.yml next to its repos, so re-scoping it is a
- * config edit. These strings follow from its cadence and stay here.
+ * Wording of the agents report's sections (config.yml agents and infra), both
+ * daily: infra was a weekly report of its own until October 2026. What a
+ * section covers and its LLM subject live in config.yml next to its repos, so
+ * re-scoping it is a config edit.
  */
-export const PROJECT_REPORTS = {
-  // Replaced the separate CLI and OpenClaw-ecosystem reports in October 2026.
-  agents: { window: "last 24h", period: "today" },
-  // A group in the agents report since October 2026; a weekly report of its
-  // own before that, which mostly listed quiet projects.
-  infra: { window: "last 24h", period: "today" },
-} as const satisfies Record<SectionKey, { window: string; period: string }>;
+export const PROJECT_SCOPE = { window: "last 24h", period: "today" } as const;
 
 export const WEB_REPORT = {
   firstCrawl: "First full crawl",
@@ -124,15 +117,6 @@ export const STEALTH_SECTION = {
   isNew: "🆕 new",
   expiring: (days: number) => (days <= 0 ? "⏳ expires today" : `⏳ expires in ${days}d`),
   live: "live",
-} as const;
-
-export const ISSUE_LABELS = {
-  agents: "agents",
-  web: "web",
-  trending: "trending",
-  hn: "hn",
-  arxiv: "arxiv",
-  hf: "hf",
 } as const;
 
 // ---------------------------------------------------------------------------

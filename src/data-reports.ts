@@ -1,22 +1,16 @@
 /**
- * Report builders for the data-source reports: LLM call + report Markdown.
- * main() writes the files and opens the issues once every report is in, so
- * each report's bar can link the others.
+ * Builders for the data-source reports: LLM call + report Markdown, plus the
+ * source's state file (web, ArXiv, trending caches) once its report is built.
+ * main() writes the report files and opens the issues once every report is
+ * in, so each report's bar can link the others.
  */
 
-import {
-  WEB_REPORT,
-  TRENDING_REPORT,
-  ISSUE_LABELS,
-  reportHeading,
-  reportIssueTitle,
-  type ReportId,
-} from "./i18n.ts";
+import { WEB_REPORT, TRENDING_REPORT, reportHeading, type ReportId } from "./i18n.ts";
 import {
   buildWebReportPrompt,
   buildDiscussionsPrompt,
   buildArxivPrompt,
-  buildHfPrompt,
+  buildModelsPrompt,
   type DiscussionsData,
 } from "./prompts-data.ts";
 import { callLlm, saveFile, autoGenFooter, LLM_TOKENS_WEB, LLM_TOKENS_LISTING } from "./report.ts";
@@ -35,19 +29,19 @@ import { saveArxivState, type ArxivData } from "./arxiv.ts";
 import type { HfData } from "./hf.ts";
 import type { OpenRouterData } from "./openrouter.ts";
 
-/** A finished report: its file and GitHub issue are written by main(). */
+/** A finished report: main() writes its file and opens its issue (title and label from REPORTS). */
 export interface SavedReport {
   id: ReportId;
   content: string;
-  issueTitle: string;
-  label: string;
+  /** Only when it differs from reportIssueTitle (the web report's first crawl). */
+  issueTitle?: string;
 }
 
 // ---------------------------------------------------------------------------
 // Web report
 // ---------------------------------------------------------------------------
 
-export async function saveWebReport(
+export async function buildWebReport(
   webResults: WebFetchResult[],
   webState: WebState,
   utcStr: string,
@@ -81,12 +75,7 @@ export async function saveWebReport(
 
       const webContent = webTitle + webMeta + webSources + `---\n\n` + summary + autoGenFooter();
 
-      saved = {
-        id: "ai-web",
-        content: webContent,
-        issueTitle: WEB_REPORT.issueTitle(dateStr, isFirstRun),
-        label: ISSUE_LABELS.web,
-      };
+      saved = { id: "ai-web", content: webContent, issueTitle: WEB_REPORT.issueTitle(dateStr, isFirstRun) };
     } catch (err) {
       console.error(`  [web] Report generation failed: ${err}`);
     }
@@ -103,7 +92,7 @@ export async function saveWebReport(
 // Trending report
 // ---------------------------------------------------------------------------
 
-export async function saveTrendingReport(
+export async function buildTrendingReport(
   trendingData: TrendingData,
   trending: { summaries: string; prose: string },
   skills: { summary: string; repo: string },
@@ -140,19 +129,14 @@ export async function saveTrendingReport(
   if (report.nextClassifications) saveClassifyCache(report.nextClassifications);
   if (report.nextStarHistory) saveStarHistory(report.nextStarHistory);
 
-  return {
-    id: "ai-trending",
-    content: trendingContent,
-    issueTitle: reportIssueTitle("ai-trending", dateStr),
-    label: ISSUE_LABELS.trending,
-  };
+  return { id: "ai-trending", content: trendingContent };
 }
 
 // ---------------------------------------------------------------------------
 // Discussions report (Hacker News daily; Dev.to + Lobste.rs on the weekly run)
 // ---------------------------------------------------------------------------
 
-export async function saveDiscussionsReport(
+export async function buildDiscussionsReport(
   data: DiscussionsData,
   utcStr: string,
   dateStr: string,
@@ -178,7 +162,7 @@ export async function saveDiscussionsReport(
       `---\n\n`;
 
     const content = header + summary + autoGenFooter();
-    return { id: "ai-hn", content, issueTitle: reportIssueTitle("ai-hn", dateStr), label: ISSUE_LABELS.hn };
+    return { id: "ai-hn", content };
   } catch (err) {
     console.error(`  [discussions] Report generation failed: ${err}`);
     return null;
@@ -189,7 +173,7 @@ export async function saveDiscussionsReport(
 // ArXiv report
 // ---------------------------------------------------------------------------
 
-export async function saveArxivReport(
+export async function buildArxivReport(
   arxivData: ArxivData,
   utcStr: string,
   dateStr: string,
@@ -218,12 +202,7 @@ export async function saveArxivReport(
     const content = header + summary + autoGenFooter();
     // Only once the report exists: after a failed report the next run takes this pool too.
     if (arxivData.nextState) saveArxivState(arxivData.nextState);
-    return {
-      id: "ai-arxiv",
-      content,
-      issueTitle: reportIssueTitle("ai-arxiv", dateStr),
-      label: ISSUE_LABELS.arxiv,
-    };
+    return { id: "ai-arxiv", content };
   } catch (err) {
     console.error(`  [arxiv] Report generation failed: ${err}`);
     return null;
@@ -234,7 +213,7 @@ export async function saveArxivReport(
 // Models report (Hugging Face + OpenRouter usage) — weekly, see WEEKLY_REPORT_WEEKDAY in date.ts
 // ---------------------------------------------------------------------------
 
-export async function saveHfReport(
+export async function buildModelsReport(
   hfData: HfData,
   openrouter: OpenRouterData,
   utcStr: string,
@@ -253,7 +232,7 @@ export async function saveHfReport(
   console.log("  [models] Calling LLM for models report...");
   try {
     const summary = stripModelTitle(
-      await callLlm(buildHfPrompt(hfData, openrouter, dateStr), LLM_TOKENS_LISTING),
+      await callLlm(buildModelsPrompt(hfData, openrouter, dateStr), LLM_TOKENS_LISTING),
     );
 
     const header =
@@ -262,7 +241,7 @@ export async function saveHfReport(
       `---\n\n`;
 
     const content = header + summary + autoGenFooter();
-    return { id: "ai-hf", content, issueTitle: reportIssueTitle("ai-hf", dateStr), label: ISSUE_LABELS.hf };
+    return { id: "ai-hf", content };
   } catch (err) {
     console.error(`  [models] Report generation failed: ${err}`);
     return null;

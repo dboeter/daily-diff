@@ -644,11 +644,16 @@ function buildDateGroup(date, reports, isFirst) {
   return grp;
 }
 
-/** The latest edition of each weekly report, pinned above the archive until the next weekly run. */
+/**
+ * The latest edition of each weekly report, pinned above the archive for the
+ * 7 days after it ran — the next weekly run replaces it. After a missed week
+ * the stale edition drops out instead of passing for this week's.
+ */
 function buildThisWeek(nav, dates) {
+  const newest = Date.parse(dates[0].date);
   const latest = WEEKLY
     .map((id) => ({ id, entry: dates.find((d) => d.reports.includes(id)) }))
-    .filter((x) => x.entry);
+    .filter((x) => x.entry && newest - Date.parse(x.entry.date) < 7 * 86400000);
   if (!latest.length) return;
   const grp = document.createElement('div');
   grp.className = 'this-week';

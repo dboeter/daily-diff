@@ -380,6 +380,7 @@ Sources: anthropic.com (N articles) + openai.com (N articles)
 ## Anthropic      (news / research / engineering / learn)
 ## OpenAI         (research / release / company / safety / ...)
 ## Signals
+## Worth a Look
 [First full crawl also includes: Content Landscape Overview]
 ```
 

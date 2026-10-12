@@ -9,3 +9,7 @@
 - [ ] Overview reachable at `#YYYY-MM-DD` and as the first sidebar entry of a day
 - [ ] No extra LLM call; built from the existing highlights
 - [ ] Days without `highlights.json` fall back to the first report
+
+## Comments
+
+- 2026-10-12, implementation: a day without highlights.json shows the overview as its list of report links ("No highlights picked."), not the first report.
