@@ -26,6 +26,7 @@ import {
 } from "./report-builders.ts";
 import { saveArxivState, type ArxivData } from "./arxiv.ts";
 import type { HfData } from "./hf.ts";
+import type { OpenRouterData } from "./openrouter.ts";
 
 // ---------------------------------------------------------------------------
 // Web report
@@ -231,29 +232,36 @@ export async function saveArxivReport(
 }
 
 // ---------------------------------------------------------------------------
-// Hugging Face report — weekly, see WEEKLY_REPORT_WEEKDAY in date.ts
+// Models report (Hugging Face + OpenRouter usage) — weekly, see WEEKLY_REPORT_WEEKDAY in date.ts
 // ---------------------------------------------------------------------------
 
 export async function saveHfReport(
   hfData: HfData,
+  openrouter: OpenRouterData,
   utcStr: string,
   dateStr: string,
   digestRepo: string,
 ): Promise<void> {
-  if (!hfData.fetchSuccess) {
-    console.log("  [hf] No data available, skipping report.");
+  const hasOpenRouter = openrouter.topModels.length > 0 || openrouter.newModels.length > 0;
+  const sources = [
+    hfData.fetchSuccess && `[Hugging Face Hub](https://huggingface.co/) (${hfData.models.length} models)`,
+    hasOpenRouter && `[OpenRouter](https://openrouter.ai/rankings)`,
+  ].filter(Boolean);
+  if (sources.length === 0) {
+    console.log("  [models] No data available, skipping report.");
     return;
   }
 
-  console.log("  [hf] Calling LLM for Hugging Face report...");
+  console.log("  [models] Calling LLM for models report...");
   try {
-    const summary = stripModelTitle(await callLlm(buildHfPrompt(hfData, dateStr), LLM_TOKENS_LISTING));
+    const summary = stripModelTitle(
+      await callLlm(buildHfPrompt(hfData, openrouter, dateStr), LLM_TOKENS_LISTING),
+    );
 
     const fileName = "ai-hf.md";
     const header =
       `${reportHeading("ai-hf", dateStr)}\n\n` +
-      `> Source: [Hugging Face Hub](https://huggingface.co/) | ` +
-      `${hfData.models.length} models | Generated: ${utcStr} UTC\n\n` +
+      `> Sources: ${sources.join(" + ")} | Generated: ${utcStr} UTC\n\n` +
       `---\n\n`;
 
     const content = header + summary + autoGenFooter();
@@ -264,9 +272,9 @@ export async function saveHfReport(
       const title = reportIssueTitle("ai-hf", dateStr);
       const label = ISSUE_LABELS.hf;
       const url = await createGitHubIssue(title, content, label);
-      console.log(`  Created HF issue: ${url}`);
+      console.log(`  Created models issue: ${url}`);
     }
   } catch (err) {
-    console.error(`  [hf] Report generation failed: ${err}`);
+    console.error(`  [models] Report generation failed: ${err}`);
   }
 }

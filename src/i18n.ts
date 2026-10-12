@@ -98,7 +98,13 @@ export const TRENDING_REPORT = {
     agent_tooling: "🔌 Agent Tooling",
     other_agent: "🤖 Other Agents",
   },
-  modelUsageHeading: "Model Usage on OpenRouter",
+} as const;
+
+// Weekly: Hugging Face trending models plus OpenRouter token usage, which
+// moved here from the trending report in October 2026.
+export const MODELS_REPORT = {
+  hfHeading: "Hugging Face Trending",
+  openRouterHeading: "OpenRouter Usage",
 } as const;
 
 // Rendered daily at the top of the agents report (buildStealthSection).

@@ -450,7 +450,7 @@ async function main(): Promise<void> {
             dateStr,
             digestRepo,
           ),
-          saveHfReport(hfData, utcStr, dateStr, digestRepo),
+          saveHfReport(hfData, trendingData.openrouter, utcStr, dateStr, digestRepo),
         ]
       : []),
   ]);

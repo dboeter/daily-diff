@@ -15,7 +15,7 @@ import {
   buildHfPrompt,
 } from "../prompts-data.ts";
 import { TRENDING_TABLES_MARKER } from "../report-builders.ts";
-import { SECTIONS, TRENDING_REPORT } from "../i18n.ts";
+import { MODELS_REPORT, SECTIONS } from "../i18n.ts";
 import type { RepoConfig, GitHubItem, GitHubRelease } from "../github.ts";
 import { EMPTY_NPM, EMPTY_OPENROUTER, type TrendingData } from "../trending.ts";
 import type { HnData } from "../hn.ts";
@@ -181,6 +181,22 @@ describe("buildSkillsPrompt", () => {
 // buildTrendingSummariesPrompt / buildTrendingProsePrompt
 // ---------------------------------------------------------------------------
 
+const withModels: TrendingData["openrouter"] = {
+  ...EMPTY_OPENROUTER,
+  topModels: [{ slug: "deepseek/deepseek-v4.1-flash", tokens: 25_630_000_000_000 }],
+  topModelsDate: "2026-10-04",
+  newModels: [
+    {
+      id: "inclusionai/ling-3.1-flash",
+      name: "Ling 3.1 Flash",
+      description: "MoE",
+      created: "2026-10-04",
+      contextLength: 262_144,
+    },
+  ],
+  fetchSuccess: true,
+};
+
 const noTrending: TrendingData = {
   trendingRepos: [],
   searchRepos: [],
@@ -230,35 +246,32 @@ describe("buildTrendingProsePrompt", () => {
     expect(result).toContain("Do not reproduce or alter the tables");
   });
 
-  it("omits the model-usage section without model data", () => {
-    const result = buildTrendingProsePrompt("", noTrending, "2026-10-05");
-    expect(result).not.toContain(TRENDING_REPORT.modelUsageHeading);
+  it("leaves OpenRouter model usage to the models report", () => {
+    const result = buildTrendingProsePrompt("", { ...noTrending, openrouter: withModels }, "2026-10-05");
+    expect(result).not.toContain(MODELS_REPORT.openRouterHeading);
+    expect(result).not.toContain("deepseek/deepseek-v4.1-flash");
     expect(result).toContain("No projects were selected");
   });
+});
 
-  it("adds the model-usage section and data when OpenRouter has models", () => {
-    const data: TrendingData = {
-      ...noTrending,
-      openrouter: {
-        ...EMPTY_OPENROUTER,
-        topModels: [{ slug: "deepseek/deepseek-v4.1-flash", tokens: 25_630_000_000_000 }],
-        topModelsDate: "2026-10-04",
-        newModels: [
-          {
-            id: "inclusionai/ling-3.1-flash",
-            name: "Ling 3.1 Flash",
-            description: "MoE",
-            created: "2026-10-04",
-            contextLength: 262_144,
-          },
-        ],
-        fetchSuccess: true,
-      },
-    };
-    const result = buildTrendingProsePrompt("", data, "2026-10-05");
-    expect(result).toContain(`## ${TRENDING_REPORT.modelUsageHeading}`);
+// ---------------------------------------------------------------------------
+// buildHfPrompt (the models report)
+// ---------------------------------------------------------------------------
+
+describe("buildHfPrompt", () => {
+  it("adds the OpenRouter section and data when OpenRouter has models", () => {
+    const result = buildHfPrompt({ models: [], fetchSuccess: true }, withModels, "2026-10-05");
+    expect(result).toContain(`## ${MODELS_REPORT.openRouterHeading}\n`);
     expect(result).toContain("deepseek/deepseek-v4.1-flash — 25.63T tokens");
     expect(result).toContain("Ling 3.1 Flash (`inclusionai/ling-3.1-flash`)");
+  });
+
+  it("omits the OpenRouter section without model data, and the HF one without HF data", () => {
+    const hfOnly = buildHfPrompt({ models: [], fetchSuccess: true }, EMPTY_OPENROUTER, "2026-10-05");
+    expect(hfOnly).not.toContain(`## ${MODELS_REPORT.openRouterHeading}`);
+    expect(hfOnly).toContain(`## ${MODELS_REPORT.hfHeading}\n`);
+    const orOnly = buildHfPrompt({ models: [], fetchSuccess: false }, withModels, "2026-10-05");
+    expect(orOnly).not.toContain(`## ${MODELS_REPORT.hfHeading}`);
   });
 });
 
@@ -408,7 +421,7 @@ describe("listing report layout", () => {
   const prompts: Record<string, string> = {
     hn: buildHnPrompt({ stories: [], fetchSuccess: true }, "2026-10-12"),
     arxiv: buildArxivPrompt({ papers: [], fetchSuccess: true, rankedBy: "recency" }, "2026-10-12"),
-    hf: buildHfPrompt({ models: [], fetchSuccess: true }, "2026-10-12"),
+    hf: buildHfPrompt({ models: [], fetchSuccess: true }, withModels, "2026-10-12"),
     weekly: buildDiscussionsPrompt(
       {
         hn: { stories: [], fetchSuccess: true },

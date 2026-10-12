@@ -7,8 +7,8 @@
 import type { WebFetchResult } from "./web.ts";
 import type { TrendingData } from "./trending.ts";
 import type { summaryRows } from "./trending-rank.ts";
-import { formatTokens } from "./openrouter.ts";
-import { SECTIONS, TRENDING_REPORT } from "./i18n.ts";
+import { formatTokens, type OpenRouterData } from "./openrouter.ts";
+import { MODELS_REPORT, SECTIONS } from "./i18n.ts";
 import { TRENDING_TABLES_MARKER } from "./report-builders.ts";
 import { NO_TITLE_RULE } from "./prompts.ts";
 import type { HnData } from "./hn.ts";
@@ -18,8 +18,8 @@ import type { DevtoData } from "./devto.ts";
 import type { LobstersData } from "./lobsters.ts";
 
 /** OpenRouter model usage. Empty string when there is no model data. */
-function buildModelUsageData(data: TrendingData): string {
-  const { topModels, topModelsDate, newModels } = data.openrouter;
+function buildModelUsageData(openrouter: OpenRouterData): string {
+  const { topModels, topModelsDate, newModels } = openrouter;
   const sections: string[] = [];
   if (topModels.length > 0) {
     sections.push(
@@ -68,12 +68,10 @@ For every numbered item write exactly one line in the form \`N: <2 sentences>\` 
  * inserts the tables.
  */
 export function buildTrendingProsePrompt(tablesMd: string, data: TrendingData, dateStr: string): string {
-  const T = TRENDING_REPORT;
-  const modelData = buildModelUsageData(data);
   return `You are a technical analyst covering AI coding tools, agents and agent harnesses. Below are this week's tables for the agent & AI coding trends report, week ending ${dateStr}. They were selected and ranked in code from GitHub Trending (weekly), GitHub topic search, OpenRouter app rankings and npm downloads; the Summary column holds the project descriptions.
 
 ${tablesMd || "(No projects were selected this week.)"}
-${modelData ? `\n---\n\n${modelData}\n` : ""}
+
 ---
 
 Write the prose sections of the report, in this order:
@@ -82,12 +80,12 @@ Write the prose sections of the report, in this order:
 2. The line \`${TRENDING_TABLES_MARKER}\` exactly once, on its own line. The tables are inserted there.
 3. \`## ${SECTIONS.signals}\` — 200-300 words: which kinds of agent or coding tool are getting attention, and any new harness or orchestration patterns.
 4. \`## ${SECTIONS.worthALook}\` — 3-5 bullets: specific projects or directions worth developer focus, with brief reasoning.
-${modelData ? `5. \`## ${T.modelUsageHeading}\` — 3-5 bullets: which models lead token usage, notable newcomers in the top list, and newly listed models worth trying for agentic work. Copy token figures verbatim.\n` : ""}
+
 Rules:
 - ${NO_TITLE_RULE}
 - Do not reproduce or alter the tables.
 - Base every claim on the tables and the data above. They show descriptions and counts only, so do not describe releases, adoption or community reactions they do not show.
-- Mention only projects that appear in the tables${modelData ? " or in the model data" : ""}, and link every project you mention.
+- Mention only projects that appear in the tables, and link every project you mention.
 - English, professional and concise.
 `;
 }
@@ -432,7 +430,15 @@ Style: English, concise and professional, preserve all ArXiv links.
 // Hugging Face prompt
 // ---------------------------------------------------------------------------
 
-export function buildHfPrompt(data: HfData, dateStr: string): string {
+/**
+ * The weekly models report: Hugging Face trending models and OpenRouter token
+ * usage (in the trending report until October 2026). Either source alone is
+ * enough for a report.
+ */
+export function buildHfPrompt(data: HfData, openrouter: OpenRouterData, dateStr: string): string {
+  const M = MODELS_REPORT;
+  const hasHf = data.fetchSuccess;
+  const modelData = buildModelUsageData(openrouter);
   const modelsText = data.models
     .map(
       (m, i) =>
@@ -444,20 +450,14 @@ export function buildHfPrompt(data: HfData, dateStr: string): string {
     )
     .join("\n\n");
 
-  return `You are an AI model ecosystem analyst. The following are trending models on Hugging Face Hub as of ${dateStr} (${data.models.length} models, sorted by weekly likes):
+  const inputs = [
+    hasHf
+      ? `# Hugging Face Hub trending models (${data.models.length}, sorted by weekly likes)\n\n${modelsText}`
+      : "",
+    modelData ? `OpenRouter:\n\n${modelData}` : "",
+  ].filter(Boolean);
 
----
-
-${modelsText}
-
----
-
-Write the report in English with these sections. ${NO_TITLE_RULE}
-
-## ${SECTIONS.highlights}
-3-5 sentences on the most notable model releases and trends on Hugging Face this week.
-
-## Trending Models
+  const hfSection = `## ${M.hfHeading}
 Organized by category: a \`### <category>\` heading per category, each followed by a **Markdown table** with exactly these columns:
 
    | Model | Author | Likes | Downloads | Summary |
@@ -474,7 +474,26 @@ Organized by category: a \`### <category>\` heading per category, each followed 
    - 🔧 Specialized Models (code, math, medical, embeddings)
    - 📦 Fine-tunes & Quantizations (community fine-tunes, GGUF, AWQ)
 
-## ${SECTIONS.signals}
+`;
+  const openRouterSection = `## ${M.openRouterHeading}
+3-5 bullets: which models lead token usage, notable newcomers in the top list, and newly listed models worth trying for agentic work. Copy token figures verbatim; link each model as https://openrouter.ai/<id>.
+
+`;
+
+  return `You are an AI model ecosystem analyst. The following are this week's model signals as of ${dateStr}:
+
+---
+
+${inputs.join("\n\n---\n\n")}
+
+---
+
+Write the report in English with these sections. ${NO_TITLE_RULE}
+
+## ${SECTIONS.highlights}
+3-5 sentences on the most notable model releases and trends this week.
+
+${hasHf ? hfSection : ""}${modelData ? openRouterSection : ""}## ${SECTIONS.signals}
 100-200 words analyzing model ecosystem trends:
    - Which model families are gaining momentum?
    - Open-weight vs proprietary trends
@@ -483,6 +502,6 @@ Organized by category: a \`### <category>\` heading per category, each followed 
 ## ${SECTIONS.worthALook}
 2-3 models most worth trying or studying, with reasoning.
 
-Style: English, concise and professional, preserve all HuggingFace links.
+Style: English, concise and professional, preserve all links.
 `;
 }
