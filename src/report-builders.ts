@@ -91,13 +91,36 @@ export function stripModelTitle(md: string): string {
       skipBlank();
     }
   }
+  const body = lines.slice(i);
+  const levels = headingLevels(body);
+  return body.map((line, j) => (levels[j] === 1 ? `#${line}` : line)).join("\n");
+}
+
+/** Lines with their heading level (0 = not a heading), ignoring code fences. */
+function headingLevels(lines: string[]): number[] {
   let inFence = false;
+  return lines.map((line) => {
+    if (/^\s*```/.test(line)) inFence = !inFence;
+    return inFence ? 0 : (line.match(/^(#{1,6})\s/)?.[1]?.length ?? 0);
+  });
+}
+
+/**
+ * Shift a body's headings so its top heading sits at `level`, for a body
+ * placed under a code-rendered heading (Skills inside trending). Before
+ * October 2026 the Skills body's own H1 and H2s outranked its "## Claude Code
+ * Skills" section.
+ */
+export function nestHeadings(md: string, level: number): string {
+  const lines = md.split("\n");
+  const levels = headingLevels(lines);
+  const top = Math.min(...levels.filter((l) => l > 0));
+  const shift = Number.isFinite(top) ? Math.max(0, level - top) : 0;
+  if (shift === 0) return md;
   return lines
-    .slice(i)
-    .map((line) => {
-      if (/^\s*```/.test(line)) inFence = !inFence;
-      return !inFence && /^#\s/.test(line) ? `#${line}` : line;
-    })
+    .map((line, i) =>
+      levels[i]! > 0 ? "#".repeat(Math.min(6, levels[i]! + shift)) + line.slice(levels[i]!) : line,
+    )
     .join("\n");
 }
 

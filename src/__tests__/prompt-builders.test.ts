@@ -11,9 +11,12 @@ import {
   buildTrendingProsePrompt,
   buildWebReportPrompt,
   buildHnPrompt,
+  buildArxivPrompt,
+  buildHfPrompt,
+  buildCommunityPrompt,
 } from "../prompts-data.ts";
 import { TRENDING_TABLES_MARKER } from "../report-builders.ts";
-import { TRENDING_REPORT } from "../i18n.ts";
+import { SECTIONS, TRENDING_REPORT } from "../i18n.ts";
 import type { RepoConfig, GitHubItem, GitHubRelease } from "../github.ts";
 import { EMPTY_NPM, EMPTY_OPENROUTER, type TrendingData } from "../trending.ts";
 import type { HnData } from "../hn.ts";
@@ -218,12 +221,9 @@ describe("buildTrendingProsePrompt", () => {
     const result = buildTrendingProsePrompt("| Tool |\n| :--- |", noTrending, "2026-10-05");
     expect(result).toContain("| Tool |");
     expect(result).toContain(`\`${TRENDING_TABLES_MARKER}\` exactly once`);
-    const order = [
-      TRENDING_REPORT.highlightsHeading,
-      TRENDING_TABLES_MARKER,
-      TRENDING_REPORT.trendsHeading,
-      TRENDING_REPORT.hotSpotsHeading,
-    ].map((s) => result.indexOf(s));
+    const order = [SECTIONS.highlights, TRENDING_TABLES_MARKER, SECTIONS.signals, SECTIONS.worthALook].map(
+      (s) => result.indexOf(s),
+    );
     expect(order.every((i) => i >= 0)).toBe(true);
     expect([...order].sort((a, b) => a - b)).toEqual(order);
     expect(result).toContain("Do not reproduce or alter the tables");
@@ -356,5 +356,44 @@ describe("buildHnPrompt", () => {
     expect(result).toContain("not the article and not the comment thread");
     expect(result).toContain("Do not describe the comments");
     expect(result).not.toMatch(/typical reaction|last cycle/);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Shared section layout
+// ---------------------------------------------------------------------------
+
+describe("listing report layout", () => {
+  const web: WebFetchResult[] = [
+    { site: "openai", siteName: "OpenAI", isFirstRun: false, newItems: [], totalDiscovered: 1 },
+  ];
+  const prompts: Record<string, string> = {
+    hn: buildHnPrompt({ stories: [], fetchSuccess: true }, "2026-10-12"),
+    arxiv: buildArxivPrompt({ papers: [], fetchSuccess: true, rankedBy: "recency" }, "2026-10-12"),
+    hf: buildHfPrompt({ models: [], fetchSuccess: true }, "2026-10-12"),
+    community: buildCommunityPrompt(
+      { articles: [], fetchSuccess: true },
+      { stories: [], fetchSuccess: true },
+      "2026-10-12",
+    ),
+    web: buildWebReportPrompt(web, "2026-10-12"),
+  };
+
+  it.each(Object.keys(prompts))("%s: Highlights first, then Signals", (id) => {
+    const p = prompts[id]!;
+    const h = p.indexOf(`## ${SECTIONS.highlights}\n`);
+    expect(h).toBeGreaterThan(-1);
+    expect(p.indexOf(`## ${SECTIONS.signals}\n`)).toBeGreaterThan(h);
+  });
+
+  it.each(["hn", "arxiv", "hf", "community"])("%s: ends with Worth a Look", (id) => {
+    const p = prompts[id]!;
+    expect(p.indexOf(`## ${SECTIONS.worthALook}\n`)).toBeGreaterThan(p.indexOf(`## ${SECTIONS.signals}\n`));
+  });
+
+  it.each(Object.keys(prompts))("%s: no title, no numbered or day-bound headings", (id) => {
+    const p = prompts[id]!;
+    expect(p).toContain("Do not write a title");
+    expect(p).not.toMatch(/Today's|This Week's|^\d\. \*\*/m);
   });
 });

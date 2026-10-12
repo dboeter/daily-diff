@@ -23,6 +23,7 @@ import {
   renderTrendingTables,
   spliceTrendingProse,
   stripModelTitle,
+  nestHeadings,
 } from "./report-builders.ts";
 import { saveArxivState, type ArxivData } from "./arxiv.ts";
 import type { HfData } from "./hf.ts";
@@ -115,7 +116,8 @@ export async function saveTrendingReport(
   const skillsSection =
     `\n\n---\n\n## ${TRENDING_REPORT.skillsHeading}\n\n` +
     `${TRENDING_REPORT.skillsSource(skills.repo)}\n\n` +
-    skills.summary;
+    // Code renders "## Claude Code Skills"; the body's own sections go below it.
+    nestHeadings(skills.summary, 3);
 
   const tables = renderTrendingTables(report, parseRowSummaries(trending.summaries));
   const trendingContent =

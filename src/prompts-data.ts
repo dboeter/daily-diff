@@ -8,8 +8,9 @@ import type { WebFetchResult } from "./web.ts";
 import type { TrendingData } from "./trending.ts";
 import type { summaryRows } from "./trending-rank.ts";
 import { formatTokens } from "./openrouter.ts";
-import { TRENDING_REPORT } from "./i18n.ts";
+import { SECTIONS, TRENDING_REPORT } from "./i18n.ts";
 import { TRENDING_TABLES_MARKER } from "./report-builders.ts";
+import { NO_TITLE_RULE } from "./prompts.ts";
 import type { HnData } from "./hn.ts";
 import type { ArxivData } from "./arxiv.ts";
 import type { HfData } from "./hf.ts";
@@ -77,12 +78,13 @@ ${modelData ? `\n---\n\n${modelData}\n` : ""}
 
 Write the prose sections of the report, in this order:
 
-1. \`## ${T.highlightsHeading}\` — 3-5 sentences on the most noteworthy agent and AI-coding developments this week.
+1. \`## ${SECTIONS.highlights}\` — 3-5 sentences on the most noteworthy agent and AI-coding developments this week.
 2. The line \`${TRENDING_TABLES_MARKER}\` exactly once, on its own line. The tables are inserted there.
-3. \`## ${T.trendsHeading}\` — 200-300 words: which kinds of agent or coding tool are getting attention, and any new harness or orchestration patterns.
-4. \`## ${T.hotSpotsHeading}\` — 3-5 bullets: specific projects or directions worth developer focus, with brief reasoning.
+3. \`## ${SECTIONS.signals}\` — 200-300 words: which kinds of agent or coding tool are getting attention, and any new harness or orchestration patterns.
+4. \`## ${SECTIONS.worthALook}\` — 3-5 bullets: specific projects or directions worth developer focus, with brief reasoning.
 ${modelData ? `5. \`## ${T.modelUsageHeading}\` — 3-5 bullets: which models lead token usage, notable newcomers in the top list, and newly listed models worth trying for agentic work. Copy token figures verbatim.\n` : ""}
 Rules:
+- ${NO_TITLE_RULE}
 - Do not reproduce or alter the tables.
 - Base every claim on the tables and the data above. They show descriptions and counts only, so do not describe releases, adoption or community reactions they do not show.
 - Mention only projects that appear in the tables${modelData ? " or in the model data" : ""}, and link every project you mention.
@@ -143,29 +145,30 @@ ${siteSections}
 
 ---
 
-Generate a detailed AI Official Content Tracking Report in English with these sections:
+Write the report in English with these sections. ${NO_TITLE_RULE}
 
-1. **Today's Highlights** — 3-5 sentences on the most important new releases or developments, calling out key highlights
+## ${SECTIONS.highlights}
+3-5 sentences on the most important new releases or developments.
 
-2. **Anthropic / Claude Content Highlights** — Organize important content by category (news / research / engineering / learn, etc.):
-   - For each piece, 2-4 sentences extracting core insights, technical details, or business significance
-   - Note publication date and original link
-   - If first full crawl, trace important milestones chronologically
+## Anthropic
+Important content grouped by category (news / research / engineering / learn, etc.) under \`###\` subheadings:
+- For each piece, 2-4 sentences extracting core insights, technical details, or business significance
+- Note publication date and original link
+- If first full crawl, trace important milestones chronologically
+Omit this section when Anthropic has no new content.
 
-3. **OpenAI Content Highlights** — Same structure, organized by research / release / company / safety categories
-   - ⚠️ Note: OpenAI data is metadata-only (titles derived from URL slugs, no article text). Only list URLs and categories objectively. Do NOT speculate on title meanings or fabricate content summaries. If information is insufficient for analysis, state the data limitation clearly.
+## OpenAI
+Same structure, grouped by research / release / company / safety. Omit this section when OpenAI has no new content.
+- ⚠️ Note: OpenAI data is metadata-only (titles derived from URL slugs, no article text). Only list URLs and categories objectively. Do NOT speculate on title meanings or fabricate content summaries. If information is insufficient for analysis, state the data limitation clearly.
 
-4. **Strategic Signal Analysis** — Based on both companies' release cadence and content focus, analyze:
-   - Each company's recent technical priorities (model capabilities / safety / productization / ecosystem)
-   - Competitive dynamics: who is setting the agenda, who is following
-   - Potential impact on developers and enterprise users
+## ${SECTIONS.signals}
+Based on both companies' release cadence and content focus:
+- Each company's recent technical priorities (model capabilities / safety / productization / ecosystem)
+- Competitive dynamics: who is setting the agenda, who is following
+- Potential impact on developers and enterprise users
+- Hidden signals in titles, phrasing and timing: new terms, dense releases in one category, policy and safety developments
 
-5. **Notable Details** — Extract hidden signals from titles, phrasing, and timing, e.g.:
-   - New terms or topics appearing for the first time
-   - Dense releases in a category (may signal a product milestone)
-   - Policy, compliance, and safety developments
-
-${isAnyFirstRun ? "6. **Content Landscape Overview** — First full crawl only: summarize the content category distribution for both companies and describe their content strategy style (academic-oriented vs product-oriented vs user stories, etc.)\n\n" : ""}Style: English, professional and detailed, suited for AI researchers, product managers, and technical decision-makers. Every item must include official links.
+${isAnyFirstRun ? "## Content Landscape Overview\nFirst full crawl only: summarize the content category distribution for both companies and describe their content strategy style (academic-oriented vs product-oriented vs user stories, etc.)\n\n" : ""}Style: English, professional and detailed, suited for AI researchers, product managers, and technical decision-makers. Every item must include official links.
 `;
 }
 
@@ -252,11 +255,13 @@ ${storiesText}
 
 ---
 
-Generate a structured Hacker News AI Community Digest in English:
+Write the report in English with these sections. ${NO_TITLE_RULE}
 
-1. **Today's Highlights** — 3-5 sentences on the hottest AI topics on HN today, judged by score and comment count
+## ${SECTIONS.highlights}
+3-5 sentences on the hottest AI topics on HN today, judged by score and comment count.
 
-2. **Top News & Discussions** — Organized by category, render a **Markdown table** per category with exactly these columns:
+## Top Stories
+Organized by category: a \`### <category>\` heading per category, each followed by a **Markdown table** with exactly these columns:
 
    | Title | Score | Comments | Summary |
    | :--- | ---: | ---: | :--- |
@@ -264,7 +269,7 @@ Generate a structured Hacker News AI Community Digest in English:
    - **Title**: title as a Markdown link to the original article, followed by a " · [HN](discussion-url)" link to the HN thread
    - **Score / Comments**: copy the numbers from the input verbatim
    - **Summary**: 2 sentences — what the item is and why it matters to developers. Do not describe the comments: you have not read them. If the title does not say what the item is, do not guess
-   - Select the 2-5 most representative items per category; omit a category's table if empty
+   - Select the 2-5 most representative items per category; omit a category if it is empty
 
    Categories:
    - 🔬 Models & Research (new model releases, papers, benchmarks)
@@ -272,11 +277,13 @@ Generate a structured Hacker News AI Community Digest in English:
    - 🏢 Industry News (company news, funding, product launches)
    - 💬 Opinions & Debates (notable Ask HN, Show HN, or hot discussion threads)
 
-3. **Community Sentiment Signal** — 100-200 words on today's HN AI focus, from the titles and counts alone:
+## ${SECTIONS.signals}
+100-200 words on today's HN AI focus, from the titles and counts alone:
    - Which topics are most active (high score + high comments)?
    - Which stories draw far more comments than points — a sign of a contested topic?
 
-4. **Worth Deep Reading** — List 2-3 pieces most worth developers/researchers reading in depth, with brief reasoning
+## ${SECTIONS.worthALook}
+2-3 pieces most worth developers/researchers reading in depth, with brief reasoning.
 
 Style: English, concise and professional, preserve all original links.
 `;
@@ -314,11 +321,13 @@ ${papersText}
 
 ---
 
-Generate a structured ArXiv AI Research Digest in English:
+Write the report in English with these sections. ${NO_TITLE_RULE}
 
-1. **Today's Highlights** — 3-5 sentences on the most significant research directions and breakthroughs
+## ${SECTIONS.highlights}
+3-5 sentences on the most significant research directions and breakthroughs.
 
-2. **Key Papers** — Select 8-15 most important papers, organized by theme. Under each theme header, render a **Markdown table** with exactly these columns:
+## Key Papers
+The 8-15 most important papers, organized by theme: a \`### <theme>\` heading per theme, each followed by a **Markdown table** with exactly these columns:
 
    | Paper | Authors | Summary |
    | :--- | :--- | :--- |
@@ -326,7 +335,7 @@ Generate a structured ArXiv AI Research Digest in English:
    - **Paper**: title as a Markdown link to its ArXiv URL
    - **Authors**: abbreviated (first 3 + et al.)
    - **Summary**: 2 sentences — the key contribution and why it matters
-   - Omit a theme's table if no paper falls under it
+   - Omit a theme if no paper falls under it
 
    Themes:
    - 🧠 Large Language Models (architecture, training, alignment, evaluation)
@@ -334,9 +343,11 @@ Generate a structured ArXiv AI Research Digest in English:
    - 🔧 Methods & Frameworks (new techniques, benchmarks, efficiency improvements)
    - 📊 Applications (domain-specific, multimodal, code generation)
 
-3. **Research Trend Signal** — 100-200 words on emerging research directions visible from today's submissions
+## ${SECTIONS.signals}
+100-200 words on emerging research directions visible in these submissions.
 
-4. **Worth Deep Reading** — 2-3 papers most worth reading in full, with reasoning
+## ${SECTIONS.worthALook}
+2-3 papers most worth reading in full, with reasoning.
 
 Style: English, concise and professional, preserve all ArXiv links.
 `;
@@ -366,11 +377,13 @@ ${modelsText}
 
 ---
 
-Generate a structured Hugging Face Trending Models Digest in English:
+Write the report in English with these sections. ${NO_TITLE_RULE}
 
-1. **Today's Highlights** — 3-5 sentences on the most notable model releases and trends on Hugging Face
+## ${SECTIONS.highlights}
+3-5 sentences on the most notable model releases and trends on Hugging Face this week.
 
-2. **Trending Models** — Organized by category. Under each category header, render a **Markdown table** with exactly these columns:
+## Trending Models
+Organized by category: a \`### <category>\` heading per category, each followed by a **Markdown table** with exactly these columns:
 
    | Model | Author | Likes | Downloads | Summary |
    | :--- | :--- | ---: | ---: | :--- |
@@ -378,7 +391,7 @@ Generate a structured Hugging Face Trending Models Digest in English:
    - **Model**: model name as a Markdown link to its HF URL
    - **Likes / Downloads**: copy the numbers from the input verbatim (keep the thousands separators; do not recompute or round)
    - **Summary**: 2 sentences — what it is and why it's trending, including a standout capability or data point
-   - Omit a category's table entirely if no model falls under it
+   - Omit a category if no model falls under it
 
    Categories:
    - 🧠 Language Models (LLMs, chat models, instruction-tuned)
@@ -386,12 +399,14 @@ Generate a structured Hugging Face Trending Models Digest in English:
    - 🔧 Specialized Models (code, math, medical, embeddings)
    - 📦 Fine-tunes & Quantizations (community fine-tunes, GGUF, AWQ)
 
-3. **Ecosystem Signal** — 100-200 words analyzing model ecosystem trends:
+## ${SECTIONS.signals}
+100-200 words analyzing model ecosystem trends:
    - Which model families are gaining momentum?
    - Open-weight vs proprietary trends
    - Notable quantization or fine-tuning activity
 
-4. **Worth Exploring** — 2-3 models most worth trying or studying, with reasoning
+## ${SECTIONS.worthALook}
+2-3 models most worth trying or studying, with reasoning.
 
 Style: English, concise and professional, preserve all HuggingFace links.
 `;
@@ -443,11 +458,13 @@ ${lobstersText}
 
 ---
 
-Generate a structured Tech Community AI Weekly in English:
+Write the report in English with these sections. ${NO_TITLE_RULE}
 
-1. **This Week's Highlights** — 3-5 sentences on the most discussed AI topics across these communities this week
+## ${SECTIONS.highlights}
+3-5 sentences on the most discussed AI topics across these communities this week.
 
-2. **Dev.to Highlights** — Select 5-10 most valuable articles as a **Markdown table**:
+## Dev.to
+The 5-10 most valuable articles as a **Markdown table**:
 
    | Article | Reactions | Comments | Summary |
    | :--- | ---: | ---: | :--- |
@@ -456,7 +473,8 @@ Generate a structured Tech Community AI Weekly in English:
    - **Reactions / Comments**: copy the numbers from the input verbatim
    - **Summary**: 2 sentences — the key takeaway for developers
 
-3. **Lobste.rs Highlights** — Select 3-8 most notable stories as a **Markdown table**:
+## Lobste.rs
+The 3-8 most notable stories as a **Markdown table**:
 
    | Story | Score | Comments | Summary |
    | :--- | ---: | ---: | :--- |
@@ -465,12 +483,14 @@ Generate a structured Tech Community AI Weekly in English:
    - **Score / Comments**: copy the numbers from the input verbatim
    - **Summary**: 2 sentences — why it's worth reading
 
-4. **Community Pulse** — 100-200 words on what these communities are talking about:
+## ${SECTIONS.signals}
+100-200 words on what these communities are talking about:
    - Common themes across both platforms
    - Practical concerns developers have about AI tools
    - Emerging tutorials, patterns, or best practices
 
-5. **Worth Reading** — 2-3 articles/stories most worth reading in depth
+## ${SECTIONS.worthALook}
+2-3 articles or stories most worth reading in depth.
 
 Style: English, concise and developer-friendly, preserve all original links.
 `;

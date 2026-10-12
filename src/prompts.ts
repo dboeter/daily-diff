@@ -74,6 +74,11 @@ const REPO_LENGTH_RULE =
   "Length: at most ~300 words in total. Use at most 3 bullets per section, one or two sentences each. " +
   "Omit any section that has nothing notable instead of writing filler.";
 
+/** Every LLM-written report body starts at its first `##` section: code renders the title. */
+export const NO_TITLE_RULE =
+  "Do not write a title, a date line or any `#` heading: code adds the report title. " +
+  "Use exactly the `##` headings given, in the given order.";
+
 /** Sort by comment count desc, take top N. */
 export function topN(items: GitHubItem[], n: number): GitHubItem[] {
   return [...items].sort((a, b) => b.comments - a.comments).slice(0, n);
@@ -205,12 +210,19 @@ ${issuesText}
 
 ---
 
-Generate a Claude Code Skills community highlights report in English with these sections:
+Write the Skills section in English with these headings. ${NO_TITLE_RULE}
 
-1. **Top Skills Ranking** - List the 3-5 most-discussed Skills (PRs) by comments/attention, describe each Skill's functionality, discussion highlights, and current status (open/merged/draft)
-2. **Community Demand Trends** - From Issues, distill the most-anticipated new Skill directions (e.g. workflow automation, code review, test generation, documentation)
-3. **High-Potential Pending Skills** - Active-comment PRs not yet merged; these Skills may land soon
-4. **Skills Ecosystem Insight** - One-sentence summary: what is the community's most concentrated demand at the Skills level?
+## Top Skills
+The 3-5 most-discussed Skills (PRs) by comments/attention: each Skill's functionality, discussion highlights, and current status (open/merged/draft).
+
+## Community Demand
+From Issues, the most-anticipated new Skill directions (e.g. workflow automation, code review, test generation, documentation).
+
+## Pending Skills
+Active-comment PRs not yet merged; these Skills may land soon.
+
+## Takeaway
+One sentence: what is the community's most concentrated demand at the Skills level?
 
 Style: concise and professional, include GitHub links for each item.
 ${REPO_LENGTH_RULE}

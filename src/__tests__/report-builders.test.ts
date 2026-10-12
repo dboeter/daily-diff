@@ -6,6 +6,7 @@ import {
   renderTrendingTables,
   spliceTrendingProse,
   stripModelTitle,
+  nestHeadings,
   TRENDING_TABLES_MARKER,
 } from "../report-builders.ts";
 import type { TrendingReportData } from "../trending-rank.ts";
@@ -318,5 +319,20 @@ describe("stripModelTitle", () => {
   it("does not touch # inside code fences", () => {
     const md = "## A\n\n```sh\n# a comment\n```";
     expect(stripModelTitle(md)).toBe(md);
+  });
+});
+
+describe("nestHeadings", () => {
+  it("shifts every heading so the top one sits at the given level", () => {
+    expect(nestHeadings("## A\n\ntext\n\n### B", 3)).toBe("### A\n\ntext\n\n#### B");
+  });
+
+  it("leaves headings already deep enough, and code fences, alone", () => {
+    expect(nestHeadings("### A\n\n#### B", 3)).toBe("### A\n\n#### B");
+    expect(nestHeadings("## A\n```\n## not a heading\n```", 3)).toBe("### A\n```\n## not a heading\n```");
+  });
+
+  it("caps at level 6", () => {
+    expect(nestHeadings("## A\n###### B", 4)).toBe("#### A\n###### B");
   });
 });

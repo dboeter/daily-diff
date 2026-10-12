@@ -72,10 +72,22 @@ export const WEB_REPORT = {
     `${reportIssueTitle("ai-web", dateStr)}${isFirstRun ? " (First Crawl)" : ""}`,
 } as const;
 
+/**
+ * Section headings every listing report shares: Highlights → tables → Signals
+ * → Worth a Look. Until October 2026 each prompt named its own ("Today's
+ * Highlights" in a weekly report, "Research Trend Signal", "Community Pulse",
+ * "Worth Deep Reading", "Worth Exploring", …).
+ */
+export const SECTIONS = {
+  highlights: "Highlights",
+  signals: "Signals",
+  worthALook: "Worth a Look",
+} as const;
+
 // Weekly since October 2026.
 export const TRENDING_REPORT = {
   sources: "Sources: GitHub Trending + GitHub Search API + OpenRouter + npm",
-  skillsHeading: "Claude Code Skills Highlights",
+  skillsHeading: "Claude Code Skills",
   skillsSource: (repo: string) => `> Source: [${repo}](https://github.com/${repo})`,
   // Tables rendered in code (renderTrendingTables); the prose headings are handed to the LLM.
   radarHeading: "🚀 Agent & Coding Tool Radar",
@@ -90,9 +102,6 @@ export const TRENDING_REPORT = {
     agent_tooling: "🔌 Agent Tooling",
     other_agent: "🤖 Other Agents",
   },
-  highlightsHeading: "This Week's Highlights",
-  trendsHeading: "Trend Signal Analysis",
-  hotSpotsHeading: "Community Hot Spots",
   modelUsageHeading: "Model Usage on OpenRouter",
 } as const;
 
