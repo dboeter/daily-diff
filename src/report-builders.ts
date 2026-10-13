@@ -6,60 +6,182 @@ import { hasActivity, type ProjectActivity } from "./prompts.ts";
 import { escapeRegex } from "./agent-news.ts";
 import type { OpenRouterStealthModel } from "./openrouter.ts";
 import type { TrendingReportData } from "./trending-rank.ts";
-import { STEALTH_SECTION, TRENDING_REPORT } from "./i18n.ts";
+import {
+  LIVE_REPORT_IDS,
+  OVERVIEW,
+  REPORTS,
+  REPORT_META,
+  STEALTH_SECTION,
+  TRENDING_REPORT,
+  type ReportId,
+} from "./i18n.ts";
 
 // ---------------------------------------------------------------------------
-// Project digest (daily agents report, weekly infra report)
+// Project digest (daily agents report: the agents and infra config sections)
 // ---------------------------------------------------------------------------
 
-export interface ProjectReportInput {
+/** One config section's projects, under its own heading. */
+export interface ProjectGroup {
+  /** The section's `title` in config.yml, rendered as its `##` heading. */
   title: string;
-  dateStr: string;
-  utcStr: string;
   /** Every tracked project, active or not, in config order. */
   activities: ProjectActivity[];
-  /** LLM output: overview plus one section per active project. */
+  /** LLM output: overview plus one `## <Project>` section per active project. */
   summary: string;
+}
+
+export interface ProjectReportInput {
+  /** The H1 line, from reportHeading. */
+  heading: string;
+  utcStr: string;
+  groups: ProjectGroup[];
   /** Label for the quiet-projects line, e.g. "today". */
   period: string;
-  /** Markdown rendered between the header and the summary, ending with its own separator. */
+  /** Markdown rendered between the header and the groups, ending with its own separator. */
   preamble?: string;
   footer: string;
 }
 
 /**
- * Release-focused report. Quiet projects are listed in one line at the end
- * rather than each getting a "no activity" section. Small enough to post as
- * the GitHub issue body unchanged, so there is no brief variant.
- *
- * Quiet is decided by the summary, not only the data: the model leaves out a
- * project whose only news mentions it in passing, and such a project is quiet
- * too. A summary with no project section at all is a failure notice, so then
- * the data decides.
+ * The projects in a group that count as quiet. Quiet is decided by the
+ * summary, not only the data: the model leaves out a project whose only news
+ * mentions it in passing, and such a project is quiet too. A summary with no
+ * project section at all is a failure notice, so then the data decides.
  */
-export function buildProjectReportContent(r: ProjectReportInput): string {
-  const releases = r.activities.reduce((n, a) => n + a.releases.length, 0);
-  const prereleases = r.activities.reduce((n, a) => n + a.prereleaseCount, 0);
-  const withData = r.activities.filter(hasActivity);
+function quietProjects(g: ProjectGroup): ProjectActivity[] {
+  const withData = g.activities.filter(hasActivity);
   // Line-anchored, so "## Pi pod" in a summary does not count as a Pi section.
   const covered = withData.filter((a) =>
-    new RegExp(`^##\\s+${escapeRegex(a.config.name)}\\s*$`, "m").test(r.summary),
+    new RegExp(`^##\\s+${escapeRegex(a.config.name)}\\s*$`, "m").test(g.summary),
   );
   const active = covered.length > 0 ? covered : withData;
-  const quiet = r.activities.filter((a) => !active.includes(a));
+  return g.activities.filter((a) => !active.includes(a));
+}
+
+/**
+ * Release-focused report, one `##` section per config group (coding agents,
+ * agent tooling), the LLM's sections nested below it. Quiet projects are
+ * listed in one line per group rather than each getting a "no activity"
+ * section. Small enough to post as the GitHub issue body unchanged, so there
+ * is no brief variant.
+ */
+export function buildProjectReportContent(r: ProjectReportInput): string {
+  const all = r.groups.flatMap((g) => g.activities);
+  const releases = all.reduce((n, a) => n + a.releases.length, 0);
+  const prereleases = all.reduce((n, a) => n + a.prereleaseCount, 0);
   const link = (a: ProjectActivity) => `[${a.config.name}](https://github.com/${a.config.repo})`;
+  let quietCount = 0;
+  const sections = r.groups.map((g) => {
+    const quiet = quietProjects(g);
+    quietCount += quiet.length;
+    return (
+      `## ${g.title}\n\n` +
+      nestHeadings(g.summary, 3) +
+      (quiet.length ? `\n\n**Quiet ${r.period}:** ${quiet.map(link).join(", ")}` : "")
+    );
+  });
 
   return (
-    `# ${r.title} ${r.dateStr}\n\n` +
-    `> Generated: ${r.utcStr} UTC | Projects: ${r.activities.length} | ` +
-    `Active ${r.period}: ${r.activities.length - quiet.length} | ` +
+    `${r.heading}\n\n` +
+    `> ${REPORT_META.generated(r.utcStr)} | Projects: ${all.length} | ` +
+    `Active ${r.period}: ${all.length - quietCount} | ` +
     `Stable releases: ${releases} | Prereleases (not covered): ${prereleases}\n\n` +
     `---\n\n` +
     (r.preamble ?? "") +
-    r.summary +
-    (quiet.length ? `\n\n---\n\n**Quiet ${r.period}:** ${quiet.map(link).join(", ")}` : "") +
+    sections.join("\n\n---\n\n") +
     r.footer
   );
+}
+
+// ---------------------------------------------------------------------------
+// Report bar: links between the day's reports
+// ---------------------------------------------------------------------------
+
+/**
+ * One line linking the day's overview and its other reports, in REPORTS
+ * order. Absolute Pages URLs, so it works in the GitHub issue copy too.
+ * Before October 2026 a report linked to nothing: the sidebar was the only
+ * way between reports.
+ */
+export function renderReportBar(
+  current: ReportId,
+  ids: ReportId[],
+  dateStr: string,
+  pagesUrl: string,
+): string {
+  const links = LIVE_REPORT_IDS.filter((id) => ids.includes(id)).map((id) => {
+    const label = `${REPORTS[id].emoji} ${REPORTS[id].name}`;
+    return id === current ? `**${label}**` : `[${label}](${pagesUrl}/#${dateStr}/${id})`;
+  });
+  return [`[${OVERVIEW.emoji} ${OVERVIEW.name}](${pagesUrl}/#${dateStr})`, ...links].join(" · ");
+}
+
+/** Put the report bar under the report's H1. */
+export function withReportBar(content: string, bar: string): string {
+  const i = content.indexOf("\n");
+  return i === -1 ? `${content}\n\n${bar}` : `${content.slice(0, i)}\n\n${bar}${content.slice(i)}`;
+}
+
+// ---------------------------------------------------------------------------
+// LLM body clean-up
+// ---------------------------------------------------------------------------
+
+/** A `**Date:** …` style line of a title block the model writes under its H1. */
+const TITLE_BLOCK_LINE = /^\*\*[\w /]+:\*\*/;
+
+/**
+ * Remove the title the model writes at the top of a report body: code renders
+ * the report's H1 and metadata line. Before October 2026 five reports carried
+ * two H1s ("# Hacker News AI Community Digest 2026-10-12" from code, then the
+ * model's "… — 2026-10-12"), and the web report a `**Date:**` … `**Type:**` block
+ * as well. A later H1 is demoted to H2, keeping its section.
+ */
+export function stripModelTitle(md: string): string {
+  const lines = md.split("\n");
+  let i = 0;
+  const skipBlank = () => {
+    while (i < lines.length && lines[i]!.trim() === "") i++;
+  };
+  skipBlank();
+  if (/^#\s/.test(lines[i] ?? "")) {
+    i++;
+    while (i < lines.length && (lines[i]!.trim() === "" || TITLE_BLOCK_LINE.test(lines[i]!))) i++;
+    if (/^-{3,}\s*$/.test(lines[i] ?? "")) {
+      i++;
+      skipBlank();
+    }
+  }
+  const body = lines.slice(i);
+  const levels = headingLevels(body);
+  return body.map((line, j) => (levels[j] === 1 ? `#${line}` : line)).join("\n");
+}
+
+/** Lines with their heading level (0 = not a heading), ignoring code fences. */
+function headingLevels(lines: string[]): number[] {
+  let inFence = false;
+  return lines.map((line) => {
+    if (/^\s*```/.test(line)) inFence = !inFence;
+    return inFence ? 0 : (line.match(/^(#{1,6})\s/)?.[1]?.length ?? 0);
+  });
+}
+
+/**
+ * Shift a body's headings so its top heading sits at `level`, for a body
+ * placed under a code-rendered heading (Skills inside trending). Before
+ * October 2026 the Skills body's own H1 and H2s outranked its "## Claude Code
+ * Skills" section.
+ */
+export function nestHeadings(md: string, level: number): string {
+  const lines = md.split("\n");
+  const levels = headingLevels(lines);
+  const top = Math.min(...levels.filter((l) => l > 0));
+  const shift = Number.isFinite(top) ? Math.max(0, level - top) : 0;
+  if (shift === 0) return md;
+  return lines
+    .map((line, i) =>
+      levels[i]! > 0 ? "#".repeat(Math.min(6, levels[i]! + shift)) + line.slice(levels[i]!) : line,
+    )
+    .join("\n");
 }
 
 // ---------------------------------------------------------------------------

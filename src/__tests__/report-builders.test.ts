@@ -5,6 +5,10 @@ import {
   parseRowSummaries,
   renderTrendingTables,
   spliceTrendingProse,
+  stripModelTitle,
+  nestHeadings,
+  renderReportBar,
+  withReportBar,
   TRENDING_TABLES_MARKER,
 } from "../report-builders.ts";
 import type { TrendingReportData } from "../trending-rank.ts";
@@ -40,27 +44,31 @@ const stableRelease: GitHubRelease = {
 };
 
 describe("buildProjectReportContent", () => {
-  const input = {
-    title: "AI Agents Digest",
-    dateStr: "2026-10-04",
-    utcStr: "2026-10-03 22:50",
+  const agents = {
+    title: "Coding Agents",
     summary: "## Overview\nLLM_BODY",
-    period: "today",
-    footer: "FOOTER",
     activities: [
       makeActivity("alpha", { releases: [stableRelease], prereleaseCount: 2 }),
       makeActivity("beta", { prereleaseCount: 5 }),
       makeActivity("gamma"),
     ],
   };
+  const input = {
+    heading: "# AI Agents 2026-10-04",
+    utcStr: "2026-10-03 22:50",
+    period: "today",
+    footer: "FOOTER",
+    groups: [agents],
+  };
+  const withAgents = (g: Partial<typeof agents>) => ({ ...input, groups: [{ ...agents, ...g }] });
 
-  it("renders title, counts, the LLM body and the footer", () => {
+  it("renders title, counts, the group heading, the LLM body and the footer", () => {
     const result = buildProjectReportContent(input);
-    expect(result).toContain("# AI Agents Digest 2026-10-04");
+    expect(result).toContain("# AI Agents 2026-10-04");
     expect(result).toContain(
       "Projects: 3 | Active today: 1 | Stable releases: 1 | Prereleases (not covered): 7",
     );
-    expect(result).toContain("LLM_BODY");
+    expect(result).toContain("## Coding Agents\n\n### Overview\nLLM_BODY");
     expect(result.endsWith("FOOTER")).toBe(true);
   });
 
@@ -74,11 +82,12 @@ describe("buildProjectReportContent", () => {
 
   it("counts a project the summary left out as quiet", () => {
     const news = [{ source: "GitHub Search", title: "works with BETA", url: "u", detail: "d" }];
-    const result = buildProjectReportContent({
-      ...input,
-      summary: "## Overview\nBODY\n\n## ALPHA\n- release\n\n## BETA pod\n- not BETA's section",
-      activities: [input.activities[0]!, makeActivity("beta", { news }), makeActivity("gamma")],
-    });
+    const result = buildProjectReportContent(
+      withAgents({
+        summary: "## Overview\nBODY\n\n## ALPHA\n- release\n\n## BETA pod\n- not BETA's section",
+        activities: [agents.activities[0]!, makeActivity("beta", { news }), makeActivity("gamma")],
+      }),
+    );
     expect(result).toContain("Active today: 1 |");
     expect(result).toContain(
       "**Quiet today:** [BETA](https://github.com/org/beta), [GAMMA](https://github.com/org/gamma)",
@@ -87,25 +96,41 @@ describe("buildProjectReportContent", () => {
 
   it("keeps projects with data active when the summary has no project section", () => {
     const news = [{ source: "Hacker News", title: "BETA 2.0", url: "u", detail: "d" }];
-    const result = buildProjectReportContent({
-      ...input,
-      summary: "Summary generation failed.",
-      activities: [input.activities[0]!, makeActivity("beta", { news }), makeActivity("gamma")],
-    });
+    const result = buildProjectReportContent(
+      withAgents({
+        summary: "Summary generation failed.",
+        activities: [agents.activities[0]!, makeActivity("beta", { news }), makeActivity("gamma")],
+      }),
+    );
     expect(result).toContain("Active today: 2 |");
     expect(result).toContain("**Quiet today:** [GAMMA](https://github.com/org/gamma)");
   });
 
   it("omits the quiet line when every project was active", () => {
-    const result = buildProjectReportContent({ ...input, activities: [input.activities[0]!] });
+    const result = buildProjectReportContent(withAgents({ activities: [agents.activities[0]!] }));
     expect(result).not.toContain("Quiet today");
   });
 
-  it("renders the preamble between the header and the LLM body", () => {
+  it("renders the preamble between the header and the groups", () => {
     const result = buildProjectReportContent({ ...input, preamble: "PREAMBLE\n\n---\n\n" });
-    expect(result).toMatch(
-      /Prereleases \(not covered\): 7\n\n---\n\nPREAMBLE\n\n---\n\n## Overview\nLLM_BODY/,
-    );
+    expect(result).toMatch(/Prereleases \(not covered\): 7\n\n---\n\nPREAMBLE\n\n---\n\n## Coding Agents\n/);
+  });
+
+  it("renders each group under its own heading with its own quiet line; the header counts all", () => {
+    const tooling = {
+      title: "Agent Tooling",
+      summary: "## Overview\nTOOLS\n\n## DELTA\n- release",
+      activities: [makeActivity("delta", { releases: [stableRelease] }), makeActivity("eps")],
+    };
+    const result = buildProjectReportContent({ ...input, groups: [agents, tooling] });
+    expect(result).toContain("Projects: 5 | Active today: 2 | Stable releases: 2 |");
+    const agentsAt = result.indexOf("## Coding Agents\n");
+    const toolingAt = result.indexOf("## Agent Tooling\n");
+    expect(agentsAt).toBeGreaterThan(-1);
+    expect(toolingAt).toBeGreaterThan(agentsAt);
+    expect(result.indexOf("[GAMMA]")).toBeLessThan(toolingAt);
+    expect(result.slice(toolingAt)).toContain("### DELTA\n- release");
+    expect(result.slice(toolingAt)).toContain("**Quiet today:** [EPS](https://github.com/org/eps)");
   });
 });
 
@@ -285,5 +310,84 @@ describe("spliceTrendingProse", () => {
   it("drops the marker when there are no tables", () => {
     const prose = `A.\n\n${TRENDING_TABLES_MARKER}\n\nB.`;
     expect(spliceTrendingProse(prose, "")).toBe("A.\n\nB.");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// stripModelTitle
+// ---------------------------------------------------------------------------
+
+describe("stripModelTitle", () => {
+  it("drops the model's own H1: code renders the report's", () => {
+    const md = "# Hacker News AI Community Digest — 2026-10-12\n\n## Today's Highlights\n\nText.";
+    expect(stripModelTitle(md)).toBe("## Today's Highlights\n\nText.");
+  });
+
+  it("drops the web report's title block and its rule", () => {
+    const md =
+      "# AI Official Content Tracking Report\n**Date:** 2026-10-11  \n" +
+      "**Source:** Anthropic & OpenAI  \n**Type:** Incremental Update  \n\n---\n\n## Highlights\n\nText.";
+    expect(stripModelTitle(md)).toBe("## Highlights\n\nText.");
+  });
+
+  it("drops the Skills summary's title (2026-10-12 trending report)", () => {
+    const md =
+      "# Claude Code Skills Community Highlights (2026-10-12)\n\n" +
+      "## Top Skills Ranking (Most Active PRs)\n\n| Skill | Status |\n|---|---|";
+    expect(stripModelTitle(md)).toBe(
+      "## Top Skills Ranking (Most Active PRs)\n\n| Skill | Status |\n|---|---|",
+    );
+  });
+
+  it("demotes a later H1 instead of dropping its section", () => {
+    expect(stripModelTitle("## A\n\n# B\n\nText.")).toBe("## A\n\n## B\n\nText.");
+  });
+
+  it("leaves a body without a title alone, including a leading rule", () => {
+    expect(stripModelTitle("## A\n\nText.")).toBe("## A\n\nText.");
+    expect(stripModelTitle("Plain text.\n\n---\n\nMore.")).toBe("Plain text.\n\n---\n\nMore.");
+  });
+
+  it("does not touch # inside code fences", () => {
+    const md = "## A\n\n```sh\n# a comment\n```";
+    expect(stripModelTitle(md)).toBe(md);
+  });
+});
+
+describe("nestHeadings", () => {
+  it("shifts every heading so the top one sits at the given level", () => {
+    expect(nestHeadings("## A\n\ntext\n\n### B", 3)).toBe("### A\n\ntext\n\n#### B");
+  });
+
+  it("leaves headings already deep enough, and code fences, alone", () => {
+    expect(nestHeadings("### A\n\n#### B", 3)).toBe("### A\n\n#### B");
+    expect(nestHeadings("## A\n```\n## not a heading\n```", 3)).toBe("### A\n```\n## not a heading\n```");
+  });
+
+  it("caps at level 6", () => {
+    expect(nestHeadings("## A\n###### B", 4)).toBe("#### A\n###### B");
+  });
+});
+
+describe("report bar", () => {
+  const url = "https://example.com/dd";
+
+  it("links the day's other reports and the overview; the current one is bold, unlinked", () => {
+    const bar = renderReportBar("ai-hn", ["ai-agents", "ai-hn", "ai-arxiv"], "2026-10-12", url);
+    expect(bar).toBe(
+      `[📅 Overview](${url}/#2026-10-12) · [🤖 AI Agents](${url}/#2026-10-12/ai-agents) · ` +
+        `**💬 AI Discussions** · [📚 AI Research](${url}/#2026-10-12/ai-arxiv)`,
+    );
+  });
+
+  it("orders the links like REPORTS, whatever order the reports were saved in", () => {
+    const bar = renderReportBar("ai-agents", ["ai-arxiv", "ai-agents"], "2026-10-12", url);
+    expect(bar.indexOf("AI Agents")).toBeLessThan(bar.indexOf("AI Research"));
+  });
+
+  it("goes under the H1", () => {
+    expect(withReportBar("# T 2026-10-12\n\n> meta\n\nbody", "BAR")).toBe(
+      "# T 2026-10-12\n\nBAR\n\n> meta\n\nbody",
+    );
   });
 });

@@ -19,7 +19,7 @@ on:
   workflow_dispatch:
     inputs:
       force_weekly:
-        description: "Also generate the weekly reports (infra, trending, community, HF) — e.g. to redo a missed Monday"
+        description: "Also generate the weekly reports (trending, models) and the Dev.to/Lobste.rs sections — e.g. to redo a missed Monday"
         type: boolean
         default: false
 

@@ -4,7 +4,7 @@
  * Jev is not a chat model: POST /v1/systemone takes a `state` and typed
  * questions and returns probabilities. It is called directly rather than through
  * callLlm — it is not an LlmProvider, and ~600 calls a day would swamp the
- * llmStats health gate that is calibrated for 3–4 report calls.
+ * llmStats health gate that is calibrated for 3–5 report calls.
  */
 
 import { sleep } from "./date.ts";

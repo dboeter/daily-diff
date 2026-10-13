@@ -150,6 +150,24 @@
     .rpt-btn:hover { background: var(--bg-hover); color: var(--text); }
     .rpt-btn.active { color: var(--accent); border-left-color: var(--accent); background: var(--accent-bg); }
 
+    /* ── Page nav, table of contents, overview ── */
+    .page-nav {
+      display: flex; flex-wrap: wrap; gap: 6px 16px; justify-content: space-between;
+      margin-bottom: 18px; font-size: 11px; letter-spacing: 0.03em;
+    }
+    .page-nav a { color: var(--muted); text-decoration: none; }
+    .page-nav a:hover { color: var(--accent); }
+    .page-nav .mid { flex: 1; text-align: center; }
+    .md details.toc > *:not(summary) { padding: 8px 14px 8px 34px; margin: 0; }
+    .md details.toc li { margin-bottom: 2px; }
+    .md details.toc li.sub { margin-left: 16px; list-style: circle; }
+    .md .dim { color: var(--muted); font-style: italic; }
+    .side-group-hdr {
+      padding: 6px 14px; font-size: 12px; font-weight: 700; color: var(--dim);
+      letter-spacing: 0.08em; text-transform: uppercase;
+    }
+    .this-week { margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+
     /* ── Content ── */
     #cwrap { flex: 1; overflow-y: auto; }
     #cwrap::-webkit-scrollbar { width: 5px; }
@@ -320,10 +338,23 @@ applyTheme(theme);
 themeBtn.onclick = () => applyTheme(theme === 'dark' ? 'light' : 'dark');
 
 // ── Routing ──
+// #YYYY-MM-DD/report is a report, #YYYY-MM-DD the day's overview.
 function getHash() {
   const [date, report] = location.hash.slice(1).split('/');
-  return /^\d{4}-\d{2}-\d{2}$/.test(date) && report ? { date, report } : null;
+  return /^\d{4}-\d{2}-\d{2}$/.test(date) ? { date, report: report || null } : null;
 }
+
+const pageKey = (date, report) => (report ? `${date}/${report}` : date);
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+}
+
+// Manifest data: dates newest first, the weekly report ids, and the overview's
+// label (OVERVIEW in src/i18n.ts).
+let DATES = [];
+let WEEKLY = [];
+let OVERVIEW_LABEL = 'Overview';
 
 // ── State ──
 let currentKey = null;
@@ -432,8 +463,95 @@ function setContent(html) {
   document.getElementById('content').innerHTML = html;
 }
 
+async function fetchReport(date, report) {
+  let res;
+  // Retry transient failures: network errors and statuses that may recover
+  // on their own (5xx, 429). A 4xx like 404 means the report is really
+  // missing (manifest/digests drift) — fail immediately instead of
+  // stalling the error behind three retries and backoff.
+  for (let attempt = 0; ; attempt++) {
+    try {
+      res = await fetch(`./digests/${date}/${report}.md`);
+      if (res.ok || (res.status < 500 && res.status !== 429) || attempt >= 2) break;
+    } catch (netErr) {
+      if (attempt >= 2) throw netErr;
+    }
+    await new Promise((r) => setTimeout(r, 300 * (attempt + 1)));
+  }
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.text();
+}
+
+/** Previous/next day and, for a report, the day of its previous report (weekly reports skip days). */
+function pageNav(date, report) {
+  const i = DATES.findIndex((d) => d.date === date);
+  if (i === -1) return '';
+  const older = DATES[i + 1];
+  const newer = DATES[i - 1];
+  // The same report on that day when it has one, else that day's overview.
+  const href = (d) => `#${pageKey(d.date, report && d.reports.includes(report) ? report : null)}`;
+  const prevReportDay = report ? DATES.slice(i + 1).find((d) => d.reports.includes(report)) : null;
+  const left = older ? `<a href="${href(older)}">← ${older.date}</a>` : '<span></span>';
+  const mid = prevReportDay && prevReportDay !== older
+    ? `<a class="mid" href="#${pageKey(prevReportDay.date, report)}">Previous ${escapeHtml(LABELS[report] || report)}: ${prevReportDay.date}</a>`
+    : '<span class="mid"></span>';
+  const right = newer ? `<a href="${href(newer)}">${newer.date} →</a>` : '<span></span>';
+  return `<nav class="page-nav">${left}${mid}${right}</nav>`;
+}
+
+/** The day's highlights (highlights.json, also sent to Telegram), each report's under a link to it. */
+async function renderOverview(date) {
+  const entry = DATES.find((d) => d.date === date);
+  if (!entry) throw new Error('unknown date');
+  let highlights = {};
+  try {
+    const res = await fetch(`./digests/${date}/highlights.json`);
+    if (res.ok) highlights = await res.json();
+  } catch {
+    /* older days have no highlights.json: the overview is then a list of links */
+  }
+  const parts = [`<h1>${escapeHtml(date)}</h1>`];
+  for (const id of entry.reports) {
+    parts.push(`<h2><a href="#${pageKey(date, id)}">${escapeHtml(LABELS[id] || id)}</a></h2>`);
+    const items = Array.isArray(highlights[id]) ? highlights[id] : [];
+    parts.push(items.length
+      ? `<ul>${items.map((h) => `<li>${escapeHtml(h)}</li>`).join('')}</ul>`
+      : '<p class="dim">No highlights picked.</p>');
+  }
+  return parts.join('');
+}
+
+/**
+ * A collapsible table of contents before the first section of a long report:
+ * 4+ `##` sections, or 4+ `##` and `###` together. The agents report has only
+ * 3 `##` (stealth models and its two groups); its projects are `###`.
+ */
+function addToc(root) {
+  let heads = [...root.querySelectorAll('h2')];
+  if (heads.length < 4) heads = [...root.querySelectorAll('h2, h3')];
+  if (heads.length < 4) return;
+  const toc = document.createElement('details');
+  toc.className = 'toc';
+  const summary = document.createElement('summary');
+  summary.textContent = `Contents (${heads.length})`;
+  const list = document.createElement('ol');
+  heads.forEach((h) => {
+    const a = document.createElement('a');
+    a.href = '#';
+    a.textContent = h.textContent;
+    // The hash holds the route, so scroll instead of linking to an anchor.
+    a.onclick = (e) => { e.preventDefault(); h.scrollIntoView({ behavior: 'smooth' }); };
+    const li = document.createElement('li');
+    if (h.tagName === 'H3') li.className = 'sub';
+    li.appendChild(a);
+    list.appendChild(li);
+  });
+  toc.append(summary, list);
+  heads[0].before(toc);
+}
+
 async function loadReport(date, report, push = true) {
-  const key = `${date}/${report}`;
+  const key = pageKey(date, report);
   if (key === currentKey) return;
   currentKey = key;
 
@@ -477,27 +595,12 @@ async function loadReport(date, report, push = true) {
   cwrap.scrollTop = 0;
 
   try {
-    let res;
-    // Retry transient failures: network errors and statuses that may recover
-    // on their own (5xx, 429). A 4xx like 404 means the report is really
-    // missing (manifest/digests drift) — fail immediately instead of
-    // stalling the error behind three retries and backoff.
-    for (let attempt = 0; ; attempt++) {
-      try {
-        res = await fetch(`./digests/${date}/${report}.md`);
-        if (res.ok || (res.status < 500 && res.status !== 429) || attempt >= 2) break;
-      } catch (netErr) {
-        if (attempt >= 2) throw netErr;
-      }
-      await new Promise((r) => setTimeout(r, 300 * (attempt + 1)));
-    }
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const raw = await res.text();
-    // Drop the response if the user has navigated to another report while
+    const html = report ? renderMarkdown(await fetchReport(date, report)) : await renderOverview(date);
+    // Drop the response if the user has navigated to another page while
     // this fetch was in flight, so a slow stale reply can't overwrite it.
     if (currentKey !== key) return;
-    const safe = renderMarkdown(raw);
-    setContent(`<div class="md fade">${safe}</div>`);
+    setContent(`${pageNav(date, report)}<div class="md fade">${html}</div>`);
+    if (report) addToc(document.querySelector('#content .md'));
   } catch (e) {
     // The user has already switched to another report — don't overwrite its
     // content with this stale request's error.
@@ -530,6 +633,13 @@ function buildDateGroup(date, reports, isFirst) {
   const list = document.createElement('div');
   list.className = 'rpt-list';
 
+  const overview = document.createElement('button');
+  overview.className = 'rpt-btn';
+  overview.dataset.key = pageKey(date, null);
+  overview.textContent = OVERVIEW_LABEL;
+  overview.onclick = () => loadReport(date, null);
+  list.appendChild(overview);
+
   reports.forEach(r => {
     const btn = document.createElement('button');
     btn.className = 'rpt-btn';
@@ -543,8 +653,39 @@ function buildDateGroup(date, reports, isFirst) {
   return grp;
 }
 
+/**
+ * The latest report of each weekly kind, pinned above the archive until the
+ * next weekly run replaces it. Counted from today, not from the newest day in
+ * the manifest, so a report stops passing for this week's when runs stop too.
+ * 8 days, not 7: a date parses as 00:00 UTC, and the next Monday's run (01:07
+ * Amsterdam, started hours late) lands a few hours into the 8th day.
+ */
+function buildThisWeek(nav, dates) {
+  const now = Date.now();
+  const latest = WEEKLY
+    .map((id) => ({ id, entry: dates.find((d) => d.reports.includes(id)) }))
+    .filter((x) => x.entry && now - Date.parse(x.entry.date) < 8 * 86400000);
+  if (!latest.length) return;
+  const grp = document.createElement('div');
+  grp.className = 'this-week';
+  const hdr = document.createElement('div');
+  hdr.className = 'side-group-hdr';
+  hdr.textContent = 'This week';
+  grp.appendChild(hdr);
+  latest.forEach(({ id, entry }) => {
+    const btn = document.createElement('button');
+    btn.className = 'rpt-btn';
+    btn.dataset.key = pageKey(entry.date, id);
+    btn.textContent = `${LABELS[id] || id} · ${entry.date.slice(5)}`;
+    btn.onclick = () => loadReport(entry.date, id);
+    grp.appendChild(btn);
+  });
+  nav.appendChild(grp);
+}
+
 function buildNav(dates) {
   const nav = document.getElementById('nav');
+  buildThisWeek(nav, dates);
 
   // Group dates by month (YYYY-MM)
   const months = new Map();
@@ -584,31 +725,38 @@ function buildNav(dates) {
   });
 }
 
-window.addEventListener('popstate', () => {
+// Back/forward, and links inside a report (report bar, overview, prev/next):
+// a same-page hash link fires hashchange. loadReport ignores the repeat.
+const followHash = () => {
   const h = getHash();
   if (h) loadReport(h.date, h.report, false);
-});
+};
+window.addEventListener('popstate', followHash);
+window.addEventListener('hashchange', followHash);
 
 // ── Init ──
 (async () => {
   try {
     const res = await fetch('./manifest.json');
     if (!res.ok) throw new Error('manifest.json not found');
-    const { dates, labels } = await res.json();
+    const { dates, labels, weekly, overview } = await res.json();
     if (!dates?.length) throw new Error('manifest is empty');
     LABELS = labels ?? {};
+    DATES = dates;
+    WEEKLY = weekly ?? [];
+    OVERVIEW_LABEL = overview ?? 'Overview';
 
     allDates = dates;
     buildNav(dates);
 
+    // A known report or day from the hash, else the latest day's overview.
     const hash = getHash();
-    const first = dates[0];
-    if (hash && dates.find(d => d.date === hash.date && d.reports.includes(hash.report))) {
+    const day = hash && dates.find(d => d.date === hash.date);
+    if (day && (!hash.report || day.reports.includes(hash.report))) {
       await loadReport(hash.date, hash.report, false);
-    } else if (first?.reports?.length) {
-      const r0 = first.reports[0];
-      history.replaceState(null, '', `#${first.date}/${r0}`);
-      await loadReport(first.date, r0, false);
+    } else {
+      history.replaceState(null, '', `#${dates[0].date}`);
+      await loadReport(dates[0].date, null, false);
     }
   } catch (e) {
     document.getElementById('nav').innerHTML =

@@ -396,11 +396,11 @@ describe("closeSupersededIssues", () => {
   });
 
   it("keeps the newest weekly issue open through the week", async () => {
-    // Monday 2026-10-05 CST: weekly infra + trending, and the daily agents report.
+    // Monday 2026-10-05 CST: weekly hf + trending, and the daily agents report.
     // By Thursday's run, only the daily report is superseded.
     const { closed } = mockIssues([
       { number: 1, created_at: "2026-10-04T22:40:00Z", labels: ["agents"] },
-      { number: 2, created_at: "2026-10-04T22:41:00Z", labels: ["infra"] },
+      { number: 2, created_at: "2026-10-04T22:41:00Z", labels: ["hf"] },
       { number: 3, created_at: "2026-10-04T22:41:00Z", labels: ["trending"] },
       { number: 4, created_at: "2026-10-07T22:40:00Z", labels: ["agents"] },
     ]);
@@ -411,9 +411,19 @@ describe("closeSupersededIssues", () => {
 
   it("closes a weekly issue once the next week's edition is open", async () => {
     const { closed } = mockIssues([
-      { number: 1, created_at: "2026-09-27T22:41:00Z", labels: ["infra"] },
-      { number: 2, created_at: "2026-10-04T22:41:00Z", labels: ["infra"] },
+      { number: 1, created_at: "2026-09-27T22:41:00Z", labels: ["hf"] },
+      { number: 2, created_at: "2026-10-04T22:41:00Z", labels: ["hf"] },
       { number: 3, created_at: "2026-10-04T22:40:00Z", labels: ["agents"] },
+    ]);
+
+    expect(await closeSupersededIssues()).toBe(1);
+    expect(closed).toEqual([1]);
+  });
+
+  it("closes the last weekly infra issue once a newer day is open: infra is in the agents report now", async () => {
+    const { closed } = mockIssues([
+      { number: 1, created_at: "2026-10-11T22:41:00Z", labels: ["infra"] },
+      { number: 2, created_at: "2026-10-12T22:40:00Z", labels: ["agents"] },
     ]);
 
     expect(await closeSupersededIssues()).toBe(1);

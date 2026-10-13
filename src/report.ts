@@ -6,6 +6,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { FOOTER } from "./i18n.ts";
 import { sleep } from "./date.ts";
+import { stripModelTitle } from "./report-builders.ts";
 
 // ---------------------------------------------------------------------------
 // LLM token budget constants
@@ -17,8 +18,9 @@ import { sleep } from "./date.ts";
 // the output cap of gpt-4o, the OpenAI and Copilot default; higher budgets would
 // make those providers reject the request.
 export const LLM_TOKENS_DEFAULT = 8192;
-/** Table-formatted listing reports (HN, ArXiv, HF, Community) need extra
- *  headroom for the multi-row tables plus 2-sentence summaries. */
+/** The agents-report sections, the table-formatted listing reports
+ *  (discussions, ArXiv, models) and both trending calls: multi-row tables plus
+ *  2-sentence summaries, and the reasoning that counts against the budget. */
 export const LLM_TOKENS_LISTING = 16384;
 export const LLM_TOKENS_WEB = 16384;
 import { type LlmProvider, createProvider, TruncatedResponseError } from "./providers/index.ts";
@@ -88,10 +90,11 @@ const LLM_ABORT_RATIO = 0.5;
 
 /**
  * Below this many calls the ratio is meaningless. Was 5 when a run made ~30
- * calls; since October 2026 a daily run makes only 3–4 (agents, HN, ArXiv, and
- * web when there is new content), so 5 would never arm the gate on six days
- * out of seven. At 3, losing 2 of the 3 core daily reports aborts the run — by
- * then the day is mostly placeholders anyway.
+ * calls; since October 2026 a daily run makes only 3–5 (agents and infra when
+ * they had activity, discussions, ArXiv, and web when there is new content),
+ * so 5 would rarely arm the gate on six days out of seven. At 3, losing 2 of
+ * the 3 core daily reports aborts the run — by then the day is mostly
+ * failure notices anyway.
  */
 const LLM_MIN_SAMPLES = 3;
 
@@ -240,6 +243,11 @@ export async function callLlm(prompt: string, maxTokens = LLM_TOKENS_DEFAULT): P
       if (!released) releaseSlot();
     }
   }
+}
+
+/** An LLM-written report body, without the H1 the model sometimes adds above the report's own. */
+export async function generateBody(prompt: string, maxTokens?: number): Promise<string> {
+  return stripModelTitle(await callLlm(prompt, maxTokens));
 }
 
 // Matches ASCII control characters U+0000–U+001F. Built from a string so no

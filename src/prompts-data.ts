@@ -7,18 +7,27 @@
 import type { WebFetchResult } from "./web.ts";
 import type { TrendingData } from "./trending.ts";
 import type { summaryRows } from "./trending-rank.ts";
-import { formatTokens } from "./openrouter.ts";
-import { TRENDING_REPORT } from "./i18n.ts";
+import { formatTokens, type OpenRouterData } from "./openrouter.ts";
+import { ARXIV_REPORT, DISCUSSIONS_REPORT, MODELS_REPORT, SECTIONS, WEB_REPORT } from "./i18n.ts";
 import { TRENDING_TABLES_MARKER } from "./report-builders.ts";
+import { NO_TITLE_RULE } from "./prompts.ts";
 import type { HnData } from "./hn.ts";
 import type { ArxivData } from "./arxiv.ts";
 import type { HfData } from "./hf.ts";
 import type { DevtoData } from "./devto.ts";
 import type { LobstersData } from "./lobsters.ts";
 
+/** Which sources the models report covers; the prompt and the report's sources line both read it. */
+export function modelSources(hf: HfData, openrouter: OpenRouterData) {
+  return {
+    hasHf: hf.fetchSuccess,
+    hasOpenRouter: openrouter.topModels.length > 0 || openrouter.newModels.length > 0,
+  };
+}
+
 /** OpenRouter model usage. Empty string when there is no model data. */
-function buildModelUsageData(data: TrendingData): string {
-  const { topModels, topModelsDate, newModels } = data.openrouter;
+function buildModelUsageData(openrouter: OpenRouterData): string {
+  const { topModels, topModelsDate, newModels } = openrouter;
   const sections: string[] = [];
   if (topModels.length > 0) {
     sections.push(
@@ -67,25 +76,24 @@ For every numbered item write exactly one line in the form \`N: <2 sentences>\` 
  * inserts the tables.
  */
 export function buildTrendingProsePrompt(tablesMd: string, data: TrendingData, dateStr: string): string {
-  const T = TRENDING_REPORT;
-  const modelData = buildModelUsageData(data);
   return `You are a technical analyst covering AI coding tools, agents and agent harnesses. Below are this week's tables for the agent & AI coding trends report, week ending ${dateStr}. They were selected and ranked in code from GitHub Trending (weekly), GitHub topic search, OpenRouter app rankings and npm downloads; the Summary column holds the project descriptions.
 
 ${tablesMd || "(No projects were selected this week.)"}
-${modelData ? `\n---\n\n${modelData}\n` : ""}
+
 ---
 
 Write the prose sections of the report, in this order:
 
-1. \`## ${T.highlightsHeading}\` — 3-5 sentences on the most noteworthy agent and AI-coding developments this week.
+1. \`## ${SECTIONS.highlights}\` — 3-5 sentences on the most noteworthy agent and AI-coding developments this week.
 2. The line \`${TRENDING_TABLES_MARKER}\` exactly once, on its own line. The tables are inserted there.
-3. \`## ${T.trendsHeading}\` — 200-300 words: which kinds of agent or coding tool are getting attention, and any new harness or orchestration patterns.
-4. \`## ${T.hotSpotsHeading}\` — 3-5 bullets: specific projects or directions worth developer focus, with brief reasoning.
-${modelData ? `5. \`## ${T.modelUsageHeading}\` — 3-5 bullets: which models lead token usage, notable newcomers in the top list, and newly listed models worth trying for agentic work. Copy token figures verbatim.\n` : ""}
+3. \`## ${SECTIONS.signals}\` — 200-300 words: which kinds of agent or coding tool are getting attention, and any new harness or orchestration patterns.
+4. \`## ${SECTIONS.worthALook}\` — 3-5 bullets: specific projects or directions worth developer focus, with brief reasoning.
+
 Rules:
+- ${NO_TITLE_RULE}
 - Do not reproduce or alter the tables.
 - Base every claim on the tables and the data above. They show descriptions and counts only, so do not describe releases, adoption or community reactions they do not show.
-- Mention only projects that appear in the tables${modelData ? " or in the model data" : ""}, and link every project you mention.
+- Mention only projects that appear in the tables, and link every project you mention.
 - English, professional and concise.
 `;
 }
@@ -143,29 +151,33 @@ ${siteSections}
 
 ---
 
-Generate a detailed AI Official Content Tracking Report in English with these sections:
+Write the report in English with these sections. ${NO_TITLE_RULE}
 
-1. **Today's Highlights** — 3-5 sentences on the most important new releases or developments, calling out key highlights
+## ${SECTIONS.highlights}
+3-5 sentences on the most important new releases or developments.
 
-2. **Anthropic / Claude Content Highlights** — Organize important content by category (news / research / engineering / learn, etc.):
-   - For each piece, 2-4 sentences extracting core insights, technical details, or business significance
-   - Note publication date and original link
-   - If first full crawl, trace important milestones chronologically
+## ${WEB_REPORT.anthropicHeading}
+Important content grouped by category (news / research / engineering / learn, etc.) under \`###\` subheadings:
+- For each piece, 2-4 sentences extracting core insights, technical details, or business significance
+- Note publication date and original link
+- If first full crawl, trace important milestones chronologically
+Omit this section when Anthropic has no new content.
 
-3. **OpenAI Content Highlights** — Same structure, organized by research / release / company / safety categories
-   - ⚠️ Note: OpenAI data is metadata-only (titles derived from URL slugs, no article text). Only list URLs and categories objectively. Do NOT speculate on title meanings or fabricate content summaries. If information is insufficient for analysis, state the data limitation clearly.
+## ${WEB_REPORT.openaiHeading}
+Same structure, grouped by research / release / company / safety. Omit this section when OpenAI has no new content.
+- ⚠️ Note: OpenAI data is metadata-only (titles derived from URL slugs, no article text). Only list URLs and categories objectively. Do NOT speculate on title meanings or fabricate content summaries. If information is insufficient for analysis, state the data limitation clearly.
 
-4. **Strategic Signal Analysis** — Based on both companies' release cadence and content focus, analyze:
-   - Each company's recent technical priorities (model capabilities / safety / productization / ecosystem)
-   - Competitive dynamics: who is setting the agenda, who is following
-   - Potential impact on developers and enterprise users
+## ${SECTIONS.signals}
+Based on both companies' release cadence and content focus:
+- Each company's recent technical priorities (model capabilities / safety / productization / ecosystem)
+- Competitive dynamics: who is setting the agenda, who is following
+- Potential impact on developers and enterprise users
+- Hidden signals in titles, phrasing and timing: new terms, dense releases in one category, policy and safety developments
 
-5. **Notable Details** — Extract hidden signals from titles, phrasing, and timing, e.g.:
-   - New terms or topics appearing for the first time
-   - Dense releases in a category (may signal a product milestone)
-   - Policy, compliance, and safety developments
+## ${SECTIONS.worthALook}
+1-3 pieces most worth reading in full, with brief reasoning.
 
-${isAnyFirstRun ? "6. **Content Landscape Overview** — First full crawl only: summarize the content category distribution for both companies and describe their content strategy style (academic-oriented vs product-oriented vs user stories, etc.)\n\n" : ""}Style: English, professional and detailed, suited for AI researchers, product managers, and technical decision-makers. Every item must include official links.
+${isAnyFirstRun ? `## ${WEB_REPORT.landscapeHeading}\nFirst full crawl only: summarize the content category distribution for both companies and describe their content strategy style (academic-oriented vs product-oriented vs user stories, etc.)\n\n` : ""}Style: English, professional and detailed, suited for AI researchers, product managers, and technical decision-makers. Every item must include official links.
 `;
 }
 
@@ -233,30 +245,53 @@ Rules:
 - At most ${maxPerReport} highlights per report, each at most ${HIGHLIGHT_MAX_CHARS} characters`;
 }
 
-export function buildHnPrompt(data: HnData, dateStr: string): string {
-  const storiesText = data.stories
-    .map(
-      (s, i) =>
-        `${i + 1}. **${s.title}**\n` +
-        `   Link: ${s.url}\n` +
-        `   Discussion: ${s.hnUrl}\n` +
-        `   HN Rank: ${s.hnRank ?? i + 1} | Score: ${s.points} | Comments: ${s.comments} | Author: ${s.author} | Time: ${s.createdAt.slice(0, 16)}`,
-    )
-    .join("\n\n");
+/** The discussions report's sources. Dev.to and Lobste.rs are fetched on the weekly run only. */
+export interface DiscussionsData {
+  hn: HnData;
+  devto: DevtoData;
+  lobsters: LobstersData;
+}
 
-  return `You are an AI industry news analyst. The following are AI-related posts from the current Hacker News topstories feed as of ${dateStr} (ordered by HN rank, ${data.stories.length} total). You have only each story's title, link and counts — not the article and not the comment thread:
+/**
+ * Which sources the discussions report covers; the prompt and the report's
+ * sources line both read it. HN alone stays in even when empty; next to a
+ * weekly source an empty HN gets no section.
+ */
+export function discussionSources({ hn, devto, lobsters }: DiscussionsData) {
+  const hasDevto = devto.fetchSuccess && devto.articles.length > 0;
+  const hasLobsters = lobsters.fetchSuccess && lobsters.stories.length > 0;
+  const hasHn = hn.fetchSuccess && (hn.stories.length > 0 || !(hasDevto || hasLobsters));
+  return { hasHn, hasDevto, hasLobsters };
+}
 
----
+/**
+ * The discussions report: Hacker News daily, plus Dev.to and Lobste.rs on the
+ * weekly run — one report since October 2026, when the weekly community
+ * report was folded in. A source that failed or was not fetched gets neither
+ * input nor section.
+ */
+export function buildDiscussionsPrompt(data: DiscussionsData, dateStr: string): string {
+  const { hn, devto, lobsters } = data;
+  const { hasHn, hasDevto, hasLobsters } = discussionSources(data);
+  const weekly = hasDevto || hasLobsters;
 
-${storiesText}
-
----
-
-Generate a structured Hacker News AI Community Digest in English:
-
-1. **Today's Highlights** — 3-5 sentences on the hottest AI topics on HN today, judged by score and comment count
-
-2. **Top News & Discussions** — Organized by category, render a **Markdown table** per category with exactly these columns:
+  const inputs: string[] = [];
+  const sections: string[] = [];
+  if (hasHn) {
+    inputs.push(
+      `## Hacker News (current topstories feed, ${hn.stories.length} AI stories, ordered by HN rank)\n\n` +
+        hn.stories
+          .map(
+            (s, i) =>
+              `${i + 1}. **${s.title}**\n` +
+              `   Link: ${s.url}\n` +
+              `   Discussion: ${s.hnUrl}\n` +
+              `   HN Rank: ${s.hnRank ?? i + 1} | Score: ${s.points} | Comments: ${s.comments} | Author: ${s.author} | Time: ${s.createdAt.slice(0, 16)}`,
+          )
+          .join("\n\n"),
+    );
+    sections.push(`## ${DISCUSSIONS_REPORT.hnHeading}
+Organized by category: a \`### <category>\` heading per category, each followed by a **Markdown table** with exactly these columns:
 
    | Title | Score | Comments | Summary |
    | :--- | ---: | ---: | :--- |
@@ -264,19 +299,85 @@ Generate a structured Hacker News AI Community Digest in English:
    - **Title**: title as a Markdown link to the original article, followed by a " · [HN](discussion-url)" link to the HN thread
    - **Score / Comments**: copy the numbers from the input verbatim
    - **Summary**: 2 sentences — what the item is and why it matters to developers. Do not describe the comments: you have not read them. If the title does not say what the item is, do not guess
-   - Select the 2-5 most representative items per category; omit a category's table if empty
+   - Select the 2-5 most representative items per category; omit a category if it is empty
 
    Categories:
    - 🔬 Models & Research (new model releases, papers, benchmarks)
    - 🛠️ Tools & Engineering (open-source projects, frameworks, engineering practices)
    - 🏢 Industry News (company news, funding, product launches)
-   - 💬 Opinions & Debates (notable Ask HN, Show HN, or hot discussion threads)
+   - 💬 Opinions & Debates (notable Ask HN, Show HN, or hot discussion threads)`);
+  }
+  if (hasDevto) {
+    inputs.push(
+      `## Dev.to (top AI articles of the week, ${devto.articles.length} articles)\n\n` +
+        devto.articles
+          .map(
+            (a, i) =>
+              `${i + 1}. **${a.title}**\n` +
+              `   Link: ${a.url}\n` +
+              `   Author: ${a.user} | Reactions: ${a.positiveReactionsCount} | Comments: ${a.commentsCount} | Reading: ${a.readingTimeMinutes} min\n` +
+              `   Tags: ${a.tags.join(", ")}\n` +
+              `   ${a.description}`,
+          )
+          .join("\n\n"),
+    );
+    sections.push(`## ${DISCUSSIONS_REPORT.devtoHeading}
+The 5-10 most valuable articles as a **Markdown table**:
 
-3. **Community Sentiment Signal** — 100-200 words on today's HN AI focus, from the titles and counts alone:
+   | Article | Reactions | Comments | Summary |
+   | :--- | ---: | ---: | :--- |
+
+   - **Article**: title as a Markdown link
+   - **Reactions / Comments**: copy the numbers from the input verbatim
+   - **Summary**: 2 sentences — the key takeaway for developers`);
+  }
+  if (hasLobsters) {
+    inputs.push(
+      `## Lobste.rs (AI/ML stories of the last 7 days, ${lobsters.stories.length} stories)\n\n` +
+        lobsters.stories
+          .map(
+            (s, i) =>
+              `${i + 1}. **${s.title}**\n` +
+              `   Link: ${s.url}\n` +
+              `   Discussion: ${s.commentsUrl}\n` +
+              `   Score: ${s.score} | Comments: ${s.commentCount} | Author: ${s.author} | Tags: ${s.tags.join(", ")}`,
+          )
+          .join("\n\n"),
+    );
+    sections.push(`## ${DISCUSSIONS_REPORT.lobstersHeading}
+The 3-8 most notable stories as a **Markdown table**:
+
+   | Story | Score | Comments | Summary |
+   | :--- | ---: | ---: | :--- |
+
+   - **Story**: title as a Markdown link, followed by " · [discuss](discussion-url)"
+   - **Score / Comments**: copy the numbers from the input verbatim
+   - **Summary**: 2 sentences — why it's worth reading`);
+  }
+
+  const when = weekly ? "today on Hacker News and this week on Dev.to and Lobste.rs" : "today on Hacker News";
+  return `You are an AI industry news analyst. The following are AI-related posts from developer communities as of ${dateStr}. You have only each item's title, link, counts and (for Dev.to) description — not the article and not the comment thread:
+
+---
+
+${inputs.join("\n\n---\n\n")}
+
+---
+
+Write the report in English with these sections. ${NO_TITLE_RULE}
+
+## ${SECTIONS.highlights}
+3-5 sentences on the hottest AI topics ${when}, judged by score and comment count.
+
+${sections.join("\n\n")}
+
+## ${SECTIONS.signals}
+100-200 words on what developers are discussing, from the titles and counts alone:
    - Which topics are most active (high score + high comments)?
-   - Which stories draw far more comments than points — a sign of a contested topic?
+   - Which stories draw far more comments than points — a sign of a contested topic?${weekly ? "\n   - Practical concerns, tutorials or patterns that recur across the communities" : ""}
 
-4. **Worth Deep Reading** — List 2-3 pieces most worth developers/researchers reading in depth, with brief reasoning
+## ${SECTIONS.worthALook}
+2-3 pieces most worth reading in depth, with brief reasoning.
 
 Style: English, concise and professional, preserve all original links.
 `;
@@ -314,11 +415,13 @@ ${papersText}
 
 ---
 
-Generate a structured ArXiv AI Research Digest in English:
+Write the report in English with these sections. ${NO_TITLE_RULE}
 
-1. **Today's Highlights** — 3-5 sentences on the most significant research directions and breakthroughs
+## ${SECTIONS.highlights}
+3-5 sentences on the most significant research directions and breakthroughs.
 
-2. **Key Papers** — Select 8-15 most important papers, organized by theme. Under each theme header, render a **Markdown table** with exactly these columns:
+## ${ARXIV_REPORT.papersHeading}
+The 8-15 most important papers, organized by theme: a \`### <theme>\` heading per theme, each followed by a **Markdown table** with exactly these columns:
 
    | Paper | Authors | Summary |
    | :--- | :--- | :--- |
@@ -326,7 +429,7 @@ Generate a structured ArXiv AI Research Digest in English:
    - **Paper**: title as a Markdown link to its ArXiv URL
    - **Authors**: abbreviated (first 3 + et al.)
    - **Summary**: 2 sentences — the key contribution and why it matters
-   - Omit a theme's table if no paper falls under it
+   - Omit a theme if no paper falls under it
 
    Themes:
    - 🧠 Large Language Models (architecture, training, alignment, evaluation)
@@ -334,9 +437,11 @@ Generate a structured ArXiv AI Research Digest in English:
    - 🔧 Methods & Frameworks (new techniques, benchmarks, efficiency improvements)
    - 📊 Applications (domain-specific, multimodal, code generation)
 
-3. **Research Trend Signal** — 100-200 words on emerging research directions visible from today's submissions
+## ${SECTIONS.signals}
+100-200 words on emerging research directions visible in these submissions.
 
-4. **Worth Deep Reading** — 2-3 papers most worth reading in full, with reasoning
+## ${SECTIONS.worthALook}
+2-3 papers most worth reading in full, with reasoning.
 
 Style: English, concise and professional, preserve all ArXiv links.
 `;
@@ -346,7 +451,15 @@ Style: English, concise and professional, preserve all ArXiv links.
 // Hugging Face prompt
 // ---------------------------------------------------------------------------
 
-export function buildHfPrompt(data: HfData, dateStr: string): string {
+/**
+ * The weekly models report: Hugging Face trending models and OpenRouter token
+ * usage (in the trending report until October 2026). Either source alone is
+ * enough for a report.
+ */
+export function buildModelsPrompt(data: HfData, openrouter: OpenRouterData, dateStr: string): string {
+  const M = MODELS_REPORT;
+  const { hasHf, hasOpenRouter } = modelSources(data, openrouter);
+  const modelData = buildModelUsageData(openrouter);
   const modelsText = data.models
     .map(
       (m, i) =>
@@ -358,19 +471,15 @@ export function buildHfPrompt(data: HfData, dateStr: string): string {
     )
     .join("\n\n");
 
-  return `You are an AI model ecosystem analyst. The following are trending models on Hugging Face Hub as of ${dateStr} (${data.models.length} models, sorted by weekly likes):
+  const inputs = [
+    hasHf
+      ? `Hugging Face Hub trending models (${data.models.length}, sorted by weekly likes):\n\n${modelsText}`
+      : "",
+    hasOpenRouter ? `OpenRouter:\n\n${modelData}` : "",
+  ].filter(Boolean);
 
----
-
-${modelsText}
-
----
-
-Generate a structured Hugging Face Trending Models Digest in English:
-
-1. **Today's Highlights** — 3-5 sentences on the most notable model releases and trends on Hugging Face
-
-2. **Trending Models** — Organized by category. Under each category header, render a **Markdown table** with exactly these columns:
+  const hfSection = `## ${M.hfHeading}
+Organized by category: a \`### <category>\` heading per category, each followed by a **Markdown table** with exactly these columns:
 
    | Model | Author | Likes | Downloads | Summary |
    | :--- | :--- | ---: | ---: | :--- |
@@ -378,7 +487,7 @@ Generate a structured Hugging Face Trending Models Digest in English:
    - **Model**: model name as a Markdown link to its HF URL
    - **Likes / Downloads**: copy the numbers from the input verbatim (keep the thousands separators; do not recompute or round)
    - **Summary**: 2 sentences — what it is and why it's trending, including a standout capability or data point
-   - Omit a category's table entirely if no model falls under it
+   - Omit a category if no model falls under it
 
    Categories:
    - 🧠 Language Models (LLMs, chat models, instruction-tuned)
@@ -386,92 +495,34 @@ Generate a structured Hugging Face Trending Models Digest in English:
    - 🔧 Specialized Models (code, math, medical, embeddings)
    - 📦 Fine-tunes & Quantizations (community fine-tunes, GGUF, AWQ)
 
-3. **Ecosystem Signal** — 100-200 words analyzing model ecosystem trends:
+`;
+  const openRouterSection = `## ${M.openRouterHeading}
+3-5 bullets: which models lead token usage, notable newcomers in the top list, and newly listed models worth trying for agentic work. Copy token figures verbatim; link each model as https://openrouter.ai/<id>.
+
+`;
+
+  return `You are an AI model ecosystem analyst. The following are this week's model signals as of ${dateStr}:
+
+---
+
+${inputs.join("\n\n---\n\n")}
+
+---
+
+Write the report in English with these sections. ${NO_TITLE_RULE}
+
+## ${SECTIONS.highlights}
+3-5 sentences on the most notable model releases and trends this week.
+
+${hasHf ? hfSection : ""}${hasOpenRouter ? openRouterSection : ""}## ${SECTIONS.signals}
+100-200 words analyzing model ecosystem trends:
    - Which model families are gaining momentum?
    - Open-weight vs proprietary trends
    - Notable quantization or fine-tuning activity
 
-4. **Worth Exploring** — 2-3 models most worth trying or studying, with reasoning
+## ${SECTIONS.worthALook}
+2-3 models most worth trying or studying, with reasoning.
 
-Style: English, concise and professional, preserve all HuggingFace links.
-`;
-}
-
-// ---------------------------------------------------------------------------
-// Community prompt (Dev.to + Lobste.rs combined)
-// ---------------------------------------------------------------------------
-
-export function buildCommunityPrompt(devto: DevtoData, lobsters: LobstersData, dateStr: string): string {
-  const devtoText =
-    devto.articles.length > 0
-      ? devto.articles
-          .map(
-            (a, i) =>
-              `${i + 1}. **${a.title}**\n` +
-              `   Link: ${a.url}\n` +
-              `   Author: ${a.user} | Reactions: ${a.positiveReactionsCount} | Comments: ${a.commentsCount} | Reading: ${a.readingTimeMinutes} min\n` +
-              `   Tags: ${a.tags.join(", ")}\n` +
-              `   ${a.description}`,
-          )
-          .join("\n\n")
-      : "(No Dev.to articles available)";
-
-  const lobstersText =
-    lobsters.stories.length > 0
-      ? lobsters.stories
-          .map(
-            (s, i) =>
-              `${i + 1}. **${s.title}**\n` +
-              `   Link: ${s.url}\n` +
-              `   Discussion: ${s.commentsUrl}\n` +
-              `   Score: ${s.score} | Comments: ${s.commentCount} | Author: ${s.author} | Tags: ${s.tags.join(", ")}`,
-          )
-          .join("\n\n")
-      : "(No Lobste.rs stories available)";
-
-  return `You are a tech community analyst. The following are this week's top AI-related content from Dev.to and Lobste.rs (week ending ${dateStr}):
-
-## Dev.to Articles (${devto.articles.length} articles)
-
-${devtoText}
-
----
-
-## Lobste.rs Stories (${lobsters.stories.length} stories)
-
-${lobstersText}
-
----
-
-Generate a structured Tech Community AI Weekly in English:
-
-1. **This Week's Highlights** — 3-5 sentences on the most discussed AI topics across these communities this week
-
-2. **Dev.to Highlights** — Select 5-10 most valuable articles as a **Markdown table**:
-
-   | Article | Reactions | Comments | Summary |
-   | :--- | ---: | ---: | :--- |
-
-   - **Article**: title as a Markdown link
-   - **Reactions / Comments**: copy the numbers from the input verbatim
-   - **Summary**: 2 sentences — the key takeaway for developers
-
-3. **Lobste.rs Highlights** — Select 3-8 most notable stories as a **Markdown table**:
-
-   | Story | Score | Comments | Summary |
-   | :--- | ---: | ---: | :--- |
-
-   - **Story**: title as a Markdown link, followed by " · [discuss](discussion-url)"
-   - **Score / Comments**: copy the numbers from the input verbatim
-   - **Summary**: 2 sentences — why it's worth reading
-
-4. **Community Pulse** — 100-200 words on what these communities are talking about:
-   - Common themes across both platforms
-   - Practical concerns developers have about AI tools
-   - Emerging tutorials, patterns, or best practices
-
-5. **Worth Reading** — 2-3 articles/stories most worth reading in depth
-
-Style: English, concise and developer-friendly, preserve all original links.
+Style: English, concise and professional, preserve all links.
 `;
 }

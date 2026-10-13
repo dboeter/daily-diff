@@ -9,8 +9,6 @@
  * Provider-specific env vars — see src/providers/ for full list.
  */
 
-import fs from "node:fs";
-import path from "node:path";
 import {
   type GitHubItem,
   type RepoConfig,
@@ -19,16 +17,9 @@ import {
   isPrerelease,
   fetchSkillsData,
   createGitHubIssue,
-  WEEKLY_ISSUE_LABELS,
 } from "./github.ts";
-import {
-  type DigestScope,
-  type ProjectActivity,
-  buildProjectDigestPrompt,
-  buildSkillsPrompt,
-  hasActivity,
-} from "./prompts.ts";
-import { matchAgentNews } from "./agent-news.ts";
+import { type ProjectActivity, buildProjectDigestPrompt, buildSkillsPrompt, hasActivity } from "./prompts.ts";
+import { matchProjectNews } from "./agent-news.ts";
 import {
   buildTrendingSummariesPrompt,
   buildTrendingProsePrompt,
@@ -37,6 +28,7 @@ import {
 } from "./prompts-data.ts";
 import {
   callLlm,
+  generateBody,
   parseLlmJson,
   saveFile,
   autoGenFooter,
@@ -46,16 +38,22 @@ import {
   llmHealthLine,
   isConnectionError,
 } from "./report.ts";
-import { buildProjectReportContent, buildStealthSection, renderTrendingTables } from "./report-builders.ts";
+import {
+  buildProjectReportContent,
+  buildStealthSection,
+  renderTrendingTables,
+  renderReportBar,
+  withReportBar,
+} from "./report-builders.ts";
 import { summaryRows } from "./trending-rank.ts";
 import {
-  saveWebReport,
-  saveTrendingReport,
-  saveHnReport,
-  saveArxivReport,
-  saveHfReport,
-  saveCommunityReport,
-} from "./report-savers.ts";
+  buildWebReport,
+  buildTrendingReport,
+  buildDiscussionsReport,
+  buildArxivReport,
+  buildModelsReport,
+  type SavedReport,
+} from "./data-reports.ts";
 import { loadWebState, fetchSiteContent, type WebFetchResult, type WebState } from "./web.ts";
 import { fetchTrendingData, EMPTY_NPM, EMPTY_OPENROUTER, type TrendingData } from "./trending.ts";
 import { fetchStealthModels, type OpenRouterStealthModel } from "./openrouter.ts";
@@ -65,8 +63,9 @@ import { fetchHfData, type HfData } from "./hf.ts";
 import { fetchDevtoData, type DevtoData } from "./devto.ts";
 import { fetchLobstersData, type LobstersData } from "./lobsters.ts";
 import { loadConfig, type SectionKey } from "./config.ts";
+import { resolvePagesUrl } from "./notify.ts";
 import { toCstDateStr, toUtcStr, isWeeklyRun, sleep } from "./date.ts";
-import { MSG, ISSUE_LABELS, PROJECT_REPORTS, projectIssueTitle } from "./i18n.ts";
+import { LIVE_REPORT_IDS, MSG, PROJECT_SCOPE, REPORTS, reportHeading, reportIssueTitle } from "./i18n.ts";
 
 // ---------------------------------------------------------------------------
 // Repo config — loaded from config.yml (throws when a section is missing)
@@ -153,12 +152,9 @@ async function fetchAllData(
   stealthModels: OpenRouterStealthModel[] | null;
 }> {
   const daySince = new Date(now.getTime() - DAY_MS);
-  const weekSince = new Date(now.getTime() - 7 * DAY_MS);
   console.log(
-    `  Tracking daily: ${AGENTS.map((r) => r.id).join(", ")}, web, hn, arxiv, trending (news only)` +
-      (weekly
-        ? ` | weekly: ${INFRA_REPOS.map((r) => r.id).join(", ")}, skills, trending, hf, devto, lobsters`
-        : ""),
+    `  Tracking daily: ${[...AGENTS, ...INFRA_REPOS].map((r) => r.id).join(", ")}, web, hn, arxiv, trending (news only)` +
+      (weekly ? " | weekly: skills, trending, hf, devto, lobsters" : ""),
   );
 
   const noSkills = { prs: [] as GitHubItem[], issues: [] as GitHubItem[] };
@@ -177,9 +173,7 @@ async function fetchAllData(
     stealthModels,
   ] = await Promise.all([
     Promise.all(AGENTS.map((cfg) => fetchProject(cfg, daySince))),
-    weekly
-      ? Promise.all(INFRA_REPOS.map((cfg) => fetchProject(cfg, weekSince)))
-      : Promise.resolve<ProjectFetch[]>([]),
+    Promise.all(INFRA_REPOS.map((cfg) => fetchProject(cfg, daySince))),
     weekly
       ? fetchSkillsData(CLAUDE_SKILLS_REPO)
           .then((d) => {
@@ -258,34 +252,23 @@ async function fetchAllData(
 async function summarize(id: string, prompt: string, failMsg: string, maxTokens?: number): Promise<string> {
   console.log(`  [${id}] Calling LLM for summary...`);
   try {
-    return await callLlm(prompt, maxTokens);
+    return await generateBody(prompt, maxTokens);
   } catch (err) {
     console.error(`  [${id}] LLM call failed: ${err}`);
     return failMsg;
   }
 }
 
-/** Prompt wording for a section report: its subject from config.yml, its cadence from i18n. */
-function sectionScope(key: SectionKey): DigestScope {
-  const { window, period } = PROJECT_REPORTS[key];
-  return { subject: CONFIG[key].subject, window, period };
-}
-
 /** One LLM call over every active project; a fixed notice when none was active. */
-function summarizeProjects(
-  id: SectionKey,
-  activities: ProjectActivity[],
-  dateStr: string,
-  noActivityMsg: string,
-): Promise<string> {
+function summarizeProjects(id: SectionKey, activities: ProjectActivity[], dateStr: string): Promise<string> {
   const active = activities.filter(hasActivity);
   if (!active.length) {
     console.log(`  [${id}] No releases, hot issues or news, skipping LLM call`);
-    return Promise.resolve(noActivityMsg);
+    return Promise.resolve(MSG.projectsNoActivity);
   }
   return summarize(
     id,
-    buildProjectDigestPrompt(active, sectionScope(id), dateStr),
+    buildProjectDigestPrompt(active, { subject: CONFIG[id].subject, ...PROJECT_SCOPE }, dateStr),
     MSG.summaryFailed,
     LLM_TOKENS_LISTING,
   );
@@ -312,8 +295,8 @@ async function generateSummaries(
   const report = trendingData.report;
   const rows = report ? summaryRows(report) : [];
   const [agentsSummary, infraSummary, skillsSummary, trendingSummaries, trendingProse] = await Promise.all([
-    summarizeProjects("agents", agentActivities, dateStr, MSG.agentsNoActivity),
-    weekly ? summarizeProjects("infra", infraActivities, dateStr, MSG.infraNoActivity) : Promise.resolve(""),
+    summarizeProjects("agents", agentActivities, dateStr),
+    summarizeProjects("infra", infraActivities, dateStr),
     weekly
       ? summarize(
           "claude-code-skills",
@@ -348,9 +331,6 @@ async function generateSummaries(
 // ---------------------------------------------------------------------------
 // Main
 // ---------------------------------------------------------------------------
-
-/** Reports that only exist on the weekly run, in highlights order. */
-const WEEKLY_REPORT_IDS = [...WEEKLY_ISSUE_LABELS].map((label) => `ai-${label}`);
 
 /**
  * Pause between the two highlights attempts when the first one died on a
@@ -391,14 +371,15 @@ async function main(): Promise<void> {
   } = await fetchAllData(now, webState, weekly);
 
   // Agent news is matched against the other sources' data, so it waits for them.
-  const agentNews = matchAgentNews(AGENTS, { hn: hnData, web: webResults, trending: trendingData });
-  const agentActivities: ProjectActivity[] = agentFetches.map((f) => ({
-    ...f,
-    news: agentNews.get(f.config.id) ?? [],
-  }));
-  // Infra is reported on releases and hot issues alone: the news sources are
-  // daily snapshots.
-  const infraActivities: ProjectActivity[] = infraFetches.map((f) => ({ ...f, news: [] }));
+  // Agents and tooling in one pass: an item naming 3+ of them is a compatibility list.
+  const projectNews = matchProjectNews([...AGENTS, ...INFRA_REPOS], {
+    hn: hnData,
+    web: webResults,
+    trending: trendingData,
+  });
+  const withNews = (f: ProjectFetch): ProjectActivity => ({ ...f, news: projectNews.get(f.config.id) ?? [] });
+  const agentActivities = agentFetches.map(withNews);
+  const infraActivities = infraFetches.map(withNews);
 
   // 2. Generate every report body
   console.log("  Generating summaries...");
@@ -411,82 +392,74 @@ async function main(): Promise<void> {
     weekly,
   );
 
-  // First gate. On a daily run only the agents call has happened by now, below
-  // LLM_MIN_SAMPLES, so this only arms on the weekly run (5 calls: agents, infra,
-  // skills, trending summaries, trending prose); the second gate, after the
-  // savers, covers every run. Bailing here costs nothing — no file has been
-  // written yet.
+  // First gate. On a daily run at most the agents and infra calls have happened
+  // by now, below LLM_MIN_SAMPLES, so this only arms on the weekly run (5 calls:
+  // agents, infra, skills, trending summaries, trending prose); the second gate,
+  // after the builders, covers every run. Bailing here costs nothing — no file
+  // has been written yet.
   assertLlmHealthy("summary");
 
-  // 3. Build + save all reports
-  const ft = autoGenFooter();
-  const agentsContent = buildProjectReportContent({
-    title: CONFIG.agents.title,
-    dateStr,
-    utcStr,
-    activities: agentActivities,
-    summary: summaries.agentsSummary,
-    period: PROJECT_REPORTS.agents.period,
-    preamble: buildStealthSection(stealthModels),
-    footer: ft,
-  });
-  console.log(`  Saved ${saveFile(agentsContent, dateStr, "ai-agents.md")}`);
-
-  let infraContent = "";
-  if (weekly) {
-    infraContent = buildProjectReportContent({
-      title: CONFIG.infra.title,
-      dateStr,
+  // 3. Build every report
+  // The infra section is a group in the agents report since October 2026.
+  const agents: SavedReport = {
+    id: "ai-agents",
+    content: buildProjectReportContent({
+      heading: reportHeading("ai-agents", dateStr),
       utcStr,
-      activities: infraActivities,
-      summary: summaries.infraSummary,
-      period: PROJECT_REPORTS.infra.period,
-      footer: ft,
-    });
-    console.log(`  Saved ${saveFile(infraContent, dateStr, "ai-infra.md")}`);
-  } else {
-    console.log("  [weekly] Infra, trending, community and HF reports — not scheduled today, skipping.");
-  }
+      groups: [
+        { title: CONFIG.agents.title, activities: agentActivities, summary: summaries.agentsSummary },
+        { title: CONFIG.infra.title, activities: infraActivities, summary: summaries.infraSummary },
+      ],
+      period: PROJECT_SCOPE.period,
+      preamble: buildStealthSection(stealthModels),
+      footer: autoGenFooter(),
+    }),
+  };
+  if (!weekly)
+    console.log("  [weekly] Trending and HF reports, Dev.to and Lobste.rs — not scheduled today, skipping.");
 
-  await Promise.all([
-    saveWebReport(webResults, webState, utcStr, dateStr, digestRepo),
-    saveHnReport(hnData, utcStr, dateStr, digestRepo),
-    saveArxivReport(arxivData, utcStr, dateStr, digestRepo),
+  const built = await Promise.all([
+    buildWebReport(webResults, webState, utcStr, dateStr),
+    buildDiscussionsReport({ hn: hnData, devto: devtoData, lobsters: lobstersData }, utcStr, dateStr),
+    buildArxivReport(arxivData, utcStr, dateStr),
     ...(weekly
       ? [
-          saveTrendingReport(
+          buildTrendingReport(
             trendingData,
             summaries.trending,
             { summary: summaries.skillsSummary, repo: CLAUDE_SKILLS_REPO },
             utcStr,
             dateStr,
-            digestRepo,
           ),
-          saveCommunityReport(devtoData, lobstersData, utcStr, dateStr, digestRepo),
-          saveHfReport(hfData, utcStr, dateStr, digestRepo),
+          buildModelsReport(hfData, trendingData.openrouter, utcStr, dateStr),
         ]
       : []),
   ]);
+  // A builder returns null when its source failed or its LLM call did.
+  // In REPORTS order, so the issues are opened in reading order.
+  const saved = [agents, ...built.filter((r): r is SavedReport => r !== null)].sort(
+    (a, b) => LIVE_REPORT_IDS.indexOf(a.id) - LIVE_REPORT_IDS.indexOf(b.id),
+  );
 
   // Second gate: an outage that starts *after* the first gate would otherwise
-  // sail straight through — the savers each swallow their own failure and just
-  // skip a report. Files are on disk by now, but the failing exit skips the
-  // commit step, so they are never published.
+  // sail straight through — the builders each swallow their own failure and
+  // just skip a report. No report file or issue exists yet; state files may,
+  // but the failing exit skips the commit step, so they are never published.
   assertLlmHealthy("report");
 
+  // The highlights pass reads the bodies, not the link bars.
+  const reports: Record<string, string> = Object.fromEntries(saved.map((r) => [r.id, r.content]));
+
+  // Each report links the others the day produced, so the bar waits for all of them.
+  const pagesUrl = resolvePagesUrl();
+  const ids = saved.map((r) => r.id);
+  const published: SavedReport[] = saved.map((r) => ({
+    ...r,
+    content: withReportBar(r.content, renderReportBar(r.id, ids, dateStr, pagesUrl)),
+  }));
+  for (const r of published) console.log(`  Saved ${saveFile(r.content, dateStr, `${r.id}.md`)}`);
+
   // 4. Generate highlights for Telegram notification
-  const readReport = (name: string): string | undefined => {
-    const p = path.join("digests", dateStr, name);
-    return fs.existsSync(p) ? fs.readFileSync(p, "utf-8") : undefined;
-  };
-
-  const reports: Record<string, string> = { "ai-agents": agentsContent };
-  // Savers skip a report when its source failed, so read back what was written.
-  for (const id of ["ai-web", "ai-hn", "ai-arxiv", ...(weekly ? WEEKLY_REPORT_IDS : [])]) {
-    const content = readReport(`${id}.md`);
-    if (content) reports[id] = content;
-  }
-
   console.log("  Generating highlights for Telegram...");
   // The highlights pass parses JSON and retries once: the LLM occasionally
   // emits slightly malformed JSON that repairJson can't fix (seen 2026-07-13:
@@ -523,22 +496,12 @@ async function main(): Promise<void> {
   const highlightsPath = saveFile(JSON.stringify(highlights, null, 2), dateStr, "highlights.json");
   console.log(`  Saved ${highlightsPath}`);
 
-  // 5. Create GitHub issues for agents (+ infra on the weekly run)
+  // 5. Create the GitHub issues
   if (digestRepo) {
-    const agentsUrl = await createGitHubIssue(
-      projectIssueTitle("agents", CONFIG.agents.title, dateStr),
-      agentsContent,
-      ISSUE_LABELS.agents,
-    );
-    console.log(`  Created agents issue: ${agentsUrl}`);
-
-    if (weekly) {
-      const infraUrl = await createGitHubIssue(
-        projectIssueTitle("infra", CONFIG.infra.title, dateStr),
-        infraContent,
-        ISSUE_LABELS.infra,
-      );
-      console.log(`  Created infra issue: ${infraUrl}`);
+    for (const r of published) {
+      const title = r.issueTitle ?? reportIssueTitle(r.id, dateStr);
+      const url = await createGitHubIssue(title, r.content, REPORTS[r.id].label);
+      console.log(`  Created ${r.id} issue: ${url}`);
     }
   }
 

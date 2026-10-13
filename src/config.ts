@@ -35,9 +35,9 @@ export type SectionKey = (typeof SECTION_KEYS)[number];
 
 type RawConfig = Partial<Record<SectionKey, RawSection>> & { skills_repo?: unknown };
 
-/** A report over a list of repos: the daily agents report or the weekly infra one. */
+/** A group of tracked repos: a section of the daily agents report. */
 export interface SectionConfig {
-  /** Report heading and GitHub issue title, e.g. "AI Agents Digest". */
+  /** The section's heading in the agents report, e.g. "Agent Tooling". */
   title: string;
   /** What the projects are, for the LLM prompt and README.md. */
   subject: string;

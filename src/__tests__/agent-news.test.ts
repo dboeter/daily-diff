@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { agentMatcher, agentTerms, matchAgentNews, NEWS_PER_AGENT } from "../agent-news.ts";
+import { agentMatcher, agentTerms, matchProjectNews, NEWS_PER_AGENT } from "../agent-news.ts";
 import type { RepoConfig } from "../github.ts";
 import type { HnData, HnStory } from "../hn.ts";
 import { EMPTY_NPM, EMPTY_OPENROUTER, type TrendingData } from "../trending.ts";
@@ -92,12 +92,12 @@ describe("agentMatcher", () => {
 });
 
 // ---------------------------------------------------------------------------
-// matchAgentNews
+// matchProjectNews
 // ---------------------------------------------------------------------------
 
-describe("matchAgentNews", () => {
+describe("matchProjectNews", () => {
   it("assigns HN stories to the agents they mention", () => {
-    const news = matchAgentNews([claudeCode, openclaw], {
+    const news = matchProjectNews([claudeCode, openclaw], {
       hn: hn("Claude Code hooks deep dive", "OpenClaw vs Claude Code", "Unrelated GPU news"),
     });
     expect(news.get("claude-code")!.map((n) => n.title)).toEqual([
@@ -108,7 +108,7 @@ describe("matchAgentNews", () => {
   });
 
   it("links HN items to the discussion and carries their score", () => {
-    const [item] = matchAgentNews([openclaw], { hn: hn("OpenClaw 2.0") }).get("openclaw")!;
+    const [item] = matchProjectNews([openclaw], { hn: hn("OpenClaw 2.0") }).get("openclaw")!;
     expect(item!.source).toBe("Hacker News");
     expect(item!.url).toContain("news.ycombinator.com");
     expect(item!.detail).toBe("100 points, 20 comments");
@@ -133,7 +133,7 @@ describe("matchAgentNews", () => {
         ],
       },
     ];
-    const news = matchAgentNews([claudeCode], { web });
+    const news = matchProjectNews([claudeCode], { web });
     expect(news.get("claude-code")!.map((n) => n.source)).toEqual(["Anthropic (Claude)"]);
   });
 
@@ -166,7 +166,7 @@ describe("matchAgentNews", () => {
         },
       ],
     };
-    const news = matchAgentNews([claudeCode, openclaw], { trending });
+    const news = matchProjectNews([claudeCode, openclaw], { trending });
     expect(news.get("claude-code")!.map((n) => n.url)).toEqual(["https://github.com/someone/cc-skills"]);
     expect(news.get("openclaw")!.map((n) => n.url)).toEqual(["https://github.com/someone/claw-memory"]);
   });
@@ -190,7 +190,7 @@ describe("matchAgentNews", () => {
         },
       ],
     };
-    expect(matchAgentNews([openclaw], { trending }).get("openclaw")).toEqual([]);
+    expect(matchProjectNews([openclaw], { trending }).get("openclaw")).toEqual([]);
 
     trending.trendingRepos = [
       {
@@ -204,7 +204,7 @@ describe("matchAgentNews", () => {
       },
     ];
     expect(
-      matchAgentNews([openclaw], { trending })
+      matchProjectNews([openclaw], { trending })
         .get("openclaw")!
         .map((n) => n.source),
     ).toEqual(["GitHub Trending"]);
@@ -216,7 +216,7 @@ describe("matchAgentNews", () => {
       story("OpenClaw one again", "1"),
       ...Array.from({ length: 10 }, (_, i) => story(`OpenClaw ${i}`, `x${i}`)),
     ];
-    const items = matchAgentNews([openclaw], { hn: { stories, fetchSuccess: true } }).get("openclaw")!;
+    const items = matchProjectNews([openclaw], { hn: { stories, fetchSuccess: true } }).get("openclaw")!;
     expect(items).toHaveLength(NEWS_PER_AGENT);
     expect(new Set(items.map((n) => n.url)).size).toBe(items.length);
   });
@@ -228,7 +228,7 @@ describe("matchAgentNews", () => {
       name: "OpenAI Codex",
       keywords: ["codex"],
     };
-    const news = matchAgentNews([claudeCode, codex, openclaw], {
+    const news = matchProjectNews([claudeCode, codex, openclaw], {
       hn: hn("Memory plugin for Claude Code, Codex and OpenClaw", "Codex vs Claude Code"),
     });
     expect(news.get("claude-code")!.map((n) => n.title)).toEqual(["Codex vs Claude Code"]);
@@ -236,7 +236,7 @@ describe("matchAgentNews", () => {
   });
 
   it("returns an empty list for every agent when no source has data", () => {
-    const news = matchAgentNews([claudeCode, pi], {});
+    const news = matchProjectNews([claudeCode, pi], {});
     expect(news.get("claude-code")).toEqual([]);
     expect(news.get("pi")).toEqual([]);
   });

@@ -3,7 +3,7 @@
  * Reads GITHUB_TOKEN and DIGEST_REPO from environment at call time.
  */
 
-import { ISSUE_LABELS } from "./i18n.ts";
+import { LIVE_REPORT_IDS, REPORTS, WEEKLY_REPORT_IDS } from "./i18n.ts";
 import { toCstDateStr, sleep } from "./date.ts";
 
 // ---------------------------------------------------------------------------
@@ -18,7 +18,7 @@ export interface RepoConfig {
   /** Human-readable display name */
   name: string;
   /**
-   * Terms matchAgentNews looks for in news items. Defaults to the display name
+   * Terms matchProjectNews looks for in news items. Defaults to the display name
    * and repo name; set this when the name is a common word (e.g. "Pi").
    */
   keywords?: string[];
@@ -343,8 +343,6 @@ const LABEL_COLORS: Record<string, string> = {
   hn: "ff6600",
   arxiv: "b31b1b",
   hf: "ff9d00",
-  community: "2563eb",
-  infra: "0891b2",
 };
 
 /**
@@ -373,9 +371,9 @@ function neutralizeGitHubRefs(text: string): string {
  * touched.
  */
 const DIGEST_ISSUE_LABELS = new Set([
-  ...Object.values(ISSUE_LABELS),
+  ...LIVE_REPORT_IDS.map((id) => REPORTS[id].label),
   // Issues from the former bilingual pipeline carried "-en" labels; keep them closable.
-  ...Object.values(ISSUE_LABELS).map((l) => `${l}-en`),
+  ...LIVE_REPORT_IDS.map((id) => `${REPORTS[id].label}-en`),
   // Discontinued in October 2026: CLI and OpenClaw were merged into the agents
   // report, Product Hunt was dropped.
   "digest",
@@ -384,6 +382,13 @@ const DIGEST_ISSUE_LABELS = new Set([
   "openclaw-en",
   "ph",
   "ph-en",
+  // Folded into the agents and discussions reports in October 2026. Not weekly
+  // any more, so an open issue falls in the daily group and is closed by the
+  // next run.
+  "infra",
+  "infra-en",
+  "community",
+  "community-en",
   "weekly",
   "weekly-en",
   "monthly",
@@ -402,16 +407,8 @@ function isDigestIssue(i: OpenIssue): boolean {
   return i.pull_request === undefined && i.labels.some((l) => DIGEST_ISSUE_LABELS.has(l.name));
 }
 
-/**
- * Labels of the reports that run weekly (see WEEKLY_REPORT_WEEKDAY in date.ts).
- * The one list of weekly reports: index.ts derives its report IDs from it.
- */
-export const WEEKLY_ISSUE_LABELS = new Set<string>([
-  ISSUE_LABELS.infra,
-  ISSUE_LABELS.trending,
-  ISSUE_LABELS.community,
-  ISSUE_LABELS.hf,
-]);
+/** Labels of the weekly reports. */
+const WEEKLY_ISSUE_LABELS = new Set<string>(WEEKLY_REPORT_IDS.map((id) => REPORTS[id].label));
 
 /**
  * Daily issues are retained as one group; each weekly report is its own group,

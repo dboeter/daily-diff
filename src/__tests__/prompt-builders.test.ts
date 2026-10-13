@@ -10,13 +10,18 @@ import {
   buildTrendingSummariesPrompt,
   buildTrendingProsePrompt,
   buildWebReportPrompt,
-  buildHnPrompt,
+  buildDiscussionsPrompt,
+  discussionSources,
+  buildArxivPrompt,
+  buildModelsPrompt,
 } from "../prompts-data.ts";
 import { TRENDING_TABLES_MARKER } from "../report-builders.ts";
-import { TRENDING_REPORT } from "../i18n.ts";
+import { MODELS_REPORT, SECTIONS } from "../i18n.ts";
 import type { RepoConfig, GitHubItem, GitHubRelease } from "../github.ts";
 import { EMPTY_NPM, EMPTY_OPENROUTER, type TrendingData } from "../trending.ts";
 import type { HnData } from "../hn.ts";
+import type { DevtoData } from "../devto.ts";
+import type { LobstersData } from "../lobsters.ts";
 import type { WebFetchResult } from "../web.ts";
 
 // ---------------------------------------------------------------------------
@@ -177,6 +182,22 @@ describe("buildSkillsPrompt", () => {
 // buildTrendingSummariesPrompt / buildTrendingProsePrompt
 // ---------------------------------------------------------------------------
 
+const withModels: TrendingData["openrouter"] = {
+  ...EMPTY_OPENROUTER,
+  topModels: [{ slug: "deepseek/deepseek-v4.1-flash", tokens: 25_630_000_000_000 }],
+  topModelsDate: "2026-10-04",
+  newModels: [
+    {
+      id: "inclusionai/ling-3.1-flash",
+      name: "Ling 3.1 Flash",
+      description: "MoE",
+      created: "2026-10-04",
+      contextLength: 262_144,
+    },
+  ],
+  fetchSuccess: true,
+};
+
 const noTrending: TrendingData = {
   trendingRepos: [],
   searchRepos: [],
@@ -218,46 +239,40 @@ describe("buildTrendingProsePrompt", () => {
     const result = buildTrendingProsePrompt("| Tool |\n| :--- |", noTrending, "2026-10-05");
     expect(result).toContain("| Tool |");
     expect(result).toContain(`\`${TRENDING_TABLES_MARKER}\` exactly once`);
-    const order = [
-      TRENDING_REPORT.highlightsHeading,
-      TRENDING_TABLES_MARKER,
-      TRENDING_REPORT.trendsHeading,
-      TRENDING_REPORT.hotSpotsHeading,
-    ].map((s) => result.indexOf(s));
+    const order = [SECTIONS.highlights, TRENDING_TABLES_MARKER, SECTIONS.signals, SECTIONS.worthALook].map(
+      (s) => result.indexOf(s),
+    );
     expect(order.every((i) => i >= 0)).toBe(true);
     expect([...order].sort((a, b) => a - b)).toEqual(order);
     expect(result).toContain("Do not reproduce or alter the tables");
   });
 
-  it("omits the model-usage section without model data", () => {
-    const result = buildTrendingProsePrompt("", noTrending, "2026-10-05");
-    expect(result).not.toContain(TRENDING_REPORT.modelUsageHeading);
+  it("leaves OpenRouter model usage to the models report", () => {
+    const result = buildTrendingProsePrompt("", { ...noTrending, openrouter: withModels }, "2026-10-05");
+    expect(result).not.toContain(MODELS_REPORT.openRouterHeading);
+    expect(result).not.toContain("deepseek/deepseek-v4.1-flash");
     expect(result).toContain("No projects were selected");
   });
+});
 
-  it("adds the model-usage section and data when OpenRouter has models", () => {
-    const data: TrendingData = {
-      ...noTrending,
-      openrouter: {
-        ...EMPTY_OPENROUTER,
-        topModels: [{ slug: "deepseek/deepseek-v4.1-flash", tokens: 25_630_000_000_000 }],
-        topModelsDate: "2026-10-04",
-        newModels: [
-          {
-            id: "inclusionai/ling-3.1-flash",
-            name: "Ling 3.1 Flash",
-            description: "MoE",
-            created: "2026-10-04",
-            contextLength: 262_144,
-          },
-        ],
-        fetchSuccess: true,
-      },
-    };
-    const result = buildTrendingProsePrompt("", data, "2026-10-05");
-    expect(result).toContain(`## ${TRENDING_REPORT.modelUsageHeading}`);
+// ---------------------------------------------------------------------------
+// buildModelsPrompt (the models report)
+// ---------------------------------------------------------------------------
+
+describe("buildModelsPrompt", () => {
+  it("adds the OpenRouter section and data when OpenRouter has models", () => {
+    const result = buildModelsPrompt({ models: [], fetchSuccess: true }, withModels, "2026-10-05");
+    expect(result).toContain(`## ${MODELS_REPORT.openRouterHeading}\n`);
     expect(result).toContain("deepseek/deepseek-v4.1-flash — 25.63T tokens");
     expect(result).toContain("Ling 3.1 Flash (`inclusionai/ling-3.1-flash`)");
+  });
+
+  it("omits the OpenRouter section without model data, and the HF one without HF data", () => {
+    const hfOnly = buildModelsPrompt({ models: [], fetchSuccess: true }, EMPTY_OPENROUTER, "2026-10-05");
+    expect(hfOnly).not.toContain(`## ${MODELS_REPORT.openRouterHeading}`);
+    expect(hfOnly).toContain(`## ${MODELS_REPORT.hfHeading}\n`);
+    const orOnly = buildModelsPrompt({ models: [], fetchSuccess: false }, withModels, "2026-10-05");
+    expect(orOnly).not.toContain(`## ${MODELS_REPORT.hfHeading}`);
   });
 });
 
@@ -302,10 +317,27 @@ describe("buildWebReportPrompt", () => {
 });
 
 // ---------------------------------------------------------------------------
-// buildHnPrompt
+// buildDiscussionsPrompt
 // ---------------------------------------------------------------------------
 
-describe("buildHnPrompt", () => {
+const noDevto: DevtoData = { articles: [], fetchSuccess: false };
+const noLobsters: LobstersData = { stories: [], fetchSuccess: false };
+const devtoArticle: DevtoData["articles"][number] = {
+  id: 1,
+  title: "MCP lesson",
+  url: "https://dev.to/a/mcp",
+  description: "d",
+  user: "u",
+  positiveReactionsCount: 78,
+  commentsCount: 85,
+  readingTimeMinutes: 5,
+  tags: ["ai"],
+  publishedAt: "2026-10-10T00:00:00Z",
+};
+const hnOnlyPrompt = (hn: HnData, dateStr: string) =>
+  buildDiscussionsPrompt({ hn, devto: noDevto, lobsters: noLobsters }, dateStr);
+
+describe("buildDiscussionsPrompt", () => {
   it("includes stories with metadata", () => {
     const data: HnData = {
       stories: [
@@ -322,7 +354,7 @@ describe("buildHnPrompt", () => {
       ],
       fetchSuccess: true,
     };
-    const result = buildHnPrompt(data, "2026-03-09");
+    const result = hnOnlyPrompt(data, "2026-03-09");
     expect(result).toContain("AI News");
     expect(result).toContain("Score: 200");
     expect(result).toContain("Comments: 50");
@@ -345,16 +377,87 @@ describe("buildHnPrompt", () => {
       ],
       fetchSuccess: true,
     };
-    const result = buildHnPrompt(data, "2026-03-09");
+    const result = hnOnlyPrompt(data, "2026-03-09");
     expect(result).toContain("Score: 10");
     expect(result).toContain("Comments: 2");
     expect(result).toContain("Hacker News");
   });
 
+  it("asks for Dev.to and Lobste.rs only when the weekly run fetched them", () => {
+    const daily = hnOnlyPrompt({ stories: [], fetchSuccess: true }, "2026-10-12");
+    expect(daily).toContain("## Hacker News\n");
+    expect(daily).not.toMatch(/## Dev\.to|## Lobste\.rs/);
+
+    const devto: DevtoData = { fetchSuccess: true, articles: [devtoArticle] };
+    const weekly = buildDiscussionsPrompt(
+      { hn: { stories: [], fetchSuccess: false }, devto, lobsters: noLobsters },
+      "2026-10-12",
+    );
+    expect(weekly).toContain("MCP lesson");
+    expect(weekly).toContain("## Dev.to\n");
+    expect(weekly).not.toContain("## Hacker News\n");
+    expect(weekly).not.toContain("## Lobste.rs\n");
+  });
+
+  it("discussionSources: an empty HN stays alone, but not next to a weekly source", () => {
+    const emptyHn: HnData = { stories: [], fetchSuccess: true };
+    const devto: DevtoData = { articles: [devtoArticle], fetchSuccess: true };
+    expect(discussionSources({ hn: emptyHn, devto: noDevto, lobsters: noLobsters }).hasHn).toBe(true);
+    expect(discussionSources({ hn: emptyHn, devto, lobsters: noLobsters })).toEqual({
+      hasHn: false,
+      hasDevto: true,
+      hasLobsters: false,
+    });
+    const failed = { hn: { stories: [], fetchSuccess: false }, devto: noDevto, lobsters: noLobsters };
+    expect(discussionSources(failed).hasHn).toBe(false);
+  });
+
   it("does not ask for comment-thread content the model never sees", () => {
-    const result = buildHnPrompt({ stories: [], fetchSuccess: true }, "2026-10-06");
+    const result = hnOnlyPrompt({ stories: [], fetchSuccess: true }, "2026-10-06");
     expect(result).toContain("not the article and not the comment thread");
     expect(result).toContain("Do not describe the comments");
     expect(result).not.toMatch(/typical reaction|last cycle/);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Shared section layout
+// ---------------------------------------------------------------------------
+
+describe("listing report layout", () => {
+  const web: WebFetchResult[] = [
+    { site: "openai", siteName: "OpenAI", isFirstRun: false, newItems: [], totalDiscovered: 1 },
+  ];
+  const prompts: Record<string, string> = {
+    hn: hnOnlyPrompt({ stories: [], fetchSuccess: true }, "2026-10-12"),
+    arxiv: buildArxivPrompt({ papers: [], fetchSuccess: true, rankedBy: "recency" }, "2026-10-12"),
+    hf: buildModelsPrompt({ models: [], fetchSuccess: true }, withModels, "2026-10-12"),
+    weekly: buildDiscussionsPrompt(
+      {
+        hn: { stories: [], fetchSuccess: true },
+        devto: { articles: [], fetchSuccess: true },
+        lobsters: { stories: [], fetchSuccess: true },
+      },
+      "2026-10-12",
+    ),
+    web: buildWebReportPrompt(web, "2026-10-12"),
+  };
+
+  it.each(Object.keys(prompts))("%s: Highlights first, then Signals", (id) => {
+    const p = prompts[id]!;
+    const h = p.indexOf(`## ${SECTIONS.highlights}\n`);
+    expect(h).toBeGreaterThan(-1);
+    expect(p.indexOf(`## ${SECTIONS.signals}\n`)).toBeGreaterThan(h);
+  });
+
+  it.each(["hn", "arxiv", "hf", "weekly", "web"])("%s: ends with Worth a Look", (id) => {
+    const p = prompts[id]!;
+    expect(p.indexOf(`## ${SECTIONS.worthALook}\n`)).toBeGreaterThan(p.indexOf(`## ${SECTIONS.signals}\n`));
+  });
+
+  it.each(Object.keys(prompts))("%s: no title, no numbered or day-bound headings", (id) => {
+    const p = prompts[id]!;
+    expect(p).toContain("Do not write a title");
+    expect(p).not.toMatch(/Today's|This Week's|^\d\. \*\*/m);
   });
 });
