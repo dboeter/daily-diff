@@ -18,7 +18,7 @@ export interface RepoConfig {
   /** Human-readable display name */
   name: string;
   /**
-   * Terms matchAgentNews looks for in news items. Defaults to the display name
+   * Terms matchProjectNews looks for in news items. Defaults to the display name
    * and repo name; set this when the name is a common word (e.g. "Pi").
    */
   keywords?: string[];
@@ -408,7 +408,7 @@ function isDigestIssue(i: OpenIssue): boolean {
 }
 
 /** Labels of the weekly reports. */
-export const WEEKLY_ISSUE_LABELS = new Set<string>(WEEKLY_REPORT_IDS.map((id) => REPORTS[id].label));
+const WEEKLY_ISSUE_LABELS = new Set<string>(WEEKLY_REPORT_IDS.map((id) => REPORTS[id].label));
 
 /**
  * Daily issues are retained as one group; each weekly report is its own group,

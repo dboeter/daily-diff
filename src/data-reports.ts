@@ -5,16 +5,24 @@
  * in, so each report's bar can link the others.
  */
 
-import { REPORT_META, WEB_REPORT, TRENDING_REPORT, reportHeading, type ReportId } from "./i18n.ts";
+import {
+  ARXIV_REPORT,
+  REPORT_META,
+  WEB_REPORT,
+  TRENDING_REPORT,
+  reportHeading,
+  type ReportId,
+} from "./i18n.ts";
 import {
   buildWebReportPrompt,
   buildDiscussionsPrompt,
   buildArxivPrompt,
   buildModelsPrompt,
   discussionSources,
+  modelSources,
   type DiscussionsData,
 } from "./prompts-data.ts";
-import { callLlm, saveFile, autoGenFooter, LLM_TOKENS_WEB, LLM_TOKENS_LISTING } from "./report.ts";
+import { generateBody, saveFile, autoGenFooter, LLM_TOKENS_WEB, LLM_TOKENS_LISTING } from "./report.ts";
 import { saveWebState, type WebFetchResult, type WebState } from "./web.ts";
 import type { TrendingData } from "./trending.ts";
 import { saveClassifyCache, saveMatchState } from "./trending-jev.ts";
@@ -23,7 +31,6 @@ import {
   parseRowSummaries,
   renderTrendingTables,
   spliceTrendingProse,
-  stripModelTitle,
   nestHeadings,
 } from "./report-builders.ts";
 import { saveArxivState, type ArxivData } from "./arxiv.ts";
@@ -38,14 +45,35 @@ export interface SavedReport {
   issueTitle?: string;
 }
 
-/** An LLM-written report body, without the H1 the model sometimes adds above the report's own. */
-export async function generateBody(prompt: string, maxTokens?: number): Promise<string> {
-  return stripModelTitle(await callLlm(prompt, maxTokens));
-}
-
 /** H1, the meta block (a `>` line, plus the web report's source list), rule, body, footer. */
 function assembleReport(id: ReportId, dateStr: string, meta: string, body: string): string {
   return `${reportHeading(id, dateStr)}\n\n${meta}\n\n---\n\n${body}${autoGenFooter()}`;
+}
+
+/** The meta line of a report with several sources: the ones present, joined. */
+function sourcesMeta(sources: (string | false)[], utcStr: string): string {
+  return `> ${REPORT_META.sources(sources.filter(Boolean).join(" + "))} | ${REPORT_META.generated(utcStr)}`;
+}
+
+/**
+ * The LLM listing reports' shared step: one call, the body under the report's
+ * H1 and meta line. Null when the call failed, so the report is skipped.
+ */
+async function buildListingReport(
+  id: ReportId,
+  tag: string,
+  prompt: string,
+  meta: string,
+  dateStr: string,
+): Promise<SavedReport | null> {
+  console.log(`  [${tag}] Calling LLM for ${tag} report...`);
+  try {
+    const body = await generateBody(prompt, LLM_TOKENS_LISTING);
+    return { id, content: assembleReport(id, dateStr, meta, body) };
+  } catch (err) {
+    console.error(`  [${tag}] Report generation failed: ${err}`);
+    return null;
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -77,7 +105,7 @@ export async function buildWebReport(
 
       const meta =
         `> ${mode} | ${WEB_REPORT.newContent(totalNew)} | ${REPORT_META.generated(utcStr)}\n\n` +
-        `${WEB_REPORT.sourcesHeader}\n` +
+        `${REPORT_META.sourcesHeader}\n` +
         `- Anthropic: [anthropic.com](https://www.anthropic.com) — ${anthropicNew} new articles (sitemap total: ${anthropicTotal})\n` +
         `- OpenAI: [openai.com](https://openai.com) — ${openaiNew} new articles (sitemap total: ${openaiTotal})`;
       const webContent = assembleReport("ai-web", dateStr, meta, summary);
@@ -150,25 +178,19 @@ export async function buildDiscussionsReport(
 ): Promise<SavedReport | null> {
   const { hn, devto, lobsters } = data;
   const { hasHn, hasDevto, hasLobsters } = discussionSources(data);
-  const sources = [
-    hasHn && `[Hacker News](https://news.ycombinator.com/) (${hn.stories.length} stories)`,
-    hasDevto && `[Dev.to](https://dev.to/) (${devto.articles.length} articles)`,
-    hasLobsters && `[Lobste.rs](https://lobste.rs/) (${lobsters.stories.length} stories)`,
-  ].filter(Boolean);
-  if (sources.length === 0) {
+  if (!hasHn && !hasDevto && !hasLobsters) {
     console.log("  [discussions] No data available, skipping report.");
     return null;
   }
-
-  console.log("  [discussions] Calling LLM for discussions report...");
-  try {
-    const summary = await generateBody(buildDiscussionsPrompt(data, dateStr), LLM_TOKENS_LISTING);
-    const meta = `> ${REPORT_META.sources(sources.join(" + "))} | ${REPORT_META.generated(utcStr)}`;
-    return { id: "ai-hn", content: assembleReport("ai-hn", dateStr, meta, summary) };
-  } catch (err) {
-    console.error(`  [discussions] Report generation failed: ${err}`);
-    return null;
-  }
+  const meta = sourcesMeta(
+    [
+      hasHn && `[Hacker News](https://news.ycombinator.com/) (${hn.stories.length} stories)`,
+      hasDevto && `[Dev.to](https://dev.to/) (${devto.articles.length} articles)`,
+      hasLobsters && `[Lobste.rs](https://lobste.rs/) (${lobsters.stories.length} stories)`,
+    ],
+    utcStr,
+  );
+  return buildListingReport("ai-hn", "discussions", buildDiscussionsPrompt(data, dateStr), meta, dateStr);
 }
 
 // ---------------------------------------------------------------------------
@@ -190,21 +212,20 @@ export async function buildArxivReport(
     console.log(`  Saved ${saveFile(arxivData.rankingFile, dateStr, "arxiv-ranking.json")}`);
   }
 
-  console.log("  [arxiv] Calling LLM for ArXiv report...");
-  try {
-    const summary = await generateBody(buildArxivPrompt(arxivData, dateStr), LLM_TOKENS_LISTING);
-    const meta =
-      `> Source: [ArXiv](https://arxiv.org/) (cs.AI, cs.CL, cs.LG) | ` +
-      `${arxivData.papers.length} papers${arxivData.rankedBy === "jev" ? " ranked by [Jev](https://typesafe.ai) relevance" : ""} | ` +
-      REPORT_META.generated(utcStr);
-    const content = assembleReport("ai-arxiv", dateStr, meta, summary);
-    // Only once the report exists: after a failed report the next run takes this pool too.
-    if (arxivData.nextState) saveArxivState(arxivData.nextState);
-    return { id: "ai-arxiv", content };
-  } catch (err) {
-    console.error(`  [arxiv] Report generation failed: ${err}`);
-    return null;
-  }
+  const meta =
+    `> ${REPORT_META.sources(ARXIV_REPORT.source)} | ` +
+    `${arxivData.papers.length} papers${arxivData.rankedBy === "jev" ? " ranked by [Jev](https://typesafe.ai) relevance" : ""} | ` +
+    REPORT_META.generated(utcStr);
+  const report = await buildListingReport(
+    "ai-arxiv",
+    "arxiv",
+    buildArxivPrompt(arxivData, dateStr),
+    meta,
+    dateStr,
+  );
+  // Only once the report exists: after a failed report the next run takes this pool too.
+  if (report && arxivData.nextState) saveArxivState(arxivData.nextState);
+  return report;
 }
 
 // ---------------------------------------------------------------------------
@@ -217,23 +238,17 @@ export async function buildModelsReport(
   utcStr: string,
   dateStr: string,
 ): Promise<SavedReport | null> {
-  const hasOpenRouter = openrouter.topModels.length > 0 || openrouter.newModels.length > 0;
-  const sources = [
-    hfData.fetchSuccess && `[Hugging Face Hub](https://huggingface.co/) (${hfData.models.length} models)`,
-    hasOpenRouter && `[OpenRouter](https://openrouter.ai/rankings)`,
-  ].filter(Boolean);
-  if (sources.length === 0) {
+  const { hasHf, hasOpenRouter } = modelSources(hfData, openrouter);
+  if (!hasHf && !hasOpenRouter) {
     console.log("  [models] No data available, skipping report.");
     return null;
   }
-
-  console.log("  [models] Calling LLM for models report...");
-  try {
-    const summary = await generateBody(buildModelsPrompt(hfData, openrouter, dateStr), LLM_TOKENS_LISTING);
-    const meta = `> ${REPORT_META.sources(sources.join(" + "))} | ${REPORT_META.generated(utcStr)}`;
-    return { id: "ai-hf", content: assembleReport("ai-hf", dateStr, meta, summary) };
-  } catch (err) {
-    console.error(`  [models] Report generation failed: ${err}`);
-    return null;
-  }
+  const meta = sourcesMeta(
+    [
+      hasHf && `[Hugging Face Hub](https://huggingface.co/) (${hfData.models.length} models)`,
+      hasOpenRouter && `[OpenRouter](https://openrouter.ai/rankings)`,
+    ],
+    utcStr,
+  );
+  return buildListingReport("ai-hf", "models", buildModelsPrompt(hfData, openrouter, dateStr), meta, dateStr);
 }

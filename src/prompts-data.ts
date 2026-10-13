@@ -8,7 +8,7 @@ import type { WebFetchResult } from "./web.ts";
 import type { TrendingData } from "./trending.ts";
 import type { summaryRows } from "./trending-rank.ts";
 import { formatTokens, type OpenRouterData } from "./openrouter.ts";
-import { MODELS_REPORT, SECTIONS } from "./i18n.ts";
+import { ARXIV_REPORT, DISCUSSIONS_REPORT, MODELS_REPORT, SECTIONS, WEB_REPORT } from "./i18n.ts";
 import { TRENDING_TABLES_MARKER } from "./report-builders.ts";
 import { NO_TITLE_RULE } from "./prompts.ts";
 import type { HnData } from "./hn.ts";
@@ -16,6 +16,14 @@ import type { ArxivData } from "./arxiv.ts";
 import type { HfData } from "./hf.ts";
 import type { DevtoData } from "./devto.ts";
 import type { LobstersData } from "./lobsters.ts";
+
+/** Which sources the models report covers; the prompt and the report's sources line both read it. */
+export function modelSources(hf: HfData, openrouter: OpenRouterData) {
+  return {
+    hasHf: hf.fetchSuccess,
+    hasOpenRouter: openrouter.topModels.length > 0 || openrouter.newModels.length > 0,
+  };
+}
 
 /** OpenRouter model usage. Empty string when there is no model data. */
 function buildModelUsageData(openrouter: OpenRouterData): string {
@@ -148,14 +156,14 @@ Write the report in English with these sections. ${NO_TITLE_RULE}
 ## ${SECTIONS.highlights}
 3-5 sentences on the most important new releases or developments.
 
-## Anthropic
+## ${WEB_REPORT.anthropicHeading}
 Important content grouped by category (news / research / engineering / learn, etc.) under \`###\` subheadings:
 - For each piece, 2-4 sentences extracting core insights, technical details, or business significance
 - Note publication date and original link
 - If first full crawl, trace important milestones chronologically
 Omit this section when Anthropic has no new content.
 
-## OpenAI
+## ${WEB_REPORT.openaiHeading}
 Same structure, grouped by research / release / company / safety. Omit this section when OpenAI has no new content.
 - ⚠️ Note: OpenAI data is metadata-only (titles derived from URL slugs, no article text). Only list URLs and categories objectively. Do NOT speculate on title meanings or fabricate content summaries. If information is insufficient for analysis, state the data limitation clearly.
 
@@ -169,7 +177,7 @@ Based on both companies' release cadence and content focus:
 ## ${SECTIONS.worthALook}
 1-3 pieces most worth reading in full, with brief reasoning.
 
-${isAnyFirstRun ? "## Content Landscape Overview\nFirst full crawl only: summarize the content category distribution for both companies and describe their content strategy style (academic-oriented vs product-oriented vs user stories, etc.)\n\n" : ""}Style: English, professional and detailed, suited for AI researchers, product managers, and technical decision-makers. Every item must include official links.
+${isAnyFirstRun ? `## ${WEB_REPORT.landscapeHeading}\nFirst full crawl only: summarize the content category distribution for both companies and describe their content strategy style (academic-oriented vs product-oriented vs user stories, etc.)\n\n` : ""}Style: English, professional and detailed, suited for AI researchers, product managers, and technical decision-makers. Every item must include official links.
 `;
 }
 
@@ -282,7 +290,7 @@ export function buildDiscussionsPrompt(data: DiscussionsData, dateStr: string): 
           )
           .join("\n\n"),
     );
-    sections.push(`## Hacker News
+    sections.push(`## ${DISCUSSIONS_REPORT.hnHeading}
 Organized by category: a \`### <category>\` heading per category, each followed by a **Markdown table** with exactly these columns:
 
    | Title | Score | Comments | Summary |
@@ -313,7 +321,7 @@ Organized by category: a \`### <category>\` heading per category, each followed 
           )
           .join("\n\n"),
     );
-    sections.push(`## Dev.to
+    sections.push(`## ${DISCUSSIONS_REPORT.devtoHeading}
 The 5-10 most valuable articles as a **Markdown table**:
 
    | Article | Reactions | Comments | Summary |
@@ -336,7 +344,7 @@ The 5-10 most valuable articles as a **Markdown table**:
           )
           .join("\n\n"),
     );
-    sections.push(`## Lobste.rs
+    sections.push(`## ${DISCUSSIONS_REPORT.lobstersHeading}
 The 3-8 most notable stories as a **Markdown table**:
 
    | Story | Score | Comments | Summary |
@@ -412,7 +420,7 @@ Write the report in English with these sections. ${NO_TITLE_RULE}
 ## ${SECTIONS.highlights}
 3-5 sentences on the most significant research directions and breakthroughs.
 
-## Key Papers
+## ${ARXIV_REPORT.papersHeading}
 The 8-15 most important papers, organized by theme: a \`### <theme>\` heading per theme, each followed by a **Markdown table** with exactly these columns:
 
    | Paper | Authors | Summary |
@@ -450,7 +458,7 @@ Style: English, concise and professional, preserve all ArXiv links.
  */
 export function buildModelsPrompt(data: HfData, openrouter: OpenRouterData, dateStr: string): string {
   const M = MODELS_REPORT;
-  const hasHf = data.fetchSuccess;
+  const { hasHf, hasOpenRouter } = modelSources(data, openrouter);
   const modelData = buildModelUsageData(openrouter);
   const modelsText = data.models
     .map(
@@ -467,7 +475,7 @@ export function buildModelsPrompt(data: HfData, openrouter: OpenRouterData, date
     hasHf
       ? `Hugging Face Hub trending models (${data.models.length}, sorted by weekly likes):\n\n${modelsText}`
       : "",
-    modelData ? `OpenRouter:\n\n${modelData}` : "",
+    hasOpenRouter ? `OpenRouter:\n\n${modelData}` : "",
   ].filter(Boolean);
 
   const hfSection = `## ${M.hfHeading}
@@ -506,7 +514,7 @@ Write the report in English with these sections. ${NO_TITLE_RULE}
 ## ${SECTIONS.highlights}
 3-5 sentences on the most notable model releases and trends this week.
 
-${hasHf ? hfSection : ""}${modelData ? openRouterSection : ""}## ${SECTIONS.signals}
+${hasHf ? hfSection : ""}${hasOpenRouter ? openRouterSection : ""}## ${SECTIONS.signals}
 100-200 words analyzing model ecosystem trends:
    - Which model families are gaining momentum?
    - Open-weight vs proprietary trends

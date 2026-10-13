@@ -125,16 +125,17 @@ export function collectNewsItems(sources: NewsSources): { item: NewsItem; text: 
 export const MAX_AGENTS_PER_ITEM = 2;
 
 /**
- * News items per agent id. An item naming one or two agents is listed under
- * each; one naming more is dropped (see MAX_AGENTS_PER_ITEM). Items keep source
- * order (HN rank, then web, then trending) and are de-duplicated by URL.
+ * News items per tracked project id (agents and infra). An item naming one or
+ * two projects is listed under each; one naming more is dropped (see
+ * MAX_AGENTS_PER_ITEM). Items keep source order (HN rank, then web, then
+ * trending) and are de-duplicated by URL.
  *
  * An agent's own repo in the GitHub Search results is not news about it: the
  * topic queries sort by stars, so a large agent repo (QwenPaw, 35k stars) is
  * returned every day. On GitHub Trending its own repo still counts — trending
  * there is a daily event.
  */
-export function matchAgentNews(agents: RepoConfig[], sources: NewsSources): Map<string, NewsItem[]> {
+export function matchProjectNews(agents: RepoConfig[], sources: NewsSources): Map<string, NewsItem[]> {
   const matchers = agents.map((cfg) => ({
     id: cfg.id,
     re: agentMatcher(cfg),

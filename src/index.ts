@@ -19,7 +19,7 @@ import {
   createGitHubIssue,
 } from "./github.ts";
 import { type ProjectActivity, buildProjectDigestPrompt, buildSkillsPrompt, hasActivity } from "./prompts.ts";
-import { matchAgentNews } from "./agent-news.ts";
+import { matchProjectNews } from "./agent-news.ts";
 import {
   buildTrendingSummariesPrompt,
   buildTrendingProsePrompt,
@@ -28,6 +28,7 @@ import {
 } from "./prompts-data.ts";
 import {
   callLlm,
+  generateBody,
   parseLlmJson,
   saveFile,
   autoGenFooter,
@@ -51,7 +52,6 @@ import {
   buildDiscussionsReport,
   buildArxivReport,
   buildModelsReport,
-  generateBody,
   type SavedReport,
 } from "./data-reports.ts";
 import { loadWebState, fetchSiteContent, type WebFetchResult, type WebState } from "./web.ts";
@@ -372,12 +372,12 @@ async function main(): Promise<void> {
 
   // Agent news is matched against the other sources' data, so it waits for them.
   // Agents and tooling in one pass: an item naming 3+ of them is a compatibility list.
-  const agentNews = matchAgentNews([...AGENTS, ...INFRA_REPOS], {
+  const projectNews = matchProjectNews([...AGENTS, ...INFRA_REPOS], {
     hn: hnData,
     web: webResults,
     trending: trendingData,
   });
-  const withNews = (f: ProjectFetch): ProjectActivity => ({ ...f, news: agentNews.get(f.config.id) ?? [] });
+  const withNews = (f: ProjectFetch): ProjectActivity => ({ ...f, news: projectNews.get(f.config.id) ?? [] });
   const agentActivities = agentFetches.map(withNews);
   const infraActivities = infraFetches.map(withNews);
 

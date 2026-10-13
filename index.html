@@ -160,6 +160,7 @@
     .page-nav .mid { flex: 1; text-align: center; }
     .md details.toc > *:not(summary) { padding: 8px 14px 8px 34px; margin: 0; }
     .md details.toc li { margin-bottom: 2px; }
+    .md details.toc li.sub { margin-left: 16px; list-style: circle; }
     .md .dim { color: var(--muted); font-style: italic; }
     .side-group-hdr {
       padding: 6px 14px; font-size: 12px; font-weight: 700; color: var(--dim);
@@ -520,9 +521,14 @@ async function renderOverview(date) {
   return parts.join('');
 }
 
-/** A collapsible table of contents before the first section of a long report. */
+/**
+ * A collapsible table of contents before the first section of a long report:
+ * 4+ `##` sections, or 4+ `##` and `###` together. The agents report has only
+ * 3 `##` (stealth models and its two groups); its projects are `###`.
+ */
 function addToc(root) {
-  const heads = [...root.querySelectorAll('h2')];
+  let heads = [...root.querySelectorAll('h2')];
+  if (heads.length < 4) heads = [...root.querySelectorAll('h2, h3')];
   if (heads.length < 4) return;
   const toc = document.createElement('details');
   toc.className = 'toc';
@@ -536,6 +542,7 @@ function addToc(root) {
     // The hash holds the route, so scroll instead of linking to an anchor.
     a.onclick = (e) => { e.preventDefault(); h.scrollIntoView({ behavior: 'smooth' }); };
     const li = document.createElement('li');
+    if (h.tagName === 'H3') li.className = 'sub';
     li.appendChild(a);
     list.appendChild(li);
   });

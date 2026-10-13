@@ -9,7 +9,7 @@ import type { NewsItem } from "./agent-news.ts";
 // Types
 // ---------------------------------------------------------------------------
 
-/** One project's input to the release-focused digest (agents and infra, daily). */
+/** One project's input to the agents report (its agents and infra sections, daily). */
 export interface ProjectActivity {
   config: RepoConfig;
   /** Stable releases only, newest first. */

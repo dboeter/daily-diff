@@ -10,3 +10,7 @@
 - [ ] Still generated when HN fails but Dev.to/Lobste.rs succeed on a Weekly Run
 - [ ] No `ai-community.md` or `community` issue produced; archive kept
 - [ ] AGENTS.md / README updated
+
+## Comments
+
+- 2026-10-13, implementation: close-stale keeps the `community` label eligible but moves it from its own weekly retention group into the daily group, so the last open community issue closes on the next run instead of staying up until the next Monday. Recorded in review of PR #74.

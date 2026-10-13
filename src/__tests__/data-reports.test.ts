@@ -2,10 +2,10 @@ import { describe, it, expect, vi } from "vitest";
 import { buildDiscussionsReport } from "../data-reports.ts";
 import type { DevtoData } from "../devto.ts";
 
-const callLlm = vi.fn(async () => "# Model title\n\n## Highlights\n\nText.");
+const generateBody = vi.fn(async () => "## Highlights\n\nText.");
 vi.mock("../report.ts", async (importOriginal) => ({
   ...(await importOriginal<typeof import("../report.ts")>()),
-  callLlm: (...args: unknown[]) => callLlm(...(args as [])),
+  generateBody: (...args: unknown[]) => generateBody(...(args as [])),
 }));
 
 const devto: DevtoData = {
@@ -28,6 +28,7 @@ const devto: DevtoData = {
 
 describe("buildDiscussionsReport", () => {
   it("is still written when HN fails but Dev.to succeeds", async () => {
+    generateBody.mockClear();
     const report = await buildDiscussionsReport(
       { hn: { stories: [], fetchSuccess: false }, devto, lobsters: { stories: [], fetchSuccess: false } },
       "00:00",
@@ -36,11 +37,12 @@ describe("buildDiscussionsReport", () => {
     expect(report?.id).toBe("ai-hn");
     expect(report?.content).toContain("[Dev.to](https://dev.to/) (1 articles)");
     expect(report?.content).not.toContain("Hacker News](");
-    expect(report?.content).not.toContain("# Model title");
+    expect(report?.content).toContain("## Highlights\n\nText.");
+    expect(generateBody).toHaveBeenCalledOnce();
   });
 
   it("is skipped when every source failed, without an LLM call", async () => {
-    callLlm.mockClear();
+    generateBody.mockClear();
     const none = { stories: [], fetchSuccess: false };
     const report = await buildDiscussionsReport(
       { hn: none, devto: { articles: [], fetchSuccess: false }, lobsters: none },
@@ -48,6 +50,6 @@ describe("buildDiscussionsReport", () => {
       "2026-10-12",
     );
     expect(report).toBeNull();
-    expect(callLlm).not.toHaveBeenCalled();
+    expect(generateBody).not.toHaveBeenCalled();
   });
 });

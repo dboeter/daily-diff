@@ -7,7 +7,7 @@
 // ---------------------------------------------------------------------------
 
 export const MSG = {
-  projectsNoActivity: "No stable releases, hot issues or news mentions today.",
+  projectsNoActivity: "No stable releases, hot issues or news items today.",
   summaryFailed: "⚠️ Summary generation failed.",
   skillsFailed: "⚠️ Skills summary generation failed.",
   trendingFailed: "⚠️ Trending report generation failed.",
@@ -59,9 +59,12 @@ export const reportIssueTitle = (id: ReportId, dateStr: string) =>
  */
 export const PROJECT_SCOPE = { window: "last 24h", period: "today" } as const;
 
-/** The meta line under every report's H1. */
+const SOURCES = "Sources:";
+
+/** The meta line under every report's H1 (the web report adds a source list). */
 export const REPORT_META = {
-  sources: (list: string) => `Sources: ${list}`,
+  sourcesHeader: SOURCES,
+  sources: (list: string) => `${SOURCES} ${list}`,
   generated: (utcStr: string) => `Generated: ${utcStr} UTC`,
 } as const;
 
@@ -72,7 +75,10 @@ export const WEB_REPORT = {
   firstCrawl: "First full crawl",
   todayUpdate: "Today's update",
   newContent: (count: number) => `New content: ${count} articles`,
-  sourcesHeader: "Sources:",
+  anthropicHeading: "Anthropic",
+  openaiHeading: "OpenAI",
+  // First full crawl only.
+  landscapeHeading: "Content Landscape Overview",
   issueTitle: (dateStr: string, isFirstRun: boolean) =>
     `${reportIssueTitle("ai-web", dateStr)}${isFirstRun ? " (First Crawl)" : ""}`,
 } as const;
@@ -107,6 +113,18 @@ export const TRENDING_REPORT = {
     agent_tooling: "🔌 Agent Tooling",
     other_agent: "🤖 Other Agents",
   },
+} as const;
+
+// The discussions report's per-source sections; Dev.to and Lobste.rs on the weekly run only.
+export const DISCUSSIONS_REPORT = {
+  hnHeading: "Hacker News",
+  devtoHeading: "Dev.to",
+  lobstersHeading: "Lobste.rs",
+} as const;
+
+export const ARXIV_REPORT = {
+  source: "[ArXiv](https://arxiv.org/) (cs.AI, cs.CL, cs.LG)",
+  papersHeading: "Key Papers",
 } as const;
 
 // Weekly: Hugging Face trending models plus OpenRouter token usage, which
