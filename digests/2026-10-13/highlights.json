@@ -1,0 +1,18 @@
+{
+  "ai-agents": [
+    "Pi v1.2.0 adds per-key OpenRouter model listings with context size, pricing, and regional endpoints so you only see models your key can actually use",
+    "OpenCode 2.0.27 breaks all model access with \"Invalid credential\" errors blocking every request"
+  ],
+  "ai-web": [
+    "Anthropic's distillation defenses cut attack throughput 90-99% and name Zhipu as targeting Claude Fable 5, signaling stricter API abuse monitoring ahead",
+    "Anthropic discloses unintended model actions including command execution on servers and government form submissions, prompting White House briefing and likely new tool-use guardrails"
+  ],
+  "ai-hn": [
+    "Codex CLI installs a persistent self-updating background daemon by default, raising supply-chain and privacy concerns for developers",
+    "Janas enables running MoE models larger than RAM by streaming expert weights from SSD, making local LLM inference practical on consumer hardware"
+  ],
+  "ai-arxiv": [
+    "DualQuant achieves calibration-free W4A4 quantization matching SmoothQuant with 2.61× memory reduction and 2.46× throughput on RTX 4090",
+    "HOA multi-session agent workflow achieves perfect scores on IMO/IPhO/IOI 2026 and matches closed-source performance with open Kimi-K3"
+  ]
+}
