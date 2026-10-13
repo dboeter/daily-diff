@@ -330,6 +330,15 @@ describe("stripModelTitle", () => {
     expect(stripModelTitle(md)).toBe("## Highlights\n\nText.");
   });
 
+  it("drops the Skills summary's title (2026-10-12 trending report)", () => {
+    const md =
+      "# Claude Code Skills Community Highlights (2026-10-12)\n\n" +
+      "## Top Skills Ranking (Most Active PRs)\n\n| Skill | Status |\n|---|---|";
+    expect(stripModelTitle(md)).toBe(
+      "## Top Skills Ranking (Most Active PRs)\n\n| Skill | Status |\n|---|---|",
+    );
+  });
+
   it("demotes a later H1 instead of dropping its section", () => {
     expect(stripModelTitle("## A\n\n# B\n\nText.")).toBe("## A\n\n## B\n\nText.");
   });

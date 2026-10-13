@@ -10,6 +10,7 @@ import {
   LIVE_REPORT_IDS,
   OVERVIEW,
   REPORTS,
+  REPORT_META,
   STEALTH_SECTION,
   TRENDING_REPORT,
   type ReportId,
@@ -82,7 +83,7 @@ export function buildProjectReportContent(r: ProjectReportInput): string {
 
   return (
     `${r.heading}\n\n` +
-    `> Generated: ${r.utcStr} UTC | Projects: ${all.length} | ` +
+    `> ${REPORT_META.generated(r.utcStr)} | Projects: ${all.length} | ` +
     `Active ${r.period}: ${all.length - quietCount} | ` +
     `Stable releases: ${releases} | Prereleases (not covered): ${prereleases}\n\n` +
     `---\n\n` +

@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import {
+  REPORT_META,
   WEB_REPORT,
   REPORTS,
   LIVE_REPORT_IDS,
@@ -44,8 +45,8 @@ describe("dynamic content helpers", () => {
     expect(WEB_REPORT.newContent(10)).toContain("10 articles");
   });
 
-  it("WEB_REPORT.generated formats timestamp", () => {
-    expect(WEB_REPORT.generated("12:00")).toContain("12:00 UTC");
+  it("REPORT_META.generated formats timestamp", () => {
+    expect(REPORT_META.generated("12:00")).toContain("12:00 UTC");
   });
 });
 

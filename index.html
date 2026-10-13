@@ -349,9 +349,11 @@ function escapeHtml(s) {
   return String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 }
 
-// Manifest data: dates newest first, and the weekly report ids.
+// Manifest data: dates newest first, the weekly report ids, and the overview's
+// label (OVERVIEW in src/i18n.ts).
 let DATES = [];
 let WEEKLY = [];
+let OVERVIEW_LABEL = 'Overview';
 
 // ── State ──
 let currentKey = null;
@@ -479,7 +481,7 @@ async function fetchReport(date, report) {
   return res.text();
 }
 
-/** Previous/next day and, for a report, its previous edition (weekly reports skip days). */
+/** Previous/next day and, for a report, the day of its previous report (weekly reports skip days). */
 function pageNav(date, report) {
   const i = DATES.findIndex((d) => d.date === date);
   if (i === -1) return '';
@@ -487,10 +489,10 @@ function pageNav(date, report) {
   const newer = DATES[i - 1];
   // The same report on that day when it has one, else that day's overview.
   const href = (d) => `#${pageKey(d.date, report && d.reports.includes(report) ? report : null)}`;
-  const prevEdition = report ? DATES.slice(i + 1).find((d) => d.reports.includes(report)) : null;
+  const prevReportDay = report ? DATES.slice(i + 1).find((d) => d.reports.includes(report)) : null;
   const left = older ? `<a href="${href(older)}">← ${older.date}</a>` : '<span></span>';
-  const mid = prevEdition && prevEdition !== older
-    ? `<a class="mid" href="#${pageKey(prevEdition.date, report)}">Previous edition: ${prevEdition.date}</a>`
+  const mid = prevReportDay && prevReportDay !== older
+    ? `<a class="mid" href="#${pageKey(prevReportDay.date, report)}">Previous ${escapeHtml(LABELS[report] || report)}: ${prevReportDay.date}</a>`
     : '<span class="mid"></span>';
   const right = newer ? `<a href="${href(newer)}">${newer.date} →</a>` : '<span></span>';
   return `<nav class="page-nav">${left}${mid}${right}</nav>`;
@@ -627,7 +629,7 @@ function buildDateGroup(date, reports, isFirst) {
   const overview = document.createElement('button');
   overview.className = 'rpt-btn';
   overview.dataset.key = pageKey(date, null);
-  overview.textContent = '📅 Overview';
+  overview.textContent = OVERVIEW_LABEL;
   overview.onclick = () => loadReport(date, null);
   list.appendChild(overview);
 
@@ -645,15 +647,17 @@ function buildDateGroup(date, reports, isFirst) {
 }
 
 /**
- * The latest edition of each weekly report, pinned above the archive for the
- * 7 days after it ran — the next weekly run replaces it. After a missed week
- * the stale edition drops out instead of passing for this week's.
+ * The latest report of each weekly kind, pinned above the archive until the
+ * next weekly run replaces it. Counted from today, not from the newest day in
+ * the manifest, so a report stops passing for this week's when runs stop too.
+ * 8 days, not 7: a date parses as 00:00 UTC, and the next Monday's run (01:07
+ * Amsterdam, started hours late) lands a few hours into the 8th day.
  */
 function buildThisWeek(nav, dates) {
-  const newest = Date.parse(dates[0].date);
+  const now = Date.now();
   const latest = WEEKLY
     .map((id) => ({ id, entry: dates.find((d) => d.reports.includes(id)) }))
-    .filter((x) => x.entry && newest - Date.parse(x.entry.date) < 7 * 86400000);
+    .filter((x) => x.entry && now - Date.parse(x.entry.date) < 8 * 86400000);
   if (!latest.length) return;
   const grp = document.createElement('div');
   grp.className = 'this-week';
@@ -728,11 +732,12 @@ window.addEventListener('hashchange', followHash);
   try {
     const res = await fetch('./manifest.json');
     if (!res.ok) throw new Error('manifest.json not found');
-    const { dates, labels, weekly } = await res.json();
+    const { dates, labels, weekly, overview } = await res.json();
     if (!dates?.length) throw new Error('manifest is empty');
     LABELS = labels ?? {};
     DATES = dates;
     WEEKLY = weekly ?? [];
+    OVERVIEW_LABEL = overview ?? 'Overview';
 
     allDates = dates;
     buildNav(dates);

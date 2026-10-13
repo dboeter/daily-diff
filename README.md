@@ -22,7 +22,7 @@ A GitHub Actions workflow that runs every night, landing the digest by about 05:
 
 **[https://dboeter.github.io/daily-diff](https://dboeter.github.io/daily-diff)**
 
-Browse all historical digests in a clean, dark-themed interface — no login required. Reports are rendered from the Markdown files in this repo via GitHub Pages. Each day opens on an overview of every report's highlights; each report links to the day's other reports, the previous and next day, and its own previous edition, and long reports get a table of contents. The latest weekly reports stay pinned under **This week** in the sidebar.
+Browse all historical digests in a clean, dark-themed interface — no login required. Reports are rendered from the Markdown files in this repo via GitHub Pages. Each day opens on an overview of every report's highlights; each report links to the day's other reports, the previous and next day, and its own previous report (weekly reports skip days), and long reports get a table of contents. The latest weekly reports stay pinned under **This week** in the sidebar.
 
 ## Telegram Notifications
 
@@ -191,7 +191,7 @@ New articles are detected by comparing sitemap `lastmod` timestamps against a pe
 - Runs via GitHub Actions; supports manual triggering, with an option to force the weekly reports
 - All tracked repositories are configurable via `config.yml` — no code changes needed
 
-The weekly split exists because the daily editions of those reports mostly repeated themselves: sampled over September 2026, 54% of trending links and 45% of community links were already in the previous day's report. Product Hunt was dropped at the same time — mostly consumer apps, a poor fit for the audience.
+The weekly split exists because those reports, run daily, mostly repeated themselves: sampled over September 2026, 54% of trending links and 45% of community links were already in the previous day's report. Product Hunt was dropped at the same time — mostly consumer apps, a poor fit for the audience.
 
 ## Setup
 

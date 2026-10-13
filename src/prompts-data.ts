@@ -245,6 +245,18 @@ export interface DiscussionsData {
 }
 
 /**
+ * Which sources the discussions report covers; the prompt and the report's
+ * sources line both read it. HN alone stays in even when empty; next to a
+ * weekly source an empty HN gets no section.
+ */
+export function discussionSources({ hn, devto, lobsters }: DiscussionsData) {
+  const hasDevto = devto.fetchSuccess && devto.articles.length > 0;
+  const hasLobsters = lobsters.fetchSuccess && lobsters.stories.length > 0;
+  const hasHn = hn.fetchSuccess && (hn.stories.length > 0 || !(hasDevto || hasLobsters));
+  return { hasHn, hasDevto, hasLobsters };
+}
+
+/**
  * The discussions report: Hacker News daily, plus Dev.to and Lobste.rs on the
  * weekly run — one report since October 2026, when the weekly community
  * report was folded in. A source that failed or was not fetched gets neither
@@ -252,14 +264,12 @@ export interface DiscussionsData {
  */
 export function buildDiscussionsPrompt(data: DiscussionsData, dateStr: string): string {
   const { hn, devto, lobsters } = data;
-  const hasHn = hn.fetchSuccess && hn.stories.length > 0;
-  const hasDevto = devto.fetchSuccess && devto.articles.length > 0;
-  const hasLobsters = lobsters.fetchSuccess && lobsters.stories.length > 0;
+  const { hasHn, hasDevto, hasLobsters } = discussionSources(data);
   const weekly = hasDevto || hasLobsters;
 
   const inputs: string[] = [];
   const sections: string[] = [];
-  if (hasHn || !weekly) {
+  if (hasHn) {
     inputs.push(
       `## Hacker News (current topstories feed, ${hn.stories.length} AI stories, ordered by HN rank)\n\n` +
         hn.stories

@@ -1,7 +1,7 @@
 import fs from "fs";
 import path from "path";
 import { marked } from "marked";
-import { LIVE_REPORT_IDS, REPORT_LABELS, WEEKLY_REPORT_IDS } from "./i18n.ts";
+import { LIVE_REPORT_IDS, OVERVIEW, REPORT_LABELS, WEEKLY_REPORT_IDS } from "./i18n.ts";
 
 const DIGESTS_DIR = "digests";
 const MANIFEST_PATH = "manifest.json";
@@ -35,6 +35,8 @@ interface Manifest {
   labels: Record<string, string>;
   /** The weekly report ids, for the sidebar's "This week" group. */
   weekly: string[];
+  /** The sidebar label of a day's overview (the report bar's first link). */
+  overview: string;
   dates: DateEntry[];
 }
 
@@ -106,6 +108,7 @@ async function main(): Promise<void> {
     generated: new Date().toISOString(),
     labels: Object.fromEntries(REPORT_FILES.map((r) => [r, REPORT_LABELS[r] ?? r])),
     weekly: WEEKLY_REPORT_IDS,
+    overview: `${OVERVIEW.emoji} ${OVERVIEW.name}`,
     dates: entries,
   };
 

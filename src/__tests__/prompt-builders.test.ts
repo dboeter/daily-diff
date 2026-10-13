@@ -11,6 +11,7 @@ import {
   buildTrendingProsePrompt,
   buildWebReportPrompt,
   buildDiscussionsPrompt,
+  discussionSources,
   buildArxivPrompt,
   buildModelsPrompt,
 } from "../prompts-data.ts";
@@ -316,12 +317,24 @@ describe("buildWebReportPrompt", () => {
 });
 
 // ---------------------------------------------------------------------------
-// buildHnPrompt
+// buildDiscussionsPrompt
 // ---------------------------------------------------------------------------
 
 const noDevto: DevtoData = { articles: [], fetchSuccess: false };
 const noLobsters: LobstersData = { stories: [], fetchSuccess: false };
-const buildHnPrompt = (hn: HnData, dateStr: string) =>
+const devtoArticle: DevtoData["articles"][number] = {
+  id: 1,
+  title: "MCP lesson",
+  url: "https://dev.to/a/mcp",
+  description: "d",
+  user: "u",
+  positiveReactionsCount: 78,
+  commentsCount: 85,
+  readingTimeMinutes: 5,
+  tags: ["ai"],
+  publishedAt: "2026-10-10T00:00:00Z",
+};
+const hnOnlyPrompt = (hn: HnData, dateStr: string) =>
   buildDiscussionsPrompt({ hn, devto: noDevto, lobsters: noLobsters }, dateStr);
 
 describe("buildDiscussionsPrompt", () => {
@@ -341,7 +354,7 @@ describe("buildDiscussionsPrompt", () => {
       ],
       fetchSuccess: true,
     };
-    const result = buildHnPrompt(data, "2026-03-09");
+    const result = hnOnlyPrompt(data, "2026-03-09");
     expect(result).toContain("AI News");
     expect(result).toContain("Score: 200");
     expect(result).toContain("Comments: 50");
@@ -364,34 +377,18 @@ describe("buildDiscussionsPrompt", () => {
       ],
       fetchSuccess: true,
     };
-    const result = buildHnPrompt(data, "2026-03-09");
+    const result = hnOnlyPrompt(data, "2026-03-09");
     expect(result).toContain("Score: 10");
     expect(result).toContain("Comments: 2");
     expect(result).toContain("Hacker News");
   });
 
   it("asks for Dev.to and Lobste.rs only when the weekly run fetched them", () => {
-    const daily = buildHnPrompt({ stories: [], fetchSuccess: true }, "2026-10-12");
+    const daily = hnOnlyPrompt({ stories: [], fetchSuccess: true }, "2026-10-12");
     expect(daily).toContain("## Hacker News\n");
     expect(daily).not.toMatch(/## Dev\.to|## Lobste\.rs/);
 
-    const devto: DevtoData = {
-      fetchSuccess: true,
-      articles: [
-        {
-          id: 1,
-          title: "MCP lesson",
-          url: "https://dev.to/a/mcp",
-          description: "d",
-          user: "u",
-          positiveReactionsCount: 78,
-          commentsCount: 85,
-          readingTimeMinutes: 5,
-          tags: ["ai"],
-          publishedAt: "2026-10-10T00:00:00Z",
-        },
-      ],
-    };
+    const devto: DevtoData = { fetchSuccess: true, articles: [devtoArticle] };
     const weekly = buildDiscussionsPrompt(
       { hn: { stories: [], fetchSuccess: false }, devto, lobsters: noLobsters },
       "2026-10-12",
@@ -402,8 +399,21 @@ describe("buildDiscussionsPrompt", () => {
     expect(weekly).not.toContain("## Lobste.rs\n");
   });
 
+  it("discussionSources: an empty HN stays alone, but not next to a weekly source", () => {
+    const emptyHn: HnData = { stories: [], fetchSuccess: true };
+    const devto: DevtoData = { articles: [devtoArticle], fetchSuccess: true };
+    expect(discussionSources({ hn: emptyHn, devto: noDevto, lobsters: noLobsters }).hasHn).toBe(true);
+    expect(discussionSources({ hn: emptyHn, devto, lobsters: noLobsters })).toEqual({
+      hasHn: false,
+      hasDevto: true,
+      hasLobsters: false,
+    });
+    const failed = { hn: { stories: [], fetchSuccess: false }, devto: noDevto, lobsters: noLobsters };
+    expect(discussionSources(failed).hasHn).toBe(false);
+  });
+
   it("does not ask for comment-thread content the model never sees", () => {
-    const result = buildHnPrompt({ stories: [], fetchSuccess: true }, "2026-10-06");
+    const result = hnOnlyPrompt({ stories: [], fetchSuccess: true }, "2026-10-06");
     expect(result).toContain("not the article and not the comment thread");
     expect(result).toContain("Do not describe the comments");
     expect(result).not.toMatch(/typical reaction|last cycle/);
@@ -419,7 +429,7 @@ describe("listing report layout", () => {
     { site: "openai", siteName: "OpenAI", isFirstRun: false, newItems: [], totalDiscovered: 1 },
   ];
   const prompts: Record<string, string> = {
-    hn: buildHnPrompt({ stories: [], fetchSuccess: true }, "2026-10-12"),
+    hn: hnOnlyPrompt({ stories: [], fetchSuccess: true }, "2026-10-12"),
     arxiv: buildArxivPrompt({ papers: [], fetchSuccess: true, rankedBy: "recency" }, "2026-10-12"),
     hf: buildModelsPrompt({ models: [], fetchSuccess: true }, withModels, "2026-10-12"),
     weekly: buildDiscussionsPrompt(

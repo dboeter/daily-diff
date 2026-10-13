@@ -5,12 +5,13 @@
  * in, so each report's bar can link the others.
  */
 
-import { WEB_REPORT, TRENDING_REPORT, reportHeading, type ReportId } from "./i18n.ts";
+import { REPORT_META, WEB_REPORT, TRENDING_REPORT, reportHeading, type ReportId } from "./i18n.ts";
 import {
   buildWebReportPrompt,
   buildDiscussionsPrompt,
   buildArxivPrompt,
   buildModelsPrompt,
+  discussionSources,
   type DiscussionsData,
 } from "./prompts-data.ts";
 import { callLlm, saveFile, autoGenFooter, LLM_TOKENS_WEB, LLM_TOKENS_LISTING } from "./report.ts";
@@ -37,6 +38,16 @@ export interface SavedReport {
   issueTitle?: string;
 }
 
+/** An LLM-written report body, without the H1 the model sometimes adds above the report's own. */
+export async function generateBody(prompt: string, maxTokens?: number): Promise<string> {
+  return stripModelTitle(await callLlm(prompt, maxTokens));
+}
+
+/** H1, the meta block (a `>` line, plus the web report's source list), rule, body, footer. */
+function assembleReport(id: ReportId, dateStr: string, meta: string, body: string): string {
+  return `${reportHeading(id, dateStr)}\n\n${meta}\n\n---\n\n${body}${autoGenFooter()}`;
+}
+
 // ---------------------------------------------------------------------------
 // Web report
 // ---------------------------------------------------------------------------
@@ -53,9 +64,7 @@ export async function buildWebReport(
   if (hasNewContent) {
     console.log("  [web] Calling LLM for web content report...");
     try {
-      const summary = stripModelTitle(
-        await callLlm(buildWebReportPrompt(webResults, dateStr), LLM_TOKENS_WEB),
-      );
+      const summary = await generateBody(buildWebReportPrompt(webResults, dateStr), LLM_TOKENS_WEB);
       const isFirstRun = webResults.some((r) => r.isFirstRun);
       const totalNew = webResults.reduce((sum, r) => sum + r.newItems.length, 0);
 
@@ -66,14 +75,12 @@ export async function buildWebReport(
 
       const mode = isFirstRun ? WEB_REPORT.firstCrawl : WEB_REPORT.todayUpdate;
 
-      const webTitle = `${reportHeading("ai-web", dateStr)}\n\n`;
-      const webMeta = `> ${mode} | ${WEB_REPORT.newContent(totalNew)} | ${WEB_REPORT.generated(utcStr)}\n\n`;
-      const webSources =
+      const meta =
+        `> ${mode} | ${WEB_REPORT.newContent(totalNew)} | ${REPORT_META.generated(utcStr)}\n\n` +
         `${WEB_REPORT.sourcesHeader}\n` +
         `- Anthropic: [anthropic.com](https://www.anthropic.com) — ${anthropicNew} new articles (sitemap total: ${anthropicTotal})\n` +
-        `- OpenAI: [openai.com](https://openai.com) — ${openaiNew} new articles (sitemap total: ${openaiTotal})\n\n`;
-
-      const webContent = webTitle + webMeta + webSources + `---\n\n` + summary + autoGenFooter();
+        `- OpenAI: [openai.com](https://openai.com) — ${openaiNew} new articles (sitemap total: ${openaiTotal})`;
+      const webContent = assembleReport("ai-web", dateStr, meta, summary);
 
       saved = { id: "ai-web", content: webContent, issueTitle: WEB_REPORT.issueTitle(dateStr, isFirstRun) };
     } catch (err) {
@@ -105,10 +112,6 @@ export async function buildTrendingReport(
     return null;
   }
 
-  const header =
-    `${reportHeading("ai-trending", dateStr)}\n\n` +
-    `> ${TRENDING_REPORT.sources} | Generated: ${utcStr} UTC\n\n---\n\n`;
-
   // Skills ranks the community's most-discussed Claude Code skills — the same
   // "what's popular" genre as trending repos, so it rides along here.
   const skillsSection =
@@ -118,8 +121,12 @@ export async function buildTrendingReport(
     nestHeadings(skills.summary, 3);
 
   const tables = renderTrendingTables(report, parseRowSummaries(trending.summaries));
-  const trendingContent =
-    header + spliceTrendingProse(trending.prose, tables) + skillsSection + autoGenFooter();
+  const trendingContent = assembleReport(
+    "ai-trending",
+    dateStr,
+    `> ${REPORT_META.sources(TRENDING_REPORT.sources)} | ${REPORT_META.generated(utcStr)}`,
+    spliceTrendingProse(trending.prose, tables) + skillsSection,
+  );
 
   // Only once the report exists, like the ArXiv state.
   if (report.rankingFile) {
@@ -142,10 +149,11 @@ export async function buildDiscussionsReport(
   dateStr: string,
 ): Promise<SavedReport | null> {
   const { hn, devto, lobsters } = data;
+  const { hasHn, hasDevto, hasLobsters } = discussionSources(data);
   const sources = [
-    hn.fetchSuccess && `[Hacker News](https://news.ycombinator.com/) (${hn.stories.length} stories)`,
-    devto.fetchSuccess && `[Dev.to](https://dev.to/) (${devto.articles.length} articles)`,
-    lobsters.fetchSuccess && `[Lobste.rs](https://lobste.rs/) (${lobsters.stories.length} stories)`,
+    hasHn && `[Hacker News](https://news.ycombinator.com/) (${hn.stories.length} stories)`,
+    hasDevto && `[Dev.to](https://dev.to/) (${devto.articles.length} articles)`,
+    hasLobsters && `[Lobste.rs](https://lobste.rs/) (${lobsters.stories.length} stories)`,
   ].filter(Boolean);
   if (sources.length === 0) {
     console.log("  [discussions] No data available, skipping report.");
@@ -154,15 +162,9 @@ export async function buildDiscussionsReport(
 
   console.log("  [discussions] Calling LLM for discussions report...");
   try {
-    const summary = stripModelTitle(await callLlm(buildDiscussionsPrompt(data, dateStr), LLM_TOKENS_LISTING));
-
-    const header =
-      `${reportHeading("ai-hn", dateStr)}\n\n` +
-      `> Sources: ${sources.join(" + ")} | Generated: ${utcStr} UTC\n\n` +
-      `---\n\n`;
-
-    const content = header + summary + autoGenFooter();
-    return { id: "ai-hn", content };
+    const summary = await generateBody(buildDiscussionsPrompt(data, dateStr), LLM_TOKENS_LISTING);
+    const meta = `> ${REPORT_META.sources(sources.join(" + "))} | ${REPORT_META.generated(utcStr)}`;
+    return { id: "ai-hn", content: assembleReport("ai-hn", dateStr, meta, summary) };
   } catch (err) {
     console.error(`  [discussions] Report generation failed: ${err}`);
     return null;
@@ -190,16 +192,12 @@ export async function buildArxivReport(
 
   console.log("  [arxiv] Calling LLM for ArXiv report...");
   try {
-    const summary = stripModelTitle(await callLlm(buildArxivPrompt(arxivData, dateStr), LLM_TOKENS_LISTING));
-
-    const header =
-      `${reportHeading("ai-arxiv", dateStr)}\n\n` +
+    const summary = await generateBody(buildArxivPrompt(arxivData, dateStr), LLM_TOKENS_LISTING);
+    const meta =
       `> Source: [ArXiv](https://arxiv.org/) (cs.AI, cs.CL, cs.LG) | ` +
       `${arxivData.papers.length} papers${arxivData.rankedBy === "jev" ? " ranked by [Jev](https://typesafe.ai) relevance" : ""} | ` +
-      `Generated: ${utcStr} UTC\n\n` +
-      `---\n\n`;
-
-    const content = header + summary + autoGenFooter();
+      REPORT_META.generated(utcStr);
+    const content = assembleReport("ai-arxiv", dateStr, meta, summary);
     // Only once the report exists: after a failed report the next run takes this pool too.
     if (arxivData.nextState) saveArxivState(arxivData.nextState);
     return { id: "ai-arxiv", content };
@@ -231,17 +229,9 @@ export async function buildModelsReport(
 
   console.log("  [models] Calling LLM for models report...");
   try {
-    const summary = stripModelTitle(
-      await callLlm(buildModelsPrompt(hfData, openrouter, dateStr), LLM_TOKENS_LISTING),
-    );
-
-    const header =
-      `${reportHeading("ai-hf", dateStr)}\n\n` +
-      `> Sources: ${sources.join(" + ")} | Generated: ${utcStr} UTC\n\n` +
-      `---\n\n`;
-
-    const content = header + summary + autoGenFooter();
-    return { id: "ai-hf", content };
+    const summary = await generateBody(buildModelsPrompt(hfData, openrouter, dateStr), LLM_TOKENS_LISTING);
+    const meta = `> ${REPORT_META.sources(sources.join(" + "))} | ${REPORT_META.generated(utcStr)}`;
+    return { id: "ai-hf", content: assembleReport("ai-hf", dateStr, meta, summary) };
   } catch (err) {
     console.error(`  [models] Report generation failed: ${err}`);
     return null;

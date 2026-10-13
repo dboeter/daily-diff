@@ -18,13 +18,7 @@ import {
   fetchSkillsData,
   createGitHubIssue,
 } from "./github.ts";
-import {
-  type DigestScope,
-  type ProjectActivity,
-  buildProjectDigestPrompt,
-  buildSkillsPrompt,
-  hasActivity,
-} from "./prompts.ts";
+import { type ProjectActivity, buildProjectDigestPrompt, buildSkillsPrompt, hasActivity } from "./prompts.ts";
 import { matchAgentNews } from "./agent-news.ts";
 import {
   buildTrendingSummariesPrompt,
@@ -48,7 +42,6 @@ import {
   buildStealthSection,
   renderTrendingTables,
   renderReportBar,
-  stripModelTitle,
   withReportBar,
 } from "./report-builders.ts";
 import { summaryRows } from "./trending-rank.ts";
@@ -58,6 +51,7 @@ import {
   buildDiscussionsReport,
   buildArxivReport,
   buildModelsReport,
+  generateBody,
   type SavedReport,
 } from "./data-reports.ts";
 import { loadWebState, fetchSiteContent, type WebFetchResult, type WebState } from "./web.ts";
@@ -71,7 +65,7 @@ import { fetchLobstersData, type LobstersData } from "./lobsters.ts";
 import { loadConfig, type SectionKey } from "./config.ts";
 import { resolvePagesUrl } from "./notify.ts";
 import { toCstDateStr, toUtcStr, isWeeklyRun, sleep } from "./date.ts";
-import { MSG, PROJECT_SCOPE, REPORTS, reportHeading, reportIssueTitle } from "./i18n.ts";
+import { LIVE_REPORT_IDS, MSG, PROJECT_SCOPE, REPORTS, reportHeading, reportIssueTitle } from "./i18n.ts";
 
 // ---------------------------------------------------------------------------
 // Repo config — loaded from config.yml (throws when a section is missing)
@@ -258,16 +252,11 @@ async function fetchAllData(
 async function summarize(id: string, prompt: string, failMsg: string, maxTokens?: number): Promise<string> {
   console.log(`  [${id}] Calling LLM for summary...`);
   try {
-    return stripModelTitle(await callLlm(prompt, maxTokens));
+    return await generateBody(prompt, maxTokens);
   } catch (err) {
     console.error(`  [${id}] LLM call failed: ${err}`);
     return failMsg;
   }
-}
-
-/** Prompt wording for a section report: its subject from config.yml, its cadence from i18n. */
-function sectionScope(key: SectionKey): DigestScope {
-  return { subject: CONFIG[key].subject, ...PROJECT_SCOPE };
 }
 
 /** One LLM call over every active project; a fixed notice when none was active. */
@@ -279,7 +268,7 @@ function summarizeProjects(id: SectionKey, activities: ProjectActivity[], dateSt
   }
   return summarize(
     id,
-    buildProjectDigestPrompt(active, sectionScope(id), dateStr),
+    buildProjectDigestPrompt(active, { subject: CONFIG[id].subject, ...PROJECT_SCOPE }, dateStr),
     MSG.summaryFailed,
     LLM_TOKENS_LISTING,
   );
@@ -405,9 +394,9 @@ async function main(): Promise<void> {
 
   // First gate. On a daily run at most the agents and infra calls have happened
   // by now, below LLM_MIN_SAMPLES, so this only arms on the weekly run (5 calls:
-  // agents, infra, skills, trending summaries, trending prose); the second gate, after the
-  // savers, covers every run. Bailing here costs nothing — no file has been
-  // written yet.
+  // agents, infra, skills, trending summaries, trending prose); the second gate,
+  // after the builders, covers every run. Bailing here costs nothing — no file
+  // has been written yet.
   assertLlmHealthy("summary");
 
   // 3. Build every report
@@ -447,7 +436,10 @@ async function main(): Promise<void> {
       : []),
   ]);
   // A builder returns null when its source failed or its LLM call did.
-  const saved = [agents, ...built.filter((r): r is SavedReport => r !== null)];
+  // In REPORTS order, so the issues are opened in reading order.
+  const saved = [agents, ...built.filter((r): r is SavedReport => r !== null)].sort(
+    (a, b) => LIVE_REPORT_IDS.indexOf(a.id) - LIVE_REPORT_IDS.indexOf(b.id),
+  );
 
   // Second gate: an outage that starts *after* the first gate would otherwise
   // sail straight through — the builders each swallow their own failure and
@@ -461,10 +453,11 @@ async function main(): Promise<void> {
   // Each report links the others the day produced, so the bar waits for all of them.
   const pagesUrl = resolvePagesUrl();
   const ids = saved.map((r) => r.id);
-  for (const r of saved) {
-    r.content = withReportBar(r.content, renderReportBar(r.id, ids, dateStr, pagesUrl));
-    console.log(`  Saved ${saveFile(r.content, dateStr, `${r.id}.md`)}`);
-  }
+  const published: SavedReport[] = saved.map((r) => ({
+    ...r,
+    content: withReportBar(r.content, renderReportBar(r.id, ids, dateStr, pagesUrl)),
+  }));
+  for (const r of published) console.log(`  Saved ${saveFile(r.content, dateStr, `${r.id}.md`)}`);
 
   // 4. Generate highlights for Telegram notification
   console.log("  Generating highlights for Telegram...");
@@ -505,7 +498,7 @@ async function main(): Promise<void> {
 
   // 5. Create the GitHub issues
   if (digestRepo) {
-    for (const r of saved) {
+    for (const r of published) {
       const title = r.issueTitle ?? reportIssueTitle(r.id, dateStr);
       const url = await createGitHubIssue(title, r.content, REPORTS[r.id].label);
       console.log(`  Created ${r.id} issue: ${url}`);
