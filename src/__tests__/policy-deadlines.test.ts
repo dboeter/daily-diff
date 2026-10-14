@@ -3,7 +3,7 @@ import { describe, it, expect, vi, afterEach } from "vitest";
 import { parseInitiatives, fetchHaveYourSay } from "../policy-haveyoursay.ts";
 import { nextDeadlines, upcomingDeadlines, renderDeadlines } from "../policy-deadlines.ts";
 import type { PolicyConfig } from "../config.ts";
-import type { PolicyItem } from "../policy.ts";
+import { newPolicyItems, nextPolicyState, type PolicyItem } from "../policy.ts";
 
 const FIXTURE = JSON.parse(
   fs.readFileSync(new URL("./fixtures/have-your-say.json", import.meta.url), "utf-8"),
@@ -44,6 +44,43 @@ describe("parseInitiatives", () => {
 
   it("takes the later stage when two statuses start the same day", () => {
     expect(byId.get("hys:19293")?.stage).toBe("Public consultation");
+  });
+});
+
+describe("parseInitiatives across feedback periods", () => {
+  // Initiative 18872 (live, 2026-10-14) carries one PLANNING_WORKFLOW status per feedback period.
+  const response = (statuses: object[]) => ({
+    initiativeResultDtoPage: {
+      content: [{ id: 18872, shortTitle: "AI in schools", currentStatuses: statuses }],
+    },
+  });
+  const firstPeriod = {
+    frontEndStage: "PLANNING_WORKFLOW",
+    receivingFeedbackStatus: "CLOSED",
+    feedbackStartDate: "2026/09/01 15:56:21",
+    feedbackEndDate: "2026/09/30 23:59:59",
+  };
+  const secondPeriod = {
+    frontEndStage: "PLANNING_WORKFLOW",
+    receivingFeedbackStatus: "OPEN",
+    feedbackStartDate: "2026/10/12 09:56:10",
+    feedbackEndDate: "2026/11/09 23:59:59",
+  };
+
+  it("reports an initiative again when a new feedback period opens in the same stage", () => {
+    const [before] = parseInitiatives(response([firstPeriod]), new Date("2026-09-02T00:00:00Z"));
+    const state = nextPolicyState(null, [before!], "2026-09-02");
+    const after = parseInitiatives(response([firstPeriod, secondPeriod]), NOW);
+    expect(after[0]).toMatchObject({ stage: before!.stage, published: "2026-10-12", deadline: "2026-11-09" });
+    expect(newPolicyItems(after, state, "2026-10-14")).toHaveLength(1);
+  });
+
+  it("does not report it again when the period only closes", () => {
+    const open = { ...firstPeriod, receivingFeedbackStatus: "OPEN" };
+    const [before] = parseInitiatives(response([open]), new Date("2026-09-02T00:00:00Z"));
+    const state = nextPolicyState(null, [before!], "2026-09-02");
+    const after = parseInitiatives(response([firstPeriod]), new Date("2026-09-20T00:00:00Z"));
+    expect(newPolicyItems(after, state, "2026-09-20")).toEqual([]);
   });
 });
 

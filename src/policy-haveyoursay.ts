@@ -107,7 +107,8 @@ export function parseInitiatives(json: unknown, now: Date, aiTitleOnly = false):
       source: "Have your say",
       jurisdiction: "eu",
       jevOnly: false,
-      // Display text only: a closing feedback period keeps the stage key, so it is not reported again.
+      // Display text only. A closing feedback period keeps the stage key, so it is not reported again; a new
+      // period in the same stage is a new status with a later start, so `published` and the key move.
       stage: STAGE_LABEL.get(status.frontEndStage!)!,
       ...(open ? { deadline: isoDay(status.feedbackEndDate!) } : {}),
     });
