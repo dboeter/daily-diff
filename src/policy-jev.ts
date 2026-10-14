@@ -194,7 +194,10 @@ export const keywordHit = (i: Pick<PolicyItem, "title" | "description">): boolea
   return AI_ACRONYM_RE.test(text) || AI_KEYWORD_RE.test(text);
 };
 
-const watchlisted = (i: PolicyItem, watchlist: string[]): boolean => {
+export const watchlisted = (
+  i: Pick<PolicyItem, "title" | "description" | "link">,
+  watchlist: string[],
+): boolean => {
   const text = `${i.title} ${i.description} ${i.link}`.toLowerCase();
   return watchlist.some((w) => w.trim() !== "" && text.includes(w.trim().toLowerCase()));
 };

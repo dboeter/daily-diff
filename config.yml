@@ -136,6 +136,10 @@ policy:
     # acts are named after the EU regulation, so keywords never find them.
     nl:
       - "36875" # Uitvoeringswet verordening cyberweerbaarheid (CRA)
+    # Federal Register / Regulations.gov dockets (NIST-2026-0100) and RINs
+    # (0693-AB12): documents in them are kept without an AI title. Bills as
+    # <type><number>-<congress> (hr10768-119), for AI provisions in non-AI
+    # bills (NDAA, appropriations); still reported only from passing a chamber.
     us_federal: []
     us_states: []
   feeds:

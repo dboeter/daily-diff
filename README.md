@@ -23,6 +23,9 @@ A GitHub Actions workflow that runs every night, landing the digest by about 05:
 | [European Parliament](https://oeil.secure.europarl.europa.eu)     | [Open Data API](https://data.europarl.europa.eu)                  | Watchlisted EU procedures, reported when their stage moves                        |
 | [Tweede Kamer](https://www.tweedekamer.nl)                        | [OData API](https://opendata.tweedekamer.nl), KOOP SRU            | AI motions, letters, questions; watchlisted bills to the Staatsblad               |
 | [Have your say](https://ec.europa.eu/info/law/better-regulation)  | Portal search API (undocumented)                                  | AI Commission initiatives: new stage or feedback period, closing date             |
+| [Federal Register](https://www.federalregister.gov)               | [API v1](https://www.federalregister.gov/developers/documentation/api/v1) | US rules and notices naming AI, presidential documents, watchlisted dockets/RINs  |
+| [Regulations.gov](https://www.regulations.gov)                    | [API v4](https://open.gsa.gov/api/regulationsgov/)                | US AI dockets the Federal Register missed, comment deadlines; needs `USA_GOV_API_KEY` |
+| [Congress.gov](https://www.congress.gov)                          | [API v3](https://api.congress.gov)                                | US federal AI bills from passing a chamber onward; needs `USA_GOV_API_KEY`        |
 | [Open States](https://openstates.org)                             | [API v3](https://v3.openstates.org/docs)                          | US state AI bills from passing a chamber onward; needs `PLURAL_API_KEY`           |
 | Policy news (7 outlets, `kind: news` in `config.yml`)             | RSS                                                               | Politico, AI Act Newsletter, Transformer, CSET, Covington, Binnenlands Bestuur    |
 
@@ -246,6 +249,7 @@ Go to **Settings → Secrets and variables → Actions** and add:
 | `DASHSCOPE_API_KEY`  | if Qwen       | Alibaba Model Studio API key                                                                                                                                                                                                                                                     |
 | `TYPESAFE_API_KEY`   | optional      | [TypeSafe](https://typesafe.ai) key. If set, ArXiv papers are ranked by Jev relevance instead of recency, Jev decides the trending report's scope, categories and cross-source matches instead of the search topics, and Jev picks the Policy Watch items instead of AI keywords |
 | `PLURAL_API_KEY`     | optional      | [Open States / Plural](https://open.pluralpolicy.com) key for Policy Watch's US state bills; unset skips that source                                                                                                                                                             |
+| `USA_GOV_API_KEY`    | optional      | [api.data.gov](https://api.data.gov/signup/) key for Policy Watch's Congress.gov bills and Regulations.gov documents; unset skips those two (the Federal Register needs no key)                                                                                                  |
 | `TELEGRAM_BOT_TOKEN` | optional      | Telegram bot token from [@BotFather](https://t.me/BotFather). If set, a message is sent after each digest run                                                                                                                                                                    |
 | `TELEGRAM_CHAT_ID`   | optional      | Telegram chat/channel/group ID to send notifications to                                                                                                                                                                                                                          |
 
@@ -320,6 +324,7 @@ export DIGEST_REPO=your-username/daily-diff  # optional; omit to only write file
 # export DIGEST_FORCE_WEEKLY=1               # optional; also run the weekly reports today
 # export TYPESAFE_API_KEY=xxxxx              # optional; Jev for ArXiv ranking, trending scope and Policy Watch relevance
 # export PLURAL_API_KEY=xxxxx                 # optional; Policy Watch's US state bills (Open States)
+# export USA_GOV_API_KEY=xxxxx                # optional; Policy Watch's Congress.gov and Regulations.gov
 
 pnpm start
 

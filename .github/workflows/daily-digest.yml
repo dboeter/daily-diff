@@ -100,6 +100,8 @@ jobs:
           TYPESAFE_API_KEY: ${{ secrets.TYPESAFE_API_KEY }}
           # Open States (Policy Watch, US states); unset skips that source.
           PLURAL_API_KEY: ${{ secrets.PLURAL_API_KEY }}
+          # api.data.gov key: Congress.gov and Regulations.gov (Policy Watch, US federal); unset skips those two.
+          USA_GOV_API_KEY: ${{ secrets.USA_GOV_API_KEY }}
           DIGEST_REPO: ${{ github.repository }}
           DIGEST_FORCE_WEEKLY: ${{ inputs.force_weekly && '1' || '' }}
         run: pnpm start
