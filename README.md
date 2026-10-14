@@ -21,6 +21,7 @@ A GitHub Actions workflow that runs every night, landing the digest by about 05:
 | [EDPB](https://www.edpb.europa.eu)                                | [RSS](https://www.edpb.europa.eu/feed/news_en)                    | EU data protection news, every item judged by Jev, at most 7 days old             |
 | [EUR-Lex](https://eur-lex.europa.eu)                              | [Cellar SPARQL](https://publications.europa.eu/webapi/rdf/sparql) | EU acts and proposals on AI or a watchlisted act, with their stage                |
 | [European Parliament](https://oeil.secure.europarl.europa.eu)     | [Open Data API](https://data.europarl.europa.eu)                  | Watchlisted EU procedures, reported when their stage moves                        |
+| [Have your say](https://ec.europa.eu/info/law/better-regulation)  | Portal search API (undocumented)                                  | AI Commission initiatives: new stage or feedback period, closing date             |
 
 ## Web UI
 
@@ -337,7 +338,7 @@ Files are written to `digests/YYYY-MM-DD/`:
 
 Archived days also contain `ai-cli.md` (the CLI report, merged into `ai-agents.md` in October 2026), `ai-ph.md` (Product Hunt, dropped in October 2026), `ai-infra.md` (weekly until October 2026, now a section of `ai-agents.md`) and `ai-community.md` (weekly until October 2026, now part of `ai-hn.md`). Before October 2026, `ai-agents.md` was the OpenClaw ecosystem report.
 
-Shared state files are committed alongside the daily digests: `digests/web-state.json` tracks which web URLs have been seen, `digests/policy-state.json` which policy items were reported (and each legislative item's last reported stage, so it reappears when it moves), and `digests/policy-verdicts.json` Jev's answers per policy item, so each is asked once (an item first reported today counts as new again, so a same-day re-run reports the same items).
+Shared state files are committed alongside the daily digests: `digests/web-state.json` tracks which web URLs have been seen, `digests/policy-state.json` which policy items were reported (and each legislative item's last reported stage, so it reappears when it moves, and the open deadlines of reported items, listed until they pass), and `digests/policy-verdicts.json` Jev's answers per policy item, so each is asked once (an item first reported today counts as new again, so a same-day re-run reports the same items).
 
 ---
 
@@ -397,6 +398,7 @@ Sources: European Commission | N new items ranked by Jev relevance
 ## Highlights
 ## EU             — one table per jurisdiction with items (EU, Netherlands, US federal, US states, Elsewhere), rendered in code:
                    date, source, title link, stage; the LLM writes the summary column
+## Upcoming deadlines (next 30 days) — rendered in code: open consultations of reported items, and policy.calendar dates
 ## Signals
 ## Worth a Look
 ```

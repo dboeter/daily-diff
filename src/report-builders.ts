@@ -255,7 +255,7 @@ export function parseRowSummaries(text: string): Map<number, string> {
 }
 
 /** Table cell text: one line, pipes escaped. */
-const cell = (s: string) => s.replace(/\r?\n/g, " ").replace(/\|/g, "\\|").trim();
+export const cell = (s: string) => s.replace(/\r?\n/g, " ").replace(/\|/g, "\\|").trim();
 
 function descriptionFallback(description: string): string {
   const d = description.replace(/\s+/g, " ").trim();

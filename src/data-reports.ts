@@ -40,6 +40,7 @@ import { saveArxivState, type ArxivData } from "./arxiv.ts";
 import type { HfData } from "./hf.ts";
 import { savePolicyState, POLICY_STATE_FILE, type PolicyData } from "./policy.ts";
 import { savePolicyVerdicts, POLICY_VERDICTS_FILE } from "./policy-jev.ts";
+import { renderDeadlines } from "./policy-deadlines.ts";
 import type { OpenRouterData } from "./openrouter.ts";
 
 /** A finished report: main() writes its file and opens its issue (title and label from REPORTS). */
@@ -263,16 +264,16 @@ export async function buildPolicyReport(
     return null;
   }
   const { items } = policyData;
+  // The deadlines go with the tables: after the jurisdiction sections, before the prose's closing sections.
+  const tables = (summaries: Map<number, string>) =>
+    [renderPolicyTable(items, summaries), renderDeadlines(policyData.deadlines)].filter(Boolean).join("\n\n");
   console.log("  [policy] Calling LLM for policy report...");
   const [summaries, prose] = await Promise.all([
     generateBody(buildPolicySummariesPrompt(items, dateStr), LLM_TOKENS_LISTING).catch((err) => {
       console.error(`  [policy] Summaries failed, showing descriptions: ${err}`);
       return "";
     }),
-    generateBody(
-      buildPolicyProsePrompt(renderPolicyTable(items, new Map()), dateStr),
-      LLM_TOKENS_LISTING,
-    ).catch((err) => {
+    generateBody(buildPolicyProsePrompt(tables(new Map()), dateStr), LLM_TOKENS_LISTING).catch((err) => {
       console.error(`  [policy] Report generation failed: ${err}`);
       return null;
     }),
@@ -282,7 +283,7 @@ export async function buildPolicyReport(
   const sources = [...new Set(items.map((i) => i.source))].join(" + ");
   const ranked = policyData.rankedBy === "jev" ? " ranked by [Jev](https://typesafe.ai) relevance" : "";
   const meta = `> ${REPORT_META.sources(sources)} | ${items.length} new items${ranked} | ${REPORT_META.generated(utcStr)}`;
-  const body = spliceTrendingProse(prose, renderPolicyTable(items, parseRowSummaries(summaries)));
+  const body = spliceTrendingProse(prose, tables(parseRowSummaries(summaries)));
   // Only once the report exists, like the ArXiv state.
   savePolicyState(policyData.nextState, stateFile);
   return { id: "ai-policy", content: assembleReport("ai-policy", dateStr, meta, body) };

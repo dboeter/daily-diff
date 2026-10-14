@@ -142,3 +142,19 @@ policy:
       url: https://www.edpb.europa.eu/feed/news_en
       jurisdiction: eu
       jev_only: true
+  # Dated milestones for the "Upcoming deadlines" section, shown in the 30 days
+  # before. AI Act dates as amended by the Digital Omnibus on AI (OJ 2026-07-24),
+  # from the Commission's AI Act Service Desk timeline, read 2026-10-14.
+  calendar:
+    - date: 2026-12-02
+      label: "AI Act: bans on sexual deepfakes and CSAM generators; Art. 50(2) transition ends"
+      link: https://ai-act-service-desk.ec.europa.eu/en/ai-act/timeline/timeline-implementation-eu-ai-act
+    - date: 2027-08-02
+      label: "AI Act: one AI regulatory sandbox per Member State operational"
+      link: https://ai-act-service-desk.ec.europa.eu/en/ai-act/timeline/timeline-implementation-eu-ai-act
+    - date: 2027-12-02
+      label: "AI Act: high-risk rules (Annex III) apply"
+      link: https://ai-act-service-desk.ec.europa.eu/en/ai-act/timeline/timeline-implementation-eu-ai-act
+    - date: 2028-08-02
+      label: "AI Act: high-risk rules for products under Annex I apply"
+      link: https://ai-act-service-desk.ec.europa.eu/en/ai-act/timeline/timeline-implementation-eu-ai-act

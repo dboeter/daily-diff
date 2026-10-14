@@ -13,6 +13,7 @@ import { JURISDICTIONS, type Jurisdiction, type PolicyConfig } from "./config.ts
 import { POLICY_SOURCES, type PolicySource } from "./policy-sources.ts";
 import { loadPolicyVerdicts, selectPolicyItems, type PolicyVerdicts } from "./policy-jev.ts";
 import type { AskJev } from "./trending-jev.ts";
+import { nextDeadlines, upcomingDeadlines, type Deadline } from "./policy-deadlines.ts";
 
 export interface PolicyItem extends FeedItem {
   /** The feed's display name (config.yml policy.feeds). */
@@ -38,6 +39,8 @@ export interface PolicyState {
    * re-report its stage. Renaming a stage's display text re-reports each item once.
    */
   stages?: Record<string, string>;
+  /** Item id → the open deadline of a reported item; dropped once passed (policy-deadlines.ts). */
+  deadlines?: Record<string, Deadline>;
 }
 
 export interface PolicyData {
@@ -53,6 +56,8 @@ export interface PolicyData {
   nextVerdicts?: PolicyVerdicts | null;
   /** `policy-ranking.json`, every scored item. */
   rankingFile?: string;
+  /** The Upcoming deadlines section's rows; shown only when there are items. */
+  deadlines: Deadline[];
 }
 
 export const POLICY_STATE_FILE = path.join("digests", "policy-state.json");
@@ -163,11 +168,8 @@ export async function fetchPolicyData(
       }
     }),
   ]);
-  const candidates = newPolicyItems(
-    results.flatMap((r) => r ?? []),
-    state,
-    dateStr,
-  );
+  const fetched = results.flatMap((r) => r ?? []);
+  const candidates = newPolicyItems(fetched, state, dateStr);
   console.log(`  [policy] ${candidates.length} new items`);
   const selection = await selectPolicyItems(candidates, {
     readerProfile: config.readerProfile,
@@ -178,11 +180,13 @@ export async function fetchPolicyData(
   // The report has one section per jurisdiction in JURISDICTIONS order. Sorting here (stable, so
   // relevance order holds within a section) keeps the summaries prompt's row numbers equal to the table's.
   const rank = (i: PolicyItem) => JURISDICTIONS.indexOf(i.jurisdiction);
+  const deadlines = nextDeadlines(state?.deadlines, selection.items, fetched, dateStr);
   return {
     items: [...selection.items].sort((a, b) => rank(a) - rank(b)),
     fetchSuccess: results.some((r) => r !== null),
     // Only the kept items: a dropped one is not reported, and its saved verdict stops it being asked again.
-    nextState: nextPolicyState(state, selection.items, dateStr),
+    nextState: { ...nextPolicyState(state, selection.items, dateStr), deadlines },
+    deadlines: upcomingDeadlines(deadlines, config.calendar, dateStr),
     rankedBy: selection.rankedBy,
     nextVerdicts: selection.nextVerdicts,
     ...(candidates.length > 0 ? { rankingFile: selection.rankingFile } : {}),

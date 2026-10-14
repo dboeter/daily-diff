@@ -142,6 +142,10 @@ export const POLICY_REPORT = {
   } satisfies Record<Jurisdiction, string>,
   // Stage is empty for news items.
   tableHeader: "| Date | Source | Title | Stage | Summary |\n| :--- | :--- | :--- | :--- | :--- |",
+  deadlinesHeading: "Upcoming deadlines (next 30 days)",
+  deadlinesHeader: "| Date | Source | Item |\n| :--- | :--- | :--- |",
+  /** The source column of a config.yml `policy.calendar` date. */
+  calendarSource: "Calendar",
 } as const;
 
 // Weekly: Hugging Face trending models plus OpenRouter token usage, which

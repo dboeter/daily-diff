@@ -57,6 +57,10 @@ policy:
       url: https://example.nl/rss.xml
       jurisdiction: nl
       jev_only: true
+  calendar:
+    - date: 2026-12-02
+      label: Milestone
+      link: https://example.eu/timeline
 infra:
   title: Infra Title
   subject: infra subject
@@ -87,6 +91,7 @@ infra:
           { name: "Commission", url: "https://example.eu/rss.xml", jurisdiction: "eu", jevOnly: false },
           { name: "Supervisor", url: "https://example.nl/rss.xml", jurisdiction: "nl", jevOnly: true },
         ],
+        calendar: [{ date: "2026-12-02", label: "Milestone", link: "https://example.eu/timeline" }],
       },
       infra: {
         title: "Infra Title",
@@ -142,6 +147,12 @@ infra:
     expect(() => load(VALID.replace(/policy:[\s\S]*?infra:/, "infra:"))).toThrow('missing section "policy"');
     expect(() => load(VALID.replace("  reader_profile: A practitioner.\n", ""))).toThrow(
       "policy.reader_profile must be a non-empty string",
+    );
+  });
+
+  it("throws when a policy calendar entry has no valid date", () => {
+    expect(() => load(VALID.replace("date: 2026-12-02", "date: December"))).toThrow(
+      "policy.calendar[0] needs date (YYYY-MM-DD), label and link",
     );
   });
 

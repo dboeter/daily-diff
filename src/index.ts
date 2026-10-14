@@ -224,6 +224,7 @@ async function fetchAllData(
       items: [],
       fetchSuccess: false,
       nextState: { reported: {} },
+      deadlines: [],
     })),
     weekly
       ? fetchHfData().catch((): HfData => ({ models: [], fetchSuccess: false }))

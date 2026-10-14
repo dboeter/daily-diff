@@ -121,6 +121,7 @@ describe("fetchPolicyData", () => {
     readerProfile: "A practitioner.",
     watchlist: { eu: [], nl: [], usFederal: [], usStates: [] },
     feeds: [{ name: "Commission", url: "https://example.eu/rss.xml", jurisdiction: "eu", jevOnly: false }],
+    calendar: [],
   };
   const rss = (ids: [string, string][]) =>
     `<rss><channel>${ids

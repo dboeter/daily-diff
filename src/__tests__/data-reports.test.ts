@@ -66,7 +66,14 @@ describe("buildPolicyReport", () => {
     fetchSuccess: true,
     items,
     nextState: { reported: Object.fromEntries(items.map((i) => [i.id, "2026-10-14"])) },
+    deadlines: [],
   });
+  const deadline = {
+    date: "2026-11-09",
+    title: "AI Act implementing act",
+    link: "https://x.eu",
+    source: "Have your say",
+  };
   const item = {
     id: "g1",
     title: "AI Act guidelines",
@@ -118,6 +125,31 @@ describe("buildPolicyReport", () => {
         "| 2026-10-09 | European Commission | [AI Act guidelines](https://example.eu/a) |  | The AI Office published guidelines. |\n\n## Signals",
     );
     expect(JSON.parse(fs.readFileSync(file, "utf-8"))).toEqual({ reported: { g1: "2026-10-14" } });
+  });
+
+  it("puts the upcoming deadlines after the jurisdiction tables", async () => {
+    generateBody.mockImplementation(async () => "## Highlights\n\nH.\n\n<!-- tables -->\n\n## Signals\n\nS.");
+    const report = await buildPolicyReport(
+      { ...data([item]), deadlines: [deadline] },
+      "00:00",
+      "2026-10-14",
+      path.join(dir, "deadlines.json"),
+    );
+    expect(report?.content).toMatch(
+      /## EU\n[\s\S]*\n\n## Upcoming deadlines \(next 30 days\)\n[\s\S]*\| 2026-11-09 \| Have your say \| \[AI Act implementing act\]\(https:\/\/x\.eu\) \|\n\n## Signals/,
+    );
+  });
+
+  it("is skipped on a day with only deadlines", async () => {
+    generateBody.mockClear();
+    const report = await buildPolicyReport(
+      { ...data([]), deadlines: [deadline] },
+      "00:00",
+      "2026-10-14",
+      path.join(dir, "only-deadlines.json"),
+    );
+    expect(report).toBeNull();
+    expect(generateBody).not.toHaveBeenCalled();
   });
 
   it("is skipped, state untouched, when the prose call fails", async () => {
