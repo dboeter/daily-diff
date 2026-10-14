@@ -43,6 +43,7 @@ async function main() {
     "ai-web",
     "ai-hn",
     "ai-arxiv",
+    "ai-policy",
     "ai-infra",
     "ai-trending",
     "ai-community",

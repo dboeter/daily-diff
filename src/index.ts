@@ -52,6 +52,7 @@ import {
   buildDiscussionsReport,
   buildArxivReport,
   buildModelsReport,
+  buildPolicyReport,
   type SavedReport,
 } from "./data-reports.ts";
 import { loadWebState, fetchSiteContent, type WebFetchResult, type WebState } from "./web.ts";
@@ -59,6 +60,7 @@ import { fetchTrendingData, EMPTY_NPM, EMPTY_OPENROUTER, type TrendingData } fro
 import { fetchStealthModels, type OpenRouterStealthModel } from "./openrouter.ts";
 import { fetchHnData, type HnData } from "./hn.ts";
 import { fetchArxivData, type ArxivData } from "./arxiv.ts";
+import { fetchPolicyData, type PolicyData } from "./policy.ts";
 import { fetchHfData, type HfData } from "./hf.ts";
 import { fetchDevtoData, type DevtoData } from "./devto.ts";
 import { fetchLobstersData, type LobstersData } from "./lobsters.ts";
@@ -146,6 +148,7 @@ async function fetchAllData(
   trendingData: TrendingData;
   hnData: HnData;
   arxivData: ArxivData;
+  policyData: PolicyData;
   hfData: HfData;
   devtoData: DevtoData;
   lobstersData: LobstersData;
@@ -153,7 +156,7 @@ async function fetchAllData(
 }> {
   const daySince = new Date(now.getTime() - DAY_MS);
   console.log(
-    `  Tracking daily: ${[...AGENTS, ...INFRA_REPOS].map((r) => r.id).join(", ")}, web, hn, arxiv, trending (news only)` +
+    `  Tracking daily: ${[...AGENTS, ...INFRA_REPOS].map((r) => r.id).join(", ")}, web, hn, arxiv, policy, trending (news only)` +
       (weekly ? " | weekly: skills, trending, hf, devto, lobsters" : ""),
   );
 
@@ -167,6 +170,7 @@ async function fetchAllData(
     trendingData,
     hnData,
     arxivData,
+    policyData,
     hfData,
     devtoData,
     lobstersData,
@@ -216,6 +220,11 @@ async function fetchAllData(
       fetchSuccess: false,
       rankedBy: "recency",
     })),
+    fetchPolicyData(CONFIG.policy.feeds, now, toCstDateStr(now)).catch((): PolicyData => ({
+      items: [],
+      fetchSuccess: false,
+      nextState: { reported: {} },
+    })),
     weekly
       ? fetchHfData().catch((): HfData => ({ models: [], fetchSuccess: false }))
       : Promise.resolve<HfData>({ models: [], fetchSuccess: false }),
@@ -237,6 +246,7 @@ async function fetchAllData(
     trendingData,
     hnData,
     arxivData,
+    policyData,
     hfData,
     devtoData,
     lobstersData,
@@ -364,6 +374,7 @@ async function main(): Promise<void> {
     trendingData,
     hnData,
     arxivData,
+    policyData,
     hfData,
     devtoData,
     lobstersData,
@@ -422,6 +433,7 @@ async function main(): Promise<void> {
     buildWebReport(webResults, webState, utcStr, dateStr),
     buildDiscussionsReport({ hn: hnData, devto: devtoData, lobsters: lobstersData }, utcStr, dateStr),
     buildArxivReport(arxivData, utcStr, dateStr),
+    buildPolicyReport(policyData, utcStr, dateStr),
     ...(weekly
       ? [
           buildTrendingReport(

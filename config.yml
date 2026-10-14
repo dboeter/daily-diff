@@ -2,8 +2,8 @@
 # Edit this file to customize which repositories are tracked, then run
 # `pnpm readme` to refresh the tracked-repo tables in README.md (pre-commit and
 # CI fail while they are stale). Changes take effect on the next workflow run.
-# Every section is required: the run stops with an error instead of falling
-# back to a built-in list.
+# Every section is required (agents, skills_repo, infra, policy): the run stops
+# with an error instead of falling back to a built-in list.
 #
 # agents and infra are the two sections of the daily agents report:
 #   title    the section's heading in the report
@@ -97,3 +97,28 @@ infra:
       repo: asheshgoplani/agent-deck
       name: Agent Deck
       # Rarely reaches the hot-issue bar: often quiet.
+
+# ── Policy ────────────────────────────────────────────────────────────────────
+# The daily Policy Watch report (ai-policy): AI legislation, regulation and
+# official guidance in the EU, the Netherlands and the US.
+#   reader_profile  who the report is for; the relevance questions will read it
+#   watchlist       files that always appear when they move, per jurisdiction
+#                   (lists may be empty; no source reads them yet)
+#   feeds           RSS news feeds; items older than 7 days are skipped
+
+policy:
+  # The sector examples are illustrations only: clients span many sectors.
+  reader_profile: >-
+    An AI practitioner based in the Netherlands, advising commercial companies of
+    roughly 500–1,500 employees across many sectors (e.g. retail, insurance,
+    banking), mostly serving the Dutch market. They deploy and integrate AI built
+    by others, largely from US vendors.
+  watchlist:
+    eu: []
+    nl: []
+    us_federal: []
+    us_states: []
+  feeds:
+    # The AI Office's news, on the Commission's digital-strategy site; ~10 items.
+    - name: European Commission
+      url: https://digital-strategy.ec.europa.eu/en/rss.xml

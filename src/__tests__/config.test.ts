@@ -42,6 +42,16 @@ agents:
       name: Custom Tool
       keywords: [custom tool]
 skills_repo: custom/skills
+policy:
+  reader_profile: A practitioner.
+  watchlist:
+    eu: [ai-act]
+    nl: []
+    us_federal: []
+    us_states: []
+  feeds:
+    - name: Commission
+      url: https://example.eu/rss.xml
 infra:
   title: Infra Title
   subject: infra subject
@@ -65,6 +75,11 @@ infra:
         repos: [{ id: "custom", repo: "org/custom", name: "Custom Tool", keywords: ["custom tool"] }],
       },
       skillsRepo: "custom/skills",
+      policy: {
+        readerProfile: "A practitioner.",
+        watchlist: { eu: ["ai-act"], nl: [], usFederal: [], usStates: [] },
+        feeds: [{ name: "Commission", url: "https://example.eu/rss.xml" }],
+      },
       infra: {
         title: "Infra Title",
         subject: "infra subject",
@@ -106,6 +121,23 @@ infra:
   it("throws when skills_repo is empty", () => {
     expect(() => load(VALID.replace("skills_repo: custom/skills", "skills_repo: ''"))).toThrow(
       "skills_repo must be a non-empty string",
+    );
+  });
+
+  it("throws when the policy section or its reader profile is missing", () => {
+    expect(() => load(VALID.replace(/policy:[\s\S]*?infra:/, "infra:"))).toThrow('missing section "policy"');
+    expect(() => load(VALID.replace("  reader_profile: A practitioner.\n", ""))).toThrow(
+      "policy.reader_profile must be a non-empty string",
+    );
+  });
+
+  it("throws when a policy watchlist is not a list", () => {
+    expect(() => load(VALID.replace("    nl: []\n", ""))).toThrow("policy.watchlist.nl must be a list");
+  });
+
+  it("throws when a policy feed lacks a name or url", () => {
+    expect(() => load(VALID.replace("      url: https://example.eu/rss.xml\n", ""))).toThrow(
+      "policy.feeds[0] needs name and url",
     );
   });
 });

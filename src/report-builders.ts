@@ -6,6 +6,7 @@ import { hasActivity, type ProjectActivity } from "./prompts.ts";
 import { escapeRegex } from "./agent-news.ts";
 import type { OpenRouterStealthModel } from "./openrouter.ts";
 import type { TrendingReportData } from "./trending-rank.ts";
+import type { PolicyItem } from "./policy.ts";
 import {
   LIVE_REPORT_IDS,
   OVERVIEW,
@@ -13,6 +14,7 @@ import {
   REPORT_META,
   STEALTH_SECTION,
   TRENDING_REPORT,
+  POLICY_REPORT,
   type ReportId,
 } from "./i18n.ts";
 
@@ -294,6 +296,20 @@ export function renderTrendingTables(report: TrendingReportData, summaries: Map<
   }
 
   return blocks.join("\n\n");
+}
+
+/**
+ * The policy report's table, rows numbered from 1 in item order (the summaries
+ * call's `N:` lines). Date, source and title come from the feed, never the model.
+ */
+export function renderPolicyTable(items: PolicyItem[], summaries: Map<number, string>): string {
+  if (items.length === 0) return "";
+  const rows = items.map(
+    (it, i) =>
+      `| ${it.published.slice(0, 10)} | ${cell(it.source)} | [${cell(it.title)}](${cell(it.link)}) | ` +
+      `${cell(summaries.get(i + 1) ?? descriptionFallback(it.description))} |`,
+  );
+  return `## ${POLICY_REPORT.euHeading}\n\n${POLICY_REPORT.tableHeader}\n${rows.join("\n")}`;
 }
 
 /** Put the tables where the prose left the marker; after the prose when the model dropped it. */

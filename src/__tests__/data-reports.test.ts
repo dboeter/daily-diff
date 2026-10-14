@@ -1,11 +1,15 @@
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
 import { describe, it, expect, vi } from "vitest";
-import { buildDiscussionsReport } from "../data-reports.ts";
+import { buildDiscussionsReport, buildPolicyReport } from "../data-reports.ts";
+import type { PolicyData } from "../policy.ts";
 import type { DevtoData } from "../devto.ts";
 
-const generateBody = vi.fn(async () => "## Highlights\n\nText.");
+const generateBody = vi.fn(async (_prompt: string) => "## Highlights\n\nText.");
 vi.mock("../report.ts", async (importOriginal) => ({
   ...(await importOriginal<typeof import("../report.ts")>()),
-  generateBody: (...args: unknown[]) => generateBody(...(args as [])),
+  generateBody: (...args: unknown[]) => generateBody(...(args as [string])),
 }));
 
 const devto: DevtoData = {
@@ -51,5 +55,57 @@ describe("buildDiscussionsReport", () => {
     );
     expect(report).toBeNull();
     expect(generateBody).not.toHaveBeenCalled();
+  });
+});
+
+describe("buildPolicyReport", () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "policy-report-"));
+  const data = (items: PolicyData["items"]): PolicyData => ({
+    fetchSuccess: true,
+    items,
+    nextState: { reported: Object.fromEntries(items.map((i) => [i.id, "2026-10-14"])) },
+  });
+  const item = {
+    id: "g1",
+    title: "AI Act guidelines",
+    link: "https://example.eu/a",
+    published: "2026-10-09T07:16:00.000Z",
+    description: "Guidelines.",
+    source: "European Commission",
+  };
+
+  it("is skipped on a day with no new items, without an LLM call or a state write", async () => {
+    generateBody.mockClear();
+    const file = path.join(dir, "empty.json");
+    expect(await buildPolicyReport(data([]), "00:00", "2026-10-14", file)).toBeNull();
+    expect(generateBody).not.toHaveBeenCalled();
+    expect(fs.existsSync(file)).toBe(false);
+  });
+
+  it("splices the code-rendered table into the prose and saves the state", async () => {
+    generateBody.mockImplementation(async (prompt: string) =>
+      prompt.includes("`N: <2 sentences>`")
+        ? "1: The AI Office published guidelines."
+        : "## Highlights\n\nH.\n\n<!-- tables -->\n\n## Signals\n\nS.\n\n## Worth a Look\n\n- W",
+    );
+    const file = path.join(dir, "state.json");
+    const report = await buildPolicyReport(data([item]), "00:00", "2026-10-14", file);
+    expect(report?.id).toBe("ai-policy");
+    expect(report?.content).toContain("# Policy Watch 2026-10-14");
+    expect(report?.content).toContain(
+      "H.\n\n## EU\n\n| Date | Source | Title | Summary |\n| :--- | :--- | :--- | :--- |\n" +
+        "| 2026-10-09 | European Commission | [AI Act guidelines](https://example.eu/a) | The AI Office published guidelines. |\n\n## Signals",
+    );
+    expect(JSON.parse(fs.readFileSync(file, "utf-8"))).toEqual({ reported: { g1: "2026-10-14" } });
+  });
+
+  it("is skipped, state untouched, when the prose call fails", async () => {
+    generateBody.mockImplementation(async (prompt: string) => {
+      if (prompt.includes("`N: <2 sentences>`")) return "1: S.";
+      throw new Error("down");
+    });
+    const file = path.join(dir, "failed.json");
+    expect(await buildPolicyReport(data([item]), "00:00", "2026-10-14", file)).toBeNull();
+    expect(fs.existsSync(file)).toBe(false);
   });
 });

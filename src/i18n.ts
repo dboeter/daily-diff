@@ -30,6 +30,7 @@ export const REPORTS = {
   "ai-hn": { emoji: "💬", name: "AI Discussions", label: "hn" },
   "ai-arxiv": { emoji: "📚", name: "AI Research", label: "arxiv" },
   "ai-web": { emoji: "🌐", name: "Lab Announcements", label: "web" },
+  "ai-policy": { emoji: "⚖️", name: "Policy Watch", label: "policy" },
   "ai-trending": { emoji: "📈", name: "Agent & AI Coding Trends", label: "trending" },
   "ai-hf": { emoji: "🧠", name: "AI Models", label: "hf" },
 } as const satisfies Record<string, { emoji: string; name: string; label: string }>;
@@ -125,6 +126,12 @@ export const DISCUSSIONS_REPORT = {
 export const ARXIV_REPORT = {
   source: "[ArXiv](https://arxiv.org/) (cs.AI, cs.CL, cs.LG)",
   papersHeading: "Key Papers",
+} as const;
+
+// Daily: AI legislation, regulation and official guidance. The table is rendered in code.
+export const POLICY_REPORT = {
+  euHeading: "EU",
+  tableHeader: "| Date | Source | Title | Summary |\n| :--- | :--- | :--- | :--- |",
 } as const;
 
 // Weekly: Hugging Face trending models plus OpenRouter token usage, which

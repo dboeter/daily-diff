@@ -4,6 +4,7 @@ import {
   buildStealthSection,
   parseRowSummaries,
   renderTrendingTables,
+  renderPolicyTable,
   spliceTrendingProse,
   stripModelTitle,
   nestHeadings,
@@ -290,6 +291,44 @@ describe("renderTrendingTables", () => {
     const noCategories = renderTrendingTables(trendingReport({ categories: [] }), new Map());
     expect(noCategories).not.toContain(TRENDING_REPORT.categoriesHeading);
     expect(renderTrendingTables(trendingReport({ radar: [], categories: [] }), new Map())).toBe("");
+  });
+});
+
+describe("renderPolicyTable", () => {
+  const items = [
+    {
+      id: "1",
+      title: "AI Act | guidelines",
+      link: "https://example.eu/a",
+      published: "2026-10-09T07:16:00.000Z",
+      description: "The AI Office publishes guidelines.",
+      source: "European Commission",
+    },
+    {
+      id: "2",
+      title: "Scientific panel",
+      link: "https://example.eu/b",
+      published: "2026-10-08T07:00:00.000Z",
+      description: "",
+      source: "European Commission",
+    },
+  ];
+
+  it("renders date, source and linked title from the data, the summary from the model", () => {
+    expect(renderPolicyTable(items, new Map([[1, "Guidelines for providers."]]))).toBe(
+      "## EU\n\n" +
+        "| Date | Source | Title | Summary |\n| :--- | :--- | :--- | :--- |\n" +
+        "| 2026-10-09 | European Commission | [AI Act \\| guidelines](https://example.eu/a) | Guidelines for providers. |\n" +
+        "| 2026-10-08 | European Commission | [Scientific panel](https://example.eu/b) | — |",
+    );
+  });
+
+  it("falls back to the description when the model gave no summary", () => {
+    expect(renderPolicyTable(items, new Map())).toContain("| The AI Office publishes guidelines. |");
+  });
+
+  it("is empty with no items", () => {
+    expect(renderPolicyTable([], new Map())).toBe("");
   });
 });
 

@@ -33,7 +33,7 @@ interface RawSection {
 export const SECTION_KEYS = ["agents", "infra"] as const;
 export type SectionKey = (typeof SECTION_KEYS)[number];
 
-type RawConfig = Partial<Record<SectionKey, RawSection>> & { skills_repo?: unknown };
+type RawConfig = Partial<Record<SectionKey, RawSection>> & { skills_repo?: unknown; policy?: unknown };
 
 /** A group of tracked repos: a section of the daily agents report. */
 export interface SectionConfig {
@@ -44,8 +44,24 @@ export interface SectionConfig {
   repos: RepoConfig[];
 }
 
+/** A news feed of the policy report. */
+export interface PolicyFeed {
+  name: string;
+  url: string;
+}
+
+/** The policy report (config.yml `policy`). */
+export interface PolicyConfig {
+  /** Who the report is for; the relevance questions read it. */
+  readerProfile: string;
+  /** Files that always appear when they move, per jurisdiction. Lists may be empty. */
+  watchlist: { eu: string[]; nl: string[]; usFederal: string[]; usStates: string[] };
+  feeds: PolicyFeed[];
+}
+
 export interface RadarConfig extends Record<SectionKey, SectionConfig> {
   skillsRepo: string;
+  policy: PolicyConfig;
 }
 
 // ---------------------------------------------------------------------------
@@ -82,6 +98,34 @@ function toSection(raw: RawSection | undefined, key: string, file: string): Sect
   return { title: title.trim(), subject: subject.trim(), repos: entries.map(toRepoConfig) };
 }
 
+const WATCHLIST_KEYS = { eu: "eu", nl: "nl", usFederal: "us_federal", usStates: "us_states" } as const;
+
+function toPolicy(raw: unknown, file: string): PolicyConfig {
+  if (!raw || typeof raw !== "object") throw new Error(`${file}: missing section "policy"`);
+  const { reader_profile, watchlist, feeds } = raw as Record<string, unknown>;
+  if (!nonEmptyString(reader_profile)) {
+    throw new Error(`${file}: policy.reader_profile must be a non-empty string`);
+  }
+  const lists = (watchlist ?? {}) as Record<string, unknown>;
+  const entries = Object.entries(WATCHLIST_KEYS).map(([key, yamlKey]) => {
+    const list = lists[yamlKey];
+    if (!Array.isArray(list)) throw new Error(`${file}: policy.watchlist.${yamlKey} must be a list`);
+    return [key, list.map(String)];
+  });
+  if (!Array.isArray(feeds)) throw new Error(`${file}: policy.feeds must be a list`);
+  const rawFeeds: Partial<PolicyFeed>[] = feeds;
+  rawFeeds.forEach((f, i) => {
+    if (!nonEmptyString(f?.name) || !nonEmptyString(f.url)) {
+      throw new Error(`${file}: policy.feeds[${i}] needs name and url`);
+    }
+  });
+  return {
+    readerProfile: reader_profile.trim(),
+    watchlist: Object.fromEntries(entries) as PolicyConfig["watchlist"],
+    feeds: rawFeeds.map((f) => ({ name: f.name!.trim(), url: f.url!.trim() })),
+  };
+}
+
 export function loadConfig(configPath = "config.yml"): RadarConfig {
   const resolved = path.resolve(configPath);
   if (!fs.existsSync(resolved)) throw new Error(`${configPath} not found`);
@@ -94,9 +138,10 @@ export function loadConfig(configPath = "config.yml"): RadarConfig {
   if (!nonEmptyString(raw.skills_repo))
     throw new Error(`${configPath}: skills_repo must be a non-empty string`);
   const skillsRepo = raw.skills_repo.trim();
+  const policy = toPolicy(raw.policy, configPath);
 
   const counts = SECTION_KEYS.map((key) => `${sections[key].repos.length} ${key}`).join(", ");
   console.log(`[config] Loaded from ${configPath}: ${counts}`);
 
-  return { ...sections, skillsRepo };
+  return { ...sections, skillsRepo, policy };
 }
