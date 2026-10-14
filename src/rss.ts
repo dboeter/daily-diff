@@ -4,6 +4,9 @@
  * enough. Atom is not handled yet — add it when a source needs it.
  */
 
+import { fetchOk } from "./http.ts";
+import { DAY_MS } from "./date.ts";
+
 export interface FeedItem {
   /** The guid, else the link. */
   id: string;
@@ -22,7 +25,6 @@ export interface FeedItem {
  */
 export const NEWS_MAX_AGE_DAYS = 7;
 
-const FETCH_TIMEOUT_MS = 30_000;
 const DESCRIPTION_MAX_CHARS = 600;
 
 function decodeEntities(s: string): string {
@@ -38,7 +40,7 @@ function decodeEntities(s: string): string {
 }
 
 /** A tag's text: CDATA unwrapped or entities decoded. "" when absent. */
-function tagText(xml: string, tag: string): string {
+export function tagText(xml: string, tag: string): string {
   const m = xml.match(new RegExp(`<${tag}(?:\\s[^>]*)?>([\\s\\S]*?)</${tag}>`));
   if (!m) return "";
   const cdata = m[1]!.trim().match(/^<!\[CDATA\[([\s\S]*?)\]\]>$/);
@@ -78,16 +80,11 @@ export function parseRssItems(xml: string): FeedItem[] {
 
 /** The items no older than NEWS_MAX_AGE_DAYS at `now`; undated items are dropped. */
 export function recentNewsItems(items: FeedItem[], now: Date): FeedItem[] {
-  const oldest = now.getTime() - NEWS_MAX_AGE_DAYS * 24 * 60 * 60 * 1000;
+  const oldest = now.getTime() - NEWS_MAX_AGE_DAYS * DAY_MS;
   return items.filter((i) => Date.parse(i.published) >= oldest);
 }
 
-/** Fetch and parse a feed. Throws on HTTP errors and after FETCH_TIMEOUT_MS. */
+/** Fetch and parse a feed. Throws on HTTP errors and after http.ts's FETCH_TIMEOUT_MS. */
 export async function fetchRssFeed(url: string): Promise<FeedItem[]> {
-  const res = await fetch(url, {
-    headers: { "User-Agent": "daily-diff/1.0" },
-    signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
-  });
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  return parseRssItems(await res.text());
+  return parseRssItems(await (await fetchOk(url)).text());
 }

@@ -14,11 +14,12 @@
 import type { PolicyItem } from "./policy.ts";
 import type { PolicySourceContext } from "./policy-sources.ts";
 import { keywordHit } from "./policy-jev.ts";
-import { NEWS_MAX_AGE_DAYS } from "./rss.ts";
+import { NEWS_MAX_AGE_DAYS, tagText } from "./rss.ts";
+import { fetchOk } from "./http.ts";
+import { DAY_MS } from "./date.ts";
 
 const ODATA_URL = "https://gegevensmagazijn.tweedekamer.nl/OData/v4/2.0/Zaak";
 const SRU_URL = "https://repository.overheid.nl/sru";
-const FETCH_TIMEOUT_MS = 30_000;
 /** The OData API caps `$top` at 250 and sends no next link; ~300 Zaken of these types a week. */
 const PAGE_SIZE = 250;
 const MAX_PAGES = 8;
@@ -28,7 +29,6 @@ const MAX_PAGES = 8;
  */
 const FIRST_SEEN_MAX_AGE_DAYS = 30;
 
-const DAY_MS = 24 * 60 * 60 * 1000;
 const DOSSIER_RE = /^\d+$/;
 
 const ZAAK_TYPES: Record<string, string> = {
@@ -72,8 +72,6 @@ type Stage = { stage: string; date: string };
 const later = (a: Stage | null, b: Stage): Stage =>
   !a || b.date > a.date || (b.date === a.date && ORDER.indexOf(b.stage) > ORDER.indexOf(a.stage)) ? b : a;
 
-const tag = (xml: string, name: string): string => xml.match(new RegExp(`<${name}[^>]*>([^<]*)<`))?.[1] ?? "";
-
 /**
  * A bill's latest stage: the Tweede Kamer vote (date from its agenda item), the
  * Eerste Kamer's `kst-<nr>-A` (it has the bill) or a Staatsblad publication
@@ -88,11 +86,11 @@ export function billStage(besluiten: Besluit[], koopXml: string): Stage | null {
     if (stage && date && !b.Verwijderd) best = later(best, { stage, date });
   }
   for (const [, rec] of koopXml.matchAll(/<sru:record>([\s\S]*?)<\/sru:record>/g)) {
-    const id = tag(rec!, "dcterms:identifier");
-    const date = tag(rec!, "dcterms:available");
+    const id = tagText(rec!, "dcterms:identifier");
+    const date = tagText(rec!, "dcterms:available");
     if (!date) continue;
     if (id.startsWith("stb-")) best = later(best, { stage: "Enacted (Staatsblad)", date });
-    else if (/^kst-\d+-A$/.test(id) && tag(rec!, "dcterms:creator").startsWith("Eerste Kamer")) {
+    else if (/^kst-\d+-A$/.test(id) && tagText(rec!, "dcterms:creator").startsWith("Eerste Kamer")) {
       best = later(best, { stage: "In the Eerste Kamer", date });
     }
   }
@@ -125,14 +123,7 @@ export function parseZaken(json: unknown): PolicyItem[] {
   });
 }
 
-async function get(url: string, accept: string): Promise<Response> {
-  const res = await fetch(url, {
-    headers: { Accept: accept, "User-Agent": "daily-diff/1.0" },
-    signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
-  });
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  return res;
-}
+const get = (url: string, accept: string): Promise<Response> => fetchOk(url, { headers: { Accept: accept } });
 
 const odata = (filter: string, rest: string) => `${ODATA_URL}?$filter=${encodeURIComponent(filter)}&${rest}`;
 

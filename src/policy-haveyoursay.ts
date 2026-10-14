@@ -8,10 +8,11 @@
 
 import type { PolicyItem } from "./policy.ts";
 import type { PolicySourceContext } from "./policy-sources.ts";
+import { fetchOk } from "./http.ts";
+import { daysBefore } from "./date.ts";
 
 const SEARCH_URL = "https://ec.europa.eu/info/law/better-regulation/brpapi/searchInitiatives";
 const PAGE_URL = "https://ec.europa.eu/info/law/better-regulation/have-your-say/initiatives";
-const FETCH_TIMEOUT_MS = 30_000;
 
 /**
  * Two searches: "artificial intelligence" (20 initiatives on 2026-10-14, any
@@ -83,7 +84,8 @@ export function parseInitiatives(json: unknown, now: Date, aiTitleOnly = false):
   const content = (json as { initiativeResultDtoPage?: { content?: Initiative[] } }).initiativeResultDtoPage
     ?.content;
   if (!Array.isArray(content)) throw new Error("unexpected response shape");
-  const recent = new Date(now.getTime() - RECENT_DAYS * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+  // From the UTC date: compared with a Brussels date, a day at most apart.
+  const recent = daysBefore(now.toISOString().slice(0, 10), RECENT_DAYS);
   const items: PolicyItem[] = [];
   for (const i of content) {
     const title = (i.shortTitle ?? "").trim();
@@ -120,11 +122,7 @@ export async function fetchHaveYourSay(ctx: PolicySourceContext): Promise<Policy
   let answered = 0;
   for (const search of SEARCHES) {
     try {
-      const res = await fetch(`${SEARCH_URL}?language=EN&size=100&${search.params}`, {
-        headers: { "User-Agent": "daily-diff/1.0" },
-        signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
-      });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const res = await fetchOk(`${SEARCH_URL}?language=EN&size=100&${search.params}`);
       for (const item of parseInitiatives(await res.json(), ctx.now, search.aiTitleOnly)) {
         byId.set(item.id, item);
       }

@@ -16,9 +16,10 @@
 import type { PolicyItem } from "./policy.ts";
 import type { PolicySourceContext } from "./policy-sources.ts";
 import { keywordHit, watchlisted } from "./policy-jev.ts";
+import { apiKeyFor, fetchOk } from "./http.ts";
+import { daysBefore } from "./date.ts";
 
 const API_URL = "https://api.congress.gov/v3/bill";
-const FETCH_TIMEOUT_MS = 30_000;
 /** The API's maximum page size. */
 const LIMIT = 250;
 /** ~1,200 bills are updated a week (spike, 2026-10-13): 5 pages; 8 leaves room. */
@@ -83,12 +84,7 @@ export function congressStage(actions: CgAction[]): { stage: string; date: strin
 
 async function getJson<T>(url: string, key: string): Promise<T> {
   // The key goes in a header, not `api_key=`, so it never lands in a logged URL.
-  const res = await fetch(url, {
-    headers: { "User-Agent": "daily-diff/1.0", "X-Api-Key": key },
-    signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
-  });
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  return (await res.json()) as T;
+  return (await (await fetchOk(url, { headers: { "X-Api-Key": key } })).json()) as T;
 }
 
 /** The watchlist id of a bill, e.g. `hr10768-119`. */
@@ -99,14 +95,9 @@ const ordinal = (n: number) =>
   `${n}${n % 100 >= 11 && n % 100 <= 13 ? "th" : (["th", "st", "nd", "rd"][n % 10] ?? "th")}`;
 
 export async function fetchCongress(ctx: PolicySourceContext): Promise<PolicyItem[]> {
-  const key = process.env["USA_GOV_API_KEY"];
-  if (!key) {
-    console.log("  [policy] Congress.gov skipped: USA_GOV_API_KEY is not set");
-    return [];
-  }
-  const since = new Date(Date.parse(ctx.dateStr) - LOOKBACK_DAYS * 24 * 60 * 60 * 1000)
-    .toISOString()
-    .slice(0, 10);
+  const key = apiKeyFor("USA_GOV_API_KEY", "Congress.gov");
+  if (!key) return [];
+  const since = daysBefore(ctx.dateStr, LOOKBACK_DAYS);
   const bills: CgBill[] = [];
   for (let page = 0; page < MAX_PAGES; page++) {
     const params = new URLSearchParams({

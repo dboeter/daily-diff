@@ -16,10 +16,11 @@
 import type { PolicyItem } from "./policy.ts";
 import type { PolicySourceContext } from "./policy-sources.ts";
 import { keywordHit, watchlisted } from "./policy-jev.ts";
+import { apiKeyFor, fetchOk } from "./http.ts";
+import { daysBefore } from "./date.ts";
 
 const FR_URL = "https://www.federalregister.gov/api/v1/documents.json";
 const REGS_URL = "https://api.regulations.gov/v4/documents";
-const FETCH_TIMEOUT_MS = 30_000;
 /** Covers a missed run; the policy state drops repeats. Also: dateStr is CST, a day ahead of US publication. */
 const LOOKBACK_DAYS = 7;
 /** The API's maximum: a 7-day window (~700 documents) is one page. */
@@ -69,12 +70,7 @@ interface RegsDoc {
 }
 
 async function getJson<T>(url: string, headers: Record<string, string> = {}): Promise<T> {
-  const res = await fetch(url, {
-    headers: { "User-Agent": "daily-diff/1.0", ...headers },
-    signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
-  });
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  return (await res.json()) as T;
+  return (await (await fetchOk(url, { headers })).json()) as T;
 }
 
 /** The Regulations.gov docket: given, or the document id minus its `-NNNN` sequence (FCC rows). */
@@ -148,11 +144,8 @@ function regsItem(d: RegsDoc): PolicyItem {
 
 /** Throws only when both sources fail; a missing key skips Regulations.gov. */
 export async function fetchUsRules(ctx: PolicySourceContext): Promise<PolicyItem[]> {
-  const since = new Date(Date.parse(ctx.dateStr) - LOOKBACK_DAYS * 24 * 60 * 60 * 1000)
-    .toISOString()
-    .slice(0, 10);
-  const key = process.env["USA_GOV_API_KEY"];
-  if (!key) console.log("  [policy] Regulations.gov skipped: USA_GOV_API_KEY is not set");
+  const since = daysBefore(ctx.dateStr, LOOKBACK_DAYS);
+  const key = apiKeyFor("USA_GOV_API_KEY", "Regulations.gov");
   const [fr, regs] = await Promise.allSettled([
     fetchFederalRegister(since),
     key ? fetchRegulationsGov(since, key) : Promise.resolve([]),

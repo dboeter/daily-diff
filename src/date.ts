@@ -9,6 +9,13 @@ export function toCstDateStr(date: Date): string {
   return new Date(date.getTime() + CST_OFFSET_MS).toISOString().slice(0, 10);
 }
 
+export const DAY_MS = 24 * 60 * 60 * 1000;
+
+/** The "YYYY-MM-DD" date `days` before a "YYYY-MM-DD" date; a negative `days` counts forward. */
+export function daysBefore(dateStr: string, days: number): string {
+  return new Date(Date.parse(dateStr) - days * DAY_MS).toISOString().slice(0, 10);
+}
+
 /** Format a Date as a compact UTC string like "2026-03-11 00:00". */
 export function toUtcStr(date: Date): string {
   return date.toISOString().slice(0, 16).replace("T", " ");

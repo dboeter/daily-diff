@@ -11,11 +11,13 @@
 
 import type { PolicyItem } from "./policy.ts";
 import type { PolicySourceContext } from "./policy-sources.ts";
+import { fetchOk } from "./http.ts";
+import { daysBefore } from "./date.ts";
 
 const SPARQL_URL = "https://publications.europa.eu/webapi/rdf/sparql";
 const LOOKBACK_DAYS = 30;
-// A year's look-back took 19 s on 2026-10-13; 30 days answers in seconds.
-const FETCH_TIMEOUT_MS = 60_000;
+// Longer than http.ts's default: a year's look-back took 19 s on 2026-10-13; 30 days answers in seconds.
+const SPARQL_TIMEOUT_MS = 60_000;
 const TITLE_MAX_CHARS = 200;
 
 /** A regulation or directive number in the watchlist (`2024/1689`); procedures (`2025/0359(COD)`) are the EP's. */
@@ -99,11 +101,11 @@ export function parseEurLexResults(json: unknown): PolicyItem[] {
 }
 
 export async function fetchEurLex(ctx: PolicySourceContext): Promise<PolicyItem[]> {
-  const since = new Date(ctx.now.getTime() - LOOKBACK_DAYS * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
-  const res = await fetch(SPARQL_URL, {
+  // From the UTC date: compared with a document's own date, which has no time zone.
+  const since = daysBefore(ctx.now.toISOString().slice(0, 10), LOOKBACK_DAYS);
+  const res = await fetchOk(SPARQL_URL, {
     method: "POST",
     headers: {
-      "User-Agent": "daily-diff/1.0",
       Accept: "application/sparql-results+json",
       "Content-Type": "application/x-www-form-urlencoded",
     },
@@ -113,8 +115,7 @@ export async function fetchEurLex(ctx: PolicySourceContext): Promise<PolicyItem[
         ctx.config.watchlist.eu.filter((w) => ACT_NUMBER_RE.test(w)),
       ),
     }).toString(),
-    signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
+    timeoutMs: SPARQL_TIMEOUT_MS,
   });
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
   return parseEurLexResults(await res.json());
 }

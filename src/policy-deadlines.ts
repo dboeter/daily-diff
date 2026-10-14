@@ -10,6 +10,7 @@ import type { PolicyCalendarEntry } from "./config.ts";
 import type { PolicyItem } from "./policy.ts";
 import { POLICY_REPORT } from "./i18n.ts";
 import { cell } from "./report-builders.ts";
+import { daysBefore } from "./date.ts";
 
 export interface Deadline {
   /** ISO date. */
@@ -55,7 +56,7 @@ export function upcomingDeadlines(
   calendar: PolicyCalendarEntry[],
   dateStr: string,
 ): Deadline[] {
-  const last = new Date(Date.parse(dateStr) + WINDOW_DAYS * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+  const last = daysBefore(dateStr, -WINDOW_DAYS);
   return [
     ...Object.values(open),
     ...calendar.map((c) => ({

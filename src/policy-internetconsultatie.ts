@@ -12,9 +12,9 @@ import type { PolicyItem } from "./policy.ts";
 import type { PolicySourceContext } from "./policy-sources.ts";
 import { keywordHit } from "./policy-jev.ts";
 import { plainText } from "./rss.ts";
+import { fetchOk } from "./http.ts";
 
 const SITE = "https://www.internetconsultatie.nl";
-const FETCH_TIMEOUT_MS = 30_000;
 
 export interface Consultation {
   slug: string;
@@ -51,14 +51,7 @@ export function parseConsultations(html: string): Consultation[] {
   return valid;
 }
 
-async function get(url: string): Promise<string> {
-  const res = await fetch(url, {
-    headers: { "User-Agent": "daily-diff/1.0" },
-    signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
-  });
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  return res.text();
-}
+const get = async (url: string): Promise<string> => (await fetchOk(url)).text();
 
 /**
  * The open AI consultations, as stage items: the state then reports each once

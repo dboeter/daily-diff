@@ -8,9 +8,9 @@
 
 import type { PolicyItem } from "./policy.ts";
 import type { PolicySourceContext } from "./policy-sources.ts";
+import { fetchOk } from "./http.ts";
 
 const API_URL = "https://data.europarl.europa.eu/api/v2/procedures";
-const FETCH_TIMEOUT_MS = 30_000;
 
 const PROCEDURE_RE = /^(\d{4})\/(\d{4})\([A-Z]+\)$/;
 
@@ -88,11 +88,7 @@ export async function fetchEuroparl(ctx: PolicySourceContext): Promise<PolicyIte
   for (const ref of procedures) {
     const [, year, num] = ref.match(PROCEDURE_RE)!;
     try {
-      const res = await fetch(`${API_URL}/${year}-${num}?format=application%2Fld%2Bjson`, {
-        headers: { "User-Agent": "daily-diff/1.0" },
-        signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
-      });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const res = await fetchOk(`${API_URL}/${year}-${num}?format=application%2Fld%2Bjson`);
       const item = parseProcedure(await res.json());
       if (item) items.push(item);
     } catch (err) {

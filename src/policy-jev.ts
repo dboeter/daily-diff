@@ -11,8 +11,7 @@ import { askJev, mapJev, jevFailedTooOften } from "./jev.ts";
 import type { AskJev } from "./trending-jev.ts";
 import type { Jurisdiction } from "./config.ts";
 import type { PolicyItem } from "./policy.ts";
-
-const DAY_MS = 24 * 60 * 60 * 1000;
+import { daysBefore } from "./date.ts";
 
 /** The four questions every item gets; `state` is `{ title, description }`. */
 const BASE_QUESTIONS = {
@@ -367,9 +366,7 @@ export async function selectPolicyItems(
     }
     nextVerdicts = {
       items: Object.fromEntries(
-        Object.entries(next).filter(
-          ([, e]) => (Date.parse(dateStr) - Date.parse(e.lastSeen)) / DAY_MS <= VERDICT_UNSEEN_DAYS,
-        ),
+        Object.entries(next).filter(([, e]) => e.lastSeen >= daysBefore(dateStr, VERDICT_UNSEEN_DAYS)),
       ),
     };
   }

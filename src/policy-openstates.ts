@@ -12,9 +12,10 @@
 
 import type { PolicyItem } from "./policy.ts";
 import type { PolicySourceContext } from "./policy-sources.ts";
+import { apiKeyFor, fetchOk } from "./http.ts";
+import { daysBefore } from "./date.ts";
 
 const API_URL = "https://v3.openstates.org/bills";
-const FETCH_TIMEOUT_MS = 30_000;
 const QUERY = '"artificial intelligence" OR "automated decision" OR "algorithmic discrimination"';
 /** The API's maximum (`max_per_page` in api-v3). */
 const PER_PAGE = 20;
@@ -94,14 +95,9 @@ function toItem(bill: OsBill, since: string): PolicyItem | null {
 
 /** Pages in turn up to MAX_PAGES; a failing first page throws, a later one keeps what arrived. */
 export async function fetchOpenStates(ctx: PolicySourceContext): Promise<PolicyItem[]> {
-  const key = process.env["PLURAL_API_KEY"];
-  if (!key) {
-    console.log("  [policy] Open States skipped: PLURAL_API_KEY is not set");
-    return [];
-  }
-  const since = new Date(Date.parse(ctx.dateStr) - LOOKBACK_DAYS * 24 * 60 * 60 * 1000)
-    .toISOString()
-    .slice(0, 10);
+  const key = apiKeyFor("PLURAL_API_KEY", "Open States");
+  if (!key) return [];
+  const since = daysBefore(ctx.dateStr, LOOKBACK_DAYS);
   const items: PolicyItem[] = [];
   for (let page = 1; page <= MAX_PAGES; page++) {
     const params = new URLSearchParams({
@@ -115,11 +111,7 @@ export async function fetchOpenStates(ctx: PolicySourceContext): Promise<PolicyI
     let body: { results: OsBill[]; pagination: { max_page: number } };
     try {
       // The key goes in a header, not `apikey=`, so it never lands in a logged URL.
-      const res = await fetch(`${API_URL}?${params}`, {
-        headers: { "User-Agent": "daily-diff/1.0", "X-API-Key": key },
-        signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
-      });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const res = await fetchOk(`${API_URL}?${params}`, { headers: { "X-API-Key": key } });
       body = (await res.json()) as typeof body;
     } catch (err) {
       if (page === 1) throw err;

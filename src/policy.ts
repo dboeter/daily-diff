@@ -14,6 +14,7 @@ import { POLICY_SOURCES, type PolicySource } from "./policy-sources.ts";
 import { loadPolicyVerdicts, selectPolicyItems, type PolicyVerdicts } from "./policy-jev.ts";
 import type { AskJev } from "./trending-jev.ts";
 import { nextDeadlines, upcomingDeadlines, type Deadline } from "./policy-deadlines.ts";
+import { daysBefore } from "./date.ts";
 
 export interface PolicyItem extends FeedItem {
   /** The feed's display name (config.yml policy.feeds). */
@@ -129,9 +130,7 @@ export function nextPolicyState(
   dateStr: string,
   recorded: StateItem[] = [],
 ): PolicyState {
-  const cutoff = new Date(Date.parse(dateStr) - REPORTED_KEEP_DAYS * 24 * 60 * 60 * 1000)
-    .toISOString()
-    .slice(0, 10);
+  const cutoff = daysBefore(dateStr, REPORTED_KEEP_DAYS);
   const reported = Object.fromEntries(
     Object.entries(state?.reported ?? {}).filter(([, day]) => day >= cutoff),
   );
