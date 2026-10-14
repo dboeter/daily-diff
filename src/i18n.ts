@@ -2,6 +2,8 @@
  * Centralized report strings: report names, labels, footers and status messages.
  */
 
+import type { Jurisdiction } from "./config.ts";
+
 // ---------------------------------------------------------------------------
 // Status & error messages (used in index.ts)
 // ---------------------------------------------------------------------------
@@ -30,6 +32,7 @@ export const REPORTS = {
   "ai-hn": { emoji: "💬", name: "AI Discussions", label: "hn" },
   "ai-arxiv": { emoji: "📚", name: "AI Research", label: "arxiv" },
   "ai-web": { emoji: "🌐", name: "Lab Announcements", label: "web" },
+  "ai-policy": { emoji: "⚖️", name: "Policy Watch", label: "policy" },
   "ai-trending": { emoji: "📈", name: "Agent & AI Coding Trends", label: "trending" },
   "ai-hf": { emoji: "🧠", name: "AI Models", label: "hf" },
 } as const satisfies Record<string, { emoji: string; name: string; label: string }>;
@@ -66,6 +69,8 @@ export const REPORT_META = {
   sourcesHeader: SOURCES,
   sources: (list: string) => `${SOURCES} ${list}`,
   generated: (utcStr: string) => `Generated: ${utcStr} UTC`,
+  /** After a listing's item count when Jev ordered it (ArXiv, policy). */
+  jevRanked: " ranked by [Jev](https://typesafe.ai) relevance",
 } as const;
 
 /** The report bar's first link: the day's overview of every report's highlights. */
@@ -125,6 +130,31 @@ export const DISCUSSIONS_REPORT = {
 export const ARXIV_REPORT = {
   source: "[ArXiv](https://arxiv.org/) (cs.AI, cs.CL, cs.LG)",
   papersHeading: "Key Papers",
+} as const;
+
+// Daily: AI legislation, regulation and official guidance. The table is rendered in code.
+export const POLICY_REPORT = {
+  /** One section per jurisdiction, in the report's order (config.ts JURISDICTIONS). */
+  headings: {
+    eu: "EU",
+    nl: "Netherlands",
+    us_federal: "US federal",
+    us_states: "US states",
+    other: "Elsewhere",
+  } satisfies Record<Jurisdiction, string>,
+  // Stage is empty for items from the regular news feeds.
+  tableHeader: "| Date | Source | Title | Stage | Summary |\n| :--- | :--- | :--- | :--- | :--- |",
+  deadlinesHeading: "Upcoming deadlines (next 30 days)",
+  deadlinesHeader: "| Date | Source | Item |\n| :--- | :--- | :--- |",
+  /** The source column of a config.yml `policy.calendar` date. */
+  calendarSource: "Calendar",
+  /** After the jurisdiction sections: items from `kind: news` feeds (news and commentary outlets). */
+  newsHeading: "News & commentary",
+  newsTableHeader: "| Date | Source | Title | Summary |\n| :--- | :--- | :--- | :--- |",
+  /** The meta line's count, and the log's. */
+  newItems: (n: number) => `${n} new items`,
+  noNewItems: "No new items, skipping report.",
+  noData: "No data available, skipping report.",
 } as const;
 
 // Weekly: Hugging Face trending models plus OpenRouter token usage, which

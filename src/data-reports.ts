@@ -7,6 +7,7 @@
 
 import {
   ARXIV_REPORT,
+  POLICY_REPORT,
   REPORT_META,
   WEB_REPORT,
   TRENDING_REPORT,
@@ -18,6 +19,8 @@ import {
   buildDiscussionsPrompt,
   buildArxivPrompt,
   buildModelsPrompt,
+  buildPolicySummariesPrompt,
+  buildPolicyProsePrompt,
   discussionSources,
   modelSources,
   type DiscussionsData,
@@ -30,11 +33,15 @@ import { saveStarHistory } from "./trending-rank.ts";
 import {
   parseRowSummaries,
   renderTrendingTables,
-  spliceTrendingProse,
+  renderPolicyTable,
+  spliceTables,
   nestHeadings,
 } from "./report-builders.ts";
 import { saveArxivState, type ArxivData } from "./arxiv.ts";
 import type { HfData } from "./hf.ts";
+import { savePolicyState, POLICY_STATE_FILE, type PolicyData } from "./policy.ts";
+import { savePolicyVerdicts, POLICY_VERDICTS_FILE } from "./policy-jev.ts";
+import { renderDeadlines } from "./policy-deadlines.ts";
 import type { OpenRouterData } from "./openrouter.ts";
 
 /** A finished report: main() writes its file and opens its issue (title and label from REPORTS). */
@@ -153,7 +160,7 @@ export async function buildTrendingReport(
     "ai-trending",
     dateStr,
     `> ${REPORT_META.sources(TRENDING_REPORT.sources)} | ${REPORT_META.generated(utcStr)}`,
-    spliceTrendingProse(trending.prose, tables) + skillsSection,
+    spliceTables(trending.prose, tables) + skillsSection,
   );
 
   // Only once the report exists, like the ArXiv state.
@@ -214,7 +221,7 @@ export async function buildArxivReport(
 
   const meta =
     `> ${REPORT_META.sources(ARXIV_REPORT.source)} | ` +
-    `${arxivData.papers.length} papers${arxivData.rankedBy === "jev" ? " ranked by [Jev](https://typesafe.ai) relevance" : ""} | ` +
+    `${arxivData.papers.length} papers${arxivData.rankedBy === "jev" ? REPORT_META.jevRanked : ""} | ` +
     REPORT_META.generated(utcStr);
   const report = await buildListingReport(
     "ai-arxiv",
@@ -226,6 +233,67 @@ export async function buildArxivReport(
   // Only once the report exists: after a failed report the next run takes this pool too.
   if (report && arxivData.nextState) saveArxivState(arxivData.nextState);
   return report;
+}
+
+// ---------------------------------------------------------------------------
+// Policy report
+// ---------------------------------------------------------------------------
+
+/**
+ * Two LLM calls, like trending: row summaries and the prose around the
+ * code-rendered table. A failed summaries call leaves the descriptions in the
+ * table; a failed prose call skips the report.
+ */
+export async function buildPolicyReport(
+  policyData: PolicyData,
+  utcStr: string,
+  dateStr: string,
+  stateFile = POLICY_STATE_FILE,
+  verdictsFile = POLICY_VERDICTS_FILE,
+): Promise<SavedReport | null> {
+  // Before the no-items skip, unlike the trending cache: on a day Jev drops
+  // every item there is no report, and the dropped items would be asked again
+  // every day until they leave the feed's age window.
+  if (policyData.rankingFile) {
+    console.log(`  Saved ${saveFile(policyData.rankingFile, dateStr, "policy-ranking.json")}`);
+  }
+  if (policyData.nextVerdicts) savePolicyVerdicts(policyData.nextVerdicts, verdictsFile);
+  // Observations (record-only stages, deadline changes) are kept whether or not a report follows;
+  // replaced by nextState below once the report exists.
+  if (policyData.fetchSuccess) savePolicyState(policyData.observedState, stateFile);
+  if (!policyData.fetchSuccess || policyData.items.length === 0) {
+    console.log(`  [policy] ${policyData.fetchSuccess ? POLICY_REPORT.noNewItems : POLICY_REPORT.noData}`);
+    return null;
+  }
+  const { items } = policyData;
+  const tables = (summaries: Map<number, string>) =>
+    renderPolicyTable(items, summaries, renderDeadlines(policyData.deadlines));
+  console.log("  [policy] Calling LLM for policy report...");
+  const [summaries, prose] = await Promise.all([
+    generateBody(
+      buildPolicySummariesPrompt(items, dateStr, policyData.readerProfile),
+      LLM_TOKENS_LISTING,
+    ).catch((err) => {
+      console.error(`  [policy] Summaries failed, showing descriptions: ${err}`);
+      return "";
+    }),
+    generateBody(
+      buildPolicyProsePrompt(tables(new Map()), dateStr, policyData.readerProfile),
+      LLM_TOKENS_LISTING,
+    ).catch((err) => {
+      console.error(`  [policy] Report generation failed: ${err}`);
+      return null;
+    }),
+  ]);
+  if (prose === null) return null;
+
+  const sources = [...new Set(items.map((i) => i.source))].join(" + ");
+  const ranked = policyData.rankedBy === "jev" ? REPORT_META.jevRanked : "";
+  const meta = `> ${REPORT_META.sources(sources)} | ${POLICY_REPORT.newItems(items.length)}${ranked} | ${REPORT_META.generated(utcStr)}`;
+  const body = spliceTables(prose, tables(parseRowSummaries(summaries)));
+  // Only once the report exists, like the ArXiv state.
+  savePolicyState(policyData.nextState, stateFile);
+  return { id: "ai-policy", content: assembleReport("ai-policy", dateStr, meta, body) };
 }
 
 // ---------------------------------------------------------------------------

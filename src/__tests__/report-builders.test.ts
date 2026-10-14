@@ -4,12 +4,13 @@ import {
   buildStealthSection,
   parseRowSummaries,
   renderTrendingTables,
-  spliceTrendingProse,
+  renderPolicyTable,
+  spliceTables,
   stripModelTitle,
   nestHeadings,
   renderReportBar,
   withReportBar,
-  TRENDING_TABLES_MARKER,
+  TABLES_MARKER,
 } from "../report-builders.ts";
 import type { TrendingReportData } from "../trending-rank.ts";
 import { TRENDING_REPORT } from "../i18n.ts";
@@ -293,23 +294,92 @@ describe("renderTrendingTables", () => {
   });
 });
 
-describe("spliceTrendingProse", () => {
-  it("replaces the marker line with the tables", () => {
-    const prose = `## Highlights\n\nText.\n\n${TRENDING_TABLES_MARKER}\n\n## Trends\n\nMore.`;
-    expect(spliceTrendingProse(prose, "TABLES")).toBe(
-      "## Highlights\n\nText.\n\nTABLES\n\n## Trends\n\nMore.",
+describe("renderPolicyTable", () => {
+  const items = [
+    {
+      id: "1",
+      title: "AI Act | guidelines",
+      link: "https://example.eu/a",
+      published: "2026-10-09T07:16:00.000Z",
+      description: "The AI Office publishes guidelines.",
+      source: "European Commission",
+      jurisdiction: "eu" as const,
+      jevOnly: false,
+    },
+    {
+      id: "2",
+      title: "Scientific panel",
+      link: "https://example.eu/b",
+      published: "2026-10-08T07:00:00.000Z",
+      description: "",
+      source: "European Commission",
+      jurisdiction: "eu" as const,
+      jevOnly: false,
+    },
+  ];
+
+  const motion = {
+    ...items[1]!,
+    id: "3",
+    title: "Motie AI",
+    link: "https://example.nl/m",
+    source: "Tweede Kamer",
+    jurisdiction: "nl" as const,
+    stage: "Stemmen - aangenomen",
+  };
+
+  it("renders one section per jurisdiction, date, source, title and stage from the data, the summary from the model", () => {
+    const summaries = new Map([
+      [1, "Guidelines for providers."],
+      [3, "A motion passed."],
+    ]);
+    expect(renderPolicyTable([...items, motion], summaries)).toBe(
+      "## EU\n\n" +
+        "| Date | Source | Title | Stage | Summary |\n| :--- | :--- | :--- | :--- | :--- |\n" +
+        "| 2026-10-09 | European Commission | [AI Act \\| guidelines](https://example.eu/a) |  | Guidelines for providers. |\n" +
+        "| 2026-10-08 | European Commission | [Scientific panel](https://example.eu/b) |  | — |\n\n" +
+        "## Netherlands\n\n" +
+        "| Date | Source | Title | Stage | Summary |\n| :--- | :--- | :--- | :--- | :--- |\n" +
+        "| 2026-10-08 | Tweede Kamer | [Motie AI](https://example.nl/m) | Stemmen - aangenomen | A motion passed. |",
     );
+  });
+
+  it("renders news items in their own section after every jurisdiction, without a stage column", () => {
+    const news = { ...items[0]!, id: "4", source: "Politico Europe", news: true };
+    expect(renderPolicyTable([items[1]!, motion, news], new Map([[3, "A report."]]))).toMatch(
+      /## Netherlands\n[\s\S]*\n\n## News & commentary\n\n\| Date \| Source \| Title \| Summary \|\n\| :--- \| :--- \| :--- \| :--- \|\n\| 2026-10-09 \| Politico Europe \| \[AI Act \\\| guidelines\]\(https:\/\/example\.eu\/a\) \| A report\. \|$/,
+    );
+  });
+
+  it("falls back to the description when the model gave no summary", () => {
+    expect(renderPolicyTable(items, new Map())).toContain("| The AI Office publishes guidelines. |");
+  });
+
+  it("truncates a long title in the link text only", () => {
+    const long = { ...items[0]!, title: "x".repeat(300) };
+    const md = renderPolicyTable([long], new Map());
+    expect(md).toContain(`[${"x".repeat(200)}…](`);
+    expect(md).not.toContain("x".repeat(201));
+  });
+
+  it("is empty with no items", () => {
+    expect(renderPolicyTable([], new Map())).toBe("");
+  });
+});
+
+describe("spliceTables", () => {
+  it("replaces the marker line with the tables", () => {
+    const prose = `## Highlights\n\nText.\n\n${TABLES_MARKER}\n\n## Trends\n\nMore.`;
+    expect(spliceTables(prose, "TABLES")).toBe("## Highlights\n\nText.\n\nTABLES\n\n## Trends\n\nMore.");
   });
 
   it("appends the tables when the marker is missing", () => {
-    expect(spliceTrendingProse("## Highlights\n\nText.\n", "TABLES")).toBe(
-      "## Highlights\n\nText.\n\nTABLES",
-    );
+    expect(spliceTables("## Highlights\n\nText.\n", "TABLES")).toBe("## Highlights\n\nText.\n\nTABLES");
   });
 
   it("drops the marker when there are no tables", () => {
-    const prose = `A.\n\n${TRENDING_TABLES_MARKER}\n\nB.`;
-    expect(spliceTrendingProse(prose, "")).toBe("A.\n\nB.");
+    const prose = `A.\n\n${TABLES_MARKER}\n\nB.`;
+    expect(spliceTables(prose, "")).toBe("A.\n\nB.");
   });
 });
 

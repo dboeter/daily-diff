@@ -1,0 +1,127 @@
+{
+  "@odata.context": "https://gegevensmagazijn.tweedekamer.nl/OData/v4/2.0/$metadata#Zaak(Nummer,Titel,Kamerstukdossier(Nummer,Citeertitel),Besluit(BesluitSoort,Verwijderd,Agendapunt(Id,Activiteit(Datum))))",
+  "value": [
+    {
+      "Nummer": "2025Z22654",
+      "Titel": "Uitvoering van Verordening (EU) 2024/2847 van het Europees Parlement en de Raad van 23 oktober 2024 betreffende horizontale cyberbeveiligingsvereisten voor producten met digitale elementen en tot wijziging van Verordeningen (EU) nr. 168/2013 en (EU) 2019/1020 en Richtlijn (EU) 2020/1828 (Uitvoeringswet verordening cyberweerbaarheid)",
+      "Kamerstukdossier": [
+        {
+          "Citeertitel": "Uitvoeringswet verordening cyberweerbaarheid",
+          "Nummer": 36875
+        }
+      ],
+      "Besluit": [
+        {
+          "BesluitSoort": "Controversieel - niet controversieel verklaren [geen Parlisproces] (commissie)",
+          "Verwijderd": false,
+          "Agendapunt": {
+            "Id": "b34ee482-4900-4077-bad2-744146bf384d",
+            "Activiteit": {
+              "Datum": "2026-01-21T11:00:00+01:00"
+            }
+          }
+        },
+        {
+          "BesluitSoort": "In handen van commissie stellen (algemeen)",
+          "Verwijderd": false,
+          "Agendapunt": {
+            "Id": "a0bceaf4-3796-47bc-8373-1115db242c14",
+            "Activiteit": {
+              "Datum": "2026-01-13T15:10:00+01:00"
+            }
+          }
+        },
+        {
+          "BesluitSoort": "Aanmelden voor plenaire behandeling",
+          "Verwijderd": false,
+          "Agendapunt": {
+            "Id": "d6f35283-ce9d-4ff9-8b8e-50cef7f326bd",
+            "Activiteit": {
+              "Datum": "2026-05-20T11:00:00+02:00"
+            }
+          }
+        },
+        {
+          "BesluitSoort": "Inbreng - verslag wetsvoorstel",
+          "Verwijderd": false,
+          "Agendapunt": {
+            "Id": "b34ee482-4900-4077-bad2-744146bf384d",
+            "Activiteit": {
+              "Datum": "2026-01-21T11:00:00+01:00"
+            }
+          }
+        },
+        {
+          "BesluitSoort": "Controversieel - niet controversieel verklaren [geen Parlisproces] (commissie)",
+          "Verwijderd": false,
+          "Agendapunt": {
+            "Id": "a6c27ba5-a118-41db-96b1-140a3b86a3ca",
+            "Activiteit": {
+              "Datum": "2026-01-13T16:45:00+01:00"
+            }
+          }
+        },
+        {
+          "BesluitSoort": "LVIS - KB rondgezonden en gepubliceerd",
+          "Verwijderd": false,
+          "Agendapunt": {
+            "Id": "32a19d1a-e26c-4754-b363-5933c8103646",
+            "Activiteit": {
+              "Datum": "2026-01-13T15:10:00+01:00"
+            }
+          }
+        },
+        {
+          "BesluitSoort": "Leveren inbreng",
+          "Verwijderd": false,
+          "Agendapunt": {
+            "Id": "1d332d37-d02d-44a3-ae4a-287e2bae95ef",
+            "Activiteit": {
+              "Datum": "2026-02-10T14:00:00+01:00"
+            }
+          }
+        },
+        {
+          "BesluitSoort": "Agenderen - plenair debat",
+          "Verwijderd": false,
+          "Agendapunt": {
+            "Id": "a1637a44-899f-4191-8aff-d072d544d9aa",
+            "Activiteit": {
+              "Datum": "2026-05-21T14:10:00+02:00"
+            }
+          }
+        },
+        {
+          "BesluitSoort": "Aanhouden - tot de volgende procedurevergadering",
+          "Verwijderd": false,
+          "Agendapunt": {
+            "Id": "a6c27ba5-a118-41db-96b1-140a3b86a3ca",
+            "Activiteit": {
+              "Datum": "2026-01-13T16:45:00+01:00"
+            }
+          }
+        },
+        {
+          "BesluitSoort": "Behandelen [geen Parlisproces]",
+          "Verwijderd": false,
+          "Agendapunt": {
+            "Id": "563ea37d-9a5a-4f58-bad8-5e4324516f58",
+            "Activiteit": {
+              "Datum": "2026-09-07T18:30:00+02:00"
+            }
+          }
+        },
+        {
+          "BesluitSoort": "Stemmen - aangenomen",
+          "Verwijderd": false,
+          "Agendapunt": {
+            "Id": "d550701b-b1f4-45ca-a4ce-682057d604ed",
+            "Activiteit": {
+              "Datum": "2026-09-10T12:45:00+02:00"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

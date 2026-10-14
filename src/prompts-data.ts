@@ -9,13 +9,14 @@ import type { TrendingData } from "./trending.ts";
 import type { summaryRows } from "./trending-rank.ts";
 import { formatTokens, type OpenRouterData } from "./openrouter.ts";
 import { ARXIV_REPORT, DISCUSSIONS_REPORT, MODELS_REPORT, SECTIONS, WEB_REPORT } from "./i18n.ts";
-import { TRENDING_TABLES_MARKER } from "./report-builders.ts";
+import { TABLES_MARKER } from "./report-builders.ts";
 import { NO_TITLE_RULE } from "./prompts.ts";
 import type { HnData } from "./hn.ts";
 import type { ArxivData } from "./arxiv.ts";
 import type { HfData } from "./hf.ts";
 import type { DevtoData } from "./devto.ts";
 import type { LobstersData } from "./lobsters.ts";
+import type { PolicyItem } from "./policy.ts";
 
 /** Which sources the models report covers; the prompt and the report's sources line both read it. */
 export function modelSources(hf: HfData, openrouter: OpenRouterData) {
@@ -72,7 +73,7 @@ For every numbered item write exactly one line in the form \`N: <2 sentences>\` 
 
 /**
  * Weekly trending, call 2 of 2: the prose sections around the code-rendered
- * tables. The model places TRENDING_TABLES_MARKER where spliceTrendingProse
+ * tables. The model places TABLES_MARKER where spliceTables
  * inserts the tables.
  */
 export function buildTrendingProsePrompt(tablesMd: string, data: TrendingData, dateStr: string): string {
@@ -85,7 +86,7 @@ ${tablesMd || "(No projects were selected this week.)"}
 Write the prose sections of the report, in this order:
 
 1. \`## ${SECTIONS.highlights}\` — 3-5 sentences on the most noteworthy agent and AI-coding developments this week.
-2. The line \`${TRENDING_TABLES_MARKER}\` exactly once, on its own line. The tables are inserted there.
+2. The line \`${TABLES_MARKER}\` exactly once, on its own line. The tables are inserted there.
 3. \`## ${SECTIONS.signals}\` — 200-300 words: which kinds of agent or coding tool are getting attention, and any new harness or orchestration patterns.
 4. \`## ${SECTIONS.worthALook}\` — 3-5 bullets: specific projects or directions worth developer focus, with brief reasoning.
 
@@ -94,6 +95,64 @@ Rules:
 - Do not reproduce or alter the tables.
 - Base every claim on the tables and the data above. They show descriptions and counts only, so do not describe releases, adoption or community reactions they do not show.
 - Mention only projects that appear in the tables, and link every project you mention.
+- English, professional and concise.
+`;
+}
+
+/**
+ * Policy report, call 1 of 2: one 2-sentence summary per numbered table row.
+ * The rows are the day's new feed items in feed order; parseRowSummaries reads the reply.
+ */
+export function buildPolicySummariesPrompt(
+  items: PolicyItem[],
+  dateStr: string,
+  readerProfile: string,
+): string {
+  const list = items
+    .map(
+      (it, i) =>
+        `${i + 1}. ${it.title} (${it.source}, ${it.published.slice(0, 10)}${it.stage ? `, stage: ${it.stage}` : ""}) — ${it.description || "(no description)"}`,
+    )
+    .join("\n");
+  return `You are a policy analyst covering AI legislation, regulation and official guidance. The reader: ${readerProfile}
+
+Below are ${items.length} numbered items from official sources and news & commentary outlets, new as of ${dateStr}, each with its source, date and text.
+
+${list}
+
+For every numbered item write exactly one line in the form \`N: <2 sentences>\` — what was published or decided, and what it means for organisations that deploy AI.
+- Ground every sentence only in the given text. Do not invent obligations, dates, stages or legal status.
+- If the text is empty, say only what the title shows.
+- Output one line per item, ${items.length} lines in total, in the given order. No other text: no headings, no introduction, no blank lines.
+- English.
+`;
+}
+
+/**
+ * Policy report, call 2 of 2: the prose sections around the code-rendered
+ * table, which spliceTables inserts at TABLES_MARKER.
+ */
+export function buildPolicyProsePrompt(tableMd: string, dateStr: string, readerProfile: string): string {
+  return `You are a policy analyst covering AI legislation, regulation and official guidance in the EU, the Netherlands and the US. The reader: ${readerProfile}
+
+Below is today's table of new items from official sources and news & commentary outlets, ${dateStr}; the Summary column holds summaries of each item.
+
+${tableMd}
+
+---
+
+Write the prose sections of the report, in this order:
+
+1. \`## ${SECTIONS.highlights}\` — 2-4 sentences on the most consequential items today.
+2. The line \`${TABLES_MARKER}\` exactly once, on its own line. The table is inserted there.
+3. \`## ${SECTIONS.signals}\` — 100-200 words: where policy is moving and what it means for organisations that deploy AI.
+4. \`## ${SECTIONS.worthALook}\` — 1-3 bullets: items worth reading in full, with brief reasoning.
+
+Rules:
+- ${NO_TITLE_RULE}
+- Do not reproduce or alter the table.
+- Base every claim on the table. Do not invent obligations, dates, stages or legal status: a wrong legal status is worse than none.
+- Mention only items that appear in the table, and link every item you mention.
 - English, professional and concise.
 `;
 }
@@ -211,13 +270,13 @@ export function buildHighlightsPrompt(
   // The count is a maximum, not a quota, and the exclusion list is explicit: a
   // fixed 6-per-report quota padded every section with routine noise
   // ("2 nightly builds", "200 commits", star counts).
-  return `You are a selective news editor. The following are today's AI ecosystem report excerpts, each labeled with a report ID. The reader is a developer who wants to know what actually changed in the AI tooling world today and why it matters to them.
+  return `You are a selective news editor. The following are today's AI ecosystem report excerpts, each labeled with a report ID. The reader is a developer who wants to know what actually changed in the AI tooling world today and why it matters to them, and who follows AI policy for work (the ai-policy report).
 
 ${sections}
 
 ---
 
-For each report, pick AT MOST ${maxPerReport} highlights that a developer would genuinely care about. Fewer is better than filler: return 1 or 0 when only 1 or 0 items qualify.
+For each report, pick AT MOST ${maxPerReport} highlights that this reader would genuinely care about. Fewer is better than filler: return 1 or 0 when only 1 or 0 items qualify.
 
 Each highlight is one sentence of at most ${HIGHLIGHT_MAX_CHARS} characters that says what happened AND why it matters (the concrete change, capability or consequence).
 Good: "Claude Code adds background subagents, so long refactors keep running while you keep chatting"
@@ -229,6 +288,7 @@ Qualifies:
 - Support for a specific new model or hardware platform
 - A concrete announcement, launch, paper result, or project with a clear new capability
 - A discussion with a specific, non-obvious takeaway
+- A law, regulation, official guidance or enforcement decision that was published, adopted or moved to a new stage, or a consultation opening, with what it means for organisations that deploy AI
 
 Never include:
 - Routine releases: nightlies, alphas, prereleases, build-number ranges, or a version number without saying what it changes

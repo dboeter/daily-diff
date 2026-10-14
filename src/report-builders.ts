@@ -6,6 +6,7 @@ import { hasActivity, type ProjectActivity } from "./prompts.ts";
 import { escapeRegex } from "./agent-news.ts";
 import type { OpenRouterStealthModel } from "./openrouter.ts";
 import type { TrendingReportData } from "./trending-rank.ts";
+import type { PolicyItem } from "./policy.ts";
 import {
   LIVE_REPORT_IDS,
   OVERVIEW,
@@ -13,6 +14,7 @@ import {
   REPORT_META,
   STEALTH_SECTION,
   TRENDING_REPORT,
+  POLICY_REPORT,
   type ReportId,
 } from "./i18n.ts";
 
@@ -223,11 +225,11 @@ export function buildStealthSection(models: OpenRouterStealthModel[] | null, now
 }
 
 // ---------------------------------------------------------------------------
-// Trending tables (weekly)
+// Code-rendered tables with LLM row summaries (trending, policy)
 // ---------------------------------------------------------------------------
 
 /** Where the prose LLM call leaves room for the code-rendered tables. */
-export const TRENDING_TABLES_MARKER = "<!-- tables -->";
+export const TABLES_MARKER = "<!-- tables -->";
 
 /**
  * A row with no LLM summary shows its description instead, cut to about two
@@ -253,7 +255,12 @@ export function parseRowSummaries(text: string): Map<number, string> {
 }
 
 /** Table cell text: one line, pipes escaped. */
-const cell = (s: string) => s.replace(/\r?\n/g, " ").replace(/\|/g, "\\|").trim();
+export const cell = (s: string) => s.replace(/\r?\n/g, " ").replace(/\|/g, "\\|").trim();
+
+/** Policy table link text. EUR-Lex titles run to 500+ characters; the item keeps the full one for Jev and the prompts. */
+const POLICY_TITLE_MAX_CHARS = 200;
+export const policyTitleLabel = (title: string): string =>
+  cell(title.length > POLICY_TITLE_MAX_CHARS ? `${title.slice(0, POLICY_TITLE_MAX_CHARS)}…` : title);
 
 function descriptionFallback(description: string): string {
   const d = description.replace(/\s+/g, " ").trim();
@@ -296,10 +303,49 @@ export function renderTrendingTables(report: TrendingReportData, summaries: Map<
   return blocks.join("\n\n");
 }
 
+/**
+ * The policy report's tables, one `##` section per jurisdiction with items, in
+ * POLICY_REPORT.headings order, then News & commentary (news-feed items). Rows are numbered from 1 across all sections in
+ * item order (the summaries call's `N:` lines), so the items must arrive
+ * grouped (fetchPolicyData sorts them). Date, source, title and stage come
+ * from the data, never the model.
+ */
+export function renderPolicyTable(
+  items: PolicyItem[],
+  summaries: Map<number, string>,
+  /** The rendered Upcoming deadlines section, which goes between the jurisdictions and the news. */
+  deadlines = "",
+): string {
+  const row = (it: PolicyItem, n: number) =>
+    `| ${it.published.slice(0, 10)} | ${cell(it.source)} | [${policyTitleLabel(it.title)}](${cell(it.link)}) | ` +
+    `${cell(it.stage ?? "")} | ${cell(summaries.get(n) ?? descriptionFallback(it.description))} |`;
+  const numbered = items.map((it, i) => ({ it, n: i + 1 }));
+  const sections = Object.entries(POLICY_REPORT.headings).map(([jurisdiction, heading]) => {
+    const rows = numbered
+      .filter(({ it }) => !it.news && it.jurisdiction === jurisdiction)
+      .map(({ it, n }) => row(it, n));
+    return rows.length ? `## ${heading}\n\n${POLICY_REPORT.tableHeader}\n${rows.join("\n")}` : "";
+  });
+  sections.push(deadlines);
+  const newsRows = numbered
+    .filter(({ it }) => it.news)
+    .map(
+      ({ it, n }) =>
+        `| ${it.published.slice(0, 10)} | ${cell(it.source)} | [${policyTitleLabel(it.title)}](${cell(it.link)}) | ` +
+        `${cell(summaries.get(n) ?? descriptionFallback(it.description))} |`,
+    );
+  if (newsRows.length) {
+    sections.push(
+      `## ${POLICY_REPORT.newsHeading}\n\n${POLICY_REPORT.newsTableHeader}\n${newsRows.join("\n")}`,
+    );
+  }
+  return sections.filter(Boolean).join("\n\n");
+}
+
 /** Put the tables where the prose left the marker; after the prose when the model dropped it. */
-export function spliceTrendingProse(prose: string, tables: string): string {
+export function spliceTables(prose: string, tables: string): string {
   const lines = prose.split("\n");
-  const i = lines.findIndex((l) => l.trim() === TRENDING_TABLES_MARKER);
+  const i = lines.findIndex((l) => l.trim() === TABLES_MARKER);
   if (i === -1) return tables ? `${prose.trimEnd()}\n\n${tables}` : prose;
   const before = lines.slice(0, i).join("\n").trimEnd();
   const after = lines

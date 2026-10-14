@@ -2,8 +2,8 @@
 # Edit this file to customize which repositories are tracked, then run
 # `pnpm readme` to refresh the tracked-repo tables in README.md (pre-commit and
 # CI fail while they are stale). Changes take effect on the next workflow run.
-# Every section is required: the run stops with an error instead of falling
-# back to a built-in list.
+# Every section is required (agents, skills_repo, infra, policy): the run stops
+# with an error instead of falling back to a built-in list.
 #
 # agents and infra are the two sections of the daily agents report:
 #   title    the section's heading in the report
@@ -97,3 +97,145 @@ infra:
       repo: asheshgoplani/agent-deck
       name: Agent Deck
       # Rarely reaches the hot-issue bar: often quiet.
+
+# ── Policy ────────────────────────────────────────────────────────────────────
+# The daily Policy Watch report (ai-policy): AI legislation, regulation and
+# official guidance in the EU, the Netherlands and the US.
+#   reader_profile  who the report is for; Jev's US impact question reads it
+#   watchlist       files that always appear when they move, per jurisdiction;
+#                   an item naming an entry skips the Jev drop (lists may be empty)
+#   feeds           RSS news feeds; items older than 7 days are skipped.
+#                   jurisdiction: eu | nl | us_federal | us_states | other
+#                   jev_only: true for a low-volume feed whose items need not
+#                   name AI: every item goes to Jev, and without Jev the feed
+#                   is dropped for the run
+#                   kind: news for a news & commentary outlet: its items get
+#                   their own section after the jurisdiction tables; the
+#                   jurisdiction still sets Jev's questions (US: impact)
+#                   query: JSON appended URL-encoded as ?query= (the
+#                   Rijksoverheid platform's feeds take their search as JSON)
+
+policy:
+  # The sector examples are illustrations only: clients span many sectors.
+  reader_profile: >-
+    An AI practitioner based in the Netherlands, advising commercial companies of
+    roughly 500–1,500 employees across many sectors (e.g. retail, insurance,
+    banking), mostly serving the Dutch market. They deploy and integrate AI built
+    by others, largely from US vendors.
+  # Watchlisted items are always kept. Text is matched against each item's title,
+  # description and link.
+  watchlist:
+    # Procedures (yyyy/nnnn(TYPE)) are fetched from the European Parliament API
+    # and reported when their stage moves; act numbers (yyyy/nnnn) join the
+    # EUR-Lex title search.
+    eu:
+      - 2025/0359(COD) # Digital Omnibus on AI (amends the AI Act)
+      - 2022/0272(COD) # Cyber Resilience Act
+      - 2024/1689 # AI Act
+      - 2024/2847 # Cyber Resilience Act
+    # Tweede Kamer dossier numbers (Kamerstuk): bills, reported from the Tweede
+    # Kamer vote on (Eerste Kamer, Staatsblad from KOOP). Dutch implementation
+    # acts are named after the EU regulation, so keywords never find them.
+    nl:
+      - "36875" # Uitvoeringswet verordening cyberweerbaarheid (CRA)
+    # Federal Register / Regulations.gov dockets (NIST-2026-0100) and RINs
+    # (0693-AB12): documents in them are kept without an AI title. Bills as
+    # <type><number>-<congress> (hr10768-119), for AI provisions in non-AI
+    # bills (NDAA, appropriations); still reported only from passing a chamber.
+    us_federal: []
+    us_states: []
+  feeds:
+    # The AI Office's news, on the Commission's digital-strategy site; ~10 items.
+    - name: European Commission
+      url: https://digital-strategy.ec.europa.eu/en/rss.xml
+      jurisdiction: eu
+    # EU data protection board; ~10 items. AI-relevant items often name no AI
+    # term (a fine for automated decision-making), so all go to Jev.
+    - name: EDPB
+      url: https://www.edpb.europa.eu/feed/news_en
+      jurisdiction: eu
+      jev_only: true
+    # Dutch AI supervisor (data protection); ~1.4 a week, AI items often name no AI term.
+    - name: Autoriteit Persoonsgegevens
+      url: https://www.autoriteitpersoonsgegevens.nl/rss.xml
+      jurisdiction: nl
+      jev_only: true
+    # All ministries' news (AI news comes from education, justice, defence too, not
+    # only BZK/EZK); the newest 20, ~4 a day. The old feed URLs broke 2026-06-02.
+    # Not resultSearchTerm: it ranks by relevance, not date.
+    - name: Rijksoverheid
+      url: https://www.rijksoverheid.nl/api/rss
+      query:
+        &rijksoverheid_news {
+          filters: [{ field: content_type, values: ["pro:newsDocument"], type: all }],
+          resultSearchTerm: "",
+          pageTitle: Nieuws,
+        }
+      jurisdiction: nl
+      jev_only: true
+    # AI Act market-surveillance co-coordinator, same platform and query; ~1 a week.
+    - name: RDI
+      url: https://www.rdi.nl/api/rss
+      query: *rijksoverheid_news
+      jurisdiction: nl
+      jev_only: true
+    # BZK's channel for government digitalisation and AI guidance; ~5 a week.
+    - name: Digitale Overheid
+      url: https://www.digitaleoverheid.nl/feed/
+      jurisdiction: nl
+      jev_only: true
+    # News & commentary (kind: news), measured 2026-09-29..10-13 and live-checked
+    # 2026-10-14; posts a week before Jev. Euractiv (403) and Lawfare had no
+    # usable feed; Tech Policy Press and IAPP feeds were not found.
+    # ~12 a week, ~7 about AI; EU AI policy.
+    - name: Politico Europe
+      url: https://www.politico.eu/section/technology/feed/
+      jurisdiction: eu
+      kind: news
+    # The EU AI Act Newsletter (Future of Life Institute); ~1 a week.
+    - name: EU AI Act Newsletter
+      url: https://artificialintelligenceact.substack.com/feed
+      jurisdiction: eu
+      kind: news
+    # ~12 a week, ~8 about AI; US federal and state attorneys general.
+    - name: Politico US
+      url: https://rss.politico.com/technology.xml
+      jurisdiction: us_federal
+      kind: news
+    # US AI policy and safety; ~3 a week.
+    - name: Transformer
+      url: https://www.transformernews.ai/feed
+      jurisdiction: us_federal
+      kind: news
+    # Georgetown CSET analysis (export controls, chips); ~4 a week.
+    - name: CSET
+      url: https://cset.georgetown.edu/feed/
+      jurisdiction: us_federal
+      kind: news
+    # Covington's Inside Privacy: US state-law round-ups; ~2 a week. Its Inside
+    # Tech Media blog overlaps, so only this one.
+    - name: Covington Inside Privacy
+      url: https://www.insideprivacy.com/feed/
+      jurisdiction: us_federal
+      kind: news
+    # Dutch public administration news; ~50 a week, ~3 about AI. No guid: keyed on the link.
+    - name: Binnenlands Bestuur
+      url: https://www.binnenlandsbestuur.nl/feeds/articles.rss
+      jurisdiction: nl
+      kind: news
+  # Dated milestones for the "Upcoming deadlines" section, shown in the 30 days
+  # before. AI Act dates as amended by the Digital Omnibus on AI (OJ 2026-07-24),
+  # from the Commission's AI Act Service Desk timeline, read 2026-10-14.
+  calendar:
+    - date: 2026-12-02
+      label: "AI Act: bans on sexual deepfakes and CSAM generators; Art. 50(2) transition ends"
+      link: https://ai-act-service-desk.ec.europa.eu/en/ai-act/timeline/timeline-implementation-eu-ai-act
+    - date: 2027-08-02
+      label: "AI Act: one AI regulatory sandbox per Member State operational"
+      link: https://ai-act-service-desk.ec.europa.eu/en/ai-act/timeline/timeline-implementation-eu-ai-act
+    - date: 2027-12-02
+      label: "AI Act: high-risk rules (Annex III) apply"
+      link: https://ai-act-service-desk.ec.europa.eu/en/ai-act/timeline/timeline-implementation-eu-ai-act
+    - date: 2028-08-02
+      label: "AI Act: high-risk rules for products under Annex I apply"
+      link: https://ai-act-service-desk.ec.europa.eu/en/ai-act/timeline/timeline-implementation-eu-ai-act

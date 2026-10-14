@@ -14,8 +14,10 @@ import {
   discussionSources,
   buildArxivPrompt,
   buildModelsPrompt,
+  buildPolicySummariesPrompt,
+  buildPolicyProsePrompt,
 } from "../prompts-data.ts";
-import { TRENDING_TABLES_MARKER } from "../report-builders.ts";
+import { TABLES_MARKER } from "../report-builders.ts";
 import { MODELS_REPORT, SECTIONS } from "../i18n.ts";
 import type { RepoConfig, GitHubItem, GitHubRelease } from "../github.ts";
 import { EMPTY_NPM, EMPTY_OPENROUTER, type TrendingData } from "../trending.ts";
@@ -238,9 +240,9 @@ describe("buildTrendingProsePrompt", () => {
   it("includes the tables, the marker instruction and the section headings in order", () => {
     const result = buildTrendingProsePrompt("| Tool |\n| :--- |", noTrending, "2026-10-05");
     expect(result).toContain("| Tool |");
-    expect(result).toContain(`\`${TRENDING_TABLES_MARKER}\` exactly once`);
-    const order = [SECTIONS.highlights, TRENDING_TABLES_MARKER, SECTIONS.signals, SECTIONS.worthALook].map(
-      (s) => result.indexOf(s),
+    expect(result).toContain(`\`${TABLES_MARKER}\` exactly once`);
+    const order = [SECTIONS.highlights, TABLES_MARKER, SECTIONS.signals, SECTIONS.worthALook].map((s) =>
+      result.indexOf(s),
     );
     expect(order.every((i) => i >= 0)).toBe(true);
     expect([...order].sort((a, b) => a - b)).toEqual(order);
@@ -252,6 +254,48 @@ describe("buildTrendingProsePrompt", () => {
     expect(result).not.toContain(MODELS_REPORT.openRouterHeading);
     expect(result).not.toContain("deepseek/deepseek-v4.1-flash");
     expect(result).toContain("No projects were selected");
+  });
+});
+
+describe("buildPolicySummariesPrompt", () => {
+  const items = [
+    {
+      id: "1",
+      title: "AI Act guidelines",
+      link: "https://example.eu/a",
+      published: "2026-10-09T07:16:00.000Z",
+      description: "The AI Office publishes guidelines.",
+      source: "European Commission",
+      jurisdiction: "eu" as const,
+      jevOnly: false,
+    },
+  ];
+
+  it("numbers the items with their source and text, and asks for one `N:` line each", () => {
+    const result = buildPolicySummariesPrompt(items, "2026-10-14", "A Dutch AI practitioner.");
+    expect(result).toContain(
+      "1. AI Act guidelines (European Commission, 2026-10-09) — The AI Office publishes guidelines.",
+    );
+    expect(result).toContain("`N: <2 sentences>`");
+    expect(result).toContain("1 lines in total");
+    expect(result).toContain("Do not invent");
+    expect(result).toContain("The reader: A Dutch AI practitioner.");
+  });
+});
+
+describe("buildPolicyProsePrompt", () => {
+  it("includes the table, the marker instruction and the section headings in order", () => {
+    const result = buildPolicyProsePrompt("| Date |\n| :--- |", "2026-10-14", "A Dutch AI practitioner.");
+    expect(result).toContain("| Date |");
+    expect(result).toContain(`\`${TABLES_MARKER}\` exactly once`);
+    const order = [SECTIONS.highlights, TABLES_MARKER, SECTIONS.signals, SECTIONS.worthALook].map((s) =>
+      result.indexOf(s),
+    );
+    expect(order.every((i) => i >= 0)).toBe(true);
+    expect([...order].sort((a, b) => a - b)).toEqual(order);
+    expect(result).toContain("Do not reproduce or alter the table");
+    expect(result).toContain("Do not write a title");
+    expect(result).toContain("The reader: A Dutch AI practitioner.");
   });
 });
 

@@ -4,19 +4,32 @@ A GitHub Actions workflow that runs every night, landing the digest by about 05:
 
 ### Data Sources
 
-| Source                                                            | Type                                              | Data                                                                              |
-| ----------------------------------------------------------------- | ------------------------------------------------- | --------------------------------------------------------------------------------- |
-| [GitHub Repos](https://github.com)                                | API                                               | Stable releases and hot issues from the agent and infra repos in `config.yml`     |
-| [Claude Code Skills](https://github.com/anthropics/skills)        | API                                               | Trending skills sorted by community engagement — **weekly**                       |
-| [GitHub Trending](https://github.com/trending)                    | HTML + API                                        | Weekly trending repos + AI topic search (7-day window) — **weekly**               |
-| [OpenRouter](https://openrouter.ai/apps)                          | HTML (RSC payload) + Models API                   | Agent app usage, top/new models — **weekly**; stealth models daily                |
-| [npm](https://www.npmjs.com)                                      | Registry search API                               | Coding-agent packages by downloads and momentum — **weekly**                      |
-| [Hacker News](https://news.ycombinator.com)                       | [Firebase API](https://github.com/HackerNews/API) | Top AI stories from last 24h via topstories scanning                              |
-| [ArXiv](https://arxiv.org)                                        | [ArXiv API](https://export.arxiv.org/api/query)   | Papers from cs.AI, cs.CL, cs.LG (new since the last run), ranked by Jev relevance |
-| [Hugging Face](https://huggingface.co)                            | [Hub API](https://huggingface.co/api/models)      | 30 trending models sorted by weekly likes — **weekly**, Mondays only              |
-| [Dev.to](https://dev.to)                                          | [Forem API](https://dev.to/api)                   | Top AI/LLM articles of the week from 5 tags — **weekly**                          |
-| [Lobste.rs](https://lobste.rs)                                    | JSON API                                          | AI/ML tagged stories from last 7 days — **weekly**                                |
-| [Anthropic](https://anthropic.com) + [OpenAI](https://openai.com) | Sitemap                                           | New articles detected via `lastmod` diff                                          |
+| Source                                                            | Type                                                              | Data                                                                              |
+| ----------------------------------------------------------------- | ----------------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| [GitHub Repos](https://github.com)                                | API                                                               | Stable releases and hot issues from the agent and infra repos in `config.yml`     |
+| [Claude Code Skills](https://github.com/anthropics/skills)        | API                                                               | Trending skills sorted by community engagement — **weekly**                       |
+| [GitHub Trending](https://github.com/trending)                    | HTML + API                                                        | Weekly trending repos + AI topic search (7-day window) — **weekly**               |
+| [OpenRouter](https://openrouter.ai/apps)                          | HTML (RSC payload) + Models API                                   | Agent app usage, top/new models — **weekly**; stealth models daily                |
+| [npm](https://www.npmjs.com)                                      | Registry search API                                               | Coding-agent packages by downloads and momentum — **weekly**                      |
+| [Hacker News](https://news.ycombinator.com)                       | [Firebase API](https://github.com/HackerNews/API)                 | Top AI stories from last 24h via topstories scanning                              |
+| [ArXiv](https://arxiv.org)                                        | [ArXiv API](https://export.arxiv.org/api/query)                   | Papers from cs.AI, cs.CL, cs.LG (new since the last run), ranked by Jev relevance |
+| [Hugging Face](https://huggingface.co)                            | [Hub API](https://huggingface.co/api/models)                      | 30 trending models sorted by weekly likes — **weekly**, Mondays only              |
+| [Dev.to](https://dev.to)                                          | [Forem API](https://dev.to/api)                                   | Top AI/LLM articles of the week from 5 tags — **weekly**                          |
+| [Lobste.rs](https://lobste.rs)                                    | JSON API                                                          | AI/ML tagged stories from last 7 days — **weekly**                                |
+| [Anthropic](https://anthropic.com) + [OpenAI](https://openai.com) | Sitemap                                                           | New articles detected via `lastmod` diff                                          |
+| [European Commission](https://digital-strategy.ec.europa.eu)      | [RSS](https://digital-strategy.ec.europa.eu/en/rss.xml)           | AI Office and digital-policy news, new since the last run, at most 7 days old     |
+| [EDPB](https://www.edpb.europa.eu)                                | [RSS](https://www.edpb.europa.eu/feed/news_en)                    | EU data protection news, every item judged by Jev, at most 7 days old             |
+| [EUR-Lex](https://eur-lex.europa.eu)                              | [Cellar SPARQL](https://publications.europa.eu/webapi/rdf/sparql) | EU acts and proposals on AI or a watchlisted act, with their stage                |
+| [European Parliament](https://oeil.secure.europarl.europa.eu)     | [Open Data API](https://data.europarl.europa.eu)                  | Watchlisted EU procedures, reported when their stage moves                        |
+| [Tweede Kamer](https://www.tweedekamer.nl)                        | [OData API](https://opendata.tweedekamer.nl), KOOP SRU            | AI motions, letters, questions; watchlisted bills to the Staatsblad               |
+| [Have your say](https://ec.europa.eu/info/law/better-regulation)  | Portal search API (undocumented)                                  | AI Commission initiatives: new stage or feedback period, closing date             |
+| [Dutch government](https://www.rijksoverheid.nl)                  | RSS                                                               | AP, Rijksoverheid, RDI, Digitale Overheid news, every item judged by Jev          |
+| [Internetconsultatie](https://www.internetconsultatie.nl)         | Homepage list                                                     | Open Dutch consultations on AI, closing date                                      |
+| [Federal Register](https://www.federalregister.gov)               | [API v1](https://www.federalregister.gov/developers/documentation/api/v1) | US rules and notices naming AI, presidential documents, watchlisted dockets/RINs  |
+| [Regulations.gov](https://www.regulations.gov)                    | [API v4](https://open.gsa.gov/api/regulationsgov/)                | US AI dockets the Federal Register missed, comment deadlines; needs `USA_GOV_API_KEY` |
+| [Congress.gov](https://www.congress.gov)                          | [API v3](https://api.congress.gov)                                | US federal AI bills from passing a chamber onward; needs `USA_GOV_API_KEY`        |
+| [Open States](https://openstates.org)                             | [API v3](https://v3.openstates.org/docs)                          | US state AI bills from passing a chamber onward; needs `PLURAL_API_KEY`           |
+| Policy news (7 outlets, `kind: news` in `config.yml`)             | RSS                                                               | Politico, AI Act Newsletter, Transformer, CSET, Covington, Binnenlands Bestuur    |
 
 ## Web UI
 
@@ -185,7 +198,7 @@ New articles are detected by comparing sitemap `lastmod` timestamps against a pe
 ## Features
 
 - **Daily:** one agents report — stable releases, hot issues and news for the `agents` and `infra` repos in `config.yml`, one section and one LLM call each
-- **Daily:** Hacker News AI stories, new ArXiv papers, and new Anthropic/OpenAI web content (sitemap-based, incremental)
+- **Daily:** Hacker News AI stories, new ArXiv papers, new Anthropic/OpenAI web content (sitemap-based, incremental), and Policy Watch: new AI policy items from official sources (`policy` in `config.yml`)
 - **Weekly (Mondays):** GitHub AI trending + Claude Code Skills; the models report (Hugging Face trending models + OpenRouter token usage); Dev.to + Lobste.rs sections in the discussions report
 - Publishes a GitHub Issue per report; commits Markdown files to `digests/YYYY-MM-DD/`
 - Runs via GitHub Actions; supports manual triggering, with an option to force the weekly reports
@@ -226,19 +239,21 @@ infra:
 
 Go to **Settings → Secrets and variables → Actions** and add:
 
-| Secret               | Required      | Description                                                                                                                                                                                                             |
-| -------------------- | ------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `LLM_PROVIDER`       | optional      | `anthropic` (default), `openai`, `github-copilot`, `openrouter`, `deepseek`, or `qwen`                                                                                                                                  |
-| `ANTHROPIC_API_KEY`  | if Anthropic  | API key — works with both Anthropic and Kimi Code                                                                                                                                                                       |
-| `ANTHROPIC_BASE_URL` | optional      | API endpoint override. Set to `https://api.kimi.com/coding/` for Kimi Code; leave unset for Anthropic                                                                                                                   |
-| `OPENAI_API_KEY`     | if OpenAI     | OpenAI API key                                                                                                                                                                                                          |
-| `OPENAI_BASE_URL`    | optional      | OpenAI endpoint override                                                                                                                                                                                                |
-| `OPENROUTER_API_KEY` | if OpenRouter | OpenRouter API key                                                                                                                                                                                                      |
-| `DEEPSEEK_API_KEY`   | if DeepSeek   | DeepSeek API key                                                                                                                                                                                                        |
-| `DASHSCOPE_API_KEY`  | if Qwen       | Alibaba Model Studio API key                                                                                                                                                                                            |
-| `TYPESAFE_API_KEY`   | optional      | [TypeSafe](https://typesafe.ai) key. If set, ArXiv papers are ranked by Jev relevance instead of recency, and Jev decides the trending report's scope, categories and cross-source matches instead of the search topics |
-| `TELEGRAM_BOT_TOKEN` | optional      | Telegram bot token from [@BotFather](https://t.me/BotFather). If set, a message is sent after each digest run                                                                                                           |
-| `TELEGRAM_CHAT_ID`   | optional      | Telegram chat/channel/group ID to send notifications to                                                                                                                                                                 |
+| Secret               | Required      | Description                                                                                                                                                                                                                                                                      |
+| -------------------- | ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `LLM_PROVIDER`       | optional      | `anthropic` (default), `openai`, `github-copilot`, `openrouter`, `deepseek`, or `qwen`                                                                                                                                                                                           |
+| `ANTHROPIC_API_KEY`  | if Anthropic  | API key — works with both Anthropic and Kimi Code                                                                                                                                                                                                                                |
+| `ANTHROPIC_BASE_URL` | optional      | API endpoint override. Set to `https://api.kimi.com/coding/` for Kimi Code; leave unset for Anthropic                                                                                                                                                                            |
+| `OPENAI_API_KEY`     | if OpenAI     | OpenAI API key                                                                                                                                                                                                                                                                   |
+| `OPENAI_BASE_URL`    | optional      | OpenAI endpoint override                                                                                                                                                                                                                                                         |
+| `OPENROUTER_API_KEY` | if OpenRouter | OpenRouter API key                                                                                                                                                                                                                                                               |
+| `DEEPSEEK_API_KEY`   | if DeepSeek   | DeepSeek API key                                                                                                                                                                                                                                                                 |
+| `DASHSCOPE_API_KEY`  | if Qwen       | Alibaba Model Studio API key                                                                                                                                                                                                                                                     |
+| `TYPESAFE_API_KEY`   | optional      | [TypeSafe](https://typesafe.ai) key. If set, ArXiv papers are ranked by Jev relevance instead of recency, Jev decides the trending report's scope, categories and cross-source matches instead of the search topics, and Jev picks the Policy Watch items instead of AI keywords |
+| `PLURAL_API_KEY`     | optional      | [Open States / Plural](https://open.pluralpolicy.com) key for Policy Watch's US state bills; unset skips that source                                                                                                                                                             |
+| `USA_GOV_API_KEY`    | optional      | [api.data.gov](https://api.data.gov/signup/) key for Policy Watch's Congress.gov bills and Regulations.gov documents; unset skips those two (the Federal Register needs no key)                                                                                                  |
+| `TELEGRAM_BOT_TOKEN` | optional      | Telegram bot token from [@BotFather](https://t.me/BotFather). If set, a message is sent after each digest run                                                                                                                                                                    |
+| `TELEGRAM_CHAT_ID`   | optional      | Telegram chat/channel/group ID to send notifications to                                                                                                                                                                                                                          |
 
 > `GITHUB_TOKEN` is provided automatically by GitHub Actions. When using `github-copilot` as the provider, the same `GITHUB_TOKEN` is used for LLM calls.
 
@@ -309,7 +324,9 @@ export ANTHROPIC_API_KEY=sk-ant-xxxxxxxx
 
 export DIGEST_REPO=your-username/daily-diff  # optional; omit to only write files
 # export DIGEST_FORCE_WEEKLY=1               # optional; also run the weekly reports today
-# export TYPESAFE_API_KEY=xxxxx              # optional; Jev for ArXiv ranking and trending scope
+# export TYPESAFE_API_KEY=xxxxx              # optional; Jev for ArXiv ranking, trending scope and Policy Watch relevance
+# export PLURAL_API_KEY=xxxxx                 # optional; Policy Watch's US state bills (Open States)
+# export USA_GOV_API_KEY=xxxxx                # optional; Policy Watch's Congress.gov and Regulations.gov
 
 pnpm start
 
@@ -326,13 +343,14 @@ Files are written to `digests/YYYY-MM-DD/`:
 | `ai-hn.md`        | AI Discussions — Hacker News stories, plus Dev.to articles and Lobste.rs stories on Mondays                                  | daily   | `hn`               |
 | `ai-arxiv.md`     | AI Research — key papers from cs.AI/cs.CL/cs.LG                                                                              | daily   | `arxiv`            |
 | `ai-web.md`       | Lab Announcements — new Anthropic and OpenAI content (only written when new content exists)                                  | daily   | `web`              |
+| `ai-policy.md`    | Policy Watch — new AI legislation, regulation and guidance items (only written when a new item passes the relevance check)   | daily   | `policy`           |
 | `ai-trending.md`  | Agent & AI Coding Trends — radar + repos by category + signals + Claude Code Skills                                          | weekly  | `trending`         |
 | `ai-hf.md`        | AI Models — Hugging Face trending models + OpenRouter token usage and new models                                             | weekly  | `hf`               |
 | `highlights.json` | Up to 2 highlights per report, for Telegram and the web UI's day overview                                                    | daily   | —                  |
 
 Archived days also contain `ai-cli.md` (the CLI report, merged into `ai-agents.md` in October 2026), `ai-ph.md` (Product Hunt, dropped in October 2026), `ai-infra.md` (weekly until October 2026, now a section of `ai-agents.md`) and `ai-community.md` (weekly until October 2026, now part of `ai-hn.md`). Before October 2026, `ai-agents.md` was the OpenClaw ecosystem report.
 
-A shared state file `digests/web-state.json` tracks which web URLs have been seen; it is committed alongside the daily digests.
+Shared state files are committed alongside the daily digests: `digests/web-state.json` tracks which web URLs have been seen, `digests/policy-state.json` which policy items were reported (and each legislative item's last reported stage, so it reappears when it moves, and the open deadlines of reported items, listed until they pass), and `digests/policy-verdicts.json` Jev's answers per policy item, so each is asked once (an item first reported today counts as new again, so a same-day re-run reports the same items).
 
 ---
 
@@ -384,6 +402,20 @@ Sources: anthropic.com (N articles) + openai.com (N articles)
 [First full crawl also includes: Content Landscape Overview]
 ```
 
+`ai-policy.md` structure:
+
+```
+Sources: European Commission | N new items ranked by Jev relevance
+
+## Highlights
+## EU             — one table per jurisdiction with items (EU, Netherlands, US federal, US states, Elsewhere), rendered in code:
+                   date, source, title link, stage; the LLM writes the summary column
+## Upcoming deadlines (next 30 days) — rendered in code: open consultations of reported items, and policy.calendar dates
+## News & commentary — items from the news & commentary feeds (`kind: news`), date, source, title link, summary
+## Signals
+## Worth a Look
+```
+
 `ai-trending.md` structure:
 
 ```
@@ -414,7 +446,7 @@ Sources: Hugging Face Hub + OpenRouter
 ## Worth a Look
 ```
 
-Historical digests are stored in [`digests/`](./digests/). Published issues are tagged by type: [`agents`](../../issues?q=is%3Aissue+label%3Aagents) · [`web`](../../issues?q=is%3Aissue+label%3Aweb) · [`trending`](../../issues?q=is%3Aissue+label%3Atrending) · [`hn`](../../issues?q=is%3Aissue+label%3Ahn) · [`arxiv`](../../issues?q=is%3Aissue+label%3Aarxiv) · [`hf`](../../issues?q=is%3Aissue+label%3Ahf). Older issues also carry the retired labels [`infra`](../../issues?q=is%3Aissue+label%3Ainfra), [`community`](../../issues?q=is%3Aissue+label%3Acommunity), [`digest`](../../issues?q=is%3Aissue+label%3Adigest) (CLI), [`openclaw`](../../issues?q=is%3Aissue+label%3Aopenclaw) and [`ph`](../../issues?q=is%3Aissue+label%3Aph).
+Historical digests are stored in [`digests/`](./digests/). Published issues are tagged by type: [`agents`](../../issues?q=is%3Aissue+label%3Aagents) · [`web`](../../issues?q=is%3Aissue+label%3Aweb) · [`trending`](../../issues?q=is%3Aissue+label%3Atrending) · [`hn`](../../issues?q=is%3Aissue+label%3Ahn) · [`arxiv`](../../issues?q=is%3Aissue+label%3Aarxiv) · [`hf`](../../issues?q=is%3Aissue+label%3Ahf) · [`policy`](../../issues?q=is%3Aissue+label%3Apolicy). Older issues also carry the retired labels [`infra`](../../issues?q=is%3Aissue+label%3Ainfra), [`community`](../../issues?q=is%3Aissue+label%3Acommunity), [`digest`](../../issues?q=is%3Aissue+label%3Adigest) (CLI), [`openclaw`](../../issues?q=is%3Aissue+label%3Aopenclaw) and [`ph`](../../issues?q=is%3Aissue+label%3Aph).
 
 Only the most recent issues are left open — `pnpm close-stale` closes everything older on each run, so the issue list stays at roughly one day's worth instead of thousands. Daily reports keep the newest day open; each weekly report keeps its newest issue open until the next Monday. Nothing is deleted: the label links above include closed issues, and the full archive also lives under `digests/` and in the Web UI. Issues without a digest label, and pull requests, are never touched.
 

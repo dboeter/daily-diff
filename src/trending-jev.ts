@@ -13,7 +13,7 @@
 import { createHash } from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
-import { askJev, jevFailedTooOften, mapJev } from "./jev.ts";
+import { askJev, jevFailedTooOften, loadItemsFile, mapJev, saveItemsFile } from "./jev.ts";
 import type { Category, GithubRow, RadarRow } from "./trending-rank.ts";
 import type { SearchTopic } from "./trending.ts";
 import type { OpenRouterApp } from "./openrouter.ts";
@@ -674,28 +674,12 @@ const descHash = (item: ClassifyItem): string =>
 
 /** Missing file → empty cache. Unreadable or malformed → null: every item is asked and nothing is saved. */
 export function loadClassifyCache(file = CLASSIFY_FILE): ClassifyCache | null {
-  if (!fs.existsSync(file)) return { items: {} };
-  try {
-    const parsed = JSON.parse(fs.readFileSync(file, "utf-8")) as Partial<ClassifyCache> | null;
-    if (typeof parsed?.items !== "object" || parsed.items === null || Array.isArray(parsed.items)) {
-      throw new Error("no `items` object");
-    }
-    return parsed as ClassifyCache;
-  } catch (err) {
-    // As with the match file: an empty cache saved after the report would overwrite a hand edit.
-    console.error(`  [trending] Cannot read ${file}, every item is asked: ${err}`);
-    return null;
-  }
+  return loadItemsFile<ClassifyEntry>(file, "trending");
 }
 
 /** One item per line, like the star history: ~200 items a week would make a pretty-printed file long. */
 export function saveClassifyCache(cache: ClassifyCache, file = CLASSIFY_FILE): void {
-  const lines = Object.entries(cache.items).map(
-    ([key, e]) => `    ${JSON.stringify(key)}: ${JSON.stringify(e)}`,
-  );
-  const body = lines.length > 0 ? `{\n${lines.join(",\n")}\n  }` : "{}";
-  fs.mkdirSync(path.dirname(file), { recursive: true });
-  fs.writeFileSync(file, `{\n  "items": ${body}\n}\n`, "utf-8");
+  saveItemsFile(cache, file);
 }
 
 /** The saved verdicts that still hold for `items`, by item key. */

@@ -343,6 +343,7 @@ const LABEL_COLORS: Record<string, string> = {
   hn: "ff6600",
   arxiv: "b31b1b",
   hf: "ff9d00",
+  policy: "1d4ed8",
 };
 
 /**
