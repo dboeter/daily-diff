@@ -4,20 +4,23 @@ A GitHub Actions workflow that runs every night, landing the digest by about 05:
 
 ### Data Sources
 
-| Source                                                            | Type                                                    | Data                                                                              |
-| ----------------------------------------------------------------- | ------------------------------------------------------- | --------------------------------------------------------------------------------- |
-| [GitHub Repos](https://github.com)                                | API                                                     | Stable releases and hot issues from the agent and infra repos in `config.yml`     |
-| [Claude Code Skills](https://github.com/anthropics/skills)        | API                                                     | Trending skills sorted by community engagement — **weekly**                       |
-| [GitHub Trending](https://github.com/trending)                    | HTML + API                                              | Weekly trending repos + AI topic search (7-day window) — **weekly**               |
-| [OpenRouter](https://openrouter.ai/apps)                          | HTML (RSC payload) + Models API                         | Agent app usage, top/new models — **weekly**; stealth models daily                |
-| [npm](https://www.npmjs.com)                                      | Registry search API                                     | Coding-agent packages by downloads and momentum — **weekly**                      |
-| [Hacker News](https://news.ycombinator.com)                       | [Firebase API](https://github.com/HackerNews/API)       | Top AI stories from last 24h via topstories scanning                              |
-| [ArXiv](https://arxiv.org)                                        | [ArXiv API](https://export.arxiv.org/api/query)         | Papers from cs.AI, cs.CL, cs.LG (new since the last run), ranked by Jev relevance |
-| [Hugging Face](https://huggingface.co)                            | [Hub API](https://huggingface.co/api/models)            | 30 trending models sorted by weekly likes — **weekly**, Mondays only              |
-| [Dev.to](https://dev.to)                                          | [Forem API](https://dev.to/api)                         | Top AI/LLM articles of the week from 5 tags — **weekly**                          |
-| [Lobste.rs](https://lobste.rs)                                    | JSON API                                                | AI/ML tagged stories from last 7 days — **weekly**                                |
-| [Anthropic](https://anthropic.com) + [OpenAI](https://openai.com) | Sitemap                                                 | New articles detected via `lastmod` diff                                          |
-| [European Commission](https://digital-strategy.ec.europa.eu)      | [RSS](https://digital-strategy.ec.europa.eu/en/rss.xml) | AI Office and digital-policy news, new since the last run, at most 7 days old     |
+| Source                                                            | Type                                                              | Data                                                                              |
+| ----------------------------------------------------------------- | ----------------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| [GitHub Repos](https://github.com)                                | API                                                               | Stable releases and hot issues from the agent and infra repos in `config.yml`     |
+| [Claude Code Skills](https://github.com/anthropics/skills)        | API                                                               | Trending skills sorted by community engagement — **weekly**                       |
+| [GitHub Trending](https://github.com/trending)                    | HTML + API                                                        | Weekly trending repos + AI topic search (7-day window) — **weekly**               |
+| [OpenRouter](https://openrouter.ai/apps)                          | HTML (RSC payload) + Models API                                   | Agent app usage, top/new models — **weekly**; stealth models daily                |
+| [npm](https://www.npmjs.com)                                      | Registry search API                                               | Coding-agent packages by downloads and momentum — **weekly**                      |
+| [Hacker News](https://news.ycombinator.com)                       | [Firebase API](https://github.com/HackerNews/API)                 | Top AI stories from last 24h via topstories scanning                              |
+| [ArXiv](https://arxiv.org)                                        | [ArXiv API](https://export.arxiv.org/api/query)                   | Papers from cs.AI, cs.CL, cs.LG (new since the last run), ranked by Jev relevance |
+| [Hugging Face](https://huggingface.co)                            | [Hub API](https://huggingface.co/api/models)                      | 30 trending models sorted by weekly likes — **weekly**, Mondays only              |
+| [Dev.to](https://dev.to)                                          | [Forem API](https://dev.to/api)                                   | Top AI/LLM articles of the week from 5 tags — **weekly**                          |
+| [Lobste.rs](https://lobste.rs)                                    | JSON API                                                          | AI/ML tagged stories from last 7 days — **weekly**                                |
+| [Anthropic](https://anthropic.com) + [OpenAI](https://openai.com) | Sitemap                                                           | New articles detected via `lastmod` diff                                          |
+| [European Commission](https://digital-strategy.ec.europa.eu)      | [RSS](https://digital-strategy.ec.europa.eu/en/rss.xml)           | AI Office and digital-policy news, new since the last run, at most 7 days old     |
+| [EDPB](https://www.edpb.europa.eu)                                | [RSS](https://www.edpb.europa.eu/feed/news_en)                    | EU data protection news, every item judged by Jev, at most 7 days old             |
+| [EUR-Lex](https://eur-lex.europa.eu)                              | [Cellar SPARQL](https://publications.europa.eu/webapi/rdf/sparql) | EU acts and proposals on AI or a watchlisted act, with their stage                |
+| [European Parliament](https://oeil.secure.europarl.europa.eu)     | [Open Data API](https://data.europarl.europa.eu)                  | Watchlisted EU procedures, reported when their stage moves                        |
 
 ## Web UI
 

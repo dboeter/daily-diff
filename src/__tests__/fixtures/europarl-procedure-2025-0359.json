@@ -1,0 +1,51 @@
+{
+  "data": [
+    {
+      "id": "eli/dl/proc/2025-0359",
+      "type": "Process",
+      "label": "2025/0359(COD)",
+      "process_id": "2025-0359",
+      "process_title": {
+        "en": "Amending Regulations (EU) 2024/1689 and (EU) 2018/1139 as regards the simplification of the implementation of harmonised rules on artificial intelligence (Digital Omnibus on AI)",
+        "nl": "Wijziging van de Verordeningen (EU) 2024/1689 en (EU) 2018/1139 wat betreft vereenvoudiging van de uitvoering van geharmoniseerde regels betreffende artificiële intelligentie (digitale omnibus inzake AI)"
+      },
+      "consists_of": [
+        {
+          "id": "eli/dl/event/2025-0359-DEC-DCPL-2026-06-16",
+          "type": "Decision",
+          "activity_date": "2026-06-16",
+          "activity_id": "2025-0359-DEC-DCPL-2026-06-16",
+          "had_activity_type": "def/ep-activities/PLENARY_ADOPT_POSITION"
+        },
+        {
+          "id": "eli/dl/event/2025-0359-ANPRO-2026-01-19",
+          "type": "Activity",
+          "activity_date": "2026-01-19",
+          "activity_id": "2025-0359-ANPRO-2026-01-19",
+          "had_activity_type": "def/ep-activities/REFERRAL"
+        },
+        {
+          "id": "eli/dl/event/A-10-2026-0073-AM-118-118-DEPOT-2026-06-10",
+          "type": "Activity",
+          "activity_date": "2026-06-10",
+          "activity_id": "A-10-2026-0073-AM-118-118-DEPOT-2026-06-10",
+          "had_activity_type": "def/ep-activities/TABLING_PLENARY"
+        },
+        {
+          "id": "eli/dl/event/MTG-PL-2026-06-16-VOT-ITM-992773",
+          "type": "Activity",
+          "activity_date": "2026-06-16",
+          "activity_id": "MTG-PL-2026-06-16-VOT-ITM-992773",
+          "had_activity_type": "def/ep-activities/PLENARY_VOTE_RESULTS"
+        },
+        {
+          "id": "eli/dl/event/MTG-PL-2026-06-16-PVCRE-ITM-7-9",
+          "type": "Activity",
+          "activity_date": "2026-06-16",
+          "activity_id": "MTG-PL-2026-06-16-PVCRE-ITM-7-9",
+          "had_activity_type": "def/ep-activities/PLENARY_VOTE"
+        }
+      ]
+    }
+  ]
+}

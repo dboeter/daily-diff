@@ -161,6 +161,7 @@ describe("fetchPolicyData", () => {
       "2026-10-14",
       { reported: { seen: "2026-10-13" } },
       { apiKey: "k", cache: { items: {} }, ask },
+      [],
     );
     expect(data.fetchSuccess).toBe(true);
     expect(ask).toHaveBeenCalledTimes(2);
@@ -203,9 +204,14 @@ describe("fetchPolicyData", () => {
 
   it("reports a failed feed as fetchSuccess false instead of throwing", async () => {
     vi.spyOn(globalThis, "fetch").mockResolvedValue(new Response("", { status: 503 }));
-    const data = await fetchPolicyData(config, new Date("2026-10-13T23:00:00Z"), "2026-10-14", null, {
-      cache: { items: {} },
-    });
+    const data = await fetchPolicyData(
+      config,
+      new Date("2026-10-13T23:00:00Z"),
+      "2026-10-14",
+      null,
+      { cache: { items: {} } },
+      [],
+    );
     expect(data.fetchSuccess).toBe(false);
     expect(data.items).toEqual([]);
   });

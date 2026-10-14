@@ -117,8 +117,17 @@ policy:
     roughly 500–1,500 employees across many sectors (e.g. retail, insurance,
     banking), mostly serving the Dutch market. They deploy and integrate AI built
     by others, largely from US vendors.
+  # Watchlisted items are always kept. Text is matched against each item's title,
+  # description and link.
   watchlist:
-    eu: []
+    # Procedures (yyyy/nnnn(TYPE)) are fetched from the European Parliament API
+    # and reported when their stage moves; act numbers (yyyy/nnnn) join the
+    # EUR-Lex title search.
+    eu:
+      - 2025/0359(COD) # Digital Omnibus on AI (amends the AI Act)
+      - 2022/0272(COD) # Cyber Resilience Act
+      - 2024/1689 # AI Act
+      - 2024/2847 # Cyber Resilience Act
     nl: []
     us_federal: []
     us_states: []
@@ -127,3 +136,9 @@ policy:
     - name: European Commission
       url: https://digital-strategy.ec.europa.eu/en/rss.xml
       jurisdiction: eu
+    # EU data protection board; ~10 items. AI-relevant items often name no AI
+    # term (a fine for automated decision-making), so all go to Jev.
+    - name: EDPB
+      url: https://www.edpb.europa.eu/feed/news_en
+      jurisdiction: eu
+      jev_only: true
