@@ -13,6 +13,7 @@ import { fetchHaveYourSay } from "./policy-haveyoursay.ts";
 import { fetchOpenStates } from "./policy-openstates.ts";
 import { fetchUsRules } from "./policy-usrules.ts";
 import { fetchCongress } from "./policy-congress.ts";
+import { fetchInternetConsultatie } from "./policy-internetconsultatie.ts";
 
 export interface PolicySourceContext {
   config: PolicyConfig;
@@ -41,4 +42,5 @@ export const POLICY_SOURCES: PolicySource[] = [
   { name: "Federal Register + Regulations.gov", fetch: fetchUsRules },
   { name: "Congress.gov", fetch: fetchCongress },
   { name: "Open States", fetch: fetchOpenStates },
+  { name: "Internetconsultatie", fetch: fetchInternetConsultatie },
 ];
