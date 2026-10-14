@@ -1,6 +1,6 @@
 # AI policy report
 
-Status: needs-triage
+Status: resolved
 
 A new report on the AI policy landscape: legislation, regulation and official guidance, ~95% EU, the Netherlands and the US. Other jurisdictions only for major events.
 

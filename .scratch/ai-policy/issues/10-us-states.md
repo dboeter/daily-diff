@@ -1,6 +1,6 @@
 # US states: Open States / Plural
 
-Status: needs-triage
+Status: resolved
 Blocked by: 04
 
 ## Scope

@@ -1,6 +1,6 @@
 # EU consultations and the Upcoming deadlines section
 
-Status: needs-triage
+Status: resolved
 Blocked by: 04
 
 ## Scope

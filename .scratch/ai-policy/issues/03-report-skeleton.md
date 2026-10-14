@@ -1,6 +1,6 @@
 # Report skeleton: the policy report end to end with one source
 
-Status: needs-triage
+Status: resolved
 Blocked by: none
 
 Tracer bullet: a daily report that fetches one source, diffs it against a state file, and publishes. Every later ticket adds a source to it.

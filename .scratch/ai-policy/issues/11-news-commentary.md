@@ -1,6 +1,6 @@
 # News & commentary section
 
-Status: needs-triage
+Status: resolved
 Blocked by: 04
 
 ## Scope

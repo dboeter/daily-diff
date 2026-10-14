@@ -1,6 +1,6 @@
 # Netherlands: consultations, AP and government news
 
-Status: needs-triage
+Status: resolved
 Blocked by: 04, 06
 
 ## Scope

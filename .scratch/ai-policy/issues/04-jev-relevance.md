@@ -1,6 +1,6 @@
 # Jev relevance scoring with a verdict cache
 
-Status: needs-triage
+Status: resolved
 Blocked by: 03
 
 ## Scope

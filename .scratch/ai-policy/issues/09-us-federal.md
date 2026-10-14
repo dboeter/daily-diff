@@ -1,6 +1,6 @@
 # US federal: Federal Register, Regulations.gov, Congress.gov
 
-Status: needs-triage
+Status: resolved
 Blocked by: 04, 06
 
 ## Scope

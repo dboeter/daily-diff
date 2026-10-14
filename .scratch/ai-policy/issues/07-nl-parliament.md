@@ -1,6 +1,6 @@
 # Netherlands: Tweede Kamer and KOOP
 
-Status: needs-triage
+Status: resolved
 Blocked by: 04
 
 ## Scope

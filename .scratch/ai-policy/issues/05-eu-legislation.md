@@ -1,6 +1,6 @@
 # EU legislation: EUR-Lex and EP procedure stages
 
-Status: needs-triage
+Status: resolved
 Blocked by: 04
 
 ## Scope
