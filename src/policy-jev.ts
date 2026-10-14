@@ -308,7 +308,8 @@ export async function selectPolicyItems(
 
   const toAsk = items.filter((i) => !verdicts.has(i.id));
   const fresh = new Map<string, Verdict>();
-  let jevDown = !apiKey;
+  // Every item decided from saved verdicts is a Jev ranking, key or not.
+  let jevDown = !apiKey && toAsk.length > 0;
   if (apiKey && toAsk.length > 0) {
     const { results, failed } = await mapJev(
       toAsk,
