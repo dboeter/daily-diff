@@ -20,6 +20,8 @@ export interface PolicyItem extends FeedItem {
   /** From the feed (config.yml): whose policy the item is, and whether only Jev can judge it. */
   jurisdiction: Jurisdiction;
   jevOnly: boolean;
+  /** From a news feed (`kind: news`): rendered in the News & commentary section, after the jurisdictions. */
+  news?: boolean;
   /**
    * Where a legislative file stands, display text rendered by code (never the
    * model). Set by stage sources; an item with a stage is reported again when it moves.
@@ -156,6 +158,7 @@ export async function fetchPolicyData(
           source: feed.name,
           jurisdiction: feed.jurisdiction,
           jevOnly: feed.jevOnly,
+          news: feed.news,
         }));
       } catch (err) {
         console.error(`  [policy] ${feed.name} failed: ${err}`);
@@ -175,9 +178,10 @@ export async function fetchPolicyData(
     dateStr,
     ...jev,
   });
-  // The report has one section per jurisdiction in JURISDICTIONS order. Sorting here (stable, so
-  // relevance order holds within a section) keeps the summaries prompt's row numbers equal to the table's.
-  const rank = (i: PolicyItem) => JURISDICTIONS.indexOf(i.jurisdiction);
+  // The report has one section per jurisdiction in JURISDICTIONS order, then News & commentary. Sorting
+  // here (stable, so relevance order holds within a section) keeps the summaries prompt's row numbers
+  // equal to the table's.
+  const rank = (i: PolicyItem) => (i.news ? JURISDICTIONS.length : JURISDICTIONS.indexOf(i.jurisdiction));
   return {
     items: [...selection.items].sort((a, b) => rank(a) - rank(b)),
     fetchSuccess: results.some((r) => r !== null),
