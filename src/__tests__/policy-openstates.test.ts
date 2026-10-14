@@ -139,6 +139,8 @@ describe("fetchOpenStates", () => {
     const [url, init] = fetchSpy.mock.calls[0]!;
     const params = new URL(String(url)).searchParams;
     expect(params.get("q")).toContain('"artificial intelligence"');
+    // A bare term is a whole-lexeme match in websearch_to_tsquery: "AI", never inside "said".
+    expect(params.get("q")).toMatch(/ OR AI$/);
     expect(params.get("action_since")).toBe("2026-09-30");
     expect(params.getAll("include")).toEqual(["actions"]);
     expect(params.has("apikey")).toBe(false);

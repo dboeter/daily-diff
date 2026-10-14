@@ -16,7 +16,14 @@ import { apiKeyFor, fetchOk } from "./http.ts";
 import { daysBefore } from "./date.ts";
 
 const API_URL = "https://v3.openstates.org/bills";
-const QUERY = '"artificial intelligence" OR "automated decision" OR "algorithmic discrimination"';
+/**
+ * Postgres `websearch_to_tsquery("english", q)` over each bill's full text
+ * (openstates/api-v3 `api/bills.py`). It matches lexemes, so the bare `AI`
+ * matches the word "AI" (and "AI-generated", whose parts are indexed too) but
+ * never the letters inside "said" or "aid". Full text means a bill that names
+ * AI in passing matches too; the stage gate and Jev drop those.
+ */
+const QUERY = '"artificial intelligence" OR "automated decision" OR "algorithmic discrimination" OR AI';
 /** The API's maximum (`max_per_page` in api-v3). */
 const PER_PAGE = 20;
 /** Requests per run, at most: 100 bills by latest action. */
