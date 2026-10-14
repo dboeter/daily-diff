@@ -202,6 +202,26 @@ describe("fetchPolicyData", () => {
     expect(data.fetchSuccess).toBe(true);
   });
 
+  it("records a record-only stage item in the state without scoring or reporting it", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(new Response(rss([])));
+    const old = { ...item("nl:1", "2026-08-01"), stage: "Passed the Tweede Kamer", recordOnly: true };
+    const askOld = vi.fn(ask.getMockImplementation()!);
+    const data = await fetchPolicyData(
+      config,
+      new Date("2026-10-13T23:00:00Z"),
+      "2026-10-14",
+      null,
+      { apiKey: "test-key", cache: { items: {} }, ask: askOld },
+      [{ name: "NL", fetch: async () => [old] }],
+    );
+    expect(data.items).toEqual([]);
+    expect(askOld).not.toHaveBeenCalled();
+    expect(data.nextState).toEqual({
+      reported: {},
+      stages: { "nl:1": "2026-08-01 Passed the Tweede Kamer" },
+    });
+  });
+
   it("reports a failed feed as fetchSuccess false instead of throwing", async () => {
     vi.spyOn(globalThis, "fetch").mockResolvedValue(new Response("", { status: 503 }));
     const data = await fetchPolicyData(

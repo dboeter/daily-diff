@@ -27,6 +27,12 @@ export interface PolicyItem extends FeedItem {
   stage?: string;
   /** ISO date of a deadline the item carries (a comment period's end). */
   deadline?: string;
+  /**
+   * A stage item recorded in the state without being scored or reported: a
+   * source sets it for a stage that was already old when first seen, so a
+   * newly watchlisted file does not open with stale news.
+   */
+  recordOnly?: boolean;
 }
 
 export interface PolicyState {
@@ -106,8 +112,16 @@ export function newPolicyItems<T extends StateItem>(
   });
 }
 
-/** The state after reporting `items` on `dateStr`; ids older than REPORTED_KEEP_DAYS are pruned. */
-export function nextPolicyState(state: PolicyState | null, items: StateItem[], dateStr: string): PolicyState {
+/**
+ * The state after reporting `items` on `dateStr`; ids older than REPORTED_KEEP_DAYS are pruned.
+ * `recorded` stage items only get their stage saved: not reported, so a same-day re-run skips them too.
+ */
+export function nextPolicyState(
+  state: PolicyState | null,
+  items: StateItem[],
+  dateStr: string,
+  recorded: StateItem[] = [],
+): PolicyState {
   const cutoff = new Date(Date.parse(dateStr) - REPORTED_KEEP_DAYS * 24 * 60 * 60 * 1000)
     .toISOString()
     .slice(0, 10);
@@ -121,6 +135,7 @@ export function nextPolicyState(state: PolicyState | null, items: StateItem[], d
       stages[i.id] = stageKey(i);
     } else reported[i.id] ??= dateStr;
   }
+  for (const i of recorded) stages[i.id] = stageKey(i);
   return { reported, stages };
 }
 
@@ -163,11 +178,13 @@ export async function fetchPolicyData(
       }
     }),
   ]);
-  const candidates = newPolicyItems(
+  const fresh = newPolicyItems(
     results.flatMap((r) => r ?? []),
     state,
     dateStr,
   );
+  const recorded = fresh.filter((i) => i.recordOnly);
+  const candidates = fresh.filter((i) => !i.recordOnly);
   console.log(`  [policy] ${candidates.length} new items`);
   const selection = await selectPolicyItems(candidates, {
     readerProfile: config.readerProfile,
@@ -182,7 +199,7 @@ export async function fetchPolicyData(
     items: [...selection.items].sort((a, b) => rank(a) - rank(b)),
     fetchSuccess: results.some((r) => r !== null),
     // Only the kept items: a dropped one is not reported, and its saved verdict stops it being asked again.
-    nextState: nextPolicyState(state, selection.items, dateStr),
+    nextState: nextPolicyState(state, selection.items, dateStr, recorded),
     rankedBy: selection.rankedBy,
     nextVerdicts: selection.nextVerdicts,
     ...(candidates.length > 0 ? { rankingFile: selection.rankingFile } : {}),
