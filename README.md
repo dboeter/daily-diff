@@ -21,6 +21,7 @@ A GitHub Actions workflow that runs every night, landing the digest by about 05:
 | [EDPB](https://www.edpb.europa.eu)                                | [RSS](https://www.edpb.europa.eu/feed/news_en)                    | EU data protection news, every item judged by Jev, at most 7 days old             |
 | [EUR-Lex](https://eur-lex.europa.eu)                              | [Cellar SPARQL](https://publications.europa.eu/webapi/rdf/sparql) | EU acts and proposals on AI or a watchlisted act, with their stage                |
 | [European Parliament](https://oeil.secure.europarl.europa.eu)     | [Open Data API](https://data.europarl.europa.eu)                  | Watchlisted EU procedures, reported when their stage moves                        |
+| [Open States](https://openstates.org)                             | [API v3](https://v3.openstates.org/docs)                          | US state AI bills from passing a chamber onward; needs `PLURAL_API_KEY`           |
 
 ## Web UI
 
@@ -241,6 +242,7 @@ Go to **Settings → Secrets and variables → Actions** and add:
 | `DEEPSEEK_API_KEY`   | if DeepSeek   | DeepSeek API key                                                                                                                                                                                                                                                                 |
 | `DASHSCOPE_API_KEY`  | if Qwen       | Alibaba Model Studio API key                                                                                                                                                                                                                                                     |
 | `TYPESAFE_API_KEY`   | optional      | [TypeSafe](https://typesafe.ai) key. If set, ArXiv papers are ranked by Jev relevance instead of recency, Jev decides the trending report's scope, categories and cross-source matches instead of the search topics, and Jev picks the Policy Watch items instead of AI keywords |
+| `PLURAL_API_KEY`     | optional      | [Open States / Plural](https://open.pluralpolicy.com) key for Policy Watch's US state bills; unset skips that source                                                                                                                                                             |
 | `TELEGRAM_BOT_TOKEN` | optional      | Telegram bot token from [@BotFather](https://t.me/BotFather). If set, a message is sent after each digest run                                                                                                                                                                    |
 | `TELEGRAM_CHAT_ID`   | optional      | Telegram chat/channel/group ID to send notifications to                                                                                                                                                                                                                          |
 
@@ -314,6 +316,7 @@ export ANTHROPIC_API_KEY=sk-ant-xxxxxxxx
 export DIGEST_REPO=your-username/daily-diff  # optional; omit to only write files
 # export DIGEST_FORCE_WEEKLY=1               # optional; also run the weekly reports today
 # export TYPESAFE_API_KEY=xxxxx              # optional; Jev for ArXiv ranking, trending scope and Policy Watch relevance
+# export PLURAL_API_KEY=xxxxx                 # optional; Policy Watch's US state bills (Open States)
 
 pnpm start
 
