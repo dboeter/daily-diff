@@ -15,6 +15,7 @@ import path from "node:path";
 import { callLlm, parseLlmJson } from "../src/report.ts";
 import { buildHighlightsPrompt, type ReportHighlights } from "../src/prompts-data.ts";
 import { buildMessage } from "../src/notify.ts";
+import { LIVE_REPORT_IDS } from "../src/i18n.ts";
 
 const DATE = process.argv[2] && !process.argv[2].startsWith("-") ? process.argv[2] : null;
 const NOTIFY = process.argv.includes("--notify");
@@ -37,18 +38,9 @@ async function main() {
 
   console.log(`Regenerating highlights for ${dateStr}...`);
 
-  // Same order as main(): daily reports, then the weekly ones.
-  const reportIds = [
-    "ai-agents",
-    "ai-web",
-    "ai-hn",
-    "ai-arxiv",
-    "ai-policy",
-    "ai-infra",
-    "ai-trending",
-    "ai-community",
-    "ai-hf",
-  ];
+  // The live reports, in main()'s order. Retired ones (ai-infra, ai-community) are left out:
+  // their highlights were generated with the reports of their day.
+  const reportIds = LIVE_REPORT_IDS;
 
   // Read reports
   const reports: Record<string, string> = {};
