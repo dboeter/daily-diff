@@ -1,0 +1,60 @@
+# AI Research 2026-10-14
+
+[📅 Overview](https://dboeter.github.io/daily-diff/#2026-10-14) · [🤖 AI Agents](https://dboeter.github.io/daily-diff/#2026-10-14/ai-agents) · [💬 AI Discussions](https://dboeter.github.io/daily-diff/#2026-10-14/ai-hn) · **📚 AI Research** · [🌐 Lab Announcements](https://dboeter.github.io/daily-diff/#2026-10-14/ai-web)
+
+> Sources: [ArXiv](https://arxiv.org/) (cs.AI, cs.CL, cs.LG) | 40 papers ranked by [Jev](https://typesafe.ai) relevance | Generated: 2026-10-14 01:48 UTC
+
+---
+
+## Highlights
+Extreme low-bit quantization reaches practical usability with SAGE achieving 95.3% BF16 performance at 2 bits on Qwen3-30B-A3B, while novel decoding theory proves the optimal temperature schedule for pass@k maximization. Agent evaluation matures through executable contracts (SkillForgeBench, ACED-Bench, DSABench) that enforce strict requirement satisfaction, causal evidence handling, and multi-database coordination rather than loose similarity checks. Recursive self-improvement frameworks (Harness², Cortex, SPROUT) demonstrate measurable gains on coding and office tasks by grounding harness evolution in measurement-gated validation and snapshot-based rollouts. Security-focused benchmarks (Last Secure Code Benchmark, SEEK) reveal that even frontier agents produce functional-but-insecure code 75–84% of the time, motivating agentic graph-RAG approaches that generalize to unseen vulnerability classes. Cross-model KV-cache transfer (Swarm Telepathy) and attention-map reuse (MapFlow) break family boundaries for efficient heterogeneous LLM serving.
+
+## Key Papers
+
+### 🧠 Large Language Models (architecture, training, alignment, evaluation)
+
+| Paper | Authors | Summary |
+| :--- | :--- | :--- |
+| [SAGE: Pushing 2-Bit Vector-Quantized LLMs toward Real-World Usability](http://arxiv.org/abs/2610.14745v1) | Xianglong Yan, Zenan Wu, Kewei Zhang et al. | Introduces Energy-Stratified Grouping and Adaptive Bit Split for 2-bit vector quantization, retaining 95.3% BF16 performance on Qwen3-30B-A3B with a custom CUDA kernel delivering 2.55× speedup over FP16. Solves the two key challenges of protecting sensitive channels and allocating bit budgets across representation components. |
+| [The Optimal Decoder is Tilted Temperature](http://arxiv.org/abs/2610.15058v1) | Nikolaos Papagiannis, Ananth Grama, Wojciech Szpankowski | Proves that pass@k maximization under entropy and cross-entropy constraints yields a closed-form "tilted temperature" rule $q^\star \propto (p e^{ηV})^{1/T}$, showing optimal temperature increases with sample budget $k$ and providing practical algorithms (J-EOS, CTD) that improve code generation benchmarks. |
+| [Accelerating Cross-Model LLM Inference via Attention Map Reuse](http://arxiv.org/abs/2610.14688v1) | Zhan Jin, Yuze Luo, Bin Cui et al. | Presents MapFlow, a system reusing attention maps instead of KV states across heterogeneous models, combining partial recomputation with linear translation and sparse compression to reduce prefilling latency while preserving generation quality in multi-turn routing workloads. |
+
+### 🤖 Agents & Reasoning (planning, tool use, multi-agent, chain-of-thought)
+
+| Paper | Authors | Summary |
+| :--- | :--- | :--- |
+| [Triage-PiEvo: Evidence Admission for Principle-Evolving Scientific Agents](http://arxiv.org/abs/2610.14683v1) | Peize Li, Yingming Pu, Xingguo Xu et al. | Formulates scientific revision as evidence admission: anomalies steer search immediately but only independently verified evidence rewrites persistent principles. Achieves +7.5–11.8% over strongest baselines across four scientific tasks while admitting zero corrupted evidence in stress tests. |
+| [Harness^2: Recursive Agent Harnessing for an Open World](http://arxiv.org/abs/2610.14224v1) | Ruiyao Xu, Yanfei Chen, Zhongying CuiZhu et al. | Introduces two-level recursion: task-level harness refinement via contrastive Propose-Probe-Compose without ground-truth verifiers, and harnessing-level extraction of continual improvement patterns. Yields up to 11.8 pp gains on LAB and 11.5 points on WorkBuddy-Bench. |
+| [SPROUT: Scaling Agentic Reinforcement Learning for Long-Horizon Software Engineering](http://arxiv.org/abs/2610.14405v1) | Mengyang Liu, Weiming Wang, Haixin Nan et al. | Builds snapshot-based rollouts that checkpoint filesystem and agent context per turn, enabling verifier-guided backtracking from intermediate states. Improves pass@k by 23.6% and outperforms GRPO by 13.9 points on long-horizon coding benchmarks while cutting training step time by 39.5%. |
+| [SAT-RL: Training Language Models for Logical Reasoning with Symbolic Solvers](http://arxiv.org/abs/2610.14402v1) | Jialiang Sun, Kuldeep Meel | Trains LLMs to interact with Z3 via multi-turn tool execution using synthetic verifiable data, supervised warm-up, and solver-grounded RL with tool-aware rewards. Substantially improves symbolic reasoning on in-domain and out-of-domain logic tasks. |
+| [CB-Agent: Concept-Based In-Context Learning for Sequential Action Selection](http://arxiv.org/abs/2610.14574v1) | Qingyue Zhang, Huaze Tang, Minyu Zhang et al. | Extracts environment-action decisions from expert trajectories and fits a concept vector by maximum likelihood to score candidate actions without including demonstrations in context. Achieves highest cross-benchmark average on TextWorld, ALFWorld, and ScienceWorld at all three model sizes tested. |
+
+### 🔧 Methods & Frameworks (new techniques, benchmarks, efficiency improvements)
+
+| Paper | Authors | Summary |
+| :--- | :--- | :--- |
+| [SkillHorizon: Constructing Long-Horizon Agent Tasks through Skill Composition](http://arxiv.org/abs/2610.14966v1) | Yuxuan Liu, Zhaochen Su, Hangyu Guo et al. | Generates 1,050 long-horizon tasks across seven business environments by composing reusable skills with input-output dependencies and shared state. Reveals mean local-goal completion drops from 90.4% to 46.8% as workload scales from 64K to 1M tokens. |
+| [MemForm: Benchmarking Memory Formation Poisoning in LLM Agents](http://arxiv.org/abs/2610.14431v1) | Haowen Pan, Pengyang Shao, Yunshan Ma et al. | Defines memory formation poisoning across five interfaces (Content, Evidence, Scope, Selection, Path) with controlled clean/poisoned pairs. Shows broad susceptibility across six LLMs, where consolidation order alone can alter downstream behavior despite identical retained experiences. |
+| [ACED-Bench: Evaluating How LLM Agents Acquire and Act on Causal Evidence](http://arxiv.org/abs/2610.14381v1) | Yiwei Chen, Amila Weerasinghe, Siddharth Biswal et al. | Neuro-symbolic benchmark separating natural-language scenarios from hidden probabilistic graphical models defining causal graphs and intervention semantics. 180 tasks test causal ancestry/descendancy and constrained decisions; evidence-ledger analysis localizes failures in experiment design and evidence retention. |
+| [DSABench: Benchmarking Source Discovery, Coordination, and Execution for Multi-Database Agents](http://arxiv.org/abs/2610.14700v1) | Jinlong Luo, Haoran Wu, Bo Xu | Evaluates agents that must discover relevant databases, coordinate cross-source dependencies, and execute multi-database workflows. Highest routing-only RA-Set score is 60.55%; adding execution drops median success to 6.69–7.98% without clarification, highlighting the gap between local SQL correctness and end-to-end workflow integrity. |
+| [TurnCost: Turns, Not Observations: Cache-Aware Loop Engineering for Coding Agents](http://arxiv.org/abs/2610.15093v1) | Pramod Kumar, Raj Kumar Pandey | Analyzes 600 coding-agent trajectories showing 98.6% of input tokens served from prefix cache and turn count explaining 84% of cost variance vs. 4% for observation size. Derives break-even condition for model delegation and releases a re-scoring tool for alternative caching/pricing policies. |
+
+### 📊 Applications (domain-specific, multimodal, code generation)
+
+| Paper | Authors | Summary |
+| :--- | :--- | :--- |
+| [LYNX: Analytical Program Synthesis via Grounding and Closed-Loop Refinement](http://arxiv.org/abs/2610.14777v1) | Ruichen Xia, Xiao Han, Dingyu Yang et al. | Multi-agent framework (planner, generator, verifier) with semantic-structural distillation and delta-guided iterative revision for NL-to-SQL. Achieves 10.66–59.54% execution accuracy on BIRD-SQL and Spider 2.0-Lite while reducing token consumption by 70.53% vs. prior best. |
+| [SEEK: Agentic Knowledge Graph Retrieval for Secure Code Generation](http://arxiv.org/abs/2610.14968v1) | Varun Gadey, Markus Tohn, Lichao Wu et al. | Builds a CWE-structured security knowledge graph injected with CVE vulnerability-fix instances. A planner predicts relevant CWEs, graph scoping restricts retrieval, and a selection agent validates before generation. Achieves 77.45% SecurePass@1 on CodeGuard+ and 85.2% on 13 unseen CWE types. |
+| [Terrarium: Growing Personal Assistants via Scalable Synthesis of App Worlds](http://arxiv.org/abs/2610.14860v1) | Mengzhou Wu, Yuzhe Guo, Jiawen Tao et al. | Synthesizes 275 executable App Worlds and 13,344 tasks with evaluator-side rubrics from web and in-app observations. Qwen3 models (4B–14B) trained with Terrarium outperform base models by 18.34 pp on τ²-bench and 10.94 pp on AppWorld bench. |
+| [Last Secure Code Benchmark: Is the Code You Vibe Secure?](http://arxiv.org/abs/2610.14766v1) | Tianyi Wu, Chao Ge, Peng Chen et al. | 450 tasks from 150 real vulnerabilities across 7 languages and 24 CWEs (21 of CWE Top 25). Even the strongest agent (Claude Fable 5) produces functional-and-secure code for only 25.1% of tasks; best model passes just 12% of vulnerability scenarios across all vibe-coding settings. |
+
+## Signals
+Evaluation rigor is shifting from outcome-only metrics to executable contracts that enforce requirement-level satisfaction (SkillForgeBench), causal evidence handling (ACED-Bench), multi-database workflow integrity (DSABench), and trajectory-quality signals (TQG-Exp). Recursive self-improvement is becoming measurable: Harness² and Cortex show harness-level gains but also reveal transfer gaps (EvoCowork shows in-domain gains don't transfer to cross-office workflows), while SPROUT makes long-horizon RL tractable via snapshot-based backtracking. Security emerges as a critical application frontier—Last Secure Code Benchmark exposes a 75–84% functional-but-insecure gap, and SEEK demonstrates graph-RAG generalization to unseen CWE classes. Efficiency research is converging on cross-model state reuse: Swarm Telepathy enables prefill-free KV transfer across 12 models/6 families with 40% higher accuracy and 4× speedup, while MapFlow reuses attention maps for heterogeneous serving. Finally, agent memory is recognized as an attack surface (MemForm) and a learning substrate (Learning after Execution), with consolidation order alone altering behavior—suggesting future work on verifiable memory formation and credit assignment across execution-correction cycles.
+
+## Worth a Look
+1. **[SAGE: Pushing 2-Bit Vector-Quantized LLMs toward Real-World Usability](http://arxiv.org/abs/2610.14745v1)** — A rare quantization paper that closes the gap to BF16 at 2 bits with a production-ready kernel; the ESG+ABS design principles are likely transferable to other extreme compression settings.
+2. **[Triage-PiEvo: Evidence Admission for Principle-Evolving Scientific Agents](http://arxiv.org/abs/2610.14683v1)** — The evidence-admission formalization (anomalies steer search, only verified evidence rewrites principles) is a clean, generalizable pattern for any self-improving agent operating under noisy feedback.
+3. **[SEEK: Agentic Knowledge Graph Retrieval for Secure Code Generation](http://arxiv.org/abs/2610.14968v1)** — Demonstrates that structuring security knowledge as a CWE graph with planner-guided scoping and selection-agent validation achieves strong OOD generalization (85.2% on unseen CWEs), a blueprint for domain-specialized agentic RAG.
+
+---
+*This digest is auto-generated by [Daily Diff](https://github.com/dboeter/daily-diff).*

@@ -1,0 +1,18 @@
+{
+  "ai-agents": [
+    "Cline v4.1.24 adds Claude Haiku 5.5, three new providers, and moves plugins in-process — removing separate Node/Bun runtime and surfacing load errors in UI",
+    "OpenCode v2.0.27 has a high-severity 'Invalid credential' error breaking all model access — blocks any session start"
+  ],
+  "ai-hn": [
+    "Codex CLI silently installs a persistent self-updating daemon by default, raising security and transparency concerns for developers",
+    "Anthropic built a custom VCS (Scion) after Claude drove merges from 2.5k to 30k/day — shows infrastructure breaking points of AI-native development"
+  ],
+  "ai-arxiv": [
+    "SAGE achieves 95.3% BF16 performance at 2-bit quantization on Qwen3-30B-A3B with a custom CUDA kernel delivering 2.55× speedup over FP16",
+    "TurnCost analysis shows 98.6% of coding agent input tokens come from prefix cache, and turn count explains 84% of cost variance — not observation size"
+  ],
+  "ai-web": [
+    "Anthropic's merge rate jumped 12× to 30k+/day via Claude autonomous coding, forcing a Git-to-Scion VCS migration in 5 months — infrastructure can't keep up",
+    "Anthropic cut distillation attacks 90–99%, naming Zhipu's GLM-5.3 as distilling from US models including an unannounced 'Claude Fable 5'"
+  ]
+}
