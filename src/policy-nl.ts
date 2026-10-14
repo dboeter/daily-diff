@@ -114,7 +114,8 @@ export function parseZaken(json: unknown): PolicyItem[] {
         link: doc
           ? `https://www.tweedekamer.nl/kamerstukken/detail?id=${z.Nummer}&did=${doc}`
           : `https://www.tweedekamer.nl/zoeken?qry=${z.Nummer}`,
-        published: new Date(z.GestartOp).toISOString(),
+        // The Amsterdam date: a UTC timestamp would put midnight on the day before.
+        published: z.GestartOp.slice(0, 10),
         description,
         source: "Tweede Kamer",
         jurisdiction: "nl",

@@ -72,6 +72,7 @@ describe("parseZaken", () => {
     const letter = items.find((i) => i.id === "tk:2026Z22040")!;
     expect(letter).toMatchObject({
       title: "Publieke AI-voorziening funderend onderwijs",
+      published: "2026-10-13",
       link: "https://www.tweedekamer.nl/kamerstukken/detail?id=2026Z22040&did=2026D50762",
       jurisdiction: "nl",
       jevOnly: false,
