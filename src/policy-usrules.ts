@@ -173,8 +173,10 @@ export async function fetchUsRules(ctx: PolicySourceContext): Promise<PolicyItem
     )
     .map(({ item }) => item);
   const frDockets = new Set(frDocs.map(frDocket));
+  // On its publication day a document often has no regulations.gov docket yet: match its number too.
+  const frNumbers = new Set(frDocs.map((d) => d.document_number));
   const regsItems = (regs.status === "fulfilled" ? regs.value : [])
-    .filter((d) => !frDockets.has(d.attributes.docketId))
+    .filter((d) => !frDockets.has(d.attributes.docketId) && !frNumbers.has(d.attributes.frDocNum ?? ""))
     .map(regsItem);
   return [...frItems, ...regsItems];
 }

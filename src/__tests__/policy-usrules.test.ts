@@ -75,8 +75,11 @@ const frResults = [
   }),
   // "ai" in lower case is not the acronym.
   frDoc("2026-7", { title: "Mauna Kea ai permits" }),
+  // Not yet linked to a regulations.gov docket (publication day): matched by document number.
+  frDoc("2026-8", { title: "Hydropower Licensing" }),
 ];
 const regsResults = [
+  regsDoc("FERC-2026-0300-0001", "FERC-2026-0300", "2026-8", "Hydropower Licensing"),
   regsDoc("NIST-2026-0200-0001", "NIST-2026-0200", "2026-1", "Securing AI Agent Systems"),
   regsDoc("FCC-2026-3961-0002", "FCC-2026-3961", null, "Spectrum Rules; supplement"),
   regsDoc("USCG-2026-1270-0001", "USCG-2026-1270", "2026-6", "Safety Zone"),
@@ -158,6 +161,7 @@ describe("fetchUsRules", () => {
     const fail = () => new Response("", { status: 500 });
     route(fail, regsOk);
     expect((await fetchUsRules(ctx)).map((i) => i.id)).toEqual([
+      "us-fr:2026-8",
       "us-fr:2026-1",
       "regs:FCC-2026-3961-0002",
       "us-fr:2026-6",
