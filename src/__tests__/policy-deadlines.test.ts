@@ -192,6 +192,13 @@ describe("upcomingDeadlines", () => {
 });
 
 describe("renderDeadlines", () => {
+  it("truncates a long title like the item tables", () => {
+    const md = renderDeadlines([
+      { date: "2026-11-09", title: "y".repeat(300), link: "https://x.eu", source: "S" },
+    ]);
+    expect(md).toContain(`[${"y".repeat(200)}…](https://x.eu)`);
+  });
+
   it("renders a table under the section heading", () => {
     const md = renderDeadlines([
       {

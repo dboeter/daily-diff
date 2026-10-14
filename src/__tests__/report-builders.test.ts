@@ -355,6 +355,13 @@ describe("renderPolicyTable", () => {
     expect(renderPolicyTable(items, new Map())).toContain("| The AI Office publishes guidelines. |");
   });
 
+  it("truncates a long title in the link text only", () => {
+    const long = { ...items[0]!, title: "x".repeat(300) };
+    const md = renderPolicyTable([long], new Map());
+    expect(md).toContain(`[${"x".repeat(200)}…](`);
+    expect(md).not.toContain("x".repeat(201));
+  });
+
   it("is empty with no items", () => {
     expect(renderPolicyTable([], new Map())).toBe("");
   });

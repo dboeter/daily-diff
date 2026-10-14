@@ -9,7 +9,7 @@
 import type { PolicyCalendarEntry } from "./config.ts";
 import type { PolicyItem } from "./policy.ts";
 import { POLICY_REPORT } from "./i18n.ts";
-import { cell } from "./report-builders.ts";
+import { cell, policyTitleLabel } from "./report-builders.ts";
 import { daysBefore } from "./date.ts";
 
 export interface Deadline {
@@ -74,7 +74,7 @@ export function upcomingDeadlines(
 export function renderDeadlines(deadlines: Deadline[]): string {
   if (deadlines.length === 0) return "";
   const rows = deadlines.map(
-    (d) => `| ${d.date} | ${cell(d.source)} | [${cell(d.title)}](${cell(d.link)}) |`,
+    (d) => `| ${d.date} | ${cell(d.source)} | [${policyTitleLabel(d.title)}](${cell(d.link)}) |`,
   );
   return `## ${POLICY_REPORT.deadlinesHeading}\n\n${POLICY_REPORT.deadlinesHeader}\n${rows.join("\n")}`;
 }

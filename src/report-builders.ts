@@ -257,6 +257,11 @@ export function parseRowSummaries(text: string): Map<number, string> {
 /** Table cell text: one line, pipes escaped. */
 export const cell = (s: string) => s.replace(/\r?\n/g, " ").replace(/\|/g, "\\|").trim();
 
+/** Policy table link text. EUR-Lex titles run to 500+ characters; the item keeps the full one for Jev and the prompts. */
+const POLICY_TITLE_MAX_CHARS = 200;
+export const policyTitleLabel = (title: string): string =>
+  cell(title.length > POLICY_TITLE_MAX_CHARS ? `${title.slice(0, POLICY_TITLE_MAX_CHARS)}…` : title);
+
 function descriptionFallback(description: string): string {
   const d = description.replace(/\s+/g, " ").trim();
   if (!d) return "—";
@@ -312,7 +317,7 @@ export function renderPolicyTable(
   deadlines = "",
 ): string {
   const row = (it: PolicyItem, n: number) =>
-    `| ${it.published.slice(0, 10)} | ${cell(it.source)} | [${cell(it.title)}](${cell(it.link)}) | ` +
+    `| ${it.published.slice(0, 10)} | ${cell(it.source)} | [${policyTitleLabel(it.title)}](${cell(it.link)}) | ` +
     `${cell(it.stage ?? "")} | ${cell(summaries.get(n) ?? descriptionFallback(it.description))} |`;
   const numbered = items.map((it, i) => ({ it, n: i + 1 }));
   const sections = Object.entries(POLICY_REPORT.headings).map(([jurisdiction, heading]) => {
@@ -326,7 +331,7 @@ export function renderPolicyTable(
     .filter(({ it }) => it.news)
     .map(
       ({ it, n }) =>
-        `| ${it.published.slice(0, 10)} | ${cell(it.source)} | [${cell(it.title)}](${cell(it.link)}) | ` +
+        `| ${it.published.slice(0, 10)} | ${cell(it.source)} | [${policyTitleLabel(it.title)}](${cell(it.link)}) | ` +
         `${cell(summaries.get(n) ?? descriptionFallback(it.description))} |`,
     );
   if (newsRows.length) {

@@ -18,7 +18,6 @@ const SPARQL_URL = "https://publications.europa.eu/webapi/rdf/sparql";
 const LOOKBACK_DAYS = 30;
 // Longer than http.ts's default: a year's look-back took 19 s on 2026-10-13; 30 days answers in seconds.
 const SPARQL_TIMEOUT_MS = 60_000;
-const TITLE_MAX_CHARS = 200;
 
 /** A regulation or directive number in the watchlist (`2024/1689`); procedures (`2025/0359(COD)`) are the EP's. */
 const ACT_NUMBER_RE = /^\d{4}\/\d{1,4}$/;
@@ -83,11 +82,11 @@ export function parseEurLexResults(json: unknown): PolicyItem[] {
     const stage = celexStage(celex);
     if (!stage || seen.has(celex)) return [];
     seen.add(celex);
-    const title = b.title.value.replace(/\s+/g, " ").trim();
     return [
       {
         id: `celex:${celex}`,
-        title: title.length > TITLE_MAX_CHARS ? `${title.slice(0, TITLE_MAX_CHARS)}…` : title,
+        // Full: Jev and the prompts read it; the table truncates it (policyTitleLabel).
+        title: b.title.value.replace(/\s+/g, " ").trim(),
         link: `https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:${celex}`,
         published: b.date.value,
         description: "",

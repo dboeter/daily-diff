@@ -60,7 +60,7 @@ describe("parseEurLexResults", () => {
     ]);
   });
 
-  it("takes stage, date and link from the data and truncates long titles", () => {
+  it("takes stage, date and link from the data and keeps the full title for Jev and the prompt", () => {
     const act = items.find((i) => i.id === "celex:32026R1744")!;
     expect(act).toMatchObject({
       stage: "Regulation adopted",
@@ -70,7 +70,9 @@ describe("parseEurLexResults", () => {
       jurisdiction: "eu",
       jevOnly: false,
     });
-    expect(items.every((i) => i.title.length <= 201)).toBe(true);
+    // Truncated only in the rendered table (policyTitleLabel).
+    expect(act.title).toHaveLength(306);
+    expect(act.title.endsWith("…")).toBe(false);
   });
 });
 
