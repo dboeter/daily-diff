@@ -176,7 +176,12 @@ describe("selectPolicyItems", () => {
   });
 
   it("shows Jev a stage item's stage and its date", async () => {
-    const ask = stub({ bill: answers(1, 1, 1, 2) });
+    const ask = stub({ bill: answers(1, 1, 1, 2), [`long ${"x".repeat(300)}`]: answers(1, 1, 1, 2) });
+    // A long EUR-Lex title reaches Jev whole; only the rendered table truncates it.
+    const long = item("long", { title: `Title long ${"x".repeat(300)}` });
+    await selectPolicyItems([long], { ...base, apiKey: "k", cache: { items: {} }, ask });
+    expect(ask.mock.calls[0]![0]).toMatchObject({ title: long.title });
+    ask.mockClear();
     await selectPolicyItems([item("bill", { stage: "Became law" })], {
       ...base,
       apiKey: "k",
