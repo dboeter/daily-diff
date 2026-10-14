@@ -266,6 +266,8 @@ describe("buildPolicySummariesPrompt", () => {
       published: "2026-10-09T07:16:00.000Z",
       description: "The AI Office publishes guidelines.",
       source: "European Commission",
+      jurisdiction: "eu" as const,
+      jevOnly: false,
     },
   ];
 

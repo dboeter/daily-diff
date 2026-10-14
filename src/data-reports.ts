@@ -39,6 +39,7 @@ import {
 import { saveArxivState, type ArxivData } from "./arxiv.ts";
 import type { HfData } from "./hf.ts";
 import { savePolicyState, POLICY_STATE_FILE, type PolicyData } from "./policy.ts";
+import { savePolicyVerdicts, POLICY_VERDICTS_FILE } from "./policy-jev.ts";
 import type { OpenRouterData } from "./openrouter.ts";
 
 /** A finished report: main() writes its file and opens its issue (title and label from REPORTS). */
@@ -246,7 +247,15 @@ export async function buildPolicyReport(
   utcStr: string,
   dateStr: string,
   stateFile = POLICY_STATE_FILE,
+  verdictsFile = POLICY_VERDICTS_FILE,
 ): Promise<SavedReport | null> {
+  // Before the no-items skip, unlike the trending cache: on a day Jev drops
+  // every item there is no report, and the dropped items would be asked again
+  // every day until they leave the feed's age window.
+  if (policyData.rankingFile) {
+    console.log(`  Saved ${saveFile(policyData.rankingFile, dateStr, "policy-ranking.json")}`);
+  }
+  if (policyData.nextVerdicts) savePolicyVerdicts(policyData.nextVerdicts, verdictsFile);
   if (!policyData.fetchSuccess || policyData.items.length === 0) {
     console.log(
       `  [policy] ${policyData.fetchSuccess ? "No new items" : "No data available"}, skipping report.`,
@@ -271,7 +280,8 @@ export async function buildPolicyReport(
   if (prose === null) return null;
 
   const sources = [...new Set(items.map((i) => i.source))].join(" + ");
-  const meta = `> ${REPORT_META.sources(sources)} | ${items.length} new items | ${REPORT_META.generated(utcStr)}`;
+  const ranked = policyData.rankedBy === "jev" ? " ranked by [Jev](https://typesafe.ai) relevance" : "";
+  const meta = `> ${REPORT_META.sources(sources)} | ${items.length} new items${ranked} | ${REPORT_META.generated(utcStr)}`;
   const body = spliceTrendingProse(prose, renderPolicyTable(items, parseRowSummaries(summaries)));
   // Only once the report exists, like the ArXiv state.
   savePolicyState(policyData.nextState, stateFile);

@@ -227,19 +227,19 @@ infra:
 
 Go to **Settings → Secrets and variables → Actions** and add:
 
-| Secret               | Required      | Description                                                                                                                                                                                                             |
-| -------------------- | ------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `LLM_PROVIDER`       | optional      | `anthropic` (default), `openai`, `github-copilot`, `openrouter`, `deepseek`, or `qwen`                                                                                                                                  |
-| `ANTHROPIC_API_KEY`  | if Anthropic  | API key — works with both Anthropic and Kimi Code                                                                                                                                                                       |
-| `ANTHROPIC_BASE_URL` | optional      | API endpoint override. Set to `https://api.kimi.com/coding/` for Kimi Code; leave unset for Anthropic                                                                                                                   |
-| `OPENAI_API_KEY`     | if OpenAI     | OpenAI API key                                                                                                                                                                                                          |
-| `OPENAI_BASE_URL`    | optional      | OpenAI endpoint override                                                                                                                                                                                                |
-| `OPENROUTER_API_KEY` | if OpenRouter | OpenRouter API key                                                                                                                                                                                                      |
-| `DEEPSEEK_API_KEY`   | if DeepSeek   | DeepSeek API key                                                                                                                                                                                                        |
-| `DASHSCOPE_API_KEY`  | if Qwen       | Alibaba Model Studio API key                                                                                                                                                                                            |
-| `TYPESAFE_API_KEY`   | optional      | [TypeSafe](https://typesafe.ai) key. If set, ArXiv papers are ranked by Jev relevance instead of recency, and Jev decides the trending report's scope, categories and cross-source matches instead of the search topics |
-| `TELEGRAM_BOT_TOKEN` | optional      | Telegram bot token from [@BotFather](https://t.me/BotFather). If set, a message is sent after each digest run                                                                                                           |
-| `TELEGRAM_CHAT_ID`   | optional      | Telegram chat/channel/group ID to send notifications to                                                                                                                                                                 |
+| Secret               | Required      | Description                                                                                                                                                                                                                                                                      |
+| -------------------- | ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `LLM_PROVIDER`       | optional      | `anthropic` (default), `openai`, `github-copilot`, `openrouter`, `deepseek`, or `qwen`                                                                                                                                                                                           |
+| `ANTHROPIC_API_KEY`  | if Anthropic  | API key — works with both Anthropic and Kimi Code                                                                                                                                                                                                                                |
+| `ANTHROPIC_BASE_URL` | optional      | API endpoint override. Set to `https://api.kimi.com/coding/` for Kimi Code; leave unset for Anthropic                                                                                                                                                                            |
+| `OPENAI_API_KEY`     | if OpenAI     | OpenAI API key                                                                                                                                                                                                                                                                   |
+| `OPENAI_BASE_URL`    | optional      | OpenAI endpoint override                                                                                                                                                                                                                                                         |
+| `OPENROUTER_API_KEY` | if OpenRouter | OpenRouter API key                                                                                                                                                                                                                                                               |
+| `DEEPSEEK_API_KEY`   | if DeepSeek   | DeepSeek API key                                                                                                                                                                                                                                                                 |
+| `DASHSCOPE_API_KEY`  | if Qwen       | Alibaba Model Studio API key                                                                                                                                                                                                                                                     |
+| `TYPESAFE_API_KEY`   | optional      | [TypeSafe](https://typesafe.ai) key. If set, ArXiv papers are ranked by Jev relevance instead of recency, Jev decides the trending report's scope, categories and cross-source matches instead of the search topics, and Jev picks the Policy Watch items instead of AI keywords |
+| `TELEGRAM_BOT_TOKEN` | optional      | Telegram bot token from [@BotFather](https://t.me/BotFather). If set, a message is sent after each digest run                                                                                                                                                                    |
+| `TELEGRAM_CHAT_ID`   | optional      | Telegram chat/channel/group ID to send notifications to                                                                                                                                                                                                                          |
 
 > `GITHUB_TOKEN` is provided automatically by GitHub Actions. When using `github-copilot` as the provider, the same `GITHUB_TOKEN` is used for LLM calls.
 
@@ -310,7 +310,7 @@ export ANTHROPIC_API_KEY=sk-ant-xxxxxxxx
 
 export DIGEST_REPO=your-username/daily-diff  # optional; omit to only write files
 # export DIGEST_FORCE_WEEKLY=1               # optional; also run the weekly reports today
-# export TYPESAFE_API_KEY=xxxxx              # optional; Jev for ArXiv ranking and trending scope
+# export TYPESAFE_API_KEY=xxxxx              # optional; Jev for ArXiv ranking, trending scope and Policy Watch relevance
 
 pnpm start
 
@@ -327,14 +327,14 @@ Files are written to `digests/YYYY-MM-DD/`:
 | `ai-hn.md`        | AI Discussions — Hacker News stories, plus Dev.to articles and Lobste.rs stories on Mondays                                  | daily   | `hn`               |
 | `ai-arxiv.md`     | AI Research — key papers from cs.AI/cs.CL/cs.LG                                                                              | daily   | `arxiv`            |
 | `ai-web.md`       | Lab Announcements — new Anthropic and OpenAI content (only written when new content exists)                                  | daily   | `web`              |
-| `ai-policy.md`    | Policy Watch — new AI legislation, regulation and guidance items (only written when there are new items)                     | daily   | `policy`           |
+| `ai-policy.md`    | Policy Watch — new AI legislation, regulation and guidance items (only written when a new item passes the relevance check)   | daily   | `policy`           |
 | `ai-trending.md`  | Agent & AI Coding Trends — radar + repos by category + signals + Claude Code Skills                                          | weekly  | `trending`         |
 | `ai-hf.md`        | AI Models — Hugging Face trending models + OpenRouter token usage and new models                                             | weekly  | `hf`               |
 | `highlights.json` | Up to 2 highlights per report, for Telegram and the web UI's day overview                                                    | daily   | —                  |
 
 Archived days also contain `ai-cli.md` (the CLI report, merged into `ai-agents.md` in October 2026), `ai-ph.md` (Product Hunt, dropped in October 2026), `ai-infra.md` (weekly until October 2026, now a section of `ai-agents.md`) and `ai-community.md` (weekly until October 2026, now part of `ai-hn.md`). Before October 2026, `ai-agents.md` was the OpenClaw ecosystem report.
 
-Shared state files are committed alongside the daily digests: `digests/web-state.json` tracks which web URLs have been seen, and `digests/policy-state.json` which policy items were reported (an item first reported today counts as new again, so a same-day re-run reports the same items).
+Shared state files are committed alongside the daily digests: `digests/web-state.json` tracks which web URLs have been seen, `digests/policy-state.json` which policy items were reported, and `digests/policy-verdicts.json` Jev's answers per policy item, so each is asked once (an item first reported today counts as new again, so a same-day re-run reports the same items).
 
 ---
 
@@ -389,7 +389,7 @@ Sources: anthropic.com (N articles) + openai.com (N articles)
 `ai-policy.md` structure:
 
 ```
-Sources: European Commission | N new items
+Sources: European Commission | N new items ranked by Jev relevance
 
 ## Highlights
 ## EU             — table rendered in code: date, source, title link; the LLM writes the summary column

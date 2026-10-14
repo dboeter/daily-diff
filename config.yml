@@ -101,10 +101,14 @@ infra:
 # ── Policy ────────────────────────────────────────────────────────────────────
 # The daily Policy Watch report (ai-policy): AI legislation, regulation and
 # official guidance in the EU, the Netherlands and the US.
-#   reader_profile  who the report is for; the relevance questions will read it
-#   watchlist       files that always appear when they move, per jurisdiction
-#                   (lists may be empty; no source reads them yet)
-#   feeds           RSS news feeds; items older than 7 days are skipped
+#   reader_profile  who the report is for; Jev's US impact question reads it
+#   watchlist       files that always appear when they move, per jurisdiction;
+#                   an item naming an entry skips the Jev drop (lists may be empty)
+#   feeds           RSS news feeds; items older than 7 days are skipped.
+#                   jurisdiction: eu | nl | us_federal | us_states | other
+#                   jev_only: true for a low-volume feed whose items need not
+#                   name AI: every item goes to Jev, and without Jev the feed
+#                   is dropped for the run
 
 policy:
   # The sector examples are illustrations only: clients span many sectors.
@@ -122,3 +126,4 @@ policy:
     # The AI Office's news, on the Commission's digital-strategy site; ~10 items.
     - name: European Commission
       url: https://digital-strategy.ec.europa.eu/en/rss.xml
+      jurisdiction: eu

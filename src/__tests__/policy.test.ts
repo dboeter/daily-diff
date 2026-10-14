@@ -10,6 +10,7 @@ import {
   fetchPolicyData,
   type PolicyItem,
 } from "../policy.ts";
+import type { PolicyConfig } from "../config.ts";
 
 const item = (id: string, published = "2026-10-13T08:00:00.000Z"): PolicyItem => ({
   id,
@@ -18,6 +19,8 @@ const item = (id: string, published = "2026-10-13T08:00:00.000Z"): PolicyItem =>
   published,
   description: "",
   source: "Commission",
+  jurisdiction: "eu",
+  jevOnly: false,
 });
 
 describe("newPolicyItems", () => {
@@ -73,7 +76,11 @@ describe("policy state file", () => {
 
 describe("fetchPolicyData", () => {
   afterEach(() => vi.restoreAllMocks());
-  const feeds = [{ name: "Commission", url: "https://example.eu/rss.xml" }];
+  const config: PolicyConfig = {
+    readerProfile: "A practitioner.",
+    watchlist: { eu: [], nl: [], usFederal: [], usStates: [] },
+    feeds: [{ name: "Commission", url: "https://example.eu/rss.xml", jurisdiction: "eu", jevOnly: false }],
+  };
   const rss = (ids: [string, string][]) =>
     `<rss><channel>${ids
       .map(
@@ -81,28 +88,54 @@ describe("fetchPolicyData", () => {
           `<item><title>${id}</title><link>https://x/${id}</link><guid>${id}</guid><pubDate>${date}</pubDate></item>`,
       )
       .join("")}</channel></rss>`;
+  const noul = (n: number) => ({ noul: n });
+  // Jev keeps "new AI rules" and drops "new event".
+  const ask = vi.fn(async (state: unknown) => {
+    const keep = (state as { title: string }).title === "new AI rules";
+    return {
+      model: "jev-1.0",
+      answers: {
+        about_ai_policy: noul(keep ? 1 : 0),
+        binding: noul(1),
+        new_stage: noul(1),
+        significance: { score: 2 },
+      } as unknown,
+    };
+  });
 
-  it("keeps new items within the news age limit, tagged with their feed", async () => {
+  it("scores new items within the news age limit and records only the kept ones", async () => {
     vi.spyOn(globalThis, "fetch").mockResolvedValue(
       new Response(
         rss([
-          ["new", "Tue, 13 Oct 2026 08:00:00 +0000"],
+          ["new AI rules", "Tue, 13 Oct 2026 08:00:00 +0000"],
+          ["new event", "Tue, 13 Oct 2026 09:00:00 +0000"],
           ["seen", "Mon, 12 Oct 2026 08:00:00 +0000"],
           ["stale", "Mon, 05 Oct 2026 08:00:00 +0000"],
         ]),
       ),
     );
-    const data = await fetchPolicyData(feeds, new Date("2026-10-13T23:00:00Z"), "2026-10-14", {
-      reported: { seen: "2026-10-13" },
-    });
+    const data = await fetchPolicyData(
+      config,
+      new Date("2026-10-13T23:00:00Z"),
+      "2026-10-14",
+      { reported: { seen: "2026-10-13" } },
+      { apiKey: "k", cache: { items: {} }, ask },
+    );
     expect(data.fetchSuccess).toBe(true);
-    expect(data.items.map((i) => [i.id, i.source])).toEqual([["new", "Commission"]]);
-    expect(data.nextState.reported).toEqual({ seen: "2026-10-13", new: "2026-10-14" });
+    expect(ask).toHaveBeenCalledTimes(2);
+    expect(data.rankedBy).toBe("jev");
+    expect(data.items.map((i) => [i.id, i.source, i.jurisdiction])).toEqual([
+      ["new AI rules", "Commission", "eu"],
+    ]);
+    expect(data.nextState.reported).toEqual({ seen: "2026-10-13", "new AI rules": "2026-10-14" });
+    expect(Object.keys(data.nextVerdicts!.items)).toEqual(["new AI rules", "new event"]);
   });
 
   it("reports a failed feed as fetchSuccess false instead of throwing", async () => {
     vi.spyOn(globalThis, "fetch").mockResolvedValue(new Response("", { status: 503 }));
-    const data = await fetchPolicyData(feeds, new Date("2026-10-13T23:00:00Z"), "2026-10-14", null);
+    const data = await fetchPolicyData(config, new Date("2026-10-13T23:00:00Z"), "2026-10-14", null, {
+      cache: { items: {} },
+    });
     expect(data.fetchSuccess).toBe(false);
     expect(data.items).toEqual([]);
   });

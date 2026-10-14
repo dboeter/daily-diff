@@ -45,9 +45,19 @@ export interface SectionConfig {
 }
 
 /** A news feed of the policy report. */
+export const JURISDICTIONS = ["eu", "nl", "us_federal", "us_states", "other"] as const;
+export type Jurisdiction = (typeof JURISDICTIONS)[number];
+
 export interface PolicyFeed {
   name: string;
   url: string;
+  /** Whose policy the feed covers; US items also get the impact question. */
+  jurisdiction: Jurisdiction;
+  /**
+   * A low-volume feed whose items need not name AI (a fine for automated
+   * decision-making), so every item goes to Jev. Without Jev it is dropped for the run.
+   */
+  jevOnly: boolean;
 }
 
 /** The policy report (config.yml `policy`). */
@@ -113,16 +123,24 @@ function toPolicy(raw: unknown, file: string): PolicyConfig {
     return [key, list.map(String)];
   });
   if (!Array.isArray(feeds)) throw new Error(`${file}: policy.feeds must be a list`);
-  const rawFeeds: Partial<PolicyFeed>[] = feeds;
+  const rawFeeds: { name?: string; url?: string; jurisdiction?: string; jev_only?: unknown }[] = feeds;
   rawFeeds.forEach((f, i) => {
     if (!nonEmptyString(f?.name) || !nonEmptyString(f.url)) {
       throw new Error(`${file}: policy.feeds[${i}] needs name and url`);
+    }
+    if (!(JURISDICTIONS as readonly unknown[]).includes(f.jurisdiction)) {
+      throw new Error(`${file}: policy.feeds[${i}].jurisdiction must be one of ${JURISDICTIONS.join(", ")}`);
     }
   });
   return {
     readerProfile: reader_profile.trim(),
     watchlist: Object.fromEntries(entries) as PolicyConfig["watchlist"],
-    feeds: rawFeeds.map((f) => ({ name: f.name!.trim(), url: f.url!.trim() })),
+    feeds: rawFeeds.map((f) => ({
+      name: f.name!.trim(),
+      url: f.url!.trim(),
+      jurisdiction: f.jurisdiction as Jurisdiction,
+      jevOnly: f.jev_only === true,
+    })),
   };
 }
 

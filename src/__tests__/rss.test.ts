@@ -52,6 +52,15 @@ describe("parseRssItems", () => {
     expect(items[1]!.description).toBe("");
   });
 
+  it("drops the Drupal byline: the repeated title, author and post date", () => {
+    const [i] = parseRssItems(
+      `<rss><channel><item><title>Panel meets</title><description>&lt;span&gt;Panel meets&lt;/span&gt; ` +
+        `&lt;span&gt;Anonymous (not verified)&lt;/span&gt; &lt;time&gt;Fri, 10/09/2026 - 09:16&lt;/time&gt; ` +
+        `&lt;p&gt;The panel meets.&lt;/p&gt;</description></item></channel></rss>`,
+    );
+    expect(i!.description).toBe("The panel meets.");
+  });
+
   it("returns nothing for a document that is not a feed", () => {
     expect(parseRssItems("<html><body>Maintenance</body></html>")).toEqual([]);
   });

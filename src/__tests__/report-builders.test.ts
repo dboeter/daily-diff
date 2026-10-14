@@ -303,6 +303,8 @@ describe("renderPolicyTable", () => {
       published: "2026-10-09T07:16:00.000Z",
       description: "The AI Office publishes guidelines.",
       source: "European Commission",
+      jurisdiction: "eu" as const,
+      jevOnly: false,
     },
     {
       id: "2",
@@ -311,6 +313,8 @@ describe("renderPolicyTable", () => {
       published: "2026-10-08T07:00:00.000Z",
       description: "",
       source: "European Commission",
+      jurisdiction: "eu" as const,
+      jevOnly: false,
     },
   ];
 

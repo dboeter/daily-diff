@@ -52,6 +52,11 @@ policy:
   feeds:
     - name: Commission
       url: https://example.eu/rss.xml
+      jurisdiction: eu
+    - name: Supervisor
+      url: https://example.nl/rss.xml
+      jurisdiction: nl
+      jev_only: true
 infra:
   title: Infra Title
   subject: infra subject
@@ -78,7 +83,10 @@ infra:
       policy: {
         readerProfile: "A practitioner.",
         watchlist: { eu: ["ai-act"], nl: [], usFederal: [], usStates: [] },
-        feeds: [{ name: "Commission", url: "https://example.eu/rss.xml" }],
+        feeds: [
+          { name: "Commission", url: "https://example.eu/rss.xml", jurisdiction: "eu", jevOnly: false },
+          { name: "Supervisor", url: "https://example.nl/rss.xml", jurisdiction: "nl", jevOnly: true },
+        ],
       },
       infra: {
         title: "Infra Title",
@@ -86,6 +94,12 @@ infra:
         repos: [{ id: "custom-engine", repo: "org/custom-engine", name: "Custom Engine" }],
       },
     });
+  });
+
+  it("throws when a policy feed has no known jurisdiction", () => {
+    expect(() => load(VALID.replace("jurisdiction: eu", "jurisdiction: uk"))).toThrow(
+      "policy.feeds[0].jurisdiction must be one of",
+    );
   });
 
   it("throws when the file does not exist", () => {

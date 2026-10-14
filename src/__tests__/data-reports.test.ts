@@ -10,7 +10,9 @@ const generateBody = vi.fn(async (_prompt: string) => "## Highlights\n\nText.");
 vi.mock("../report.ts", async (importOriginal) => ({
   ...(await importOriginal<typeof import("../report.ts")>()),
   generateBody: (...args: unknown[]) => generateBody(...(args as [string])),
+  saveFile: (...args: unknown[]) => saveFile(...(args as [string, string, string])),
 }));
+const saveFile = vi.fn((_content: string, dateStr: string, name: string) => `digests/${dateStr}/${name}`);
 
 const devto: DevtoData = {
   fetchSuccess: true,
@@ -72,6 +74,8 @@ describe("buildPolicyReport", () => {
     published: "2026-10-09T07:16:00.000Z",
     description: "Guidelines.",
     source: "European Commission",
+    jurisdiction: "eu" as const,
+    jevOnly: false,
   };
 
   it("is skipped on a day with no new items, without an LLM call or a state write", async () => {
@@ -80,6 +84,23 @@ describe("buildPolicyReport", () => {
     expect(await buildPolicyReport(data([]), "00:00", "2026-10-14", file)).toBeNull();
     expect(generateBody).not.toHaveBeenCalled();
     expect(fs.existsSync(file)).toBe(false);
+  });
+
+  it("saves the verdicts and the trace even when Jev kept nothing, so dropped items are not asked again", async () => {
+    generateBody.mockClear();
+    saveFile.mockClear();
+    const verdicts = path.join(dir, "verdicts.json");
+    const dropped: PolicyData = {
+      ...data([]),
+      nextVerdicts: { items: { x: { title: "X", answers: {} as never, lastSeen: "2026-10-14" } } },
+      rankingFile: "{}\n",
+    };
+    expect(
+      await buildPolicyReport(dropped, "00:00", "2026-10-14", path.join(dir, "s.json"), verdicts),
+    ).toBeNull();
+    expect(generateBody).not.toHaveBeenCalled();
+    expect(saveFile).toHaveBeenCalledWith("{}\n", "2026-10-14", "policy-ranking.json");
+    expect(Object.keys(JSON.parse(fs.readFileSync(verdicts, "utf-8")).items)).toEqual(["x"]);
   });
 
   it("splices the code-rendered table into the prose and saves the state", async () => {

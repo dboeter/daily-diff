@@ -220,7 +220,7 @@ async function fetchAllData(
       fetchSuccess: false,
       rankedBy: "recency",
     })),
-    fetchPolicyData(CONFIG.policy.feeds, now, toCstDateStr(now)).catch((): PolicyData => ({
+    fetchPolicyData(CONFIG.policy, now, toCstDateStr(now)).catch((): PolicyData => ({
       items: [],
       fetchSuccess: false,
       nextState: { reported: {} },

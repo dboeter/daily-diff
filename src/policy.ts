@@ -1,17 +1,23 @@
 /**
  * Policy Watch sources and state. One source so far: the Commission's
- * digital-strategy news feed. The state records which items a run reported,
- * so the daily report shows each item once.
+ * digital-strategy news feed. New items are scored by Jev (`policy-jev.ts`).
+ * The state records which items a run reported, so the daily report shows
+ * each item once.
  */
 
 import fs from "node:fs";
 import path from "node:path";
 import { fetchRssFeed, recentNewsItems, type FeedItem } from "./rss.ts";
-import type { PolicyFeed } from "./config.ts";
+import type { Jurisdiction, PolicyConfig } from "./config.ts";
+import { loadPolicyVerdicts, selectPolicyItems, type PolicyVerdicts } from "./policy-jev.ts";
+import type { AskJev } from "./trending-jev.ts";
 
 export interface PolicyItem extends FeedItem {
   /** The feed's display name (config.yml policy.feeds). */
   source: string;
+  /** From the feed (config.yml): whose policy the item is, and whether only Jev can judge it. */
+  jurisdiction: Jurisdiction;
+  jevOnly: boolean;
 }
 
 export interface PolicyState {
@@ -20,12 +26,18 @@ export interface PolicyState {
 }
 
 export interface PolicyData {
-  /** The items to report today, in feed order. */
+  /** The items to report today: the kept ones, most relevant first. */
   items: PolicyItem[];
   /** False when every feed failed. */
   fetchSuccess: boolean;
   /** Saved by buildPolicyReport once the report exists, like the ArXiv state. */
   nextState: PolicyState;
+  /** "keywords" when Jev was unavailable: watchlisted items and keyword hits only. */
+  rankedBy?: "jev" | "keywords";
+  /** Saved by buildPolicyReport; null leaves a malformed file as it is. */
+  nextVerdicts?: PolicyVerdicts | null;
+  /** `policy-ranking.json`, every scored item. */
+  rankingFile?: string;
 }
 
 export const POLICY_STATE_FILE = path.join("digests", "policy-state.json");
@@ -86,32 +98,51 @@ export function nextPolicyState(
 }
 
 export async function fetchPolicyData(
-  feeds: PolicyFeed[],
+  config: PolicyConfig,
   now: Date,
   dateStr: string,
   state = loadPolicyState(),
+  jev: { apiKey?: string; cache: PolicyVerdicts | null; ask?: AskJev } = {
+    apiKey: process.env["TYPESAFE_API_KEY"],
+    cache: loadPolicyVerdicts(),
+  },
 ): Promise<PolicyData> {
   const results = await Promise.all(
-    feeds.map(async (feed) => {
+    config.feeds.map(async (feed) => {
       try {
         const items = recentNewsItems(await fetchRssFeed(feed.url), now);
         console.log(`  [policy] ${feed.name}: ${items.length} items within the news age limit`);
-        return items.map((i): PolicyItem => ({ ...i, source: feed.name }));
+        return items.map((i): PolicyItem => ({
+          ...i,
+          source: feed.name,
+          jurisdiction: feed.jurisdiction,
+          jevOnly: feed.jevOnly,
+        }));
       } catch (err) {
         console.error(`  [policy] ${feed.name} failed: ${err}`);
         return null;
       }
     }),
   );
-  const items = newPolicyItems(
+  const candidates = newPolicyItems(
     results.flatMap((r) => r ?? []),
     state,
     dateStr,
   );
-  console.log(`  [policy] ${items.length} new items`);
+  console.log(`  [policy] ${candidates.length} new items`);
+  const selection = await selectPolicyItems(candidates, {
+    readerProfile: config.readerProfile,
+    watchlist: Object.values(config.watchlist).flat(),
+    dateStr,
+    ...jev,
+  });
   return {
-    items,
+    items: selection.items,
     fetchSuccess: results.some((r) => r !== null),
-    nextState: nextPolicyState(state, items, dateStr),
+    // Only the kept items: a dropped one is not reported, and its saved verdict stops it being asked again.
+    nextState: nextPolicyState(state, selection.items, dateStr),
+    rankedBy: selection.rankedBy,
+    nextVerdicts: selection.nextVerdicts,
+    ...(candidates.length > 0 ? { rankingFile: selection.rankingFile } : {}),
   };
 }

@@ -45,10 +45,18 @@ function tagText(xml: string, tag: string): string {
   return (cdata ? cdata[1]! : decodeEntities(m[1]!)).trim();
 }
 
+/**
+ * Drupal's byline: the title repeated, "Anonymous (not verified)" and the post
+ * date, ahead of the body in every Commission digital-strategy description.
+ * Stripped before truncation so it costs no body text and Jev and the LLM never read it.
+ */
+const DRUPAL_BYLINE_RE = /^.*?Anonymous \(not verified\) \w{3}, \d{2}\/\d{2}\/\d{4} - \d{2}:\d{2}\s*/;
+
 function plainText(html: string): string {
   const text = decodeEntities(html.replace(/<[^>]*>/g, " "))
     .replace(/\s+/g, " ")
-    .trim();
+    .trim()
+    .replace(DRUPAL_BYLINE_RE, "");
   return text.length > DESCRIPTION_MAX_CHARS ? `${text.slice(0, DESCRIPTION_MAX_CHARS)}…` : text;
 }
 
