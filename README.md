@@ -4,19 +4,20 @@ A GitHub Actions workflow that runs every night, landing the digest by about 05:
 
 ### Data Sources
 
-| Source                                                            | Type                                              | Data                                                                              |
-| ----------------------------------------------------------------- | ------------------------------------------------- | --------------------------------------------------------------------------------- |
-| [GitHub Repos](https://github.com)                                | API                                               | Stable releases and hot issues from the agent and infra repos in `config.yml`     |
-| [Claude Code Skills](https://github.com/anthropics/skills)        | API                                               | Trending skills sorted by community engagement — **weekly**                       |
-| [GitHub Trending](https://github.com/trending)                    | HTML + API                                        | Weekly trending repos + AI topic search (7-day window) — **weekly**               |
-| [OpenRouter](https://openrouter.ai/apps)                          | HTML (RSC payload) + Models API                   | Agent app usage, top/new models — **weekly**; stealth models daily                |
-| [npm](https://www.npmjs.com)                                      | Registry search API                               | Coding-agent packages by downloads and momentum — **weekly**                      |
-| [Hacker News](https://news.ycombinator.com)                       | [Firebase API](https://github.com/HackerNews/API) | Top AI stories from last 24h via topstories scanning                              |
-| [ArXiv](https://arxiv.org)                                        | [ArXiv API](https://export.arxiv.org/api/query)   | Papers from cs.AI, cs.CL, cs.LG (new since the last run), ranked by Jev relevance |
-| [Hugging Face](https://huggingface.co)                            | [Hub API](https://huggingface.co/api/models)      | 30 trending models sorted by weekly likes — **weekly**, Mondays only              |
-| [Dev.to](https://dev.to)                                          | [Forem API](https://dev.to/api)                   | Top AI/LLM articles of the week from 5 tags — **weekly**                          |
-| [Lobste.rs](https://lobste.rs)                                    | JSON API                                          | AI/ML tagged stories from last 7 days — **weekly**                                |
-| [Anthropic](https://anthropic.com) + [OpenAI](https://openai.com) | Sitemap                                           | New articles detected via `lastmod` diff                                          |
+| Source                                                            | Type                                                    | Data                                                                              |
+| ----------------------------------------------------------------- | ------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| [GitHub Repos](https://github.com)                                | API                                                     | Stable releases and hot issues from the agent and infra repos in `config.yml`     |
+| [Claude Code Skills](https://github.com/anthropics/skills)        | API                                                     | Trending skills sorted by community engagement — **weekly**                       |
+| [GitHub Trending](https://github.com/trending)                    | HTML + API                                              | Weekly trending repos + AI topic search (7-day window) — **weekly**               |
+| [OpenRouter](https://openrouter.ai/apps)                          | HTML (RSC payload) + Models API                         | Agent app usage, top/new models — **weekly**; stealth models daily                |
+| [npm](https://www.npmjs.com)                                      | Registry search API                                     | Coding-agent packages by downloads and momentum — **weekly**                      |
+| [Hacker News](https://news.ycombinator.com)                       | [Firebase API](https://github.com/HackerNews/API)       | Top AI stories from last 24h via topstories scanning                              |
+| [ArXiv](https://arxiv.org)                                        | [ArXiv API](https://export.arxiv.org/api/query)         | Papers from cs.AI, cs.CL, cs.LG (new since the last run), ranked by Jev relevance |
+| [Hugging Face](https://huggingface.co)                            | [Hub API](https://huggingface.co/api/models)            | 30 trending models sorted by weekly likes — **weekly**, Mondays only              |
+| [Dev.to](https://dev.to)                                          | [Forem API](https://dev.to/api)                         | Top AI/LLM articles of the week from 5 tags — **weekly**                          |
+| [Lobste.rs](https://lobste.rs)                                    | JSON API                                                | AI/ML tagged stories from last 7 days — **weekly**                                |
+| [Anthropic](https://anthropic.com) + [OpenAI](https://openai.com) | Sitemap                                                 | New articles detected via `lastmod` diff                                          |
+| [European Commission](https://digital-strategy.ec.europa.eu)      | [RSS](https://digital-strategy.ec.europa.eu/en/rss.xml) | AI Office and digital-policy news, new since the last run, at most 7 days old     |
 
 ## Web UI
 
@@ -185,7 +186,7 @@ New articles are detected by comparing sitemap `lastmod` timestamps against a pe
 ## Features
 
 - **Daily:** one agents report — stable releases, hot issues and news for the `agents` and `infra` repos in `config.yml`, one section and one LLM call each
-- **Daily:** Hacker News AI stories, new ArXiv papers, and new Anthropic/OpenAI web content (sitemap-based, incremental)
+- **Daily:** Hacker News AI stories, new ArXiv papers, new Anthropic/OpenAI web content (sitemap-based, incremental), and Policy Watch: new AI policy items from official sources (`policy` in `config.yml`)
 - **Weekly (Mondays):** GitHub AI trending + Claude Code Skills; the models report (Hugging Face trending models + OpenRouter token usage); Dev.to + Lobste.rs sections in the discussions report
 - Publishes a GitHub Issue per report; commits Markdown files to `digests/YYYY-MM-DD/`
 - Runs via GitHub Actions; supports manual triggering, with an option to force the weekly reports
@@ -326,13 +327,14 @@ Files are written to `digests/YYYY-MM-DD/`:
 | `ai-hn.md`        | AI Discussions — Hacker News stories, plus Dev.to articles and Lobste.rs stories on Mondays                                  | daily   | `hn`               |
 | `ai-arxiv.md`     | AI Research — key papers from cs.AI/cs.CL/cs.LG                                                                              | daily   | `arxiv`            |
 | `ai-web.md`       | Lab Announcements — new Anthropic and OpenAI content (only written when new content exists)                                  | daily   | `web`              |
+| `ai-policy.md`    | Policy Watch — new AI legislation, regulation and guidance items (only written when there are new items)                     | daily   | `policy`           |
 | `ai-trending.md`  | Agent & AI Coding Trends — radar + repos by category + signals + Claude Code Skills                                          | weekly  | `trending`         |
 | `ai-hf.md`        | AI Models — Hugging Face trending models + OpenRouter token usage and new models                                             | weekly  | `hf`               |
 | `highlights.json` | Up to 2 highlights per report, for Telegram and the web UI's day overview                                                    | daily   | —                  |
 
 Archived days also contain `ai-cli.md` (the CLI report, merged into `ai-agents.md` in October 2026), `ai-ph.md` (Product Hunt, dropped in October 2026), `ai-infra.md` (weekly until October 2026, now a section of `ai-agents.md`) and `ai-community.md` (weekly until October 2026, now part of `ai-hn.md`). Before October 2026, `ai-agents.md` was the OpenClaw ecosystem report.
 
-A shared state file `digests/web-state.json` tracks which web URLs have been seen; it is committed alongside the daily digests.
+Shared state files are committed alongside the daily digests: `digests/web-state.json` tracks which web URLs have been seen, and `digests/policy-state.json` which policy items were reported (an item first reported today counts as new again, so a same-day re-run reports the same items).
 
 ---
 
@@ -384,6 +386,17 @@ Sources: anthropic.com (N articles) + openai.com (N articles)
 [First full crawl also includes: Content Landscape Overview]
 ```
 
+`ai-policy.md` structure:
+
+```
+Sources: European Commission | N new items
+
+## Highlights
+## EU             — table rendered in code: date, source, title link; the LLM writes the summary column
+## Signals
+## Worth a Look
+```
+
 `ai-trending.md` structure:
 
 ```
@@ -414,7 +427,7 @@ Sources: Hugging Face Hub + OpenRouter
 ## Worth a Look
 ```
 
-Historical digests are stored in [`digests/`](./digests/). Published issues are tagged by type: [`agents`](../../issues?q=is%3Aissue+label%3Aagents) · [`web`](../../issues?q=is%3Aissue+label%3Aweb) · [`trending`](../../issues?q=is%3Aissue+label%3Atrending) · [`hn`](../../issues?q=is%3Aissue+label%3Ahn) · [`arxiv`](../../issues?q=is%3Aissue+label%3Aarxiv) · [`hf`](../../issues?q=is%3Aissue+label%3Ahf). Older issues also carry the retired labels [`infra`](../../issues?q=is%3Aissue+label%3Ainfra), [`community`](../../issues?q=is%3Aissue+label%3Acommunity), [`digest`](../../issues?q=is%3Aissue+label%3Adigest) (CLI), [`openclaw`](../../issues?q=is%3Aissue+label%3Aopenclaw) and [`ph`](../../issues?q=is%3Aissue+label%3Aph).
+Historical digests are stored in [`digests/`](./digests/). Published issues are tagged by type: [`agents`](../../issues?q=is%3Aissue+label%3Aagents) · [`web`](../../issues?q=is%3Aissue+label%3Aweb) · [`trending`](../../issues?q=is%3Aissue+label%3Atrending) · [`hn`](../../issues?q=is%3Aissue+label%3Ahn) · [`arxiv`](../../issues?q=is%3Aissue+label%3Aarxiv) · [`hf`](../../issues?q=is%3Aissue+label%3Ahf) · [`policy`](../../issues?q=is%3Aissue+label%3Apolicy). Older issues also carry the retired labels [`infra`](../../issues?q=is%3Aissue+label%3Ainfra), [`community`](../../issues?q=is%3Aissue+label%3Acommunity), [`digest`](../../issues?q=is%3Aissue+label%3Adigest) (CLI), [`openclaw`](../../issues?q=is%3Aissue+label%3Aopenclaw) and [`ph`](../../issues?q=is%3Aissue+label%3Aph).
 
 Only the most recent issues are left open — `pnpm close-stale` closes everything older on each run, so the issue list stays at roughly one day's worth instead of thousands. Daily reports keep the newest day open; each weekly report keeps its newest issue open until the next Monday. Nothing is deleted: the label links above include closed issues, and the full archive also lives under `digests/` and in the Web UI. Issues without a digest label, and pull requests, are never touched.
 
