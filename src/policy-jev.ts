@@ -2,7 +2,7 @@
  * Policy Watch relevance: Jev scores each new item, code weighs the answers
  * into keep/drop and an order (the ArXiv `relevanceOf` pattern), and the
  * answers are cached per item id in `digests/policy-verdicts.json` so an item
- * is asked once. Without Jev, watchlisted items and keyword hits are kept.
+ * is asked once (a stage item once per stage). Without Jev, watchlisted items and keyword hits are kept.
  */
 
 import path from "node:path";
@@ -12,7 +12,10 @@ import type { Jurisdiction, PolicyConfig } from "./config.ts";
 import type { PolicyItem, PolicyState } from "./policy.ts";
 import { daysBefore } from "./date.ts";
 
-/** The four questions every item gets; `state` is `{ title, description }`. */
+/**
+ * The four questions every item gets; `state` is `{ title, description }`, plus
+ * `stage` and `stage_date` for a stage item (an enacted bill is not the bill it was).
+ */
 const BASE_QUESTIONS = {
   about_ai_policy: {
     type: "noul",
@@ -40,7 +43,8 @@ const BASE_QUESTIONS = {
   },
   binding: {
     type: "noul",
-    instructions: "Does the item in `title` and `description` concern a legally binding measure?",
+    instructions:
+      "Does the item in `title` and `description` (at `stage`, when given) concern a legally binding measure?",
     criteria: {
       true: {
         what: "A law, regulation, implementing or delegated act, executive order, or an enforcement decision",
@@ -55,7 +59,7 @@ const BASE_QUESTIONS = {
   new_stage: {
     type: "noul",
     instructions:
-      "Does the item in `title` and `description` report a new step in a policy process, rather than routine activity?",
+      "Does the item in `title` and `description` (at `stage`, when given) report a new step in a policy process, rather than routine activity?",
     criteria: {
       true: {
         what: "Something was adopted, published, voted, signed, decided, entered into force, or opened for comment",
@@ -75,7 +79,7 @@ const BASE_QUESTIONS = {
   significance: {
     type: "score",
     instructions:
-      "How significant is the item in `title` and `description` for organisations that use AI in the jurisdiction it concerns?",
+      "How significant is the item in `title` and `description` (at `stage`, when given) for organisations that use AI in the jurisdiction it concerns?",
     criteria: [
       {
         what: "Minor: little changes for organisations using AI",
@@ -272,6 +276,12 @@ export interface PolicyVerdictEntry {
   title: string;
   /** Raw answers, not the decision, so the weights can change without asking again. */
   answers: PolicyAnswers;
+  /**
+   * A stage item's stage when Jev answered: Congress, Open States and Have
+   * your say keep an id across stages, so a different stage is asked again.
+   * Absent for other items, and on entries saved before stages were recorded.
+   */
+  stage?: string;
   /** CST date Jev answered; absent on a hand-added entry. */
   decided?: string;
   model?: string;
@@ -339,7 +349,7 @@ export async function selectPolicyItems(
   const verdicts = new Map<string, Verdict>();
   for (const item of items) {
     const e = cache?.items[item.id];
-    if (!e) continue;
+    if (!e || e.stage !== item.stage) continue;
     try {
       verdicts.set(item.id, {
         answers: e.answers,
@@ -363,6 +373,8 @@ export async function selectPolicyItems(
         const state = {
           title: item.title,
           description: item.description,
+          // A stage item's `published` is its stage's date.
+          ...(item.stage ? { stage: item.stage, stage_date: item.published.slice(0, 10) } : {}),
           ...(us ? { reader: readerProfile } : {}),
         };
         const impact = item.news ? NEWS_IMPACT_QUESTION : IMPACT_QUESTION;
@@ -401,6 +413,7 @@ export async function selectPolicyItems(
       if (v) {
         next[item.id] = {
           title: item.title,
+          ...(item.stage ? { stage: item.stage } : {}),
           answers: roundAnswers(v.answers),
           decided: dateStr,
           ...(v.model ? { model: v.model } : {}),

@@ -143,6 +143,54 @@ describe("selectPolicyItems", () => {
     });
   });
 
+  it("asks again when a stage item has moved past the stage its verdict was saved at", async () => {
+    const saved = { answers: answers(1, 0, 0, 0), decided: "2026-10-01", lastSeen: "2026-10-13" };
+    const cache: PolicyVerdicts = {
+      items: {
+        moved: { ...saved, title: "Title moved", stage: "Introduced" },
+        same: { ...saved, title: "Title same", stage: "Introduced" },
+        // Saved before verdicts carried a stage.
+        legacy: { ...saved, title: "Title legacy" },
+        plain: { ...saved, title: "Title plain" },
+      },
+    };
+    const ask = stub({ moved: answers(1, 1, 1, 2), legacy: answers(1, 1, 1, 2) });
+    const sel = await selectPolicyItems(
+      [
+        item("moved", { stage: "Became law" }),
+        item("same", { stage: "Introduced" }),
+        item("legacy", { stage: "Introduced" }),
+        item("plain"),
+      ],
+      { ...base, apiKey: "k", cache, ask },
+    );
+    expect(ask.mock.calls.map(([state]) => (state as { title: string }).title)).toEqual([
+      "Title moved",
+      "Title legacy",
+    ]);
+    expect(sel.items.map((i) => i.id)).toEqual(["moved", "legacy"]);
+    expect(sel.nextVerdicts?.items["moved"]).toMatchObject({
+      stage: "Became law",
+      answers: answers(1, 1, 1, 2),
+    });
+  });
+
+  it("shows Jev a stage item's stage and its date", async () => {
+    const ask = stub({ bill: answers(1, 1, 1, 2) });
+    await selectPolicyItems([item("bill", { stage: "Became law" })], {
+      ...base,
+      apiKey: "k",
+      cache: { items: {} },
+      ask,
+    });
+    expect(ask.mock.calls[0]![0]).toEqual({
+      title: "Title bill",
+      description: "",
+      stage: "Became law",
+      stage_date: "2026-10-13",
+    });
+  });
+
   it("without a key keeps watchlisted items and keyword hits, and drops Jev-only feeds", async () => {
     const ask = stub({});
     const sel = await selectPolicyItems(
