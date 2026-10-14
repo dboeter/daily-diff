@@ -8,6 +8,7 @@ import type { PolicyConfig } from "./config.ts";
 import type { PolicyItem, PolicyState } from "./policy.ts";
 import { fetchEurLex } from "./policy-eurlex.ts";
 import { fetchEuroparl } from "./policy-europarl.ts";
+import { fetchNlParliament } from "./policy-nl.ts";
 
 export interface PolicySourceContext {
   config: PolicyConfig;
@@ -31,4 +32,5 @@ export interface PolicySource {
 export const POLICY_SOURCES: PolicySource[] = [
   { name: "EUR-Lex", fetch: fetchEurLex },
   { name: "European Parliament", fetch: fetchEuroparl },
+  { name: "Tweede Kamer", fetch: fetchNlParliament },
 ];

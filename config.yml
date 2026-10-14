@@ -128,7 +128,11 @@ policy:
       - 2022/0272(COD) # Cyber Resilience Act
       - 2024/1689 # AI Act
       - 2024/2847 # Cyber Resilience Act
-    nl: []
+    # Tweede Kamer dossier numbers (Kamerstuk): bills, reported from the Tweede
+    # Kamer vote on (Eerste Kamer, Staatsblad from KOOP). Dutch implementation
+    # acts are named after the EU regulation, so keywords never find them.
+    nl:
+      - "36875" # Uitvoeringswet verordening cyberweerbaarheid (CRA)
     us_federal: []
     us_states: []
   feeds:

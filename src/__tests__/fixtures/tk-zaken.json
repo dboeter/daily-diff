@@ -1,0 +1,56 @@
+{
+  "value": [
+    {
+      "Id": "f36f9d94-1bf4-4e81-9918-006dcb2a80ce",
+      "Nummer": "2026Z21700",
+      "Soort": "Motie",
+      "Titel": "Waterbeleid",
+      "Onderwerp": "Motie van het lid Grinwis c.s. over inzetten op spoedige besluitvorming over en maximale medewerking verlenen aan het robuuster maken van het inlaatwerk Bernisse ",
+      "GestartOp": "2026-10-08T00:00:00+02:00",
+      "Document": [
+        {
+          "DocumentNummer": "2026D49961"
+        }
+      ]
+    },
+    {
+      "Id": "65f0e60d-3d9a-4cdc-be59-5d274e390b4e",
+      "Nummer": "2026Z22040",
+      "Soort": "Brief regering",
+      "Titel": null,
+      "Onderwerp": "Publieke AI-voorziening funderend onderwijs",
+      "GestartOp": "2026-10-13T00:00:00+02:00",
+      "Document": [
+        {
+          "DocumentNummer": "2026D50762"
+        }
+      ]
+    },
+    {
+      "Id": "6bbd04b0-5229-4b21-8e15-607b1f69a924",
+      "Nummer": "2026Z21775",
+      "Soort": "Schriftelijke vragen",
+      "Titel": null,
+      "Onderwerp": "Het artikel ‘Leraren en scholieren massaal aan de schandpaal: honderden TikTok-accounts verspreiden vernederende AI-filmpjes’",
+      "GestartOp": "2026-10-09T00:00:00+02:00",
+      "Document": [
+        {
+          "DocumentNummer": "2026D50131"
+        }
+      ]
+    },
+    {
+      "Id": "07cb0b28-8dea-4b16-ad9d-d4742892d5fd",
+      "Nummer": "2026Z21772",
+      "Soort": "Schriftelijke vragen",
+      "Titel": null,
+      "Onderwerp": "Het bericht 'Jetten informeerde Tweede Kamer onjuist over AI-gebruik'",
+      "GestartOp": "2026-10-09T00:00:00+02:00",
+      "Document": [
+        {
+          "DocumentNummer": "2026D50128"
+        }
+      ]
+    }
+  ]
+}

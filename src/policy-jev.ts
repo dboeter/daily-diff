@@ -189,7 +189,7 @@ export function policyRelevance(
 const AI_ACRONYM_RE = /\b(?:GP)?AI\b/;
 const AI_KEYWORD_RE =
   /artificial intelligence|machine learning|\balgorithm|automated decision|generative|foundation model|kunstmatige intelligentie|\balgoritm/i;
-const keywordHit = (i: PolicyItem): boolean => {
+export const keywordHit = (i: Pick<PolicyItem, "title" | "description">): boolean => {
   const text = `${i.title} ${i.description}`;
   return AI_ACRONYM_RE.test(text) || AI_KEYWORD_RE.test(text);
 };
