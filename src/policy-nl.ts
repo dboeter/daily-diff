@@ -13,7 +13,7 @@
 
 import type { PolicyItem } from "./policy.ts";
 import type { PolicySourceContext } from "./policy-sources.ts";
-import { keywordHit } from "./policy-jev.ts";
+import { keywordHit, staleOnFirstSight } from "./policy-jev.ts";
 import { NEWS_MAX_AGE_DAYS, tagText } from "./rss.ts";
 import { fetchOk } from "./http.ts";
 import { DAY_MS } from "./date.ts";
@@ -23,11 +23,6 @@ const SRU_URL = "https://repository.overheid.nl/sru";
 /** The OData API caps `$top` at 250 and sends no next link; ~300 Zaken of these types a week. */
 const PAGE_SIZE = 250;
 const MAX_PAGES = 8;
-/**
- * A dossier first seen at a stage older than this is recorded in the state
- * but not reported: adding a dossier to the watchlist must not report stale news.
- */
-const FIRST_SEEN_MAX_AGE_DAYS = 30;
 
 const DOSSIER_RE = /^\d+$/;
 
@@ -166,9 +161,6 @@ async function fetchBill(dossier: string, ctx: PolicySourceContext): Promise<Pol
   const latest = billStage(zaak?.Besluit ?? [], await koopRes.text());
   if (!latest) return null;
   const id = `nl:${dossier}`;
-  const firstSeenOld =
-    ctx.state?.stages?.[id] === undefined &&
-    Date.parse(ctx.dateStr) - Date.parse(latest.date) > FIRST_SEEN_MAX_AGE_DAYS * DAY_MS;
   return {
     id,
     title: zaak?.Kamerstukdossier[0]?.Citeertitel ?? zaak?.Titel ?? `Kamerstuk ${dossier}`,
@@ -180,7 +172,7 @@ async function fetchBill(dossier: string, ctx: PolicySourceContext): Promise<Pol
     jurisdiction: "nl",
     jevOnly: false,
     stage: latest.stage,
-    ...(firstSeenOld ? { recordOnly: true } : {}),
+    ...(staleOnFirstSight(ctx, id, latest.date) ? { recordOnly: true } : {}),
   };
 }
 

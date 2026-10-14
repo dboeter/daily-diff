@@ -9,7 +9,7 @@ import path from "node:path";
 import { askJev, mapJev, jevFailedTooOften, loadItemsFile, saveItemsFile } from "./jev.ts";
 import type { AskJev } from "./trending-jev.ts";
 import type { Jurisdiction, PolicyConfig } from "./config.ts";
-import type { PolicyItem } from "./policy.ts";
+import type { PolicyItem, PolicyState } from "./policy.ts";
 import { daysBefore } from "./date.ts";
 
 /** The four questions every item gets; `state` is `{ title, description }`. */
@@ -227,6 +227,23 @@ export const watchlisted = (
     return new RegExp(`(?<![\\p{L}\\p{N}])${escaped}(?![\\p{L}\\p{N}])`, "iu").test(text);
   });
 };
+
+/**
+ * A stage item first seen at a stage older than this is recorded in the state
+ * but not reported: adding a file to the watchlist must not report stale news.
+ */
+const FIRST_SEEN_MAX_AGE_DAYS = 30;
+
+/** Whether a stage source should set `recordOnly`: the state has never seen `id`, and its stage is old. */
+export function staleOnFirstSight(
+  ctx: { state: PolicyState | null; dateStr: string },
+  id: string,
+  stageDate: string,
+): boolean {
+  return (
+    ctx.state?.stages?.[id] === undefined && stageDate < daysBefore(ctx.dateStr, FIRST_SEEN_MAX_AGE_DAYS)
+  );
+}
 
 /** The watchlist of an item's own jurisdiction; Elsewhere has none. */
 const WATCHLIST_OF: Record<Jurisdiction, keyof PolicyConfig["watchlist"] | null> = {

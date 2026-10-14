@@ -151,6 +151,20 @@ describe("fetchEuroparl", () => {
     expect(items.map((i) => i.stage)).toEqual(["Parliament position adopted"]);
   });
 
+  it("only records a first-seen stage older than 30 days", async () => {
+    vi.spyOn(globalThis, "fetch").mockImplementation(
+      async () => new Response(JSON.stringify(fixture("europarl-procedure-2025-0359.json"))),
+    );
+    // The stage is dated 2026-06-16.
+    const [first] = await fetchEuroparl(ctx(["2025/0359(COD)"]));
+    expect(first!.recordOnly).toBe(true);
+    const [recent] = await fetchEuroparl({ ...ctx(["2025/0359(COD)"]), dateStr: "2026-07-01" });
+    expect(recent!.recordOnly).toBeUndefined();
+    const known = { reported: {}, stages: { "ep:2025/0359(COD)": "2026-05-01 Trilogue" } };
+    const [moved] = await fetchEuroparl({ ...ctx(["2025/0359(COD)"]), state: known });
+    expect(moved!.recordOnly).toBeUndefined();
+  });
+
   it("skips a failing procedure and throws only when all fail", async () => {
     vi.spyOn(globalThis, "fetch")
       .mockResolvedValueOnce(new Response("", { status: 500 }))
