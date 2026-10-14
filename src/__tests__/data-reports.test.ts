@@ -129,4 +129,19 @@ describe("buildPolicyReport", () => {
     expect(await buildPolicyReport(data([item]), "00:00", "2026-10-14", file)).toBeNull();
     expect(fs.existsSync(file)).toBe(false);
   });
+
+  it("is written on a day with only news, which gets its own section after the jurisdiction tables", async () => {
+    generateBody.mockImplementation(async (prompt: string) =>
+      prompt.includes("`N: <2 sentences>`")
+        ? "1: Politico reports."
+        : "## Highlights\n\nH.\n\n<!-- tables -->\n\n## Signals\n\nS.",
+    );
+    const news = { ...item, id: "n1", source: "Politico Europe", news: true };
+    const report = await buildPolicyReport(data([news]), "00:00", "2026-10-14", path.join(dir, "news.json"));
+    expect(report?.content).toContain(
+      "H.\n\n## News & commentary\n\n| Date | Source | Title | Summary |\n| :--- | :--- | :--- | :--- |\n" +
+        "| 2026-10-09 | Politico Europe | [AI Act guidelines](https://example.eu/a) | Politico reports. |\n\n## Signals",
+    );
+    expect(report?.content).not.toContain("## EU");
+  });
 });

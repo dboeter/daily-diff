@@ -21,6 +21,7 @@ A GitHub Actions workflow that runs every night, landing the digest by about 05:
 | [EDPB](https://www.edpb.europa.eu)                                | [RSS](https://www.edpb.europa.eu/feed/news_en)                    | EU data protection news, every item judged by Jev, at most 7 days old             |
 | [EUR-Lex](https://eur-lex.europa.eu)                              | [Cellar SPARQL](https://publications.europa.eu/webapi/rdf/sparql) | EU acts and proposals on AI or a watchlisted act, with their stage                |
 | [European Parliament](https://oeil.secure.europarl.europa.eu)     | [Open Data API](https://data.europarl.europa.eu)                  | Watchlisted EU procedures, reported when their stage moves                        |
+| Policy news (7 outlets, `kind: news` in `config.yml`)             | RSS                                                               | Politico, AI Act Newsletter, Transformer, CSET, Covington, Binnenlands Bestuur    |
 
 ## Web UI
 
@@ -397,6 +398,7 @@ Sources: European Commission | N new items ranked by Jev relevance
 ## Highlights
 ## EU             — one table per jurisdiction with items (EU, Netherlands, US federal, US states, Elsewhere), rendered in code:
                    date, source, title link, stage; the LLM writes the summary column
+## News & commentary — items from the news & commentary feeds (`kind: news`), date, source, title link, summary
 ## Signals
 ## Worth a Look
 ```
