@@ -264,9 +264,8 @@ export async function buildPolicyReport(
     return null;
   }
   const { items } = policyData;
-  // The deadlines go with the tables: after the jurisdiction sections, before the prose's closing sections.
   const tables = (summaries: Map<number, string>) =>
-    [renderPolicyTable(items, summaries), renderDeadlines(policyData.deadlines)].filter(Boolean).join("\n\n");
+    renderPolicyTable(items, summaries, renderDeadlines(policyData.deadlines));
   console.log("  [policy] Calling LLM for policy report...");
   const [summaries, prose] = await Promise.all([
     generateBody(buildPolicySummariesPrompt(items, dateStr), LLM_TOKENS_LISTING).catch((err) => {

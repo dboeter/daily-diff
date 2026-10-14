@@ -58,6 +58,8 @@ export interface PolicyFeed {
    * decision-making), so every item goes to Jev. Without Jev it is dropped for the run.
    */
   jevOnly: boolean;
+  /** `kind: news`: news and commentary, reported in its own section, not the jurisdiction tables. */
+  news: boolean;
 }
 
 /** A dated milestone for the policy report's Upcoming deadlines section. */
@@ -133,7 +135,13 @@ function toPolicy(raw: unknown, file: string): PolicyConfig {
     return [key, list.map(String)];
   });
   if (!Array.isArray(feeds)) throw new Error(`${file}: policy.feeds must be a list`);
-  const rawFeeds: { name?: string; url?: string; jurisdiction?: string; jev_only?: unknown }[] = feeds;
+  const rawFeeds: {
+    name?: string;
+    url?: string;
+    jurisdiction?: string;
+    jev_only?: unknown;
+    kind?: unknown;
+  }[] = feeds;
   rawFeeds.forEach((f, i) => {
     if (!nonEmptyString(f?.name) || !nonEmptyString(f.url)) {
       throw new Error(`${file}: policy.feeds[${i}] needs name and url`);
@@ -141,6 +149,8 @@ function toPolicy(raw: unknown, file: string): PolicyConfig {
     if (!(JURISDICTIONS as readonly unknown[]).includes(f.jurisdiction)) {
       throw new Error(`${file}: policy.feeds[${i}].jurisdiction must be one of ${JURISDICTIONS.join(", ")}`);
     }
+    if (f.kind !== undefined && f.kind !== "news")
+      throw new Error(`${file}: policy.feeds[${i}].kind must be news`);
   });
   if (!Array.isArray(calendar)) throw new Error(`${file}: policy.calendar must be a list`);
   // js-yaml reads an unquoted 2026-12-02 as a Date.
@@ -160,6 +170,7 @@ function toPolicy(raw: unknown, file: string): PolicyConfig {
       url: f.url!.trim(),
       jurisdiction: f.jurisdiction as Jurisdiction,
       jevOnly: f.jev_only === true,
+      news: f.kind === "news",
     })),
     calendar: calendarEntries,
   };

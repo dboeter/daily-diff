@@ -127,16 +127,17 @@ describe("buildPolicyReport", () => {
     expect(JSON.parse(fs.readFileSync(file, "utf-8"))).toEqual({ reported: { g1: "2026-10-14" } });
   });
 
-  it("puts the upcoming deadlines after the jurisdiction tables", async () => {
+  it("puts the upcoming deadlines between the jurisdiction tables and the news", async () => {
     generateBody.mockImplementation(async () => "## Highlights\n\nH.\n\n<!-- tables -->\n\n## Signals\n\nS.");
+    const news = { ...item, id: "n1", title: "Op-ed", news: true };
     const report = await buildPolicyReport(
-      { ...data([item]), deadlines: [deadline] },
+      { ...data([item, news]), deadlines: [deadline] },
       "00:00",
       "2026-10-14",
       path.join(dir, "deadlines.json"),
     );
     expect(report?.content).toMatch(
-      /## EU\n[\s\S]*\n\n## Upcoming deadlines \(next 30 days\)\n[\s\S]*\| 2026-11-09 \| Have your say \| \[AI Act implementing act\]\(https:\/\/x\.eu\) \|\n\n## Signals/,
+      /## EU\n[\s\S]*\n\n## Upcoming deadlines \(next 30 days\)\n[\s\S]*\| 2026-11-09 \| Have your say \| \[AI Act implementing act\]\(https:\/\/x\.eu\) \|\n\n## News & commentary\n[\s\S]*Op-ed[\s\S]*\n\n## Signals/,
     );
   });
 
@@ -160,5 +161,20 @@ describe("buildPolicyReport", () => {
     const file = path.join(dir, "failed.json");
     expect(await buildPolicyReport(data([item]), "00:00", "2026-10-14", file)).toBeNull();
     expect(fs.existsSync(file)).toBe(false);
+  });
+
+  it("is written on a day with only news, which gets its own section after the jurisdiction tables", async () => {
+    generateBody.mockImplementation(async (prompt: string) =>
+      prompt.includes("`N: <2 sentences>`")
+        ? "1: Politico reports."
+        : "## Highlights\n\nH.\n\n<!-- tables -->\n\n## Signals\n\nS.",
+    );
+    const news = { ...item, id: "n1", source: "Politico Europe", news: true };
+    const report = await buildPolicyReport(data([news]), "00:00", "2026-10-14", path.join(dir, "news.json"));
+    expect(report?.content).toContain(
+      "H.\n\n## News & commentary\n\n| Date | Source | Title | Summary |\n| :--- | :--- | :--- | :--- |\n" +
+        "| 2026-10-09 | Politico Europe | [AI Act guidelines](https://example.eu/a) | Politico reports. |\n\n## Signals",
+    );
+    expect(report?.content).not.toContain("## EU");
   });
 });

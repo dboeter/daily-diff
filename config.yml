@@ -109,6 +109,9 @@ infra:
 #                   jev_only: true for a low-volume feed whose items need not
 #                   name AI: every item goes to Jev, and without Jev the feed
 #                   is dropped for the run
+#                   kind: news for a news & commentary outlet: its items get
+#                   their own section after the jurisdiction tables; the
+#                   jurisdiction still sets Jev's questions (US: impact)
 
 policy:
   # The sector examples are illustrations only: clients span many sectors.
@@ -142,6 +145,45 @@ policy:
       url: https://www.edpb.europa.eu/feed/news_en
       jurisdiction: eu
       jev_only: true
+    # News & commentary (kind: news), measured 2026-09-29..10-13 and live-checked
+    # 2026-10-14; posts a week before Jev. Euractiv (403) and Lawfare had no
+    # usable feed; Tech Policy Press and IAPP feeds were not found.
+    # ~12 a week, ~7 about AI; EU AI policy.
+    - name: Politico Europe
+      url: https://www.politico.eu/section/technology/feed/
+      jurisdiction: eu
+      kind: news
+    # The EU AI Act Newsletter (Future of Life Institute); ~1 a week.
+    - name: EU AI Act Newsletter
+      url: https://artificialintelligenceact.substack.com/feed
+      jurisdiction: eu
+      kind: news
+    # ~12 a week, ~8 about AI; US federal and state attorneys general.
+    - name: Politico US
+      url: https://rss.politico.com/technology.xml
+      jurisdiction: us_federal
+      kind: news
+    # US AI policy and safety; ~3 a week.
+    - name: Transformer
+      url: https://www.transformernews.ai/feed
+      jurisdiction: us_federal
+      kind: news
+    # Georgetown CSET analysis (export controls, chips); ~4 a week.
+    - name: CSET
+      url: https://cset.georgetown.edu/feed/
+      jurisdiction: us_federal
+      kind: news
+    # Covington's Inside Privacy: US state-law round-ups; ~2 a week. Its Inside
+    # Tech Media blog overlaps, so only this one.
+    - name: Covington Inside Privacy
+      url: https://www.insideprivacy.com/feed/
+      jurisdiction: us_federal
+      kind: news
+    # Dutch public administration news; ~50 a week, ~3 about AI. No guid: keyed on the link.
+    - name: Binnenlands Bestuur
+      url: https://www.binnenlandsbestuur.nl/feeds/articles.rss
+      jurisdiction: nl
+      kind: news
   # Dated milestones for the "Upcoming deadlines" section, shown in the 30 days
   # before. AI Act dates as amended by the Digital Omnibus on AI (OJ 2026-07-24),
   # from the Commission's AI Act Service Desk timeline, read 2026-10-14.

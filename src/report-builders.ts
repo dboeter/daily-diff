@@ -300,25 +300,41 @@ export function renderTrendingTables(report: TrendingReportData, summaries: Map<
 
 /**
  * The policy report's tables, one `##` section per jurisdiction with items, in
- * POLICY_REPORT.headings order. Rows are numbered from 1 across all sections in
+ * POLICY_REPORT.headings order, then News & commentary (news-feed items). Rows are numbered from 1 across all sections in
  * item order (the summaries call's `N:` lines), so the items must arrive
  * grouped (fetchPolicyData sorts them). Date, source, title and stage come
  * from the data, never the model.
  */
-export function renderPolicyTable(items: PolicyItem[], summaries: Map<number, string>): string {
+export function renderPolicyTable(
+  items: PolicyItem[],
+  summaries: Map<number, string>,
+  /** The rendered Upcoming deadlines section, which goes between the jurisdictions and the news. */
+  deadlines = "",
+): string {
   const row = (it: PolicyItem, n: number) =>
     `| ${it.published.slice(0, 10)} | ${cell(it.source)} | [${cell(it.title)}](${cell(it.link)}) | ` +
     `${cell(it.stage ?? "")} | ${cell(summaries.get(n) ?? descriptionFallback(it.description))} |`;
   const numbered = items.map((it, i) => ({ it, n: i + 1 }));
-  return Object.entries(POLICY_REPORT.headings)
-    .map(([jurisdiction, heading]) => {
-      const rows = numbered
-        .filter(({ it }) => it.jurisdiction === jurisdiction)
-        .map(({ it, n }) => row(it, n));
-      return rows.length ? `## ${heading}\n\n${POLICY_REPORT.tableHeader}\n${rows.join("\n")}` : "";
-    })
-    .filter(Boolean)
-    .join("\n\n");
+  const sections = Object.entries(POLICY_REPORT.headings).map(([jurisdiction, heading]) => {
+    const rows = numbered
+      .filter(({ it }) => !it.news && it.jurisdiction === jurisdiction)
+      .map(({ it, n }) => row(it, n));
+    return rows.length ? `## ${heading}\n\n${POLICY_REPORT.tableHeader}\n${rows.join("\n")}` : "";
+  });
+  sections.push(deadlines);
+  const newsRows = numbered
+    .filter(({ it }) => it.news)
+    .map(
+      ({ it, n }) =>
+        `| ${it.published.slice(0, 10)} | ${cell(it.source)} | [${cell(it.title)}](${cell(it.link)}) | ` +
+        `${cell(summaries.get(n) ?? descriptionFallback(it.description))} |`,
+    );
+  if (newsRows.length) {
+    sections.push(
+      `## ${POLICY_REPORT.newsHeading}\n\n${POLICY_REPORT.newsTableHeader}\n${newsRows.join("\n")}`,
+    );
+  }
+  return sections.filter(Boolean).join("\n\n");
 }
 
 /** Put the tables where the prose left the marker; after the prose when the model dropped it. */

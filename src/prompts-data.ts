@@ -110,7 +110,7 @@ export function buildPolicySummariesPrompt(items: PolicyItem[], dateStr: string)
         `${i + 1}. ${it.title} (${it.source}, ${it.published.slice(0, 10)}${it.stage ? `, stage: ${it.stage}` : ""}) — ${it.description || "(no description)"}`,
     )
     .join("\n");
-  return `You are a policy analyst covering AI legislation, regulation and official guidance for an AI practitioner in the Netherlands. Below are ${items.length} numbered items from official sources, new as of ${dateStr}, each with its source, date and text.
+  return `You are a policy analyst covering AI legislation, regulation and official guidance for an AI practitioner in the Netherlands. Below are ${items.length} numbered items from official sources and news & commentary outlets, new as of ${dateStr}, each with its source, date and text.
 
 ${list}
 
@@ -127,7 +127,7 @@ For every numbered item write exactly one line in the form \`N: <2 sentences>\` 
  * table, which spliceTrendingProse inserts at TRENDING_TABLES_MARKER.
  */
 export function buildPolicyProsePrompt(tableMd: string, dateStr: string): string {
-  return `You are a policy analyst covering AI legislation, regulation and official guidance in the EU, the Netherlands and the US, for an AI practitioner in the Netherlands who deploys AI built by others. Below is today's table of new items from official sources, ${dateStr}; the Summary column holds summaries of each item.
+  return `You are a policy analyst covering AI legislation, regulation and official guidance in the EU, the Netherlands and the US, for an AI practitioner in the Netherlands who deploys AI built by others. Below is today's table of new items from official sources and news & commentary outlets, ${dateStr}; the Summary column holds summaries of each item.
 
 ${tableMd}
 
