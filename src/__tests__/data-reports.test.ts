@@ -114,8 +114,8 @@ describe("buildPolicyReport", () => {
     expect(report?.id).toBe("ai-policy");
     expect(report?.content).toContain("# Policy Watch 2026-10-14");
     expect(report?.content).toContain(
-      "H.\n\n## EU\n\n| Date | Source | Title | Summary |\n| :--- | :--- | :--- | :--- |\n" +
-        "| 2026-10-09 | European Commission | [AI Act guidelines](https://example.eu/a) | The AI Office published guidelines. |\n\n## Signals",
+      "H.\n\n## EU\n\n| Date | Source | Title | Stage | Summary |\n| :--- | :--- | :--- | :--- | :--- |\n" +
+        "| 2026-10-09 | European Commission | [AI Act guidelines](https://example.eu/a) |  | The AI Office published guidelines. |\n\n## Signals",
     );
     expect(JSON.parse(fs.readFileSync(file, "utf-8"))).toEqual({ reported: { g1: "2026-10-14" } });
   });

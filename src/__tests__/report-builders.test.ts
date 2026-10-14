@@ -318,12 +318,29 @@ describe("renderPolicyTable", () => {
     },
   ];
 
-  it("renders date, source and linked title from the data, the summary from the model", () => {
-    expect(renderPolicyTable(items, new Map([[1, "Guidelines for providers."]]))).toBe(
+  const motion = {
+    ...items[1]!,
+    id: "3",
+    title: "Motie AI",
+    link: "https://example.nl/m",
+    source: "Tweede Kamer",
+    jurisdiction: "nl" as const,
+    stage: "Stemmen - aangenomen",
+  };
+
+  it("renders one section per jurisdiction, date, source, title and stage from the data, the summary from the model", () => {
+    const summaries = new Map([
+      [1, "Guidelines for providers."],
+      [3, "A motion passed."],
+    ]);
+    expect(renderPolicyTable([...items, motion], summaries)).toBe(
       "## EU\n\n" +
-        "| Date | Source | Title | Summary |\n| :--- | :--- | :--- | :--- |\n" +
-        "| 2026-10-09 | European Commission | [AI Act \\| guidelines](https://example.eu/a) | Guidelines for providers. |\n" +
-        "| 2026-10-08 | European Commission | [Scientific panel](https://example.eu/b) | — |",
+        "| Date | Source | Title | Stage | Summary |\n| :--- | :--- | :--- | :--- | :--- |\n" +
+        "| 2026-10-09 | European Commission | [AI Act \\| guidelines](https://example.eu/a) |  | Guidelines for providers. |\n" +
+        "| 2026-10-08 | European Commission | [Scientific panel](https://example.eu/b) |  | — |\n\n" +
+        "## Netherlands\n\n" +
+        "| Date | Source | Title | Stage | Summary |\n| :--- | :--- | :--- | :--- | :--- |\n" +
+        "| 2026-10-08 | Tweede Kamer | [Motie AI](https://example.nl/m) | Stemmen - aangenomen | A motion passed. |",
     );
   });
 

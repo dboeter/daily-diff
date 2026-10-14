@@ -107,7 +107,7 @@ export function buildPolicySummariesPrompt(items: PolicyItem[], dateStr: string)
   const list = items
     .map(
       (it, i) =>
-        `${i + 1}. ${it.title} (${it.source}, ${it.published.slice(0, 10)}) — ${it.description || "(no description)"}`,
+        `${i + 1}. ${it.title} (${it.source}, ${it.published.slice(0, 10)}${it.stage ? `, stage: ${it.stage}` : ""}) — ${it.description || "(no description)"}`,
     )
     .join("\n");
   return `You are a policy analyst covering AI legislation, regulation and official guidance for an AI practitioner in the Netherlands. Below are ${items.length} numbered items from official sources, new as of ${dateStr}, each with its source, date and text.

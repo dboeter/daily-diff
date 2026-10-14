@@ -39,7 +39,42 @@ describe("newPolicyItems", () => {
   });
 });
 
+describe("newPolicyItems with stages", () => {
+  const staged = (stage: string, published = "2026-07-24T00:00:00.000Z"): PolicyItem => ({
+    ...item("ep:2025/0359(COD)", published),
+    stage,
+  });
+  const reportedOn = (day: string) =>
+    nextPolicyState(null, [staged("Published in the Official Journal")], day);
+
+  it("skips an item whose stage has not changed, also after its reported day is pruned", () => {
+    const state = { ...reportedOn("2026-08-01"), reported: {} };
+    expect(newPolicyItems([staged("Published in the Official Journal")], state, "2026-10-14")).toEqual([]);
+  });
+
+  it("reports an item again when its stage moves", () => {
+    const moved = staged("Signed", "2026-10-13T00:00:00.000Z");
+    expect(newPolicyItems([moved], reportedOn("2026-10-01"), "2026-10-14")).toEqual([moved]);
+  });
+
+  it("a same-day re-run reports the same stage again", () => {
+    const it0 = staged("Published in the Official Journal");
+    expect(newPolicyItems([it0], reportedOn("2026-10-14"), "2026-10-14")).toEqual([it0]);
+  });
+});
+
 describe("nextPolicyState", () => {
+  it("records a stage change as reported today and never prunes stages", () => {
+    const before = {
+      reported: { a: "2026-10-01" },
+      stages: { a: "2026-10-01 Trilogue", old: "2024-01-01 Signed" },
+    };
+    const a = { ...item("a", "2026-10-13T00:00:00.000Z"), stage: "Signed" };
+    const state = nextPolicyState(before, [a], "2026-10-14");
+    expect(state.reported).toEqual({ a: "2026-10-14" });
+    expect(state.stages).toEqual({ a: "2026-10-13 Signed", old: "2024-01-01 Signed" });
+  });
+
   it("records each reported item with the day it was first reported", () => {
     const state = nextPolicyState({ reported: { a: "2026-10-13" } }, [item("b")], "2026-10-14");
     expect(state.reported).toEqual({ a: "2026-10-13", b: "2026-10-14" });
@@ -62,7 +97,13 @@ describe("policy state file", () => {
 
   it("round-trips", () => {
     savePolicyState({ reported: { a: "2026-10-14" } }, file);
-    expect(loadPolicyState(file)).toEqual({ reported: { a: "2026-10-14" } });
+    expect(loadPolicyState(file)).toEqual({ reported: { a: "2026-10-14" }, stages: {} });
+  });
+
+  it("reads a state saved before stages existed", () => {
+    const file = path.join(dir, "old.json");
+    fs.writeFileSync(file, JSON.stringify({ reported: { a: "2026-10-13" } }));
+    expect(loadPolicyState(file)).toEqual({ reported: { a: "2026-10-13" }, stages: {} });
   });
 
   it("missing or malformed reads as no state", () => {
@@ -129,6 +170,35 @@ describe("fetchPolicyData", () => {
     ]);
     expect(data.nextState.reported).toEqual({ seen: "2026-10-13", "new AI rules": "2026-10-14" });
     expect(Object.keys(data.nextVerdicts!.items)).toEqual(["new AI rules", "new event"]);
+  });
+
+  it("adds registered sources' items, groups them by jurisdiction and survives a failing source", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response(rss([["new AI rules", "Tue, 13 Oct 2026 08:00:00 +0000"]])),
+    );
+    const nl = { ...item("nl-motion"), title: "new AI rules", jurisdiction: "nl" as const };
+    const act = { ...item("eu-act"), title: "new AI rules", stage: "Regulation adopted" };
+    const procedure = { ...item("ep:1"), title: "new AI rules", stage: "Trilogue" };
+    const fetchStages = vi.fn(async () => [nl, procedure, act]);
+    const data = await fetchPolicyData(
+      config,
+      new Date("2026-10-13T23:00:00Z"),
+      "2026-10-14",
+      { reported: {}, stages: { "ep:1": "2026-10-13 Trilogue" } },
+      { apiKey: "test-key", cache: { items: {} }, ask },
+      [
+        { name: "Stages", fetch: fetchStages },
+        { name: "Broken", fetch: async () => Promise.reject(new Error("HTTP 500")) },
+      ],
+    );
+    expect(fetchStages).toHaveBeenCalledWith(expect.objectContaining({ dateStr: "2026-10-14", config }));
+    // The procedure's stage is unchanged, so it is not new; EU items come before NL ones.
+    expect(data.items.map((i) => i.id)).toEqual(["eu-act", "new AI rules", "nl-motion"]);
+    expect(data.nextState.stages).toEqual({
+      "ep:1": "2026-10-13 Trilogue",
+      "eu-act": "2026-10-13 Regulation adopted",
+    });
+    expect(data.fetchSuccess).toBe(true);
   });
 
   it("reports a failed feed as fetchSuccess false instead of throwing", async () => {

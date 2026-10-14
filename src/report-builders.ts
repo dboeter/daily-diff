@@ -299,17 +299,26 @@ export function renderTrendingTables(report: TrendingReportData, summaries: Map<
 }
 
 /**
- * The policy report's table, rows numbered from 1 in item order (the summaries
- * call's `N:` lines). Date, source and title come from the feed, never the model.
+ * The policy report's tables, one `##` section per jurisdiction with items, in
+ * POLICY_REPORT.headings order. Rows are numbered from 1 across all sections in
+ * item order (the summaries call's `N:` lines), so the items must arrive
+ * grouped (fetchPolicyData sorts them). Date, source, title and stage come
+ * from the data, never the model.
  */
 export function renderPolicyTable(items: PolicyItem[], summaries: Map<number, string>): string {
-  if (items.length === 0) return "";
-  const rows = items.map(
-    (it, i) =>
-      `| ${it.published.slice(0, 10)} | ${cell(it.source)} | [${cell(it.title)}](${cell(it.link)}) | ` +
-      `${cell(summaries.get(i + 1) ?? descriptionFallback(it.description))} |`,
-  );
-  return `## ${POLICY_REPORT.euHeading}\n\n${POLICY_REPORT.tableHeader}\n${rows.join("\n")}`;
+  const row = (it: PolicyItem, n: number) =>
+    `| ${it.published.slice(0, 10)} | ${cell(it.source)} | [${cell(it.title)}](${cell(it.link)}) | ` +
+    `${cell(it.stage ?? "")} | ${cell(summaries.get(n) ?? descriptionFallback(it.description))} |`;
+  const numbered = items.map((it, i) => ({ it, n: i + 1 }));
+  return Object.entries(POLICY_REPORT.headings)
+    .map(([jurisdiction, heading]) => {
+      const rows = numbered
+        .filter(({ it }) => it.jurisdiction === jurisdiction)
+        .map(({ it, n }) => row(it, n));
+      return rows.length ? `## ${heading}\n\n${POLICY_REPORT.tableHeader}\n${rows.join("\n")}` : "";
+    })
+    .filter(Boolean)
+    .join("\n\n");
 }
 
 /** Put the tables where the prose left the marker; after the prose when the model dropped it. */

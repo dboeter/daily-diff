@@ -2,6 +2,8 @@
  * Centralized report strings: report names, labels, footers and status messages.
  */
 
+import type { Jurisdiction } from "./config.ts";
+
 // ---------------------------------------------------------------------------
 // Status & error messages (used in index.ts)
 // ---------------------------------------------------------------------------
@@ -130,8 +132,16 @@ export const ARXIV_REPORT = {
 
 // Daily: AI legislation, regulation and official guidance. The table is rendered in code.
 export const POLICY_REPORT = {
-  euHeading: "EU",
-  tableHeader: "| Date | Source | Title | Summary |\n| :--- | :--- | :--- | :--- |",
+  /** One section per jurisdiction, in the report's order (config.ts JURISDICTIONS). */
+  headings: {
+    eu: "EU",
+    nl: "Netherlands",
+    us_federal: "US federal",
+    us_states: "US states",
+    other: "Elsewhere",
+  } satisfies Record<Jurisdiction, string>,
+  // Stage is empty for news items.
+  tableHeader: "| Date | Source | Title | Stage | Summary |\n| :--- | :--- | :--- | :--- | :--- |",
 } as const;
 
 // Weekly: Hugging Face trending models plus OpenRouter token usage, which
