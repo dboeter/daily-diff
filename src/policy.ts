@@ -195,7 +195,7 @@ export async function fetchPolicyData(
   console.log(`  [policy] ${POLICY_REPORT.newItems(candidates.length)}`);
   const selection = await selectPolicyItems(candidates, {
     readerProfile: config.readerProfile,
-    watchlist: Object.values(config.watchlist).flat(),
+    watchlist: config.watchlist,
     dateStr,
     ...jev,
   });

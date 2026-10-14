@@ -5,12 +5,14 @@ import { describe, it, expect, vi } from "vitest";
 import {
   policyRelevance,
   selectPolicyItems,
+  watchlisted,
   loadPolicyVerdicts,
   savePolicyVerdicts,
   type PolicyAnswers,
   type PolicyVerdicts,
 } from "../policy-jev.ts";
 import type { PolicyItem } from "../policy.ts";
+import type { PolicyConfig } from "../config.ts";
 
 const answers = (
   about: number,
@@ -72,7 +74,8 @@ describe("policyRelevance", () => {
 });
 
 describe("selectPolicyItems", () => {
-  const base = { readerProfile: "A practitioner.", watchlist: [], dateStr: "2026-10-14" };
+  const noWatchlist = { eu: [], nl: [], usFederal: [], usStates: [] };
+  const base = { readerProfile: "A practitioner.", watchlist: noWatchlist, dateStr: "2026-10-14" };
   const stub = (byId: Record<string, PolicyAnswers>) =>
     vi.fn(async (state: unknown, _questions: object, _apiKey: string) => {
       const title = (state as { title: string }).title;
@@ -149,7 +152,7 @@ describe("selectPolicyItems", () => {
         item("jevonly", { title: "Regulator fines AI provider", jevOnly: true }),
         item("watched", { title: "Uber fine", description: "Case 2024/123", jevOnly: true }),
       ],
-      { ...base, watchlist: ["2024/123"], cache: { items: {} }, ask },
+      { ...base, watchlist: { ...noWatchlist, eu: ["2024/123"] }, cache: { items: {} }, ask },
     );
     expect(ask).not.toHaveBeenCalled();
     expect(sel.rankedBy).toBe("keywords");
@@ -173,7 +176,7 @@ describe("selectPolicyItems", () => {
     const ask = stub({ w: answers(0, 0, 0, 0) });
     const sel = await selectPolicyItems([item("w", { link: "https://x/2024-0106(COD)" })], {
       ...base,
-      watchlist: ["2024-0106(cod)"],
+      watchlist: { ...noWatchlist, eu: ["2024-0106(cod)"] },
       apiKey: "k",
       cache: { items: {} },
       ask,
@@ -212,5 +215,94 @@ describe("policy verdict file", () => {
     expect(loadPolicyVerdicts(file)).toEqual(cache);
     fs.writeFileSync(file, "{ nope");
     expect(loadPolicyVerdicts(file)).toBeNull();
+  });
+});
+
+describe("policyRelevance for news items", () => {
+  it("keeps a significant commentary piece that reports no new stage and nothing binding", () => {
+    // A weekly AI Act roundup: on topic and notable, neither a step in a process nor binding.
+    expect(policyRelevance(answers(0.8, 0, 0, 1), "eu", true).keep).toBe(true);
+  });
+
+  it("drops an off-topic news piece however significant", () => {
+    expect(policyRelevance(answers(0.2, 0, 0, 1.6), "eu", true).keep).toBe(false);
+  });
+
+  it("drops an on-topic news piece of minor significance", () => {
+    expect(policyRelevance(answers(1, 1, 1, 0), "nl", true).keep).toBe(false);
+  });
+
+  it("still holds US news to the impact gate", () => {
+    expect(policyRelevance(answers(0.9, 0, 0, 1.5, 0.4), "us_federal", true).keep).toBe(false);
+    expect(policyRelevance(answers(0.9, 0, 0, 1.5, 1.2), "us_federal", true).keep).toBe(true);
+  });
+});
+
+describe("watchlisted", () => {
+  const item = (description: string) => ({ title: "T", description, link: "https://x.nl/" });
+
+  it("matches a whole entry, case-insensitively", () => {
+    expect(watchlisted(item("Dutch bill, Kamerstuk 36875."), ["36875"])).toBe(true);
+    expect(watchlisted(item("procedure 2025/0359(COD)."), ["2025/0359(cod)"])).toBe(true);
+    expect(watchlisted(item("(NIST-2026-0100; RIN 0693-AB12)"), ["0693-AB12"])).toBe(true);
+  });
+
+  it("does not match inside a longer number", () => {
+    expect(watchlisted(item("Kamerstuk 136875"), ["36875"])).toBe(false);
+    expect(watchlisted(item("Kamerstuk 368750"), ["36875"])).toBe(false);
+    expect(watchlisted(item("Regulation (EU) 2024/16890"), ["2024/1689"])).toBe(false);
+    expect(watchlisted(item("CELEX 2032024/1689"), ["2024/1689"])).toBe(false);
+  });
+});
+
+describe("selectPolicyItems watchlist", () => {
+  const empty: PolicyConfig["watchlist"] = { eu: [], nl: [], usFederal: [], usStates: [] };
+  const drop = vi.fn(async () => ({ model: "jev-1.0", answers: answers(0, 0, 0, 0) as unknown }));
+  const opts = (watchlist: PolicyConfig["watchlist"]) => ({
+    readerProfile: "A practitioner.",
+    dateStr: "2026-10-14",
+    watchlist,
+    apiKey: "test",
+    cache: { items: {} },
+    ask: drop,
+  });
+
+  it("does not let a news item naming a watchlisted file bypass Jev", async () => {
+    const news = item("n", { description: "Analysis of Regulation 2024/1689", news: true });
+    const sel = await selectPolicyItems([news], opts({ ...empty, eu: ["2024/1689"] }));
+    expect(sel.items).toEqual([]);
+  });
+
+  it("matches only the item's own jurisdiction's watchlist", async () => {
+    const us = item("u", { description: "Bill citing EU Regulation 2024/1689", jurisdiction: "us_federal" });
+    const eu = item("e", { description: "Regulation 2024/1689" });
+    const sel = await selectPolicyItems([us, eu], opts({ ...empty, eu: ["2024/1689"] }));
+    expect(sel.items.map((i) => i.id)).toEqual(["e"]);
+  });
+});
+
+describe("selectPolicyItems impact wording", () => {
+  it("asks about the reported development, not a US measure, for US news", async () => {
+    const ask = vi.fn(async (_s: unknown, _q: object, _k: string) => ({
+      model: "jev-1.0",
+      answers: answers(1, 0, 0, 1, 1) as unknown,
+    }));
+    await selectPolicyItems(
+      [item("m"), item("n", { news: true })].map((i) => ({ ...i, jurisdiction: "us_federal" as const })),
+      {
+        readerProfile: "A practitioner.",
+        dateStr: "2026-10-14",
+        watchlist: { eu: [], nl: [], usFederal: [], usStates: [] },
+        apiKey: "test",
+        cache: { items: {} },
+        ask,
+      },
+    );
+    const wording = ask.mock.calls.map(
+      ([, q]) => (q as { impact: { instructions: string } }).impact.instructions,
+    );
+    expect(wording[0]).toContain("US measure");
+    expect(wording[1]).not.toContain("US measure");
+    expect(wording[1]).toContain("development");
   });
 });

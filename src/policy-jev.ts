@@ -8,7 +8,7 @@
 import path from "node:path";
 import { askJev, mapJev, jevFailedTooOften, loadItemsFile, saveItemsFile } from "./jev.ts";
 import type { AskJev } from "./trending-jev.ts";
-import type { Jurisdiction } from "./config.ts";
+import type { Jurisdiction, PolicyConfig } from "./config.ts";
 import type { PolicyItem } from "./policy.ts";
 import { daysBefore } from "./date.ts";
 
@@ -103,31 +103,38 @@ const BASE_QUESTIONS = {
  * kind: a direct or an indirect impact can be either level. Examples name no
  * sector: the reader's clients span many.
  */
+const IMPACT_CRITERIA = [
+  {
+    what: "Little or no expected effect outside the US",
+    examples: ["a state rule on AI in its own agencies", "a federal grant program", "a hearing"],
+  },
+  {
+    what: "Some effect: obligations or shifts that reach EU users in part or later",
+    examples: [
+      "disclosure duties for US AI vendors that their EU customers inherit",
+      "a state law that national vendors are likely to apply everywhere",
+    ],
+  },
+  {
+    what: "Significant effect: obligations that reach EU users of US models, clouds or tools, or a change to the pace or direction of AI development",
+    examples: [
+      "export controls on AI chips or model weights",
+      "federal rules for frontier models",
+      "federal preemption of state AI laws",
+    ],
+  },
+];
 const IMPACT_QUESTION = {
   type: "score",
   instructions:
     "How much is the US measure in `title` and `description` expected to affect `reader`, their clients and colleagues, directly or indirectly?",
-  criteria: [
-    {
-      what: "Little or no expected effect outside the US",
-      examples: ["a state rule on AI in its own agencies", "a federal grant program", "a hearing"],
-    },
-    {
-      what: "Some effect: obligations or shifts that reach EU users in part or later",
-      examples: [
-        "disclosure duties for US AI vendors that their EU customers inherit",
-        "a state law that national vendors are likely to apply everywhere",
-      ],
-    },
-    {
-      what: "Significant effect: obligations that reach EU users of US models, clouds or tools, or a change to the pace or direction of AI development",
-      examples: [
-        "export controls on AI chips or model weights",
-        "federal rules for frontier models",
-        "federal preemption of state AI laws",
-      ],
-    },
-  ],
+  criteria: IMPACT_CRITERIA,
+};
+/** A news or commentary piece reports on a development rather than being a measure itself. */
+const NEWS_IMPACT_QUESTION = {
+  ...IMPACT_QUESTION,
+  instructions:
+    "How much is the US development reported in `title` and `description` expected to affect `reader`, their clients and colleagues, directly or indirectly?",
 };
 
 export interface PolicyAnswers {
@@ -145,6 +152,14 @@ export interface PolicyAnswers {
  * share and also a gate, so an off-topic item never ranks on significance alone.
  */
 const POLICY_WEIGHTS = { about_ai_policy: 0.4, significance: 0.3, new_stage: 0.2, binding: 0.1 };
+/**
+ * News items (`kind: news` feeds), summing to 1: topic and significance only.
+ * A weekly roundup or an analysis piece is no new stage and binds nothing, yet
+ * belongs in the report when it is about AI policy and significant. With
+ * KEEP_MIN_RELEVANCE, an on-topic piece needs some significance: about 1 and
+ * significance 0 is 0.4 and drops.
+ */
+const NEWS_WEIGHTS = { about_ai_policy: 0.4, significance: 0.6 };
 const MAX_LEVEL = 2;
 /** Keep: about AI policy at this noul or more, and a relevance of at least KEEP_MIN_RELEVANCE. */
 const ABOUT_MIN = 0.5;
@@ -161,13 +176,16 @@ const isUs = (j: Jurisdiction): boolean => j === "us_federal" || j === "us_state
 export function policyRelevance(
   a: PolicyAnswers,
   jurisdiction: Jurisdiction,
+  news = false,
 ): { relevance: number; keep: boolean } {
   const impact = isUs(jurisdiction) ? a.impact?.score : 0;
-  const relevance =
-    POLICY_WEIGHTS.about_ai_policy * a.about_ai_policy?.noul +
-    (POLICY_WEIGHTS.significance * a.significance?.score) / MAX_LEVEL +
-    POLICY_WEIGHTS.new_stage * a.new_stage?.noul +
-    POLICY_WEIGHTS.binding * a.binding?.noul;
+  const relevance = news
+    ? NEWS_WEIGHTS.about_ai_policy * a.about_ai_policy?.noul +
+      (NEWS_WEIGHTS.significance * a.significance?.score) / MAX_LEVEL
+    : POLICY_WEIGHTS.about_ai_policy * a.about_ai_policy?.noul +
+      (POLICY_WEIGHTS.significance * a.significance?.score) / MAX_LEVEL +
+      POLICY_WEIGHTS.new_stage * a.new_stage?.noul +
+      POLICY_WEIGHTS.binding * a.binding?.noul;
   // A NaN would sort arbitrarily yet count as a success (see relevanceOf in arxiv.ts).
   if (!Number.isFinite(relevance) || !Number.isFinite(impact)) {
     throw new Error(`Unexpected Jev answers: ${JSON.stringify(a)}`);
@@ -192,12 +210,35 @@ export const keywordHit = (i: Pick<PolicyItem, "title" | "description">): boolea
   return AI_ACRONYM_RE.test(text) || AI_KEYWORD_RE.test(text);
 };
 
+/**
+ * Names a watchlist entry as a whole token, case-insensitively: no letter or
+ * digit on either side, so dossier 36875 does not match inside 136875, nor
+ * 2024/1689 inside 2024/16890.
+ */
 export const watchlisted = (
   i: Pick<PolicyItem, "title" | "description" | "link">,
   watchlist: string[],
 ): boolean => {
-  const text = `${i.title} ${i.description} ${i.link}`.toLowerCase();
-  return watchlist.some((w) => w.trim() !== "" && text.includes(w.trim().toLowerCase()));
+  const text = `${i.title} ${i.description} ${i.link}`;
+  return watchlist.some((w) => {
+    const entry = w.trim();
+    if (entry === "") return false;
+    const escaped = entry.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    return new RegExp(`(?<![\\p{L}\\p{N}])${escaped}(?![\\p{L}\\p{N}])`, "iu").test(text);
+  });
+};
+
+/** The watchlist of an item's own jurisdiction; Elsewhere has none. */
+const WATCHLIST_OF: Record<Jurisdiction, keyof PolicyConfig["watchlist"] | null> = {
+  eu: "eu",
+  nl: "nl",
+  us_federal: "usFederal",
+  us_states: "usStates",
+  other: null,
+};
+const watchlistFor = (watchlist: PolicyConfig["watchlist"], j: Jurisdiction): string[] => {
+  const key = WATCHLIST_OF[j];
+  return key ? watchlist[key] : [];
 };
 
 // ---------------------------------------------------------------------------
@@ -269,8 +310,8 @@ export async function selectPolicyItems(
   items: PolicyItem[],
   opts: {
     readerProfile: string;
-    /** Every watchlist entry, all jurisdictions: an item naming one is always kept. */
-    watchlist: string[];
+    /** A non-news item naming an entry of its own jurisdiction's list is always kept. */
+    watchlist: PolicyConfig["watchlist"];
     apiKey?: string;
     cache: PolicyVerdicts | null;
     dateStr: string;
@@ -285,7 +326,7 @@ export async function selectPolicyItems(
     try {
       verdicts.set(item.id, {
         answers: e.answers,
-        ...policyRelevance(e.answers, item.jurisdiction),
+        ...policyRelevance(e.answers, item.jurisdiction, item.news),
         decided: e.decided ?? "by hand",
       });
     } catch {
@@ -307,10 +348,11 @@ export async function selectPolicyItems(
           description: item.description,
           ...(us ? { reader: readerProfile } : {}),
         };
-        const questions = us ? { ...BASE_QUESTIONS, impact: IMPACT_QUESTION } : BASE_QUESTIONS;
+        const impact = item.news ? NEWS_IMPACT_QUESTION : IMPACT_QUESTION;
+        const questions = us ? { ...BASE_QUESTIONS, impact } : BASE_QUESTIONS;
         const { model, answers } = await ask(state, questions, apiKey);
         const a = answers as PolicyAnswers;
-        return { answers: a, model, ...policyRelevance(a, item.jurisdiction) };
+        return { answers: a, model, ...policyRelevance(a, item.jurisdiction, item.news) };
       },
       "policy",
     );
@@ -320,8 +362,10 @@ export async function selectPolicyItems(
   // Too many failures: the answers that did arrive are saved, but this run decides by keyword.
   if (!jevDown) for (const [id, v] of fresh) verdicts.set(id, v);
 
+  const onWatchlist = (i: PolicyItem): boolean => watchlisted(i, watchlistFor(watchlist, i.jurisdiction));
   const kept = (i: PolicyItem): boolean => {
-    if (watchlisted(i, watchlist)) return true;
+    // News about a watchlisted file is still news: Jev judges it like any other piece.
+    if (!i.news && onWatchlist(i)) return true;
     const v = verdicts.get(i.id);
     // A Jev-only feed's items need not name AI, so a keyword match means nothing there.
     return v ? v.keep : !i.jevOnly && keywordHit(i);
@@ -368,13 +412,13 @@ export async function selectPolicyItems(
       relevance: v ? round(v.relevance) : null,
       ...(v ? roundAnswers(v.answers) : {}),
       decided: v?.decided ?? null,
-      watchlisted: watchlisted(i, watchlist),
+      watchlisted: onWatchlist(i),
       keyword: keywordHit(i),
     });
   });
   const rankingFile =
     `{\n"models": ${JSON.stringify(models)},\n"rankedBy": ${JSON.stringify(jevDown ? "keywords" : "jev")},\n` +
-    `"weights": ${JSON.stringify(POLICY_WEIGHTS)},\n"items": [\n${lines.join(",\n")}\n]\n}\n`;
+    `"weights": ${JSON.stringify(POLICY_WEIGHTS)},\n"newsWeights": ${JSON.stringify(NEWS_WEIGHTS)},\n"items": [\n${lines.join(",\n")}\n]\n}\n`;
 
   return { items: selected, rankedBy: jevDown ? "keywords" : "jev", nextVerdicts, rankingFile };
 }
