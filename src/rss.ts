@@ -52,7 +52,8 @@ function tagText(xml: string, tag: string): string {
  */
 const DRUPAL_BYLINE_RE = /^.*?Anonymous \(not verified\) \w{3}, \d{2}\/\d{2}\/\d{4} - \d{2}:\d{2}\s*/;
 
-function plainText(html: string): string {
+/** HTML to plain text: tags stripped, entities decoded, whitespace collapsed, truncated. */
+export function plainText(html: string): string {
   const text = decodeEntities(html.replace(/<[^>]*>/g, " "))
     .replace(/\s+/g, " ")
     .trim()

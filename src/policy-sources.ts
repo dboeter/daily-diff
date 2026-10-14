@@ -11,6 +11,7 @@ import { fetchEuroparl } from "./policy-europarl.ts";
 import { fetchNlParliament } from "./policy-nl.ts";
 import { fetchHaveYourSay } from "./policy-haveyoursay.ts";
 import { fetchOpenStates } from "./policy-openstates.ts";
+import { fetchInternetConsultatie } from "./policy-internetconsultatie.ts";
 
 export interface PolicySourceContext {
   config: PolicyConfig;
@@ -37,4 +38,5 @@ export const POLICY_SOURCES: PolicySource[] = [
   { name: "Tweede Kamer", fetch: fetchNlParliament },
   { name: "Have your say", fetch: fetchHaveYourSay },
   { name: "Open States", fetch: fetchOpenStates },
+  { name: "Internetconsultatie", fetch: fetchInternetConsultatie },
 ];

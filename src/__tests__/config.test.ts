@@ -120,6 +120,17 @@ infra:
     );
   });
 
+  it("appends a policy feed's query, URL-encoded JSON, to its url", () => {
+    const yaml = VALID.replace(
+      "url: https://example.nl/rss.xml",
+      `url: https://www.rijksoverheid.nl/api/rss
+      query: { filters: [{ field: content_type, values: ["pro:newsDocument"], type: all }], resultSearchTerm: "", pageTitle: Nieuws }`,
+    );
+    expect(load(yaml).policy.feeds[1]!.url).toBe(
+      "https://www.rijksoverheid.nl/api/rss?query=%7B%22filters%22%3A%5B%7B%22field%22%3A%22content_type%22%2C%22values%22%3A%5B%22pro%3AnewsDocument%22%5D%2C%22type%22%3A%22all%22%7D%5D%2C%22resultSearchTerm%22%3A%22%22%2C%22pageTitle%22%3A%22Nieuws%22%7D",
+    );
+  });
+
   it("throws when a policy feed has an unknown kind", () => {
     expect(() => load(VALID.replace("kind: news", "kind: blog"))).toThrow(
       "policy.feeds[1].kind must be news",

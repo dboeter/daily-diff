@@ -112,6 +112,8 @@ infra:
 #                   kind: news for a news & commentary outlet: its items get
 #                   their own section after the jurisdiction tables; the
 #                   jurisdiction still sets Jev's questions (US: impact)
+#                   query: JSON appended URL-encoded as ?query= (the
+#                   Rijksoverheid platform's feeds take their search as JSON)
 
 policy:
   # The sector examples are illustrations only: clients span many sectors.
@@ -148,6 +150,35 @@ policy:
     - name: EDPB
       url: https://www.edpb.europa.eu/feed/news_en
       jurisdiction: eu
+      jev_only: true
+    # Dutch AI supervisor (data protection); ~1.4 a week, AI items often name no AI term.
+    - name: Autoriteit Persoonsgegevens
+      url: https://www.autoriteitpersoonsgegevens.nl/rss.xml
+      jurisdiction: nl
+      jev_only: true
+    # All ministries' news (AI news comes from education, justice, defence too, not
+    # only BZK/EZK); the newest 20, ~4 a day. The old feed URLs broke 2026-06-02.
+    # Not resultSearchTerm: it ranks by relevance, not date.
+    - name: Rijksoverheid
+      url: https://www.rijksoverheid.nl/api/rss
+      query:
+        &rijksoverheid_news {
+          filters: [{ field: content_type, values: ["pro:newsDocument"], type: all }],
+          resultSearchTerm: "",
+          pageTitle: Nieuws,
+        }
+      jurisdiction: nl
+      jev_only: true
+    # AI Act market-surveillance co-coordinator, same platform and query; ~1 a week.
+    - name: RDI
+      url: https://www.rdi.nl/api/rss
+      query: *rijksoverheid_news
+      jurisdiction: nl
+      jev_only: true
+    # BZK's channel for government digitalisation and AI guidance; ~5 a week.
+    - name: Digitale Overheid
+      url: https://www.digitaleoverheid.nl/feed/
+      jurisdiction: nl
       jev_only: true
     # News & commentary (kind: news), measured 2026-09-29..10-13 and live-checked
     # 2026-10-14; posts a week before Jev. Euractiv (403) and Lawfare had no

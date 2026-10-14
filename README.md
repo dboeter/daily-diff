@@ -23,6 +23,8 @@ A GitHub Actions workflow that runs every night, landing the digest by about 05:
 | [European Parliament](https://oeil.secure.europarl.europa.eu)     | [Open Data API](https://data.europarl.europa.eu)                  | Watchlisted EU procedures, reported when their stage moves                        |
 | [Tweede Kamer](https://www.tweedekamer.nl)                        | [OData API](https://opendata.tweedekamer.nl), KOOP SRU            | AI motions, letters, questions; watchlisted bills to the Staatsblad               |
 | [Have your say](https://ec.europa.eu/info/law/better-regulation)  | Portal search API (undocumented)                                  | AI Commission initiatives: new stage or feedback period, closing date             |
+| [Dutch government](https://www.rijksoverheid.nl)                  | RSS                                                               | AP, Rijksoverheid, RDI, Digitale Overheid news, every item judged by Jev          |
+| [Internetconsultatie](https://www.internetconsultatie.nl)         | Homepage list                                                     | Open Dutch consultations on AI, closing date                                      |
 | [Open States](https://openstates.org)                             | [API v3](https://v3.openstates.org/docs)                          | US state AI bills from passing a chamber onward; needs `PLURAL_API_KEY`           |
 | Policy news (7 outlets, `kind: news` in `config.yml`)             | RSS                                                               | Politico, AI Act Newsletter, Transformer, CSET, Covington, Binnenlands Bestuur    |
 

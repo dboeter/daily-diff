@@ -2,3 +2,5 @@ node_modules/
 dist/
 digests/
 pnpm-lock.yaml
+# Saved live responses: kept byte-for-byte as the site serves them.
+src/__tests__/fixtures/*.html

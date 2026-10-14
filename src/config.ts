@@ -141,6 +141,7 @@ function toPolicy(raw: unknown, file: string): PolicyConfig {
     jurisdiction?: string;
     jev_only?: unknown;
     kind?: unknown;
+    query?: unknown;
   }[] = feeds;
   rawFeeds.forEach((f, i) => {
     if (!nonEmptyString(f?.name) || !nonEmptyString(f.url)) {
@@ -167,7 +168,11 @@ function toPolicy(raw: unknown, file: string): PolicyConfig {
     watchlist: Object.fromEntries(entries) as PolicyConfig["watchlist"],
     feeds: rawFeeds.map((f) => ({
       name: f.name!.trim(),
-      url: f.url!.trim(),
+      // `query` is kept as JSON in config.yml so the Rijksoverheid-platform feeds stay readable.
+      url:
+        f.query === undefined
+          ? f.url!.trim()
+          : `${f.url!.trim()}?query=${encodeURIComponent(JSON.stringify(f.query))}`,
       jurisdiction: f.jurisdiction as Jurisdiction,
       jevOnly: f.jev_only === true,
       news: f.kind === "news",
