@@ -66,6 +66,7 @@ describe("buildPolicyReport", () => {
     fetchSuccess: true,
     items,
     nextState: { reported: Object.fromEntries(items.map((i) => [i.id, "2026-10-14"])) },
+    observedState: { reported: {} },
     deadlines: [],
     readerProfile: "A practitioner.",
   });
@@ -86,11 +87,24 @@ describe("buildPolicyReport", () => {
     jevOnly: false,
   };
 
-  it("is skipped on a day with no new items, without an LLM call or a state write", async () => {
+  it("is skipped on a day with no new items, without an LLM call, but saves the observed state", async () => {
     generateBody.mockClear();
     const file = path.join(dir, "empty.json");
-    expect(await buildPolicyReport(data([]), "00:00", "2026-10-14", file)).toBeNull();
+    const observedState = {
+      reported: {},
+      stages: { "nl:1": "2026-08-01 Passed the Tweede Kamer" },
+      deadlines: { "hys:1": deadline },
+    };
+    expect(await buildPolicyReport({ ...data([]), observedState }, "00:00", "2026-10-14", file)).toBeNull();
     expect(generateBody).not.toHaveBeenCalled();
+    expect(JSON.parse(fs.readFileSync(file, "utf-8"))).toEqual(observedState);
+  });
+
+  it("writes no state when every source failed", async () => {
+    const file = path.join(dir, "all-failed.json");
+    expect(
+      await buildPolicyReport({ ...data([]), fetchSuccess: false }, "00:00", "2026-10-14", file),
+    ).toBeNull();
     expect(fs.existsSync(file)).toBe(false);
   });
 
@@ -154,14 +168,15 @@ describe("buildPolicyReport", () => {
     expect(generateBody).not.toHaveBeenCalled();
   });
 
-  it("is skipped, state untouched, when the prose call fails", async () => {
+  it("is skipped when the prose call fails, saving only the observed state", async () => {
     generateBody.mockImplementation(async (prompt: string) => {
       if (prompt.includes("`N: <2 sentences>`")) return "1: S.";
       throw new Error("down");
     });
     const file = path.join(dir, "failed.json");
     expect(await buildPolicyReport(data([item]), "00:00", "2026-10-14", file)).toBeNull();
-    expect(fs.existsSync(file)).toBe(false);
+    // The item is not marked reported: the next run takes it again.
+    expect(JSON.parse(fs.readFileSync(file, "utf-8"))).toEqual({ reported: {} });
   });
 
   it("is written on a day with only news, which gets its own section after the jurisdiction tables", async () => {

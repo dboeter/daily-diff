@@ -3,7 +3,9 @@
  * `policy.feeds`, and the registered non-RSS sources (`policy-sources.ts`).
  * New items are scored by Jev (`policy-jev.ts`). The state records which items
  * a run reported, so the daily report shows each item once, and a stage item
- * again when its stage moves.
+ * again when its stage moves. What a run observes (record-only stages, deadline
+ * changes) is saved on every successful fetch; what it reports, only once the
+ * report exists.
  */
 
 import fs from "node:fs";
@@ -60,6 +62,12 @@ export interface PolicyData {
   fetchSuccess: boolean;
   /** Saved by buildPolicyReport once the report exists, like the ArXiv state. */
   nextState: PolicyState;
+  /**
+   * `nextState` without today's kept items: the record-only stages and the
+   * saved deadlines reconciled with the fetch. Saved on every successful fetch,
+   * so a quiet day or a failed report still keeps them.
+   */
+  observedState: PolicyState;
   /** "keywords" when Jev was unavailable: watchlisted items and keyword hits only. */
   rankedBy?: "jev" | "keywords";
   /** Saved by buildPolicyReport; null leaves a malformed file as it is. */
@@ -204,11 +212,16 @@ export async function fetchPolicyData(
   // equal to the table's.
   const rank = (i: PolicyItem) => (i.news ? JURISDICTIONS.length : JURISDICTIONS.indexOf(i.jurisdiction));
   const deadlines = nextDeadlines(state?.deadlines, selection.items, fetched, dateStr);
+  const observedState = {
+    ...nextPolicyState(state, [], dateStr, recorded),
+    deadlines: nextDeadlines(state?.deadlines, [], fetched, dateStr),
+  };
   return {
     items: [...selection.items].sort((a, b) => rank(a) - rank(b)),
     fetchSuccess: results.some((r) => r !== null),
     // Only the kept items: a dropped one is not reported, and its saved verdict stops it being asked again.
     nextState: { ...nextPolicyState(state, selection.items, dateStr, recorded), deadlines },
+    observedState,
     deadlines: upcomingDeadlines(deadlines, config.calendar, dateStr),
     rankedBy: selection.rankedBy,
     readerProfile: config.readerProfile,

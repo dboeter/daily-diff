@@ -258,6 +258,9 @@ export async function buildPolicyReport(
     console.log(`  Saved ${saveFile(policyData.rankingFile, dateStr, "policy-ranking.json")}`);
   }
   if (policyData.nextVerdicts) savePolicyVerdicts(policyData.nextVerdicts, verdictsFile);
+  // Observations (record-only stages, deadline changes) are kept whether or not a report follows;
+  // replaced by nextState below once the report exists.
+  if (policyData.fetchSuccess) savePolicyState(policyData.observedState, stateFile);
   if (!policyData.fetchSuccess || policyData.items.length === 0) {
     console.log(`  [policy] ${policyData.fetchSuccess ? POLICY_REPORT.noNewItems : POLICY_REPORT.noData}`);
     return null;

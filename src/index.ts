@@ -224,6 +224,7 @@ async function fetchAllData(
       items: [],
       fetchSuccess: false,
       nextState: { reported: {} },
+      observedState: { reported: {} },
       deadlines: [],
       readerProfile: CONFIG.policy.readerProfile,
     })),

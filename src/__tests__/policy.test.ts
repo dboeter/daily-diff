@@ -231,6 +231,50 @@ describe("fetchPolicyData", () => {
     });
   });
 
+  it("observes stages and deadline changes without marking kept items as reported", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response(rss([["new AI rules", "Tue, 13 Oct 2026 08:00:00 +0000"]])),
+    );
+    const old = { ...item("nl:1", "2026-08-01"), stage: "Passed the Tweede Kamer", recordOnly: true };
+    // Reported before, its stage unchanged: not new, but its feedback period was extended.
+    const extended = { ...item("hys:1"), stage: "Open for feedback", deadline: "2026-11-20" };
+    const closed = { ...item("hys:2"), stage: "Open for feedback" };
+    const saved = { title: "T", link: "https://x", source: "Have your say" };
+    const data = await fetchPolicyData(
+      config,
+      new Date("2026-10-13T23:00:00Z"),
+      "2026-10-14",
+      {
+        reported: { "hys:1": "2026-10-13", "hys:2": "2026-10-13" },
+        stages: { "hys:1": "2026-10-13 Open for feedback", "hys:2": "2026-10-13 Open for feedback" },
+        deadlines: {
+          "hys:1": { ...saved, date: "2026-11-01" },
+          "hys:2": { ...saved, date: "2026-11-02" },
+        },
+      },
+      { apiKey: "k", cache: { items: {} }, ask },
+      [{ name: "Stages", fetch: async () => [old, extended, closed] }],
+    );
+    expect(data.items.map((i) => i.id)).toEqual(["new AI rules"]);
+    expect(data.observedState).toEqual({
+      reported: { "hys:1": "2026-10-13", "hys:2": "2026-10-13" },
+      stages: {
+        "hys:1": "2026-10-13 Open for feedback",
+        "hys:2": "2026-10-13 Open for feedback",
+        "nl:1": "2026-08-01 Passed the Tweede Kamer",
+      },
+      deadlines: {
+        "hys:1": {
+          date: "2026-11-20",
+          title: "Title hys:1",
+          link: "https://example.eu/hys:1",
+          source: "Commission",
+        },
+      },
+    });
+    expect(data.nextState.reported["new AI rules"]).toBe("2026-10-14");
+  });
+
   it("reports a failed feed as fetchSuccess false instead of throwing", async () => {
     vi.spyOn(globalThis, "fetch").mockResolvedValue(new Response("", { status: 503 }));
     const data = await fetchPolicyData(
