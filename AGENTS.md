@@ -131,6 +131,8 @@ Files written to `digests/YYYY-MM-DD/`:
 
 Weekly = on `WEEKLY_REPORT_WEEKDAY` (Monday, CST) or when `DIGEST_FORCE_WEEKLY=1` (the workflow's `force_weekly` dispatch input). Archive-only files: `ai-cli.md` (merged into `ai-agents.md` in October 2026), `ai-ph.md` (dropped October 2026), `ai-infra.md` (weekly until October 2026, now a section of `ai-agents.md`), `ai-community.md` (weekly until October 2026, now the Dev.to/Lobste.rs sections of `ai-hn.md`); before October 2026 `ai-agents.md` was the OpenClaw ecosystem report.
 
+`pnpm tsx scripts/regen-highlights.ts [YYYY-MM-DD] [--notify]` regenerates a day's `highlights.json` (one LLM call) from every report file of that date with a label in `REPORT_LABELS`, archive-only ones included: it overwrites the file whole, so an old date keeps its retired reports' highlights.
+
 ## Tracked sources
 
 - **Agents** (daily): `agents.repos` in `config.yml`, the only list (README's table is generated from it). On 2026-10-10 Qwen Code, OpenClaw, IronClaw, QwenPaw, ZeroClaw and Copilot CLI were dropped (unused by the maintainer); Kilo Code, Oh My Pi, jcode, Cline, Command Code and DeepSeek Harness were added. Per-repo quirks (no releases, issues disabled, prerelease-only) are comments next to the entry in `config.yml`. One list, CLI or not — the CLI/OpenClaw split was merged in October 2026. Optional `keywords` per agent set the news-match terms (Pi needs them: "pi" alone matches Raspberry Pi).
