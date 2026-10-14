@@ -120,7 +120,16 @@ describe("fetchPolicyData", () => {
   const config: PolicyConfig = {
     readerProfile: "A practitioner.",
     watchlist: { eu: [], nl: [], usFederal: [], usStates: [] },
-    feeds: [{ name: "Commission", url: "https://example.eu/rss.xml", jurisdiction: "eu", jevOnly: false }],
+    feeds: [
+      {
+        name: "Commission",
+        url: "https://example.eu/rss.xml",
+        jurisdiction: "eu",
+        jevOnly: false,
+        news: false,
+      },
+    ],
+    calendar: [],
   };
   const rss = (ids: [string, string][]) =>
     `<rss><channel>${ids
@@ -216,7 +225,7 @@ describe("fetchPolicyData", () => {
     );
     expect(data.items).toEqual([]);
     expect(askOld).not.toHaveBeenCalled();
-    expect(data.nextState).toEqual({
+    expect(data.nextState).toMatchObject({
       reported: {},
       stages: { "nl:1": "2026-08-01 Passed the Tweede Kamer" },
     });
@@ -234,5 +243,48 @@ describe("fetchPolicyData", () => {
     );
     expect(data.fetchSuccess).toBe(false);
     expect(data.items).toEqual([]);
+  });
+
+  it("marks news-feed items and puts them after every jurisdiction's items", async () => {
+    vi.spyOn(globalThis, "fetch").mockImplementation(
+      async (url) =>
+        new Response(
+          rss([[String(url).includes("politico") ? "news" : "rules", "Tue, 13 Oct 2026 08:00:00 +0000"]]),
+        ),
+    );
+    const keepAll = vi.fn(async () => ({
+      model: "jev-1.0",
+      answers: {
+        about_ai_policy: noul(1),
+        binding: noul(1),
+        new_stage: noul(1),
+        significance: { score: 2 },
+        impact: { score: 2 },
+      } as unknown,
+    }));
+    const data = await fetchPolicyData(
+      {
+        ...config,
+        feeds: [
+          {
+            name: "Politico",
+            url: "https://politico/rss",
+            jurisdiction: "us_federal",
+            jevOnly: false,
+            news: true,
+          },
+          { name: "Agency", url: "https://agency/rss", jurisdiction: "other", jevOnly: false, news: false },
+        ],
+      },
+      new Date("2026-10-13T23:00:00Z"),
+      "2026-10-14",
+      null,
+      { apiKey: "test-key", cache: { items: {} }, ask: keepAll },
+      [],
+    );
+    expect(data.items.map((i) => [i.id, i.news])).toEqual([
+      ["rules", false],
+      ["news", true],
+    ]);
   });
 });

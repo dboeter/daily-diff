@@ -22,6 +22,9 @@ A GitHub Actions workflow that runs every night, landing the digest by about 05:
 | [EUR-Lex](https://eur-lex.europa.eu)                              | [Cellar SPARQL](https://publications.europa.eu/webapi/rdf/sparql) | EU acts and proposals on AI or a watchlisted act, with their stage                |
 | [European Parliament](https://oeil.secure.europarl.europa.eu)     | [Open Data API](https://data.europarl.europa.eu)                  | Watchlisted EU procedures, reported when their stage moves                        |
 | [Tweede Kamer](https://www.tweedekamer.nl)                        | [OData API](https://opendata.tweedekamer.nl), KOOP SRU            | AI motions, letters, questions; watchlisted bills to the Staatsblad               |
+| [Have your say](https://ec.europa.eu/info/law/better-regulation)  | Portal search API (undocumented)                                  | AI Commission initiatives: new stage or feedback period, closing date             |
+| [Open States](https://openstates.org)                             | [API v3](https://v3.openstates.org/docs)                          | US state AI bills from passing a chamber onward; needs `PLURAL_API_KEY`           |
+| Policy news (7 outlets, `kind: news` in `config.yml`)             | RSS                                                               | Politico, AI Act Newsletter, Transformer, CSET, Covington, Binnenlands Bestuur    |
 
 ## Web UI
 
@@ -242,6 +245,7 @@ Go to **Settings → Secrets and variables → Actions** and add:
 | `DEEPSEEK_API_KEY`   | if DeepSeek   | DeepSeek API key                                                                                                                                                                                                                                                                 |
 | `DASHSCOPE_API_KEY`  | if Qwen       | Alibaba Model Studio API key                                                                                                                                                                                                                                                     |
 | `TYPESAFE_API_KEY`   | optional      | [TypeSafe](https://typesafe.ai) key. If set, ArXiv papers are ranked by Jev relevance instead of recency, Jev decides the trending report's scope, categories and cross-source matches instead of the search topics, and Jev picks the Policy Watch items instead of AI keywords |
+| `PLURAL_API_KEY`     | optional      | [Open States / Plural](https://open.pluralpolicy.com) key for Policy Watch's US state bills; unset skips that source                                                                                                                                                             |
 | `TELEGRAM_BOT_TOKEN` | optional      | Telegram bot token from [@BotFather](https://t.me/BotFather). If set, a message is sent after each digest run                                                                                                                                                                    |
 | `TELEGRAM_CHAT_ID`   | optional      | Telegram chat/channel/group ID to send notifications to                                                                                                                                                                                                                          |
 
@@ -315,6 +319,7 @@ export ANTHROPIC_API_KEY=sk-ant-xxxxxxxx
 export DIGEST_REPO=your-username/daily-diff  # optional; omit to only write files
 # export DIGEST_FORCE_WEEKLY=1               # optional; also run the weekly reports today
 # export TYPESAFE_API_KEY=xxxxx              # optional; Jev for ArXiv ranking, trending scope and Policy Watch relevance
+# export PLURAL_API_KEY=xxxxx                 # optional; Policy Watch's US state bills (Open States)
 
 pnpm start
 
@@ -338,7 +343,7 @@ Files are written to `digests/YYYY-MM-DD/`:
 
 Archived days also contain `ai-cli.md` (the CLI report, merged into `ai-agents.md` in October 2026), `ai-ph.md` (Product Hunt, dropped in October 2026), `ai-infra.md` (weekly until October 2026, now a section of `ai-agents.md`) and `ai-community.md` (weekly until October 2026, now part of `ai-hn.md`). Before October 2026, `ai-agents.md` was the OpenClaw ecosystem report.
 
-Shared state files are committed alongside the daily digests: `digests/web-state.json` tracks which web URLs have been seen, `digests/policy-state.json` which policy items were reported (and each legislative item's last reported stage, so it reappears when it moves), and `digests/policy-verdicts.json` Jev's answers per policy item, so each is asked once (an item first reported today counts as new again, so a same-day re-run reports the same items).
+Shared state files are committed alongside the daily digests: `digests/web-state.json` tracks which web URLs have been seen, `digests/policy-state.json` which policy items were reported (and each legislative item's last reported stage, so it reappears when it moves, and the open deadlines of reported items, listed until they pass), and `digests/policy-verdicts.json` Jev's answers per policy item, so each is asked once (an item first reported today counts as new again, so a same-day re-run reports the same items).
 
 ---
 
@@ -398,6 +403,8 @@ Sources: European Commission | N new items ranked by Jev relevance
 ## Highlights
 ## EU             — one table per jurisdiction with items (EU, Netherlands, US federal, US states, Elsewhere), rendered in code:
                    date, source, title link, stage; the LLM writes the summary column
+## Upcoming deadlines (next 30 days) — rendered in code: open consultations of reported items, and policy.calendar dates
+## News & commentary — items from the news & commentary feeds (`kind: news`), date, source, title link, summary
 ## Signals
 ## Worth a Look
 ```

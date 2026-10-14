@@ -140,8 +140,15 @@ export const POLICY_REPORT = {
     us_states: "US states",
     other: "Elsewhere",
   } satisfies Record<Jurisdiction, string>,
-  // Stage is empty for news items.
+  // Stage is empty for items from the regular news feeds.
   tableHeader: "| Date | Source | Title | Stage | Summary |\n| :--- | :--- | :--- | :--- | :--- |",
+  deadlinesHeading: "Upcoming deadlines (next 30 days)",
+  deadlinesHeader: "| Date | Source | Item |\n| :--- | :--- | :--- |",
+  /** The source column of a config.yml `policy.calendar` date. */
+  calendarSource: "Calendar",
+  /** After the jurisdiction sections: items from `kind: news` feeds (news and commentary outlets). */
+  newsHeading: "News & commentary",
+  newsTableHeader: "| Date | Source | Title | Summary |\n| :--- | :--- | :--- | :--- |",
 } as const;
 
 // Weekly: Hugging Face trending models plus OpenRouter token usage, which

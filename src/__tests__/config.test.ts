@@ -57,6 +57,11 @@ policy:
       url: https://example.nl/rss.xml
       jurisdiction: nl
       jev_only: true
+      kind: news
+  calendar:
+    - date: 2026-12-02
+      label: Milestone
+      link: https://example.eu/timeline
 infra:
   title: Infra Title
   subject: infra subject
@@ -84,9 +89,22 @@ infra:
         readerProfile: "A practitioner.",
         watchlist: { eu: ["ai-act"], nl: [], usFederal: [], usStates: [] },
         feeds: [
-          { name: "Commission", url: "https://example.eu/rss.xml", jurisdiction: "eu", jevOnly: false },
-          { name: "Supervisor", url: "https://example.nl/rss.xml", jurisdiction: "nl", jevOnly: true },
+          {
+            name: "Commission",
+            url: "https://example.eu/rss.xml",
+            jurisdiction: "eu",
+            jevOnly: false,
+            news: false,
+          },
+          {
+            name: "Supervisor",
+            url: "https://example.nl/rss.xml",
+            jurisdiction: "nl",
+            jevOnly: true,
+            news: true,
+          },
         ],
+        calendar: [{ date: "2026-12-02", label: "Milestone", link: "https://example.eu/timeline" }],
       },
       infra: {
         title: "Infra Title",
@@ -99,6 +117,12 @@ infra:
   it("throws when a policy feed has no known jurisdiction", () => {
     expect(() => load(VALID.replace("jurisdiction: eu", "jurisdiction: uk"))).toThrow(
       "policy.feeds[0].jurisdiction must be one of",
+    );
+  });
+
+  it("throws when a policy feed has an unknown kind", () => {
+    expect(() => load(VALID.replace("kind: news", "kind: blog"))).toThrow(
+      "policy.feeds[1].kind must be news",
     );
   });
 
@@ -142,6 +166,12 @@ infra:
     expect(() => load(VALID.replace(/policy:[\s\S]*?infra:/, "infra:"))).toThrow('missing section "policy"');
     expect(() => load(VALID.replace("  reader_profile: A practitioner.\n", ""))).toThrow(
       "policy.reader_profile must be a non-empty string",
+    );
+  });
+
+  it("throws when a policy calendar entry has no valid date", () => {
+    expect(() => load(VALID.replace("date: 2026-12-02", "date: December"))).toThrow(
+      "policy.calendar[0] needs date (YYYY-MM-DD), label and link",
     );
   });
 

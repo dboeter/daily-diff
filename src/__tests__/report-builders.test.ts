@@ -344,6 +344,13 @@ describe("renderPolicyTable", () => {
     );
   });
 
+  it("renders news items in their own section after every jurisdiction, without a stage column", () => {
+    const news = { ...items[0]!, id: "4", source: "Politico Europe", news: true };
+    expect(renderPolicyTable([items[1]!, motion, news], new Map([[3, "A report."]]))).toMatch(
+      /## Netherlands\n[\s\S]*\n\n## News & commentary\n\n\| Date \| Source \| Title \| Summary \|\n\| :--- \| :--- \| :--- \| :--- \|\n\| 2026-10-09 \| Politico Europe \| \[AI Act \\\| guidelines\]\(https:\/\/example\.eu\/a\) \| A report\. \|$/,
+    );
+  });
+
   it("falls back to the description when the model gave no summary", () => {
     expect(renderPolicyTable(items, new Map())).toContain("| The AI Office publishes guidelines. |");
   });

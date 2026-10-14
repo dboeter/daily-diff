@@ -1,0 +1,142 @@
+{
+  "initiativeResultDtoPage": {
+    "content": [
+      {
+        "id": 12270,
+        "initiativeStatus": "ACTIVE",
+        "reference": "AIConsult2020",
+        "shortTitle": "\rWhite Paper on Artificial Intelligence - a European Approach",
+        "snippet": "AIConsult2020 White Paper on <span class=\"highlight\">Artificial</span> <span class=\"highlight\">Intelligence</span> - a European Approach <span class=\"highlight\">Artificial</span> <span class=\"highlight\">intelligence</span> will have a profound impact on society and economy.<b>...</b>approach to the ",
+        "currentStatuses": [
+          {
+            "frontEndStage": "OPC_LAUNCHED",
+            "receivingFeedbackStatus": "CLOSED",
+            "feedbackStartDate": "2020/02/20 12:42:26",
+            "feedbackEndDate": "2020/06/14 00:00:00",
+            "isCurrent": true
+          }
+        ]
+      },
+      {
+        "id": 18592,
+        "initiativeStatus": "ACTIVE",
+        "reference": "Ares(2026)6387101",
+        "foreseenActType": "COMMUNIC",
+        "shortTitle": "AI strategy for cultural and creative sectors ",
+        "snippet": "the strategy will lay down a strategic vision for the use of <span class=\"highlight\">artificial</span> <span class=\"highlight\">intelligence</span> (AI) in the cultural and creative sectors and industries.<b>...</b>creation, cultural and linguistic diversity and inclusion. <span class=\"highlight\">Art",
+        "currentStatuses": [
+          {
+            "frontEndStage": "PLANNING_WORKFLOW",
+            "receivingFeedbackStatus": "CLOSED",
+            "feedbackStartDate": "2026/07/27 11:48:20",
+            "feedbackEndDate": "2026/09/11 23:59:59",
+            "isCurrent": true
+          }
+        ],
+        "topics": [
+          {
+            "code": "CULT",
+            "label": "Culture and media"
+          }
+        ]
+      },
+      {
+        "id": 14398,
+        "initiativeStatus": "ACTIVE",
+        "reference": "Ares(2024)6271161",
+        "foreseenActType": "REG_IMPL",
+        "shortTitle": "Establishment of the scientific panel of independent experts under the AI Act – implementing regulation",
+        "snippet": "for the establishment and operation of this scientific panel. <span class=\"highlight\">Artificial</span> <span class=\"highlight\">intelligence</span> – implementing regulation establishing a scientific panel of independent experts The <span class=\"highlight\">Artificial</span> <span class=\"highlight\">I",
+        "currentStatuses": [
+          {
+            "frontEndStage": "ADOPTION_WORKFLOW",
+            "receivingFeedbackStatus": "DISABLED",
+            "feedbackStartDate": "2025/03/14 19:56:00",
+            "feedbackEndDate": null,
+            "isCurrent": true
+          }
+        ],
+        "topics": [
+          {
+            "code": "DIGITAL",
+            "label": "Digital economy and society"
+          }
+        ]
+      },
+      {
+        "id": 19292,
+        "initiativeStatus": "ACTIVE",
+        "reference": "Ares(2026)8716045",
+        "foreseenActType": "REG_IMPL",
+        "shortTitle": "Articles 75c – 75d AI Act Implementing Act ",
+        "currentStatuses": [
+          {
+            "frontEndStage": "ISC_WORKFLOW",
+            "receivingFeedbackStatus": "OPEN",
+            "feedbackStartDate": "2026/10/12 11:32:31",
+            "feedbackEndDate": "2026/11/09 23:59:59",
+            "isCurrent": true
+          }
+        ],
+        "topics": [
+          {
+            "code": "DIGITAL",
+            "label": "Digital economy and society"
+          }
+        ]
+      },
+      {
+        "id": 19293,
+        "initiativeStatus": "ACTIVE",
+        "reference": "Ares(2026)8738685",
+        "foreseenActType": "PROP_REG",
+        "shortTitle": "Minimum performance standards for data centres in Europe",
+        "currentStatuses": [
+          {
+            "frontEndStage": "PLANNING_WORKFLOW",
+            "receivingFeedbackStatus": "OPEN",
+            "feedbackStartDate": "2026/09/21 12:14:46",
+            "feedbackEndDate": "2026/12/14 23:59:59",
+            "isCurrent": true
+          },
+          {
+            "frontEndStage": "OPC_LAUNCHED",
+            "receivingFeedbackStatus": "OPEN",
+            "feedbackStartDate": "2026/09/21 12:14:46",
+            "feedbackEndDate": "2026/12/14 23:59:59",
+            "isCurrent": true
+          }
+        ],
+        "topics": [
+          {
+            "code": "ENER",
+            "label": "Energy"
+          }
+        ]
+      },
+      {
+        "id": 14628,
+        "initiativeStatus": "ACTIVE",
+        "reference": "Ares(2025)2876603",
+        "foreseenActType": "PROP_REG",
+        "shortTitle": "Cloud and AI Development Act",
+        "currentStatuses": [
+          {
+            "frontEndStage": "ADOPTION_WORKFLOW",
+            "receivingFeedbackStatus": "OPEN",
+            "feedbackStartDate": "2026/07/02 13:24:32",
+            "feedbackEndDate": "2026/11/11 23:59:59",
+            "isCurrent": true
+          }
+        ],
+        "topics": [
+          {
+            "code": "DIGITAL",
+            "label": "Digital economy and society"
+          }
+        ]
+      }
+    ],
+    "totalElements": 6
+  }
+}

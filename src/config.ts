@@ -58,6 +58,16 @@ export interface PolicyFeed {
    * decision-making), so every item goes to Jev. Without Jev it is dropped for the run.
    */
   jevOnly: boolean;
+  /** `kind: news`: news and commentary, reported in its own section, not the jurisdiction tables. */
+  news: boolean;
+}
+
+/** A dated milestone for the policy report's Upcoming deadlines section. */
+export interface PolicyCalendarEntry {
+  /** ISO date. */
+  date: string;
+  label: string;
+  link: string;
 }
 
 /** The policy report (config.yml `policy`). */
@@ -67,6 +77,8 @@ export interface PolicyConfig {
   /** Files that always appear when they move, per jurisdiction. Lists may be empty. */
   watchlist: { eu: string[]; nl: string[]; usFederal: string[]; usStates: string[] };
   feeds: PolicyFeed[];
+  /** May be empty. */
+  calendar: PolicyCalendarEntry[];
 }
 
 export interface RadarConfig extends Record<SectionKey, SectionConfig> {
@@ -112,7 +124,7 @@ const WATCHLIST_KEYS = { eu: "eu", nl: "nl", usFederal: "us_federal", usStates: 
 
 function toPolicy(raw: unknown, file: string): PolicyConfig {
   if (!raw || typeof raw !== "object") throw new Error(`${file}: missing section "policy"`);
-  const { reader_profile, watchlist, feeds } = raw as Record<string, unknown>;
+  const { reader_profile, watchlist, feeds, calendar } = raw as Record<string, unknown>;
   if (!nonEmptyString(reader_profile)) {
     throw new Error(`${file}: policy.reader_profile must be a non-empty string`);
   }
@@ -123,7 +135,13 @@ function toPolicy(raw: unknown, file: string): PolicyConfig {
     return [key, list.map(String)];
   });
   if (!Array.isArray(feeds)) throw new Error(`${file}: policy.feeds must be a list`);
-  const rawFeeds: { name?: string; url?: string; jurisdiction?: string; jev_only?: unknown }[] = feeds;
+  const rawFeeds: {
+    name?: string;
+    url?: string;
+    jurisdiction?: string;
+    jev_only?: unknown;
+    kind?: unknown;
+  }[] = feeds;
   rawFeeds.forEach((f, i) => {
     if (!nonEmptyString(f?.name) || !nonEmptyString(f.url)) {
       throw new Error(`${file}: policy.feeds[${i}] needs name and url`);
@@ -131,6 +149,18 @@ function toPolicy(raw: unknown, file: string): PolicyConfig {
     if (!(JURISDICTIONS as readonly unknown[]).includes(f.jurisdiction)) {
       throw new Error(`${file}: policy.feeds[${i}].jurisdiction must be one of ${JURISDICTIONS.join(", ")}`);
     }
+    if (f.kind !== undefined && f.kind !== "news")
+      throw new Error(`${file}: policy.feeds[${i}].kind must be news`);
+  });
+  if (!Array.isArray(calendar)) throw new Error(`${file}: policy.calendar must be a list`);
+  // js-yaml reads an unquoted 2026-12-02 as a Date.
+  const day = (v: unknown) => (v instanceof Date ? v.toISOString().slice(0, 10) : String(v ?? ""));
+  const rawCalendar: { date?: unknown; label?: unknown; link?: unknown }[] = calendar;
+  const calendarEntries = rawCalendar.map((c, i) => {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(day(c?.date)) || !nonEmptyString(c.label) || !nonEmptyString(c.link)) {
+      throw new Error(`${file}: policy.calendar[${i}] needs date (YYYY-MM-DD), label and link`);
+    }
+    return { date: day(c.date), label: c.label.trim(), link: c.link.trim() };
   });
   return {
     readerProfile: reader_profile.trim(),
@@ -140,7 +170,9 @@ function toPolicy(raw: unknown, file: string): PolicyConfig {
       url: f.url!.trim(),
       jurisdiction: f.jurisdiction as Jurisdiction,
       jevOnly: f.jev_only === true,
+      news: f.kind === "news",
     })),
+    calendar: calendarEntries,
   };
 }
 
