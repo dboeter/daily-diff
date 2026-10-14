@@ -7,6 +7,7 @@
 
 import {
   ARXIV_REPORT,
+  POLICY_REPORT,
   REPORT_META,
   WEB_REPORT,
   TRENDING_REPORT,
@@ -33,7 +34,7 @@ import {
   parseRowSummaries,
   renderTrendingTables,
   renderPolicyTable,
-  spliceTrendingProse,
+  spliceTables,
   nestHeadings,
 } from "./report-builders.ts";
 import { saveArxivState, type ArxivData } from "./arxiv.ts";
@@ -159,7 +160,7 @@ export async function buildTrendingReport(
     "ai-trending",
     dateStr,
     `> ${REPORT_META.sources(TRENDING_REPORT.sources)} | ${REPORT_META.generated(utcStr)}`,
-    spliceTrendingProse(trending.prose, tables) + skillsSection,
+    spliceTables(trending.prose, tables) + skillsSection,
   );
 
   // Only once the report exists, like the ArXiv state.
@@ -220,7 +221,7 @@ export async function buildArxivReport(
 
   const meta =
     `> ${REPORT_META.sources(ARXIV_REPORT.source)} | ` +
-    `${arxivData.papers.length} papers${arxivData.rankedBy === "jev" ? " ranked by [Jev](https://typesafe.ai) relevance" : ""} | ` +
+    `${arxivData.papers.length} papers${arxivData.rankedBy === "jev" ? REPORT_META.jevRanked : ""} | ` +
     REPORT_META.generated(utcStr);
   const report = await buildListingReport(
     "ai-arxiv",
@@ -258,9 +259,7 @@ export async function buildPolicyReport(
   }
   if (policyData.nextVerdicts) savePolicyVerdicts(policyData.nextVerdicts, verdictsFile);
   if (!policyData.fetchSuccess || policyData.items.length === 0) {
-    console.log(
-      `  [policy] ${policyData.fetchSuccess ? "No new items" : "No data available"}, skipping report.`,
-    );
+    console.log(`  [policy] ${policyData.fetchSuccess ? POLICY_REPORT.noNewItems : POLICY_REPORT.noData}`);
     return null;
   }
   const { items } = policyData;
@@ -268,11 +267,17 @@ export async function buildPolicyReport(
     renderPolicyTable(items, summaries, renderDeadlines(policyData.deadlines));
   console.log("  [policy] Calling LLM for policy report...");
   const [summaries, prose] = await Promise.all([
-    generateBody(buildPolicySummariesPrompt(items, dateStr), LLM_TOKENS_LISTING).catch((err) => {
+    generateBody(
+      buildPolicySummariesPrompt(items, dateStr, policyData.readerProfile),
+      LLM_TOKENS_LISTING,
+    ).catch((err) => {
       console.error(`  [policy] Summaries failed, showing descriptions: ${err}`);
       return "";
     }),
-    generateBody(buildPolicyProsePrompt(tables(new Map()), dateStr), LLM_TOKENS_LISTING).catch((err) => {
+    generateBody(
+      buildPolicyProsePrompt(tables(new Map()), dateStr, policyData.readerProfile),
+      LLM_TOKENS_LISTING,
+    ).catch((err) => {
       console.error(`  [policy] Report generation failed: ${err}`);
       return null;
     }),
@@ -280,9 +285,9 @@ export async function buildPolicyReport(
   if (prose === null) return null;
 
   const sources = [...new Set(items.map((i) => i.source))].join(" + ");
-  const ranked = policyData.rankedBy === "jev" ? " ranked by [Jev](https://typesafe.ai) relevance" : "";
-  const meta = `> ${REPORT_META.sources(sources)} | ${items.length} new items${ranked} | ${REPORT_META.generated(utcStr)}`;
-  const body = spliceTrendingProse(prose, tables(parseRowSummaries(summaries)));
+  const ranked = policyData.rankedBy === "jev" ? REPORT_META.jevRanked : "";
+  const meta = `> ${REPORT_META.sources(sources)} | ${POLICY_REPORT.newItems(items.length)}${ranked} | ${REPORT_META.generated(utcStr)}`;
+  const body = spliceTables(prose, tables(parseRowSummaries(summaries)));
   // Only once the report exists, like the ArXiv state.
   savePolicyState(policyData.nextState, stateFile);
   return { id: "ai-policy", content: assembleReport("ai-policy", dateStr, meta, body) };

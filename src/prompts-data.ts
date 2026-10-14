@@ -9,7 +9,7 @@ import type { TrendingData } from "./trending.ts";
 import type { summaryRows } from "./trending-rank.ts";
 import { formatTokens, type OpenRouterData } from "./openrouter.ts";
 import { ARXIV_REPORT, DISCUSSIONS_REPORT, MODELS_REPORT, SECTIONS, WEB_REPORT } from "./i18n.ts";
-import { TRENDING_TABLES_MARKER } from "./report-builders.ts";
+import { TABLES_MARKER } from "./report-builders.ts";
 import { NO_TITLE_RULE } from "./prompts.ts";
 import type { HnData } from "./hn.ts";
 import type { ArxivData } from "./arxiv.ts";
@@ -73,7 +73,7 @@ For every numbered item write exactly one line in the form \`N: <2 sentences>\` 
 
 /**
  * Weekly trending, call 2 of 2: the prose sections around the code-rendered
- * tables. The model places TRENDING_TABLES_MARKER where spliceTrendingProse
+ * tables. The model places TABLES_MARKER where spliceTables
  * inserts the tables.
  */
 export function buildTrendingProsePrompt(tablesMd: string, data: TrendingData, dateStr: string): string {
@@ -86,7 +86,7 @@ ${tablesMd || "(No projects were selected this week.)"}
 Write the prose sections of the report, in this order:
 
 1. \`## ${SECTIONS.highlights}\` — 3-5 sentences on the most noteworthy agent and AI-coding developments this week.
-2. The line \`${TRENDING_TABLES_MARKER}\` exactly once, on its own line. The tables are inserted there.
+2. The line \`${TABLES_MARKER}\` exactly once, on its own line. The tables are inserted there.
 3. \`## ${SECTIONS.signals}\` — 200-300 words: which kinds of agent or coding tool are getting attention, and any new harness or orchestration patterns.
 4. \`## ${SECTIONS.worthALook}\` — 3-5 bullets: specific projects or directions worth developer focus, with brief reasoning.
 
@@ -103,14 +103,20 @@ Rules:
  * Policy report, call 1 of 2: one 2-sentence summary per numbered table row.
  * The rows are the day's new feed items in feed order; parseRowSummaries reads the reply.
  */
-export function buildPolicySummariesPrompt(items: PolicyItem[], dateStr: string): string {
+export function buildPolicySummariesPrompt(
+  items: PolicyItem[],
+  dateStr: string,
+  readerProfile: string,
+): string {
   const list = items
     .map(
       (it, i) =>
         `${i + 1}. ${it.title} (${it.source}, ${it.published.slice(0, 10)}${it.stage ? `, stage: ${it.stage}` : ""}) — ${it.description || "(no description)"}`,
     )
     .join("\n");
-  return `You are a policy analyst covering AI legislation, regulation and official guidance for an AI practitioner in the Netherlands. Below are ${items.length} numbered items from official sources and news & commentary outlets, new as of ${dateStr}, each with its source, date and text.
+  return `You are a policy analyst covering AI legislation, regulation and official guidance. The reader: ${readerProfile}
+
+Below are ${items.length} numbered items from official sources and news & commentary outlets, new as of ${dateStr}, each with its source, date and text.
 
 ${list}
 
@@ -124,10 +130,12 @@ For every numbered item write exactly one line in the form \`N: <2 sentences>\` 
 
 /**
  * Policy report, call 2 of 2: the prose sections around the code-rendered
- * table, which spliceTrendingProse inserts at TRENDING_TABLES_MARKER.
+ * table, which spliceTables inserts at TABLES_MARKER.
  */
-export function buildPolicyProsePrompt(tableMd: string, dateStr: string): string {
-  return `You are a policy analyst covering AI legislation, regulation and official guidance in the EU, the Netherlands and the US, for an AI practitioner in the Netherlands who deploys AI built by others. Below is today's table of new items from official sources and news & commentary outlets, ${dateStr}; the Summary column holds summaries of each item.
+export function buildPolicyProsePrompt(tableMd: string, dateStr: string, readerProfile: string): string {
+  return `You are a policy analyst covering AI legislation, regulation and official guidance in the EU, the Netherlands and the US. The reader: ${readerProfile}
+
+Below is today's table of new items from official sources and news & commentary outlets, ${dateStr}; the Summary column holds summaries of each item.
 
 ${tableMd}
 
@@ -136,7 +144,7 @@ ${tableMd}
 Write the prose sections of the report, in this order:
 
 1. \`## ${SECTIONS.highlights}\` — 2-4 sentences on the most consequential items today.
-2. The line \`${TRENDING_TABLES_MARKER}\` exactly once, on its own line. The table is inserted there.
+2. The line \`${TABLES_MARKER}\` exactly once, on its own line. The table is inserted there.
 3. \`## ${SECTIONS.signals}\` — 100-200 words: where policy is moving and what it means for organisations that deploy AI.
 4. \`## ${SECTIONS.worthALook}\` — 1-3 bullets: items worth reading in full, with brief reasoning.
 

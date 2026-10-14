@@ -69,6 +69,8 @@ export const REPORT_META = {
   sourcesHeader: SOURCES,
   sources: (list: string) => `${SOURCES} ${list}`,
   generated: (utcStr: string) => `Generated: ${utcStr} UTC`,
+  /** After a listing's item count when Jev ordered it (ArXiv, policy). */
+  jevRanked: " ranked by [Jev](https://typesafe.ai) relevance",
 } as const;
 
 /** The report bar's first link: the day's overview of every report's highlights. */
@@ -149,6 +151,10 @@ export const POLICY_REPORT = {
   /** After the jurisdiction sections: items from `kind: news` feeds (news and commentary outlets). */
   newsHeading: "News & commentary",
   newsTableHeader: "| Date | Source | Title | Summary |\n| :--- | :--- | :--- | :--- |",
+  /** The meta line's count, and the log's. */
+  newItems: (n: number) => `${n} new items`,
+  noNewItems: "No new items, skipping report.",
+  noData: "No data available, skipping report.",
 } as const;
 
 // Weekly: Hugging Face trending models plus OpenRouter token usage, which

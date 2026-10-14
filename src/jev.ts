@@ -7,6 +7,8 @@
  * llmStats health gate that is calibrated for 3–5 report calls.
  */
 
+import fs from "node:fs";
+import path from "node:path";
 import { sleep } from "./date.ts";
 
 const JEV_URL = "https://api.typesafe.ai/v1/systemone";
@@ -91,4 +93,41 @@ export async function mapJev<T, R>(
 /** True when too many calls failed for the answers to mean anything. */
 export function jevFailedTooOften(failed: number, total: number): boolean {
   return total > 0 && failed / total > JEV_MAX_FAILURE_RATIO;
+}
+
+// ---------------------------------------------------------------------------
+// Verdict cache files (trending classifications, policy verdicts)
+// ---------------------------------------------------------------------------
+
+/** A committed, hand-editable cache: `{ "items": { <key>: <entry> } }`. */
+export interface ItemsFile<T> {
+  items: Record<string, T>;
+}
+
+/**
+ * Missing file → empty. Unreadable or malformed → null, logged under `tag`:
+ * every item is asked and nothing is saved, since an empty cache saved after
+ * the report would overwrite a hand edit.
+ */
+export function loadItemsFile<T>(file: string, tag: string): ItemsFile<T> | null {
+  if (!fs.existsSync(file)) return { items: {} };
+  try {
+    const parsed = JSON.parse(fs.readFileSync(file, "utf-8")) as Partial<ItemsFile<T>> | null;
+    const items: unknown = parsed?.items;
+    if (!items || typeof items !== "object" || Array.isArray(items)) throw new Error("no `items` object");
+    return parsed as ItemsFile<T>;
+  } catch (err) {
+    console.error(`  [${tag}] Cannot read ${file}, every item is asked: ${err}`);
+    return null;
+  }
+}
+
+/** One item per line: a pretty-printed file of hundreds of entries would be long to read and diff. */
+export function saveItemsFile(cache: ItemsFile<unknown>, file: string): void {
+  const lines = Object.entries(cache.items).map(
+    ([key, e]) => `    ${JSON.stringify(key)}: ${JSON.stringify(e)}`,
+  );
+  const body = lines.length > 0 ? `{\n${lines.join(",\n")}\n  }` : "{}";
+  fs.mkdirSync(path.dirname(file), { recursive: true });
+  fs.writeFileSync(file, `{\n  "items": ${body}\n}\n`, "utf-8");
 }

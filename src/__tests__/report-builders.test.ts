@@ -5,12 +5,12 @@ import {
   parseRowSummaries,
   renderTrendingTables,
   renderPolicyTable,
-  spliceTrendingProse,
+  spliceTables,
   stripModelTitle,
   nestHeadings,
   renderReportBar,
   withReportBar,
-  TRENDING_TABLES_MARKER,
+  TABLES_MARKER,
 } from "../report-builders.ts";
 import type { TrendingReportData } from "../trending-rank.ts";
 import { TRENDING_REPORT } from "../i18n.ts";
@@ -360,23 +360,19 @@ describe("renderPolicyTable", () => {
   });
 });
 
-describe("spliceTrendingProse", () => {
+describe("spliceTables", () => {
   it("replaces the marker line with the tables", () => {
-    const prose = `## Highlights\n\nText.\n\n${TRENDING_TABLES_MARKER}\n\n## Trends\n\nMore.`;
-    expect(spliceTrendingProse(prose, "TABLES")).toBe(
-      "## Highlights\n\nText.\n\nTABLES\n\n## Trends\n\nMore.",
-    );
+    const prose = `## Highlights\n\nText.\n\n${TABLES_MARKER}\n\n## Trends\n\nMore.`;
+    expect(spliceTables(prose, "TABLES")).toBe("## Highlights\n\nText.\n\nTABLES\n\n## Trends\n\nMore.");
   });
 
   it("appends the tables when the marker is missing", () => {
-    expect(spliceTrendingProse("## Highlights\n\nText.\n", "TABLES")).toBe(
-      "## Highlights\n\nText.\n\nTABLES",
-    );
+    expect(spliceTables("## Highlights\n\nText.\n", "TABLES")).toBe("## Highlights\n\nText.\n\nTABLES");
   });
 
   it("drops the marker when there are no tables", () => {
-    const prose = `A.\n\n${TRENDING_TABLES_MARKER}\n\nB.`;
-    expect(spliceTrendingProse(prose, "")).toBe("A.\n\nB.");
+    const prose = `A.\n\n${TABLES_MARKER}\n\nB.`;
+    expect(spliceTables(prose, "")).toBe("A.\n\nB.");
   });
 });
 

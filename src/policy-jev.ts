@@ -5,9 +5,8 @@
  * is asked once. Without Jev, watchlisted items and keyword hits are kept.
  */
 
-import fs from "node:fs";
 import path from "node:path";
-import { askJev, mapJev, jevFailedTooOften } from "./jev.ts";
+import { askJev, mapJev, jevFailedTooOften, loadItemsFile, saveItemsFile } from "./jev.ts";
 import type { AskJev } from "./trending-jev.ts";
 import type { Jurisdiction } from "./config.ts";
 import type { PolicyItem } from "./policy.ts";
@@ -230,26 +229,12 @@ const VERDICT_UNSEEN_DAYS = 30;
 
 /** Missing → empty. Malformed → null: every item is asked and nothing is saved, so a hand edit survives. */
 export function loadPolicyVerdicts(file = POLICY_VERDICTS_FILE): PolicyVerdicts | null {
-  if (!fs.existsSync(file)) return { items: {} };
-  try {
-    const parsed = JSON.parse(fs.readFileSync(file, "utf-8")) as Partial<PolicyVerdicts> | null;
-    const items: unknown = parsed?.items;
-    if (!items || typeof items !== "object" || Array.isArray(items)) throw new Error("no `items` object");
-    return parsed as PolicyVerdicts;
-  } catch (err) {
-    console.error(`  [policy] Cannot read ${file}, every item is asked: ${err}`);
-    return null;
-  }
+  return loadItemsFile<PolicyVerdictEntry>(file, "policy");
 }
 
 /** One item per line, like the trending classifications. */
 export function savePolicyVerdicts(cache: PolicyVerdicts, file = POLICY_VERDICTS_FILE): void {
-  const lines = Object.entries(cache.items).map(
-    ([id, e]) => `    ${JSON.stringify(id)}: ${JSON.stringify(e)}`,
-  );
-  const body = lines.length > 0 ? `{\n${lines.join(",\n")}\n  }` : "{}";
-  fs.mkdirSync(path.dirname(file), { recursive: true });
-  fs.writeFileSync(file, `{\n  "items": ${body}\n}\n`, "utf-8");
+  saveItemsFile(cache, file);
 }
 
 // ---------------------------------------------------------------------------

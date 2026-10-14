@@ -225,11 +225,11 @@ export function buildStealthSection(models: OpenRouterStealthModel[] | null, now
 }
 
 // ---------------------------------------------------------------------------
-// Trending tables (weekly)
+// Code-rendered tables with LLM row summaries (trending, policy)
 // ---------------------------------------------------------------------------
 
 /** Where the prose LLM call leaves room for the code-rendered tables. */
-export const TRENDING_TABLES_MARKER = "<!-- tables -->";
+export const TABLES_MARKER = "<!-- tables -->";
 
 /**
  * A row with no LLM summary shows its description instead, cut to about two
@@ -338,9 +338,9 @@ export function renderPolicyTable(
 }
 
 /** Put the tables where the prose left the marker; after the prose when the model dropped it. */
-export function spliceTrendingProse(prose: string, tables: string): string {
+export function spliceTables(prose: string, tables: string): string {
   const lines = prose.split("\n");
-  const i = lines.findIndex((l) => l.trim() === TRENDING_TABLES_MARKER);
+  const i = lines.findIndex((l) => l.trim() === TABLES_MARKER);
   if (i === -1) return tables ? `${prose.trimEnd()}\n\n${tables}` : prose;
   const before = lines.slice(0, i).join("\n").trimEnd();
   const after = lines

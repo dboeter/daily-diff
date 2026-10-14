@@ -225,6 +225,7 @@ async function fetchAllData(
       fetchSuccess: false,
       nextState: { reported: {} },
       deadlines: [],
+      readerProfile: CONFIG.policy.readerProfile,
     })),
     weekly
       ? fetchHfData().catch((): HfData => ({ models: [], fetchSuccess: false }))

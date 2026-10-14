@@ -15,6 +15,7 @@ import { loadPolicyVerdicts, selectPolicyItems, type PolicyVerdicts } from "./po
 import type { AskJev } from "./trending-jev.ts";
 import { nextDeadlines, upcomingDeadlines, type Deadline } from "./policy-deadlines.ts";
 import { daysBefore } from "./date.ts";
+import { POLICY_REPORT } from "./i18n.ts";
 
 export interface PolicyItem extends FeedItem {
   /** The feed's display name (config.yml policy.feeds). */
@@ -67,6 +68,8 @@ export interface PolicyData {
   rankingFile?: string;
   /** The Upcoming deadlines section's rows; shown only when there are items. */
   deadlines: Deadline[];
+  /** config.yml `policy.reader_profile`, for the report prompts. */
+  readerProfile: string;
 }
 
 export const POLICY_STATE_FILE = path.join("digests", "policy-state.json");
@@ -189,7 +192,7 @@ export async function fetchPolicyData(
   const fresh = newPolicyItems(fetched, state, dateStr);
   const recorded = fresh.filter((i) => i.recordOnly);
   const candidates = fresh.filter((i) => !i.recordOnly);
-  console.log(`  [policy] ${candidates.length} new items`);
+  console.log(`  [policy] ${POLICY_REPORT.newItems(candidates.length)}`);
   const selection = await selectPolicyItems(candidates, {
     readerProfile: config.readerProfile,
     watchlist: Object.values(config.watchlist).flat(),
@@ -208,6 +211,7 @@ export async function fetchPolicyData(
     nextState: { ...nextPolicyState(state, selection.items, dateStr, recorded), deadlines },
     deadlines: upcomingDeadlines(deadlines, config.calendar, dateStr),
     rankedBy: selection.rankedBy,
+    readerProfile: config.readerProfile,
     nextVerdicts: selection.nextVerdicts,
     ...(candidates.length > 0 ? { rankingFile: selection.rankingFile } : {}),
   };

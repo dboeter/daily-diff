@@ -67,6 +67,7 @@ describe("buildPolicyReport", () => {
     items,
     nextState: { reported: Object.fromEntries(items.map((i) => [i.id, "2026-10-14"])) },
     deadlines: [],
+    readerProfile: "A practitioner.",
   });
   const deadline = {
     date: "2026-11-09",
