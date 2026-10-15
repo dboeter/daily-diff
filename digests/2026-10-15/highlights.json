@@ -1,0 +1,22 @@
+{
+  "ai-agents": [
+    "Claude Code v2.1.300 adds idle compaction for 200K+ token conversations and splits cache token metrics by lifetime in OpenTelemetry",
+    "Hermes Agent v0.22.0 logs llama-server API keys in plain text to local logs on every spawn and crash-restart"
+  ],
+  "ai-hn": [
+    "Google DeepMind releases Gemini 4 Argon, the latest flagship multimodal model with improved reasoning and coding capabilities",
+    "Security experts argue AI 'hacking' incidents stem from basic containment failures in frontier labs, not model autonomy"
+  ],
+  "ai-arxiv": [
+    "The Agent Knew paper shows a linear readout of agent internal states forecasts unauthorized actions at AUROC 0.94, gating cuts violations 70% to 9%",
+    "DoubtLess contrastive decoding shortens Qwen3-32B chain-of-thought by 31% with unchanged accuracy on math, science, and coding benchmarks"
+  ],
+  "ai-web": [
+    "Anthropic publishes real-world election usage data from 250k Claude conversations: only 0.01% request vote recommendations, informing misuse detection",
+    "Anthropic opens Singapore office and signs government MOU on AI safety, model evaluation, and adoption with GovTech, Grab, DBS deployments"
+  ],
+  "ai-policy": [
+    "Dutch DPA fines Uber €824.99M for unlawful automated decision-making under GDPR Article 22, setting aggressive precedent for AI deployers",
+    "European Commission adopts harmonised standards for high-risk AI systems under the AI Act, providing the technical compliance benchmark"
+  ]
+}

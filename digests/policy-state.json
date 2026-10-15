@@ -1,0 +1,40 @@
+{
+  "reported": {
+    "b7ce37b6-62ea-41f8-a4e6-5d7fb6620d40": "2026-10-15",
+    "celex:32026D2274": "2026-10-15",
+    "hys:14628": "2026-10-15",
+    "hys:19292": "2026-10-15",
+    "000001a1-1db9-d365-a3e9-1fbf7dd90001": "2026-10-15",
+    "https://www.digitaleoverheid.nl/?p=141479": "2026-10-15",
+    "https://www.binnenlandsbestuur.nl/digitaal/handreiking-voor-software-updates-met-ai-toevoegingen": "2026-10-15",
+    "tk:2026Z22040": "2026-10-15",
+    "2b0b500b-8214-4703-adf3-c76a0aa99c19": "2026-10-15",
+    "000001a1-3266-dc9a-a9a3-7f7e79d00000": "2026-10-15",
+    "https://www.binnenlandsbestuur.nl/digitaal/ap-richt-directie-voor-ai-toezicht-op": "2026-10-15",
+    "https://www.transformernews.ai/p/democrats-prepare-to-battle-over-ai-regulation": "2026-10-15",
+    "https://www.politico.eu/?post_type=pro&p=9148589": "2026-10-15",
+    "nl:36875": "2026-10-15"
+  },
+  "stages": {
+    "celex:32026D2274": "2026-10-12 Decision adopted",
+    "hys:14628": "2026-07-02 Adopted by the Commission",
+    "hys:19292": "2026-10-12 Draft act",
+    "nl:36875": "2026-09-22 In the Eerste Kamer",
+    "ep:2025/0359(COD)": "2026-07-24 Published in the Official Journal",
+    "ep:2022/0272(COD)": "2024-11-20 Published in the Official Journal"
+  },
+  "deadlines": {
+    "hys:14628": {
+      "date": "2026-11-11",
+      "title": "Cloud and AI Development Act",
+      "link": "https://ec.europa.eu/info/law/better-regulation/have-your-say/initiatives/14628_en",
+      "source": "Have your say"
+    },
+    "hys:19292": {
+      "date": "2026-11-09",
+      "title": "Articles 75c – 75d AI Act Implementing Act",
+      "link": "https://ec.europa.eu/info/law/better-regulation/have-your-say/initiatives/19292_en",
+      "source": "Have your say"
+    }
+  }
+}
