@@ -1,35 +1,35 @@
 # Daily Diff
 
-A GitHub Actions workflow that runs every night, landing the digest by about 05:00 Amsterdam time. It aggregates AI ecosystem signals from 11 data sources, then publishes English digests as GitHub Issues and committed Markdown files: a daily set (AI Agents, AI Discussions, AI Research, Lab Announcements) and a weekly set on Mondays (Agent & AI Coding Trends, AI Models).
+A personal daily digest of AI coding agents, agent tooling and AI policy, built by a GitHub Actions workflow that runs every night and lands by about 05:00 Amsterdam time. Read it in the [Web UI](#web-ui), the [RSS feed](#rss-feed) or the [MCP server](#mcp-server). The workflow aggregates AI ecosystem signals from 11 data sources, then publishes English digests as GitHub Issues and committed Markdown files: a daily set (AI Agents, AI Discussions, AI Research, Lab Announcements) and a weekly set on Mondays (Agent & AI Coding Trends, AI Models).
 
 ### Data Sources
 
-| Source                                                            | Type                                                              | Data                                                                              |
-| ----------------------------------------------------------------- | ----------------------------------------------------------------- | --------------------------------------------------------------------------------- |
-| [GitHub Repos](https://github.com)                                | API                                                               | Stable releases and hot issues from the agent and infra repos in `config.yml`     |
-| [Claude Code Skills](https://github.com/anthropics/skills)        | API                                                               | Trending skills sorted by community engagement — **weekly**                       |
-| [GitHub Trending](https://github.com/trending)                    | HTML + API                                                        | Weekly trending repos + AI topic search (7-day window) — **weekly**               |
-| [OpenRouter](https://openrouter.ai/apps)                          | HTML (RSC payload) + Models API                                   | Agent app usage, top/new models — **weekly**; stealth models daily                |
-| [npm](https://www.npmjs.com)                                      | Registry search API                                               | Coding-agent packages by downloads and momentum — **weekly**                      |
-| [Hacker News](https://news.ycombinator.com)                       | [Firebase API](https://github.com/HackerNews/API)                 | Top AI stories from last 24h via topstories scanning                              |
-| [ArXiv](https://arxiv.org)                                        | [ArXiv API](https://export.arxiv.org/api/query)                   | Papers from cs.AI, cs.CL, cs.LG (new since the last run), ranked by Jev relevance |
-| [Hugging Face](https://huggingface.co)                            | [Hub API](https://huggingface.co/api/models)                      | 30 trending models sorted by weekly likes — **weekly**, Mondays only              |
-| [Dev.to](https://dev.to)                                          | [Forem API](https://dev.to/api)                                   | Top AI/LLM articles of the week from 5 tags — **weekly**                          |
-| [Lobste.rs](https://lobste.rs)                                    | JSON API                                                          | AI/ML tagged stories from last 7 days — **weekly**                                |
-| [Anthropic](https://anthropic.com) + [OpenAI](https://openai.com) | Sitemap                                                           | New articles detected via `lastmod` diff                                          |
-| [European Commission](https://digital-strategy.ec.europa.eu)      | [RSS](https://digital-strategy.ec.europa.eu/en/rss.xml)           | AI Office and digital-policy news, new since the last run, at most 7 days old     |
-| [EDPB](https://www.edpb.europa.eu)                                | [RSS](https://www.edpb.europa.eu/feed/news_en)                    | EU data protection news, every item judged by Jev, at most 7 days old             |
-| [EUR-Lex](https://eur-lex.europa.eu)                              | [Cellar SPARQL](https://publications.europa.eu/webapi/rdf/sparql) | EU acts and proposals on AI or a watchlisted act, with their stage                |
-| [European Parliament](https://oeil.secure.europarl.europa.eu)     | [Open Data API](https://data.europarl.europa.eu)                  | Watchlisted EU procedures, reported when their stage moves                        |
-| [Tweede Kamer](https://www.tweedekamer.nl)                        | [OData API](https://opendata.tweedekamer.nl), KOOP SRU            | AI motions, letters, questions; watchlisted bills to the Staatsblad               |
-| [Have your say](https://ec.europa.eu/info/law/better-regulation)  | Portal search API (undocumented)                                  | AI Commission initiatives: new stage or feedback period, closing date             |
-| [Dutch government](https://www.rijksoverheid.nl)                  | RSS                                                               | AP, Rijksoverheid, RDI, Digitale Overheid news, every item judged by Jev          |
-| [Internetconsultatie](https://www.internetconsultatie.nl)         | Homepage list                                                     | Open Dutch consultations on AI, closing date                                      |
-| [Federal Register](https://www.federalregister.gov)               | [API v1](https://www.federalregister.gov/developers/documentation/api/v1) | US rules and notices naming AI, presidential documents, watchlisted dockets/RINs  |
-| [Regulations.gov](https://www.regulations.gov)                    | [API v4](https://open.gsa.gov/api/regulationsgov/)                | US AI dockets the Federal Register missed, comment deadlines; needs `USA_GOV_API_KEY` |
-| [Congress.gov](https://www.congress.gov)                          | [API v3](https://api.congress.gov)                                | US federal AI bills from passing a chamber onward; needs `USA_GOV_API_KEY`        |
-| [Open States](https://openstates.org)                             | [API v3](https://v3.openstates.org/docs)                          | US state AI bills from passing a chamber onward; needs `PLURAL_API_KEY`           |
-| Policy news (7 outlets, `kind: news` in `config.yml`)             | RSS                                                               | Politico, AI Act Newsletter, Transformer, CSET, Covington, Binnenlands Bestuur    |
+| Source                                                            | Type                                                                      | Data                                                                                  |
+| ----------------------------------------------------------------- | ------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| [GitHub Repos](https://github.com)                                | API                                                                       | Stable releases and hot issues from the agent and infra repos in `config.yml`         |
+| [Claude Code Skills](https://github.com/anthropics/skills)        | API                                                                       | Trending skills sorted by community engagement — **weekly**                           |
+| [GitHub Trending](https://github.com/trending)                    | HTML + API                                                                | Weekly trending repos + AI topic search (7-day window) — **weekly**                   |
+| [OpenRouter](https://openrouter.ai/apps)                          | HTML (RSC payload) + Models API                                           | Agent app usage, top/new models — **weekly**; stealth models daily                    |
+| [npm](https://www.npmjs.com)                                      | Registry search API                                                       | Coding-agent packages by downloads and momentum — **weekly**                          |
+| [Hacker News](https://news.ycombinator.com)                       | [Firebase API](https://github.com/HackerNews/API)                         | Top AI stories from last 24h via topstories scanning                                  |
+| [ArXiv](https://arxiv.org)                                        | [ArXiv API](https://export.arxiv.org/api/query)                           | Papers from cs.AI, cs.CL, cs.LG (new since the last run), ranked by Jev relevance     |
+| [Hugging Face](https://huggingface.co)                            | [Hub API](https://huggingface.co/api/models)                              | 30 trending models sorted by weekly likes — **weekly**, Mondays only                  |
+| [Dev.to](https://dev.to)                                          | [Forem API](https://dev.to/api)                                           | Top AI/LLM articles of the week from 5 tags — **weekly**                              |
+| [Lobste.rs](https://lobste.rs)                                    | JSON API                                                                  | AI/ML tagged stories from last 7 days — **weekly**                                    |
+| [Anthropic](https://anthropic.com) + [OpenAI](https://openai.com) | Sitemap                                                                   | New articles detected via `lastmod` diff                                              |
+| [European Commission](https://digital-strategy.ec.europa.eu)      | [RSS](https://digital-strategy.ec.europa.eu/en/rss.xml)                   | AI Office and digital-policy news, new since the last run, at most 7 days old         |
+| [EDPB](https://www.edpb.europa.eu)                                | [RSS](https://www.edpb.europa.eu/feed/news_en)                            | EU data protection news, every item judged by Jev, at most 7 days old                 |
+| [EUR-Lex](https://eur-lex.europa.eu)                              | [Cellar SPARQL](https://publications.europa.eu/webapi/rdf/sparql)         | EU acts and proposals on AI or a watchlisted act, with their stage                    |
+| [European Parliament](https://oeil.secure.europarl.europa.eu)     | [Open Data API](https://data.europarl.europa.eu)                          | Watchlisted EU procedures, reported when their stage moves                            |
+| [Tweede Kamer](https://www.tweedekamer.nl)                        | [OData API](https://opendata.tweedekamer.nl), KOOP SRU                    | AI motions, letters, questions; watchlisted bills to the Staatsblad                   |
+| [Have your say](https://ec.europa.eu/info/law/better-regulation)  | Portal search API (undocumented)                                          | AI Commission initiatives: new stage or feedback period, closing date                 |
+| [Dutch government](https://www.rijksoverheid.nl)                  | RSS                                                                       | AP, Rijksoverheid, RDI, Digitale Overheid news, every item judged by Jev              |
+| [Internetconsultatie](https://www.internetconsultatie.nl)         | Homepage list                                                             | Open Dutch consultations on AI, closing date                                          |
+| [Federal Register](https://www.federalregister.gov)               | [API v1](https://www.federalregister.gov/developers/documentation/api/v1) | US rules and notices naming AI, presidential documents, watchlisted dockets/RINs      |
+| [Regulations.gov](https://www.regulations.gov)                    | [API v4](https://open.gsa.gov/api/regulationsgov/)                        | US AI dockets the Federal Register missed, comment deadlines; needs `USA_GOV_API_KEY` |
+| [Congress.gov](https://www.congress.gov)                          | [API v3](https://api.congress.gov)                                        | US federal AI bills from passing a chamber onward; needs `USA_GOV_API_KEY`            |
+| [Open States](https://openstates.org)                             | [API v3](https://v3.openstates.org/docs)                                  | US state AI bills from passing a chamber onward; needs `PLURAL_API_KEY`               |
+| Policy news (7 outlets, `kind: news` in `config.yml`)             | RSS                                                                       | Politico, AI Act Newsletter, Transformer, CSET, Covington, Binnenlands Bestuur        |
 
 ## Web UI
 
@@ -49,7 +49,7 @@ Subscribe in any RSS reader (Feedly, Reeder, NewsBlur, etc.) to receive new dige
 
 ## MCP Server
 
-**`https://daily-diff-mcp.<your-subdomain>.workers.dev`** (see **Self-hosting** below)
+**`https://daily-diff-mcp.<subdomain>.workers.dev`** (a Cloudflare Worker deployed from `mcp/`, see **Deploying** below)
 
 A [Model Context Protocol](https://modelcontextprotocol.io) server that exposes Daily Diff data as tools. Any MCP-compatible client (Claude Desktop, OpenClaw, etc.) can query the latest AI ecosystem reports directly.
 
@@ -68,7 +68,7 @@ A [Model Context Protocol](https://modelcontextprotocol.io) server that exposes 
 {
   "mcpServers": {
     "daily-diff": {
-      "url": "https://daily-diff-mcp.<your-subdomain>.workers.dev"
+      "url": "https://daily-diff-mcp.<subdomain>.workers.dev"
     }
   }
 }
@@ -83,7 +83,7 @@ Restart Claude Desktop after saving. You can then ask Claude things like:
 **OpenClaw setup** — run the following command:
 
 ```bash
-openclaw mcp add --transport http daily-diff https://daily-diff-mcp.<your-subdomain>.workers.dev
+openclaw mcp add --transport http daily-diff https://daily-diff-mcp.<subdomain>.workers.dev
 ```
 
 Or add it manually to `~/.openclaw/openclaw.json`:
@@ -93,7 +93,7 @@ Or add it manually to `~/.openclaw/openclaw.json`:
   "mcpServers": {
     "daily-diff": {
       "type": "http",
-      "url": "https://daily-diff-mcp.<your-subdomain>.workers.dev"
+      "url": "https://daily-diff-mcp.<subdomain>.workers.dev"
     }
   }
 }
@@ -105,7 +105,7 @@ You can then ask OpenClaw things like:
 - _"Search for Claude Code mentions this week"_ → calls `search`
 - _"Show me the AI trending report for 2026-03-05"_ → calls `get_report`
 
-**Self-hosting** — deploy your own instance from the `mcp/` directory:
+**Deploying** — the worker is deployed from the `mcp/` directory:
 
 ```bash
 cd mcp
@@ -202,42 +202,28 @@ New articles are detected by comparing sitemap `lastmod` timestamps against a pe
 - **Weekly (Mondays):** GitHub AI trending + Claude Code Skills; the models report (Hugging Face trending models + OpenRouter token usage); Dev.to + Lobste.rs sections in the discussions report
 - Publishes a GitHub Issue per report; commits Markdown files to `digests/YYYY-MM-DD/`
 - Runs via GitHub Actions; supports manual triggering, with an option to force the weekly reports
-- All tracked repositories are configurable via `config.yml` — no code changes needed
+- Tracked repositories and policy sources live in `config.yml`, so changing them needs no code change
 
 The weekly split exists because those reports, run daily, mostly repeated themselves: sampled over September 2026, 54% of trending links and 45% of community links were already in the previous day's report. Product Hunt was dropped at the same time — mostly consumer apps, a poor fit for the audience.
 
-## Setup
+## Configuration
 
-### 1. Fork this repository
+### Tracked repositories (`config.yml`)
 
-### 2. Customize `config.yml` (optional)
-
-Edit `config.yml` in the repo root to add, remove, or replace the tracked repositories. The file is fully commented. No code changes are needed — the pipeline reads it on every run and stops with an error if the file or a section is missing. Each section of the agents report also sets its `title` (its heading in the report) and `subject` (what the projects are, for the LLM prompt). After editing, run `pnpm readme` to refresh the tracked-repo tables above; the pre-commit hook and CI fail while they are stale.
+`config.yml` in the repo root lists the tracked repositories and the Policy Watch sources. The file is fully commented. The pipeline reads it on every run and stops with an error if the file or a section is missing. Each section of the agents report also sets its `title` (its heading in the report) and `subject` (what the projects are, for the LLM prompt). After editing, run `pnpm readme` to refresh the tracked-repo tables above; the pre-commit hook and CI fail while they are stale.
 
 ```yaml
 agents:
-  title: My Agents # section heading in the agents report
-  subject: what the projects are, for the LLM prompt
   repos:
-    # Add a new agent
     - id: my-agent
       repo: owner/my-agent
       name: My Agent
       keywords: [my agent] # optional: news match terms; defaults to name + repo name
-
-infra:
-  title: My Tooling
-  subject: what the projects are, for the LLM prompt
-  repos:
-    # Add a new tooling project
-    - id: my-tool
-      repo: owner/my-tool
-      name: My Tool
 ```
 
-### 3. Add Secrets
+### Secrets
 
-Go to **Settings → Secrets and variables → Actions** and add:
+The workflow reads these repository secrets (**Settings → Secrets and variables → Actions**):
 
 | Secret               | Required      | Description                                                                                                                                                                                                                                                                      |
 | -------------------- | ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -260,19 +246,15 @@ Go to **Settings → Secrets and variables → Actions** and add:
 **Setting up Telegram notifications** (optional):
 
 1. Message [@BotFather](https://t.me/BotFather) on Telegram, create a bot, and copy the token
-2. Add the bot to your channel/group, or start a DM with it
+2. Add the bot to the channel/group, or start a DM with it
 3. Get the chat ID via [@userinfobot](https://t.me/userinfobot) or the [getUpdates](https://core.telegram.org/bots/api#getupdates) API
 4. Add `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID` as repository secrets
 
 > If neither secret is set, the notification step is silently skipped.
 
-### 3. Enable the workflow
+### Manual runs
 
-Confirm the workflow is enabled in the **Actions** tab.
-
-To test immediately, go to **Actions → Daily Diff → Run workflow**. Tick **force_weekly** to also generate the weekly reports on a non-Monday (e.g. to redo a missed Monday).
-
-> **First run note**: The web content step will fetch up to 50 articles (25 per site) and may take a few extra minutes. Subsequent runs are fast — only new articles are processed.
+**Actions → Daily Diff → Run workflow** starts a run outside the schedule, e.g. to regenerate a day. Tick **force_weekly** to also generate the weekly reports on a non-Monday (e.g. to redo a missed Monday).
 
 ## LLM providers
 
@@ -322,7 +304,7 @@ export ANTHROPIC_API_KEY=sk-ant-xxxxxxxx
 # export LLM_PROVIDER=qwen
 # export DASHSCOPE_API_KEY=sk-xxxxxxxx
 
-export DIGEST_REPO=your-username/daily-diff  # optional; omit to only write files
+export DIGEST_REPO=dboeter/daily-diff       # optional; omit to only write files
 # export DIGEST_FORCE_WEEKLY=1               # optional; also run the weekly reports today
 # export TYPESAFE_API_KEY=xxxxx              # optional; Jev for ArXiv ranking, trending scope and Policy Watch relevance
 # export PLURAL_API_KEY=xxxxx                 # optional; Policy Watch's US state bills (Open States)
