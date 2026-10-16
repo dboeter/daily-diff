@@ -159,6 +159,23 @@ const RETRY_BASE_MS = 5_000;
 /** Backoff cap. Uncapped, attempt 6 would sleep 160 s and blow the job timeout. */
 const RETRY_MAX_MS = 60_000; // ladder: 5, 10, 20, 40, 60, 60 -> 195 s of cover
 
+/**
+ * The provider answered but the model behind it did not: a 502/503/504 status,
+ * a 2xx body carrying one (OpenRouter: `{"code":504,"message":"A Timeout
+ * Occurred"}`), or our own request timeout. One retry: on 2026-10-16 the free
+ * model's only endpoint was down and each attempt waited out a 5-minute
+ * gateway timeout, so a longer ladder only runs into the job's time limit.
+ * A gateway error means no generation came back, so a retry bills nothing twice.
+ */
+const MAX_RETRIES_UNAVAILABLE = 1;
+
+export function isProviderUnavailable(err: unknown): boolean {
+  const e = err as { name?: string; status?: number; message?: string } | null;
+  if (e?.name === "APIConnectionTimeoutError") return true;
+  if (e?.status === 502 || e?.status === 503 || e?.status === 504) return true;
+  return typeof e?.message === "string" && /returned no choices: .*"code":50[234]\b/.test(e.message);
+}
+
 export function is429(err: unknown): boolean {
   return (err as { status?: number })?.status === 429 || String(err).includes("429");
 }
@@ -188,7 +205,9 @@ const CONNECTION_ERROR_CODES = new Set([
 export function isConnectionError(err: unknown): boolean {
   for (let cur: unknown = err, depth = 0; cur != null && depth < 5; depth++) {
     const e = cur as { name?: string; code?: string; message?: string; cause?: unknown };
-    if (e.name === "APIConnectionError" || e.name === "APIConnectionTimeoutError") return true;
+    // APIConnectionTimeoutError is not here: the request was sent and the model
+    // never answered, which isProviderUnavailable covers with its shorter budget.
+    if (e.name === "APIConnectionError") return true;
     if (typeof e.code === "string" && CONNECTION_ERROR_CODES.has(e.code)) return true;
     if (typeof e.message === "string" && /fetch failed|Connection error/i.test(e.message)) return true;
     cur = e.cause;
@@ -197,13 +216,14 @@ export function isConnectionError(err: unknown): boolean {
 }
 
 /**
- * Retry rate limits and connection failures; let everything else through.
+ * Retry rate limits, connection failures and an unavailable model; let
+ * everything else through.
  *
  * A 4xx that is not 429 will fail identically on the next attempt, and retrying
- * a 5xx risks a duplicate generation that already billed.
+ * a 500 risks a duplicate generation that already billed.
  */
 export function isRetryable(err: unknown): boolean {
-  return is429(err) || isConnectionError(err);
+  return is429(err) || isProviderUnavailable(err) || isConnectionError(err);
 }
 
 export async function callLlm(prompt: string, maxTokens = LLM_TOKENS_DEFAULT): Promise<string> {
@@ -226,12 +246,17 @@ export async function callLlm(prompt: string, maxTokens = LLM_TOKENS_DEFAULT): P
         continue;
       }
       const rateLimited = is429(err);
-      const maxRetries = rateLimited ? MAX_RETRIES_429 : MAX_RETRIES_CONNECTION;
+      const unavailable = !rateLimited && isProviderUnavailable(err);
+      const maxRetries = rateLimited
+        ? MAX_RETRIES_429
+        : unavailable
+          ? MAX_RETRIES_UNAVAILABLE
+          : MAX_RETRIES_CONNECTION;
       if (attempt < maxRetries && isRetryable(err)) {
         releaseSlot();
         released = true;
         const wait = Math.min(RETRY_BASE_MS * 2 ** attempt, RETRY_MAX_MS);
-        const reason = rateLimited ? "429" : "connection error";
+        const reason = rateLimited ? "429" : unavailable ? "model unavailable" : "connection error";
         console.error(`[llm] ${reason} — retry ${attempt + 1}/${maxRetries} in ${wait / 1000}s...`);
         attempt++;
         await sleep(wait);

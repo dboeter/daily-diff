@@ -7,6 +7,14 @@
 import OpenAI from "openai";
 import { type LlmProvider, TruncatedResponseError } from "./types.ts";
 
+/**
+ * Per-request timeout. Just over OpenRouter's 5-minute gateway timeout, so its
+ * 504 arrives first. The SDK default is 10 minutes with 2 hidden retries: one
+ * hung call could take 30 minutes, past the job's 40-minute limit, before
+ * callLlm's own retry ladder even started.
+ */
+const LLM_REQUEST_TIMEOUT_MS = 330_000;
+
 export abstract class OpenAICompatibleProvider implements LlmProvider {
   abstract readonly name: string;
   protected readonly client: OpenAI;
@@ -25,6 +33,9 @@ export abstract class OpenAICompatibleProvider implements LlmProvider {
     this.client = new OpenAI({
       apiKey: opts.apiKey,
       baseURL: opts.baseURL,
+      timeout: LLM_REQUEST_TIMEOUT_MS,
+      // Retries are callLlm's (report.ts), with budgets per error class.
+      maxRetries: 0,
     });
   }
 

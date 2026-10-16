@@ -271,7 +271,7 @@ Set `LLM_PROVIDER` to choose which model backend powers the digest generation. D
 
 Override the model name with `ANTHROPIC_MODEL`, `OPENAI_MODEL`, `GITHUB_COPILOT_MODEL`, `OPENROUTER_MODEL`, `DEEPSEEK_MODEL`, or `QWEN_MODEL` respectively. The Qwen endpoint can be overridden with `DASHSCOPE_BASE_URL`. For reasoning models on OpenRouter, set `OPENROUTER_REASONING_EFFORT` (e.g. `low`) so reasoning does not consume the whole output budget.
 
-The scheduled daily run uses `openrouter` / `nvidia/nemotron-3-ultra-550b-a55b:free` with `OPENROUTER_REASONING_EFFORT=low`.
+The scheduled daily run uses `openrouter` / `nvidia/nemotron-3-super-120b-a12b:free` with `OPENROUTER_REASONING_EFFORT=low`, falling back to `nvidia/nemotron-3-ultra-550b-a55b:free` and `nvidia/nemotron-3.5-super-vl:free` (`OPENROUTER_FALLBACK_MODELS`, comma-separated, tried in order when the primary errors or is down).
 
 The provider abstraction lives in `src/providers/` — each provider is a separate file implementing the `LlmProvider` interface. Adding a new provider only requires creating a new file and registering it in the factory.
 
