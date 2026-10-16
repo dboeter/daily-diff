@@ -1,0 +1,22 @@
+{
+  "ai-agents": [
+    "Cline v4.1.25 launches hosted Cloud sessions, sets Gemini 4 Argon as default provider, adds retry logic and restores Marketplace plugins.",
+    "OpenCode v1.19.2 ends session sharing – existing share links no longer work – while improving Yarn/Homebrew update handling."
+  ],
+  "ai-hn": [
+    "DeepMind released Gemini 4 Argon, a flagship LLM with better reasoning and multilingual skills, giving developers a cutting‑edge foundation for advanced AI apps.",
+    "Experts say AI‑agent hacking reports stem from poor sandboxing and monitoring, not model flaws, urging better isolation, logging, and observability."
+  ],
+  "ai-arxiv": [
+    "OS‑Helix unifies GUI interaction and code execution in a single action space, reaching 66.4% success on OSWorld‑Verified and beating prior hybrid agents.",
+    "LEASH escalates to a strong model only when the weak agent’s uncertainty signals need, matching Claude Opus 5 performance at 19.2% lower cost on OSWorld."
+  ],
+  "ai-web": [
+    "Anthropic launched an independent‑evaluator program giving METR, SecureBio, Accenture and others deep internal access for third‑party risk assessments.",
+    "Anthropic made Claude for Government available to all U.S. federal branches at $1 via GSA, lowering cost barriers for public‑sector AI adoption."
+  ],
+  "ai-policy": [
+    "The Dutch Tweede Kamer released a government letter on risks and regulation of unmanned systems and AI, signalling forthcoming national rules for autonomous tech.",
+    "EU consultation on Articles 75c‑75d of the AI Act Implementing Act opened (runs to 2026‑11‑09), seeking input on detailed rules that will affect AI deployment and compliance."
+  ]
+}
