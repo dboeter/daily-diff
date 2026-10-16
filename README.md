@@ -29,7 +29,7 @@ A personal daily digest of AI coding agents, agent tooling and AI policy, built 
 | [Regulations.gov](https://www.regulations.gov)                    | [API v4](https://open.gsa.gov/api/regulationsgov/)                        | US AI dockets the Federal Register missed, comment deadlines; needs `USA_GOV_API_KEY` |
 | [Congress.gov](https://www.congress.gov)                          | [API v3](https://api.congress.gov)                                        | US federal AI bills from passing a chamber onward; needs `USA_GOV_API_KEY`            |
 | [Open States](https://openstates.org)                             | [API v3](https://v3.openstates.org/docs)                                  | US state AI bills from passing a chamber onward; needs `PLURAL_API_KEY`               |
-| Policy news (7 outlets, `kind: news` in `config.yml`)             | RSS                                                                       | Politico, AI Act Newsletter, Transformer, CSET, Covington, Binnenlands Bestuur        |
+| Policy news (6 outlets, `kind: news` in `config.yml`)             | RSS                                                                       | Politico, Transformer, CSET, Covington, Binnenlands Bestuur                           |
 
 ## Web UI
 
