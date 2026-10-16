@@ -186,15 +186,11 @@ policy:
       jev_only: true
     # News & commentary (kind: news), measured 2026-09-29..10-13 and live-checked
     # 2026-10-14; posts a week before Jev. Euractiv (403) and Lawfare had no
-    # usable feed; Tech Policy Press and IAPP feeds were not found.
+    # usable feed; Tech Policy Press and IAPP feeds were not found. The EU AI Act
+    # Newsletter (Substack) was dropped 2026-10-16: HTTP 403 to every Actions run.
     # ~12 a week, ~7 about AI; EU AI policy.
     - name: Politico Europe
       url: https://www.politico.eu/section/technology/feed/
-      jurisdiction: eu
-      kind: news
-    # The EU AI Act Newsletter (Future of Life Institute); ~1 a week.
-    - name: EU AI Act Newsletter
-      url: https://artificialintelligenceact.substack.com/feed
       jurisdiction: eu
       kind: news
     # ~12 a week, ~8 about AI; US federal and state attorneys general.
