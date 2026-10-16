@@ -93,7 +93,10 @@ jobs:
           LLM_PROVIDER: openrouter
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
           # Free model; if OpenRouter retires it, runs abort at the LLM health gate — swap the id here.
-          OPENROUTER_MODEL: nvidia/nemotron-3-ultra-550b-a55b:free
+          # Nemotron 3 Ultra's free endpoint was down on 2026-10-16 (16% uptime that day), so Super leads.
+          OPENROUTER_MODEL: nvidia/nemotron-3-super-120b-a12b:free
+          # Tried in order when the model above errors or is down; one free endpoint is no guarantee.
+          OPENROUTER_FALLBACK_MODELS: nvidia/nemotron-3-ultra-550b-a55b:free,nvidia/nemotron-3.5-super-vl:free
           # Without this the reasoning model spends the whole token budget thinking and returns empty content.
           OPENROUTER_REASONING_EFFORT: low
           # Jev relevance ranking for the ArXiv report (~$0.02/day); unset falls back to recency.

@@ -341,6 +341,39 @@ describe("OpenRouterProvider", () => {
     }),
   );
 
+  it(
+    "sends OPENROUTER_FALLBACK_MODELS as `models`, primary first",
+    withEnv(
+      {
+        OPENROUTER_MODEL: "a/primary:free",
+        OPENROUTER_FALLBACK_MODELS: " b/one:free, ,a/primary:free,c/two:free",
+      },
+      async () => {
+        const mockCreate = await getOpenAIMockCreate();
+        mockCreate.mockResolvedValueOnce({ choices: [{ message: { content: "ok" } }] });
+
+        await new OpenRouterProvider({ apiKey: "test" }).call("prompt", 256);
+        expect(mockCreate).toHaveBeenLastCalledWith(
+          expect.objectContaining({
+            model: "a/primary:free",
+            models: ["a/primary:free", "b/one:free", "c/two:free"],
+          }),
+        );
+      },
+    ),
+  );
+
+  it(
+    "sends no `models` without OPENROUTER_FALLBACK_MODELS",
+    withEnv({ OPENROUTER_FALLBACK_MODELS: undefined }, async () => {
+      const mockCreate = await getOpenAIMockCreate();
+      mockCreate.mockResolvedValueOnce({ choices: [{ message: { content: "ok" } }] });
+
+      await new OpenRouterProvider({ apiKey: "test" }).call("prompt", 256);
+      expect(mockCreate.mock.lastCall?.[0]).not.toHaveProperty("models");
+    }),
+  );
+
   it("throws on empty response", async () => {
     const mockCreate = await getOpenAIMockCreate();
     mockCreate.mockResolvedValueOnce({

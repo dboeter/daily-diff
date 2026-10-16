@@ -22,6 +22,7 @@ vi.mock("../providers/index.ts", async (importOriginal) => {
 import {
   is429,
   isConnectionError,
+  isProviderUnavailable,
   isRetryable,
   callLlm,
   saveFile,
@@ -232,6 +233,34 @@ describe("isConnectionError", () => {
   });
 });
 
+describe("isProviderUnavailable", () => {
+  // The body OpenRouter sent for every call of the 2026-10-16 run.
+  const gatewayTimeout = new Error(
+    'openrouter returned no choices: {"message":"A Timeout Occurred","code":504,"metadata":{"error_type":"timeout"}}',
+  );
+
+  it("detects a 504 in a 2xx body, a 502/503/504 status and the SDK request timeout", () => {
+    expect(isProviderUnavailable(gatewayTimeout)).toBe(true);
+    expect(isProviderUnavailable({ status: 503 })).toBe(true);
+    expect(
+      isProviderUnavailable(
+        Object.assign(new Error("Request timed out."), { name: "APIConnectionTimeoutError" }),
+      ),
+    ).toBe(true);
+  });
+
+  it("leaves other errors alone", () => {
+    expect(isProviderUnavailable({ status: 500, message: "server error" })).toBe(false);
+    expect(isProviderUnavailable(new Error('openrouter returned no choices: {"code":400}'))).toBe(false);
+    expect(isProviderUnavailable(null)).toBe(false);
+  });
+
+  it("is not a connection error, so it does not get the 6-retry ladder", () => {
+    const timeout = Object.assign(new Error("Request timed out."), { name: "APIConnectionTimeoutError" });
+    expect(isConnectionError(timeout)).toBe(false);
+  });
+});
+
 describe("isRetryable", () => {
   it("covers both rate limits and connection failures", () => {
     expect(isRetryable({ status: 429 })).toBe(true);
@@ -325,6 +354,19 @@ describe("callLlm", () => {
 
     expect(await promise).toBe("success after retry");
     expect(mockCall).toHaveBeenCalledTimes(2);
+  });
+
+  it("retries an unavailable model once, then fails", async () => {
+    const err504 = new Error('openrouter returned no choices: {"message":"A Timeout Occurred","code":504}');
+    mockCall.mockRejectedValue(err504);
+
+    const promise = callLlm("prompt", 1024);
+    promise.catch(() => {});
+    await vi.advanceTimersByTimeAsync(5_000);
+
+    await expect(promise).rejects.toThrow("A Timeout Occurred");
+    expect(mockCall).toHaveBeenCalledTimes(2);
+    expect(llmStats).toEqual({ attempted: 1, failed: 1 });
   });
 
   it("throws immediately on errors that are neither 429 nor connection failures", async () => {
