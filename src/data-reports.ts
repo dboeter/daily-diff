@@ -7,8 +7,12 @@
 
 import {
   ARXIV_REPORT,
+  DATA_REPORT,
+  MSG,
   POLICY_REPORT,
+  PROJECT_SCOPE,
   REPORT_META,
+  SECTIONS,
   WEB_REPORT,
   TRENDING_REPORT,
   reportHeading,
@@ -21,6 +25,8 @@ import {
   buildModelsPrompt,
   buildPolicySummariesPrompt,
   buildPolicyProsePrompt,
+  buildDataSummariesPrompt,
+  buildDataProsePrompt,
   discussionSources,
   modelSources,
   type DiscussionsData,
@@ -30,19 +36,28 @@ import { saveWebState, type WebFetchResult, type WebState } from "./web.ts";
 import type { TrendingData } from "./trending.ts";
 import { saveClassifyCache, saveMatchState } from "./trending-jev.ts";
 import { saveStarHistory } from "./trending-rank.ts";
+import { buildProjectDigestPrompt, hasActivity, type ProjectActivity } from "./prompts.ts";
 import {
+  buildProjectReportContent,
   parseRowSummaries,
   renderTrendingTables,
   renderPolicyTable,
   spliceTables,
   nestHeadings,
+  renderVendorTables,
+  policyTitleLabel,
+  TABLES_MARKER,
+  type ProjectGroup,
 } from "./report-builders.ts";
 import { saveArxivState, type ArxivData } from "./arxiv.ts";
 import type { HfData } from "./hf.ts";
-import { savePolicyState, POLICY_STATE_FILE, type PolicyData } from "./policy.ts";
+import { savePolicyState, POLICY_STATE_FILE, type PolicyData, type PolicyItem } from "./policy.ts";
 import { savePolicyVerdicts, POLICY_VERDICTS_FILE } from "./policy-jev.ts";
 import { renderDeadlines } from "./policy-deadlines.ts";
 import type { OpenRouterData } from "./openrouter.ts";
+import { saveDataState, DATA_STATE_FILE, type VendorData } from "./data-vendors.ts";
+import { saveDataVerdicts, DATA_VERDICTS_FILE } from "./data-jev.ts";
+import type { DataSectionKey } from "./config.ts";
 
 /** A finished report: main() writes its file and opens its issue (title and label from REPORTS). */
 export interface SavedReport {
@@ -294,6 +309,167 @@ export async function buildPolicyReport(
   // Only once the report exists, like the ArXiv state.
   savePolicyState(policyData.nextState, stateFile);
   return { id: "ai-policy", content: assembleReport("ai-policy", dateStr, meta, body) };
+}
+
+// ---------------------------------------------------------------------------
+// Data report (Databricks, Snowflake, the open-source data stack) — daily
+// ---------------------------------------------------------------------------
+
+/** One repo section of the data report (config.yml `databricks`, `snowflake`, `data_stack`). */
+export interface DataSection {
+  key: DataSectionKey;
+  subject: string;
+  /** Every tracked project, active or not, in config order. */
+  activities: ProjectActivity[];
+}
+
+/**
+ * Split the prose call's reply at TABLES_MARKER: Highlights before it; after
+ * it, the Data × AI and Worth a Look sections, each from its heading to the
+ * next `## ` heading, so they render in report order whatever order the model used.
+ */
+function splitProse(prose: string): { highlights: string; dataAi: string; worthALook: string } {
+  const lines = prose.split("\n");
+  const i = lines.findIndex((l) => l.trim() === TABLES_MARKER);
+  // No marker: all of it goes on top, as spliceTables does with a missing marker.
+  if (i === -1) return { highlights: prose.trim(), dataAi: "", worthALook: "" };
+  const after = lines.slice(i + 1);
+  const section = (heading: string) => {
+    const start = after.findIndex((l) => l.trim() === `## ${heading}`);
+    if (start === -1) return "";
+    const end = after.findIndex((l, j) => j > start && l.startsWith("## "));
+    return after
+      .slice(start, end === -1 ? undefined : end)
+      .join("\n")
+      .trim();
+  };
+  return {
+    highlights: lines.slice(0, i).join("\n").trim(),
+    dataAi: section(DATA_REPORT.dataAi),
+    worthALook: section(SECTIONS.worthALook),
+  };
+}
+
+/**
+ * The data report: Highlights, then Databricks, Snowflake and Azure / Fabric &
+ * GCP (each its code-rendered vendor table, then the vendor's repo section),
+ * the open-source stack, Data × AI and Worth a Look. A section with neither vendor items
+ * nor repo activity is left out; Data × AI is asked for only when a vendor item
+ * is AI-flagged or a tracked project is active (the model picks the AI-related
+ * releases and news), and left out when the model writes none. LLM calls: one per active repo section (as in
+ * the agents report) and one for the vendor row summaries, in parallel; then
+ * one for Highlights and Worth a Look over all of it. A failed summaries call
+ * leaves the descriptions in the tables; a failed prose call leaves the failure
+ * notice in Highlights. Null when there are no kept vendor items and no repo activity.
+ * `dataLaw` (today's Policy Watch items that are EU data law) is linked in code
+ * at the end of Worth a Look, which it creates if the prose has none; it never
+ * makes a report on its own.
+ */
+export async function buildDataReport(
+  sections: DataSection[],
+  vendor: VendorData,
+  dataLaw: PolicyItem[],
+  utcStr: string,
+  dateStr: string,
+  stateFile = DATA_STATE_FILE,
+  verdictsFile = DATA_VERDICTS_FILE,
+): Promise<SavedReport | null> {
+  // Before the skip, as in buildPolicyReport: dropped items are then not asked again tomorrow.
+  if (vendor.rankingFile)
+    console.log(`  Saved ${saveFile(vendor.rankingFile, dateStr, "data-ranking.json")}`);
+  if (vendor.nextVerdicts) saveDataVerdicts(vendor.nextVerdicts, verdictsFile);
+  const { items } = vendor;
+  if (items.length === 0 && !sections.some((s) => s.activities.some(hasActivity))) {
+    console.log(`  [data] ${DATA_REPORT.noNewItems}`);
+    return null;
+  }
+  const H = DATA_REPORT.headings;
+  const [repos, rowSummaries] = await Promise.all([
+    Promise.all(
+      sections.map(async (s) => {
+        const active = s.activities.filter(hasActivity);
+        if (!active.length) return { ...s, summary: "" };
+        console.log(`  [data] Calling LLM for ${H[s.key]}...`);
+        const prompt = buildProjectDigestPrompt(active, { subject: s.subject, ...PROJECT_SCOPE }, dateStr);
+        const summary = await generateBody(prompt, LLM_TOKENS_LISTING).catch((err) => {
+          console.error(`  [data] ${H[s.key]} LLM call failed: ${err}`);
+          return MSG.summaryFailed;
+        });
+        return { ...s, summary };
+      }),
+    ),
+    items.length > 0
+      ? generateBody(buildDataSummariesPrompt(items, dateStr), LLM_TOKENS_LISTING).catch((err) => {
+          console.error(`  [data] Vendor summaries failed, showing descriptions: ${err}`);
+          return "";
+        })
+      : "",
+  ]);
+  const tables = renderVendorTables(items, parseRowSummaries(rowSummaries));
+  const repo = (key: DataSectionKey) => {
+    const r = repos.find((s) => s.key === key);
+    return { activities: r?.activities ?? [], summary: r?.summary ?? "" };
+  };
+  // Report order; Azure and GCP have no repo section.
+  const groups: ProjectGroup[] = [
+    { title: H.databricks, ...repo("databricks"), preamble: tables.databricks },
+    { title: H.snowflake, ...repo("snowflake"), preamble: tables.snowflake },
+    { title: H.cloud, activities: [], summary: "", preamble: tables.cloud },
+    { title: H.data_stack, ...repo("data_stack") },
+  ];
+
+  // The prose call sees what the reader sees between Highlights and Worth a Look.
+  const sectionsMd = groups
+    .map((g) => {
+      const body = g.activities.some(hasActivity) ? nestHeadings(g.summary, 3) : "";
+      return g.preamble || body ? `## ${g.title}\n\n${[g.preamble, body].filter(Boolean).join("\n\n")}` : "";
+    })
+    .filter(Boolean)
+    .join("\n\n");
+  const aiItems = items.filter((i) => i.aiInData);
+  const active = sections.flatMap((s) => s.activities.filter(hasActivity));
+  const dataAi =
+    aiItems.length || active.length
+      ? {
+          vendorTitles: aiItems.map((i) => `${i.title} (${i.source})`),
+          news: active.flatMap((a) => a.news.map((n) => `${n.title} (${n.source}; ${a.config.name})`)),
+        }
+      : undefined;
+  console.log("  [data] Calling LLM for the data report's highlights...");
+  const prose = await generateBody(
+    buildDataProsePrompt(sectionsMd, dateStr, dataAi),
+    LLM_TOKENS_LISTING,
+  ).catch((err) => {
+    console.error(`  [data] Highlights failed: ${err}`);
+    return null;
+  });
+  const {
+    highlights,
+    dataAi: dataAiMd,
+    worthALook,
+  } = prose === null
+    ? { highlights: `## ${SECTIONS.highlights}\n\n${MSG.summaryFailed}`, dataAi: "", worthALook: "" }
+    : splitProse(prose);
+  const lawLinks = dataLaw
+    .map((i) => `- [${policyTitleLabel(i.title)}](${i.link}) — Policy Watch${i.stage ? `, ${i.stage}` : ""}`)
+    .join("\n");
+  const worth = lawLinks ? `${worthALook || `## ${SECTIONS.worthALook}\n`}\n${lawLinks}` : worthALook;
+  // Not asked for: a Data × AI section the model wrote anyway is dropped.
+  const epilogue = [dataAi ? dataAiMd : "", worth].filter(Boolean).join("\n\n---\n\n");
+
+  const content = buildProjectReportContent({
+    heading: reportHeading("ai-data", dateStr),
+    utcStr,
+    groups,
+    period: PROJECT_SCOPE.period,
+    preamble: highlights ? `${highlights}\n\n---\n\n` : "",
+    omitQuietGroups: true,
+    ...(epilogue ? { epilogue: `\n\n---\n\n${epilogue}` } : {}),
+    footer: autoGenFooter(),
+  });
+  // Only once the report exists, like the policy state.
+  if (vendor.nextState) saveDataState(vendor.nextState, stateFile);
+  return { id: "ai-data", content };
 }
 
 // ---------------------------------------------------------------------------

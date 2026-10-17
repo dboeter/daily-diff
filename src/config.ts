@@ -26,18 +26,29 @@ interface RawSection {
   repos?: unknown;
 }
 
+/** The agents report's sections (ai-agents). */
+export const AGENT_SECTION_KEYS = ["agents", "infra"] as const;
+/** The data report's repo sections (ai-data), in report order. */
+export const DATA_SECTION_KEYS = ["databricks", "snowflake", "data_stack"] as const;
+export type DataSectionKey = (typeof DATA_SECTION_KEYS)[number];
+
 /**
  * The config.yml sections that are reports over a list of repos. Adding one here
- * adds it to the loader, `RadarConfig` and the README tables (`src/readme.ts`).
+ * adds it to the loader, `RadarConfig` and the README tables (`src/readme.ts`);
+ * each report builds only its own keys.
  */
-export const SECTION_KEYS = ["agents", "infra"] as const;
+export const SECTION_KEYS = [...AGENT_SECTION_KEYS, ...DATA_SECTION_KEYS] as const;
 export type SectionKey = (typeof SECTION_KEYS)[number];
 
-type RawConfig = Partial<Record<SectionKey, RawSection>> & { skills_repo?: unknown; policy?: unknown };
+type RawConfig = Partial<Record<SectionKey, RawSection>> & {
+  skills_repo?: unknown;
+  policy?: unknown;
+  data?: unknown;
+};
 
-/** A group of tracked repos: a section of the daily agents report. */
+/** A group of tracked repos: a section of the agents or the data report. */
 export interface SectionConfig {
-  /** The section's heading in the agents report, e.g. "Agent Tooling". */
+  /** The section's heading in its report, e.g. "Agent Tooling". */
   title: string;
   /** What the projects are, for the LLM prompt and README.md. */
   subject: string;
@@ -76,14 +87,43 @@ export interface PolicyConfig {
   readerProfile: string;
   /** Files that always appear when they move, per jurisdiction. Lists may be empty. */
   watchlist: { eu: string[]; nl: string[]; usFederal: string[]; usStates: string[] };
+  /** Tokens that mark an item as EU data law, matched like the watchlist; linked from the data report. May be empty. */
+  dataLaw: string[];
   feeds: PolicyFeed[];
   /** May be empty. */
   calendar: PolicyCalendarEntry[];
 }
 
+export const VENDORS = ["databricks", "snowflake", "azure", "gcp"] as const;
+export type Vendor = (typeof VENDORS)[number];
+/** The data report's vendor sections, in report order: Azure and GCP share one. */
+export const VENDOR_SECTIONS = ["databricks", "snowflake", "cloud"] as const;
+export type VendorSection = (typeof VENDOR_SECTIONS)[number];
+export const vendorSection = (v: Vendor): VendorSection =>
+  v === "databricks" || v === "snowflake" ? v : "cloud";
+/** How a feed is read: `rss` by src/rss.ts, the others by their own module. */
+export const FEED_PARSERS = ["rss", "snowflake", "snowflake-bcr", "bigquery"] as const;
+export type FeedParser = (typeof FEED_PARSERS)[number];
+
+/** A vendor release-notes feed of the data report (config.yml `data.feeds`). */
+export interface DataFeed {
+  name: string;
+  vendor: Vendor;
+  url: string;
+  parser: FeedParser;
+  /** `rss` only: keep an item only when one of its `<category>` values is listed. */
+  categories?: string[];
+}
+
+/** The data report's non-repo sources (config.yml `data`). */
+export interface DataConfig {
+  feeds: DataFeed[];
+}
+
 export interface RadarConfig extends Record<SectionKey, SectionConfig> {
   skillsRepo: string;
   policy: PolicyConfig;
+  data: DataConfig;
 }
 
 // ---------------------------------------------------------------------------
@@ -124,7 +164,7 @@ const WATCHLIST_KEYS = { eu: "eu", nl: "nl", usFederal: "us_federal", usStates: 
 
 function toPolicy(raw: unknown, file: string): PolicyConfig {
   if (!raw || typeof raw !== "object") throw new Error(`${file}: missing section "policy"`);
-  const { reader_profile, watchlist, feeds, calendar } = raw as Record<string, unknown>;
+  const { reader_profile, watchlist, data_law, feeds, calendar } = raw as Record<string, unknown>;
   if (!nonEmptyString(reader_profile)) {
     throw new Error(`${file}: policy.reader_profile must be a non-empty string`);
   }
@@ -134,6 +174,7 @@ function toPolicy(raw: unknown, file: string): PolicyConfig {
     if (!Array.isArray(list)) throw new Error(`${file}: policy.watchlist.${yamlKey} must be a list`);
     return [key, list.map(String)];
   });
+  if (!Array.isArray(data_law)) throw new Error(`${file}: policy.data_law must be a list`);
   if (!Array.isArray(feeds)) throw new Error(`${file}: policy.feeds must be a list`);
   const rawFeeds: {
     name?: string;
@@ -166,6 +207,7 @@ function toPolicy(raw: unknown, file: string): PolicyConfig {
   return {
     readerProfile: reader_profile.trim(),
     watchlist: Object.fromEntries(entries) as PolicyConfig["watchlist"],
+    dataLaw: data_law.map(String),
     feeds: rawFeeds.map((f) => ({
       name: f.name!.trim(),
       // `query` is kept as JSON in config.yml so the Rijksoverheid-platform feeds stay readable.
@@ -178,6 +220,42 @@ function toPolicy(raw: unknown, file: string): PolicyConfig {
       news: f.kind === "news",
     })),
     calendar: calendarEntries,
+  };
+}
+
+function toData(raw: unknown, file: string): DataConfig {
+  if (!raw || typeof raw !== "object") throw new Error(`${file}: missing section "data"`);
+  const { feeds } = raw as Record<string, unknown>;
+  if (!Array.isArray(feeds)) throw new Error(`${file}: data.feeds must be a list`);
+  const rawFeeds: {
+    name?: unknown;
+    vendor?: unknown;
+    url?: unknown;
+    parser?: unknown;
+    categories?: unknown;
+  }[] = feeds;
+  return {
+    feeds: rawFeeds.map((f, i) => {
+      if (!nonEmptyString(f?.name) || !nonEmptyString(f.url)) {
+        throw new Error(`${file}: data.feeds[${i}] needs name and url`);
+      }
+      if (!(VENDORS as readonly unknown[]).includes(f.vendor)) {
+        throw new Error(`${file}: data.feeds[${i}].vendor must be one of ${VENDORS.join(", ")}`);
+      }
+      if (!(FEED_PARSERS as readonly unknown[]).includes(f.parser)) {
+        throw new Error(`${file}: data.feeds[${i}].parser must be one of ${FEED_PARSERS.join(", ")}`);
+      }
+      if (f.categories !== undefined && (f.parser !== "rss" || !Array.isArray(f.categories))) {
+        throw new Error(`${file}: data.feeds[${i}].categories must be a list, on an rss feed`);
+      }
+      return {
+        name: f.name.trim(),
+        vendor: f.vendor as Vendor,
+        url: f.url.trim(),
+        parser: f.parser as FeedParser,
+        ...(Array.isArray(f.categories) ? { categories: f.categories.map(String) } : {}),
+      };
+    }),
   };
 }
 
@@ -194,9 +272,10 @@ export function loadConfig(configPath = "config.yml"): RadarConfig {
     throw new Error(`${configPath}: skills_repo must be a non-empty string`);
   const skillsRepo = raw.skills_repo.trim();
   const policy = toPolicy(raw.policy, configPath);
+  const data = toData(raw.data, configPath);
 
   const counts = SECTION_KEYS.map((key) => `${sections[key].repos.length} ${key}`).join(", ");
   console.log(`[config] Loaded from ${configPath}: ${counts}`);
 
-  return { ...sections, skillsRepo, policy };
+  return { ...sections, skillsRepo, policy, data };
 }

@@ -1,0 +1,369 @@
+/**
+ * The data report's vendor relevance: Jev answers four questions per new
+ * vendor item, code weighs them into keep/drop and an order (the Policy Watch
+ * pattern, `policy-jev.ts`), and the answers are cached per item id in
+ * `digests/data-verdicts.json` so an item is asked once. Without Jev, keyword
+ * rules decide. Behavior-change bundles skip Jev: always kept, as deprecations.
+ */
+
+import path from "node:path";
+import { askJev, mapJev, jevFailedTooOften, loadItemsFile, saveItemsFile } from "./jev.ts";
+import type { AskJev } from "./trending-jev.ts";
+import type { VendorItem } from "./data-vendors.ts";
+import { VENDOR_SECTIONS, vendorSection, type VendorSection } from "./config.ts";
+import { daysBefore } from "./date.ts";
+
+/** `state` is `{ title, description, source }`. */
+const QUESTIONS = {
+  real_change: {
+    type: "noul",
+    instructions:
+      "Does the item from `source`, described by `title` and `description`, announce a change to a data platform or service?",
+    criteria: {
+      true: {
+        what: "A product change: a release, general availability, a preview, a deprecation or retirement, a behavior change",
+        examples: [
+          "a feature now generally available",
+          "a new runtime version",
+          "a feature in public preview",
+          "a service scheduled for retirement",
+        ],
+      },
+      false: {
+        what: "Marketing, an event recap, a customer story, a community post or an opinion piece",
+        examples: ["a conference roundup", "a customer success story", "a community spotlight", "a webinar"],
+      },
+    },
+  },
+  deprecation: {
+    type: "noul",
+    instructions: "Does the item in `title` and `description` announce something going away or breaking?",
+    criteria: {
+      true: {
+        what: "A deprecation, retirement, end of support or a breaking change",
+        examples: [
+          "a model scheduled for retirement",
+          "an API version reaching end of support",
+          "a default behavior that changes",
+        ],
+      },
+      false: {
+        what: "A new feature, an improvement, a fix or anything else",
+        examples: ["a new connector", "a performance improvement", "a region rollout"],
+      },
+    },
+  },
+  ai_in_data: {
+    type: "noul",
+    instructions: "Is the item in `title` and `description` about AI in data work?",
+    criteria: {
+      true: {
+        what: "AI or LLM features in a data platform, or AI tooling for data work",
+        examples: [
+          "an LLM function in SQL",
+          "a text-to-SQL assistant",
+          "an agent framework on the warehouse",
+        ],
+      },
+      false: {
+        what: "Data platform changes without an AI angle",
+        examples: ["a storage format change", "a new SQL function", "a networking feature"],
+      },
+    },
+  },
+  significance: {
+    type: "score",
+    instructions:
+      "How significant is the item in `title` and `description` for a data engineer at a consultancy whose clients use Databricks, Snowflake, Azure and GCP?",
+    criteria: [
+      {
+        what: "Minor: niche, or little changes for client projects",
+        examples: ["a region rollout", "a new model on a model gateway", "a documentation update"],
+      },
+      {
+        what: "Notable: data engineers should know about it",
+        examples: ["a new feature in preview", "a connector update", "a new SQL capability"],
+      },
+      {
+        what: "Major: changes how client platforms are built or run",
+        examples: [
+          "a core feature generally available",
+          "a retirement that forces a migration",
+          "a pricing or default change",
+        ],
+      },
+    ],
+  },
+};
+
+export interface DataAnswers {
+  real_change: { noul: number };
+  deprecation: { noul: number };
+  /** Not weighed: flags an item for the Data × AI section (`aiInData`). */
+  ai_in_data: { noul: number };
+  /** Probability-weighted level, 0–2. */
+  significance: { score: number };
+}
+
+/** Summing to 1. A real change and significance carry the order; a deprecation adds a little on top. */
+const DATA_WEIGHTS = { real_change: 0.4, significance: 0.4, deprecation: 0.2 };
+const MAX_LEVEL = 2;
+/** Keep: a real change at this noul or more (the gate that drops marketing and event recaps). */
+const REAL_CHANGE_MIN = 0.5;
+/** A sure real change (0.4) needs some significance or a deprecation on top: a niche note drops. */
+const KEEP_MIN_RELEVANCE = 0.5;
+/** A deprecation at this noul or more, if a real change, is always kept: consultants warn clients early. */
+const DEPRECATION_MIN = 0.5;
+
+/** Weighted relevance in 0–1, the keep decision and the deprecation flag. Throws on an unexpected answer shape. */
+export function dataRelevance(a: DataAnswers): { relevance: number; keep: boolean; deprecation: boolean } {
+  const relevance =
+    DATA_WEIGHTS.real_change * a.real_change?.noul +
+    (DATA_WEIGHTS.significance * a.significance?.score) / MAX_LEVEL +
+    DATA_WEIGHTS.deprecation * a.deprecation?.noul;
+  // A NaN would sort arbitrarily yet count as a success (see relevanceOf in arxiv.ts).
+  if (!Number.isFinite(relevance)) throw new Error(`Unexpected Jev answers: ${JSON.stringify(a)}`);
+  const real = a.real_change.noul >= REAL_CHANGE_MIN;
+  const deprecation = real && a.deprecation.noul >= DEPRECATION_MIN;
+  return { relevance, keep: deprecation || (real && relevance >= KEEP_MIN_RELEVANCE), deprecation };
+}
+
+/**
+ * Keyword fallback. GA and AI are matched case-sensitively as whole words,
+ * so "ga" and "ai" inside other words do not count.
+ */
+const DEPRECATION_RE = /deprecat|retire|breaking|end of support|end-of-life|sunset|behaviou?r change/i;
+const FEATURE_RE = /generally available|preview|now available|introduc|release/i;
+const GA_RE = /\bGA\b/;
+const AI_ACRONYM_RE = /\bAI\b/;
+const AI_RE = /\bLLM|\bagent|cortex|genie|copilot|\bmodel/i;
+/** Data × AI: Jev's `ai_in_data` at this noul or more. */
+const AI_IN_DATA_MIN = 0.5;
+/** Without a Jev answer, an item is in Data × AI when it names an AI term (bundles included). */
+const aiKeywordHit = (text: string): boolean => AI_ACRONYM_RE.test(text) || AI_RE.test(text);
+/** Azure updates' status category for retirements. */
+const RETIREMENTS_CATEGORY = "Retirements";
+
+/** The fallback's verdict: kept or not, and as a deprecation. */
+export function keywordVerdict(i: Pick<VendorItem, "title" | "description" | "categories">): {
+  keep: boolean;
+  deprecation: boolean;
+} {
+  const text = `${i.title} ${i.description}`;
+  if (DEPRECATION_RE.test(text) || i.categories?.includes(RETIREMENTS_CATEGORY)) {
+    return { keep: true, deprecation: true };
+  }
+  return { keep: FEATURE_RE.test(text) || GA_RE.test(text) || aiKeywordHit(text), deprecation: false };
+}
+
+/**
+ * Vendor items in the report at most. The 2026-10-17 spike counted ~11 raw
+ * items on a typical day and ~45 on a busy one: 12 covers a typical day in
+ * full, and Jev's order trims a busy one.
+ */
+export const MAX_VENDOR_ITEMS = 12;
+
+// ---------------------------------------------------------------------------
+// Verdict cache
+// ---------------------------------------------------------------------------
+
+/** `digests/data-verdicts.json`: Jev's raw answers per item id. Hand-editable. */
+export interface DataVerdicts {
+  items: Record<string, DataVerdictEntry>;
+}
+
+export interface DataVerdictEntry {
+  /** For readers only. */
+  title: string;
+  /** Raw answers, not the decision, so the weights can change without asking again. */
+  answers: DataAnswers;
+  /** CST date Jev answered; absent on a hand-added entry. */
+  decided?: string;
+  model?: string;
+  lastSeen: string;
+}
+
+export const DATA_VERDICTS_FILE = path.join("digests", "data-verdicts.json");
+/** Items leave the 7-day age limit, so an id unseen this long will not return; the data state's span. */
+const VERDICT_UNSEEN_DAYS = 30;
+
+/** Missing → empty. Malformed → null: every item is asked and nothing is saved, so a hand edit survives. */
+export function loadDataVerdicts(file = DATA_VERDICTS_FILE): DataVerdicts | null {
+  return loadItemsFile<DataVerdictEntry>(file, "data");
+}
+
+export function saveDataVerdicts(cache: DataVerdicts, file = DATA_VERDICTS_FILE): void {
+  saveItemsFile(cache, file);
+}
+
+// ---------------------------------------------------------------------------
+// Selection
+// ---------------------------------------------------------------------------
+
+/** A kept vendor item; deprecations are rendered with ⚠️ and listed first. */
+export interface KeptVendorItem extends VendorItem {
+  deprecation: boolean;
+  /** For the Data × AI section: Jev's `ai_in_data`, else an AI keyword in title or description. */
+  aiInData: boolean;
+}
+
+export interface VendorSelection {
+  /** In report order: by section, deprecations first, then by relevance (no verdict: feed order). */
+  items: KeptVendorItem[];
+  /** "keywords" when there was no key or more than half the new calls failed. */
+  rankedBy: "jev" | "keywords";
+  /** null when the verdict file was malformed: it is left as it is. */
+  nextVerdicts: DataVerdicts | null;
+  /** `digests/YYYY-MM-DD/data-ranking.json`: every item, kept or dropped. */
+  rankingFile: string;
+}
+
+interface Verdict {
+  answers: DataAnswers;
+  relevance: number;
+  keep: boolean;
+  deprecation: boolean;
+  model?: string;
+  /** Set when the verdict came from the cache. */
+  decided?: string;
+}
+
+const round = (n: number): number => Math.round(n * 1000) / 1000;
+const roundAnswers = (a: DataAnswers): DataAnswers =>
+  JSON.parse(JSON.stringify(a), (_, v: unknown) => (typeof v === "number" ? round(v) : v)) as DataAnswers;
+
+/**
+ * Non-deprecations each section gets first. Without floors the cloud block got
+ * 0 of 12 on the 2026-10-17 first-run pool: Databricks and Snowflake filled the cap.
+ */
+const SECTION_FLOORS: Record<VendorSection, number> = { databricks: 6, snowflake: 3, cloud: 3 };
+
+/**
+ * Every deprecation, plus up to SECTION_FLOORS non-deprecations per section by
+ * relevance; slots still left under MAX_VENDOR_ITEMS go Databricks, Snowflake,
+ * then Azure/GCP. Returned in report order.
+ */
+function orderAndCap(kept: KeptVendorItem[], score: (i: VendorItem) => number): KeptVendorItem[] {
+  const rank = (i: VendorItem) => VENDOR_SECTIONS.indexOf(vendorSection(i.vendor));
+  // Stable: items without a verdict (score -1) keep feed order.
+  const byRelevance = [...kept].sort((a, b) => rank(a) - rank(b) || score(b) - score(a));
+  const rest = byRelevance.filter((i) => !i.deprecation);
+  const picked = new Set([
+    ...byRelevance.filter((i) => i.deprecation),
+    ...VENDOR_SECTIONS.flatMap((sec) =>
+      rest.filter((i) => vendorSection(i.vendor) === sec).slice(0, SECTION_FLOORS[sec]),
+    ),
+  ]);
+  // `rest` is in section order, so the leftover slots fill Databricks first.
+  for (const i of rest) if (picked.size < MAX_VENDOR_ITEMS) picked.add(i);
+  return byRelevance
+    .filter((i) => picked.has(i))
+    .sort((a, b) => rank(a) - rank(b) || Number(b.deprecation) - Number(a.deprecation));
+}
+
+export async function selectVendorItems(
+  items: VendorItem[],
+  opts: { apiKey?: string; cache: DataVerdicts | null; dateStr: string; ask?: AskJev },
+): Promise<VendorSelection> {
+  const { apiKey, cache, dateStr, ask = askJev } = opts;
+  // Behavior-change bundles are deprecations by definition: no question to ask.
+  const judged = items.filter((i) => i.stage === undefined);
+  const verdicts = new Map<string, Verdict>();
+  for (const item of judged) {
+    const e = cache?.items[item.id];
+    if (!e) continue;
+    try {
+      verdicts.set(item.id, {
+        answers: e.answers,
+        ...dataRelevance(e.answers),
+        decided: e.decided ?? "by hand",
+      });
+    } catch {
+      console.error(`  [data] Invalid saved verdict for ${item.id}, asking again`);
+    }
+  }
+
+  const toAsk = judged.filter((i) => !verdicts.has(i.id));
+  const fresh = new Map<string, Verdict>();
+  let jevDown = !apiKey && toAsk.length > 0;
+  if (apiKey && toAsk.length > 0) {
+    const { results, failed } = await mapJev(
+      toAsk,
+      async (item) => {
+        const state = { title: item.title, description: item.description, source: item.source };
+        const { model, answers } = await ask(state, QUESTIONS, apiKey);
+        const a = answers as DataAnswers;
+        return { answers: a, model, ...dataRelevance(a) };
+      },
+      "data",
+    );
+    toAsk.forEach((item, i) => results[i] && fresh.set(item.id, results[i]));
+    jevDown = jevFailedTooOften(failed, toAsk.length);
+  }
+  // Too many failures: the answers that did arrive are saved, but this run decides by keyword.
+  if (!jevDown) for (const [id, v] of fresh) verdicts.set(id, v);
+
+  const decide = (i: VendorItem): { keep: boolean; deprecation: boolean } =>
+    i.stage !== undefined ? { keep: true, deprecation: true } : (verdicts.get(i.id) ?? keywordVerdict(i));
+  const kept = items.flatMap((i): KeptVendorItem[] => {
+    const d = decide(i);
+    // `?.`: dataRelevance does not check this answer, and a hand-added entry may lack it.
+    const ai = verdicts.get(i.id)?.answers.ai_in_data?.noul;
+    const aiInData = ai === undefined ? aiKeywordHit(`${i.title} ${i.description}`) : ai >= AI_IN_DATA_MIN;
+    return d.keep ? [{ ...i, deprecation: d.deprecation, aiInData }] : [];
+  });
+  const selected = orderAndCap(kept, (i) => verdicts.get(i.id)?.relevance ?? -1);
+  console.log(
+    `  [data] Kept ${selected.length}/${items.length} vendor items` +
+      `${kept.length > selected.length ? ` (${kept.length - selected.length} over the cap)` : ""}` +
+      `${jevDown ? " (no Jev: keyword rules)" : ""}`,
+  );
+
+  let nextVerdicts: DataVerdicts | null = null;
+  if (cache) {
+    const next = { ...cache.items };
+    for (const item of judged) {
+      const v = fresh.get(item.id);
+      if (v) {
+        next[item.id] = {
+          title: item.title,
+          answers: roundAnswers(v.answers),
+          decided: dateStr,
+          ...(v.model ? { model: v.model } : {}),
+          lastSeen: dateStr,
+        };
+      } else if (next[item.id]) {
+        next[item.id] = { ...next[item.id]!, lastSeen: dateStr };
+      }
+    }
+    nextVerdicts = {
+      items: Object.fromEntries(
+        Object.entries(next).filter(([, e]) => e.lastSeen >= daysBefore(dateStr, VERDICT_UNSEEN_DAYS)),
+      ),
+    };
+  }
+
+  const models = [...new Set([...fresh.values()].flatMap((v) => (v.model ? [v.model] : [])))];
+  const keptIds = new Set(kept.map((i) => i.id));
+  const selectedIds = new Set(selected.map((i) => i.id));
+  const lines = items.map((i) => {
+    const v = verdicts.get(i.id) ?? fresh.get(i.id);
+    return JSON.stringify({
+      id: i.id,
+      title: i.title,
+      source: i.source,
+      kept: selectedIds.has(i.id),
+      ...(keptIds.has(i.id) && !selectedIds.has(i.id) ? { overCap: true } : {}),
+      deprecation: decide(i).deprecation,
+      relevance: v ? round(v.relevance) : null,
+      ...(v ? roundAnswers(v.answers) : {}),
+      decided: v?.decided ?? null,
+      ...(i.stage !== undefined ? { stage: i.stage } : { keyword: keywordVerdict(i) }),
+    });
+  });
+  const rankingFile =
+    `{\n"models": ${JSON.stringify(models)},\n"rankedBy": ${JSON.stringify(jevDown ? "keywords" : "jev")},\n` +
+    `"weights": ${JSON.stringify(DATA_WEIGHTS)},\n"items": [\n${lines.join(",\n")}\n]\n}\n`;
+
+  return { items: selected, rankedBy: jevDown ? "keywords" : "jev", nextVerdicts, rankingFile };
+}

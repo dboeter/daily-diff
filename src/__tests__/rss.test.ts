@@ -61,6 +61,15 @@ describe("parseRssItems", () => {
     expect(i!.description).toBe("The panel meets.");
   });
 
+  it("reads every <category>, decoded; no categories field when there are none", () => {
+    const [withCats, without] = parseRssItems(
+      `<rss><channel><item><title>A</title><category>Databases</category>` +
+        `<category>Regions &amp; Datacenters</category></item><item><title>B</title></item></channel></rss>`,
+    );
+    expect(withCats!.categories).toEqual(["Databases", "Regions & Datacenters"]);
+    expect(without).not.toHaveProperty("categories");
+  });
+
   it("returns nothing for a document that is not a feed", () => {
     expect(parseRssItems("<html><body>Maintenance</body></html>")).toEqual([]);
   });

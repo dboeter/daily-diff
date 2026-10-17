@@ -1,18 +1,19 @@
 /**
- * Telegram notification — reads manifest.json and sends a message
- * with links to the latest reports. Skips silently if secrets are not set.
+ * Notifications — reads manifest.json and sends a Telegram message with links
+ * to the latest reports, and a Teams card with the data report's highlights.
+ * Each channel skips silently if its secrets are not set.
  *
- * Required env vars:
+ * Env vars:
  *   TELEGRAM_BOT_TOKEN  — bot token from @BotFather
  *   TELEGRAM_CHAT_ID    — channel/group/user chat ID
- * Optional:
+ *   TEAMS_WEBHOOK_URL   — Teams Workflows "When a Teams webhook request is received" URL
  *   PAGES_URL           — GitHub Pages base URL (defaults to the public deployment)
  */
 
 import fs from "node:fs";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
-import { REPORT_LABELS } from "./i18n.ts";
+import { REPORT_LABELS, REPORTS } from "./i18n.ts";
 import type { ReportHighlights } from "./prompts-data.ts";
 
 const PAGES_URL_DEFAULT = "https://dboeter.github.io/daily-diff";
@@ -80,17 +81,84 @@ export function buildMessage(
   return lines.join("\n");
 }
 
-async function main(): Promise<void> {
-  const BOT_TOKEN = process.env["TELEGRAM_BOT_TOKEN"] ?? "";
-  if (!BOT_TOKEN) {
-    console.log("[notify] TELEGRAM_BOT_TOKEN not set — skipping.");
-    return;
-  }
-  if (!process.env["TELEGRAM_CHAT_ID"]) {
-    console.log("[notify] TELEGRAM_CHAT_ID not set — skipping.");
-    return;
-  }
+const TEAMS_REPORT_ID = "ai-data";
 
+/**
+ * The webhook body for a Teams Workflows trigger: a `message` envelope around
+ * one Adaptive Card (connectors/teams, "Microsoft Teams - Webhook": contentUrl
+ * must be null). Version 1.2 matches Microsoft's webhook samples and is the
+ * first with RichTextBlock.
+ */
+export function buildTeamsCard(date: string, highlights: string[], pagesUrl?: string) {
+  const PAGES_URL = resolvePagesUrl(pagesUrl);
+  const { emoji, name } = REPORTS[TEAMS_REPORT_ID];
+  return {
+    type: "message",
+    attachments: [
+      {
+        contentType: "application/vnd.microsoft.card.adaptive",
+        contentUrl: null,
+        content: {
+          $schema: "http://adaptivecards.io/schemas/adaptive-card.json",
+          type: "AdaptiveCard",
+          version: "1.2",
+          body: [
+            { type: "TextBlock", text: `${emoji} ${name}`, weight: "Bolder", size: "Medium", wrap: true },
+            { type: "TextBlock", text: date, isSubtle: true, spacing: "None", wrap: true },
+            // A TextBlock parses Markdown (`*`, `_`, `[x](y)`, a leading `- `), which
+            // LLM-written highlights can contain by accident; a TextRun is plain
+            // text, so the highlight needs no escaping.
+            ...highlights.map((h) => ({
+              type: "RichTextBlock",
+              inlines: [{ type: "TextRun", text: `• ${h}` }],
+            })),
+          ],
+          actions: [
+            { type: "Action.OpenUrl", title: "Open report", url: `${PAGES_URL}/#${date}/${TEAMS_REPORT_ID}` },
+          ],
+        },
+      },
+    ],
+  };
+}
+
+/**
+ * Posts the data report's card. Never throws: the report is already published,
+ * so a Teams failure is logged and noted in the step summary, not a failed run.
+ */
+export async function sendTeams(date: string, highlights: ReportHighlights | null): Promise<void> {
+  const webhookUrl = process.env["TEAMS_WEBHOOK_URL"] ?? "";
+  if (!webhookUrl) return;
+  const items = highlights?.[TEAMS_REPORT_ID];
+  if (!items?.length) {
+    console.log(`[notify] No ${TEAMS_REPORT_ID} highlights for ${date} — skipping Teams.`);
+    return;
+  }
+  let error: string | null = null;
+  try {
+    const res = await fetch(webhookUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(buildTeamsCard(date, items)),
+    });
+    // Microsoft documents no success status for the Workflows trigger, so any 2xx
+    // counts. The body is cut: an error page can be kilobytes of HTML.
+    if (!res.ok) error = `HTTP ${res.status}: ${(await res.text()).slice(0, 300)}`;
+  } catch (e) {
+    error = e instanceof Error ? e.message : String(e);
+  }
+  if (!error) {
+    console.log(`[notify] Teams card sent for ${date}.`);
+    return;
+  }
+  console.error(`[notify] Teams webhook failed — ${error}`);
+  const summaryPath = process.env["GITHUB_STEP_SUMMARY"];
+  if (summaryPath) {
+    fs.appendFileSync(summaryPath, `⚠️ **Teams notification failed** — ${error}\n`, "utf-8");
+  }
+}
+
+async function main(): Promise<void> {
   if (!fs.existsSync("manifest.json")) {
     console.log("[notify] manifest.json not found — skipping.");
     return;
@@ -116,6 +184,18 @@ async function main(): Promise<void> {
     } catch {
       console.log("[notify] Failed to parse highlights.json — sending without highlights.");
     }
+  }
+
+  // Teams first: it never throws, so a Telegram failure cannot skip it.
+  await sendTeams(date, highlights);
+
+  if (!process.env["TELEGRAM_BOT_TOKEN"]) {
+    console.log("[notify] TELEGRAM_BOT_TOKEN not set — skipping.");
+    return;
+  }
+  if (!process.env["TELEGRAM_CHAT_ID"]) {
+    console.log("[notify] TELEGRAM_CHAT_ID not set — skipping.");
+    return;
   }
 
   const text = buildMessage(date, reports, undefined, highlights);

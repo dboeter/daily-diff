@@ -344,6 +344,7 @@ const LABEL_COLORS: Record<string, string> = {
   arxiv: "b31b1b",
   hf: "ff9d00",
   policy: "1d4ed8",
+  data: "0d9488",
 };
 
 /**

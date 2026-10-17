@@ -33,6 +33,7 @@ export const REPORTS = {
   "ai-arxiv": { emoji: "📚", name: "AI Research", label: "arxiv" },
   "ai-web": { emoji: "🌐", name: "Lab Announcements", label: "web" },
   "ai-policy": { emoji: "⚖️", name: "Policy Watch", label: "policy" },
+  "ai-data": { emoji: "🗄️", name: "Data Engineering Watch", label: "data" },
   "ai-trending": { emoji: "📈", name: "Agent & AI Coding Trends", label: "trending" },
   "ai-hf": { emoji: "🧠", name: "AI Models", label: "hf" },
 } as const satisfies Record<string, { emoji: string; name: string; label: string }>;
@@ -55,8 +56,9 @@ export const reportIssueTitle = (id: ReportId, dateStr: string) =>
   `${REPORTS[id].emoji} ${REPORTS[id].name} ${dateStr}`;
 
 /**
- * Wording of the agents report's sections (config.yml agents and infra), both
- * daily: infra was a weekly report of its own until October 2026. What a
+ * Wording of the repo sections (config.yml agents and infra in the agents
+ * report, the data sections in the data report), all daily: infra was a
+ * weekly report of its own until October 2026. What a
  * section covers and its LLM subject live in config.yml next to its repos, so
  * re-scoping it is a config edit.
  */
@@ -155,6 +157,23 @@ export const POLICY_REPORT = {
   newItems: (n: number) => `${n} new items`,
   noNewItems: "No new items, skipping report.",
   noData: "No data available, skipping report.",
+} as const;
+
+// Daily: the data platforms and open-source data stack of Digital Power's data engineers.
+// Fixed section headings, in report order; config.yml's section titles are README's.
+export const DATA_REPORT = {
+  headings: {
+    databricks: "Databricks",
+    snowflake: "Snowflake",
+    cloud: "Azure / Fabric & GCP",
+    data_stack: "Open-source stack",
+  },
+  /** Written by the prose call, between the sections and Worth a Look; not a DataSectionKey. */
+  dataAi: "Data × AI",
+  vendorTableHeader: "| Date | Source | Item | Summary |\n| :--- | :--- | :--- | :--- |",
+  /** Marks a deprecation, retirement, breaking or behavior change in the Item cell. */
+  deprecationMarker: "⚠️",
+  noNewItems: "No vendor items, releases, hot issues or news in the tracked data projects, skipping report.",
 } as const;
 
 // Weekly: Hugging Face trending models plus OpenRouter token usage, which

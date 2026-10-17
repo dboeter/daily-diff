@@ -209,9 +209,11 @@ export function policyRelevance(
 const AI_ACRONYM_RE = /\b(?:GP)?AI\b/;
 const AI_KEYWORD_RE =
   /artificial intelligence|machine learning|\balgorithm|automated decision|generative|foundation model|kunstmatige intelligentie|\balgoritm/i;
+// The data-law names of config.yml policy.data_law (hard-coded here) count too, so the fallback keeps them for the data report.
+const DATA_LAW_RE = /\bData (?:Governance )?Act\b|\bNIS ?2\b/i;
 export const keywordHit = (i: Pick<PolicyItem, "title" | "description">): boolean => {
   const text = `${i.title} ${i.description}`;
-  return AI_ACRONYM_RE.test(text) || AI_KEYWORD_RE.test(text);
+  return AI_ACRONYM_RE.test(text) || AI_KEYWORD_RE.test(text) || DATA_LAW_RE.test(text);
 };
 
 /**
@@ -231,6 +233,10 @@ export const watchlisted = (
     return new RegExp(`(?<![\\p{L}\\p{N}])${escaped}(?![\\p{L}\\p{N}])`, "iu").test(text);
   });
 };
+
+/** EU data law (config.yml `policy.data_law`): linked from the data report's Worth a Look. */
+export const isDataLaw = (i: Pick<PolicyItem, "title" | "description" | "link">, tokens: string[]): boolean =>
+  watchlisted(i, tokens);
 
 /**
  * A stage item first seen at a stage older than this is recorded in the state

@@ -100,6 +100,7 @@ describe("fetchNlParliament", () => {
   const config: PolicyConfig = {
     readerProfile: "A practitioner.",
     watchlist: { eu: [], nl: ["36875"], usFederal: [], usStates: [] },
+    dataLaw: [],
     calendar: [],
     feeds: [],
   };

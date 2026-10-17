@@ -6,6 +6,8 @@ import {
   policyRelevance,
   selectPolicyItems,
   watchlisted,
+  isDataLaw,
+  keywordHit,
   loadPolicyVerdicts,
   savePolicyVerdicts,
   type PolicyAnswers,
@@ -305,6 +307,28 @@ describe("watchlisted", () => {
     expect(watchlisted(item("Kamerstuk 368750"), ["36875"])).toBe(false);
     expect(watchlisted(item("Regulation (EU) 2024/16890"), ["2024/1689"])).toBe(false);
     expect(watchlisted(item("CELEX 2032024/1689"), ["2024/1689"])).toBe(false);
+  });
+});
+
+describe("isDataLaw", () => {
+  const tokens = ["2023/2854", "2022/868", "2022/2555", "Data Act", "Data Governance Act", "NIS2", "NIS 2"];
+  const item = (title: string, link = "https://x.eu/") => ({ title, description: "", link });
+
+  it("matches a data-law name or act number in the title or link", () => {
+    expect(isDataLaw(item("NIS2 implementing act adopted"), tokens)).toBe(true);
+    expect(isDataLaw(item("Regulation", "https://eur-lex.europa.eu/eli/reg/2022/868/oj"), tokens)).toBe(true);
+  });
+
+  it("does not match a longer word", () => {
+    expect(isDataLaw(item("Data Actions in the cloud"), tokens)).toBe(false);
+  });
+});
+
+describe("keywordHit data law", () => {
+  it("hits the data-law names, whole-word", () => {
+    expect(keywordHit({ title: "Data Governance Act review", description: "" })).toBe(true);
+    expect(keywordHit({ title: "NIS 2 transposition", description: "" })).toBe(true);
+    expect(keywordHit({ title: "Data Actions", description: "" })).toBe(false);
   });
 });
 

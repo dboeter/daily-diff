@@ -138,6 +138,7 @@ jobs:
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          TEAMS_WEBHOOK_URL: ${{ secrets.TEAMS_WEBHOOK_URL }}
           # PAGES_URL deliberately unset: scheduled runs have no github.event.repository,
           # so notify.ts derives the URL from GITHUB_REPOSITORY instead.
         run: pnpm notify

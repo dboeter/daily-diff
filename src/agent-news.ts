@@ -125,9 +125,9 @@ export function collectNewsItems(sources: NewsSources): { item: NewsItem; text: 
 export const MAX_AGENTS_PER_ITEM = 2;
 
 /**
- * News items per tracked project id (agents and infra). An item naming one or
- * two projects is listed under each; one naming more is dropped (see
- * MAX_AGENTS_PER_ITEM). Items keep source order (HN rank, then web, then
+ * News items per tracked project id. An item naming up to `maxPerItem`
+ * projects is listed under each; one naming more is dropped (default
+ * MAX_AGENTS_PER_ITEM, for the agents and infra pool). Items keep source order (HN rank, then web, then
  * trending) and are de-duplicated by URL.
  *
  * An agent's own repo in the GitHub Search results is not news about it: the
@@ -135,7 +135,11 @@ export const MAX_AGENTS_PER_ITEM = 2;
  * returned every day. On GitHub Trending its own repo still counts — trending
  * there is a daily event.
  */
-export function matchProjectNews(agents: RepoConfig[], sources: NewsSources): Map<string, NewsItem[]> {
+export function matchProjectNews(
+  agents: RepoConfig[],
+  sources: NewsSources,
+  maxPerItem = MAX_AGENTS_PER_ITEM,
+): Map<string, NewsItem[]> {
   const matchers = agents.map((cfg) => ({
     id: cfg.id,
     re: agentMatcher(cfg),
@@ -150,7 +154,7 @@ export function matchProjectNews(agents: RepoConfig[], sources: NewsSources): Ma
     const ownSearchResult = (m: { ownUrl: string }) =>
       item.source === "GitHub Search" && item.url.toLowerCase() === m.ownUrl;
     const hits = matchers.filter((m) => m.re.test(text) && !ownSearchResult(m));
-    if (hits.length === 0 || hits.length > MAX_AGENTS_PER_ITEM) continue;
+    if (hits.length === 0 || hits.length > maxPerItem) continue;
     for (const { id } of hits) {
       const list = result.get(id)!;
       if (list.length < NEWS_PER_AGENT) list.push(item);

@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0">
+    <channel>
+        <title>Azure Databricks Release Notes</title>
+        <link>https://learn.microsoft.com/en-us/azure/databricks/release-notes</link>
+        <description>Databricks Release Notes updates</description>
+        <lastBuildDate>Fri, 16 Oct 2026 17:19:41 GMT</lastBuildDate>
+        <docs>https://validator.w3.org/feed/docs/rss2.html</docs>
+        <generator>rssFeed.ts</generator>
+        <language>en-us</language>
+        <copyright>© Databricks 2026. All rights reserved. Apache, Apache Spark, Spark and the Spark logo are trademarks of the Apache Software Foundation.</copyright>
+        <item>
+            <title><![CDATA[Saving an unchanged job no longer adds rows to the jobs system tables]]></title>
+            <link>https://learn.microsoft.com/azure/databricks/release-notes/product/2026/october#saving-an-unchanged-job-no-longer-adds-rows-to-the-jobs-system-tables</link>
+            <guid>https://learn.microsoft.com/azure/databricks/release-notes/product/2026/october#saving-an-unchanged-job-no-longer-adds-rows-to-the-jobs-system-tables</guid>
+            <pubDate>Mon, 19 Oct 2026 00:00:00 GMT</pubDate>
+            <description><![CDATA[<p>Saving a job without changing its settings no longer adds rows to <code>system.lakeflow.jobs</code> or <code>system.lakeflow.job_tasks</code>, and <code>change_time</code> stays at the last change. This applies to saves from the UI, the Jobs API, and Declarative Automation Bundles. See <a href="/azure/databricks/admin/system-tables/jobs#jobs">Jobs table schema</a>.</p>]]></description>
+            <category>Product</category>
+            <category>Jobs</category>
+            <category>System tables &amp; audit logs</category>
+        </item>
+        <item>
+            <title><![CDATA[READ METADATA privilege support for compliance security profile standards]]></title>
+            <link>https://learn.microsoft.com/azure/databricks/release-notes/product/2026/october#read-metadata-privilege-support-for-compliance-security-profile-standards</link>
+            <guid>https://learn.microsoft.com/azure/databricks/release-notes/product/2026/october#read-metadata-privilege-support-for-compliance-security-profile-standards</guid>
+            <pubDate>Fri, 16 Oct 2026 00:00:00 GMT</pubDate>
+            <description><![CDATA[<p>The <a href="/azure/databricks/data-governance/unity-catalog/access-control/privileges-reference#read-metadata"><code>READ METADATA</code> privilege</a> now supports all compliance security profile standards supported by Azure Databricks and is available by default for workspaces with the <a href="/azure/databricks/security/privacy/security-profile">compliance security profile</a> enabled.</p>
+<p>For a full list of supported compliance standards, see <a href="/azure/databricks/security/privacy/security-profile">Compliance security profile</a>.</p>]]></description>
+            <category>Product</category>
+            <category>Unity Catalog</category>
+            <category>Security</category>
+        </item>
+        <item>
+            <title><![CDATA[Consumer access to query Unity Gateway services is generally available]]></title>
+            <link>https://learn.microsoft.com/azure/databricks/release-notes/unity-gateway#consumer-access-to-query-unity-gateway-services-is-generally-available</link>
+            <guid>https://learn.microsoft.com/azure/databricks/release-notes/unity-gateway#consumer-access-to-query-unity-gateway-services-is-generally-available</guid>
+            <pubDate>Thu, 15 Oct 2026 00:00:00 GMT</pubDate>
+            <description><![CDATA[<p>Users with the consumer access entitlement no longer need an account admin to enable the "Consumer access to Unity Gateway" preview to query the model services and model provider services shared with them, or to use Unity Gateway coding agent features. See <a href="/azure/databricks/ai-bi/consumers#consumer-access-capabilities">Consumer access capabilities</a>.</p>
+<p>This change can increase model traffic from consumer access users, including traffic to external providers. To control this traffic, account admins can set budgets and rate limits, or disable direct model access, for consumer access users. See <a href="/azure/databricks/ai-gateway/budgets">Manage budgets for Unity Gateway</a>, <a href="/azure/databricks/ai-gateway/rate-limits">Apply rate limits to model and MCP services</a>, and <a href="/azure/databricks/security/auth/entitlements">Manage entitlements</a>.</p>]]></description>
+            <category>Product</category>
+            <category>Unity Gateway</category>
+            <category>Security</category>
+        </item>
+        <item>
+            <title><![CDATA[Consumer access to query Unity Gateway services is generally available]]></title>
+            <link>https://learn.microsoft.com/azure/databricks/release-notes/product/2026/october#consumer-access-to-query-unity-gateway-services-is-generally-available</link>
+            <guid>https://learn.microsoft.com/azure/databricks/release-notes/product/2026/october#consumer-access-to-query-unity-gateway-services-is-generally-available</guid>
+            <pubDate>Thu, 15 Oct 2026 00:00:00 GMT</pubDate>
+            <description><![CDATA[<p>Users with the consumer access entitlement no longer need an account admin to enable the "Consumer access to Unity Gateway" preview to query the model services and model provider services shared with them, or to use Unity Gateway coding agent features. See <a href="/azure/databricks/ai-bi/consumers#consumer-access-capabilities">Consumer access capabilities</a>.</p>
+<p>This change can increase model traffic from consumer access users, including traffic to external providers. To control this traffic, account admins can set budgets and rate limits, or disable direct model access, for consumer access users. See <a href="/azure/databricks/ai-gateway/budgets">Manage budgets for Unity Gateway</a>, <a href="/azure/databricks/ai-gateway/rate-limits">Apply rate limits to model and MCP services</a>, and <a href="/azure/databricks/security/auth/entitlements">Manage entitlements</a>.</p>]]></description>
+            <category>Product</category>
+            <category>Unity Gateway</category>
+            <category>Security</category>
+        </item>
+        </channel>
+</rss>

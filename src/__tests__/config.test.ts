@@ -49,6 +49,7 @@ policy:
     nl: []
     us_federal: []
     us_states: []
+  data_law: [Data Act, "2022/868"]
   feeds:
     - name: Commission
       url: https://example.eu/rss.xml
@@ -69,6 +70,38 @@ infra:
     - id: custom-engine
       repo: org/custom-engine
       name: Custom Engine
+databricks:
+  title: Databricks Title
+  subject: databricks subject
+  repos:
+    - id: delta
+      repo: org/delta
+      name: Delta
+snowflake:
+  title: Snowflake Title
+  subject: snowflake subject
+  repos:
+    - id: polaris
+      repo: org/polaris
+      name: Polaris
+data_stack:
+  title: Stack Title
+  subject: stack subject
+  repos:
+    - id: duckdb
+      repo: org/duckdb
+      name: DuckDB
+data:
+  feeds:
+    - name: Azure updates
+      vendor: azure
+      url: https://example.com/azure/rss
+      parser: rss
+      categories: [Databases]
+    - name: BigQuery
+      vendor: gcp
+      url: https://example.com/bq.xml
+      parser: bigquery
 `;
 
   function load(yamlText: string) {
@@ -77,7 +110,7 @@ infra:
     return loadConfig("test.yml");
   }
 
-  it("loads both sections and skills_repo from valid YAML", () => {
+  it("loads every section and skills_repo from valid YAML", () => {
     expect(load(VALID)).toEqual({
       agents: {
         title: "Agents Title",
@@ -104,6 +137,7 @@ infra:
             news: true,
           },
         ],
+        dataLaw: ["Data Act", "2022/868"],
         calendar: [{ date: "2026-12-02", label: "Milestone", link: "https://example.eu/timeline" }],
       },
       infra: {
@@ -111,7 +145,50 @@ infra:
         subject: "infra subject",
         repos: [{ id: "custom-engine", repo: "org/custom-engine", name: "Custom Engine" }],
       },
+      databricks: {
+        title: "Databricks Title",
+        subject: "databricks subject",
+        repos: [{ id: "delta", repo: "org/delta", name: "Delta" }],
+      },
+      snowflake: {
+        title: "Snowflake Title",
+        subject: "snowflake subject",
+        repos: [{ id: "polaris", repo: "org/polaris", name: "Polaris" }],
+      },
+      data_stack: {
+        title: "Stack Title",
+        subject: "stack subject",
+        repos: [{ id: "duckdb", repo: "org/duckdb", name: "DuckDB" }],
+      },
+      data: {
+        feeds: [
+          {
+            name: "Azure updates",
+            vendor: "azure",
+            url: "https://example.com/azure/rss",
+            parser: "rss",
+            categories: ["Databases"],
+          },
+          { name: "BigQuery", vendor: "gcp", url: "https://example.com/bq.xml", parser: "bigquery" },
+        ],
+      },
     });
+  });
+
+  it("throws when the data section or a data feed field is missing or unknown", () => {
+    expect(() => load(VALID.slice(0, VALID.indexOf("data:")))).toThrow('missing section "data"');
+    expect(() => load(VALID.replace("      vendor: gcp\n", ""))).toThrow(
+      "data.feeds[1].vendor must be one of",
+    );
+    expect(() => load(VALID.replace("parser: bigquery", "parser: atom"))).toThrow(
+      "data.feeds[1].parser must be one of",
+    );
+    expect(() => load(VALID.replace("url: https://example.com/bq.xml", ""))).toThrow(
+      "data.feeds[1] needs name and url",
+    );
+    expect(() =>
+      load(VALID.replace("parser: bigquery", "parser: bigquery\n      categories: [Feature]")),
+    ).toThrow("data.feeds[1].categories must be a list, on an rss feed");
   });
 
   it("throws when a policy feed has no known jurisdiction", () => {
@@ -144,6 +221,7 @@ infra:
 
   it("throws when a section is missing", () => {
     expect(() => load(VALID.replace(/infra:[\s\S]*$/, ""))).toThrow('missing section "infra"');
+    expect(() => load(VALID.replace(/data_stack:[\s\S]*$/, ""))).toThrow('missing section "data_stack"');
   });
 
   it("throws when repos is empty", () => {
@@ -183,6 +261,12 @@ infra:
   it("throws when a policy calendar entry has no valid date", () => {
     expect(() => load(VALID.replace("date: 2026-12-02", "date: December"))).toThrow(
       "policy.calendar[0] needs date (YYYY-MM-DD), label and link",
+    );
+  });
+
+  it("throws when policy.data_law is not a list", () => {
+    expect(() => load(VALID.replace('  data_law: [Data Act, "2022/868"]\n', ""))).toThrow(
+      "policy.data_law must be a list",
     );
   });
 

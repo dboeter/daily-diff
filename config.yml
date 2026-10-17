@@ -2,10 +2,12 @@
 # Edit this file to customize which repositories are tracked, then run
 # `pnpm readme` to refresh the tracked-repo tables in README.md (pre-commit and
 # CI fail while they are stale). Changes take effect on the next workflow run.
-# Every section is required (agents, skills_repo, infra, policy): the run stops
-# with an error instead of falling back to a built-in list.
+# Every section is required (agents, skills_repo, infra, databricks, snowflake,
+# data_stack, policy): the run stops with an error instead of falling back to a
+# built-in list.
 #
-# agents and infra are the two sections of the daily agents report:
+# agents and infra are the two sections of the daily agents report; databricks,
+# snowflake and data_stack the repo sections of the daily data report:
 #   title    the section's heading in the report
 #   subject  what the projects are; the LLM prompt reads "You are a technical
 #            editor covering <subject>", and README.md shows it
@@ -98,12 +100,163 @@ infra:
       name: Agent Deck
       # Rarely reaches the hot-issue bar: often quiet.
 
+# ── Data engineering ──────────────────────────────────────────────────────────
+# The repo sections of the daily data report (ai-data), for Digital Power's data
+# engineers, same pipeline as the agents: stable releases, hot issues and news
+# (matched in a pool of their own, with no names-per-item limit: a story naming
+# DuckDB, Polars and Iceberg is stack news). A name or repo name that is an
+# ordinary word gets keywords. A section
+# with nothing new is left out of the report; the report is skipped when all are.
+# Checked 2026-10-17, not tracked: dbt-snowflake (archived; dbt adapters have
+# published no GitHub release since 2024), dbt-fusion (no releases, issues off),
+# Apache Spark, Kafka and Flink (tags only, no GitHub releases), databricks-sdk-py
+# (14 generated releases in 30 days).
+
+databricks:
+  title: Databricks
+  subject: Databricks and the open-source projects Databricks maintains (Delta Lake, Unity Catalog, MLflow, its CLI and dbt adapter)
+  repos:
+    - id: delta
+      repo: delta-io/delta
+      name: Delta Lake
+      # Never bare "delta": Delta Air Lines, "the delta between", Delta Live Tables.
+      keywords: [delta lake, delta-rs, delta-io]
+    - id: unity-catalog
+      repo: unitycatalog/unitycatalog
+      name: Unity Catalog
+    - id: mlflow
+      repo: mlflow/mlflow
+      name: MLflow
+      # Its rolling "model-catalog/latest" release is re-created often but keeps
+      # its April 2026 published_at, which the release filter reads: never reported.
+    - id: databricks-cli
+      repo: databricks/cli
+      name: Databricks CLI
+      # The repo name "cli" would match every story about any CLI.
+      keywords: [databricks cli]
+    - id: dbt-databricks
+      repo: databricks/dbt-databricks
+      name: dbt-databricks
+
+snowflake:
+  title: Snowflake
+  subject: Snowflake's open-source clients and the Apache Polaris catalog Snowflake maintains
+  repos:
+    - id: snowpark-python
+      repo: snowflakedb/snowpark-python
+      name: Snowpark Python
+    - id: snowflake-connector-python
+      repo: snowflakedb/snowflake-connector-python
+      name: Snowflake Connector for Python
+    - id: polaris
+      repo: apache/polaris
+      name: Apache Polaris
+      # Bare "polaris" is a star, a car brand and many products. Polaris Catalog
+      # was its name before it moved to Apache.
+      keywords: [apache polaris, polaris catalog]
+
+data_stack:
+  title: Open-source data stack
+  subject: open-source data engineering tools — transformation, orchestration, ingestion, table formats and query engines
+  repos:
+    - id: dbt-core
+      # Renamed from dbt-labs/dbt-core.
+      repo: dbt-labs/dbt
+      name: dbt Core
+      # Bare "dbt" stays: on HN and GitHub it almost always means this tool, and
+      # most stories say "dbt", not "dbt Core". It also matches "dbt-databricks"
+      # (a following "-" is allowed), which is dbt news too.
+      keywords: [dbt, dbt core, dbt labs]
+    - id: sqlmesh
+      repo: SQLMesh/sqlmesh
+      name: SQLMesh
+    - id: airflow
+      repo: apache/airflow
+      name: Apache Airflow
+      # Bare "airflow" is cooling and ventilation on HN.
+      keywords: [apache airflow, airflow dag, airflow dags]
+    - id: dagster
+      repo: dagster-io/dagster
+      name: Dagster
+    - id: dlt
+      repo: dlt-hub/dlt
+      name: dlt
+      # Bare "dlt" is distributed ledger technology or Databricks' Delta Live
+      # Tables. "dlt-hub" also matches "dltHub" and "dlt hub".
+      keywords: [dlt-hub, data load tool]
+    - id: iceberg
+      repo: apache/iceberg
+      name: Apache Iceberg
+      # Bare "iceberg" is an ordinary word ("the tip of the iceberg").
+      keywords: [apache iceberg, iceberg table, iceberg tables, iceberg catalog, pyiceberg]
+    - id: duckdb
+      repo: duckdb/duckdb
+      name: DuckDB
+    - id: polars
+      repo: pola-rs/polars
+      name: Polars
+      # Separate py-* and rs-* releases.
+    - id: trino
+      repo: trinodb/trino
+      name: Trino
+
+# ── Data: vendor feeds ────────────────────────────────────────────────────────
+# Vendor release notes for the data report (ai-data), from the 2026-10-17 feed
+# spike (.scratch/data-watch/issues/01-feed-spike.md); the vendor blogs repeat them.
+#   feeds   name, vendor (databricks | snowflake | azure | gcp), url and parser:
+#           rss (RSS 2.0), snowflake (release-notes page), snowflake-bcr
+#           (behavior-change bundles), bigquery (Atom, one entry per day);
+#           categories (rss only): keep an item only when one of its
+#           <category> values is listed
+
+data:
+  feeds:
+    # Azure rather than AWS Databricks (clients are mainly on Azure; 120 of 127
+    # titles are shared). Lists some notes twice under different guids.
+    - name: Azure Databricks
+      vendor: databricks
+      url: https://learn.microsoft.com/en-us/azure/databricks/feed.xml
+      parser: rss
+    - name: Microsoft Fabric
+      vendor: azure
+      url: https://blog.fabric.microsoft.com/en-us/blog/feed/
+      parser: rss
+    # All of Azure. Analytics and AI + machine learning are left out: every Azure
+    # Databricks update carries both (the Databricks feed covers those).
+    - name: Azure updates
+      vendor: azure
+      url: https://www.microsoft.com/releasecommunications/api/v2/azure/rss
+      parser: rss
+      categories:
+        - Databases
+        - Microsoft Fabric
+        - Azure SQL Database
+        - Azure SQL Managed Instance
+        - Azure Database for PostgreSQL
+        - Azure Database for MySQL
+        - Azure HorizonDB
+        - Azure Blob Storage
+    - name: Snowflake
+      vendor: snowflake
+      url: https://docs.snowflake.com/en/release-notes/all-release-notes?bundle=false
+      parser: snowflake
+    - name: Snowflake behavior changes
+      vendor: snowflake
+      url: https://docs.snowflake.com/en/release-notes/behavior-changes
+      parser: snowflake-bcr
+    - name: BigQuery
+      vendor: gcp
+      url: https://cloud.google.com/feeds/bigquery-release-notes.xml
+      parser: bigquery
+
 # ── Policy ────────────────────────────────────────────────────────────────────
 # The daily Policy Watch report (ai-policy): AI legislation, regulation and
 # official guidance in the EU, the Netherlands and the US.
 #   reader_profile  who the report is for; Jev's US impact question reads it
 #   watchlist       files that always appear when they move, per jurisdiction;
 #                   an item naming an entry skips the Jev drop (lists may be empty)
+#   data_law        tokens that mark a kept item as EU data law: it is also
+#                   linked from the data report's Worth a Look (may be empty)
 #   feeds           RSS news feeds; items older than 7 days are skipped.
 #                   jurisdiction: eu | nl | us_federal | us_states | other
 #                   jev_only: true for a low-volume feed whose items need not
@@ -133,6 +286,10 @@ policy:
       - 2022/0272(COD) # Cyber Resilience Act
       - 2024/1689 # AI Act
       - 2024/2847 # Cyber Resilience Act
+      # EU data law, also linked from the data report (data_law below).
+      - 2023/2854 # Data Act
+      - 2022/868 # Data Governance Act
+      - 2022/2555 # NIS2 Directive
     # Tweede Kamer dossier numbers (Kamerstuk): bills, reported from the Tweede
     # Kamer vote on (Eerste Kamer, Staatsblad from KOOP). Dutch implementation
     # acts are named after the EU regulation, so keywords never find them.
@@ -144,6 +301,15 @@ policy:
     # bills (NDAA, appropriations); still reported only from passing a chamber.
     us_federal: []
     us_states: []
+  # Matched like the watchlist (whole token, title, description and link).
+  data_law:
+    - 2023/2854
+    - 2022/868
+    - 2022/2555
+    - Data Act
+    - Data Governance Act
+    - NIS2
+    - NIS 2
   feeds:
     # The AI Office's news, on the Commission's digital-strategy site; ~10 items.
     - name: European Commission

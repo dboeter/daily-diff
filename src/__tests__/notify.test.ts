@@ -1,5 +1,8 @@
-import { describe, it, expect, afterEach } from "vitest";
-import { buildMessage, resolvePagesUrl } from "../notify.ts";
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
+import { describe, it, expect, afterEach, vi } from "vitest";
+import { buildMessage, buildTeamsCard, resolvePagesUrl, sendTeams } from "../notify.ts";
 import type { ReportHighlights } from "../prompts-data.ts";
 import { REPORT_LABELS } from "../i18n.ts";
 
@@ -102,5 +105,94 @@ describe("buildMessage", () => {
     const msg = buildMessage("2026-03-09", ["ai-agents"], BASE_URL);
     expect(msg).toContain("AI Agents");
     expect(msg).not.toContain("◦");
+  });
+});
+
+describe("buildTeamsCard", () => {
+  const card = buildTeamsCard(
+    "2026-10-17",
+    ["Spark *4.1* drops `_legacy_` [API](x)", "- not a list"],
+    BASE_URL,
+  );
+  const attachment = card.attachments[0]!;
+  const texts = JSON.stringify(attachment.content.body);
+
+  it("wraps one Adaptive Card in a message envelope", () => {
+    expect(card.type).toBe("message");
+    expect(card.attachments).toHaveLength(1);
+    expect(attachment.contentType).toBe("application/vnd.microsoft.card.adaptive");
+    expect(attachment.contentUrl).toBeNull();
+    expect(attachment.content.type).toBe("AdaptiveCard");
+    expect(attachment.content.version).toBe("1.2");
+  });
+
+  it("shows the data report's name and the date", () => {
+    expect(texts).toContain(REPORT_LABELS["ai-data"]!);
+    expect(texts).toContain("2026-10-17");
+  });
+
+  it("puts highlights in plain-text runs, so Markdown in them is not parsed", () => {
+    const runs = attachment.content.body
+      .filter((b) => b.type === "RichTextBlock")
+      .map((b) => (b as { inlines: { type: string; text: string }[] }).inlines[0]!);
+    expect(runs.map((r) => r.type)).toEqual(["TextRun", "TextRun"]);
+    expect(runs.map((r) => r.text)).toEqual(["• Spark *4.1* drops `_legacy_` [API](x)", "• - not a list"]);
+  });
+
+  it("links the report on Pages", () => {
+    expect(attachment.content.actions).toEqual([
+      { type: "Action.OpenUrl", title: "Open report", url: `${BASE_URL}/#2026-10-17/ai-data` },
+    ]);
+  });
+
+  it("still has the title and the report link without highlights", () => {
+    const empty = buildTeamsCard("2026-10-17", [], BASE_URL).attachments[0]!.content;
+    expect(empty.body).toHaveLength(2);
+    expect(empty.actions[0]!.url).toBe(`${BASE_URL}/#2026-10-17/ai-data`);
+  });
+});
+
+describe("sendTeams", () => {
+  const origWebhook = process.env["TEAMS_WEBHOOK_URL"];
+  const origSummary = process.env["GITHUB_STEP_SUMMARY"];
+  const highlights: ReportHighlights = { "ai-data": ["Snowflake ships a thing."] };
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.restoreAllMocks();
+    if (origWebhook !== undefined) process.env["TEAMS_WEBHOOK_URL"] = origWebhook;
+    else delete process.env["TEAMS_WEBHOOK_URL"];
+    if (origSummary !== undefined) process.env["GITHUB_STEP_SUMMARY"] = origSummary;
+    else delete process.env["GITHUB_STEP_SUMMARY"];
+  });
+
+  it("does nothing when TEAMS_WEBHOOK_URL is unset", async () => {
+    delete process.env["TEAMS_WEBHOOK_URL"];
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+    await sendTeams("2026-10-17", highlights);
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("does not post when the data report has no highlights", async () => {
+    process.env["TEAMS_WEBHOOK_URL"] = "https://teams.example.com/hook";
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+    vi.spyOn(console, "log").mockImplementation(() => {});
+    await sendTeams("2026-10-17", { "ai-agents": ["x"] });
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("logs a non-2xx answer and writes a step-summary warning without throwing", async () => {
+    const summary = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "teams-")), "summary.md");
+    process.env["TEAMS_WEBHOOK_URL"] = "https://teams.example.com/hook";
+    process.env["GITHUB_STEP_SUMMARY"] = summary;
+    const fetchMock = vi.fn().mockResolvedValue(new Response("bad card", { status: 400 }));
+    vi.stubGlobal("fetch", fetchMock);
+    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    await expect(sendTeams("2026-10-17", highlights)).resolves.toBeUndefined();
+    expect(fetchMock).toHaveBeenCalledOnce();
+    expect(errorSpy).toHaveBeenCalled();
+    expect(fs.readFileSync(summary, "utf-8")).toContain("**Teams notification failed** — HTTP 400: bad card");
   });
 });

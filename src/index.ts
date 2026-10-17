@@ -1,5 +1,5 @@
 /**
- * Daily Diff: daily digest for AI agents and the AI open-source ecosystem.
+ * Daily Diff: daily digest for AI agents, AI policy and the data engineering stack.
  *
  * Env vars:
  *   LLM_PROVIDER        - "anthropic" | "openai" | "github-copilot" | "openrouter" (default: anthropic)
@@ -53,6 +53,7 @@ import {
   buildArxivReport,
   buildModelsReport,
   buildPolicyReport,
+  buildDataReport,
   type SavedReport,
 } from "./data-reports.ts";
 import { loadWebState, fetchSiteContent, type WebFetchResult, type WebState } from "./web.ts";
@@ -61,10 +62,12 @@ import { fetchStealthModels, type OpenRouterStealthModel } from "./openrouter.ts
 import { fetchHnData, type HnData } from "./hn.ts";
 import { fetchArxivData, type ArxivData } from "./arxiv.ts";
 import { fetchPolicyData, type PolicyData } from "./policy.ts";
+import { isDataLaw } from "./policy-jev.ts";
+import { fetchVendorData, type VendorData } from "./data-vendors.ts";
 import { fetchHfData, type HfData } from "./hf.ts";
 import { fetchDevtoData, type DevtoData } from "./devto.ts";
 import { fetchLobstersData, type LobstersData } from "./lobsters.ts";
-import { loadConfig, type SectionKey } from "./config.ts";
+import { DATA_SECTION_KEYS, loadConfig, type SectionKey } from "./config.ts";
 import { resolvePagesUrl } from "./notify.ts";
 import { toCstDateStr, toUtcStr, isWeeklyRun, sleep } from "./date.ts";
 import { LIVE_REPORT_IDS, MSG, PROJECT_SCOPE, REPORTS, reportHeading, reportIssueTitle } from "./i18n.ts";
@@ -77,6 +80,7 @@ const CONFIG = loadConfig();
 const AGENTS = CONFIG.agents.repos;
 const INFRA_REPOS = CONFIG.infra.repos;
 const CLAUDE_SKILLS_REPO = CONFIG.skillsRepo;
+const DATA_SECTIONS = DATA_SECTION_KEYS.map((key) => CONFIG[key]);
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -143,12 +147,15 @@ async function fetchAllData(
 ): Promise<{
   agentFetches: ProjectFetch[];
   infraFetches: ProjectFetch[];
+  /** One list per data report section, in DATA_SECTIONS order. */
+  dataFetches: ProjectFetch[][];
   skillsData: { prs: GitHubItem[]; issues: GitHubItem[] };
   webResults: WebFetchResult[];
   trendingData: TrendingData;
   hnData: HnData;
   arxivData: ArxivData;
   policyData: PolicyData;
+  vendorData: VendorData;
   hfData: HfData;
   devtoData: DevtoData;
   lobstersData: LobstersData;
@@ -156,7 +163,7 @@ async function fetchAllData(
 }> {
   const daySince = new Date(now.getTime() - DAY_MS);
   console.log(
-    `  Tracking daily: ${[...AGENTS, ...INFRA_REPOS].map((r) => r.id).join(", ")}, web, hn, arxiv, policy, trending (news only)` +
+    `  Tracking daily: ${[...AGENTS, ...INFRA_REPOS, ...DATA_SECTIONS.flatMap((s) => s.repos)].map((r) => r.id).join(", ")}, web, hn, arxiv, policy, trending (news only)` +
       (weekly ? " | weekly: skills, trending, hf, devto, lobsters" : ""),
   );
 
@@ -165,12 +172,14 @@ async function fetchAllData(
   const [
     agentFetches,
     infraFetches,
+    dataFetches,
     skillsData,
     webResults,
     trendingData,
     hnData,
     arxivData,
     policyData,
+    vendorData,
     hfData,
     devtoData,
     lobstersData,
@@ -178,6 +187,7 @@ async function fetchAllData(
   ] = await Promise.all([
     Promise.all(AGENTS.map((cfg) => fetchProject(cfg, daySince))),
     Promise.all(INFRA_REPOS.map((cfg) => fetchProject(cfg, daySince))),
+    Promise.all(DATA_SECTIONS.map((s) => Promise.all(s.repos.map((cfg) => fetchProject(cfg, daySince))))),
     weekly
       ? fetchSkillsData(CLAUDE_SKILLS_REPO)
           .then((d) => {
@@ -228,6 +238,11 @@ async function fetchAllData(
       deadlines: [],
       readerProfile: CONFIG.policy.readerProfile,
     })),
+    // Each feed already fails on its own; this catches the state or Jev step.
+    fetchVendorData(CONFIG.data, now).catch((err): VendorData => {
+      console.error(`  [data] Vendor feeds failed: ${err}`);
+      return { items: [] };
+    }),
     weekly
       ? fetchHfData().catch((): HfData => ({ models: [], fetchSuccess: false }))
       : Promise.resolve<HfData>({ models: [], fetchSuccess: false }),
@@ -244,12 +259,14 @@ async function fetchAllData(
   return {
     agentFetches,
     infraFetches,
+    dataFetches,
     skillsData,
     webResults,
     trendingData,
     hnData,
     arxivData,
     policyData,
+    vendorData,
     hfData,
     devtoData,
     lobstersData,
@@ -372,12 +389,14 @@ async function main(): Promise<void> {
   const {
     agentFetches,
     infraFetches,
+    dataFetches,
     skillsData,
     webResults,
     trendingData,
     hnData,
     arxivData,
     policyData,
+    vendorData,
     hfData,
     devtoData,
     lobstersData,
@@ -394,6 +413,21 @@ async function main(): Promise<void> {
   const withNews = (f: ProjectFetch): ProjectActivity => ({ ...f, news: projectNews.get(f.config.id) ?? [] });
   const agentActivities = agentFetches.map(withNews);
   const infraActivities = infraFetches.map(withNews);
+  // The data projects are a pool of their own, without the compatibility-list
+  // drop: a story naming DuckDB, Polars and Iceberg is news about the stack.
+  const dataNews = matchProjectNews(
+    DATA_SECTIONS.flatMap((s) => s.repos),
+    { hn: hnData, web: webResults, trending: trendingData },
+    Infinity,
+  );
+  const dataSections = DATA_SECTION_KEYS.map((key, i) => ({
+    key,
+    subject: CONFIG[key].subject,
+    activities: dataFetches[i]!.map((f): ProjectActivity => ({
+      ...f,
+      news: dataNews.get(f.config.id) ?? [],
+    })),
+  }));
 
   // 2. Generate every report body
   console.log("  Generating summaries...");
@@ -437,6 +471,13 @@ async function main(): Promise<void> {
     buildDiscussionsReport({ hn: hnData, devto: devtoData, lobsters: lobstersData }, utcStr, dateStr),
     buildArxivReport(arxivData, utcStr, dateStr),
     buildPolicyReport(policyData, utcStr, dateStr),
+    buildDataReport(
+      dataSections,
+      vendorData,
+      policyData.items.filter((i) => isDataLaw(i, CONFIG.policy.dataLaw)),
+      utcStr,
+      dateStr,
+    ),
     ...(weekly
       ? [
           buildTrendingReport(
