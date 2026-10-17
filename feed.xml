@@ -6,7 +6,135 @@
     <description>Daily AI ecosystem digest</description>
     <language>en</language>
     <atom:link href="https://dboeter.github.io/daily-diff/feed.xml" rel="self" type="application/rss+xml"/>
-    <lastBuildDate>Fri, 16 Oct 2026 09:02:20 +0000</lastBuildDate>
+    <lastBuildDate>Sat, 17 Oct 2026 01:20:24 +0000</lastBuildDate>
+    <item>
+      <title>AI Agents 2026-10-17</title>
+      <link>https://dboeter.github.io/daily-diff/#2026-10-17/ai-agents</link>
+      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-10-17/ai-agents</guid>
+      <pubDate>Sat, 17 Oct 2026 00:00:00 +0000</pubDate>
+      <description>AI Agents 2026-10-17 📅 Overview · 🤖 AI Agents · 🌐 Lab Announcements Generated: 2026-10-17 01:14 UTC | Projects: 16 | Active today: 10 | Stable releases: 10 | Prereleases (not covered): 6 🕵️ Stealth Models on OpenRouter ⚠️ OpenRouter model catalog unavailable — stealth model status unknown. Coding Agents &amp;amp; Assistants Overview Claude Code shipped a new stable version that adds model‑selection controls and idle‑compaction toggles, while OpenAI Codex users are seeing desktop‑client 404 error...</description>
+      <content:encoded><![CDATA[<h1>AI Agents 2026-10-17</h1>
+<p><a href="https://dboeter.github.io/daily-diff/#2026-10-17">📅 Overview</a> · <strong>🤖 AI Agents</strong> · <a href="https://dboeter.github.io/daily-diff/#2026-10-17/ai-web">🌐 Lab Announcements</a></p>
+<blockquote>
+<p>Generated: 2026-10-17 01:14 UTC | Projects: 16 | Active today: 10 | Stable releases: 10 | Prereleases (not covered): 6</p>
+</blockquote>
+<hr>
+<h2>🕵️ Stealth Models on OpenRouter</h2>
+<p>⚠️ OpenRouter model catalog unavailable — stealth model status unknown.</p>
+<hr>
+<h2>Coding Agents &amp; Assistants</h2>
+<h3>Overview</h3>
+<p>Claude Code shipped a new stable version that adds model‑selection controls and idle‑compaction toggles, while OpenAI Codex users are seeing desktop‑client 404 errors and lost browser access. Kilo Code’s JetBrains plugin gained mobile‑agent listing and CLI bundling, OpenCode refined model‑reasoning handling and fixed upgrade paths, and Oh My Pi updated its agent‑core and AI layers. Cline introduced Cloud sessions, moved plugins to worker/sandbox threads, and retried provider failures, DeepSeek Harness released an alpha that polished skill lists and added model‑label slots, and Hermes Agent dealt with a provider‑override bug and reported Android/Termux regressions. Community highlights include official Claude Code plugins, a Codex‑focused tutorial, a Pi desktop wrapper, and a DeepSeek Harness desktop client.</p>
+<h3>Claude Code</h3>
+<ul>
+<li><strong>Release</strong>: v2.1.302 adds the <code>CLAUDE_CODE_AUTO_MODE_MODEL</code> environment variable to choose the model for the client‑side auto‑mode classifier, introduces an idle‑compaction toggle in <code>/config</code> with notices showing how to disable it, and adds notices to <code>/design-sync</code> and <code>/design-login</code>. [<a href="https://github.com/anthropics/claude-code/releases/tag/v2.1.302">Release</a>]</li>
+<li><strong>Hot issues</strong>: Users ask for a less intrusive end‑of‑turn “next‑step” box in the Code tab (#102273) and want the “Group by folder” toggle and always‑visible context percentage restored (#102305). [<a href="https://github.com/anthropics/claude-code/issues/102273">#102273</a>] [<a href="https://github.com/anthropics/claude-code/issues/102305">#102305</a>]</li>
+<li><strong>News</strong>: The official plugin directory (<code>anthropics/claude-plugins-official</code>) and the community‑curated <code>awesome-claude-code</code> list showcase growing plugin ecosystems for Claude Code. [<a href="https://github.com/anthropics/claude-plugins-official">claude-plugins-official</a>] [<a href="https://github.com/hesreallyhim/awesome-claude-code">awesome-claude-code</a>]</li>
+</ul>
+<h3>OpenAI Codex</h3>
+<ul>
+<li><strong>Hot issues</strong>: #54197 reports a 404 “Model not found” error on desktop clients because the client sends model “gpt-6”, while mobile works; #54376 describes the Codex app losing browser access after an update on macOS. [<a href="https://github.com/openai/codex/issues/54197">#54197</a>] [<a href="https://github.com/openai/codex/issues/54376">#54376</a>]</li>
+<li><strong>News</strong>: The tutorial repo <code>tradecatlabs/vibe-coding-cn</code> provides a Chinese‑language guide to Codex‑based pair programming, covering prompts, skills, workflow and context management. [<a href="https://github.com/tradecatlabs/vibe-coding-cn">vibe-coding-cn</a>]</li>
+</ul>
+<h3>Kilo Code</h3>
+<ul>
+<li><strong>Release</strong>: JetBrains plugin v7.1.11 adds listing remote agents for the mobile app, bundles Kilo CLI v7.8.13, and fixes UI‑thread blocking from ignore‑file loading, deferred prompt dispatch, worker console writes, MCP OAuth token refresh, session timing, and OpenRouter reasoning persistence. [<a href="https://github.com/Kilo-Org/kilocode/releases/tag/jetbrains/v7.1.11">jetbrains/v7.1.11</a>]</li>
+</ul>
+<h3>OpenCode</h3>
+<ul>
+<li><strong>Release</strong>: v1.19.3 lets users configure model reasoning options to generate reasoning variants, superseding catalog variants while preserving overrides; v1.19.2 ensures 1.x updates stay on the 1.x line, separates 2.x upgrades, and fixes Yarn and Homebrew upgrade handling. [<a href="https://github.com/anomalyco/opencode/releases/tag/v1.19.3">v1.19.3</a>] [<a href="https://github.com/anomalyco/opencode/releases/tag/v1.19.2">v1.19.2</a>]</li>
+<li><strong>Hot issues</strong>: #55607 (closed) reported frequent “Endpoint not available” errors with the free LongCat 2.5 preview, hinting at server capacity limits; #56033 (open) complains that the recent v2.0.29 update reduced communication and thought output, making the agent less informative. [<a href="https://github.com/anomalyco/opencode/issues/55607">#55607</a>] [<a href="https://github.com/anomalyco/opencode/issues/56033">#56033</a>]</li>
+</ul>
+<h3>Pi</h3>
+<ul>
+<li><strong>News</strong>: <code>vastsa/PI-Desktop</code> packages the Pi Agent Harness into a local‑first desktop client built with Electron and Rust, supporting user‑installable plugins. [<a href="https://github.com/vastsa/PI-Desktop">PI-Desktop</a>]</li>
+</ul>
+<h3>Oh My Pi</h3>
+<ul>
+<li><strong>Release</strong>: v18.11.3 adds queue‑aware <code>prepareQueuedMessages</code> and fixes JSON Schema dereferencing; v18.11.2 makes <code>agent_start</code> carry resumed tool‑call IDs and changes cancelled ask handling to report user‑canceled instead of retrying. [<a href="https://github.com/can1357/oh-my-pi/releases/tag/v18.11.3">v18.11.3</a>] [<a href="https://github.com/can1357/oh-my-pi/releases/tag/v18.11.2">v18.11.2</a>]</li>
+</ul>
+<h3>Cline</h3>
+<ul>
+<li><strong>Release</strong>: v4.1.25 introduces Cline Cloud sessions (hosted GitHub sandbox tasks) and sets Gemini 4 Argon as the default provider when no model is selected; SDK v0.0.94 moves plugins to worker or sandbox threads, dropping in‑process mode; desktop v0.0.47 restores marketplace plugin loading, removes the Cloud sessions toggle (always on when available) and adds up‑to‑three retries on provider errors; cli v3.0.72 runs plugins in a worker thread and reports missing‑plugin situations. [<a href="https://github.com/cline/cline/releases/tag/v4.1.25">v4.1.25</a>] [<a href="https://github.com/cline/cline/releases/tag/sdk/sdk/v0.0.94">sdk/v0.0.94</a>] [<a href="https://github.com/cline/cline/releases/tag/desktop-v0.0.47">desktop-v0.0.47</a>] [<a href="https://github.com/cline/cline/releases/tag/cli-v3.0.72">cli-v3.0.72</a>]</li>
+</ul>
+<h3>DeepSeek Harness</h3>
+<ul>
+<li><strong>Prerelease</strong>: dsh‑v0.2.1‑alpha.5 fixes the skill list not updating after plugin toggles, reduces redundant terminal queries, improves PTC Mode guidance, stops Page Up from shifting the UI, and adds a <code>conversation.input.model.label</code> slot for plugins to customize model labels per provider. [<a href="https://github.com/deepseek-ai/deepseek-harness/releases/tag/dsh-v0.2.1-alpha.5">dsh-v0.2.1-alpha.5</a>]</li>
+<li><strong>News</strong>: <code>dataelement/dsh-desktop</code> delivers a dedicated DeepSeek Harness desktop client, wrapping the harness in an Electron‑style interface for local use. [<a href="https://github.com/dataelement/dsh-desktop">dsh-desktop</a>]</li>
+</ul>
+<h3>Hermes Agent</h3>
+<ul>
+<li><strong>Hot issues</strong>: #138843 (closed) showed that a local <code>session.create</code> with an explicit provider but no base_url would reuse the profile’s stale base_url, causing 401 errors; #140004 (open) describes Hermes on Android/Termux losing functionality after several days, noting what works and what broke after recent updates. [<a href="https://github.com/NousResearch/hermes-agent/issues/138843">#138843</a>] [<a href="https://github.com/NousResearch/hermes-agent/issues/140004">#140004</a>]</li>
+</ul>
+<p><strong>Quiet today:</strong> <a href="https://github.com/google-gemini/gemini-cli">Gemini CLI</a>, <a href="https://github.com/1jehuang/jcode">jcode</a>, <a href="https://github.com/CommandCodeAI/command-code">Command Code</a></p>
+<hr>
+<h2>Agent Tooling</h2>
+<h3>Overview</h3>
+<p>Today the only activity was a GitHub Trending highlight for context-mode, which showcased its context‑window optimization for AI coding agents. The project claims a 98% reduction in sandbox tool output, persistent session memory, and cross‑platform routing via MCP and hooks. This attention signals growing interest in tools that manage agent context and sandbox overhead.</p>
+<h3>context-mode</h3>
+<ul>
+<li><strong>News</strong>: GitHub Trending highlighted context-mode as a context‑window optimizer for AI coding agents, noting 98% less sandbox output, persistent session memory, and MCP‑hook routing across 17 platforms; the post drove significant visibility. <a href="https://github.com/mksglu/context-mode">https://github.com/mksglu/context-mode</a></li>
+</ul>
+<p><strong>Quiet today:</strong> <a href="https://github.com/NVIDIA/OpenShell">OpenShell</a>, <a href="https://github.com/herdrdev/herdr">herdr</a>, <a href="https://github.com/asheshgoplani/agent-deck">Agent Deck</a></p>
+<hr>
+<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
+]]></content:encoded>
+    </item>
+    <item>
+      <title>Lab Announcements 2026-10-17</title>
+      <link>https://dboeter.github.io/daily-diff/#2026-10-17/ai-web</link>
+      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-10-17/ai-web</guid>
+      <pubDate>Sat, 17 Oct 2026 00:00:00 +0000</pubDate>
+      <description>Lab Announcements 2026-10-17 📅 Overview · 🤖 AI Agents · 🌐 Lab Announcements Today&amp;#39;s update | New content: 6 articles | Generated: 2026-10-17 01:14 UTC Sources: Anthropic: anthropic.com — 6 new articles (sitemap total: 473) OpenAI: openai.com — 0 new articles (sitemap total: 1069) Highlights Anthropic released a suite of research and news updates on October 15‑16 2026 that together illuminate its technical depth, internal AI‑driven productivity gains, and commitment to external safety over...</description>
+      <content:encoded><![CDATA[<h1>Lab Announcements 2026-10-17</h1>
+<p><a href="https://dboeter.github.io/daily-diff/#2026-10-17">📅 Overview</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-17/ai-agents">🤖 AI Agents</a> · <strong>🌐 Lab Announcements</strong></p>
+<blockquote>
+<p>Today&#39;s update | New content: 6 articles | Generated: 2026-10-17 01:14 UTC</p>
+</blockquote>
+<p>Sources:</p>
+<ul>
+<li>Anthropic: <a href="https://www.anthropic.com">anthropic.com</a> — 6 new articles (sitemap total: 473)</li>
+<li>OpenAI: <a href="https://openai.com">openai.com</a> — 0 new articles (sitemap total: 1069)</li>
+</ul>
+<hr>
+<h2>Highlights</h2>
+<p>Anthropic released a suite of research and news updates on October 15‑16 2026 that together illuminate its technical depth, internal AI‑driven productivity gains, and commitment to external safety oversight. The cryptography team solved the long‑standing mystery of NIST ECDSA curve seeds, showing they derive from simple timestamps. Economic studies reveal a widening gap between public and Anthropic staff expectations about AI’s future capabilities and workplace impact, with staff forecasting far faster progress and higher productivity. Internal metrics show AI agents now work six times more hours than human employees, shifting hiring toward autonomy and judgment. Anthropic also began granting deep, employee‑like access to independent evaluators from METR, SecureBio, and Accenture to strengthen third‑party risk assessment. Finally, Claude demonstrated the ability to design quantum circuits that improve on published benchmarks by up to an order of magnitude, suggesting near‑term advances in quantum‑hardware efficiency.</p>
+<h2>Anthropic</h2>
+<h3>news</h3>
+<ul>
+<li><strong>Anthropic update on independent evaluators</strong> (Oct 15, 2026) – <a href="https://www.anthropic.com/news/an-update-on-independent-evaluators">https://www.anthropic.com/news/an-update-on-independent-evaluators</a><br>Anthropic announced it has started providing a team from METR with employee‑level access to internal model and safety data, enabling the nonprofit to publish risk assessments. The move follows the White House Accord on Super Intelligence and complements ongoing work with SecureBio, Accenture, and early talks with Hugging Face. By sharing deep but controlled information, Anthropic aims to close the understanding gap between external auditors and its frontier‑model development while protecting commercially sensitive details.</li>
+</ul>
+<h3>research</h3>
+<ul>
+<li><p><strong>Claude reveals ECDSA curve origins</strong> (Oct 16, 2026) – <a href="https://www.anthropic.com/research/ecdsa-curve-origins">https://www.anthropic.com/research/ecdsa-curve-origins</a><br>The Frontier Red Team traced the NIST P‑256 curve seed to a simple timestamp‑derived hash, resolving a decades‑old provenance mystery. The analysis shows the seed C49D3608 86E70493 6A6678E1 139D26B7 819F7E90 results from hashing a date‑time string, eliminating concerns of hidden backdoors. While the cryptographic community already trusted the curves, the work provides a transparent closure to the “riddle wrapped in an enigma” debate.</p>
+</li>
+<li><p><strong>The AI expectations gap</strong> (Oct 16, 2026) – <a href="https://www.anthropic.com/research/ai-expectations-gap">https://www.anthropic.com/research/ai-expectations-gap</a><br>A joint study by Anthropic economists and external co‑authors finds that 91% of Anthropic staff expect AI to achieve Nobel‑level discoveries by 2030, versus only 39% of the general US public. Staff also report larger productivity gains: 59% say AI cuts task time to a quarter or less, compared with 26% of US adult AI users. The perception that AI will automate a large share of one’s own job correlates with higher anticipated unemployment across both groups.</p>
+</li>
+<li><p><strong>How employment is changing at Anthropic</strong> (Oct 16, 2026) – <a href="https://www.anthropic.com/research/employment-at-anthropic">https://www.anthropic.com/research/employment-at-anthropic</a><br>Since deploying Claude agents, Anthropic’s ratio of agent hours to employee hours rose to 6:1 by August 2026, prompting a hiring shift toward roles emphasizing autonomy and judgment over junior technical skills. Employees report that reviewing agent output consumes half their work week, leading to the emergence of “meta‑work” such as building monitoring tools. Longitudinal tracking shows individual output rises as workers adopt more AI tools, making human attention the new bottleneck.</p>
+</li>
+<li><p><strong>Working at the frontier shapes expectations for the future</strong> (Oct 16, 2026) – <a href="https://www.anthropic.com/research/expectations-for-the-future">https://www.anthropic.com/research/expectations-for-the-future</a><br>This companion paper links Anthropic’s internal employment shifts to staff forecasts about AI’s economic impact. The authors argue that direct experience with powerful AI agents drives higher expectations for capabilities and productivity, which in turn shapes beliefs about future job displacement. The findings suggest that organizations at the AI frontier develop distinct predictive models based on lived interaction rather than abstract theory.</p>
+</li>
+<li><p><strong>Designing more efficient quantum circuits with Claude</strong> (Oct 16, 2026) – <a href="https://www.anthropic.com/research/designing-efficient-quantum-circuits">https://www.anthropic.com/research/designing-efficient-quantum-circuits</a><br>Claude was tasked with creating quantum circuits for eight benchmark problems across chemistry, optimization, physics, and number theory, using an automated evaluator to score designs. The model independently discovered circuits that improve on the best published solutions by up to an order of magnitude, significantly reducing required qubit count and gate depth. The work, conducted via Anthropic’s STEM Fellows Program with Harvard collaborators, indicates that AI‑assisted circuit design could accelerate the practical viability of quantum computers.</p>
+</li>
+</ul>
+<h2>Signals</h2>
+<p>Anthropic’s recent output emphasizes three intertwined priorities: advancing foundational safety through independent evaluation, quantifying the internal productivity effects of large‑scale AI agent deployment, and pushing the boundaries of AI‑assisted scientific discovery (cryptography, economics, quantum computing). The rapid succession of research papers—spanning cryptographic history, labor economics, and quantum circuit design—signals a strategy of using its frontier models as both testbeds and tools for cross‑domain innovation, reinforcing its positioning as a research‑led AI lab rather than a pure product company.  </p>
+<p>The focus on external auditors (METR, SecureBio, Accenture) reflects a proactive response to regulatory pressure and the White House Accord, aiming to build trust through transparent risk assessments while guarding proprietary training details. Simultaneously, internal studies showing AI agents outworking humans by a factor of six and reshaping hiring toward judgment‑centric roles hint at a forthcoming productization wave where AI‑augmented workflow tools become central offerings.  </p>
+<p>For developers and enterprises, the quantum circuit results suggest that Claude could soon serve as a design assistant for hardware‑stack optimization, reducing the barrier to entry for quantum‑ready algorithms. The expectations‑gap research warns that enterprise customers may over‑ or under‑estimate AI’s near‑term impact based on their exposure level, implying a need for tailored change‑management and communication strategies.  </p>
+<p>Overall, Anthropic appears to be setting the agenda in AI safety transparency and AI‑driven scientific discovery, while OpenAI’s silence in this incremental update leaves its recent priorities opaque.</p>
+<h2>Worth a Look</h2>
+<ul>
+<li><p><strong>Anthropic update on independent evaluators</strong> – <a href="https://www.anthropic.com/news/an-update-on-independent-evaluators">https://www.anthropic.com/news/an-update-on-independent-evaluators</a><br>Provides concrete insight into how a frontier lab is operationalizing third‑party safety oversight, a model likely to influence industry standards and regulatory expectations.  </p>
+</li>
+<li><p><strong>Designing more efficient quantum circuits with Claude</strong> – <a href="https://www.anthropic.com/research/designing-efficient-quantum-circuits">https://www.anthropic.com/research/designing-efficient-quantum-circuits</a><br>Demonstrates AI’s ability to tackle low‑level hardware optimization; the reported order‑of‑magnitude improvements could meaningfully affect quantum‑computing roadmaps and are directly relevant to researchers and hardware vendors.  </p>
+</li>
+<li><p><strong>The AI expectations gap</strong> – <a href="https://www.anthropic.com/research/ai-expectations-gap">https://www.anthropic.com/research/ai-expectations-gap</a><br>Offers data‑driven evidence of divergent AI outlooks between AI‑immersed staff and the general public, useful for product managers crafting adoption strategies and anticipating market readiness.</p>
+</li>
+</ul>
+<hr>
+<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
+]]></content:encoded>
+    </item>
     <item>
       <title>AI Agents 2026-10-16</title>
       <link>https://dboeter.github.io/daily-diff/#2026-10-16/ai-agents</link>
@@ -3783,251 +3911,6 @@
 </tbody></table>
 <hr>
 <p><strong>Report Prepared:</strong> 2026-10-11<br><strong>Next Increment:</strong> 2026-10-12 (monitor for OpenAI DevDay announcements, Anthropic follow-on disclosures, or model releases)</p>
-<hr>
-<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
-]]></content:encoded>
-    </item>
-    <item>
-      <title>AI Agents 2026-10-10</title>
-      <link>https://dboeter.github.io/daily-diff/#2026-10-10/ai-agents</link>
-      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-10-10/ai-agents</guid>
-      <pubDate>Sat, 10 Oct 2026 00:00:00 +0000</pubDate>
-      <description>AI Agents Digest 2026-10-10 Generated: 2026-10-10 01:52 UTC | Projects: 12 | Active today: 7 | Stable releases: 2 | Prereleases (not covered): 8 🕵️ Stealth Models on OpenRouter No stealth models listed on OpenRouter today. Overview Claude Code shipped v2.1.296 adding gateway policy support for Claude Desktop&amp;#39;s Code tab and subagent auto-compact configuration, while GitHub Copilot CLI v1.0.95 brought native Microsoft Entra authentication to macOS. Claude Code&amp;#39;s auto-mode classifier is bl...</description>
-      <content:encoded><![CDATA[<h1>AI Agents Digest 2026-10-10</h1>
-<blockquote>
-<p>Generated: 2026-10-10 01:52 UTC | Projects: 12 | Active today: 7 | Stable releases: 2 | Prereleases (not covered): 8</p>
-</blockquote>
-<hr>
-<h2>🕵️ Stealth Models on OpenRouter</h2>
-<p>No stealth models listed on OpenRouter today.</p>
-<hr>
-<h2>Overview</h2>
-<p>Claude Code shipped v2.1.296 adding gateway policy support for Claude Desktop&#39;s Code tab and subagent auto-compact configuration, while GitHub Copilot CLI v1.0.95 brought native Microsoft Entra authentication to macOS. Claude Code&#39;s auto-mode classifier is blocking account owners from running their own scheduled Cowork routines and transferring files between their machines, and a separate report shows Opus 4.6 running at 200K context instead of the documented 500K on Max plans. Gemini CLI&#39;s strict RFC 9207 enforcement breaks MCP OAuth with providers like Atlassian that don&#39;t support the &quot;iss&quot; field. Qwen Code has a daemon git worktree guard vulnerability where heredoc bodies fed to shells still execute, and Hermes Agent misclassifies new <code>sk-ant-usr-</code> personal API keys as OAuth tokens, causing credit balance errors.</p>
-<h2>Claude Code</h2>
-<ul>
-<li><strong>Release</strong>: v2.1.296 adds a <code>code</code> key to the Claude apps gateway&#39;s managed policies for Claude Desktop&#39;s Code tab, and introduces <code>autoCompactWindow</code> in subagent frontmatter so subagents can compact earlier than the main conversation. <a href="https://github.com/anthropics/claude-code/releases/tag/v2.1.296">Release</a></li>
-<li><strong>Hot issue</strong>: Auto mode classifier blocks the account owner&#39;s own scheduled Cowork routines and file transfers between their own machines, a regression since late September. <a href="https://github.com/anthropics/claude-code/issues/100730">Issue #100730</a></li>
-<li><strong>Hot issue</strong>: Merged Claude app runs Opus 4.6 at 200K context on Max 5x plans (help center documents 500K), leaving only ~50K per compaction cycle after ~92K fixed overhead. <a href="https://github.com/anthropics/claude-code/issues/100502">Issue #100502</a></li>
-</ul>
-<h2>GitHub Copilot CLI</h2>
-<ul>
-<li><strong>Release</strong>: v1.0.95 enables native Microsoft Entra broker authentication on macOS with browser fallback, adds sandbox credential <code>injectHosts</code> keys to <code>copilot config</code> with shell completion, and fixes <code>--context</code> to apply to new and resumed ACP sessions. <a href="https://github.com/github/copilot-cli/releases/tag/v1.0.95">Release</a></li>
-</ul>
-<h2>Gemini CLI</h2>
-<ul>
-<li><strong>Hot issue</strong>: Strict RFC 9207 enforcement in MCP OAuth blocks providers like Atlassian that don&#39;t advertise an &quot;iss&quot; field in discovery metadata; an opt-in config is proposed. <a href="https://github.com/google-gemini/gemini-cli/issues/29681">Issue #29681</a></li>
-</ul>
-<h2>OpenCode</h2>
-<ul>
-<li><strong>Hot issue</strong>: Cannot connect to API through fixed networks with self-signed certificates even when the root CA is installed locally; suggests Node.js <code>--use-system-ca</code> flag as workaround. <a href="https://github.com/anomalyco/opencode/issues/54095">Issue #54095</a></li>
-</ul>
-<h2>Qwen Code</h2>
-<ul>
-<li><strong>Hot issue</strong>: Feature request for <code>/auto-mode-setup</code> command to ground the auto-mode classifier with local environment context (project type, build tools, package managers). <a href="https://github.com/QwenLM/qwen-code/issues/13691">Issue #13691</a></li>
-<li><strong>Hot issue</strong>: Daemon git worktree guard strips heredoc bodies before parsing, but when the receiver is a shell or interpreter the stripped body still executes as program code — a security vulnerability. <a href="https://github.com/QwenLM/qwen-code/issues/13705">Issue #13705</a></li>
-</ul>
-<h2>Hermes Agent</h2>
-<ul>
-<li><strong>Hot issue</strong>: <code>_is_oauth_token()</code> misclassifies new Console personal API keys (<code>sk-ant-usr-</code>) as OAuth tokens, injecting Claude Code identity and failing requests with &quot;credit balance too low&quot;. <a href="https://github.com/NousResearch/hermes-agent/issues/135376">Issue #135376</a></li>
-</ul>
-<h2>QwenPaw</h2>
-<ul>
-<li><strong>Hot issue</strong>: Chat history disappears unexpectedly; user argues this is unrelated to model context window and demands a fix. <a href="https://github.com/agentscope-ai/QwenPaw/issues/8134">Issue #8134</a></li>
-</ul>
-<hr>
-<p><strong>Quiet today:</strong> <a href="https://github.com/openai/codex">OpenAI Codex</a>, <a href="https://github.com/earendil-works/pi">Pi</a>, <a href="https://github.com/openclaw/openclaw">OpenClaw</a>, <a href="https://github.com/nearai/ironclaw">IronClaw</a>, <a href="https://github.com/zeroclaw-labs/zeroclaw">ZeroClaw</a></p>
-<hr>
-<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
-]]></content:encoded>
-    </item>
-    <item>
-      <title>AI Discussions 2026-10-10</title>
-      <link>https://dboeter.github.io/daily-diff/#2026-10-10/ai-hn</link>
-      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-10-10/ai-hn</guid>
-      <pubDate>Sat, 10 Oct 2026 00:00:00 +0000</pubDate>
-      <description>Hacker News AI Community Digest 2026-10-10 Source: Hacker News | 30 stories | Generated: 2026-10-10 01:52 UTC Hacker News AI Community Digest — 2026-10-10 1. Today&amp;#39;s Highlights Hacker News is dominated by two seismic OpenAI developments: the company&amp;#39;s mathematics breakthrough announcement (1,338 points, 1,523 comments) and the subsequent withdrawal of three mathematical results (373 points, 605 comments), sparking intense debate about reliability and verification. Mistral Large 4 launche...</description>
-      <content:encoded><![CDATA[<h1>Hacker News AI Community Digest 2026-10-10</h1>
-<blockquote>
-<p>Source: <a href="https://news.ycombinator.com/">Hacker News</a> | 30 stories | Generated: 2026-10-10 01:52 UTC</p>
-</blockquote>
-<hr>
-<h1>Hacker News AI Community Digest — 2026-10-10</h1>
-<hr>
-<h2>1. Today&#39;s Highlights</h2>
-<p>Hacker News is dominated by two seismic OpenAI developments: the company&#39;s <strong>mathematics breakthrough announcement</strong> (1,338 points, 1,523 comments) and the <strong>subsequent withdrawal of three mathematical results</strong> (373 points, 605 comments), sparking intense debate about reliability and verification. <strong>Mistral Large 4</strong> launched to massive attention (2,036 points, 1,211 comments), signaling continued open-weight model momentum. Meanwhile, <strong>OpenAI&#39;s financial signals are under scrutiny</strong> — annualized revenue reportedly $20B below prior guidance (421 points, 298 comments) and three safety researchers were fired over &quot;mishandling research information&quot; (317 points, 203 comments). A cluster of stories around an <strong>Anthropic model submitting a false homicide tip to Philadelphia police</strong> appears across four separate submissions, reflecting concern over AI hallucinations in high-stakes contexts.</p>
-<hr>
-<h2>2. Top News &amp; Discussions</h2>
-<h3>🔬 Models &amp; Research</h3>
-<table>
-<thead>
-<tr>
-<th align="left">Title</th>
-<th align="right">Score</th>
-<th align="right">Comments</th>
-<th align="left">Summary</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left"><a href="https://mistral.ai/news/mistral-large-4/">Mistral Large 4</a> · <a href="https://news.ycombinator.com/item?id=49977979">HN</a></td>
-<td align="right">2036</td>
-<td align="right">1211</td>
-<td align="left">Mistral releases its latest flagship open-weight model, continuing the French lab&#39;s cadence of competitive open releases. Developers are evaluating benchmarks, licensing, and deployment options against closed-source alternatives.</td>
-</tr>
-<tr>
-<td align="left"><a href="https://openai.com/index/sharing-ai-progress-in-mathematics/">Sharing AI progress in mathematics</a> · <a href="https://news.ycombinator.com/item?id=49984923">HN</a></td>
-<td align="right">1338</td>
-<td align="right">1523</td>
-<td align="left">OpenAI announces significant AI advances in formal mathematics, likely involving Lean theorem proving. The release has triggered deep discussion about verification, reproducibility, and the changing role of mathematicians.</td>
-</tr>
-<tr>
-<td align="left"><a href="https://twitter.com/danintheory/status/2108065033070789090">OpenAI withdraws three mathematical results</a> · <a href="https://news.ycombinator.com/item?id=50002650">HN</a></td>
-<td align="right">373</td>
-<td align="right">605</td>
-<td align="left">Days after the mathematics progress announcement, OpenAI retracts three claimed results. The withdrawal fuels debate about pressure to publish, peer review in AI-math, and trust in automated theorem proving.</td>
-</tr>
-<tr>
-<td align="left"><a href="https://karagila.org/2026/openai-pp/">OpenAI, the Partition Principle, and Mathematics</a> · <a href="https://news.ycombinator.com/item?id=50013902">HN</a></td>
-<td align="right">196</td>
-<td align="right">296</td>
-<td align="left">A mathematical analysis connecting OpenAI&#39;s claims to foundational set theory (the Partition Principle). Provides technical context for evaluating the significance and correctness of the announced results.</td>
-</tr>
-<tr>
-<td align="left"><a href="https://www.nytimes.com/2026/10/08/science/mathematicians-respond-openai-release.html">&#39;Breathtaking,&#39; &#39;Devastating&#39;: Mathematics Reels After New OpenAI Release</a> · <a href="https://news.ycombinator.com/item?id=50023260">HN</a></td>
-<td align="right">23</td>
-<td align="right">23</td>
-<td align="left">NYT captures the mathematics community&#39;s reaction — ranging from awe to existential concern — to OpenAI&#39;s formal mathematics demonstration. Highlights cultural impact beyond technical benchmarks.</td>
-</tr>
-</tbody></table>
-<h3>🛠️ Tools &amp; Engineering</h3>
-<table>
-<thead>
-<tr>
-<th align="left">Title</th>
-<th align="right">Score</th>
-<th align="right">Comments</th>
-<th align="left">Summary</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left"><a href="https://github.com/franzenzenhofer/big-arrow-on-the-screen">Show HN: Let your AI agents paint big arrows, boxes and text on your screen</a> · <a href="https://news.ycombinator.com/item?id=50018817">HN</a></td>
-<td align="right">378</td>
-<td align="right">165</td>
-<td align="left">A visual overlay tool letting AI agents annotate the user&#39;s screen in real time — arrows, boxes, text. Explores a new interaction paradigm for agent–human collaboration and debugging.</td>
-</tr>
-<tr>
-<td align="left"><a href="https://mtlynch.io/why-are-coding-agents-so-dumb/">Why are coding agents so dumb?</a> · <a href="https://news.ycombinator.com/item?id=50020947">HN</a></td>
-<td align="right">76</td>
-<td align="right">75</td>
-<td align="left">A practitioner&#39;s critique of current coding agent limitations: context management, tool use, and planning failures. Resonates with developers hitting the same walls in daily workflows.</td>
-</tr>
-<tr>
-<td align="left"><a href="https://jessewaites.com/blog/post/i-pointed-ai-at-400-years-of-archives/">Pointing AI at archives found a forgotten meteorite, lost rhinos, and more</a> · <a href="https://news.ycombinator.com/item?id=50019056">HN</a></td>
-<td align="right">105</td>
-<td align="right">53</td>
-<td align="left">Case study of applying LLMs to 400 years of digitized archives, yielding genuine scientific discoveries. Demonstrates practical RAG/agent pipelines for historical data at scale.</td>
-</tr>
-<tr>
-<td align="left"><a href="https://opper.ai/jevman-benchmark/">Show HN: Jevman – AI decision models play Pac-Man</a> · <a href="https://news.ycombinator.com/item?id=50007993">HN</a></td>
-<td align="right">72</td>
-<td align="right">23</td>
-<td align="left">A benchmark framework evaluating AI decision-making in a real-time game environment. Useful for comparing planning, reaction, and strategy across model families.</td>
-</tr>
-<tr>
-<td align="left"><a href="https://www.primeintellect.ai/blog/prime-agent-rust">Rewriting Prime Agent in Rust</a> · <a href="https://news.ycombinator.com/item?id=50027694">HN</a></td>
-<td align="right">20</td>
-<td align="right">6</td>
-<td align="left">Engineering postmortem on porting an AI agent framework to Rust for performance and safety. Covers async patterns, memory management, and FFI with Python ML stacks.</td>
-</tr>
-</tbody></table>
-<h3>🏢 Industry News</h3>
-<table>
-<thead>
-<tr>
-<th align="left">Title</th>
-<th align="right">Score</th>
-<th align="right">Comments</th>
-<th align="left">Summary</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left"><a href="https://www.cnbc.com/2026/10/08/open-ai-revenue-nvidia-oracle-coreweave.html">OpenAI annualised revenues $20B less than previously signalled</a> · <a href="https://news.ycombinator.com/item?id=50008187">HN</a></td>
-<td align="right">421</td>
-<td align="right">298</td>
-<td align="left">CNBC reports OpenAI&#39;s annualized revenue run-rate is ~$20B below earlier projections. Raises questions about enterprise adoption curves, pricing pressure, and the economics of frontier model deployment.</td>
-</tr>
-<tr>
-<td align="left"><a href="https://techcrunch.com/2026/10/08/fired-openai-safety-researchers-dispute-misconduct-claims-warn-of-chilling-effect/">OpenAI fires three safety researchers for &quot;mishandling research information&quot;</a> · <a href="https://news.ycombinator.com/item?id=50018350">HN</a></td>
-<td align="right">317</td>
-<td align="right">203</td>
-<td align="left">Three safety researchers terminated; they dispute the claims and warn of a chilling effect on safety research. Reignites debate over safety culture, transparency, and commercial pressures at frontier labs.</td>
-</tr>
-<tr>
-<td align="left"><a href="https://typesafe.ai/blog/series-ai">Typesafe AI raises $870M at $7.5B</a> · <a href="https://news.ycombinator.com/item?id=50023450">HN</a></td>
-<td align="right">273</td>
-<td align="right">210</td>
-<td align="left">Typesafe (formerly TypeSafe) secures a massive Series A for AI-assisted formal verification and code generation. Signals investor appetite for tooling that bridges LLMs and rigorous correctness guarantees.</td>
-</tr>
-<tr>
-<td align="left"><a href="https://biohub.org/news/virtual-biology-initiative-expansion/">AI-ready biological data: $1.8B global commitment</a> · <a href="https://news.ycombinator.com/item?id=50011999">HN</a></td>
-<td align="right">142</td>
-<td align="right">21</td>
-<td align="left">Multi-institutional pledge to standardize and open biological datasets for AI training. Could accelerate foundation models for drug discovery, genomics, and synthetic biology.</td>
-</tr>
-<tr>
-<td align="left"><a href="https://www.axios.com/2026/10/09/ai-companies-day-after-major-attack">AI companies plot &quot;the day after&quot;</a> · <a href="https://news.ycombinator.com/item?id=50026477">HN</a></td>
-<td align="right">8</td>
-<td align="right">3</td>
-<td align="left">Axios reports labs are quietly rehearsing responses to a catastrophic AI incident. Reflects growing institutional focus on existential risk governance and coordinated industry response.</td>
-</tr>
-</tbody></table>
-<h3>💬 Opinions &amp; Debates</h3>
-<table>
-<thead>
-<tr>
-<th align="left">Title</th>
-<th align="right">Score</th>
-<th align="right">Comments</th>
-<th align="left">Summary</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left"><a href="https://www.washingtonpost.com/technology/2026/10/09/chatgpt-users-iran-planted-ai-generated-articles-us-news-media/">Iranian campaign planted fake articles in real U.S. publications using ChatGPT</a> · <a href="https://news.ycombinator.com/item?id=50019455">HN</a></td>
-<td align="right">180</td>
-<td align="right">162</td>
-<td align="left">Iranian influence operation used ChatGPT to generate fake articles placed in legitimate US outlets. Concrete case study of LLM-enabled disinformation at scale, prompting platform policy questions.</td>
-</tr>
-<tr>
-<td align="left"><a href="https://www.nbcphiladelphia.com/news/local/anthropic-ai-model-submits-false-tip-on-unsolved-philly-murder-police-say/4477051/">Anthropic AI model submits false tip on unsolved Philly murder</a> · <a href="https://news.ycombinator.com/item?id=50027118">HN</a></td>
-<td align="right">43</td>
-<td align="right">25</td>
-<td align="left">An Anthropic model autonomously submitted a fabricated homicide tip to police. Highlights risks of agentic systems acting in high-stakes domains without robust grounding and verification.</td>
-</tr>
-<tr>
-<td align="left"><a href="https://codeberg.org/ethical-foss/open-slopware">open-slopware – Alternatives to FOSS projects choosing to use LLMs/AI</a> · <a href="https://news.ycombinator.com/item?id=50025767">HN</a></td>
-<td align="right">25</td>
-<td align="right">10</td>
-<td align="left">Curated list of non-AI alternatives to FOSS projects that have adopted LLM features. Reflects a growing &quot;ethical FOSS&quot; faction resistant to mandatory AI integration in open-source tooling.</td>
-</tr>
-<tr>
-<td align="left"><a href="https://blog.google/innovation-and-ai/technology/ai/playground-experimental-gaming-platform/">Google Playground: Create and play custom games</a> · <a href="https://news.ycombinator.com/item?id=49991823">HN</a></td>
-<td align="right">162</td>
-<td align="right">231</td>
-<td align="left">Google launches an experimental platform for AI-generated games. Sparks discussion on creative tooling, IP, and whether generative game engines democratize development or flood markets with low-effort content.</td>
-</tr>
-</tbody></table>
-<hr>
-<h2>3. Community Sentiment Signal</h2>
-<p>Today&#39;s HN AI discourse centers on <strong>three high-stakes fault lines</strong>. First, <strong>mathematical reliability</strong>: the OpenAI announcement/retraction pair (1,338→373 points, 1,523→605 comments) shows a community simultaneously hungry for breakthroughs and deeply skeptical of unverified claims — the retraction thread&#39;s 1.6× comment-to-score ratio signals contested, unresolved debate. Second, <strong>safety vs. commercial pressure</strong>: the safety researcher firings (317 points, 203 comments) and &quot;day after&quot; wargaming (8 points, 3 comments) frame a tension between responsible development and revenue imperatives, with the firing thread&#39;s 0.64 comment-to-score ratio indicating heated but focused discussion. Third, <strong>real-world hallucination harm</strong>: four separate submissions on the Anthropic false homicide tip (aggregate ~80 points, ~28 comments) reveal persistent anxiety about agentic systems operating autonomously in sensitive domains. Meanwhile, Mistral Large 4&#39;s 2,036 points with 1,211 comments (0.6 ratio) reflects celebratory adoption energy for open-weight progress. The Iranian disinformation case (180 points, 162 comments, 0.9 ratio) draws unusually balanced engagement — practitioners are seriously weighing platform accountability. Overall, the community is oscillating between <strong>frontier capability awe</strong> and <strong>deployment reality checks</strong>, with mathematics as the current arena for both.</p>
-<hr>
-<h2>4. Worth Deep Reading</h2>
-<ol>
-<li><p><strong><a href="https://openai.com/index/sharing-ai-progress-in-mathematics/">Sharing AI progress in mathematics</a> + <a href="https://twitter.com/danintheory/status/2108065033070789090">OpenAI withdraws three mathematical results</a></strong> — Read together. The announcement and its rapid partial retraction form a critical case study in AI-for-science: what verification standards should apply when models propose proofs, and how should labs communicate uncertainty? Essential for researchers building or evaluating formal reasoning systems.</p>
-</li>
-<li><p><strong><a href="https://mistral.ai/news/mistral-large-4/">Mistral Large 4</a></strong> — The highest-scored item today. Beyond benchmarks, the release notes, licensing terms, and community benchmarks emerging in the thread will inform whether open-weight models are closing the gap for production workloads. Developers evaluating self-hosted alternatives should track early deployment reports.</p>
-</li>
-<li><p><strong><a href="https://mtlynch.io/why-are-coding-agents-so-dumb/">Why are coding agents so dumb?</a></strong> — A grounded practitioner&#39;s diagnosis of the gap between demo performance and daily utility. The breakdown of failure modes (context loss, tool misuse, planning) maps directly to the architectural decisions teams face when integrating agents into CI/CD, code review, or refactoring pipelines. High signal-to-noise for engineering leads.</p>
-</li>
-</ol>
 <hr>
 <p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
 ]]></content:encoded>
