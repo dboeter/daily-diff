@@ -49,7 +49,7 @@ Subscribe in any RSS reader (Feedly, Reeder, NewsBlur, etc.) to receive new dige
 
 ## MCP Server
 
-**`https://daily-diff-mcp.<subdomain>.workers.dev`** (a Cloudflare Worker deployed from `mcp/`, see **Deploying** below)
+**`https://daily-diff-mcp.dboeter.workers.dev`** (a Cloudflare Worker deployed from `mcp/`, see **Deploying** below)
 
 A [Model Context Protocol](https://modelcontextprotocol.io) server that exposes Daily Diff data as tools. Any MCP-compatible client (Claude Desktop, OpenClaw, etc.) can query the latest AI ecosystem reports directly.
 
@@ -68,7 +68,7 @@ A [Model Context Protocol](https://modelcontextprotocol.io) server that exposes 
 {
   "mcpServers": {
     "daily-diff": {
-      "url": "https://daily-diff-mcp.<subdomain>.workers.dev"
+      "url": "https://daily-diff-mcp.dboeter.workers.dev"
     }
   }
 }
@@ -83,7 +83,7 @@ Restart Claude Desktop after saving. You can then ask Claude things like:
 **OpenClaw setup** — run the following command:
 
 ```bash
-openclaw mcp add --transport http daily-diff https://daily-diff-mcp.<subdomain>.workers.dev
+openclaw mcp add --transport http daily-diff https://daily-diff-mcp.dboeter.workers.dev
 ```
 
 Or add it manually to `~/.openclaw/openclaw.json`:
@@ -93,7 +93,7 @@ Or add it manually to `~/.openclaw/openclaw.json`:
   "mcpServers": {
     "daily-diff": {
       "type": "http",
-      "url": "https://daily-diff-mcp.<subdomain>.workers.dev"
+      "url": "https://daily-diff-mcp.dboeter.workers.dev"
     }
   }
 }
@@ -105,7 +105,7 @@ You can then ask OpenClaw things like:
 - _"Search for Claude Code mentions this week"_ → calls `search`
 - _"Show me the AI trending report for 2026-03-05"_ → calls `get_report`
 
-**Deploying** — the worker is deployed from the `mcp/` directory:
+**Deploying** — the `Deploy MCP` workflow (`.github/workflows/deploy-mcp.yml`) deploys the worker on every push to `main` that touches `mcp/`, using the `CLOUDFLARE_API_TOKEN` secret (a Cloudflare token with the "Edit Cloudflare Workers" template). New digests need no deploy: the worker reads them from GitHub Pages. To deploy by hand:
 
 ```bash
 cd mcp
@@ -225,21 +225,22 @@ agents:
 
 The workflow reads these repository secrets (**Settings → Secrets and variables → Actions**):
 
-| Secret               | Required      | Description                                                                                                                                                                                                                                                                      |
-| -------------------- | ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `LLM_PROVIDER`       | optional      | `anthropic` (default), `openai`, `github-copilot`, `openrouter`, `deepseek`, or `qwen`                                                                                                                                                                                           |
-| `ANTHROPIC_API_KEY`  | if Anthropic  | API key — works with both Anthropic and Kimi Code                                                                                                                                                                                                                                |
-| `ANTHROPIC_BASE_URL` | optional      | API endpoint override. Set to `https://api.kimi.com/coding/` for Kimi Code; leave unset for Anthropic                                                                                                                                                                            |
-| `OPENAI_API_KEY`     | if OpenAI     | OpenAI API key                                                                                                                                                                                                                                                                   |
-| `OPENAI_BASE_URL`    | optional      | OpenAI endpoint override                                                                                                                                                                                                                                                         |
-| `OPENROUTER_API_KEY` | if OpenRouter | OpenRouter API key                                                                                                                                                                                                                                                               |
-| `DEEPSEEK_API_KEY`   | if DeepSeek   | DeepSeek API key                                                                                                                                                                                                                                                                 |
-| `DASHSCOPE_API_KEY`  | if Qwen       | Alibaba Model Studio API key                                                                                                                                                                                                                                                     |
-| `TYPESAFE_API_KEY`   | optional      | [TypeSafe](https://typesafe.ai) key. If set, ArXiv papers are ranked by Jev relevance instead of recency, Jev decides the trending report's scope, categories and cross-source matches instead of the search topics, and Jev picks the Policy Watch items instead of AI keywords |
-| `PLURAL_API_KEY`     | optional      | [Open States / Plural](https://open.pluralpolicy.com) key for Policy Watch's US state bills; unset skips that source                                                                                                                                                             |
-| `USA_GOV_API_KEY`    | optional      | [api.data.gov](https://api.data.gov/signup/) key for Policy Watch's Congress.gov bills and Regulations.gov documents; unset skips those two (the Federal Register needs no key)                                                                                                  |
-| `TELEGRAM_BOT_TOKEN` | optional      | Telegram bot token from [@BotFather](https://t.me/BotFather). If set, a message is sent after each digest run                                                                                                                                                                    |
-| `TELEGRAM_CHAT_ID`   | optional      | Telegram chat/channel/group ID to send notifications to                                                                                                                                                                                                                          |
+| Secret                 | Required           | Description                                                                                                                                                                                                                                                                      |
+| ---------------------- | ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `LLM_PROVIDER`         | optional           | `anthropic` (default), `openai`, `github-copilot`, `openrouter`, `deepseek`, or `qwen`                                                                                                                                                                                           |
+| `ANTHROPIC_API_KEY`    | if Anthropic       | API key — works with both Anthropic and Kimi Code                                                                                                                                                                                                                                |
+| `ANTHROPIC_BASE_URL`   | optional           | API endpoint override. Set to `https://api.kimi.com/coding/` for Kimi Code; leave unset for Anthropic                                                                                                                                                                            |
+| `OPENAI_API_KEY`       | if OpenAI          | OpenAI API key                                                                                                                                                                                                                                                                   |
+| `OPENAI_BASE_URL`      | optional           | OpenAI endpoint override                                                                                                                                                                                                                                                         |
+| `OPENROUTER_API_KEY`   | if OpenRouter      | OpenRouter API key                                                                                                                                                                                                                                                               |
+| `DEEPSEEK_API_KEY`     | if DeepSeek        | DeepSeek API key                                                                                                                                                                                                                                                                 |
+| `DASHSCOPE_API_KEY`    | if Qwen            | Alibaba Model Studio API key                                                                                                                                                                                                                                                     |
+| `TYPESAFE_API_KEY`     | optional           | [TypeSafe](https://typesafe.ai) key. If set, ArXiv papers are ranked by Jev relevance instead of recency, Jev decides the trending report's scope, categories and cross-source matches instead of the search topics, and Jev picks the Policy Watch items instead of AI keywords |
+| `PLURAL_API_KEY`       | optional           | [Open States / Plural](https://open.pluralpolicy.com) key for Policy Watch's US state bills; unset skips that source                                                                                                                                                             |
+| `USA_GOV_API_KEY`      | optional           | [api.data.gov](https://api.data.gov/signup/) key for Policy Watch's Congress.gov bills and Regulations.gov documents; unset skips those two (the Federal Register needs no key)                                                                                                  |
+| `TELEGRAM_BOT_TOKEN`   | optional           | Telegram bot token from [@BotFather](https://t.me/BotFather). If set, a message is sent after each digest run                                                                                                                                                                    |
+| `TELEGRAM_CHAT_ID`     | optional           | Telegram chat/channel/group ID to send notifications to                                                                                                                                                                                                                          |
+| `CLOUDFLARE_API_TOKEN` | for the MCP deploy | Cloudflare API token used by the `Deploy MCP` workflow (not by the daily digest)                                                                                                                                                                                                 |
 
 > `GITHUB_TOKEN` is provided automatically by GitHub Actions. When using `github-copilot` as the provider, the same `GITHUB_TOKEN` is used for LLM calls.
 

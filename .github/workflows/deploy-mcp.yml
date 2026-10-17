@@ -1,0 +1,47 @@
+name: Deploy MCP
+
+# Deploys the MCP server (mcp/) to Cloudflare Workers when its code changes.
+# New digests need no deploy: the worker reads them from GitHub Pages at request time.
+on:
+  push:
+    branches: [main]
+    paths: ["mcp/**", ".github/workflows/deploy-mcp.yml"]
+  workflow_dispatch:
+
+concurrency: deploy-mcp
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: mcp
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # mcp/ is its own package with its own lockfile, not part of the root workspace
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          package_json_file: mcp/package.json
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: mcp/pnpm-lock.yaml
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Deploy
+        run: pnpm run deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
