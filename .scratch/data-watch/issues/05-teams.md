@@ -1,6 +1,6 @@
 # Teams card and sender
 
-Status: ready-for-agent
+Status: ready-for-human
 Type: task
 Blocked by: 02
 
