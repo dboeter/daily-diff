@@ -1,0 +1,10 @@
+{
+  "ai-agents": [
+    "Cline v4.1.25 adds Cloud sessions (GitHub sandbox tasks), defaults to Gemini 4 Argon, and runs plugins in worker threads for isolation.",
+    "OpenAI Codex desktop client returns 404 for model 'gpt-6', breaking access until fixed; macOS app loses browser access after update."
+  ],
+  "ai-web": [
+    "Anthropic grants METR employee‑level access to internal model data for independent risk assessments, strengthening AI safety oversight.",
+    "Claude designs quantum circuits that beat benchmarks by up to 10×, showing AI‑assisted hardware optimization potential."
+  ]
+}
