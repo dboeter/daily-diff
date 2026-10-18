@@ -15,13 +15,8 @@ import { POLICY_SOURCES, type PolicySource } from "./policy-sources.ts";
 import { loadPolicyVerdicts, selectPolicyItems, type PolicyVerdicts } from "./policy-jev.ts";
 import type { AskJev } from "./jev.ts";
 import { nextDeadlines, upcomingDeadlines, type Deadline } from "./policy-deadlines.ts";
-import {
-  loadReportedState,
-  newItems,
-  nextReportedState,
-  saveReportedState,
-  type ReportedState,
-} from "./report-state.ts";
+import { loadReportedState, type ReportedState } from "./report-state.ts";
+import { collectNewItems, type NewItems } from "./new-items.ts";
 import { POLICY_REPORT } from "./i18n.ts";
 
 export interface PolicyItem extends FeedItem {
@@ -53,25 +48,7 @@ export interface PolicyState extends ReportedState {
   deadlines?: Record<string, Deadline>;
 }
 
-export interface PolicyData {
-  /** The items to report today: the kept ones, most relevant first. */
-  items: PolicyItem[];
-  /** False when every feed failed. */
-  fetchSuccess: boolean;
-  /** Saved by buildPolicyReport once the report exists, like the ArXiv state. */
-  nextState: PolicyState;
-  /**
-   * `nextState` without today's kept items: the record-only stages and the
-   * saved deadlines reconciled with the fetch. Saved on every successful fetch,
-   * so a quiet day or a failed report still keeps them.
-   */
-  observedState: PolicyState;
-  /** "keywords" when Jev was unavailable: watchlisted items and keyword hits only. */
-  rankedBy?: "jev" | "keywords";
-  /** Saved by buildPolicyReport; null leaves a malformed file as it is. */
-  nextVerdicts?: PolicyVerdicts | null;
-  /** `policy-ranking.json`, every scored item. */
-  rankingFile?: string;
+export interface PolicyData extends NewItems<PolicyItem, PolicyState, PolicyVerdicts> {
   /** The Upcoming deadlines section's rows; shown only when there are items. */
   deadlines: Deadline[];
   /** config.yml `policy.reader_profile`, for the report prompts. */
@@ -82,8 +59,6 @@ export const POLICY_STATE_FILE = path.join("digests", "policy-state.json");
 
 /** Missing or malformed → null: every item in the age window counts as new, like a first run. */
 export const loadPolicyState = (file = POLICY_STATE_FILE): PolicyState | null => loadReportedState(file);
-export const savePolicyState = (state: PolicyState, file = POLICY_STATE_FILE): void =>
-  saveReportedState(state, file);
 
 /** A paid advertorial's link path. */
 const SPONSORED_LINK_RE = /\/sponsored-content\//;
@@ -142,37 +117,38 @@ export async function fetchPolicyData(
   },
   sources: PolicySource[] = POLICY_SOURCES,
 ): Promise<PolicyData> {
-  const results = await fetchPolicySources(config, now, dateStr, state, sources);
-  const fetched = results.flatMap((r) => r ?? []);
-  const fresh = newItems(fetched, state, dateStr);
-  const recorded = fresh.filter((i) => i.recordOnly);
-  const candidates = fresh.filter((i) => !i.recordOnly);
-  console.log(`  [policy] ${POLICY_REPORT.newItems(candidates.length)}`);
-  const selection = await selectPolicyItems(candidates, {
-    readerProfile: config.readerProfile,
-    watchlist: config.watchlist,
-    dateStr,
-    ...jev,
-  });
   // The report has one section per jurisdiction in JURISDICTIONS order, then News & commentary. Sorting
   // here (stable, so relevance order holds within a section) keeps the summaries prompt's row numbers
   // equal to the table's.
   const rank = (i: PolicyItem) => (i.news ? JURISDICTIONS.length : JURISDICTIONS.indexOf(i.jurisdiction));
-  const deadlines = nextDeadlines(state?.deadlines, selection.items, fetched, dateStr);
-  const observedState = {
-    ...nextReportedState(state, [], dateStr, recorded),
-    deadlines: nextDeadlines(state?.deadlines, [], fetched, dateStr),
-  };
+  const data = await collectNewItems({
+    tag: "policy",
+    state,
+    dateStr,
+    fetch: async () => {
+      const results = await fetchPolicySources(config, now, dateStr, state, sources);
+      return { items: results.flatMap((r) => r ?? []), fetchSuccess: results.some((r) => r !== null) };
+    },
+    // A source sets `recordOnly` itself (staleOnFirstSight): Have your say, for one, keeps an open
+    // initiative whose stage started long ago.
+    stateItem: (i: PolicyItem) => i,
+    select: async (candidates) => {
+      console.log(`  [policy] ${POLICY_REPORT.newItems(candidates.length)}`);
+      const selection = await selectPolicyItems(candidates, {
+        readerProfile: config.readerProfile,
+        watchlist: config.watchlist,
+        dateStr,
+        ...jev,
+      });
+      return { ...selection, items: [...selection.items].sort((a, b) => rank(a) - rank(b)) };
+    },
+    extend: (kept, fetched): Pick<PolicyState, "deadlines"> => ({
+      deadlines: nextDeadlines(state?.deadlines, kept, fetched, dateStr),
+    }),
+  });
   return {
-    items: [...selection.items].sort((a, b) => rank(a) - rank(b)),
-    fetchSuccess: results.some((r) => r !== null),
-    // Only the kept items: a dropped one is not reported, and its saved verdict stops it being asked again.
-    nextState: { ...nextReportedState(state, selection.items, dateStr, recorded), deadlines },
-    observedState,
-    deadlines: upcomingDeadlines(deadlines, config.calendar, dateStr),
-    rankedBy: selection.rankedBy,
+    ...data,
+    deadlines: upcomingDeadlines(data.nextState.deadlines ?? {}, config.calendar, dateStr),
     readerProfile: config.readerProfile,
-    nextVerdicts: selection.nextVerdicts,
-    ...(candidates.length > 0 ? { rankingFile: selection.rankingFile } : {}),
   };
 }

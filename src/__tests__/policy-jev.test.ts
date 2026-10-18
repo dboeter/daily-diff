@@ -10,11 +10,11 @@ import {
   keywordHit,
   fallbackKeywordHit,
   loadPolicyVerdicts,
-  savePolicyVerdicts,
   type PolicyAnswers,
   type PolicyVerdicts,
 } from "../policy-jev.ts";
 import type { PolicyItem } from "../policy.ts";
+import { saveItemsFile } from "../jev.ts";
 import type { Jurisdiction, PolicyConfig } from "../config.ts";
 
 const answers = (
@@ -239,7 +239,7 @@ describe("policy verdict file", () => {
     const cache: PolicyVerdicts = {
       items: { a: { title: "A", answers: answers(1, 1, 1, 2), lastSeen: "2026-10-14" } },
     };
-    savePolicyVerdicts(cache, file);
+    saveItemsFile(cache, file);
     expect(loadPolicyVerdicts(file)).toEqual(cache);
     fs.writeFileSync(file, "{ nope");
     expect(loadPolicyVerdicts(file)).toBeNull();

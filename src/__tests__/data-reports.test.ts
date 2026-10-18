@@ -15,6 +15,7 @@ import { isDataLaw } from "../policy-jev.ts";
 import type { DevtoData } from "../devto.ts";
 import type { VendorData, VendorItem } from "../data-vendors.ts";
 import { selectVendorItems } from "../data-jev.ts";
+import { fetchVendorData } from "../data-vendors.ts";
 
 const generateBody = vi.fn(async (_prompt: string) => "## Highlights\n\nText.");
 vi.mock("../report.ts", async (importOriginal) => ({
@@ -22,6 +23,13 @@ vi.mock("../report.ts", async (importOriginal) => ({
   generateBody: (...args: unknown[]) => generateBody(...(args as [string])),
   saveFile: (...args: unknown[]) => saveFile(...(args as [string, string, string])),
 }));
+/** A vendor result with these items and nothing to save but the pruned state. */
+const vendorOf = (items: VendorData["items"]): VendorData => ({
+  items,
+  fetchSuccess: true,
+  nextState: { reported: {} },
+  observedState: { reported: {} },
+});
 const saveFile = vi.fn((_content: string, dateStr: string, name: string) => `digests/${dateStr}/${name}`);
 
 const devto: DevtoData = {
@@ -213,7 +221,7 @@ describe("buildDataReport", () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "data-report-"));
   const stateFile = path.join(dir, "data-state.json");
   const verdictsFile = path.join(dir, "data-verdicts.json");
-  const build = (s: DataSection[], vendor: VendorData = { items: [] }, dataLaw: PolicyItem[] = []) =>
+  const build = (s: DataSection[], vendor: VendorData = vendorOf([]), dataLaw: PolicyItem[] = []) =>
     buildDataReport(s, vendor, dataLaw, "00:00", "2026-10-17", stateFile, verdictsFile);
 
   const project = (name: string, active: boolean): ProjectActivity => ({
@@ -274,7 +282,7 @@ describe("buildDataReport", () => {
       { cache: { items: {} }, dateStr: "2026-10-17" },
     );
     return {
-      items,
+      ...vendorOf(items),
       rankingFile,
       nextVerdicts,
       nextState: { reported: { "dbx-new": "2026-10-17" }, stages: {} },
@@ -402,7 +410,7 @@ describe("buildDataReport", () => {
       },
     );
     expect(items.map((i) => i.aiInData)).toEqual([false]);
-    const content = (await build(sections(false, false), { items }))!.content;
+    const content = (await build(sections(false, false), vendorOf(items)))!.content;
     expect(prosePrompts()[0]).not.toContain("Data × AI");
     expect(content).not.toContain("Data × AI");
     expect(content).toContain("## Worth a Look");
@@ -440,7 +448,7 @@ describe("buildDataReport", () => {
       policyItem("data-act", "Data Act: guidance on smart contracts", "Guidance"),
       policyItem("ai-act", "AI Act: Code of Practice published"),
     ];
-    const content = (await build(sections(false), { items: [] }, dataLawOf(policy)))!.content;
+    const content = (await build(sections(false), vendorOf([]), dataLawOf(policy)))!.content;
     expect(content).toContain(
       "## Worth a Look\n- Read this.\n- [Data Act: guidance on smart contracts](https://example.eu/data-act) — Policy Watch, Guidance",
     );
@@ -454,7 +462,7 @@ describe("buildDataReport", () => {
       return reply(prompt);
     });
     const policy = [policyItem("nis2", "NIS2 implementing act adopted")];
-    const content = (await build(sections(false), { items: [] }, dataLawOf(policy)))!.content;
+    const content = (await build(sections(false), vendorOf([]), dataLawOf(policy)))!.content;
     expect(content).toContain(
       "## Worth a Look\n\n- [NIS2 implementing act adopted](https://example.eu/nis2) — Policy Watch",
     );
@@ -463,6 +471,59 @@ describe("buildDataReport", () => {
   it("is still skipped when only data-law policy items are new", async () => {
     generateBody.mockReset();
     const policy = [policyItem("nis2", "NIS2 implementing act adopted")];
-    expect(await build(sections(false, false), { items: [] }, policy)).toBeNull();
+    expect(await build(sections(false, false), vendorOf([]), policy)).toBeNull();
+  });
+
+  describe("with fetchVendorData", () => {
+    const bcr = fs.readFileSync(new URL("./fixtures/snowflake-bcr.html", import.meta.url), "utf-8");
+    const feeds = [
+      {
+        name: "Snowflake BCR",
+        vendor: "snowflake" as const,
+        url: "https://x/bcr",
+        parser: "snowflake-bcr" as const,
+      },
+    ];
+    const fetchWith = async (resp: () => Response, state: Parameters<typeof fetchVendorData>[2]) => {
+      vi.spyOn(console, "log").mockImplementation(() => {});
+      const spy = vi.spyOn(globalThis, "fetch").mockImplementation(async () => resp());
+      const data = await fetchVendorData({ feeds }, new Date("2026-10-17T00:00:00Z"), state, {
+        cache: { items: {} },
+      });
+      spy.mockRestore();
+      return data;
+    };
+
+    it("saves a quiet day's record-only bundles and leaves reported unchanged", async () => {
+      generateBody.mockReset();
+      fs.rmSync(stateFile, { force: true });
+      const first = await fetchWith(() => new Response(bcr), null);
+      // 2026_08 was reported on an earlier day at its current stage; 2026_05..07 were never seen.
+      const reported = { "older-note|2026-10-16": "2026-10-16" };
+      const stage08 = first.nextState.stages!["snowflake-bcr:2026_08"]!;
+      const data = await fetchWith(() => new Response(bcr), {
+        reported,
+        stages: { "snowflake-bcr:2026_08": stage08 },
+      });
+      expect(data.items).toEqual([]);
+      expect(await build(sections(false, false), data)).toBeNull();
+      const saved = JSON.parse(fs.readFileSync(stateFile, "utf-8"));
+      expect(saved.reported).toEqual(reported);
+      expect(Object.keys(saved.stages).sort()).toEqual([
+        "snowflake-bcr:2026_05",
+        "snowflake-bcr:2026_06",
+        "snowflake-bcr:2026_07",
+        "snowflake-bcr:2026_08",
+      ]);
+    });
+
+    it("reports fetchSuccess false when every feed fails, and writes no state on a quiet day", async () => {
+      generateBody.mockReset();
+      fs.rmSync(stateFile, { force: true });
+      const data = await fetchWith(() => new Response("", { status: 503 }), { reported: {} });
+      expect(data.fetchSuccess).toBe(false);
+      expect(await build(sections(false, false), data)).toBeNull();
+      expect(fs.existsSync(stateFile)).toBe(false);
+    });
   });
 });

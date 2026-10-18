@@ -51,12 +51,13 @@ import {
 } from "./report-builders.ts";
 import { saveArxivState, type ArxivData } from "./arxiv.ts";
 import type { HfData } from "./hf.ts";
-import { savePolicyState, POLICY_STATE_FILE, type PolicyData, type PolicyItem } from "./policy.ts";
-import { savePolicyVerdicts, POLICY_VERDICTS_FILE } from "./policy-jev.ts";
+import { POLICY_STATE_FILE, type PolicyData, type PolicyItem } from "./policy.ts";
+import { POLICY_VERDICTS_FILE } from "./policy-jev.ts";
 import { renderDeadlines } from "./policy-deadlines.ts";
 import type { OpenRouterData } from "./openrouter.ts";
-import { saveDataState, DATA_STATE_FILE, type VendorData } from "./data-vendors.ts";
-import { saveDataVerdicts, DATA_VERDICTS_FILE } from "./data-jev.ts";
+import { DATA_STATE_FILE, type VendorData } from "./data-vendors.ts";
+import { DATA_VERDICTS_FILE } from "./data-jev.ts";
+import { commitWrites, planWrites } from "./new-items.ts";
 import type { DataSectionKey } from "./config.ts";
 
 /** A finished report: main() writes its file and opens its issue (title and label from REPORTS). */
@@ -266,16 +267,12 @@ export async function buildPolicyReport(
   stateFile = POLICY_STATE_FILE,
   verdictsFile = POLICY_VERDICTS_FILE,
 ): Promise<SavedReport | null> {
-  // Before the no-items skip, unlike the trending cache: on a day Jev drops
-  // every item there is no report, and the dropped items would be asked again
-  // every day until they leave the feed's age window.
-  if (policyData.rankingFile) {
-    console.log(`  Saved ${saveFile(policyData.rankingFile, dateStr, "policy-ranking.json")}`);
-  }
-  if (policyData.nextVerdicts) savePolicyVerdicts(policyData.nextVerdicts, verdictsFile);
-  // Observations (record-only stages, deadline changes) are kept whether or not a report follows;
-  // replaced by nextState below once the report exists.
-  if (policyData.fetchSuccess) savePolicyState(policyData.observedState, stateFile);
+  // The trace, the verdicts and the observed state before the no-items skip, unlike the trending
+  // cache: on a day Jev drops every item there is no report, and the dropped items would be asked
+  // again every day until they leave the feed's age window.
+  const files = { state: stateFile, verdicts: verdictsFile, trace: "policy-ranking.json" };
+  const writes = planWrites(policyData);
+  commitWrites(writes.onFetched, files, dateStr);
   if (!policyData.fetchSuccess || policyData.items.length === 0) {
     console.log(`  [policy] ${policyData.fetchSuccess ? POLICY_REPORT.noNewItems : POLICY_REPORT.noData}`);
     return null;
@@ -307,7 +304,7 @@ export async function buildPolicyReport(
   const meta = `> ${REPORT_META.sources(sources)} | ${POLICY_REPORT.newItems(items.length)}${ranked} | ${REPORT_META.generated(utcStr)}`;
   const body = spliceTables(prose, tables(parseRowSummaries(summaries)));
   // Only once the report exists, like the ArXiv state.
-  savePolicyState(policyData.nextState, stateFile);
+  commitWrites(writes.onReported, files, dateStr);
   return { id: "ai-policy", content: assembleReport("ai-policy", dateStr, meta, body) };
 }
 
@@ -374,10 +371,11 @@ export async function buildDataReport(
   stateFile = DATA_STATE_FILE,
   verdictsFile = DATA_VERDICTS_FILE,
 ): Promise<SavedReport | null> {
-  // Before the skip, as in buildPolicyReport: dropped items are then not asked again tomorrow.
-  if (vendor.rankingFile)
-    console.log(`  Saved ${saveFile(vendor.rankingFile, dateStr, "data-ranking.json")}`);
-  if (vendor.nextVerdicts) saveDataVerdicts(vendor.nextVerdicts, verdictsFile);
+  // Before the skip, as in buildPolicyReport: dropped items are then not asked again tomorrow, and
+  // a quiet day keeps its record-only bundles.
+  const files = { state: stateFile, verdicts: verdictsFile, trace: "data-ranking.json" };
+  const writes = planWrites(vendor);
+  commitWrites(writes.onFetched, files, dateStr);
   const { items } = vendor;
   if (items.length === 0 && !sections.some((s) => s.activities.some(hasActivity))) {
     console.log(`  [data] ${DATA_REPORT.noNewItems}`);
@@ -467,8 +465,8 @@ export async function buildDataReport(
     ...(epilogue ? { epilogue: `\n\n---\n\n${epilogue}` } : {}),
     footer: autoGenFooter(),
   });
-  // Only once the report exists, like the policy state.
-  if (vendor.nextState) saveDataState(vendor.nextState, stateFile);
+  // Only once the report exists, like the policy state; after a failed fetch it only prunes.
+  commitWrites(writes.onReported, files, dateStr);
   return { id: "ai-data", content };
 }
 

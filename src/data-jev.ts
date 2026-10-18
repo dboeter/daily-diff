@@ -7,7 +7,7 @@
  */
 
 import path from "node:path";
-import { judgeItems, loadItemsFile, saveItemsFile, type AskJev, type VerdictCache } from "./jev.ts";
+import { judgeItems, loadItemsFile, type AskJev, type VerdictCache } from "./jev.ts";
 import type { VendorItem } from "./data-vendors.ts";
 import { VENDOR_SECTIONS, vendorSection, type VendorSection } from "./config.ts";
 
@@ -175,10 +175,6 @@ const VERDICT_UNSEEN_DAYS = 30;
 /** Missing → empty. Malformed → null: every item is asked and nothing is saved, so a hand edit survives. */
 export function loadDataVerdicts(file = DATA_VERDICTS_FILE): DataVerdicts | null {
   return loadItemsFile(file, "data");
-}
-
-export function saveDataVerdicts(cache: DataVerdicts, file = DATA_VERDICTS_FILE): void {
-  saveItemsFile(cache, file);
 }
 
 // ---------------------------------------------------------------------------

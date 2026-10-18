@@ -6,7 +6,8 @@ import {
   MAX_VENDOR_ITEMS,
   type DataAnswers,
 } from "../data-jev.ts";
-import { newVendorItems, nextDataState, type VendorItem } from "../data-vendors.ts";
+import { asStateItem, recentVendorItems, type VendorItem } from "../data-vendors.ts";
+import { newItems, nextReportedState, type ReportedState } from "../report-state.ts";
 
 const answers = (real: number, deprecation: number, significance: number, ai = 0): DataAnswers => ({
   real_change: { noul: real },
@@ -187,6 +188,14 @@ describe("selectVendorItems", () => {
 });
 
 describe("vendor state", () => {
+  // What fetchVendorData's pipeline does with the state (new-items.ts): the age limit, then the state's keys.
+  const newVendorItems = (items: VendorItem[], state: ReportedState | null, dateStr: string) => {
+    const recent = recentVendorItems(items, dateStr);
+    const fresh = new Set(newItems(recent.map(asStateItem), state, dateStr).map((i) => i.id));
+    return recent.filter((i) => fresh.has(asStateItem(i).id));
+  };
+  const nextDataState = (state: ReportedState | null, items: VendorItem[], dateStr: string) =>
+    nextReportedState(state, items.map(asStateItem), dateStr);
   // The state keys a note on title + date (data-vendors.ts stateId), as item() builds them.
   const key = (id: string) => `title ${id}|2026-10-16`;
 

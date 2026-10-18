@@ -6,7 +6,7 @@
  */
 
 import path from "node:path";
-import { judgeItems, loadItemsFile, saveItemsFile, type AskJev, type VerdictCache } from "./jev.ts";
+import { judgeItems, loadItemsFile, type AskJev, type VerdictCache } from "./jev.ts";
 import type { Jurisdiction, PolicyConfig } from "./config.ts";
 import type { PolicyItem } from "./policy.ts";
 
@@ -298,11 +298,6 @@ const VERDICT_UNSEEN_DAYS = 30;
 /** Missing → empty. Malformed → null: every item is asked and nothing is saved, so a hand edit survives. */
 export function loadPolicyVerdicts(file = POLICY_VERDICTS_FILE): PolicyVerdicts | null {
   return loadItemsFile(file, "policy");
-}
-
-/** One item per line, like the trending classifications. */
-export function savePolicyVerdicts(cache: PolicyVerdicts, file = POLICY_VERDICTS_FILE): void {
-  saveItemsFile(cache, file);
 }
 
 // ---------------------------------------------------------------------------

@@ -230,19 +230,9 @@ async function fetchAllData(
       fetchSuccess: false,
       rankedBy: "recency",
     })),
-    fetchPolicyData(CONFIG.policy, now, toCstDateStr(now)).catch((): PolicyData => ({
-      items: [],
-      fetchSuccess: false,
-      nextState: { reported: {} },
-      observedState: { reported: {} },
-      deadlines: [],
-      readerProfile: CONFIG.policy.readerProfile,
-    })),
-    // Each feed already fails on its own; this catches the state or Jev step.
-    fetchVendorData(CONFIG.data, now).catch((err): VendorData => {
-      console.error(`  [data] Vendor feeds failed: ${err}`);
-      return { items: [] };
-    }),
+    // Neither throws: a failure is fetchSuccess false.
+    fetchPolicyData(CONFIG.policy, now, toCstDateStr(now)),
+    fetchVendorData(CONFIG.data, now),
     weekly
       ? fetchHfData().catch((): HfData => ({ models: [], fetchSuccess: false }))
       : Promise.resolve<HfData>({ models: [], fetchSuccess: false }),

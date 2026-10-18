@@ -9,14 +9,8 @@ import { fetchRssFeed, VENDOR_DESCRIPTION_MAX_CHARS } from "./rss.ts";
 import { fetchBehaviorChangeBundles, fetchSnowflakeReleases } from "./data-snowflake.ts";
 import { fetchBigQueryNotes } from "./data-bigquery.ts";
 import path from "node:path";
-import {
-  loadReportedState,
-  newItems,
-  nextReportedState,
-  saveReportedState,
-  staleOnFirstSight,
-  type ReportedState,
-} from "./report-state.ts";
+import { loadReportedState, staleOnFirstSight, type ReportedState, type StateItem } from "./report-state.ts";
+import { collectNewItems, type NewItems } from "./new-items.ts";
 import { loadDataVerdicts, selectVendorItems, type DataVerdicts, type KeptVendorItem } from "./data-jev.ts";
 import type { AskJev } from "./jev.ts";
 import { daysBefore, toCstDateStr } from "./date.ts";
@@ -39,6 +33,8 @@ export interface VendorItem {
   /** A behavior-change bundle's status. */
   stage?: string;
   categories?: string[];
+  /** A bundle first seen at an old stage: its stage is recorded, not reported (staleOnFirstSight). */
+  recordOnly?: boolean;
 }
 
 /** An item as a parser returns it, before the feed's vendor and name are added. */
@@ -74,12 +70,15 @@ const dedupeKey = (i: VendorItem): string => `${i.title.toLowerCase().replace(/\
  * Every configured feed's items, fetched in parallel. Deduped within the run on
  * title + date: Databricks lists a note on its topic page and on the monthly
  * product page, under two guids; the first one listed is kept. `now` is unused:
- * the age limit is applied with the state (`newVendorItems`), on the CST date.
+ * the age limit is applied by fetchVendorData (`recentVendorItems`), on the CST date.
  */
-export async function fetchVendorFeeds(config: DataConfig, _now: Date): Promise<VendorItem[]> {
+export async function fetchVendorFeeds(
+  config: DataConfig,
+  _now: Date,
+): Promise<{ items: VendorItem[]; fetchSuccess: boolean }> {
   const results = await Promise.allSettled(config.feeds.map((f) => PARSERS[f.parser](f)));
   const seen = new Set<string>();
-  return results.flatMap((r, i) => {
+  const items = results.flatMap((r, i) => {
     const feed = config.feeds[i]!;
     if (r.status === "rejected") {
       console.log(`  [data] ${feed.name} failed: ${r.reason instanceof Error ? r.reason.message : r.reason}`);
@@ -95,6 +94,7 @@ export async function fetchVendorFeeds(config: DataConfig, _now: Date): Promise<
         return true;
       });
   });
+  return { items, fetchSuccess: results.some((r) => r.status === "fulfilled") };
 }
 
 // ---------------------------------------------------------------------------
@@ -115,8 +115,6 @@ const VENDOR_MAX_AGE_DAYS = 7;
 
 /** Missing or malformed → null, a first run. */
 export const loadDataState = (file = DATA_STATE_FILE): DataState | null => loadReportedState(file);
-export const saveDataState = (state: DataState, file = DATA_STATE_FILE): void =>
-  saveReportedState(state, file);
 
 /**
  * The state's StateItem: it dates an item by `published`. A note is keyed
@@ -125,41 +123,25 @@ export const saveDataState = (state: DataState, file = DATA_STATE_FILE): void =>
  * added before it. Bundles keep their id: their stage is what moves.
  */
 const stateId = (i: VendorItem): string => (i.stage === undefined ? dedupeKey(i) : i.id);
-const asStateItem = (i: VendorItem) => ({ id: stateId(i), published: i.date, stage: i.stage });
+export const asStateItem = (i: VendorItem): StateItem => ({
+  id: stateId(i),
+  published: i.date,
+  stage: i.stage,
+});
 
 /**
- * Items within the age limit that no earlier day reported; a bundle also when
- * its stage moved. A date ahead of the run is valid (Databricks dates a note
- * by its release); bundles skip the age limit (their date may be "").
+ * The age limit. A date ahead of the run is valid (Databricks dates a note by
+ * its release); bundles skip the limit (their date may be "").
  */
-export function newVendorItems(items: VendorItem[], state: DataState | null, dateStr: string): VendorItem[] {
+export function recentVendorItems(items: VendorItem[], dateStr: string): VendorItem[] {
   const cutoff = daysBefore(dateStr, VENDOR_MAX_AGE_DAYS);
-  const recent = items.filter((i) => i.stage !== undefined || i.date >= cutoff);
-  const fresh = new Set(newItems(recent.map(asStateItem), state, dateStr).map((i) => i.id));
-  return recent.filter((i) => fresh.has(stateId(i)));
+  return items.filter((i) => i.stage !== undefined || i.date >= cutoff);
 }
 
-/** The state after reporting `items` on `dateStr`; ids older than 30 days are pruned, stages never. */
-export const nextDataState = (
-  state: DataState | null,
-  items: VendorItem[],
-  dateStr: string,
-  /** Bundles whose stage is only recorded, not reported (staleOnFirstSight). */
-  recorded: VendorItem[] = [],
-): DataState => nextReportedState(state, items.map(asStateItem), dateStr, recorded.map(asStateItem));
+/** The kept items in report order (selectVendorItems). */
+export type VendorData = NewItems<KeptVendorItem, DataState, DataVerdicts>;
 
-export interface VendorData {
-  /** The kept items in report order (selectVendorItems). */
-  items: KeptVendorItem[];
-  /** Saved by buildDataReport once the report exists; absent when the fetch threw. */
-  nextState?: DataState;
-  /** Saved by buildDataReport; null leaves a malformed file as it is. */
-  nextVerdicts?: DataVerdicts | null;
-  /** `data-ranking.json`, every new item; absent when there were none. */
-  rankingFile?: string;
-}
-
-/** Fetch every feed, keep the new items, and let Jev (or the keyword rules) select them. */
+/** Fetch every feed, keep the new items, and let Jev (or the keyword rules) select them. Never throws. */
 export async function fetchVendorData(
   config: DataConfig,
   now: Date,
@@ -170,20 +152,27 @@ export async function fetchVendorData(
   },
 ): Promise<VendorData> {
   const dateStr = toCstDateStr(now);
-  const fresh = newVendorItems(await fetchVendorFeeds(config, now), state, dateStr);
-  // A bundle first seen at a stage over 30 days old (or with no full date) is recorded without
-  // reporting, as Policy Watch does: a first run must not open with months-old bundles.
-  const stale = (i: VendorItem) =>
-    i.stage !== undefined && staleOnFirstSight({ state, dateStr }, i.id, i.date);
-  const recorded = fresh.filter(stale);
-  const candidates = fresh.filter((i) => !stale(i));
-  console.log(`  [data] ${candidates.length} new vendor items`);
-  const selection = await selectVendorItems(candidates, { ...jev, dateStr });
-  return {
-    items: selection.items,
-    // Only the kept items: a dropped one is not reported, and its saved verdict stops it being asked again.
-    nextState: nextDataState(state, selection.items, dateStr, recorded),
-    nextVerdicts: selection.nextVerdicts,
-    ...(candidates.length > 0 ? { rankingFile: selection.rankingFile } : {}),
-  };
+  return collectNewItems({
+    tag: "data",
+    state,
+    dateStr,
+    fetch: async () => {
+      const { items, fetchSuccess } = await fetchVendorFeeds(config, now);
+      return {
+        // A bundle first seen at a stage over 30 days old (or with no full date) is recorded without
+        // reporting, as Policy Watch does: a first run must not open with months-old bundles.
+        items: recentVendorItems(items, dateStr).map((i) =>
+          i.stage !== undefined && staleOnFirstSight({ state, dateStr }, i.id, i.date)
+            ? { ...i, recordOnly: true }
+            : i,
+        ),
+        fetchSuccess,
+      };
+    },
+    stateItem: asStateItem,
+    select: (candidates) => {
+      console.log(`  [data] ${candidates.length} new vendor items`);
+      return selectVendorItems(candidates, { ...jev, dateStr });
+    },
+  });
 }

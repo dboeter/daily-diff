@@ -132,7 +132,7 @@ describe("fetchVendorFeeds", () => {
 
   it("dedupes a note listed twice under two guids, keeps future dates, and tags vendor and source", async () => {
     stubFetch();
-    const items = await fetchVendorFeeds({ feeds }, now);
+    const { items } = await fetchVendorFeeds({ feeds }, now);
     const dbx = items.filter((i) => i.vendor === "databricks");
     expect(dbx.map((i) => i.date)).toEqual(["2026-10-19", "2026-10-16", "2026-10-15"]);
     expect(dbx[0]).toMatchObject({
@@ -144,14 +144,14 @@ describe("fetchVendorFeeds", () => {
 
   it("keeps only the RSS items in the feed's categories", async () => {
     stubFetch();
-    const azure = (await fetchVendorFeeds({ feeds }, now)).filter((i) => i.vendor === "azure");
+    const azure = (await fetchVendorFeeds({ feeds }, now)).items.filter((i) => i.vendor === "azure");
     expect(azure.map((i) => i.id)).toEqual(["573691"]);
     expect(azure[0]).toMatchObject({ source: "Azure updates", date: "2026-10-08" });
   });
 
   it("logs and skips a failing feed", async () => {
     stubFetch();
-    const items = await fetchVendorFeeds({ feeds }, now);
+    const { items } = await fetchVendorFeeds({ feeds }, now);
     expect(items.some((i) => i.vendor === "gcp")).toBe(false);
     expect(console.log).toHaveBeenCalledWith("  [data] BigQuery failed: HTTP 503");
   });
