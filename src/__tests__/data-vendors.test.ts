@@ -86,13 +86,12 @@ describe("parseBehaviorChangeBundles", () => {
 describe("parseBigQueryNotes", () => {
   const notes = parseBigQueryNotes(fixture("bigquery.xml"));
 
-  it("splits each day's entry into its notes, keyed by anchor and index", () => {
-    expect(notes.map((n) => n.id).slice(0, 4)).toEqual([
-      "October_16_2026#0",
-      "October_15_2026#0",
-      "October_15_2026#1",
-      "October_15_2026#2",
-    ]);
+  it("splits each day's entry into its notes, keyed by anchor and title", () => {
+    expect(notes.map((n) => n.id.split("#")[0])).toEqual(
+      expect.arrayContaining(["October_16_2026", "October_15_2026"]),
+    );
+    expect(notes[1]!.id).toBe("October_15_2026#Feature: You can copy tables across regions.");
+    expect(new Set(notes.map((n) => n.id)).size).toBe(notes.length);
     expect(notes[1]).toMatchObject({
       title: "Feature: You can copy tables across regions.",
       date: "2026-10-15",

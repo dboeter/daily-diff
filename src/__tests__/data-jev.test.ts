@@ -203,8 +203,11 @@ describe("selectVendorItems", () => {
 });
 
 describe("vendor state", () => {
+  // The state keys a note on title + date (data-vendors.ts stateId), as item() builds them.
+  const key = (id: string) => `title ${id}|2026-10-16`;
+
   it("keeps items reported today for a same-day re-run and drops earlier ones", () => {
-    const state = { reported: { today: DATE, earlier: "2026-10-15" }, stages: {} };
+    const state = { reported: { [key("today")]: DATE, [key("earlier")]: "2026-10-15" }, stages: {} };
     const fresh = newVendorItems([item("today"), item("earlier"), item("new")], state, DATE);
     expect(fresh.map((i) => i.id)).toEqual(["today", "new"]);
   });
@@ -224,6 +227,11 @@ describe("vendor state", () => {
     ]);
   });
 
+  it("does not report a note again under its other guid", () => {
+    const state = nextDataState(null, [item("topic-page-guid", { title: "Same note" })], "2026-10-16");
+    expect(newVendorItems([item("monthly-page-guid", { title: "Same note" })], state, DATE)).toEqual([]);
+  });
+
   it("reports a bundle again when its stage moves, not before", () => {
     const bundle = item("bcr", { date: "", stage: "Enabled by default" });
     const state = nextDataState(null, [bundle], "2026-10-10");
@@ -238,6 +246,9 @@ describe("vendor state", () => {
       [item("new")],
       DATE,
     );
-    expect(state).toEqual({ reported: { kept: "2026-10-01", new: DATE }, stages: { bcr: " Planned" } });
+    expect(state).toEqual({
+      reported: { kept: "2026-10-01", [key("new")]: DATE },
+      stages: { bcr: " Planned" },
+    });
   });
 });

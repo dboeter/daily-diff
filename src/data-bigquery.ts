@@ -16,8 +16,9 @@ function firstSentence(html: string): string {
 }
 
 /**
- * One note per `<h3>`: id = the entry's anchor + "#" + the note's index in the
- * entry, title = "<type>: <first sentence>", categories = [type].
+ * One note per `<h3>`: title = "<type>: <first sentence>", id = the entry's
+ * anchor + "#" + title (not the note's index: a note added before it would
+ * move it, and the verdict cache is keyed by id), categories = [type].
  */
 export function parseBigQueryNotes(xml: string): VendorNote[] {
   const entries = [...xml.matchAll(/<entry>([\s\S]*?)<\/entry>/g)].map(([, e]) => e!);
@@ -31,12 +32,13 @@ export function parseBigQueryNotes(xml: string): VendorNote[] {
     return tagText(entry, "content")
       .split(/<h3>/)
       .slice(1)
-      .map((part, i) => {
+      .map((part) => {
         const [type, body = ""] = part.split("</h3>");
         const kind = vendorText(type!);
+        const title = `${kind}: ${firstSentence(body)}`;
         return {
-          id: `${anchor}#${i}`,
-          title: `${kind}: ${firstSentence(body)}`,
+          id: `${anchor}#${title}`,
+          title,
           link,
           date,
           description: vendorText(body),

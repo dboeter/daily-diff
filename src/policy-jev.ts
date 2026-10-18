@@ -209,12 +209,17 @@ export function policyRelevance(
 const AI_ACRONYM_RE = /\b(?:GP)?AI\b/;
 const AI_KEYWORD_RE =
   /artificial intelligence|machine learning|\balgorithm|automated decision|generative|foundation model|kunstmatige intelligentie|\balgoritm/i;
-// The data-law names of config.yml policy.data_law (hard-coded here) count too, so the fallback keeps them for the data report.
-const DATA_LAW_RE = /\bData (?:Governance )?Act\b|\bNIS ?2\b/i;
 export const keywordHit = (i: Pick<PolicyItem, "title" | "description">): boolean => {
   const text = `${i.title} ${i.description}`;
-  return AI_ACRONYM_RE.test(text) || AI_KEYWORD_RE.test(text) || DATA_LAW_RE.test(text);
+  return AI_ACRONYM_RE.test(text) || AI_KEYWORD_RE.test(text);
 };
+
+// The data-law names of config.yml policy.data_law (hard-coded here), so the fallback keeps them for the
+// data report. Not in keywordHit: the sources filter on that, and "... Data Act" would let US bills in.
+const DATA_LAW_RE = /\bData (?:Governance )?Act\b|\bNIS ?2\b/i;
+/** The fallback's keyword step: keywordHit or a data-law name. */
+export const fallbackKeywordHit = (i: Pick<PolicyItem, "title" | "description">): boolean =>
+  keywordHit(i) || DATA_LAW_RE.test(`${i.title} ${i.description}`);
 
 /**
  * Names a watchlist entry as a whole token, case-insensitively: no letter or
@@ -234,9 +239,14 @@ export const watchlisted = (
   });
 };
 
-/** EU data law (config.yml `policy.data_law`): linked from the data report's Worth a Look. */
-export const isDataLaw = (i: Pick<PolicyItem, "title" | "description" | "link">, tokens: string[]): boolean =>
-  watchlisted(i, tokens);
+/**
+ * EU data law (config.yml `policy.data_law`): linked from the data report's Worth a Look. Not from a US
+ * government source: a US bill can be called "... Data Act". US news feeds still count (Covington on the EU Data Act).
+ */
+export const isDataLaw = (
+  i: Pick<PolicyItem, "title" | "description" | "link" | "jurisdiction" | "news">,
+  tokens: string[],
+): boolean => !(i.jurisdiction.startsWith("us_") && !i.news) && watchlisted(i, tokens);
 
 /**
  * A stage item first seen at a stage older than this is recorded in the state
@@ -403,7 +413,7 @@ export async function selectPolicyItems(
     if (!i.news && onWatchlist(i)) return true;
     const v = verdicts.get(i.id);
     // A Jev-only feed's items need not name AI, so a keyword match means nothing there.
-    return v ? v.keep : !i.jevOnly && keywordHit(i);
+    return v ? v.keep : !i.jevOnly && fallbackKeywordHit(i);
   };
   const score = (i: PolicyItem): number => verdicts.get(i.id)?.relevance ?? -1;
   const selected = items.filter(kept).sort((a, b) => score(b) - score(a));
@@ -449,7 +459,7 @@ export async function selectPolicyItems(
       ...(v ? roundAnswers(v.answers) : {}),
       decided: v?.decided ?? null,
       watchlisted: onWatchlist(i),
-      keyword: keywordHit(i),
+      keyword: fallbackKeywordHit(i),
     });
   });
   const rankingFile =
