@@ -273,8 +273,7 @@ export function renderTrendingTables(report: TrendingReportData, summaries: Map<
     blocks.push(`## ${T.categoriesHeading}`);
     for (const { category, rows } of report.categories) {
       const lines = rows.map(
-        (r) =>
-          `| ${link(r.fullName, r.url)} | ${cell(r.language)} | ${cell(r.starsCell)} | ` + `${summary(r)} |`,
+        (r) => `| ${link(r.fullName, r.url)} | ${cell(r.language)} | ${cell(r.starsCell)} | ${summary(r)} |`,
       );
       blocks.push(`### ${T.categoryTitles[category]}`, `${T.categoryHeader}\n${lines.join("\n")}`);
     }
