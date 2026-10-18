@@ -9,7 +9,7 @@
 import type { PolicyItem } from "./policy.ts";
 import type { PolicySourceContext } from "./policy-sources.ts";
 import { fetchOk } from "./http.ts";
-import { staleOnFirstSight } from "./policy-jev.ts";
+import { staleOnFirstSight } from "./report-state.ts";
 
 const API_URL = "https://data.europarl.europa.eu/api/v2/procedures";
 

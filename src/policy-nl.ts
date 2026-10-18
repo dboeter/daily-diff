@@ -13,7 +13,8 @@
 
 import type { PolicyItem } from "./policy.ts";
 import type { PolicySourceContext } from "./policy-sources.ts";
-import { keywordHit, staleOnFirstSight } from "./policy-jev.ts";
+import { keywordHit } from "./policy-jev.ts";
+import { staleOnFirstSight } from "./report-state.ts";
 import { NEWS_MAX_AGE_DAYS, tagText } from "./rss.ts";
 import { fetchOk } from "./http.ts";
 import { DAY_MS } from "./date.ts";

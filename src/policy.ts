@@ -8,7 +8,6 @@
  * report exists.
  */
 
-import fs from "node:fs";
 import path from "node:path";
 import { fetchRssFeed, recentNewsItems, type FeedItem } from "./rss.ts";
 import { JURISDICTIONS, type Jurisdiction, type PolicyConfig } from "./config.ts";
@@ -16,7 +15,13 @@ import { POLICY_SOURCES, type PolicySource } from "./policy-sources.ts";
 import { loadPolicyVerdicts, selectPolicyItems, type PolicyVerdicts } from "./policy-jev.ts";
 import type { AskJev } from "./jev.ts";
 import { nextDeadlines, upcomingDeadlines, type Deadline } from "./policy-deadlines.ts";
-import { daysBefore } from "./date.ts";
+import {
+  loadReportedState,
+  newItems,
+  nextReportedState,
+  saveReportedState,
+  type ReportedState,
+} from "./report-state.ts";
 import { POLICY_REPORT } from "./i18n.ts";
 
 export interface PolicyItem extends FeedItem {
@@ -42,15 +47,8 @@ export interface PolicyItem extends FeedItem {
   recordOnly?: boolean;
 }
 
-export interface PolicyState {
-  /** Item id → the CST date it was first reported (for a stage item: the day its stage last changed). */
-  reported: Record<string, string>;
-  /**
-   * Stage item id → its last reported `stageKey`. Never pruned: a procedure can
-   * stall for months, and an id missing for a day (a failed fetch) must not
-   * re-report its stage. Renaming a stage's display text re-reports each item once.
-   */
-  stages?: Record<string, string>;
+/** The reported-items state plus the open deadlines of reported items. */
+export interface PolicyState extends ReportedState {
   /** Item id → the open deadline of a reported item; dropped once passed (policy-deadlines.ts). */
   deadlines?: Record<string, Deadline>;
 }
@@ -82,79 +80,10 @@ export interface PolicyData {
 
 export const POLICY_STATE_FILE = path.join("digests", "policy-state.json");
 
-/**
- * How long a reported id is remembered. News items leave the feed's age window
- * (NEWS_MAX_AGE_DAYS) a week after they are published, so this only needs to
- * be longer than that.
- */
-const REPORTED_KEEP_DAYS = 30;
-
 /** Missing or malformed → null: every item in the age window counts as new, like a first run. */
-export function loadPolicyState(file = POLICY_STATE_FILE): PolicyState | null {
-  try {
-    const state = JSON.parse(fs.readFileSync(file, "utf-8")) as PolicyState;
-    const r: unknown = state?.reported;
-    // A state saved before stage sources existed has no `stages`.
-    return r && typeof r === "object" && !Array.isArray(r) ? { ...state, stages: state.stages ?? {} } : null;
-  } catch {
-    return null;
-  }
-}
-
-export function savePolicyState(state: PolicyState, file = POLICY_STATE_FILE): void {
-  fs.mkdirSync(path.dirname(file), { recursive: true });
-  fs.writeFileSync(file, JSON.stringify(state, null, 2) + "\n", "utf-8");
-}
-
-/** What the state compares for a stage item: the stage and its date, so a second trilogue is a move too. */
-export function stageKey(item: { published: string; stage?: string }): string {
-  return `${item.published.slice(0, 10)} ${item.stage}`;
-}
-
-type StateItem = { id: string; published: string; stage?: string };
-
-/**
- * Items no earlier day reported; a stage item also when its stage moved. An
- * item reported today is still new, so a same-day re-run (workflow_dispatch
- * after the day's commit) reports the same items, as the ArXiv state does.
- */
-export function newPolicyItems<T extends StateItem>(
-  items: T[],
-  state: PolicyState | null,
-  dateStr: string,
-): T[] {
-  return items.filter((i) => {
-    const day = state?.reported[i.id];
-    if (day === dateStr) return true;
-    if (i.stage !== undefined) return state?.stages?.[i.id] !== stageKey(i);
-    return day === undefined;
-  });
-}
-
-/**
- * The state after reporting `items` on `dateStr`; ids older than REPORTED_KEEP_DAYS are pruned.
- * `recorded` stage items only get their stage saved: not reported, so a same-day re-run skips them too.
- */
-export function nextPolicyState(
-  state: PolicyState | null,
-  items: StateItem[],
-  dateStr: string,
-  recorded: StateItem[] = [],
-): PolicyState {
-  const cutoff = daysBefore(dateStr, REPORTED_KEEP_DAYS);
-  const reported = Object.fromEntries(
-    Object.entries(state?.reported ?? {}).filter(([, day]) => day >= cutoff),
-  );
-  const stages = { ...state?.stages };
-  for (const i of items) {
-    if (i.stage !== undefined && stages[i.id] !== stageKey(i)) {
-      reported[i.id] = dateStr;
-      stages[i.id] = stageKey(i);
-    } else reported[i.id] ??= dateStr;
-  }
-  for (const i of recorded) stages[i.id] = stageKey(i);
-  return { reported, stages };
-}
+export const loadPolicyState = (file = POLICY_STATE_FILE): PolicyState | null => loadReportedState(file);
+export const savePolicyState = (state: PolicyState, file = POLICY_STATE_FILE): void =>
+  saveReportedState(state, file);
 
 /** A paid advertorial's link path. */
 const SPONSORED_LINK_RE = /\/sponsored-content\//;
@@ -215,7 +144,7 @@ export async function fetchPolicyData(
 ): Promise<PolicyData> {
   const results = await fetchPolicySources(config, now, dateStr, state, sources);
   const fetched = results.flatMap((r) => r ?? []);
-  const fresh = newPolicyItems(fetched, state, dateStr);
+  const fresh = newItems(fetched, state, dateStr);
   const recorded = fresh.filter((i) => i.recordOnly);
   const candidates = fresh.filter((i) => !i.recordOnly);
   console.log(`  [policy] ${POLICY_REPORT.newItems(candidates.length)}`);
@@ -231,14 +160,14 @@ export async function fetchPolicyData(
   const rank = (i: PolicyItem) => (i.news ? JURISDICTIONS.length : JURISDICTIONS.indexOf(i.jurisdiction));
   const deadlines = nextDeadlines(state?.deadlines, selection.items, fetched, dateStr);
   const observedState = {
-    ...nextPolicyState(state, [], dateStr, recorded),
+    ...nextReportedState(state, [], dateStr, recorded),
     deadlines: nextDeadlines(state?.deadlines, [], fetched, dateStr),
   };
   return {
     items: [...selection.items].sort((a, b) => rank(a) - rank(b)),
     fetchSuccess: results.some((r) => r !== null),
     // Only the kept items: a dropped one is not reported, and its saved verdict stops it being asked again.
-    nextState: { ...nextPolicyState(state, selection.items, dateStr, recorded), deadlines },
+    nextState: { ...nextReportedState(state, selection.items, dateStr, recorded), deadlines },
     observedState,
     deadlines: upcomingDeadlines(deadlines, config.calendar, dateStr),
     rankedBy: selection.rankedBy,

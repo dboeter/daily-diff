@@ -10,15 +10,15 @@ import { fetchBehaviorChangeBundles, fetchSnowflakeReleases } from "./data-snowf
 import { fetchBigQueryNotes } from "./data-bigquery.ts";
 import path from "node:path";
 import {
-  loadPolicyState,
-  newPolicyItems,
-  nextPolicyState,
-  savePolicyState,
-  type PolicyState,
-} from "./policy.ts";
+  loadReportedState,
+  newItems,
+  nextReportedState,
+  saveReportedState,
+  staleOnFirstSight,
+  type ReportedState,
+} from "./report-state.ts";
 import { loadDataVerdicts, selectVendorItems, type DataVerdicts, type KeptVendorItem } from "./data-jev.ts";
 import type { AskJev } from "./jev.ts";
-import { staleOnFirstSight } from "./policy-jev.ts";
 import { daysBefore, toCstDateStr } from "./date.ts";
 
 export interface VendorItem {
@@ -98,11 +98,11 @@ export async function fetchVendorFeeds(config: DataConfig, _now: Date): Promise<
 }
 
 // ---------------------------------------------------------------------------
-// State: which vendor items a run reported (the Policy Watch state's format and rules)
+// State: which vendor items a run reported (report-state.ts, shared with Policy Watch)
 // ---------------------------------------------------------------------------
 
 /** Note key (title + date, `stateId`) or bundle id → CST date first reported; `stages`: behavior-change bundle id → its last reported stageKey. */
-export type DataState = PolicyState;
+export type DataState = ReportedState;
 
 export const DATA_STATE_FILE = path.join("digests", "data-state.json");
 
@@ -114,11 +114,12 @@ export const DATA_STATE_FILE = path.join("digests", "data-state.json");
 const VENDOR_MAX_AGE_DAYS = 7;
 
 /** Missing or malformed → null, a first run. */
-export const loadDataState = (file = DATA_STATE_FILE): DataState | null => loadPolicyState(file);
-export const saveDataState = (state: DataState, file = DATA_STATE_FILE): void => savePolicyState(state, file);
+export const loadDataState = (file = DATA_STATE_FILE): DataState | null => loadReportedState(file);
+export const saveDataState = (state: DataState, file = DATA_STATE_FILE): void =>
+  saveReportedState(state, file);
 
 /**
- * The policy state's StateItem: it dates an item by `published`. A note is keyed
+ * The state's StateItem: it dates an item by `published`. A note is keyed
  * on dedupeKey, not its id: Databricks lists a note under two guids and the run
  * keeps whichever comes first, and a BigQuery note's id moves when a note is
  * added before it. Bundles keep their id: their stage is what moves.
@@ -134,7 +135,7 @@ const asStateItem = (i: VendorItem) => ({ id: stateId(i), published: i.date, sta
 export function newVendorItems(items: VendorItem[], state: DataState | null, dateStr: string): VendorItem[] {
   const cutoff = daysBefore(dateStr, VENDOR_MAX_AGE_DAYS);
   const recent = items.filter((i) => i.stage !== undefined || i.date >= cutoff);
-  const fresh = new Set(newPolicyItems(recent.map(asStateItem), state, dateStr).map((i) => i.id));
+  const fresh = new Set(newItems(recent.map(asStateItem), state, dateStr).map((i) => i.id));
   return recent.filter((i) => fresh.has(stateId(i)));
 }
 
@@ -145,7 +146,7 @@ export const nextDataState = (
   dateStr: string,
   /** Bundles whose stage is only recorded, not reported (staleOnFirstSight). */
   recorded: VendorItem[] = [],
-): DataState => nextPolicyState(state, items.map(asStateItem), dateStr, recorded.map(asStateItem));
+): DataState => nextReportedState(state, items.map(asStateItem), dateStr, recorded.map(asStateItem));
 
 export interface VendorData {
   /** The kept items in report order (selectVendorItems). */

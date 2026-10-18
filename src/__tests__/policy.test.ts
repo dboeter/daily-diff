@@ -1,15 +1,5 @@
-import fs from "node:fs";
-import os from "node:os";
-import path from "node:path";
 import { describe, it, expect, vi, afterEach } from "vitest";
-import {
-  newPolicyItems,
-  nextPolicyState,
-  loadPolicyState,
-  savePolicyState,
-  fetchPolicyData,
-  type PolicyItem,
-} from "../policy.ts";
+import { fetchPolicyData, type PolicyItem } from "../policy.ts";
 import type { PolicyConfig } from "../config.ts";
 
 const item = (id: string, published = "2026-10-13T08:00:00.000Z"): PolicyItem => ({
@@ -21,98 +11,6 @@ const item = (id: string, published = "2026-10-13T08:00:00.000Z"): PolicyItem =>
   source: "Commission",
   jurisdiction: "eu",
   jevOnly: false,
-});
-
-describe("newPolicyItems", () => {
-  it("everything is new without state", () => {
-    expect(newPolicyItems([item("a"), item("b")], null, "2026-10-14").map((i) => i.id)).toEqual(["a", "b"]);
-  });
-
-  it("skips items an earlier day reported", () => {
-    const state = { reported: { a: "2026-10-13" } };
-    expect(newPolicyItems([item("a"), item("b")], state, "2026-10-14").map((i) => i.id)).toEqual(["b"]);
-  });
-
-  it("a same-day re-run reports the same items again", () => {
-    const state = nextPolicyState(null, [item("a"), item("b")], "2026-10-14");
-    expect(newPolicyItems([item("a"), item("b")], state, "2026-10-14").map((i) => i.id)).toEqual(["a", "b"]);
-  });
-});
-
-describe("newPolicyItems with stages", () => {
-  const staged = (stage: string, published = "2026-07-24T00:00:00.000Z"): PolicyItem => ({
-    ...item("ep:2025/0359(COD)", published),
-    stage,
-  });
-  const reportedOn = (day: string) =>
-    nextPolicyState(null, [staged("Published in the Official Journal")], day);
-
-  it("skips an item whose stage has not changed, also after its reported day is pruned", () => {
-    const state = { ...reportedOn("2026-08-01"), reported: {} };
-    expect(newPolicyItems([staged("Published in the Official Journal")], state, "2026-10-14")).toEqual([]);
-  });
-
-  it("reports an item again when its stage moves", () => {
-    const moved = staged("Signed", "2026-10-13T00:00:00.000Z");
-    expect(newPolicyItems([moved], reportedOn("2026-10-01"), "2026-10-14")).toEqual([moved]);
-  });
-
-  it("a same-day re-run reports the same stage again", () => {
-    const it0 = staged("Published in the Official Journal");
-    expect(newPolicyItems([it0], reportedOn("2026-10-14"), "2026-10-14")).toEqual([it0]);
-  });
-});
-
-describe("nextPolicyState", () => {
-  it("records a stage change as reported today and never prunes stages", () => {
-    const before = {
-      reported: { a: "2026-10-01" },
-      stages: { a: "2026-10-01 Trilogue", old: "2024-01-01 Signed" },
-    };
-    const a = { ...item("a", "2026-10-13T00:00:00.000Z"), stage: "Signed" };
-    const state = nextPolicyState(before, [a], "2026-10-14");
-    expect(state.reported).toEqual({ a: "2026-10-14" });
-    expect(state.stages).toEqual({ a: "2026-10-13 Signed", old: "2024-01-01 Signed" });
-  });
-
-  it("records each reported item with the day it was first reported", () => {
-    const state = nextPolicyState({ reported: { a: "2026-10-13" } }, [item("b")], "2026-10-14");
-    expect(state.reported).toEqual({ a: "2026-10-13", b: "2026-10-14" });
-  });
-
-  it("keeps the first-reported day on a same-day re-run", () => {
-    const state = nextPolicyState({ reported: { a: "2026-10-14" } }, [item("a")], "2026-10-14");
-    expect(state.reported).toEqual({ a: "2026-10-14" });
-  });
-
-  it("prunes ids reported more than 30 days ago", () => {
-    const state = nextPolicyState({ reported: { old: "2026-09-13", kept: "2026-09-14" } }, [], "2026-10-14");
-    expect(state.reported).toEqual({ kept: "2026-09-14" });
-  });
-});
-
-describe("policy state file", () => {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "policy-state-"));
-  const file = path.join(dir, "policy-state.json");
-
-  it("round-trips", () => {
-    savePolicyState({ reported: { a: "2026-10-14" } }, file);
-    expect(loadPolicyState(file)).toEqual({ reported: { a: "2026-10-14" }, stages: {} });
-  });
-
-  it("reads a state saved before stages existed", () => {
-    const file = path.join(dir, "old.json");
-    fs.writeFileSync(file, JSON.stringify({ reported: { a: "2026-10-13" } }));
-    expect(loadPolicyState(file)).toEqual({ reported: { a: "2026-10-13" }, stages: {} });
-  });
-
-  it("missing or malformed reads as no state", () => {
-    expect(loadPolicyState(path.join(dir, "missing.json"))).toBeNull();
-    fs.writeFileSync(file, "{ not json");
-    expect(loadPolicyState(file)).toBeNull();
-    fs.writeFileSync(file, '{"reported": []}');
-    expect(loadPolicyState(file)).toBeNull();
-  });
 });
 
 describe("fetchPolicyData", () => {

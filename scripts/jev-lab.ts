@@ -23,7 +23,8 @@ import path from "node:path";
 import { loadConfig } from "../src/config.ts";
 import { toCstDateStr } from "../src/date.ts";
 import { askJev, mapJev } from "../src/jev.ts";
-import { fetchPolicySources, newPolicyItems, type PolicyItem } from "../src/policy.ts";
+import { fetchPolicySources, type PolicyItem } from "../src/policy.ts";
+import { newItems } from "../src/report-state.ts";
 import {
   loadPolicyVerdicts,
   policyRelevance,
@@ -274,7 +275,7 @@ async function fetchPool(): Promise<void> {
   const results = await fetchPolicySources(CONFIG, now, dateStr, null);
   const fetched = results.flatMap((r) => r ?? []);
   // As a first run: record-only stage items are never asked in production either.
-  const items = newPolicyItems(fetched, null, dateStr).filter((i) => !i.recordOnly);
+  const items = newItems(fetched, null, dateStr).filter((i) => !i.recordOnly);
   writeJson(POOL_FILE, { fetched: dateStr, items });
   const saved = loadPolicyVerdicts();
   const ids = new Set(items.map((i) => i.id));
