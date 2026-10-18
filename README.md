@@ -1,12 +1,12 @@
 # Daily Diff
 
-A personal daily digest of AI coding agents, agent tooling and AI policy, built by a GitHub Actions workflow that runs every night and lands by about 05:00 Amsterdam time. Read it in the [Web UI](#web-ui), the [RSS feed](#rss-feed) or the [MCP server](#mcp-server). The workflow aggregates AI ecosystem signals from 11 data sources, then publishes English digests as GitHub Issues and committed Markdown files: a daily set (AI Agents, AI Discussions, AI Research, Lab Announcements) and a weekly set on Mondays (Agent & AI Coding Trends, AI Models).
+A personal daily digest of AI coding agents, agent tooling, AI policy and the data engineering stack, built by a GitHub Actions workflow that runs every night and lands by about 05:00 Amsterdam time. Read it in the [Web UI](#web-ui), the [RSS feed](#rss-feed) or the [MCP server](#mcp-server). The workflow aggregates AI ecosystem signals from 11 data sources, then publishes English digests as GitHub Issues and committed Markdown files: a daily set (AI Agents, AI Discussions, AI Research, Lab Announcements, Policy Watch, Data Engineering Watch) and a weekly set on Mondays (Agent & AI Coding Trends, AI Models).
 
 ### Data Sources
 
 | Source                                                            | Type                                                                      | Data                                                                                  |
 | ----------------------------------------------------------------- | ------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
-| [GitHub Repos](https://github.com)                                | API                                                                       | Stable releases and hot issues from the agent and infra repos in `config.yml`         |
+| [GitHub Repos](https://github.com)                                | API                                                                       | Stable releases and hot issues from the agent, infra and data repos in `config.yml`   |
 | [Claude Code Skills](https://github.com/anthropics/skills)        | API                                                                       | Trending skills sorted by community engagement — **weekly**                           |
 | [GitHub Trending](https://github.com/trending)                    | HTML + API                                                                | Weekly trending repos + AI topic search (7-day window) — **weekly**                   |
 | [OpenRouter](https://openrouter.ai/apps)                          | HTML (RSC payload) + Models API                                           | Agent app usage, top/new models — **weekly**; stealth models daily                    |
@@ -29,6 +29,7 @@ A personal daily digest of AI coding agents, agent tooling and AI policy, built 
 | [Regulations.gov](https://www.regulations.gov)                    | [API v4](https://open.gsa.gov/api/regulationsgov/)                        | US AI dockets the Federal Register missed, comment deadlines; needs `USA_GOV_API_KEY` |
 | [Congress.gov](https://www.congress.gov)                          | [API v3](https://api.congress.gov)                                        | US federal AI bills from passing a chamber onward; needs `USA_GOV_API_KEY`            |
 | [Open States](https://openstates.org)                             | [API v3](https://v3.openstates.org/docs)                                  | US state AI bills from passing a chamber onward; needs `PLURAL_API_KEY`               |
+| Data vendor release notes (`data.feeds` in `config.yml`)          | RSS, Atom, HTML                                                           | New Databricks, Fabric, Azure, Snowflake, BigQuery notes; Jev-judged                  |
 | Policy news (6 outlets, `kind: news` in `config.yml`)             | RSS                                                                       | Politico, Transformer, CSET, Covington, Binnenlands Bestuur                           |
 
 ## Web UI
@@ -165,6 +166,57 @@ The `infra` section of `config.yml`: the second section of the daily agents repo
 
 <!-- /tracked:infra -->
 
+### Data engineering (GitHub) — daily
+
+The `databricks`, `snowflake` and `data_stack` sections of `config.yml`: the repo sections of the daily data report (`ai-data`), for data engineers working on Databricks, Snowflake and the open-source data stack. Covered like the agents, news included (`keywords` keep ordinary words such as delta, dlt and iceberg from matching). The report also carries the vendors' release notes (`data.feeds`: Azure Databricks, Microsoft Fabric, Azure updates, Snowflake, Snowflake behavior changes, BigQuery), new items only, judged by Jev (keyword rules without `TYPESAFE_API_KEY`), at most 12 a day with deprecations first. A section with nothing new is left out, and the report is skipped when all are.
+
+<!-- tracked:databricks -->
+<!-- generated from config.yml: edit config.yml, then run pnpm readme -->
+
+**Databricks**: Databricks and the open-source projects Databricks maintains (Delta Lake, Unity Catalog, MLflow, its CLI and dbt adapter).
+
+| Project        | Repository                                                                |
+| -------------- | ------------------------------------------------------------------------- |
+| Delta Lake     | [delta-io/delta](https://github.com/delta-io/delta)                       |
+| Unity Catalog  | [unitycatalog/unitycatalog](https://github.com/unitycatalog/unitycatalog) |
+| MLflow         | [mlflow/mlflow](https://github.com/mlflow/mlflow)                         |
+| Databricks CLI | [databricks/cli](https://github.com/databricks/cli)                       |
+| dbt-databricks | [databricks/dbt-databricks](https://github.com/databricks/dbt-databricks) |
+
+<!-- /tracked:databricks -->
+
+<!-- tracked:snowflake -->
+<!-- generated from config.yml: edit config.yml, then run pnpm readme -->
+
+**Snowflake**: Snowflake's open-source clients and the Apache Polaris catalog Snowflake maintains.
+
+| Project                        | Repository                                                                                          |
+| ------------------------------ | --------------------------------------------------------------------------------------------------- |
+| Snowpark Python                | [snowflakedb/snowpark-python](https://github.com/snowflakedb/snowpark-python)                       |
+| Snowflake Connector for Python | [snowflakedb/snowflake-connector-python](https://github.com/snowflakedb/snowflake-connector-python) |
+| Apache Polaris                 | [apache/polaris](https://github.com/apache/polaris)                                                 |
+
+<!-- /tracked:snowflake -->
+
+<!-- tracked:data_stack -->
+<!-- generated from config.yml: edit config.yml, then run pnpm readme -->
+
+**Open-source data stack**: open-source data engineering tools — transformation, orchestration, ingestion, table formats and query engines.
+
+| Project        | Repository                                                  |
+| -------------- | ----------------------------------------------------------- |
+| dbt Core       | [dbt-labs/dbt](https://github.com/dbt-labs/dbt)             |
+| SQLMesh        | [SQLMesh/sqlmesh](https://github.com/SQLMesh/sqlmesh)       |
+| Apache Airflow | [apache/airflow](https://github.com/apache/airflow)         |
+| Dagster        | [dagster-io/dagster](https://github.com/dagster-io/dagster) |
+| dlt            | [dlt-hub/dlt](https://github.com/dlt-hub/dlt)               |
+| Apache Iceberg | [apache/iceberg](https://github.com/apache/iceberg)         |
+| DuckDB         | [duckdb/duckdb](https://github.com/duckdb/duckdb)           |
+| Polars         | [pola-rs/polars](https://github.com/pola-rs/polars)         |
+| Trino          | [trinodb/trino](https://github.com/trinodb/trino)           |
+
+<!-- /tracked:data_stack -->
+
 ### GitHub AI Trending — weekly
 
 | Source                                                          | Details                                                                                                                                                                                                                        |
@@ -198,6 +250,7 @@ New articles are detected by comparing sitemap `lastmod` timestamps against a pe
 ## Features
 
 - **Daily:** one agents report — stable releases, hot issues and news for the `agents` and `infra` repos in `config.yml`, one section and one LLM call each
+- **Daily:** one data report — vendor release notes (`data.feeds`, code-rendered tables, deprecations first) plus stable releases, hot issues and news for the `databricks`, `snowflake` and `data_stack` repos in `config.yml`, one LLM call per repo section, one for the vendor row summaries and one for Highlights, Data × AI and Worth a Look
 - **Daily:** Hacker News AI stories, new ArXiv papers, new Anthropic/OpenAI web content (sitemap-based, incremental), and Policy Watch: new AI policy items from official sources (`policy` in `config.yml`)
 - **Weekly (Mondays):** GitHub AI trending + Claude Code Skills; the models report (Hugging Face trending models + OpenRouter token usage); Dev.to + Lobste.rs sections in the discussions report
 - Publishes a GitHub Issue per report; commits Markdown files to `digests/YYYY-MM-DD/`
@@ -210,7 +263,7 @@ The weekly split exists because those reports, run daily, mostly repeated themse
 
 ### Tracked repositories (`config.yml`)
 
-`config.yml` in the repo root lists the tracked repositories and the Policy Watch sources. The file is fully commented. The pipeline reads it on every run and stops with an error if the file or a section is missing. Each section of the agents report also sets its `title` (its heading in the report) and `subject` (what the projects are, for the LLM prompt). After editing, run `pnpm readme` to refresh the tracked-repo tables above; the pre-commit hook and CI fail while they are stale.
+`config.yml` in the repo root lists the tracked repositories and the Policy Watch sources. The file is fully commented. The pipeline reads it on every run and stops with an error if the file or a section is missing. Each repo section (the agents and the data report's) also sets its `title` (its heading in the report) and `subject` (what the projects are, for the LLM prompt). After editing, run `pnpm readme` to refresh the tracked-repo tables above; the pre-commit hook and CI fail while they are stale.
 
 ```yaml
 agents:
@@ -240,6 +293,7 @@ The workflow reads these repository secrets (**Settings → Secrets and variable
 | `USA_GOV_API_KEY`      | optional           | [api.data.gov](https://api.data.gov/signup/) key for Policy Watch's Congress.gov bills and Regulations.gov documents; unset skips those two (the Federal Register needs no key)                                                                                                  |
 | `TELEGRAM_BOT_TOKEN`   | optional           | Telegram bot token from [@BotFather](https://t.me/BotFather). If set, a message is sent after each digest run                                                                                                                                                                    |
 | `TELEGRAM_CHAT_ID`     | optional           | Telegram chat/channel/group ID to send notifications to                                                                                                                                                                                                                          |
+| `TEAMS_WEBHOOK_URL`    | optional           | Power Automate Workflows webhook ("When a Teams webhook request is received"). If set, the data report's highlights are posted to that Teams channel as an Adaptive Card                                                                                                         |
 | `CLOUDFLARE_API_TOKEN` | for the MCP deploy | Cloudflare API token used by the `Deploy MCP` workflow (not by the daily digest)                                                                                                                                                                                                 |
 
 > `GITHUB_TOKEN` is provided automatically by GitHub Actions. When using `github-copilot` as the provider, the same `GITHUB_TOKEN` is used for LLM calls.
@@ -320,16 +374,17 @@ pnpm readme   # after editing config.yml: refresh the tracked-repo tables in thi
 
 Files are written to `digests/YYYY-MM-DD/`:
 
-| File              | Content                                                                                                                      | Cadence | GitHub Issue label |
-| ----------------- | ---------------------------------------------------------------------------------------------------------------------------- | ------- | ------------------ |
-| `ai-agents.md`    | AI Agents — stealth models, then a section each for the agents and the agent-tooling projects: releases, news and hot issues | daily   | `agents`           |
-| `ai-hn.md`        | AI Discussions — Hacker News stories, plus Dev.to articles and Lobste.rs stories on Mondays                                  | daily   | `hn`               |
-| `ai-arxiv.md`     | AI Research — key papers from cs.AI/cs.CL/cs.LG                                                                              | daily   | `arxiv`            |
-| `ai-web.md`       | Lab Announcements — new Anthropic and OpenAI content (only written when new content exists)                                  | daily   | `web`              |
-| `ai-policy.md`    | Policy Watch — new AI legislation, regulation and guidance items (only written when a new item passes the relevance check)   | daily   | `policy`           |
-| `ai-trending.md`  | Agent & AI Coding Trends — radar + repos by category + signals + Claude Code Skills                                          | weekly  | `trending`         |
-| `ai-hf.md`        | AI Models — Hugging Face trending models + OpenRouter token usage and new models                                             | weekly  | `hf`               |
-| `highlights.json` | Up to 2 highlights per report, for Telegram and the web UI's day overview                                                    | daily   | —                  |
+| File              | Content                                                                                                                                                                             | Cadence | GitHub Issue label |
+| ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- | ------------------ |
+| `ai-agents.md`    | AI Agents — stealth models, then a section each for the agents and the agent-tooling projects: releases, news and hot issues                                                        | daily   | `agents`           |
+| `ai-hn.md`        | AI Discussions — Hacker News stories, plus Dev.to articles and Lobste.rs stories on Mondays                                                                                         | daily   | `hn`               |
+| `ai-arxiv.md`     | AI Research — key papers from cs.AI/cs.CL/cs.LG                                                                                                                                     | daily   | `arxiv`            |
+| `ai-web.md`       | Lab Announcements — new Anthropic and OpenAI content (only written when new content exists)                                                                                         | daily   | `web`              |
+| `ai-policy.md`    | Policy Watch — new AI legislation, regulation and guidance items (only written when a new item passes the relevance check)                                                          | daily   | `policy`           |
+| `ai-data.md`      | Data Engineering Watch — vendor release notes and repo releases for Databricks, Snowflake, Azure / Fabric & GCP and the open-source data stack (only written when something is new) | daily   | `data`             |
+| `ai-trending.md`  | Agent & AI Coding Trends — radar + repos by category + signals + Claude Code Skills                                                                                                 | weekly  | `trending`         |
+| `ai-hf.md`        | AI Models — Hugging Face trending models + OpenRouter token usage and new models                                                                                                    | weekly  | `hf`               |
+| `highlights.json` | Up to 2 highlights per report, for Telegram and the web UI's day overview                                                                                                           | daily   | —                  |
 
 Archived days also contain `ai-cli.md` (the CLI report, merged into `ai-agents.md` in October 2026), `ai-ph.md` (Product Hunt, dropped in October 2026), `ai-infra.md` (weekly until October 2026, now a section of `ai-agents.md`) and `ai-community.md` (weekly until October 2026, now part of `ai-hn.md`). Before October 2026, `ai-agents.md` was the OpenClaw ecosystem report.
 
@@ -353,6 +408,21 @@ Generated | Projects: N | Active today: N | Stable releases: N | Prereleases (no
 Quiet today: <agents with nothing to report>
 
 ## Agent Tooling                       — config.yml infra.title, same layout
+```
+
+`ai-data.md` structure:
+
+```
+Generated | Projects: N | Active today: N | Stable releases: N | Prereleases (not covered): N
+
+## Highlights                          — 3-5 bullets, deprecations and breaking changes first
+## Databricks                          — vendor table (⚠️ = deprecation), then the repos in the ai-agents layout
+## Snowflake                           — the same
+## Azure / Fabric & GCP                — vendor table only
+## Open-source stack                   — the data_stack repos
+## Data × AI                           — 2-4 bullets: AI features in data platforms, AI tooling for data work
+## Worth a Look                        — at most 3 bullets
+(a section with nothing new is left out)
 ```
 
 `ai-hn.md` structure:

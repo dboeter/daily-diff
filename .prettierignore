@@ -4,3 +4,4 @@ digests/
 pnpm-lock.yaml
 # Saved live responses: kept byte-for-byte as the site serves them.
 src/__tests__/fixtures/*.html
+src/__tests__/fixtures/*.xml

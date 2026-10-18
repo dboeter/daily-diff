@@ -6,13 +6,16 @@ import {
   policyRelevance,
   selectPolicyItems,
   watchlisted,
+  isDataLaw,
+  keywordHit,
+  fallbackKeywordHit,
   loadPolicyVerdicts,
   savePolicyVerdicts,
   type PolicyAnswers,
   type PolicyVerdicts,
 } from "../policy-jev.ts";
 import type { PolicyItem } from "../policy.ts";
-import type { PolicyConfig } from "../config.ts";
+import type { Jurisdiction, PolicyConfig } from "../config.ts";
 
 const answers = (
   about: number,
@@ -305,6 +308,44 @@ describe("watchlisted", () => {
     expect(watchlisted(item("Kamerstuk 368750"), ["36875"])).toBe(false);
     expect(watchlisted(item("Regulation (EU) 2024/16890"), ["2024/1689"])).toBe(false);
     expect(watchlisted(item("CELEX 2032024/1689"), ["2024/1689"])).toBe(false);
+  });
+});
+
+describe("isDataLaw", () => {
+  const tokens = ["2023/2854", "2022/868", "2022/2555", "Data Act", "Data Governance Act", "NIS2", "NIS 2"];
+  const item = (title: string, link = "https://x.eu/", jurisdiction: Jurisdiction = "eu", news = false) => ({
+    title,
+    description: "",
+    link,
+    jurisdiction,
+    news,
+  });
+
+  it("matches a data-law name or act number in the title or link", () => {
+    expect(isDataLaw(item("NIS2 implementing act adopted"), tokens)).toBe(true);
+    expect(isDataLaw(item("Regulation", "https://eur-lex.europa.eu/eli/reg/2022/868/oj"), tokens)).toBe(true);
+  });
+
+  it("does not match a longer word", () => {
+    expect(isDataLaw(item("Data Actions in the cloud"), tokens)).toBe(false);
+  });
+
+  it("skips US government sources but not US news feeds", () => {
+    expect(isDataLaw(item("Protecting Kids' Data Act", "https://congress.gov/", "us_federal"), tokens)).toBe(
+      false,
+    );
+    expect(isDataLaw(item("EU Data Act guidance", "https://cov.com/", "us_federal", true), tokens)).toBe(
+      true,
+    );
+  });
+});
+
+describe("data-law keywords", () => {
+  it("count in the fallback, whole-word, but not as a source filter", () => {
+    expect(fallbackKeywordHit({ title: "Data Governance Act review", description: "" })).toBe(true);
+    expect(fallbackKeywordHit({ title: "NIS 2 transposition", description: "" })).toBe(true);
+    expect(fallbackKeywordHit({ title: "Data Actions", description: "" })).toBe(false);
+    expect(keywordHit({ title: "Protecting Kids' Data Act", description: "" })).toBe(false);
   });
 });
 

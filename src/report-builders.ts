@@ -7,6 +7,8 @@ import { escapeRegex } from "./agent-news.ts";
 import type { OpenRouterStealthModel } from "./openrouter.ts";
 import type { TrendingReportData } from "./trending-rank.ts";
 import type { PolicyItem } from "./policy.ts";
+import type { KeptVendorItem } from "./data-jev.ts";
+import { VENDOR_SECTIONS, vendorSection, type VendorSection } from "./config.ts";
 import {
   LIVE_REPORT_IDS,
   OVERVIEW,
@@ -15,11 +17,12 @@ import {
   STEALTH_SECTION,
   TRENDING_REPORT,
   POLICY_REPORT,
+  DATA_REPORT,
   type ReportId,
 } from "./i18n.ts";
 
 // ---------------------------------------------------------------------------
-// Project digest (daily agents report: the agents and infra config sections)
+// Project digest (the agents report's agents and infra sections, the data report's repo sections)
 // ---------------------------------------------------------------------------
 
 /** One config section's projects, under its own heading. */
@@ -30,6 +33,8 @@ export interface ProjectGroup {
   activities: ProjectActivity[];
   /** LLM output: overview plus one `## <Project>` section per active project. */
   summary: string;
+  /** Markdown under the heading, before the projects (the data report's vendor table). Shown even when every project is quiet. */
+  preamble?: string;
 }
 
 export interface ProjectReportInput {
@@ -41,6 +46,13 @@ export interface ProjectReportInput {
   period: string;
   /** Markdown rendered between the header and the groups, ending with its own separator. */
   preamble?: string;
+  /**
+   * Leave out a group with no active project (the data report). The agents
+   * report shows it with its notice and quiet line. Either way the header counts it.
+   */
+  omitQuietGroups?: boolean;
+  /** Markdown after the last group, before the footer (the data report's Worth a Look), with its own separator. */
+  epilogue?: string;
   footer: string;
 }
 
@@ -73,14 +85,17 @@ export function buildProjectReportContent(r: ProjectReportInput): string {
   const prereleases = all.reduce((n, a) => n + a.prereleaseCount, 0);
   const link = (a: ProjectActivity) => `[${a.config.name}](https://github.com/${a.config.repo})`;
   let quietCount = 0;
-  const sections = r.groups.map((g) => {
+  const sections = r.groups.flatMap((g) => {
     const quiet = quietProjects(g);
     quietCount += quiet.length;
-    return (
-      `## ${g.title}\n\n` +
-      nestHeadings(g.summary, 3) +
-      (quiet.length ? `\n\n**Quiet ${r.period}:** ${quiet.map(link).join(", ")}` : "")
-    );
+    // With omitQuietGroups, a group's projects are left out when all are quiet; its preamble still shows.
+    const showProjects = !(r.omitQuietGroups && quiet.length === g.activities.length);
+    if (!showProjects && !g.preamble) return [];
+    const projects = showProjects
+      ? nestHeadings(g.summary, 3) +
+        (quiet.length ? `\n\n**Quiet ${r.period}:** ${quiet.map(link).join(", ")}` : "")
+      : "";
+    return `## ${g.title}\n\n` + [g.preamble, projects].filter(Boolean).join("\n\n");
   });
 
   return (
@@ -91,6 +106,7 @@ export function buildProjectReportContent(r: ProjectReportInput): string {
     `---\n\n` +
     (r.preamble ?? "") +
     sections.join("\n\n---\n\n") +
+    (r.epilogue ?? "") +
     r.footer
   );
 }
@@ -262,7 +278,7 @@ const POLICY_TITLE_MAX_CHARS = 200;
 export const policyTitleLabel = (title: string): string =>
   cell(title.length > POLICY_TITLE_MAX_CHARS ? `${title.slice(0, POLICY_TITLE_MAX_CHARS)}…` : title);
 
-function descriptionFallback(description: string): string {
+export function descriptionFallback(description: string): string {
   const d = description.replace(/\s+/g, " ").trim();
   if (!d) return "—";
   if (d.length <= DESCRIPTION_FALLBACK_CHARS) return d;
@@ -340,6 +356,32 @@ export function renderPolicyTable(
     );
   }
   return sections.filter(Boolean).join("\n\n");
+}
+
+/**
+ * The data report's vendor tables, one per vendor section with items. Rows are
+ * numbered from 1 across sections in item order (the summaries call's `N:`
+ * lines), so the items must arrive in report order (selectVendorItems).
+ * Date, source, title and the deprecation marker come from the data, never the model.
+ */
+export function renderVendorTables(
+  items: KeptVendorItem[],
+  summaries: Map<number, string>,
+): Partial<Record<VendorSection, string>> {
+  const numbered = items.map((it, i) => ({ it, n: i + 1 }));
+  const tables: Partial<Record<VendorSection, string>> = {};
+  for (const section of VENDOR_SECTIONS) {
+    const rows = numbered
+      .filter(({ it }) => vendorSection(it.vendor) === section)
+      .map(
+        ({ it, n }) =>
+          `| ${it.date || "—"} | ${cell(it.source)} | ` +
+          `${it.deprecation ? `${DATA_REPORT.deprecationMarker} ` : ""}[${policyTitleLabel(it.title)}](${cell(it.link)}) | ` +
+          `${cell(summaries.get(n) ?? descriptionFallback(it.description))} |`,
+      );
+    if (rows.length) tables[section] = `${DATA_REPORT.vendorTableHeader}\n${rows.join("\n")}`;
+  }
+  return tables;
 }
 
 /** Put the tables where the prose left the marker; after the prose when the model dropped it. */

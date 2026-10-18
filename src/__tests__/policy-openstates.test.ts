@@ -71,6 +71,7 @@ const config: PolicyConfig = {
   readerProfile: "A practitioner.",
   watchlist: { eu: [], nl: [], usFederal: [], usStates: [] },
   feeds: [],
+  dataLaw: [],
   calendar: [],
 };
 const ctx = { config, now: new Date("2026-10-13T23:00:00Z"), dateStr: "2026-10-14", state: null };

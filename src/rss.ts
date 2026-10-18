@@ -16,6 +16,8 @@ export interface FeedItem {
   published: string;
   /** Plain text: entities decoded, HTML stripped, whitespace collapsed. */
   description: string;
+  /** The `<category>` values; absent when the item has none. */
+  categories?: string[];
 }
 
 /**
@@ -55,25 +57,39 @@ export function tagText(xml: string, tag: string): string {
 const DRUPAL_BYLINE_RE = /^.*?Anonymous \(not verified\) \w{3}, \d{2}\/\d{2}\/\d{4} - \d{2}:\d{2}\s*/;
 
 /** HTML to plain text: tags stripped, entities decoded, whitespace collapsed, truncated. */
-export function plainText(html: string): string {
+export function plainText(html: string, maxChars = DESCRIPTION_MAX_CHARS): string {
   const text = decodeEntities(html.replace(/<[^>]*>/g, " "))
     .replace(/\s+/g, " ")
     .trim()
     .replace(DRUPAL_BYLINE_RE, "");
-  return text.length > DESCRIPTION_MAX_CHARS ? `${text.slice(0, DESCRIPTION_MAX_CHARS)}…` : text;
+  return text.length > maxChars ? `${text.slice(0, maxChars)}…` : text;
 }
 
-export function parseRssItems(xml: string): FeedItem[] {
+/** The data report's vendor notes; Fabric's descriptions are whole posts (up to ~12 KB). */
+export const VENDOR_DESCRIPTION_MAX_CHARS = 1000;
+
+/**
+ * plainText for the vendor parsers, without the space it leaves before
+ * punctuation where a tag closed ("<a>regions</a>." → "regions .").
+ */
+export const vendorText = (html: string, maxChars = VENDOR_DESCRIPTION_MAX_CHARS): string =>
+  plainText(html, maxChars).replace(/ ([,;:.])/g, "$1");
+
+export function parseRssItems(xml: string, maxChars = DESCRIPTION_MAX_CHARS): FeedItem[] {
   return [...xml.matchAll(/<item(?:\s[^>]*)?>([\s\S]*?)<\/item>/g)].map(([, body]) => {
     const link = tagText(body!, "link");
     const date = Date.parse(tagText(body!, "pubDate"));
+    const categories = [...body!.matchAll(/<category(?:\s[^>]*)?>([\s\S]*?)<\/category>/g)].map(([c]) =>
+      tagText(c, "category"),
+    );
     return {
       id: tagText(body!, "guid") || link,
       title: tagText(body!, "title"),
       link,
       published: Number.isFinite(date) ? new Date(date).toISOString() : "",
       // Description HTML arrives entity-encoded: tagText decodes it to HTML, plainText strips it.
-      description: plainText(tagText(body!, "description")),
+      description: plainText(tagText(body!, "description"), maxChars),
+      ...(categories.length ? { categories } : {}),
     };
   });
 }
@@ -85,6 +101,6 @@ export function recentNewsItems(items: FeedItem[], now: Date): FeedItem[] {
 }
 
 /** Fetch and parse a feed. Throws on HTTP errors and after http.ts's FETCH_TIMEOUT_MS. */
-export async function fetchRssFeed(url: string): Promise<FeedItem[]> {
-  return parseRssItems(await (await fetchOk(url)).text());
+export async function fetchRssFeed(url: string, maxChars = DESCRIPTION_MAX_CHARS): Promise<FeedItem[]> {
+  return parseRssItems(await (await fetchOk(url)).text(), maxChars);
 }

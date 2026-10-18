@@ -11,6 +11,9 @@ const section = (title: string, ...repos: [string, string][]): SectionConfig => 
 const config = {
   agents: section("Agents", ["Alpha", "org/alpha"], ["Beta Long Name", "o/b"]),
   infra: section("Infra", ["Gamma", "org/gamma"]),
+  databricks: section("Databricks", ["Delta", "org/delta"]),
+  snowflake: section("Snowflake", ["Polaris", "org/polaris"]),
+  data_stack: section("Stack", ["DuckDB", "org/duckdb"]),
 };
 
 const START = (key: string) => `<!-- tracked:${key} -->`;
@@ -50,6 +53,12 @@ describe("syncReadme", () => {
     "prose between",
     START("infra"),
     END("infra"),
+    START("databricks"),
+    END("databricks"),
+    START("snowflake"),
+    END("snowflake"),
+    START("data_stack"),
+    END("data_stack"),
     "tail",
   ].join("\n");
 

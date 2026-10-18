@@ -12,6 +12,7 @@ const config = (eu: string[]): PolicyConfig => ({
   readerProfile: "A practitioner.",
   watchlist: { eu, nl: [], usFederal: [], usStates: [] },
   feeds: [],
+  dataLaw: [],
   calendar: [],
 });
 const ctx = (eu: string[]) => ({

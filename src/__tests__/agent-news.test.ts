@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { agentMatcher, agentTerms, matchProjectNews, NEWS_PER_AGENT } from "../agent-news.ts";
+import { DATA_SECTION_KEYS, loadConfig } from "../config.ts";
 import type { RepoConfig } from "../github.ts";
 import type { HnData, HnStory } from "../hn.ts";
 import { EMPTY_NPM, EMPTY_OPENROUTER, type TrendingData } from "../trending.ts";
@@ -239,5 +240,38 @@ describe("matchProjectNews", () => {
     const news = matchProjectNews([claudeCode, pi], {});
     expect(news.get("claude-code")).toEqual([]);
     expect(news.get("pi")).toEqual([]);
+  });
+});
+
+// The data report's projects, with the keywords in config.yml.
+describe("data project news", () => {
+  const config = loadConfig();
+  const dataRepos = DATA_SECTION_KEYS.flatMap((k) => config[k].repos);
+  const repo = (id: string) => dataRepos.find((r) => r.id === id)!;
+
+  it("does not match Delta Lake on another delta", () => {
+    expect(matches(repo("delta"), "Delta Air Lines cancels flights")).toBe(false);
+    expect(matches(repo("delta"), "Measuring the delta between two runs")).toBe(false);
+    expect(matches(repo("delta"), "Delta Lake 4.0 released")).toBe(true);
+    expect(matches(repo("delta"), "delta-rs adds deletion vectors")).toBe(true);
+  });
+
+  it("matches dlt only by its keywords, never inside another word", () => {
+    expect(matches(repo("dlt"), "DLT pipelines on Databricks")).toBe(false);
+    expect(matches(repo("dlt"), "Faster sdlt parsing")).toBe(false);
+    expect(matches(repo("dlt"), "dltHub raises a seed round")).toBe(true);
+    expect(matches(repo("dlt"), "dlt-hub/dlt — data load tool")).toBe(true);
+  });
+
+  it("does not match the Databricks CLI on any CLI", () => {
+    expect(matches(repo("databricks-cli"), "A CLI for everything")).toBe(false);
+    expect(matches(repo("databricks-cli"), "The new Databricks CLI bundles")).toBe(true);
+  });
+
+  it("keeps a story naming three data projects, which the agents pool would drop", () => {
+    const sources = { hn: hn("DuckDB vs Polars on Apache Iceberg tables") };
+    const news = matchProjectNews(dataRepos, sources, Infinity);
+    for (const id of ["duckdb", "polars", "iceberg"]) expect(news.get(id)).toHaveLength(1);
+    expect(matchProjectNews(dataRepos, sources).get("duckdb")).toEqual([]);
   });
 });

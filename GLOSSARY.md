@@ -80,6 +80,10 @@ _Avoid_: Mention
 The link between a News Item and the Tracked Project it names.
 _Avoid_: Match (bare)
 
+**Vendor Feed**:
+A data platform's release notes (Databricks, Snowflake, Azure / Fabric, BigQuery) read by the data report, one item per note; a Snowflake behavior-change bundle is one item that returns when its status moves.
+_Avoid_: Blog, vendor news
+
 **Quiet**:
 A Tracked Project with nothing worth reporting for the window, whether nothing happened or what happened was noise; a project that could not be checked is not Quiet.
 _Avoid_: Inactive, idle

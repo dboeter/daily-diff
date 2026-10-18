@@ -4,3 +4,8 @@ node_modules/
 dist/
 coverage/
 .plans/
+*.log
+mcp/.wrangler/
+mcp/.dev.vars
+.claude/*.local.json
+.claude/worktrees/

@@ -129,6 +129,7 @@ describe("fetchPolicyData", () => {
         news: false,
       },
     ],
+    dataLaw: [],
     calendar: [],
   };
   const rss = (ids: [string, string][]) =>
