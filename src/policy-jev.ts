@@ -333,7 +333,7 @@ export async function selectPolicyItems(
     tag: "policy",
     request: (item) => policyRequest(item, readerProfile),
     decide: (a: PolicyAnswers, item) => policyRelevance(a, item.jurisdiction, item.news),
-    stage: (item) => item.stage,
+    fingerprint: (item) => item.stage,
     unseenDays: VERDICT_UNSEEN_DAYS,
   });
   const { verdicts, rankedBy } = judgment;

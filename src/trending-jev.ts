@@ -2,7 +2,7 @@
  * Scope and category policy for the weekly trending report.
  *
  * Every candidate item — a GitHub row, an OpenRouter app, an npm package — gets
- * a `Classification`: from Jev (`classifyItems`) when `TYPESAFE_API_KEY` is set,
+ * a `Classification`: from Jev (`classifyTrendingItems`, through `judgeItems`) when `TYPESAFE_API_KEY` is set,
  * else from `fallbackClassification`, which reads the GitHub topic query that
  * found a repo. The policy functions (`inScope`, `onRadar`) are the same either
  * way. Jev's verdicts are saved in `digests/trending-classifications.json`, so
@@ -13,7 +13,15 @@
 import { createHash } from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
-import { askJev, jevFailedTooOften, loadItemsFile, mapJev, saveItemsFile, type AskJev } from "./jev.ts";
+import {
+  askJev,
+  judgeItems,
+  loadItemsFile,
+  mapJev,
+  saveItemsFile,
+  type AskJev,
+  type VerdictCache,
+} from "./jev.ts";
 import type { Category, GithubRow, RadarRow } from "./trending-rank.ts";
 import type { SearchTopic } from "./trending.ts";
 import type { OpenRouterApp } from "./openrouter.ts";
@@ -176,9 +184,10 @@ interface ChoiceAnswer {
   probabilities: Record<string, number>;
 }
 
-interface ClassifyAnswers {
-  category: ChoiceAnswer;
-  standalone_tool: { noul: number };
+/** Jev's raw answers, as saved. A migrated or hand-added entry may lack the probabilities, or the noul (null). */
+export interface ClassifyAnswers {
+  category: { choice: string; confidence?: number; probabilities?: Record<string, number> };
+  standalone_tool: { noul: number | null };
 }
 
 const SOURCE_NAMES: Record<ClassifyItem["kind"], string> = {
@@ -212,29 +221,27 @@ function classifyState(item: ClassifyItem): object {
   };
 }
 
-export async function classifyItem(
-  item: ClassifyItem,
-  apiKey: string,
-  ask: AskJev = askJev,
-): Promise<Classification> {
-  const { model, answers } = await ask(classifyState(item), CLASSIFY_QUESTIONS, apiKey);
-  const a = answers as ClassifyAnswers;
-  const choice = a?.category?.choice;
-  const standalone = a?.standalone_tool?.noul;
-  // Throw rather than guess: mapJev counts it as a failure, so a changed
-  // response shape trips the fallback instead of classifying everything wrong.
+/**
+ * Answers → scope and category. Throws rather than guess on an unexpected
+ * shape: a new call then counts as failed (a changed response shape trips the
+ * fallback instead of classifying everything wrong), and a saved entry with a
+ * typo is asked again rather than shown under an unknown category.
+ */
+export function classificationOf(answers: ClassifyAnswers): Classification {
+  const choice = answers?.category?.choice;
+  const standalone = answers?.standalone_tool?.noul;
   if (
     typeof choice !== "string" ||
     !Object.hasOwn(CLASSIFY_QUESTIONS.category.criteria, choice) ||
-    !Number.isFinite(standalone)
+    (standalone !== null && !Number.isFinite(standalone))
   ) {
     throw new Error(`Unexpected Jev answers: ${JSON.stringify(answers)}`);
   }
+  const probabilities = answers.category.probabilities;
   return {
     category: choice as Classification["category"],
-    standalone,
-    probabilities: a.category.probabilities,
-    model,
+    standalone: standalone ?? null,
+    ...(probabilities ? { probabilities } : {}),
   };
 }
 
@@ -254,20 +261,62 @@ export function isTaggedAgentApp(item: ClassifyItem): boolean {
   return item.kind === "openrouter" && item.app.categories.some((c) => AGENT_APP_TAGS.has(c));
 }
 
-/** Jev classification by item key; null when too many calls failed for the answers to mean anything. */
-export async function classifyItems(
+/**
+ * Every item's classification, by item key. Tagged apps by their tag (in
+ * scope, standalone unknown); the rest through `judgeItems`: a saved verdict
+ * at the same description (`descHash`) or pinned, else Jev, else the topic
+ * fallback (a failed call falls back for that item only).
+ * `classifiedBy` is "topics" when there was no key or more than half the new
+ * calls failed, with items left to ask.
+ */
+export async function classifyTrendingItems(
   items: ClassifyItem[],
-  apiKey: string,
-  ask: AskJev = askJev,
-): Promise<Map<string, Classification> | null> {
-  const asked = items.filter((item) => !isTaggedAgentApp(item));
-  const { results, failed } = await mapJev(asked, (item) => classifyItem(item, apiKey, ask), "trending");
-  if (jevFailedTooOften(failed, asked.length)) return null;
-  const byKey = new Map(asked.map((item, i) => [item.key, results[i]]));
-  // Tagged apps get the fallback's verdict: in scope, standalone unknown. A
-  // single failed call also falls back for that item only: it should neither
-  // drop the item (unclassified = off the Radar) nor send the whole run to the fallback.
-  return new Map(items.map((item) => [item.key, byKey.get(item.key) ?? fallbackClassification(item)]));
+  opts: { apiKey?: string; cache: ClassifyCache | null; dateStr: string; ask?: AskJev },
+): Promise<{
+  classifications: Map<string, Classification>;
+  classifiedBy: "jev" | "topics";
+  nextCache: ClassifyCache | null;
+}> {
+  const judgment = await judgeItems(
+    items
+      .filter((item) => !isTaggedAgentApp(item))
+      .map((item) => ({ id: normKey(item.key), title: itemText(item)[0], item })),
+    {
+      ...opts,
+      tag: "trending",
+      request: ({ item }) => ({ state: classifyState(item), questions: CLASSIFY_QUESTIONS }),
+      decide: (a: ClassifyAnswers) => classificationOf(a),
+      fingerprint: ({ item }) => descHash(item),
+      unseenDays: CLASSIFY_UNSEEN_DAYS,
+    },
+  );
+  const classifications = new Map(
+    items.map((item): [string, Classification] => {
+      const v = isTaggedAgentApp(item) ? undefined : judgment.verdicts.get(normKey(item.key));
+      if (!v) return [item.key, fallbackClassification(item)];
+      // Built, not spread: the verdict also carries its raw answers.
+      const { category, standalone, probabilities, model, decided } = v;
+      return [
+        item.key,
+        {
+          category,
+          standalone,
+          ...(probabilities ? { probabilities } : {}),
+          ...(model ? { model } : {}),
+          ...(decided ? { decided } : {}),
+        },
+      ];
+    }),
+  );
+  const saved = [...classifications.values()].filter((c) => c.decided).length;
+  const classifiedBy = judgment.rankedBy === "jev" ? "jev" : "topics";
+  console.log(
+    `  [trending] Classified ${classifications.size} items: ${saved} saved, the rest ` +
+      (classifiedBy === "jev"
+        ? "by Jev"
+        : `by topic labels (fallback: ${opts.apiKey ? "too many Jev failures" : "no TYPESAFE_API_KEY"})`),
+  );
+  return { classifications, classifiedBy, nextCache: judgment.nextCache };
 }
 
 // ---------------------------------------------------------------------------
@@ -615,32 +664,15 @@ export async function matchApps(
 // ---------------------------------------------------------------------------
 
 /**
- * `digests/trending-classifications.json`: Jev's verdict per item, so each item
- * is asked once instead of every week. A project's scope does not change while
- * its description stays the same. Hand-editable; see AGENTS.md.
+ * `digests/trending-classifications.json`: Jev's answers per item key (GitHub
+ * keys lowercased, `normKey`), so each item is asked once instead of every
+ * week: a project's scope does not change while its description stays the
+ * same. The entry's `fingerprint` is the hash of the description Jev read, so
+ * a changed description is asked again (a new repo first seen with an empty or
+ * placeholder description would otherwise stay out of scope); `pinned` keeps a
+ * hand fix. Hand-editable; see AGENTS.md.
  */
-export interface ClassifyCache {
-  /** Key: the item key, GitHub keys lowercased (`normKey`). */
-  items: Record<string, ClassifyEntry>;
-}
-
-export interface ClassifyEntry {
-  /** For readers only. */
-  name: string;
-  category: Category | "out_of_scope";
-  standalone: number | null;
-  /**
-   * Hash of the description Jev read. A changed description is asked again: a
-   * new repo first seen with an empty or placeholder description would
-   * otherwise stay out of scope. Absent = keep the verdict regardless (a hand fix).
-   */
-  desc?: string;
-  /** CST date Jev answered; absent on a hand-added entry. */
-  decided?: string;
-  model?: string;
-  /** CST date the item was last on one of the report's lists. */
-  lastSeen: string;
-}
+export type ClassifyCache = VerdictCache<ClassifyAnswers>;
 
 export const CLASSIFY_FILE = path.join("digests", "trending-classifications.json");
 /** An item off every list this long is dropped, which keeps the file bounded; if it returns, it costs one call. */
@@ -664,81 +696,12 @@ const descHash = (item: ClassifyItem): string =>
 
 /** Missing file → empty cache. Unreadable or malformed → null: every item is asked and nothing is saved. */
 export function loadClassifyCache(file = CLASSIFY_FILE): ClassifyCache | null {
-  return loadItemsFile<ClassifyEntry>(file, "trending");
+  return loadItemsFile(file, "trending");
 }
 
 /** One item per line, like the star history: ~200 items a week would make a pretty-printed file long. */
 export function saveClassifyCache(cache: ClassifyCache, file = CLASSIFY_FILE): void {
   saveItemsFile(cache, file);
-}
-
-/** The saved verdicts that still hold for `items`, by item key. */
-export function cachedClassifications(
-  cache: ClassifyCache,
-  items: ClassifyItem[],
-): Map<string, Classification> {
-  const hits = new Map<string, Classification>();
-  for (const item of items) {
-    // The tags settle scope, so they beat a verdict saved before the app was tagged.
-    if (isTaggedAgentApp(item)) continue;
-    const e = cache.items[normKey(item.key)];
-    if (!e || (e.desc !== undefined && e.desc !== descHash(item))) continue;
-    // A hand edit with a typo is asked again rather than shown under an unknown category.
-    if (
-      !Object.hasOwn(CLASSIFY_QUESTIONS.category.criteria, e.category) ||
-      (e.standalone !== null && !Number.isFinite(e.standalone))
-    ) {
-      console.error(`  [trending] Invalid saved classification for ${item.key}, asking again`);
-      continue;
-    }
-    hits.set(item.key, {
-      category: e.category,
-      standalone: e.standalone,
-      ...(e.model ? { model: e.model } : {}),
-      decided: e.decided ?? "by hand",
-    });
-  }
-  return hits;
-}
-
-/**
- * The cache after this run: Jev's new answers saved, every classified item
- * marked seen, items unseen for CLASSIFY_UNSEEN_DAYS dropped. A verdict without
- * a model (a tagged app, a failed call, the topic fallback) is never saved, so a
- * later run never reads a topic-label guess as Jev's.
- */
-export function nextClassifyCache(
-  cache: ClassifyCache,
-  items: ClassifyItem[],
-  classifications: Map<string, Classification>,
-  dateStr: string,
-): ClassifyCache {
-  const next = { ...cache.items };
-  for (const item of items) {
-    const key = normKey(item.key);
-    const c = classifications.get(item.key);
-    if (c?.model !== undefined && c.decided === undefined && c.category !== null) {
-      next[key] = {
-        name: itemText(item)[0],
-        category: c.category,
-        standalone: c.standalone === null ? null : Math.round(c.standalone * 1000) / 1000,
-        desc: descHash(item),
-        decided: dateStr,
-        model: c.model,
-        lastSeen: dateStr,
-      };
-    } else if (next[key]) {
-      // Spread, not rebuilt: a hand edit keeps its fields.
-      next[key] = { ...next[key], lastSeen: dateStr };
-    }
-  }
-  return {
-    items: Object.fromEntries(
-      Object.entries(next).filter(
-        ([, e]) => (Date.parse(dateStr) - Date.parse(e.lastSeen)) / DAY_MS <= CLASSIFY_UNSEEN_DAYS,
-      ),
-    ),
-  };
 }
 
 // ---------------------------------------------------------------------------
@@ -773,7 +736,7 @@ export function buildTrendingRankingFile(
       gain: row?.gain ?? null,
       gainFrom: row?.gainFrom ?? null,
       relative: row?.relative == null ? null : round(row.relative),
-      // A saved verdict has no probabilities here; they are in the trace of the run that decided it.
+      // A saved verdict shows the probabilities it was saved with (none on a migrated or hand-added entry).
       ...(c?.decided ? { decided: c.decided } : {}),
     });
   });

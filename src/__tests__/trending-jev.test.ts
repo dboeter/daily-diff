@@ -5,15 +5,13 @@ import { describe, it, expect, vi } from "vitest";
 import {
   applyMatchAnswers,
   buildTrendingRankingFile,
-  cachedClassifications,
-  classifyItem,
-  classifyItems,
+  classificationOf,
+  classifyTrendingItems,
   fallbackClassification,
   inScope,
   loadClassifyCache,
   loadMatchState,
   matchApps,
-  nextClassifyCache,
   onRadar,
   pendingMatchQuestions,
   pruneMatchState,
@@ -21,11 +19,13 @@ import {
   saveMatchState,
   STANDALONE_MIN_NOUL,
   type Classification,
+  type ClassifyAnswers,
   type ClassifyCache,
   type ClassifyItem,
   type MatchState,
 } from "../trending-jev.ts";
-import type { AskJev } from "../jev.ts";
+import { judgeItems, type AskJev } from "../jev.ts";
+import { migrateClassifyEntry, migratePolicyEntry } from "../../scripts/migrate-verdict-fingerprints.ts";
 import { urlMerge, type GithubRow, type RadarRow } from "../trending-rank.ts";
 import { composeTrendingReport, EMPTY_OPENROUTER, type SearchRepo, type TrendingData } from "../trending.ts";
 import type { OpenRouterApp } from "../openrouter.ts";
@@ -126,39 +126,31 @@ const githubItem = (topic?: string, description = ""): ClassifyItem => ({
   row: { ...githubRow(topic), description },
 });
 
-describe("classifyItem", () => {
-  it("maps a Choice and a Noul answer to a Classification with probabilities and model", async () => {
-    expect(await classifyItem(githubItem("ai-agent"), "key", classifyAnswer("coding_agent", 0.81))).toEqual({
-      category: "coding_agent",
-      standalone: 0.81,
-      probabilities: { coding_agent: 0.9, none: 1 - 0.9 },
-      model: MODEL,
-    });
+describe("classificationOf", () => {
+  it("maps a Choice and a Noul answer to a Classification with probabilities", () => {
+    expect(
+      classificationOf({
+        category: { choice: "coding_agent", probabilities: { coding_agent: 0.9 } },
+        standalone_tool: { noul: 0.81 },
+      }),
+    ).toEqual({ category: "coding_agent", standalone: 0.81, probabilities: { coding_agent: 0.9 } });
   });
 
-  it("sends the topic and omits an empty description", async () => {
-    const ask = vi.fn(classifyAnswer("coding_agent", 1));
-    await classifyItem(githubItem("coding-agent"), "key", ask);
-    expect(ask.mock.calls[0]![0]).toEqual({
-      name: "o/r",
-      source: "GitHub repository",
-      topic: "coding-agent",
-    });
-    await classifyItem(
-      { kind: "npm", key: "npm:x", pkg: { name: "x", description: "d" } as NpmPackage },
-      "key",
-      ask,
-    );
-    expect(ask.mock.calls[1]![0]).toEqual({ name: "x", description: "d", source: "npm package" });
+  it("accepts a missing noul (a hand-added entry) and no probabilities (a migrated one)", () => {
+    expect(
+      classificationOf({ category: { choice: "out_of_scope" }, standalone_tool: { noul: null } }),
+    ).toEqual({ category: "out_of_scope", standalone: null });
   });
 
-  it("throws on an unknown choice and on a NaN noul", async () => {
-    await expect(classifyItem(githubItem(), "key", classifyAnswer("toString", 1))).rejects.toThrow();
-    await expect(classifyItem(githubItem(), "key", classifyAnswer("coding_agent", NaN))).rejects.toThrow();
+  it("throws on an unknown choice and on a NaN noul", () => {
+    const bad = (choice: string, noul: number) => () =>
+      classificationOf({ category: { choice }, standalone_tool: { noul } });
+    expect(bad("toString", 1)).toThrow();
+    expect(bad("coding_agent", NaN)).toThrow();
   });
 });
 
-describe("classifyItems", () => {
+describe("classifyTrendingItems", () => {
   const items: ClassifyItem[] = ["a", "b", "c"].map((n) => ({
     kind: "npm",
     key: `npm:${n}`,
@@ -168,17 +160,41 @@ describe("classifyItems", () => {
     (names: string[]): AskJev =>
     async (state) => {
       if (names.includes((state as { name: string }).name)) throw new Error("HTTP 529");
-      return classifyAnswer("coding_agent", 0.9)(state, {}, "key");
+      return classifyAnswer("coding_agent", 0.9)(state, {}, "k");
     };
+  const run = (list: ClassifyItem[], ask: AskJev, cache: ClassifyCache | null = { items: {} }) =>
+    classifyTrendingItems(list, { apiKey: "k", cache, dateStr: DATE, ask });
 
-  it("returns null when more than half the calls fail", async () => {
-    expect(await classifyItems(items, "key", failing(["a", "b"]))).toBeNull();
+  it("sends the topic and omits an empty description", async () => {
+    const ask = vi.fn(classifyAnswer("coding_agent", 1));
+    const npm: ClassifyItem = {
+      kind: "npm",
+      key: "npm:x",
+      pkg: { name: "x", description: "d" } as NpmPackage,
+    };
+    await run([githubItem("coding-agent"), npm], ask);
+    expect(ask.mock.calls.map((c) => c[0])).toEqual([
+      { name: "o/r", source: "GitHub repository", topic: "coding-agent" },
+      { name: "x", description: "d", source: "npm package" },
+    ]);
+  });
+
+  it("falls back to topic labels when more than half the calls fail", async () => {
+    const result = await run(items, failing(["a", "b"]));
+    expect(result.classifiedBy).toBe("topics");
+    expect(result.classifications.get("npm:c")).toEqual({ category: null, standalone: null });
   });
 
   it("gives a single failed item the fallback classification", async () => {
-    const result = await classifyItems(items, "key", failing(["b"]));
-    expect(result?.get("npm:b")).toEqual({ category: null, standalone: null });
-    expect(result?.get("npm:a")?.category).toBe("coding_agent");
+    const result = await run(items, failing(["b"]));
+    expect(result.classifiedBy).toBe("jev");
+    expect(result.classifications.get("npm:b")).toEqual({ category: null, standalone: null });
+    expect(result.classifications.get("npm:a")).toEqual({
+      category: "coding_agent",
+      standalone: 0.9,
+      probabilities: { coding_agent: 0.9, none: 1 - 0.9 },
+      model: MODEL,
+    });
   });
 
   it("skips Jev for apps OpenRouter tags as agents, not for broad tags or untagged apps", async () => {
@@ -188,15 +204,14 @@ describe("classifyItems", () => {
       app: { appId, title: `App ${appId}`, description: "", categories } as unknown as OpenRouterApp,
     });
     const ask = vi.fn(classifyAnswer("out_of_scope", 0.1));
-    const result = await classifyItems(
+    const { classifications } = await run(
       [app(1, ["cli-agent"]), app(2, ["programming-app"]), app(3, [])],
-      "key",
       ask,
     );
     expect(ask.mock.calls.map((c) => (c[0] as { name: string }).name)).toEqual(["App 2", "App 3"]);
-    expect(result?.get("openrouter:1")).toEqual({ category: null, standalone: null });
-    expect(result?.get("openrouter:2")?.category).toBe("out_of_scope");
-    expect(result?.get("openrouter:3")?.category).toBe("out_of_scope");
+    expect(classifications.get("openrouter:1")).toEqual({ category: null, standalone: null });
+    expect(classifications.get("openrouter:2")?.category).toBe("out_of_scope");
+    expect(classifications.get("openrouter:3")?.category).toBe("out_of_scope");
   });
 });
 
@@ -441,87 +456,61 @@ describe("loadMatchState", () => {
 // ---------------------------------------------------------------------------
 
 describe("classification cache", () => {
+  // The generic cache rules (reuse, prune, hand-edit spread, invalid entry asked again) are judgeItems' (jev.test.ts).
   const npmItem = (name: string, description = ""): ClassifyItem => ({
     kind: "npm",
     key: `npm:${name}`,
     pkg: { name, description } as NpmPackage,
   });
-  const jev = (category: Classification["category"], standalone: number): Classification => ({
-    category,
-    standalone,
-    probabilities: { [String(category)]: 0.9 },
-    model: MODEL,
-  });
-  const saveAnswers = (items: ClassifyItem[], answers: Classification[]) =>
-    nextClassifyCache({ items: {} }, items, new Map(items.map((item, i) => [item.key, answers[i]!])), DATE);
-  const handFix = {
-    name: "o/r",
-    category: "out_of_scope" as const,
-    standalone: null,
-    lastSeen: daysBefore(30),
-  };
+  const run = (
+    list: ClassifyItem[],
+    cache: ClassifyCache,
+    ask: AskJev = classifyAnswer("coding_agent", 0.9),
+  ) => classifyTrendingItems(list, { apiKey: "k", cache, dateStr: DATE, ask });
 
-  it("saves a Jev answer and reuses it while the description is unchanged", () => {
-    const item = npmItem("a", "An agent");
-    const cache = saveAnswers([item], [jev("coding_agent", 0.81234)]);
-    expect(cache.items["npm:a"]).toEqual({
-      name: "a",
-      category: "coding_agent",
-      standalone: 0.812,
-      desc: expect.stringMatching(/^[0-9a-f]{8}$/),
+  it("saves the answers with a description hash, and asks again when the description changes", async () => {
+    const first = await run([npmItem("a", "An agent")], { items: {} });
+    expect(first.nextCache!.items["npm:a"]).toEqual({
+      title: "a",
+      fingerprint: expect.stringMatching(/^[0-9a-f]{8}$/),
+      answers: {
+        category: {
+          type: "choice",
+          choice: "coding_agent",
+          confidence: 0.9,
+          probabilities: { coding_agent: 0.9, none: 0.1 },
+        },
+        standalone_tool: { noul: 0.9 },
+      },
       decided: DATE,
       model: MODEL,
       lastSeen: DATE,
     });
-    const hits = cachedClassifications(cache, [item]);
-    expect(hits.get("npm:a")).toEqual({
-      category: "coding_agent",
-      standalone: 0.812,
-      model: MODEL,
-      decided: DATE,
-    });
-    // A same-day re-run rewrites the same file.
-    expect(nextClassifyCache(cache, [item], hits, DATE)).toEqual(cache);
-    expect(cachedClassifications(cache, [npmItem("a", "A different project now")]).size).toBe(0);
+    const ask = vi.fn(classifyAnswer("out_of_scope", 0.1));
+    const same = await run([npmItem("a", "An agent")], first.nextCache!, ask);
+    expect(ask).not.toHaveBeenCalled();
+    expect(same.classifications.get("npm:a")).toMatchObject({ category: "coding_agent", decided: DATE });
+    const changed = await run([npmItem("a", "A different project now")], first.nextCache!, ask);
+    expect(ask).toHaveBeenCalledOnce();
+    expect(changed.classifications.get("npm:a")?.category).toBe("out_of_scope");
   });
 
-  it("ignores entities, case and whitespace in the description, as the trending scrape and search differ", () => {
-    const cache = saveAnswers(
-      [npmItem("a", "Claude Code & Codex: a harness")],
-      [jev("harness_framework", 0.9)],
-    );
-    expect(cachedClassifications(cache, [npmItem("a", "Claude Code &amp; Codex:\n  a harness")]).size).toBe(
-      1,
-    );
+  it("ignores entities, case and whitespace in the description, as the trending scrape and search differ", async () => {
+    const first = await run([npmItem("a", "Claude Code & Codex: a harness")], { items: {} });
+    const ask = vi.fn(classifyAnswer("out_of_scope", 0.1));
+    await run([npmItem("a", "Claude Code &amp; Codex:\n  a harness")], first.nextCache!, ask);
+    expect(ask).not.toHaveBeenCalled();
   });
 
-  it("lets OpenRouter's agent tags beat a verdict saved before the app was tagged", () => {
-    const app = (categories: string[]): ClassifyItem => ({
-      kind: "openrouter",
-      key: "openrouter:7",
-      app: { appId: 7, title: "Crush", description: "", categories } as unknown as OpenRouterApp,
-    });
-    const cache = saveAnswers([app([])], [jev("out_of_scope", 0.2)]);
-    expect(cachedClassifications(cache, [app([])]).size).toBe(1);
-    expect(cachedClassifications(cache, [app(["cli-agent"])]).size).toBe(0);
-  });
-
-  it("never saves a verdict without a model: tagged apps, failed calls, the topic fallback", () => {
-    const cache = saveAnswers(
-      [npmItem("a"), githubItem("ai-agent")],
-      [
-        { category: null, standalone: null },
-        { category: "other_agent", standalone: null },
-      ],
-    );
-    expect(cache.items).toEqual({});
-  });
-
-  it("keeps a hand fix without desc, compares GitHub keys case-insensitively, and asks again on a bad category", () => {
+  it("never asks a pinned entry again, and compares GitHub keys case-insensitively", async () => {
     const cache: ClassifyCache = {
       items: {
-        "github:o/r": handFix,
-        "npm:typo": { ...handFix, name: "typo", category: "coding-agent" as never },
+        "github:o/r": {
+          title: "o/r",
+          answers: { category: { choice: "out_of_scope" }, standalone_tool: { noul: null } },
+          pinned: true,
+          lastSeen: daysBefore(30),
+        },
       },
     };
     const item: ClassifyItem = {
@@ -529,44 +518,39 @@ describe("classification cache", () => {
       key: "github:O/R",
       row: { ...githubRow("ai-agent"), key: "github:O/R", fullName: "O/R", description: "anything" },
     };
-    vi.spyOn(console, "error").mockImplementationOnce(() => {});
-    const hits = cachedClassifications(cache, [item, npmItem("typo")]);
-    expect(hits.get("github:O/R")).toEqual({
+    const ask = vi.fn(classifyAnswer("coding_agent", 0.9));
+    const result = await run([item], cache, ask);
+    expect(ask).not.toHaveBeenCalled();
+    expect(result.classifications.get("github:O/R")).toEqual({
       category: "out_of_scope",
       standalone: null,
       decided: "by hand",
     });
-    expect(hits.has("npm:typo")).toBe(false);
   });
 
-  it("marks hits seen without rewriting them and drops items unseen for 180 days", () => {
-    const cache: ClassifyCache = {
-      items: {
-        "github:o/r": handFix,
-        "npm:old": { ...handFix, name: "old", lastSeen: daysBefore(181) },
-        "npm:kept": { ...handFix, name: "kept", lastSeen: daysBefore(180) },
-      },
-    };
-    const items = [githubItem("ai-agent")];
-    expect(nextClassifyCache(cache, items, cachedClassifications(cache, items), DATE).items).toEqual({
-      "github:o/r": { ...handFix, lastSeen: DATE },
-      "npm:kept": cache.items["npm:kept"],
+  it("lets OpenRouter's agent tags beat a verdict saved before the app was tagged", async () => {
+    const app = (categories: string[]): ClassifyItem => ({
+      kind: "openrouter",
+      key: "openrouter:7",
+      app: { appId: 7, title: "Crush", description: "", categories } as unknown as OpenRouterApp,
     });
+    const first = await run([app([])], { items: {} }, classifyAnswer("out_of_scope", 0.2));
+    expect(first.classifications.get("openrouter:7")?.category).toBe("out_of_scope");
+    const tagged = await run([app(["cli-agent"])], first.nextCache!);
+    expect(tagged.classifications.get("openrouter:7")).toEqual({ category: null, standalone: null });
   });
 
-  it("reads back what it saved, one item per line; a missing file is empty, an invalid one null", () => {
+  it("reads back what it saved, one item per line; a missing file is empty, an invalid one null", async () => {
     const file = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "trending-classify-")), "c.json");
     expect(loadClassifyCache(file)).toEqual({ items: {} });
-    const cache = saveAnswers(
-      [npmItem("a"), npmItem("b")],
-      [jev("coding_agent", 0.9), jev("out_of_scope", 0.1)],
-    );
-    saveClassifyCache(cache, file);
+    const { nextCache } = await run([npmItem("a"), npmItem("b")], { items: {} });
+    saveClassifyCache(nextCache!, file);
     const lines = fs.readFileSync(file, "utf-8").split("\n");
     expect(lines.filter((l) => l.startsWith('    "npm:'))).toHaveLength(2);
     expect(lines).toHaveLength(7); // "{", "items" line, 2 items, "}", "}", "" after the final newline
-    expect(loadClassifyCache(file)).toEqual(cache);
+    expect(loadClassifyCache(file)).toEqual(nextCache);
     fs.writeFileSync(file, "{ not json");
+    vi.spyOn(console, "error").mockImplementation(() => {});
     expect(loadClassifyCache(file)).toBeNull();
     fs.writeFileSync(file, '{"items": []}');
     expect(loadClassifyCache(file)).toBeNull();
@@ -809,5 +793,57 @@ describe("buildTrendingRankingFile", () => {
       },
     ]);
     expect(parsed.matches[0].probabilities).toEqual({ none: 0.333 });
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Migration of the pre-judgeItems cache (scripts/migrate-verdict-fingerprints.ts)
+// ---------------------------------------------------------------------------
+
+describe("classification cache migration", () => {
+  type OldEntry = { name: string; category: string; standalone: number | null; desc?: string };
+  const old = JSON.parse(
+    fs.readFileSync(new URL("./fixtures/trending-classifications-v1.json", import.meta.url), "utf-8"),
+  ) as { items: Record<string, OldEntry> };
+
+  it("gives every migrated entry its old category and standalone, a hand fix pinned", async () => {
+    const file = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "classify-migrate-")), "c.json");
+    const migrated = Object.fromEntries(
+      Object.entries(old.items).map(([k, e]) => [k, migrateClassifyEntry(e as never)]),
+    );
+    saveClassifyCache({ items: migrated }, file);
+    // The entry's own hash, except for the hand fix, whose description has changed since.
+    const items = Object.entries(old.items).map(([id, e]) => ({
+      id,
+      title: e.name,
+      hash: e.desc ?? "changed",
+    }));
+    const j = await judgeItems(items, {
+      tag: "test",
+      request: () => ({ state: {}, questions: {} }),
+      decide: (a: ClassifyAnswers) => classificationOf(a),
+      fingerprint: (i) => i.hash,
+      cache: loadClassifyCache(file),
+      dateStr: DATE,
+      unseenDays: 180,
+    });
+    expect(j.rankedBy).toBe("jev");
+    expect(j.verdicts.size).toBe(11);
+    for (const [id, e] of Object.entries(old.items)) {
+      expect(j.verdicts.get(id)).toMatchObject({ category: e.category, standalone: e.standalone });
+    }
+    expect(migrated["npm:hand-fixed"]).toMatchObject({ pinned: true });
+    expect(migrated["npm:hand-fixed"]).not.toHaveProperty("fingerprint");
+    // Idempotent: a migrated entry is left as it is.
+    expect(migrateClassifyEntry(migrated["github:cursor/plugins"] as never)).toEqual(
+      migrated["github:cursor/plugins"],
+    );
+  });
+
+  it("renames a policy verdict's stage to fingerprint, once", () => {
+    const e = { title: "t", stage: "Adopted", answers: {}, lastSeen: DATE };
+    const m = migratePolicyEntry(e);
+    expect(m).toEqual({ title: "t", answers: {}, lastSeen: DATE, fingerprint: "Adopted" });
+    expect(migratePolicyEntry(m)).toEqual(m);
   });
 });

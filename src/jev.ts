@@ -1,6 +1,6 @@
 /**
  * TypeSafe Jev client, shared by ArXiv, trending, Policy Watch and the data
- * report's vendor feeds; `judgeItems` is the cached keep/drop flow of the last two.
+ * report's vendor feeds; `judgeItems` is the cached judgment of the last three.
  *
  * Jev is not a chat model: POST /v1/systemone takes a `state` and typed
  * questions and returns probabilities. It is called directly rather than through
@@ -144,17 +144,25 @@ export function saveItemsFile(cache: ItemsFile<unknown>, file: string): void {
 }
 
 // ---------------------------------------------------------------------------
-// Cached judgments (Policy Watch, the data report's vendor items)
+// Cached judgments (Policy Watch, the data report's vendor items, trending classification)
 // ---------------------------------------------------------------------------
 
-/** One item's saved answers in a verdict file. Hand-editable: to fix a verdict, edit its `answers`. */
+/**
+ * One item's saved answers in a verdict file. Hand-editable: to fix a verdict,
+ * edit its `answers` and set `pinned`.
+ */
 export interface VerdictEntry<A> {
   /** For readers only. */
   title: string;
   /** Raw answers, not the decision, so the weights can change without asking again. */
   answers: A;
-  /** A stage item's stage when Jev answered (`judgeItems`' `stage`); absent otherwise. */
-  stage?: string;
+  /**
+   * What the answers were given for (`judgeItems`' `fingerprint`): a stage
+   * item's stage, a trending item's description hash. Absent otherwise.
+   */
+  fingerprint?: string;
+  /** A hand fix: reused whatever the fingerprint, never asked again. */
+  pinned?: true;
   /** CST date Jev answered; absent on a hand-added entry. */
   decided?: string;
   model?: string;
@@ -173,7 +181,10 @@ export interface Judgment<I, A, D> {
   rankedBy: "jev" | "keywords";
   /** The cache to save: new answers, items marked seen, unseen ones pruned. null when the file was malformed. */
   nextCache: VerdictCache<A> | null;
-  /** The trace fields of an item: relevance, its answers and `decided`; also the answers that arrived when Jev was down. */
+  /**
+   * The trace fields of an item: relevance (when the decision has one), its
+   * answers and `decided`; also the answers that arrived when Jev was down.
+   */
   traceFields(item: I): Record<string, unknown>;
   /** The trace file: `header` entries after `models` and `rankedBy`, then one row per line. */
   rankingFile(rows: object[], header: Record<string, unknown>): string;
@@ -184,21 +195,25 @@ const roundAnswers = <A>(a: A): A =>
   JSON.parse(JSON.stringify(a), (_, v: unknown) => (typeof v === "number" ? round(v) : v)) as A;
 
 /**
- * Judge `items` once each: a saved verdict is reused (a stage item's only at
- * the same stage), the rest are asked. `decide` weighs answers into a decision
+ * Judge `items` once each: a saved verdict is reused (only at the same
+ * fingerprint, unless pinned), the rest are asked. `decide` weighs answers into a decision
  * and throws on an unexpected shape, which counts a new call as failed and a
  * saved entry as missing (it is asked again). When the new calls fail too often,
  * the answers that did arrive are still saved, but this run decides without them.
  */
-export async function judgeItems<I extends { id: string; title: string }, A, D extends { relevance: number }>(
+export async function judgeItems<I extends { id: string; title: string }, A, D extends object>(
   items: I[],
   opts: {
     /** Log tag. */
     tag: string;
     request: (item: I) => { state: unknown; questions: object };
     decide: (answers: A, item: I) => D;
-    /** The item's stage; set for sources whose ids persist across stages. */
-    stage?: (item: I) => string | undefined;
+    /**
+     * What the answers depend on beyond the id: a stage, for sources whose ids
+     * persist across stages; a description hash. A saved entry at a different
+     * fingerprint (or none) is asked again.
+     */
+    fingerprint?: (item: I) => string | undefined;
     apiKey?: string;
     cache: VerdictCache<A> | null;
     dateStr: string;
@@ -207,11 +222,11 @@ export async function judgeItems<I extends { id: string; title: string }, A, D e
     ask?: AskJev;
   },
 ): Promise<Judgment<I, A, D>> {
-  const { tag, request, decide, stage, apiKey, cache, dateStr, unseenDays, ask = askJev } = opts;
+  const { tag, request, decide, fingerprint, apiKey, cache, dateStr, unseenDays, ask = askJev } = opts;
   const verdicts = new Map<string, Judged<A, D>>();
   for (const item of items) {
     const e = cache?.items[item.id];
-    if (!e || (stage && e.stage !== stage(item))) continue;
+    if (!e || (!e.pinned && fingerprint && e.fingerprint !== fingerprint(item))) continue;
     try {
       verdicts.set(item.id, {
         answers: e.answers,
@@ -248,11 +263,11 @@ export async function judgeItems<I extends { id: string; title: string }, A, D e
     const next = { ...cache.items };
     for (const item of items) {
       const v = fresh.get(item.id);
-      const s = stage?.(item);
+      const f = fingerprint?.(item);
       if (v) {
         next[item.id] = {
           title: item.title,
-          ...(s ? { stage: s } : {}),
+          ...(f ? { fingerprint: f } : {}),
           answers: roundAnswers(v.answers),
           decided: dateStr,
           ...(v.model ? { model: v.model } : {}),
@@ -278,8 +293,11 @@ export async function judgeItems<I extends { id: string; title: string }, A, D e
     nextCache,
     traceFields(item) {
       const v = verdicts.get(item.id) ?? fresh.get(item.id);
+      const relevance = (v as { relevance?: unknown } | undefined)?.relevance;
       return {
-        relevance: v ? round(v.relevance) : null,
+        ...(v === undefined || typeof relevance === "number"
+          ? { relevance: typeof relevance === "number" ? round(relevance) : null }
+          : {}),
         ...(v ? roundAnswers(v.answers) : {}),
         decided: v?.decided ?? null,
       };

@@ -1,0 +1,100 @@
+{
+  "items": {
+    "github:boykopovar/anyps5": {
+      "name": "boykopovar/AnyPS5",
+      "category": "out_of_scope",
+      "standalone": 0.64,
+      "desc": "7c512e8e",
+      "decided": "2026-10-12",
+      "model": "jev-1.13.0",
+      "lastSeen": "2026-10-12"
+    },
+    "github:mattpocock/skills": {
+      "name": "mattpocock/skills",
+      "category": "agent_tooling",
+      "standalone": 0.06,
+      "desc": "fa4cb060",
+      "decided": "2026-10-12",
+      "model": "jev-1.13.0",
+      "lastSeen": "2026-10-12"
+    },
+    "github:tester-army/e2e": {
+      "name": "tester-army/e2e",
+      "category": "out_of_scope",
+      "standalone": 0.33,
+      "desc": "28b5bb85",
+      "decided": "2026-10-12",
+      "model": "jev-1.13.0",
+      "lastSeen": "2026-10-12"
+    },
+    "github:heygen-com/hyperframes": {
+      "name": "heygen-com/hyperframes",
+      "category": "agent_tooling",
+      "standalone": 0.63,
+      "desc": "f597506b",
+      "decided": "2026-10-12",
+      "model": "jev-1.13.0",
+      "lastSeen": "2026-10-12"
+    },
+    "github:alibaba/open-code-review": {
+      "name": "alibaba/open-code-review",
+      "category": "harness_framework",
+      "standalone": 0.81,
+      "desc": "9d383cac",
+      "decided": "2026-10-12",
+      "model": "jev-1.13.0",
+      "lastSeen": "2026-10-12"
+    },
+    "github:mvschwarz/openrig": {
+      "name": "mvschwarz/openrig",
+      "category": "multi_agent",
+      "standalone": 0.87,
+      "desc": "4d435860",
+      "decided": "2026-10-12",
+      "model": "jev-1.13.0",
+      "lastSeen": "2026-10-12"
+    },
+    "github:dataelement/dsh-desktop": {
+      "name": "dataelement/dsh-desktop",
+      "category": "harness_framework",
+      "standalone": 0.81,
+      "desc": "7033d221",
+      "decided": "2026-10-12",
+      "model": "jev-1.13.0",
+      "lastSeen": "2026-10-12"
+    },
+    "github:cursor/plugins": {
+      "name": "cursor/plugins",
+      "category": "coding_agent",
+      "standalone": 0.05,
+      "desc": "90804b7f",
+      "decided": "2026-10-12",
+      "model": "jev-1.13.0",
+      "lastSeen": "2026-10-12"
+    },
+    "github:nealbridges/vulnhunter": {
+      "name": "nealbridges/VulnHunter",
+      "category": "other_agent",
+      "standalone": 0.83,
+      "desc": "ba30994e",
+      "decided": "2026-10-12",
+      "model": "jev-1.13.0",
+      "lastSeen": "2026-10-12"
+    },
+    "github:whitetowerai/ohmygame": {
+      "name": "WhiteTowerAI/ohmygame",
+      "category": "coding_agent",
+      "standalone": 0.83,
+      "desc": "b06fab7b",
+      "decided": "2026-10-12",
+      "model": "jev-1.13.0",
+      "lastSeen": "2026-10-12"
+    },
+    "npm:hand-fixed": {
+      "name": "hand-fixed",
+      "category": "agent_tooling",
+      "standalone": null,
+      "lastSeen": "2026-10-12"
+    }
+  }
+}

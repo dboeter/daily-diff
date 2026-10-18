@@ -27,13 +27,10 @@ import {
 } from "./trending-rank.ts";
 import {
   buildTrendingRankingFile,
-  cachedClassifications,
-  classifyItems,
-  fallbackClassification,
+  classifyTrendingItems,
   loadClassifyCache,
   loadMatchState,
   matchApps,
-  nextClassifyCache,
   type Classification,
   type ClassifyCache,
   type ClassifyItem,
@@ -493,31 +490,20 @@ export async function composeTrendingReport(
   const firstItems = itemsFor(firstRows);
   // Saved verdicts are Jev's, so they hold without a key or when this run's calls
   // fail; only the rest is asked, and `classifiedBy` describes those.
-  const saved = classifyCache
-    ? cachedClassifications(classifyCache, firstItems)
-    : new Map<string, Classification>();
-  const asked = firstItems.filter((item) => !saved.has(item.key));
-  const byJev = apiKey ? await classifyItems(asked, apiKey, ask) : null;
-  const classifiedBy = byJev ? "jev" : "topics";
-  const classifications = new Map(
-    firstItems.map((item) => [
-      item.key,
-      saved.get(item.key) ?? byJev?.get(item.key) ?? fallbackClassification(item),
-    ]),
-  );
-  console.log(
-    `  [trending] Classified ${classifications.size} items: ${saved.size} saved, the rest ` +
-      (byJev
-        ? "by Jev"
-        : `by topic labels (fallback: ${apiKey ? "too many Jev failures" : "no TYPESAFE_API_KEY"})`),
-  );
+  const { classifications, classifiedBy, nextCache } = await classifyTrendingItems(firstItems, {
+    apiKey,
+    cache: classifyCache,
+    dateStr,
+    ask,
+  });
 
   const fetched = await fetchMissingGains(firstRows, classifications, fetchGain);
   const githubRows =
     fetched.size > 0
       ? rankGithubRepos(data.trendingRepos, data.searchRepos, dateStr, history, fetched)
       : firstRows;
-  // The trace and the cache read the final rows' gains.
+  // The trace reads the final rows' gains. Same keys as firstItems: the gains re-rank rows, they
+  // neither add nor drop any, so the cache built from firstItems marks every item seen.
   const items = itemsFor(githubRows);
   const candidates = buildRadarCandidates(data.openrouter.apps, data.npm, githubRows, dateStr);
 
@@ -548,9 +534,7 @@ export async function composeTrendingReport(
     ...report,
     ...(rankingFile !== undefined ? { rankingFile } : {}),
     ...(nextMatches !== undefined ? { nextMatches } : {}),
-    ...(classifyCache
-      ? { nextClassifications: nextClassifyCache(classifyCache, items, classifications, dateStr) }
-      : {}),
+    ...(nextCache ? { nextClassifications: nextCache } : {}),
     nextStarHistory: nextStarHistory(history, githubRows, dateStr),
   };
 }

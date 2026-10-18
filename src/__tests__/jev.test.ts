@@ -35,7 +35,7 @@ describe("judgeItems", () => {
     items: Item[],
     cache: VerdictCache<A> | null,
     ask = stub({}),
-    extra: { stage?: boolean } = {},
+    extra: { fingerprint?: boolean } = {},
   ) =>
     judgeItems(items, {
       tag: "test",
@@ -44,7 +44,7 @@ describe("judgeItems", () => {
         if (!Number.isFinite(a.score)) throw new Error("bad shape");
         return { relevance: a.score, keep: a.score >= 0.5 };
       },
-      ...(extra.stage ? { stage: (i: Item) => i.stage } : {}),
+      ...(extra.fingerprint ? { fingerprint: (i: Item) => i.stage } : {}),
       apiKey: "k",
       cache,
       dateStr: DATE,
@@ -87,18 +87,43 @@ describe("judgeItems", () => {
     expect(j.verdicts.get("x")?.relevance).toBe(1);
   });
 
-  it("asks a stage item again at a new stage and saves the stage", async () => {
+  it("asks an item again at a new fingerprint and saves the fingerprint", async () => {
     const cache: VerdictCache<A> = {
-      items: { b: { title: "t", stage: "Introduced", answers: { score: 0 }, lastSeen: DATE } },
+      items: { b: { title: "t", fingerprint: "Introduced", answers: { score: 0 }, lastSeen: DATE } },
     };
     const ask = stub({ b: 1 });
-    const j = await judge([item("b", "Enacted")], cache, ask, { stage: true });
+    const j = await judge([item("b", "Enacted")], cache, ask, { fingerprint: true });
     expect(ask).toHaveBeenCalledTimes(1);
-    expect(j.nextCache?.items["b"]).toMatchObject({ stage: "Enacted", answers: { score: 1 } });
-    // Without a stage hook the stage is not compared.
+    expect(j.nextCache?.items["b"]).toMatchObject({ fingerprint: "Enacted", answers: { score: 1 } });
+    // Without a fingerprint hook the fingerprint is not compared.
     const ask2 = stub({});
     await judge([item("b", "Enacted")], cache, ask2);
     expect(ask2).not.toHaveBeenCalled();
+  });
+
+  it("reuses a pinned entry whatever its fingerprint, and keeps it pinned", async () => {
+    const cache: VerdictCache<A> = {
+      items: { b: { title: "t", pinned: true, answers: { score: 1 }, lastSeen: "2026-10-01" } },
+    };
+    const ask = stub({ b: 0 });
+    const j = await judge([item("b", "Enacted")], cache, ask, { fingerprint: true });
+    expect(ask).not.toHaveBeenCalled();
+    expect(j.verdicts.get("b")).toMatchObject({ keep: true, decided: "by hand" });
+    expect(j.nextCache?.items["b"]).toEqual({ ...cache.items["b"], lastSeen: DATE });
+  });
+
+  it("leaves relevance out of the trace when the decision has none", async () => {
+    const j = await judgeItems([item("c")], {
+      tag: "test",
+      request: (i) => ({ state: { id: i.id }, questions: {} }),
+      decide: (a: A) => ({ category: a.score > 0.5 ? "yes" : "no" }),
+      apiKey: "k",
+      cache: { items: {} },
+      dateStr: DATE,
+      unseenDays: 30,
+      ask: stub({ c: 1 }),
+    });
+    expect(j.traceFields(item("c"))).toEqual({ score: 1, decided: null });
   });
 
   it("decides by saved verdicts only when more than half the calls fail, but saves what arrived", async () => {

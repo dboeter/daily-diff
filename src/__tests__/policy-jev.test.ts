@@ -122,8 +122,8 @@ describe("selectPolicyItems", () => {
     const saved = { answers: answers(1, 0, 0, 0), decided: "2026-10-01", lastSeen: "2026-10-13" };
     const cache: PolicyVerdicts = {
       items: {
-        moved: { ...saved, title: "Title moved", stage: "Introduced" },
-        same: { ...saved, title: "Title same", stage: "Introduced" },
+        moved: { ...saved, title: "Title moved", fingerprint: "Introduced" },
+        same: { ...saved, title: "Title same", fingerprint: "Introduced" },
         // Saved before verdicts carried a stage.
         legacy: { ...saved, title: "Title legacy" },
         plain: { ...saved, title: "Title plain" },
@@ -145,7 +145,7 @@ describe("selectPolicyItems", () => {
     ]);
     expect(sel.items.map((i) => i.id)).toEqual(["moved", "legacy"]);
     expect(sel.nextVerdicts?.items["moved"]).toMatchObject({
-      stage: "Became law",
+      fingerprint: "Became law",
       answers: answers(1, 1, 1, 2),
     });
   });
