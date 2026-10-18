@@ -1,5 +1,5 @@
 {
-  "generated": "2026-10-17T01:20:24.930Z",
+  "generated": "2026-10-18T01:00:13.253Z",
   "labels": {
     "ai-agents": "AI Agents",
     "ai-hn": "AI Discussions",
@@ -21,6 +21,15 @@
   ],
   "overview": "📅 Overview",
   "dates": [
+    {
+      "date": "2026-10-18",
+      "reports": [
+        "ai-agents",
+        "ai-hn",
+        "ai-web",
+        "ai-policy"
+      ]
+    },
     {
       "date": "2026-10-17",
       "reports": [
