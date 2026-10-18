@@ -10,6 +10,7 @@
  * item (`trending-jev.ts`).
  */
 
+import type { Numbered } from "./summarized-table.ts";
 import fs from "node:fs";
 import path from "node:path";
 import type { SearchRepo, TrendingRepo } from "./trending.ts";
@@ -81,8 +82,6 @@ export interface RadarRow {
   /** Normalized merge links (`repo:<owner/repo>`, `host:<hostname>`), see `urlMerge`. */
   links: string[];
 }
-
-export type Numbered<T> = T & { n: number };
 
 export interface TrendingReportData {
   radar: Numbered<RadarRow>[];

@@ -17,7 +17,7 @@ import {
   buildPolicySummariesPrompt,
   buildPolicyProsePrompt,
 } from "../prompts-data.ts";
-import { TABLES_MARKER } from "../report-builders.ts";
+import { TABLES_MARKER, numberRows } from "../summarized-table.ts";
 import { MODELS_REPORT, SECTIONS } from "../i18n.ts";
 import type { RepoConfig, GitHubItem, GitHubRelease } from "../github.ts";
 import { EMPTY_NPM, EMPTY_OPENROUTER, type TrendingData } from "../trending.ts";
@@ -272,7 +272,7 @@ describe("buildPolicySummariesPrompt", () => {
   ];
 
   it("numbers the items with their source and text, and asks for one `N:` line each", () => {
-    const result = buildPolicySummariesPrompt(items, "2026-10-14", "A Dutch AI practitioner.");
+    const result = buildPolicySummariesPrompt(numberRows(items), "2026-10-14", "A Dutch AI practitioner.");
     expect(result).toContain(
       "1. AI Act guidelines (European Commission, 2026-10-09) — The AI Office publishes guidelines.",
     );

@@ -2,17 +2,15 @@ import { describe, it, expect } from "vitest";
 import {
   buildProjectReportContent,
   buildStealthSection,
-  parseRowSummaries,
   renderTrendingTables,
   renderPolicyTable,
-  spliceTables,
   stripModelTitle,
   nestHeadings,
   renderReportBar,
   withReportBar,
-  TABLES_MARKER,
 } from "../report-builders.ts";
 import type { TrendingReportData } from "../trending-rank.ts";
+import { numberRows } from "../summarized-table.ts";
 import { TRENDING_REPORT } from "../i18n.ts";
 import type { ProjectActivity } from "../prompts.ts";
 import type { GitHubRelease } from "../github.ts";
@@ -174,37 +172,6 @@ describe("buildStealthSection", () => {
 // Trending tables
 // ---------------------------------------------------------------------------
 
-describe("parseRowSummaries", () => {
-  it("accepts the common numbering styles", () => {
-    const parsed = parseRowSummaries(
-      ["1: one.", "2. two.", "3) three.", "- 4: four.", "**5:** five.", "  6 :  six.  "].join("\n"),
-    );
-    expect([...parsed.entries()]).toEqual([
-      [1, "one."],
-      [2, "two."],
-      [3, "three."],
-      [4, "four."],
-      [5, "five."],
-      [6, "six."],
-    ]);
-  });
-
-  it("ignores lines without a leading number or text, and keeps the first occurrence", () => {
-    const parsed = parseRowSummaries(
-      [
-        "Here are the summaries:",
-        "",
-        "7:",
-        "3.5x growth this week",
-        "8: first.",
-        "8: second.",
-        "## 9: no",
-      ].join("\n"),
-    );
-    expect([...parsed.entries()]).toEqual([[8, "first."]]);
-  });
-});
-
 function trendingReport(over: Partial<TrendingReportData> = {}): TrendingReportData {
   return {
     radar: [
@@ -333,7 +300,7 @@ describe("renderPolicyTable", () => {
       [1, "Guidelines for providers."],
       [3, "A motion passed."],
     ]);
-    expect(renderPolicyTable([...items, motion], summaries)).toBe(
+    expect(renderPolicyTable(numberRows([...items, motion]), summaries)).toBe(
       "## EU\n\n" +
         "| Date | Source | Title | Stage | Summary |\n| :--- | :--- | :--- | :--- | :--- |\n" +
         "| 2026-10-09 | European Commission | [AI Act \\| guidelines](https://example.eu/a) |  | Guidelines for providers. |\n" +
@@ -346,40 +313,26 @@ describe("renderPolicyTable", () => {
 
   it("renders news items in their own section after every jurisdiction, without a stage column", () => {
     const news = { ...items[0]!, id: "4", source: "Politico Europe", news: true };
-    expect(renderPolicyTable([items[1]!, motion, news], new Map([[3, "A report."]]))).toMatch(
+    expect(renderPolicyTable(numberRows([items[1]!, motion, news]), new Map([[3, "A report."]]))).toMatch(
       /## Netherlands\n[\s\S]*\n\n## News & commentary\n\n\| Date \| Source \| Title \| Summary \|\n\| :--- \| :--- \| :--- \| :--- \|\n\| 2026-10-09 \| Politico Europe \| \[AI Act \\\| guidelines\]\(https:\/\/example\.eu\/a\) \| A report\. \|$/,
     );
   });
 
   it("falls back to the description when the model gave no summary", () => {
-    expect(renderPolicyTable(items, new Map())).toContain("| The AI Office publishes guidelines. |");
+    expect(renderPolicyTable(numberRows(items), new Map())).toContain(
+      "| The AI Office publishes guidelines. |",
+    );
   });
 
   it("truncates a long title in the link text only", () => {
     const long = { ...items[0]!, title: "x".repeat(300) };
-    const md = renderPolicyTable([long], new Map());
+    const md = renderPolicyTable(numberRows([long]), new Map());
     expect(md).toContain(`[${"x".repeat(200)}…](`);
     expect(md).not.toContain("x".repeat(201));
   });
 
   it("is empty with no items", () => {
     expect(renderPolicyTable([], new Map())).toBe("");
-  });
-});
-
-describe("spliceTables", () => {
-  it("replaces the marker line with the tables", () => {
-    const prose = `## Highlights\n\nText.\n\n${TABLES_MARKER}\n\n## Trends\n\nMore.`;
-    expect(spliceTables(prose, "TABLES")).toBe("## Highlights\n\nText.\n\nTABLES\n\n## Trends\n\nMore.");
-  });
-
-  it("appends the tables when the marker is missing", () => {
-    expect(spliceTables("## Highlights\n\nText.\n", "TABLES")).toBe("## Highlights\n\nText.\n\nTABLES");
-  });
-
-  it("drops the marker when there are no tables", () => {
-    const prose = `A.\n\n${TABLES_MARKER}\n\nB.`;
-    expect(spliceTables(prose, "")).toBe("A.\n\nB.");
   });
 });
 

@@ -9,6 +9,7 @@
 import path from "node:path";
 import { judgeItems, loadItemsFile, type AskJev, type VerdictCache } from "./jev.ts";
 import type { VendorItem } from "./data-vendors.ts";
+import { numberRows, type Numbered } from "./summarized-table.ts";
 import { VENDOR_SECTIONS, vendorSection, type VendorSection } from "./config.ts";
 
 /** `state` is `{ title, description, source }`. */
@@ -189,8 +190,8 @@ export interface KeptVendorItem extends VendorItem {
 }
 
 export interface VendorSelection {
-  /** In report order: by section, deprecations first, then by relevance (no verdict: feed order). */
-  items: KeptVendorItem[];
+  /** In report order: by section, deprecations first, then by relevance (no verdict: feed order); numbered in that order. */
+  items: Numbered<KeptVendorItem>[];
   /** "keywords" when there was no key or more than half the new calls failed. */
   rankedBy: "jev" | "keywords";
   /** null when the verdict file was malformed: it is left as it is. */
@@ -278,5 +279,5 @@ export async function selectVendorItems(
   }));
   const rankingFile = judgment.rankingFile(rows, { weights: DATA_WEIGHTS });
 
-  return { items: selected, rankedBy, nextVerdicts: judgment.nextCache, rankingFile };
+  return { items: numberRows(selected), rankedBy, nextVerdicts: judgment.nextCache, rankingFile };
 }

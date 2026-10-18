@@ -17,6 +17,7 @@ import type { AskJev } from "./jev.ts";
 import { nextDeadlines, upcomingDeadlines, type Deadline } from "./policy-deadlines.ts";
 import { loadReportedState, type ReportedState } from "./report-state.ts";
 import { collectNewItems, type NewItems } from "./new-items.ts";
+import { numberRows, type Numbered } from "./summarized-table.ts";
 import { POLICY_REPORT } from "./i18n.ts";
 
 export interface PolicyItem extends FeedItem {
@@ -48,7 +49,7 @@ export interface PolicyState extends ReportedState {
   deadlines?: Record<string, Deadline>;
 }
 
-export interface PolicyData extends NewItems<PolicyItem, PolicyState, PolicyVerdicts> {
+export interface PolicyData extends NewItems<Numbered<PolicyItem>, PolicyState, PolicyVerdicts> {
   /** The Upcoming deadlines section's rows; shown only when there are items. */
   deadlines: Deadline[];
   /** config.yml `policy.reader_profile`, for the report prompts. */
@@ -117,9 +118,9 @@ export async function fetchPolicyData(
   },
   sources: PolicySource[] = POLICY_SOURCES,
 ): Promise<PolicyData> {
-  // The report has one section per jurisdiction in JURISDICTIONS order, then News & commentary. Sorting
-  // here (stable, so relevance order holds within a section) keeps the summaries prompt's row numbers
-  // equal to the table's.
+  // The report has one section per jurisdiction in JURISDICTIONS order, then News & commentary. Sorted
+  // (stable, so relevance order holds within a section) and then numbered, so the row numbers run on
+  // down the page; the table and the summaries prompt both read each row's own number.
   const rank = (i: PolicyItem) => (i.news ? JURISDICTIONS.length : JURISDICTIONS.indexOf(i.jurisdiction));
   const data = await collectNewItems({
     tag: "policy",
@@ -140,7 +141,7 @@ export async function fetchPolicyData(
         dateStr,
         ...jev,
       });
-      return { ...selection, items: [...selection.items].sort((a, b) => rank(a) - rank(b)) };
+      return { ...selection, items: numberRows([...selection.items].sort((a, b) => rank(a) - rank(b))) };
     },
     extend: (kept, fetched): Pick<PolicyState, "deadlines"> => ({
       deadlines: nextDeadlines(state?.deadlines, kept, fetched, dateStr),

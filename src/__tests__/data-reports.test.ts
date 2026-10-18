@@ -16,6 +16,7 @@ import type { DevtoData } from "../devto.ts";
 import type { VendorData, VendorItem } from "../data-vendors.ts";
 import { selectVendorItems } from "../data-jev.ts";
 import { fetchVendorData } from "../data-vendors.ts";
+import { numberRows } from "../summarized-table.ts";
 
 const generateBody = vi.fn(async (_prompt: string) => "## Highlights\n\nText.");
 vi.mock("../report.ts", async (importOriginal) => ({
@@ -80,9 +81,9 @@ describe("buildDiscussionsReport", () => {
 
 describe("buildPolicyReport", () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "policy-report-"));
-  const data = (items: PolicyData["items"]): PolicyData => ({
+  const data = (items: PolicyItem[]): PolicyData => ({
     fetchSuccess: true,
-    items,
+    items: numberRows(items),
     nextState: { reported: Object.fromEntries(items.map((i) => [i.id, "2026-10-14"])) },
     observedState: { reported: {} },
     deadlines: [],

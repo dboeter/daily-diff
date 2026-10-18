@@ -39,16 +39,14 @@ import { saveStarHistory } from "./trending-rank.ts";
 import { buildProjectDigestPrompt, hasActivity, type ProjectActivity } from "./prompts.ts";
 import {
   buildProjectReportContent,
-  parseRowSummaries,
   renderTrendingTables,
   renderPolicyTable,
-  spliceTables,
   nestHeadings,
   renderVendorTables,
   policyTitleLabel,
-  TABLES_MARKER,
   type ProjectGroup,
 } from "./report-builders.ts";
+import { parseRowSummaries, spliceTables, TABLES_MARKER } from "./summarized-table.ts";
 import { saveArxivState, type ArxivData } from "./arxiv.ts";
 import type { HfData } from "./hf.ts";
 import { POLICY_STATE_FILE, type PolicyData, type PolicyItem } from "./policy.ts";

@@ -11,6 +11,7 @@ import { fetchBigQueryNotes } from "./data-bigquery.ts";
 import path from "node:path";
 import { loadReportedState, staleOnFirstSight, type ReportedState, type StateItem } from "./report-state.ts";
 import { collectNewItems, type NewItems } from "./new-items.ts";
+import type { Numbered } from "./summarized-table.ts";
 import { loadDataVerdicts, selectVendorItems, type DataVerdicts, type KeptVendorItem } from "./data-jev.ts";
 import type { AskJev } from "./jev.ts";
 import { daysBefore, toCstDateStr } from "./date.ts";
@@ -139,7 +140,7 @@ export function recentVendorItems(items: VendorItem[], dateStr: string): VendorI
 }
 
 /** The kept items in report order (selectVendorItems). */
-export type VendorData = NewItems<KeptVendorItem, DataState, DataVerdicts>;
+export type VendorData = NewItems<Numbered<KeptVendorItem>, DataState, DataVerdicts>;
 
 /** Fetch every feed, keep the new items, and let Jev (or the keyword rules) select them. Never throws. */
 export async function fetchVendorData(
