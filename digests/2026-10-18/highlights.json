@@ -1,0 +1,18 @@
+{
+  "ai-agents": [
+    "Cline adds GPT-6 support on OpenAI/Azure via max_completion_tokens for developers.",
+    "Claude Code 2.1.301 on Linux blocks previously allowed file deletions, breaking permission handling for automated workflows."
+  ],
+  "ai-hn": [
+    "Gemini 4 Argon now plays StarCraft, showing improved real-time reasoning useful for developers building interactive AI agents.",
+    "Anthropic traced ECDSA curve seeds to simple timestamps, removing a long-standing distrust in cryptographic standards used for AI security."
+  ],
+  "ai-web": [
+    "Claude-designed quantum circuits beat benchmarks by up to 10×, lowering qubit needs for chemistry, optimization, physics, and number theory tasks.",
+    "91% of Anthropic staff expect AI Nobel-level discoveries by 2030 vs 39% of public, revealing an expectations gap in workforce planning"
+  ],
+  "ai-policy": [
+    "EU opens consultation on AI Act Articles 75c‑75d implementing act (closing Nov 9), shaping conformity‑assessment and post‑market‑monitoring rules for high‑risk AI.",
+    "Anthropic’s draft US AI safety bill would limit federal power to block advanced models and pre‑empt state AI safety laws, affecting deployment compliance."
+  ]
+}
