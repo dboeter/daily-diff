@@ -156,17 +156,17 @@ export function nextPolicyState(
   return { reported, stages };
 }
 
-export async function fetchPolicyData(
+/** A paid advertorial's link path. */
+const SPONSORED_LINK_RE = /\/sponsored-content\//;
+
+/** Every source and feed in parallel; one entry per source, null when it failed. Also used by `scripts/jev-lab.ts`. */
+export async function fetchPolicySources(
   config: PolicyConfig,
   now: Date,
   dateStr: string,
-  state = loadPolicyState(),
-  jev: { apiKey?: string; cache: PolicyVerdicts | null; ask?: AskJev } = {
-    apiKey: process.env["TYPESAFE_API_KEY"],
-    cache: loadPolicyVerdicts(),
-  },
+  state: PolicyState | null,
   sources: PolicySource[] = POLICY_SOURCES,
-): Promise<PolicyData> {
+): Promise<(PolicyItem[] | null)[]> {
   const fromSources = sources.map(async (source) => {
     try {
       const items = await source.fetch({ config, now, dateStr, state });
@@ -177,11 +177,15 @@ export async function fetchPolicyData(
       return null;
     }
   });
-  const results = await Promise.all([
+  return Promise.all([
     ...fromSources,
     ...config.feeds.map(async (feed) => {
       try {
-        const items = recentNewsItems(await fetchRssFeed(feed.url), now);
+        // Politico's feeds carry paid advertorials under /sponsored-content/; on 2026-10-18 Jev kept one
+        // ("How can Europe leverage laws to secure cloud sovereignty?") once it read the full text.
+        const items = recentNewsItems(await fetchRssFeed(feed.url), now).filter(
+          (i) => !SPONSORED_LINK_RE.test(i.link),
+        );
         console.log(`  [policy] ${feed.name}: ${items.length} items within the news age limit`);
         return items.map((i): PolicyItem => ({
           ...i,
@@ -196,6 +200,20 @@ export async function fetchPolicyData(
       }
     }),
   ]);
+}
+
+export async function fetchPolicyData(
+  config: PolicyConfig,
+  now: Date,
+  dateStr: string,
+  state = loadPolicyState(),
+  jev: { apiKey?: string; cache: PolicyVerdicts | null; ask?: AskJev } = {
+    apiKey: process.env["TYPESAFE_API_KEY"],
+    cache: loadPolicyVerdicts(),
+  },
+  sources: PolicySource[] = POLICY_SOURCES,
+): Promise<PolicyData> {
+  const results = await fetchPolicySources(config, now, dateStr, state, sources);
   const fetched = results.flatMap((r) => r ?? []);
   const fresh = newPolicyItems(fetched, state, dateStr);
   const recorded = fresh.filter((i) => i.recordOnly);

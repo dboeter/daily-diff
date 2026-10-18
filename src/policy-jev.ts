@@ -141,6 +141,24 @@ const NEWS_IMPACT_QUESTION = {
     "How much is the US development reported in `title` and `description` expected to affect `reader`, their clients and colleagues, directly or indirectly?",
 };
 
+/** The Jev request for one item; also the baseline of `scripts/jev-lab.ts`. */
+export function policyRequest(
+  item: PolicyItem,
+  readerProfile: string,
+): { state: Record<string, string>; questions: Record<string, object> } {
+  const us = isUs(item.jurisdiction);
+  const state = {
+    title: item.title,
+    description: item.description,
+    // A stage item's `published` is its stage's date.
+    ...(item.stage ? { stage: item.stage, stage_date: item.published.slice(0, 10) } : {}),
+    ...(us ? { reader: readerProfile } : {}),
+  };
+  const impact = item.news ? NEWS_IMPACT_QUESTION : IMPACT_QUESTION;
+  const questions = us ? { ...BASE_QUESTIONS, impact } : BASE_QUESTIONS;
+  return { state, questions };
+}
+
 export interface PolicyAnswers {
   about_ai_policy: { noul: number };
   binding: { noul: number };
@@ -273,7 +291,7 @@ const WATCHLIST_OF: Record<Jurisdiction, keyof PolicyConfig["watchlist"] | null>
   us_states: "usStates",
   other: null,
 };
-const watchlistFor = (watchlist: PolicyConfig["watchlist"], j: Jurisdiction): string[] => {
+export const watchlistFor = (watchlist: PolicyConfig["watchlist"], j: Jurisdiction): string[] => {
   const key = WATCHLIST_OF[j];
   return key ? watchlist[key] : [];
 };
@@ -385,16 +403,7 @@ export async function selectPolicyItems(
     const { results, failed } = await mapJev(
       toAsk,
       async (item) => {
-        const us = isUs(item.jurisdiction);
-        const state = {
-          title: item.title,
-          description: item.description,
-          // A stage item's `published` is its stage's date.
-          ...(item.stage ? { stage: item.stage, stage_date: item.published.slice(0, 10) } : {}),
-          ...(us ? { reader: readerProfile } : {}),
-        };
-        const impact = item.news ? NEWS_IMPACT_QUESTION : IMPACT_QUESTION;
-        const questions = us ? { ...BASE_QUESTIONS, impact } : BASE_QUESTIONS;
+        const { state, questions } = policyRequest(item, readerProfile);
         const { model, answers } = await ask(state, questions, apiKey);
         const a = answers as PolicyAnswers;
         return { answers: a, model, ...policyRelevance(a, item.jurisdiction, item.news) };

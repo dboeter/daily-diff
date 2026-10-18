@@ -183,6 +183,29 @@ describe("fetchPolicyData", () => {
     expect(Object.keys(data.nextVerdicts!.items)).toEqual(["new AI rules", "new event"]);
   });
 
+  it("drops sponsored content from a feed", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response(
+        rss([
+          ["new AI rules", "Tue, 13 Oct 2026 08:00:00 +0000"],
+          ["sponsored-content/ad", "Tue, 13 Oct 2026 09:00:00 +0000"],
+        ]),
+      ),
+    );
+    const data = await fetchPolicyData(
+      config,
+      new Date("2026-10-13T23:00:00Z"),
+      "2026-10-14",
+      { reported: {} },
+      { apiKey: "k", cache: { items: {} }, ask },
+      [],
+    );
+    expect(ask.mock.calls.map(([state]) => (state as { title: string }).title)).not.toContain(
+      "sponsored-content/ad",
+    );
+    expect(data.items.map((i) => i.id)).toEqual(["new AI rules"]);
+  });
+
   it("adds registered sources' items, groups them by jurisdiction and survives a failing source", async () => {
     vi.spyOn(globalThis, "fetch").mockResolvedValue(
       new Response(rss([["new AI rules", "Tue, 13 Oct 2026 08:00:00 +0000"]])),
