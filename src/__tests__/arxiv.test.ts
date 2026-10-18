@@ -1,5 +1,6 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import {
+  fetchArxivData,
   extractTag,
   extractAllTags,
   extractAttr,
@@ -255,5 +256,24 @@ describe("ArXiv pool cutoff", () => {
     expect(
       nextArxivState([paper("2026-10-05T10:00:00Z"), paper("2026-10-05T17:30:00Z")], cutoff, "2026-10-06"),
     ).toEqual({ date: "2026-10-06", cutoff: "2026-10-02T17:59:00.000Z", newest: "2026-10-05T17:30:00.000Z" });
+  });
+});
+
+describe("fetchArxivData", () => {
+  afterEach(() => {
+    vi.useRealTimers();
+    vi.unstubAllEnvs();
+    vi.restoreAllMocks();
+  });
+
+  it("returns fetchSuccess false instead of throwing when the network is down", async () => {
+    vi.stubEnv("TYPESAFE_API_KEY", "");
+    vi.spyOn(console, "log").mockImplementation(() => {});
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    vi.spyOn(globalThis, "fetch").mockRejectedValue(new TypeError("fetch failed"));
+    vi.useFakeTimers();
+    const pending = fetchArxivData("2026-10-19", null);
+    await vi.runAllTimersAsync();
+    expect(await pending).toMatchObject({ papers: [], fetchSuccess: false });
   });
 });

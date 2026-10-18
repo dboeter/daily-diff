@@ -18,14 +18,9 @@ import {
   fetchSkillsData,
   createGitHubIssue,
 } from "./github.ts";
-import { type ProjectActivity, buildProjectDigestPrompt, buildSkillsPrompt, hasActivity } from "./prompts.ts";
+import { type ProjectActivity, buildProjectDigestPrompt, hasActivity } from "./prompts.ts";
 import { matchProjectNews } from "./agent-news.ts";
-import {
-  buildTrendingSummariesPrompt,
-  buildTrendingProsePrompt,
-  buildHighlightsPrompt,
-  type ReportHighlights,
-} from "./prompts-data.ts";
+import { buildHighlightsPrompt, type ReportHighlights } from "./prompts-data.ts";
 import {
   callLlm,
   generateBody,
@@ -41,11 +36,9 @@ import {
 import {
   buildProjectReportContent,
   buildStealthSection,
-  renderTrendingTables,
   renderReportBar,
   withReportBar,
 } from "./report-builders.ts";
-import { summaryRows } from "./trending-rank.ts";
 import {
   buildWebReport,
   buildTrendingReport,
@@ -57,7 +50,7 @@ import {
   type SavedReport,
 } from "./data-reports.ts";
 import { loadWebState, fetchSiteContent, type WebFetchResult, type WebState } from "./web.ts";
-import { fetchTrendingData, EMPTY_NPM, EMPTY_OPENROUTER, type TrendingData } from "./trending.ts";
+import { fetchTrendingData, type TrendingData } from "./trending.ts";
 import { fetchStealthModels, type OpenRouterStealthModel } from "./openrouter.ts";
 import { fetchHnData, type HnData } from "./hn.ts";
 import { fetchArxivData, type ArxivData } from "./arxiv.ts";
@@ -188,60 +181,19 @@ async function fetchAllData(
     Promise.all(AGENTS.map((cfg) => fetchProject(cfg, daySince))),
     Promise.all(INFRA_REPOS.map((cfg) => fetchProject(cfg, daySince))),
     Promise.all(DATA_SECTIONS.map((s) => Promise.all(s.repos.map((cfg) => fetchProject(cfg, daySince))))),
-    weekly
-      ? fetchSkillsData(CLAUDE_SKILLS_REPO)
-          .then((d) => {
-            console.log(`  [claude-code-skills] prs: ${d.prs.length}, issues: ${d.issues.length}`);
-            return d;
-          })
-          .catch((err) => {
-            console.error(`  [claude-code-skills] fetch failed: ${err}`);
-            return noSkills;
-          })
-      : Promise.resolve(noSkills),
-    Promise.all([
-      fetchSiteContent("anthropic", webState).catch((err): WebFetchResult => {
-        console.error(`  [web/anthropic] fetch failed: ${err}`);
-        return {
-          site: "anthropic",
-          siteName: "Anthropic (Claude)",
-          isFirstRun: false,
-          newItems: [],
-          totalDiscovered: 0,
-        };
-      }),
-      fetchSiteContent("openai", webState).catch((err): WebFetchResult => {
-        console.error(`  [web/openai] fetch failed: ${err}`);
-        return { site: "openai", siteName: "OpenAI", isFirstRun: false, newItems: [], totalDiscovered: 0 };
-      }),
-    ]),
+    // No fetcher here throws: each returns its empty value (fetchSuccess false) on a failure.
+    weekly ? fetchSkillsData(CLAUDE_SKILLS_REPO) : Promise.resolve(noSkills),
+    Promise.all([fetchSiteContent("anthropic", webState), fetchSiteContent("openai", webState)]),
     // Fetched every day — the agents report matches trending repos as news —
     // but only reported weekly.
-    fetchTrendingData(weekly ? "weekly" : "daily", toCstDateStr(now)).catch((): TrendingData => ({
-      trendingRepos: [],
-      searchRepos: [],
-      trendingFetchSuccess: false,
-      openrouter: EMPTY_OPENROUTER,
-      npm: EMPTY_NPM,
-    })),
-    fetchHnData().catch((): HnData => ({ stories: [], fetchSuccess: false })),
-    fetchArxivData(toCstDateStr(now)).catch((): ArxivData => ({
-      papers: [],
-      fetchSuccess: false,
-      rankedBy: "recency",
-    })),
-    // Neither throws: a failure is fetchSuccess false.
+    fetchTrendingData(weekly ? "weekly" : "daily", toCstDateStr(now)),
+    fetchHnData(),
+    fetchArxivData(toCstDateStr(now)),
     fetchPolicyData(CONFIG.policy, now, toCstDateStr(now)),
     fetchVendorData(CONFIG.data, now),
-    weekly
-      ? fetchHfData().catch((): HfData => ({ models: [], fetchSuccess: false }))
-      : Promise.resolve<HfData>({ models: [], fetchSuccess: false }),
-    weekly
-      ? fetchDevtoData().catch((): DevtoData => ({ articles: [], fetchSuccess: false }))
-      : Promise.resolve<DevtoData>({ articles: [], fetchSuccess: false }),
-    weekly
-      ? fetchLobstersData().catch((): LobstersData => ({ stories: [], fetchSuccess: false }))
-      : Promise.resolve<LobstersData>({ stories: [], fetchSuccess: false }),
+    weekly ? fetchHfData() : Promise.resolve<HfData>({ models: [], fetchSuccess: false }),
+    weekly ? fetchDevtoData() : Promise.resolve<DevtoData>({ articles: [], fetchSuccess: false }),
+    weekly ? fetchLobstersData() : Promise.resolve<LobstersData>({ stories: [], fetchSuccess: false }),
     // Daily, unlike the rest of OpenRouter: stealth models are free for a short window.
     fetchStealthModels(),
   ]);
@@ -292,60 +244,6 @@ function summarizeProjects(id: SectionKey, activities: ProjectActivity[], dateSt
     MSG.summaryFailed,
     LLM_TOKENS_LISTING,
   );
-}
-
-/** Every LLM-generated report body. The weekly ones are empty on other days. */
-interface Summaries {
-  agentsSummary: string;
-  infraSummary: string;
-  skillsSummary: string;
-  /** Weekly trending: the per-row summaries (`N: text` lines) and the prose around the tables. */
-  trending: { summaries: string; prose: string };
-}
-
-/** Generate every report body. */
-async function generateSummaries(
-  agentActivities: ProjectActivity[],
-  infraActivities: ProjectActivity[],
-  skillsData: { prs: GitHubItem[]; issues: GitHubItem[] },
-  trendingData: TrendingData,
-  dateStr: string,
-  weekly: boolean,
-): Promise<Summaries> {
-  const report = trendingData.report;
-  const rows = report ? summaryRows(report) : [];
-  const [agentsSummary, infraSummary, skillsSummary, trendingSummaries, trendingProse] = await Promise.all([
-    summarizeProjects("agents", agentActivities, dateStr),
-    summarizeProjects("infra", infraActivities, dateStr),
-    weekly
-      ? summarize(
-          "claude-code-skills",
-          buildSkillsPrompt(skillsData.prs, skillsData.issues, dateStr),
-          MSG.skillsFailed,
-        )
-      : Promise.resolve(""),
-    // Trending: code ranks and renders the tables; one call writes the row
-    // summaries, the other the prose around the tables. A failed summaries
-    // call is "": the rows fall back to their descriptions.
-    report && rows.length > 0
-      ? summarize("trending-summaries", buildTrendingSummariesPrompt(rows, dateStr), "", LLM_TOKENS_LISTING)
-      : Promise.resolve(""),
-    report
-      ? summarize(
-          "trending",
-          buildTrendingProsePrompt(renderTrendingTables(report, new Map()), trendingData, dateStr),
-          MSG.trendingFailed,
-          LLM_TOKENS_LISTING,
-        )
-      : Promise.resolve(""),
-  ]);
-
-  return {
-    agentsSummary,
-    infraSummary,
-    skillsSummary,
-    trending: { summaries: trendingSummaries, prose: trendingProse },
-  };
 }
 
 // ---------------------------------------------------------------------------
@@ -419,23 +317,12 @@ async function main(): Promise<void> {
     })),
   }));
 
-  // 2. Generate every report body
+  // 2. The agents report's two sections; every other report makes its own calls in its builder.
   console.log("  Generating summaries...");
-  const summaries = await generateSummaries(
-    agentActivities,
-    infraActivities,
-    skillsData,
-    trendingData,
-    dateStr,
-    weekly,
-  );
-
-  // First gate. On a daily run at most the agents and infra calls have happened
-  // by now, below LLM_MIN_SAMPLES, so this only arms on the weekly run (5 calls:
-  // agents, infra, skills, trending summaries, trending prose); the second gate,
-  // after the builders, covers every run. Bailing here costs nothing — no file
-  // has been written yet.
-  assertLlmHealthy("summary");
+  const [agentsSummary, infraSummary] = await Promise.all([
+    summarizeProjects("agents", agentActivities, dateStr),
+    summarizeProjects("infra", infraActivities, dateStr),
+  ]);
 
   // 3. Build every report
   // The infra section is a group in the agents report since October 2026.
@@ -445,8 +332,8 @@ async function main(): Promise<void> {
       heading: reportHeading("ai-agents", dateStr),
       utcStr,
       groups: [
-        { title: CONFIG.agents.title, activities: agentActivities, summary: summaries.agentsSummary },
-        { title: CONFIG.infra.title, activities: infraActivities, summary: summaries.infraSummary },
+        { title: CONFIG.agents.title, activities: agentActivities, summary: agentsSummary },
+        { title: CONFIG.infra.title, activities: infraActivities, summary: infraSummary },
       ],
       period: PROJECT_SCOPE.period,
       preamble: buildStealthSection(stealthModels),
@@ -470,13 +357,7 @@ async function main(): Promise<void> {
     ),
     ...(weekly
       ? [
-          buildTrendingReport(
-            trendingData,
-            summaries.trending,
-            { summary: summaries.skillsSummary, repo: CLAUDE_SKILLS_REPO },
-            utcStr,
-            dateStr,
-          ),
+          buildTrendingReport(trendingData, { ...skillsData, repo: CLAUDE_SKILLS_REPO }, utcStr, dateStr),
           buildModelsReport(hfData, trendingData.openrouter, utcStr, dateStr),
         ]
       : []),
@@ -487,10 +368,10 @@ async function main(): Promise<void> {
     (a, b) => LIVE_REPORT_IDS.indexOf(a.id) - LIVE_REPORT_IDS.indexOf(b.id),
   );
 
-  // Second gate: an outage that starts *after* the first gate would otherwise
-  // sail straight through — the builders each swallow their own failure and
-  // just skip a report. No report file or issue exists yet; state files may,
-  // but the failing exit skips the commit step, so they are never published.
+  // The LLM health gate: the builders each swallow their own failure and just
+  // skip a report, so an outage would otherwise publish a day of placeholders.
+  // No report file or issue exists yet; state files may, but the failing exit
+  // skips the commit step, so they are never published.
   assertLlmHealthy("report");
 
   // The highlights pass reads the bodies, not the link bars.

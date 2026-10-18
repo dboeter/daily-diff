@@ -45,6 +45,8 @@ export interface WebFetchResult {
   newItems: WebPageItem[];
   /** Total URLs discovered in sitemap (for context in the report) */
   totalDiscovered: number;
+  /** False when the fetch threw (a sub-sitemap that fails is skipped on its own). */
+  fetchSuccess: boolean;
 }
 
 // ---------------------------------------------------------------------------
@@ -271,10 +273,21 @@ export function saveWebState(state: WebState): void {
 // Main export
 // ---------------------------------------------------------------------------
 
+/** One site's new pages. Never throws: a failed fetch is an empty result with `fetchSuccess: false`. */
 export async function fetchSiteContent(
   site: "anthropic" | "openai",
   state: WebState,
 ): Promise<WebFetchResult> {
+  try {
+    return await fetchSite(site, state);
+  } catch (err) {
+    console.error(`  [web/${site}] fetch failed: ${err}`);
+    const empty = { isFirstRun: false, newItems: [], totalDiscovered: 0, fetchSuccess: false };
+    return { site, siteName: SITE_CONFIGS[site].name, ...empty };
+  }
+}
+
+async function fetchSite(site: "anthropic" | "openai", state: WebState): Promise<WebFetchResult> {
   const cfg = SITE_CONFIGS[site];
   const siteState = state[site];
   const isFirstRun = Object.keys(siteState.seenUrls).length === 0;
@@ -356,5 +369,6 @@ export async function fetchSiteContent(
     isFirstRun,
     newItems: items,
     totalDiscovered: allDiscovered.length,
+    fetchSuccess: true,
   };
 }

@@ -6,8 +6,10 @@ import {
   buildDataReport,
   buildDiscussionsReport,
   buildPolicyReport,
+  buildTrendingReport,
   type DataSection,
 } from "../data-reports.ts";
+import { EMPTY_TRENDING, type TrendingData } from "../trending.ts";
 import { MSG } from "../i18n.ts";
 import type { ProjectActivity } from "../prompts.ts";
 import type { PolicyData, PolicyItem } from "../policy.ts";
@@ -75,6 +77,84 @@ describe("buildDiscussionsReport", () => {
       "2026-10-12",
     );
     expect(report).toBeNull();
+    expect(generateBody).not.toHaveBeenCalled();
+  });
+});
+
+describe("buildTrendingReport", () => {
+  const data: TrendingData = {
+    ...EMPTY_TRENDING,
+    report: {
+      radar: [
+        {
+          n: 1,
+          keys: ["npm:kilo"],
+          name: "Kilo",
+          url: "https://kilo.ai/",
+          description: "Kilo description.",
+          sources: ["npm"],
+          signals: ["1,000/week"],
+          isNew: false,
+          links: [],
+        },
+      ],
+      categories: [],
+      classifiedBy: "jev",
+    },
+  };
+  const skills = { prs: [], issues: [], repo: "anthropics/skills" };
+  const isSummaries = (p: string) => p.includes("`N: <2 sentences>`");
+  const isProse = (p: string) => p.includes("<!-- tables -->");
+  const build = () => buildTrendingReport(data, skills, "00:00", "2026-10-19");
+
+  it("splices the row summaries and the prose, and adds the Skills section", async () => {
+    generateBody.mockReset();
+    generateBody.mockImplementation(async (p: string) =>
+      isSummaries(p)
+        ? "1: Kilo is an agent."
+        : isProse(p)
+          ? "## Highlights\n\nH.\n\n<!-- tables -->\n\n## Signals\n\nS."
+          : "## Top Skills\n\nK.",
+    );
+    const content = (await build())!.content;
+    expect(content).toMatch(/H\.\n\n## [^\n]+\n\n[\s\S]*\| Kilo is an agent\. \|\n\n## Signals/);
+    expect(content).toContain("## Claude Code Skills");
+    expect(content).toContain("### Top Skills\n\nK.");
+    expect(generateBody).toHaveBeenCalledTimes(3);
+  });
+
+  it("shows the descriptions when the summaries call fails", async () => {
+    generateBody.mockReset();
+    generateBody.mockImplementation(async (p: string) => {
+      if (isSummaries(p)) throw new Error("HTTP 504");
+      return isProse(p) ? "## Highlights\n\nH.\n\n<!-- tables -->" : "K.";
+    });
+    expect((await build())!.content).toContain("| Kilo description. |");
+  });
+
+  it("is still written with the failure notice when the prose call fails", async () => {
+    generateBody.mockReset();
+    generateBody.mockImplementation(async (p: string) => {
+      if (isProse(p)) throw new Error("HTTP 504");
+      return isSummaries(p) ? "1: S." : "K.";
+    });
+    const content = (await build())!.content;
+    expect(content).toContain(MSG.trendingFailed);
+    expect(content).toContain("| S. |");
+  });
+
+  it("shows the Skills failure notice when the Skills call fails", async () => {
+    generateBody.mockReset();
+    generateBody.mockImplementation(async (p: string) => {
+      if (!isSummaries(p) && !isProse(p)) throw new Error("HTTP 504");
+      return "1: S.";
+    });
+    expect((await build())!.content).toContain(MSG.skillsFailed);
+  });
+
+  it("is skipped without an LLM call when there is no ranked data", async () => {
+    generateBody.mockReset();
+    expect(await buildTrendingReport(EMPTY_TRENDING, skills, "00:00", "2026-10-19")).toBeNull();
     expect(generateBody).not.toHaveBeenCalled();
   });
 });

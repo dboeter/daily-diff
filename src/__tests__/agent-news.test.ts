@@ -122,6 +122,7 @@ describe("matchProjectNews", () => {
         siteName: "Anthropic (Claude)",
         isFirstRun: false,
         totalDiscovered: 1,
+        fetchSuccess: true,
         newItems: [
           {
             url: "https://www.anthropic.com/news/claude-code-on-the-web",

@@ -360,7 +360,25 @@ export async function searchAiRepos(pushedSince: string, createdSince: string | 
  */
 export type TrendingPeriod = "daily" | "weekly";
 
+/** Never throws: a failure is an empty result with `trendingFetchSuccess: false`. */
 export async function fetchTrendingData(period: TrendingPeriod, dateStr: string): Promise<TrendingData> {
+  try {
+    return await fetchTrending(period, dateStr);
+  } catch (err) {
+    console.error(`  [trending] fetch failed: ${err}`);
+    return EMPTY_TRENDING;
+  }
+}
+
+export const EMPTY_TRENDING: TrendingData = {
+  trendingRepos: [],
+  searchRepos: [],
+  trendingFetchSuccess: false,
+  openrouter: EMPTY_OPENROUTER,
+  npm: EMPTY_NPM,
+};
+
+async function fetchTrending(period: TrendingPeriod, dateStr: string): Promise<TrendingData> {
   const daysAgo = (n: number) => new Date(Date.now() - n * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
   const weekly = period === "weekly";
 
@@ -374,9 +392,8 @@ export async function fetchTrendingData(period: TrendingPeriod, dateStr: string)
   const data: TrendingData = { trendingRepos, searchRepos, trendingFetchSuccess: success, openrouter, npm };
   if (!weekly || !hasTrendingData(data)) return data;
 
-  // Caught here, not left to the caller: index.ts wraps fetchTrendingData in
-  // `.catch(() => empty)`, so a throw would also wipe trendingRepos and
-  // searchRepos — Monday's agent news.
+  // Caught here, not by fetchTrendingData's catch-all, which would also wipe
+  // trendingRepos and searchRepos — Monday's agent news.
   try {
     return { ...data, report: await composeTrendingReport(data, dateStr) };
   } catch (err) {

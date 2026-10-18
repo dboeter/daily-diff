@@ -425,7 +425,17 @@ export function nextArxivState(pool: ArxivPaper[], cutoff: number, dateStr: stri
   return { date: dateStr, cutoff: new Date(cutoff).toISOString(), newest: new Date(newest).toISOString() };
 }
 
+/** Never throws: a failure is an empty result with `fetchSuccess: false`. */
 export async function fetchArxivData(dateStr: string, state = loadArxivState()): Promise<ArxivData> {
+  try {
+    return await fetchArxiv(dateStr, state);
+  } catch (err) {
+    console.error(`  [arxiv] fetch failed: ${err}`);
+    return { papers: [], fetchSuccess: false, rankedBy: "recency" };
+  }
+}
+
+async function fetchArxiv(dateStr: string, state: ArxivState | null): Promise<ArxivData> {
   const cutoff = submissionCutoff(state, dateStr, new Date());
   const seen = new Map<string, ArxivPaper>();
   let requests = 0;

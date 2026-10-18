@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { parseTrendingHtml, searchAiRepos } from "../trending.ts";
+import { fetchTrendingData, parseTrendingHtml, searchAiRepos } from "../trending.ts";
 
 const SAMPLE_HTML = `
 <main>
@@ -205,5 +205,22 @@ describe("searchAiRepos", () => {
     expect(errors).toHaveBeenCalledWith(
       expect.stringContaining('"coding-agent" page 2: Error: GitHub API error 500'),
     );
+  });
+});
+
+describe("fetchTrendingData", () => {
+  afterEach(() => {
+    vi.useRealTimers();
+    vi.restoreAllMocks();
+  });
+
+  it("returns trendingFetchSuccess false instead of throwing when the network is down", async () => {
+    vi.spyOn(console, "log").mockImplementation(() => {});
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    vi.spyOn(globalThis, "fetch").mockRejectedValue(new TypeError("fetch failed"));
+    vi.useFakeTimers();
+    const pending = fetchTrendingData("daily", "2026-10-19");
+    await vi.runAllTimersAsync();
+    expect(await pending).toMatchObject({ trendingRepos: [], searchRepos: [], trendingFetchSuccess: false });
   });
 });

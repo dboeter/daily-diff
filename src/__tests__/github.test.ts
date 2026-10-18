@@ -3,6 +3,7 @@ import {
   closeSupersededIssues,
   fetchHotIssues,
   fetchRecentReleases,
+  fetchSkillsData,
   fetchWeeklyStarGain,
   gainFromHistory,
   GitHubApiError,
@@ -228,6 +229,19 @@ describe("fetchRecentReleases", () => {
 
 /** Epoch seconds of a UTC date. */
 const weekOf = (date: string) => Date.parse(`${date}T00:00:00Z`) / 1000;
+
+describe("fetchSkillsData", () => {
+  afterEach(() => vi.useRealTimers());
+
+  it("returns no PRs and no issues instead of throwing when the network is down", async () => {
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    vi.spyOn(globalThis, "fetch").mockRejectedValue(new TypeError("fetch failed"));
+    vi.useFakeTimers();
+    const pending = fetchSkillsData("anthropics/skills");
+    await vi.runAllTimersAsync();
+    expect(await pending).toEqual({ prs: [], issues: [] });
+  });
+});
 
 describe("gainFromHistory", () => {
   // Sunday 2026-10-11 22:37 UTC, the weekly run: the window is Sun 10-04 .. Sat 10-10.

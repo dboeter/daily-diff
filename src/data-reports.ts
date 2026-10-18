@@ -24,6 +24,8 @@ import {
   buildArxivPrompt,
   buildModelsPrompt,
   buildPolicySummariesPrompt,
+  buildTrendingSummariesPrompt,
+  buildTrendingProsePrompt,
   buildPolicyProsePrompt,
   buildDataSummariesPrompt,
   buildDataProsePrompt,
@@ -35,8 +37,9 @@ import { generateBody, saveFile, autoGenFooter, LLM_TOKENS_WEB, LLM_TOKENS_LISTI
 import { saveWebState, type WebFetchResult, type WebState } from "./web.ts";
 import type { TrendingData } from "./trending.ts";
 import { saveClassifyCache, saveMatchState } from "./trending-jev.ts";
-import { saveStarHistory } from "./trending-rank.ts";
-import { buildProjectDigestPrompt, hasActivity, type ProjectActivity } from "./prompts.ts";
+import { saveStarHistory, summaryRows } from "./trending-rank.ts";
+import { buildProjectDigestPrompt, buildSkillsPrompt, hasActivity, type ProjectActivity } from "./prompts.ts";
+import type { GitHubItem } from "./github.ts";
 import {
   buildProjectReportContent,
   renderTrendingTables,
@@ -148,10 +151,16 @@ export async function buildWebReport(
 // Trending report
 // ---------------------------------------------------------------------------
 
+/**
+ * Three LLM calls: the row summaries, the prose around the code-rendered
+ * tables, and the Skills section. A failed summaries call leaves the
+ * descriptions in the rows; a failed prose call leaves MSG.trendingFailed and
+ * the report is still written (unlike Policy Watch, whose report is skipped:
+ * here the tables carry the report); a failed Skills call leaves MSG.skillsFailed.
+ */
 export async function buildTrendingReport(
   trendingData: TrendingData,
-  trending: { summaries: string; prose: string },
-  skills: { summary: string; repo: string },
+  skills: { prs: GitHubItem[]; issues: GitHubItem[]; repo: string },
   utcStr: string,
   dateStr: string,
 ): Promise<SavedReport | null> {
@@ -160,6 +169,26 @@ export async function buildTrendingReport(
     console.log("  [trending] No ranked data, skipping report.");
     return null;
   }
+  const call = (tag: string, prompt: string, failMsg: string, maxTokens?: number) => {
+    console.log(`  [${tag}] Calling LLM...`);
+    return generateBody(prompt, maxTokens).catch((err) => {
+      console.error(`  [${tag}] LLM call failed: ${err}`);
+      return failMsg;
+    });
+  };
+  const rows = summaryRows(report);
+  const [summaries, prose, skillsSummary] = await Promise.all([
+    rows.length > 0
+      ? call("trending-summaries", buildTrendingSummariesPrompt(rows, dateStr), "", LLM_TOKENS_LISTING)
+      : "",
+    call(
+      "trending",
+      buildTrendingProsePrompt(renderTrendingTables(report, new Map()), trendingData, dateStr),
+      MSG.trendingFailed,
+      LLM_TOKENS_LISTING,
+    ),
+    call("claude-code-skills", buildSkillsPrompt(skills.prs, skills.issues, dateStr), MSG.skillsFailed),
+  ]);
 
   // Skills ranks the community's most-discussed Claude Code skills — the same
   // "what's popular" genre as trending repos, so it rides along here.
@@ -167,14 +196,14 @@ export async function buildTrendingReport(
     `\n\n---\n\n## ${TRENDING_REPORT.skillsHeading}\n\n` +
     `${TRENDING_REPORT.skillsSource(skills.repo)}\n\n` +
     // Code renders "## Claude Code Skills"; the body's own sections go below it.
-    nestHeadings(skills.summary, 3);
+    nestHeadings(skillsSummary, 3);
 
-  const tables = renderTrendingTables(report, parseRowSummaries(trending.summaries));
+  const tables = renderTrendingTables(report, parseRowSummaries(summaries));
   const trendingContent = assembleReport(
     "ai-trending",
     dateStr,
     `> ${REPORT_META.sources(TRENDING_REPORT.sources)} | ${REPORT_META.generated(utcStr)}`,
-    spliceTables(trending.prose, tables) + skillsSection,
+    spliceTables(prose, tables) + skillsSection,
   );
 
   // Only once the report exists, like the ArXiv state.

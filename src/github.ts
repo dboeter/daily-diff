@@ -314,7 +314,19 @@ export async function ensureLabel(name: string, color: string): Promise<void> {
  * PRs sorted by popularity (comment count); issues sorted by comments.
  * No `since` filter — we want all-time hot items, not just the last 24 h.
  */
+/** Never throws: a failed fetch is no PRs and no issues. */
 export async function fetchSkillsData(repo: string): Promise<{ prs: GitHubItem[]; issues: GitHubItem[] }> {
+  try {
+    const data = await fetchSkills(repo);
+    console.log(`  [claude-code-skills] prs: ${data.prs.length}, issues: ${data.issues.length}`);
+    return data;
+  } catch (err) {
+    console.error(`  [claude-code-skills] fetch failed: ${err}`);
+    return { prs: [], issues: [] };
+  }
+}
+
+async function fetchSkills(repo: string): Promise<{ prs: GitHubItem[]; issues: GitHubItem[] }> {
   const [prs, issuesRaw] = await Promise.all([
     githubGet<GitHubItem[]>(`https://api.github.com/repos/${repo}/pulls`, {
       state: "open",

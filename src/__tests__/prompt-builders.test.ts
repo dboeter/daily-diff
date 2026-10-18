@@ -342,6 +342,7 @@ describe("buildWebReportPrompt", () => {
           },
         ],
         totalDiscovered: 50,
+        fetchSuccess: true,
       },
     ];
     const result = buildWebReportPrompt(results, "2026-03-09");
@@ -352,7 +353,14 @@ describe("buildWebReportPrompt", () => {
 
   it("shows incremental mode for non-first-run", () => {
     const results: WebFetchResult[] = [
-      { site: "openai", siteName: "OpenAI", isFirstRun: false, newItems: [], totalDiscovered: 100 },
+      {
+        site: "openai",
+        siteName: "OpenAI",
+        isFirstRun: false,
+        newItems: [],
+        totalDiscovered: 100,
+        fetchSuccess: true,
+      },
     ];
     const result = buildWebReportPrompt(results, "2026-03-09");
     expect(result).toContain("Incremental update");
@@ -470,7 +478,14 @@ describe("buildDiscussionsPrompt", () => {
 
 describe("listing report layout", () => {
   const web: WebFetchResult[] = [
-    { site: "openai", siteName: "OpenAI", isFirstRun: false, newItems: [], totalDiscovered: 1 },
+    {
+      site: "openai",
+      siteName: "OpenAI",
+      isFirstRun: false,
+      newItems: [],
+      totalDiscovered: 1,
+      fetchSuccess: true,
+    },
   ];
   const prompts: Record<string, string> = {
     hn: hnOnlyPrompt({ stories: [], fetchSuccess: true }, "2026-10-12"),
