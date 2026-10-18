@@ -17,7 +17,7 @@ import {
   type PolicyState,
 } from "./policy.ts";
 import { loadDataVerdicts, selectVendorItems, type DataVerdicts, type KeptVendorItem } from "./data-jev.ts";
-import type { AskJev } from "./trending-jev.ts";
+import type { AskJev } from "./jev.ts";
 import { staleOnFirstSight } from "./policy-jev.ts";
 import { daysBefore, toCstDateStr } from "./date.ts";
 

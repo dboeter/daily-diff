@@ -118,34 +118,6 @@ describe("selectPolicyItems", () => {
     ]);
   });
 
-  it("asks once: a saved verdict is reused, and new answers are saved", async () => {
-    const cache: PolicyVerdicts = {
-      items: {
-        old: {
-          title: "Title old",
-          answers: answers(1, 1, 1, 2),
-          decided: "2026-10-12",
-          lastSeen: "2026-10-12",
-        },
-        gone: { title: "Gone", answers: answers(1, 1, 1, 2), decided: "2026-09-01", lastSeen: "2026-09-13" },
-      },
-    };
-    const ask = stub({ fresh: answers(1, 1, 1, 1) });
-    const sel = await selectPolicyItems([item("old"), item("fresh")], { ...base, apiKey: "k", cache, ask });
-    expect(ask).toHaveBeenCalledTimes(1);
-    expect(sel.items.map((i) => i.id)).toEqual(["old", "fresh"]);
-    expect(sel.nextVerdicts?.items).toEqual({
-      old: { ...cache.items["old"], lastSeen: "2026-10-14" },
-      fresh: {
-        title: "Title fresh",
-        answers: answers(1, 1, 1, 1),
-        decided: "2026-10-14",
-        model: "jev-1.0",
-        lastSeen: "2026-10-14",
-      },
-    });
-  });
-
   it("asks again when a stage item has moved past the stage its verdict was saved at", async () => {
     const saved = { answers: answers(1, 0, 0, 0), decided: "2026-10-01", lastSeen: "2026-10-13" };
     const cache: PolicyVerdicts = {

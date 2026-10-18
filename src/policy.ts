@@ -14,7 +14,7 @@ import { fetchRssFeed, recentNewsItems, type FeedItem } from "./rss.ts";
 import { JURISDICTIONS, type Jurisdiction, type PolicyConfig } from "./config.ts";
 import { POLICY_SOURCES, type PolicySource } from "./policy-sources.ts";
 import { loadPolicyVerdicts, selectPolicyItems, type PolicyVerdicts } from "./policy-jev.ts";
-import type { AskJev } from "./trending-jev.ts";
+import type { AskJev } from "./jev.ts";
 import { nextDeadlines, upcomingDeadlines, type Deadline } from "./policy-deadlines.ts";
 import { daysBefore } from "./date.ts";
 import { POLICY_REPORT } from "./i18n.ts";

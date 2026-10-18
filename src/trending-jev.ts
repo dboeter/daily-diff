@@ -13,7 +13,7 @@
 import { createHash } from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
-import { askJev, jevFailedTooOften, loadItemsFile, mapJev, saveItemsFile } from "./jev.ts";
+import { askJev, jevFailedTooOften, loadItemsFile, mapJev, saveItemsFile, type AskJev } from "./jev.ts";
 import type { Category, GithubRow, RadarRow } from "./trending-rank.ts";
 import type { SearchTopic } from "./trending.ts";
 import type { OpenRouterApp } from "./openrouter.ts";
@@ -100,16 +100,6 @@ export function fallbackClassification(item: ClassifyItem): Classification {
 // ---------------------------------------------------------------------------
 // Jev classification
 // ---------------------------------------------------------------------------
-
-/**
- * `askJev` without the type parameter, so tests can inject a stub that returns
- * fixed answers. Callers check the answer shape themselves.
- */
-export type AskJev = (
-  state: unknown,
-  questions: object,
-  apiKey: string,
-) => Promise<{ model: string; answers: unknown }>;
 
 /** One request per item, both questions together. */
 const CLASSIFY_QUESTIONS = {

@@ -20,12 +20,12 @@ import {
   saveClassifyCache,
   saveMatchState,
   STANDALONE_MIN_NOUL,
-  type AskJev,
   type Classification,
   type ClassifyCache,
   type ClassifyItem,
   type MatchState,
 } from "../trending-jev.ts";
+import type { AskJev } from "../jev.ts";
 import { urlMerge, type GithubRow, type RadarRow } from "../trending-rank.ts";
 import { composeTrendingReport, EMPTY_OPENROUTER, type SearchRepo, type TrendingData } from "../trending.ts";
 import type { OpenRouterApp } from "../openrouter.ts";

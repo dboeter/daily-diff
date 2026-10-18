@@ -34,14 +34,13 @@ import {
   loadMatchState,
   matchApps,
   nextClassifyCache,
-  type AskJev,
   type Classification,
   type ClassifyCache,
   type ClassifyItem,
   type MatchState,
   type MatchTrace,
 } from "./trending-jev.ts";
-import { askJev } from "./jev.ts";
+import { askJev, type AskJev } from "./jev.ts";
 
 // ---------------------------------------------------------------------------
 // Types

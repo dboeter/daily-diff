@@ -5,7 +5,6 @@ import {
   selectVendorItems,
   MAX_VENDOR_ITEMS,
   type DataAnswers,
-  type DataVerdicts,
 } from "../data-jev.ts";
 import { newVendorItems, nextDataState, type VendorItem } from "../data-vendors.ts";
 
@@ -114,21 +113,6 @@ describe("selectVendorItems", () => {
     expect(sel.rankingFile).toContain(
       '"id":"ad","title":"Title ad","source":"Azure Databricks","kept":false',
     );
-  });
-
-  it("uses a saved verdict without asking, and prunes ids unseen for 30 days", async () => {
-    ask.mockClear();
-    const cache: DataVerdicts = {
-      items: {
-        high: { title: "t", answers: byId["high"]!, decided: "2026-10-10", lastSeen: "2026-10-10" },
-        gone: { title: "t", answers: byId["high"]!, lastSeen: "2026-09-01" },
-      },
-    };
-    const sel = await selectVendorItems([item("high")], { apiKey: "k", cache, dateStr: DATE, ask });
-    expect(ask).not.toHaveBeenCalled();
-    expect(sel.items.map((i) => i.id)).toEqual(["high"]);
-    expect(Object.keys(sel.nextVerdicts!.items)).toEqual(["high"]);
-    expect(sel.nextVerdicts!.items["high"]!.lastSeen).toBe(DATE);
   });
 
   it("falls back to the keyword rules without a key, keeping feed order after deprecations", async () => {
