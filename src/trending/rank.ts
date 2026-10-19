@@ -109,11 +109,6 @@ export const NEW_REPO_DAYS = 14;
  * "new" means the same across the Radar's sources.
  */
 const NEW_LISTING_DAYS = 14;
-/**
- * momentumRatio ~4.3 means first published this week; 3 leaves slack for a
- * package published late last week.
- */
-const NPM_NEW_MIN_RATIO = 3;
 
 /**
  * A new repo below this many stars stays off the Radar, and the `created:`
@@ -405,8 +400,8 @@ export function buildRadarCandidates(
         `week ${rankStr(a.weekRank)} / month ${rankStr(a.monthRank)}` +
         (a.weekTokens > 0 ? `, ${formatTokens(a.weekTokens)} tokens/week` : "") +
         growth,
-      // Ranked this week but absent from the month list = newly popular.
-      isNew: (listed !== null && listed <= NEW_LISTING_DAYS) || (a.weekRank !== null && a.monthRank === null),
+      // By listing date only: ranked this week but not this month is Rising, not New.
+      isNew: listed !== null && listed <= NEW_LISTING_DAYS,
       links: linksOf(repoLink(a.url), hostLink(a.url)),
     });
   });
@@ -419,7 +414,9 @@ export function buildRadarCandidates(
       description: p.description,
       sources: ["npm"],
       signal: `${fmt(p.weekly)}/week, ${momentumRatio(p).toFixed(1)}x`,
-      isNew: momentumRatio(p) >= NPM_NEW_MIN_RATIO,
+      // The registry search carries no first-publish date (`date` is the last
+      // publish), and download momentum is Rising, not New: npm rows are never 🆕.
+      isNew: false,
       links: linksOf(repoLink(p.repository), repoLink(p.homepage), hostLink(p.homepage)),
     }),
   );

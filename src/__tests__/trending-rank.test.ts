@@ -103,6 +103,8 @@ const npmData = (rising: NpmPackage[], top: NpmPackage[] = []): NpmData => ({
   fetchSuccess: true,
 });
 const NO_NPM = npmData([]);
+/** `count` OpenRouter apps listed this week (🆕), ids 0…count-1. */
+const newApps = (count: number) => Array.from({ length: count }, (_, i) => app(i, { createdAt: NEW }));
 const IN_SCOPE: Classification = { category: null, standalone: null };
 
 /** Classify every candidate in scope. */
@@ -266,7 +268,7 @@ describe("rankGithubRepos", () => {
 describe("buildRadarCandidates", () => {
   const signal = (rows: RadarRow[], key: string) => rows.find((r) => r.keys[0] === key)!.signals[0];
 
-  it("formats OpenRouter signals and flags new apps", () => {
+  it("formats OpenRouter signals and flags apps listed in the last 14 days as new", () => {
     const rows = buildRadarCandidates(
       [
         app(1, { weekRank: 12, monthRank: null, weekTokens: 2_640_000_000_000, growthPercent: 776 }),
@@ -279,20 +281,20 @@ describe("buildRadarCandidates", () => {
       [],
       DATE,
     );
-    expect(signal(rows, "openrouter:1")).toBe("🆕 week #12 / month —, 2.64T tokens/week · 📈 +776%");
+    // Ranked this week but not this month is Rising, not New.
+    expect(signal(rows, "openrouter:1")).toBe("week #12 / month —, 2.64T tokens/week · 📈 +776%");
     expect(signal(rows, "openrouter:2")).toBe("week #3 / month #5 · 📈 -12%");
     // Listed 14 days ago: new; 15 days: not.
     expect(signal(rows, "openrouter:3")).toBe("🆕 week #10 / month #20");
     expect(signal(rows, "openrouter:4")).toBe("week #10 / month #20");
-    // Unranked both periods is not "ranked this week, absent from the month list".
     expect(signal(rows, "openrouter:5")).toBe("week — / month —");
-    expect(rows.find((r) => r.keys[0] === "openrouter:1")).toMatchObject({
+    expect(rows.find((r) => r.keys[0] === "openrouter:3")).toMatchObject({
       sources: ["OpenRouter"],
       isNew: true,
     });
   });
 
-  it("formats npm signals and flags momentum >= 3x as new", () => {
+  it("formats npm signals and never flags a package as new, whatever its momentum", () => {
     const rows = buildRadarCandidates(
       [],
       npmData(
@@ -302,7 +304,7 @@ describe("buildRadarCandidates", () => {
       [],
       DATE,
     );
-    expect(signal(rows, "npm:at-three")).toBe("🆕 700/week, 3.0x");
+    expect(signal(rows, "npm:at-three")).toBe("700/week, 3.0x");
     expect(signal(rows, "npm:steady")).toBe("12,560/week, 0.5x");
     expect(rows.find((r) => r.keys[0] === "npm:steady")).toMatchObject({ sources: ["npm"], isNew: false });
   });
@@ -341,19 +343,19 @@ describe("buildRadarCandidates", () => {
   it("orders 🆕 first, then by relative position, ties OpenRouter > npm > GitHub", () => {
     const github = rankGithubRepos([], [search("g/new", { createdAt: NEW, stargazersCount: 30 })], DATE);
     const rows = buildRadarCandidates(
-      [app(1), app(2)],
-      npmData([pkg("p-new", { weekly: 1000, monthly: 1000 })], [pkg("p1"), pkg("p2"), pkg("p3")]),
+      [app(3, { createdAt: NEW }), app(1), app(2)],
+      npmData([pkg("p1")], [pkg("p2"), pkg("p3")]),
       github,
       DATE,
     );
     expect(rows.map((r) => r.keys[0])).toEqual([
-      "npm:p-new", // 🆕, position 0, npm before GitHub
+      "openrouter:3", // 🆕, position 0, OpenRouter before GitHub
       "github:g/new", // 🆕, position 0
-      "openrouter:1", // 0
-      "npm:p1", // 0.25
-      "openrouter:2", // 0.5, OpenRouter before npm
-      "npm:p2", // 0.5
-      "npm:p3", // 0.75
+      "npm:p1", // 0
+      "openrouter:1", // 0.33, OpenRouter before npm
+      "npm:p2", // 0.33
+      "openrouter:2", // 0.67
+      "npm:p3", // 0.67
     ]);
   });
 });
@@ -663,43 +665,26 @@ describe("selectTrendingReport", () => {
     ]);
   });
 
-  /** `count` npm candidates named `${prefix}${i}`; momentum 4.3x (🆕) when `fresh`. */
-  const npmRun = (prefix: string, count: number, fresh: boolean) =>
-    Array.from({ length: count }, (_, i) =>
-      pkg(`${prefix}${i}`, fresh ? { weekly: 1000, monthly: 1000 } : {}),
-    );
+  /** `count` established npm candidates named `${prefix}${i}`. */
+  const npmRun = (prefix: string, count: number) =>
+    Array.from({ length: count }, (_, i) => pkg(`${prefix}${i}`));
 
   it("keeps at most 8 🆕 rows when established tools can fill the rest", () => {
-    const candidates = buildRadarCandidates(
-      [],
-      npmData(npmRun("new", 15, true), npmRun("old", 15, false)),
-      [],
-      DATE,
-    );
+    const candidates = buildRadarCandidates(newApps(15), npmData(npmRun("old", 15)), [], DATE);
     const report = selectTrendingReport([], candidates, allInScope(candidates), "topics");
     expect(report.radar.map((r) => r.keys[0])).toEqual([
-      ...Array.from({ length: 8 }, (_, i) => `npm:new${i}`),
+      ...Array.from({ length: 8 }, (_, i) => `openrouter:${i}`),
       ...Array.from({ length: 4 }, (_, i) => `npm:old${i}`),
     ]);
   });
 
   it("backfills either side when the other runs short", () => {
-    const fewOld = buildRadarCandidates(
-      [],
-      npmData(npmRun("new", 15, true), npmRun("old", 2, false)),
-      [],
-      DATE,
-    );
+    const fewOld = buildRadarCandidates(newApps(15), npmData(npmRun("old", 2)), [], DATE);
     const a = selectTrendingReport([], fewOld, allInScope(fewOld), "topics");
     expect(a.radar.filter((r) => r.isNew)).toHaveLength(10);
     expect(a.radar).toHaveLength(12);
 
-    const fewNew = buildRadarCandidates(
-      [],
-      npmData(npmRun("new", 2, true), npmRun("old", 15, false)),
-      [],
-      DATE,
-    );
+    const fewNew = buildRadarCandidates(newApps(2), npmData(npmRun("old", 15)), [], DATE);
     const b = selectTrendingReport([], fewNew, allInScope(fewNew), "topics");
     expect(b.radar.filter((r) => r.isNew)).toHaveLength(2);
     expect(b.radar).toHaveLength(12);
@@ -708,19 +693,16 @@ describe("selectTrendingReport", () => {
   it("caps 🆕 rows in the pool at 20, so established tools reach it", () => {
     // 25 🆕 rows, then an established row that would merge with 🆕 row 22 if both were pooled.
     const candidates = buildRadarCandidates(
-      [],
+      newApps(25).map((a, i) => (i === 22 ? { ...a, url: "https://x.dev" } : a)),
       npmData(
-        [
-          ...npmRun("new", 25, true).map((p, i) => (i === 22 ? { ...p, homepage: "https://x.dev" } : p)),
-          ...npmRun("old", 1, false).map((p) => ({ ...p, homepage: "https://x.dev" })),
-        ],
-        npmRun("top", 10, false),
+        npmRun("old", 1).map((p) => ({ ...p, homepage: "https://x.dev" })),
+        npmRun("top", 10),
       ),
       [],
       DATE,
     );
     const report = selectTrendingReport([], candidates, allInScope(candidates), "topics");
-    // old0 is pooled (unmerged, established); new22 is not, as the 23rd 🆕 row.
+    // old0 is pooled (unmerged, established); app 22 is not, as the 23rd 🆕 row.
     expect(report.radar.find((r) => r.keys.includes("npm:old0"))?.keys).toEqual(["npm:old0"]);
   });
 
@@ -798,20 +780,15 @@ describe("selectTrendingReport", () => {
 
 describe("radarPool", () => {
   it("keeps eligible candidates unmerged, 🆕 first and capped at 20, the pool at 30", () => {
-    const fresh = buildRadarCandidates(
-      [],
-      npmData(Array.from({ length: 25 }, (_, i) => pkg(`n${i}`, { weekly: 4000, monthly: 4000 }))),
-      [],
-      DATE,
-    );
+    const fresh = buildRadarCandidates(newApps(25), NO_NPM, [], DATE);
     const established = buildRadarCandidates([], npmData([], [pkg("e0"), pkg("e1")]), [], DATE);
     const candidates = [...fresh, ...established];
     const classifications = allInScope(candidates);
-    classifications.set("npm:n0", { category: null, standalone: 0.1 });
+    classifications.set("openrouter:0", { category: null, standalone: 0.1 });
     const pool = radarPool(candidates, classifications);
     expect(pool).toHaveLength(26);
-    expect(pool.map((r) => r.keys[0]).slice(19, 22)).toEqual(["npm:n20", "npm:e0", "npm:e1"]);
-    expect(pool.at(-1)!.keys).toEqual(["npm:n24"]);
+    expect(pool.map((r) => r.keys[0]).slice(19, 22)).toEqual(["openrouter:20", "npm:e0", "npm:e1"]);
+    expect(pool.at(-1)!.keys).toEqual(["openrouter:24"]);
   });
 });
 
