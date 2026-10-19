@@ -7,7 +7,7 @@
  * (`buildTrendingSummariesPrompt`, `buildTrendingProsePrompt`). Two tables:
  * the Agent & Coding Tool Radar (OpenRouter, npm and new GitHub repos) and the
  * GitHub category tables. Scope and category come from a `Classification` per
- * item (`trending-jev.ts`).
+ * item (`trending/jev.ts`).
  */
 
 import fs from "node:fs";

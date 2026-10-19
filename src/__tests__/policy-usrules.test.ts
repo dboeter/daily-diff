@@ -126,7 +126,7 @@ describe("fetchUsRules", () => {
         jevOnly: false,
       }),
     );
-    // The watchlist match in policy-jev.ts reads the description.
+    // The watchlist match in policy/jev.ts reads the description.
     expect(items[3]!.description).toContain("0693-AB12");
     // No key: Regulations.gov is skipped without a request.
     expect(fetchSpy).toHaveBeenCalledOnce();

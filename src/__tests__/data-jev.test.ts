@@ -196,7 +196,7 @@ describe("vendor state", () => {
   };
   const nextDataState = (state: ReportedState | null, items: VendorItem[], dateStr: string) =>
     nextReportedState(state, items.map(asStateItem), dateStr);
-  // The state keys a note on title + date (data-vendors.ts stateId), as item() builds them.
+  // The state keys a note on title + date (data/vendors.ts stateId), as item() builds them.
   const key = (id: string) => `title ${id}|2026-10-16`;
 
   it("keeps items reported today for a same-day re-run and drops earlier ones", () => {

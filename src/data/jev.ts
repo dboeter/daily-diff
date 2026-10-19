@@ -1,7 +1,7 @@
 /**
  * The data report's vendor relevance: Jev answers four questions per new
  * vendor item, code weighs them into keep/drop and an order (the Policy Watch
- * pattern, `policy-jev.ts`), and the answers are cached per item id in
+ * pattern, `policy/jev.ts`), and the answers are cached per item id in
  * `digests/data-verdicts.json` so an item is asked once. Without Jev, keyword
  * rules decide. Behavior-change bundles skip Jev: always kept, as deprecations.
  */

@@ -87,7 +87,7 @@ function frItem(d: FrDoc): PolicyItem {
     title: agency ? `${agency}: ${d.title}` : d.title,
     link: d.html_url,
     published: d.publication_date,
-    // Carries the dockets and RINs, which is what the watchlist match (policy-jev.ts) reads.
+    // Carries the dockets and RINs, which is what the watchlist match (policy/jev.ts) reads.
     description: [`${d.subtype ?? d.type}.`, d.abstract ?? "", ids.length ? `(${ids.join("; ")})` : ""]
       .filter(Boolean)
       .join(" "),

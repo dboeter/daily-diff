@@ -1,7 +1,7 @@
 /**
  * Policy Watch fetching and state. Sources: the RSS feeds in config.yml
- * `policy.feeds`, and the registered non-RSS sources (`policy-sources.ts`).
- * New items are scored by Jev (`policy-jev.ts`). The state records which items
+ * `policy.feeds`, and the registered non-RSS sources (`policy/sources.ts`).
+ * New items are scored by Jev (`policy/jev.ts`). The state records which items
  * a run reported, so the daily report shows each item once, and a stage item
  * again when its stage moves. What a run observes (record-only stages, deadline
  * changes) is saved on every successful fetch; what it reports, only once the
@@ -45,7 +45,7 @@ export interface PolicyItem extends FeedItem {
 
 /** The reported-items state plus the open deadlines of reported items. */
 export interface PolicyState extends ReportedState {
-  /** Item id → the open deadline of a reported item; dropped once passed (policy-deadlines.ts). */
+  /** Item id → the open deadline of a reported item; dropped once passed (policy/deadlines.ts). */
   deadlines?: Record<string, Deadline>;
 }
 

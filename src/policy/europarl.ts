@@ -70,7 +70,7 @@ export function parseProcedure(json: unknown): PolicyItem | null {
   return {
     id: `ep:${p.label}`,
     title: p.process_title?.["en"] ?? p.label,
-    // Carries the procedure reference, which is what the watchlist match (policy-jev.ts) reads.
+    // Carries the procedure reference, which is what the watchlist match (policy/jev.ts) reads.
     link: `https://oeil.secure.europarl.europa.eu/oeil/en/procedure-file?reference=${p.label}`,
     published: latest.date,
     description: `European Parliament procedure ${p.label}.`,
@@ -91,7 +91,7 @@ export async function fetchEuroparl(ctx: PolicySourceContext): Promise<PolicyIte
     try {
       const res = await fetchOk(`${API_URL}/${year}-${num}?format=application%2Fld%2Bjson`);
       const item = parseProcedure(await res.json());
-      // A newly watchlisted procedure opens without its old stage, as in policy-nl.ts.
+      // A newly watchlisted procedure opens without its old stage, as in policy/nl.ts.
       if (item) items.push(markStaleOnFirstSight(ctx, item, item.published));
     } catch (err) {
       console.error(`  [policy] European Parliament ${ref} failed: ${err}`);

@@ -154,7 +154,7 @@ export async function fetchCongress(ctx: PolicySourceContext): Promise<PolicyIte
       title: `${label} ${b.number}: ${b.title}`,
       link: `https://www.congress.gov/bill/${ordinal(b.congress)}-congress/${slug}/${b.number}`,
       published: stage.date,
-      // Carries the bill id, which is what the watchlist match (policy-jev.ts) reads.
+      // Carries the bill id, which is what the watchlist match (policy/jev.ts) reads.
       description:
         `US federal bill ${billId(b)} (${ordinal(b.congress)} Congress). ` +
         `Latest action: ${b.latestAction?.text ?? "none"}`,
