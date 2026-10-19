@@ -215,7 +215,7 @@ export function buildDataProsePrompt(
           `\`## ${DATA_REPORT.dataAi}\` — 2-4 bullets, at most ~120 words: AI features in data platforms and AI tooling for data work (LLM functions, text-to-SQL, agents, MCP servers), from the flagged vendor items, AI-related releases of the tracked projects and the news listed above. Leave this heading out when nothing is about AI.`,
         ]
       : []),
-    `\`## ${SECTIONS.worthALook}\` — at most 3 bullets: items worth reading in full, with brief reasoning. Leave this heading out when nothing qualifies.`,
+    `\`## ${SECTIONS.worthALook}\` — at most 3 bullets: items worth reading in full, with brief reasoning, not one the sections already lead with. Leave this heading out when nothing qualifies.`,
   ];
   return `You are the editor of a daily data engineering report for ${DATA_READER}.
 
@@ -233,6 +233,8 @@ Rules:
 - ${NO_TITLE_RULE}
 - Length: at most ~${dataAi ? 300 : 200} words in total.
 - Do not reproduce the sections, and write no links, URLs or dates: name each item as the sections do; code links them there.
+- Name each item in at most one of these parts: an item in Highlights is not repeated in ${dataAi ? `${DATA_REPORT.dataAi} or ` : ""}${SECTIONS.worthALook}.
+- Two rows that describe the same change (a release note and its behavior change bundle, a "coming soon" note and its GA note) are one item: mention it once.
 - Base every claim on the sections${dataAi ? " and the lists above" : ""}. Do not invent versions, dates or availability.
 - English, professional and concise.
 `;

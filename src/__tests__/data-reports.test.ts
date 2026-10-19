@@ -509,6 +509,8 @@ describe("buildDataReport", () => {
     expect(content).toContain("## Databricks\n\n| Date | Source | Item | Summary |");
     expect(content).not.toContain("## Open-source stack");
     expect(content).not.toContain("Quiet today");
+    // 2026-10-19: "Projects: 17 | Active today: 0" sat above 16 vendor rows.
+    expect(content).toContain("Vendor items: 5 | Projects:");
     expect(generateBody).toHaveBeenCalledTimes(2);
   });
 

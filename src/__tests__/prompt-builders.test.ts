@@ -16,6 +16,7 @@ import {
   buildModelsPrompt,
   buildPolicySummariesPrompt,
   buildPolicyProsePrompt,
+  buildDataProsePrompt,
 } from "../reports/prompts-data.ts";
 import { TABLES_MARKER, numberRows } from "../reports/summarized-table.ts";
 import { MODELS_REPORT, SECTIONS } from "../core/i18n.ts";
@@ -534,5 +535,17 @@ describe("listing report layout", () => {
     const p = prompts[id]!;
     expect(p).toContain("Do not write a title");
     expect(p).not.toMatch(/Today's|This Week's|^\d\. \*\*/m);
+  });
+});
+
+describe("buildDataProsePrompt", () => {
+  it("names each item in at most one prose section, and a same-change pair once", () => {
+    const prompt = buildDataProsePrompt("## Databricks\n\n(table)", "2026-10-19", {
+      vendorTitles: ["X"],
+      news: [],
+    });
+    expect(prompt).toContain("at most one of these parts");
+    expect(prompt).toContain("not one the sections already lead with");
+    expect(prompt).toContain("describe the same change");
   });
 });

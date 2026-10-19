@@ -52,6 +52,8 @@ export interface ProjectReportInput {
    * report shows it with its notice and quiet line. Either way the header counts it.
    */
   omitQuietGroups?: boolean;
+  /** Counts shown before the project counts, e.g. the data report's "Vendor items: 16". */
+  counts?: string;
   /** Markdown after the last group, before the footer (the data report's Worth a Look), with its own separator. */
   epilogue?: string;
   footer: string;
@@ -101,7 +103,7 @@ export function buildProjectReportContent(r: ProjectReportInput): string {
 
   return (
     `${r.heading}\n\n` +
-    `> ${REPORT_META.generated(r.utcStr)} | Projects: ${all.length} | ` +
+    `> ${REPORT_META.generated(r.utcStr)} | ${r.counts ? `${r.counts} | ` : ""}Projects: ${all.length} | ` +
     `Active ${r.period}: ${all.length - quietCount} | ` +
     `Stable releases: ${releases} | Prereleases (not covered): ${prereleases}\n\n` +
     `---\n\n` +

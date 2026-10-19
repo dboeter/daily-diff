@@ -485,6 +485,8 @@ export async function buildDataReport(
     period: PROJECT_SCOPE.period,
     preamble: highlights ? `${highlights}\n\n---\n\n` : "",
     omitQuietGroups: true,
+    // On 2026-10-19 "Projects: 17 | Active today: 0" was all the header said above 16 vendor rows.
+    counts: DATA_REPORT.vendorCount(items.length),
     ...(epilogue ? { epilogue: `\n\n---\n\n${epilogue}` } : {}),
     footer: autoGenFooter(),
   });
