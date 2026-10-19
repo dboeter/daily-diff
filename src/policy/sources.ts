@@ -1,9 +1,7 @@
 /**
  * The Policy Watch sources that are not RSS feeds (RSS feeds are config-driven:
  * config.yml `policy.feeds`). Adding a source = one module exporting a
- * `PolicySource["fetch"]`, one line in POLICY_SOURCES, and its config. The one
- * exception, Hacker News (`policy/hn.ts`), reads the run's shared HN fetch and
- * is added in `fetchAllData`.
+ * `PolicySource["fetch"]`, one line in POLICY_SOURCES, and its config.
  */
 
 import type { PolicyConfig } from "../core/config.ts";
