@@ -1,6 +1,6 @@
 # Policy Watch misses AI-policy stories that only reach HN or the web
 
-Status: needs-triage
+Status: resolved
 
 ## Problem
 
@@ -18,3 +18,7 @@ HN stories (and lab web posts) that are about AI policy enter the policy pool as
 ## Where
 
 `fetchPolicyData` (`src/policy/policy.ts`), `selectPolicyItems` (`src/policy/jev.ts`), `src/sources/hn.ts`.
+
+## Comments
+
+- 2026-10-19: HN only, decided without the maintainer (defaults; revisit). `src/policy/hn.ts` turns HN stories whose title or page description names a policy term into news items with jurisdiction `other` (the major-only gate), `jevOnly`, judged by the same Jev questions; registered in `fetchAllData` over the one shared HN fetch. Open: a Jev Choice for the jurisdiction instead of `other` (a US bill story would then get the impact question), lab web posts as a source, and dedupe against Politico/Transformer coverage.

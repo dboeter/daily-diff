@@ -56,6 +56,8 @@ import { fetchStealthModels, type OpenRouterStealthModel } from "./sources/openr
 import { fetchHnData, type HnData } from "./sources/hn.ts";
 import { fetchArxivData, type ArxivData } from "./sources/arxiv.ts";
 import { fetchPolicyData, type PolicyData } from "./policy/policy.ts";
+import { POLICY_SOURCES } from "./policy/sources.ts";
+import { hnPolicySource } from "./policy/hn.ts";
 import { isDataLaw } from "./policy/jev.ts";
 import { fetchVendorData, type VendorData } from "./data/vendors.ts";
 import { fetchHfData, type HfData } from "./sources/hf.ts";
@@ -169,6 +171,8 @@ async function fetchAllData(
   );
 
   const noSkills: SkillsData = { prs: [], issues: [], fetchSuccess: false };
+  // One HN fetch for the discussions report and Policy Watch's HN source, which waits for it.
+  const hn = fetchHnData();
 
   const [
     agentFetches,
@@ -195,9 +199,12 @@ async function fetchAllData(
     // Fetched every day — the agents report matches trending repos as news —
     // but only reported weekly.
     fetchTrendingData(weekly ? "weekly" : "daily", toCstDateStr(now)),
-    fetchHnData(),
+    hn,
     fetchArxivData(toCstDateStr(now)),
-    fetchPolicyData(CONFIG.policy, now, toCstDateStr(now)),
+    fetchPolicyData(CONFIG.policy, now, toCstDateStr(now), undefined, undefined, [
+      ...POLICY_SOURCES,
+      hnPolicySource(hn),
+    ]),
     fetchVendorData(CONFIG.data, now),
     weekly ? fetchHfData() : Promise.resolve<HfData>({ models: [], fetchSuccess: false }),
     weekly ? fetchDevtoData() : Promise.resolve<DevtoData>({ articles: [], fetchSuccess: false }),
