@@ -5,7 +5,7 @@ import {
   hasActivity,
   previewNotes,
   type ProjectActivity,
-} from "../prompts.ts";
+} from "../reports/prompts.ts";
 import {
   buildTrendingSummariesPrompt,
   buildTrendingProsePrompt,
@@ -16,15 +16,15 @@ import {
   buildModelsPrompt,
   buildPolicySummariesPrompt,
   buildPolicyProsePrompt,
-} from "../prompts-data.ts";
-import { TABLES_MARKER, numberRows } from "../summarized-table.ts";
-import { MODELS_REPORT, SECTIONS } from "../i18n.ts";
-import type { RepoConfig, GitHubItem, GitHubRelease } from "../github.ts";
-import { EMPTY_NPM, EMPTY_OPENROUTER, type TrendingData } from "../trending.ts";
-import type { HnData } from "../hn.ts";
-import type { DevtoData } from "../devto.ts";
-import type { LobstersData } from "../lobsters.ts";
-import type { WebFetchResult } from "../web.ts";
+} from "../reports/prompts-data.ts";
+import { TABLES_MARKER, numberRows } from "../reports/summarized-table.ts";
+import { MODELS_REPORT, SECTIONS } from "../core/i18n.ts";
+import type { RepoConfig, GitHubItem, GitHubRelease } from "../core/github.ts";
+import { EMPTY_NPM, EMPTY_OPENROUTER, type TrendingData } from "../trending/trending.ts";
+import type { HnData } from "../sources/hn.ts";
+import type { DevtoData } from "../sources/devto.ts";
+import type { LobstersData } from "../sources/lobsters.ts";
+import type { WebFetchResult } from "../sources/web.ts";
 
 // ---------------------------------------------------------------------------
 // Fixtures

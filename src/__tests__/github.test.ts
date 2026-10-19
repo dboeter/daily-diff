@@ -11,7 +11,7 @@ import {
   selectHotIssues,
   type GitHubItem,
   type GitHubRelease,
-} from "../github.ts";
+} from "../core/github.ts";
 
 const SINCE = new Date("2026-10-03T22:37:00Z");
 

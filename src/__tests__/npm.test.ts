@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { momentumRatio, rankNpmPackages, type NpmSearchObject } from "../npm.ts";
+import { momentumRatio, rankNpmPackages, type NpmSearchObject } from "../trending/npm.ts";
 
 const obj = (name: string, weekly: number, monthly: number): NpmSearchObject => ({
   downloads: { weekly, monthly },

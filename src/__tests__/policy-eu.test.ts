@@ -1,8 +1,8 @@
 import fs from "node:fs";
 import { describe, it, expect, vi, afterEach } from "vitest";
-import { celexStage, eurLexQuery, fetchEurLex, parseEurLexResults } from "../policy-eurlex.ts";
-import { latestStage, parseProcedure, fetchEuroparl } from "../policy-europarl.ts";
-import type { PolicyConfig } from "../config.ts";
+import { celexStage, eurLexQuery, fetchEurLex, parseEurLexResults } from "../policy/eurlex.ts";
+import { latestStage, parseProcedure, fetchEuroparl } from "../policy/europarl.ts";
+import type { PolicyConfig } from "../core/config.ts";
 
 // Trimmed live responses, 2026-10-14.
 const fixture = (name: string): unknown =>

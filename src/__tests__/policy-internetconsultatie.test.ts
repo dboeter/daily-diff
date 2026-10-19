@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import { describe, it, expect, vi, afterEach } from "vitest";
-import { fetchInternetConsultatie, parseConsultations } from "../policy-internetconsultatie.ts";
-import type { PolicySourceContext } from "../policy-sources.ts";
+import { fetchInternetConsultatie, parseConsultations } from "../policy/internetconsultatie.ts";
+import type { PolicySourceContext } from "../policy/sources.ts";
 
 const HOMEPAGE = fs.readFileSync(new URL("./fixtures/internetconsultatie.html", import.meta.url), "utf-8");
 

@@ -8,7 +8,7 @@ import {
   selectAgentApps,
   selectStealthModels,
   type OpenRouterApp,
-} from "../openrouter.ts";
+} from "../sources/openrouter.ts";
 
 /** Wrap payload text in RSC script chunks, split at the given offsets. */
 function rscHtml(payload: string, splits: number[] = []): string {

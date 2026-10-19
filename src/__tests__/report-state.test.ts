@@ -10,7 +10,7 @@ import {
   saveReportedState,
   staleOnFirstSight,
   type StateItem,
-} from "../report-state.ts";
+} from "../core/report-state.ts";
 
 const item = (id: string, published = "2026-10-13T08:00:00.000Z"): StateItem => ({ id, published });
 

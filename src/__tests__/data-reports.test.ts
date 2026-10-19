@@ -9,29 +9,29 @@ import {
   buildTrendingReport,
   buildWebReport,
   type DataSection,
-} from "../data-reports.ts";
-import { EMPTY_TRENDING, type TrendingData } from "../trending.ts";
-import { MSG } from "../i18n.ts";
-import type { ProjectActivity } from "../prompts.ts";
-import type { PolicyData, PolicyItem } from "../policy.ts";
-import { isDataLaw } from "../policy-jev.ts";
-import type { DevtoData } from "../devto.ts";
-import type { VendorData, VendorItem } from "../data-vendors.ts";
-import { selectVendorItems } from "../data-jev.ts";
-import { fetchVendorData } from "../data-vendors.ts";
-import { numberRows } from "../summarized-table.ts";
+} from "../reports/data-reports.ts";
+import { EMPTY_TRENDING, type TrendingData } from "../trending/trending.ts";
+import { MSG } from "../core/i18n.ts";
+import type { ProjectActivity } from "../reports/prompts.ts";
+import type { PolicyData, PolicyItem } from "../policy/policy.ts";
+import { isDataLaw } from "../policy/jev.ts";
+import type { DevtoData } from "../sources/devto.ts";
+import type { VendorData, VendorItem } from "../data/vendors.ts";
+import { selectVendorItems } from "../data/jev.ts";
+import { fetchVendorData } from "../data/vendors.ts";
+import { numberRows } from "../reports/summarized-table.ts";
 
 const generateBody = vi.fn(async (_prompt: string) => "## Highlights\n\nText.");
-vi.mock("../report.ts", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("../report.ts")>()),
+vi.mock("../core/report.ts", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("../core/report.ts")>()),
   generateBody: (...args: unknown[]) => generateBody(...(args as [string])),
   // generateOr calls report.ts's own generateBody, which this mock can't reach: route it here.
   generateOr: (_tag: string, prompt: string, fallback: unknown) => generateBody(prompt).catch(() => fallback),
   saveFile: (...args: unknown[]) => saveFile(...(args as [string, string, string])),
 }));
 // buildWebReport writes digests/web-state.json: keep the tests off the real file.
-vi.mock("../web.ts", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("../web.ts")>()),
+vi.mock("../sources/web.ts", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("../sources/web.ts")>()),
   saveWebState: () => {},
 }));
 /** A vendor result with these items and nothing to save but the pruned state. */

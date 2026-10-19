@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { parseRssItems, recentNewsItems, type FeedItem } from "../rss.ts";
+import { parseRssItems, recentNewsItems, type FeedItem } from "../core/rss.ts";
 
 // Shaped like the Commission digital-strategy feed: guid with an attribute,
 // entity-encoded Drupal HTML in the description that repeats the title.

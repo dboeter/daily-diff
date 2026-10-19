@@ -8,7 +8,7 @@ import {
   urlCategory,
   titleFromUrl,
   emptyState,
-} from "../web.ts";
+} from "../sources/web.ts";
 
 // ---------------------------------------------------------------------------
 // parseSitemapUrls

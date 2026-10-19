@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
-import { renderTrackedBlock, syncReadme } from "../readme.ts";
-import type { SectionConfig } from "../config.ts";
+import { renderTrackedBlock, syncReadme } from "../cli/readme.ts";
+import type { SectionConfig } from "../core/config.ts";
 
 const section = (title: string, ...repos: [string, string][]): SectionConfig => ({
   title,

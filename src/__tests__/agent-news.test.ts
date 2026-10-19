@@ -1,10 +1,10 @@
 import { describe, it, expect } from "vitest";
-import { agentMatcher, agentTerms, matchProjectNews, NEWS_PER_AGENT } from "../agent-news.ts";
-import { DATA_SECTION_KEYS, loadConfig } from "../config.ts";
-import type { RepoConfig } from "../github.ts";
-import type { HnData, HnStory } from "../hn.ts";
-import { EMPTY_NPM, EMPTY_OPENROUTER, type TrendingData } from "../trending.ts";
-import type { WebFetchResult } from "../web.ts";
+import { agentMatcher, agentTerms, matchProjectNews, NEWS_PER_AGENT } from "../reports/agent-news.ts";
+import { DATA_SECTION_KEYS, loadConfig } from "../core/config.ts";
+import type { RepoConfig } from "../core/github.ts";
+import type { HnData, HnStory } from "../sources/hn.ts";
+import { EMPTY_NPM, EMPTY_OPENROUTER, type TrendingData } from "../trending/trending.ts";
+import type { WebFetchResult } from "../sources/web.ts";
 
 // ---------------------------------------------------------------------------
 // Fixtures

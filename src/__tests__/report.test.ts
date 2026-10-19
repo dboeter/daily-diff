@@ -35,7 +35,7 @@ import {
   llmHealthLine,
   assertLlmHealthy,
   reportLlmHealth,
-} from "../report.ts";
+} from "../core/report.ts";
 
 // ---------------------------------------------------------------------------
 // is429
