@@ -231,17 +231,21 @@ describe("buildTrendingSummariesPrompt", () => {
       n: 1,
       name: "nano-coder",
       description: "A 6MB coding agent",
-      facts: "Source: npm | Signal: 🆕 12,560/week, 4.2x",
+      facts: "Source: npm | New: created or listed in the last 14 days",
     },
-    { n: 2, name: "org/repo", description: "", facts: "Stars: 86,392 (+1,851)" },
+    { n: 2, name: "org/repo", description: "", facts: "" },
   ];
 
   it("lists each row with its number, description and facts", () => {
     const result = buildTrendingSummariesPrompt(rows, "2026-10-05");
-    expect(result).toContain(
-      "1. nano-coder — A 6MB coding agent — Source: npm | Signal: 🆕 12,560/week, 4.2x",
+    expect(result).toContain("1. nano-coder — A 6MB coding agent — Source: npm | New: created or listed");
+    expect(result).toContain("2. org/repo — (no description)\n");
+  });
+
+  it("forbids the figures the table already shows", () => {
+    expect(buildTrendingSummariesPrompt(rows, "2026-10-05")).toContain(
+      "No star, gain, download, token or rank figures",
     );
-    expect(result).toContain("2. org/repo — (no description) — Stars: 86,392 (+1,851)");
   });
 
   it("asks for one `N: <2 sentences>` line per row and nothing else", () => {

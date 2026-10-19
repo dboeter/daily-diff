@@ -64,14 +64,18 @@ function buildModelUsageData(openrouter: OpenRouterData): string {
  * The rows were selected and ranked in code; parseRowSummaries reads the reply.
  */
 export function buildTrendingSummariesPrompt(rows: ReturnType<typeof summaryRows>, dateStr: string): string {
-  const list = rowList(rows, (r) => `${r.name} — ${r.description || "(no description)"} — ${r.facts}`);
-  return `You are a technical analyst covering AI coding tools, agents and agent harnesses. Below are ${rows.length} numbered projects and tools from the agent & AI coding trends report for the week ending ${dateStr}, each with its description and the facts measured this week.
+  const list = rowList(
+    rows,
+    (r) => `${r.name} — ${r.description || "(no description)"}${r.facts ? ` — ${r.facts}` : ""}`,
+  );
+  return `You are a technical analyst covering AI coding tools, agents and agent harnesses. Below are ${rows.length} numbered projects and tools from the agent & AI coding trends report for the week ending ${dateStr}, each with its description and where it was found.
 
 ${list}
 
-${summaryLine("2 sentences")} — what it is and why it is worth attention this week.
-- Ground every sentence only in the given description and facts. Do not invent features, users, releases or numbers.
-- If the description is empty, say only what the name and the facts show.
+${summaryLine("2 sentences")} — what it is and why it matters to developers.
+- Ground every sentence only in the given description. Do not invent features, users, releases or numbers.
+- No star, gain, download, token or rank figures: the table shows them next to the summary.
+- If the description is empty, say only what the name shows, in one sentence.
 ${summaryOutputRule(rows.length)}
 - English.
 `;

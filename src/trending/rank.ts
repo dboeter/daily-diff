@@ -618,7 +618,12 @@ export function selectTrendingReport(
   return { radar, categories, classifiedBy };
 }
 
-/** One entry per row, by number: the input of the summaries prompt. */
+/**
+ * One entry per row, by number: the input of the summaries prompt. No stars,
+ * gains, downloads or ranks: the row shows them, and on 2026-10-19 half of
+ * every summary repeated them ("It has 625 stars, up 328") and the model read
+ * OpenRouter's "week #16 / month #19" as a date.
+ */
 export function summaryRows(
   report: TrendingReportData,
 ): { n: number; name: string; description: string; facts: string }[] {
@@ -627,14 +632,16 @@ export function summaryRows(
       n: r.n,
       name: r.name,
       description: r.description,
-      facts: `Source: ${r.sources.join("; ")} | Signal: ${r.signals.join("; ")}`,
+      facts: [`Source: ${r.sources.join("; ")}`, r.isNew && "New: created or listed in the last 14 days"]
+        .filter(Boolean)
+        .join(" | "),
     })),
     ...report.categories.flatMap((g) =>
       g.rows.map((r) => ({
         n: r.n,
         name: r.fullName,
         description: r.description,
-        facts: [r.language && `Language: ${r.language}`, `Stars: ${r.starsCell}`].filter(Boolean).join(" | "),
+        facts: r.language ? `Language: ${r.language}` : "",
       })),
     ),
   ];

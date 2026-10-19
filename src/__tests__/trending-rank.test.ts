@@ -749,8 +749,8 @@ describe("selectTrendingReport", () => {
 
     const summaries = summaryRows(report);
     expect(summaries.map((s) => s.n)).toEqual([1, 2, 3]);
-    expect(summaries[0]!.facts).toBe("Source: GitHub | Signal: 🆕 50 (+50)");
-    expect(summaries[2]).toEqual({ n: 3, name: "g/old", description: "A coding tool", facts: "Stars: 10" });
+    expect(summaries[0]!.facts).toBe("Source: GitHub | New: created or listed in the last 14 days");
+    expect(summaries[2]).toEqual({ n: 3, name: "g/old", description: "A coding tool", facts: "" });
   });
 
   it("shows exactly the GitHub rows reachesReport accepts, the ones the history API is asked about", () => {
@@ -816,7 +816,8 @@ describe("radarPool", () => {
 });
 
 describe("summaryRows", () => {
-  it("lists language and stars for GitHub rows, joined sources and signals for Radar rows", () => {
+  // 2026-10-19: summaries repeated the Stars column, and "week #16 / month #19" read as a date.
+  it("gives the model no figures: language for GitHub rows, sources and newness for Radar rows", () => {
     const github: GithubRow[] = rankGithubRepos(
       [trending("t/x", { periodStars: 7, totalStars: 70, language: "Rust", description: "Desc" })],
       [search("t/x", { topic: "harness" })],
@@ -836,9 +837,9 @@ describe("summaryRows", () => {
         n: 1,
         name: "Tool",
         description: "",
-        facts: "Source: OpenRouter; npm | Signal: week #10 / month #20; 1,000/week, 1.1x",
+        facts: "Source: OpenRouter; npm",
       },
-      { n: 2, name: "t/x", description: "Desc", facts: "Language: Rust | Stars: 70 (+7)" },
+      { n: 2, name: "t/x", description: "Desc", facts: "Language: Rust" },
     ]);
   });
 });
