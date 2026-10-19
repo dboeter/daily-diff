@@ -23,7 +23,12 @@ export const LLM_TOKENS_DEFAULT = 8192;
  *  2-sentence summaries, and the reasoning that counts against the budget. */
 export const LLM_TOKENS_LISTING = 16384;
 export const LLM_TOKENS_WEB = 16384;
-import { type LlmProvider, createProvider, TruncatedResponseError } from "../providers/index.ts";
+import {
+  type LlmProvider,
+  createProvider,
+  EmptyResponseError,
+  TruncatedResponseError,
+} from "../providers/index.ts";
 
 const provider: LlmProvider = createProvider();
 
@@ -166,10 +171,14 @@ const RETRY_MAX_MS = 60_000; // ladder: 5, 10, 20, 40, 60, 60 -> 195 s of cover
  * model's only endpoint was down and each attempt waited out a 5-minute
  * gateway timeout, so a longer ladder only runs into the job's time limit.
  * A gateway error means no generation came back, so a retry bills nothing twice.
+ * An empty answer (`EmptyResponseError`) gets the same one retry: it may have
+ * been billed, but without it the call's output is lost (2026-10-19, the data
+ * report's vendor summaries).
  */
 const MAX_RETRIES_UNAVAILABLE = 1;
 
 export function isProviderUnavailable(err: unknown): boolean {
+  if (err instanceof EmptyResponseError) return true;
   const e = err as { name?: string; status?: number; message?: string } | null;
   if (e?.name === "APIConnectionTimeoutError") return true;
   if (e?.status === 502 || e?.status === 503 || e?.status === 504) return true;
@@ -256,7 +265,13 @@ export async function callLlm(prompt: string, maxTokens = LLM_TOKENS_DEFAULT): P
         releaseSlot();
         released = true;
         const wait = Math.min(RETRY_BASE_MS * 2 ** attempt, RETRY_MAX_MS);
-        const reason = rateLimited ? "429" : unavailable ? "model unavailable" : "connection error";
+        const reason = rateLimited
+          ? "429"
+          : err instanceof EmptyResponseError
+            ? "empty response"
+            : unavailable
+              ? "model unavailable"
+              : "connection error";
         console.error(`[llm] ${reason} — retry ${attempt + 1}/${maxRetries} in ${wait / 1000}s...`);
         attempt++;
         await sleep(wait);

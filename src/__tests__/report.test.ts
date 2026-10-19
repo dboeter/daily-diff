@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import fs from "node:fs";
-import { TruncatedResponseError } from "../providers/index.ts";
+import { EmptyResponseError, TruncatedResponseError } from "../providers/index.ts";
 
 // ---------------------------------------------------------------------------
 // Mock provider — intercepts createProvider() so the module-level `provider`
@@ -366,6 +366,30 @@ describe("callLlm", () => {
     await vi.advanceTimersByTimeAsync(5_000);
 
     await expect(promise).rejects.toThrow("A Timeout Occurred");
+    expect(mockCall).toHaveBeenCalledTimes(2);
+    expect(llmStats).toEqual({ attempted: 1, failed: 1 });
+  });
+
+  it("retries an empty response once", async () => {
+    mockCall.mockRejectedValueOnce(new EmptyResponseError("mock", "stop"));
+    mockCall.mockResolvedValueOnce("summaries");
+
+    const promise = callLlm("prompt", 1024);
+    await vi.advanceTimersByTimeAsync(5_000);
+
+    expect(await promise).toBe("summaries");
+    expect(mockCall).toHaveBeenCalledTimes(2);
+    expect(llmStats).toEqual({ attempted: 1, failed: 0 });
+  });
+
+  it("fails after a second empty response", async () => {
+    mockCall.mockRejectedValue(new EmptyResponseError("mock", "stop"));
+
+    const promise = callLlm("prompt", 1024);
+    promise.catch(() => {});
+    await vi.advanceTimersByTimeAsync(5_000);
+
+    await expect(promise).rejects.toBeInstanceOf(EmptyResponseError);
     expect(mockCall).toHaveBeenCalledTimes(2);
     expect(llmStats).toEqual({ attempted: 1, failed: 1 });
   });
