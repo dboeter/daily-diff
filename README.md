@@ -476,7 +476,7 @@ Sources: European Commission | N new items ranked by Jev relevance
 Sources: GitHub Trending + GitHub Search API + OpenRouter + npm
 
 ## Highlights
-## 🚀 Agent & Coding Tool Radar (OpenRouter / npm / GitHub, new tools flagged 🆕)
+## 🚀 Agent & Coding Tool Radar (OpenRouter / npm / GitHub, new tools flagged 🆕; 🔥 = also in last week's report, in the category tables too)
 ## Top Projects by Category
   ### 🧑‍💻 Coding Agents               — CLI / IDE / cloud agents that write code
   ### 🧰 Agent Harnesses & Frameworks — harnesses / SDKs / agent runtimes

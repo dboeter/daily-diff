@@ -2,8 +2,8 @@
  * Selection, ranking and numbering for the weekly trending report — pure, except
  * for loading and saving the star history (`digests/trending-state.json`).
  *
- * Code decides which items appear, in which order, with which 🆕 flag and
- * which numbers; the LLM only writes the per-row summaries and the prose
+ * Code decides which items appear, in which order, with which 🆕 and 🔥 flags
+ * and which numbers; the LLM only writes the per-row summaries and the prose
  * (`buildTrendingSummariesPrompt`, `buildTrendingProsePrompt`). Two tables:
  * the Agent & Coding Tool Radar (OpenRouter, npm and new GitHub repos) and the
  * GitHub category tables. Scope and category come from a `Classification` per
@@ -52,6 +52,8 @@ export interface GithubRow {
   relative: number | null;
   starsCell: string;
   isNew: boolean;
+  /** Also in the report dated exactly 7 days earlier (`selectTrendingReport`): 🔥. */
+  onFire?: boolean;
   /** The search topic that found it; absent for trending-page-only repos. */
   topic?: string;
 }
@@ -73,6 +75,8 @@ export interface RadarRow {
   signals: string[];
   /** Some member is new. */
   isNew: boolean;
+  /** Some member was also in the report dated exactly 7 days earlier (`selectTrendingReport`): 🔥. */
+  onFire?: boolean;
   /** Normalized merge links (`repo:<owner/repo>`, `host:<hostname>`), see `urlMerge`. */
   links: string[];
 }
@@ -96,6 +100,8 @@ export interface TrendingReportData {
 export interface StarHistory {
   /** Key: `fullName` lowercased — GitHub names are case-insensitive, and the trending page and search may differ in case. */
   repos: Record<string, [string, number][]>;
+  /** CST date of a weekly report → the lowercased item keys it showed (`reportedKeys`), for 🔥. */
+  reported?: Record<string, string[]>;
 }
 
 // ---------------------------------------------------------------------------
@@ -186,7 +192,15 @@ export function loadStarHistory(file = STAR_HISTORY_FILE): StarHistory {
     if (typeof parsed?.repos !== "object" || parsed.repos === null || Array.isArray(parsed.repos)) {
       throw new Error("no `repos` object");
     }
-    return parsed as StarHistory;
+    const { reported } = parsed;
+    // A missing or malformed `reported` costs one week of 🔥, nothing else.
+    const validReported =
+      typeof reported === "object" &&
+      reported !== null &&
+      Object.values(reported).every(
+        (keys) => Array.isArray(keys) && keys.every((k) => typeof k === "string"),
+      );
+    return { repos: parsed.repos, ...(validReported ? { reported } : {}) };
   } catch (err) {
     // Unlike the match file, starting over is safe: the history is never
     // hand-edited, and losing it costs one run of history-API calls, not a decision.
@@ -204,8 +218,12 @@ export function saveStarHistory(history: StarHistory, file = STAR_HISTORY_FILE):
     ([name, points]) => `    ${JSON.stringify(name)}: ${JSON.stringify(points)}`,
   );
   const body = lines.length > 0 ? `{\n${lines.join(",\n")}\n  }` : "{}";
+  const reported = Object.entries(history.reported ?? {}).map(
+    ([date, keys]) => `    ${JSON.stringify(date)}: ${JSON.stringify(keys)}`,
+  );
+  const reportedBody = reported.length > 0 ? `,\n  "reported": {\n${reported.join(",\n")}\n  }` : "";
   fs.mkdirSync(path.dirname(file), { recursive: true });
-  fs.writeFileSync(file, `{\n  "repos": ${body}\n}\n`, "utf-8");
+  fs.writeFileSync(file, `{\n  "repos": ${body}${reportedBody}\n}\n`, "utf-8");
 }
 
 /**
@@ -222,8 +240,37 @@ export function starBaseline(history: StarHistory, fullName: string, dateStr: st
   return point ? point[1] : null;
 }
 
-/** History after this run: today's points recorded or replaced, unseen repos carried forward, old points pruned. */
-export function nextStarHistory(history: StarHistory, githubRows: GithubRow[], dateStr: string): StarHistory {
+/**
+ * The item keys of the report dated exactly STAR_GAIN_DAYS before `dateStr`,
+ * the same rule as `starBaseline`: a forced mid-week run is not "last week",
+ * and a missed Monday breaks the run of weeks, so its rows get no 🔥.
+ */
+export function lastWeekKeys(history: StarHistory, dateStr: string): Set<string> {
+  const entry = Object.entries(history.reported ?? {}).find(
+    ([date]) => daysBetween(date, dateStr) === STAR_GAIN_DAYS,
+  );
+  return new Set(entry?.[1] ?? []);
+}
+
+/** Every item key the report shows, merged Radar members included, lowercased like the star history. */
+export function reportedKeys(report: Pick<TrendingReportData, "radar" | "categories">): string[] {
+  return [
+    ...report.radar.flatMap((r) => r.keys),
+    ...report.categories.flatMap((c) => c.rows.map((r) => r.key)),
+  ].map((k) => k.toLowerCase());
+}
+
+/**
+ * History after this run: today's points recorded or replaced, unseen repos
+ * carried forward, old points pruned; today's report keys recorded or
+ * replaced, reports older than a week pruned.
+ */
+export function nextStarHistory(
+  history: StarHistory,
+  githubRows: GithubRow[],
+  dateStr: string,
+  reported?: string[],
+): StarHistory {
   const repos: Record<string, [string, number][]> = {};
   for (const [name, points] of Object.entries(history.repos)) {
     repos[name] = points.filter(([date]) => date !== dateStr);
@@ -235,6 +282,11 @@ export function nextStarHistory(history: StarHistory, githubRows: GithubRow[], d
   }
   // Repos not seen this run are kept until pruned: a forced mid-week run must not drop Monday's points.
   const next: StarHistory = { repos: {} };
+  const allReported = { ...history.reported, ...(reported ? { [dateStr]: reported } : {}) };
+  const keptReported = Object.entries(allReported)
+    .filter(([date]) => daysBetween(date, dateStr) <= STAR_HISTORY_DAYS)
+    .sort(([a], [b]) => a.localeCompare(b));
+  if (keptReported.length > 0) next.reported = Object.fromEntries(keptReported);
   for (const [name, points] of Object.entries(repos)) {
     const kept = points
       .filter(([date]) => daysBetween(date, dateStr) <= STAR_HISTORY_DAYS)
@@ -586,7 +638,10 @@ export function selectTrendingReport(
   classifications: Map<string, Classification>,
   classifiedBy: TrendingReportData["classifiedBy"],
   links: [string, string][] = [],
+  /** `lastWeekKeys`: a row with a key in it is 🔥. */
+  lastWeek: Set<string> = new Set(),
 ): TrendingReportData {
+  const onFire = (keys: string[]) => keys.some((k) => lastWeek.has(k.toLowerCase()));
   // A merged row is 🆕 when any member is, so split again after merging.
   const merged = mergeRows(urlMerge(radarPool(radarCandidates, classifications)), links);
   const mergedFresh = merged.filter((r) => r.isNew);
@@ -599,7 +654,7 @@ export function selectTrendingReport(
   const radar = [
     ...mergedFresh.slice(0, freshCount),
     ...mergedEstablished.slice(0, RADAR_MAX - freshCount),
-  ].map((r) => ({ ...r, n: ++n }));
+  ].map((r) => ({ ...r, onFire: onFire(r.keys), n: ++n }));
 
   const categories = CATEGORIES.map((category) => ({
     category,
@@ -610,7 +665,10 @@ export function selectTrendingReport(
     ),
   }))
     .filter((g) => g.rows.length > 0)
-    .map((g) => ({ category: g.category, rows: g.rows.map((r) => ({ ...r, n: ++n })) }));
+    .map((g) => ({
+      category: g.category,
+      rows: g.rows.map((r) => ({ ...r, onFire: onFire([r.key]), n: ++n })),
+    }));
 
   return { radar, categories, classifiedBy };
 }

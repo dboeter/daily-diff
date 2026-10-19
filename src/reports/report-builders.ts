@@ -268,12 +268,14 @@ export function renderTrendingTables(report: TrendingReportData, summaries: Map<
   const T = TRENDING_REPORT;
   const summary = (row: { n: number; description: string }) => cell(summaryText(summaries, row));
   const link = (name: string, url: string) => (url ? `[${cell(name)}](${cell(url)})` : cell(name));
+  // 🔥: also in last week's report. In the name cell, the one cell both tables share.
+  const fire = (r: { onFire?: boolean }) => (r.onFire ? "🔥 " : "");
   const blocks: string[] = [];
 
   if (report.radar.length > 0) {
     const rows = report.radar.map(
       (r) =>
-        `| ${link(r.name, r.url)} | ${cell(r.sources.join("; "))} | ${cell(r.signals.join("; "))} | ` +
+        `| ${fire(r)}${link(r.name, r.url)} | ${cell(r.sources.join("; "))} | ${cell(r.signals.join("; "))} | ` +
         `${summary(r)} |`,
     );
     blocks.push(`## ${T.radarHeading}`, `${T.radarHeader}\n${rows.join("\n")}`);
@@ -283,7 +285,8 @@ export function renderTrendingTables(report: TrendingReportData, summaries: Map<
     blocks.push(`## ${T.categoriesHeading}`);
     for (const { category, rows } of report.categories) {
       const lines = rows.map(
-        (r) => `| ${link(r.fullName, r.url)} | ${cell(r.language)} | ${cell(r.starsCell)} | ${summary(r)} |`,
+        (r) =>
+          `| ${fire(r)}${link(r.fullName, r.url)} | ${cell(r.language)} | ${cell(r.starsCell)} | ${summary(r)} |`,
       );
       blocks.push(`### ${T.categoryTitles[category]}`, `${T.categoryHeader}\n${lines.join("\n")}`);
     }

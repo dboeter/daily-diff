@@ -99,8 +99,12 @@ An item that first appeared in the ecosystem recently, marked 🆕.
 _Avoid_: Fresh, hot (for an item that was already around)
 
 **Rising**:
-An existing item whose usage jumped recently; not New, however steep the jump.
+An existing item whose usage jumped recently; not New, however steep the jump. Not marked: everything in the trending report is supposed to be rising.
 _Avoid_: New, trending (for momentum alone)
+
+**Trending**:
+An item in the weekly trending report two weeks in a row or more, marked 🔥.
+_Avoid_: Hot, popular (for a first appearance or a one-week jump)
 
 **Established Repo**:
 A repo that is not New; only Established Repos appear in the category tables.

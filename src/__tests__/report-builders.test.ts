@@ -264,6 +264,20 @@ describe("renderTrendingTables", () => {
     expect(md).not.toContain("---\n\n");
   });
 
+  it("puts 🔥 before the name of a row that was in last week's report", () => {
+    const base = trendingReport();
+    const md = renderTrendingTables(
+      trendingReport({
+        radar: base.radar.map((r, i) => ({ ...r, onFire: i === 0 })),
+        categories: base.categories.map((c) => ({ ...c, rows: c.rows.map((r) => ({ ...r, onFire: true })) })),
+      }),
+      new Map(),
+    );
+    expect(md).toContain("| 🔥 [Kilo](https://kilo.ai/) | OpenRouter; npm |");
+    expect(md).toContain("| bare | npm |");
+    expect(md).toContain("| 🔥 [o/r](https://github.com/o/r) | Rust |");
+  });
+
   it("shows — when there is neither summary nor description", () => {
     const md = renderTrendingTables(trendingReport(), new Map());
     expect(md).toContain(

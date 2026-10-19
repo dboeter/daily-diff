@@ -1,6 +1,6 @@
 # npm momentum earns 🆕; only New items should
 
-Status: needs-triage
+Status: resolved
 
 ## Problem
 
@@ -23,3 +23,7 @@ Status: needs-triage
 - Rename `NPM_NEW_MIN_RATIO` to match (e.g. `NPM_RISING_MIN_RATIO`); grep for the old name.
 - Update the Trending bullets in AGENTS.md and the Radar paragraph in README.md that describe 🆕 and the Radar order.
 - Tests in `src/__tests__/` for `buildRadarCandidates` / `selectTrendingReport`.
+
+## Comments
+
+- 2026-10-20, the maintainer's decision: 🆕 is New only; Rising gets no marker (everything in the report is supposed to be rising); a new 🔥 marks Trending, an item in the top two weeks in a row or more. "In the top" is read as "in the report" (Radar or category tables); say so if it should be narrower. Done: OpenRouter apps are 🆕 by listing date only and npm rows never (the registry search has no first-publish date; `NPM_NEW_MIN_RATIO` deleted). The caps and Radar order are unchanged: ~45 new GitHub repos a week still justify them. 🔥 reads the report keys saved in `digests/trending-state.json` (`reported`) from exactly 7 days back, seeded for 2026-10-19, so it can first show on 2026-10-26.

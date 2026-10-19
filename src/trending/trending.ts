@@ -13,6 +13,8 @@ import {
   NEW_REPO_DAYS,
   NEW_REPO_MIN_STARS,
   nextStarHistory,
+  lastWeekKeys,
+  reportedKeys,
   npmKey,
   openrouterKey,
   radarPool,
@@ -507,7 +509,14 @@ export async function composeTrendingReport(
     console.log(`  [trending] Cross-source matches applied: ${links.length}`);
   }
 
-  const report = selectTrendingReport(githubRows, candidates, classifications, classifiedBy, links);
+  const report = selectTrendingReport(
+    githubRows,
+    candidates,
+    classifications,
+    classifiedBy,
+    links,
+    lastWeekKeys(history, dateStr),
+  );
   console.log(
     `  [trending] Radar: ${report.radar.length} rows | ` +
       (report.categories.map((c) => `${c.category}: ${c.rows.length}`).join(", ") || "no category rows"),
@@ -521,6 +530,6 @@ export async function composeTrendingReport(
     ...(rankingFile !== undefined ? { rankingFile } : {}),
     ...(nextMatches !== undefined ? { nextMatches } : {}),
     ...(nextCache ? { nextClassifications: nextCache } : {}),
-    nextStarHistory: nextStarHistory(history, githubRows, dateStr),
+    nextStarHistory: nextStarHistory(history, githubRows, dateStr, reportedKeys(report)),
   };
 }

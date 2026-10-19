@@ -4,6 +4,7 @@ import os from "node:os";
 import path from "node:path";
 import {
   buildRadarCandidates,
+  lastWeekKeys,
   loadStarHistory,
   mergeRows,
   nextStarHistory,
@@ -778,6 +779,29 @@ describe("selectTrendingReport", () => {
   });
 });
 
+describe("selectTrendingReport 🔥", () => {
+  it("marks a Radar row 🔥 when any merged member was in last week's report", () => {
+    const candidates = buildRadarCandidates(
+      [app(1, { url: "https://x.dev" }), app(2)],
+      npmData([pkg("p", { homepage: "https://x.dev" })]),
+      [],
+      DATE,
+    );
+    const report = selectTrendingReport(
+      [],
+      candidates,
+      allInScope(candidates),
+      "topics",
+      [],
+      new Set(["npm:p"]),
+    );
+    expect(report.radar.map((r) => [r.keys, r.onFire])).toEqual([
+      [["openrouter:1", "npm:p"], true],
+      [["openrouter:2"], false],
+    ]);
+  });
+});
+
 describe("radarPool", () => {
   it("keeps eligible candidates unmerged, 🆕 first and capped at 20, the pool at 30", () => {
     const fresh = buildRadarCandidates(newApps(25), NO_NPM, [], DATE);
@@ -922,6 +946,30 @@ describe("nextStarHistory", () => {
       hist({ "a/x": [["2026-09-28", 2]], "b/y": [["2026-10-01", 7]] }),
     );
   });
+
+  it("records today's report keys, replaces them on a re-run and prunes reports older than 7 days", () => {
+    const h = {
+      repos: {},
+      reported: { "2026-09-27": ["npm:gone"], "2026-09-28": ["npm:last"], [DATE]: ["npm:x"] },
+    };
+    expect(nextStarHistory(h, [], DATE, ["npm:y"]).reported).toEqual({
+      "2026-09-28": ["npm:last"],
+      [DATE]: ["npm:y"],
+    });
+    // Without a report (no keys given) today's entry is left as it was.
+    expect(nextStarHistory(h, [], DATE).reported?.[DATE]).toEqual(["npm:x"]);
+  });
+});
+
+describe("lastWeekKeys", () => {
+  it("reads only the report dated exactly 7 days earlier", () => {
+    const h = {
+      repos: {},
+      reported: { "2026-09-27": ["npm:a"], "2026-09-28": ["npm:b"], "2026-10-01": ["npm:c"] },
+    };
+    expect([...lastWeekKeys(h, DATE)]).toEqual(["npm:b"]);
+    expect(lastWeekKeys(hist({}), DATE).size).toBe(0);
+  });
 });
 
 describe("loadStarHistory / saveStarHistory", () => {
@@ -943,6 +991,16 @@ describe("loadStarHistory / saveStarHistory", () => {
     expect(loadStarHistory(file)).toEqual(h);
     saveStarHistory(hist({}), file);
     expect(loadStarHistory(file)).toEqual(hist({}));
+    const withReported = { ...h, reported: { [DATE]: ["github:a/x", "npm:p"] } };
+    saveStarHistory(withReported, file);
+    expect(fs.readFileSync(file, "utf-8")).toContain(`"${DATE}": ["github:a/x","npm:p"]`);
+    expect(loadStarHistory(file)).toEqual(withReported);
+  });
+
+  it("keeps the star points when `reported` is malformed", () => {
+    const file = path.join(tmp(), "s.json");
+    fs.writeFileSync(file, JSON.stringify({ repos: { "a/x": [[DATE, 1]] }, reported: { [DATE]: "npm:p" } }));
+    expect(loadStarHistory(file)).toEqual(hist({ "a/x": [[DATE, 1]] }));
   });
 
   it("returns an empty history for a missing, invalid or repos-less file", () => {
@@ -998,6 +1056,37 @@ describe("composeTrendingReport with star history", () => {
       ["2026-09-28", 400],
       [DATE, 600],
     ]);
+  });
+
+  it("marks 🔥 the rows last week's report showed and records this week's", async () => {
+    const h = {
+      ...hist({ "big/agent": [["2026-09-28", 8_990]], "small/agent": [["2026-09-28", 400]] }),
+      reported: { "2026-09-28": ["github:small/agent"] },
+    };
+    const report = await composeTrendingReport(
+      data([
+        search("big/agent", { stargazersCount: 9_000 }),
+        search("Small/Agent", { stargazersCount: 600 }),
+      ]),
+      DATE,
+      {
+        apiKey: "",
+        matchState: null,
+        ask: notCalled,
+        history: h,
+        classifyCache: { items: {} },
+        fetchGain: noFetch,
+      },
+    );
+    const rows = report.categories.flatMap((c) => c.rows);
+    expect(rows.map((r) => [r.fullName, r.onFire])).toEqual([
+      ["Small/Agent", true],
+      ["big/agent", false],
+    ]);
+    expect(report.nextStarHistory?.reported).toEqual({
+      "2026-09-28": ["github:small/agent"],
+      [DATE]: ["github:small/agent", "github:big/agent"],
+    });
   });
 
   it("asks the history API only about rows that could reach the report, new ones first", async () => {
