@@ -1,0 +1,23 @@
+{
+  "reported": {
+    "databricks ai runtime sdk replaces serverless_gpu|2026-10-13": "2026-10-19",
+    "knowledge assistant and supervisor agent are now legacy|2026-10-12": "2026-10-19",
+    "feature views are now generally available|2026-10-12": "2026-10-19",
+    "billing for private network gateway|2026-10-14": "2026-10-19",
+    "feature views will soon be available by default for workspaces with the compliance security profile enabled|2026-10-12": "2026-10-19",
+    "mysql integrated cdc pipeline is now generally available|2026-10-15": "2026-10-19",
+    "external writes to managed delta tables are now generally available|2026-10-13": "2026-10-19",
+    "adbc driver for power bi is now generally available|2026-10-15": "2026-10-19",
+    "10.37 release notes (with behavior changes): oct 08, 2026 - oct 16, 2026|2026-10-16": "2026-10-19",
+    "snowflake-bcr:2026_08": "2026-10-19",
+    "october 16, 2026: apache iceberg™ v3 table upgrades and expression defaults (general availability)|2026-10-16": "2026-10-19",
+    "oct 15, 2026: data mirroring for snowflake postgres (general availability)|2026-10-15": "2026-10-19",
+    "oct 14, 2026: document generation in snowflake cowork (general availability)|2026-10-14": "2026-10-19",
+    "feature: the apache hive catalog endpoint in the lakehouse runtime catalog is now generally available (ga).|2026-10-14": "2026-10-19",
+    "feature: you can copy tables across regions.|2026-10-15": "2026-10-19",
+    "feature: incremental data transfers for the bigquery data transfer service for postgresql and servicenow are now generally available (ga).|2026-10-12": "2026-10-19"
+  },
+  "stages": {
+    "snowflake-bcr:2026_08": "2026-10-16 Introduced in the 10.37 release (October 8-16, 2026) as Disabled by Default; account admins can enable for testing."
+  }
+}

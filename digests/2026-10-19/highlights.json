@@ -1,0 +1,29 @@
+{
+  "ai-agents": [
+    "Claude Code v2.1.303 shipped bug‑fix and reliability improvements, making the agent more stable for daily coding tasks.",
+    "OpenAI Codex’s BYOK Work‑mode now blocks message submission when local browser tools are enabled, breaking workflows that rely on those tools."
+  ],
+  "ai-hn": [
+    "Anthropic’s AI safety bill would only trigger federal oversight after 50 deaths or $1B in damages, setting a high bar for regulation.",
+    "A study finds 90% of US work hours involve tasks poorly covered by AI benchmarks, urging devs to look beyond standard evals."
+  ],
+  "ai-arxiv": [
+    "LM2LM framework lets LLMs generate improvement proposals for other models, enabling recursive self‑improvement with less data.",
+    "SchemaShield‑Lite adds a training‑free repair layer that restores function‑call accuracy when tool schemas drift after deployment."
+  ],
+  "ai-web": [
+    "Anthropic pledged 5% of its shares to a Public Benefit Fund, with more tied to growth, to fund safety research and public‑good AI projects."
+  ],
+  "ai-data": [
+    "Databricks AI Runtime SDK now replaces the deprecated serverless_gpu package in GPU environment version 6, providing the official SDK for GPU workloads.",
+    "Snowflake 10.37 adds behavior change bundle 2026_08 (disabled by default), letting admins test upcoming changes before they become default."
+  ],
+  "ai-trending": [
+    "vakandi/opencode-rust releases an open‑source Rust implementation of the OpenCode agent, offering a CLI, TUI, and HTTP server without Docker.",
+    "context-mode optimizes AI coding agents’ context windows (98% output reduction), persists memory, and routes via MCP+hooks across 17 platforms."
+  ],
+  "ai-hf": [
+    "DeepSeek released its V4.1‑Flash multimodal model, boosting image‑understanding performance for agents and vision‑language tasks.",
+    "Lightricks’ LTX‑2.5 image‑to‑video model surpassed 2 M downloads, offering temporally consistent video generation from still images."
+  ]
+}

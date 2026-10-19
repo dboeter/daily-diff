@@ -1,11 +1,12 @@
 {
-  "generated": "2026-10-17T01:20:24.930Z",
+  "generated": "2026-10-19T01:16:48.363Z",
   "labels": {
     "ai-agents": "AI Agents",
     "ai-hn": "AI Discussions",
     "ai-arxiv": "AI Research",
     "ai-web": "Lab Announcements",
     "ai-policy": "Policy Watch",
+    "ai-data": "Data Engineering Watch",
     "ai-trending": "Agent & AI Coding Trends",
     "ai-hf": "AI Models",
     "ai-infra": "AI Infrastructure Digest",
@@ -21,6 +22,27 @@
   ],
   "overview": "📅 Overview",
   "dates": [
+    {
+      "date": "2026-10-19",
+      "reports": [
+        "ai-agents",
+        "ai-hn",
+        "ai-arxiv",
+        "ai-web",
+        "ai-data",
+        "ai-trending",
+        "ai-hf"
+      ]
+    },
+    {
+      "date": "2026-10-18",
+      "reports": [
+        "ai-agents",
+        "ai-hn",
+        "ai-web",
+        "ai-policy"
+      ]
+    },
     {
       "date": "2026-10-17",
       "reports": [
