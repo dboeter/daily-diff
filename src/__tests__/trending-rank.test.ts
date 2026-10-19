@@ -56,7 +56,7 @@ function trending(fullName: string, o: Partial<TrendingRepo> = {}): TrendingRepo
 function search(fullName: string, o: Partial<SearchRepo> = {}): SearchRepo {
   return {
     fullName,
-    description: null,
+    description: "A coding tool",
     language: null,
     stargazersCount: 0,
     pushedAt: "2026-10-04T00:00:00Z",
@@ -429,7 +429,7 @@ describe("urlMerge", () => {
   it("merges transitively, at the earliest member's position, joining sources and signals", () => {
     const github = rankGithubRepos(
       [],
-      [search("kilo-org/kilocode", { createdAt: NEW, stargazersCount: 30 })],
+      [search("kilo-org/kilocode", { createdAt: NEW, stargazersCount: 30, description: null })],
       DATE,
     );
     const rows = urlMerge(
@@ -540,6 +540,29 @@ describe("selectTrendingReport", () => {
     const candidates = npmCandidates(32, { 0: "https://x.dev", 30: "https://x.dev" });
     const report = selectTrendingReport([], candidates, allInScope(candidates), "topics");
     expect(report.radar[0]!.keys).toEqual(["npm:p0"]);
+  });
+
+  // 2026-10-19: emo-xiaoyu/harness-mix, no description, was summarized as "a TypeScript project".
+  it("keeps a repo without a description out of the category tables", () => {
+    const github = rankGithubRepos(
+      [
+        trending("a/empty", { periodStars: 90, description: " " }),
+        trending("a/tool", { periodStars: 80, description: "A coding agent" }),
+      ],
+      [search("a/empty"), search("a/tool")],
+      DATE,
+    );
+    const inScope = { category: "coding_agent", standalone: 0.9 } as const;
+    const report = selectTrendingReport(
+      github,
+      [],
+      new Map<string, Classification>([
+        ["github:a/empty", inScope],
+        ["github:a/tool", inScope],
+      ]),
+      "jev",
+    );
+    expect(report.categories.flatMap((g) => g.rows.map((r) => r.fullName))).toEqual(["a/tool"]);
   });
 
   it("drops unclassified, out-of-scope and non-standalone candidates from the Radar", () => {
@@ -727,7 +750,7 @@ describe("selectTrendingReport", () => {
     const summaries = summaryRows(report);
     expect(summaries.map((s) => s.n)).toEqual([1, 2, 3]);
     expect(summaries[0]!.facts).toBe("Source: GitHub | Signal: 🆕 50 (+50)");
-    expect(summaries[2]).toEqual({ n: 3, name: "g/old", description: "", facts: "Stars: 10" });
+    expect(summaries[2]).toEqual({ n: 3, name: "g/old", description: "A coding tool", facts: "Stars: 10" });
   });
 
   it("shows exactly the GitHub rows reachesReport accepts, the ones the history API is asked about", () => {

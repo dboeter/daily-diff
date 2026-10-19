@@ -581,7 +581,7 @@ describe("composeTrendingReport", () => {
     ({ name, description: "", weekly: 1000, monthly: 4000, url: "", lastPublish: DATE }) as NpmPackage;
   const data: TrendingData = {
     trendingRepos: [],
-    searchRepos: [search("a/agent"), search("b/weights")],
+    searchRepos: [{ ...search("a/agent"), description: "A coding agent" }, search("b/weights")],
     trendingFetchSuccess: true,
     openrouter: {
       ...EMPTY_OPENROUTER,

@@ -567,8 +567,15 @@ export function isRadarRepo(r: GithubRow): boolean {
  */
 export function reachesReport(r: GithubRow, c: Classification | undefined): boolean {
   if (c === undefined) return false;
-  return r.isNew ? isRadarRepo(r) && onRadar(c) : inScope(c);
+  return r.isNew ? isRadarRepo(r) && onRadar(c) : hasDescription(r) && inScope(c);
 }
+
+/**
+ * The category tables need one: a repo without a description has nothing to
+ * summarize, and on 2026-10-19 the model padded emo-xiaoyu/harness-mix's slot
+ * with "is a TypeScript project". Jev still classifies it.
+ */
+const hasDescription = (r: GithubRow): boolean => r.description.trim() !== "";
 
 /**
  * Apply scope, merge, cap and number the rows. New repos are Radar-only: the
@@ -600,7 +607,9 @@ export function selectTrendingReport(
   const categories = CATEGORIES.map((category) => ({
     category,
     rows: interleaveGains(
-      githubRows.filter((r) => !r.isNew && classifications.get(r.key)?.category === category),
+      githubRows.filter(
+        (r) => !r.isNew && hasDescription(r) && classifications.get(r.key)?.category === category,
+      ),
     ),
   }))
     .filter((g) => g.rows.length > 0)
