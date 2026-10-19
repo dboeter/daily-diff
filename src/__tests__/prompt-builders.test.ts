@@ -383,6 +383,36 @@ describe("buildWebReportPrompt", () => {
     expect(result).toContain("Incremental update");
     expect(result).not.toContain("Content Landscape Overview");
   });
+
+  // 2026-10-19: one article became ~600 words restated across four sections.
+  it("asks for Highlights and the lab section only with 1-2 new articles", () => {
+    const article = (n: number) => ({
+      url: `https://anthropic.com/news/a${n}`,
+      title: `A${n}`,
+      lastmod: "2026-10-19",
+      content: "Text",
+      site: "anthropic" as const,
+      category: "news",
+    });
+    const site = (count: number): WebFetchResult[] => [
+      {
+        site: "anthropic",
+        siteName: "Anthropic",
+        isFirstRun: false,
+        newItems: Array.from({ length: count }, (_, i) => article(i)),
+        totalDiscovered: 100,
+        fetchSuccess: true,
+      },
+    ];
+    const short = buildWebReportPrompt(site(1), "2026-10-19");
+    expect(short).toContain(`## ${SECTIONS.highlights}\n`);
+    expect(short).toContain("## Anthropic\n");
+    expect(short).not.toContain(`## ${SECTIONS.signals}\n`);
+    expect(short).not.toContain(`## ${SECTIONS.worthALook}\n`);
+    const full = buildWebReportPrompt(site(3), "2026-10-19");
+    expect(full).toContain(`## ${SECTIONS.signals}\n`);
+    expect(full).toContain("no forward-looking claims");
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -494,13 +524,21 @@ describe("buildDiscussionsPrompt", () => {
 // ---------------------------------------------------------------------------
 
 describe("listing report layout", () => {
+  // Three articles: with fewer the web prompt leaves out Signals and Worth a Look.
   const web: WebFetchResult[] = [
     {
       site: "openai",
       siteName: "OpenAI",
       isFirstRun: false,
-      newItems: [],
-      totalDiscovered: 1,
+      newItems: [1, 2, 3].map((n) => ({
+        url: `https://openai.com/index/p${n}`,
+        title: `P${n}`,
+        lastmod: "2026-10-12",
+        content: "",
+        site: "openai" as const,
+        category: "release",
+      })),
+      totalDiscovered: 3,
       fetchSuccess: true,
     },
   ];

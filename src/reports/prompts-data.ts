@@ -240,8 +240,33 @@ Rules:
 `;
 }
 
+/**
+ * Below this many new articles (first crawls aside) the web report is Highlights
+ * and the lab sections only: on 2026-10-19 one article was restated in all four
+ * sections, ~600 words, and Signals speculated past it.
+ */
+const WEB_FULL_LAYOUT_MIN = 3;
+
 export function buildWebReportPrompt(results: WebFetchResult[], dateStr: string): string {
   const isAnyFirstRun = results.some((r) => r.isFirstRun);
+  const articleCount = results.reduce((n, r) => n + r.newItems.length, 0);
+  const full = isAnyFirstRun || articleCount >= WEB_FULL_LAYOUT_MIN;
+  const closingSections = full
+    ? `## ${SECTIONS.signals}
+Based on both companies' release cadence and content focus:
+- Each company's recent technical priorities (model capabilities / safety / productization / ecosystem)
+- Competitive dynamics: who is setting the agenda, who is following
+- Potential impact on developers and enterprise users
+- Hidden signals in titles, phrasing and timing: new terms, dense releases in one category, policy and safety developments
+- Patterns across the articles only: no forward-looking claims the articles don't make
+
+## ${SECTIONS.worthALook}
+1-3 pieces most worth reading in full, with brief reasoning.
+
+`
+    : `Write no other sections: with ${articleCount} new article${articleCount === 1 ? "" : "s"}, a Signals or Worth a Look section would only restate it.
+
+`;
 
   const siteSections = results
     .map(({ siteName, isFirstRun, newItems, totalDiscovered }) => {
@@ -296,7 +321,7 @@ ${siteSections}
 Write the report in English with these sections. ${NO_TITLE_RULE}
 
 ## ${SECTIONS.highlights}
-3-5 sentences on the most important new releases or developments.
+${full ? "3-5 sentences" : "1-2 sentences"} on the most important new releases or developments.
 
 ## ${WEB_REPORT.anthropicHeading}
 Important content grouped by category (news / research / engineering / learn, etc.) under \`###\` subheadings:
@@ -309,17 +334,7 @@ Omit this section when Anthropic has no new content.
 Same structure, grouped by research / release / company / safety. Omit this section when OpenAI has no new content.
 - ⚠️ Note: OpenAI data is metadata-only (titles derived from URL slugs, no article text). Only list URLs and categories objectively. Do NOT speculate on title meanings or fabricate content summaries. If information is insufficient for analysis, state the data limitation clearly.
 
-## ${SECTIONS.signals}
-Based on both companies' release cadence and content focus:
-- Each company's recent technical priorities (model capabilities / safety / productization / ecosystem)
-- Competitive dynamics: who is setting the agenda, who is following
-- Potential impact on developers and enterprise users
-- Hidden signals in titles, phrasing and timing: new terms, dense releases in one category, policy and safety developments
-
-## ${SECTIONS.worthALook}
-1-3 pieces most worth reading in full, with brief reasoning.
-
-${isAnyFirstRun ? `## ${WEB_REPORT.landscapeHeading}\nFirst full crawl only: summarize the content category distribution for both companies and describe their content strategy style (academic-oriented vs product-oriented vs user stories, etc.)\n\n` : ""}Style: English, professional and detailed, suited for AI researchers, product managers, and technical decision-makers. Every item must include official links.
+${closingSections}${isAnyFirstRun ? `## ${WEB_REPORT.landscapeHeading}\nFirst full crawl only: summarize the content category distribution for both companies and describe their content strategy style (academic-oriented vs product-oriented vs user stories, etc.)\n\n` : ""}Style: English, professional and detailed, suited for AI researchers, product managers, and technical decision-makers. Every item must include official links.
 `;
 }
 
