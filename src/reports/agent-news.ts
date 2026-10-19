@@ -102,18 +102,6 @@ export function collectNewsItems(sources: NewsSources): { item: NewsItem; text: 
       text: `${r.fullName.replace("/", " ")} ${r.description}`,
     });
   }
-  for (const r of trending?.searchRepos ?? []) {
-    out.push({
-      item: {
-        source: "GitHub Search",
-        title: `${r.fullName}${r.description ? ` — ${r.description}` : ""}`,
-        url: r.url,
-        detail: `${r.stargazersCount} stars`,
-      },
-      text: `${r.fullName.replace("/", " ")} ${r.description ?? ""}`,
-    });
-  }
-
   return out;
 }
 
@@ -130,10 +118,11 @@ export const MAX_AGENTS_PER_ITEM = 2;
  * MAX_AGENTS_PER_ITEM, for the agents and infra pool). Items keep source order (HN rank, then web, then
  * trending) and are de-duplicated by URL.
  *
- * An agent's own repo in the GitHub Search results is not news about it: the
- * topic queries sort by stars, so a large agent repo (QwenPaw, 35k stars) is
- * returned every day. On GitHub Trending its own repo still counts — trending
- * there is a daily event.
+ * A GitHub Trending repo is news only for the project whose own repo it is:
+ * trending there is a daily event. A third-party repo naming a project is not
+ * (on 2026-10-19 vakandi/opencode-rust, vastsa/PI-Desktop and three more made
+ * 10 of 16 agents "active"), and GitHub Search results never are: the topic
+ * queries sort by stars, so they return the same large repos every day.
  */
 export function matchProjectNews(
   agents: RepoConfig[],
@@ -151,9 +140,9 @@ export function matchProjectNews(
   for (const { item, text } of collectNewsItems(sources)) {
     if (seen.has(item.url)) continue;
     seen.add(item.url);
-    const ownSearchResult = (m: { ownUrl: string }) =>
-      item.source === "GitHub Search" && item.url.toLowerCase() === m.ownUrl;
-    const hits = matchers.filter((m) => m.re.test(text) && !ownSearchResult(m));
+    const hits = matchers.filter((m) =>
+      item.source === "GitHub Trending" ? item.url.toLowerCase() === m.ownUrl : m.re.test(text),
+    );
     if (hits.length === 0 || hits.length > maxPerItem) continue;
     for (const { id } of hits) {
       const list = result.get(id)!;

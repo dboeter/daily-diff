@@ -3,7 +3,7 @@ import {
   buildProjectDigestPrompt,
   buildSkillsPrompt,
   hasActivity,
-  previewNotes,
+  releaseNotes,
   type ProjectActivity,
 } from "../reports/prompts.ts";
 import {
@@ -136,8 +136,24 @@ describe("buildProjectDigestPrompt", () => {
     expect(prompt).toContain("New features New plugin manager");
     expect(prompt).not.toContain("<h3");
     expect(prompt).not.toContain("(#en-");
-    expect(previewNotes(preview.body).length).toBeGreaterThan(400);
+    expect(releaseNotes(preview.body, 1500).length).toBeGreaterThan(400);
     expect(prompt).toContain("skip routine alpha/rc bumps");
+  });
+
+  it("leaves fenced code blocks (install commands) out of the release notes", () => {
+    const body =
+      "### Installation\n```bash\nbrew install org/tap/tool\n```\n```bash\n" +
+      "x".repeat(400) +
+      "\n```\n## What's new\n- Slash commands run safely";
+    const prompt = buildProjectDigestPrompt([makeActivity({ releases: [{ ...release, body }] })], scope, "d");
+    expect(prompt).not.toContain("brew install");
+    expect(prompt).toContain("Slash commands run safely");
+    expect(releaseNotes("```sh\nnpm i tool\n```", 400)).toBe("");
+  });
+
+  it("forbids stating absences in the overview too", () => {
+    const prompt = buildProjectDigestPrompt([makeActivity({ releases: [release] })], scope, "d");
+    expect(prompt).toContain("Never state what did not happen");
   });
 
   it("caps the releases shown and notes the total", () => {

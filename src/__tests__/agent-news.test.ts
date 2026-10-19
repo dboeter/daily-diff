@@ -139,7 +139,8 @@ describe("matchProjectNews", () => {
     expect(news.get("claude-code")!.map((n) => n.source)).toEqual(["Anthropic (Claude)"]);
   });
 
-  it("matches trending repos by name and description", () => {
+  // 2026-10-19: vakandi/opencode-rust, vastsa/PI-Desktop and others made 10 of 16 projects "active".
+  it("does not count a third-party repo that names a project as its news", () => {
     const trending: TrendingData = {
       trendingFetchSuccess: true,
       openrouter: EMPTY_OPENROUTER,
@@ -169,8 +170,8 @@ describe("matchProjectNews", () => {
       ],
     };
     const news = matchProjectNews([claudeCode, openclaw], { trending });
-    expect(news.get("claude-code")!.map((n) => n.url)).toEqual(["https://github.com/someone/cc-skills"]);
-    expect(news.get("openclaw")!.map((n) => n.url)).toEqual(["https://github.com/someone/claw-memory"]);
+    expect(news.get("claude-code")).toEqual([]);
+    expect(news.get("openclaw")).toEqual([]);
   });
 
   it("skips an agent's own repo in search results, not on GitHub Trending", () => {
