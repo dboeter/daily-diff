@@ -72,7 +72,7 @@ function quietProjects(g: ProjectGroup): ProjectActivity[] {
     new RegExp(`^##\\s+${escapeRegex(a.config.name)}\\s*$`, "m").test(g.summary),
   );
   const active = covered.length > 0 ? covered : withData;
-  return g.activities.filter((a) => !active.includes(a));
+  return g.activities.filter((a) => !active.includes(a) && !a.fetchFailed);
 }
 
 /**
@@ -87,16 +87,24 @@ export function buildProjectReportContent(r: ProjectReportInput): string {
   const releases = all.reduce((n, a) => n + a.releases.length, 0);
   const prereleases = all.reduce((n, a) => n + a.prereleaseCount, 0);
   const link = (a: ProjectActivity) => `[${a.config.name}](https://github.com/${a.config.repo})`;
-  let quietCount = 0;
+  let inactiveCount = 0;
   const sections = r.groups.flatMap((g) => {
     const quiet = quietProjects(g);
-    quietCount += quiet.length;
+    // A project whose release fetch failed was not checked: "Quiet" would claim it shipped nothing.
+    const unavailable = g.activities.filter((a) => a.fetchFailed);
+    inactiveCount += quiet.length + unavailable.length;
     // With omitQuietGroups, a group's projects are left out when all are quiet; its preamble still shows.
     const showProjects = !(r.omitQuietGroups && quiet.length === g.activities.length);
     if (!showProjects && !g.preamble) return [];
     const projects = showProjects
-      ? nestHeadings(g.summary, 3) +
-        (quiet.length ? `\n\n**Quiet ${r.period}:** ${quiet.map(link).join(", ")}` : "")
+      ? [
+          // The data report passes an empty summary for a group with no active project.
+          nestHeadings(g.summary, 3),
+          quiet.length ? `**Quiet ${r.period}:** ${quiet.map(link).join(", ")}` : "",
+          unavailable.length ? `**Unavailable ${r.period}:** ${unavailable.map(link).join(", ")}` : "",
+        ]
+          .filter(Boolean)
+          .join("\n\n")
       : "";
     return `## ${g.title}\n\n` + [g.preamble, projects].filter(Boolean).join("\n\n");
   });
@@ -104,7 +112,7 @@ export function buildProjectReportContent(r: ProjectReportInput): string {
   return (
     `${r.heading}\n\n` +
     `> ${REPORT_META.generated(r.utcStr)} | ${r.leadingCounts ? `${r.leadingCounts} | ` : ""}Projects: ${all.length} | ` +
-    `Active ${r.period}: ${all.length - quietCount} | ` +
+    `Active ${r.period}: ${all.length - inactiveCount} | ` +
     `Stable releases: ${releases} | Prereleases (not covered): ${prereleases}\n\n` +
     `---\n\n` +
     (r.preamble ?? "") +

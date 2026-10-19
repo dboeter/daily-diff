@@ -110,6 +110,26 @@ describe("buildProjectReportContent", () => {
     expect(result).not.toContain("Quiet today");
   });
 
+  it("lists a project whose release fetch failed as unavailable, neither quiet nor active", () => {
+    const result = buildProjectReportContent(
+      withAgents({ activities: [...agents.activities, makeActivity("delta", { fetchFailed: true })] }),
+    );
+    expect(result).toContain("Projects: 4 | Active today: 1 |");
+    expect(result).toContain(
+      "**Quiet today:** [BETA](https://github.com/org/beta), [GAMMA](https://github.com/org/gamma)\n\n" +
+        "**Unavailable today:** [DELTA](https://github.com/org/delta)",
+    );
+  });
+
+  it("shows an omitted group's unavailable projects", () => {
+    const result = buildProjectReportContent({
+      ...input,
+      omitQuietGroups: true,
+      groups: [{ title: "Stack", summary: "", activities: [makeActivity("delta", { fetchFailed: true })] }],
+    });
+    expect(result).toContain("## Stack\n\n**Unavailable today:** [DELTA](https://github.com/org/delta)");
+  });
+
   it("renders the preamble between the header and the groups", () => {
     const result = buildProjectReportContent({ ...input, preamble: "PREAMBLE\n\n---\n\n" });
     expect(result).toMatch(/Prereleases \(not covered\): 7\n\n---\n\nPREAMBLE\n\n---\n\n## Coding Agents\n/);

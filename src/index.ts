@@ -110,7 +110,7 @@ type ProjectFetch = Omit<ProjectActivity, "news">;
  */
 const PREVIEWS_PER_PROJECT = 3;
 
-/** Stable releases and hot issues for one project. A failed fetch reads as a quiet period. */
+/** Stable releases and hot issues for one project. A failed release fetch is `fetchFailed`, shown as unavailable. */
 async function fetchProject(cfg: RepoConfig, since: Date): Promise<ProjectFetch> {
   try {
     const [{ recent: releases, noStableYet }, hotIssues] = await Promise.all([
@@ -137,7 +137,7 @@ async function fetchProject(cfg: RepoConfig, since: Date): Promise<ProjectFetch>
     };
   } catch (err) {
     console.error(`  [${cfg.id}] fetch failed: ${err}`);
-    return { config: cfg, releases: [], previews: [], prereleaseCount: 0, hotIssues: [] };
+    return { config: cfg, releases: [], previews: [], prereleaseCount: 0, hotIssues: [], fetchFailed: true };
   }
 }
 

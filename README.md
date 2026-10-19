@@ -124,7 +124,7 @@ The `agents` section of `config.yml`, in one daily report. Issue and PR churn is
 - **Hot issues**: opened in the last 48h with 10+ comments and 👍 combined (3+ when labelled regression or security), at most 2 per agent.
 - **News**: Hacker News stories, new Anthropic/OpenAI pages and GitHub Trending repos that name the agent. An item naming three or more tracked projects is treated as a compatibility list and skipped.
 
-Agents with none of these are listed in one "Quiet today" line.
+Agents with none of these are listed in one "Quiet today" line; an agent whose releases could not be fetched goes in an "Unavailable today" line instead.
 
 <!-- tracked:agents -->
 <!-- generated from config.yml: edit config.yml, then run pnpm readme -->
@@ -406,6 +406,7 @@ Generated | Projects: N | Active today: N | Stable releases: N | Prereleases (no
 ### Overview                           — what shipped, what broke, what got attention
 ### <Agent>                            — one per active agent, at most 3 bullets: Release / News / Hot issue
 Quiet today: <agents with nothing to report>
+Unavailable today: <agents whose release fetch failed, if any>
 
 ## Agent Tooling                       — config.yml infra.title, same layout
 ```

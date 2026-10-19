@@ -23,6 +23,8 @@ export interface ProjectActivity {
   prereleaseCount: number;
   hotIssues: GitHubItem[];
   news: NewsItem[];
+  /** The release fetch failed: the project could not be checked, so it is neither active nor quiet. */
+  fetchFailed?: boolean;
 }
 
 /** Wording that differs between the agents and infra sections. */
