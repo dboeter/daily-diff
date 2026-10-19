@@ -449,7 +449,8 @@ export function buildDiscussionsPrompt(data: DiscussionsData, dateStr: string): 
               `${i + 1}. **${s.title}**\n` +
               `   Link: ${s.url}\n` +
               `   Discussion: ${s.hnUrl}\n` +
-              `   HN Rank: ${s.hnRank ?? i + 1} | Score: ${s.points} | Comments: ${s.comments} | Author: ${s.author} | Time: ${s.createdAt.slice(0, 16)}`,
+              `   HN Rank: ${s.hnRank ?? i + 1} | Score: ${s.points} | Comments: ${s.comments} | Author: ${s.author} | Time: ${s.createdAt.slice(0, 16)}` +
+              (s.description ? `\n   Page description: ${s.description}` : ""),
           )
           .join("\n\n"),
     );
@@ -461,7 +462,7 @@ Organized by category: a \`### <category>\` heading per category, each followed 
 
    - **Title**: title as a Markdown link to the original article, followed by a " · [HN](discussion-url)" link to the HN thread
    - **Score / Comments**: copy the numbers from the input verbatim
-   - **Summary**: 2 sentences — what the item is and why it matters to developers. Do not describe the comments: you have not read them. If the title does not say what the item is, do not guess
+   - **Summary**: with a page description, 2 sentences from it — what the item is and why it matters to developers; without one, 1 sentence saying only what the title and the link's domain say. You have read neither the article nor the comments: describe no discussion, and no claim, method or result the title and description do not state
    - Select the 2-5 most representative items per category; omit a category if it is empty
 
    Categories:
@@ -519,7 +520,7 @@ The 3-8 most notable stories as a **Markdown table**:
   }
 
   const when = weekly ? "today on Hacker News and this week on Dev.to and Lobste.rs" : "today on Hacker News";
-  return `You are an AI industry news analyst. The following are AI-related posts from developer communities as of ${dateStr}. You have only each item's title, link, counts and (for Dev.to) description — not the article and not the comment thread:
+  return `You are an AI industry news analyst. The following are AI-related posts from developer communities as of ${dateStr}. You have only each item's title, link, counts and, where given, a description (the linked page's own for HN, the author's for Dev.to) — not the article and not the comment thread:
 
 ---
 

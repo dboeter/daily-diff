@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { fetchHnData } from "../sources/hn.ts";
+import { fetchHnData, metaDescription } from "../sources/hn.ts";
 
 function jsonResponse(data: unknown, status = 200): Response {
   return new Response(JSON.stringify(data), {
@@ -94,5 +94,48 @@ describe("fetchHnData", () => {
     const result = await fetchHnData();
 
     expect(result).toEqual({ stories: [], fetchSuccess: false });
+  });
+});
+
+describe("metaDescription", () => {
+  it("reads og:description in either attribute order, else the meta description", () => {
+    expect(metaDescription(`<meta property="og:description" content="Goodfire on SAEs &amp; probes">`)).toBe(
+      "Goodfire on SAEs & probes",
+    );
+    expect(metaDescription(`<meta content='Reversed order' property='og:description' />`)).toBe(
+      "Reversed order",
+    );
+    expect(metaDescription(`<head><meta name="description" content="Plain meta"></head>`)).toBe("Plain meta");
+    expect(metaDescription("<head><title>None</title></head>")).toBe("");
+  });
+});
+
+// 2026-10-19: with titles only, summaries guessed what "Neural networks are clean" argues.
+describe("fetchHnData descriptions", () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it("gives each linked story its page's description, and none to a text post", async () => {
+    vi.spyOn(globalThis, "fetch").mockImplementation(async (input) => {
+      const url = String(input);
+      if (url.endsWith("/topstories.json")) return jsonResponse([1, 2]);
+      if (url === "https://example.com/clean") {
+        return new Response(`<meta property="og:description" content="Sparse features generalize.">`, {
+          headers: { "Content-Type": "text/html; charset=utf-8" },
+        });
+      }
+      const id = Number(url.match(/item\/(\d+)\.json$/)?.[1]);
+      return jsonResponse({
+        id,
+        type: "story",
+        title: id === 1 ? "Neural networks are clean (AI)" : "Ask HN: AI at work?",
+        score: 10,
+        ...(id === 1 ? { url: "https://example.com/clean" } : {}),
+      });
+    });
+
+    const { stories } = await fetchHnData();
+    expect(stories.map((s) => s.description)).toEqual(["Sparse features generalize.", undefined]);
   });
 });

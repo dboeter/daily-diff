@@ -518,8 +518,25 @@ describe("buildDiscussionsPrompt", () => {
   it("does not ask for comment-thread content the model never sees", () => {
     const result = hnOnlyPrompt({ stories: [], fetchSuccess: true }, "2026-10-06");
     expect(result).toContain("not the article and not the comment thread");
-    expect(result).toContain("Do not describe the comments");
+    expect(result).toContain("describe no discussion");
     expect(result).not.toMatch(/typical reaction|last cycle/);
+  });
+
+  it("passes a story's page description, and limits a story without one to its title", () => {
+    const story = {
+      id: "1",
+      title: "Neural networks are clean",
+      url: "https://goodfire.ai/clean",
+      hnUrl: "https://news.ycombinator.com/item?id=1",
+      points: 300,
+      comments: 80,
+      author: "a",
+      createdAt: "2026-10-19T00:00:00Z",
+      description: "Sparse features generalize.",
+    };
+    const result = hnOnlyPrompt({ stories: [story], fetchSuccess: true }, "2026-10-19");
+    expect(result).toContain("   Page description: Sparse features generalize.");
+    expect(result).toContain("without one, 1 sentence saying only what the title and the link's domain say");
   });
 });
 

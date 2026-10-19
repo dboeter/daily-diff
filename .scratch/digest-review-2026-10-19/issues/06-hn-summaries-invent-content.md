@@ -1,6 +1,6 @@
 # HN summaries describe articles and threads the model never saw
 
-Status: needs-triage
+Status: resolved
 
 ## Problem
 
@@ -18,3 +18,7 @@ The discussions prompt gets titles and counts only. AGENTS.md records that befor
 ## Where
 
 `src/sources/hn.ts`, `buildDiscussionsPrompt` (`src/reports/prompts-data.ts`).
+
+## Comments
+
+- 2026-10-19: both options. `fetchHnData` gives each linked story its page's og:description / meta description (parallel, 8 s timeout, HTML only, first 64 KB; 21 of 30 on a live run). The prompt takes 2 sentences from a description, else 1 sentence from the title and domain only, and forbids any discussion, claim, method or result the title and description do not state. News matching still reads titles only.

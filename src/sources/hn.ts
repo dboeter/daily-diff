@@ -2,6 +2,9 @@
  * Hacker News AI stories fetched from the official Firebase API.
  */
 
+import { fetchOk } from "../core/http.ts";
+import { plainText } from "../core/rss.ts";
+
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
@@ -16,6 +19,8 @@ export interface HnStory {
   comments: number;
   author: string;
   createdAt: string;
+  /** The linked page's og:description or meta description; absent for a text post or a failed fetch. */
+  description?: string;
 }
 
 export interface HnData {
@@ -95,6 +100,65 @@ function toHnStory(item: HnFirebaseItem, hnRank: number): HnStory {
 }
 
 // ---------------------------------------------------------------------------
+// Article descriptions
+// ---------------------------------------------------------------------------
+
+/**
+ * The model saw titles only, and on 2026-10-19 summaries guessed what an
+ * article argues ("Neural networks are clean": "when properly regularized…").
+ * A page's own description is one request per story, cut short: a slow or
+ * huge page only loses its description.
+ */
+const DESCRIPTION_TIMEOUT_MS = 8000;
+/** The `<head>` is near the top; a `text()` on a 20 MB page would be a timeout, not a cap. */
+const DESCRIPTION_MAX_BYTES = 64 * 1024;
+const DESCRIPTION_MAX_CHARS = 300;
+
+/** `og:description`, else `<meta name="description">`, as plain text; "" when neither. */
+export function metaDescription(html: string): string {
+  for (const key of ["property=[\"']og:description[\"']", "name=[\"']description[\"']"]) {
+    for (const [tag] of html.matchAll(/<meta\b[^>]*>/gi)) {
+      if (!new RegExp(key, "i").test(tag)) continue;
+      const content = tag.match(/content=(?:"([^"]*)"|'([^']*)')/i);
+      const text = plainText(content?.[1] ?? content?.[2] ?? "", DESCRIPTION_MAX_CHARS);
+      if (text) return text;
+    }
+  }
+  return "";
+}
+
+/** The first DESCRIPTION_MAX_BYTES of an HTML page, else null. */
+async function fetchHead(url: string): Promise<string | null> {
+  const res = await fetchOk(url, { timeoutMs: DESCRIPTION_TIMEOUT_MS });
+  if (!res.headers.get("content-type")?.includes("text/html") || !res.body) {
+    await res.body?.cancel();
+    return null;
+  }
+  const reader = res.body.getReader();
+  const chunks: Uint8Array[] = [];
+  let size = 0;
+  while (size < DESCRIPTION_MAX_BYTES) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    chunks.push(value);
+    size += value.length;
+  }
+  await reader.cancel();
+  return Buffer.concat(chunks).toString("utf8");
+}
+
+async function withDescription(story: HnStory): Promise<HnStory> {
+  if (story.url === story.hnUrl) return story;
+  try {
+    const html = await fetchHead(story.url);
+    const description = html ? metaDescription(html) : "";
+    return description ? { ...story, description } : story;
+  } catch {
+    return story;
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Fetch
 // ---------------------------------------------------------------------------
 
@@ -137,8 +201,12 @@ export async function fetchHnData(): Promise<HnData> {
       }
     }
 
-    console.log(`  [hn] ${stories.length} AI stories (scanned ${topIds.length} topstories)`);
-    return { stories, fetchSuccess: stories.length > 0 };
+    const described = await Promise.all(stories.map(withDescription));
+    console.log(
+      `  [hn] ${stories.length} AI stories (scanned ${topIds.length} topstories), ` +
+        `${described.filter((s) => s.description).length} with a page description`,
+    );
+    return { stories: described, fetchSuccess: stories.length > 0 };
   } catch (err) {
     console.error(`  [hn] fetch failed: ${err}`);
     return { stories: [], fetchSuccess: false };
