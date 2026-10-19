@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { toCstDateStr, toUtcStr, weekdayOf, isWeeklyRun } from "../date.ts";
+import { toCstDateStr, toUtcStr, weekdayOf, isWeeklyRun } from "../core/date.ts";
 
 describe("toCstDateStr", () => {
   it("shifts a late-UTC timestamp to the next CST day", () => {

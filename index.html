@@ -316,7 +316,7 @@ function renderMarkdown(raw) {
   });
 }
 
-// Report id → label, from manifest.json (`labels`, written from REPORT_LABELS in src/i18n.ts).
+// Report id → label, from manifest.json (`labels`, written from REPORT_LABELS in src/core/i18n.ts).
 let LABELS = {};
 
 // ── Theme ──
@@ -351,7 +351,7 @@ function escapeHtml(s) {
 }
 
 // Manifest data: dates newest first, the weekly report ids, and the overview's
-// label (OVERVIEW in src/i18n.ts).
+// label (OVERVIEW in src/core/i18n.ts).
 let DATES = [];
 let WEEKLY = [];
 let OVERVIEW_LABEL = 'Overview';

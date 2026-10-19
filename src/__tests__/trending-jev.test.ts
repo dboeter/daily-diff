@@ -23,13 +23,18 @@ import {
   type ClassifyCache,
   type ClassifyItem,
   type MatchState,
-} from "../trending-jev.ts";
-import { judgeItems, type AskJev } from "../jev.ts";
+} from "../trending/jev.ts";
+import { judgeItems, type AskJev } from "../core/jev.ts";
 import { migrateClassifyEntry, migratePolicyEntry } from "../../scripts/migrate-verdict-fingerprints.ts";
-import { urlMerge, type GithubRow, type RadarRow } from "../trending-rank.ts";
-import { composeTrendingReport, EMPTY_OPENROUTER, type SearchRepo, type TrendingData } from "../trending.ts";
-import type { OpenRouterApp } from "../openrouter.ts";
-import type { NpmPackage } from "../npm.ts";
+import { urlMerge, type GithubRow, type RadarRow } from "../trending/rank.ts";
+import {
+  composeTrendingReport,
+  EMPTY_OPENROUTER,
+  type SearchRepo,
+  type TrendingData,
+} from "../trending/trending.ts";
+import type { OpenRouterApp } from "../sources/openrouter.ts";
+import type { NpmPackage } from "../trending/npm.ts";
 
 function githubRow(topic?: string): GithubRow {
   return {

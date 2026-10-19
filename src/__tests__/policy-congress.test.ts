@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
-import { congressStage, fetchCongress } from "../policy-congress.ts";
-import type { PolicyConfig } from "../config.ts";
+import { congressStage, fetchCongress } from "../policy/congress.ts";
+import type { PolicyConfig } from "../core/config.ts";
 
 // Shapes from live api.congress.gov v3 responses (DEMO_KEY, 2026-10-14): `/bill` list items and
 // S. 195's `/actions` (newest first, Library of Congress action codes next to chamber-floor ones).

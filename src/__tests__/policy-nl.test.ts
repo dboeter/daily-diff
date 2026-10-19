@@ -1,9 +1,9 @@
 import fs from "node:fs";
 import { describe, it, expect, vi, afterEach } from "vitest";
-import { billStage, fetchNlParliament, parseZaken } from "../policy-nl.ts";
-import { newItems, nextReportedState } from "../report-state.ts";
-import type { PolicyConfig } from "../config.ts";
-import type { PolicyState } from "../policy.ts";
+import { billStage, fetchNlParliament, parseZaken } from "../policy/nl.ts";
+import { newItems, nextReportedState } from "../core/report-state.ts";
+import type { PolicyConfig } from "../core/config.ts";
+import type { PolicyState } from "../policy/policy.ts";
 
 // Live responses, 2026-10-14: the Tweede Kamer OData and KOOP SRU.
 const text = (name: string): string =>

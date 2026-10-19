@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
-import { fetchUsRules } from "../policy-usrules.ts";
-import type { PolicyConfig } from "../config.ts";
+import { fetchUsRules } from "../policy/usrules.ts";
+import type { PolicyConfig } from "../core/config.ts";
 
 // Shapes from live responses (2026-10-14): federalregister.gov/api/v1/documents.json and
 // api.regulations.gov/v4/documents (DEMO_KEY).

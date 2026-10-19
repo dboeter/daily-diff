@@ -18,19 +18,19 @@ import {
   type GithubRow,
   type RadarRow,
   type StarHistory,
-} from "../trending-rank.ts";
-import type { AskJev } from "../jev.ts";
-import type { Classification } from "../trending-jev.ts";
-import { GitHubApiError } from "../github.ts";
+} from "../trending/rank.ts";
+import type { AskJev } from "../core/jev.ts";
+import type { Classification } from "../trending/jev.ts";
+import { GitHubApiError } from "../core/github.ts";
 import {
   composeTrendingReport,
   EMPTY_NPM,
   EMPTY_OPENROUTER,
   type SearchRepo,
   type TrendingRepo,
-} from "../trending.ts";
-import type { OpenRouterApp } from "../openrouter.ts";
-import type { NpmData, NpmPackage } from "../npm.ts";
+} from "../trending/trending.ts";
+import type { OpenRouterApp } from "../sources/openrouter.ts";
+import type { NpmData, NpmPackage } from "../trending/npm.ts";
 
 // ---------------------------------------------------------------------------
 // Fixtures

@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { fetchTrendingData, parseTrendingHtml, searchAiRepos } from "../trending.ts";
+import { fetchTrendingData, parseTrendingHtml, searchAiRepos } from "../trending/trending.ts";
 
 const SAMPLE_HTML = `
 <main>

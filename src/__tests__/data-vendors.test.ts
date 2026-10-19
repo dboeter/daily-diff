@@ -1,9 +1,9 @@
 import fs from "node:fs";
 import { describe, it, expect, vi, afterEach } from "vitest";
-import { fetchVendorData, fetchVendorFeeds } from "../data-vendors.ts";
-import { parseBehaviorChangeBundles, parseSnowflakeReleases } from "../data-snowflake.ts";
-import { parseBigQueryNotes } from "../data-bigquery.ts";
-import type { DataFeed } from "../config.ts";
+import { fetchVendorData, fetchVendorFeeds } from "../data/vendors.ts";
+import { parseBehaviorChangeBundles, parseSnowflakeReleases } from "../data/snowflake.ts";
+import { parseBigQueryNotes } from "../data/bigquery.ts";
+import type { DataFeed } from "../core/config.ts";
 
 const fixture = (name: string) => fs.readFileSync(new URL(`./fixtures/${name}`, import.meta.url), "utf-8");
 

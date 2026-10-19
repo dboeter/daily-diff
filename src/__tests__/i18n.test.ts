@@ -8,7 +8,7 @@ import {
   WEEKLY_REPORT_IDS,
   reportHeading,
   reportIssueTitle,
-} from "../i18n.ts";
+} from "../core/i18n.ts";
 
 // ---------------------------------------------------------------------------
 // One name per report

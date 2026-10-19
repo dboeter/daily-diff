@@ -20,11 +20,11 @@
 
 import fs from "node:fs";
 import path from "node:path";
-import { loadConfig } from "../src/config.ts";
-import { toCstDateStr } from "../src/date.ts";
-import { askJev, mapJev } from "../src/jev.ts";
-import { fetchPolicySources, type PolicyItem } from "../src/policy.ts";
-import { newItems } from "../src/report-state.ts";
+import { loadConfig } from "../src/core/config.ts";
+import { toCstDateStr } from "../src/core/date.ts";
+import { askJev, mapJev } from "../src/core/jev.ts";
+import { fetchPolicySources, type PolicyItem } from "../src/policy/policy.ts";
+import { newItems } from "../src/core/report-state.ts";
 import {
   loadPolicyVerdicts,
   policyRelevance,
@@ -32,7 +32,7 @@ import {
   watchlisted,
   watchlistFor,
   type PolicyAnswers,
-} from "../src/policy-jev.ts";
+} from "../src/policy/jev.ts";
 import { fullText } from "./jev-lab-text.ts";
 
 const LAB_DIR = path.join(".scratch", "ai-policy", "lab");

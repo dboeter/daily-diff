@@ -8,12 +8,12 @@ import {
   nestHeadings,
   renderReportBar,
   withReportBar,
-} from "../report-builders.ts";
-import type { TrendingReportData } from "../trending-rank.ts";
-import { numberRows } from "../summarized-table.ts";
-import { TRENDING_REPORT } from "../i18n.ts";
-import type { ProjectActivity } from "../prompts.ts";
-import type { GitHubRelease } from "../github.ts";
+} from "../reports/report-builders.ts";
+import type { TrendingReportData } from "../trending/rank.ts";
+import { numberRows } from "../reports/summarized-table.ts";
+import { TRENDING_REPORT } from "../core/i18n.ts";
+import type { ProjectActivity } from "../reports/prompts.ts";
+import type { GitHubRelease } from "../core/github.ts";
 
 // ---------------------------------------------------------------------------
 // Fixtures

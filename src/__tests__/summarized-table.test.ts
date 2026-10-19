@@ -6,15 +6,15 @@ import {
   summaryLine,
   summaryOutputRule,
   TABLES_MARKER,
-} from "../summarized-table.ts";
-import { renderPolicyTable, renderVendorTables } from "../report-builders.ts";
+} from "../reports/summarized-table.ts";
+import { renderPolicyTable, renderVendorTables } from "../reports/report-builders.ts";
 import {
   buildDataSummariesPrompt,
   buildPolicySummariesPrompt,
   buildTrendingSummariesPrompt,
-} from "../prompts-data.ts";
-import type { PolicyItem } from "../policy.ts";
-import type { KeptVendorItem } from "../data-jev.ts";
+} from "../reports/prompts-data.ts";
+import type { PolicyItem } from "../policy/policy.ts";
+import type { KeptVendorItem } from "../data/jev.ts";
 
 const policyItem = (id: string, jurisdiction: PolicyItem["jurisdiction"], news = false): PolicyItem => ({
   id,

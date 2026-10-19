@@ -2,9 +2,9 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { describe, it, expect, afterEach, vi } from "vitest";
-import { buildMessage, buildTeamsCard, resolvePagesUrl, sendTeams } from "../notify.ts";
-import type { ReportHighlights } from "../prompts-data.ts";
-import { REPORT_LABELS } from "../i18n.ts";
+import { buildMessage, buildTeamsCard, resolvePagesUrl, sendTeams } from "../cli/notify.ts";
+import type { ReportHighlights } from "../reports/prompts-data.ts";
+import { REPORT_LABELS } from "../core/i18n.ts";
 
 const BASE_URL = "https://example.com/radar";
 

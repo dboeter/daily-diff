@@ -15,7 +15,7 @@ import {
   buildRankingFile,
   type JevScore,
   type ArxivPaper,
-} from "../arxiv.ts";
+} from "../sources/arxiv.ts";
 
 const SAMPLE_ENTRY_XML = `
 <entry>

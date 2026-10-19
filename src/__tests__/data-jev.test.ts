@@ -5,9 +5,9 @@ import {
   selectVendorItems,
   MAX_VENDOR_ITEMS,
   type DataAnswers,
-} from "../data-jev.ts";
-import { asStateItem, recentVendorItems, type VendorItem } from "../data-vendors.ts";
-import { newItems, nextReportedState, type ReportedState } from "../report-state.ts";
+} from "../data/jev.ts";
+import { asStateItem, recentVendorItems, type VendorItem } from "../data/vendors.ts";
+import { newItems, nextReportedState, type ReportedState } from "../core/report-state.ts";
 
 const answers = (real: number, deprecation: number, significance: number, ai = 0): DataAnswers => ({
   real_change: { noul: real },

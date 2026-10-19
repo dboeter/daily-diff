@@ -1,10 +1,10 @@
 import fs from "node:fs";
 import { describe, it, expect, vi, afterEach } from "vitest";
-import { parseInitiatives, fetchHaveYourSay } from "../policy-haveyoursay.ts";
-import { nextDeadlines, upcomingDeadlines, renderDeadlines } from "../policy-deadlines.ts";
-import type { PolicyConfig } from "../config.ts";
-import type { PolicyItem } from "../policy.ts";
-import { newItems, nextReportedState } from "../report-state.ts";
+import { parseInitiatives, fetchHaveYourSay } from "../policy/haveyoursay.ts";
+import { nextDeadlines, upcomingDeadlines, renderDeadlines } from "../policy/deadlines.ts";
+import type { PolicyConfig } from "../core/config.ts";
+import type { PolicyItem } from "../policy/policy.ts";
+import { newItems, nextReportedState } from "../core/report-state.ts";
 
 const FIXTURE = JSON.parse(
   fs.readFileSync(new URL("./fixtures/have-your-say.json", import.meta.url), "utf-8"),

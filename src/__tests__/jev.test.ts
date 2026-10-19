@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { judgeItems, retryDelayMs, type VerdictCache } from "../jev.ts";
+import { judgeItems, retryDelayMs, type VerdictCache } from "../core/jev.ts";
 
 describe("Jev client", () => {
   it("honors retry-after and otherwise backs off exponentially, capped", () => {

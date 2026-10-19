@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { toDevtoArticle, type DevtoApiArticle } from "../devto.ts";
-import { toLobstersStory, type LobstersApiStory } from "../lobsters.ts";
-import { toHfModel, type HfApiModel } from "../hf.ts";
+import { toDevtoArticle, type DevtoApiArticle } from "../sources/devto.ts";
+import { toLobstersStory, type LobstersApiStory } from "../sources/lobsters.ts";
+import { toHfModel, type HfApiModel } from "../sources/hf.ts";
 
 describe("toDevtoArticle", () => {
   it("maps raw Forem API article to DevtoArticle structure", () => {

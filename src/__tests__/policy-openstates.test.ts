@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
-import { billStage, fetchOpenStates } from "../policy-openstates.ts";
-import type { PolicyConfig } from "../config.ts";
+import { billStage, fetchOpenStates } from "../policy/openstates.ts";
+import type { PolicyConfig } from "../core/config.ts";
 
 // Built from the public OpenAPI schema (v3.openstates.org/openapi.json, BillList/Bill/BillAction)
 // and the openstates-core action classifications: no key, so no live response.

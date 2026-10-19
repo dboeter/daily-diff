@@ -18,10 +18,10 @@ import {
   fetchSkillsData,
   type SkillsData,
   createGitHubIssue,
-} from "./github.ts";
-import { type ProjectActivity, buildProjectDigestPrompt, hasActivity } from "./prompts.ts";
-import { matchProjectNews } from "./agent-news.ts";
-import { buildHighlightsPrompt, type ReportHighlights } from "./prompts-data.ts";
+} from "./core/github.ts";
+import { type ProjectActivity, buildProjectDigestPrompt, hasActivity } from "./reports/prompts.ts";
+import { matchProjectNews } from "./reports/agent-news.ts";
+import { buildHighlightsPrompt, type ReportHighlights } from "./reports/prompts-data.ts";
 import {
   callLlm,
   generateOr,
@@ -33,13 +33,13 @@ import {
   reportLlmHealth,
   llmHealthLine,
   isConnectionError,
-} from "./report.ts";
+} from "./core/report.ts";
 import {
   buildProjectReportContent,
   buildStealthSection,
   renderReportBar,
   withReportBar,
-} from "./report-builders.ts";
+} from "./reports/report-builders.ts";
 import {
   buildWebReport,
   buildTrendingReport,
@@ -49,22 +49,29 @@ import {
   buildPolicyReport,
   buildDataReport,
   type SavedReport,
-} from "./data-reports.ts";
-import { loadWebState, fetchSiteContent, type WebFetchResult, type WebState } from "./web.ts";
-import { fetchTrendingData, type TrendingData } from "./trending.ts";
-import { fetchStealthModels, type OpenRouterStealthModel } from "./openrouter.ts";
-import { fetchHnData, type HnData } from "./hn.ts";
-import { fetchArxivData, type ArxivData } from "./arxiv.ts";
-import { fetchPolicyData, type PolicyData } from "./policy.ts";
-import { isDataLaw } from "./policy-jev.ts";
-import { fetchVendorData, type VendorData } from "./data-vendors.ts";
-import { fetchHfData, type HfData } from "./hf.ts";
-import { fetchDevtoData, type DevtoData } from "./devto.ts";
-import { fetchLobstersData, type LobstersData } from "./lobsters.ts";
-import { DATA_SECTION_KEYS, loadConfig, type SectionKey } from "./config.ts";
-import { resolvePagesUrl } from "./notify.ts";
-import { toCstDateStr, toUtcStr, isWeeklyRun, sleep } from "./date.ts";
-import { LIVE_REPORT_IDS, MSG, PROJECT_SCOPE, REPORTS, reportHeading, reportIssueTitle } from "./i18n.ts";
+} from "./reports/data-reports.ts";
+import { loadWebState, fetchSiteContent, type WebFetchResult, type WebState } from "./sources/web.ts";
+import { fetchTrendingData, type TrendingData } from "./trending/trending.ts";
+import { fetchStealthModels, type OpenRouterStealthModel } from "./sources/openrouter.ts";
+import { fetchHnData, type HnData } from "./sources/hn.ts";
+import { fetchArxivData, type ArxivData } from "./sources/arxiv.ts";
+import { fetchPolicyData, type PolicyData } from "./policy/policy.ts";
+import { isDataLaw } from "./policy/jev.ts";
+import { fetchVendorData, type VendorData } from "./data/vendors.ts";
+import { fetchHfData, type HfData } from "./sources/hf.ts";
+import { fetchDevtoData, type DevtoData } from "./sources/devto.ts";
+import { fetchLobstersData, type LobstersData } from "./sources/lobsters.ts";
+import { DATA_SECTION_KEYS, loadConfig, type SectionKey } from "./core/config.ts";
+import { resolvePagesUrl } from "./cli/notify.ts";
+import { toCstDateStr, toUtcStr, isWeeklyRun, sleep } from "./core/date.ts";
+import {
+  LIVE_REPORT_IDS,
+  MSG,
+  PROJECT_SCOPE,
+  REPORTS,
+  reportHeading,
+  reportIssueTitle,
+} from "./core/i18n.ts";
 
 // ---------------------------------------------------------------------------
 // Repo config — loaded from config.yml (throws when a section is missing)

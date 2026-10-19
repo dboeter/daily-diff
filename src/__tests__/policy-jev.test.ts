@@ -12,10 +12,10 @@ import {
   loadPolicyVerdicts,
   type PolicyAnswers,
   type PolicyVerdicts,
-} from "../policy-jev.ts";
-import type { PolicyItem } from "../policy.ts";
-import { saveItemsFile } from "../jev.ts";
-import type { Jurisdiction, PolicyConfig } from "../config.ts";
+} from "../policy/jev.ts";
+import type { PolicyItem } from "../policy/policy.ts";
+import { saveItemsFile } from "../core/jev.ts";
+import type { Jurisdiction, PolicyConfig } from "../core/config.ts";
 
 const answers = (
   about: number,
