@@ -13,7 +13,8 @@
 
 import type { PolicyItem } from "./policy.ts";
 import type { PolicySourceContext } from "./policy-sources.ts";
-import { keywordHit, staleOnFirstSight } from "./policy-jev.ts";
+import { keywordHit } from "./policy-jev.ts";
+import { markStaleOnFirstSight } from "./report-state.ts";
 import { NEWS_MAX_AGE_DAYS, tagText } from "./rss.ts";
 import { fetchOk } from "./http.ts";
 import { DAY_MS } from "./date.ts";
@@ -161,7 +162,7 @@ async function fetchBill(dossier: string, ctx: PolicySourceContext): Promise<Pol
   const latest = billStage(zaak?.Besluit ?? [], await koopRes.text());
   if (!latest) return null;
   const id = `nl:${dossier}`;
-  return {
+  const item: PolicyItem = {
     id,
     title: zaak?.Kamerstukdossier[0]?.Citeertitel ?? zaak?.Titel ?? `Kamerstuk ${dossier}`,
     link: `https://www.tweedekamer.nl/kamerstukken/wetsvoorstellen/detail?cfg=wetsvoorsteldetails&qry=wetsvoorstel%3A${dossier}`,
@@ -172,8 +173,8 @@ async function fetchBill(dossier: string, ctx: PolicySourceContext): Promise<Pol
     jurisdiction: "nl",
     jevOnly: false,
     stage: latest.stage,
-    ...(staleOnFirstSight(ctx, id, latest.date) ? { recordOnly: true } : {}),
   };
+  return markStaleOnFirstSight(ctx, item, latest.date);
 }
 
 /** The keyword search and one bill per watchlisted dossier; a failing part is skipped, all failing throws. */

@@ -24,6 +24,8 @@ import {
   buildArxivPrompt,
   buildModelsPrompt,
   buildPolicySummariesPrompt,
+  buildTrendingSummariesPrompt,
+  buildTrendingProsePrompt,
   buildPolicyProsePrompt,
   buildDataSummariesPrompt,
   buildDataProsePrompt,
@@ -31,32 +33,39 @@ import {
   modelSources,
   type DiscussionsData,
 } from "./prompts-data.ts";
-import { generateBody, saveFile, autoGenFooter, LLM_TOKENS_WEB, LLM_TOKENS_LISTING } from "./report.ts";
+import {
+  generateBody,
+  generateOr,
+  saveFile,
+  autoGenFooter,
+  LLM_TOKENS_WEB,
+  LLM_TOKENS_LISTING,
+} from "./report.ts";
 import { saveWebState, type WebFetchResult, type WebState } from "./web.ts";
 import type { TrendingData } from "./trending.ts";
 import { saveClassifyCache, saveMatchState } from "./trending-jev.ts";
-import { saveStarHistory } from "./trending-rank.ts";
-import { buildProjectDigestPrompt, hasActivity, type ProjectActivity } from "./prompts.ts";
+import { saveStarHistory, summaryRows } from "./trending-rank.ts";
+import { buildProjectDigestPrompt, buildSkillsPrompt, hasActivity, type ProjectActivity } from "./prompts.ts";
+import type { SkillsData } from "./github.ts";
 import {
   buildProjectReportContent,
-  parseRowSummaries,
   renderTrendingTables,
   renderPolicyTable,
-  spliceTables,
   nestHeadings,
   renderVendorTables,
   policyTitleLabel,
-  TABLES_MARKER,
   type ProjectGroup,
 } from "./report-builders.ts";
+import { parseRowSummaries, spliceTables, TABLES_MARKER } from "./summarized-table.ts";
 import { saveArxivState, type ArxivData } from "./arxiv.ts";
 import type { HfData } from "./hf.ts";
-import { savePolicyState, POLICY_STATE_FILE, type PolicyData, type PolicyItem } from "./policy.ts";
-import { savePolicyVerdicts, POLICY_VERDICTS_FILE } from "./policy-jev.ts";
+import { POLICY_STATE_FILE, type PolicyData, type PolicyItem } from "./policy.ts";
+import { POLICY_VERDICTS_FILE } from "./policy-jev.ts";
 import { renderDeadlines } from "./policy-deadlines.ts";
 import type { OpenRouterData } from "./openrouter.ts";
-import { saveDataState, DATA_STATE_FILE, type VendorData } from "./data-vendors.ts";
-import { saveDataVerdicts, DATA_VERDICTS_FILE } from "./data-jev.ts";
+import { DATA_STATE_FILE, type VendorData } from "./data-vendors.ts";
+import { DATA_VERDICTS_FILE } from "./data-jev.ts";
+import { commitWrites, planWrites } from "./new-items.ts";
 import type { DataSectionKey } from "./config.ts";
 
 /** A finished report: main() writes its file and opens its issue (title and label from REPORTS). */
@@ -118,18 +127,19 @@ export async function buildWebReport(
       const isFirstRun = webResults.some((r) => r.isFirstRun);
       const totalNew = webResults.reduce((sum, r) => sum + r.newItems.length, 0);
 
-      const anthropicNew = webResults.find((r) => r.site === "anthropic")?.newItems.length ?? 0;
-      const anthropicTotal = webResults.find((r) => r.site === "anthropic")?.totalDiscovered ?? 0;
-      const openaiNew = webResults.find((r) => r.site === "openai")?.newItems.length ?? 0;
-      const openaiTotal = webResults.find((r) => r.site === "openai")?.totalDiscovered ?? 0;
+      const counts = (site: WebFetchResult["site"]) => {
+        const r = webResults.find((w) => w.site === site);
+        if (r && !r.fetchSuccess) return WEB_REPORT.sourceFailed;
+        return WEB_REPORT.sourceCounts(r?.newItems.length ?? 0, r?.totalDiscovered ?? 0);
+      };
 
       const mode = isFirstRun ? WEB_REPORT.firstCrawl : WEB_REPORT.todayUpdate;
 
       const meta =
         `> ${mode} | ${WEB_REPORT.newContent(totalNew)} | ${REPORT_META.generated(utcStr)}\n\n` +
         `${REPORT_META.sourcesHeader}\n` +
-        `- Anthropic: [anthropic.com](https://www.anthropic.com) — ${anthropicNew} new articles (sitemap total: ${anthropicTotal})\n` +
-        `- OpenAI: [openai.com](https://openai.com) — ${openaiNew} new articles (sitemap total: ${openaiTotal})`;
+        `- Anthropic: [anthropic.com](https://www.anthropic.com) — ${counts("anthropic")}\n` +
+        `- OpenAI: [openai.com](https://openai.com) — ${counts("openai")}`;
       const webContent = assembleReport("ai-web", dateStr, meta, summary);
 
       saved = { id: "ai-web", content: webContent, issueTitle: WEB_REPORT.issueTitle(dateStr, isFirstRun) };
@@ -149,10 +159,16 @@ export async function buildWebReport(
 // Trending report
 // ---------------------------------------------------------------------------
 
+/**
+ * Three LLM calls: the row summaries, the prose around the code-rendered
+ * tables, and the Skills section. A failed summaries call leaves the
+ * descriptions in the rows; a failed prose call leaves MSG.trendingFailed and
+ * the report is still written (unlike Policy Watch, whose report is skipped:
+ * here the tables carry the report); a failed Skills fetch or call leaves MSG.skillsFailed.
+ */
 export async function buildTrendingReport(
   trendingData: TrendingData,
-  trending: { summaries: string; prose: string },
-  skills: { summary: string; repo: string },
+  skills: SkillsData & { repo: string },
   utcStr: string,
   dateStr: string,
 ): Promise<SavedReport | null> {
@@ -161,6 +177,26 @@ export async function buildTrendingReport(
     console.log("  [trending] No ranked data, skipping report.");
     return null;
   }
+  const rows = summaryRows(report);
+  const [summaries, prose, skillsSummary] = await Promise.all([
+    rows.length > 0
+      ? generateOr("trending-summaries", buildTrendingSummariesPrompt(rows, dateStr), "", LLM_TOKENS_LISTING)
+      : "",
+    generateOr(
+      "trending",
+      buildTrendingProsePrompt(renderTrendingTables(report, new Map()), trendingData, dateStr),
+      MSG.trendingFailed,
+      LLM_TOKENS_LISTING,
+    ),
+    // A failed fetch has nothing to summarize: the notice, without a call.
+    skills.fetchSuccess
+      ? generateOr(
+          "claude-code-skills",
+          buildSkillsPrompt(skills.prs, skills.issues, dateStr),
+          MSG.skillsFailed,
+        )
+      : MSG.skillsFailed,
+  ]);
 
   // Skills ranks the community's most-discussed Claude Code skills — the same
   // "what's popular" genre as trending repos, so it rides along here.
@@ -168,14 +204,14 @@ export async function buildTrendingReport(
     `\n\n---\n\n## ${TRENDING_REPORT.skillsHeading}\n\n` +
     `${TRENDING_REPORT.skillsSource(skills.repo)}\n\n` +
     // Code renders "## Claude Code Skills"; the body's own sections go below it.
-    nestHeadings(skills.summary, 3);
+    nestHeadings(skillsSummary, 3);
 
-  const tables = renderTrendingTables(report, parseRowSummaries(trending.summaries));
+  const tables = renderTrendingTables(report, parseRowSummaries(summaries));
   const trendingContent = assembleReport(
     "ai-trending",
     dateStr,
     `> ${REPORT_META.sources(TRENDING_REPORT.sources)} | ${REPORT_META.generated(utcStr)}`,
-    spliceTables(trending.prose, tables) + skillsSection,
+    spliceTables(prose, tables) + skillsSection,
   );
 
   // Only once the report exists, like the ArXiv state.
@@ -266,16 +302,12 @@ export async function buildPolicyReport(
   stateFile = POLICY_STATE_FILE,
   verdictsFile = POLICY_VERDICTS_FILE,
 ): Promise<SavedReport | null> {
-  // Before the no-items skip, unlike the trending cache: on a day Jev drops
-  // every item there is no report, and the dropped items would be asked again
-  // every day until they leave the feed's age window.
-  if (policyData.rankingFile) {
-    console.log(`  Saved ${saveFile(policyData.rankingFile, dateStr, "policy-ranking.json")}`);
-  }
-  if (policyData.nextVerdicts) savePolicyVerdicts(policyData.nextVerdicts, verdictsFile);
-  // Observations (record-only stages, deadline changes) are kept whether or not a report follows;
-  // replaced by nextState below once the report exists.
-  if (policyData.fetchSuccess) savePolicyState(policyData.observedState, stateFile);
+  // The trace, the verdicts and the observed state before the no-items skip, unlike the trending
+  // cache: on a day Jev drops every item there is no report, and the dropped items would be asked
+  // again every day until they leave the feed's age window.
+  const files = { state: stateFile, verdicts: verdictsFile, trace: "policy-ranking.json" };
+  const writes = planWrites(policyData);
+  commitWrites(writes.onFetched, files, dateStr);
   if (!policyData.fetchSuccess || policyData.items.length === 0) {
     console.log(`  [policy] ${policyData.fetchSuccess ? POLICY_REPORT.noNewItems : POLICY_REPORT.noData}`);
     return null;
@@ -283,22 +315,19 @@ export async function buildPolicyReport(
   const { items } = policyData;
   const tables = (summaries: Map<number, string>) =>
     renderPolicyTable(items, summaries, renderDeadlines(policyData.deadlines));
-  console.log("  [policy] Calling LLM for policy report...");
   const [summaries, prose] = await Promise.all([
-    generateBody(
+    generateOr(
+      "policy-summaries",
       buildPolicySummariesPrompt(items, dateStr, policyData.readerProfile),
+      "",
       LLM_TOKENS_LISTING,
-    ).catch((err) => {
-      console.error(`  [policy] Summaries failed, showing descriptions: ${err}`);
-      return "";
-    }),
-    generateBody(
+    ),
+    generateOr(
+      "policy",
       buildPolicyProsePrompt(tables(new Map()), dateStr, policyData.readerProfile),
+      null,
       LLM_TOKENS_LISTING,
-    ).catch((err) => {
-      console.error(`  [policy] Report generation failed: ${err}`);
-      return null;
-    }),
+    ),
   ]);
   if (prose === null) return null;
 
@@ -307,7 +336,7 @@ export async function buildPolicyReport(
   const meta = `> ${REPORT_META.sources(sources)} | ${POLICY_REPORT.newItems(items.length)}${ranked} | ${REPORT_META.generated(utcStr)}`;
   const body = spliceTables(prose, tables(parseRowSummaries(summaries)));
   // Only once the report exists, like the ArXiv state.
-  savePolicyState(policyData.nextState, stateFile);
+  commitWrites(writes.onReported, files, dateStr);
   return { id: "ai-policy", content: assembleReport("ai-policy", dateStr, meta, body) };
 }
 
@@ -374,10 +403,11 @@ export async function buildDataReport(
   stateFile = DATA_STATE_FILE,
   verdictsFile = DATA_VERDICTS_FILE,
 ): Promise<SavedReport | null> {
-  // Before the skip, as in buildPolicyReport: dropped items are then not asked again tomorrow.
-  if (vendor.rankingFile)
-    console.log(`  Saved ${saveFile(vendor.rankingFile, dateStr, "data-ranking.json")}`);
-  if (vendor.nextVerdicts) saveDataVerdicts(vendor.nextVerdicts, verdictsFile);
+  // Before the skip, as in buildPolicyReport: dropped items are then not asked again tomorrow, and
+  // a quiet day keeps its record-only bundles.
+  const files = { state: stateFile, verdicts: verdictsFile, trace: "data-ranking.json" };
+  const writes = planWrites(vendor);
+  commitWrites(writes.onFetched, files, dateStr);
   const { items } = vendor;
   if (items.length === 0 && !sections.some((s) => s.activities.some(hasActivity))) {
     console.log(`  [data] ${DATA_REPORT.noNewItems}`);
@@ -389,20 +419,13 @@ export async function buildDataReport(
       sections.map(async (s) => {
         const active = s.activities.filter(hasActivity);
         if (!active.length) return { ...s, summary: "" };
-        console.log(`  [data] Calling LLM for ${H[s.key]}...`);
         const prompt = buildProjectDigestPrompt(active, { subject: s.subject, ...PROJECT_SCOPE }, dateStr);
-        const summary = await generateBody(prompt, LLM_TOKENS_LISTING).catch((err) => {
-          console.error(`  [data] ${H[s.key]} LLM call failed: ${err}`);
-          return MSG.summaryFailed;
-        });
+        const summary = await generateOr(`data-${s.key}`, prompt, MSG.summaryFailed, LLM_TOKENS_LISTING);
         return { ...s, summary };
       }),
     ),
     items.length > 0
-      ? generateBody(buildDataSummariesPrompt(items, dateStr), LLM_TOKENS_LISTING).catch((err) => {
-          console.error(`  [data] Vendor summaries failed, showing descriptions: ${err}`);
-          return "";
-        })
+      ? generateOr("data-vendor-summaries", buildDataSummariesPrompt(items, dateStr), "", LLM_TOKENS_LISTING)
       : "",
   ]);
   const tables = renderVendorTables(items, parseRowSummaries(rowSummaries));
@@ -435,14 +458,12 @@ export async function buildDataReport(
           news: active.flatMap((a) => a.news.map((n) => `${n.title} (${n.source}; ${a.config.name})`)),
         }
       : undefined;
-  console.log("  [data] Calling LLM for the data report's highlights...");
-  const prose = await generateBody(
+  const prose = await generateOr(
+    "data-highlights",
     buildDataProsePrompt(sectionsMd, dateStr, dataAi),
+    null,
     LLM_TOKENS_LISTING,
-  ).catch((err) => {
-    console.error(`  [data] Highlights failed: ${err}`);
-    return null;
-  });
+  );
   const {
     highlights,
     dataAi: dataAiMd,
@@ -467,8 +488,8 @@ export async function buildDataReport(
     ...(epilogue ? { epilogue: `\n\n---\n\n${epilogue}` } : {}),
     footer: autoGenFooter(),
   });
-  // Only once the report exists, like the policy state.
-  if (vendor.nextState) saveDataState(vendor.nextState, stateFile);
+  // Only once the report exists, like the policy state; after a failed fetch it only prunes.
+  commitWrites(writes.onReported, files, dateStr);
   return { id: "ai-data", content };
 }
 

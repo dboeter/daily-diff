@@ -5,9 +5,9 @@ import {
   selectVendorItems,
   MAX_VENDOR_ITEMS,
   type DataAnswers,
-  type DataVerdicts,
 } from "../data-jev.ts";
-import { newVendorItems, nextDataState, type VendorItem } from "../data-vendors.ts";
+import { asStateItem, recentVendorItems, type VendorItem } from "../data-vendors.ts";
+import { newItems, nextReportedState, type ReportedState } from "../report-state.ts";
 
 const answers = (real: number, deprecation: number, significance: number, ai = 0): DataAnswers => ({
   real_change: { noul: real },
@@ -116,21 +116,6 @@ describe("selectVendorItems", () => {
     );
   });
 
-  it("uses a saved verdict without asking, and prunes ids unseen for 30 days", async () => {
-    ask.mockClear();
-    const cache: DataVerdicts = {
-      items: {
-        high: { title: "t", answers: byId["high"]!, decided: "2026-10-10", lastSeen: "2026-10-10" },
-        gone: { title: "t", answers: byId["high"]!, lastSeen: "2026-09-01" },
-      },
-    };
-    const sel = await selectVendorItems([item("high")], { apiKey: "k", cache, dateStr: DATE, ask });
-    expect(ask).not.toHaveBeenCalled();
-    expect(sel.items.map((i) => i.id)).toEqual(["high"]);
-    expect(Object.keys(sel.nextVerdicts!.items)).toEqual(["high"]);
-    expect(sel.nextVerdicts!.items["high"]!.lastSeen).toBe(DATE);
-  });
-
   it("falls back to the keyword rules without a key, keeping feed order after deprecations", async () => {
     const sel = await selectVendorItems(
       [
@@ -203,6 +188,14 @@ describe("selectVendorItems", () => {
 });
 
 describe("vendor state", () => {
+  // What fetchVendorData's pipeline does with the state (new-items.ts): the age limit, then the state's keys.
+  const newVendorItems = (items: VendorItem[], state: ReportedState | null, dateStr: string) => {
+    const recent = recentVendorItems(items, dateStr);
+    const fresh = new Set(newItems(recent.map(asStateItem), state, dateStr).map((i) => i.id));
+    return recent.filter((i) => fresh.has(asStateItem(i).id));
+  };
+  const nextDataState = (state: ReportedState | null, items: VendorItem[], dateStr: string) =>
+    nextReportedState(state, items.map(asStateItem), dateStr);
   // The state keys a note on title + date (data-vendors.ts stateId), as item() builds them.
   const key = (id: string) => `title ${id}|2026-10-16`;
 

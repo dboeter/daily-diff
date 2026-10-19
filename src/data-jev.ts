@@ -7,11 +7,11 @@
  */
 
 import path from "node:path";
-import { askJev, mapJev, jevFailedTooOften, loadItemsFile, saveItemsFile } from "./jev.ts";
-import type { AskJev } from "./trending-jev.ts";
+import { judgeItems, loadItemsFile, type AskJev, type VerdictCache } from "./jev.ts";
 import type { VendorItem } from "./data-vendors.ts";
+import { numberRows, type Numbered } from "./summarized-table.ts";
 import { VENDOR_SECTIONS, vendorSection, type VendorSection } from "./config.ts";
-import { daysBefore } from "./date.ts";
+import type { Selection } from "./new-items.ts";
 
 /** `state` is `{ title, description, source }`. */
 const QUESTIONS = {
@@ -168,20 +168,7 @@ export const MAX_VENDOR_ITEMS = 12;
 // ---------------------------------------------------------------------------
 
 /** `digests/data-verdicts.json`: Jev's raw answers per item id. Hand-editable. */
-export interface DataVerdicts {
-  items: Record<string, DataVerdictEntry>;
-}
-
-export interface DataVerdictEntry {
-  /** For readers only. */
-  title: string;
-  /** Raw answers, not the decision, so the weights can change without asking again. */
-  answers: DataAnswers;
-  /** CST date Jev answered; absent on a hand-added entry. */
-  decided?: string;
-  model?: string;
-  lastSeen: string;
-}
+export type DataVerdicts = VerdictCache<DataAnswers>;
 
 export const DATA_VERDICTS_FILE = path.join("digests", "data-verdicts.json");
 /** Items leave the 7-day age limit, so an id unseen this long will not return; the data state's span. */
@@ -189,11 +176,7 @@ const VERDICT_UNSEEN_DAYS = 30;
 
 /** Missing → empty. Malformed → null: every item is asked and nothing is saved, so a hand edit survives. */
 export function loadDataVerdicts(file = DATA_VERDICTS_FILE): DataVerdicts | null {
-  return loadItemsFile<DataVerdictEntry>(file, "data");
-}
-
-export function saveDataVerdicts(cache: DataVerdicts, file = DATA_VERDICTS_FILE): void {
-  saveItemsFile(cache, file);
+  return loadItemsFile(file, "data");
 }
 
 // ---------------------------------------------------------------------------
@@ -207,30 +190,11 @@ export interface KeptVendorItem extends VendorItem {
   aiInData: boolean;
 }
 
-export interface VendorSelection {
-  /** In report order: by section, deprecations first, then by relevance (no verdict: feed order). */
-  items: KeptVendorItem[];
-  /** "keywords" when there was no key or more than half the new calls failed. */
-  rankedBy: "jev" | "keywords";
-  /** null when the verdict file was malformed: it is left as it is. */
-  nextVerdicts: DataVerdicts | null;
-  /** `digests/YYYY-MM-DD/data-ranking.json`: every item, kept or dropped. */
-  rankingFile: string;
-}
-
-interface Verdict {
-  answers: DataAnswers;
-  relevance: number;
-  keep: boolean;
-  deprecation: boolean;
-  model?: string;
-  /** Set when the verdict came from the cache. */
-  decided?: string;
-}
-
-const round = (n: number): number => Math.round(n * 1000) / 1000;
-const roundAnswers = (a: DataAnswers): DataAnswers =>
-  JSON.parse(JSON.stringify(a), (_, v: unknown) => (typeof v === "number" ? round(v) : v)) as DataAnswers;
+/**
+ * Items by section, deprecations first, then by relevance (no verdict: feed order);
+ * numbered in that order. Trace: `data-ranking.json`.
+ */
+export type VendorSelection = Selection<Numbered<KeptVendorItem>, DataVerdicts>;
 
 /**
  * Non-deprecations each section gets first. Without floors the cloud block got
@@ -265,43 +229,21 @@ export async function selectVendorItems(
   items: VendorItem[],
   opts: { apiKey?: string; cache: DataVerdicts | null; dateStr: string; ask?: AskJev },
 ): Promise<VendorSelection> {
-  const { apiKey, cache, dateStr, ask = askJev } = opts;
   // Behavior-change bundles are deprecations by definition: no question to ask.
-  const judged = items.filter((i) => i.stage === undefined);
-  const verdicts = new Map<string, Verdict>();
-  for (const item of judged) {
-    const e = cache?.items[item.id];
-    if (!e) continue;
-    try {
-      verdicts.set(item.id, {
-        answers: e.answers,
-        ...dataRelevance(e.answers),
-        decided: e.decided ?? "by hand",
-      });
-    } catch {
-      console.error(`  [data] Invalid saved verdict for ${item.id}, asking again`);
-    }
-  }
-
-  const toAsk = judged.filter((i) => !verdicts.has(i.id));
-  const fresh = new Map<string, Verdict>();
-  let jevDown = !apiKey && toAsk.length > 0;
-  if (apiKey && toAsk.length > 0) {
-    const { results, failed } = await mapJev(
-      toAsk,
-      async (item) => {
-        const state = { title: item.title, description: item.description, source: item.source };
-        const { model, answers } = await ask(state, QUESTIONS, apiKey);
-        const a = answers as DataAnswers;
-        return { answers: a, model, ...dataRelevance(a) };
-      },
-      "data",
-    );
-    toAsk.forEach((item, i) => results[i] && fresh.set(item.id, results[i]));
-    jevDown = jevFailedTooOften(failed, toAsk.length);
-  }
-  // Too many failures: the answers that did arrive are saved, but this run decides by keyword.
-  if (!jevDown) for (const [id, v] of fresh) verdicts.set(id, v);
+  const judgment = await judgeItems(
+    items.filter((i) => i.stage === undefined),
+    {
+      ...opts,
+      tag: "data",
+      request: (item) => ({
+        state: { title: item.title, description: item.description, source: item.source },
+        questions: QUESTIONS,
+      }),
+      decide: (a: DataAnswers) => dataRelevance(a),
+      unseenDays: VERDICT_UNSEEN_DAYS,
+    },
+  );
+  const { verdicts, rankedBy } = judgment;
 
   const decide = (i: VendorItem): { keep: boolean; deprecation: boolean } =>
     i.stage !== undefined ? { keep: true, deprecation: true } : (verdicts.get(i.id) ?? keywordVerdict(i));
@@ -316,54 +258,22 @@ export async function selectVendorItems(
   console.log(
     `  [data] Kept ${selected.length}/${items.length} vendor items` +
       `${kept.length > selected.length ? ` (${kept.length - selected.length} over the cap)` : ""}` +
-      `${jevDown ? " (no Jev: keyword rules)" : ""}`,
+      `${rankedBy === "keywords" ? " (no Jev: keyword rules)" : ""}`,
   );
 
-  let nextVerdicts: DataVerdicts | null = null;
-  if (cache) {
-    const next = { ...cache.items };
-    for (const item of judged) {
-      const v = fresh.get(item.id);
-      if (v) {
-        next[item.id] = {
-          title: item.title,
-          answers: roundAnswers(v.answers),
-          decided: dateStr,
-          ...(v.model ? { model: v.model } : {}),
-          lastSeen: dateStr,
-        };
-      } else if (next[item.id]) {
-        next[item.id] = { ...next[item.id]!, lastSeen: dateStr };
-      }
-    }
-    nextVerdicts = {
-      items: Object.fromEntries(
-        Object.entries(next).filter(([, e]) => e.lastSeen >= daysBefore(dateStr, VERDICT_UNSEEN_DAYS)),
-      ),
-    };
-  }
-
-  const models = [...new Set([...fresh.values()].flatMap((v) => (v.model ? [v.model] : [])))];
   const keptIds = new Set(kept.map((i) => i.id));
   const selectedIds = new Set(selected.map((i) => i.id));
-  const lines = items.map((i) => {
-    const v = verdicts.get(i.id) ?? fresh.get(i.id);
-    return JSON.stringify({
-      id: i.id,
-      title: i.title,
-      source: i.source,
-      kept: selectedIds.has(i.id),
-      ...(keptIds.has(i.id) && !selectedIds.has(i.id) ? { overCap: true } : {}),
-      deprecation: decide(i).deprecation,
-      relevance: v ? round(v.relevance) : null,
-      ...(v ? roundAnswers(v.answers) : {}),
-      decided: v?.decided ?? null,
-      ...(i.stage !== undefined ? { stage: i.stage } : { keyword: keywordVerdict(i) }),
-    });
-  });
-  const rankingFile =
-    `{\n"models": ${JSON.stringify(models)},\n"rankedBy": ${JSON.stringify(jevDown ? "keywords" : "jev")},\n` +
-    `"weights": ${JSON.stringify(DATA_WEIGHTS)},\n"items": [\n${lines.join(",\n")}\n]\n}\n`;
+  const rows = items.map((i) => ({
+    id: i.id,
+    title: i.title,
+    source: i.source,
+    kept: selectedIds.has(i.id),
+    ...(keptIds.has(i.id) && !selectedIds.has(i.id) ? { overCap: true } : {}),
+    deprecation: decide(i).deprecation,
+    ...judgment.traceFields(i),
+    ...(i.stage !== undefined ? { stage: i.stage } : { keyword: keywordVerdict(i) }),
+  }));
+  const rankingFile = judgment.rankingFile(rows, { weights: DATA_WEIGHTS });
 
-  return { items: selected, rankedBy: jevDown ? "keywords" : "jev", nextVerdicts, rankingFile };
+  return { items: numberRows(selected), rankedBy, nextVerdicts: judgment.nextCache, rankingFile };
 }

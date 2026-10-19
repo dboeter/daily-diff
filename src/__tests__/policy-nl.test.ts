@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import { describe, it, expect, vi, afterEach } from "vitest";
 import { billStage, fetchNlParliament, parseZaken } from "../policy-nl.ts";
-import { newPolicyItems, nextPolicyState } from "../policy.ts";
+import { newItems, nextReportedState } from "../report-state.ts";
 import type { PolicyConfig } from "../config.ts";
 import type { PolicyState } from "../policy.ts";
 
@@ -120,17 +120,17 @@ describe("fetchNlParliament", () => {
     expect(bill).toMatchObject({ id: "nl:36875", stage: "In the Eerste Kamer", published: "2026-09-22" });
     expect(bill!.recordOnly).toBeUndefined();
     expect(bill!.description).toContain("36875");
-    const state = nextPolicyState(null, [bill!], "2026-10-14");
-    expect(newPolicyItems(await run(state, "2026-10-15"), state, "2026-10-15")).toEqual([]);
+    const state = nextReportedState(null, [bill!], "2026-10-14");
+    expect(newItems(await run(state, "2026-10-15"), state, "2026-10-15")).toEqual([]);
   });
 
   it("only records a first-seen stage older than 30 days", async () => {
     mockFetch();
     const [bill] = await run(null, "2026-10-23");
     expect(bill!.recordOnly).toBe(true);
-    const state = nextPolicyState(null, [], "2026-10-23", [bill!]);
+    const state = nextReportedState(null, [], "2026-10-23", [bill!]);
     expect(state.reported).toEqual({});
-    expect(newPolicyItems([bill!], state, "2026-10-24")).toEqual([]);
+    expect(newItems([bill!], state, "2026-10-24")).toEqual([]);
     // Known to the state: an old stage is no longer record-only (it is not new either).
     const [again] = await run(state, "2026-10-24");
     expect(again!.recordOnly).toBeUndefined();

@@ -10,11 +10,11 @@ import {
   keywordHit,
   fallbackKeywordHit,
   loadPolicyVerdicts,
-  savePolicyVerdicts,
   type PolicyAnswers,
   type PolicyVerdicts,
 } from "../policy-jev.ts";
 import type { PolicyItem } from "../policy.ts";
+import { saveItemsFile } from "../jev.ts";
 import type { Jurisdiction, PolicyConfig } from "../config.ts";
 
 const answers = (
@@ -118,40 +118,12 @@ describe("selectPolicyItems", () => {
     ]);
   });
 
-  it("asks once: a saved verdict is reused, and new answers are saved", async () => {
-    const cache: PolicyVerdicts = {
-      items: {
-        old: {
-          title: "Title old",
-          answers: answers(1, 1, 1, 2),
-          decided: "2026-10-12",
-          lastSeen: "2026-10-12",
-        },
-        gone: { title: "Gone", answers: answers(1, 1, 1, 2), decided: "2026-09-01", lastSeen: "2026-09-13" },
-      },
-    };
-    const ask = stub({ fresh: answers(1, 1, 1, 1) });
-    const sel = await selectPolicyItems([item("old"), item("fresh")], { ...base, apiKey: "k", cache, ask });
-    expect(ask).toHaveBeenCalledTimes(1);
-    expect(sel.items.map((i) => i.id)).toEqual(["old", "fresh"]);
-    expect(sel.nextVerdicts?.items).toEqual({
-      old: { ...cache.items["old"], lastSeen: "2026-10-14" },
-      fresh: {
-        title: "Title fresh",
-        answers: answers(1, 1, 1, 1),
-        decided: "2026-10-14",
-        model: "jev-1.0",
-        lastSeen: "2026-10-14",
-      },
-    });
-  });
-
   it("asks again when a stage item has moved past the stage its verdict was saved at", async () => {
     const saved = { answers: answers(1, 0, 0, 0), decided: "2026-10-01", lastSeen: "2026-10-13" };
     const cache: PolicyVerdicts = {
       items: {
-        moved: { ...saved, title: "Title moved", stage: "Introduced" },
-        same: { ...saved, title: "Title same", stage: "Introduced" },
+        moved: { ...saved, title: "Title moved", fingerprint: "Introduced" },
+        same: { ...saved, title: "Title same", fingerprint: "Introduced" },
         // Saved before verdicts carried a stage.
         legacy: { ...saved, title: "Title legacy" },
         plain: { ...saved, title: "Title plain" },
@@ -173,7 +145,7 @@ describe("selectPolicyItems", () => {
     ]);
     expect(sel.items.map((i) => i.id)).toEqual(["moved", "legacy"]);
     expect(sel.nextVerdicts?.items["moved"]).toMatchObject({
-      stage: "Became law",
+      fingerprint: "Became law",
       answers: answers(1, 1, 1, 2),
     });
   });
@@ -267,7 +239,7 @@ describe("policy verdict file", () => {
     const cache: PolicyVerdicts = {
       items: { a: { title: "A", answers: answers(1, 1, 1, 2), lastSeen: "2026-10-14" } },
     };
-    savePolicyVerdicts(cache, file);
+    saveItemsFile(cache, file);
     expect(loadPolicyVerdicts(file)).toEqual(cache);
     fs.writeFileSync(file, "{ nope");
     expect(loadPolicyVerdicts(file)).toBeNull();

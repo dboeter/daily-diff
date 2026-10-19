@@ -17,7 +17,7 @@ import {
   buildPolicySummariesPrompt,
   buildPolicyProsePrompt,
 } from "../prompts-data.ts";
-import { TABLES_MARKER } from "../report-builders.ts";
+import { TABLES_MARKER, numberRows } from "../summarized-table.ts";
 import { MODELS_REPORT, SECTIONS } from "../i18n.ts";
 import type { RepoConfig, GitHubItem, GitHubRelease } from "../github.ts";
 import { EMPTY_NPM, EMPTY_OPENROUTER, type TrendingData } from "../trending.ts";
@@ -272,7 +272,7 @@ describe("buildPolicySummariesPrompt", () => {
   ];
 
   it("numbers the items with their source and text, and asks for one `N:` line each", () => {
-    const result = buildPolicySummariesPrompt(items, "2026-10-14", "A Dutch AI practitioner.");
+    const result = buildPolicySummariesPrompt(numberRows(items), "2026-10-14", "A Dutch AI practitioner.");
     expect(result).toContain(
       "1. AI Act guidelines (European Commission, 2026-10-09) — The AI Office publishes guidelines.",
     );
@@ -342,6 +342,7 @@ describe("buildWebReportPrompt", () => {
           },
         ],
         totalDiscovered: 50,
+        fetchSuccess: true,
       },
     ];
     const result = buildWebReportPrompt(results, "2026-03-09");
@@ -352,7 +353,14 @@ describe("buildWebReportPrompt", () => {
 
   it("shows incremental mode for non-first-run", () => {
     const results: WebFetchResult[] = [
-      { site: "openai", siteName: "OpenAI", isFirstRun: false, newItems: [], totalDiscovered: 100 },
+      {
+        site: "openai",
+        siteName: "OpenAI",
+        isFirstRun: false,
+        newItems: [],
+        totalDiscovered: 100,
+        fetchSuccess: true,
+      },
     ];
     const result = buildWebReportPrompt(results, "2026-03-09");
     expect(result).toContain("Incremental update");
@@ -470,7 +478,14 @@ describe("buildDiscussionsPrompt", () => {
 
 describe("listing report layout", () => {
   const web: WebFetchResult[] = [
-    { site: "openai", siteName: "OpenAI", isFirstRun: false, newItems: [], totalDiscovered: 1 },
+    {
+      site: "openai",
+      siteName: "OpenAI",
+      isFirstRun: false,
+      newItems: [],
+      totalDiscovered: 1,
+      fetchSuccess: true,
+    },
   ];
   const prompts: Record<string, string> = {
     hn: hnOnlyPrompt({ stories: [], fetchSuccess: true }, "2026-10-12"),

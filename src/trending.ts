@@ -27,21 +27,17 @@ import {
 } from "./trending-rank.ts";
 import {
   buildTrendingRankingFile,
-  cachedClassifications,
-  classifyItems,
-  fallbackClassification,
+  classifyTrendingItems,
   loadClassifyCache,
   loadMatchState,
   matchApps,
-  nextClassifyCache,
-  type AskJev,
   type Classification,
   type ClassifyCache,
   type ClassifyItem,
   type MatchState,
   type MatchTrace,
 } from "./trending-jev.ts";
-import { askJev } from "./jev.ts";
+import { askJev, type AskJev } from "./jev.ts";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -361,7 +357,25 @@ export async function searchAiRepos(pushedSince: string, createdSince: string | 
  */
 export type TrendingPeriod = "daily" | "weekly";
 
+/** Never throws: a failure is an empty result with `trendingFetchSuccess: false`. */
 export async function fetchTrendingData(period: TrendingPeriod, dateStr: string): Promise<TrendingData> {
+  try {
+    return await fetchTrending(period, dateStr);
+  } catch (err) {
+    console.error(`  [trending] fetch failed: ${err}`);
+    return EMPTY_TRENDING;
+  }
+}
+
+export const EMPTY_TRENDING: TrendingData = {
+  trendingRepos: [],
+  searchRepos: [],
+  trendingFetchSuccess: false,
+  openrouter: EMPTY_OPENROUTER,
+  npm: EMPTY_NPM,
+};
+
+async function fetchTrending(period: TrendingPeriod, dateStr: string): Promise<TrendingData> {
   const daysAgo = (n: number) => new Date(Date.now() - n * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
   const weekly = period === "weekly";
 
@@ -375,9 +389,8 @@ export async function fetchTrendingData(period: TrendingPeriod, dateStr: string)
   const data: TrendingData = { trendingRepos, searchRepos, trendingFetchSuccess: success, openrouter, npm };
   if (!weekly || !hasTrendingData(data)) return data;
 
-  // Caught here, not left to the caller: index.ts wraps fetchTrendingData in
-  // `.catch(() => empty)`, so a throw would also wipe trendingRepos and
-  // searchRepos — Monday's agent news.
+  // Caught here, not by fetchTrendingData's catch-all, which would also wipe
+  // trendingRepos and searchRepos — Monday's agent news.
   try {
     return { ...data, report: await composeTrendingReport(data, dateStr) };
   } catch (err) {
@@ -477,31 +490,20 @@ export async function composeTrendingReport(
   const firstItems = itemsFor(firstRows);
   // Saved verdicts are Jev's, so they hold without a key or when this run's calls
   // fail; only the rest is asked, and `classifiedBy` describes those.
-  const saved = classifyCache
-    ? cachedClassifications(classifyCache, firstItems)
-    : new Map<string, Classification>();
-  const asked = firstItems.filter((item) => !saved.has(item.key));
-  const byJev = apiKey ? await classifyItems(asked, apiKey, ask) : null;
-  const classifiedBy = byJev ? "jev" : "topics";
-  const classifications = new Map(
-    firstItems.map((item) => [
-      item.key,
-      saved.get(item.key) ?? byJev?.get(item.key) ?? fallbackClassification(item),
-    ]),
-  );
-  console.log(
-    `  [trending] Classified ${classifications.size} items: ${saved.size} saved, the rest ` +
-      (byJev
-        ? "by Jev"
-        : `by topic labels (fallback: ${apiKey ? "too many Jev failures" : "no TYPESAFE_API_KEY"})`),
-  );
+  const { classifications, classifiedBy, nextCache } = await classifyTrendingItems(firstItems, {
+    apiKey,
+    cache: classifyCache,
+    dateStr,
+    ask,
+  });
 
   const fetched = await fetchMissingGains(firstRows, classifications, fetchGain);
   const githubRows =
     fetched.size > 0
       ? rankGithubRepos(data.trendingRepos, data.searchRepos, dateStr, history, fetched)
       : firstRows;
-  // The trace and the cache read the final rows' gains.
+  // The trace reads the final rows' gains. Same keys as firstItems: the gains re-rank rows, they
+  // neither add nor drop any, so the cache built from firstItems marks every item seen.
   const items = itemsFor(githubRows);
   const candidates = buildRadarCandidates(data.openrouter.apps, data.npm, githubRows, dateStr);
 
@@ -532,9 +534,7 @@ export async function composeTrendingReport(
     ...report,
     ...(rankingFile !== undefined ? { rankingFile } : {}),
     ...(nextMatches !== undefined ? { nextMatches } : {}),
-    ...(classifyCache
-      ? { nextClassifications: nextClassifyCache(classifyCache, items, classifications, dateStr) }
-      : {}),
+    ...(nextCache ? { nextClassifications: nextCache } : {}),
     nextStarHistory: nextStarHistory(history, githubRows, dateStr),
   };
 }

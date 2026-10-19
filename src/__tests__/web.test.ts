@@ -1,5 +1,6 @@
-import { describe, it, expect } from "vitest";
+import { afterEach, describe, it, expect, vi } from "vitest";
 import {
+  fetchSiteContent,
   parseSitemapUrls,
   isSitemapIndex,
   extractTitle,
@@ -200,5 +201,25 @@ describe("emptyState", () => {
     expect(a).not.toBe(b);
     a.anthropic.lastChecked = "modified";
     expect(b.anthropic.lastChecked).toBe("");
+  });
+});
+
+describe("fetchSiteContent", () => {
+  afterEach(() => vi.restoreAllMocks());
+
+  it("returns an empty result with fetchSuccess false when the sitemap request throws", async () => {
+    vi.spyOn(console, "log").mockImplementation(() => {});
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    vi.spyOn(globalThis, "fetch").mockRejectedValue(new TypeError("fetch failed"));
+    // Anthropic's single sitemap: OpenAI's sub-sitemaps each fail on their own, without a throw.
+    const result = await fetchSiteContent("anthropic", emptyState());
+    expect(result).toEqual({
+      site: "anthropic",
+      siteName: "Anthropic (Claude)",
+      isFirstRun: false,
+      newItems: [],
+      totalDiscovered: 0,
+      fetchSuccess: false,
+    });
   });
 });

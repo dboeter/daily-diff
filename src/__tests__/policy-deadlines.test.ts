@@ -3,7 +3,8 @@ import { describe, it, expect, vi, afterEach } from "vitest";
 import { parseInitiatives, fetchHaveYourSay } from "../policy-haveyoursay.ts";
 import { nextDeadlines, upcomingDeadlines, renderDeadlines } from "../policy-deadlines.ts";
 import type { PolicyConfig } from "../config.ts";
-import { newPolicyItems, nextPolicyState, type PolicyItem } from "../policy.ts";
+import type { PolicyItem } from "../policy.ts";
+import { newItems, nextReportedState } from "../report-state.ts";
 
 const FIXTURE = JSON.parse(
   fs.readFileSync(new URL("./fixtures/have-your-say.json", import.meta.url), "utf-8"),
@@ -69,18 +70,18 @@ describe("parseInitiatives across feedback periods", () => {
 
   it("reports an initiative again when a new feedback period opens in the same stage", () => {
     const [before] = parseInitiatives(response([firstPeriod]), new Date("2026-09-02T00:00:00Z"));
-    const state = nextPolicyState(null, [before!], "2026-09-02");
+    const state = nextReportedState(null, [before!], "2026-09-02");
     const after = parseInitiatives(response([firstPeriod, secondPeriod]), NOW);
     expect(after[0]).toMatchObject({ stage: before!.stage, published: "2026-10-12", deadline: "2026-11-09" });
-    expect(newPolicyItems(after, state, "2026-10-14")).toHaveLength(1);
+    expect(newItems(after, state, "2026-10-14")).toHaveLength(1);
   });
 
   it("does not report it again when the period only closes", () => {
     const open = { ...firstPeriod, receivingFeedbackStatus: "OPEN" };
     const [before] = parseInitiatives(response([open]), new Date("2026-09-02T00:00:00Z"));
-    const state = nextPolicyState(null, [before!], "2026-09-02");
+    const state = nextReportedState(null, [before!], "2026-09-02");
     const after = parseInitiatives(response([firstPeriod]), new Date("2026-09-20T00:00:00Z"));
-    expect(newPolicyItems(after, state, "2026-09-20")).toEqual([]);
+    expect(newItems(after, state, "2026-09-20")).toEqual([]);
   });
 });
 

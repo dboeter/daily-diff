@@ -6,8 +6,11 @@ import {
   buildDataReport,
   buildDiscussionsReport,
   buildPolicyReport,
+  buildTrendingReport,
+  buildWebReport,
   type DataSection,
 } from "../data-reports.ts";
+import { EMPTY_TRENDING, type TrendingData } from "../trending.ts";
 import { MSG } from "../i18n.ts";
 import type { ProjectActivity } from "../prompts.ts";
 import type { PolicyData, PolicyItem } from "../policy.ts";
@@ -15,13 +18,29 @@ import { isDataLaw } from "../policy-jev.ts";
 import type { DevtoData } from "../devto.ts";
 import type { VendorData, VendorItem } from "../data-vendors.ts";
 import { selectVendorItems } from "../data-jev.ts";
+import { fetchVendorData } from "../data-vendors.ts";
+import { numberRows } from "../summarized-table.ts";
 
 const generateBody = vi.fn(async (_prompt: string) => "## Highlights\n\nText.");
 vi.mock("../report.ts", async (importOriginal) => ({
   ...(await importOriginal<typeof import("../report.ts")>()),
   generateBody: (...args: unknown[]) => generateBody(...(args as [string])),
+  // generateOr calls report.ts's own generateBody, which this mock can't reach: route it here.
+  generateOr: (_tag: string, prompt: string, fallback: unknown) => generateBody(prompt).catch(() => fallback),
   saveFile: (...args: unknown[]) => saveFile(...(args as [string, string, string])),
 }));
+// buildWebReport writes digests/web-state.json: keep the tests off the real file.
+vi.mock("../web.ts", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("../web.ts")>()),
+  saveWebState: () => {},
+}));
+/** A vendor result with these items and nothing to save but the pruned state. */
+const vendorOf = (items: VendorData["items"]): VendorData => ({
+  items,
+  fetchSuccess: true,
+  nextState: { reported: {} },
+  observedState: { reported: {} },
+});
 const saveFile = vi.fn((_content: string, dateStr: string, name: string) => `digests/${dateStr}/${name}`);
 
 const devto: DevtoData = {
@@ -41,6 +60,42 @@ const devto: DevtoData = {
     },
   ],
 };
+
+describe("buildWebReport", () => {
+  it("says a site's fetch failed instead of reporting an empty sitemap", async () => {
+    generateBody.mockClear();
+    const page = {
+      url: "https://www.anthropic.com/news/x",
+      title: "X",
+      lastmod: "2026-10-18",
+      content: "Body.",
+      site: "anthropic" as const,
+      category: "news",
+    };
+    const results = [
+      {
+        site: "anthropic" as const,
+        siteName: "Anthropic",
+        isFirstRun: false,
+        newItems: [page],
+        totalDiscovered: 40,
+        fetchSuccess: true,
+      },
+      {
+        site: "openai" as const,
+        siteName: "OpenAI",
+        isFirstRun: false,
+        newItems: [],
+        totalDiscovered: 0,
+        fetchSuccess: false,
+      },
+    ];
+    const state = { anthropic: {}, openai: {} } as unknown as Parameters<typeof buildWebReport>[1];
+    const content = (await buildWebReport(results, state, "00:00", "2026-10-19"))!.content;
+    expect(content).toContain("— 1 new articles (sitemap total: 40)");
+    expect(content).toContain("[openai.com](https://openai.com) — fetch failed");
+  });
+});
 
 describe("buildDiscussionsReport", () => {
   it("is still written when HN fails but Dev.to succeeds", async () => {
@@ -70,11 +125,100 @@ describe("buildDiscussionsReport", () => {
   });
 });
 
+describe("buildTrendingReport", () => {
+  const data: TrendingData = {
+    ...EMPTY_TRENDING,
+    report: {
+      radar: [
+        {
+          n: 1,
+          keys: ["npm:kilo"],
+          name: "Kilo",
+          url: "https://kilo.ai/",
+          description: "Kilo description.",
+          sources: ["npm"],
+          signals: ["1,000/week"],
+          isNew: false,
+          links: [],
+        },
+      ],
+      categories: [],
+      classifiedBy: "jev",
+    },
+  };
+  const skills = { prs: [], issues: [], fetchSuccess: true, repo: "anthropics/skills" };
+  const isSummaries = (p: string) => p.includes("`N: <2 sentences>`");
+  const isProse = (p: string) => p.includes("<!-- tables -->");
+  const build = () => buildTrendingReport(data, skills, "00:00", "2026-10-19");
+
+  it("splices the row summaries and the prose, and adds the Skills section", async () => {
+    generateBody.mockReset();
+    generateBody.mockImplementation(async (p: string) =>
+      isSummaries(p)
+        ? "1: Kilo is an agent."
+        : isProse(p)
+          ? "## Highlights\n\nH.\n\n<!-- tables -->\n\n## Signals\n\nS."
+          : "## Top Skills\n\nK.",
+    );
+    const content = (await build())!.content;
+    expect(content).toMatch(/H\.\n\n## [^\n]+\n\n[\s\S]*\| Kilo is an agent\. \|\n\n## Signals/);
+    expect(content).toContain("## Claude Code Skills");
+    expect(content).toContain("### Top Skills\n\nK.");
+    expect(generateBody).toHaveBeenCalledTimes(3);
+  });
+
+  it("shows the descriptions when the summaries call fails", async () => {
+    generateBody.mockReset();
+    generateBody.mockImplementation(async (p: string) => {
+      if (isSummaries(p)) throw new Error("HTTP 504");
+      return isProse(p) ? "## Highlights\n\nH.\n\n<!-- tables -->" : "K.";
+    });
+    expect((await build())!.content).toContain("| Kilo description. |");
+  });
+
+  it("is still written with the failure notice when the prose call fails", async () => {
+    generateBody.mockReset();
+    generateBody.mockImplementation(async (p: string) => {
+      if (isProse(p)) throw new Error("HTTP 504");
+      return isSummaries(p) ? "1: S." : "K.";
+    });
+    const content = (await build())!.content;
+    expect(content).toContain(MSG.trendingFailed);
+    expect(content).toContain("| S. |");
+  });
+
+  it("shows the Skills failure notice when the Skills call fails", async () => {
+    generateBody.mockReset();
+    generateBody.mockImplementation(async (p: string) => {
+      if (!isSummaries(p) && !isProse(p)) throw new Error("HTTP 504");
+      return "1: S.";
+    });
+    expect((await build())!.content).toContain(MSG.skillsFailed);
+  });
+
+  it("shows the Skills failure notice without a Skills call when the Skills fetch failed", async () => {
+    generateBody.mockReset();
+    generateBody.mockImplementation(async (p: string) =>
+      isSummaries(p) ? "1: S." : "## Highlights\n\nH.\n\n<!-- tables -->",
+    );
+    const failed = { ...skills, fetchSuccess: false };
+    const content = (await buildTrendingReport(data, failed, "00:00", "2026-10-19"))!.content;
+    expect(content).toContain(MSG.skillsFailed);
+    expect(generateBody).toHaveBeenCalledTimes(2);
+  });
+
+  it("is skipped without an LLM call when there is no ranked data", async () => {
+    generateBody.mockReset();
+    expect(await buildTrendingReport(EMPTY_TRENDING, skills, "00:00", "2026-10-19")).toBeNull();
+    expect(generateBody).not.toHaveBeenCalled();
+  });
+});
+
 describe("buildPolicyReport", () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "policy-report-"));
-  const data = (items: PolicyData["items"]): PolicyData => ({
+  const data = (items: PolicyItem[]): PolicyData => ({
     fetchSuccess: true,
-    items,
+    items: numberRows(items),
     nextState: { reported: Object.fromEntries(items.map((i) => [i.id, "2026-10-14"])) },
     observedState: { reported: {} },
     deadlines: [],
@@ -213,7 +357,7 @@ describe("buildDataReport", () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "data-report-"));
   const stateFile = path.join(dir, "data-state.json");
   const verdictsFile = path.join(dir, "data-verdicts.json");
-  const build = (s: DataSection[], vendor: VendorData = { items: [] }, dataLaw: PolicyItem[] = []) =>
+  const build = (s: DataSection[], vendor: VendorData = vendorOf([]), dataLaw: PolicyItem[] = []) =>
     buildDataReport(s, vendor, dataLaw, "00:00", "2026-10-17", stateFile, verdictsFile);
 
   const project = (name: string, active: boolean): ProjectActivity => ({
@@ -274,7 +418,7 @@ describe("buildDataReport", () => {
       { cache: { items: {} }, dateStr: "2026-10-17" },
     );
     return {
-      items,
+      ...vendorOf(items),
       rankingFile,
       nextVerdicts,
       nextState: { reported: { "dbx-new": "2026-10-17" }, stages: {} },
@@ -402,7 +546,7 @@ describe("buildDataReport", () => {
       },
     );
     expect(items.map((i) => i.aiInData)).toEqual([false]);
-    const content = (await build(sections(false, false), { items }))!.content;
+    const content = (await build(sections(false, false), vendorOf(items)))!.content;
     expect(prosePrompts()[0]).not.toContain("Data × AI");
     expect(content).not.toContain("Data × AI");
     expect(content).toContain("## Worth a Look");
@@ -440,7 +584,7 @@ describe("buildDataReport", () => {
       policyItem("data-act", "Data Act: guidance on smart contracts", "Guidance"),
       policyItem("ai-act", "AI Act: Code of Practice published"),
     ];
-    const content = (await build(sections(false), { items: [] }, dataLawOf(policy)))!.content;
+    const content = (await build(sections(false), vendorOf([]), dataLawOf(policy)))!.content;
     expect(content).toContain(
       "## Worth a Look\n- Read this.\n- [Data Act: guidance on smart contracts](https://example.eu/data-act) — Policy Watch, Guidance",
     );
@@ -454,7 +598,7 @@ describe("buildDataReport", () => {
       return reply(prompt);
     });
     const policy = [policyItem("nis2", "NIS2 implementing act adopted")];
-    const content = (await build(sections(false), { items: [] }, dataLawOf(policy)))!.content;
+    const content = (await build(sections(false), vendorOf([]), dataLawOf(policy)))!.content;
     expect(content).toContain(
       "## Worth a Look\n\n- [NIS2 implementing act adopted](https://example.eu/nis2) — Policy Watch",
     );
@@ -463,6 +607,59 @@ describe("buildDataReport", () => {
   it("is still skipped when only data-law policy items are new", async () => {
     generateBody.mockReset();
     const policy = [policyItem("nis2", "NIS2 implementing act adopted")];
-    expect(await build(sections(false, false), { items: [] }, policy)).toBeNull();
+    expect(await build(sections(false, false), vendorOf([]), policy)).toBeNull();
+  });
+
+  describe("with fetchVendorData", () => {
+    const bcr = fs.readFileSync(new URL("./fixtures/snowflake-bcr.html", import.meta.url), "utf-8");
+    const feeds = [
+      {
+        name: "Snowflake BCR",
+        vendor: "snowflake" as const,
+        url: "https://x/bcr",
+        parser: "snowflake-bcr" as const,
+      },
+    ];
+    const fetchWith = async (resp: () => Response, state: Parameters<typeof fetchVendorData>[2]) => {
+      vi.spyOn(console, "log").mockImplementation(() => {});
+      const spy = vi.spyOn(globalThis, "fetch").mockImplementation(async () => resp());
+      const data = await fetchVendorData({ feeds }, new Date("2026-10-17T00:00:00Z"), state, {
+        cache: { items: {} },
+      });
+      spy.mockRestore();
+      return data;
+    };
+
+    it("saves a quiet day's record-only bundles and leaves reported unchanged", async () => {
+      generateBody.mockReset();
+      fs.rmSync(stateFile, { force: true });
+      const first = await fetchWith(() => new Response(bcr), null);
+      // 2026_08 was reported on an earlier day at its current stage; 2026_05..07 were never seen.
+      const reported = { "older-note|2026-10-16": "2026-10-16" };
+      const stage08 = first.nextState.stages!["snowflake-bcr:2026_08"]!;
+      const data = await fetchWith(() => new Response(bcr), {
+        reported,
+        stages: { "snowflake-bcr:2026_08": stage08 },
+      });
+      expect(data.items).toEqual([]);
+      expect(await build(sections(false, false), data)).toBeNull();
+      const saved = JSON.parse(fs.readFileSync(stateFile, "utf-8"));
+      expect(saved.reported).toEqual(reported);
+      expect(Object.keys(saved.stages).sort()).toEqual([
+        "snowflake-bcr:2026_05",
+        "snowflake-bcr:2026_06",
+        "snowflake-bcr:2026_07",
+        "snowflake-bcr:2026_08",
+      ]);
+    });
+
+    it("reports fetchSuccess false when every feed fails, and writes no state on a quiet day", async () => {
+      generateBody.mockReset();
+      fs.rmSync(stateFile, { force: true });
+      const data = await fetchWith(() => new Response("", { status: 503 }), { reported: {} });
+      expect(data.fetchSuccess).toBe(false);
+      expect(await build(sections(false, false), data)).toBeNull();
+      expect(fs.existsSync(stateFile)).toBe(false);
+    });
   });
 });

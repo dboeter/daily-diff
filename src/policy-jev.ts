@@ -6,11 +6,10 @@
  */
 
 import path from "node:path";
-import { askJev, mapJev, jevFailedTooOften, loadItemsFile, saveItemsFile } from "./jev.ts";
-import type { AskJev } from "./trending-jev.ts";
+import { judgeItems, loadItemsFile, type AskJev, type VerdictCache } from "./jev.ts";
 import type { Jurisdiction, PolicyConfig } from "./config.ts";
-import type { PolicyItem, PolicyState } from "./policy.ts";
-import { daysBefore } from "./date.ts";
+import type { PolicyItem } from "./policy.ts";
+import type { Selection } from "./new-items.ts";
 
 /**
  * The four questions every item gets; `state` is `{ title, description }`, plus
@@ -141,6 +140,24 @@ const NEWS_IMPACT_QUESTION = {
     "How much is the US development reported in `title` and `description` expected to affect `reader`, their clients and colleagues, directly or indirectly?",
 };
 
+/** The Jev request for one item; also the baseline of `scripts/jev-lab.ts`. */
+export function policyRequest(
+  item: PolicyItem,
+  readerProfile: string,
+): { state: Record<string, string>; questions: Record<string, object> } {
+  const us = isUs(item.jurisdiction);
+  const state = {
+    title: item.title,
+    description: item.description,
+    // A stage item's `published` is its stage's date.
+    ...(item.stage ? { stage: item.stage, stage_date: item.published.slice(0, 10) } : {}),
+    ...(us ? { reader: readerProfile } : {}),
+  };
+  const impact = item.news ? NEWS_IMPACT_QUESTION : IMPACT_QUESTION;
+  const questions = us ? { ...BASE_QUESTIONS, impact } : BASE_QUESTIONS;
+  return { state, questions };
+}
+
 export interface PolicyAnswers {
   about_ai_policy: { noul: number };
   binding: { noul: number };
@@ -248,23 +265,6 @@ export const isDataLaw = (
   tokens: string[],
 ): boolean => !(i.jurisdiction.startsWith("us_") && !i.news) && watchlisted(i, tokens);
 
-/**
- * A stage item first seen at a stage older than this is recorded in the state
- * but not reported: adding a file to the watchlist must not report stale news.
- */
-const FIRST_SEEN_MAX_AGE_DAYS = 30;
-
-/** Whether a stage source should set `recordOnly`: the state has never seen `id`, and its stage is old. */
-export function staleOnFirstSight(
-  ctx: { state: PolicyState | null; dateStr: string },
-  id: string,
-  stageDate: string,
-): boolean {
-  return (
-    ctx.state?.stages?.[id] === undefined && stageDate < daysBefore(ctx.dateStr, FIRST_SEEN_MAX_AGE_DAYS)
-  );
-}
-
 /** The watchlist of an item's own jurisdiction; Elsewhere has none. */
 const WATCHLIST_OF: Record<Jurisdiction, keyof PolicyConfig["watchlist"] | null> = {
   eu: "eu",
@@ -273,7 +273,7 @@ const WATCHLIST_OF: Record<Jurisdiction, keyof PolicyConfig["watchlist"] | null>
   us_states: "usStates",
   other: null,
 };
-const watchlistFor = (watchlist: PolicyConfig["watchlist"], j: Jurisdiction): string[] => {
+export const watchlistFor = (watchlist: PolicyConfig["watchlist"], j: Jurisdiction): string[] => {
   const key = WATCHLIST_OF[j];
   return key ? watchlist[key] : [];
 };
@@ -282,27 +282,12 @@ const watchlistFor = (watchlist: PolicyConfig["watchlist"], j: Jurisdiction): st
 // Verdict cache
 // ---------------------------------------------------------------------------
 
-/** `digests/policy-verdicts.json`: Jev's raw answers per item id. Hand-editable. */
-export interface PolicyVerdicts {
-  items: Record<string, PolicyVerdictEntry>;
-}
-
-export interface PolicyVerdictEntry {
-  /** For readers only. */
-  title: string;
-  /** Raw answers, not the decision, so the weights can change without asking again. */
-  answers: PolicyAnswers;
-  /**
-   * A stage item's stage when Jev answered: Congress, Open States and Have
-   * your say keep an id across stages, so a different stage is asked again.
-   * Absent for other items, and on entries saved before stages were recorded.
-   */
-  stage?: string;
-  /** CST date Jev answered; absent on a hand-added entry. */
-  decided?: string;
-  model?: string;
-  lastSeen: string;
-}
+/**
+ * `digests/policy-verdicts.json`: Jev's raw answers per item id. A stage
+ * item's entry holds its `stage`: Congress, Open States and Have your say keep
+ * an id across stages, so a different stage is asked again.
+ */
+export type PolicyVerdicts = VerdictCache<PolicyAnswers>;
 
 export const POLICY_VERDICTS_FILE = path.join("digests", "policy-verdicts.json");
 /**
@@ -313,41 +298,15 @@ const VERDICT_UNSEEN_DAYS = 30;
 
 /** Missing → empty. Malformed → null: every item is asked and nothing is saved, so a hand edit survives. */
 export function loadPolicyVerdicts(file = POLICY_VERDICTS_FILE): PolicyVerdicts | null {
-  return loadItemsFile<PolicyVerdictEntry>(file, "policy");
-}
-
-/** One item per line, like the trending classifications. */
-export function savePolicyVerdicts(cache: PolicyVerdicts, file = POLICY_VERDICTS_FILE): void {
-  saveItemsFile(cache, file);
+  return loadItemsFile(file, "policy");
 }
 
 // ---------------------------------------------------------------------------
 // Selection
 // ---------------------------------------------------------------------------
 
-export interface PolicySelection {
-  /** The kept items, most relevant first; items without a verdict after, in feed order. */
-  items: PolicyItem[];
-  /** "keywords" when there was no key or more than half the new calls failed. */
-  rankedBy: "jev" | "keywords";
-  /** null when the verdict file was malformed: it is left as it is. */
-  nextVerdicts: PolicyVerdicts | null;
-  /** `digests/YYYY-MM-DD/policy-ranking.json`: every item, kept or dropped. */
-  rankingFile: string;
-}
-
-interface Verdict {
-  answers: PolicyAnswers;
-  relevance: number;
-  keep: boolean;
-  model?: string;
-  /** Set when the verdict came from the cache. */
-  decided?: string;
-}
-
-const round = (n: number): number => Math.round(n * 1000) / 1000;
-const roundAnswers = (a: PolicyAnswers): PolicyAnswers =>
-  JSON.parse(JSON.stringify(a), (_, v: unknown) => (typeof v === "number" ? round(v) : v)) as PolicyAnswers;
+/** Items most relevant first; items without a verdict after, in feed order. Trace: `policy-ranking.json`. */
+export type PolicySelection = Selection<PolicyItem, PolicyVerdicts>;
 
 export async function selectPolicyItems(
   items: PolicyItem[],
@@ -361,51 +320,16 @@ export async function selectPolicyItems(
     ask?: AskJev;
   },
 ): Promise<PolicySelection> {
-  const { readerProfile, watchlist, apiKey, cache, dateStr, ask = askJev } = opts;
-  const verdicts = new Map<string, Verdict>();
-  for (const item of items) {
-    const e = cache?.items[item.id];
-    if (!e || e.stage !== item.stage) continue;
-    try {
-      verdicts.set(item.id, {
-        answers: e.answers,
-        ...policyRelevance(e.answers, item.jurisdiction, item.news),
-        decided: e.decided ?? "by hand",
-      });
-    } catch {
-      console.error(`  [policy] Invalid saved verdict for ${item.id}, asking again`);
-    }
-  }
-
-  const toAsk = items.filter((i) => !verdicts.has(i.id));
-  const fresh = new Map<string, Verdict>();
-  // Every item decided from saved verdicts is a Jev ranking, key or not.
-  let jevDown = !apiKey && toAsk.length > 0;
-  if (apiKey && toAsk.length > 0) {
-    const { results, failed } = await mapJev(
-      toAsk,
-      async (item) => {
-        const us = isUs(item.jurisdiction);
-        const state = {
-          title: item.title,
-          description: item.description,
-          // A stage item's `published` is its stage's date.
-          ...(item.stage ? { stage: item.stage, stage_date: item.published.slice(0, 10) } : {}),
-          ...(us ? { reader: readerProfile } : {}),
-        };
-        const impact = item.news ? NEWS_IMPACT_QUESTION : IMPACT_QUESTION;
-        const questions = us ? { ...BASE_QUESTIONS, impact } : BASE_QUESTIONS;
-        const { model, answers } = await ask(state, questions, apiKey);
-        const a = answers as PolicyAnswers;
-        return { answers: a, model, ...policyRelevance(a, item.jurisdiction, item.news) };
-      },
-      "policy",
-    );
-    toAsk.forEach((item, i) => results[i] && fresh.set(item.id, results[i]));
-    jevDown = jevFailedTooOften(failed, toAsk.length);
-  }
-  // Too many failures: the answers that did arrive are saved, but this run decides by keyword.
-  if (!jevDown) for (const [id, v] of fresh) verdicts.set(id, v);
+  const { readerProfile, watchlist, ...jev } = opts;
+  const judgment = await judgeItems(items, {
+    ...jev,
+    tag: "policy",
+    request: (item) => policyRequest(item, readerProfile),
+    decide: (a: PolicyAnswers, item) => policyRelevance(a, item.jurisdiction, item.news),
+    fingerprint: (item) => item.stage,
+    unseenDays: VERDICT_UNSEEN_DAYS,
+  });
+  const { verdicts, rankedBy } = judgment;
 
   const onWatchlist = (i: PolicyItem): boolean => watchlisted(i, watchlistFor(watchlist, i.jurisdiction));
   const kept = (i: PolicyItem): boolean => {
@@ -418,53 +342,20 @@ export async function selectPolicyItems(
   const score = (i: PolicyItem): number => verdicts.get(i.id)?.relevance ?? -1;
   const selected = items.filter(kept).sort((a, b) => score(b) - score(a));
   console.log(
-    `  [policy] Kept ${selected.length}/${items.length} items${jevDown ? " (no Jev: watchlist and keywords only)" : ""}`,
+    `  [policy] Kept ${selected.length}/${items.length} items${rankedBy === "keywords" ? " (no Jev: watchlist and keywords only)" : ""}`,
   );
 
-  let nextVerdicts: PolicyVerdicts | null = null;
-  if (cache) {
-    const next = { ...cache.items };
-    for (const item of items) {
-      const v = fresh.get(item.id);
-      if (v) {
-        next[item.id] = {
-          title: item.title,
-          ...(item.stage ? { stage: item.stage } : {}),
-          answers: roundAnswers(v.answers),
-          decided: dateStr,
-          ...(v.model ? { model: v.model } : {}),
-          lastSeen: dateStr,
-        };
-      } else if (next[item.id]) {
-        next[item.id] = { ...next[item.id]!, lastSeen: dateStr };
-      }
-    }
-    nextVerdicts = {
-      items: Object.fromEntries(
-        Object.entries(next).filter(([, e]) => e.lastSeen >= daysBefore(dateStr, VERDICT_UNSEEN_DAYS)),
-      ),
-    };
-  }
+  const rows = items.map((i) => ({
+    id: i.id,
+    title: i.title,
+    source: i.source,
+    jurisdiction: i.jurisdiction,
+    kept: selected.includes(i),
+    ...judgment.traceFields(i),
+    watchlisted: onWatchlist(i),
+    keyword: fallbackKeywordHit(i),
+  }));
+  const rankingFile = judgment.rankingFile(rows, { weights: POLICY_WEIGHTS, newsWeights: NEWS_WEIGHTS });
 
-  const models = [...new Set([...fresh.values()].flatMap((v) => (v.model ? [v.model] : [])))];
-  const lines = items.map((i) => {
-    const v = verdicts.get(i.id) ?? fresh.get(i.id);
-    return JSON.stringify({
-      id: i.id,
-      title: i.title,
-      source: i.source,
-      jurisdiction: i.jurisdiction,
-      kept: selected.includes(i),
-      relevance: v ? round(v.relevance) : null,
-      ...(v ? roundAnswers(v.answers) : {}),
-      decided: v?.decided ?? null,
-      watchlisted: onWatchlist(i),
-      keyword: fallbackKeywordHit(i),
-    });
-  });
-  const rankingFile =
-    `{\n"models": ${JSON.stringify(models)},\n"rankedBy": ${JSON.stringify(jevDown ? "keywords" : "jev")},\n` +
-    `"weights": ${JSON.stringify(POLICY_WEIGHTS)},\n"newsWeights": ${JSON.stringify(NEWS_WEIGHTS)},\n"items": [\n${lines.join(",\n")}\n]\n}\n`;
-
-  return { items: selected, rankedBy: jevDown ? "keywords" : "jev", nextVerdicts, rankingFile };
+  return { items: selected, rankedBy, nextVerdicts: judgment.nextCache, rankingFile };
 }

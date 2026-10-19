@@ -9,6 +9,7 @@ import type { TrendingReportData } from "./trending-rank.ts";
 import type { PolicyItem } from "./policy.ts";
 import type { KeptVendorItem } from "./data-jev.ts";
 import { VENDOR_SECTIONS, vendorSection, type VendorSection } from "./config.ts";
+import { summaryText, type Numbered } from "./summarized-table.ts";
 import {
   LIVE_REPORT_IDS,
   OVERVIEW,
@@ -241,34 +242,8 @@ export function buildStealthSection(models: OpenRouterStealthModel[] | null, now
 }
 
 // ---------------------------------------------------------------------------
-// Code-rendered tables with LLM row summaries (trending, policy)
+// Code-rendered tables with LLM row summaries (summarized-table.ts)
 // ---------------------------------------------------------------------------
-
-/** Where the prose LLM call leaves room for the code-rendered tables. */
-export const TABLES_MARKER = "<!-- tables -->";
-
-/**
- * A row with no LLM summary shows its description instead, cut to about two
- * lines of a table cell so one long README blurb does not stretch the table.
- */
-const DESCRIPTION_FALLBACK_CHARS = 160;
-
-/**
- * Parse the summaries call's `N: text` lines. Tolerant of the list styles
- * models drift into (`3.`, `3)`, `- 3:`, `**3:**`); lines without a leading
- * number or with no text are ignored, and the first line for a number wins.
- */
-export function parseRowSummaries(text: string): Map<number, string> {
-  const summaries = new Map<number, string>();
-  for (const line of text.split("\n")) {
-    // `.` must not be followed by a digit, so "3.5x growth" is not row 3.
-    const m = line.match(/^\s*(?:[-*+]\s+)?\**\s*(\d+)\s*\**\s*(?::|\)|\.(?!\d))\s*\**\s*(.*?)\s*$/);
-    if (!m || !m[2]) continue;
-    const n = Number(m[1]);
-    if (!summaries.has(n)) summaries.set(n, m[2]);
-  }
-  return summaries;
-}
 
 /** Table cell text: one line, pipes escaped. */
 export const cell = (s: string) => s.replace(/\r?\n/g, " ").replace(/\|/g, "\\|").trim();
@@ -278,20 +253,10 @@ const POLICY_TITLE_MAX_CHARS = 200;
 export const policyTitleLabel = (title: string): string =>
   cell(title.length > POLICY_TITLE_MAX_CHARS ? `${title.slice(0, POLICY_TITLE_MAX_CHARS)}…` : title);
 
-export function descriptionFallback(description: string): string {
-  const d = description.replace(/\s+/g, " ").trim();
-  if (!d) return "—";
-  if (d.length <= DESCRIPTION_FALLBACK_CHARS) return d;
-  const cut = d.slice(0, DESCRIPTION_FALLBACK_CHARS);
-  const space = cut.lastIndexOf(" ");
-  return `${(space > 0 ? cut.slice(0, space) : cut).trimEnd()}…`;
-}
-
 /** The Radar and category tables; "" when both are empty. */
 export function renderTrendingTables(report: TrendingReportData, summaries: Map<number, string>): string {
   const T = TRENDING_REPORT;
-  const summary = (n: number, description: string) =>
-    cell(summaries.get(n) ?? descriptionFallback(description));
+  const summary = (row: { n: number; description: string }) => cell(summaryText(summaries, row));
   const link = (name: string, url: string) => (url ? `[${cell(name)}](${cell(url)})` : cell(name));
   const blocks: string[] = [];
 
@@ -299,7 +264,7 @@ export function renderTrendingTables(report: TrendingReportData, summaries: Map<
     const rows = report.radar.map(
       (r) =>
         `| ${link(r.name, r.url)} | ${cell(r.sources.join("; "))} | ${cell(r.signals.join("; "))} | ` +
-        `${summary(r.n, r.description)} |`,
+        `${summary(r)} |`,
     );
     blocks.push(`## ${T.radarHeading}`, `${T.radarHeader}\n${rows.join("\n")}`);
   }
@@ -308,9 +273,7 @@ export function renderTrendingTables(report: TrendingReportData, summaries: Map<
     blocks.push(`## ${T.categoriesHeading}`);
     for (const { category, rows } of report.categories) {
       const lines = rows.map(
-        (r) =>
-          `| ${link(r.fullName, r.url)} | ${cell(r.language)} | ${cell(r.starsCell)} | ` +
-          `${summary(r.n, r.description)} |`,
+        (r) => `| ${link(r.fullName, r.url)} | ${cell(r.language)} | ${cell(r.starsCell)} | ${summary(r)} |`,
       );
       blocks.push(`### ${T.categoryTitles[category]}`, `${T.categoryHeader}\n${lines.join("\n")}`);
     }
@@ -321,35 +284,28 @@ export function renderTrendingTables(report: TrendingReportData, summaries: Map<
 
 /**
  * The policy report's tables, one `##` section per jurisdiction with items, in
- * POLICY_REPORT.headings order, then News & commentary (news-feed items). Rows are numbered from 1 across all sections in
- * item order (the summaries call's `N:` lines), so the items must arrive
- * grouped (fetchPolicyData sorts them). Date, source, title and stage come
- * from the data, never the model.
+ * POLICY_REPORT.headings order, then News & commentary (news-feed items). Each
+ * row shows the summary for its own number (`n`, set by fetchPolicyData).
+ * Date, source, title and stage come from the data, never the model.
  */
 export function renderPolicyTable(
-  items: PolicyItem[],
+  items: Numbered<PolicyItem>[],
   summaries: Map<number, string>,
   /** The rendered Upcoming deadlines section, which goes between the jurisdictions and the news. */
   deadlines = "",
 ): string {
-  const row = (it: PolicyItem, n: number) =>
-    `| ${it.published.slice(0, 10)} | ${cell(it.source)} | [${policyTitleLabel(it.title)}](${cell(it.link)}) | ` +
-    `${cell(it.stage ?? "")} | ${cell(summaries.get(n) ?? descriptionFallback(it.description))} |`;
-  const numbered = items.map((it, i) => ({ it, n: i + 1 }));
+  const lead = (it: PolicyItem) =>
+    `| ${it.published.slice(0, 10)} | ${cell(it.source)} | [${policyTitleLabel(it.title)}](${cell(it.link)}) | `;
   const sections = Object.entries(POLICY_REPORT.headings).map(([jurisdiction, heading]) => {
-    const rows = numbered
-      .filter(({ it }) => !it.news && it.jurisdiction === jurisdiction)
-      .map(({ it, n }) => row(it, n));
+    const rows = items
+      .filter((it) => !it.news && it.jurisdiction === jurisdiction)
+      .map((it) => `${lead(it)}${cell(it.stage ?? "")} | ${cell(summaryText(summaries, it))} |`);
     return rows.length ? `## ${heading}\n\n${POLICY_REPORT.tableHeader}\n${rows.join("\n")}` : "";
   });
   sections.push(deadlines);
-  const newsRows = numbered
-    .filter(({ it }) => it.news)
-    .map(
-      ({ it, n }) =>
-        `| ${it.published.slice(0, 10)} | ${cell(it.source)} | [${policyTitleLabel(it.title)}](${cell(it.link)}) | ` +
-        `${cell(summaries.get(n) ?? descriptionFallback(it.description))} |`,
-    );
+  const newsRows = items
+    .filter((it) => it.news)
+    .map((it) => `${lead(it)}${cell(summaryText(summaries, it))} |`);
   if (newsRows.length) {
     sections.push(
       `## ${POLICY_REPORT.newsHeading}\n\n${POLICY_REPORT.newsTableHeader}\n${newsRows.join("\n")}`,
@@ -359,40 +315,25 @@ export function renderPolicyTable(
 }
 
 /**
- * The data report's vendor tables, one per vendor section with items. Rows are
- * numbered from 1 across sections in item order (the summaries call's `N:`
- * lines), so the items must arrive in report order (selectVendorItems).
+ * The data report's vendor tables, one per vendor section with items. Each row
+ * shows the summary for its own number (`n`, set by selectVendorItems).
  * Date, source, title and the deprecation marker come from the data, never the model.
  */
 export function renderVendorTables(
-  items: KeptVendorItem[],
+  items: Numbered<KeptVendorItem>[],
   summaries: Map<number, string>,
 ): Partial<Record<VendorSection, string>> {
-  const numbered = items.map((it, i) => ({ it, n: i + 1 }));
   const tables: Partial<Record<VendorSection, string>> = {};
   for (const section of VENDOR_SECTIONS) {
-    const rows = numbered
-      .filter(({ it }) => vendorSection(it.vendor) === section)
+    const rows = items
+      .filter((it) => vendorSection(it.vendor) === section)
       .map(
-        ({ it, n }) =>
+        (it) =>
           `| ${it.date || "—"} | ${cell(it.source)} | ` +
           `${it.deprecation ? `${DATA_REPORT.deprecationMarker} ` : ""}[${policyTitleLabel(it.title)}](${cell(it.link)}) | ` +
-          `${cell(summaries.get(n) ?? descriptionFallback(it.description))} |`,
+          `${cell(summaryText(summaries, it))} |`,
       );
     if (rows.length) tables[section] = `${DATA_REPORT.vendorTableHeader}\n${rows.join("\n")}`;
   }
   return tables;
-}
-
-/** Put the tables where the prose left the marker; after the prose when the model dropped it. */
-export function spliceTables(prose: string, tables: string): string {
-  const lines = prose.split("\n");
-  const i = lines.findIndex((l) => l.trim() === TABLES_MARKER);
-  if (i === -1) return tables ? `${prose.trimEnd()}\n\n${tables}` : prose;
-  const before = lines.slice(0, i).join("\n").trimEnd();
-  const after = lines
-    .slice(i + 1)
-    .join("\n")
-    .trimStart();
-  return [before, tables, after].filter(Boolean).join("\n\n");
 }

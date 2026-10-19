@@ -16,7 +16,7 @@ import {
   SECTIONS,
   WEB_REPORT,
 } from "./i18n.ts";
-import { TABLES_MARKER } from "./report-builders.ts";
+import { TABLES_MARKER, rowList, summaryLine, summaryOutputRule, type Numbered } from "./summarized-table.ts";
 import { NO_TITLE_RULE } from "./prompts.ts";
 import type { HnData } from "./hn.ts";
 import type { ArxivData } from "./arxiv.ts";
@@ -64,17 +64,15 @@ function buildModelUsageData(openrouter: OpenRouterData): string {
  * The rows were selected and ranked in code; parseRowSummaries reads the reply.
  */
 export function buildTrendingSummariesPrompt(rows: ReturnType<typeof summaryRows>, dateStr: string): string {
-  const list = rows
-    .map((r) => `${r.n}. ${r.name} — ${r.description || "(no description)"} — ${r.facts}`)
-    .join("\n");
+  const list = rowList(rows, (r) => `${r.name} — ${r.description || "(no description)"} — ${r.facts}`);
   return `You are a technical analyst covering AI coding tools, agents and agent harnesses. Below are ${rows.length} numbered projects and tools from the agent & AI coding trends report for the week ending ${dateStr}, each with its description and the facts measured this week.
 
 ${list}
 
-For every numbered item write exactly one line in the form \`N: <2 sentences>\` — what it is and why it is worth attention this week.
+${summaryLine("2 sentences")} — what it is and why it is worth attention this week.
 - Ground every sentence only in the given description and facts. Do not invent features, users, releases or numbers.
 - If the description is empty, say only what the name and the facts show.
-- Output one line per item, ${rows.length} lines in total, in the given order. No other text: no headings, no introduction, no blank lines.
+${summaryOutputRule(rows.length)}
 - English.
 `;
 }
@@ -109,29 +107,28 @@ Rules:
 
 /**
  * Policy report, call 1 of 2: one 2-sentence summary per numbered table row.
- * The rows are the day's new feed items in feed order; parseRowSummaries reads the reply.
+ * The rows are the kept items, numbered by fetchPolicyData; parseRowSummaries reads the reply.
  */
 export function buildPolicySummariesPrompt(
-  items: PolicyItem[],
+  items: Numbered<PolicyItem>[],
   dateStr: string,
   readerProfile: string,
 ): string {
-  const list = items
-    .map(
-      (it, i) =>
-        `${i + 1}. ${it.title} (${it.source}, ${it.published.slice(0, 10)}${it.stage ? `, stage: ${it.stage}` : ""}) — ${it.description || "(no description)"}`,
-    )
-    .join("\n");
+  const list = rowList(
+    items,
+    (it) =>
+      `${it.title} (${it.source}, ${it.published.slice(0, 10)}${it.stage ? `, stage: ${it.stage}` : ""}) — ${it.description || "(no description)"}`,
+  );
   return `You are a policy analyst covering AI legislation, regulation and official guidance. The reader: ${readerProfile}
 
 Below are ${items.length} numbered items from official sources and news & commentary outlets, new as of ${dateStr}, each with its source, date and text.
 
 ${list}
 
-For every numbered item write exactly one line in the form \`N: <2 sentences>\` — what was published or decided, and what it means for organisations that deploy AI.
+${summaryLine("2 sentences")} — what was published or decided, and what it means for organisations that deploy AI.
 - Ground every sentence only in the given text. Do not invent obligations, dates, stages or legal status.
 - If the text is empty, say only what the title shows.
-- Output one line per item, ${items.length} lines in total, in the given order. No other text: no headings, no introduction, no blank lines.
+${summaryOutputRule(items.length)}
 - English.
 `;
 }
@@ -171,25 +168,24 @@ const DATA_READER =
 
 /**
  * Data report, vendor call 1 of 2: one summary per numbered vendor table row.
- * The rows are the kept vendor items in report order; parseRowSummaries reads the reply.
+ * The rows are the kept vendor items, numbered by selectVendorItems; parseRowSummaries reads the reply.
  */
-export function buildDataSummariesPrompt(items: KeptVendorItem[], dateStr: string): string {
-  const list = items
-    .map(
-      (it, i) =>
-        `${i + 1}. ${it.title} (${it.source}${it.date ? `, ${it.date}` : ""}${it.stage ? `, status: ${it.stage}` : ""}${it.deprecation ? ", deprecation or breaking change" : ""}) — ${it.description || "(no description)"}`,
-    )
-    .join("\n");
+export function buildDataSummariesPrompt(items: Numbered<KeptVendorItem>[], dateStr: string): string {
+  const list = rowList(
+    items,
+    (it) =>
+      `${it.title} (${it.source}${it.date ? `, ${it.date}` : ""}${it.stage ? `, status: ${it.stage}` : ""}${it.deprecation ? ", deprecation or breaking change" : ""}) — ${it.description || "(no description)"}`,
+  );
   return `You summarize data platform release notes for ${DATA_READER}.
 
 Below are ${items.length} numbered release notes and updates, new as of ${dateStr}, each with its source and text.
 
 ${list}
 
-For every numbered item write exactly one line in the form \`N: <1-2 sentences>\` — what changed, and what it means for client data platforms (for a deprecation or breaking change: what stops working or must be migrated).
+${summaryLine("1-2 sentences")} — what changed, and what it means for client data platforms (for a deprecation or breaking change: what stops working or must be migrated).
 - Ground every sentence only in the given text. Do not invent dates, versions, regions or availability.
 - If the text is empty, say only what the title shows.
-- Output one line per item, ${items.length} lines in total, in the given order. No other text: no headings, no introduction, no blank lines.
+${summaryOutputRule(items.length)}
 - English.
 `;
 }

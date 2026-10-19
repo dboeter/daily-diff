@@ -25,6 +25,7 @@ import {
   isProviderUnavailable,
   isRetryable,
   callLlm,
+  generateOr,
   saveFile,
   autoGenFooter,
   parseLlmJson,
@@ -461,6 +462,27 @@ describe("callLlm", () => {
 
     await expect(promise).rejects.toThrow("rate limited");
     expect(mockCall).toHaveBeenCalledTimes(4);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// generateOr
+// ---------------------------------------------------------------------------
+
+describe("generateOr", () => {
+  beforeEach(() => {
+    mockCall.mockReset();
+    resetLlmStats();
+  });
+
+  it("returns the body, without a model-written H1", async () => {
+    mockCall.mockResolvedValueOnce("# Title\n\n## Highlights\n\nText.");
+    expect(await generateOr("t", "p", null)).toBe("## Highlights\n\nText.");
+  });
+
+  it("returns the fallback when the call fails", async () => {
+    mockCall.mockRejectedValueOnce(new Error("boom"));
+    expect(await generateOr("t", "p", null)).toBeNull();
   });
 });
 

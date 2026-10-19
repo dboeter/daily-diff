@@ -19,7 +19,8 @@ import {
   type RadarRow,
   type StarHistory,
 } from "../trending-rank.ts";
-import type { AskJev, Classification } from "../trending-jev.ts";
+import type { AskJev } from "../jev.ts";
+import type { Classification } from "../trending-jev.ts";
 import { GitHubApiError } from "../github.ts";
 import {
   composeTrendingReport,

@@ -9,7 +9,7 @@
 import type { PolicyItem } from "./policy.ts";
 import type { PolicySourceContext } from "./policy-sources.ts";
 import { fetchOk } from "./http.ts";
-import { staleOnFirstSight } from "./policy-jev.ts";
+import { markStaleOnFirstSight } from "./report-state.ts";
 
 const API_URL = "https://data.europarl.europa.eu/api/v2/procedures";
 
@@ -92,8 +92,7 @@ export async function fetchEuroparl(ctx: PolicySourceContext): Promise<PolicyIte
       const res = await fetchOk(`${API_URL}/${year}-${num}?format=application%2Fld%2Bjson`);
       const item = parseProcedure(await res.json());
       // A newly watchlisted procedure opens without its old stage, as in policy-nl.ts.
-      if (item)
-        items.push(staleOnFirstSight(ctx, item.id, item.published) ? { ...item, recordOnly: true } : item);
+      if (item) items.push(markStaleOnFirstSight(ctx, item, item.published));
     } catch (err) {
       console.error(`  [policy] European Parliament ${ref} failed: ${err}`);
       lastError = err;
