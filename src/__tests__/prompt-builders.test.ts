@@ -150,6 +150,7 @@ describe("buildProjectDigestPrompt", () => {
     expect(prompt).not.toContain("brew install");
     expect(prompt).toContain("Slash commands run safely");
     expect(releaseNotes("```sh\nnpm i tool\n```", 400)).toBe("");
+    expect(releaseNotes("~~~\ngo install tool\n~~~\nFixes", 400)).toBe("Fixes");
   });
 
   it("forbids stating absences in the overview too", () => {

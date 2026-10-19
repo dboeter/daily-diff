@@ -260,7 +260,7 @@ export function buildWebReportPrompt(results: WebFetchResult[], dateStr: string)
 Based on both companies' release cadence and content focus:
 - Each company's recent technical priorities (model capabilities / safety / productization / ecosystem)
 - Competitive dynamics: who is setting the agenda, who is following
-- Potential impact on developers and enterprise users
+- Impact on developers and enterprise users, as the articles state it
 - Hidden signals in titles, phrasing and timing: new terms, dense releases in one category, policy and safety developments
 - Patterns across the articles only: no forward-looking claims the articles don't make
 

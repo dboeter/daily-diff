@@ -107,6 +107,9 @@ describe("metaDescription", () => {
     );
     expect(metaDescription(`<head><meta name="description" content="Plain meta"></head>`)).toBe("Plain meta");
     expect(metaDescription("<head><title>None</title></head>")).toBe("");
+    expect(metaDescription(`<meta name="og:description" data-content="no" content="Named og">`)).toBe(
+      "Named og",
+    );
   });
 });
 

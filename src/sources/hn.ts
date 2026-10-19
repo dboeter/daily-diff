@@ -114,12 +114,16 @@ const DESCRIPTION_TIMEOUT_MS = 8000;
 const DESCRIPTION_MAX_BYTES = 64 * 1024;
 const DESCRIPTION_MAX_CHARS = 300;
 
+/** Some sites write `name="og:description"`. `\s` before each attribute, so `data-name=` is not one. */
+const META_KEYS = [/\s(?:property|name)=["']og:description["']/i, /\sname=["']description["']/i];
+
 /** `og:description`, else `<meta name="description">`, as plain text; "" when neither. */
 export function metaDescription(html: string): string {
-  for (const key of ["property=[\"']og:description[\"']", "name=[\"']description[\"']"]) {
-    for (const [tag] of html.matchAll(/<meta\b[^>]*>/gi)) {
-      if (!new RegExp(key, "i").test(tag)) continue;
-      const content = tag.match(/content=(?:"([^"]*)"|'([^']*)')/i);
+  const tags = [...html.matchAll(/<meta\b[^>]*>/gi)].map(([tag]) => tag);
+  for (const key of META_KEYS) {
+    for (const tag of tags) {
+      if (!key.test(tag)) continue;
+      const content = tag.match(/\scontent=(?:"([^"]*)"|'([^']*)')/i);
       const text = plainText(content?.[1] ?? content?.[2] ?? "", DESCRIPTION_MAX_CHARS);
       if (text) return text;
     }

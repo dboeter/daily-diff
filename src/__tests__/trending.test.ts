@@ -152,21 +152,12 @@ describe("searchAiRepos", () => {
   }
 
   /** searchSlot spaces calls 2.1 s apart: run them on fake timers. */
-  async function run(fourteenDaysAgo: string | null) {
+  async function run(fourteenDaysAgo: string) {
     vi.useFakeTimers();
     const pending = searchAiRepos("2026-09-30", fourteenDaysAgo);
     await vi.runAllTimersAsync();
     return pending;
   }
-
-  it("daily: one page of the top 15 pushed repos per topic", async () => {
-    const urls = mockSearch({ "topic:coding-agent pushed:>2026-09-30 page 1": ["a/one"] });
-    const repos = await run(null);
-    expect(urls).toHaveLength(6);
-    expect(urls.every((u) => u.includes("&per_page=15&page=1"))).toBe(true);
-    expect(urls.some((u) => new URL(u).searchParams.get("q")!.includes("created:"))).toBe(false);
-    expect(repos.map((r) => [r.fullName, r.topic])).toEqual([["a/one", "coding-agent"]]);
-  });
 
   it("weekly: new and established queries per topic, paging while pages are full", async () => {
     const full = Array.from({ length: 100 }, (_, i) => `full/r${i}`);
@@ -222,5 +213,17 @@ describe("fetchTrendingData", () => {
     const pending = fetchTrendingData("daily", "2026-10-19");
     await vi.runAllTimersAsync();
     expect(await pending).toMatchObject({ trendingRepos: [], searchRepos: [], trendingFetchSuccess: false });
+  });
+
+  // Search results stopped counting as agent news on 2026-10-19, so the daily run asks only the trending page.
+  it("makes no search request on the daily run", async () => {
+    vi.spyOn(console, "log").mockImplementation(() => {});
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    const fetchSpy = vi.spyOn(globalThis, "fetch").mockRejectedValue(new TypeError("fetch failed"));
+    vi.useFakeTimers();
+    const pending = fetchTrendingData("daily", "2026-10-19");
+    await vi.runAllTimersAsync();
+    await pending;
+    expect(fetchSpy.mock.calls.some(([u]) => String(u).includes("/search/"))).toBe(false);
   });
 });

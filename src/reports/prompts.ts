@@ -110,7 +110,7 @@ const PREVIEW_BODY_CHARS = 1500;
  */
 export function releaseNotes(body: string | null | undefined, maxChars: number): string {
   return (body ?? "")
-    .replace(/```[\s\S]*?(```|$)/g, " ")
+    .replace(/(```|~~~)[\s\S]*?(\1|$)/g, " ")
     .replace(/<[^>]*>/g, " ")
     .replace(/\[[^\]]*\]\(#[^)]*\)/g, " ")
     .replace(/\s+/g, " ")

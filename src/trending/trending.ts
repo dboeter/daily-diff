@@ -131,8 +131,6 @@ const SEARCH_PUSHED_DAYS = 7;
  * gave 565 unique repos from 16 requests.
  */
 const MAX_SEARCH_PAGES = 3;
-/** Daily runs only feed agent news, which needs the top repos, not the whole pool. */
-const DAILY_PER_TOPIC = 15;
 
 /**
  * History-API calls per weekly run. The Actions GITHUB_TOKEN allows 1,000 core
@@ -259,44 +257,32 @@ interface SearchQuery {
 }
 
 /**
- * Weekly (`createdSince` set): per topic, repos created since then with
+ * Weekly only: per topic, repos created since `createdSince` with
  * NEW_REPO_MIN_STARS (the Radar's new agents) and repos pushed since
  * `pushedSince` with RELATIVE_MIN_BASELINE stars, every page (the category
  * tables' pool, wide enough that a mid-size repo with a big week is in it).
  * Sorted by total stars, the pushed query alone is an all-time leaderboard: it
- * needs the second query for new repos and the star gain to rank. Daily: the
- * top DAILY_PER_TOPIC pushed repos per topic, for agent news.
+ * needs the second query for new repos and the star gain to rank. Not daily:
+ * search results stopped counting as agent news on 2026-10-19 (`matchProjectNews`).
  */
-export async function searchAiRepos(pushedSince: string, createdSince: string | null): Promise<SearchRepo[]> {
+export async function searchAiRepos(pushedSince: string, createdSince: string): Promise<SearchRepo[]> {
   // Space-separated: githubGet URL-encodes `q`, and an encoded "+" is a literal plus.
-  const queries: SearchQuery[] = SEARCH_TOPICS.flatMap((topic): SearchQuery[] =>
-    createdSince
-      ? [
-          {
-            q: `topic:${topic} created:>${createdSince} stars:>=${NEW_REPO_MIN_STARS}`,
-            topic,
-            name: `${topic} (new)`,
-            perPage: 100,
-            maxPages: 1,
-          },
-          {
-            q: `topic:${topic} pushed:>${pushedSince} stars:>=${RELATIVE_MIN_BASELINE}`,
-            topic,
-            name: topic,
-            perPage: 100,
-            maxPages: MAX_SEARCH_PAGES,
-          },
-        ]
-      : [
-          {
-            q: `topic:${topic} pushed:>${pushedSince}`,
-            topic,
-            name: topic,
-            perPage: DAILY_PER_TOPIC,
-            maxPages: 1,
-          },
-        ],
-  );
+  const queries: SearchQuery[] = SEARCH_TOPICS.flatMap((topic): SearchQuery[] => [
+    {
+      q: `topic:${topic} created:>${createdSince} stars:>=${NEW_REPO_MIN_STARS}`,
+      topic,
+      name: `${topic} (new)`,
+      perPage: 100,
+      maxPages: 1,
+    },
+    {
+      q: `topic:${topic} pushed:>${pushedSince} stars:>=${RELATIVE_MIN_BASELINE}`,
+      topic,
+      name: topic,
+      perPage: 100,
+      maxPages: MAX_SEARCH_PAGES,
+    },
+  ]);
 
   // A short page is the last one. A failed page keeps the pages before it.
   const searchPages = async ({ q, name, perPage, maxPages }: SearchQuery): Promise<SearchApiItem[]> => {
@@ -381,7 +367,7 @@ async function fetchTrending(period: TrendingPeriod, dateStr: string): Promise<T
 
   const [{ repos: trendingRepos, success }, searchRepos, openrouter, npm] = await Promise.all([
     fetchGitHubTrending(period),
-    searchAiRepos(daysAgo(SEARCH_PUSHED_DAYS), weekly ? daysAgo(NEW_REPO_DAYS) : null),
+    weekly ? searchAiRepos(daysAgo(SEARCH_PUSHED_DAYS), daysAgo(NEW_REPO_DAYS)) : [],
     weekly ? fetchOpenRouterData().catch((): OpenRouterData => EMPTY_OPENROUTER) : EMPTY_OPENROUTER,
     weekly ? fetchNpmData().catch((): NpmData => EMPTY_NPM) : EMPTY_NPM,
   ]);
@@ -390,7 +376,7 @@ async function fetchTrending(period: TrendingPeriod, dateStr: string): Promise<T
   if (!weekly || !hasTrendingData(data)) return data;
 
   // Caught here, not by fetchTrendingData's catch-all, which would also wipe
-  // trendingRepos and searchRepos — Monday's agent news.
+  // trendingRepos, Monday's agent news.
   try {
     return { ...data, report: await composeTrendingReport(data, dateStr) };
   } catch (err) {

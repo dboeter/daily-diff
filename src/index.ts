@@ -171,7 +171,8 @@ async function fetchAllData(
   );
 
   const noSkills: SkillsData = { prs: [], issues: [], fetchSuccess: false };
-  // One HN fetch for the discussions report and Policy Watch's HN source, which waits for it.
+  // One HN fetch for the discussions report and Policy Watch's HN source, which waits for it. That
+  // source is added here, not in POLICY_SOURCES: it needs this promise, which PolicySourceContext lacks.
   const hn = fetchHnData();
 
   const [
