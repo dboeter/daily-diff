@@ -7,6 +7,7 @@ import {
   buildDiscussionsReport,
   buildPolicyReport,
   buildTrendingReport,
+  buildWebReport,
   type DataSection,
 } from "../data-reports.ts";
 import { EMPTY_TRENDING, type TrendingData } from "../trending.ts";
@@ -24,7 +25,14 @@ const generateBody = vi.fn(async (_prompt: string) => "## Highlights\n\nText.");
 vi.mock("../report.ts", async (importOriginal) => ({
   ...(await importOriginal<typeof import("../report.ts")>()),
   generateBody: (...args: unknown[]) => generateBody(...(args as [string])),
+  // generateOr calls report.ts's own generateBody, which this mock can't reach: route it here.
+  generateOr: (_tag: string, prompt: string, fallback: unknown) => generateBody(prompt).catch(() => fallback),
   saveFile: (...args: unknown[]) => saveFile(...(args as [string, string, string])),
+}));
+// buildWebReport writes digests/web-state.json: keep the tests off the real file.
+vi.mock("../web.ts", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("../web.ts")>()),
+  saveWebState: () => {},
 }));
 /** A vendor result with these items and nothing to save but the pruned state. */
 const vendorOf = (items: VendorData["items"]): VendorData => ({
@@ -52,6 +60,42 @@ const devto: DevtoData = {
     },
   ],
 };
+
+describe("buildWebReport", () => {
+  it("says a site's fetch failed instead of reporting an empty sitemap", async () => {
+    generateBody.mockClear();
+    const page = {
+      url: "https://www.anthropic.com/news/x",
+      title: "X",
+      lastmod: "2026-10-18",
+      content: "Body.",
+      site: "anthropic" as const,
+      category: "news",
+    };
+    const results = [
+      {
+        site: "anthropic" as const,
+        siteName: "Anthropic",
+        isFirstRun: false,
+        newItems: [page],
+        totalDiscovered: 40,
+        fetchSuccess: true,
+      },
+      {
+        site: "openai" as const,
+        siteName: "OpenAI",
+        isFirstRun: false,
+        newItems: [],
+        totalDiscovered: 0,
+        fetchSuccess: false,
+      },
+    ];
+    const state = { anthropic: {}, openai: {} } as unknown as Parameters<typeof buildWebReport>[1];
+    const content = (await buildWebReport(results, state, "00:00", "2026-10-19"))!.content;
+    expect(content).toContain("— 1 new articles (sitemap total: 40)");
+    expect(content).toContain("[openai.com](https://openai.com) — fetch failed");
+  });
+});
 
 describe("buildDiscussionsReport", () => {
   it("is still written when HN fails but Dev.to succeeds", async () => {
@@ -102,7 +146,7 @@ describe("buildTrendingReport", () => {
       classifiedBy: "jev",
     },
   };
-  const skills = { prs: [], issues: [], repo: "anthropics/skills" };
+  const skills = { prs: [], issues: [], fetchSuccess: true, repo: "anthropics/skills" };
   const isSummaries = (p: string) => p.includes("`N: <2 sentences>`");
   const isProse = (p: string) => p.includes("<!-- tables -->");
   const build = () => buildTrendingReport(data, skills, "00:00", "2026-10-19");
@@ -150,6 +194,17 @@ describe("buildTrendingReport", () => {
       return "1: S.";
     });
     expect((await build())!.content).toContain(MSG.skillsFailed);
+  });
+
+  it("shows the Skills failure notice without a Skills call when the Skills fetch failed", async () => {
+    generateBody.mockReset();
+    generateBody.mockImplementation(async (p: string) =>
+      isSummaries(p) ? "1: S." : "## Highlights\n\nH.\n\n<!-- tables -->",
+    );
+    const failed = { ...skills, fetchSuccess: false };
+    const content = (await buildTrendingReport(data, failed, "00:00", "2026-10-19"))!.content;
+    expect(content).toContain(MSG.skillsFailed);
+    expect(generateBody).toHaveBeenCalledTimes(2);
   });
 
   it("is skipped without an LLM call when there is no ranked data", async () => {

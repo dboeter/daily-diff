@@ -239,7 +239,7 @@ describe("fetchSkillsData", () => {
     vi.useFakeTimers();
     const pending = fetchSkillsData("anthropics/skills");
     await vi.runAllTimersAsync();
-    expect(await pending).toEqual({ prs: [], issues: [] });
+    expect(await pending).toEqual({ prs: [], issues: [], fetchSuccess: false });
   });
 });
 

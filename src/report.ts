@@ -275,6 +275,20 @@ export async function generateBody(prompt: string, maxTokens?: number): Promise<
   return stripModelTitle(await callLlm(prompt, maxTokens));
 }
 
+/** `generateBody` with logging; a failed call is logged and returns `fallback`. */
+export function generateOr<T>(
+  tag: string,
+  prompt: string,
+  fallback: T,
+  maxTokens?: number,
+): Promise<string | T> {
+  console.log(`  [${tag}] Calling LLM...`);
+  return generateBody(prompt, maxTokens).catch((err) => {
+    console.error(`  [${tag}] LLM call failed: ${err}`);
+    return fallback;
+  });
+}
+
 // Matches ASCII control characters U+0000–U+001F. Built from a string so no
 // literal control character appears in the source (keeps it readable + lint-clean).
 // eslint-disable-next-line no-control-regex

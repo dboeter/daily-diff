@@ -6,6 +6,7 @@ import {
   loadReportedState,
   newItems,
   nextReportedState,
+  markStaleOnFirstSight,
   saveReportedState,
   staleOnFirstSight,
   type StateItem,
@@ -116,5 +117,14 @@ describe("staleOnFirstSight", () => {
     expect(staleOnFirstSight(ctx, "new", "2026-09-14")).toBe(false);
     expect(staleOnFirstSight(ctx, "seen", "2026-01-01")).toBe(false);
     expect(staleOnFirstSight({ state: null, dateStr: "2026-10-14" }, "new", "")).toBe(true);
+  });
+});
+
+describe("markStaleOnFirstSight", () => {
+  it("marks a stale item recordOnly and returns a fresh one unchanged", () => {
+    const ctx = { state: { reported: {}, stages: {} }, dateStr: "2026-10-14" };
+    const it_ = { id: "new", title: "T" };
+    expect(markStaleOnFirstSight(ctx, it_, "2026-09-13")).toEqual({ ...it_, recordOnly: true });
+    expect(markStaleOnFirstSight(ctx, it_, "2026-09-14")).toBe(it_);
   });
 });

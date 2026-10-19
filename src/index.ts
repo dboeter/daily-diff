@@ -16,6 +16,7 @@ import {
   fetchHotIssues,
   isPrerelease,
   fetchSkillsData,
+  type SkillsData,
   createGitHubIssue,
 } from "./github.ts";
 import { type ProjectActivity, buildProjectDigestPrompt, hasActivity } from "./prompts.ts";
@@ -23,7 +24,7 @@ import { matchProjectNews } from "./agent-news.ts";
 import { buildHighlightsPrompt, type ReportHighlights } from "./prompts-data.ts";
 import {
   callLlm,
-  generateBody,
+  generateOr,
   parseLlmJson,
   saveFile,
   autoGenFooter,
@@ -142,7 +143,7 @@ async function fetchAllData(
   infraFetches: ProjectFetch[];
   /** One list per data report section, in DATA_SECTIONS order. */
   dataFetches: ProjectFetch[][];
-  skillsData: { prs: GitHubItem[]; issues: GitHubItem[] };
+  skillsData: SkillsData;
   webResults: WebFetchResult[];
   trendingData: TrendingData;
   hnData: HnData;
@@ -160,7 +161,7 @@ async function fetchAllData(
       (weekly ? " | weekly: skills, trending, hf, devto, lobsters" : ""),
   );
 
-  const noSkills = { prs: [] as GitHubItem[], issues: [] as GitHubItem[] };
+  const noSkills: SkillsData = { prs: [], issues: [], fetchSuccess: false };
 
   const [
     agentFetches,
@@ -220,17 +221,6 @@ async function fetchAllData(
 // Phase 2: LLM summaries
 // ---------------------------------------------------------------------------
 
-/** Call LLM with logging and error fallback. */
-async function summarize(id: string, prompt: string, failMsg: string, maxTokens?: number): Promise<string> {
-  console.log(`  [${id}] Calling LLM for summary...`);
-  try {
-    return await generateBody(prompt, maxTokens);
-  } catch (err) {
-    console.error(`  [${id}] LLM call failed: ${err}`);
-    return failMsg;
-  }
-}
-
 /** One LLM call over every active project; a fixed notice when none was active. */
 function summarizeProjects(id: SectionKey, activities: ProjectActivity[], dateStr: string): Promise<string> {
   const active = activities.filter(hasActivity);
@@ -238,7 +228,7 @@ function summarizeProjects(id: SectionKey, activities: ProjectActivity[], dateSt
     console.log(`  [${id}] No releases, hot issues or news, skipping LLM call`);
     return Promise.resolve(MSG.projectsNoActivity);
   }
-  return summarize(
+  return generateOr(
     id,
     buildProjectDigestPrompt(active, { subject: CONFIG[id].subject, ...PROJECT_SCOPE }, dateStr),
     MSG.summaryFailed,

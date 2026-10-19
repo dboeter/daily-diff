@@ -9,7 +9,12 @@ import { fetchRssFeed, VENDOR_DESCRIPTION_MAX_CHARS } from "./rss.ts";
 import { fetchBehaviorChangeBundles, fetchSnowflakeReleases } from "./data-snowflake.ts";
 import { fetchBigQueryNotes } from "./data-bigquery.ts";
 import path from "node:path";
-import { loadReportedState, staleOnFirstSight, type ReportedState, type StateItem } from "./report-state.ts";
+import {
+  loadReportedState,
+  markStaleOnFirstSight,
+  type ReportedState,
+  type StateItem,
+} from "./report-state.ts";
 import { collectNewItems, type NewItems } from "./new-items.ts";
 import type { Numbered } from "./summarized-table.ts";
 import { loadDataVerdicts, selectVendorItems, type DataVerdicts, type KeptVendorItem } from "./data-jev.ts";
@@ -163,9 +168,7 @@ export async function fetchVendorData(
         // A bundle first seen at a stage over 30 days old (or with no full date) is recorded without
         // reporting, as Policy Watch does: a first run must not open with months-old bundles.
         items: recentVendorItems(items, dateStr).map((i) =>
-          i.stage !== undefined && staleOnFirstSight({ state, dateStr }, i.id, i.date)
-            ? { ...i, recordOnly: true }
-            : i,
+          i.stage !== undefined ? markStaleOnFirstSight({ state, dateStr }, i, i.date) : i,
         ),
         fetchSuccess,
       };

@@ -309,15 +309,21 @@ export async function ensureLabel(name: string, color: string): Promise<void> {
   }
 }
 
-/** Never throws: a failed fetch is no PRs and no issues. */
-export async function fetchSkillsData(repo: string): Promise<{ prs: GitHubItem[]; issues: GitHubItem[] }> {
+export interface SkillsData {
+  prs: GitHubItem[];
+  issues: GitHubItem[];
+  fetchSuccess: boolean;
+}
+
+/** Never throws: a failed fetch is no PRs and no issues, with `fetchSuccess: false`. */
+export async function fetchSkillsData(repo: string): Promise<SkillsData> {
   try {
     const data = await fetchSkills(repo);
     console.log(`  [claude-code-skills] prs: ${data.prs.length}, issues: ${data.issues.length}`);
-    return data;
+    return { ...data, fetchSuccess: true };
   } catch (err) {
     console.error(`  [claude-code-skills] fetch failed: ${err}`);
-    return { prs: [], issues: [] };
+    return { prs: [], issues: [], fetchSuccess: false };
   }
 }
 

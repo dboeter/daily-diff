@@ -9,6 +9,7 @@ import path from "node:path";
 import { judgeItems, loadItemsFile, type AskJev, type VerdictCache } from "./jev.ts";
 import type { Jurisdiction, PolicyConfig } from "./config.ts";
 import type { PolicyItem } from "./policy.ts";
+import type { Selection } from "./new-items.ts";
 
 /**
  * The four questions every item gets; `state` is `{ title, description }`, plus
@@ -304,16 +305,8 @@ export function loadPolicyVerdicts(file = POLICY_VERDICTS_FILE): PolicyVerdicts 
 // Selection
 // ---------------------------------------------------------------------------
 
-export interface PolicySelection {
-  /** The kept items, most relevant first; items without a verdict after, in feed order. */
-  items: PolicyItem[];
-  /** "keywords" when there was no key or more than half the new calls failed. */
-  rankedBy: "jev" | "keywords";
-  /** null when the verdict file was malformed: it is left as it is. */
-  nextVerdicts: PolicyVerdicts | null;
-  /** `digests/YYYY-MM-DD/policy-ranking.json`: every item, kept or dropped. */
-  rankingFile: string;
-}
+/** Items most relevant first; items without a verdict after, in feed order. Trace: `policy-ranking.json`. */
+export type PolicySelection = Selection<PolicyItem, PolicyVerdicts>;
 
 export async function selectPolicyItems(
   items: PolicyItem[],

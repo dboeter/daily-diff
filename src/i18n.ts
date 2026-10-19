@@ -82,6 +82,9 @@ export const WEB_REPORT = {
   firstCrawl: "First full crawl",
   todayUpdate: "Today's update",
   newContent: (count: number) => `New content: ${count} articles`,
+  sourceCounts: (count: number, total: number) => `${count} new articles (sitemap total: ${total})`,
+  // A failed sitemap fetch would otherwise read "0 new articles (sitemap total: 0)".
+  sourceFailed: "fetch failed",
   anthropicHeading: "Anthropic",
   openaiHeading: "OpenAI",
   // First full crawl only.

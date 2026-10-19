@@ -11,6 +11,7 @@ import { judgeItems, loadItemsFile, type AskJev, type VerdictCache } from "./jev
 import type { VendorItem } from "./data-vendors.ts";
 import { numberRows, type Numbered } from "./summarized-table.ts";
 import { VENDOR_SECTIONS, vendorSection, type VendorSection } from "./config.ts";
+import type { Selection } from "./new-items.ts";
 
 /** `state` is `{ title, description, source }`. */
 const QUESTIONS = {
@@ -189,16 +190,11 @@ export interface KeptVendorItem extends VendorItem {
   aiInData: boolean;
 }
 
-export interface VendorSelection {
-  /** In report order: by section, deprecations first, then by relevance (no verdict: feed order); numbered in that order. */
-  items: Numbered<KeptVendorItem>[];
-  /** "keywords" when there was no key or more than half the new calls failed. */
-  rankedBy: "jev" | "keywords";
-  /** null when the verdict file was malformed: it is left as it is. */
-  nextVerdicts: DataVerdicts | null;
-  /** `digests/YYYY-MM-DD/data-ranking.json`: every item, kept or dropped. */
-  rankingFile: string;
-}
+/**
+ * Items by section, deprecations first, then by relevance (no verdict: feed order);
+ * numbered in that order. Trace: `data-ranking.json`.
+ */
+export type VendorSelection = Selection<Numbered<KeptVendorItem>, DataVerdicts>;
 
 /**
  * Non-deprecations each section gets first. Without floors the cloud block got

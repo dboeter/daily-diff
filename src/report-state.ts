@@ -103,3 +103,12 @@ export function staleOnFirstSight(
     ctx.state?.stages?.[id] === undefined && stageDate < daysBefore(ctx.dateStr, FIRST_SEEN_MAX_AGE_DAYS)
   );
 }
+
+/** `item`, marked `recordOnly` when it is stale on first sight (`staleOnFirstSight`). */
+export function markStaleOnFirstSight<T extends { id: string; recordOnly?: boolean }>(
+  ctx: { state: ReportedState | null; dateStr: string },
+  item: T,
+  stageDate: string,
+): T {
+  return staleOnFirstSight(ctx, item.id, stageDate) ? { ...item, recordOnly: true } : item;
+}

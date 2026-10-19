@@ -11,7 +11,7 @@
  */
 
 import { saveFile } from "./report.ts";
-import { saveItemsFile, type ItemsFile } from "./jev.ts";
+import { saveItemsFile, type ItemsFile, type RankedBy } from "./jev.ts";
 import {
   newItems,
   nextReportedState,
@@ -22,10 +22,13 @@ import {
 
 /** What a report's selection returns (`selectPolicyItems`, `selectVendorItems`). */
 export interface Selection<I, V extends ItemsFile<unknown>> {
+  /** The kept items, in the report's order. */
   items: I[];
-  rankedBy: "jev" | "keywords";
+  /** "keywords" when there was no key or more than half the new calls failed. */
+  rankedBy: RankedBy;
   /** null when the verdict file was malformed: it is left as it is. */
   nextVerdicts: V | null;
+  /** The day's `*-ranking.json` trace: every new item, kept or dropped. */
   rankingFile: string;
 }
 
@@ -35,7 +38,7 @@ export interface NewItems<I, S extends ReportedState, V extends ItemsFile<unknow
   /** False when every source failed, or the pipeline threw. */
   fetchSuccess: boolean;
   /** Absent when nothing was selected (a failed fetch). */
-  rankedBy?: "jev" | "keywords";
+  rankedBy?: RankedBy;
   /** Saved once the report exists: today's kept items marked reported. */
   nextState: S;
   /** `nextState` without today's kept items. Saved on every successful fetch, so a quiet day keeps it. */

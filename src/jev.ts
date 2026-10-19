@@ -171,14 +171,20 @@ export interface VerdictEntry<A> {
 
 export type VerdictCache<A> = ItemsFile<VerdictEntry<A>>;
 
-/** An item's decision with the answers it came from; `decided` is set when they came from the cache. */
+/** Who decided a run's selection: Jev, or the caller's keyword fallback. */
+export type RankedBy = "jev" | "keywords";
+
+/**
+ * An item's decision with the answers it came from. `decided` is set when they came
+ * from the cache: the CST date Jev answered, or "by hand" for a hand-added entry.
+ */
 export type Judged<A, D> = D & { answers: A; model?: string; decided?: string };
 
 export interface Judgment<I, A, D> {
   /** The verdicts this run decides by: saved ones, plus the new ones unless Jev failed too often. */
   verdicts: Map<string, Judged<A, D>>;
   /** "keywords" when there was no key or more than half the new calls failed: the caller's fallback decides. */
-  rankedBy: "jev" | "keywords";
+  rankedBy: RankedBy;
   /** The cache to save: new answers, items marked seen, unseen ones pruned. null when the file was malformed. */
   nextCache: VerdictCache<A> | null;
   /**
@@ -200,6 +206,7 @@ const roundAnswers = <A>(a: A): A =>
  * and throws on an unexpected shape, which counts a new call as failed and a
  * saved entry as missing (it is asked again). When the new calls fail too often,
  * the answers that did arrive are still saved, but this run decides without them.
+ * A decision's numeric `relevance`, when it has one, goes into the trace.
  */
 export async function judgeItems<I extends { id: string; title: string }, A, D extends object>(
   items: I[],
@@ -293,10 +300,10 @@ export async function judgeItems<I extends { id: string; title: string }, A, D e
     nextCache,
     traceFields(item) {
       const v = verdicts.get(item.id) ?? fresh.get(item.id);
-      const relevance = (v as { relevance?: unknown } | undefined)?.relevance;
+      const relevance = v && "relevance" in v && typeof v.relevance === "number" ? v.relevance : undefined;
       return {
-        ...(v === undefined || typeof relevance === "number"
-          ? { relevance: typeof relevance === "number" ? round(relevance) : null }
+        ...(v === undefined || relevance !== undefined
+          ? { relevance: relevance === undefined ? null : round(relevance) }
           : {}),
         ...(v ? roundAnswers(v.answers) : {}),
         decided: v?.decided ?? null,

@@ -33,13 +33,20 @@ import {
   modelSources,
   type DiscussionsData,
 } from "./prompts-data.ts";
-import { generateBody, saveFile, autoGenFooter, LLM_TOKENS_WEB, LLM_TOKENS_LISTING } from "./report.ts";
+import {
+  generateBody,
+  generateOr,
+  saveFile,
+  autoGenFooter,
+  LLM_TOKENS_WEB,
+  LLM_TOKENS_LISTING,
+} from "./report.ts";
 import { saveWebState, type WebFetchResult, type WebState } from "./web.ts";
 import type { TrendingData } from "./trending.ts";
 import { saveClassifyCache, saveMatchState } from "./trending-jev.ts";
 import { saveStarHistory, summaryRows } from "./trending-rank.ts";
 import { buildProjectDigestPrompt, buildSkillsPrompt, hasActivity, type ProjectActivity } from "./prompts.ts";
-import type { GitHubItem } from "./github.ts";
+import type { SkillsData } from "./github.ts";
 import {
   buildProjectReportContent,
   renderTrendingTables,
@@ -120,18 +127,19 @@ export async function buildWebReport(
       const isFirstRun = webResults.some((r) => r.isFirstRun);
       const totalNew = webResults.reduce((sum, r) => sum + r.newItems.length, 0);
 
-      const anthropicNew = webResults.find((r) => r.site === "anthropic")?.newItems.length ?? 0;
-      const anthropicTotal = webResults.find((r) => r.site === "anthropic")?.totalDiscovered ?? 0;
-      const openaiNew = webResults.find((r) => r.site === "openai")?.newItems.length ?? 0;
-      const openaiTotal = webResults.find((r) => r.site === "openai")?.totalDiscovered ?? 0;
+      const counts = (site: WebFetchResult["site"]) => {
+        const r = webResults.find((w) => w.site === site);
+        if (r && !r.fetchSuccess) return WEB_REPORT.sourceFailed;
+        return WEB_REPORT.sourceCounts(r?.newItems.length ?? 0, r?.totalDiscovered ?? 0);
+      };
 
       const mode = isFirstRun ? WEB_REPORT.firstCrawl : WEB_REPORT.todayUpdate;
 
       const meta =
         `> ${mode} | ${WEB_REPORT.newContent(totalNew)} | ${REPORT_META.generated(utcStr)}\n\n` +
         `${REPORT_META.sourcesHeader}\n` +
-        `- Anthropic: [anthropic.com](https://www.anthropic.com) — ${anthropicNew} new articles (sitemap total: ${anthropicTotal})\n` +
-        `- OpenAI: [openai.com](https://openai.com) — ${openaiNew} new articles (sitemap total: ${openaiTotal})`;
+        `- Anthropic: [anthropic.com](https://www.anthropic.com) — ${counts("anthropic")}\n` +
+        `- OpenAI: [openai.com](https://openai.com) — ${counts("openai")}`;
       const webContent = assembleReport("ai-web", dateStr, meta, summary);
 
       saved = { id: "ai-web", content: webContent, issueTitle: WEB_REPORT.issueTitle(dateStr, isFirstRun) };
@@ -156,11 +164,11 @@ export async function buildWebReport(
  * tables, and the Skills section. A failed summaries call leaves the
  * descriptions in the rows; a failed prose call leaves MSG.trendingFailed and
  * the report is still written (unlike Policy Watch, whose report is skipped:
- * here the tables carry the report); a failed Skills call leaves MSG.skillsFailed.
+ * here the tables carry the report); a failed Skills fetch or call leaves MSG.skillsFailed.
  */
 export async function buildTrendingReport(
   trendingData: TrendingData,
-  skills: { prs: GitHubItem[]; issues: GitHubItem[]; repo: string },
+  skills: SkillsData & { repo: string },
   utcStr: string,
   dateStr: string,
 ): Promise<SavedReport | null> {
@@ -169,25 +177,25 @@ export async function buildTrendingReport(
     console.log("  [trending] No ranked data, skipping report.");
     return null;
   }
-  const call = (tag: string, prompt: string, failMsg: string, maxTokens?: number) => {
-    console.log(`  [${tag}] Calling LLM...`);
-    return generateBody(prompt, maxTokens).catch((err) => {
-      console.error(`  [${tag}] LLM call failed: ${err}`);
-      return failMsg;
-    });
-  };
   const rows = summaryRows(report);
   const [summaries, prose, skillsSummary] = await Promise.all([
     rows.length > 0
-      ? call("trending-summaries", buildTrendingSummariesPrompt(rows, dateStr), "", LLM_TOKENS_LISTING)
+      ? generateOr("trending-summaries", buildTrendingSummariesPrompt(rows, dateStr), "", LLM_TOKENS_LISTING)
       : "",
-    call(
+    generateOr(
       "trending",
       buildTrendingProsePrompt(renderTrendingTables(report, new Map()), trendingData, dateStr),
       MSG.trendingFailed,
       LLM_TOKENS_LISTING,
     ),
-    call("claude-code-skills", buildSkillsPrompt(skills.prs, skills.issues, dateStr), MSG.skillsFailed),
+    // A failed fetch has nothing to summarize: the notice, without a call.
+    skills.fetchSuccess
+      ? generateOr(
+          "claude-code-skills",
+          buildSkillsPrompt(skills.prs, skills.issues, dateStr),
+          MSG.skillsFailed,
+        )
+      : MSG.skillsFailed,
   ]);
 
   // Skills ranks the community's most-discussed Claude Code skills — the same
@@ -307,22 +315,19 @@ export async function buildPolicyReport(
   const { items } = policyData;
   const tables = (summaries: Map<number, string>) =>
     renderPolicyTable(items, summaries, renderDeadlines(policyData.deadlines));
-  console.log("  [policy] Calling LLM for policy report...");
   const [summaries, prose] = await Promise.all([
-    generateBody(
+    generateOr(
+      "policy-summaries",
       buildPolicySummariesPrompt(items, dateStr, policyData.readerProfile),
+      "",
       LLM_TOKENS_LISTING,
-    ).catch((err) => {
-      console.error(`  [policy] Summaries failed, showing descriptions: ${err}`);
-      return "";
-    }),
-    generateBody(
+    ),
+    generateOr(
+      "policy",
       buildPolicyProsePrompt(tables(new Map()), dateStr, policyData.readerProfile),
+      null,
       LLM_TOKENS_LISTING,
-    ).catch((err) => {
-      console.error(`  [policy] Report generation failed: ${err}`);
-      return null;
-    }),
+    ),
   ]);
   if (prose === null) return null;
 
@@ -414,20 +419,13 @@ export async function buildDataReport(
       sections.map(async (s) => {
         const active = s.activities.filter(hasActivity);
         if (!active.length) return { ...s, summary: "" };
-        console.log(`  [data] Calling LLM for ${H[s.key]}...`);
         const prompt = buildProjectDigestPrompt(active, { subject: s.subject, ...PROJECT_SCOPE }, dateStr);
-        const summary = await generateBody(prompt, LLM_TOKENS_LISTING).catch((err) => {
-          console.error(`  [data] ${H[s.key]} LLM call failed: ${err}`);
-          return MSG.summaryFailed;
-        });
+        const summary = await generateOr(`data-${s.key}`, prompt, MSG.summaryFailed, LLM_TOKENS_LISTING);
         return { ...s, summary };
       }),
     ),
     items.length > 0
-      ? generateBody(buildDataSummariesPrompt(items, dateStr), LLM_TOKENS_LISTING).catch((err) => {
-          console.error(`  [data] Vendor summaries failed, showing descriptions: ${err}`);
-          return "";
-        })
+      ? generateOr("data-vendor-summaries", buildDataSummariesPrompt(items, dateStr), "", LLM_TOKENS_LISTING)
       : "",
   ]);
   const tables = renderVendorTables(items, parseRowSummaries(rowSummaries));
@@ -460,14 +458,12 @@ export async function buildDataReport(
           news: active.flatMap((a) => a.news.map((n) => `${n.title} (${n.source}; ${a.config.name})`)),
         }
       : undefined;
-  console.log("  [data] Calling LLM for the data report's highlights...");
-  const prose = await generateBody(
+  const prose = await generateOr(
+    "data-highlights",
     buildDataProsePrompt(sectionsMd, dateStr, dataAi),
+    null,
     LLM_TOKENS_LISTING,
-  ).catch((err) => {
-    console.error(`  [data] Highlights failed: ${err}`);
-    return null;
-  });
+  );
   const {
     highlights,
     dataAi: dataAiMd,
