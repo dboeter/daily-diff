@@ -1,6 +1,6 @@
 # Report modules own their LLM calls and their empty value
 
-Status: needs-triage
+Status: resolved
 Type: task
 Blocked by: 01
 

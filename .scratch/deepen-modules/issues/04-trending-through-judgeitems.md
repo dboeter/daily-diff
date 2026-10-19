@@ -1,6 +1,6 @@
 # Trending classification through `judgeItems`
 
-Status: needs-triage
+Status: resolved
 Type: task
 Blocked by: none
 

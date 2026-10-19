@@ -1,6 +1,6 @@
 # Summarized tables: number rows once, at selection
 
-Status: needs-triage
+Status: resolved
 Type: task
 Blocked by: 01
 

@@ -1,6 +1,6 @@
 # One new-items pipeline for Policy Watch and the data report
 
-Status: needs-triage
+Status: resolved
 Type: task
 Blocked by: none
 
