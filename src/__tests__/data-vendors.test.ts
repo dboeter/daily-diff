@@ -39,6 +39,32 @@ describe("parseSnowflakeReleases", () => {
     expect(dcr.description).toMatch(/^Clean Rooms API Version: 18\.9 The following updates/);
   });
 
+  // 2026-10-19: "10.37 Release Notes (with behavior changes)" repeated the 2026_08 bundle row.
+  it("skips a release header that only points at the behavior change bundles", () => {
+    const page = (content: string) =>
+      `<script id="__NEXT_DATA__" type="application/json">${JSON.stringify({
+        props: {
+          pageProps: {
+            releases: [
+              {
+                title: "10.37 Release Notes (with behavior changes): Oct 08, 2026 - Oct 16, 2026",
+                source: "/release-notes/2026/10_37",
+                date: ["2026-10-08", "2026-10-16"],
+                changeType: "Server Release",
+                content,
+              },
+            ],
+          },
+        },
+      })}</script>`;
+    const pointer =
+      "<h2>Behavior change bundles</h2><p>This release contains the following behavior change bundles:</p>";
+    expect(parseSnowflakeReleases(page(pointer))).toEqual([]);
+    expect(
+      parseSnowflakeReleases(page(`${pointer}<h2>New features</h2><p>${"Dynamic tables ".repeat(20)}</p>`)),
+    ).toHaveLength(1);
+  });
+
   it("throws when the JSON or the releases are missing: the markup changed", () => {
     expect(() => parseSnowflakeReleases("<html></html>")).toThrow("no __NEXT_DATA__");
     expect(() =>

@@ -36,20 +36,37 @@ export function parseSnowflakeReleases(html: string): VendorNote[] {
   return releases.flatMap((r) => {
     const date = r.date?.at(-1) ?? "";
     if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || !r.source || !r.title) return [];
+    // Some summaries are an MDX import line (`import UpdateInstructions from '…'`): use the content.
+    const description = vendorText(
+      r.summary && !r.summary.startsWith("import ") ? r.summary : (r.content ?? ""),
+    );
+    if (isBundlePointer(r.title, description)) return [];
     return [
       {
         id: `${r.source}#${r.title}`,
         title: r.title,
         link: `${SITE}${r.source}`,
         date,
-        // Some summaries are an MDX import line (`import UpdateInstructions from '…'`): use the content.
-        description: vendorText(
-          r.summary && !r.summary.startsWith("import ") ? r.summary : (r.content ?? ""),
-        ),
+        description,
         ...(r.changeType ? { categories: [r.changeType] } : {}),
       },
     ];
   });
+}
+
+/**
+ * A server release header whose notes only list its behavior change bundles:
+ * the bundle page is their source, so on 2026-10-19 "10.37 Release Notes (with
+ * behavior changes)" repeated the 2026_08 bundle row. A header with notes of
+ * its own is kept.
+ */
+function isBundlePointer(title: string, description: string): boolean {
+  return (
+    title.includes("(with behavior changes)") &&
+    description
+      .replace(/behavior change bundles?|this release contains the following|read more/gi, "")
+      .replace(/[\s:.…]/g, "") === ""
+  );
 }
 
 const get = async (url: string): Promise<string> => (await fetchOk(url)).text();
