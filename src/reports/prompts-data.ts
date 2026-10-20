@@ -219,7 +219,7 @@ export function buildDataProsePrompt(
           `\`## ${DATA_REPORT.dataAi}\` — 2-4 bullets, at most ~120 words: AI features in data platforms and AI tooling for data work (LLM functions, text-to-SQL, agents, MCP servers), from the flagged vendor items, AI-related releases of the tracked projects and the news listed above. Leave this heading out when nothing is about AI.`,
         ]
       : []),
-    `\`## ${SECTIONS.worthALook}\` — at most 3 bullets: items worth reading in full, with brief reasoning, not one the sections already lead with. Leave this heading out when nothing qualifies.`,
+    `\`## ${SECTIONS.worthALook}\` — at most 3 bullets: items worth reading in full, with brief reasoning, not one the sections already lead with. Each bullet opens with the item's title as a Markdown link, copied from its row in the sections. Leave this heading out when nothing qualifies.`,
   ];
   return `You are the editor of a daily data engineering report for ${DATA_READER}.
 
@@ -236,7 +236,7 @@ ${parts.map((p, i) => `${i + 1}. ${p}`).join("\n")}
 Rules:
 - ${NO_TITLE_RULE}
 - Length: at most ~${dataAi ? 300 : 200} words in total.
-- Do not reproduce the sections, and write no links, URLs or dates: name each item as the sections do; code links them there.
+- Do not reproduce the sections, and write no links, URLs or dates outside ${SECTIONS.worthALook}: name each item as the sections do; code links them there. ${SECTIONS.worthALook}'s links are copied from the sections, never made up.
 - Name each item in at most one of these parts: an item in Highlights is not repeated in ${dataAi ? `${DATA_REPORT.dataAi} or ` : ""}${SECTIONS.worthALook}.
 - Two rows that describe the same change (a release note and its behavior change bundle, a "coming soon" note and its GA note) are one item: mention it once.
 - Base every claim on the sections${dataAi ? " and the lists above" : ""}. Do not invent versions, dates or availability.
@@ -265,7 +265,7 @@ Based on both companies' release cadence and content focus:
 - Patterns across the articles only: no forward-looking claims the articles don't make
 
 ## ${SECTIONS.worthALook}
-1-3 pieces most worth reading in full, with brief reasoning.
+1-3 pieces most worth reading in full, with brief reasoning. Each bullet opens with the article's title as a Markdown link to its URL.
 
 `
     : `Write no other sections: with ${articleCount} new article${articleCount === 1 ? "" : "s"}, a Signals or Worth a Look section would only restate it.
@@ -405,7 +405,54 @@ Return ONLY valid JSON, no markdown fences, no explanation. Format:
 Rules:
 - Use the exact report IDs from the [brackets] above as keys
 - Omit a report's key entirely when nothing in it qualifies, or when it contains only failure messages
+- ai-policy and ai-data list only items already judged relevant to this reader: when either report is present, give it at least 1 highlight
 - At most ${maxPerReport} highlights per report, each at most ${HIGHLIGHT_MAX_CHARS} characters`;
+}
+
+// Policy Watch and the data report keep only items Jev judged relevant, so a
+// published one always has a highlight to give; on 2026-10-20 the model left
+// Policy Watch out anyway (the AI Act's first harmonised standard in the OJ).
+const ALWAYS_HIGHLIGHTED = ["ai-policy", "ai-data"];
+
+/**
+ * The highlights with a fallback for each ALWAYS_HIGHLIGHTED report the model
+ * left out: the first sentence of that report's own Highlights section.
+ */
+export function withFallbackHighlights(
+  highlights: ReportHighlights,
+  reportContents: Record<string, string>,
+): ReportHighlights {
+  const out = { ...highlights };
+  for (const id of ALWAYS_HIGHLIGHTED) {
+    const content = reportContents[id];
+    if (out[id]?.length || !content) continue;
+    const line = firstHighlight(content);
+    if (line) out[id] = [line];
+  }
+  return out;
+}
+
+/** The first sentence under a report's `## Highlights`, as plain text; null when there is none or only a failure notice. */
+export function firstHighlight(md: string): string | null {
+  const lines = md.split("\n");
+  const start = lines.findIndex((l) => l.trim() === `## ${SECTIONS.highlights}`);
+  if (start < 0) return null;
+  for (const raw of lines.slice(start + 1)) {
+    const line = raw.trim();
+    if (line.startsWith("## ") || line === TABLES_MARKER) return null;
+    if (!line) continue;
+    // Failure notices (MSG.summaryFailed…) open with ⚠️.
+    if (line.startsWith("⚠️")) return null;
+    const text = line
+      .replace(/^[-*]\s+/, "")
+      .replace(/\[([^\]]*)\]\([^)]*\)/g, "$1")
+      .replace(/\*\*|__/g, "");
+    const sentence = text.match(/^.*?[.!?](?=\s|$)/)?.[0] ?? text;
+    if (sentence.length <= HIGHLIGHT_MAX_CHARS) return sentence;
+    const cut = sentence.slice(0, HIGHLIGHT_MAX_CHARS - 1);
+    return `${cut.slice(0, cut.lastIndexOf(" ") > 0 ? cut.lastIndexOf(" ") : cut.length).replace(/[,;:]$/, "")}…`;
+  }
+  return null;
 }
 
 /** The discussions report's sources. Dev.to and Lobste.rs are fetched on the weekly run only. */
@@ -541,7 +588,7 @@ ${sections.join("\n\n")}
    - Which stories draw far more comments than points — a sign of a contested topic?${weekly ? "\n   - Practical concerns, tutorials or patterns that recur across the communities" : ""}
 
 ## ${SECTIONS.worthALook}
-2-3 pieces most worth reading in depth, with brief reasoning.
+2-3 pieces most worth reading in depth, with brief reasoning. Each bullet opens with the item's title as a Markdown link, the same link as in its table row.
 
 Style: English, concise and professional, preserve all original links.
 `;
@@ -605,7 +652,7 @@ The 8-15 most important papers, organized by theme: a \`### <theme>\` heading pe
 100-200 words on emerging research directions visible in these submissions.
 
 ## ${SECTIONS.worthALook}
-2-3 papers most worth reading in full, with reasoning.
+2-3 papers most worth reading in full, with reasoning. Each bullet opens with the paper's title as a Markdown link to its ArXiv URL.
 
 Style: English, concise and professional, preserve all ArXiv links.
 `;
@@ -685,7 +732,7 @@ ${hasHf ? hfSection : ""}${hasOpenRouter ? openRouterSection : ""}## ${SECTIONS.
    - Notable quantization or fine-tuning activity
 
 ## ${SECTIONS.worthALook}
-2-3 models most worth trying or studying, with reasoning.
+2-3 models most worth trying or studying, with reasoning. Each bullet opens with the model's name as a Markdown link, the same link as in its table row.
 
 Style: English, concise and professional, preserve all links.
 `;

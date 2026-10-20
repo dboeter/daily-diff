@@ -17,6 +17,8 @@ import {
   buildPolicySummariesPrompt,
   buildPolicyProsePrompt,
   buildDataProsePrompt,
+  withFallbackHighlights,
+  firstHighlight,
 } from "../reports/prompts-data.ts";
 import { TABLES_MARKER, numberRows } from "../reports/summarized-table.ts";
 import { MODELS_REPORT, SECTIONS } from "../core/i18n.ts";
@@ -607,5 +609,38 @@ describe("buildDataProsePrompt", () => {
     expect(prompt).toContain("at most one of these parts");
     expect(prompt).toContain("not one the sections already lead with");
     expect(prompt).toContain("describe the same change");
+  });
+});
+
+describe("withFallbackHighlights", () => {
+  const POLICY =
+    "## Highlights\nThe Commission published the first [harmonised standard](https://x.eu) for the AI Act. Consultations close in November.\n\n<!-- tables -->";
+
+  it("fills a published policy or data report the model left out with its first Highlights sentence", () => {
+    const out = withFallbackHighlights({ "ai-hn": ["H."] }, { "ai-hn": "x", "ai-policy": POLICY });
+    expect(out).toEqual({
+      "ai-hn": ["H."],
+      "ai-policy": ["The Commission published the first harmonised standard for the AI Act."],
+    });
+  });
+
+  it("keeps the model's highlights, and adds none for other or absent reports", () => {
+    const out = withFallbackHighlights({ "ai-policy": ["Mine."] }, { "ai-policy": POLICY, "ai-web": POLICY });
+    expect(out).toEqual({ "ai-policy": ["Mine."] });
+  });
+
+  it("reads a bullet, skips a failure notice and cuts a long sentence at a word", () => {
+    expect(firstHighlight("## Highlights\n\n- **Snowflake** retires X. More.")).toBe("Snowflake retires X.");
+    expect(firstHighlight("## Highlights\n\n⚠️ Summary generation failed.")).toBeNull();
+    expect(firstHighlight("## Signals\nNo highlights here.")).toBeNull();
+    const long = firstHighlight(`## Highlights\n${"word ".repeat(60)}end.`)!;
+    expect(long.length).toBeLessThanOrEqual(140);
+    expect(long.endsWith("word…")).toBe(true);
+  });
+});
+
+describe("buildDataProsePrompt Worth a Look", () => {
+  it("links Worth a Look items from the sections", () => {
+    expect(buildDataProsePrompt("sections", "2026-10-20")).toContain("Markdown link, copied from its row");
   });
 });
