@@ -120,14 +120,20 @@ export const NEW_REPO_DAYS = 14;
 const NEW_LISTING_DAYS = 14;
 
 /**
- * Total stars a GitHub repo needs to appear anywhere in the report (Radar and
- * category tables), and so to be promoted into the daily agents report; both
- * topic searches ask for no fewer. Raised from 25 (new repos) and 100
- * (established) on 2026-10-20: the report should follow established projects,
- * and on 2026-10-19 most rows were few-hundred-star repos with one good week.
- * 0 (a trending scrape miss) is unknown and does not pass.
+ * Total stars an established GitHub repo needs for the category tables, and so
+ * to be promoted into the daily agents report; the `pushed:` search asks for no
+ * fewer. Raised from 100 on 2026-10-20: the report should follow established
+ * projects, and on 2026-10-19 most rows were few-hundred-star repos with one
+ * good week. 0 (a trending scrape miss) is unknown and does not pass.
  */
 export const MIN_STARS = 1000;
+/**
+ * The same bar for a new repo (created in 14 days) on the Radar, lower since it
+ * has had two weeks at most; the `created:` search asks for no fewer. Raised
+ * from 25 on 2026-10-20 (on the 2026-10-06 live check an 8-star repo created
+ * that day ranked above week-old repos).
+ */
+export const NEW_REPO_MIN_STARS = 500;
 /**
  * A relative gain needs at least this many stars a week ago: below it, 8 → 16
  * stars reads as +100%.
@@ -628,7 +634,7 @@ function interleaveGains(rows: GithubRow[]): GithubRow[] {
 
 /** New repos the Radar can list (`buildRadarCandidates`); `radarPool` then applies `onRadar`. */
 export function isRadarRepo(r: GithubRow): boolean {
-  return r.isNew && hasStars(r);
+  return r.isNew && r.totalStars >= NEW_REPO_MIN_STARS;
 }
 
 /**
@@ -641,8 +647,6 @@ export function reachesReport(r: GithubRow, c: Classification | undefined): bool
   return r.isNew ? isRadarRepo(r) && onRadar(c) : isCategoryRepo(r) && inScope(c);
 }
 
-const hasStars = (r: GithubRow): boolean => r.totalStars >= MIN_STARS;
-
 /**
  * The category tables need one: a repo without a description has nothing to
  * summarize, and on 2026-10-19 the model padded emo-xiaoyu/harness-mix's slot
@@ -651,7 +655,7 @@ const hasStars = (r: GithubRow): boolean => r.totalStars >= MIN_STARS;
 const hasDescription = (r: GithubRow): boolean => r.description.trim() !== "";
 
 /** An established repo the category tables can list, before scope. */
-const isCategoryRepo = (r: GithubRow): boolean => !r.isNew && hasStars(r) && hasDescription(r);
+const isCategoryRepo = (r: GithubRow): boolean => !r.isNew && r.totalStars >= MIN_STARS && hasDescription(r);
 
 /**
  * Apply scope, merge, cap and number the rows. New repos are Radar-only: the

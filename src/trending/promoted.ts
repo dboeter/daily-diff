@@ -46,7 +46,7 @@ const DAY_MS = 24 * 60 * 60 * 1000;
 
 /**
  * The category-table rows of a weekly report (`MIN_STARS` or more, like every
- * GitHub row in it). Not the Radar: its GitHub rows are repos created this
+ * row in those tables). Not the Radar: its GitHub rows are repos created this
  * fortnight, and its other rows have no repo. Undefined when the tables are
  * empty (the GitHub fetches failed, OpenRouter or npm answered), so the saved
  * record is kept rather than replaced by nothing.

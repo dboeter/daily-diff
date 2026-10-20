@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { fetchTrendingData, parseTrendingHtml, searchAiRepos } from "../trending/trending.ts";
-import { MIN_STARS } from "../trending/rank.ts";
+import { MIN_STARS, NEW_REPO_MIN_STARS } from "../trending/rank.ts";
 
 const SAMPLE_HTML = `
 <main>
@@ -163,7 +163,7 @@ describe("searchAiRepos", () => {
   it("weekly: new and established queries per topic, paging while pages are full", async () => {
     const full = Array.from({ length: 100 }, (_, i) => `full/r${i}`);
     const urls = mockSearch({
-      [`topic:coding-agent created:>2026-09-23 stars:>=${MIN_STARS} page 1`]: ["n/new"],
+      [`topic:coding-agent created:>2026-09-23 stars:>=${NEW_REPO_MIN_STARS} page 1`]: ["n/new"],
       [`topic:coding-agent pushed:>2026-09-30 stars:>=${MIN_STARS} page 1`]: full,
       [`topic:coding-agent pushed:>2026-09-30 stars:>=${MIN_STARS} page 2`]: ["p/two", "n/new"],
       [`topic:ai-coding pushed:>2026-09-30 stars:>=${MIN_STARS} page 1`]: ["p/two", "c/three"],

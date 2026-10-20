@@ -8,6 +8,7 @@ import {
   loadStarHistory,
   mergeRows,
   MIN_STARS,
+  NEW_REPO_MIN_STARS,
   nextStarHistory,
   radarPool,
   rankGithubRepos,
@@ -330,12 +331,12 @@ describe("buildRadarCandidates", () => {
     });
   });
 
-  it("leaves new GitHub repos under 1,000 stars off the Radar", () => {
+  it("leaves new GitHub repos under 500 stars off the Radar", () => {
     const github = rankGithubRepos(
       [],
       [
-        search("s/small", { createdAt: NEW, stargazersCount: MIN_STARS - 1 }),
-        search("s/big", { createdAt: NEW, stargazersCount: MIN_STARS }),
+        search("s/small", { createdAt: NEW, stargazersCount: NEW_REPO_MIN_STARS - 1 }),
+        search("s/big", { createdAt: NEW, stargazersCount: NEW_REPO_MIN_STARS }),
       ],
       DATE,
     );
@@ -756,7 +757,7 @@ describe("selectTrendingReport", () => {
       [],
       [
         search("g/radar", { stargazersCount: 1050, createdAt: NEW }),
-        // New and in scope, but under 1,000 stars.
+        // New and in scope, but under 500 stars.
         search("g/tiny", { stargazersCount: 10, createdAt: NEW }),
         // New and in scope, but not a standalone tool.
         search("g/plugin", { stargazersCount: 1060, createdAt: NEW }),
@@ -1140,7 +1141,7 @@ describe("composeTrendingReport with star history", () => {
         search("off/topic", { stargazersCount: 7_000, topic: "llm" }),
         // Ten days old: too old to count every star, so it needs the API.
         search("new/agent", { stargazersCount: 1_040, createdAt: "2026-09-25T00:00:00Z" }),
-        // Under MIN_STARS: never on the Radar.
+        // Under NEW_REPO_MIN_STARS: never on the Radar.
         search("tiny/new", { stargazersCount: 10, createdAt: "2026-09-25T00:00:00Z" }),
       ]),
       DATE,

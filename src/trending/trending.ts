@@ -13,6 +13,7 @@ import {
   loadStarHistory,
   NEW_REPO_DAYS,
   MIN_STARS,
+  NEW_REPO_MIN_STARS,
   nextStarHistory,
   lastWeekKeys,
   reportedKeys,
@@ -260,7 +261,7 @@ interface SearchQuery {
 
 /**
  * Weekly only: per topic, repos created since `createdSince` with
- * MIN_STARS (the Radar's new agents) and repos pushed since
+ * NEW_REPO_MIN_STARS (the Radar's new agents) and repos pushed since
  * `pushedSince` with MIN_STARS, every page (the category
  * tables' pool, wide enough that a mid-size repo with a big week is in it).
  * Sorted by total stars, the pushed query alone is an all-time leaderboard: it
@@ -271,7 +272,7 @@ export async function searchAiRepos(pushedSince: string, createdSince: string): 
   // Space-separated: githubGet URL-encodes `q`, and an encoded "+" is a literal plus.
   const queries: SearchQuery[] = SEARCH_TOPICS.flatMap((topic): SearchQuery[] => [
     {
-      q: `topic:${topic} created:>${createdSince} stars:>=${MIN_STARS}`,
+      q: `topic:${topic} created:>${createdSince} stars:>=${NEW_REPO_MIN_STARS}`,
       topic,
       name: `${topic} (new)`,
       perPage: 100,
