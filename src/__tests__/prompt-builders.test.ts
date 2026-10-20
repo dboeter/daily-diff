@@ -637,6 +637,27 @@ describe("withFallbackHighlights", () => {
     expect(long.length).toBeLessThanOrEqual(140);
     expect(long.endsWith("word…")).toBe(true);
   });
+
+  it("does not end the sentence at an abbreviation", () => {
+    expect(firstHighlight("## Highlights\nThe U.S. Senate passed the bill. More.")).toBe(
+      "The U.S. Senate passed the bill.",
+    );
+    expect(
+      firstHighlight("## Highlights\n- See [Art. 50 guidance](https://x.eu) e.g. for providers. More."),
+    ).toBe("See Art. 50 guidance e.g. for providers.");
+  });
+
+  it("handles numbered bullets, sub-headings, wrapped lines, ⚠️ markers and italics", () => {
+    expect(firstHighlight("## Highlights\n1. Snowflake retires X. More.")).toBe("Snowflake retires X.");
+    expect(firstHighlight("## Highlights\n### Sub\n- A.")).toBeNull();
+    expect(firstHighlight("## Highlights\nThe Commission published\na standard. More.\n\nNext.")).toBe(
+      "The Commission published a standard.",
+    );
+    expect(firstHighlight("## Highlights\n- ⚠️ **Snowflake** retires X.\n- B.")).toBe("Snowflake retires X.");
+    expect(firstHighlight("## Highlights\n- *Delta Lake* 4.0 adds `variant` type.")).toBe(
+      "Delta Lake 4.0 adds variant type.",
+    );
+  });
 });
 
 describe("buildDataProsePrompt Worth a Look", () => {

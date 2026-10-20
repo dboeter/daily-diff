@@ -13,6 +13,7 @@ import {
   DATA_REPORT,
   DISCUSSIONS_REPORT,
   MODELS_REPORT,
+  MSG,
   SECTIONS,
   WEB_REPORT,
 } from "../core/i18n.ts";
@@ -432,27 +433,70 @@ export function withFallbackHighlights(
   return out;
 }
 
-/** The first sentence under a report's `## Highlights`, as plain text; null when there is none or only a failure notice. */
+// A period after one of these, or inside a dotted abbreviation (U.S., E.U.), ends no
+// sentence: Policy Watch prose cites "Art. 50" and "the U.S. Senate".
+const ABBREVIATIONS = new Set([
+  "art",
+  "no",
+  "nr",
+  "e.g",
+  "i.e",
+  "vs",
+  "etc",
+  "inc",
+  "cf",
+  "approx",
+  "dr",
+  "mr",
+  "ms",
+  "st",
+]);
+const FAILURE_NOTICES = new Set<string>(Object.values(MSG));
+
+/**
+ * The first sentence under a report's `## Highlights`, as plain text (the
+ * first bullet or paragraph, hard-wrapped lines joined, Markdown and ⚠️
+ * removed); null when there is none or only a failure notice.
+ */
 export function firstHighlight(md: string): string | null {
   const lines = md.split("\n");
   const start = lines.findIndex((l) => l.trim() === `## ${SECTIONS.highlights}`);
   if (start < 0) return null;
+  const block: string[] = [];
   for (const raw of lines.slice(start + 1)) {
     const line = raw.trim();
-    if (line.startsWith("## ") || line === TABLES_MARKER) return null;
-    if (!line) continue;
-    // Failure notices (MSG.summaryFailed…) open with ⚠️.
-    if (line.startsWith("⚠️")) return null;
-    const text = line
-      .replace(/^[-*]\s+/, "")
-      .replace(/\[([^\]]*)\]\([^)]*\)/g, "$1")
-      .replace(/\*\*|__/g, "");
-    const sentence = text.match(/^.*?[.!?](?=\s|$)/)?.[0] ?? text;
-    if (sentence.length <= HIGHLIGHT_MAX_CHARS) return sentence;
-    const cut = sentence.slice(0, HIGHLIGHT_MAX_CHARS - 1);
-    return `${cut.slice(0, cut.lastIndexOf(" ") > 0 ? cut.lastIndexOf(" ") : cut.length).replace(/[,;:]$/, "")}…`;
+    // The saved report has the tables spliced in, each opening with a heading.
+    if (line.startsWith("#") || line === TABLES_MARKER) break;
+    if (!line) {
+      if (block.length) break;
+      continue;
+    }
+    if (block.length && /^([-*]|\d+[.)])\s/.test(line)) break;
+    block.push(line);
   }
-  return null;
+  const text = block
+    .join(" ")
+    .replace(/^([-*]|\d+[.)])\s+/, "")
+    .replace(/\[([^\]]*)\]\((?:[^()]|\([^)]*\))*\)/g, "$1")
+    .replace(/\*\*|__|`/g, "")
+    .replace(/(^|[\s(])[*_]([^*_]+)[*_](?=[\s.,;:!?)]|$)/g, "$1$2")
+    .trim();
+  if (!text || FAILURE_NOTICES.has(text)) return null;
+  const plain = text.replace(/⚠️\s*/g, "").trim();
+  let end = plain.length;
+  for (const m of plain.matchAll(/[.!?](?=\s|$)/g)) {
+    const word = plain.slice(0, m.index).split(/\s/).pop() ?? "";
+    if (m[0] === "." && (/\.[A-Za-z]$/.test(word) || ABBREVIATIONS.has(word.toLowerCase()))) continue;
+    end = m.index + 1;
+    break;
+  }
+  const sentence = plain.slice(0, end);
+  if (sentence.length <= HIGHLIGHT_MAX_CHARS) return sentence;
+  const cut = Array.from(sentence)
+    .slice(0, HIGHLIGHT_MAX_CHARS - 1)
+    .join("");
+  const space = cut.lastIndexOf(" ");
+  return `${(space > 0 ? cut.slice(0, space) : cut).replace(/[,;:]$/, "")}…`;
 }
 
 /** The discussions report's sources. Dev.to and Lobste.rs are fetched on the weekly run only. */
@@ -732,7 +776,7 @@ ${hasHf ? hfSection : ""}${hasOpenRouter ? openRouterSection : ""}## ${SECTIONS.
    - Notable quantization or fine-tuning activity
 
 ## ${SECTIONS.worthALook}
-2-3 models most worth trying or studying, with reasoning. Each bullet opens with the model's name as a Markdown link, the same link as in its table row.
+2-3 models most worth trying or studying, with reasoning. Each bullet opens with the model's name as a Markdown link, the same link as elsewhere in the report.
 
 Style: English, concise and professional, preserve all links.
 `;

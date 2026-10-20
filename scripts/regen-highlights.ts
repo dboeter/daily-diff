@@ -13,7 +13,11 @@
 import fs from "node:fs";
 import path from "node:path";
 import { callLlm, parseLlmJson } from "../src/core/report.ts";
-import { buildHighlightsPrompt, type ReportHighlights } from "../src/reports/prompts-data.ts";
+import {
+  buildHighlightsPrompt,
+  withFallbackHighlights,
+  type ReportHighlights,
+} from "../src/reports/prompts-data.ts";
 import { buildMessage } from "../src/cli/notify.ts";
 import { REPORT_LABELS } from "../src/core/i18n.ts";
 
@@ -58,6 +62,7 @@ async function main() {
   } catch (err) {
     console.error(`  [highlights] parse failed: ${err}`);
   }
+  highlights = withFallbackHighlights(highlights, reports);
 
   const outPath = path.join(digestsDir, dateStr, "highlights.json");
   fs.writeFileSync(outPath, JSON.stringify(highlights, null, 2) + "\n");
