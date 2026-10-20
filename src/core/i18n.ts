@@ -173,6 +173,7 @@ export const DATA_REPORT = {
   },
   /** Written by the prose call, between the sections and Worth a Look; not a DataSectionKey. */
   dataAi: "Data × AI",
+  vendorCount: (count: number) => `Vendor items: ${count}`,
   vendorTableHeader: "| Date | Source | Item | Summary |\n| :--- | :--- | :--- | :--- |",
   /** Marks a deprecation, retirement, breaking or behavior change in the Item cell. */
   deprecationMarker: "⚠️",

@@ -64,14 +64,18 @@ function buildModelUsageData(openrouter: OpenRouterData): string {
  * The rows were selected and ranked in code; parseRowSummaries reads the reply.
  */
 export function buildTrendingSummariesPrompt(rows: ReturnType<typeof summaryRows>, dateStr: string): string {
-  const list = rowList(rows, (r) => `${r.name} — ${r.description || "(no description)"} — ${r.facts}`);
-  return `You are a technical analyst covering AI coding tools, agents and agent harnesses. Below are ${rows.length} numbered projects and tools from the agent & AI coding trends report for the week ending ${dateStr}, each with its description and the facts measured this week.
+  const list = rowList(
+    rows,
+    (r) => `${r.name} — ${r.description || "(no description)"}${r.facts ? ` — ${r.facts}` : ""}`,
+  );
+  return `You are a technical analyst covering AI coding tools, agents and agent harnesses. Below are ${rows.length} numbered projects and tools from the agent & AI coding trends report for the week ending ${dateStr}, each with its description and where it was found.
 
 ${list}
 
-${summaryLine("2 sentences")} — what it is and why it is worth attention this week.
-- Ground every sentence only in the given description and facts. Do not invent features, users, releases or numbers.
-- If the description is empty, say only what the name and the facts show.
+${summaryLine("2 sentences")} — what it is and why it matters to developers.
+- Ground every sentence only in the given description. Do not invent features, users, releases or numbers.
+- No star, gain, download, token or rank figures: the table shows them next to the summary.
+- If the description is empty, say only what the name shows, in one sentence.
 ${summaryOutputRule(rows.length)}
 - English.
 `;
@@ -83,7 +87,7 @@ ${summaryOutputRule(rows.length)}
  * inserts the tables.
  */
 export function buildTrendingProsePrompt(tablesMd: string, data: TrendingData, dateStr: string): string {
-  return `You are a technical analyst covering AI coding tools, agents and agent harnesses. Below are this week's tables for the agent & AI coding trends report, week ending ${dateStr}. They were selected and ranked in code from GitHub Trending (weekly), GitHub topic search, OpenRouter app rankings and npm downloads; the Summary column holds the project descriptions.
+  return `You are a technical analyst covering AI coding tools, agents and agent harnesses. Below are this week's tables for the agent & AI coding trends report, week ending ${dateStr}. They were selected and ranked in code from GitHub Trending (weekly), GitHub topic search, OpenRouter app rankings and npm downloads; the Summary column holds the project descriptions. 🆕 in the Signal column means created or listed in the last 14 days; 🔥 before a name means the item was also in last week's report.
 
 ${tablesMd || "(No projects were selected this week.)"}
 
@@ -215,7 +219,7 @@ export function buildDataProsePrompt(
           `\`## ${DATA_REPORT.dataAi}\` — 2-4 bullets, at most ~120 words: AI features in data platforms and AI tooling for data work (LLM functions, text-to-SQL, agents, MCP servers), from the flagged vendor items, AI-related releases of the tracked projects and the news listed above. Leave this heading out when nothing is about AI.`,
         ]
       : []),
-    `\`## ${SECTIONS.worthALook}\` — at most 3 bullets: items worth reading in full, with brief reasoning. Leave this heading out when nothing qualifies.`,
+    `\`## ${SECTIONS.worthALook}\` — at most 3 bullets: items worth reading in full, with brief reasoning, not one the sections already lead with. Leave this heading out when nothing qualifies.`,
   ];
   return `You are the editor of a daily data engineering report for ${DATA_READER}.
 
@@ -233,13 +237,40 @@ Rules:
 - ${NO_TITLE_RULE}
 - Length: at most ~${dataAi ? 300 : 200} words in total.
 - Do not reproduce the sections, and write no links, URLs or dates: name each item as the sections do; code links them there.
+- Name each item in at most one of these parts: an item in Highlights is not repeated in ${dataAi ? `${DATA_REPORT.dataAi} or ` : ""}${SECTIONS.worthALook}.
+- Two rows that describe the same change (a release note and its behavior change bundle, a "coming soon" note and its GA note) are one item: mention it once.
 - Base every claim on the sections${dataAi ? " and the lists above" : ""}. Do not invent versions, dates or availability.
 - English, professional and concise.
 `;
 }
 
+/**
+ * Below this many new articles (first crawls aside) the web report is Highlights
+ * and the lab sections only: on 2026-10-19 one article was restated in all four
+ * sections, ~600 words, and Signals speculated past it.
+ */
+const WEB_FULL_LAYOUT_MIN = 3;
+
 export function buildWebReportPrompt(results: WebFetchResult[], dateStr: string): string {
   const isAnyFirstRun = results.some((r) => r.isFirstRun);
+  const articleCount = results.reduce((n, r) => n + r.newItems.length, 0);
+  const full = isAnyFirstRun || articleCount >= WEB_FULL_LAYOUT_MIN;
+  const closingSections = full
+    ? `## ${SECTIONS.signals}
+Based on both companies' release cadence and content focus:
+- Each company's recent technical priorities (model capabilities / safety / productization / ecosystem)
+- Competitive dynamics: who is setting the agenda, who is following
+- Impact on developers and enterprise users, as the articles state it
+- Hidden signals in titles, phrasing and timing: new terms, dense releases in one category, policy and safety developments
+- Patterns across the articles only: no forward-looking claims the articles don't make
+
+## ${SECTIONS.worthALook}
+1-3 pieces most worth reading in full, with brief reasoning.
+
+`
+    : `Write no other sections: with ${articleCount} new article${articleCount === 1 ? "" : "s"}, a Signals or Worth a Look section would only restate it.
+
+`;
 
   const siteSections = results
     .map(({ siteName, isFirstRun, newItems, totalDiscovered }) => {
@@ -294,7 +325,7 @@ ${siteSections}
 Write the report in English with these sections. ${NO_TITLE_RULE}
 
 ## ${SECTIONS.highlights}
-3-5 sentences on the most important new releases or developments.
+${full ? "3-5 sentences" : "1-2 sentences"} on the most important new releases or developments.
 
 ## ${WEB_REPORT.anthropicHeading}
 Important content grouped by category (news / research / engineering / learn, etc.) under \`###\` subheadings:
@@ -307,17 +338,7 @@ Omit this section when Anthropic has no new content.
 Same structure, grouped by research / release / company / safety. Omit this section when OpenAI has no new content.
 - ⚠️ Note: OpenAI data is metadata-only (titles derived from URL slugs, no article text). Only list URLs and categories objectively. Do NOT speculate on title meanings or fabricate content summaries. If information is insufficient for analysis, state the data limitation clearly.
 
-## ${SECTIONS.signals}
-Based on both companies' release cadence and content focus:
-- Each company's recent technical priorities (model capabilities / safety / productization / ecosystem)
-- Competitive dynamics: who is setting the agenda, who is following
-- Potential impact on developers and enterprise users
-- Hidden signals in titles, phrasing and timing: new terms, dense releases in one category, policy and safety developments
-
-## ${SECTIONS.worthALook}
-1-3 pieces most worth reading in full, with brief reasoning.
-
-${isAnyFirstRun ? `## ${WEB_REPORT.landscapeHeading}\nFirst full crawl only: summarize the content category distribution for both companies and describe their content strategy style (academic-oriented vs product-oriented vs user stories, etc.)\n\n` : ""}Style: English, professional and detailed, suited for AI researchers, product managers, and technical decision-makers. Every item must include official links.
+${closingSections}${isAnyFirstRun ? `## ${WEB_REPORT.landscapeHeading}\nFirst full crawl only: summarize the content category distribution for both companies and describe their content strategy style (academic-oriented vs product-oriented vs user stories, etc.)\n\n` : ""}Style: English, professional and detailed, suited for AI researchers, product managers, and technical decision-makers. Every item must include official links.
 `;
 }
 
@@ -428,7 +449,8 @@ export function buildDiscussionsPrompt(data: DiscussionsData, dateStr: string): 
               `${i + 1}. **${s.title}**\n` +
               `   Link: ${s.url}\n` +
               `   Discussion: ${s.hnUrl}\n` +
-              `   HN Rank: ${s.hnRank ?? i + 1} | Score: ${s.points} | Comments: ${s.comments} | Author: ${s.author} | Time: ${s.createdAt.slice(0, 16)}`,
+              `   HN Rank: ${s.hnRank ?? i + 1} | Score: ${s.points} | Comments: ${s.comments} | Author: ${s.author} | Time: ${s.createdAt.slice(0, 16)}` +
+              (s.description ? `\n   Page description: ${s.description}` : ""),
           )
           .join("\n\n"),
     );
@@ -440,7 +462,7 @@ Organized by category: a \`### <category>\` heading per category, each followed 
 
    - **Title**: title as a Markdown link to the original article, followed by a " · [HN](discussion-url)" link to the HN thread
    - **Score / Comments**: copy the numbers from the input verbatim
-   - **Summary**: 2 sentences — what the item is and why it matters to developers. Do not describe the comments: you have not read them. If the title does not say what the item is, do not guess
+   - **Summary**: with a page description, 2 sentences from it — what the item is and why it matters to developers; without one, 1 sentence saying only what the title and the link's domain say. You have read neither the article nor the comments: describe no discussion, and no claim, method or result the title and description do not state
    - Select the 2-5 most representative items per category; omit a category if it is empty
 
    Categories:
@@ -498,7 +520,7 @@ The 3-8 most notable stories as a **Markdown table**:
   }
 
   const when = weekly ? "today on Hacker News and this week on Dev.to and Lobste.rs" : "today on Hacker News";
-  return `You are an AI industry news analyst. The following are AI-related posts from developer communities as of ${dateStr}. You have only each item's title, link, counts and (for Dev.to) description — not the article and not the comment thread:
+  return `You are an AI industry news analyst. The following are AI-related posts from developer communities as of ${dateStr}. You have only each item's title, link, counts and, where given, a description (the linked page's own for HN, the author's for Dev.to) — not the article and not the comment thread:
 
 ---
 

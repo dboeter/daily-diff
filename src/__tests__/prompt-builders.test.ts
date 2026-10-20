@@ -3,7 +3,7 @@ import {
   buildProjectDigestPrompt,
   buildSkillsPrompt,
   hasActivity,
-  previewNotes,
+  releaseNotes,
   type ProjectActivity,
 } from "../reports/prompts.ts";
 import {
@@ -16,6 +16,7 @@ import {
   buildModelsPrompt,
   buildPolicySummariesPrompt,
   buildPolicyProsePrompt,
+  buildDataProsePrompt,
 } from "../reports/prompts-data.ts";
 import { TABLES_MARKER, numberRows } from "../reports/summarized-table.ts";
 import { MODELS_REPORT, SECTIONS } from "../core/i18n.ts";
@@ -136,8 +137,25 @@ describe("buildProjectDigestPrompt", () => {
     expect(prompt).toContain("New features New plugin manager");
     expect(prompt).not.toContain("<h3");
     expect(prompt).not.toContain("(#en-");
-    expect(previewNotes(preview.body).length).toBeGreaterThan(400);
+    expect(releaseNotes(preview.body, 1500).length).toBeGreaterThan(400);
     expect(prompt).toContain("skip routine alpha/rc bumps");
+  });
+
+  it("leaves fenced code blocks (install commands) out of the release notes", () => {
+    const body =
+      "### Installation\n```bash\nbrew install org/tap/tool\n```\n```bash\n" +
+      "x".repeat(400) +
+      "\n```\n## What's new\n- Slash commands run safely";
+    const prompt = buildProjectDigestPrompt([makeActivity({ releases: [{ ...release, body }] })], scope, "d");
+    expect(prompt).not.toContain("brew install");
+    expect(prompt).toContain("Slash commands run safely");
+    expect(releaseNotes("```sh\nnpm i tool\n```", 400)).toBe("");
+    expect(releaseNotes("~~~\ngo install tool\n~~~\nFixes", 400)).toBe("Fixes");
+  });
+
+  it("forbids stating absences in the overview too", () => {
+    const prompt = buildProjectDigestPrompt([makeActivity({ releases: [release] })], scope, "d");
+    expect(prompt).toContain("Never state what did not happen");
   });
 
   it("caps the releases shown and notes the total", () => {
@@ -214,17 +232,21 @@ describe("buildTrendingSummariesPrompt", () => {
       n: 1,
       name: "nano-coder",
       description: "A 6MB coding agent",
-      facts: "Source: npm | Signal: 🆕 12,560/week, 4.2x",
+      facts: "Source: npm | New: created or listed in the last 14 days",
     },
-    { n: 2, name: "org/repo", description: "", facts: "Stars: 86,392 (+1,851)" },
+    { n: 2, name: "org/repo", description: "", facts: "" },
   ];
 
   it("lists each row with its number, description and facts", () => {
     const result = buildTrendingSummariesPrompt(rows, "2026-10-05");
-    expect(result).toContain(
-      "1. nano-coder — A 6MB coding agent — Source: npm | Signal: 🆕 12,560/week, 4.2x",
+    expect(result).toContain("1. nano-coder — A 6MB coding agent — Source: npm | New: created or listed");
+    expect(result).toContain("2. org/repo — (no description)\n");
+  });
+
+  it("forbids the figures the table already shows", () => {
+    expect(buildTrendingSummariesPrompt(rows, "2026-10-05")).toContain(
+      "No star, gain, download, token or rank figures",
     );
-    expect(result).toContain("2. org/repo — (no description) — Stars: 86,392 (+1,851)");
   });
 
   it("asks for one `N: <2 sentences>` line per row and nothing else", () => {
@@ -366,6 +388,36 @@ describe("buildWebReportPrompt", () => {
     expect(result).toContain("Incremental update");
     expect(result).not.toContain("Content Landscape Overview");
   });
+
+  // 2026-10-19: one article became ~600 words restated across four sections.
+  it("asks for Highlights and the lab section only with 1-2 new articles", () => {
+    const article = (n: number) => ({
+      url: `https://anthropic.com/news/a${n}`,
+      title: `A${n}`,
+      lastmod: "2026-10-19",
+      content: "Text",
+      site: "anthropic" as const,
+      category: "news",
+    });
+    const site = (count: number): WebFetchResult[] => [
+      {
+        site: "anthropic",
+        siteName: "Anthropic",
+        isFirstRun: false,
+        newItems: Array.from({ length: count }, (_, i) => article(i)),
+        totalDiscovered: 100,
+        fetchSuccess: true,
+      },
+    ];
+    const short = buildWebReportPrompt(site(1), "2026-10-19");
+    expect(short).toContain(`## ${SECTIONS.highlights}\n`);
+    expect(short).toContain("## Anthropic\n");
+    expect(short).not.toContain(`## ${SECTIONS.signals}\n`);
+    expect(short).not.toContain(`## ${SECTIONS.worthALook}\n`);
+    const full = buildWebReportPrompt(site(3), "2026-10-19");
+    expect(full).toContain(`## ${SECTIONS.signals}\n`);
+    expect(full).toContain("no forward-looking claims");
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -467,8 +519,25 @@ describe("buildDiscussionsPrompt", () => {
   it("does not ask for comment-thread content the model never sees", () => {
     const result = hnOnlyPrompt({ stories: [], fetchSuccess: true }, "2026-10-06");
     expect(result).toContain("not the article and not the comment thread");
-    expect(result).toContain("Do not describe the comments");
+    expect(result).toContain("describe no discussion");
     expect(result).not.toMatch(/typical reaction|last cycle/);
+  });
+
+  it("passes a story's page description, and limits a story without one to its title", () => {
+    const story = {
+      id: "1",
+      title: "Neural networks are clean",
+      url: "https://goodfire.ai/clean",
+      hnUrl: "https://news.ycombinator.com/item?id=1",
+      points: 300,
+      comments: 80,
+      author: "a",
+      createdAt: "2026-10-19T00:00:00Z",
+      description: "Sparse features generalize.",
+    };
+    const result = hnOnlyPrompt({ stories: [story], fetchSuccess: true }, "2026-10-19");
+    expect(result).toContain("   Page description: Sparse features generalize.");
+    expect(result).toContain("without one, 1 sentence saying only what the title and the link's domain say");
   });
 });
 
@@ -477,13 +546,21 @@ describe("buildDiscussionsPrompt", () => {
 // ---------------------------------------------------------------------------
 
 describe("listing report layout", () => {
+  // Three articles: with fewer the web prompt leaves out Signals and Worth a Look.
   const web: WebFetchResult[] = [
     {
       site: "openai",
       siteName: "OpenAI",
       isFirstRun: false,
-      newItems: [],
-      totalDiscovered: 1,
+      newItems: [1, 2, 3].map((n) => ({
+        url: `https://openai.com/index/p${n}`,
+        title: `P${n}`,
+        lastmod: "2026-10-12",
+        content: "",
+        site: "openai" as const,
+        category: "release",
+      })),
+      totalDiscovered: 3,
       fetchSuccess: true,
     },
   ];
@@ -518,5 +595,17 @@ describe("listing report layout", () => {
     const p = prompts[id]!;
     expect(p).toContain("Do not write a title");
     expect(p).not.toMatch(/Today's|This Week's|^\d\. \*\*/m);
+  });
+});
+
+describe("buildDataProsePrompt", () => {
+  it("names each item in at most one prose section, and a same-change pair once", () => {
+    const prompt = buildDataProsePrompt("## Databricks\n\n(table)", "2026-10-19", {
+      vendorTitles: ["X"],
+      news: [],
+    });
+    expect(prompt).toContain("at most one of these parts");
+    expect(prompt).toContain("not one the sections already lead with");
+    expect(prompt).toContain("describe the same change");
   });
 });

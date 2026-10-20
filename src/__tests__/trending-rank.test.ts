@@ -4,8 +4,11 @@ import os from "node:os";
 import path from "node:path";
 import {
   buildRadarCandidates,
+  lastWeekKeys,
   loadStarHistory,
   mergeRows,
+  MIN_STARS,
+  NEW_REPO_MIN_STARS,
   nextStarHistory,
   radarPool,
   rankGithubRepos,
@@ -56,7 +59,7 @@ function trending(fullName: string, o: Partial<TrendingRepo> = {}): TrendingRepo
 function search(fullName: string, o: Partial<SearchRepo> = {}): SearchRepo {
   return {
     fullName,
-    description: null,
+    description: "A coding tool",
     language: null,
     stargazersCount: 0,
     pushedAt: "2026-10-04T00:00:00Z",
@@ -103,6 +106,8 @@ const npmData = (rising: NpmPackage[], top: NpmPackage[] = []): NpmData => ({
   fetchSuccess: true,
 });
 const NO_NPM = npmData([]);
+/** `count` OpenRouter apps listed this week (🆕), ids 0…count-1. */
+const newApps = (count: number) => Array.from({ length: count }, (_, i) => app(i, { createdAt: NEW }));
 const IN_SCOPE: Classification = { category: null, standalone: null };
 
 /** Classify every candidate in scope. */
@@ -266,7 +271,7 @@ describe("rankGithubRepos", () => {
 describe("buildRadarCandidates", () => {
   const signal = (rows: RadarRow[], key: string) => rows.find((r) => r.keys[0] === key)!.signals[0];
 
-  it("formats OpenRouter signals and flags new apps", () => {
+  it("formats OpenRouter signals and flags apps listed in the last 14 days as new", () => {
     const rows = buildRadarCandidates(
       [
         app(1, { weekRank: 12, monthRank: null, weekTokens: 2_640_000_000_000, growthPercent: 776 }),
@@ -279,20 +284,20 @@ describe("buildRadarCandidates", () => {
       [],
       DATE,
     );
-    expect(signal(rows, "openrouter:1")).toBe("🆕 week #12 / month —, 2.64T tokens/week · 📈 +776%");
+    // Ranked this week but not this month is Rising, not New.
+    expect(signal(rows, "openrouter:1")).toBe("week #12 / month —, 2.64T tokens/week · 📈 +776%");
     expect(signal(rows, "openrouter:2")).toBe("week #3 / month #5 · 📈 -12%");
     // Listed 14 days ago: new; 15 days: not.
     expect(signal(rows, "openrouter:3")).toBe("🆕 week #10 / month #20");
     expect(signal(rows, "openrouter:4")).toBe("week #10 / month #20");
-    // Unranked both periods is not "ranked this week, absent from the month list".
     expect(signal(rows, "openrouter:5")).toBe("week — / month —");
-    expect(rows.find((r) => r.keys[0] === "openrouter:1")).toMatchObject({
+    expect(rows.find((r) => r.keys[0] === "openrouter:3")).toMatchObject({
       sources: ["OpenRouter"],
       isNew: true,
     });
   });
 
-  it("formats npm signals and flags momentum >= 3x as new", () => {
+  it("formats npm signals and never flags a package as new, whatever its momentum", () => {
     const rows = buildRadarCandidates(
       [],
       npmData(
@@ -302,7 +307,7 @@ describe("buildRadarCandidates", () => {
       [],
       DATE,
     );
-    expect(signal(rows, "npm:at-three")).toBe("🆕 700/week, 3.0x");
+    expect(signal(rows, "npm:at-three")).toBe("700/week, 3.0x");
     expect(signal(rows, "npm:steady")).toBe("12,560/week, 0.5x");
     expect(rows.find((r) => r.keys[0] === "npm:steady")).toMatchObject({ sources: ["npm"], isNew: false });
   });
@@ -326,12 +331,12 @@ describe("buildRadarCandidates", () => {
     });
   });
 
-  it("leaves new GitHub repos under 25 stars off the Radar", () => {
+  it("leaves new GitHub repos under 500 stars off the Radar", () => {
     const github = rankGithubRepos(
       [],
       [
-        search("s/small", { createdAt: NEW, stargazersCount: 24 }),
-        search("s/big", { createdAt: NEW, stargazersCount: 25 }),
+        search("s/small", { createdAt: NEW, stargazersCount: NEW_REPO_MIN_STARS - 1 }),
+        search("s/big", { createdAt: NEW, stargazersCount: NEW_REPO_MIN_STARS }),
       ],
       DATE,
     );
@@ -339,21 +344,21 @@ describe("buildRadarCandidates", () => {
   });
 
   it("orders 🆕 first, then by relative position, ties OpenRouter > npm > GitHub", () => {
-    const github = rankGithubRepos([], [search("g/new", { createdAt: NEW, stargazersCount: 30 })], DATE);
+    const github = rankGithubRepos([], [search("g/new", { createdAt: NEW, stargazersCount: 1030 })], DATE);
     const rows = buildRadarCandidates(
-      [app(1), app(2)],
-      npmData([pkg("p-new", { weekly: 1000, monthly: 1000 })], [pkg("p1"), pkg("p2"), pkg("p3")]),
+      [app(3, { createdAt: NEW }), app(1), app(2)],
+      npmData([pkg("p1")], [pkg("p2"), pkg("p3")]),
       github,
       DATE,
     );
     expect(rows.map((r) => r.keys[0])).toEqual([
-      "npm:p-new", // 🆕, position 0, npm before GitHub
+      "openrouter:3", // 🆕, position 0, OpenRouter before GitHub
       "github:g/new", // 🆕, position 0
-      "openrouter:1", // 0
-      "npm:p1", // 0.25
-      "openrouter:2", // 0.5, OpenRouter before npm
-      "npm:p2", // 0.5
-      "npm:p3", // 0.75
+      "npm:p1", // 0
+      "openrouter:1", // 0.33, OpenRouter before npm
+      "npm:p2", // 0.33
+      "openrouter:2", // 0.67
+      "npm:p3", // 0.67
     ]);
   });
 });
@@ -366,7 +371,7 @@ describe("urlMerge", () => {
   it("merges an npm package with the GitHub repo its repository URL names", () => {
     const github = rankGithubRepos(
       [],
-      [search("Kilo-Org/kilocode", { createdAt: NEW, stargazersCount: 30 })],
+      [search("Kilo-Org/kilocode", { createdAt: NEW, stargazersCount: 1030 })],
       DATE,
     );
     const rows = urlMerge(
@@ -383,7 +388,7 @@ describe("urlMerge", () => {
       keys: ["github:Kilo-Org/kilocode", "npm:@kilocode/cli"],
       name: "Kilo-Org/kilocode",
       sources: ["GitHub", "npm"],
-      signals: ["🆕 30 (+30)", "1,000/week, 1.1x"],
+      signals: ["🆕 1,030 (+1,030)", "1,000/week, 1.1x"],
       isNew: true,
     });
   });
@@ -429,7 +434,7 @@ describe("urlMerge", () => {
   it("merges transitively, at the earliest member's position, joining sources and signals", () => {
     const github = rankGithubRepos(
       [],
-      [search("kilo-org/kilocode", { createdAt: NEW, stargazersCount: 30 })],
+      [search("kilo-org/kilocode", { createdAt: NEW, stargazersCount: 1030, description: null })],
       DATE,
     );
     const rows = urlMerge(
@@ -542,6 +547,43 @@ describe("selectTrendingReport", () => {
     expect(report.radar[0]!.keys).toEqual(["npm:p0"]);
   });
 
+  // 2026-10-19: emo-xiaoyu/harness-mix, no description, was summarized as "a TypeScript project".
+  it("keeps a repo without a description out of the category tables", () => {
+    const github = rankGithubRepos(
+      [
+        trending("a/empty", { periodStars: 90, description: " " }),
+        trending("a/tool", { periodStars: 80, description: "A coding agent" }),
+      ],
+      [search("a/empty", { stargazersCount: MIN_STARS }), search("a/tool", { stargazersCount: MIN_STARS })],
+      DATE,
+    );
+    const inScope = { category: "coding_agent", standalone: 0.9 } as const;
+    const report = selectTrendingReport(
+      github,
+      [],
+      new Map<string, Classification>([
+        ["github:a/empty", inScope],
+        ["github:a/tool", inScope],
+      ]),
+      "jev",
+    );
+    expect(report.categories.flatMap((g) => g.rows.map((r) => r.fullName))).toEqual(["a/tool"]);
+  });
+
+  it("keeps an established repo under 1,000 stars out of the category tables", () => {
+    const github = rankGithubRepos(
+      [],
+      [
+        search("a/small", { stargazersCount: MIN_STARS - 1 }),
+        search("a/big", { stargazersCount: MIN_STARS }),
+      ],
+      DATE,
+    );
+    const coding: Classification = { category: "coding_agent", standalone: null };
+    const report = selectTrendingReport(github, [], new Map(github.map((r) => [r.key, coding])), "topics");
+    expect(report.categories.flatMap((g) => g.rows.map((r) => r.fullName))).toEqual(["a/big"]);
+  });
+
   it("drops unclassified, out-of-scope and non-standalone candidates from the Radar", () => {
     const candidates = npmCandidates(4);
     const classifications = new Map<string, Classification>([
@@ -564,7 +606,7 @@ describe("selectTrendingReport", () => {
   it("groups category rows in fixed order, caps them at 8 and omits empty categories", () => {
     const github = rankGithubRepos(
       [],
-      Array.from({ length: 12 }, (_, i) => search(`c/r${i}`, { stargazersCount: 100 - i })),
+      Array.from({ length: 12 }, (_, i) => search(`c/r${i}`, { stargazersCount: 1100 - i })),
       DATE,
     );
     const classifications = new Map<string, Classification>(
@@ -588,9 +630,9 @@ describe("selectTrendingReport", () => {
       ["big1", 100_000, 900],
       ["big2", 90_000, 800],
       ["big3", 80_000, 700],
-      ["mid", 2_000, 400],
-      ["small1", 300, 200],
-      ["small2", 250, 150],
+      ["mid", 5_000, 400],
+      ["small1", 1_300, 300],
+      ["small2", 1_200, 200],
       ["none", 50_000, -1],
     ];
     const github = rankGithubRepos(
@@ -620,9 +662,9 @@ describe("selectTrendingReport", () => {
         100_000,
         900 - i * 100,
       ]),
-      // +50% and +36%, both above every big repo's relative gain.
-      ["fifty", 150, 50],
-      ["tiny", 150, 40],
+      // +5% and +4%, both above every big repo's relative gain.
+      ["fifty", 1_050, 50],
+      ["tiny", 1_040, 40],
     ];
     const github = rankGithubRepos(
       [],
@@ -640,43 +682,26 @@ describe("selectTrendingReport", () => {
     ]);
   });
 
-  /** `count` npm candidates named `${prefix}${i}`; momentum 4.3x (🆕) when `fresh`. */
-  const npmRun = (prefix: string, count: number, fresh: boolean) =>
-    Array.from({ length: count }, (_, i) =>
-      pkg(`${prefix}${i}`, fresh ? { weekly: 1000, monthly: 1000 } : {}),
-    );
+  /** `count` established npm candidates named `${prefix}${i}`. */
+  const npmRun = (prefix: string, count: number) =>
+    Array.from({ length: count }, (_, i) => pkg(`${prefix}${i}`));
 
   it("keeps at most 8 🆕 rows when established tools can fill the rest", () => {
-    const candidates = buildRadarCandidates(
-      [],
-      npmData(npmRun("new", 15, true), npmRun("old", 15, false)),
-      [],
-      DATE,
-    );
+    const candidates = buildRadarCandidates(newApps(15), npmData(npmRun("old", 15)), [], DATE);
     const report = selectTrendingReport([], candidates, allInScope(candidates), "topics");
     expect(report.radar.map((r) => r.keys[0])).toEqual([
-      ...Array.from({ length: 8 }, (_, i) => `npm:new${i}`),
+      ...Array.from({ length: 8 }, (_, i) => `openrouter:${i}`),
       ...Array.from({ length: 4 }, (_, i) => `npm:old${i}`),
     ]);
   });
 
   it("backfills either side when the other runs short", () => {
-    const fewOld = buildRadarCandidates(
-      [],
-      npmData(npmRun("new", 15, true), npmRun("old", 2, false)),
-      [],
-      DATE,
-    );
+    const fewOld = buildRadarCandidates(newApps(15), npmData(npmRun("old", 2)), [], DATE);
     const a = selectTrendingReport([], fewOld, allInScope(fewOld), "topics");
     expect(a.radar.filter((r) => r.isNew)).toHaveLength(10);
     expect(a.radar).toHaveLength(12);
 
-    const fewNew = buildRadarCandidates(
-      [],
-      npmData(npmRun("new", 2, true), npmRun("old", 15, false)),
-      [],
-      DATE,
-    );
+    const fewNew = buildRadarCandidates(newApps(2), npmData(npmRun("old", 15)), [], DATE);
     const b = selectTrendingReport([], fewNew, allInScope(fewNew), "topics");
     expect(b.radar.filter((r) => r.isNew)).toHaveLength(2);
     expect(b.radar).toHaveLength(12);
@@ -685,19 +710,16 @@ describe("selectTrendingReport", () => {
   it("caps 🆕 rows in the pool at 20, so established tools reach it", () => {
     // 25 🆕 rows, then an established row that would merge with 🆕 row 22 if both were pooled.
     const candidates = buildRadarCandidates(
-      [],
+      newApps(25).map((a, i) => (i === 22 ? { ...a, url: "https://x.dev" } : a)),
       npmData(
-        [
-          ...npmRun("new", 25, true).map((p, i) => (i === 22 ? { ...p, homepage: "https://x.dev" } : p)),
-          ...npmRun("old", 1, false).map((p) => ({ ...p, homepage: "https://x.dev" })),
-        ],
-        npmRun("top", 10, false),
+        npmRun("old", 1).map((p) => ({ ...p, homepage: "https://x.dev" })),
+        npmRun("top", 10),
       ),
       [],
       DATE,
     );
     const report = selectTrendingReport([], candidates, allInScope(candidates), "topics");
-    // old0 is pooled (unmerged, established); new22 is not, as the 23rd 🆕 row.
+    // old0 is pooled (unmerged, established); app 22 is not, as the 23rd 🆕 row.
     expect(report.radar.find((r) => r.keys.includes("npm:old0"))?.keys).toEqual(["npm:old0"]);
   });
 
@@ -705,8 +727,8 @@ describe("selectTrendingReport", () => {
     const github = rankGithubRepos(
       [],
       [
-        search("g/new", { stargazersCount: 50, createdAt: "2026-10-01T00:00:00Z" }),
-        search("g/old", { stargazersCount: 10 }),
+        search("g/new", { stargazersCount: 1050, createdAt: "2026-10-01T00:00:00Z" }),
+        search("g/old", { stargazersCount: 1010 }),
       ],
       DATE,
     );
@@ -726,21 +748,21 @@ describe("selectTrendingReport", () => {
 
     const summaries = summaryRows(report);
     expect(summaries.map((s) => s.n)).toEqual([1, 2, 3]);
-    expect(summaries[0]!.facts).toBe("Source: GitHub | Signal: 🆕 50 (+50)");
-    expect(summaries[2]).toEqual({ n: 3, name: "g/old", description: "", facts: "Stars: 10" });
+    expect(summaries[0]!.facts).toBe("Source: GitHub | New: created or listed in the last 14 days");
+    expect(summaries[2]).toEqual({ n: 3, name: "g/old", description: "A coding tool", facts: "" });
   });
 
   it("shows exactly the GitHub rows reachesReport accepts, the ones the history API is asked about", () => {
     const github = rankGithubRepos(
       [],
       [
-        search("g/radar", { stargazersCount: 50, createdAt: NEW }),
-        // New and in scope, but under 25 stars.
+        search("g/radar", { stargazersCount: 1050, createdAt: NEW }),
+        // New and in scope, but under 500 stars.
         search("g/tiny", { stargazersCount: 10, createdAt: NEW }),
         // New and in scope, but not a standalone tool.
-        search("g/plugin", { stargazersCount: 60, createdAt: NEW }),
-        search("g/table", { stargazersCount: 500 }),
-        search("g/off", { stargazersCount: 900 }),
+        search("g/plugin", { stargazersCount: 1060, createdAt: NEW }),
+        search("g/table", { stargazersCount: 1500 }),
+        search("g/off", { stargazersCount: 1900 }),
       ],
       DATE,
       hist({}),
@@ -773,29 +795,48 @@ describe("selectTrendingReport", () => {
   });
 });
 
-describe("radarPool", () => {
-  it("keeps eligible candidates unmerged, 🆕 first and capped at 20, the pool at 30", () => {
-    const fresh = buildRadarCandidates(
-      [],
-      npmData(Array.from({ length: 25 }, (_, i) => pkg(`n${i}`, { weekly: 4000, monthly: 4000 }))),
+describe("selectTrendingReport 🔥", () => {
+  it("marks a Radar row 🔥 when any merged member was in last week's report", () => {
+    const candidates = buildRadarCandidates(
+      [app(1, { url: "https://x.dev" }), app(2)],
+      npmData([pkg("p", { homepage: "https://x.dev" })]),
       [],
       DATE,
     );
+    const report = selectTrendingReport(
+      [],
+      candidates,
+      allInScope(candidates),
+      "topics",
+      [],
+      new Set(["npm:p"]),
+    );
+    expect(report.radar.map((r) => [r.keys, r.onFire])).toEqual([
+      [["openrouter:1", "npm:p"], true],
+      [["openrouter:2"], false],
+    ]);
+  });
+});
+
+describe("radarPool", () => {
+  it("keeps eligible candidates unmerged, 🆕 first and capped at 20, the pool at 30", () => {
+    const fresh = buildRadarCandidates(newApps(25), NO_NPM, [], DATE);
     const established = buildRadarCandidates([], npmData([], [pkg("e0"), pkg("e1")]), [], DATE);
     const candidates = [...fresh, ...established];
     const classifications = allInScope(candidates);
-    classifications.set("npm:n0", { category: null, standalone: 0.1 });
+    classifications.set("openrouter:0", { category: null, standalone: 0.1 });
     const pool = radarPool(candidates, classifications);
     expect(pool).toHaveLength(26);
-    expect(pool.map((r) => r.keys[0]).slice(19, 22)).toEqual(["npm:n20", "npm:e0", "npm:e1"]);
-    expect(pool.at(-1)!.keys).toEqual(["npm:n24"]);
+    expect(pool.map((r) => r.keys[0]).slice(19, 22)).toEqual(["openrouter:20", "npm:e0", "npm:e1"]);
+    expect(pool.at(-1)!.keys).toEqual(["openrouter:24"]);
   });
 });
 
 describe("summaryRows", () => {
-  it("lists language and stars for GitHub rows, joined sources and signals for Radar rows", () => {
+  // 2026-10-19: summaries repeated the Stars column, and "week #16 / month #19" read as a date.
+  it("gives the model no figures: language for GitHub rows, sources and newness for Radar rows", () => {
     const github: GithubRow[] = rankGithubRepos(
-      [trending("t/x", { periodStars: 7, totalStars: 70, language: "Rust", description: "Desc" })],
+      [trending("t/x", { periodStars: 7, totalStars: 1070, language: "Rust", description: "Desc" })],
       [search("t/x", { topic: "harness" })],
       DATE,
     );
@@ -813,9 +854,9 @@ describe("summaryRows", () => {
         n: 1,
         name: "Tool",
         description: "",
-        facts: "Source: OpenRouter; npm | Signal: week #10 / month #20; 1,000/week, 1.1x",
+        facts: "Source: OpenRouter; npm",
       },
-      { n: 2, name: "t/x", description: "Desc", facts: "Language: Rust | Stars: 70 (+7)" },
+      { n: 2, name: "t/x", description: "Desc", facts: "Language: Rust" },
     ]);
   });
 });
@@ -902,6 +943,11 @@ describe("nextStarHistory", () => {
     const rerunRows = rankGithubRepos([], repos, DATE, first);
     expect(rerunRows[0]!.gain).toBe(812);
     expect(nextStarHistory(first, rerunRows, DATE)).toEqual(first);
+    const promoted = { date: DATE, repos: [["a/x", "agent_tooling"]] as [string, "agent_tooling"][] };
+    // A new record replaces the last one; a run without one keeps it.
+    const withPromoted = nextStarHistory(first, rerunRows, DATE, undefined, promoted);
+    expect(withPromoted.promoted).toEqual(promoted);
+    expect(nextStarHistory(withPromoted, rerunRows, DATE).promoted).toEqual(promoted);
     expect(first.repos["a/x"]).toEqual([
       ["2026-09-28", 85_580],
       [DATE, 86_392],
@@ -920,6 +966,30 @@ describe("nextStarHistory", () => {
     expect(nextStarHistory(h, [], DATE)).toEqual(
       hist({ "a/x": [["2026-09-28", 2]], "b/y": [["2026-10-01", 7]] }),
     );
+  });
+
+  it("records today's report keys, replaces them on a re-run and prunes reports older than 7 days", () => {
+    const h = {
+      repos: {},
+      reported: { "2026-09-27": ["npm:gone"], "2026-09-28": ["npm:last"], [DATE]: ["npm:x"] },
+    };
+    expect(nextStarHistory(h, [], DATE, ["npm:y"]).reported).toEqual({
+      "2026-09-28": ["npm:last"],
+      [DATE]: ["npm:y"],
+    });
+    // Without a report (no keys given) today's entry is left as it was.
+    expect(nextStarHistory(h, [], DATE).reported?.[DATE]).toEqual(["npm:x"]);
+  });
+});
+
+describe("lastWeekKeys", () => {
+  it("reads only the report dated exactly 7 days earlier", () => {
+    const h = {
+      repos: {},
+      reported: { "2026-09-27": ["npm:a"], "2026-09-28": ["npm:b"], "2026-10-01": ["npm:c"] },
+    };
+    expect([...lastWeekKeys(h, DATE)]).toEqual(["npm:b"]);
+    expect(lastWeekKeys(hist({}), DATE).size).toBe(0);
   });
 });
 
@@ -942,6 +1012,31 @@ describe("loadStarHistory / saveStarHistory", () => {
     expect(loadStarHistory(file)).toEqual(h);
     saveStarHistory(hist({}), file);
     expect(loadStarHistory(file)).toEqual(hist({}));
+    const withReported = { ...h, reported: { [DATE]: ["github:a/x", "npm:p"] } };
+    saveStarHistory(withReported, file);
+    expect(fs.readFileSync(file, "utf-8")).toContain(`"${DATE}": ["github:a/x","npm:p"]`);
+    expect(loadStarHistory(file)).toEqual(withReported);
+    const withPromoted = {
+      ...withReported,
+      promoted: { date: DATE, repos: [["a/x", "coding_agent"]] as [string, "coding_agent"][] },
+    };
+    saveStarHistory(withPromoted, file);
+    expect(loadStarHistory(file)).toEqual(withPromoted);
+  });
+
+  it("drops a malformed `promoted`, keeping the rest", () => {
+    const file = path.join(tmp(), "s.json");
+    fs.writeFileSync(
+      file,
+      JSON.stringify({ repos: { "a/x": [[DATE, 1]] }, promoted: { date: DATE, repos: [["a/x", "nope"]] } }),
+    );
+    expect(loadStarHistory(file)).toEqual(hist({ "a/x": [[DATE, 1]] }));
+  });
+
+  it("keeps the star points when `reported` is malformed", () => {
+    const file = path.join(tmp(), "s.json");
+    fs.writeFileSync(file, JSON.stringify({ repos: { "a/x": [[DATE, 1]] }, reported: { [DATE]: "npm:p" } }));
+    expect(loadStarHistory(file)).toEqual(hist({ "a/x": [[DATE, 1]] }));
   });
 
   it("returns an empty history for a missing, invalid or repos-less file", () => {
@@ -973,11 +1068,11 @@ describe("composeTrendingReport with star history", () => {
     report.categories.flatMap((c) => c.rows.map((r) => [r.fullName, r.starsCell]));
 
   it("ranks search repos by their deltas and returns the next history", async () => {
-    const h = hist({ "big/agent": [["2026-09-28", 8_990]], "small/agent": [["2026-09-28", 400]] });
+    const h = hist({ "big/agent": [["2026-09-28", 8_990]], "small/agent": [["2026-09-28", 1_000]] });
     const report = await composeTrendingReport(
       data([
         search("big/agent", { stargazersCount: 9_000 }),
-        search("small/agent", { stargazersCount: 600 }),
+        search("small/agent", { stargazersCount: 1_500 }),
       ]),
       DATE,
       {
@@ -990,13 +1085,44 @@ describe("composeTrendingReport with star history", () => {
       },
     );
     expect(cells(report)).toEqual([
-      ["small/agent", "600 (+200, +50%)"],
+      ["small/agent", "1,500 (+500, +50%)"],
       ["big/agent", "9,000 (+10, +0.1%)"],
     ]);
     expect(report.nextStarHistory?.repos["small/agent"]).toEqual([
-      ["2026-09-28", 400],
-      [DATE, 600],
+      ["2026-09-28", 1_000],
+      [DATE, 1_500],
     ]);
+  });
+
+  it("marks 🔥 the rows last week's report showed and records this week's", async () => {
+    const h = {
+      ...hist({ "big/agent": [["2026-09-28", 8_990]], "small/agent": [["2026-09-28", 1_000]] }),
+      reported: { "2026-09-28": ["github:small/agent"] },
+    };
+    const report = await composeTrendingReport(
+      data([
+        search("big/agent", { stargazersCount: 9_000 }),
+        search("Small/Agent", { stargazersCount: 1_500 }),
+      ]),
+      DATE,
+      {
+        apiKey: "",
+        matchState: null,
+        ask: notCalled,
+        history: h,
+        classifyCache: { items: {} },
+        fetchGain: noFetch,
+      },
+    );
+    const rows = report.categories.flatMap((c) => c.rows);
+    expect(rows.map((r) => [r.fullName, r.onFire])).toEqual([
+      ["Small/Agent", true],
+      ["big/agent", false],
+    ]);
+    expect(report.nextStarHistory?.reported).toEqual({
+      "2026-09-28": ["github:small/agent"],
+      [DATE]: ["github:small/agent", "github:big/agent"],
+    });
   });
 
   it("asks the history API only about rows that could reach the report, new ones first", async () => {
@@ -1010,11 +1136,11 @@ describe("composeTrendingReport with star history", () => {
       data([
         search("snap/agent", { stargazersCount: 9_000 }),
         search("big/agent", { stargazersCount: 5_000 }),
-        search("small/agent", { stargazersCount: 300 }),
+        search("small/agent", { stargazersCount: 1_150 }),
         // The topic fallback puts an unknown label out of scope.
         search("off/topic", { stargazersCount: 7_000, topic: "llm" }),
         // Ten days old: too old to count every star, so it needs the API.
-        search("new/agent", { stargazersCount: 40, createdAt: "2026-09-25T00:00:00Z" }),
+        search("new/agent", { stargazersCount: 1_040, createdAt: "2026-09-25T00:00:00Z" }),
         // Under NEW_REPO_MIN_STARS: never on the Radar.
         search("tiny/new", { stargazersCount: 10, createdAt: "2026-09-25T00:00:00Z" }),
       ]),
@@ -1031,10 +1157,10 @@ describe("composeTrendingReport with star history", () => {
     expect(asked).toEqual(["new/agent", "big/agent", "small/agent"]);
     expect(cells(report)).toEqual([
       ["snap/agent", "9,000 (+1,000, +13%)"],
-      ["small/agent", "300 (+150, +100%)"],
+      ["small/agent", "1,150 (+150, +15%)"],
       ["big/agent", "5,000 (+50, +1%)"],
     ]);
-    expect(report.radar.map((r) => r.signals)).toEqual([["🆕 40 (+30)"]]);
+    expect(report.radar.map((r) => r.signals)).toEqual([["🆕 1,040 (+30, +3%)"]]);
   });
 
   it("skips a failed repo, and stops at a rate limit", async () => {

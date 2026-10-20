@@ -1,6 +1,6 @@
 # Trending summaries repeat the numbers column
 
-Status: needs-triage
+Status: resolved
 
 ## Problem
 
@@ -16,3 +16,7 @@ The Radar's OpenRouter signal was also misread: `week #16 / month #19, 800.5B to
 ## Where
 
 `buildTrendingSummariesPrompt` (`src/reports/prompts-data.ts`), `summaryRows` (`src/trending/rank.ts`).
+
+## Comments
+
+- 2026-10-19: fixed at the input. `summaryRows` no longer passes stars, gains, downloads or the OpenRouter ranks: a Radar row gets its sources and "New: created or listed in the last 14 days", a category row its language. The prompt also forbids those figures and asks for one sentence when the description is empty.

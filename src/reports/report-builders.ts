@@ -52,6 +52,8 @@ export interface ProjectReportInput {
    * report shows it with its notice and quiet line. Either way the header counts it.
    */
   omitQuietGroups?: boolean;
+  /** Counts shown before the project counts, e.g. the data report's "Vendor items: 16". */
+  leadingCounts?: string;
   /** Markdown after the last group, before the footer (the data report's Worth a Look), with its own separator. */
   epilogue?: string;
   footer: string;
@@ -70,7 +72,7 @@ function quietProjects(g: ProjectGroup): ProjectActivity[] {
     new RegExp(`^##\\s+${escapeRegex(a.config.name)}\\s*$`, "m").test(g.summary),
   );
   const active = covered.length > 0 ? covered : withData;
-  return g.activities.filter((a) => !active.includes(a));
+  return g.activities.filter((a) => !active.includes(a) && !a.fetchFailed);
 }
 
 /**
@@ -85,24 +87,32 @@ export function buildProjectReportContent(r: ProjectReportInput): string {
   const releases = all.reduce((n, a) => n + a.releases.length, 0);
   const prereleases = all.reduce((n, a) => n + a.prereleaseCount, 0);
   const link = (a: ProjectActivity) => `[${a.config.name}](https://github.com/${a.config.repo})`;
-  let quietCount = 0;
+  let inactiveCount = 0;
   const sections = r.groups.flatMap((g) => {
     const quiet = quietProjects(g);
-    quietCount += quiet.length;
+    // A project whose release fetch failed was not checked: "Quiet" would claim it shipped nothing.
+    const unavailable = g.activities.filter((a) => a.fetchFailed);
+    inactiveCount += quiet.length + unavailable.length;
     // With omitQuietGroups, a group's projects are left out when all are quiet; its preamble still shows.
     const showProjects = !(r.omitQuietGroups && quiet.length === g.activities.length);
     if (!showProjects && !g.preamble) return [];
     const projects = showProjects
-      ? nestHeadings(g.summary, 3) +
-        (quiet.length ? `\n\n**Quiet ${r.period}:** ${quiet.map(link).join(", ")}` : "")
+      ? [
+          // The data report passes an empty summary for a group with no active project.
+          nestHeadings(g.summary, 3),
+          quiet.length ? `**Quiet ${r.period}:** ${quiet.map(link).join(", ")}` : "",
+          unavailable.length ? `**Unavailable ${r.period}:** ${unavailable.map(link).join(", ")}` : "",
+        ]
+          .filter(Boolean)
+          .join("\n\n")
       : "";
     return `## ${g.title}\n\n` + [g.preamble, projects].filter(Boolean).join("\n\n");
   });
 
   return (
     `${r.heading}\n\n` +
-    `> ${REPORT_META.generated(r.utcStr)} | Projects: ${all.length} | ` +
-    `Active ${r.period}: ${all.length - quietCount} | ` +
+    `> ${REPORT_META.generated(r.utcStr)} | ${r.leadingCounts ? `${r.leadingCounts} | ` : ""}Projects: ${all.length} | ` +
+    `Active ${r.period}: ${all.length - inactiveCount} | ` +
     `Stable releases: ${releases} | Prereleases (not covered): ${prereleases}\n\n` +
     `---\n\n` +
     (r.preamble ?? "") +
@@ -258,12 +268,14 @@ export function renderTrendingTables(report: TrendingReportData, summaries: Map<
   const T = TRENDING_REPORT;
   const summary = (row: { n: number; description: string }) => cell(summaryText(summaries, row));
   const link = (name: string, url: string) => (url ? `[${cell(name)}](${cell(url)})` : cell(name));
+  // 🔥: also in last week's report. In the name cell, the one cell both tables share.
+  const fire = (r: { onFire?: boolean }) => (r.onFire ? "🔥 " : "");
   const blocks: string[] = [];
 
   if (report.radar.length > 0) {
     const rows = report.radar.map(
       (r) =>
-        `| ${link(r.name, r.url)} | ${cell(r.sources.join("; "))} | ${cell(r.signals.join("; "))} | ` +
+        `| ${fire(r)}${link(r.name, r.url)} | ${cell(r.sources.join("; "))} | ${cell(r.signals.join("; "))} | ` +
         `${summary(r)} |`,
     );
     blocks.push(`## ${T.radarHeading}`, `${T.radarHeader}\n${rows.join("\n")}`);
@@ -273,7 +285,8 @@ export function renderTrendingTables(report: TrendingReportData, summaries: Map<
     blocks.push(`## ${T.categoriesHeading}`);
     for (const { category, rows } of report.categories) {
       const lines = rows.map(
-        (r) => `| ${link(r.fullName, r.url)} | ${cell(r.language)} | ${cell(r.starsCell)} | ${summary(r)} |`,
+        (r) =>
+          `| ${fire(r)}${link(r.fullName, r.url)} | ${cell(r.language)} | ${cell(r.starsCell)} | ${summary(r)} |`,
       );
       blocks.push(`### ${T.categoryTitles[category]}`, `${T.categoryHeader}\n${lines.join("\n")}`);
     }

@@ -23,6 +23,8 @@ export interface ProjectActivity {
   prereleaseCount: number;
   hotIssues: GitHubItem[];
   news: NewsItem[];
+  /** The release fetch failed: the project could not be checked, so it is neither active nor quiet. */
+  fetchFailed?: boolean;
 }
 
 /** Wording that differs between the agents and infra sections. */
@@ -102,14 +104,20 @@ const RELEASE_BODY_CHARS = 400;
 // model saw the anchors and half a heading.
 const PREVIEW_BODY_CHARS = 1500;
 
-/** Release notes on one line, without HTML tags and in-page anchor links. */
-export function previewNotes(body: string | null | undefined): string {
+/**
+ * Release notes on one line, without fenced code blocks, HTML tags and in-page
+ * anchor links, cut at `maxChars`. Agent Deck's notes open with three install
+ * blocks (Homebrew, curl, `go install`), so on 2026-10-19 the first 400
+ * characters held no change and the report listed install commands.
+ */
+export function releaseNotes(body: string | null | undefined, maxChars: number): string {
   return (body ?? "")
+    .replace(/(```|~~~)[\s\S]*?(\1|$)/g, " ")
     .replace(/<[^>]*>/g, " ")
     .replace(/\[[^\]]*\]\(#[^)]*\)/g, " ")
     .replace(/\s+/g, " ")
     .trim()
-    .slice(0, PREVIEW_BODY_CHARS);
+    .slice(0, maxChars);
 }
 
 function formatRelease(r: GitHubRelease, repo: string, notes: string): string {
@@ -124,17 +132,13 @@ function formatProject(a: ProjectActivity): string {
       ? ` (${a.releases.length} stable releases; showing newest ${shown.length})`
       : "";
   const releases = shown.length
-    ? shown
-        .map((r) =>
-          formatRelease(r, cfg.repo, (r.body ?? "").replace(/\s+/g, " ").trim().slice(0, RELEASE_BODY_CHARS)),
-        )
-        .join("\n")
+    ? shown.map((r) => formatRelease(r, cfg.repo, releaseNotes(r.body, RELEASE_BODY_CHARS))).join("\n")
     : "None";
   // Only for a project without a stable release, so every other project's
   // section reads as before.
   const previews = a.previews.length
     ? `\n\n### Prereleases (no stable release yet)\n` +
-      a.previews.map((r) => formatRelease(r, cfg.repo, previewNotes(r.body))).join("\n")
+      a.previews.map((r) => formatRelease(r, cfg.repo, releaseNotes(r.body, PREVIEW_BODY_CHARS))).join("\n")
     : "";
   const issues = a.hotIssues.map((i) => formatItem(i)).join("\n") || "None";
   const news = a.news.map((n) => `- [${n.source}] ${n.title} — ${n.url} (${n.detail})`).join("\n") || "None";
@@ -182,7 +186,7 @@ Then one section per project above that has something left to report, in the ord
 - **Hot issue**: what users are hitting and how serious it is. Link the issue (https://github.com/<repo>/issues/<number>).
 
 Rules:
-- Use only the data above. Omit a bullet type that has no data; never write "no release today" or similar.
+- Use only the data above. Omit a bullet type that has no data. Never state what did not happen, in the overview or a section ("no release today", "no breaking issues were reported").
 - A news item may mention a project only in passing: skip it unless the project is its actual subject.
 - If every item for a project is skipped, leave out its section entirely; the report lists it as quiet.
 - Style: concise and concrete, for developers who use these tools.

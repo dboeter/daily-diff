@@ -124,7 +124,9 @@ The `agents` section of `config.yml`, in one daily report. Issue and PR churn is
 - **Hot issues**: opened in the last 48h with 10+ comments and 👍 combined (3+ when labelled regression or security), at most 2 per agent.
 - **News**: Hacker News stories, new Anthropic/OpenAI pages and GitHub Trending repos that name the agent. An item naming three or more tracked projects is treated as a compatibility list and skipped.
 
-Agents with none of these are listed in one "Quiet today" line.
+Agents with none of these are listed in one "Quiet today" line; an agent whose releases could not be fetched goes in an "Unavailable today" line instead.
+
+The table below is the curated core. Each day the report also follows up to 5 repos from the last weekly trending report's Coding Agents table, and up to 5 from its harness, orchestration and tooling tables in the agent tooling section. They are named by their `owner/repo` and matched to news by that path only.
 
 <!-- tracked:agents -->
 <!-- generated from config.yml: edit config.yml, then run pnpm readme -->
@@ -228,7 +230,7 @@ The `databricks`, `snowflake` and `data_stack` sections of `config.yml`: the rep
 
 Code builds the tables, not the LLM. The category tables hold established repos and alternate between the biggest star gains this week and the biggest relative gains (repos that had at least 100 stars a week ago and gained at least 50), so a fast-growing smaller repo shows next to the big movers. The weekly gain is GitHub's own count for repos on the trending page, otherwise the difference from last week's count in `digests/trending-state.json`. Repos missing from last week's count get it from GitHub's [star history API](https://docs.github.com/en/rest/activity/starring#get-repository-star-history), one request each, at most 500 per run. [Jev](https://typesafe.ai) decides whether each item is in scope and which category it lands in (coding agents / harnesses & frameworks / multi-agent & orchestration / agent tooling / other agents), and whether it is an agent itself rather than a plugin or MCP server. Each item is judged once: the verdicts are saved in `digests/trending-classifications.json` and reused every week, unless the item's description changes. Without a `TYPESAFE_API_KEY` the repo's search topic decides instead for items not judged before, and a trending repo that no agent topic search returned is left out. Each category shows at most 8 repos.
 
-OpenRouter, npm and the new-repo search feed an **Agent & Coding Tool Radar** table of standalone agents and coding tools worth watching. New tools come first (🆕: listed on OpenRouter in the last 14 days or ranked this week but not this month, npm downloads at 3x the monthly rate, or a GitHub repo created in the last 14 days with at least 25 stars), but they take at most 8 of the 12 rows, so the week's established leaders still show. Rows that share a GitHub repo or a website become one row, and Jev matches an OpenRouter app to its npm package or GitHub repo. Each match is decided once and saved in `digests/trending-matches.json`, which you can edit by hand.
+OpenRouter, npm and the new-repo search feed an **Agent & Coding Tool Radar** table of standalone agents and coding tools worth watching. New tools come first (🆕: listed on OpenRouter in the last 14 days, or a GitHub repo created in the last 14 days; a jump in usage is not new, so npm packages, whose search results carry no first-publish date, are never 🆕), but they take at most 8 of the 12 rows, so the week's established leaders still show. A GitHub repo needs at least 1,000 stars to appear in the report, a new one 500. Rows that share a GitHub repo or a website become one row, and Jev matches an OpenRouter app to its npm package or GitHub repo. Each match is decided once and saved in `digests/trending-matches.json`, which you can edit by hand.
 
 The LLM writes a two-sentence summary for each row and the prose sections around the tables: highlights, signals and projects worth a look. OpenRouter's model usage is in the weekly models report. The report ends with a Claude Code Skills section: [anthropics/skills](https://github.com/anthropics/skills) PRs and issues, fetched without a date filter and sorted by popularity.
 
@@ -406,6 +408,7 @@ Generated | Projects: N | Active today: N | Stable releases: N | Prereleases (no
 ### Overview                           — what shipped, what broke, what got attention
 ### <Agent>                            — one per active agent, at most 3 bullets: Release / News / Hot issue
 Quiet today: <agents with nothing to report>
+Unavailable today: <agents whose release fetch failed, if any>
 
 ## Agent Tooling                       — config.yml infra.title, same layout
 ```
@@ -475,7 +478,7 @@ Sources: European Commission | N new items ranked by Jev relevance
 Sources: GitHub Trending + GitHub Search API + OpenRouter + npm
 
 ## Highlights
-## 🚀 Agent & Coding Tool Radar (OpenRouter / npm / GitHub, new tools flagged 🆕)
+## 🚀 Agent & Coding Tool Radar (OpenRouter / npm / GitHub, new tools flagged 🆕; 🔥 = also in last week's report, in the category tables too)
 ## Top Projects by Category
   ### 🧑‍💻 Coding Agents               — CLI / IDE / cloud agents that write code
   ### 🧰 Agent Harnesses & Frameworks — harnesses / SDKs / agent runtimes

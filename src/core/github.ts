@@ -80,6 +80,19 @@ export class GitHubApiError extends Error {
   }
 }
 
+/**
+ * The rate-limit headers of a 403 or 429, for the log. On 2026-10-19 a hot-issue
+ * search failed with "API rate limit exceeded for installation", which the
+ * search and core limits both say; `x-ratelimit-resource` tells them apart.
+ */
+function rateLimitNote(resp: Response): string {
+  if (resp.status !== 403 && resp.status !== 429) return "";
+  const h = (name: string) => resp.headers?.get(name) ?? "?";
+  const reset = Number(resp.headers?.get("x-ratelimit-reset"));
+  const resetStr = reset ? new Date(reset * 1000).toISOString() : "?";
+  return ` [rate limit: resource ${h("x-ratelimit-resource")}, remaining ${h("x-ratelimit-remaining")}, reset ${resetStr}, retry-after ${h("retry-after")}]`;
+}
+
 /** Retries after a dropped connection; waits GET_RETRY_MS, then twice that. */
 const GET_RETRIES = 2;
 const GET_RETRY_MS = 2000;
@@ -107,7 +120,7 @@ export async function githubGet<T>(
       if (!resp.ok) {
         throw new GitHubApiError(
           resp.status,
-          `GitHub API error ${resp.status} (${url}): ${await resp.text()}`,
+          `GitHub API error ${resp.status} (${url}): ${await resp.text()}${rateLimitNote(resp)}`,
         );
       }
       return (await resp.json()) as T;

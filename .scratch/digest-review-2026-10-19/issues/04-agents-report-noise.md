@@ -1,6 +1,6 @@
 # Agents report: install boilerplate as release notes, third-party repos as news
 
-Status: needs-triage
+Status: resolved
 
 ## Problems (from `digests/2026-10-19/ai-agents.md`)
 
@@ -11,3 +11,7 @@ Status: needs-triage
 ## Where
 
 `buildProjectDigestPrompt` (`src/reports/prompts.ts`), `matchProjectNews` (`src/reports/agent-news.ts`).
+
+## Comments
+
+- 2026-10-19: fixed. 1: `releaseNotes` strips fenced code blocks (also HTML, anchors) before the 400-character cut; an empty result already shows the link and "(no release notes)". 2: a GitHub repo is news only as the project's own repo on GitHub Trending; third-party Trending repos and all Search results no longer match (both pools; the data pool had the same exposure). 3: the prompt forbids stating absences in the overview too.

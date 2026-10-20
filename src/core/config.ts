@@ -28,6 +28,7 @@ interface RawSection {
 
 /** The agents report's sections (ai-agents). */
 export const AGENT_SECTION_KEYS = ["agents", "infra"] as const;
+export type AgentSectionKey = (typeof AGENT_SECTION_KEYS)[number];
 /** The data report's repo sections (ai-data), in report order. */
 export const DATA_SECTION_KEYS = ["databricks", "snowflake", "data_stack"] as const;
 export type DataSectionKey = (typeof DATA_SECTION_KEYS)[number];

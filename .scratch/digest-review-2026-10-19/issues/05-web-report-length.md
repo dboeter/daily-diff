@@ -1,6 +1,6 @@
 # Web report: one article becomes ~600 words of four sections
 
-Status: needs-triage
+Status: resolved
 
 ## Problem
 
@@ -14,3 +14,7 @@ Status: needs-triage
 ## Where
 
 `buildWebReportPrompt` (`src/reports/prompts-data.ts`), `WEB_REPORT` headings (`src/core/i18n.ts`).
+
+## Comments
+
+- 2026-10-19: fixed in `buildWebReportPrompt`. With fewer than 3 new articles (`WEB_FULL_LAYOUT_MIN`; first crawls always get the full layout) the prompt asks for 1-2 sentences of Highlights and the lab sections only. Signals gets a rule against forward-looking claims the articles do not make. No `WEB_REPORT` heading change was needed.

@@ -93,6 +93,20 @@ describe("buildProjectReportContent", () => {
     );
   });
 
+  it("finds the section of a promoted trending repo named by its owner/repo", () => {
+    const news = [{ source: "Hacker News", title: "cursor/plugins", url: "u", detail: "d" }];
+    const promoted = (repo: string) =>
+      makeActivity("p", { config: { id: `trending-${repo}`, repo, name: repo, keywords: [repo] }, news });
+    const result = buildProjectReportContent(
+      withAgents({
+        summary: "## Overview\nBODY\n\n## cursor/plugins\n- news",
+        activities: [promoted("cursor/plugins"), promoted("ruvnet/ruflo")],
+      }),
+    );
+    expect(result).toContain("Active today: 1 |");
+    expect(result).toContain("**Quiet today:** [ruvnet/ruflo](https://github.com/ruvnet/ruflo)");
+  });
+
   it("keeps projects with data active when the summary has no project section", () => {
     const news = [{ source: "Hacker News", title: "BETA 2.0", url: "u", detail: "d" }];
     const result = buildProjectReportContent(
@@ -108,6 +122,26 @@ describe("buildProjectReportContent", () => {
   it("omits the quiet line when every project was active", () => {
     const result = buildProjectReportContent(withAgents({ activities: [agents.activities[0]!] }));
     expect(result).not.toContain("Quiet today");
+  });
+
+  it("lists a project whose release fetch failed as unavailable, neither quiet nor active", () => {
+    const result = buildProjectReportContent(
+      withAgents({ activities: [...agents.activities, makeActivity("delta", { fetchFailed: true })] }),
+    );
+    expect(result).toContain("Projects: 4 | Active today: 1 |");
+    expect(result).toContain(
+      "**Quiet today:** [BETA](https://github.com/org/beta), [GAMMA](https://github.com/org/gamma)\n\n" +
+        "**Unavailable today:** [DELTA](https://github.com/org/delta)",
+    );
+  });
+
+  it("shows an omitted group's unavailable projects", () => {
+    const result = buildProjectReportContent({
+      ...input,
+      omitQuietGroups: true,
+      groups: [{ title: "Stack", summary: "", activities: [makeActivity("delta", { fetchFailed: true })] }],
+    });
+    expect(result).toContain("## Stack\n\n**Unavailable today:** [DELTA](https://github.com/org/delta)");
   });
 
   it("renders the preamble between the header and the groups", () => {
@@ -242,6 +276,20 @@ describe("renderTrendingTables", () => {
       /^\| \[o\/r\]\(https:\/\/github\.com\/o\/r\) \| Rust \| 100 \(\+7\) \| (word ){31}word… \|$/,
     );
     expect(md).not.toContain("---\n\n");
+  });
+
+  it("puts 🔥 before the name of a row that was in last week's report", () => {
+    const base = trendingReport();
+    const md = renderTrendingTables(
+      trendingReport({
+        radar: base.radar.map((r, i) => ({ ...r, onFire: i === 0 })),
+        categories: base.categories.map((c) => ({ ...c, rows: c.rows.map((r) => ({ ...r, onFire: true })) })),
+      }),
+      new Map(),
+    );
+    expect(md).toContain("| 🔥 [Kilo](https://kilo.ai/) | OpenRouter; npm |");
+    expect(md).toContain("| bare | npm |");
+    expect(md).toContain("| 🔥 [o/r](https://github.com/o/r) | Rust |");
   });
 
   it("shows — when there is neither summary nor description", () => {

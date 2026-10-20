@@ -12,6 +12,8 @@
 #   subject  what the projects are; the LLM prompt reads "You are a technical
 #            editor covering <subject>", and README.md shows it
 #   repos    the tracked repositories
+# agents and infra also follow the last weekly trending report's category-table
+# repos (src/trending/promoted.ts); these lists are the curated core.
 
 # ── Agents ────────────────────────────────────────────────────────────────────
 # The first section of the daily agents report. Each agent is covered by its stable releases, a few hot issues (high

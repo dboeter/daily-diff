@@ -2,8 +2,8 @@
  * Selection, ranking and numbering for the weekly trending report — pure, except
  * for loading and saving the star history (`digests/trending-state.json`).
  *
- * Code decides which items appear, in which order, with which 🆕 flag and
- * which numbers; the LLM only writes the per-row summaries and the prose
+ * Code decides which items appear, in which order, with which 🆕 and 🔥 flags
+ * and which numbers; the LLM only writes the per-row summaries and the prose
  * (`buildTrendingSummariesPrompt`, `buildTrendingProsePrompt`). Two tables:
  * the Agent & Coding Tool Radar (OpenRouter, npm and new GitHub repos) and the
  * GitHub category tables. Scope and category come from a `Classification` per
@@ -14,6 +14,7 @@ import fs from "node:fs";
 import path from "node:path";
 import type { Numbered } from "../reports/summarized-table.ts";
 import type { SearchRepo, TrendingRepo } from "./trending.ts";
+import type { PromotedRecord } from "./promoted.ts";
 import { formatTokens, type OpenRouterApp } from "../sources/openrouter.ts";
 import { momentumRatio, type NpmData, type NpmPackage } from "./npm.ts";
 import { toCstDateStr } from "../core/date.ts";
@@ -52,6 +53,8 @@ export interface GithubRow {
   relative: number | null;
   starsCell: string;
   isNew: boolean;
+  /** Also in the report dated exactly 7 days earlier (`selectTrendingReport`): 🔥. */
+  onFire?: boolean;
   /** The search topic that found it; absent for trending-page-only repos. */
   topic?: string;
 }
@@ -73,6 +76,8 @@ export interface RadarRow {
   signals: string[];
   /** Some member is new. */
   isNew: boolean;
+  /** Some member was also in the report dated exactly 7 days earlier (`selectTrendingReport`): 🔥. */
+  onFire?: boolean;
   /** Normalized merge links (`repo:<owner/repo>`, `host:<hostname>`), see `urlMerge`. */
   links: string[];
 }
@@ -96,6 +101,10 @@ export interface TrendingReportData {
 export interface StarHistory {
   /** Key: `fullName` lowercased — GitHub names are case-insensitive, and the trending page and search may differ in case. */
   repos: Record<string, [string, number][]>;
+  /** CST date of a weekly report → the lowercased item keys it showed (`reportedKeys`), for 🔥. */
+  reported?: Record<string, string[]>;
+  /** The latest weekly report's category-table repos, tracked by the daily agents report (`promotedRepos`). */
+  promoted?: PromotedRecord;
 }
 
 // ---------------------------------------------------------------------------
@@ -109,23 +118,25 @@ export const NEW_REPO_DAYS = 14;
  * "new" means the same across the Radar's sources.
  */
 const NEW_LISTING_DAYS = 14;
-/**
- * momentumRatio ~4.3 means first published this week; 3 leaves slack for a
- * package published late last week.
- */
-const NPM_NEW_MIN_RATIO = 3;
 
 /**
- * A new repo below this many stars stays off the Radar, and the `created:`
- * search asks for no fewer. On the 2026-10-06 live check an 8-star repo created
- * that day ranked above week-old repos; the LLM's new-repo picks on 2026-10-05
- * had 27–168 stars.
+ * Total stars an established GitHub repo needs for the category tables, and so
+ * to be promoted into the daily agents report; the `pushed:` search asks for no
+ * fewer. Raised from 100 on 2026-10-20: the report should follow established
+ * projects, and on 2026-10-19 most rows were few-hundred-star repos with one
+ * good week. 0 (a trending scrape miss) is unknown and does not pass.
  */
-export const NEW_REPO_MIN_STARS = 25;
+export const MIN_STARS = 1000;
+/**
+ * The same bar for a new repo (created in 14 days) on the Radar, lower since it
+ * has had two weeks at most; the `created:` search asks for no fewer. Raised
+ * from 25 on 2026-10-20 (on the 2026-10-06 live check an 8-star repo created
+ * that day ranked above week-old repos).
+ */
+export const NEW_REPO_MIN_STARS = 500;
 /**
  * A relative gain needs at least this many stars a week ago: below it, 8 → 16
- * stars reads as +100%. The established-repo search asks for this many stars
- * now, since a repo with fewer cannot have had more a week ago.
+ * stars reads as +100%.
  */
 export const RELATIVE_MIN_BASELINE = 100;
 /**
@@ -191,7 +202,28 @@ export function loadStarHistory(file = STAR_HISTORY_FILE): StarHistory {
     if (typeof parsed?.repos !== "object" || parsed.repos === null || Array.isArray(parsed.repos)) {
       throw new Error("no `repos` object");
     }
-    return parsed as StarHistory;
+    const { reported } = parsed;
+    // A missing or malformed `reported` costs one week of 🔥, nothing else.
+    const validReported =
+      typeof reported === "object" &&
+      reported !== null &&
+      Object.values(reported).every(
+        (keys) => Array.isArray(keys) && keys.every((k) => typeof k === "string"),
+      );
+    const { promoted } = parsed;
+    // A malformed `promoted` costs the daily agents report its trending repos until Monday.
+    const validPromoted =
+      typeof promoted?.date === "string" &&
+      Array.isArray(promoted.repos) &&
+      promoted.repos.every(
+        (r) =>
+          Array.isArray(r) && typeof r[0] === "string" && (CATEGORIES as readonly unknown[]).includes(r[1]),
+      );
+    return {
+      repos: parsed.repos,
+      ...(validReported ? { reported } : {}),
+      ...(validPromoted ? { promoted } : {}),
+    };
   } catch (err) {
     // Unlike the match file, starting over is safe: the history is never
     // hand-edited, and losing it costs one run of history-API calls, not a decision.
@@ -209,8 +241,13 @@ export function saveStarHistory(history: StarHistory, file = STAR_HISTORY_FILE):
     ([name, points]) => `    ${JSON.stringify(name)}: ${JSON.stringify(points)}`,
   );
   const body = lines.length > 0 ? `{\n${lines.join(",\n")}\n  }` : "{}";
+  const reported = Object.entries(history.reported ?? {}).map(
+    ([date, keys]) => `    ${JSON.stringify(date)}: ${JSON.stringify(keys)}`,
+  );
+  const reportedBody = reported.length > 0 ? `,\n  "reported": {\n${reported.join(",\n")}\n  }` : "";
+  const promotedBody = history.promoted ? `,\n  "promoted": ${JSON.stringify(history.promoted)}` : "";
   fs.mkdirSync(path.dirname(file), { recursive: true });
-  fs.writeFileSync(file, `{\n  "repos": ${body}\n}\n`, "utf-8");
+  fs.writeFileSync(file, `{\n  "repos": ${body}${reportedBody}${promotedBody}\n}\n`, "utf-8");
 }
 
 /**
@@ -227,8 +264,39 @@ export function starBaseline(history: StarHistory, fullName: string, dateStr: st
   return point ? point[1] : null;
 }
 
-/** History after this run: today's points recorded or replaced, unseen repos carried forward, old points pruned. */
-export function nextStarHistory(history: StarHistory, githubRows: GithubRow[], dateStr: string): StarHistory {
+/**
+ * The item keys of the report dated exactly STAR_GAIN_DAYS before `dateStr`,
+ * the same rule as `starBaseline`: a forced mid-week run is not "last week",
+ * and a missed Monday breaks the run of weeks, so its rows get no 🔥.
+ */
+export function lastWeekKeys(history: StarHistory, dateStr: string): Set<string> {
+  const entry = Object.entries(history.reported ?? {}).find(
+    ([date]) => daysBetween(date, dateStr) === STAR_GAIN_DAYS,
+  );
+  return new Set(entry?.[1] ?? []);
+}
+
+/** Every item key the report shows, merged Radar members included, lowercased like the star history. */
+export function reportedKeys(report: Pick<TrendingReportData, "radar" | "categories">): string[] {
+  return [
+    ...report.radar.flatMap((r) => r.keys),
+    ...report.categories.flatMap((c) => c.rows.map((r) => r.key)),
+  ].map((k) => k.toLowerCase());
+}
+
+/**
+ * History after this run: today's points recorded or replaced, unseen repos
+ * carried forward, old points pruned; today's report keys recorded or
+ * replaced, reports older than a week pruned; today's promoted repos replace
+ * the last record (kept when there are none).
+ */
+export function nextStarHistory(
+  history: StarHistory,
+  githubRows: GithubRow[],
+  dateStr: string,
+  reported?: string[],
+  promoted?: PromotedRecord,
+): StarHistory {
   const repos: Record<string, [string, number][]> = {};
   for (const [name, points] of Object.entries(history.repos)) {
     repos[name] = points.filter(([date]) => date !== dateStr);
@@ -240,6 +308,13 @@ export function nextStarHistory(history: StarHistory, githubRows: GithubRow[], d
   }
   // Repos not seen this run are kept until pruned: a forced mid-week run must not drop Monday's points.
   const next: StarHistory = { repos: {} };
+  const allReported = { ...history.reported, ...(reported ? { [dateStr]: reported } : {}) };
+  const keptReported = Object.entries(allReported)
+    .filter(([date]) => daysBetween(date, dateStr) <= STAR_HISTORY_DAYS)
+    .sort(([a], [b]) => a.localeCompare(b));
+  if (keptReported.length > 0) next.reported = Object.fromEntries(keptReported);
+  const nextPromoted = promoted ?? history.promoted;
+  if (nextPromoted) next.promoted = nextPromoted;
   for (const [name, points] of Object.entries(repos)) {
     const kept = points
       .filter(([date]) => daysBetween(date, dateStr) <= STAR_HISTORY_DAYS)
@@ -405,8 +480,8 @@ export function buildRadarCandidates(
         `week ${rankStr(a.weekRank)} / month ${rankStr(a.monthRank)}` +
         (a.weekTokens > 0 ? `, ${formatTokens(a.weekTokens)} tokens/week` : "") +
         growth,
-      // Ranked this week but absent from the month list = newly popular.
-      isNew: (listed !== null && listed <= NEW_LISTING_DAYS) || (a.weekRank !== null && a.monthRank === null),
+      // By listing date only: ranked this week but not this month is Rising, not New.
+      isNew: listed !== null && listed <= NEW_LISTING_DAYS,
       links: linksOf(repoLink(a.url), hostLink(a.url)),
     });
   });
@@ -419,7 +494,9 @@ export function buildRadarCandidates(
       description: p.description,
       sources: ["npm"],
       signal: `${fmt(p.weekly)}/week, ${momentumRatio(p).toFixed(1)}x`,
-      isNew: momentumRatio(p) >= NPM_NEW_MIN_RATIO,
+      // The registry search carries no first-publish date (`date` is the last
+      // publish), and download momentum is Rising, not New: npm rows are never 🆕.
+      isNew: false,
       links: linksOf(repoLink(p.repository), repoLink(p.homepage), hostLink(p.homepage)),
     }),
   );
@@ -567,8 +644,18 @@ export function isRadarRepo(r: GithubRow): boolean {
  */
 export function reachesReport(r: GithubRow, c: Classification | undefined): boolean {
   if (c === undefined) return false;
-  return r.isNew ? isRadarRepo(r) && onRadar(c) : inScope(c);
+  return r.isNew ? isRadarRepo(r) && onRadar(c) : isCategoryRepo(r) && inScope(c);
 }
+
+/**
+ * The category tables need one: a repo without a description has nothing to
+ * summarize, and on 2026-10-19 the model padded emo-xiaoyu/harness-mix's slot
+ * with "is a TypeScript project". Jev still classifies it.
+ */
+const hasDescription = (r: GithubRow): boolean => r.description.trim() !== "";
+
+/** An established repo the category tables can list, before scope. */
+const isCategoryRepo = (r: GithubRow): boolean => !r.isNew && r.totalStars >= MIN_STARS && hasDescription(r);
 
 /**
  * Apply scope, merge, cap and number the rows. New repos are Radar-only: the
@@ -582,7 +669,10 @@ export function selectTrendingReport(
   classifications: Map<string, Classification>,
   classifiedBy: TrendingReportData["classifiedBy"],
   links: [string, string][] = [],
+  /** `lastWeekKeys`: a row with a key in it is 🔥. */
+  lastWeek: Set<string> = new Set(),
 ): TrendingReportData {
+  const onFire = (keys: string[]) => keys.some((k) => lastWeek.has(k.toLowerCase()));
   // A merged row is 🆕 when any member is, so split again after merging.
   const merged = mergeRows(urlMerge(radarPool(radarCandidates, classifications)), links);
   const mergedFresh = merged.filter((r) => r.isNew);
@@ -595,21 +685,29 @@ export function selectTrendingReport(
   const radar = [
     ...mergedFresh.slice(0, freshCount),
     ...mergedEstablished.slice(0, RADAR_MAX - freshCount),
-  ].map((r) => ({ ...r, n: ++n }));
+  ].map((r) => ({ ...r, onFire: onFire(r.keys), n: ++n }));
 
   const categories = CATEGORIES.map((category) => ({
     category,
     rows: interleaveGains(
-      githubRows.filter((r) => !r.isNew && classifications.get(r.key)?.category === category),
+      githubRows.filter((r) => isCategoryRepo(r) && classifications.get(r.key)?.category === category),
     ),
   }))
     .filter((g) => g.rows.length > 0)
-    .map((g) => ({ category: g.category, rows: g.rows.map((r) => ({ ...r, n: ++n })) }));
+    .map((g) => ({
+      category: g.category,
+      rows: g.rows.map((r) => ({ ...r, onFire: onFire([r.key]), n: ++n })),
+    }));
 
   return { radar, categories, classifiedBy };
 }
 
-/** One entry per row, by number: the input of the summaries prompt. */
+/**
+ * One entry per row, by number: the input of the summaries prompt. No stars,
+ * gains, downloads or ranks: the row shows them, and on 2026-10-19 half of
+ * every summary repeated them ("It has 625 stars, up 328") and the model read
+ * OpenRouter's "week #16 / month #19" as a date.
+ */
 export function summaryRows(
   report: TrendingReportData,
 ): { n: number; name: string; description: string; facts: string }[] {
@@ -618,14 +716,16 @@ export function summaryRows(
       n: r.n,
       name: r.name,
       description: r.description,
-      facts: `Source: ${r.sources.join("; ")} | Signal: ${r.signals.join("; ")}`,
+      facts: [`Source: ${r.sources.join("; ")}`, r.isNew && "New: created or listed in the last 14 days"]
+        .filter(Boolean)
+        .join(" | "),
     })),
     ...report.categories.flatMap((g) =>
       g.rows.map((r) => ({
         n: r.n,
         name: r.fullName,
         description: r.description,
-        facts: [r.language && `Language: ${r.language}`, `Stars: ${r.starsCell}`].filter(Boolean).join(" | "),
+        facts: r.language ? `Language: ${r.language}` : "",
       })),
     ),
   ];

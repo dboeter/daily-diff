@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { fetchTrendingData, parseTrendingHtml, searchAiRepos } from "../trending/trending.ts";
+import { MIN_STARS, NEW_REPO_MIN_STARS } from "../trending/rank.ts";
 
 const SAMPLE_HTML = `
 <main>
@@ -152,29 +153,20 @@ describe("searchAiRepos", () => {
   }
 
   /** searchSlot spaces calls 2.1 s apart: run them on fake timers. */
-  async function run(fourteenDaysAgo: string | null) {
+  async function run(fourteenDaysAgo: string) {
     vi.useFakeTimers();
     const pending = searchAiRepos("2026-09-30", fourteenDaysAgo);
     await vi.runAllTimersAsync();
     return pending;
   }
 
-  it("daily: one page of the top 15 pushed repos per topic", async () => {
-    const urls = mockSearch({ "topic:coding-agent pushed:>2026-09-30 page 1": ["a/one"] });
-    const repos = await run(null);
-    expect(urls).toHaveLength(6);
-    expect(urls.every((u) => u.includes("&per_page=15&page=1"))).toBe(true);
-    expect(urls.some((u) => new URL(u).searchParams.get("q")!.includes("created:"))).toBe(false);
-    expect(repos.map((r) => [r.fullName, r.topic])).toEqual([["a/one", "coding-agent"]]);
-  });
-
   it("weekly: new and established queries per topic, paging while pages are full", async () => {
     const full = Array.from({ length: 100 }, (_, i) => `full/r${i}`);
     const urls = mockSearch({
-      "topic:coding-agent created:>2026-09-23 stars:>=25 page 1": ["n/new"],
-      "topic:coding-agent pushed:>2026-09-30 stars:>=100 page 1": full,
-      "topic:coding-agent pushed:>2026-09-30 stars:>=100 page 2": ["p/two", "n/new"],
-      "topic:ai-coding pushed:>2026-09-30 stars:>=100 page 1": ["p/two", "c/three"],
+      [`topic:coding-agent created:>2026-09-23 stars:>=${NEW_REPO_MIN_STARS} page 1`]: ["n/new"],
+      [`topic:coding-agent pushed:>2026-09-30 stars:>=${MIN_STARS} page 1`]: full,
+      [`topic:coding-agent pushed:>2026-09-30 stars:>=${MIN_STARS} page 2`]: ["p/two", "n/new"],
+      [`topic:ai-coding pushed:>2026-09-30 stars:>=${MIN_STARS} page 1`]: ["p/two", "c/three"],
     });
     const repos = await run("2026-09-23");
     // 6 topics × 2 queries, plus page 2 of the one full page.
@@ -188,7 +180,7 @@ describe("searchAiRepos", () => {
   it("retries a dropped connection, and keeps the pages before a failed one", async () => {
     vi.spyOn(console, "log").mockImplementation(() => {});
     const errors = vi.spyOn(console, "error").mockImplementation(() => {});
-    const pushed = "topic:coding-agent pushed:>2026-09-30 stars:>=100";
+    const pushed = `topic:coding-agent pushed:>2026-09-30 stars:>=${MIN_STARS}`;
     const full = Array.from({ length: 100 }, (_, i) => `full/r${i}`);
     let attempts = 0;
     vi.spyOn(globalThis, "fetch").mockImplementation(async (input) => {
@@ -222,5 +214,17 @@ describe("fetchTrendingData", () => {
     const pending = fetchTrendingData("daily", "2026-10-19");
     await vi.runAllTimersAsync();
     expect(await pending).toMatchObject({ trendingRepos: [], searchRepos: [], trendingFetchSuccess: false });
+  });
+
+  // Search results stopped counting as agent news on 2026-10-19, so the daily run asks only the trending page.
+  it("makes no search request on the daily run", async () => {
+    vi.spyOn(console, "log").mockImplementation(() => {});
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    const fetchSpy = vi.spyOn(globalThis, "fetch").mockRejectedValue(new TypeError("fetch failed"));
+    vi.useFakeTimers();
+    const pending = fetchTrendingData("daily", "2026-10-19");
+    await vi.runAllTimersAsync();
+    await pending;
+    expect(fetchSpy.mock.calls.some(([u]) => String(u).includes("/search/"))).toBe(false);
   });
 });

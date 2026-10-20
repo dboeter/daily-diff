@@ -1,6 +1,6 @@
 # A failed release fetch reads as Quiet
 
-Status: needs-triage
+Status: resolved
 
 ## Problem
 
@@ -22,3 +22,7 @@ Per `GLOSSARY.md`, Quiet means the project had nothing worth reporting for the p
 - Applies to both the Agents (daily) and Infra (weekly) reports.
 - Update the "Agents and infra reports" bullet in AGENTS.md.
 - Add a test next to the existing `buildProjectReportContent` tests.
+
+## Comments
+
+- 2026-10-20: `fetchProject` sets `fetchFailed` when the release fetch fails; `buildProjectReportContent` leaves those projects out of the active count and the Quiet line and lists them as `**Unavailable <period>:**` (also in a data-report group that is otherwise omitted). Tests in `report-builders.test.ts`.

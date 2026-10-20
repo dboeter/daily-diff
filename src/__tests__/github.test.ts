@@ -298,6 +298,25 @@ describe("fetchWeeklyStarGain", () => {
     await expect(fetchWeeklyStarGain("org/repo")).rejects.toMatchObject({ status: 422 });
     await expect(fetchWeeklyStarGain("org/repo")).rejects.toBeInstanceOf(GitHubApiError);
   });
+
+  // 2026-10-19: "API rate limit exceeded for installation" did not say which limit.
+  it("names the rate limit in the error of a 403 or 429", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValue({
+      ok: false,
+      status: 403,
+      headers: new Headers({
+        "x-ratelimit-resource": "search",
+        "x-ratelimit-remaining": "0",
+        "x-ratelimit-reset": "1760835960",
+        "retry-after": "42",
+      }),
+      text: () => Promise.resolve("API rate limit exceeded for installation"),
+    } as unknown as Response);
+
+    await expect(fetchWeeklyStarGain("org/repo")).rejects.toThrow(
+      "[rate limit: resource search, remaining 0, reset 2025-10-19T01:06:00.000Z, retry-after 42]",
+    );
+  });
 });
 
 // ---------------------------------------------------------------------------
