@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { fetchTrendingData, parseTrendingHtml, searchAiRepos } from "../trending/trending.ts";
+import { MIN_STARS } from "../trending/rank.ts";
 
 const SAMPLE_HTML = `
 <main>
@@ -162,10 +163,10 @@ describe("searchAiRepos", () => {
   it("weekly: new and established queries per topic, paging while pages are full", async () => {
     const full = Array.from({ length: 100 }, (_, i) => `full/r${i}`);
     const urls = mockSearch({
-      "topic:coding-agent created:>2026-09-23 stars:>=25 page 1": ["n/new"],
-      "topic:coding-agent pushed:>2026-09-30 stars:>=100 page 1": full,
-      "topic:coding-agent pushed:>2026-09-30 stars:>=100 page 2": ["p/two", "n/new"],
-      "topic:ai-coding pushed:>2026-09-30 stars:>=100 page 1": ["p/two", "c/three"],
+      [`topic:coding-agent created:>2026-09-23 stars:>=${MIN_STARS} page 1`]: ["n/new"],
+      [`topic:coding-agent pushed:>2026-09-30 stars:>=${MIN_STARS} page 1`]: full,
+      [`topic:coding-agent pushed:>2026-09-30 stars:>=${MIN_STARS} page 2`]: ["p/two", "n/new"],
+      [`topic:ai-coding pushed:>2026-09-30 stars:>=${MIN_STARS} page 1`]: ["p/two", "c/three"],
     });
     const repos = await run("2026-09-23");
     // 6 topics × 2 queries, plus page 2 of the one full page.
@@ -179,7 +180,7 @@ describe("searchAiRepos", () => {
   it("retries a dropped connection, and keeps the pages before a failed one", async () => {
     vi.spyOn(console, "log").mockImplementation(() => {});
     const errors = vi.spyOn(console, "error").mockImplementation(() => {});
-    const pushed = "topic:coding-agent pushed:>2026-09-30 stars:>=100";
+    const pushed = `topic:coding-agent pushed:>2026-09-30 stars:>=${MIN_STARS}`;
     const full = Array.from({ length: 100 }, (_, i) => `full/r${i}`);
     let attempts = 0;
     vi.spyOn(globalThis, "fetch").mockImplementation(async (input) => {

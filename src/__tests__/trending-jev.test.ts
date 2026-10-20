@@ -571,7 +571,7 @@ describe("composeTrendingReport", () => {
     fullName,
     description: null,
     language: null,
-    stargazersCount: 100,
+    stargazersCount: 1000,
     pushedAt: "2026-10-04T00:00:00Z",
     createdAt: "2024-01-01T00:00:00Z",
     url: `https://github.com/${fullName}`,

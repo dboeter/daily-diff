@@ -7,6 +7,7 @@ import {
   lastWeekKeys,
   loadStarHistory,
   mergeRows,
+  MIN_STARS,
   nextStarHistory,
   radarPool,
   rankGithubRepos,
@@ -329,12 +330,12 @@ describe("buildRadarCandidates", () => {
     });
   });
 
-  it("leaves new GitHub repos under 25 stars off the Radar", () => {
+  it("leaves new GitHub repos under 1,000 stars off the Radar", () => {
     const github = rankGithubRepos(
       [],
       [
-        search("s/small", { createdAt: NEW, stargazersCount: 24 }),
-        search("s/big", { createdAt: NEW, stargazersCount: 25 }),
+        search("s/small", { createdAt: NEW, stargazersCount: MIN_STARS - 1 }),
+        search("s/big", { createdAt: NEW, stargazersCount: MIN_STARS }),
       ],
       DATE,
     );
@@ -342,7 +343,7 @@ describe("buildRadarCandidates", () => {
   });
 
   it("orders 🆕 first, then by relative position, ties OpenRouter > npm > GitHub", () => {
-    const github = rankGithubRepos([], [search("g/new", { createdAt: NEW, stargazersCount: 30 })], DATE);
+    const github = rankGithubRepos([], [search("g/new", { createdAt: NEW, stargazersCount: 1030 })], DATE);
     const rows = buildRadarCandidates(
       [app(3, { createdAt: NEW }), app(1), app(2)],
       npmData([pkg("p1")], [pkg("p2"), pkg("p3")]),
@@ -369,7 +370,7 @@ describe("urlMerge", () => {
   it("merges an npm package with the GitHub repo its repository URL names", () => {
     const github = rankGithubRepos(
       [],
-      [search("Kilo-Org/kilocode", { createdAt: NEW, stargazersCount: 30 })],
+      [search("Kilo-Org/kilocode", { createdAt: NEW, stargazersCount: 1030 })],
       DATE,
     );
     const rows = urlMerge(
@@ -386,7 +387,7 @@ describe("urlMerge", () => {
       keys: ["github:Kilo-Org/kilocode", "npm:@kilocode/cli"],
       name: "Kilo-Org/kilocode",
       sources: ["GitHub", "npm"],
-      signals: ["🆕 30 (+30)", "1,000/week, 1.1x"],
+      signals: ["🆕 1,030 (+1,030)", "1,000/week, 1.1x"],
       isNew: true,
     });
   });
@@ -432,7 +433,7 @@ describe("urlMerge", () => {
   it("merges transitively, at the earliest member's position, joining sources and signals", () => {
     const github = rankGithubRepos(
       [],
-      [search("kilo-org/kilocode", { createdAt: NEW, stargazersCount: 30, description: null })],
+      [search("kilo-org/kilocode", { createdAt: NEW, stargazersCount: 1030, description: null })],
       DATE,
     );
     const rows = urlMerge(
@@ -552,7 +553,7 @@ describe("selectTrendingReport", () => {
         trending("a/empty", { periodStars: 90, description: " " }),
         trending("a/tool", { periodStars: 80, description: "A coding agent" }),
       ],
-      [search("a/empty"), search("a/tool")],
+      [search("a/empty", { stargazersCount: MIN_STARS }), search("a/tool", { stargazersCount: MIN_STARS })],
       DATE,
     );
     const inScope = { category: "coding_agent", standalone: 0.9 } as const;
@@ -566,6 +567,20 @@ describe("selectTrendingReport", () => {
       "jev",
     );
     expect(report.categories.flatMap((g) => g.rows.map((r) => r.fullName))).toEqual(["a/tool"]);
+  });
+
+  it("keeps an established repo under 1,000 stars out of the category tables", () => {
+    const github = rankGithubRepos(
+      [],
+      [
+        search("a/small", { stargazersCount: MIN_STARS - 1 }),
+        search("a/big", { stargazersCount: MIN_STARS }),
+      ],
+      DATE,
+    );
+    const coding: Classification = { category: "coding_agent", standalone: null };
+    const report = selectTrendingReport(github, [], new Map(github.map((r) => [r.key, coding])), "topics");
+    expect(report.categories.flatMap((g) => g.rows.map((r) => r.fullName))).toEqual(["a/big"]);
   });
 
   it("drops unclassified, out-of-scope and non-standalone candidates from the Radar", () => {
@@ -590,7 +605,7 @@ describe("selectTrendingReport", () => {
   it("groups category rows in fixed order, caps them at 8 and omits empty categories", () => {
     const github = rankGithubRepos(
       [],
-      Array.from({ length: 12 }, (_, i) => search(`c/r${i}`, { stargazersCount: 100 - i })),
+      Array.from({ length: 12 }, (_, i) => search(`c/r${i}`, { stargazersCount: 1100 - i })),
       DATE,
     );
     const classifications = new Map<string, Classification>(
@@ -614,9 +629,9 @@ describe("selectTrendingReport", () => {
       ["big1", 100_000, 900],
       ["big2", 90_000, 800],
       ["big3", 80_000, 700],
-      ["mid", 2_000, 400],
-      ["small1", 300, 200],
-      ["small2", 250, 150],
+      ["mid", 5_000, 400],
+      ["small1", 1_300, 300],
+      ["small2", 1_200, 200],
       ["none", 50_000, -1],
     ];
     const github = rankGithubRepos(
@@ -646,9 +661,9 @@ describe("selectTrendingReport", () => {
         100_000,
         900 - i * 100,
       ]),
-      // +50% and +36%, both above every big repo's relative gain.
-      ["fifty", 150, 50],
-      ["tiny", 150, 40],
+      // +5% and +4%, both above every big repo's relative gain.
+      ["fifty", 1_050, 50],
+      ["tiny", 1_040, 40],
     ];
     const github = rankGithubRepos(
       [],
@@ -711,8 +726,8 @@ describe("selectTrendingReport", () => {
     const github = rankGithubRepos(
       [],
       [
-        search("g/new", { stargazersCount: 50, createdAt: "2026-10-01T00:00:00Z" }),
-        search("g/old", { stargazersCount: 10 }),
+        search("g/new", { stargazersCount: 1050, createdAt: "2026-10-01T00:00:00Z" }),
+        search("g/old", { stargazersCount: 1010 }),
       ],
       DATE,
     );
@@ -740,13 +755,13 @@ describe("selectTrendingReport", () => {
     const github = rankGithubRepos(
       [],
       [
-        search("g/radar", { stargazersCount: 50, createdAt: NEW }),
-        // New and in scope, but under 25 stars.
+        search("g/radar", { stargazersCount: 1050, createdAt: NEW }),
+        // New and in scope, but under 1,000 stars.
         search("g/tiny", { stargazersCount: 10, createdAt: NEW }),
         // New and in scope, but not a standalone tool.
-        search("g/plugin", { stargazersCount: 60, createdAt: NEW }),
-        search("g/table", { stargazersCount: 500 }),
-        search("g/off", { stargazersCount: 900 }),
+        search("g/plugin", { stargazersCount: 1060, createdAt: NEW }),
+        search("g/table", { stargazersCount: 1500 }),
+        search("g/off", { stargazersCount: 1900 }),
       ],
       DATE,
       hist({}),
@@ -820,7 +835,7 @@ describe("summaryRows", () => {
   // 2026-10-19: summaries repeated the Stars column, and "week #16 / month #19" read as a date.
   it("gives the model no figures: language for GitHub rows, sources and newness for Radar rows", () => {
     const github: GithubRow[] = rankGithubRepos(
-      [trending("t/x", { periodStars: 7, totalStars: 70, language: "Rust", description: "Desc" })],
+      [trending("t/x", { periodStars: 7, totalStars: 1070, language: "Rust", description: "Desc" })],
       [search("t/x", { topic: "harness" })],
       DATE,
     );
@@ -927,6 +942,11 @@ describe("nextStarHistory", () => {
     const rerunRows = rankGithubRepos([], repos, DATE, first);
     expect(rerunRows[0]!.gain).toBe(812);
     expect(nextStarHistory(first, rerunRows, DATE)).toEqual(first);
+    const promoted = { date: DATE, repos: [["a/x", "agent_tooling"]] as [string, "agent_tooling"][] };
+    // A new record replaces the last one; a run without one keeps it.
+    const withPromoted = nextStarHistory(first, rerunRows, DATE, undefined, promoted);
+    expect(withPromoted.promoted).toEqual(promoted);
+    expect(nextStarHistory(withPromoted, rerunRows, DATE).promoted).toEqual(promoted);
     expect(first.repos["a/x"]).toEqual([
       ["2026-09-28", 85_580],
       [DATE, 86_392],
@@ -995,6 +1015,21 @@ describe("loadStarHistory / saveStarHistory", () => {
     saveStarHistory(withReported, file);
     expect(fs.readFileSync(file, "utf-8")).toContain(`"${DATE}": ["github:a/x","npm:p"]`);
     expect(loadStarHistory(file)).toEqual(withReported);
+    const withPromoted = {
+      ...withReported,
+      promoted: { date: DATE, repos: [["a/x", "coding_agent"]] as [string, "coding_agent"][] },
+    };
+    saveStarHistory(withPromoted, file);
+    expect(loadStarHistory(file)).toEqual(withPromoted);
+  });
+
+  it("drops a malformed `promoted`, keeping the rest", () => {
+    const file = path.join(tmp(), "s.json");
+    fs.writeFileSync(
+      file,
+      JSON.stringify({ repos: { "a/x": [[DATE, 1]] }, promoted: { date: DATE, repos: [["a/x", "nope"]] } }),
+    );
+    expect(loadStarHistory(file)).toEqual(hist({ "a/x": [[DATE, 1]] }));
   });
 
   it("keeps the star points when `reported` is malformed", () => {
@@ -1032,11 +1067,11 @@ describe("composeTrendingReport with star history", () => {
     report.categories.flatMap((c) => c.rows.map((r) => [r.fullName, r.starsCell]));
 
   it("ranks search repos by their deltas and returns the next history", async () => {
-    const h = hist({ "big/agent": [["2026-09-28", 8_990]], "small/agent": [["2026-09-28", 400]] });
+    const h = hist({ "big/agent": [["2026-09-28", 8_990]], "small/agent": [["2026-09-28", 1_000]] });
     const report = await composeTrendingReport(
       data([
         search("big/agent", { stargazersCount: 9_000 }),
-        search("small/agent", { stargazersCount: 600 }),
+        search("small/agent", { stargazersCount: 1_500 }),
       ]),
       DATE,
       {
@@ -1049,24 +1084,24 @@ describe("composeTrendingReport with star history", () => {
       },
     );
     expect(cells(report)).toEqual([
-      ["small/agent", "600 (+200, +50%)"],
+      ["small/agent", "1,500 (+500, +50%)"],
       ["big/agent", "9,000 (+10, +0.1%)"],
     ]);
     expect(report.nextStarHistory?.repos["small/agent"]).toEqual([
-      ["2026-09-28", 400],
-      [DATE, 600],
+      ["2026-09-28", 1_000],
+      [DATE, 1_500],
     ]);
   });
 
   it("marks 🔥 the rows last week's report showed and records this week's", async () => {
     const h = {
-      ...hist({ "big/agent": [["2026-09-28", 8_990]], "small/agent": [["2026-09-28", 400]] }),
+      ...hist({ "big/agent": [["2026-09-28", 8_990]], "small/agent": [["2026-09-28", 1_000]] }),
       reported: { "2026-09-28": ["github:small/agent"] },
     };
     const report = await composeTrendingReport(
       data([
         search("big/agent", { stargazersCount: 9_000 }),
-        search("Small/Agent", { stargazersCount: 600 }),
+        search("Small/Agent", { stargazersCount: 1_500 }),
       ]),
       DATE,
       {
@@ -1100,12 +1135,12 @@ describe("composeTrendingReport with star history", () => {
       data([
         search("snap/agent", { stargazersCount: 9_000 }),
         search("big/agent", { stargazersCount: 5_000 }),
-        search("small/agent", { stargazersCount: 300 }),
+        search("small/agent", { stargazersCount: 1_150 }),
         // The topic fallback puts an unknown label out of scope.
         search("off/topic", { stargazersCount: 7_000, topic: "llm" }),
         // Ten days old: too old to count every star, so it needs the API.
-        search("new/agent", { stargazersCount: 40, createdAt: "2026-09-25T00:00:00Z" }),
-        // Under NEW_REPO_MIN_STARS: never on the Radar.
+        search("new/agent", { stargazersCount: 1_040, createdAt: "2026-09-25T00:00:00Z" }),
+        // Under MIN_STARS: never on the Radar.
         search("tiny/new", { stargazersCount: 10, createdAt: "2026-09-25T00:00:00Z" }),
       ]),
       DATE,
@@ -1121,10 +1156,10 @@ describe("composeTrendingReport with star history", () => {
     expect(asked).toEqual(["new/agent", "big/agent", "small/agent"]);
     expect(cells(report)).toEqual([
       ["snap/agent", "9,000 (+1,000, +13%)"],
-      ["small/agent", "300 (+150, +100%)"],
+      ["small/agent", "1,150 (+150, +15%)"],
       ["big/agent", "5,000 (+50, +1%)"],
     ]);
-    expect(report.radar.map((r) => r.signals)).toEqual([["🆕 40 (+30)"]]);
+    expect(report.radar.map((r) => r.signals)).toEqual([["🆕 1,040 (+30, +3%)"]]);
   });
 
   it("skips a failed repo, and stops at a rate limit", async () => {

@@ -14,6 +14,7 @@ import fs from "node:fs";
 import path from "node:path";
 import type { Numbered } from "../reports/summarized-table.ts";
 import type { SearchRepo, TrendingRepo } from "./trending.ts";
+import type { PromotedRecord } from "./promoted.ts";
 import { formatTokens, type OpenRouterApp } from "../sources/openrouter.ts";
 import { momentumRatio, type NpmData, type NpmPackage } from "./npm.ts";
 import { toCstDateStr } from "../core/date.ts";
@@ -102,6 +103,8 @@ export interface StarHistory {
   repos: Record<string, [string, number][]>;
   /** CST date of a weekly report → the lowercased item keys it showed (`reportedKeys`), for 🔥. */
   reported?: Record<string, string[]>;
+  /** The latest weekly report's category-table repos, tracked by the daily agents report (`promotedRepos`). */
+  promoted?: PromotedRecord;
 }
 
 // ---------------------------------------------------------------------------
@@ -117,16 +120,17 @@ export const NEW_REPO_DAYS = 14;
 const NEW_LISTING_DAYS = 14;
 
 /**
- * A new repo below this many stars stays off the Radar, and the `created:`
- * search asks for no fewer. On the 2026-10-06 live check an 8-star repo created
- * that day ranked above week-old repos; the LLM's new-repo picks on 2026-10-05
- * had 27–168 stars.
+ * Total stars a GitHub repo needs to appear anywhere in the report (Radar and
+ * category tables), and so to be promoted into the daily agents report; both
+ * topic searches ask for no fewer. Raised from 25 (new repos) and 100
+ * (established) on 2026-10-20: the report should follow established projects,
+ * and on 2026-10-19 most rows were few-hundred-star repos with one good week.
+ * 0 (a trending scrape miss) is unknown and does not pass.
  */
-export const NEW_REPO_MIN_STARS = 25;
+export const MIN_STARS = 1000;
 /**
  * A relative gain needs at least this many stars a week ago: below it, 8 → 16
- * stars reads as +100%. The established-repo search asks for this many stars
- * now, since a repo with fewer cannot have had more a week ago.
+ * stars reads as +100%.
  */
 export const RELATIVE_MIN_BASELINE = 100;
 /**
@@ -200,7 +204,20 @@ export function loadStarHistory(file = STAR_HISTORY_FILE): StarHistory {
       Object.values(reported).every(
         (keys) => Array.isArray(keys) && keys.every((k) => typeof k === "string"),
       );
-    return { repos: parsed.repos, ...(validReported ? { reported } : {}) };
+    const { promoted } = parsed;
+    // A malformed `promoted` costs the daily agents report its trending repos until Monday.
+    const validPromoted =
+      typeof promoted?.date === "string" &&
+      Array.isArray(promoted.repos) &&
+      promoted.repos.every(
+        (r) =>
+          Array.isArray(r) && typeof r[0] === "string" && (CATEGORIES as readonly unknown[]).includes(r[1]),
+      );
+    return {
+      repos: parsed.repos,
+      ...(validReported ? { reported } : {}),
+      ...(validPromoted ? { promoted } : {}),
+    };
   } catch (err) {
     // Unlike the match file, starting over is safe: the history is never
     // hand-edited, and losing it costs one run of history-API calls, not a decision.
@@ -222,8 +239,9 @@ export function saveStarHistory(history: StarHistory, file = STAR_HISTORY_FILE):
     ([date, keys]) => `    ${JSON.stringify(date)}: ${JSON.stringify(keys)}`,
   );
   const reportedBody = reported.length > 0 ? `,\n  "reported": {\n${reported.join(",\n")}\n  }` : "";
+  const promotedBody = history.promoted ? `,\n  "promoted": ${JSON.stringify(history.promoted)}` : "";
   fs.mkdirSync(path.dirname(file), { recursive: true });
-  fs.writeFileSync(file, `{\n  "repos": ${body}${reportedBody}\n}\n`, "utf-8");
+  fs.writeFileSync(file, `{\n  "repos": ${body}${reportedBody}${promotedBody}\n}\n`, "utf-8");
 }
 
 /**
@@ -263,13 +281,15 @@ export function reportedKeys(report: Pick<TrendingReportData, "radar" | "categor
 /**
  * History after this run: today's points recorded or replaced, unseen repos
  * carried forward, old points pruned; today's report keys recorded or
- * replaced, reports older than a week pruned.
+ * replaced, reports older than a week pruned; today's promoted repos replace
+ * the last record (kept when there are none).
  */
 export function nextStarHistory(
   history: StarHistory,
   githubRows: GithubRow[],
   dateStr: string,
   reported?: string[],
+  promoted?: PromotedRecord,
 ): StarHistory {
   const repos: Record<string, [string, number][]> = {};
   for (const [name, points] of Object.entries(history.repos)) {
@@ -287,6 +307,8 @@ export function nextStarHistory(
     .filter(([date]) => daysBetween(date, dateStr) <= STAR_HISTORY_DAYS)
     .sort(([a], [b]) => a.localeCompare(b));
   if (keptReported.length > 0) next.reported = Object.fromEntries(keptReported);
+  const nextPromoted = promoted ?? history.promoted;
+  if (nextPromoted) next.promoted = nextPromoted;
   for (const [name, points] of Object.entries(repos)) {
     const kept = points
       .filter(([date]) => daysBetween(date, dateStr) <= STAR_HISTORY_DAYS)
@@ -606,7 +628,7 @@ function interleaveGains(rows: GithubRow[]): GithubRow[] {
 
 /** New repos the Radar can list (`buildRadarCandidates`); `radarPool` then applies `onRadar`. */
 export function isRadarRepo(r: GithubRow): boolean {
-  return r.isNew && r.totalStars >= NEW_REPO_MIN_STARS;
+  return r.isNew && hasStars(r);
 }
 
 /**
@@ -616,8 +638,10 @@ export function isRadarRepo(r: GithubRow): boolean {
  */
 export function reachesReport(r: GithubRow, c: Classification | undefined): boolean {
   if (c === undefined) return false;
-  return r.isNew ? isRadarRepo(r) && onRadar(c) : hasDescription(r) && inScope(c);
+  return r.isNew ? isRadarRepo(r) && onRadar(c) : isCategoryRepo(r) && inScope(c);
 }
+
+const hasStars = (r: GithubRow): boolean => r.totalStars >= MIN_STARS;
 
 /**
  * The category tables need one: a repo without a description has nothing to
@@ -625,6 +649,9 @@ export function reachesReport(r: GithubRow, c: Classification | undefined): bool
  * with "is a TypeScript project". Jev still classifies it.
  */
 const hasDescription = (r: GithubRow): boolean => r.description.trim() !== "";
+
+/** An established repo the category tables can list, before scope. */
+const isCategoryRepo = (r: GithubRow): boolean => !r.isNew && hasStars(r) && hasDescription(r);
 
 /**
  * Apply scope, merge, cap and number the rows. New repos are Radar-only: the
@@ -659,9 +686,7 @@ export function selectTrendingReport(
   const categories = CATEGORIES.map((category) => ({
     category,
     rows: interleaveGains(
-      githubRows.filter(
-        (r) => !r.isNew && hasDescription(r) && classifications.get(r.key)?.category === category,
-      ),
+      githubRows.filter((r) => isCategoryRepo(r) && classifications.get(r.key)?.category === category),
     ),
   }))
     .filter((g) => g.rows.length > 0)

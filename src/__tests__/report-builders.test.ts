@@ -93,6 +93,20 @@ describe("buildProjectReportContent", () => {
     );
   });
 
+  it("finds the section of a promoted trending repo named by its owner/repo", () => {
+    const news = [{ source: "Hacker News", title: "cursor/plugins", url: "u", detail: "d" }];
+    const promoted = (repo: string) =>
+      makeActivity("p", { config: { id: `trending-${repo}`, repo, name: repo, keywords: [repo] }, news });
+    const result = buildProjectReportContent(
+      withAgents({
+        summary: "## Overview\nBODY\n\n## cursor/plugins\n- news",
+        activities: [promoted("cursor/plugins"), promoted("ruvnet/ruflo")],
+      }),
+    );
+    expect(result).toContain("Active today: 1 |");
+    expect(result).toContain("**Quiet today:** [ruvnet/ruflo](https://github.com/ruvnet/ruflo)");
+  });
+
   it("keeps projects with data active when the summary has no project section", () => {
     const news = [{ source: "Hacker News", title: "BETA 2.0", url: "u", detail: "d" }];
     const result = buildProjectReportContent(

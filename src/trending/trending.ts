@@ -6,12 +6,13 @@
 
 import { fetchOpenRouterData, type OpenRouterData } from "../sources/openrouter.ts";
 import { fetchNpmData, type NpmData } from "./npm.ts";
+import { promotedRecord } from "./promoted.ts";
 import { fetchWeeklyStarGain, GitHubApiError, githubGet, searchSlot } from "../core/github.ts";
 import {
   buildRadarCandidates,
   loadStarHistory,
   NEW_REPO_DAYS,
-  NEW_REPO_MIN_STARS,
+  MIN_STARS,
   nextStarHistory,
   lastWeekKeys,
   reportedKeys,
@@ -20,7 +21,6 @@ import {
   radarPool,
   rankGithubRepos,
   reachesReport,
-  RELATIVE_MIN_BASELINE,
   selectTrendingReport,
   urlMerge,
   type GithubRow,
@@ -260,8 +260,8 @@ interface SearchQuery {
 
 /**
  * Weekly only: per topic, repos created since `createdSince` with
- * NEW_REPO_MIN_STARS (the Radar's new agents) and repos pushed since
- * `pushedSince` with RELATIVE_MIN_BASELINE stars, every page (the category
+ * MIN_STARS (the Radar's new agents) and repos pushed since
+ * `pushedSince` with MIN_STARS, every page (the category
  * tables' pool, wide enough that a mid-size repo with a big week is in it).
  * Sorted by total stars, the pushed query alone is an all-time leaderboard: it
  * needs the second query for new repos and the star gain to rank. Not daily:
@@ -271,14 +271,14 @@ export async function searchAiRepos(pushedSince: string, createdSince: string): 
   // Space-separated: githubGet URL-encodes `q`, and an encoded "+" is a literal plus.
   const queries: SearchQuery[] = SEARCH_TOPICS.flatMap((topic): SearchQuery[] => [
     {
-      q: `topic:${topic} created:>${createdSince} stars:>=${NEW_REPO_MIN_STARS}`,
+      q: `topic:${topic} created:>${createdSince} stars:>=${MIN_STARS}`,
       topic,
       name: `${topic} (new)`,
       perPage: 100,
       maxPages: 1,
     },
     {
-      q: `topic:${topic} pushed:>${pushedSince} stars:>=${RELATIVE_MIN_BASELINE}`,
+      q: `topic:${topic} pushed:>${pushedSince} stars:>=${MIN_STARS}`,
       topic,
       name: topic,
       perPage: 100,
@@ -530,6 +530,12 @@ export async function composeTrendingReport(
     ...(rankingFile !== undefined ? { rankingFile } : {}),
     ...(nextMatches !== undefined ? { nextMatches } : {}),
     ...(nextCache ? { nextClassifications: nextCache } : {}),
-    nextStarHistory: nextStarHistory(history, githubRows, dateStr, reportedKeys(report)),
+    nextStarHistory: nextStarHistory(
+      history,
+      githubRows,
+      dateStr,
+      reportedKeys(report),
+      promotedRecord(report, dateStr),
+    ),
   };
 }

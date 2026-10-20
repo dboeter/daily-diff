@@ -64,6 +64,8 @@ import { fetchLobstersData, type LobstersData } from "./sources/lobsters.ts";
 import { DATA_SECTION_KEYS, loadConfig, type SectionKey } from "./core/config.ts";
 import { resolvePagesUrl } from "./cli/notify.ts";
 import { toCstDateStr, toUtcStr, isWeeklyRun, sleep } from "./core/date.ts";
+import { loadStarHistory } from "./trending/rank.ts";
+import { promotedRepos } from "./trending/promoted.ts";
 import {
   LIVE_REPORT_IDS,
   MSG,
@@ -78,10 +80,18 @@ import {
 // ---------------------------------------------------------------------------
 
 const CONFIG = loadConfig();
-const AGENTS = CONFIG.agents.repos;
-const INFRA_REPOS = CONFIG.infra.repos;
 const CLAUDE_SKILLS_REPO = CONFIG.skillsRepo;
 const DATA_SECTIONS = DATA_SECTION_KEYS.map((key) => CONFIG[key]);
+// The last weekly trending report's category-table repos join the curated
+// lists. Read from the committed state, so Monday's run still uses the previous
+// Monday's record: this run's trending report is saved after the fetch.
+const PROMOTED = promotedRepos(loadStarHistory(), toCstDateStr(new Date()), [
+  ...CONFIG.agents.repos,
+  ...CONFIG.infra.repos,
+  ...DATA_SECTIONS.flatMap((s) => s.repos),
+]);
+const AGENTS = [...CONFIG.agents.repos, ...PROMOTED.agents];
+const INFRA_REPOS = [...CONFIG.infra.repos, ...PROMOTED.infra];
 
 // ---------------------------------------------------------------------------
 // Helpers
