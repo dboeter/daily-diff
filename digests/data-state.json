@@ -15,7 +15,20 @@
     "oct 14, 2026: document generation in snowflake cowork (general availability)|2026-10-14": "2026-10-19",
     "feature: the apache hive catalog endpoint in the lakehouse runtime catalog is now generally available (ga).|2026-10-14": "2026-10-19",
     "feature: you can copy tables across regions.|2026-10-15": "2026-10-19",
-    "feature: incremental data transfers for the bigquery data transfer service for postgresql and servicenow are now generally available (ga).|2026-10-12": "2026-10-19"
+    "feature: incremental data transfers for the bigquery data transfer service for postgresql and servicenow are now generally available (ga).|2026-10-12": "2026-10-19",
+    "the agentic code converter is generally available for sql conversion|2026-10-15": "2026-10-20",
+    "on-demand state repartitioning is now generally available|2026-10-13": "2026-10-20",
+    "ai runtime will soon be available by default for workspaces with the compliance security profile enabled|2026-10-13": "2026-10-20",
+    "workspace-level package repositories for databricks apps will soon be available by default for workspaces with the compliance security profile enabled|2026-10-14": "2026-10-20",
+    "context-based ingress policies for inbound private connectivity are now generally available|2026-10-15": "2026-10-20",
+    "consumer access to query unity gateway services is generally available|2026-10-15": "2026-10-20",
+    "october 20, 2026: online feature store (general availability)|2026-10-20": "2026-10-20",
+    "oct 13, 2026: cortex agent sdk (public preview)|2026-10-13": "2026-10-20",
+    "oct 13, 2026: gemini 4 argon model in ai functions (preview)|2026-10-13": "2026-10-20",
+    "retiring the fabric data agent custom tool in microsoft foundry: move to fabric iq|2026-10-19": "2026-10-20",
+    "feature: metadata migration from dataproc metastore to lakehouse is now generally available (ga).|2026-10-14": "2026-10-20",
+    "feature: you can publish a bigquery conversational analytics agent in gemini enterprise.|2026-10-14": "2026-10-20",
+    "feature: the ai.agg function is generally available (ga).|2026-10-13": "2026-10-20"
   },
   "stages": {
     "snowflake-bcr:2026_08": "2026-10-16 Introduced in the 10.37 release (October 8-16, 2026) as Disabled by Default; account admins can enable for testing."

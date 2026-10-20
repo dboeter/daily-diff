@@ -1,0 +1,22 @@
+{
+  "ai-agents": [
+    "Claude Code v2.1.304 adds plugin hook transparency and stricter permission controls, giving developers clearer insight and safer tool use when extending the agent.",
+    "Kilo Code v7.8.15 makes the browser_open prompt remember user choice, reducing repetitive permission prompts and streamlining web‑based tooling."
+  ],
+  "ai-hn": [
+    "DeepSeek releases V4.1 Flash checkpoint on Hugging Face, a compact, speed‑optimized language model enabling low‑latency inference for developers.",
+    "Codex Desktop repeatedly creates Crashpad dump files, a stability bug that wastes disk space and hides real crash reports, requiring monitoring by developers."
+  ],
+  "ai-arxiv": [
+    "Muse Glimmer 30B is a 30B‑parameter on‑device language model with perception encoder and reliable tool use, letting developers run powerful private agents locally without cloud reliance.",
+    "Bellman Language Models cache repeated LLM decisions as a controller, cutting model calls by >90% while preserving success, delivering faster, cheaper agents for repetitive workflows."
+  ],
+  "ai-web": [
+    "Anthropic’s internal staff expect AI to reach Nobel‑level discoveries by 2030 at 91% (vs 39% public) and foresee far higher productivity gains, signaling a more aggressive roadmap that may shape product priorities.",
+    "Anthropic grants METR nonprofit employee‑level access to internal model and safety data to publish independent risk assessments, strengthening third‑party scrutiny and setting a transparency precedent."
+  ],
+  "ai-data": [
+    "Snowflake’s Online Feature Store is now generally available, providing low‑latency feature serving for ML workloads directly inside Snowflake.",
+    "Databricks releases the agentic code converter for general availability, enabling SQL translation from T‑SQL, Snowflake, Redshift, Oracle, BigQuery and Teradata with validation and Genie Code chat."
+  ]
+}
