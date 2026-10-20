@@ -47,16 +47,18 @@ const DAY_MS = 24 * 60 * 60 * 1000;
 /**
  * The category-table rows of a weekly report (`MIN_STARS` or more, like every
  * GitHub row in it). Not the Radar: its GitHub rows are repos created this
- * fortnight, and its other rows have no repo.
+ * fortnight, and its other rows have no repo. Undefined when the tables are
+ * empty (the GitHub fetches failed, OpenRouter or npm answered), so the saved
+ * record is kept rather than replaced by nothing.
  */
 export function promotedRecord(
   report: Pick<TrendingReportData, "categories">,
   dateStr: string,
-): PromotedRecord {
-  return {
-    date: dateStr,
-    repos: report.categories.flatMap((c) => c.rows.map((r): [string, Category] => [r.fullName, c.category])),
-  };
+): PromotedRecord | undefined {
+  const repos = report.categories.flatMap((c) =>
+    c.rows.map((r): [string, Category] => [r.fullName, c.category]),
+  );
+  return repos.length > 0 ? { date: dateStr, repos } : undefined;
 }
 
 /**
@@ -92,7 +94,8 @@ export function promotedRepos(
         if (out[section].length >= PROMOTED_PER_SECTION) break;
         seen.add(fullName.toLowerCase());
         out[section].push({
-          id: `trending-${fullName.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`,
+          // "__" for the slash: an owner has no "_", so two repos never share an id.
+          id: `trending-${fullName.toLowerCase().replace("/", "__")}`,
           repo: fullName,
           // The full path, so a promoted project reads apart from the curated ones.
           name: fullName,

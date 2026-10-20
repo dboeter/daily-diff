@@ -37,6 +37,10 @@ describe("promotedRecord", () => {
       ],
     });
   });
+
+  it("is undefined when the tables are empty, so the saved record is kept", () => {
+    expect(promotedRecord({ categories: [] }, DATE)).toBeUndefined();
+  });
 });
 
 describe("promotedRepos", () => {
@@ -54,7 +58,7 @@ describe("promotedRepos", () => {
     expect(out.agents.map((r) => r.repo)).toEqual(["Cursor/Plugins"]);
     expect(out.infra.map((r) => r.repo)).toEqual(["y/harness", "z/swarm"]);
     expect(out.agents[0]).toEqual({
-      id: "trending-cursor-plugins",
+      id: "trending-cursor__plugins",
       repo: "Cursor/Plugins",
       name: "Cursor/Plugins",
       keywords: ["Cursor/Plugins"],
@@ -65,6 +69,30 @@ describe("promotedRepos", () => {
     const tracked: RepoConfig[] = [{ id: "cline", repo: "cline/cline", name: "Cline" }];
     const out = promotedRepos(record([["Cline/Cline", "coding_agent"]]), DATE, tracked);
     expect(out.agents).toEqual([]);
+  });
+
+  it("takes a repo listed twice in the record once, case-insensitively", () => {
+    const out = promotedRepos(
+      record([
+        ["Ryder-Sun/Meldwork", "coding_agent"],
+        ["ryder-sun/meldwork", "coding_agent"],
+      ]),
+      DATE,
+      [],
+    );
+    expect(out.agents.map((r) => r.repo)).toEqual(["Ryder-Sun/Meldwork"]);
+  });
+
+  it("gives repos whose names differ only in punctuation different ids", () => {
+    const out = promotedRepos(
+      record([
+        ["a-b/c", "coding_agent"],
+        ["a/b-c", "coding_agent"],
+      ]),
+      DATE,
+      [],
+    );
+    expect(new Set(out.agents.map((r) => r.id)).size).toBe(2);
   });
 
   it("caps each section, round-robin over its categories", () => {
