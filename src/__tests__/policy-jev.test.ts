@@ -60,14 +60,35 @@ describe("policyRelevance", () => {
     expect(policyRelevance(answers(0.3, 1, 1, 2), "nl").keep).toBe(false);
   });
 
+  // Score-only answers (no probabilities) gate on the score's nearest level.
   it("drops a US item with little expected impact on the reader", () => {
-    expect(policyRelevance(answers(1, 1, 1, 2, 0.6), "us_federal").keep).toBe(false);
+    expect(policyRelevance(answers(1, 1, 1, 2, 0.4), "us_federal").keep).toBe(false);
     expect(policyRelevance(answers(1, 1, 1, 2, 1.4), "us_states").keep).toBe(true);
   });
 
   it("keeps an item from elsewhere only when it is a major event", () => {
-    expect(policyRelevance(answers(1, 1, 1, 1.2), "other").keep).toBe(false);
+    expect(policyRelevance(answers(1, 1, 1, 1.4), "other").keep).toBe(false);
     expect(policyRelevance(answers(1, 1, 1, 1.8), "other").keep).toBe(true);
+  });
+
+  it("gates on the level probabilities, not the expected score", () => {
+    const withProbs = (impact: Record<string, number>, score: number): PolicyAnswers => ({
+      ...answers(1, 1, 1, 2),
+      impact: { score, probabilities: impact },
+    });
+    // 2026-10-19, Covington on an enacted US law: mostly "some effect", expected score under 1.
+    expect(policyRelevance(withProbs({ 0: 0.17, 1: 0.82, 2: 0.01 }, 0.84), "us_federal").keep).toBe(true);
+    expect(policyRelevance(withProbs({ 0: 0.6, 1: 0.4, 2: 0 }, 0.4), "us_states").keep).toBe(false);
+
+    const other = (probabilities: Record<string, number>, score: number): PolicyAnswers => ({
+      ...answers(1, 1, 1, 2),
+      significance: { score, probabilities },
+    });
+    expect(policyRelevance(other({ 0: 0.2, 1: 0.2, 2: 0.6 }, 1.4), "other").keep).toBe(true);
+    expect(policyRelevance(other({ 0: 0, 1: 0.7, 2: 0.3 }, 1.6), "other").keep).toBe(false);
+
+    expect(policyRelevance(withProbs({}, 1), "us_federal").keep).toBe(false);
+    expect(() => policyRelevance(withProbs({ 0: 0.2, 1: NaN }, 1), "us_federal")).toThrow("Unexpected");
   });
 
   it("throws on an unexpected answer shape, so the call counts as failed", () => {

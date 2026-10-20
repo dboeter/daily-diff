@@ -5,7 +5,7 @@
  */
 
 import OpenAI from "openai";
-import { type LlmProvider, TruncatedResponseError } from "./types.ts";
+import { EmptyResponseError, type LlmProvider, TruncatedResponseError } from "./types.ts";
 
 /**
  * Per-request timeout. Just over OpenRouter's 5-minute gateway timeout, so its
@@ -61,7 +61,7 @@ export abstract class OpenAICompatibleProvider implements LlmProvider {
       throw new TruncatedResponseError(this.name, maxTokens, response.usage);
     }
     const text = choice?.message?.content;
-    if (!text) throw new Error(`Unexpected empty response from ${this.name}`);
+    if (!text) throw new EmptyResponseError(this.name, choice?.finish_reason, response.usage);
     return text;
   }
 }

@@ -30,5 +30,19 @@ export class TruncatedResponseError extends Error {
   }
 }
 
+/**
+ * The model answered with no text. The reason and usage go into the message:
+ * on 2026-10-19 the data report's vendor summaries failed with only "empty
+ * response" in the log. `callLlm` retries once, as for an unavailable model.
+ */
+export class EmptyResponseError extends Error {
+  constructor(provider: string, reason?: unknown, usage?: unknown) {
+    super(
+      `Unexpected empty response from ${provider} (finish_reason: ${String(reason)}, usage: ${JSON.stringify(usage)})`,
+    );
+    this.name = "EmptyResponseError";
+  }
+}
+
 /** Factory function that creates an LlmProvider instance. */
 export type ProviderFactory = () => LlmProvider;

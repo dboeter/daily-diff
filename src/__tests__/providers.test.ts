@@ -190,7 +190,7 @@ describe("AnthropicProvider", () => {
     });
 
     const p = new AnthropicProvider();
-    await expect(p.call("prompt", 100)).rejects.toThrow("Unexpected response type from Anthropic");
+    await expect(p.call("prompt", 100)).rejects.toThrow("Unexpected empty response from anthropic");
   });
 
   it("throws TruncatedResponseError when it stops at max_tokens, even with text", async () => {
@@ -377,11 +377,13 @@ describe("OpenRouterProvider", () => {
   it("throws on empty response", async () => {
     const mockCreate = await getOpenAIMockCreate();
     mockCreate.mockResolvedValueOnce({
-      choices: [{ message: { content: "" } }],
+      choices: [{ message: { content: "" }, finish_reason: "stop" }],
     });
 
     const p = new OpenRouterProvider({ apiKey: "k" });
-    await expect(p.call("prompt", 100)).rejects.toThrow("Unexpected empty response from openrouter");
+    await expect(p.call("prompt", 100)).rejects.toThrow(
+      "Unexpected empty response from openrouter (finish_reason: stop",
+    );
   });
 
   it("throws TruncatedResponseError on finish_reason length, even with content", async () => {

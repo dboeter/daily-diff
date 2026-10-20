@@ -162,11 +162,14 @@ export interface PolicyAnswers {
   about_ai_policy: { noul: number };
   binding: { noul: number };
   new_stage: { noul: number };
-  /** Probability-weighted level, 0–2. */
-  significance: { score: number };
+  /** Probability-weighted level, 0–2, and the level probabilities (keys "0"–"2"). */
+  significance: ScoreAnswer;
   /** US items only; 0–2. */
-  impact?: { score: number };
+  impact?: ScoreAnswer;
 }
+
+/** A Jev score answer; `probabilities` may be missing from a hand-edited verdict. */
+type ScoreAnswer = { score: number; probabilities?: Record<string, number> };
 
 /**
  * Weights for the order, summing to 1. Being about AI policy is the largest
@@ -186,12 +189,32 @@ const MAX_LEVEL = 2;
 const ABOUT_MIN = 0.5;
 /** An AI-policy item (0.4) needs a new stage or some significance on top: a routine event drops. */
 const KEEP_MIN_RELEVANCE = 0.5;
+/**
+ * The level gates below read Jev's probabilities, not the expected score: an
+ * answer of mostly level 1 has an expected score just under 1. On 2026-10-19
+ * a US law enacted (impact {0: 0.17, 1: 0.82, 2: 0.01}, score 0.84) was dropped
+ * by a `score >= 1` gate, and Policy Watch kept nothing that day.
+ */
+const GATE_MIN_PROBABILITY = 0.5;
 /** US items: "some effect" or more (spec: a US item with little expected impact stays out). */
-const US_IMPACT_MIN = 1;
+const US_IMPACT_LEVEL = 1;
 /** Elsewhere: only major events (spec). */
-const OTHER_SIGNIFICANCE_MIN = 1.5;
+const OTHER_SIGNIFICANCE_LEVEL = 2;
 
 const isUs = (j: Jurisdiction): boolean => j === "us_federal" || j === "us_states";
+
+/**
+ * Whether the answer is at `level` or above with probability ≥ 0.5. Without
+ * probabilities (a verdict written by hand without them), by the score's
+ * nearest level. Throws on a non-finite probability, like `policyRelevance`.
+ */
+function reachesLevel(a: ScoreAnswer, level: number): boolean {
+  if (!a.probabilities) return Math.round(a.score) >= level;
+  let p = 0;
+  for (const [key, prob] of Object.entries(a.probabilities)) if (Number(key) >= level) p += prob;
+  if (!Number.isFinite(p)) throw new Error(`Unexpected Jev probabilities: ${JSON.stringify(a)}`);
+  return p >= GATE_MIN_PROBABILITY;
+}
 
 /** Weighted relevance in 0–1 and the keep decision. Throws on an unexpected answer shape. */
 export function policyRelevance(
@@ -214,8 +237,8 @@ export function policyRelevance(
   const keep =
     a.about_ai_policy.noul >= ABOUT_MIN &&
     relevance >= KEEP_MIN_RELEVANCE &&
-    (!isUs(jurisdiction) || impact! >= US_IMPACT_MIN) &&
-    (jurisdiction !== "other" || a.significance.score >= OTHER_SIGNIFICANCE_MIN);
+    (!isUs(jurisdiction) || reachesLevel(a.impact!, US_IMPACT_LEVEL)) &&
+    (jurisdiction !== "other" || reachesLevel(a.significance, OTHER_SIGNIFICANCE_LEVEL));
   return { relevance, keep };
 }
 
