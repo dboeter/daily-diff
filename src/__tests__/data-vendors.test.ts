@@ -212,3 +212,72 @@ describe("fetchVendorData", () => {
     expect(data.items.map((i) => i.id)).toEqual(["snowflake-bcr:2026_08", "snowflake-bcr:2026_07"]);
   });
 });
+
+describe("fetchVendorData across days", () => {
+  const rss = (items: { guid: string; title: string; date: string }[]) =>
+    `<?xml version="1.0"?><rss version="2.0"><channel><title>t</title>${items
+      .map(
+        (i) =>
+          `<item><title>${i.title}</title><link>https://x/${i.guid}</link><guid>${i.guid}</guid><pubDate>${new Date(`${i.date}T00:00:00Z`).toUTCString()}</pubDate><description>d</description></item>`,
+      )
+      .join("")}</channel></rss>`;
+  const feeds: DataFeed[] = [
+    { name: "Microsoft Fabric", vendor: "azure", url: "https://x/fabric.xml", parser: "rss", stableId: true },
+    { name: "Azure Databricks", vendor: "databricks", url: "https://x/dbx.xml", parser: "rss" },
+  ];
+  type Note = { guid: string; title: string; date: string };
+  const run = (day: string, fabric: Note[], dbx: Note[], state: Parameters<typeof fetchVendorData>[2]) => {
+    vi.spyOn(console, "log").mockImplementation(() => {});
+    vi.spyOn(globalThis, "fetch").mockImplementation(
+      async (input) => new Response(rss(String(input).endsWith("fabric.xml") ? fabric : dbx)),
+    );
+    return fetchVendorData({ feeds }, new Date(`${day}T01:00:00Z`), state, { cache: { items: {} } });
+  };
+  const retiring = { guid: "ba-p/5374418", title: "Retirement of the custom tool: move to Fabric IQ" };
+
+  it("does not report a stable-id item again when its date moves", async () => {
+    const first = await run("2026-10-20", [{ ...retiring, date: "2026-10-19" }], [], null);
+    expect(first.items.map((i) => i.title)).toEqual([retiring.title]);
+    const second = await run("2026-10-21", [{ ...retiring, date: "2026-10-20" }], [], first.nextState);
+    expect(second.items).toEqual([]);
+  });
+
+  it("reads a stable-id item's title + date key saved before the change as reported", async () => {
+    const legacy = {
+      reported: { "retirement of the custom tool: move to fabric iq|2026-10-19": "2026-10-20" },
+    };
+    const data = await run("2026-10-21", [{ ...retiring, date: "2026-10-19" }], [], legacy);
+    expect(data.items).toEqual([]);
+  });
+
+  it("still keys an Azure Databricks note on title + date, so a second guid is not new", async () => {
+    const note = { title: "Lakebase replication is generally available", date: "2026-10-19" };
+    const first = await run("2026-10-20", [], [{ ...note, guid: "topic#a" }], null);
+    expect(first.items).toHaveLength(1);
+    const second = await run("2026-10-21", [], [{ ...note, guid: "month#a" }], first.nextState);
+    expect(second.items).toEqual([]);
+  });
+
+  const comingSoon = {
+    guid: "whats-coming#pkg",
+    title: "Workspace-level package repositories for Databricks Apps will soon be generally available",
+    date: "2026-10-14",
+  };
+  const ga = {
+    guid: "october#pkg",
+    title: "Workspace-level package repositories for Databricks Apps are generally available",
+    date: "2026-10-14",
+  };
+
+  it("does not report a GA note after its coming-soon note was reported on an earlier day", async () => {
+    const first = await run("2026-10-20", [], [comingSoon], null);
+    expect(first.items.map((i) => i.title)).toEqual([comingSoon.title]);
+    const second = await run("2026-10-21", [], [comingSoon, ga], first.nextState);
+    expect(second.items).toEqual([]);
+  });
+
+  it("reports both when the coming-soon and GA notes arrive on the same day", async () => {
+    const data = await run("2026-10-21", [], [comingSoon, ga], null);
+    expect(data.items.map((i) => i.title).sort()).toEqual([ga.title, comingSoon.title].sort());
+  });
+});

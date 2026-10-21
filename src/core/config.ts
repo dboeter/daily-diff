@@ -114,6 +114,11 @@ export interface DataFeed {
   parser: FeedParser;
   /** `rss` only: keep an item only when one of its `<category>` values is listed. */
   categories?: string[];
+  /**
+   * config `stable_id: true`: the feed's guid stays put when a post's date or
+   * title is edited, so the state keys an item on it instead of title + date.
+   */
+  stableId?: boolean;
 }
 
 /** The data report's non-repo sources (config.yml `data`). */
@@ -234,6 +239,7 @@ function toData(raw: unknown, file: string): DataConfig {
     url?: unknown;
     parser?: unknown;
     categories?: unknown;
+    stable_id?: unknown;
   }[] = feeds;
   return {
     feeds: rawFeeds.map((f, i) => {
@@ -249,12 +255,16 @@ function toData(raw: unknown, file: string): DataConfig {
       if (f.categories !== undefined && (f.parser !== "rss" || !Array.isArray(f.categories))) {
         throw new Error(`${file}: data.feeds[${i}].categories must be a list, on an rss feed`);
       }
+      if (f.stable_id !== undefined && typeof f.stable_id !== "boolean") {
+        throw new Error(`${file}: data.feeds[${i}].stable_id must be true or false`);
+      }
       return {
         name: f.name.trim(),
         vendor: f.vendor as Vendor,
         url: f.url.trim(),
         parser: f.parser as FeedParser,
         ...(Array.isArray(f.categories) ? { categories: f.categories.map(String) } : {}),
+        ...(f.stable_id ? { stableId: true } : {}),
       };
     }),
   };

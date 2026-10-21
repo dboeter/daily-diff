@@ -21,8 +21,12 @@ export interface ReportedState {
   stages?: Record<string, string>;
 }
 
-/** What the state reads of an item; `published` dates a stage item's stage. */
-export type StateItem = { id: string; published: string; stage?: string };
+/**
+ * What the state reads of an item; `published` dates a stage item's stage.
+ * `aliases`: keys the state may hold the item under from before its key
+ * changed; one in `reported` counts as the item's own (it ages out with the prune).
+ */
+export type StateItem = { id: string; published: string; stage?: string; aliases?: string[] };
 
 /**
  * How long a reported id is remembered. Both reports drop items older than 7
@@ -61,7 +65,7 @@ export function stageKey(item: { published: string; stage?: string }): string {
 /** Items no earlier day reported; a stage item also when its stage moved. An item reported today is still new. */
 export function newItems<T extends StateItem>(items: T[], state: ReportedState | null, dateStr: string): T[] {
   return items.filter((i) => {
-    const day = state?.reported[i.id];
+    const day = [i.id, ...(i.aliases ?? [])].map((k) => state?.reported[k]).find((d) => d !== undefined);
     if (day === dateStr) return true;
     if (i.stage !== undefined) return state?.stages?.[i.id] !== stageKey(i);
     return day === undefined;
