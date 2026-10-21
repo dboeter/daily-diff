@@ -353,23 +353,38 @@ export interface DataSection {
 }
 
 /**
- * The prose call's Highlights: everything before TABLES_MARKER (all of it
- * without one, as spliceTables does with a missing marker). Whatever the model
- * wrote after the marker was not asked for and is dropped.
+ * Split the prose call's reply at TABLES_MARKER: Highlights before it (all of
+ * it without one, as spliceTables does with a missing marker); after it, only
+ * the Across platforms section, from its heading to the next `## ` heading.
+ * Any other section the model wrote was not asked for and is dropped.
  */
-function proseHighlights(prose: string): string {
+function splitProse(prose: string): { highlights: string; acrossPlatforms: string } {
   const lines = prose.split("\n");
   const i = lines.findIndex((l) => l.trim() === TABLES_MARKER);
-  return (i === -1 ? prose : lines.slice(0, i).join("\n")).trim();
+  if (i === -1) return { highlights: prose.trim(), acrossPlatforms: "" };
+  const after = lines.slice(i + 1);
+  const start = after.findIndex((l) => l.trim() === `## ${DATA_REPORT.acrossPlatforms}`);
+  const end = after.findIndex((l, j) => j > start && l.startsWith("## "));
+  return {
+    highlights: lines.slice(0, i).join("\n").trim(),
+    acrossPlatforms:
+      start === -1
+        ? ""
+        : after
+            .slice(start, end === -1 ? undefined : end)
+            .join("\n")
+            .trim(),
+  };
 }
 
 /**
  * The data report: Highlights, then Databricks, Snowflake and Azure / Fabric &
  * GCP (each its code-rendered vendor table, then the vendor's repo section),
- * the open-source stack and Worth a Look. A section with neither vendor items
+ * the open-source stack, Across platforms and Worth a Look. A section with neither vendor items
  * nor repo activity is left out. LLM calls: one per active repo section (as in
  * the agents report) and one for the vendor row summaries, in parallel; then
- * one for Highlights over all of it. A failed summaries call leaves the
+ * one for Highlights and Across platforms over all of it (Across platforms is
+ * left out when the model writes none). A failed summaries call leaves the
  * descriptions in the tables; a failed prose call leaves the failure notice in
  * Highlights. Null when there are no kept vendor items and no repo activity.
  * Worth a Look is code only: links to `dataLaw` (today's Policy Watch items
@@ -437,12 +452,16 @@ export async function buildDataReport(
     null,
     LLM_TOKENS_LISTING,
   );
-  const highlights =
-    prose === null ? `## ${SECTIONS.highlights}\n\n${MSG.summaryFailed}` : proseHighlights(prose);
+  const { highlights, acrossPlatforms } =
+    prose === null
+      ? { highlights: `## ${SECTIONS.highlights}\n\n${MSG.summaryFailed}`, acrossPlatforms: "" }
+      : splitProse(prose);
   const lawLinks = dataLaw
     .map((i) => `- [${policyTitleLabel(i.title)}](${i.link}) — Policy Watch${i.stage ? `, ${i.stage}` : ""}`)
     .join("\n");
-  const epilogue = lawLinks ? `## ${SECTIONS.worthALook}\n\n${lawLinks}` : "";
+  const epilogue = [acrossPlatforms, lawLinks ? `## ${SECTIONS.worthALook}\n\n${lawLinks}` : ""]
+    .filter(Boolean)
+    .join("\n\n---\n\n");
 
   const content = buildProjectReportContent({
     heading: reportHeading("ai-data", dateStr),

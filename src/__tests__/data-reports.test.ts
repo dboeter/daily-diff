@@ -537,6 +537,26 @@ describe("buildDataReport", () => {
     expect(content).toContain("## Highlights\n- H.");
   });
 
+  it("puts Across platforms after the tables and before Worth a Look, and leaves it out when absent", async () => {
+    generateBody.mockReset();
+    const across =
+      "## Highlights\n- H.\n\n<!-- tables -->\n\n## Across platforms\n- Governance tagging: Snowflake GA, Databricks GA.\n\n## Data × AI\n- X.";
+    generateBody.mockImplementation(async (prompt: string) =>
+      prompt.startsWith("You are the editor") ? across : reply(prompt),
+    );
+    const policy = [policyItem("nis2", "NIS2 implementing act adopted")];
+    const content = (await build(sections(false), await vendorData(), dataLawOf(policy)))!.content;
+    const at = (s: string) => content.indexOf(s);
+    expect(content).toContain("## Across platforms\n- Governance tagging: Snowflake GA, Databricks GA.");
+    expect(at("## Open-source stack")).toBeLessThan(at("## Across platforms"));
+    expect(at("## Azure / Fabric & GCP")).toBeLessThan(at("## Across platforms"));
+    expect(at("## Across platforms")).toBeLessThan(at("## Worth a Look"));
+    expect(content).not.toContain("Data × AI");
+
+    generateBody.mockImplementation(async (prompt: string) => reply(prompt));
+    expect((await build(sections(false), await vendorData()))!.content).not.toContain("Across platforms");
+  });
+
   it("leaves the failure notice in Highlights and no Worth a Look when the prose call fails", async () => {
     generateBody.mockReset();
     generateBody.mockImplementation(async (prompt: string) => {

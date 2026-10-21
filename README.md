@@ -252,7 +252,7 @@ New articles are detected by comparing sitemap `lastmod` timestamps against a pe
 ## Features
 
 - **Daily:** one agents report — stable releases, hot issues and news for the `agents` and `infra` repos in `config.yml`, one section and one LLM call each
-- **Daily:** one data report — vendor release notes (`data.feeds`, code-rendered tables, deprecations first) plus stable releases, hot issues and news for the `databricks`, `snowflake` and `data_stack` repos in `config.yml`, one LLM call per repo section, one for the vendor row summaries and one for Highlights
+- **Daily:** one data report — vendor release notes (`data.feeds`, code-rendered tables, deprecations first) plus stable releases, hot issues and news for the `databricks`, `snowflake` and `data_stack` repos in `config.yml`, one LLM call per repo section, one for the vendor row summaries and one for Highlights and Across platforms
 - **Daily:** Hacker News AI stories, new ArXiv papers, new Anthropic/OpenAI web content (sitemap-based, incremental), and Policy Watch: new AI policy items from official sources (`policy` in `config.yml`)
 - **Weekly (Mondays):** GitHub AI trending + Claude Code Skills; the models report (Hugging Face trending models + OpenRouter token usage); Dev.to + Lobste.rs sections in the discussions report
 - Publishes a GitHub Issue per report; commits Markdown files to `digests/YYYY-MM-DD/`
@@ -423,6 +423,7 @@ Generated | Projects: N | Active today: N | Stable releases: N | Prereleases (no
 ## Snowflake                           — the same
 ## Azure / Fabric & GCP                — vendor table only
 ## Open-source stack                   — the data_stack repos
+## Across platforms                    — 0-3 bullets: one capability that moved on two or more vendors, compared
 ## Worth a Look                        — links to today's Policy Watch items that are EU data law (code-rendered)
 (a section with nothing new is left out)
 ```

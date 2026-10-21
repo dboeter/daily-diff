@@ -8,7 +8,15 @@ import type { WebFetchResult } from "../sources/web.ts";
 import type { TrendingData } from "../trending/trending.ts";
 import type { summaryRows } from "../trending/rank.ts";
 import { formatTokens, type OpenRouterData } from "../sources/openrouter.ts";
-import { ARXIV_REPORT, DISCUSSIONS_REPORT, MODELS_REPORT, MSG, SECTIONS, WEB_REPORT } from "../core/i18n.ts";
+import {
+  ARXIV_REPORT,
+  DATA_REPORT,
+  DISCUSSIONS_REPORT,
+  MODELS_REPORT,
+  MSG,
+  SECTIONS,
+  WEB_REPORT,
+} from "../core/i18n.ts";
 import { TABLES_MARKER, rowList, summaryLine, summaryOutputRule, type Numbered } from "./summarized-table.ts";
 import { NO_TITLE_RULE } from "./prompts.ts";
 import type { HnData } from "../sources/hn.ts";
@@ -189,15 +197,17 @@ ${summaryOutputRule(items.length)}
 }
 
 /**
- * Data report, vendor call 2 of 2: Highlights around the report's sections
- * (code-rendered vendor tables plus the repo bodies), which buildDataReport
- * splits at TABLES_MARKER. Highlights say what a change means for clients;
- * the tables already say what changed.
+ * Data report, vendor call 2 of 2: Highlights before the report's sections
+ * (code-rendered vendor tables plus the repo bodies) and Across platforms after
+ * them, which buildDataReport splits at TABLES_MARKER. Highlights say what a
+ * change means for clients (the tables already say what changed); Across
+ * platforms compares one capability across vendors, or is left out.
  */
 export function buildDataProsePrompt(sectionsMd: string, dateStr: string): string {
   const parts = [
     `\`## ${SECTIONS.highlights}\` — 3-5 bullets, the most consequential changes today, deprecations, retirements and breaking changes first. Each bullet says who is affected (which client setup: e.g. Azure Databricks workspaces with the compliance security profile, Snowflake Native App providers, BigQuery users of AI functions), what to do (enable, migrate, test, plan for) and by when, if the row gives a date.`,
     `The line \`${TABLES_MARKER}\` exactly once, on its own line. The sections are inserted there.`,
+    `\`## ${DATA_REPORT.acrossPlatforms}\` — 0-3 bullets, each one capability that moved on two or more platforms in the rows above (e.g. governance tagging on Snowflake and Databricks, AI functions in SQL on BigQuery and Snowflake), saying how they differ: GA or preview, which clouds, what each covers. Only rows in the sections count; say nothing about features they do not show. Leave this heading out when no capability moved on two platforms: no padding.`,
   ];
   return `You are the editor of a daily data engineering report for ${DATA_READER}.
 
@@ -213,10 +223,10 @@ ${parts.map((p, i) => `${i + 1}. ${p}`).join("\n")}
 
 Rules:
 - ${NO_TITLE_RULE}
-- Length: at most ~200 words in total.
+- Length: at most ~200 words for ${SECTIONS.highlights}, ~120 for ${DATA_REPORT.acrossPlatforms}.
 - Never restate a row: the reader sees the tables right below. A bullet that only says what changed, without who is affected and what to do, is left out.
 - Write no links, URLs or other sections; name each item as the sections do. Dates only as the "by when" of a row that gives one.
-- Name each item in at most one bullet. Two rows that describe the same change (a release note and its behavior change bundle, a "coming soon" note and its GA note) are one item: mention it once.
+- Name each item in at most one bullet of ${SECTIONS.highlights}; ${DATA_REPORT.acrossPlatforms} compares rows, so it may name a row again. Two rows that describe the same change (a release note and its behavior change bundle, a "coming soon" note and its GA note) are one item: mention it once.
 - Base every claim on the sections. Do not invent versions, dates or availability.
 - English, professional and concise.
 `;

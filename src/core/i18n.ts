@@ -175,6 +175,8 @@ export const DATA_REPORT = {
   vendorTableHeader: "| Date | Source | Item | Summary |\n| :--- | :--- | :--- | :--- |",
   /** Marks a deprecation, retirement, breaking or behavior change in the Item cell. */
   deprecationMarker: "⚠️",
+  /** Written by the prose call after the tables: one capability compared across vendors. */
+  acrossPlatforms: "Across platforms",
   /** Marks an AI feature in a data platform (`aiInData`) in the Item cell. */
   aiMarker: "🤖",
   noNewItems: "No vendor items, releases, hot issues or news in the tracked data projects, skipping report.",
