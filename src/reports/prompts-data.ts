@@ -187,9 +187,10 @@ Below are ${items.length} numbered release notes and updates, new as of ${dateSt
 
 ${list}
 
-${summaryLine("1-2 sentences")} — what changed, and what it means for client data platforms (for a deprecation or breaking change: what stops working or must be migrated).
+${summaryLine("1-2 sentences")} — what the change enables, breaks or requires for client data platforms: a setting to turn on, a migration, a cloud, region or edition limit (for a deprecation or breaking change: what stops working or must be migrated, and by when).
+- Do not repeat the title or its status words (generally available, preview, now available): the title is shown next to the summary.
 - Ground every sentence only in the given text. Do not invent dates, versions, regions or availability.
-- If the text is empty, say only what the title shows.
+- When the text adds nothing beyond the title (or is empty), write \`N: —\` for that item.
 ${summaryOutputRule(items.length)}
 - English.
 `;

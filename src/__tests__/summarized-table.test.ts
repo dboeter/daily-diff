@@ -75,6 +75,21 @@ describe("row numbers", () => {
     expect(tables.databricks).toContain("| S1. |");
   });
 
+  it("shows a vendor row's '—' as '—', and the description only when its line is missing", () => {
+    const vendor = numberRows([vendorItem("dbx-1", "databricks"), vendorItem("dbx-2", "databricks")]);
+    const tables = renderVendorTables(vendor, parseRowSummaries("1: —"));
+    expect(tables.databricks).toContain("[Title dbx-1](https://example.com/dbx-1) | — |");
+    expect(tables.databricks).not.toContain("| — | — |");
+    expect(tables.databricks).toContain(`| ${vendor[1]!.description} |`);
+  });
+
+  it("asks for vendor summaries that add to the title, or '—'", () => {
+    const prompt = buildDataSummariesPrompt(numberRows([vendorItem("a", "databricks")]), "2026-10-21");
+    expect(prompt).toContain("Do not repeat the title");
+    expect(prompt).toContain("`N: —`");
+    expect(prompt).toContain("enables, breaks or requires");
+  });
+
   it("is listed in the summaries prompts by each row's number", () => {
     const listed = (prompt: string) => [...prompt.matchAll(/^(\d+)\. /gm)].map((m) => Number(m[1]));
     const some = [policy[3]!, policy[1]!];
