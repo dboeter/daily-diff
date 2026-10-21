@@ -53,6 +53,14 @@ describe("dataRelevance", () => {
 });
 
 describe("keywordVerdict", () => {
+  it("keeps a post titled 'Retiring …' as a deprecation", () => {
+    // 2026-10-20: "Retiring the Fabric data agent custom tool in Microsoft Foundry: move to Fabric IQ".
+    expect(keywordVerdict(item("a", { title: "Retiring the Fabric data agent custom tool" }))).toEqual({
+      keep: true,
+      deprecation: true,
+    });
+  });
+
   it("keeps a retirement as a deprecation", () => {
     expect(
       keywordVerdict(item("a", { title: "Retirement: Azure Database for MySQL Single Server" })),

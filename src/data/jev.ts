@@ -132,7 +132,7 @@ export function dataRelevance(a: DataAnswers): { relevance: number; keep: boolea
  * Keyword fallback. GA and AI are matched case-sensitively as whole words,
  * so "ga" and "ai" inside other words do not count.
  */
-const DEPRECATION_RE = /deprecat|retire|breaking|end of support|end-of-life|sunset|behaviou?r change/i;
+const DEPRECATION_RE = /deprecat|retir|breaking|end of support|end-of-life|sunset|behaviou?r change/i;
 const FEATURE_RE = /generally available|preview|now available|introduc|release/i;
 const GA_RE = /\bGA\b/;
 const AI_ACRONYM_RE = /\bAI\b/;
