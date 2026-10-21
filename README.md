@@ -419,6 +419,7 @@ Unavailable today: <agents whose release fetch failed, if any>
 Generated | Projects: N | Active today: N | Stable releases: N | Prereleases (not covered): N
 
 ## Highlights                          — 3-5 bullets: who is affected, what to do, by when; deprecations first
+## Action required                     — open end dates of reported deprecations, nearest first, until they pass
 ## Databricks                          — vendor table (⚠️ = deprecation, 🤖 = AI in data work), then the repos in the ai-agents layout
 ## Snowflake                           — the same
 ## Azure / Fabric & GCP                — vendor table only

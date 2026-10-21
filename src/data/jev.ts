@@ -98,11 +98,67 @@ const QUESTIONS = {
 
 export interface DataAnswers {
   real_change: { noul: number };
+  /** Asked only when the text has dates (`dateCandidates`): an ISO candidate, or "none". */
+  end_date?: { choice: string };
   deprecation: { noul: number };
   /** Not weighed: flags an item as AI in data work (`aiInData`, the 🤖 marker). */
   ai_in_data: { noul: number };
   /** Probability-weighted level, 0–2. */
   significance: { score: number };
+}
+
+// ---------------------------------------------------------------------------
+// End dates (the Action required table)
+// ---------------------------------------------------------------------------
+
+const MONTH_NAMES = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
+const MONTH = String.raw`(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\.?`;
+/**
+ * The date formats on the vendor feeds: "November 19, 2026" and "Nov. 19, 2026"
+ * (Databricks, Snowflake), "6 December 2026", ISO, and "11/6/2026", which the
+ * Fabric blog writes month first.
+ */
+const DATE_RE = new RegExp(
+  String.raw`\b(${MONTH}) (\d{1,2}),? (\d{4})\b|\b(\d{1,2}) (${MONTH}) (\d{4})\b|\b(\d{4})-(\d{2})-(\d{2})\b|\b(\d{1,2})/(\d{1,2})/(\d{4})\b`,
+  "g",
+);
+
+/**
+ * Every date in `text`, once per day (the first spelling wins), in text order.
+ * A regex over-finds (a release date, a preview date); Jev picks which one, if
+ * any, is the end date: the pattern of TypeSafe's pre-parsed value extraction.
+ */
+export function dateCandidates(text: string): { iso: string; text: string }[] {
+  const pad = (n: string | number) => String(n).padStart(2, "0");
+  const month = (name: string) => MONTH_NAMES.indexOf(name.slice(0, 3).toLowerCase()) + 1;
+  const seen = new Map<string, string>();
+  for (const m of text.matchAll(DATE_RE)) {
+    const [y, mo, d] = m[1]
+      ? [m[3]!, month(m[1]), m[2]!]
+      : m[5]
+        ? [m[6]!, month(m[5]), m[4]!]
+        : m[7]
+          ? [m[7], m[8]!, m[9]!]
+          : [m[12]!, m[10]!, m[11]!];
+    const iso = `${y}-${pad(mo)}-${pad(d)}`;
+    if (Number(mo) >= 1 && Number(mo) <= 12 && Number(d) >= 1 && Number(d) <= 31 && !seen.has(iso)) {
+      seen.set(iso, m[0]);
+    }
+  }
+  return [...seen].map(([iso, t]) => ({ iso, text: t }));
+}
+
+/** The end-date question over the text's dates; the options are the ISO dates, as Jev returns the key. */
+function endDateQuestion(dates: { iso: string; text: string }[]): object {
+  return {
+    type: "choice",
+    instructions:
+      "Which date in `title` and `description` is the deadline of something going away or breaking: when it is retired, stops being supported or changes, so users must act before it?",
+    criteria: {
+      ...Object.fromEntries(dates.map((d) => [d.iso, `The date written "${d.text}"`])),
+      none: "None of these dates is such a deadline (a release, preview or publication date), or nothing is going away",
+    },
+  };
 }
 
 /** Summing to 1. A real change and significance carry the order; a deprecation adds a little on top. */
@@ -186,6 +242,11 @@ export function loadDataVerdicts(file = DATA_VERDICTS_FILE): DataVerdicts | null
 /** A kept vendor item; deprecations are rendered with ⚠️ and listed first. */
 export interface KeptVendorItem extends VendorItem {
   deprecation: boolean;
+  /**
+   * A deprecation's deadline (ISO): Jev's `end_date` pick among the text's dates,
+   * or a behavior-change bundle's planned window. For the Action required table.
+   */
+  endDate?: string;
   /** The 🤖 marker: Jev's `ai_in_data`, else an AI keyword in title or description. */
   aiInData: boolean;
 }
@@ -225,6 +286,8 @@ function orderAndCap(kept: KeptVendorItem[], score: (i: VendorItem) => number): 
     .sort((a, b) => rank(a) - rank(b) || Number(b.deprecation) - Number(a.deprecation));
 }
 
+const datesOf = (i: VendorItem) => dateCandidates(`${i.title} ${i.description}`);
+
 export async function selectVendorItems(
   items: VendorItem[],
   opts: { apiKey?: string; cache: DataVerdicts | null; dateStr: string; ask?: AskJev },
@@ -235,11 +298,19 @@ export async function selectVendorItems(
     {
       ...opts,
       tag: "data",
-      request: (item) => ({
-        state: { title: item.title, description: item.description, source: item.source },
-        questions: QUESTIONS,
-      }),
+      request: (item) => {
+        const dates = datesOf(item);
+        return {
+          state: { title: item.title, description: item.description, source: item.source },
+          questions: dates.length ? { ...QUESTIONS, end_date: endDateQuestion(dates) } : QUESTIONS,
+        };
+      },
       decide: (a: DataAnswers) => dataRelevance(a),
+      // A verdict saved before the end-date question (or over other dates) is asked again.
+      fingerprint: (item) => {
+        const dates = datesOf(item);
+        return dates.length ? `dates:${dates.map((d) => d.iso).join(",")}` : undefined;
+      },
       unseenDays: VERDICT_UNSEEN_DAYS,
     },
   );
@@ -252,7 +323,11 @@ export async function selectVendorItems(
     // `?.`: dataRelevance does not check this answer, and a hand-added entry may lack it.
     const ai = verdicts.get(i.id)?.answers.ai_in_data?.noul;
     const aiInData = ai === undefined ? aiKeywordHit(`${i.title} ${i.description}`) : ai >= AI_IN_DATA_MIN;
-    return d.keep ? [{ ...i, deprecation: d.deprecation, aiInData }] : [];
+    const picked = verdicts.get(i.id)?.answers.end_date?.choice;
+    // Only a candidate counts: "none", or a date Jev made up, is no end date.
+    const jevEnd = datesOf(i).some((c) => c.iso === picked) ? picked : undefined;
+    const endDate = d.deprecation ? (i.endDate ?? jevEnd) : undefined;
+    return d.keep ? [{ ...i, deprecation: d.deprecation, aiInData, ...(endDate ? { endDate } : {}) }] : [];
   });
   const selected = orderAndCap(kept, (i) => verdicts.get(i.id)?.relevance ?? -1);
   console.log(
@@ -261,15 +336,16 @@ export async function selectVendorItems(
       `${rankedBy === "keywords" ? " (no Jev: keyword rules)" : ""}`,
   );
 
-  const keptIds = new Set(kept.map((i) => i.id));
+  const keptById = new Map(kept.map((i) => [i.id, i]));
   const selectedIds = new Set(selected.map((i) => i.id));
   const rows = items.map((i) => ({
     id: i.id,
     title: i.title,
     source: i.source,
     kept: selectedIds.has(i.id),
-    ...(keptIds.has(i.id) && !selectedIds.has(i.id) ? { overCap: true } : {}),
+    ...(keptById.has(i.id) && !selectedIds.has(i.id) ? { overCap: true } : {}),
     deprecation: decide(i).deprecation,
+    ...(keptById.get(i.id)?.endDate ? { endDate: keptById.get(i.id)!.endDate } : {}),
     ...judgment.traceFields(i),
     ...(i.stage !== undefined ? { stage: i.stage } : { keyword: keywordVerdict(i) }),
   }));

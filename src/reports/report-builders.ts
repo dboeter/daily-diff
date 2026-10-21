@@ -8,6 +8,7 @@ import type { OpenRouterStealthModel } from "../sources/openrouter.ts";
 import type { TrendingReportData } from "../trending/rank.ts";
 import type { PolicyItem } from "../policy/policy.ts";
 import type { KeptVendorItem } from "../data/jev.ts";
+import type { VendorAction } from "../data/vendors.ts";
 import { VENDOR_SECTIONS, vendorSection, type VendorSection } from "../core/config.ts";
 import { summaryText, type Numbered } from "./summarized-table.ts";
 import {
@@ -332,6 +333,23 @@ export function renderPolicyTable(
  * shows the summary for its own number (`n`, set by selectVendorItems).
  * Date, source, title and the ⚠️/🤖 markers come from the data, never the model.
  */
+/**
+ * The data report's Action required section: the open end dates (on or after
+ * `dateStr`), nearest first. Empty when none is open.
+ */
+export function renderVendorActions(actions: Record<string, VendorAction>, dateStr: string): string {
+  const rows = Object.values(actions)
+    .filter((a) => a.date >= dateStr)
+    .sort((a, b) => a.date.localeCompare(b.date) || a.title.localeCompare(b.title))
+    .map(
+      (a) =>
+        `| ${a.date} | ${cell(a.source)} | [${policyTitleLabel(a.title)}](${cell(a.link)}) | ${cell(a.summary ?? "—")} |`,
+    );
+  return rows.length
+    ? `## ${DATA_REPORT.actionHeading}\n\n${DATA_REPORT.actionTableHeader}\n${rows.join("\n")}`
+    : "";
+}
+
 export function renderVendorTables(
   items: Numbered<KeptVendorItem>[],
   summaries: Map<number, string>,

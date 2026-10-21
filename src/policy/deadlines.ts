@@ -7,7 +7,6 @@
  */
 
 import type { PolicyCalendarEntry } from "../core/config.ts";
-import type { PolicyItem } from "./policy.ts";
 import { POLICY_REPORT } from "../core/i18n.ts";
 import { cell, policyTitleLabel } from "../reports/report-builders.ts";
 import { daysBefore } from "../core/date.ts";
@@ -20,22 +19,27 @@ export interface Deadline {
   source: string;
 }
 
+/** What nextDeadlines reads of an item: a policy item, or the data report's vendor item. */
+type Dated = { id: string; title: string; link: string; source: string; deadline?: string };
+
 const WINDOW_DAYS = 30;
 
 /**
  * The open deadlines after today's run: the saved ones not yet passed, plus
  * the reported items' deadlines. A saved item fetched again takes its current
  * deadline (an extension), or leaves when it has none (feedback closed early).
- * An item no report carried is not added: Jev dropped it.
+ * An item no report carried is not added: Jev dropped it. A saved entry not
+ * fetched again is kept as it is, extra fields included. Shared with the data
+ * report's Action required table (`src/data/vendors.ts`).
  */
 export function nextDeadlines(
   saved: Record<string, Deadline> | undefined,
-  reported: PolicyItem[],
-  fetched: PolicyItem[],
+  reported: Dated[],
+  fetched: Dated[],
   dateStr: string,
 ): Record<string, Deadline> {
   const next = Object.fromEntries(Object.entries(saved ?? {}).filter(([, d]) => d.date >= dateStr));
-  const toDeadline = (i: PolicyItem): Deadline => ({
+  const toDeadline = (i: Dated): Deadline => ({
     date: i.deadline!,
     title: i.title,
     link: i.link,

@@ -53,17 +53,18 @@ import {
   renderPolicyTable,
   nestHeadings,
   renderVendorTables,
+  renderVendorActions,
   policyTitleLabel,
   type ProjectGroup,
 } from "./report-builders.ts";
-import { parseRowSummaries, spliceTables, TABLES_MARKER } from "./summarized-table.ts";
+import { parseRowSummaries, spliceTables, summaryText, TABLES_MARKER } from "./summarized-table.ts";
 import { saveArxivState, type ArxivData } from "../sources/arxiv.ts";
 import type { HfData } from "../sources/hf.ts";
 import { POLICY_STATE_FILE, type PolicyData, type PolicyItem } from "../policy/policy.ts";
 import { POLICY_VERDICTS_FILE } from "../policy/jev.ts";
 import { renderDeadlines } from "../policy/deadlines.ts";
 import type { OpenRouterData } from "../sources/openrouter.ts";
-import { DATA_STATE_FILE, type VendorData } from "../data/vendors.ts";
+import { DATA_STATE_FILE, type DataState, type VendorData } from "../data/vendors.ts";
 import { DATA_VERDICTS_FILE } from "../data/jev.ts";
 import { commitWrites, planWrites } from "../core/new-items.ts";
 import type { DataSectionKey } from "../core/config.ts";
@@ -385,6 +386,8 @@ function splitProse(prose: string): { highlights: string; acrossPlatforms: strin
 /**
  * The data report: Highlights, then Databricks, Snowflake and Azure / Fabric &
  * GCP (each its code-rendered vendor table, then the vendor's repo section),
+ * with Action required (code-rendered: the open end dates of reported
+ * deprecations, in the state until they pass) between Highlights and them,
  * the open-source stack, Across platforms and Worth a Look. A section with neither vendor items
  * nor repo activity is left out. LLM calls: one per active repo section (as in
  * the agents report) and one for the vendor row summaries, in parallel; then
@@ -430,7 +433,14 @@ export async function buildDataReport(
       ? generateOr("data-vendor-summaries", buildDataSummariesPrompt(items, dateStr), "", LLM_TOKENS_LISTING)
       : "",
   ]);
-  const tables = renderVendorTables(items, parseRowSummaries(rowSummaries));
+  const summaries = parseRowSummaries(rowSummaries);
+  const tables = renderVendorTables(items, summaries);
+  // Today's end dates take today's row summary, kept in the state for the later report days.
+  const actions = { ...vendor.nextState.actions };
+  for (const i of items) {
+    if (actions[i.id] && i.endDate) actions[i.id] = { ...actions[i.id]!, summary: summaryText(summaries, i) };
+  }
+  const actionTable = renderVendorActions(actions, dateStr);
   const repo = (key: DataSectionKey) => {
     const r = repos.find((s) => s.key === key);
     return { activities: r?.activities ?? [], summary: r?.summary ?? "" };
@@ -473,7 +483,10 @@ export async function buildDataReport(
     utcStr,
     groups,
     period: PROJECT_SCOPE.period,
-    preamble: highlights ? `${highlights}\n\n---\n\n` : "",
+    preamble: [highlights, actionTable]
+      .filter(Boolean)
+      .map((s) => `${s}\n\n---\n\n`)
+      .join(""),
     omitQuietGroups: true,
     // On 2026-10-19 "Projects: 17 | Active today: 0" was all the header said above 16 vendor rows.
     leadingCounts: DATA_REPORT.vendorCount(items.length),
@@ -481,7 +494,8 @@ export async function buildDataReport(
     footer: autoGenFooter(),
   });
   // Only once the report exists, like the policy state; after a failed fetch it only prunes.
-  commitWrites(writes.onReported, files, dateStr);
+  const nextState: DataState = vendor.nextState.actions ? { ...vendor.nextState, actions } : vendor.nextState;
+  commitWrites(planWrites({ ...vendor, nextState }).onReported, files, dateStr);
   return { id: "ai-data", content };
 }
 

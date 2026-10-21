@@ -20,6 +20,7 @@ import type { Numbered } from "../reports/summarized-table.ts";
 import { loadDataVerdicts, selectVendorItems, type DataVerdicts, type KeptVendorItem } from "./jev.ts";
 import type { AskJev } from "../core/jev.ts";
 import { daysBefore, toCstDateStr } from "../core/date.ts";
+import { nextDeadlines, type Deadline } from "../policy/deadlines.ts";
 
 export interface VendorItem {
   /** Stable per note: the guid, or the parser's own key. */
@@ -41,6 +42,8 @@ export interface VendorItem {
   categories?: string[];
   /** A bundle first seen at an old stage: its stage is recorded, not reported (staleOnFirstSight). */
   recordOnly?: boolean;
+  /** A behavior-change bundle's planned next status change, when its window has a full date (ISO). */
+  endDate?: string;
   /** From a feed with `stable_id`: the state keys it on `id`. */
   stableId?: true;
 }
@@ -114,8 +117,19 @@ export async function fetchVendorFeeds(
 // State: which vendor items a run reported (report-state.ts, shared with Policy Watch)
 // ---------------------------------------------------------------------------
 
-/** Note key (`stateId`) or bundle id → CST date first reported; `stages`: behavior-change bundle id → its last reported stageKey. */
-export type DataState = ReportedState;
+/** An open end date of a reported deprecation: the Action required table's row. */
+export interface VendorAction extends Deadline {
+  /** The row summary of the day it was reported ("what to do"); set by buildDataReport. */
+  summary?: string;
+}
+
+/**
+ * Note key (`stateId`) or bundle id → CST date first reported; `stages`: behavior-change bundle id → its last reported stageKey;
+ * `actions`: item id → the open end date of a reported deprecation, until it passes.
+ */
+export interface DataState extends ReportedState {
+  actions?: Record<string, VendorAction>;
+}
 
 export const DATA_STATE_FILE = path.join("digests", "data-state.json");
 
@@ -221,6 +235,16 @@ export async function fetchVendorData(
       };
     },
     stateItem: asStateItem,
+    // Not `fetched` as the third argument: no raw item carries an end date (Jev sets it on kept
+    // items), so a refetched one would wipe its saved date the day after it was reported.
+    extend: (kept) => ({
+      actions: nextDeadlines(
+        state?.actions,
+        kept.filter((i) => i.endDate).map((i) => ({ ...i, deadline: i.endDate })),
+        [],
+        dateStr,
+      ) as Record<string, VendorAction>,
+    }),
     select: (candidates) => {
       console.log(`  [data] ${candidates.length} new vendor items`);
       return selectVendorItems(candidates, { ...jev, dateStr });

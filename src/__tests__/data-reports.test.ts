@@ -561,6 +561,66 @@ describe("buildDataReport", () => {
     expect((await build(sections(false), await vendorData()))!.content).not.toContain("Across platforms");
   });
 
+  it("lists the open end dates under Action required, nearest first, with today's row summary", async () => {
+    generateBody.mockReset();
+    generateBody.mockImplementation(async (prompt: string) => reply(prompt));
+    const data = await vendorData();
+    const retiring = data.items.find((i) => i.id === "dbx-old")!;
+    const saved = {
+      date: "2026-12-01",
+      title: "Old retirement",
+      link: "https://example.com/saved",
+      source: "Microsoft Fabric",
+      summary: "Move to Fabric IQ.",
+    };
+    const vendor: VendorData = {
+      ...data,
+      items: data.items.map((i) => (i.id === "dbx-old" ? { ...i, endDate: "2026-11-19" } : i)),
+      nextState: {
+        reported: {},
+        actions: {
+          saved,
+          "dbx-old": {
+            date: "2026-11-19",
+            title: retiring.title,
+            link: retiring.link,
+            source: retiring.source,
+          },
+          passed: {
+            date: "2026-10-16",
+            title: "Gone",
+            link: "https://example.com/gone",
+            source: "Snowflake",
+          },
+        },
+      },
+    };
+    const content = (await build(sections(false), vendor))!.content;
+    const at = (s: string) => content.indexOf(s);
+    expect(at("## Highlights")).toBeLessThan(at("## Action required"));
+    expect(at("## Action required")).toBeLessThan(at("## Databricks"));
+    const table = content.slice(at("## Action required"), at("## Databricks"));
+    expect(table).toContain("| Date | Platform | Item | What to do |");
+    expect(table).toContain(
+      "| 2026-11-19 | Azure Databricks | [Retirement: legacy runtime](https://example.com/dbx-old) | Retiring soon. |\n| 2026-12-01 | Microsoft Fabric | [Old retirement](https://example.com/saved) | Move to Fabric IQ. |",
+    );
+    expect(table).not.toContain("Gone");
+    // Today's summary is saved with the end date, for the later report days.
+    expect(JSON.parse(fs.readFileSync(stateFile, "utf-8")).actions["dbx-old"].summary).toBe("Retiring soon.");
+  });
+
+  it("is still skipped when only open end dates are left", async () => {
+    generateBody.mockReset();
+    const vendor: VendorData = {
+      ...vendorOf([]),
+      nextState: {
+        reported: {},
+        actions: { a: { date: "2026-12-01", title: "T", link: "https://x", source: "S" } },
+      },
+    };
+    expect(await build(sections(false, false), vendor)).toBeNull();
+  });
+
   it("leaves the failure notice in Highlights and no Worth a Look when the prose call fails", async () => {
     generateBody.mockReset();
     generateBody.mockImplementation(async (prompt: string) => {

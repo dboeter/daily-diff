@@ -177,6 +177,9 @@ export const DATA_REPORT = {
   deprecationMarker: "⚠️",
   /** Written by the prose call after the tables: one capability compared across vendors. */
   acrossPlatforms: "Across platforms",
+  /** Code-rendered after Highlights: the open end dates of reported deprecations. */
+  actionHeading: "Action required",
+  actionTableHeader: "| Date | Platform | Item | What to do |\n| :--- | :--- | :--- | :--- |",
   /** Marks an AI feature in a data platform (`aiInData`) in the Item cell. */
   aiMarker: "🤖",
   noNewItems: "No vendor items, releases, hot issues or news in the tracked data projects, skipping report.",

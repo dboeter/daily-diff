@@ -95,6 +95,8 @@ function windowEnd(text: string): string {
  * "Status planned…" paragraphs are left out: Snowflake rewords them, which
  * would re-report the bundle. date = the end of that paragraph's release
  * window; "" when the window has no day or year ("April 2026"), for the caller.
+ * endDate = the end of a planned move to Enabled by Default or Generally
+ * Enabled, when its window has a day (on 2026-10-21 every plan was month-only).
  */
 export function parseBehaviorChangeBundles(html: string): VendorNote[] {
   const pending =
@@ -107,6 +109,11 @@ export function parseBehaviorChangeBundles(html: string): VendorNote[] {
     );
     const stage =
       paragraphs.filter((p) => !/^(Status planned|Planned)\b/.test(p)).at(-1) ?? paragraphs[0] ?? "";
+    // The end date: a planned move to Enabled by Default or Generally Enabled, when its window has a day.
+    const endDate = paragraphs
+      .filter((p) => /^Status planned\b.*\bto (?:Enabled by Default|Generally Enabled)\b/.test(p))
+      .map(windowEnd)
+      .find(Boolean);
     return {
       id: `snowflake-bcr:${bundle}`,
       title: `Behavior change bundle ${bundle}`,
@@ -114,6 +121,7 @@ export function parseBehaviorChangeBundles(html: string): VendorNote[] {
       date: windowEnd(stage),
       description: vendorText(status!),
       stage,
+      ...(endDate ? { endDate } : {}),
     };
   });
 }
