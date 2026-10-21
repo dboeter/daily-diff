@@ -21,7 +21,12 @@ import {
 } from "./core/github.ts";
 import { type ProjectActivity, buildProjectDigestPrompt, hasActivity } from "./reports/prompts.ts";
 import { matchProjectNews } from "./reports/agent-news.ts";
-import { buildHighlightsPrompt, type ReportHighlights } from "./reports/prompts-data.ts";
+import {
+  buildHighlightsPrompt,
+  forcedHighlightReports,
+  withFallbackHighlights,
+  type ReportHighlights,
+} from "./reports/prompts-data.ts";
 import {
   callLlm,
   generateOr,
@@ -425,7 +430,12 @@ async function main(): Promise<void> {
     return {};
   };
 
-  const highlights = await attemptJson(buildHighlightsPrompt(reports));
+  const forced = forcedHighlightReports(vendorData.items.length > 0);
+  const highlights = withFallbackHighlights(
+    await attemptJson(buildHighlightsPrompt(reports, forced)),
+    reports,
+    forced,
+  );
 
   const highlightsPath = saveFile(JSON.stringify(highlights, null, 2), dateStr, "highlights.json");
   console.log(`  Saved ${highlightsPath}`);

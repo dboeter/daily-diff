@@ -17,6 +17,10 @@ import {
   buildPolicySummariesPrompt,
   buildPolicyProsePrompt,
   buildDataProsePrompt,
+  withFallbackHighlights,
+  forcedHighlightReports,
+  buildHighlightsPrompt,
+  firstHighlight,
 } from "../reports/prompts-data.ts";
 import { TABLES_MARKER, numberRows } from "../reports/summarized-table.ts";
 import { MODELS_REPORT, SECTIONS } from "../core/i18n.ts";
@@ -607,5 +611,86 @@ describe("buildDataProsePrompt", () => {
     expect(prompt).toContain("at most one of these parts");
     expect(prompt).toContain("not one the sections already lead with");
     expect(prompt).toContain("describe the same change");
+  });
+});
+
+describe("withFallbackHighlights", () => {
+  const POLICY =
+    "## Highlights\nThe Commission published the first [harmonised standard](https://x.eu) for the AI Act. Consultations close in November.\n\n<!-- tables -->";
+
+  it("fills a published policy or data report the model left out with its first Highlights sentence", () => {
+    const out = withFallbackHighlights({ "ai-hn": ["H."] }, { "ai-hn": "x", "ai-policy": POLICY }, [
+      "ai-policy",
+    ]);
+    expect(out).toEqual({
+      "ai-hn": ["H."],
+      "ai-policy": ["The Commission published the first harmonised standard for the AI Act."],
+    });
+  });
+
+  it("keeps the model's highlights, and adds none for other or absent reports", () => {
+    const out = withFallbackHighlights(
+      { "ai-policy": ["Mine."] },
+      { "ai-policy": POLICY, "ai-web": POLICY },
+      ["ai-policy"],
+    );
+    expect(out).toEqual({ "ai-policy": ["Mine."] });
+  });
+
+  it("reads a bullet, skips a failure notice and cuts a long sentence at a word", () => {
+    expect(firstHighlight("## Highlights\n\n- **Snowflake** retires X. More.")).toBe("Snowflake retires X.");
+    expect(firstHighlight("## Highlights\n\n⚠️ Summary generation failed.")).toBeNull();
+    expect(firstHighlight("## Signals\nNo highlights here.")).toBeNull();
+    const long = firstHighlight(`## Highlights\n${"word ".repeat(60)}end.`)!;
+    expect(long.length).toBeLessThanOrEqual(140);
+    expect(long.endsWith("word…")).toBe(true);
+  });
+
+  it("forces ai-data only on a day with kept vendor items", () => {
+    expect(forcedHighlightReports(false)).toEqual(["ai-policy"]);
+    expect(forcedHighlightReports(true)).toEqual(["ai-policy", "ai-data"]);
+    const reports = { "ai-data": "## Highlights\n- dbt Core 1.11 ships." };
+    expect(withFallbackHighlights({}, reports, forcedHighlightReports(false))).toEqual({});
+    expect(withFallbackHighlights({}, reports, forcedHighlightReports(true))).toEqual({
+      "ai-data": ["dbt Core 1.11 ships."],
+    });
+  });
+
+  it("asks the model for a forced report's highlight only when forced", () => {
+    expect(buildHighlightsPrompt({}, ["ai-policy"])).toContain("give that report at least 1 highlight");
+    expect(buildHighlightsPrompt({}, forcedHighlightReports(true))).toContain(
+      "vendor release-note row in ai-data",
+    );
+    expect(buildHighlightsPrompt({})).not.toContain("at least 1 highlight");
+  });
+
+  it("does not end the sentence at an abbreviation", () => {
+    expect(firstHighlight("## Highlights\nThe U.S. Senate passed the bill. More.")).toBe(
+      "The U.S. Senate passed the bill.",
+    );
+    expect(firstHighlight("## Highlights\nThe consultation closes Nov. 9 for comments. More.")).toBe(
+      "The consultation closes Nov. 9 for comments.",
+    );
+    expect(
+      firstHighlight("## Highlights\n- See [Art. 50 guidance](https://x.eu) e.g. for providers. More."),
+    ).toBe("See Art. 50 guidance e.g. for providers.");
+  });
+
+  it("handles numbered bullets, sub-headings, wrapped lines, ⚠️ markers and italics", () => {
+    expect(firstHighlight("## Highlights\n1. Snowflake retires X. More.")).toBe("Snowflake retires X.");
+    expect(firstHighlight("## Highlights\n### Sub\n- A.")).toBeNull();
+    expect(firstHighlight("## Highlights\nThe Commission published\na standard. More.\n\nNext.")).toBe(
+      "The Commission published a standard.",
+    );
+    expect(firstHighlight("## Highlights\n- ⚠️ **Snowflake** retires X.\n- B.")).toBe("Snowflake retires X.");
+    expect(firstHighlight("## Highlights\n- *Delta Lake* 4.0 adds `variant` type.")).toBe(
+      "Delta Lake 4.0 adds variant type.",
+    );
+  });
+});
+
+describe("buildDataProsePrompt Worth a Look", () => {
+  it("links Worth a Look items from the sections", () => {
+    expect(buildDataProsePrompt("sections", "2026-10-20")).toContain("Markdown link, copied from its row");
   });
 });
