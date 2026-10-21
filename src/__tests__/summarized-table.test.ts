@@ -90,6 +90,29 @@ describe("row numbers", () => {
     expect(prompt).toContain("enables, breaks or requires");
   });
 
+  it("lists release rows after the vendor rows, calls only x.0.0 major, and never mentions the cut notes", () => {
+    const release = {
+      n: 2,
+      key: "release:org/duckdb@v2.0.0",
+      project: { id: "duckdb", repo: "org/duckdb", name: "DuckDB" },
+      release: {
+        tag_name: "v2.0.0",
+        name: "v2.0.0",
+        body: "Notes.",
+        published_at: "2026-10-21T00:00:00Z",
+        prerelease: false,
+      },
+    };
+    const prompt = buildDataSummariesPrompt(numberRows([vendorItem("a", "databricks")]), "2026-10-21", [
+      release,
+    ]);
+    expect([...prompt.matchAll(/^(\d+)\. /gm)].map((m) => Number(m[1]))).toEqual([1, 2]);
+    expect(prompt).toContain("2. DuckDB v2.0.0 (release, 2026-10-21) — Notes.");
+    expect(prompt).toContain("only a version x.0.0 is a major version");
+    expect(prompt).toContain("never say they are cut");
+    expect(prompt).toContain(summaryOutputRule(2));
+  });
+
   it("is listed in the summaries prompts by each row's number", () => {
     const listed = (prompt: string) => [...prompt.matchAll(/^(\d+)\. /gm)].map((m) => Number(m[1]));
     const some = [policy[3]!, policy[1]!];
