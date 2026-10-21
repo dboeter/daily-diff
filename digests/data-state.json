@@ -28,7 +28,23 @@
     "retiring the fabric data agent custom tool in microsoft foundry: move to fabric iq|2026-10-19": "2026-10-20",
     "feature: metadata migration from dataproc metastore to lakehouse is now generally available (ga).|2026-10-14": "2026-10-20",
     "feature: you can publish a bigquery conversational analytics agent in gemini enterprise.|2026-10-14": "2026-10-20",
-    "feature: the ai.agg function is generally available (ga).|2026-10-13": "2026-10-20"
+    "feature: the ai.agg function is generally available (ga).|2026-10-13": "2026-10-20",
+    "deepseek v4.1 flash is scheduled for retirement|2026-10-19": "2026-10-21",
+    "redesigned mlflow logs tab for ai runtime runs|2026-10-15": "2026-10-21",
+    "databricks runtime 19: october 19, 2026|2026-10-19": "2026-10-21",
+    "asynchronous processing with transformwithstate is now generally available|2026-10-19": "2026-10-21",
+    "transactions support both managed delta lake and apache iceberg tables|2026-10-14": "2026-10-21",
+    "data classification api is now generally available|2026-10-14": "2026-10-21",
+    "file upload in genie one and genie agents is now generally available|2026-10-16": "2026-10-21",
+    "read metadata privilege support for compliance security profile standards|2026-10-16": "2026-10-21",
+    "workspace-level package repositories for databricks apps are generally available|2026-10-14": "2026-10-21",
+    "oct 19, 2026: schema variables (general availability)|2026-10-19": "2026-10-21",
+    "oct 20, 2026: snowflake-provided tags (general availability)|2026-10-20": "2026-10-21",
+    "october 14, 2026: centralized event sharing for snowflake native apps — general availability|2026-10-14": "2026-10-21",
+    "retiring the fabric data agent custom tool in microsoft foundry: move to fabric iq|2026-10-20": "2026-10-21",
+    "feature: you can now use reusable column aliases in googlesql.|2026-10-15": "2026-10-21",
+    "feature: conversational analytics now lets you create a conversation with all of the data sources in multiple projects, or create a conversation with a dataset.|2026-10-14": "2026-10-21",
+    "feature: the ai.agg function now supports the output_schema argument, which lets you specify the schema of the function output as a comma-separated list of fields.|2026-10-14": "2026-10-21"
   },
   "stages": {
     "snowflake-bcr:2026_08": "2026-10-16 Introduced in the 10.37 release (October 8-16, 2026) as Disabled by Default; account admins can enable for testing."

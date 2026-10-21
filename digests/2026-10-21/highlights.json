@@ -1,0 +1,26 @@
+{
+  "ai-agents": [
+    "Claude Code v2.1.305 adds Linux nested namespace sandboxing for Chromium/rootless podman and a retry watchdog for usage limits, but regresses Windows Bedrock custom CA handling",
+    "Hermes Agent smart approval auto-executes destructive `osascript` commands causing unrecoverable data loss on macOS, plus protocol mismatch sending chat/completions to Codex Responses endpoint"
+  ],
+  "ai-hn": [
+    "DeepSeek open-sources DeepInfer, a high-performance inference framework optimized for their model family targeting production deployment efficiency",
+    "Ask HN thread with 691 comments reveals developer crisis: teams shipping AI-generated code they cannot verify, debating review strategies and organizational guardrails"
+  ],
+  "ai-arxiv": [
+    "AutoRedClaw achieves >50% attack success rate on persistent claw-style agents with long-term memory/skills, revealing systemic vulnerabilities across 7 harnesses and 4 frontier models",
+    "Single merged skill file with one worked example fixes \"skill takeover\" (61-62% → 96-99% rule compliance) across all 7 tested models"
+  ],
+  "ai-web": [
+    "Anthropic research shows 250 poisoned documents can backdoor any size LLM (600M-13B params), challenging assumptions about data volume requirements for poisoning",
+    "Anthropic internal data: AI agent hours exceed human employee hours 6:1, driving hiring shift away from junior technical roles as human attention becomes bottleneck"
+  ],
+  "ai-policy": [
+    "EU AI Act Articles 75c-75d implementing act consultation closes Nov 9, shaping GPAI model obligations for orgs deploying US models on hyperscaler platforms",
+    "California SB 1050 requires AI transparency disclosures in ads featuring synthetic performers, adding to state-level patchwork affecting US vendor compliance cascades"
+  ],
+  "ai-data": [
+    "Azure Databricks retires DeepSeek V4.1 Flash on Nov 19, 2026 requiring mandatory migration to DeepSeek V4.1 Flash (1017)",
+    "Microsoft Fabric deprecates Foundry data-agent custom tool with support ending Nov 6, 2026, requiring migration to Fabric IQ (OneLake Catalog)"
+  ]
+}
