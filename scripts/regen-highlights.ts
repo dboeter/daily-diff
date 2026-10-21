@@ -15,6 +15,7 @@ import path from "node:path";
 import { callLlm, parseLlmJson } from "../src/core/report.ts";
 import {
   buildHighlightsPrompt,
+  forcedHighlightReports,
   withFallbackHighlights,
   type ReportHighlights,
 } from "../src/reports/prompts-data.ts";
@@ -55,14 +56,16 @@ async function main() {
 
   console.log(`  Reports: ${Object.keys(reports).length}`);
 
-  // Generate highlights
+  // Generate highlights. The saved data report does not say whether Jev kept a
+  // vendor item that day, so only Policy Watch is forced here.
+  const forced = forcedHighlightReports(false);
   let highlights: ReportHighlights = {};
   try {
-    highlights = parseLlmJson<ReportHighlights>(await callLlm(buildHighlightsPrompt(reports), 2048));
+    highlights = parseLlmJson<ReportHighlights>(await callLlm(buildHighlightsPrompt(reports, forced), 2048));
   } catch (err) {
     console.error(`  [highlights] parse failed: ${err}`);
   }
-  highlights = withFallbackHighlights(highlights, reports);
+  highlights = withFallbackHighlights(highlights, reports, forced);
 
   const outPath = path.join(digestsDir, dateStr, "highlights.json");
   fs.writeFileSync(outPath, JSON.stringify(highlights, null, 2) + "\n");

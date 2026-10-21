@@ -18,6 +18,8 @@ import {
   buildPolicyProsePrompt,
   buildDataProsePrompt,
   withFallbackHighlights,
+  forcedHighlightReports,
+  buildHighlightsPrompt,
   firstHighlight,
 } from "../reports/prompts-data.ts";
 import { TABLES_MARKER, numberRows } from "../reports/summarized-table.ts";
@@ -617,7 +619,9 @@ describe("withFallbackHighlights", () => {
     "## Highlights\nThe Commission published the first [harmonised standard](https://x.eu) for the AI Act. Consultations close in November.\n\n<!-- tables -->";
 
   it("fills a published policy or data report the model left out with its first Highlights sentence", () => {
-    const out = withFallbackHighlights({ "ai-hn": ["H."] }, { "ai-hn": "x", "ai-policy": POLICY });
+    const out = withFallbackHighlights({ "ai-hn": ["H."] }, { "ai-hn": "x", "ai-policy": POLICY }, [
+      "ai-policy",
+    ]);
     expect(out).toEqual({
       "ai-hn": ["H."],
       "ai-policy": ["The Commission published the first harmonised standard for the AI Act."],
@@ -625,7 +629,11 @@ describe("withFallbackHighlights", () => {
   });
 
   it("keeps the model's highlights, and adds none for other or absent reports", () => {
-    const out = withFallbackHighlights({ "ai-policy": ["Mine."] }, { "ai-policy": POLICY, "ai-web": POLICY });
+    const out = withFallbackHighlights(
+      { "ai-policy": ["Mine."] },
+      { "ai-policy": POLICY, "ai-web": POLICY },
+      ["ai-policy"],
+    );
     expect(out).toEqual({ "ai-policy": ["Mine."] });
   });
 
@@ -638,9 +646,30 @@ describe("withFallbackHighlights", () => {
     expect(long.endsWith("word…")).toBe(true);
   });
 
+  it("forces ai-data only on a day with kept vendor items", () => {
+    expect(forcedHighlightReports(false)).toEqual(["ai-policy"]);
+    expect(forcedHighlightReports(true)).toEqual(["ai-policy", "ai-data"]);
+    const reports = { "ai-data": "## Highlights\n- dbt Core 1.11 ships." };
+    expect(withFallbackHighlights({}, reports, forcedHighlightReports(false))).toEqual({});
+    expect(withFallbackHighlights({}, reports, forcedHighlightReports(true))).toEqual({
+      "ai-data": ["dbt Core 1.11 ships."],
+    });
+  });
+
+  it("asks the model for a forced report's highlight only when forced", () => {
+    expect(buildHighlightsPrompt({}, ["ai-policy"])).toContain("give that report at least 1 highlight");
+    expect(buildHighlightsPrompt({}, forcedHighlightReports(true))).toContain(
+      "vendor release-note row in ai-data",
+    );
+    expect(buildHighlightsPrompt({})).not.toContain("at least 1 highlight");
+  });
+
   it("does not end the sentence at an abbreviation", () => {
     expect(firstHighlight("## Highlights\nThe U.S. Senate passed the bill. More.")).toBe(
       "The U.S. Senate passed the bill.",
+    );
+    expect(firstHighlight("## Highlights\nThe consultation closes Nov. 9 for comments. More.")).toBe(
+      "The consultation closes Nov. 9 for comments.",
     );
     expect(
       firstHighlight("## Highlights\n- See [Art. 50 guidance](https://x.eu) e.g. for providers. More."),

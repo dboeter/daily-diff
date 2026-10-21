@@ -23,6 +23,7 @@ import { type ProjectActivity, buildProjectDigestPrompt, hasActivity } from "./r
 import { matchProjectNews } from "./reports/agent-news.ts";
 import {
   buildHighlightsPrompt,
+  forcedHighlightReports,
   withFallbackHighlights,
   type ReportHighlights,
 } from "./reports/prompts-data.ts";
@@ -429,7 +430,12 @@ async function main(): Promise<void> {
     return {};
   };
 
-  const highlights = withFallbackHighlights(await attemptJson(buildHighlightsPrompt(reports)), reports);
+  const forced = forcedHighlightReports(vendorData.items.length > 0);
+  const highlights = withFallbackHighlights(
+    await attemptJson(buildHighlightsPrompt(reports, forced)),
+    reports,
+    forced,
+  );
 
   const highlightsPath = saveFile(JSON.stringify(highlights, null, 2), dateStr, "highlights.json");
   console.log(`  Saved ${highlightsPath}`);
