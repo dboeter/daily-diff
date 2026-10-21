@@ -12,6 +12,8 @@ import path from "node:path";
 import {
   loadReportedState,
   markStaleOnFirstSight,
+  nextDeadlines,
+  type Deadline,
   type ReportedState,
   type StateItem,
 } from "../core/report-state.ts";
@@ -20,7 +22,6 @@ import type { Numbered } from "../reports/summarized-table.ts";
 import { loadDataVerdicts, selectVendorItems, type DataVerdicts, type KeptVendorItem } from "./jev.ts";
 import type { AskJev } from "../core/jev.ts";
 import { daysBefore, toCstDateStr } from "../core/date.ts";
-import { nextDeadlines, type Deadline } from "../policy/deadlines.ts";
 
 export interface VendorItem {
   /** Stable per note: the guid, or the parser's own key. */

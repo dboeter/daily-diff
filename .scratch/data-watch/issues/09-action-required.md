@@ -25,4 +25,4 @@ Type: task
 
 - Date source: Jev, as a `choice` question (`end_date`) added to the existing vendor request when the title or description has dates; the options are the regex-found dates as ISO keys plus `none` (TypeSafe's pre-parsed value extraction). A pick outside the candidates is ignored. Live check on the 2026-10-21 pool: DeepSeek V4.1 Flash → 2026-11-19, Fabric data agent custom tool → 2026-11-06, Databricks Runtime 19 (a release date in its title) → none.
 - Bundles: the planned move to Enabled by Default or Generally Enabled, when its window has a day. On 2026-10-21 every planned change was month-only ("a subsequent October 2026 release"), so no bundle has an end date yet.
-- State: `actions` in `digests/data-state.json`, through Policy Watch's `nextDeadlines`.
+- State: `actions` in `digests/data-state.json`, through `nextDeadlines` (moved to `src/core/report-state.ts`, shared with Policy Watch). A "—" row summary leaves the description as the action.

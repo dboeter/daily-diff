@@ -2,7 +2,8 @@
  * Report content builders — extracted from index.ts for testability.
  */
 
-import { hasActivity, releaseNotes, type ProjectActivity, type ReleaseRow } from "./prompts.ts";
+import { hasActivity, RELEASE_BODY_CHARS, releaseNotes, type ProjectActivity } from "./prompts.ts";
+import type { ReleaseRow } from "./data-reports.ts";
 import { escapeRegex } from "./agent-news.ts";
 import type { OpenRouterStealthModel } from "../sources/openrouter.ts";
 import type { TrendingReportData } from "../trending/rank.ts";
@@ -334,7 +335,10 @@ export function renderPolicyTable(
 export function renderReleaseTable(rows: Numbered<ReleaseRow>[], summaries: Map<number, string>): string {
   if (!rows.length) return "";
   const lines = rows.map(({ n, project, release }) => {
-    const summary = summaryText(summaries, { n, description: releaseNotes(release.body, 400) });
+    const summary = summaryText(summaries, {
+      n,
+      description: releaseNotes(release.body, RELEASE_BODY_CHARS),
+    });
     return (
       `| [${cell(project.name)}](https://github.com/${project.repo}) | ` +
       `[${cell(release.tag_name)}](https://github.com/${project.repo}/releases/tag/${encodeURIComponent(release.tag_name)}) | ` +

@@ -45,14 +45,8 @@ import { saveWebState, type WebFetchResult, type WebState } from "../sources/web
 import type { TrendingData } from "../trending/trending.ts";
 import { saveClassifyCache, saveMatchState } from "../trending/jev.ts";
 import { saveStarHistory, summaryRows } from "../trending/rank.ts";
-import {
-  buildProjectDigestPrompt,
-  buildSkillsPrompt,
-  hasActivity,
-  type ProjectActivity,
-  type ReleaseRow,
-} from "./prompts.ts";
-import type { SkillsData } from "../core/github.ts";
+import { buildProjectDigestPrompt, buildSkillsPrompt, hasActivity, type ProjectActivity } from "./prompts.ts";
+import type { GitHubRelease, RepoConfig, SkillsData } from "../core/github.ts";
 import {
   buildProjectReportContent,
   renderTrendingTables,
@@ -358,6 +352,14 @@ export async function buildPolicyReport(
 // Data report (Databricks, Snowflake, the open-source data stack) — daily
 // ---------------------------------------------------------------------------
 
+/** A Releases this week row: a stable release no earlier report showed. */
+export interface ReleaseRow {
+  /** `release:<owner/repo>@<tag>`, its entry in the data state's `reported`. */
+  key: string;
+  project: RepoConfig;
+  release: GitHubRelease;
+}
+
 /** One repo section of the data report (config.yml `databricks`, `snowflake`, `data_stack`). */
 export interface DataSection {
   key: DataSectionKey;
@@ -405,7 +407,7 @@ function newReleases(
   sections: DataSection[],
   reported: Record<string, string>,
   dateStr: string,
-): ReleaseRow[] {
+): (ReleaseRow & { inSection: boolean })[] {
   return sections
     .flatMap((s) => s.activities)
     .flatMap((a) =>
@@ -413,6 +415,7 @@ function newReleases(
         key: `release:${a.config.repo}@${release.tag_name}`,
         project: a.config,
         release,
+        inSection: a.releases.some((r) => r.tag_name === release.tag_name),
       })),
     )
     .filter((r) => (reported[r.key] ?? dateStr) === dateStr)
@@ -449,10 +452,11 @@ export async function buildDataReport(
   // Before the skip, as in buildPolicyReport: dropped items are then not asked again tomorrow, and
   // a quiet day keeps its record-only bundles.
   const files = { state: stateFile, verdicts: verdictsFile, trace: "data-ranking.json" };
-  const writes = planWrites(vendor);
-  commitWrites(writes.onFetched, files, dateStr);
+  commitWrites(planWrites(vendor).onFetched, files, dateStr);
   const { items } = vendor;
-  const releases = numberRows(newReleases(sections, vendor.nextState.reported, dateStr)).map((r) => ({
+  const unshown = newReleases(sections, vendor.nextState.reported, dateStr);
+  // A release of the last 24h is in its repo section: recorded as shown, not listed twice.
+  const releases = numberRows(unshown.filter((r) => !r.inSection)).map((r) => ({
     ...r,
     n: r.n + items.length,
   }));
@@ -483,9 +487,12 @@ export async function buildDataReport(
   const summaries = parseRowSummaries(rowSummaries);
   const tables = renderVendorTables(items, summaries);
   // Today's end dates take today's row summary, kept in the state for the later report days.
+  // A "—" summary (nothing beyond the title) is no action: the description, truncated, stands in.
   const actions = { ...vendor.nextState.actions };
   for (const i of items) {
-    if (actions[i.id] && i.endDate) actions[i.id] = { ...actions[i.id]!, summary: summaryText(summaries, i) };
+    if (!actions[i.id] || !i.endDate) continue;
+    const summary = summaryText(summaries, i);
+    actions[i.id] = { ...actions[i.id]!, summary: summary === "—" ? summaryText(new Map(), i) : summary };
   }
   const actionTable = renderVendorActions(actions, dateStr);
   const repo = (key: DataSectionKey) => {
@@ -550,8 +557,9 @@ export async function buildDataReport(
     ...vendor.nextState,
     ...(vendor.nextState.actions ? { actions } : {}),
     // Shown once: the next run skips them (newReleases); pruned with the vendor ids.
-    reported: { ...vendor.nextState.reported, ...Object.fromEntries(releases.map((r) => [r.key, dateStr])) },
+    reported: { ...vendor.nextState.reported, ...Object.fromEntries(unshown.map((r) => [r.key, dateStr])) },
   };
+  // The reported state as the report left it: today's action summaries and shown releases added.
   commitWrites(planWrites({ ...vendor, nextState }).onReported, files, dateStr);
   return { id: "ai-data", content };
 }

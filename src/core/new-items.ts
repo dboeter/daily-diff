@@ -75,7 +75,13 @@ export async function collectNewItems<
   const { tag, state, dateStr, stateItem } = opts;
   const stateFor = (kept: I[], recorded: F[], fetched: F[]): S =>
     ({
-      ...nextReportedState(state, kept.map(stateItem), dateStr, recorded.map(stateItem)),
+      ...nextReportedState(
+        state,
+        kept.map(stateItem),
+        dateStr,
+        recorded.map(stateItem),
+        fetched.map(stateItem),
+      ),
       ...opts.extend?.(kept, fetched),
     }) as S;
   try {

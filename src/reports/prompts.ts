@@ -99,7 +99,8 @@ export function hasActivity(a: ProjectActivity): boolean {
 
 /** Newest stable releases shown per project; llama.cpp alone tags 35–70 a week. */
 const RELEASES_PER_PROJECT = 10;
-const RELEASE_BODY_CHARS = 400;
+/** A stable release's notes as the model sees them (the agents and data reports). */
+export const RELEASE_BODY_CHARS = 400;
 // A prerelease is reported only if its notes show notable features, so the
 // model needs more of them. DeepSeek Harness notes run 4–19 KB, Chinese first
 // behind "[English](#en-…)" anchor links and <h3> tags: at 400 characters the
@@ -112,14 +113,6 @@ const PREVIEW_BODY_CHARS = 1500;
  * blocks (Homebrew, curl, `go install`), so on 2026-10-19 the first 400
  * characters held no change and the report listed install commands.
  */
-/** A Releases this week row of the data report: a stable release no earlier report showed. */
-export interface ReleaseRow {
-  /** `release:<owner/repo>@<tag>`, its key in the data state's `reported`. */
-  key: string;
-  project: RepoConfig;
-  release: GitHubRelease;
-}
-
 export function releaseNotes(body: string | null | undefined, maxChars: number): string {
   return (body ?? "")
     .replace(/(```|~~~)[\s\S]*?(\1|$)/g, " ")

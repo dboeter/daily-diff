@@ -14,8 +14,8 @@ import { JURISDICTIONS, type Jurisdiction, type PolicyConfig } from "../core/con
 import { POLICY_SOURCES, type PolicySource } from "./sources.ts";
 import { loadPolicyVerdicts, selectPolicyItems, type PolicyVerdicts } from "./jev.ts";
 import type { AskJev } from "../core/jev.ts";
-import { nextDeadlines, upcomingDeadlines, type Deadline } from "./deadlines.ts";
-import { loadReportedState, type ReportedState } from "../core/report-state.ts";
+import { upcomingDeadlines } from "./deadlines.ts";
+import { loadReportedState, nextDeadlines, type Deadline, type ReportedState } from "../core/report-state.ts";
 import { collectNewItems, type NewItems } from "../core/new-items.ts";
 import { numberRows, type Numbered } from "../reports/summarized-table.ts";
 import { POLICY_REPORT } from "../core/i18n.ts";

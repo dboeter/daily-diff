@@ -22,4 +22,4 @@ Type: task
 
 ## Decision
 
-The table, not a 7-day window for the repo sections (that would repeat a release on seven consecutive days). Releases are fetched over 7 days from the same request as the daily ones; each shown release is saved as `release:<repo>@<tag>` in `digests/data-state.json`'s `reported`, so it shows once. A release from the last 24h also appears in its repo section on that day. Summaries come from the vendor summaries call, numbered after the vendor rows.
+The table, not a 7-day window for the repo sections (that would repeat a release on seven consecutive days). Releases are fetched over 7 days from the same request as the daily ones; each shown release is saved as `release:<repo>@<tag>` in `digests/data-state.json`'s `reported`, so it shows once. A release from the last 24h stays in its repo section (the LLM body) and is only recorded as shown, so no release appears twice. Summaries come from the vendor summaries call, numbered after the vendor rows.

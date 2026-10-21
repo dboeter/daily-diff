@@ -18,7 +18,8 @@ import {
   WEB_REPORT,
 } from "../core/i18n.ts";
 import { TABLES_MARKER, rowList, summaryLine, summaryOutputRule, type Numbered } from "./summarized-table.ts";
-import { NO_TITLE_RULE, releaseNotes, type ReleaseRow } from "./prompts.ts";
+import { NO_TITLE_RULE, RELEASE_BODY_CHARS, releaseNotes } from "./prompts.ts";
+import type { ReleaseRow } from "./data-reports.ts";
 import type { HnData } from "../sources/hn.ts";
 import type { ArxivData } from "../sources/arxiv.ts";
 import type { HfData } from "../sources/hf.ts";
@@ -175,9 +176,6 @@ const DATA_READER =
  * Data report, vendor call 1 of 2: one summary per numbered vendor table row.
  * The rows are the kept vendor items, numbered by selectVendorItems; parseRowSummaries reads the reply.
  */
-/** A release's notes in the summaries prompt: enough for its changes, short enough for a busy week. */
-const RELEASE_NOTES_CHARS = 400;
-
 export function buildDataSummariesPrompt(
   items: Numbered<KeptVendorItem>[],
   dateStr: string,
@@ -192,7 +190,7 @@ export function buildDataSummariesPrompt(
     rowList(
       releases,
       (r) =>
-        `${r.project.name} ${r.release.tag_name} (release, ${r.release.published_at.slice(0, 10)}) — ${releaseNotes(r.release.body, RELEASE_NOTES_CHARS) || "(no release notes)"}`,
+        `${r.project.name} ${r.release.tag_name} (release, ${r.release.published_at.slice(0, 10)}) — ${releaseNotes(r.release.body, RELEASE_BODY_CHARS) || "(no release notes)"}`,
     ),
   ]
     .filter(Boolean)
@@ -207,7 +205,7 @@ ${list}
 ${summaryLine("1-2 sentences")} — what the change enables, breaks or requires for client data platforms: a setting to turn on, a migration, a cloud, region or edition limit (for a deprecation or breaking change: what stops working or must be migrated, and by when).
 - Do not repeat the title or its status words (generally available, preview, now available): the title is shown next to the summary.
 - Ground every sentence only in the given text. Do not invent dates, versions, regions or availability.
-- When the text adds nothing beyond the title (or is empty), write \`N: —\` for that item.${releases.length ? "\n- For a release: its most important change for users in 1 sentence; say so first when it is a major version (only a version x.0.0 is a major version) or its notes name breaking changes. Notes are cut at ${RELEASE_NOTES_CHARS} characters: summarize what they show, and never say they are cut." : ""}
+- When the text adds nothing beyond the title (or is empty), write \`N: —\` for that item.${releases.length ? "\n- For a release: its most important change for users in 1 sentence; say so first when it is a major version (only a version x.0.0 is a major version) or its notes name breaking changes. Notes are cut at ${RELEASE_BODY_CHARS} characters: summarize what they show, and never say they are cut." : ""}
 ${summaryOutputRule(count)}
 - English.
 `;

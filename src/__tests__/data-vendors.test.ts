@@ -265,6 +265,10 @@ describe("fetchVendorData across days", () => {
     };
     const data = await run("2026-10-21", [{ ...retiring, date: "2026-10-19" }], [], legacy);
     expect(data.items).toEqual([]);
+    // The old key's day moves to the guid, so a later date edit is still not new.
+    expect(data.observedState.reported["ba-p/5374418"]).toBe("2026-10-20");
+    const moved = await run("2026-10-22", [{ ...retiring, date: "2026-10-21" }], [], data.observedState);
+    expect(moved.items).toEqual([]);
   });
 
   it("still keys an Azure Databricks note on title + date, so a second guid is not new", async () => {

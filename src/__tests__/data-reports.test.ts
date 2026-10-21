@@ -609,6 +609,54 @@ describe("buildDataReport", () => {
     expect(JSON.parse(fs.readFileSync(stateFile, "utf-8")).actions["dbx-old"].summary).toBe("Retiring soon.");
   });
 
+  it("leaves a release of the last 24h to its repo section, and records it as shown", async () => {
+    generateBody.mockReset();
+    generateBody.mockImplementation(async (prompt: string) => reply(prompt));
+    fs.rmSync(stateFile, { force: true });
+    const s = releasedThisWeek();
+    const today = weekRelease("v2.0.1", "2026-10-16T09:00:00Z");
+    s[2]!.activities[0] = {
+      ...s[2]!.activities[0]!,
+      releases: [today],
+      weekReleases: [today, ...s[2]!.activities[0]!.weekReleases!],
+    };
+    const content = (await build(s, vendorOf([])))!.content;
+    const table = content.slice(content.indexOf("## Releases this week"));
+    expect(table).toContain("[v2.0.0]");
+    expect(table).not.toContain("[v2.0.1]");
+    expect(content).toContain("### DuckDB");
+    expect(JSON.parse(fs.readFileSync(stateFile, "utf-8")).reported).toMatchObject({
+      "release:org/duckdb@v2.0.1": "2026-10-17",
+      "release:org/duckdb@v2.0.0": "2026-10-17",
+    });
+  });
+
+  it("shows the description as the action when the row summary is '—'", async () => {
+    generateBody.mockReset();
+    generateBody.mockImplementation(async (prompt: string) =>
+      prompt.startsWith("You summarize data platform") ? "1: —" : reply(prompt),
+    );
+    const data = await vendorData();
+    const retiring = data.items.find((i) => i.id === "dbx-old")!;
+    const vendor: VendorData = {
+      ...data,
+      items: data.items.map((i) => (i.id === "dbx-old" ? { ...i, endDate: "2026-11-19" } : i)),
+      nextState: {
+        reported: {},
+        actions: {
+          "dbx-old": {
+            date: "2026-11-19",
+            title: retiring.title,
+            link: retiring.link,
+            source: retiring.source,
+          },
+        },
+      },
+    };
+    const content = (await build(sections(false), vendor))!.content;
+    expect(content).toContain("(https://example.com/dbx-old) | Description dbx-old. |");
+  });
+
   it("is still skipped when only open end dates are left", async () => {
     generateBody.mockReset();
     const vendor: VendorData = {
