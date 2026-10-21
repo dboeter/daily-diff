@@ -224,6 +224,37 @@ describe("fetchVendorData", () => {
     ]);
   });
 
+  it("lists a reported bundle's end date once its plan gets a day, and follows a reschedule", async () => {
+    const page = (planned: string) =>
+      `<table><tr><th>Pending Changes</th></tr><tr><td><strong>2026_09</strong></td><td><p>Introduced in the 10.38 release (October 14-20, 2026) as Disabled by Default; account admins can enable for testing.</p><p>Status planned to change in ${planned} to Generally Enabled.</p></td></tr></table>`;
+    const day = (date: string, planned: string, state: Parameters<typeof fetchVendorData>[2]) => {
+      vi.spyOn(console, "log").mockImplementation(() => {});
+      vi.spyOn(globalThis, "fetch").mockImplementation(async () => new Response(page(planned)));
+      return fetchVendorData({ feeds }, new Date(`${date}T01:00:00Z`), state, { cache: { items: {} } });
+    };
+    const d1 = await day("2026-10-21", "a subsequent November 2026 release", null);
+    expect(d1.items.map((i) => i.id)).toEqual(["snowflake-bcr:2026_09"]);
+    expect(d1.nextState.actions).toEqual({});
+    // Same stage, so not new again: the action still has to come from the fetched bundle.
+    const d2 = await day("2026-10-22", "the 10.42 release (November 10-16, 2026)", d1.nextState);
+    expect(d2.items).toEqual([]);
+    expect(d2.observedState.actions?.["snowflake-bcr:2026_09"]?.date).toBe("2026-11-16");
+    // buildDataReport adds the row summary; a reschedule keeps it.
+    const saved = d2.observedState.actions!["snowflake-bcr:2026_09"]!;
+    const d2State = {
+      ...d2.observedState,
+      actions: { "snowflake-bcr:2026_09": { ...saved, summary: "Test it." } },
+    };
+    const d3 = await day("2026-10-23", "the 10.43 release (November 17-23, 2026)", d2State);
+    expect(d3.observedState.actions?.["snowflake-bcr:2026_09"]).toMatchObject({
+      date: "2026-11-23",
+      summary: "Test it.",
+    });
+    // Back to a month-only plan: no date to act by.
+    const d4 = await day("2026-10-24", "a subsequent December 2026 release", d3.observedState);
+    expect(d4.observedState.actions).toEqual({});
+  });
+
   it("reports a known bundle whose stage moved, however old the stage date", async () => {
     const data = await run({ reported: {}, stages: { "snowflake-bcr:2026_07": "2026-08-01 Planned" } });
     expect(data.items.map((i) => i.id)).toEqual(["snowflake-bcr:2026_08", "snowflake-bcr:2026_07"]);

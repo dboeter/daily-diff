@@ -142,7 +142,8 @@ type Dated = Omit<Deadline, "date"> & { id: string; deadline?: string };
 /**
  * The open deadlines after today's run: the saved ones not yet passed, plus
  * the reported items' deadlines. A saved item fetched again takes its current
- * deadline (an extension), or leaves when it has none (feedback closed early).
+ * deadline (an extension), its extra fields kept, or leaves when it has none
+ * (feedback closed early).
  * An item no report carried is not added: Jev dropped it. A saved entry not
  * fetched again is kept as it is, extra fields included. Policy Watch's
  * Upcoming deadlines and the data report's Action required table.
@@ -162,9 +163,10 @@ export function nextDeadlines(
   });
   for (const i of fetched) {
     if (!(i.id in next)) continue;
-    if (i.deadline && i.deadline >= dateStr) next[i.id] = toDeadline(i);
+    if (i.deadline && i.deadline >= dateStr) next[i.id] = { ...next[i.id], ...toDeadline(i) };
     else delete next[i.id];
   }
-  for (const i of reported) if (i.deadline && i.deadline >= dateStr) next[i.id] = toDeadline(i);
+  for (const i of reported)
+    if (i.deadline && i.deadline >= dateStr) next[i.id] = { ...next[i.id], ...toDeadline(i) };
   return next;
 }

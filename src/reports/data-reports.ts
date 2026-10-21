@@ -372,8 +372,9 @@ export interface DataSection {
 const BULLET_RE = /^\s*(?:[-*]|\d+\.)\s/;
 
 /**
- * Split the prose call's reply at TABLES_MARKER: Highlights before it (all of
- * it without one, as spliceTables does with a missing marker); after it, only
+ * Split the prose call's reply at TABLES_MARKER (without one, at its first
+ * `## ` heading after the first line, so a section the model wrote is still
+ * placed or dropped): Highlights before it; after it, only
  * the Across platforms section's bullets (with their wrapped lines), from its
  * heading to the next `## ` heading, so a note the model adds there is dropped
  * (the 2026-10-21 replay ended with one). Any other section it wrote was not
@@ -381,9 +382,11 @@ const BULLET_RE = /^\s*(?:[-*]|\d+\.)\s/;
  */
 function splitProse(prose: string): { highlights: string; acrossPlatforms: string } {
   const lines = prose.split("\n");
-  const i = lines.findIndex((l) => l.trim() === TABLES_MARKER);
-  if (i === -1) return { highlights: prose.trim(), acrossPlatforms: "" };
-  const after = lines.slice(i + 1);
+  const marker = lines.findIndex((l) => l.trim() === TABLES_MARKER);
+  const heading = lines.findIndex((l, j) => j > 0 && l.startsWith("## "));
+  const i = marker !== -1 ? marker : heading !== -1 ? heading : lines.length;
+  // Past the marker, or from the heading itself when there is none.
+  const after = lines.slice(marker !== -1 ? i + 1 : i);
   const start = after.findIndex((l) => l.trim() === `## ${DATA_REPORT.acrossPlatforms}`);
   const end = after.findIndex((l, j) => j > start && l.startsWith("## "));
   const bullets: string[] = [];

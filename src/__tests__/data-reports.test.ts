@@ -561,6 +561,20 @@ describe("buildDataReport", () => {
     expect((await build(sections(false), await vendorData()))!.content).not.toContain("Across platforms");
   });
 
+  it("splits a reply without the tables marker at its first heading after Highlights", async () => {
+    generateBody.mockReset();
+    const noMarker =
+      "## Highlights\n- H.\n\n## Across platforms\n\n- Tagging: Snowflake GA, Databricks preview.\n\n## Data × AI\n- X.";
+    generateBody.mockImplementation(async (prompt: string) =>
+      prompt.startsWith("You are the editor") ? noMarker : reply(prompt),
+    );
+    const content = (await build(sections(false), await vendorData()))!.content;
+    const at = (s: string) => content.indexOf(s);
+    expect(content).toContain("## Highlights\n- H.");
+    expect(at("## Open-source stack")).toBeLessThan(at("## Across platforms"));
+    expect(content).not.toContain("Data × AI");
+  });
+
   it("lists the open end dates under Action required, nearest first, with today's row summary", async () => {
     generateBody.mockReset();
     generateBody.mockImplementation(async (prompt: string) => reply(prompt));

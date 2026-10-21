@@ -236,16 +236,22 @@ export async function fetchVendorData(
       };
     },
     stateItem: asStateItem,
-    // Not `fetched` as the third argument: no raw item carries an end date (Jev sets it on kept
-    // items), so a refetched one would wipe its saved date the day after it was reported.
-    extend: (kept) => ({
-      actions: nextDeadlines(
-        state?.actions,
-        kept.filter((i) => i.endDate).map((i) => ({ ...i, deadline: i.endDate })),
-        [],
-        dateStr,
-      ) as Record<string, VendorAction>,
-    }),
+    // Only bundles as `fetched`: a note's end date is Jev's (set on kept items), so a refetched note
+    // would wipe its saved date; a bundle's is parsed from the page, so each fetch is current.
+    // A bundle the state knows is not new while its stage holds, so its date (a plan that gained a
+    // day, a reschedule) comes from the fetch.
+    extend: (kept, fetched) => {
+      const bundles = fetched.filter((i) => i.stage !== undefined);
+      const known = bundles.filter((i) => i.endDate && state?.stages?.[i.id] !== undefined);
+      return {
+        actions: nextDeadlines(
+          state?.actions,
+          [...known, ...kept.filter((i) => i.endDate)].map((i) => ({ ...i, deadline: i.endDate })),
+          bundles.map((i) => ({ ...i, deadline: i.endDate })),
+          dateStr,
+        ) as Record<string, VendorAction>,
+      };
+    },
     select: (candidates) => {
       console.log(`  [data] ${candidates.length} new vendor items`);
       return selectVendorItems(candidates, { ...jev, dateStr });
