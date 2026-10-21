@@ -2,7 +2,7 @@
  * Report content builders — extracted from index.ts for testability.
  */
 
-import { hasActivity, type ProjectActivity } from "./prompts.ts";
+import { hasActivity, releaseNotes, type ProjectActivity, type ReleaseRow } from "./prompts.ts";
 import { escapeRegex } from "./agent-news.ts";
 import type { OpenRouterStealthModel } from "../sources/openrouter.ts";
 import type { TrendingReportData } from "../trending/rank.ts";
@@ -48,11 +48,6 @@ export interface ProjectReportInput {
   period: string;
   /** Markdown rendered between the header and the groups, ending with its own separator. */
   preamble?: string;
-  /**
-   * Leave out a group with no active project (the data report). The agents
-   * report shows it with its notice and quiet line. Either way the header counts it.
-   */
-  omitQuietGroups?: boolean;
   /** Counts shown before the project counts, e.g. the data report's "Vendor items: 16". */
   leadingCounts?: string;
   /** Markdown after the last group, before the footer (the data report's Worth a Look), with its own separator. */
@@ -94,19 +89,17 @@ export function buildProjectReportContent(r: ProjectReportInput): string {
     // A project whose release fetch failed was not checked: "Quiet" would claim it shipped nothing.
     const unavailable = g.activities.filter((a) => a.fetchFailed);
     inactiveCount += quiet.length + unavailable.length;
-    // With omitQuietGroups, a group's projects are left out when all are quiet; its preamble still shows.
-    const showProjects = !(r.omitQuietGroups && quiet.length === g.activities.length);
-    if (!showProjects && !g.preamble) return [];
-    const projects = showProjects
-      ? [
-          // The data report passes an empty summary for a group with no active project.
-          nestHeadings(g.summary, 3),
-          quiet.length ? `**Quiet ${r.period}:** ${quiet.map(link).join(", ")}` : "",
-          unavailable.length ? `**Unavailable ${r.period}:** ${unavailable.map(link).join(", ")}` : "",
-        ]
-          .filter(Boolean)
-          .join("\n\n")
-      : "";
+    // A group with neither projects nor a preamble (the data report's Azure / Fabric & GCP on a day
+    // without its vendor rows) has nothing to show. An all-quiet group shows its quiet line.
+    if (!g.activities.length && !g.preamble) return [];
+    const projects = [
+      // The data report passes an empty summary for a group with no active project.
+      nestHeadings(g.summary, 3),
+      quiet.length ? `**Quiet ${r.period}:** ${quiet.map(link).join(", ")}` : "",
+      unavailable.length ? `**Unavailable ${r.period}:** ${unavailable.map(link).join(", ")}` : "",
+    ]
+      .filter(Boolean)
+      .join("\n\n");
     return `## ${g.title}\n\n` + [g.preamble, projects].filter(Boolean).join("\n\n");
   });
 
@@ -333,6 +326,24 @@ export function renderPolicyTable(
  * shows the summary for its own number (`n`, set by selectVendorItems).
  * Date, source, title and the ⚠️/🤖 markers come from the data, never the model.
  */
+/**
+ * The data report's Releases this week table; each row's summary by its own
+ * number (after the vendor rows), else its release notes, truncated. Empty
+ * when there are no rows.
+ */
+export function renderReleaseTable(rows: Numbered<ReleaseRow>[], summaries: Map<number, string>): string {
+  if (!rows.length) return "";
+  const lines = rows.map(({ n, project, release }) => {
+    const summary = summaryText(summaries, { n, description: releaseNotes(release.body, 400) });
+    return (
+      `| [${cell(project.name)}](https://github.com/${project.repo}) | ` +
+      `[${cell(release.tag_name)}](https://github.com/${project.repo}/releases/tag/${encodeURIComponent(release.tag_name)}) | ` +
+      `${release.published_at.slice(0, 10)} | ${cell(summary)} |`
+    );
+  });
+  return `${DATA_REPORT.releasesTableHeader}\n${lines.join("\n")}`;
+}
+
 /**
  * The data report's Action required section: the open end dates (on or after
  * `dateStr`), nearest first. Empty when none is open.

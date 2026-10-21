@@ -25,6 +25,8 @@ export interface ProjectActivity {
   news: NewsItem[];
   /** The release fetch failed: the project could not be checked, so it is neither active nor quiet. */
   fetchFailed?: boolean;
+  /** The data report only: stable releases of the last 7 days, newest first, for Releases this week. */
+  weekReleases?: GitHubRelease[];
 }
 
 /** Wording that differs between the agents and infra sections. */
@@ -110,6 +112,14 @@ const PREVIEW_BODY_CHARS = 1500;
  * blocks (Homebrew, curl, `go install`), so on 2026-10-19 the first 400
  * characters held no change and the report listed install commands.
  */
+/** A Releases this week row of the data report: a stable release no earlier report showed. */
+export interface ReleaseRow {
+  /** `release:<owner/repo>@<tag>`, its key in the data state's `reported`. */
+  key: string;
+  project: RepoConfig;
+  release: GitHubRelease;
+}
+
 export function releaseNotes(body: string | null | undefined, maxChars: number): string {
   return (body ?? "")
     .replace(/(```|~~~)[\s\S]*?(\1|$)/g, " ")

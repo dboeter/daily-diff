@@ -423,7 +423,8 @@ Generated | Projects: N | Active today: N | Stable releases: N | Prereleases (no
 ## Databricks                          — vendor table (⚠️ = deprecation, 🤖 = AI in data work), then the repos in the ai-agents layout
 ## Snowflake                           — the same
 ## Azure / Fabric & GCP                — vendor table only
-## Open-source stack                   — the data_stack repos
+## Open-source stack                   — the data_stack repos (a quiet line even when all are quiet)
+## Releases this week                  — the data repos' stable releases of the last 7 days, each shown once
 ## Across platforms                    — 0-3 bullets: one capability that moved on two or more vendors, compared
 ## Worth a Look                        — links to today's Policy Watch items that are EU data law (code-rendered)
 (a section with nothing new is left out)

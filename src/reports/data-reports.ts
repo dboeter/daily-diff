@@ -45,7 +45,13 @@ import { saveWebState, type WebFetchResult, type WebState } from "../sources/web
 import type { TrendingData } from "../trending/trending.ts";
 import { saveClassifyCache, saveMatchState } from "../trending/jev.ts";
 import { saveStarHistory, summaryRows } from "../trending/rank.ts";
-import { buildProjectDigestPrompt, buildSkillsPrompt, hasActivity, type ProjectActivity } from "./prompts.ts";
+import {
+  buildProjectDigestPrompt,
+  buildSkillsPrompt,
+  hasActivity,
+  type ProjectActivity,
+  type ReleaseRow,
+} from "./prompts.ts";
 import type { SkillsData } from "../core/github.ts";
 import {
   buildProjectReportContent,
@@ -54,10 +60,17 @@ import {
   nestHeadings,
   renderVendorTables,
   renderVendorActions,
+  renderReleaseTable,
   policyTitleLabel,
   type ProjectGroup,
 } from "./report-builders.ts";
-import { parseRowSummaries, spliceTables, summaryText, TABLES_MARKER } from "./summarized-table.ts";
+import {
+  numberRows,
+  parseRowSummaries,
+  spliceTables,
+  summaryText,
+  TABLES_MARKER,
+} from "./summarized-table.ts";
 import { saveArxivState, type ArxivData } from "../sources/arxiv.ts";
 import type { HfData } from "../sources/hf.ts";
 import { POLICY_STATE_FILE, type PolicyData, type PolicyItem } from "../policy/policy.ts";
@@ -384,11 +397,36 @@ function splitProse(prose: string): { highlights: string; acrossPlatforms: strin
 }
 
 /**
+ * The data repos' stable releases of the last 7 days that no earlier report
+ * showed (`reported`: the data state, which keeps them as `release:<repo>@<tag>`;
+ * one shown today is shown again on a same-day re-run), newest first.
+ */
+function newReleases(
+  sections: DataSection[],
+  reported: Record<string, string>,
+  dateStr: string,
+): ReleaseRow[] {
+  return sections
+    .flatMap((s) => s.activities)
+    .flatMap((a) =>
+      (a.weekReleases ?? []).map((release) => ({
+        key: `release:${a.config.repo}@${release.tag_name}`,
+        project: a.config,
+        release,
+      })),
+    )
+    .filter((r) => (reported[r.key] ?? dateStr) === dateStr)
+    .sort((a, b) => b.release.published_at.localeCompare(a.release.published_at));
+}
+
+/**
  * The data report: Highlights, then Databricks, Snowflake and Azure / Fabric &
  * GCP (each its code-rendered vendor table, then the vendor's repo section),
  * with Action required (code-rendered: the open end dates of reported
  * deprecations, in the state until they pass) between Highlights and them,
- * the open-source stack, Across platforms and Worth a Look. A section with neither vendor items
+ * the open-source stack, Releases this week (code-rendered: the data repos'
+ * stable releases of the last 7 days not shown before, summarized by the vendor
+ * summaries call), Across platforms and Worth a Look. A section with neither vendor items
  * nor repo activity is left out. LLM calls: one per active repo section (as in
  * the agents report) and one for the vendor row summaries, in parallel; then
  * one for Highlights and Across platforms over all of it (Across platforms is
@@ -414,7 +452,11 @@ export async function buildDataReport(
   const writes = planWrites(vendor);
   commitWrites(writes.onFetched, files, dateStr);
   const { items } = vendor;
-  if (items.length === 0 && !sections.some((s) => s.activities.some(hasActivity))) {
+  const releases = numberRows(newReleases(sections, vendor.nextState.reported, dateStr)).map((r) => ({
+    ...r,
+    n: r.n + items.length,
+  }));
+  if (items.length === 0 && releases.length === 0 && !sections.some((s) => s.activities.some(hasActivity))) {
     console.log(`  [data] ${DATA_REPORT.noNewItems}`);
     return null;
   }
@@ -429,8 +471,13 @@ export async function buildDataReport(
         return { ...s, summary };
       }),
     ),
-    items.length > 0
-      ? generateOr("data-vendor-summaries", buildDataSummariesPrompt(items, dateStr), "", LLM_TOKENS_LISTING)
+    items.length + releases.length > 0
+      ? generateOr(
+          "data-vendor-summaries",
+          buildDataSummariesPrompt(items, dateStr, releases),
+          "",
+          LLM_TOKENS_LISTING,
+        )
       : "",
   ]);
   const summaries = parseRowSummaries(rowSummaries);
@@ -451,6 +498,12 @@ export async function buildDataReport(
     { title: H.snowflake, ...repo("snowflake"), preamble: tables.snowflake },
     { title: H.cloud, activities: [], summary: "", preamble: tables.cloud },
     { title: H.data_stack, ...repo("data_stack") },
+    {
+      title: DATA_REPORT.releasesHeading,
+      activities: [],
+      summary: "",
+      preamble: renderReleaseTable(releases, summaries),
+    },
   ];
 
   // The prose call sees what the reader sees below Highlights.
@@ -487,14 +540,18 @@ export async function buildDataReport(
       .filter(Boolean)
       .map((s) => `${s}\n\n---\n\n`)
       .join(""),
-    omitQuietGroups: true,
     // On 2026-10-19 "Projects: 17 | Active today: 0" was all the header said above 16 vendor rows.
     leadingCounts: DATA_REPORT.vendorCount(items.length),
     ...(epilogue ? { epilogue: `\n\n---\n\n${epilogue}` } : {}),
     footer: autoGenFooter(),
   });
   // Only once the report exists, like the policy state; after a failed fetch it only prunes.
-  const nextState: DataState = vendor.nextState.actions ? { ...vendor.nextState, actions } : vendor.nextState;
+  const nextState: DataState = {
+    ...vendor.nextState,
+    ...(vendor.nextState.actions ? { actions } : {}),
+    // Shown once: the next run skips them (newReleases); pruned with the vendor ids.
+    reported: { ...vendor.nextState.reported, ...Object.fromEntries(releases.map((r) => [r.key, dateStr])) },
+  };
   commitWrites(planWrites({ ...vendor, nextState }).onReported, files, dateStr);
   return { id: "ai-data", content };
 }

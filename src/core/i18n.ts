@@ -177,6 +177,9 @@ export const DATA_REPORT = {
   deprecationMarker: "⚠️",
   /** Written by the prose call after the tables: one capability compared across vendors. */
   acrossPlatforms: "Across platforms",
+  /** Code-rendered after Open-source stack: the data repos' stable releases no earlier report showed. */
+  releasesHeading: "Releases this week",
+  releasesTableHeader: "| Project | Version | Date | Summary |\n| :--- | :--- | :--- | :--- |",
   /** Code-rendered after Highlights: the open end dates of reported deprecations. */
   actionHeading: "Action required",
   actionTableHeader: "| Date | Platform | Item | What to do |\n| :--- | :--- | :--- | :--- |",

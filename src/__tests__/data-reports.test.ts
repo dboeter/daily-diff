@@ -425,7 +425,7 @@ describe("buildDataReport", () => {
     };
   };
 
-  it("renders Highlights, the active sections in order, leaves out a quiet one, and lists quiet projects", async () => {
+  it("renders Highlights, the sections in order, and an all-quiet repo section with its quiet line", async () => {
     generateBody.mockReset();
     generateBody.mockImplementation(async (prompt: string) => reply(prompt));
     const report = await build(sections(false));
@@ -436,12 +436,13 @@ describe("buildDataReport", () => {
     expect(content.indexOf("## Databricks")).toBeLessThan(content.indexOf("## Open-source stack"));
     // The model wrote one; code writes it only for data-law links.
     expect(content).not.toContain("## Worth a Look");
-    expect(content).not.toContain("## Snowflake");
+    // 2026-10-19..21: "Active today: 0" and no sign the stack was tracked at all.
+    expect(content).toContain("## Snowflake\n\n**Quiet today:** [Polaris](https://github.com/org/polaris)");
+    // No repos and no vendor rows: nothing to show.
     expect(content).not.toContain("## Azure / Fabric & GCP");
     expect(content).not.toContain("<!-- tables -->");
     expect(content).toContain("### Delta");
     expect(content).toContain("**Quiet today:** [MLflow](https://github.com/org/mlflow)");
-    // The header still counts the left-out section's project.
     expect(content).toContain("Projects: 4 | Active today: 2");
     // Two repo sections and the prose; no vendor items, so no summaries call.
     expect(generateBody).toHaveBeenCalledTimes(3);
@@ -486,8 +487,8 @@ describe("buildDataReport", () => {
       "| — | Snowflake BCR | ⚠️ [2026_08 bundle](https://example.com/bundle) | Snowflake note. |",
     );
     expect(at("bundle)")).toBeLessThan(at("sf)"));
-    // Snowflake's repos are quiet: only its table, no quiet line.
-    expect(content.slice(at("## Snowflake"), at("## Azure"))).not.toContain("Quiet today");
+    // Snowflake's repos are quiet: its table, then the quiet line.
+    expect(content.slice(at("## Snowflake"), at("## Azure"))).toContain("**Quiet today:** [Polaris]");
     expect(at("## Azure / Fabric & GCP")).toBeLessThan(at("## Open-source stack"));
     expect(content).toContain("[Feature: new preview](https://example.com/gcp)");
     // Two repo sections, the summaries and the prose; the state is saved once the report exists.
@@ -508,8 +509,7 @@ describe("buildDataReport", () => {
     generateBody.mockImplementation(async (prompt: string) => reply(prompt));
     const content = (await build(sections(false, false), await vendorData()))!.content;
     expect(content).toContain("## Databricks\n\n| Date | Source | Item | Summary |");
-    expect(content).not.toContain("## Open-source stack");
-    expect(content).not.toContain("Quiet today");
+    expect(content).toContain("## Open-source stack\n\n**Quiet today:** [DuckDB]");
     // 2026-10-19: "Projects: 17 | Active today: 0" sat above 16 vendor rows.
     expect(content).toContain("Vendor items: 5 | Projects:");
     expect(generateBody).toHaveBeenCalledTimes(2);
@@ -619,6 +619,69 @@ describe("buildDataReport", () => {
       },
     };
     expect(await build(sections(false, false), vendor)).toBeNull();
+  });
+
+  const weekRelease = (tag: string, published: string) => ({
+    tag_name: tag,
+    name: tag,
+    body: `## Notes\n${tag} notes.`,
+    published_at: published,
+    prerelease: false,
+  });
+  /** Quiet today, with a stable release earlier this week. */
+  const releasedThisWeek = (): DataSection[] => {
+    const s = sections(false, false);
+    s[2]!.activities[0] = {
+      ...s[2]!.activities[0]!,
+      weekReleases: [weekRelease("v2.0.0", "2026-10-14T09:00:00Z")],
+    };
+    return s;
+  };
+
+  it("lists a release of this week once under Releases this week, and not on the next run", async () => {
+    generateBody.mockReset();
+    generateBody.mockImplementation(async (prompt: string) =>
+      prompt.startsWith("You summarize data platform")
+        ? "1: Major release: drops Python 3.9."
+        : reply(prompt),
+    );
+    fs.rmSync(stateFile, { force: true });
+    const vendor: VendorData = {
+      ...vendorOf([]),
+      nextState: { reported: { "older|2026-10-10": "2026-10-11" } },
+    };
+    const content = (await build(releasedThisWeek(), vendor))!.content;
+    const at = (s: string) => content.indexOf(s);
+    expect(content).toContain(
+      "## Releases this week\n\n| Project | Version | Date | Summary |\n| :--- | :--- | :--- | :--- |\n| [DuckDB](https://github.com/org/duckdb) | [v2.0.0](https://github.com/org/duckdb/releases/tag/v2.0.0) | 2026-10-14 | Major release: drops Python 3.9. |",
+    );
+    expect(at("## Open-source stack")).toBeLessThan(at("## Releases this week"));
+    // The summaries call lists the release after the (here: no) vendor rows.
+    const summariesPrompt = generateBody.mock.calls
+      .map((c) => c[0] as string)
+      .find((p) => p.startsWith("You summarize data platform"))!;
+    expect(summariesPrompt).toContain("1. DuckDB v2.0.0 (release, 2026-10-14) — ## Notes v2.0.0 notes.");
+    const state = JSON.parse(fs.readFileSync(stateFile, "utf-8"));
+    expect(state.reported).toEqual({
+      "older|2026-10-10": "2026-10-11",
+      "release:org/duckdb@v2.0.0": "2026-10-17",
+    });
+
+    // The next day: already shown, and nothing else new, so no report.
+    generateBody.mockClear();
+    const next = await buildDataReport(
+      releasedThisWeek(),
+      { ...vendorOf([]), nextState: state },
+      [],
+      "00:00",
+      "2026-10-18",
+      stateFile,
+      verdictsFile,
+    );
+    expect(next).toBeNull();
+    // A same-day re-run shows it again.
+    const again = await build(releasedThisWeek(), { ...vendorOf([]), nextState: state });
+    expect(again!.content).toContain("## Releases this week");
   });
 
   it("leaves the failure notice in Highlights and no Worth a Look when the prose call fails", async () => {

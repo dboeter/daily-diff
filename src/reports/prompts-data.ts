@@ -18,7 +18,7 @@ import {
   WEB_REPORT,
 } from "../core/i18n.ts";
 import { TABLES_MARKER, rowList, summaryLine, summaryOutputRule, type Numbered } from "./summarized-table.ts";
-import { NO_TITLE_RULE } from "./prompts.ts";
+import { NO_TITLE_RULE, releaseNotes, type ReleaseRow } from "./prompts.ts";
 import type { HnData } from "../sources/hn.ts";
 import type { ArxivData } from "../sources/arxiv.ts";
 import type { HfData } from "../sources/hf.ts";
@@ -175,23 +175,40 @@ const DATA_READER =
  * Data report, vendor call 1 of 2: one summary per numbered vendor table row.
  * The rows are the kept vendor items, numbered by selectVendorItems; parseRowSummaries reads the reply.
  */
-export function buildDataSummariesPrompt(items: Numbered<KeptVendorItem>[], dateStr: string): string {
-  const list = rowList(
-    items,
-    (it) =>
-      `${it.title} (${it.source}${it.date ? `, ${it.date}` : ""}${it.stage ? `, status: ${it.stage}` : ""}${it.deprecation ? ", deprecation or breaking change" : ""}) — ${it.description || "(no description)"}`,
-  );
+/** A release's notes in the summaries prompt: enough for its changes, short enough for a busy week. */
+const RELEASE_NOTES_CHARS = 400;
+
+export function buildDataSummariesPrompt(
+  items: Numbered<KeptVendorItem>[],
+  dateStr: string,
+  releases: Numbered<ReleaseRow>[] = [],
+): string {
+  const list = [
+    rowList(
+      items,
+      (it) =>
+        `${it.title} (${it.source}${it.date ? `, ${it.date}` : ""}${it.stage ? `, status: ${it.stage}` : ""}${it.deprecation ? ", deprecation or breaking change" : ""}) — ${it.description || "(no description)"}`,
+    ),
+    rowList(
+      releases,
+      (r) =>
+        `${r.project.name} ${r.release.tag_name} (release, ${r.release.published_at.slice(0, 10)}) — ${releaseNotes(r.release.body, RELEASE_NOTES_CHARS) || "(no release notes)"}`,
+    ),
+  ]
+    .filter(Boolean)
+    .join("\n");
+  const count = items.length + releases.length;
   return `You summarize data platform release notes for ${DATA_READER}.
 
-Below are ${items.length} numbered release notes and updates, new as of ${dateStr}, each with its source and text.
+Below are ${count} numbered release notes and updates, new as of ${dateStr}, each with its source and text${releases.length ? "; the ones marked (release) are open-source project releases, with their release notes" : ""}.
 
 ${list}
 
 ${summaryLine("1-2 sentences")} — what the change enables, breaks or requires for client data platforms: a setting to turn on, a migration, a cloud, region or edition limit (for a deprecation or breaking change: what stops working or must be migrated, and by when).
 - Do not repeat the title or its status words (generally available, preview, now available): the title is shown next to the summary.
 - Ground every sentence only in the given text. Do not invent dates, versions, regions or availability.
-- When the text adds nothing beyond the title (or is empty), write \`N: —\` for that item.
-${summaryOutputRule(items.length)}
+- When the text adds nothing beyond the title (or is empty), write \`N: —\` for that item.${releases.length ? "\n- For a release: its most important change for users in 1 sentence; say so first when it is a major version or its notes name breaking changes." : ""}
+${summaryOutputRule(count)}
 - English.
 `;
 }
@@ -224,6 +241,7 @@ ${parts.map((p, i) => `${i + 1}. ${p}`).join("\n")}
 Rules:
 - ${NO_TITLE_RULE}
 - Length: at most ~200 words for ${SECTIONS.highlights}, ~120 for ${DATA_REPORT.acrossPlatforms}.
+- A major release in ${DATA_REPORT.releasesHeading} (a version x.0.0, or one whose summary names breaking changes) is a Highlights candidate: say who must test or migrate.
 - Never restate a row: the reader sees the tables right below. A bullet that only says what changed, without who is affected and what to do, is left out.
 - Write no links, URLs or other sections; name each item as the sections do. Dates only as the "by when" of a row that gives one.
 - Name each item in at most one bullet of ${SECTIONS.highlights}; ${DATA_REPORT.acrossPlatforms} compares rows, so it may name a row again. Two rows that describe the same change (a release note and its behavior change bundle, a "coming soon" note and its GA note) are one item: mention it once.

@@ -125,11 +125,14 @@ type ProjectFetch = Omit<ProjectActivity, "news">;
  */
 const PREVIEWS_PER_PROJECT = 3;
 
-/** Stable releases and hot issues for one project. A failed release fetch is `fetchFailed`, shown as unavailable. */
-async function fetchProject(cfg: RepoConfig, since: Date): Promise<ProjectFetch> {
+/**
+ * Stable releases and hot issues for one project. A failed release fetch is `fetchFailed`, shown as unavailable.
+ * `weekSince` (the data report): also the stable releases since then, as `weekReleases`, from the same request.
+ */
+async function fetchProject(cfg: RepoConfig, since: Date, weekSince?: Date): Promise<ProjectFetch> {
   try {
-    const [{ recent: releases, noStableYet }, hotIssues] = await Promise.all([
-      fetchRecentReleases(cfg.repo, since),
+    const [{ recent, noStableYet }, hotIssues] = await Promise.all([
+      fetchRecentReleases(cfg.repo, weekSince ?? since),
       // Search API, rate-limited separately from releases: a failure here must
       // not discard the releases.
       fetchHotIssues(cfg.repo, since).catch((err): GitHubItem[] => {
@@ -137,6 +140,7 @@ async function fetchProject(cfg: RepoConfig, since: Date): Promise<ProjectFetch>
         return [];
       }),
     ]);
+    const releases = recent.filter((r) => new Date(r.published_at) >= since);
     const stable = releases.filter((r) => !isPrerelease(r));
     const previews = noStableYet ? releases.slice(0, PREVIEWS_PER_PROJECT) : [];
     console.log(
@@ -149,6 +153,7 @@ async function fetchProject(cfg: RepoConfig, since: Date): Promise<ProjectFetch>
       previews,
       prereleaseCount: releases.length - stable.length - previews.length,
       hotIssues,
+      ...(weekSince ? { weekReleases: recent.filter((r) => !isPrerelease(r)) } : {}),
     };
   } catch (err) {
     console.error(`  [${cfg.id}] fetch failed: ${err}`);
@@ -178,6 +183,8 @@ async function fetchAllData(
   stealthModels: OpenRouterStealthModel[] | null;
 }> {
   const daySince = new Date(now.getTime() - DAY_MS);
+  // The data report's Releases this week: its repos release about weekly, so a 24h window saw none on most days.
+  const weekSince = new Date(now.getTime() - 7 * DAY_MS);
   console.log(
     `  Tracking daily: ${[...AGENTS, ...INFRA_REPOS, ...DATA_SECTIONS.flatMap((s) => s.repos)].map((r) => r.id).join(", ")}, web, hn, arxiv, policy, trending (news only)` +
       (weekly ? " | weekly: skills, trending, hf, devto, lobsters" : ""),
@@ -203,7 +210,9 @@ async function fetchAllData(
   ] = await Promise.all([
     Promise.all(AGENTS.map((cfg) => fetchProject(cfg, daySince))),
     Promise.all(INFRA_REPOS.map((cfg) => fetchProject(cfg, daySince))),
-    Promise.all(DATA_SECTIONS.map((s) => Promise.all(s.repos.map((cfg) => fetchProject(cfg, daySince))))),
+    Promise.all(
+      DATA_SECTIONS.map((s) => Promise.all(s.repos.map((cfg) => fetchProject(cfg, daySince, weekSince)))),
+    ),
     // No fetcher here throws: each returns its empty value (fetchSuccess false) on a failure.
     weekly ? fetchSkillsData(CLAUDE_SKILLS_REPO) : Promise.resolve(noSkills),
     Promise.all([fetchSiteContent("anthropic", webState), fetchSiteContent("openai", webState)]),

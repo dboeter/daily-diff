@@ -621,6 +621,12 @@ describe("buildDataProsePrompt", () => {
     expect(prompt.indexOf("<!-- tables -->")).toBeLessThan(prompt.indexOf("`## Across platforms`"));
   });
 
+  it("makes a major release a Highlights candidate", () => {
+    expect(prompt).toContain("Releases this week");
+    expect(prompt).toContain("x.0.0");
+    expect(prompt).toContain("breaking changes");
+  });
+
   it("asks for no Data × AI or Worth a Look section", () => {
     expect(prompt).not.toContain("Data × AI");
     expect(prompt).not.toContain("Worth a Look");
