@@ -540,14 +540,18 @@ describe("buildDataReport", () => {
   it("puts Across platforms after the tables and before Worth a Look, and leaves it out when absent", async () => {
     generateBody.mockReset();
     const across =
-      "## Highlights\n- H.\n\n<!-- tables -->\n\n## Across platforms\n- Governance tagging: Snowflake GA, Databricks GA.\n\n## Data × AI\n- X.";
+      "## Highlights\n- H.\n\n<!-- tables -->\n\n## Across platforms\n\n- Governance tagging: Snowflake GA,\n  Databricks GA.\n\n---\n\nNote, outside the report: a row needs checking.\n\n## Data × AI\n- X.";
     generateBody.mockImplementation(async (prompt: string) =>
       prompt.startsWith("You are the editor") ? across : reply(prompt),
     );
     const policy = [policyItem("nis2", "NIS2 implementing act adopted")];
     const content = (await build(sections(false), await vendorData(), dataLawOf(policy)))!.content;
     const at = (s: string) => content.indexOf(s);
-    expect(content).toContain("## Across platforms\n- Governance tagging: Snowflake GA, Databricks GA.");
+    // Only its bullets: on the 2026-10-21 replay the model appended a note to the editor.
+    expect(content).toContain(
+      "## Across platforms\n\n- Governance tagging: Snowflake GA,\n  Databricks GA.\n\n---",
+    );
+    expect(content).not.toContain("Note, outside the report");
     expect(at("## Open-source stack")).toBeLessThan(at("## Across platforms"));
     expect(at("## Azure / Fabric & GCP")).toBeLessThan(at("## Across platforms"));
     expect(at("## Across platforms")).toBeLessThan(at("## Worth a Look"));

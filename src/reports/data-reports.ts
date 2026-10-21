@@ -352,11 +352,16 @@ export interface DataSection {
   activities: ProjectActivity[];
 }
 
+/** A bullet line: `- `, `* ` or `1. `. */
+const BULLET_RE = /^\s*(?:[-*]|\d+\.)\s/;
+
 /**
  * Split the prose call's reply at TABLES_MARKER: Highlights before it (all of
  * it without one, as spliceTables does with a missing marker); after it, only
- * the Across platforms section, from its heading to the next `## ` heading.
- * Any other section the model wrote was not asked for and is dropped.
+ * the Across platforms section's bullets (with their wrapped lines), from its
+ * heading to the next `## ` heading, so a note the model adds there is dropped
+ * (the 2026-10-21 replay ended with one). Any other section it wrote was not
+ * asked for and is dropped; a heading without bullets is left out.
  */
 function splitProse(prose: string): { highlights: string; acrossPlatforms: string } {
   const lines = prose.split("\n");
@@ -365,15 +370,15 @@ function splitProse(prose: string): { highlights: string; acrossPlatforms: strin
   const after = lines.slice(i + 1);
   const start = after.findIndex((l) => l.trim() === `## ${DATA_REPORT.acrossPlatforms}`);
   const end = after.findIndex((l, j) => j > start && l.startsWith("## "));
+  const bullets: string[] = [];
+  let inBullet = false;
+  for (const l of start === -1 ? [] : after.slice(start + 1, end === -1 ? undefined : end)) {
+    inBullet = BULLET_RE.test(l) || (inBullet && /^\s+\S/.test(l));
+    if (inBullet) bullets.push(l.trimEnd());
+  }
   return {
     highlights: lines.slice(0, i).join("\n").trim(),
-    acrossPlatforms:
-      start === -1
-        ? ""
-        : after
-            .slice(start, end === -1 ? undefined : end)
-            .join("\n")
-            .trim(),
+    acrossPlatforms: bullets.length ? `## ${DATA_REPORT.acrossPlatforms}\n\n${bullets.join("\n")}` : "",
   };
 }
 
