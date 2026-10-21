@@ -8,15 +8,7 @@ import type { WebFetchResult } from "../sources/web.ts";
 import type { TrendingData } from "../trending/trending.ts";
 import type { summaryRows } from "../trending/rank.ts";
 import { formatTokens, type OpenRouterData } from "../sources/openrouter.ts";
-import {
-  ARXIV_REPORT,
-  DATA_REPORT,
-  DISCUSSIONS_REPORT,
-  MODELS_REPORT,
-  MSG,
-  SECTIONS,
-  WEB_REPORT,
-} from "../core/i18n.ts";
+import { ARXIV_REPORT, DISCUSSIONS_REPORT, MODELS_REPORT, MSG, SECTIONS, WEB_REPORT } from "../core/i18n.ts";
 import { TABLES_MARKER, rowList, summaryLine, summaryOutputRule, type Numbered } from "./summarized-table.ts";
 import { NO_TITLE_RULE } from "./prompts.ts";
 import type { HnData } from "../sources/hn.ts";
@@ -197,38 +189,22 @@ ${summaryOutputRule(items.length)}
 }
 
 /**
- * Data report, vendor call 2 of 2: Highlights, Data × AI (only when `dataAi`
- * is given) and Worth a Look around the report's sections (code-rendered
- * vendor tables plus the repo bodies), which buildDataReport splits at
- * TABLES_MARKER and the headings. `dataAi` lists the AI-flagged vendor items
- * and the news matched to tracked projects.
+ * Data report, vendor call 2 of 2: Highlights around the report's sections
+ * (code-rendered vendor tables plus the repo bodies), which buildDataReport
+ * splits at TABLES_MARKER. Highlights say what a change means for clients;
+ * the tables already say what changed.
  */
-export function buildDataProsePrompt(
-  sectionsMd: string,
-  dateStr: string,
-  dataAi?: { vendorTitles: string[]; news: string[] },
-): string {
-  const aiList = (label: string, lines: string[]) =>
-    lines.length ? `\n${label}:\n${lines.map((l) => `- ${l}`).join("\n")}\n` : "";
-  const aiInputs = dataAi
-    ? `${aiList("Vendor items flagged as AI in data work", dataAi.vendorTitles)}${aiList("News matched to tracked projects", dataAi.news)}`
-    : "";
+export function buildDataProsePrompt(sectionsMd: string, dateStr: string): string {
   const parts = [
-    `\`## ${SECTIONS.highlights}\` — 3-5 bullets, one sentence each, on the most consequential changes today. Deprecations, retirements and breaking changes come first.`,
+    `\`## ${SECTIONS.highlights}\` — 3-5 bullets, the most consequential changes today, deprecations, retirements and breaking changes first. Each bullet says who is affected (which client setup: e.g. Azure Databricks workspaces with the compliance security profile, Snowflake Native App providers, BigQuery users of AI functions), what to do (enable, migrate, test, plan for) and by when, if the row gives a date.`,
     `The line \`${TABLES_MARKER}\` exactly once, on its own line. The sections are inserted there.`,
-    ...(dataAi
-      ? [
-          `\`## ${DATA_REPORT.dataAi}\` — 2-4 bullets, at most ~120 words: AI features in data platforms and AI tooling for data work (LLM functions, text-to-SQL, agents, MCP servers), from the flagged vendor items, AI-related releases of the tracked projects and the news listed above. Leave this heading out when nothing is about AI.`,
-        ]
-      : []),
-    `\`## ${SECTIONS.worthALook}\` — at most 3 bullets: items worth reading in full, with brief reasoning, not one the sections already lead with. Each bullet opens with the item's title as a Markdown link, copied from its row in the sections. Leave this heading out when nothing qualifies.`,
   ];
   return `You are the editor of a daily data engineering report for ${DATA_READER}.
 
-Below are today's report sections, ${dateStr}: vendor release-note tables (⚠️ marks a deprecation, retirement or breaking change) and the releases and hot issues of tracked open-source projects.
+Below are today's report sections, ${dateStr}: vendor release-note tables (⚠️ marks a deprecation, retirement or breaking change; 🤖 an AI feature in a data platform) and the releases and hot issues of tracked open-source projects.
 
 ${sectionsMd}
-${aiInputs}
+
 ---
 
 Write only these parts, in this order:
@@ -237,11 +213,11 @@ ${parts.map((p, i) => `${i + 1}. ${p}`).join("\n")}
 
 Rules:
 - ${NO_TITLE_RULE}
-- Length: at most ~${dataAi ? 300 : 200} words in total.
-- Do not reproduce the sections, and write no links, URLs or dates outside ${SECTIONS.worthALook}: name each item as the sections do; code links them there. ${SECTIONS.worthALook}'s links are copied from the sections, never made up.
-- Name each item in at most one of these parts: an item in Highlights is not repeated in ${dataAi ? `${DATA_REPORT.dataAi} or ` : ""}${SECTIONS.worthALook}.
-- Two rows that describe the same change (a release note and its behavior change bundle, a "coming soon" note and its GA note) are one item: mention it once.
-- Base every claim on the sections${dataAi ? " and the lists above" : ""}. Do not invent versions, dates or availability.
+- Length: at most ~200 words in total.
+- Never restate a row: the reader sees the tables right below. A bullet that only says what changed, without who is affected and what to do, is left out.
+- Write no links, URLs or other sections; name each item as the sections do. Dates only as the "by when" of a row that gives one.
+- Name each item in at most one bullet. Two rows that describe the same change (a release note and its behavior change bundle, a "coming soon" note and its GA note) are one item: mention it once.
+- Base every claim on the sections. Do not invent versions, dates or availability.
 - English, professional and concise.
 `;
 }

@@ -99,7 +99,7 @@ const QUESTIONS = {
 export interface DataAnswers {
   real_change: { noul: number };
   deprecation: { noul: number };
-  /** Not weighed: flags an item for the Data × AI section (`aiInData`). */
+  /** Not weighed: flags an item as AI in data work (`aiInData`, the 🤖 marker). */
   ai_in_data: { noul: number };
   /** Probability-weighted level, 0–2. */
   significance: { score: number };
@@ -137,9 +137,9 @@ const FEATURE_RE = /generally available|preview|now available|introduc|release/i
 const GA_RE = /\bGA\b/;
 const AI_ACRONYM_RE = /\bAI\b/;
 const AI_RE = /\bLLM|\bagent|cortex|genie|copilot|\bmodel/i;
-/** Data × AI: Jev's `ai_in_data` at this noul or more. */
+/** AI in data work (🤖): Jev's `ai_in_data` at this noul or more. */
 const AI_IN_DATA_MIN = 0.5;
-/** Without a Jev answer, an item is in Data × AI when it names an AI term (bundles included). */
+/** Without a Jev answer, an item is AI in data work when it names an AI term (bundles included). */
 const aiKeywordHit = (text: string): boolean => AI_ACRONYM_RE.test(text) || AI_RE.test(text);
 /** Azure updates' status category for retirements. */
 const RETIREMENTS_CATEGORY = "Retirements";
@@ -186,7 +186,7 @@ export function loadDataVerdicts(file = DATA_VERDICTS_FILE): DataVerdicts | null
 /** A kept vendor item; deprecations are rendered with ⚠️ and listed first. */
 export interface KeptVendorItem extends VendorItem {
   deprecation: boolean;
-  /** For the Data × AI section: Jev's `ai_in_data`, else an AI keyword in title or description. */
+  /** The 🤖 marker: Jev's `ai_in_data`, else an AI keyword in title or description. */
   aiInData: boolean;
 }
 

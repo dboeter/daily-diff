@@ -330,7 +330,7 @@ export function renderPolicyTable(
 /**
  * The data report's vendor tables, one per vendor section with items. Each row
  * shows the summary for its own number (`n`, set by selectVendorItems).
- * Date, source, title and the deprecation marker come from the data, never the model.
+ * Date, source, title and the ⚠️/🤖 markers come from the data, never the model.
  */
 export function renderVendorTables(
   items: Numbered<KeptVendorItem>[],
@@ -343,7 +343,8 @@ export function renderVendorTables(
       .map(
         (it) =>
           `| ${it.date || "—"} | ${cell(it.source)} | ` +
-          `${it.deprecation ? `${DATA_REPORT.deprecationMarker} ` : ""}[${policyTitleLabel(it.title)}](${cell(it.link)}) | ` +
+          `${it.deprecation ? `${DATA_REPORT.deprecationMarker} ` : ""}${it.aiInData ? `${DATA_REPORT.aiMarker} ` : ""}` +
+          `[${policyTitleLabel(it.title)}](${cell(it.link)}) | ` +
           `${cell(summaryText(summaries, it))} |`,
       );
     if (rows.length) tables[section] = `${DATA_REPORT.vendorTableHeader}\n${rows.join("\n")}`;

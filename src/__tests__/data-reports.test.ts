@@ -434,7 +434,8 @@ describe("buildDataReport", () => {
     expect(content).toMatch(/^# Data Engineering Watch 2026-10-17\n/);
     expect(content.indexOf("## Highlights")).toBeLessThan(content.indexOf("## Databricks"));
     expect(content.indexOf("## Databricks")).toBeLessThan(content.indexOf("## Open-source stack"));
-    expect(content.indexOf("## Open-source stack")).toBeLessThan(content.indexOf("## Worth a Look"));
+    // The model wrote one; code writes it only for data-law links.
+    expect(content).not.toContain("## Worth a Look");
     expect(content).not.toContain("## Snowflake");
     expect(content).not.toContain("## Azure / Fabric & GCP");
     expect(content).not.toContain("<!-- tables -->");
@@ -519,39 +520,21 @@ describe("buildDataReport", () => {
   const prosePrompts = () =>
     generateBody.mock.calls.map((c) => c[0] as string).filter((p) => p.startsWith("You are the editor"));
 
-  it("writes Data × AI from an AI-flagged vendor item, between Open-source stack and Worth a Look", async () => {
+  it("marks an AI-flagged vendor row with 🤖 and drops a Data × AI or Worth a Look section the model wrote", async () => {
     generateBody.mockReset();
     generateBody.mockImplementation(async (prompt: string) =>
       prompt.startsWith("You are the editor") ? PROSE_AI : reply(prompt),
     );
     const content = (await build(sections(false), await vendorData()))!.content;
-    const at = (s: string) => content.indexOf(s);
-    // "Genie" is an AI term in the keyword fallback.
-    expect(prosePrompts()[0]).toContain("## Data × AI");
-    expect(prosePrompts()[0]).toContain("- Genie spaces now available (Azure Databricks)");
-    expect(at("## Open-source stack")).toBeLessThan(at("## Data × AI"));
-    // Report order, though the model wrote Worth a Look first.
-    expect(at("## Data × AI")).toBeLessThan(at("## Worth a Look"));
-    expect(content).toContain("## Data × AI\n- Genie spaces arrive.");
-  });
-
-  it("leaves Data × AI out, and does not ask for it, without AI items or project activity", async () => {
-    generateBody.mockReset();
-    generateBody.mockImplementation(async (prompt: string) =>
-      prompt.startsWith("You are the editor") ? PROSE_AI : reply(prompt),
-    );
-    const { items } = await selectVendorItems(
-      [vendorItem("plain", { title: "Retirement: legacy runtime" })],
-      {
-        cache: { items: {} },
-        dateStr: "2026-10-17",
-      },
-    );
-    expect(items.map((i) => i.aiInData)).toEqual([false]);
-    const content = (await build(sections(false, false), vendorOf(items)))!.content;
+    // "Genie" is an AI term in the keyword fallback; the retirement is not AI.
+    expect(content).toContain("| 🤖 [Genie spaces now available](https://example.com/dbx-new) |");
+    expect(content).toContain("| ⚠️ [Retirement: legacy runtime](https://example.com/dbx-old) |");
     expect(prosePrompts()[0]).not.toContain("Data × AI");
+    expect(prosePrompts()[0]).not.toContain("## Worth a Look");
     expect(content).not.toContain("Data × AI");
-    expect(content).toContain("## Worth a Look");
+    expect(content).not.toContain("## Worth a Look");
+    expect(content).not.toContain("Read this.");
+    expect(content).toContain("## Highlights\n- H.");
   });
 
   it("leaves the failure notice in Highlights and no Worth a Look when the prose call fails", async () => {
@@ -588,7 +571,7 @@ describe("buildDataReport", () => {
     ];
     const content = (await build(sections(false), vendorOf([]), dataLawOf(policy)))!.content;
     expect(content).toContain(
-      "## Worth a Look\n- Read this.\n- [Data Act: guidance on smart contracts](https://example.eu/data-act) — Policy Watch, Guidance",
+      "## Worth a Look\n\n- [Data Act: guidance on smart contracts](https://example.eu/data-act) — Policy Watch, Guidance",
     );
     expect(content).not.toContain("https://example.eu/ai-act");
   });

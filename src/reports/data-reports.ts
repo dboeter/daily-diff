@@ -353,46 +353,28 @@ export interface DataSection {
 }
 
 /**
- * Split the prose call's reply at TABLES_MARKER: Highlights before it; after
- * it, the Data × AI and Worth a Look sections, each from its heading to the
- * next `## ` heading, so they render in report order whatever order the model used.
+ * The prose call's Highlights: everything before TABLES_MARKER (all of it
+ * without one, as spliceTables does with a missing marker). Whatever the model
+ * wrote after the marker was not asked for and is dropped.
  */
-function splitProse(prose: string): { highlights: string; dataAi: string; worthALook: string } {
+function proseHighlights(prose: string): string {
   const lines = prose.split("\n");
   const i = lines.findIndex((l) => l.trim() === TABLES_MARKER);
-  // No marker: all of it goes on top, as spliceTables does with a missing marker.
-  if (i === -1) return { highlights: prose.trim(), dataAi: "", worthALook: "" };
-  const after = lines.slice(i + 1);
-  const section = (heading: string) => {
-    const start = after.findIndex((l) => l.trim() === `## ${heading}`);
-    if (start === -1) return "";
-    const end = after.findIndex((l, j) => j > start && l.startsWith("## "));
-    return after
-      .slice(start, end === -1 ? undefined : end)
-      .join("\n")
-      .trim();
-  };
-  return {
-    highlights: lines.slice(0, i).join("\n").trim(),
-    dataAi: section(DATA_REPORT.dataAi),
-    worthALook: section(SECTIONS.worthALook),
-  };
+  return (i === -1 ? prose : lines.slice(0, i).join("\n")).trim();
 }
 
 /**
  * The data report: Highlights, then Databricks, Snowflake and Azure / Fabric &
  * GCP (each its code-rendered vendor table, then the vendor's repo section),
- * the open-source stack, Data × AI and Worth a Look. A section with neither vendor items
- * nor repo activity is left out; Data × AI is asked for only when a vendor item
- * is AI-flagged or a tracked project is active (the model picks the AI-related
- * releases and news), and left out when the model writes none. LLM calls: one per active repo section (as in
+ * the open-source stack and Worth a Look. A section with neither vendor items
+ * nor repo activity is left out. LLM calls: one per active repo section (as in
  * the agents report) and one for the vendor row summaries, in parallel; then
- * one for Highlights and Worth a Look over all of it. A failed summaries call
- * leaves the descriptions in the tables; a failed prose call leaves the failure
- * notice in Highlights. Null when there are no kept vendor items and no repo activity.
- * `dataLaw` (today's Policy Watch items that are EU data law) is linked in code
- * at the end of Worth a Look, which it creates if the prose has none; it never
- * makes a report on its own.
+ * one for Highlights over all of it. A failed summaries call leaves the
+ * descriptions in the tables; a failed prose call leaves the failure notice in
+ * Highlights. Null when there are no kept vendor items and no repo activity.
+ * Worth a Look is code only: links to `dataLaw` (today's Policy Watch items
+ * that are EU data law), left out when there are none; it never makes a report
+ * on its own.
  */
 export async function buildDataReport(
   sections: DataSection[],
@@ -441,7 +423,7 @@ export async function buildDataReport(
     { title: H.data_stack, ...repo("data_stack") },
   ];
 
-  // The prose call sees what the reader sees between Highlights and Worth a Look.
+  // The prose call sees what the reader sees below Highlights.
   const sectionsMd = groups
     .map((g) => {
       const body = g.activities.some(hasActivity) ? nestHeadings(g.summary, 3) : "";
@@ -449,34 +431,18 @@ export async function buildDataReport(
     })
     .filter(Boolean)
     .join("\n\n");
-  const aiItems = items.filter((i) => i.aiInData);
-  const active = sections.flatMap((s) => s.activities.filter(hasActivity));
-  const dataAi =
-    aiItems.length || active.length
-      ? {
-          vendorTitles: aiItems.map((i) => `${i.title} (${i.source})`),
-          news: active.flatMap((a) => a.news.map((n) => `${n.title} (${n.source}; ${a.config.name})`)),
-        }
-      : undefined;
   const prose = await generateOr(
     "data-highlights",
-    buildDataProsePrompt(sectionsMd, dateStr, dataAi),
+    buildDataProsePrompt(sectionsMd, dateStr),
     null,
     LLM_TOKENS_LISTING,
   );
-  const {
-    highlights,
-    dataAi: dataAiMd,
-    worthALook,
-  } = prose === null
-    ? { highlights: `## ${SECTIONS.highlights}\n\n${MSG.summaryFailed}`, dataAi: "", worthALook: "" }
-    : splitProse(prose);
+  const highlights =
+    prose === null ? `## ${SECTIONS.highlights}\n\n${MSG.summaryFailed}` : proseHighlights(prose);
   const lawLinks = dataLaw
     .map((i) => `- [${policyTitleLabel(i.title)}](${i.link}) — Policy Watch${i.stage ? `, ${i.stage}` : ""}`)
     .join("\n");
-  const worth = lawLinks ? `${worthALook || `## ${SECTIONS.worthALook}\n`}\n${lawLinks}` : worthALook;
-  // Not asked for: a Data × AI section the model wrote anyway is dropped.
-  const epilogue = [dataAi ? dataAiMd : "", worth].filter(Boolean).join("\n\n---\n\n");
+  const epilogue = lawLinks ? `## ${SECTIONS.worthALook}\n\n${lawLinks}` : "";
 
   const content = buildProjectReportContent({
     heading: reportHeading("ai-data", dateStr),
