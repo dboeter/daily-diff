@@ -54,6 +54,7 @@ import {
   buildPolicyReport,
   buildDataReport,
   buildAgentsReport,
+  hasDataNews,
   type SavedReport,
 } from "./reports/data-reports.ts";
 import { loadWebState, fetchSiteContent, type WebFetchResult, type WebState } from "./sources/web.ts";
@@ -372,6 +373,8 @@ async function main(): Promise<void> {
     [...projectNews.values(), ...dataNews.values()].flat().flatMap((n) => (n.id ? [n.id] : [])),
   );
   const newsLinks = new Set(fresh.filter((s) => matchedIds.has(s.id)).map((s) => linkKey(s.url)));
+  // Every copy of a link is routed: copies' titles differ, and one routed nowhere must not hide one
+  // a page takes.
   const unmatched = fresh.filter((s) => !newsLinks.has(linkKey(s.url)));
   const topicCache = loadTopicCache();
   const routing = await routeStories(unmatched, {
@@ -384,6 +387,16 @@ async function main(): Promise<void> {
     return topic ? PAGE_OF_TOPIC[topic] : null;
   });
   const spottedOf = (page: SpottedPage) => spottedRows.filter((r) => r.page === page);
+  // Trends' Most discussed leaves out what today's pages show: a skipped data page shows no Spotted
+  // rows (a data page with project news is never skipped).
+  const discussed = weekly
+    ? mostDiscussed(spottedLog, dateStr, [
+        ...fresh.filter((s) => matchedIds.has(s.id)),
+        ...(hasDataNews(dataSections, vendorData, dateStr)
+          ? spottedRows
+          : spottedRows.filter((r) => r.page !== "data")),
+      ])
+    : [];
 
   // 2. The agents report's two sections and every page's Spotted summaries (one call, before the
   // page builders: their Highlights calls see their Spotted tables); every other
@@ -444,10 +457,7 @@ async function main(): Promise<void> {
               hf: hfData,
               // Both read the days before today: today's papers and stories are saved after the gate.
               papers: weekPapers(researchState, dateStr),
-              stories: mostDiscussed(spottedLog, dateStr, [
-                ...fresh.filter((s) => matchedIds.has(s.id)),
-                ...spottedRows,
-              ]),
+              stories: discussed,
               tracked: [...AGENTS, ...INFRA_REPOS, ...DATA_SECTIONS.flatMap((s) => s.repos)],
             },
             utcStr,
@@ -469,7 +479,7 @@ async function main(): Promise<void> {
   assertLlmHealthy("report");
 
   // Shown: the Spotted rows and the matched project news of every published page, whether or not
-  // the model mentioned them.
+  // the model mentioned them, and Trends' Most discussed rows.
   const savedIds = new Set(saved.map((r) => r.id));
   const pageActivities = [
     ...agentActivities,
@@ -481,6 +491,7 @@ async function main(): Promise<void> {
     ...(savedIds.has("ai-models") ? spottedOf("models").map((r) => r.id) : []),
     ...(savedIds.has("ai-data") ? spottedOf("data").map((r) => r.id) : []),
     ...pageActivities.flatMap((a) => a.news.flatMap((n) => (n.id ? [n.id] : []))),
+    ...(savedIds.has("ai-trends") ? discussed.map((s) => s.id) : []),
   ]);
   saveSpottedLog(nextLog(spottedLog, stories, shownIds, dateStr));
   if (routing.judgment.nextCache) saveTopicCache(routing.judgment.nextCache);

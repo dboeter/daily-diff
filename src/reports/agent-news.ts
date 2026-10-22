@@ -115,8 +115,8 @@ export const MAX_AGENTS_PER_ITEM = 2;
  * News items per tracked project id. An item naming up to `maxPerItem`
  * projects is listed under each; one naming more is dropped (default
  * MAX_AGENTS_PER_ITEM, for the agents and infra pool). Items keep source order (community stories, then
- * trending), each `key` once: the first copy that matches claims it, so a copy whose title names no
- * project leaves the article to one whose title does.
+ * trending), each `key` once: the first copy listed under a project claims it, so a copy whose title
+ * names no project, or only projects whose lists are full, leaves the article to another copy.
  *
  * A GitHub Trending repo is news only for the project whose own repo it is:
  * trending there is a daily event. A third-party repo naming a project is not
@@ -143,11 +143,10 @@ export function matchProjectNews(
       item.source === "GitHub Trending" ? item.url.toLowerCase() === m.ownUrl : m.re.test(text),
     );
     if (hits.length === 0 || hits.length > maxPerItem) continue;
+    const lists = hits.map(({ id }) => result.get(id)!).filter((list) => list.length < NEWS_PER_AGENT);
+    if (lists.length === 0) continue;
     claimed.add(key);
-    for (const { id } of hits) {
-      const list = result.get(id)!;
-      if (list.length < NEWS_PER_AGENT) list.push(item);
-    }
+    for (const list of lists) list.push(item);
   }
 
   return result;

@@ -267,8 +267,8 @@ export const LAB_POSTS_MAX = 15;
 
 /**
  * The models page: Highlights, Lab announcements (the sitemaps' new posts,
- * newest first, at most LAB_POSTS_MAX; a site on its first crawl only adds to
- * one line with the count), New on OpenRouter (models listed in the last 2 days
+ * newest first, at most LAB_POSTS_MAX; a lab on its first crawl gets one line
+ * with its count instead), New on OpenRouter (models listed in the last 2 days
  * that no earlier page listed), the stealth table (always shown) and Spotted.
  * Two LLM calls: the posts' and models' row summaries, then Highlights over the
  * rendered sections. A failed summaries call shows the descriptions, a failed
@@ -499,6 +499,19 @@ function newReleases(
 }
 
 /**
+ * Whether the data report has news: a kept vendor item, a release of the week
+ * no earlier report showed that no repo section lists, or an active project.
+ * Without any it is skipped: Spotted rows and EU data law never make one.
+ */
+export function hasDataNews(sections: DataSection[], vendor: VendorData, dateStr: string): boolean {
+  return (
+    vendor.items.length > 0 ||
+    newReleases(sections, vendor.nextState.reported, dateStr).some((r) => !r.inSection) ||
+    sections.some((s) => s.activities.some(hasActivity))
+  );
+}
+
+/**
  * The data report: Highlights, then Databricks, Snowflake and Azure / Fabric &
  * GCP (each its code-rendered vendor table, then the vendor's repo section),
  * with Action required (code-rendered: the open end dates of reported
@@ -532,6 +545,10 @@ export async function buildDataReport(
   // a quiet day keeps its record-only bundles.
   const files = { state: stateFile, verdicts: verdictsFile, trace: "data-ranking.json" };
   commitWrites(planWrites(vendor).onFetched, files, dateStr);
+  if (!hasDataNews(sections, vendor, dateStr)) {
+    console.log(`  [data] ${DATA_REPORT.noNewItems}`);
+    return null;
+  }
   const { items } = vendor;
   const unshown = newReleases(sections, vendor.nextState.reported, dateStr);
   // A release of the last 24h is in its repo section: recorded as shown, not listed twice.
@@ -539,10 +556,6 @@ export async function buildDataReport(
     unshown.filter((r) => !r.inSection),
     items.length,
   );
-  if (items.length === 0 && releases.length === 0 && !sections.some((s) => s.activities.some(hasActivity))) {
-    console.log(`  [data] ${DATA_REPORT.noNewItems}`);
-    return null;
-  }
   const H = DATA_REPORT.headings;
   const [repos, rowSummaries] = await Promise.all([
     Promise.all(

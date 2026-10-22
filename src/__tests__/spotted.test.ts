@@ -158,11 +158,11 @@ describe("freshStories by link", () => {
     expect(freshStories([copy, other], log, DATE).map((s) => s.id)).toEqual([other.id]);
   });
 
-  it("keeps the copy shown today on a same-day re-run and drops the other copies of its link", () => {
+  it("keeps every copy of a link shown only today, for a same-day re-run to claim again", () => {
     const shownToday = story("y", "lobsters", 10, { url: "https://example.com/b" });
     const copy = story("3", "hn", 500, { url: "https://example.com/b" });
     const log: SpottedLog = { items: { [shownToday.id]: logged(shownToday, { shown: DATE }) } };
-    expect(freshStories([copy, shownToday], log, DATE).map((s) => s.id)).toEqual([shownToday.id]);
+    expect(freshStories([copy, shownToday], log, DATE).map((s) => s.id)).toEqual([copy.id, shownToday.id]);
   });
 });
 

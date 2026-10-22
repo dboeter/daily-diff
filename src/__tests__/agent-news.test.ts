@@ -268,6 +268,22 @@ describe("matchProjectNews", () => {
     expect(one.get("openclaw")!.map((n) => n.id)).toEqual(["lobsters:x"]);
   });
 
+  it("leaves an article to another copy when the projects its title names have full lists", () => {
+    const codex: RepoConfig = { id: "codex", repo: "openai/codex", name: "Codex" };
+    const full = Array.from({ length: NEWS_PER_AGENT }, (_, i) => story(`Claude Code tip ${i}`, `t${i}`));
+    const lobsters: Story = {
+      ...story("Codex adopts the same plugin API", "x"),
+      id: "lobsters:x",
+      source: "lobsters",
+      url: "https://example.com/a",
+    };
+    const news = matchProjectNews([claudeCode, codex], {
+      stories: [...full, { ...story("Claude Code 3.0 is out", "1"), url: "https://example.com/a" }, lobsters],
+    });
+    expect(news.get("claude-code")).toHaveLength(NEWS_PER_AGENT);
+    expect(news.get("codex")!.map((n) => n.id)).toEqual(["lobsters:x"]);
+  });
+
   it("drops compatibility lists that name three or more agents", () => {
     const codex: RepoConfig = {
       id: "codex",

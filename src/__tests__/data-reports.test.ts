@@ -8,6 +8,7 @@ import {
   buildModelsPage,
   buildPolicyReport,
   buildTrendsReport,
+  hasDataNews,
   type TrendsInput,
   LAB_POSTS_MAX,
   type DataSection,
@@ -777,6 +778,33 @@ describe("buildDataReport", () => {
     expect(content).toContain("Projects: 4 | Active today: 2");
     // Two repo sections and the prose; no vendor items, so no summaries call.
     expect(generateBody).toHaveBeenCalledTimes(3);
+  });
+
+  it("has news from a vendor item, a release of the week no report showed or an active project", () => {
+    const weekOnly: DataSection[] = [
+      {
+        key: "data_stack",
+        subject: "oss",
+        activities: [
+          {
+            ...project("Trino", false),
+            weekReleases: [
+              { tag_name: "484", name: "484", published_at: "2026-10-14T00:00:00Z", prerelease: false },
+            ],
+          },
+        ],
+      },
+    ];
+    const shownBefore = {
+      ...vendorOf([]),
+      nextState: { reported: { "release:org/trino@484": "2026-10-15" } },
+    };
+    expect(hasDataNews(sections(false, false), vendorOf([]), "2026-10-17")).toBe(false);
+    const kept = { ...vendorItem("a", {}), deprecation: false, aiInData: false, n: 1 };
+    expect(hasDataNews(sections(false, false), vendorOf([kept]), "2026-10-17")).toBe(true);
+    expect(hasDataNews(sections(true, false), vendorOf([]), "2026-10-17")).toBe(true);
+    expect(hasDataNews(weekOnly, vendorOf([]), "2026-10-17")).toBe(true);
+    expect(hasDataNews(weekOnly, shownBefore, "2026-10-17")).toBe(false);
   });
 
   it("is skipped without an LLM call when there are no vendor items and no repo activity", async () => {

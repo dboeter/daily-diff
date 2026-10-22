@@ -138,21 +138,18 @@ export function saveSpottedLog(log: SpottedLog, file = SPOTTED_LOG_FILE): void {
 }
 
 /**
- * Whether a story is in today's pool. One a page showed is in only on a
- * same-day re-run; one never shown is out once a page showed another copy of
- * its link (`linkKey`, any source): on an earlier day, or today, when a
- * same-day re-run shows that copy again.
+ * Whether a story is in today's pool: no page showed it, or another copy of its
+ * link (`linkKey`, any source), on an earlier day. A link shown today keeps all
+ * its copies in for a same-day re-run, which claims it again.
  */
 export function isFresh(log: SpottedLog, dateStr: string): (story: Pick<Story, "id" | "url">) => boolean {
+  const earlier = (shown?: string) => shown !== undefined && shown !== dateStr;
   const shownLinks = new Set(
     Object.values(log.items)
-      .filter((e) => e.shown)
+      .filter((e) => earlier(e.shown))
       .map((e) => linkKey(e.url)),
   );
-  return (s) => {
-    const shown = log.items[s.id]?.shown;
-    return shown ? shown === dateStr : !shownLinks.has(linkKey(s.url));
-  };
+  return (s) => !earlier(log.items[s.id]?.shown) && !shownLinks.has(linkKey(s.url));
 }
 
 /**

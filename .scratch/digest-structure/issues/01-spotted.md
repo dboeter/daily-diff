@@ -107,4 +107,4 @@ The Models page and retiring the Discussions page (ticket 03). The weekly Most d
 
 ## Comments
 
-- Stories are deduplicated by link across sources and days (`linkKey`). Only a shown copy claims a link: a project's news first (the first copy whose title names the project), then the Spotted rows in numbering order. A copy that lands nowhere (topic `other`, below its source's cut) leaves the link to another copy; a first version let the first copy in pool order claim it, so an HN copy routed to `other` hid its Lobste.rs copy from every page.
+- Stories are deduplicated by link across sources and days (`linkKey`). Only a shown copy claims a link: a project's news first (in each news pool, the first copy listed under a project; the two pools claim apart, so an article can be news on AI Agents and Data Engineering, as one story naming projects of both is), then the Spotted rows in numbering order. A copy that lands nowhere (topic `other`, below its source's cut) leaves the link to another copy; a first version let the first copy in pool order claim it, so an HN copy routed to `other` hid its Lobste.rs copy from every page.
