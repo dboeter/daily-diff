@@ -87,7 +87,7 @@ export interface TopicAnswers {
 
 /**
  * The page each topic lands on. Research stays a topic of its own so later
- * work can tell it from model news. Policy stories are dropped: Policy Watch
+ * work can tell it from model news. Policy stories are dropped: AI Policy
  * has its own sources (the HN-to-policy routing was reverted on 2026-10-20).
  */
 export const SPOTTED_PAGE: Record<Topic, SpottedPage | null> = {

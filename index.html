@@ -354,6 +354,7 @@ function escapeHtml(s) {
 // label (OVERVIEW in src/core/i18n.ts).
 let DATES = [];
 let WEEKLY = [];
+let FEEDS = {};
 let OVERVIEW_LABEL = 'Overview';
 
 // ── State ──
@@ -492,9 +493,14 @@ function pageNav(date, report) {
   const href = (d) => `#${pageKey(d.date, report && d.reports.includes(report) ? report : null)}`;
   const prevReportDay = report ? DATES.slice(i + 1).find((d) => d.reports.includes(report)) : null;
   const left = older ? `<a href="${href(older)}">← ${older.date}</a>` : '<span></span>';
-  const mid = prevReportDay && prevReportDay !== older
-    ? `<a class="mid" href="#${pageKey(prevReportDay.date, report)}">Previous ${escapeHtml(LABELS[report] || report)}: ${prevReportDay.date}</a>`
-    : '<span class="mid"></span>';
+  const prev = prevReportDay && prevReportDay !== older
+    ? `<a href="#${pageKey(prevReportDay.date, report)}">Previous ${escapeHtml(LABELS[report] || report)}: ${prevReportDay.date}</a>`
+    : '';
+  // A live page links its own feed (manifest `feeds`); retired reports have none.
+  const feed = report && FEEDS[report]
+    ? `<a href="./${FEEDS[report]}" title="RSS feed of ${escapeHtml(LABELS[report] || report)}">⊕ RSS</a>`
+    : '';
+  const mid = `<span class="mid">${[prev, feed].filter(Boolean).join(' · ')}</span>`;
   const right = newer ? `<a href="${href(newer)}">${newer.date} →</a>` : '<span></span>';
   return `<nav class="page-nav">${left}${mid}${right}</nav>`;
 }
@@ -756,11 +762,12 @@ window.addEventListener('hashchange', followHash);
   try {
     const res = await fetch('./manifest.json');
     if (!res.ok) throw new Error('manifest.json not found');
-    const { dates, labels, weekly, overview } = await res.json();
+    const { dates, labels, weekly, feeds, overview } = await res.json();
     if (!dates?.length) throw new Error('manifest is empty');
     LABELS = labels ?? {};
     DATES = dates;
     WEEKLY = weekly ?? [];
+    FEEDS = feeds ?? {};
     OVERVIEW_LABEL = overview ?? 'Overview';
 
     allDates = dates;

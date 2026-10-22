@@ -1,5 +1,5 @@
 /**
- * Policy Watch relevance: Jev scores each new item, code weighs the answers
+ * AI Policy relevance: Jev scores each new item, code weighs the answers
  * into keep/drop and an order (the ArXiv `relevanceOf` pattern), and the
  * answers are cached per item id in `digests/policy-verdicts.json` so an item
  * is asked once (a stage item once per stage). Without Jev, watchlisted items and keyword hits are kept.
@@ -193,7 +193,7 @@ const KEEP_MIN_RELEVANCE = 0.5;
  * The level gates below read Jev's probabilities, not the expected score: an
  * answer of mostly level 1 has an expected score just under 1. On 2026-10-19
  * a US law enacted (impact {0: 0.17, 1: 0.82, 2: 0.01}, score 0.84) was dropped
- * by a `score >= 1` gate, and Policy Watch kept nothing that day.
+ * by a `score >= 1` gate, and AI Policy kept nothing that day.
  */
 const GATE_MIN_PROBABILITY = 0.5;
 /** US items: "some effect" or more (spec: a US item with little expected impact stays out). */

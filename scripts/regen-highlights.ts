@@ -57,7 +57,7 @@ async function main() {
   console.log(`  Reports: ${Object.keys(reports).length}`);
 
   // Generate highlights. The saved data report does not say whether Jev kept a
-  // vendor item that day, so only Policy Watch is forced here.
+  // vendor item that day, so only AI Policy is forced here.
   const forced = forcedHighlightReports(false);
   let highlights: ReportHighlights = {};
   try {

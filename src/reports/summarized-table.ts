@@ -1,5 +1,5 @@
 /**
- * Code-rendered tables with LLM row summaries (trending, Policy Watch, the
+ * Code-rendered tables with LLM row summaries (trending, AI Policy, the
  * data report's vendor tables). A row's number is set once, when the report's
  * final order is chosen (`numberRows`, or trending's `selectTrendingReport`);
  * the summaries prompt lists the rows by that number, the model answers

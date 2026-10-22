@@ -18,7 +18,7 @@ The set of reports of one cadence published for one day; there is a Daily Digest
 _Avoid_: Edition, run output
 
 **Daily Digest**:
-The digest published every day: AI Agents, AI Models & Labs, Policy Watch and Data Engineering Watch.
+The digest published every day: AI Agents, AI Models & Labs, AI Policy and Data Engineering.
 
 **Weekly Digest**:
 The digest published once a week, alongside that day's Daily Digest: the Trends page.
@@ -50,6 +50,16 @@ The web UI page for one day: each report's Highlights under a link to the report
 **Report Bar**:
 The line under a report's title linking the day's Overview and its other reports.
 _Avoid_: Nav, menu
+
+**Tracked**:
+The part of a daily page built from the lists in `config.yml` (projects, vendor feeds, legislative files, policy feeds) and the Anthropic and OpenAI sitemaps, with a quiet line on a day without news. Nothing moves from Spotted to Tracked without a config edit.
+
+**Spotted**:
+The part of a daily page holding the best community stories (Hacker News, Lobste.rs, Dev.to) that name no Tracked Project, routed to the page by topic and shown once.
+_Avoid_: Discussions, Worth a Look
+
+**Coming up**:
+The dated items of the next 30 days: AI Policy's deadlines and calendar dates, the data page's Action required dates, Stealth Model expiries. All pages' items are listed on the Overview and in the Telegram message; AI Policy also ends with its own.
 
 ### Tracking
 

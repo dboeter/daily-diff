@@ -254,7 +254,7 @@ data:
       parser: bigquery
 
 # ── Policy ────────────────────────────────────────────────────────────────────
-# The daily Policy Watch report (ai-policy): AI legislation, regulation and
+# The daily AI Policy report (ai-policy): AI legislation, regulation and
 # official guidance in the EU, the Netherlands and the US.
 #   reader_profile  who the report is for; Jev's US impact question reads it
 #   watchlist       files that always appear when they move, per jurisdiction;

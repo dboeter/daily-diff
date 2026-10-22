@@ -504,7 +504,7 @@ function newReleases(
  * descriptions in the tables; a failed prose call leaves the failure notice in
  * Highlights. Null when there are no kept vendor items and no repo activity.
  * EU data law, the last section, is code only: links to `dataLaw` (today's
- * Policy Watch items that are EU data law), left out when there are none; it
+ * AI Policy items that are EU data law), left out when there are none; it
  * never makes a report on its own. Spotted (code-rendered, summarized by
  * main()'s Spotted call) goes between Across platforms and EU data law, and
  * never makes a report on its own either; the prose call sees it.
@@ -600,7 +600,10 @@ export async function buildDataReport(
       ? { highlights: `## ${SECTIONS.highlights}\n\n${MSG.summaryFailed}`, acrossPlatforms: "" }
       : splitProse(prose);
   const lawLinks = dataLaw
-    .map((i) => `- [${policyTitleLabel(i.title)}](${i.link}) — Policy Watch${i.stage ? `, ${i.stage}` : ""}`)
+    .map(
+      (i) =>
+        `- [${policyTitleLabel(i.title)}](${i.link}) — ${REPORTS["ai-policy"].name}${i.stage ? `, ${i.stage}` : ""}`,
+    )
     .join("\n");
   const epilogue = [
     acrossPlatforms,

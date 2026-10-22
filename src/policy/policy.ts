@@ -1,5 +1,5 @@
 /**
- * Policy Watch fetching and state. Sources: the RSS feeds in config.yml
+ * AI Policy fetching and state. Sources: the RSS feeds in config.yml
  * `policy.feeds`, and the registered non-RSS sources (`policy/sources.ts`).
  * New items are scored by Jev (`policy/jev.ts`). The state records which items
  * a run reported, so the daily report shows each item once, and a stage item

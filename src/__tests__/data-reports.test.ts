@@ -593,7 +593,7 @@ describe("buildPolicyReport", () => {
     const file = path.join(dir, "state.json");
     const report = await buildPolicyReport(data([item]), "00:00", "2026-10-14", file);
     expect(report?.id).toBe("ai-policy");
-    expect(report?.content).toContain("# Policy Watch 2026-10-14");
+    expect(report?.content).toContain("# AI Policy 2026-10-14");
     expect(report?.content).toContain(
       "H.\n\n## EU\n\n| Date | Source | Title | Stage | Summary |\n| :--- | :--- | :--- | :--- | :--- |\n" +
         "| 2026-10-09 | European Commission | [AI Act guidelines](https://example.eu/a) |  | The AI Office published guidelines. |",
@@ -745,7 +745,7 @@ describe("buildDataReport", () => {
     const report = await build(sections(false));
     const content = report!.content;
     expect(report!.id).toBe("ai-data");
-    expect(content).toMatch(/^# Data Engineering Watch 2026-10-17\n/);
+    expect(content).toMatch(/^# Data Engineering 2026-10-17\n/);
     expect(content.indexOf("## Highlights")).toBeLessThan(content.indexOf("## Databricks"));
     expect(content.indexOf("## Databricks")).toBeLessThan(content.indexOf("## Open-source stack"));
     // The model wrote one; code drops it.
@@ -1141,7 +1141,7 @@ describe("buildDataReport", () => {
     ];
     const content = (await build(sections(false), vendorOf([]), dataLawOf(policy)))!.content;
     expect(content).toContain(
-      "## EU data law\n\n- [Data Act: guidance on smart contracts](https://example.eu/data-act) — Policy Watch, Guidance",
+      "## EU data law\n\n- [Data Act: guidance on smart contracts](https://example.eu/data-act) — AI Policy, Guidance",
     );
     expect(content).not.toContain("https://example.eu/ai-act");
   });
@@ -1155,7 +1155,7 @@ describe("buildDataReport", () => {
     const policy = [policyItem("nis2", "NIS2 implementing act adopted")];
     const content = (await build(sections(false), vendorOf([]), dataLawOf(policy)))!.content;
     expect(content).toContain(
-      "## EU data law\n\n- [NIS2 implementing act adopted](https://example.eu/nis2) — Policy Watch",
+      "## EU data law\n\n- [NIS2 implementing act adopted](https://example.eu/nis2) — AI Policy",
     );
   });
 

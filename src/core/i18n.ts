@@ -29,8 +29,8 @@ export const MSG = {
 export const REPORTS = {
   "ai-agents": { emoji: "🤖", name: "AI Agents", label: "agents" },
   "ai-models": { emoji: "🧠", name: "AI Models & Labs", label: "models" },
-  "ai-policy": { emoji: "⚖️", name: "Policy Watch", label: "policy" },
-  "ai-data": { emoji: "🗄️", name: "Data Engineering Watch", label: "data" },
+  "ai-policy": { emoji: "⚖️", name: "AI Policy", label: "policy" },
+  "ai-data": { emoji: "🗄️", name: "Data Engineering", label: "data" },
   "ai-trends": { emoji: "📈", name: "Trends", label: "trends" },
 } as const satisfies Record<string, { emoji: string; name: string; label: string }>;
 
@@ -186,7 +186,7 @@ export const DATA_REPORT = {
   actionTableHeader: "| Date | Platform | Item | What to do |\n| :--- | :--- | :--- | :--- |",
   /** Marks an AI feature in a data platform (`aiInData`) in the Item cell. */
   aiMarker: "🤖",
-  /** The last section, code only: links to today's Policy Watch items that are EU data law. */
+  /** The last section, code only: links to today's AI Policy items that are EU data law. */
   dataLawHeading: "EU data law",
   noNewItems: "No vendor items, releases, hot issues or news in the tracked data projects, skipping report.",
 } as const;

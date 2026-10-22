@@ -1,5 +1,5 @@
 /**
- * TypeSafe Jev client, shared by ArXiv, trending, Policy Watch and the data
+ * TypeSafe Jev client, shared by ArXiv, trending, AI Policy and the data
  * report's vendor feeds; `judgeItems` is the cached judgment of the last three.
  *
  * Jev is not a chat model: POST /v1/systemone takes a `state` and typed
@@ -144,7 +144,7 @@ export function saveItemsFile(cache: ItemsFile<unknown>, file: string): void {
 }
 
 // ---------------------------------------------------------------------------
-// Cached judgments (Policy Watch, the data report's vendor items, trending classification)
+// Cached judgments (AI Policy, the data report's vendor items, trending classification)
 // ---------------------------------------------------------------------------
 
 /**

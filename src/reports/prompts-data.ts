@@ -394,10 +394,10 @@ const FORCED_REASON: Record<string, string> = {
 };
 
 /**
- * The reports that always get a highlight when published: Policy Watch, whose
+ * The reports that always get a highlight when published: AI Policy, whose
  * every item Jev kept, and the data report only on a day Jev kept a vendor
  * item (a day of repo activity alone holds routine releases and hot issues,
- * which the model may rightly skip). On 2026-10-20 the model left Policy Watch
+ * which the model may rightly skip). On 2026-10-20 the model left AI Policy
  * out though it carried the AI Act's first harmonised standard in the OJ.
  */
 export function forcedHighlightReports(hasVendorItems: boolean): string[] {
@@ -424,7 +424,7 @@ export function withFallbackHighlights(
 }
 
 // A period after one of these, or inside a dotted abbreviation (U.S., E.U.), ends no
-// sentence: Policy Watch prose cites "Art. 50", "the U.S. Senate" and
+// sentence: AI Policy prose cites "Art. 50", "the U.S. Senate" and
 // deadlines such as "closes Nov. 9". A sentence that really ends on "Dec." runs
 // on, and is cut at HIGHLIGHT_MAX_CHARS.
 const ABBREVIATIONS = new Set([
