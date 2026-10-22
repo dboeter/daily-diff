@@ -223,12 +223,14 @@ describe("renderDeadlines", () => {
 
 describe("nearPolicyDeadlines", () => {
   const d = (date: string, link: string) => ({ date, title: link, link, source: "Have your say" });
-  it("keeps deadlines within 7 days of items not in today's table", () => {
+  it("keeps deadlines within 7 days of earlier items: not today's, not passed, not the calendar", () => {
     const deadlines = [
       d("2026-10-25", "a"),
       d("2026-10-29", "b"),
       d("2026-10-30", "c"),
       d("2026-10-24", "today"),
+      d("2026-10-21", "past"),
+      { ...d("2026-10-23", "cal"), source: "Calendar" },
     ];
     expect(nearPolicyDeadlines(deadlines, [{ link: "today" }], "2026-10-22").map((x) => x.link)).toEqual([
       "a",

@@ -38,7 +38,8 @@ const NEAR_DAYS = 7;
 
 /**
  * The deadlines the prose call may mention: closing within a week, of items
- * not in today's table (those it sees there).
+ * reported on earlier days (not today's table, which it sees; not the
+ * calendar, which is no item).
  */
 export function nearPolicyDeadlines(
   deadlines: Deadline[],
@@ -47,7 +48,10 @@ export function nearPolicyDeadlines(
 ): Deadline[] {
   const last = daysBefore(dateStr, -NEAR_DAYS);
   const links = new Set(today.map((i) => i.link));
-  return deadlines.filter((d) => d.date <= last && !links.has(d.link));
+  return deadlines.filter(
+    (d) =>
+      d.source !== POLICY_REPORT.calendarSource && d.date >= dateStr && d.date <= last && !links.has(d.link),
+  );
 }
 
 /** The section; empty when nothing is due. */

@@ -22,7 +22,7 @@ import {
 } from "./core/github.ts";
 import {
   type ProjectActivity,
-  announcementLink,
+  announcementLinks,
   buildProjectDigestPrompt,
   hasActivity,
   isMajorRelease,
@@ -141,10 +141,13 @@ const ANNOUNCEMENT_MAX_CHARS = 600;
 
 /** A major release's announcement post description, when its notes link one; a failure only loses it. */
 async function withAnnouncement(r: GitHubRelease): Promise<GitHubRelease> {
-  const link = isMajorRelease(r.tag_name) && !isPrerelease(r) ? announcementLink(r.body) : undefined;
-  if (!link) return r;
-  const announcement = await pageDescription(link, ANNOUNCEMENT_MAX_CHARS);
-  return announcement ? { ...r, announcement } : r;
+  if (!isMajorRelease(r.tag_name) || isPrerelease(r)) return r;
+  // The first two candidates, in order, until one has a description.
+  for (const link of announcementLinks(r.body).slice(0, 2)) {
+    const announcement = await pageDescription(link, ANNOUNCEMENT_MAX_CHARS);
+    if (announcement) return { ...r, announcement };
+  }
+  return r;
 }
 
 async function fetchProject(cfg: RepoConfig, since: Date, weekSince?: Date): Promise<ProjectFetch> {

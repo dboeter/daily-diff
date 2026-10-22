@@ -252,9 +252,12 @@ export async function fetchVendorData(
         ) as Record<string, VendorAction>,
       };
     },
-    select: (candidates) => {
+    select: async (candidates) => {
       console.log(`  [data] ${candidates.length} new vendor items`);
-      return selectVendorItems(candidates, { ...jev, dateStr });
+      const selection = await selectVendorItems(candidates, { ...jev, dateStr });
+      // An over-cap coming-soon note stays unreported: marked reported, it would make
+      // shippedComingSoon skip its GA note, which the reader would then never see.
+      return { ...selection, alsoNew: selection.alsoNew?.filter((i) => !COMING_SOON_RE.test(i.title)) };
     },
   });
 }

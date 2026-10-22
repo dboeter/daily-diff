@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import {
   buildProjectDigestPrompt,
   buildSkillsPrompt,
-  announcementLink,
+  announcementLinks,
   hasActivity,
   isMajorRelease,
   releaseNotes,
@@ -180,13 +180,39 @@ describe("buildProjectDigestPrompt", () => {
     );
   });
 
+  it("skips badges, images, code, chat and package links, and trims trailing punctuation", () => {
+    const body =
+      "[![PyPI](https://img.shields.io/pypi/v/x.svg)](https://pypi.org/project/x)\n" +
+      "![shot](https://user-images.githubusercontent.com/1/2.png)\n" +
+      "```\npip install x --index-url https://download.example.com/whl/release\n```\n" +
+      "Join https://discord.gg/abc or read https://docs.example.com/start.\n" +
+      "**https://example.com/blog/v2**, and https://example.com/news/x-2-0.";
+    expect(announcementLinks(body)).toEqual([
+      "https://example.com/blog/v2",
+      "https://example.com/news/x-2-0",
+    ]);
+  });
+
+  it("counts a changelog without a What's Changed header, or with a curly apostrophe", () => {
+    const entry =
+      "* Fix a thing by @a in https://github.com/o/r/pull/1\n* Add b by @dependabot[bot] in https://github.com/o/r/pull/2";
+    expect(releaseNotes(`Big release.\n${entry}`, 400)).toBe(
+      "Big release. What's Changed (2 merged PRs): Fix a thing; Add b;",
+    );
+    expect(releaseNotes(`## What’s Changed\n${entry}`, 400)).toBe(
+      "What's Changed (2 merged PRs): Fix a thing; Add b;",
+    );
+  });
+
   it("finds a major release's announcement and shows it in the prompt", () => {
     expect(isMajorRelease("v2.0.0")).toBe(true);
     expect(isMajorRelease("2.0.0")).toBe(true);
     expect(isMajorRelease("v2.0.1")).toBe(false);
     expect(isMajorRelease("v2.1.0")).toBe(false);
-    expect(announcementLink(duckdbBody)).toBe("https://duckdb.org/2026/10/21/announcing-duckdb-200.html");
-    expect(announcementLink("See https://github.com/o/r/pull/1")).toBeUndefined();
+    expect(announcementLinks(duckdbBody)).toEqual([
+      "https://duckdb.org/2026/10/21/announcing-duckdb-200.html",
+    ]);
+    expect(announcementLinks("See https://github.com/o/r/pull/1")).toEqual([]);
     const prompt = buildProjectDigestPrompt(
       [
         makeActivity({

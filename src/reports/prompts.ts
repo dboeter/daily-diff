@@ -135,8 +135,13 @@ const NEW_CONTRIBUTOR_RE = /^[ \t]*[*-][ \t]+@\S+ made their first contribution 
 function compactChangelog(body: string): string {
   const entries = body.match(CHANGELOG_ENTRY_RE)?.length ?? 0;
   if (!entries) return body;
-  return body
-    .replace(/^#+[ \t]*What's Changed[ \t]*$/im, `What's Changed (${entries} merged PRs):`)
+  const header = /^#+[ \t]*What['’]s Changed[ \t]*$/im;
+  const counted = `What's Changed (${entries} merged PRs):`;
+  const first = body.search(CHANGELOG_ENTRY_RE);
+  const withCount = header.test(body)
+    ? body.replace(header, counted)
+    : `${body.slice(0, first)}${counted}\n${body.slice(first)}`;
+  return withCount
     .replace(CHANGELOG_ENTRY_RE, "$1;")
     .replace(NEW_CONTRIBUTOR_RE, "")
     .replace(/^#+[ \t]*New Contributors[ \t]*$/im, "")
@@ -148,9 +153,31 @@ export function isMajorRelease(tag: string): boolean {
   return /^v?\d+\.0\.0$/.test(tag);
 }
 
-/** The first link off GitHub in a release's notes: its announcement post, if any. */
-export function announcementLink(body: string | null | undefined): string | undefined {
-  return (body ?? "").match(/https:\/\/(?!(?:www\.)?github\.com\/)[^\s)\]>"']+/)?.[0];
+/** Hosts whose pages are never a release announcement: their description is a badge, an invite or a package page. */
+const NOT_ANNOUNCEMENT_HOST =
+  /(?:^|\.)(?:github\.com|githubusercontent\.com|shields\.io|discord\.(?:gg|com)|pypi\.org|npmjs\.com|x\.com|twitter\.com|crates\.io|docs\.rs)$/i;
+/** A post, not a docs or landing page: the prompt describes the release from what this page says. */
+const ANNOUNCEMENT_PATH = /blog|announc|news|release|post/i;
+
+/**
+ * Links in a release's notes that look like its announcement post, in order:
+ * outside code blocks, images and HTML, on no badge, chat or package host,
+ * with a post-like path.
+ */
+export function announcementLinks(body: string | null | undefined): string[] {
+  const text = (body ?? "")
+    .replace(/(```|~~~)[\s\S]*?(\1|$)/g, " ")
+    .replace(/!\[[^\]]*\]\([^)]*\)/g, " ")
+    .replace(/<[^>]*>/g, " ");
+  const links = [...text.matchAll(/https:\/\/[^\s)\]>"'`]+/g)].map(([u]) => u.replace(/[.,;:*!?]+$/, ""));
+  return [...new Set(links)].filter((u) => {
+    try {
+      const url = new URL(u);
+      return !NOT_ANNOUNCEMENT_HOST.test(url.hostname) && ANNOUNCEMENT_PATH.test(url.pathname);
+    } catch {
+      return false;
+    }
+  });
 }
 
 function formatRelease(r: GitHubRelease, repo: string, notes: string): string {
