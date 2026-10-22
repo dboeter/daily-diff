@@ -115,7 +115,7 @@ export async function fetchVendorFeeds(
 }
 
 // ---------------------------------------------------------------------------
-// State: which vendor items a run reported (report-state.ts, shared with Policy Watch)
+// State: which vendor items a run reported (report-state.ts, shared with AI Policy)
 // ---------------------------------------------------------------------------
 
 /** An open end date of a reported deprecation: the Action required table's row. */
@@ -227,7 +227,7 @@ export async function fetchVendorData(
         console.log(`  [data] ${shipped.size} notes ship a reported coming-soon note, skipped`);
       return {
         // A bundle first seen at a stage over 30 days old (or with no full date) is recorded without
-        // reporting, as Policy Watch does: a first run must not open with months-old bundles.
+        // reporting, as AI Policy does: a first run must not open with months-old bundles.
         items: recentVendorItems(
           items.filter((i) => !shipped.has(i)),
           dateStr,

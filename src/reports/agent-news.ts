@@ -1,11 +1,12 @@
 /**
- * Matches already-fetched news items (HN, Anthropic/OpenAI web pages, GitHub
- * Trending) to the agents they mention. Pure functions — no network I/O.
+ * Matches already-fetched news items (community stories, GitHub Trending) to the
+ * agents they mention. Lab posts are not project news: they are the models page's
+ * tracked items. Pure functions — no network I/O.
  */
 
 import type { RepoConfig } from "../core/github.ts";
-import type { HnData } from "../sources/hn.ts";
-import type { WebFetchResult } from "../sources/web.ts";
+import { SPOTTED } from "../core/i18n.ts";
+import { linkKey, type Story } from "../spotted/spotted.ts";
 import type { TrendingData } from "../trending/trending.ts";
 
 export interface NewsItem {
@@ -14,11 +15,13 @@ export interface NewsItem {
   url: string;
   /** Short engagement/context line, e.g. "312 points, 95 comments". */
   detail: string;
+  /** A community story's id, so a story matched into a page counts as shown. */
+  id?: string;
 }
 
 export interface NewsSources {
-  hn?: HnData;
-  web?: WebFetchResult[];
+  /** The fresh community stories: HN, Lobste.rs, Dev.to. */
+  stories?: Story[];
   trending?: TrendingData;
 }
 
@@ -63,31 +66,26 @@ export function agentMatcher(cfg: RepoConfig): RegExp {
   return new RegExp(`(?<![\\w/-])(?<!raspberry[\\s-]?)(?:${alternatives.join("|")})(?![\\w/])`, "i");
 }
 
-/** Flatten the fetched sources into one list of candidate news items. */
-export function collectNewsItems(sources: NewsSources): { item: NewsItem; text: string }[] {
-  const out: { item: NewsItem; text: string }[] = [];
+/**
+ * Flatten the fetched sources into one list of candidate news items. `key`
+ * dedupes them: a story's is its article's link (`linkKey`), so its copies on
+ * other sources are one item; a trending repo's is its URL.
+ */
+export function collectNewsItems(sources: NewsSources): { item: NewsItem; text: string; key: string }[] {
+  const out: { item: NewsItem; text: string; key: string }[] = [];
 
-  for (const s of sources.hn?.stories ?? []) {
+  for (const s of sources.stories ?? []) {
     out.push({
       item: {
-        source: "Hacker News",
+        source: SPOTTED.sources[s.source],
         title: s.title,
-        url: s.hnUrl,
-        detail: `${s.points} points, ${s.comments} comments`,
+        url: s.discussionUrl,
+        detail: SPOTTED.counts(s.source, s.points, s.comments),
+        id: s.id,
       },
       text: s.title,
+      key: linkKey(s.url),
     });
-  }
-
-  for (const site of sources.web ?? []) {
-    for (const p of site.newItems) {
-      // The URL slug often names the product when the title is generic.
-      const slug = p.url.replace(/^https?:\/\/[^/]+/, "").replace(/[/_-]+/g, " ");
-      out.push({
-        item: { source: site.siteName, title: p.title, url: p.url, detail: p.category },
-        text: `${p.title} ${slug}`,
-      });
-    }
   }
 
   const trending = sources.trending;
@@ -100,6 +98,7 @@ export function collectNewsItems(sources: NewsSources): { item: NewsItem; text: 
         detail: `+${r.periodStars} stars on GitHub Trending`,
       },
       text: `${r.fullName.replace("/", " ")} ${r.description}`,
+      key: r.url,
     });
   }
   return out;
@@ -115,8 +114,9 @@ export const MAX_AGENTS_PER_ITEM = 2;
 /**
  * News items per tracked project id. An item naming up to `maxPerItem`
  * projects is listed under each; one naming more is dropped (default
- * MAX_AGENTS_PER_ITEM, for the agents and infra pool). Items keep source order (HN rank, then web, then
- * trending) and are de-duplicated by URL.
+ * MAX_AGENTS_PER_ITEM, for the agents and infra pool). Items keep source order (community stories, then
+ * trending), each `key` once: the first copy listed under a project claims it, so a copy whose title
+ * names no project, or only projects whose lists are full, leaves the article to another copy.
  *
  * A GitHub Trending repo is news only for the project whose own repo it is:
  * trending there is a daily event. A third-party repo naming a project is not
@@ -135,19 +135,18 @@ export function matchProjectNews(
     ownUrl: `https://github.com/${cfg.repo}`.toLowerCase(),
   }));
   const result = new Map<string, NewsItem[]>(agents.map((cfg) => [cfg.id, []]));
-  const seen = new Set<string>();
+  const claimed = new Set<string>();
 
-  for (const { item, text } of collectNewsItems(sources)) {
-    if (seen.has(item.url)) continue;
-    seen.add(item.url);
+  for (const { item, text, key } of collectNewsItems(sources)) {
+    if (claimed.has(key)) continue;
     const hits = matchers.filter((m) =>
       item.source === "GitHub Trending" ? item.url.toLowerCase() === m.ownUrl : m.re.test(text),
     );
     if (hits.length === 0 || hits.length > maxPerItem) continue;
-    for (const { id } of hits) {
-      const list = result.get(id)!;
-      if (list.length < NEWS_PER_AGENT) list.push(item);
-    }
+    const lists = hits.map(({ id }) => result.get(id)!).filter((list) => list.length < NEWS_PER_AGENT);
+    if (lists.length === 0) continue;
+    claimed.add(key);
+    for (const list of lists) list.push(item);
   }
 
   return result;

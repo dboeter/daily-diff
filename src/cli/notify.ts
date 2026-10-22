@@ -13,7 +13,8 @@
 import fs from "node:fs";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
-import { REPORT_LABELS, REPORTS } from "../core/i18n.ts";
+import { COMING_UP, REPORT_LABELS, REPORTS } from "../core/i18n.ts";
+import type { ComingUpEntry } from "../reports/coming-up.ts";
 import type { ReportHighlights } from "../reports/prompts-data.ts";
 
 const PAGES_URL_DEFAULT = "https://dboeter.github.io/daily-diff";
@@ -31,8 +32,10 @@ export function resolvePagesUrl(override?: string): string {
 }
 
 function escapeHtml(s: string): string {
-  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 }
+
+const COMING_UP_MAX = 5;
 
 async function sendTelegram(text: string): Promise<void> {
   const BOT_TOKEN = process.env["TELEGRAM_BOT_TOKEN"] ?? "";
@@ -59,6 +62,7 @@ export function buildMessage(
   reports: string[],
   pagesUrl?: string,
   highlights?: ReportHighlights | null,
+  comingUp?: ComingUpEntry[] | null,
 ): string {
   const PAGES_URL = resolvePagesUrl(pagesUrl);
   const lines: string[] = [`📡 <b>Daily Diff · ${date}</b>`];
@@ -66,7 +70,7 @@ export function buildMessage(
   for (const r of reports) {
     const label = REPORT_LABELS[r] ?? r;
     lines.push(""); // blank line before each report section
-    lines.push(`• <a href="${PAGES_URL}/#${date}/${r}">${label}</a>`);
+    lines.push(`• <a href="${PAGES_URL}/#${date}/${r}">${escapeHtml(label)}</a>`);
 
     // Add highlights as indented sub-items.
     const items = highlights?.[r];
@@ -74,6 +78,16 @@ export function buildMessage(
       for (const h of items) {
         lines.push(`  ◦ ${escapeHtml(h)}`);
       }
+    }
+  }
+
+  if (comingUp?.length) {
+    lines.push("", `📅 <b>${COMING_UP.heading}</b>`);
+    for (const c of comingUp.slice(0, COMING_UP_MAX)) {
+      const page = REPORT_LABELS[c.page] ?? c.page;
+      lines.push(
+        `• ${c.date} · <a href="${escapeHtml(c.link)}">${escapeHtml(c.title)}</a> (${escapeHtml(page)})`,
+      );
     }
   }
 
@@ -186,6 +200,16 @@ async function main(): Promise<void> {
     }
   }
 
+  let comingUp: ComingUpEntry[] | null = null;
+  const comingUpPath = path.join("digests", date, "coming-up.json");
+  if (fs.existsSync(comingUpPath)) {
+    try {
+      comingUp = JSON.parse(fs.readFileSync(comingUpPath, "utf-8")) as ComingUpEntry[];
+    } catch {
+      console.log("[notify] Failed to parse coming-up.json — sending without Coming up.");
+    }
+  }
+
   // Teams first: it never throws, so a Telegram failure cannot skip it.
   await sendTeams(date, highlights);
 
@@ -198,7 +222,7 @@ async function main(): Promise<void> {
     return;
   }
 
-  const text = buildMessage(date, reports, undefined, highlights);
+  const text = buildMessage(date, reports, undefined, highlights, comingUp);
 
   console.log(`[notify] Sending Telegram message for ${date} (${reports.length} reports)…`);
   await sendTelegram(text);

@@ -18,10 +18,10 @@ The set of reports of one cadence published for one day; there is a Daily Digest
 _Avoid_: Edition, run output
 
 **Daily Digest**:
-The digest published every day: Agents, Discussions, ArXiv and Web.
+The digest published every day: AI Agents, AI Models & Labs, AI Policy and Data Engineering.
 
 **Weekly Digest**:
-The digest published once a week, alongside that day's Daily Digest: Trending and Models. The same run adds Dev.to and Lobste.rs to that day's Discussions report.
+The digest published once a week, alongside that day's Daily Digest: the Trends page.
 _Avoid_: Weekly rollup (the retired summary of a week's daily digests)
 
 **Report**:
@@ -51,10 +51,20 @@ The web UI page for one day: each report's Highlights under a link to the report
 The line under a report's title linking the day's Overview and its other reports.
 _Avoid_: Nav, menu
 
+**Tracked**:
+The part of a daily page built from the lists in `config.yml` (projects, vendor feeds, legislative files, policy feeds) and the Anthropic and OpenAI sitemaps, with a quiet line on a day without news. Nothing moves from Spotted to Tracked without a config edit.
+
+**Spotted**:
+The part of a daily page holding the best community stories (Hacker News, Lobste.rs, Dev.to) that name no Tracked Project, routed to the page by topic and shown once.
+_Avoid_: Discussions, Worth a Look
+
+**Coming up**:
+The dated items of the next 30 days: AI Policy's deadlines and calendar dates, the data page's Action required dates, Stealth Model expiries. All pages' items are listed on the Overview and in the Telegram message; AI Policy also ends with its own.
+
 ### Tracking
 
 **Tracked Project**:
-One named entry on the Agents or Infra list (the two sections of the Agents report), followed for its releases, hot issues and news whether or not its repo has any.
+One named entry on a repo list in `config.yml` (Agents and Infra on the AI Agents page; Databricks, Snowflake and the open-source stack on Data Engineering), followed for its releases, hot issues and news whether or not its repo has any.
 _Avoid_: Repo, agent (for a list entry)
 
 **Repo**:
@@ -73,7 +83,7 @@ _Avoid_: Release, preview
 An issue on a Tracked Project's repo with real engagement (comments plus 👍), or less engagement on a regression or security issue, however old.
 
 **News Item**:
-An HN story, web post or trending repo that names a Tracked Project.
+A community story (Hacker News, Lobste.rs, Dev.to) that names a Tracked Project, or a Tracked Project's own repo on GitHub Trending. Lab posts are not News Items.
 _Avoid_: Mention
 
 **News Match**:
@@ -99,11 +109,11 @@ An item that first appeared in the ecosystem recently, marked 🆕.
 _Avoid_: Fresh, hot (for an item that was already around)
 
 **Rising**:
-An existing item whose usage jumped recently; not New, however steep the jump. Not marked: everything in the trending report is supposed to be rising.
+An existing item whose usage jumped recently; not New, however steep the jump. Not marked: everything in the Trends page's agents tables is supposed to be rising.
 _Avoid_: New, trending (for momentum alone)
 
 **Trending**:
-An item in the weekly trending report two weeks in a row or more, marked 🔥.
+An item in the weekly Trends page's agents tables two weeks in a row or more, marked 🔥.
 _Avoid_: Hot, popular (for a first appearance or a one-week jump)
 
 **Established Repo**:
@@ -121,7 +131,7 @@ A trending item that belongs in one of the Categories; any other item is Out of 
 _Avoid_: Relevant, irrelevant
 
 **Category**:
-The kind of project an In Scope item is, which decides its table in the Trending report. There are five:
+The kind of project an In Scope item is, which decides its table on the Trends page. There are five:
 
 - **Coding Agent**: an agent that writes code.
 - **Agent Harness & Framework**: a harness, SDK, framework or runtime for building agents.
@@ -134,7 +144,7 @@ A product someone runs on its own: a CLI, IDE, app or cloud agent; plugins, MCP 
 _Avoid_: Product, app (for this distinction)
 
 **Radar**:
-The Trending report's list of Standalone Tools worth watching this week, New or not, drawn from GitHub, OpenRouter and npm.
+The Trends page's list of Standalone Tools worth watching this week, New or not, drawn from GitHub, OpenRouter and npm.
 _Avoid_: New-agents list, watchlist
 
 **Cross-source Match**:

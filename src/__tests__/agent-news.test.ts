@@ -1,8 +1,14 @@
 import { describe, it, expect } from "vitest";
-import { agentMatcher, agentTerms, matchProjectNews, NEWS_PER_AGENT } from "../reports/agent-news.ts";
+import {
+  agentMatcher,
+  agentTerms,
+  matchProjectNews,
+  NEWS_PER_AGENT,
+  type NewsSources,
+} from "../reports/agent-news.ts";
 import { DATA_SECTION_KEYS, loadConfig } from "../core/config.ts";
 import type { RepoConfig } from "../core/github.ts";
-import type { HnData, HnStory } from "../sources/hn.ts";
+import type { Story } from "../spotted/spotted.ts";
 import { EMPTY_NPM, EMPTY_OPENROUTER, type TrendingData } from "../trending/trending.ts";
 import type { WebFetchResult } from "../sources/web.ts";
 
@@ -19,22 +25,20 @@ const pi: RepoConfig = {
 };
 const openclaw: RepoConfig = { id: "openclaw", repo: "openclaw/openclaw", name: "OpenClaw" };
 
-function story(title: string, id = title): HnStory {
+function story(title: string, id = title): Story {
   return {
-    id,
+    id: `hn:${id}`,
+    source: "hn",
     title,
     url: `https://example.com/${encodeURIComponent(id)}`,
-    hnUrl: `https://news.ycombinator.com/item?id=${encodeURIComponent(id)}`,
+    discussionUrl: `https://news.ycombinator.com/item?id=${encodeURIComponent(id)}`,
     points: 100,
     comments: 20,
-    author: "alice",
-    createdAt: "2026-10-04T00:00:00Z",
+    published: "2026-10-04T00:00:00Z",
   };
 }
 
-function hn(...titles: string[]): HnData {
-  return { stories: titles.map((t) => story(t)), fetchSuccess: true };
-}
+const hn = (...titles: string[]): Story[] => titles.map((t) => story(t));
 
 const matches = (cfg: RepoConfig, text: string) => agentMatcher(cfg).test(text);
 
@@ -99,7 +103,7 @@ describe("agentMatcher", () => {
 describe("matchProjectNews", () => {
   it("assigns HN stories to the agents they mention", () => {
     const news = matchProjectNews([claudeCode, openclaw], {
-      hn: hn("Claude Code hooks deep dive", "OpenClaw vs Claude Code", "Unrelated GPU news"),
+      stories: hn("Claude Code hooks deep dive", "OpenClaw vs Claude Code", "Unrelated GPU news"),
     });
     expect(news.get("claude-code")!.map((n) => n.title)).toEqual([
       "Claude Code hooks deep dive",
@@ -108,18 +112,39 @@ describe("matchProjectNews", () => {
     expect(news.get("openclaw")!.map((n) => n.title)).toEqual(["OpenClaw vs Claude Code"]);
   });
 
-  it("links HN items to the discussion and carries their score", () => {
-    const [item] = matchProjectNews([openclaw], { hn: hn("OpenClaw 2.0") }).get("openclaw")!;
+  it("links HN items to the discussion and carries their score and story id", () => {
+    const [item] = matchProjectNews([openclaw], { stories: hn("OpenClaw 2.0") }).get("openclaw")!;
     expect(item!.source).toBe("Hacker News");
     expect(item!.url).toContain("news.ycombinator.com");
     expect(item!.detail).toBe("100 points, 20 comments");
+    expect(item!.id).toBe("hn:OpenClaw 2.0");
   });
 
-  it("matches web pages by URL slug when the title is generic", () => {
+  it("matches Lobste.rs and Dev.to stories too, a Dev.to story's points as reactions", () => {
+    const lobsters: Story = {
+      ...story("OpenClaw on a Pi"),
+      id: "lobsters:abc",
+      source: "lobsters",
+      discussionUrl: "https://lobste.rs/s/abc",
+    };
+    const devto: Story = {
+      ...story("OpenClaw tips"),
+      id: "devto:7",
+      source: "devto",
+      discussionUrl: "https://dev.to/a/b",
+    };
+    const items = matchProjectNews([openclaw], { stories: [lobsters, devto] }).get("openclaw")!;
+    expect(items.map((n) => [n.source, n.url, n.detail, n.id])).toEqual([
+      ["Lobste.rs", "https://lobste.rs/s/abc", "100 points, 20 comments", "lobsters:abc"],
+      ["Dev.to", "https://dev.to/a/b", "100 reactions, 20 comments", "devto:7"],
+    ]);
+  });
+
+  // Lab posts are the models page's tracked items, shown there once.
+  it("takes no lab posts as project news", () => {
     const web: WebFetchResult[] = [
       {
         site: "anthropic",
-        siteName: "Anthropic (Claude)",
         isFirstRun: false,
         totalDiscovered: 1,
         fetchSuccess: true,
@@ -130,13 +155,12 @@ describe("matchProjectNews", () => {
             lastmod: "2026-10-04",
             content: "",
             site: "anthropic",
-            category: "news",
           },
         ],
       },
     ];
-    const news = matchProjectNews([claudeCode], { web });
-    expect(news.get("claude-code")!.map((n) => n.source)).toEqual(["Anthropic (Claude)"]);
+    const news = matchProjectNews([claudeCode], { web } as NewsSources);
+    expect(news.get("claude-code")).toEqual([]);
   });
 
   // 2026-10-19: vakandi/opencode-rust, vastsa/PI-Desktop and others made 10 of 16 projects "active".
@@ -213,15 +237,51 @@ describe("matchProjectNews", () => {
     ).toEqual(["GitHub Trending"]);
   });
 
-  it("de-duplicates by URL and caps the list per agent", () => {
+  it("de-duplicates by link and caps the list per agent", () => {
     const stories = [
       story("OpenClaw one", "1"),
       story("OpenClaw one again", "1"),
       ...Array.from({ length: 10 }, (_, i) => story(`OpenClaw ${i}`, `x${i}`)),
     ];
-    const items = matchProjectNews([openclaw], { hn: { stories, fetchSuccess: true } }).get("openclaw")!;
+    const items = matchProjectNews([openclaw], { stories }).get("openclaw")!;
     expect(items).toHaveLength(NEWS_PER_AGENT);
     expect(new Set(items.map((n) => n.url)).size).toBe(items.length);
+  });
+
+  it("takes the copies of one article on two sources as one item, the first that matches", () => {
+    const lobsters = (title: string): Story => ({
+      ...story(title, "x"),
+      id: "lobsters:x",
+      source: "lobsters",
+      url: "https://www.example.com/a/",
+      discussionUrl: "https://lobste.rs/s/x",
+    });
+    const hnCopy = (title: string): Story => ({ ...story(title, "1"), url: "https://example.com/a" });
+    const both = matchProjectNews([openclaw], {
+      stories: [hnCopy("OpenClaw 3.0"), lobsters("OpenClaw 3.0")],
+    });
+    expect(both.get("openclaw")!.map((n) => n.id)).toEqual(["hn:1"]);
+    // An HN title that names no project leaves the article to the Lobste.rs copy that does.
+    const one = matchProjectNews([openclaw], {
+      stories: [hnCopy("A 3.0 release"), lobsters("OpenClaw 3.0")],
+    });
+    expect(one.get("openclaw")!.map((n) => n.id)).toEqual(["lobsters:x"]);
+  });
+
+  it("leaves an article to another copy when the projects its title names have full lists", () => {
+    const codex: RepoConfig = { id: "codex", repo: "openai/codex", name: "Codex" };
+    const full = Array.from({ length: NEWS_PER_AGENT }, (_, i) => story(`Claude Code tip ${i}`, `t${i}`));
+    const lobsters: Story = {
+      ...story("Codex adopts the same plugin API", "x"),
+      id: "lobsters:x",
+      source: "lobsters",
+      url: "https://example.com/a",
+    };
+    const news = matchProjectNews([claudeCode, codex], {
+      stories: [...full, { ...story("Claude Code 3.0 is out", "1"), url: "https://example.com/a" }, lobsters],
+    });
+    expect(news.get("claude-code")).toHaveLength(NEWS_PER_AGENT);
+    expect(news.get("codex")!.map((n) => n.id)).toEqual(["lobsters:x"]);
   });
 
   it("drops compatibility lists that name three or more agents", () => {
@@ -232,7 +292,7 @@ describe("matchProjectNews", () => {
       keywords: ["codex"],
     };
     const news = matchProjectNews([claudeCode, codex, openclaw], {
-      hn: hn("Memory plugin for Claude Code, Codex and OpenClaw", "Codex vs Claude Code"),
+      stories: hn("Memory plugin for Claude Code, Codex and OpenClaw", "Codex vs Claude Code"),
     });
     expect(news.get("claude-code")!.map((n) => n.title)).toEqual(["Codex vs Claude Code"]);
     expect(news.get("openclaw")).toEqual([]);
@@ -271,7 +331,7 @@ describe("data project news", () => {
   });
 
   it("keeps a story naming three data projects, which the agents pool would drop", () => {
-    const sources = { hn: hn("DuckDB vs Polars on Apache Iceberg tables") };
+    const sources = { stories: hn("DuckDB vs Polars on Apache Iceberg tables") };
     const news = matchProjectNews(dataRepos, sources, Infinity);
     for (const id of ["duckdb", "polars", "iceberg"]) expect(news.get(id)).toHaveLength(1);
     expect(matchProjectNews(dataRepos, sources).get("duckdb")).toEqual([]);

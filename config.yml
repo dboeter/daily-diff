@@ -12,13 +12,11 @@
 #   subject  what the projects are; the LLM prompt reads "You are a technical
 #            editor covering <subject>", and README.md shows it
 #   repos    the tracked repositories
-# agents and infra also follow the last weekly trending report's category-table
-# repos (src/trending/promoted.ts); these lists are the curated core.
 
 # ── Agents ────────────────────────────────────────────────────────────────────
 # The first section of the daily agents report. Each agent is covered by its stable releases, a few hot issues (high
-# engagement or a regression/security label) and news: HN, Anthropic/OpenAI and
-# GitHub Trending items that mention it. Issue and PR churn is not reported.
+# engagement or a regression/security label) and news: Hacker News, Lobste.rs,
+# Dev.to and GitHub Trending items that mention it. Issue and PR churn is not reported.
 # Each repo requires: id (slug), repo (owner/repo), name (display name).
 # Optional keywords: terms to match in news items. They replace the display
 # name and repo name (the full owner/repo always matches). Set them when the
@@ -74,7 +72,7 @@ agents:
 
 # ── Claude Code Skills ────────────────────────────────────────────────────────
 # No date filter, sorted by community engagement. A section of the weekly
-# ai-trending report.
+# Trends page (ai-trends).
 
 skills_repo: anthropics/skills
 
@@ -256,13 +254,13 @@ data:
       parser: bigquery
 
 # ── Policy ────────────────────────────────────────────────────────────────────
-# The daily Policy Watch report (ai-policy): AI legislation, regulation and
+# The daily AI Policy report (ai-policy): AI legislation, regulation and
 # official guidance in the EU, the Netherlands and the US.
 #   reader_profile  who the report is for; Jev's US impact question reads it
 #   watchlist       files that always appear when they move, per jurisdiction;
 #                   an item naming an entry skips the Jev drop (lists may be empty)
 #   data_law        tokens that mark a kept item as EU data law: it is also
-#                   linked from the data report's Worth a Look (may be empty)
+#                   linked from the data report's EU data law section (may be empty)
 #   feeds           RSS news feeds; items older than 7 days are skipped.
 #                   jurisdiction: eu | nl | us_federal | us_states | other
 #                   jev_only: true for a low-volume feed whose items need not
@@ -391,7 +389,7 @@ policy:
       url: https://www.binnenlandsbestuur.nl/feeds/articles.rss
       jurisdiction: nl
       kind: news
-  # Dated milestones for the "Upcoming deadlines" section, shown in the 30 days
+  # Dated milestones for the "Coming up" section, shown in the 30 days
   # before. AI Act dates as amended by the Digital Omnibus on AI (OJ 2026-07-24),
   # from the Commission's AI Act Service Desk timeline, read 2026-10-14.
   calendar:

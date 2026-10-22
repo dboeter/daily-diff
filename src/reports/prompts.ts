@@ -4,6 +4,7 @@
 
 import type { RepoConfig, GitHubItem, GitHubRelease } from "../core/github.ts";
 import type { NewsItem } from "./agent-news.ts";
+import { SECTIONS } from "../core/i18n.ts";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -238,22 +239,53 @@ ${sections}
 
 ---
 
-Write the report in English with exactly this structure:
-
-## Overview
-3–5 sentences on the most important changes across these projects ${scope.period}: what shipped, what broke, what got attention. Name projects. No counts of issues, PRs or stars.
-
-Then one section per project above that has something left to report, in the order given, headed \`## <Project name>\`, with at most 3 bullets, one or two sentences each:
-- **Release**: what the stable release(s) change for users — features, breaking changes, fixes that matter. Several releases in a range: summarize the range, do not list each one. Link each release you name as \`[tag](url)\`; a range as its oldest and newest, \`[v1.2.0](url)–[v1.2.5](url)\`. A release with an Announcement: describe it from the announcement, not from its first changelog entries.
+Write the report in English: one section per project above that has something left to report, in the order given, headed \`## <Project name>\`, with at most 3 bullets, one or two sentences each. Write no other sections:
+- **Release**: what the stable release(s) change for users — features, breaking changes, fixes that matter. Several releases in a range: summarize the range, do not list each one. Link each release you name as a plain Markdown link, [tag](url), never inside backticks; a range as its oldest and newest, [v1.2.0](url)–[v1.2.5](url). A release with an Announcement: describe it from the announcement, not from its first changelog entries.
 - **Prerelease**: only from a "Prereleases (no stable release yet)" list, and only when it adds notable features or breaking changes; skip routine alpha/rc bumps. Say it is a prerelease and link it.
 - **News**: what the news item says about the project and why it matters. Link it.
 - **Hot issue**: what users are hitting and how serious it is. Link the issue (https://github.com/<repo>/issues/<number>).
 
 Rules:
-- Use only the data above. Omit a bullet type that has no data. Never state what did not happen, in the overview or a section ("no release today", "no breaking issues were reported").
+- Use only the data above. Omit a bullet type that has no data. Never state what did not happen ("no release today", "no breaking issues were reported").
 - A news item may mention a project only in passing: skip it unless the project is its actual subject.
 - If every item for a project is skipped, leave out its section entirely; the report lists it as quiet.
 - Style: concise and concrete, for developers who use these tools.
+`;
+}
+
+/** What the agents page's Highlights rank first: its focus line for buildPageHighlightsPrompt. */
+export const AGENTS_HIGHLIGHTS_FOCUS =
+  "a release with breaking changes, a hot regression, a new capability, a notable spotted tool";
+
+/** The models page's focus: what changes what a practitioner builds with. */
+export const MODELS_HIGHLIGHTS_FOCUS =
+  "a new model or a model's availability or price, a capability, a safety or evaluation finding, a lab's product launch";
+
+/**
+ * A page's Highlights, written after its sections: the model reads the rendered
+ * body (the tracked sections and Spotted) and writes only `## Highlights`,
+ * which goes above them. `focus` names what counts as consequential on this page.
+ */
+export function buildPageHighlightsPrompt(
+  page: string,
+  bodyMd: string,
+  focus: string,
+  dateStr: string,
+): string {
+  return `You are the editor of ${page}, a daily report. Below are today's report sections, ${dateStr}.
+
+${bodyMd}
+
+---
+
+Write only \`## ${SECTIONS.highlights}\`: 3–5 bullets, most consequential first: ${focus}.
+
+Rules:
+- ${NO_TITLE_RULE}
+- About 150 words in total. Write no other sections.
+- Name each item in at most one bullet. Write no links or URLs: the sections below link every item.
+- Base every claim on the sections. Do not invent versions, dates or features.
+- English, concise and concrete.
 `;
 }
 

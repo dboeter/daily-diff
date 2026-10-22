@@ -1,5 +1,5 @@
 /**
- * Policy Watch fetching and state. Sources: the RSS feeds in config.yml
+ * AI Policy fetching and state. Sources: the RSS feeds in config.yml
  * `policy.feeds`, and the registered non-RSS sources (`policy/sources.ts`).
  * New items are scored by Jev (`policy/jev.ts`). The state records which items
  * a run reported, so the daily report shows each item once, and a stage item
@@ -50,7 +50,7 @@ export interface PolicyState extends ReportedState {
 }
 
 export interface PolicyData extends NewItems<Numbered<PolicyItem>, PolicyState, PolicyVerdicts> {
-  /** The Upcoming deadlines section's rows; shown only when there are items. */
+  /** The Coming up section's rows; shown only when there are items. */
   deadlines: Deadline[];
   /** config.yml `policy.reader_profile`, for the report prompts. */
   readerProfile: string;

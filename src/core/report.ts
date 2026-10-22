@@ -6,7 +6,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { FOOTER } from "./i18n.ts";
 import { sleep } from "./date.ts";
-import { stripModelTitle } from "../reports/report-builders.ts";
+import { stripModelTitle, unwrapCodeLinks } from "../reports/report-builders.ts";
 
 // ---------------------------------------------------------------------------
 // LLM token budget constants
@@ -18,11 +18,10 @@ import { stripModelTitle } from "../reports/report-builders.ts";
 // the output cap of gpt-4o, the OpenAI and Copilot default; higher budgets would
 // make those providers reject the request.
 export const LLM_TOKENS_DEFAULT = 8192;
-/** The agents-report sections, the table-formatted listing reports
- *  (discussions, ArXiv, models) and both trending calls: multi-row tables plus
- *  2-sentence summaries, and the reasoning that counts against the budget. */
+/** The agents-report sections, the pages' row-summaries and Highlights calls and
+ *  the Trends calls (Skills aside): multi-row tables plus 2-sentence summaries,
+ *  and the reasoning that counts against the budget. */
 export const LLM_TOKENS_LISTING = 16384;
-export const LLM_TOKENS_WEB = 16384;
 import {
   type LlmProvider,
   createProvider,
@@ -285,9 +284,9 @@ export async function callLlm(prompt: string, maxTokens = LLM_TOKENS_DEFAULT): P
   }
 }
 
-/** An LLM-written report body, without the H1 the model sometimes adds above the report's own. */
+/** An LLM-written report body, without the H1 the model sometimes adds above the report's own, its links out of backticks. */
 export async function generateBody(prompt: string, maxTokens?: number): Promise<string> {
-  return stripModelTitle(await callLlm(prompt, maxTokens));
+  return unwrapCodeLinks(stripModelTitle(await callLlm(prompt, maxTokens)));
 }
 
 /** `generateBody` with logging; a failed call is logged and returns `fallback`. */

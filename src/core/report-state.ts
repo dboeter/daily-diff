@@ -1,5 +1,5 @@
 /**
- * Which items a report has already shown: the state behind Policy Watch
+ * Which items a report has already shown: the state behind AI Policy
  * (`digests/policy-state.json`) and the data report's vendor feeds
  * (`digests/data-state.json`). An item is new until a run reports it; a stage
  * item (one with a `stage`) is new again when its stage moves. A same-day
@@ -145,8 +145,8 @@ type Dated = Omit<Deadline, "date"> & { id: string; deadline?: string };
  * deadline (an extension), its extra fields kept, or leaves when it has none
  * (feedback closed early).
  * An item no report carried is not added: Jev dropped it. A saved entry not
- * fetched again is kept as it is, extra fields included. Policy Watch's
- * Upcoming deadlines and the data report's Action required table.
+ * fetched again is kept as it is, extra fields included. AI Policy's
+ * Coming up and the data report's Action required table.
  */
 export function nextDeadlines(
   saved: Record<string, Deadline> | undefined,

@@ -1,5 +1,5 @@
 /**
- * The new-items pipeline of Policy Watch and the data report's vendor feeds:
+ * The new-items pipeline of AI Policy and the data report's vendor feeds:
  * fetch, keep what the state has not reported, record the record-only stage
  * items, select the rest (Jev or keywords), and the order the files are saved
  * in. Each report supplies the fetch, the state item and the selection.

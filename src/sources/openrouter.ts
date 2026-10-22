@@ -9,9 +9,9 @@
  * sources. Category pages (`/apps/category/cli-agent`) load data client-side,
  * so `/apps` (top 200 per day/week/month + trending) is the widest view.
  *
- * New models and stealth models come from the official `/api/v1/models` catalog.
- * Apps and models feed the weekly trending report; stealth models are fetched
- * daily for the agents report (`fetchStealthModels`).
+ * Apps and model usage feed the weekly Trends page. New and stealth models come
+ * from the official `/api/v1/models` catalog, fetched daily for the models
+ * page (`fetchModelCatalogDaily`).
  */
 
 // ---------------------------------------------------------------------------
@@ -61,7 +61,6 @@ export interface OpenRouterData {
   apps: OpenRouterApp[];
   topModels: OpenRouterModel[];
   topModelsDate: string;
-  newModels: OpenRouterNewModel[];
   fetchSuccess: boolean;
 }
 
@@ -89,8 +88,8 @@ const AGENT_MAX_WEEK_RANK = 100;
 const NEW_APP_DAYS = 30;
 /** Cap on apps sent to the LLM. */
 const MAX_APPS = 60;
-/** New-model window: the trending report is weekly, so one week plus a day of slack for a delayed cron. */
-const NEW_MODEL_DAYS = 8;
+/** The models page's window, 2 days for a delayed cron; its state drops the models an earlier page listed. */
+const LISTED_MODEL_DAYS = 2;
 
 const HEADERS = { "User-Agent": "Mozilla/5.0 (compatible; daily-diff/1.0)" };
 
@@ -330,8 +329,8 @@ async function fetchModelCatalog(): Promise<ApiModel[]> {
   return data;
 }
 
-function selectNewModels(data: ApiModel[]): OpenRouterNewModel[] {
-  const cutoff = Date.now() / 1000 - NEW_MODEL_DAYS * 24 * 60 * 60;
+export function selectNewModels(data: ApiModel[], days: number, now = Date.now()): OpenRouterNewModel[] {
+  const cutoff = now / 1000 - days * 24 * 60 * 60;
   return data
     .filter((m) => m.created >= cutoff)
     .sort((a, b) => b.created - a.created)
@@ -345,7 +344,7 @@ function selectNewModels(data: ApiModel[]): OpenRouterNewModel[] {
 }
 
 export async function fetchOpenRouterData(): Promise<OpenRouterData> {
-  const [apps, top, catalog] = await Promise.all([
+  const [apps, top] = await Promise.all([
     fetchHtml(APPS_URL)
       .then((html) => selectAgentApps(parseOpenRouterApps(html)))
       .catch((err): OpenRouterApp[] => {
@@ -358,42 +357,48 @@ export async function fetchOpenRouterData(): Promise<OpenRouterData> {
         console.error(`  [openrouter] rankings fetch failed: ${err}`);
         return { models: [], date: "" };
       }),
-    fetchModelCatalog().catch((err): ApiModel[] | null => {
-      console.error(`  [openrouter] models fetch failed: ${err}`);
-      return null;
-    }),
   ]);
-  const newModels = catalog ? selectNewModels(catalog) : [];
 
   if (apps.length === 0) console.error("  [openrouter] Parsed 0 apps — payload structure may have changed");
   if (top.models.length === 0)
     console.error("  [openrouter] Parsed 0 ranked models — payload structure may have changed");
-  console.log(
-    `  [openrouter] ${apps.length} agent apps, ${top.models.length} ranked models, ${newModels.length} new models`,
-  );
+  console.log(`  [openrouter] ${apps.length} agent apps, ${top.models.length} ranked models`);
 
   return {
     apps,
     topModels: top.models,
     topModelsDate: top.date,
-    newModels,
-    fetchSuccess: apps.length > 0 || top.models.length > 0 || catalog !== null,
+    fetchSuccess: apps.length > 0 || top.models.length > 0,
   };
 }
 
+/** The daily catalog's two lists for the models page. */
+export interface ModelCatalog {
+  stealth: OpenRouterStealthModel[];
+  /** Listed in the last LISTED_MODEL_DAYS, stealth models left out. */
+  newModels: OpenRouterNewModel[];
+}
+
 /**
- * Stealth models currently in the catalog, for the daily agents report.
+ * The catalog, fetched once a day: its stealth models and its newly listed models.
  * Returns null when the catalog could not be fetched — distinct from "none listed".
  */
-export async function fetchStealthModels(): Promise<OpenRouterStealthModel[] | null> {
+export async function fetchModelCatalogDaily(now = Date.now()): Promise<ModelCatalog | null> {
   try {
-    const models = selectStealthModels(await fetchModelCatalog());
-    console.log(
-      `  [openrouter] ${models.length} stealth models: ${models.map((m) => m.id).join(", ") || "none"}`,
+    const catalog = await fetchModelCatalog();
+    const stealth = selectStealthModels(catalog);
+    const newModels = selectNewModels(
+      catalog.filter((m) => !isStealthModel(m)),
+      LISTED_MODEL_DAYS,
+      now,
     );
-    return models;
+    console.log(
+      `  [openrouter] ${stealth.length} stealth models: ${stealth.map((m) => m.id).join(", ") || "none"}; ` +
+        `${newModels.length} listed in ${LISTED_MODEL_DAYS} days`,
+    );
+    return { stealth, newModels };
   } catch (err) {
-    console.error(`  [openrouter] stealth model check failed: ${err}`);
+    console.error(`  [openrouter] model catalog fetch failed: ${err}`);
     return null;
   }
 }

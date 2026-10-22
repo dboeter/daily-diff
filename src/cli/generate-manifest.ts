@@ -1,27 +1,17 @@
 import fs from "fs";
 import path from "path";
 import { marked } from "marked";
-import { LIVE_REPORT_IDS, OVERVIEW, REPORT_LABELS, WEEKLY_REPORT_IDS } from "../core/i18n.ts";
+import { COMING_UP, LIVE_REPORT_IDS, OVERVIEW, REPORT_LABELS, WEEKLY_REPORT_IDS } from "../core/i18n.ts";
 
 const DIGESTS_DIR = "digests";
 const MANIFEST_PATH = "manifest.json";
 const FEED_PATH = "feed.xml";
+// One feed per live report next to feed.xml, so a reader can follow one page.
+const FEEDS_DIR = "feeds";
 const SITE_URL = "https://dboeter.github.io/daily-diff";
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
-const REPORT_FILES = [
-  // Live reports, in REPORTS (reading) order: the sidebar lists them this way.
-  ...LIVE_REPORT_IDS,
-  // No longer generated — listed only so archived reports stay reachable from
-  // the sidebar and RSS feed. October 2026: ai-cli merged into ai-agents, ai-ph
-  // dropped, ai-infra folded into ai-agents, ai-community into ai-hn; the
-  // rollups were removed earlier.
-  "ai-infra",
-  "ai-community",
-  "ai-cli",
-  "ai-ph",
-  "ai-weekly",
-  "ai-monthly",
-];
+// Live reports in REPORTS (reading) order, then the archive: the sidebar lists them this way.
+const REPORT_FILES = Object.keys(REPORT_LABELS);
 const MAX_FEED_ITEMS = 30;
 
 interface DateEntry {
@@ -35,8 +25,12 @@ interface Manifest {
   labels: Record<string, string>;
   /** The weekly report ids, for the sidebar's "This week" group. */
   weekly: string[];
+  /** Report id → its own feed's path, for the web UI's per-page feed link. */
+  feeds: Record<string, string>;
   /** The sidebar label of a day's overview (the report bar's first link). */
   overview: string;
+  /** The heading of the overview's Coming up list (coming-up.json). */
+  comingUp: string;
   dates: DateEntry[];
 }
 
@@ -92,6 +86,68 @@ async function getReportContent(date: string, report: string): Promise<ReportCon
   }
 }
 
+/** The newest MAX_FEED_ITEMS reports of the entries (newest first), of one report or, without one, of all. */
+export function selectFeedItems(
+  entries: DateEntry[],
+  report?: string,
+): Array<{ date: string; report: string }> {
+  const items: Array<{ date: string; report: string }> = [];
+  for (const entry of entries) {
+    for (const r of entry.reports) {
+      if (report && r !== report) continue;
+      items.push({ date: entry.date, report: r });
+      if (items.length >= MAX_FEED_ITEMS) return items;
+    }
+  }
+  return items;
+}
+
+async function buildFeedXml(
+  items: Array<{ date: string; report: string }>,
+  title: string,
+  feedPath: string,
+): Promise<string> {
+  const buildDate = toRfc822(new Date());
+
+  const itemXmlChunks: string[] = [];
+  for (const { date, report } of items) {
+    const label = REPORT_LABELS[report] ?? report;
+    const itemTitle = `${label} ${date}`;
+    const link = `${SITE_URL}/#${date}/${report}`;
+    const parts = date.split("-").map(Number);
+    const pubDate = toRfc822(new Date(Date.UTC(parts[0]!, parts[1]! - 1, parts[2]!)));
+    const content = await getReportContent(date, report);
+    itemXmlChunks.push(
+      [
+        "    <item>",
+        `      <title>${escapeXml(itemTitle)}</title>`,
+        `      <link>${escapeXml(link)}</link>`,
+        `      <guid isPermaLink="true">${escapeXml(link)}</guid>`,
+        `      <pubDate>${pubDate}</pubDate>`,
+        `      <description>${content.summary}</description>`,
+        `      <content:encoded>${content.fullHtml}</content:encoded>`,
+        "    </item>",
+      ].join("\n"),
+    );
+  }
+  const itemsXml = itemXmlChunks.join("\n");
+
+  return (
+    `<?xml version="1.0" encoding="UTF-8"?>\n` +
+    `<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">\n` +
+    `  <channel>\n` +
+    `    <title>${escapeXml(title)}</title>\n` +
+    `    <link>${SITE_URL}</link>\n` +
+    `    <description>Daily AI ecosystem digest</description>\n` +
+    `    <language>en</language>\n` +
+    `    <atom:link href="${SITE_URL}/${feedPath}" rel="self" type="application/rss+xml"/>\n` +
+    `    <lastBuildDate>${buildDate}</lastBuildDate>\n` +
+    itemsXml +
+    `\n  </channel>\n` +
+    `</rss>\n`
+  );
+}
+
 async function main(): Promise<void> {
   const entries = fs
     .readdirSync(DIGESTS_DIR)
@@ -106,9 +162,11 @@ async function main(): Promise<void> {
 
   const manifest: Manifest = {
     generated: new Date().toISOString(),
-    labels: Object.fromEntries(REPORT_FILES.map((r) => [r, REPORT_LABELS[r] ?? r])),
+    labels: REPORT_LABELS,
     weekly: WEEKLY_REPORT_IDS,
+    feeds: Object.fromEntries(LIVE_REPORT_IDS.map((id) => [id, `${FEEDS_DIR}/${id}.xml`])),
     overview: `${OVERVIEW.emoji} ${OVERVIEW.name}`,
+    comingUp: COMING_UP.heading,
     dates: entries,
   };
 
@@ -117,55 +175,17 @@ async function main(): Promise<void> {
 
   // ── RSS Feed ──────────────────────────────────────────────────────────────────
 
-  const feedItems: Array<{ date: string; report: string }> = [];
-  outer: for (const entry of entries) {
-    for (const report of entry.reports) {
-      feedItems.push({ date: entry.date, report });
-      if (feedItems.length >= MAX_FEED_ITEMS) break outer;
-    }
-  }
-
-  const buildDate = toRfc822(new Date());
-
-  const itemXmlChunks: string[] = [];
-  for (const { date, report } of feedItems) {
-    const label = REPORT_LABELS[report] ?? report;
-    const title = `${label} ${date}`;
-    const link = `${SITE_URL}/#${date}/${report}`;
-    const parts = date.split("-").map(Number);
-    const pubDate = toRfc822(new Date(Date.UTC(parts[0]!, parts[1]! - 1, parts[2]!)));
-    const content = await getReportContent(date, report);
-    itemXmlChunks.push(
-      [
-        "    <item>",
-        `      <title>${escapeXml(title)}</title>`,
-        `      <link>${escapeXml(link)}</link>`,
-        `      <guid isPermaLink="true">${escapeXml(link)}</guid>`,
-        `      <pubDate>${pubDate}</pubDate>`,
-        `      <description>${content.summary}</description>`,
-        `      <content:encoded>${content.fullHtml}</content:encoded>`,
-        "    </item>",
-      ].join("\n"),
-    );
-  }
-  const itemsXml = itemXmlChunks.join("\n");
-
-  const feedXml =
-    `<?xml version="1.0" encoding="UTF-8"?>\n` +
-    `<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">\n` +
-    `  <channel>\n` +
-    `    <title>Daily Diff</title>\n` +
-    `    <link>${SITE_URL}</link>\n` +
-    `    <description>Daily AI ecosystem digest</description>\n` +
-    `    <language>en</language>\n` +
-    `    <atom:link href="${SITE_URL}/feed.xml" rel="self" type="application/rss+xml"/>\n` +
-    `    <lastBuildDate>${buildDate}</lastBuildDate>\n` +
-    itemsXml +
-    `\n  </channel>\n` +
-    `</rss>\n`;
-
-  fs.writeFileSync(FEED_PATH, feedXml);
+  const feedItems = selectFeedItems(entries);
+  fs.writeFileSync(FEED_PATH, await buildFeedXml(feedItems, "Daily Diff", FEED_PATH));
   console.log(`feed.xml updated: ${feedItems.length} items`);
+
+  fs.mkdirSync(FEEDS_DIR, { recursive: true });
+  for (const id of LIVE_REPORT_IDS) {
+    const feedPath = `${FEEDS_DIR}/${id}.xml`;
+    const items = selectFeedItems(entries, id);
+    fs.writeFileSync(feedPath, await buildFeedXml(items, `Daily Diff: ${REPORT_LABELS[id]}`, feedPath));
+    console.log(`${feedPath} updated: ${items.length} items`);
+  }
 }
 
 // Run only when executed directly (not imported for testing)

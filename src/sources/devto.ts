@@ -14,9 +14,6 @@ export interface DevtoArticle {
   publishedAt: string;
   positiveReactionsCount: number;
   commentsCount: number;
-  readingTimeMinutes: number;
-  tags: string[];
-  user: string;
 }
 
 export interface DevtoData {
@@ -29,6 +26,11 @@ export interface DevtoData {
 // ---------------------------------------------------------------------------
 
 const DEVTO_PER_PAGE = 30;
+/**
+ * `top=2` returned 110 unique articles over the five tags on 2026-10-22, most
+ * with fewer than 15 reactions: below this they are not worth a Jev call each.
+ */
+const DEVTO_MIN_REACTIONS = 15;
 const API_URL = "https://dev.to/api/articles";
 
 /** Tags to query — run in parallel, dedup by id. */
@@ -46,9 +48,6 @@ export interface DevtoApiArticle {
   published_at: string;
   positive_reactions_count: number;
   comments_count: number;
-  reading_time_minutes: number;
-  tag_list: string[];
-  user: { name: string };
 }
 
 export function toDevtoArticle(a: DevtoApiArticle): DevtoArticle {
@@ -60,9 +59,6 @@ export function toDevtoArticle(a: DevtoApiArticle): DevtoArticle {
     publishedAt: a.published_at,
     positiveReactionsCount: a.positive_reactions_count,
     commentsCount: a.comments_count,
-    readingTimeMinutes: a.reading_time_minutes,
-    tags: a.tag_list,
-    user: a.user.name,
   };
 }
 
@@ -80,8 +76,8 @@ export async function fetchDevtoData(): Promise<DevtoData> {
           const params = new URLSearchParams({
             tag,
             per_page: String(DEVTO_PER_PAGE),
-            // Fetched on the weekly run for the discussions report: top articles of the past 7 days.
-            top: "7",
+            // Fetched daily: the most popular articles of the last 2 days.
+            top: "2",
           });
 
           const resp = await fetch(`${API_URL}?${params}`, {
@@ -106,11 +102,13 @@ export async function fetchDevtoData(): Promise<DevtoData> {
     );
 
     const articles = [...seen.values()]
+      .filter((a) => a.positiveReactionsCount >= DEVTO_MIN_REACTIONS)
       .sort((a, b) => b.positiveReactionsCount - a.positiveReactionsCount)
       .slice(0, DEVTO_PER_PAGE);
 
     console.log(`  [devto] ${articles.length} articles (from ${seen.size} unique)`);
-    return { articles, fetchSuccess: articles.length > 0 };
+    // A quiet day with every article under the reaction floor is not a failed fetch.
+    return { articles, fetchSuccess: seen.size > 0 };
   } catch (err) {
     console.error(`  [devto] fetch failed: ${err}`);
     return { articles: [], fetchSuccess: false };

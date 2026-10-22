@@ -2,10 +2,11 @@
  * Web content fetching for AI company news/blog/research.
  *
  * Strategy:
- *   - Discover article URLs via sitemaps (no date filter needed — lastmod is reliable)
- *   - Compare with stored state to find new/updated URLs
+ *   - Discover article URLs via sitemaps
+ *   - Compare with stored state to find new URLs (an edited post is not an announcement)
  *   - Fetch content only for new URLs; on first run, cap at MAX_CONTENT_FETCH_FIRST_RUN per site
  *   - After every run, mark ALL discovered URLs as seen so future runs stay incremental
+ *   - Keep the run's new URLs under its CST date, so a same-day re-run lists them again
  *
  * State is persisted in digests/web-state.json (committed to git by the Actions workflow).
  */
@@ -24,13 +25,18 @@ export interface WebPageItem {
   lastmod: string;
   content: string;
   site: "anthropic" | "openai";
-  category: string;
 }
 
 interface SiteState {
   lastChecked: string;
   /** url → lastmod string (or "seen" if no lastmod available) */
   seenUrls: Record<string, string>;
+  /**
+   * The last run's CST date and the URLs new on it (none on a first crawl), so
+   * a same-day re-run lists the same posts: it rebuilds the models page, and on
+   * the 2026-10-23 e2e re-run its 4 lab posts were already seen and gone.
+   */
+  newOn?: { date: string; urls: string[]; firstRun?: true };
 }
 
 export interface WebState {
@@ -40,7 +46,6 @@ export interface WebState {
 
 export interface WebFetchResult {
   site: "anthropic" | "openai";
-  siteName: string;
   isFirstRun: boolean;
   newItems: WebPageItem[];
   /** Total URLs discovered in sitemap (for context in the report) */
@@ -54,7 +59,6 @@ export interface WebFetchResult {
 // ---------------------------------------------------------------------------
 
 interface SiteConfig {
-  name: string;
   /** For single sitemaps: URL to fetch */
   sitemapUrl: string;
   /** For single sitemaps: only keep URLs starting with these path prefixes */
@@ -70,12 +74,10 @@ interface SiteConfig {
 
 const SITE_CONFIGS: Record<"anthropic" | "openai", SiteConfig> = {
   anthropic: {
-    name: "Anthropic (Claude)",
     sitemapUrl: "https://www.anthropic.com/sitemap.xml",
     prefixes: ["/news/", "/research/", "/engineering/", "/learn/"],
   },
   openai: {
-    name: "OpenAI",
     sitemapUrl: "https://openai.com/sitemap.xml",
     // Fetch only content-focused sub-sitemaps; skip app-category and i18n sitemaps
     subSitemapNames: [
@@ -198,14 +200,6 @@ export function extractText(html: string): string {
     .slice(0, MAX_CONTENT_LENGTH);
 }
 
-export function urlCategory(url: string): string {
-  try {
-    return new URL(url).pathname.split("/").filter(Boolean)[0] ?? "article";
-  } catch {
-    return "article";
-  }
-}
-
 /** Derive a human-readable title from the last URL path segment. */
 export function titleFromUrl(url: string): string {
   try {
@@ -225,7 +219,8 @@ async function discoverUrls(site: "anthropic" | "openai"): Promise<Array<{ loc: 
   const results: Array<{ loc: string; lastmod?: string }> = [];
 
   if (cfg.subSitemapNames && cfg.subSitemapTemplate) {
-    // Sitemap index: fetch each named sub-sitemap
+    // Sitemap index: fetch each named sub-sitemap; a failing one loses only its URLs
+    let failed = 0;
     for (const name of cfg.subSitemapNames) {
       const subUrl = cfg.subSitemapTemplate.replace("{name}", name);
       try {
@@ -233,9 +228,12 @@ async function discoverUrls(site: "anthropic" | "openai"): Promise<Array<{ loc: 
         results.push(...parseSitemapUrls(xml));
         await sleep(100);
       } catch (err) {
+        failed++;
         console.error(`  [web/${site}] sub-sitemap "${name}" failed: ${err}`);
       }
     }
+    // All of them failing is the site failing, not a day without new posts.
+    if (failed === cfg.subSitemapNames.length) throw new Error("every sub-sitemap failed");
   } else {
     // Single sitemap
     const xml = await httpGet(cfg.sitemapUrl);
@@ -288,24 +286,36 @@ export function saveWebState(state: WebState): void {
 // Main export
 // ---------------------------------------------------------------------------
 
-/** One site's new pages. Never throws: a failed fetch is an empty result with `fetchSuccess: false`. */
+/**
+ * One site's new pages: URLs not seen before, or new on an earlier run of the
+ * same CST day. Never throws: a failed fetch is an empty result with `fetchSuccess: false`.
+ */
 export async function fetchSiteContent(
   site: "anthropic" | "openai",
   state: WebState,
+  dateStr: string,
 ): Promise<WebFetchResult> {
   try {
-    return await fetchSite(site, state);
+    return await fetchSite(site, state, dateStr);
   } catch (err) {
     console.error(`  [web/${site}] fetch failed: ${err}`);
     const empty = { isFirstRun: false, newItems: [], totalDiscovered: 0, fetchSuccess: false };
-    return { site, siteName: SITE_CONFIGS[site].name, ...empty };
+    return { site, ...empty };
   }
 }
 
-async function fetchSite(site: "anthropic" | "openai", state: WebState): Promise<WebFetchResult> {
+async function fetchSite(
+  site: "anthropic" | "openai",
+  state: WebState,
+  dateStr: string,
+): Promise<WebFetchResult> {
   const cfg = SITE_CONFIGS[site];
   const siteState = state[site];
-  const isFirstRun = Object.keys(siteState.seenUrls).length === 0;
+  const today = siteState.newOn?.date === dateStr ? siteState.newOn : undefined;
+  // A first crawl stays one on a same-day re-run, so a post published between the two runs is
+  // counted with it, not listed (once per site: both labs are past their first crawl).
+  const isFirstRun = today ? today.firstRun === true : Object.keys(siteState.seenUrls).length === 0;
+  const newToday = new Set(today?.urls);
 
   console.log(`  [web/${site}] Discovering URLs from sitemap...`);
   const allDiscovered = await discoverUrls(site);
@@ -319,16 +329,20 @@ async function fetchSite(site: "anthropic" | "openai", state: WebState): Promise
     return b.lastmod.localeCompare(a.lastmod);
   });
 
-  // New = not seen before, OR (for non-metadataOnly sites) lastmod is newer.
-  // For metadataOnly sites (e.g. OpenAI), lastmod reflects sitemap generation
-  // time rather than content publication — ignore lastmod changes to avoid
-  // flagging hundreds of unchanged URLs as "new" on every run.
-  const newUrls = allDiscovered.filter(({ loc, lastmod }) => {
-    const prev = siteState.seenUrls[loc];
-    if (!prev) return true;
-    if (!cfg.metadataOnly && lastmod && lastmod > prev) return true;
-    return false;
-  });
+  // New = a URL not seen before. A moved lastmod is not: on 2026-10-21 Anthropic's sitemap moved
+  // the lastmod of all 476 URLs, and OpenAI's tracks sitemap generation.
+  // The day's earlier new URLs that a failing sub-sitemap hid from this run are listed again too.
+  const discovered = new Set(allDiscovered.map(({ loc }) => loc));
+  const hidden = [...newToday]
+    .filter((loc) => !discovered.has(loc))
+    .map((loc) => ({
+      loc,
+      lastmod: siteState.seenUrls[loc] === "seen" ? undefined : siteState.seenUrls[loc],
+    }));
+  const newUrls = [
+    ...allDiscovered.filter(({ loc }) => !siteState.seenUrls[loc] || newToday.has(loc)),
+    ...hidden,
+  ];
 
   // Cap content fetches on first run to avoid excessive runtime
   const toFetch = isFirstRun ? newUrls.slice(0, MAX_CONTENT_FETCH_FIRST_RUN) : newUrls;
@@ -348,7 +362,6 @@ async function fetchSite(site: "anthropic" | "openai", state: WebState): Promise
         lastmod: lastmod ?? "",
         content: "",
         site,
-        category: urlCategory(loc),
       });
     }
   } else {
@@ -362,7 +375,6 @@ async function fetchSite(site: "anthropic" | "openai", state: WebState): Promise
           lastmod: lastmod ?? "",
           content: extractText(html),
           site,
-          category: urlCategory(loc),
         });
       } catch (err) {
         console.error(`  [web/${site}] Failed to fetch ${loc}: ${err}`);
@@ -377,10 +389,12 @@ async function fetchSite(site: "anthropic" | "openai", state: WebState): Promise
     siteState.seenUrls[loc] = lastmod ?? "seen";
   }
   siteState.lastChecked = new Date().toISOString();
+  siteState.newOn = isFirstRun
+    ? { date: dateStr, urls: [], firstRun: true }
+    : { date: dateStr, urls: newUrls.map(({ loc }) => loc) };
 
   return {
     site,
-    siteName: cfg.name,
     isFirstRun,
     newItems: items,
     totalDiscovered: allDiscovered.length,

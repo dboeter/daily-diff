@@ -3,23 +3,45 @@ import os from "node:os";
 import path from "node:path";
 import { describe, it, expect, vi } from "vitest";
 import {
+  buildAgentsReport,
   buildDataReport,
-  buildDiscussionsReport,
+  buildModelsPage,
   buildPolicyReport,
-  buildTrendingReport,
-  buildWebReport,
+  buildTrendsReport,
+  hasDataNews,
+  type TrendsInput,
+  LAB_POSTS_MAX,
   type DataSection,
 } from "../reports/data-reports.ts";
 import { EMPTY_TRENDING, type TrendingData } from "../trending/trending.ts";
-import { MSG } from "../core/i18n.ts";
+import { MSG, TRENDS_REPORT } from "../core/i18n.ts";
 import type { ProjectActivity } from "../reports/prompts.ts";
+import type { GitHubItem } from "../core/github.ts";
 import type { PolicyData, PolicyItem } from "../policy/policy.ts";
 import { isDataLaw } from "../policy/jev.ts";
-import type { DevtoData } from "../sources/devto.ts";
+import type { WebFetchResult, WebPageItem } from "../sources/web.ts";
+import type { ModelCatalog } from "../sources/openrouter.ts";
 import type { VendorData, VendorItem } from "../data/vendors.ts";
 import { selectVendorItems } from "../data/jev.ts";
 import { fetchVendorData } from "../data/vendors.ts";
 import { numberRows } from "../reports/summarized-table.ts";
+import type { SpottedRow } from "../spotted/spotted.ts";
+
+const NO_SPOTTED = { rows: [], summaries: new Map<number, string>() };
+/** A page's `##` headings, in order. */
+const headings = (content: string) => [...content.matchAll(/^## (.+)$/gm)].map((m) => m[1]);
+const spottedRow = (n: number, page: SpottedRow["page"]): SpottedRow => ({
+  n,
+  page,
+  id: `hn:${n}`,
+  source: "hn",
+  title: `Story ${n}`,
+  url: `https://example.com/${n}`,
+  discussionUrl: `https://news.ycombinator.com/item?id=${n}`,
+  points: 100,
+  comments: 10,
+  published: "2026-10-22T00:00:00Z",
+});
 
 const generateBody = vi.fn(async (_prompt: string) => "## Highlights\n\nText.");
 vi.mock("../core/report.ts", async (importOriginal) => ({
@@ -29,10 +51,11 @@ vi.mock("../core/report.ts", async (importOriginal) => ({
   generateOr: (_tag: string, prompt: string, fallback: unknown) => generateBody(prompt).catch(() => fallback),
   saveFile: (...args: unknown[]) => saveFile(...(args as [string, string, string])),
 }));
-// buildWebReport writes digests/web-state.json: keep the tests off the real file.
+// buildModelsPage writes digests/web-state.json: keep the tests off the real file.
+const saveWebState = vi.fn();
 vi.mock("../sources/web.ts", async (importOriginal) => ({
   ...(await importOriginal<typeof import("../sources/web.ts")>()),
-  saveWebState: () => {},
+  saveWebState: () => saveWebState(),
 }));
 /** A vendor result with these items and nothing to save but the pruned state. */
 const vendorOf = (items: VendorData["items"]): VendorData => ({
@@ -43,91 +66,29 @@ const vendorOf = (items: VendorData["items"]): VendorData => ({
 });
 const saveFile = vi.fn((_content: string, dateStr: string, name: string) => `digests/${dateStr}/${name}`);
 
-const devto: DevtoData = {
-  fetchSuccess: true,
-  articles: [
-    {
-      id: 1,
-      title: "MCP lesson",
-      url: "https://dev.to/a/mcp",
-      description: "d",
-      user: "u",
-      positiveReactionsCount: 78,
-      commentsCount: 85,
-      readingTimeMinutes: 5,
-      tags: ["ai"],
-      publishedAt: "2026-10-10T00:00:00Z",
-    },
-  ],
-};
-
-describe("buildWebReport", () => {
-  it("says a site's fetch failed instead of reporting an empty sitemap", async () => {
-    generateBody.mockClear();
-    const page = {
-      url: "https://www.anthropic.com/news/x",
-      title: "X",
-      lastmod: "2026-10-18",
-      content: "Body.",
-      site: "anthropic" as const,
-      category: "news",
-    };
-    const results = [
-      {
-        site: "anthropic" as const,
-        siteName: "Anthropic",
-        isFirstRun: false,
-        newItems: [page],
-        totalDiscovered: 40,
-        fetchSuccess: true,
-      },
-      {
-        site: "openai" as const,
-        siteName: "OpenAI",
-        isFirstRun: false,
-        newItems: [],
-        totalDiscovered: 0,
-        fetchSuccess: false,
-      },
-    ];
-    const state = { anthropic: {}, openai: {} } as unknown as Parameters<typeof buildWebReport>[1];
-    const content = (await buildWebReport(results, state, "00:00", "2026-10-19"))!.content;
-    expect(content).toContain("— 1 new articles (sitemap total: 40)");
-    expect(content).toContain("[openai.com](https://openai.com) — fetch failed");
+describe("buildTrendsReport", () => {
+  const githubRow = (n: number, fullName: string, onFire = false) => ({
+    n,
+    key: `github:${fullName}`,
+    fullName,
+    url: `https://github.com/${fullName}`,
+    description: `${fullName} description.`,
+    language: "TypeScript",
+    totalStars: 5000,
+    gain: 800,
+    gainFrom: "trending" as const,
+    relative: 0.19,
+    starsCell: "5,000 (+800, +19.0%)",
+    isNew: false,
+    onFire,
   });
-});
-
-describe("buildDiscussionsReport", () => {
-  it("is still written when HN fails but Dev.to succeeds", async () => {
-    generateBody.mockClear();
-    const report = await buildDiscussionsReport(
-      { hn: { stories: [], fetchSuccess: false }, devto, lobsters: { stories: [], fetchSuccess: false } },
-      "00:00",
-      "2026-10-12",
-    );
-    expect(report?.id).toBe("ai-hn");
-    expect(report?.content).toContain("[Dev.to](https://dev.to/) (1 articles)");
-    expect(report?.content).not.toContain("Hacker News](");
-    expect(report?.content).toContain("## Highlights\n\nText.");
-    expect(generateBody).toHaveBeenCalledOnce();
-  });
-
-  it("is skipped when every source failed, without an LLM call", async () => {
-    generateBody.mockClear();
-    const none = { stories: [], fetchSuccess: false };
-    const report = await buildDiscussionsReport(
-      { hn: none, devto: { articles: [], fetchSuccess: false }, lobsters: none },
-      "00:00",
-      "2026-10-12",
-    );
-    expect(report).toBeNull();
-    expect(generateBody).not.toHaveBeenCalled();
-  });
-});
-
-describe("buildTrendingReport", () => {
   const data: TrendingData = {
     ...EMPTY_TRENDING,
+    openrouter: {
+      ...EMPTY_TRENDING.openrouter,
+      topModels: [{ slug: "a/b", tokens: 1e12 }],
+      fetchSuccess: true,
+    },
     report: {
       radar: [
         {
@@ -142,75 +103,462 @@ describe("buildTrendingReport", () => {
           links: [],
         },
       ],
-      categories: [],
+      categories: [{ category: "coding_agent", rows: [githubRow(2, "o/fast", true)] }],
+      onFire: [{ fullName: "o/fast", category: "coding_agent" }],
       classifiedBy: "jev",
     },
   };
-  const skills = { prs: [], issues: [], fetchSuccess: true, repo: "anthropics/skills" };
-  const isSummaries = (p: string) => p.includes("`N: <2 sentences>`");
+  const input: TrendsInput = {
+    trending: data,
+    skills: { prs: [], issues: [], fetchSuccess: true, repo: "anthropics/skills" },
+    hf: { models: [], fetchSuccess: true },
+    papers: [
+      {
+        id: "p1",
+        title: "Paper 1",
+        url: "https://arxiv.org/abs/p1",
+        published: "2026-10-20T00:00:00Z",
+        relevance: 0.9,
+        abstract: "Paper abstract.",
+        date: "2026-10-21",
+      },
+    ],
+    stories: [
+      {
+        id: "lobsters:x",
+        source: "lobsters",
+        title: "Essay",
+        url: "https://example.com/essay",
+        discussionUrl: "https://lobste.rs/s/x",
+        points: 40,
+        comments: 60,
+      },
+    ],
+    tracked: [],
+  };
+  const isTrendingSummaries = (p: string) => p.includes("`N: <2 sentences>`");
+  const isRowSummaries = (p: string) => p.includes("research papers and community stories");
+  const isModels = (p: string) => p.includes("model ecosystem analyst");
   const isProse = (p: string) => p.includes("<!-- tables -->");
-  const build = () => buildTrendingReport(data, skills, "00:00", "2026-10-19");
+  const reply = (p: string) =>
+    isTrendingSummaries(p)
+      ? "1: Kilo is an agent.\n2: Fast is a coding agent."
+      : isRowSummaries(p)
+        ? "1: The paper shows X.\n2: An essay on Y."
+        : isModels(p)
+          ? "### OpenRouter usage\n\n- a/b leads.\n\n### Hugging Face trending\n\n| Model |\n| :--- |"
+          : isProse(p)
+            ? "## Highlights\n\n- H.\n\n<!-- tables -->\n\n## Signals\n\nS."
+            : "## Top Skills\n\nK.";
+  const build = (over: Partial<TrendsInput> = {}) =>
+    buildTrendsReport({ ...input, ...over }, "00:00", "2026-10-26");
 
-  it("splices the row summaries and the prose, and adds the Skills section", async () => {
+  it("reads Highlights, Agents & coding tools, Skills, Candidates, Models, Research, Most discussed, Signals", async () => {
     generateBody.mockReset();
-    generateBody.mockImplementation(async (p: string) =>
-      isSummaries(p)
-        ? "1: Kilo is an agent."
-        : isProse(p)
-          ? "## Highlights\n\nH.\n\n<!-- tables -->\n\n## Signals\n\nS."
-          : "## Top Skills\n\nK.",
-    );
+    generateBody.mockImplementation(async (p: string) => reply(p));
     const content = (await build())!.content;
-    expect(content).toMatch(/H\.\n\n## [^\n]+\n\n[\s\S]*\| Kilo is an agent\. \|\n\n## Signals/);
-    expect(content).toContain("## Claude Code Skills");
+    expect(headings(content)).toEqual([
+      "Highlights",
+      TRENDS_REPORT.agentsHeading,
+      TRENDS_REPORT.skillsHeading,
+      TRENDS_REPORT.candidatesHeading,
+      TRENDS_REPORT.modelsHeading,
+      TRENDS_REPORT.researchHeading,
+      TRENDS_REPORT.mostDiscussedHeading,
+      "Signals",
+    ]);
+    expect(content).toContain(`### ${TRENDS_REPORT.radarHeading}`);
+    expect(content).toContain(`### ${TRENDS_REPORT.categoryTitles.coding_agent}`);
     expect(content).toContain("### Top Skills\n\nK.");
-    expect(generateBody).toHaveBeenCalledTimes(3);
+    expect(content).toContain("### OpenRouter usage");
+    expect(content).toContain("| Kilo is an agent. |");
+    expect(content).toContain("| [Paper 1](https://arxiv.org/abs/p1) | The paper shows X. |");
+    expect(content).toContain("| An essay on Y. |");
+    expect(content).toContain("    - id: fast\n      repo: o/fast\n      name: fast");
+    expect(content).not.toContain("<!-- tables -->");
   });
 
-  it("shows the descriptions when the summaries call fails", async () => {
+  it("makes four calls in the first round, then the prose call over the rendered page", async () => {
     generateBody.mockReset();
-    generateBody.mockImplementation(async (p: string) => {
-      if (isSummaries(p)) throw new Error("HTTP 504");
-      return isProse(p) ? "## Highlights\n\nH.\n\n<!-- tables -->" : "K.";
-    });
-    expect((await build())!.content).toContain("| Kilo description. |");
+    generateBody.mockImplementation(async (p: string) => reply(p));
+    await build();
+    const prompts = generateBody.mock.calls.map((c) => c[0]);
+    expect(prompts).toHaveLength(5);
+    expect(isProse(prompts[4]!)).toBe(true);
+    expect(prompts.slice(0, 4).some(isProse)).toBe(false);
+    // The prose call reads the page with the first round's summaries in it.
+    expect(prompts[4]).toContain("| The paper shows X. |");
+    expect(prompts[4]).toContain("### OpenRouter usage");
   });
 
-  it("is still written with the failure notice when the prose call fails", async () => {
+  it("leaves out an empty section, and the failure notice under Highlights when the prose call fails", async () => {
     generateBody.mockReset();
     generateBody.mockImplementation(async (p: string) => {
       if (isProse(p)) throw new Error("HTTP 504");
-      return isSummaries(p) ? "1: S." : "K.";
+      return reply(p);
     });
-    const content = (await build())!.content;
-    expect(content).toContain(MSG.trendingFailed);
-    expect(content).toContain("| S. |");
+    const content = (await build({ papers: [], tracked: [{ id: "f", repo: "O/Fast", name: "Fast" }] }))!
+      .content;
+    expect(headings(content)).toEqual([
+      "Highlights",
+      TRENDS_REPORT.agentsHeading,
+      TRENDS_REPORT.skillsHeading,
+      TRENDS_REPORT.modelsHeading,
+      TRENDS_REPORT.mostDiscussedHeading,
+    ]);
+    expect(content).toContain(`## Highlights\n\n${MSG.summaryFailed}`);
   });
 
-  it("shows the Skills failure notice when the Skills call fails", async () => {
+  it("shows the descriptions when a summaries call fails, and the Skills notice without a Skills fetch", async () => {
     generateBody.mockReset();
     generateBody.mockImplementation(async (p: string) => {
-      if (!isSummaries(p) && !isProse(p)) throw new Error("HTTP 504");
-      return "1: S.";
+      if (isTrendingSummaries(p) || isRowSummaries(p)) throw new Error("HTTP 504");
+      return reply(p);
     });
-    expect((await build())!.content).toContain(MSG.skillsFailed);
+    const content = (await build({ skills: { ...input.skills, fetchSuccess: false } }))!.content;
+    expect(content).toContain("| Kilo description. |");
+    expect(content).toContain("| Paper abstract. |");
+    expect(content).toContain(MSG.skillsFailed);
+    expect(generateBody).toHaveBeenCalledTimes(4);
   });
 
-  it("shows the Skills failure notice without a Skills call when the Skills fetch failed", async () => {
+  it("is skipped without an LLM call when no section has data", async () => {
+    generateBody.mockReset();
+    expect(
+      await build({
+        trending: EMPTY_TRENDING,
+        hf: { models: [], fetchSuccess: false },
+        papers: [],
+        stories: [],
+      }),
+    ).toBeNull();
+    expect(generateBody).not.toHaveBeenCalled();
+  });
+
+  it("is built from Skills activity alone", async () => {
+    generateBody.mockReset();
+    generateBody.mockImplementation(async (p: string) => reply(p));
+    const pr: GitHubItem = {
+      number: 1,
+      title: "Add a skill",
+      state: "open",
+      user: { login: "a" },
+      labels: [],
+      created_at: "2026-10-25T00:00:00Z",
+      updated_at: "2026-10-25T00:00:00Z",
+      comments: 0,
+      html_url: "https://github.com/anthropics/skills/pull/1",
+    };
+    const report = await build({
+      trending: EMPTY_TRENDING,
+      hf: { models: [], fetchSuccess: false },
+      papers: [],
+      stories: [],
+      skills: { ...input.skills, prs: [pr] },
+    });
+    expect(report?.content).toContain(`## ${TRENDS_REPORT.skillsHeading}`);
+  });
+
+  it("stays under 60 KB with the largest plausible inputs", async () => {
+    const sentence =
+      "This summary says what the row is and why it matters to developers in two sentences of plain text.";
+    const summary = `${sentence} ${sentence}`.slice(0, 250);
+    const categories = (
+      ["coding_agent", "harness_framework", "multi_agent", "agent_tooling", "other_agent"] as const
+    ).map((category, c) => ({
+      category,
+      rows: Array.from({ length: 8 }, (_, i) => ({
+        ...githubRow(13 + c * 8 + i, `some-owner-${c}/a-fairly-long-repository-name-${i}`, true),
+        description: "d".repeat(300),
+      })),
+    }));
+    const radar = Array.from({ length: 12 }, (_, i) => ({
+      n: i + 1,
+      keys: [`openrouter:${i}`, `npm:pkg-${i}`, `github:radar-owner/radar-tool-${i}`],
+      name: `Radar Tool ${i}`,
+      url: `https://radar-tool-${i}.example.com/`,
+      description: "d".repeat(300),
+      sources: ["OpenRouter", "npm", "GitHub"] as ("OpenRouter" | "npm" | "GitHub")[],
+      signals: ["🆕 week #3 / month #12", "12,345/week, 4.3x", "1,234 (+567, +85.0%)"],
+      isNew: true,
+      onFire: true,
+      links: [],
+    }));
+    const hfRows = Array.from(
+      { length: 15 },
+      (_, i) =>
+        `| [some-org/A-Model-Name-${i}-Instruct-GGUF](https://huggingface.co/some-org/A-Model-Name-${i}-Instruct-GGUF) | some-org | 1,234 | 123,456 | ${summary} |`,
+    );
+    const big: TrendsInput = {
+      ...input,
+      trending: {
+        ...data,
+        report: {
+          radar,
+          categories,
+          onFire: categories.flatMap((g) =>
+            g.rows.map((r) => ({ fullName: r.fullName, category: g.category })),
+          ),
+          classifiedBy: "jev",
+        },
+      },
+      papers: Array.from({ length: 10 }, (_, i) => ({
+        ...input.papers[0]!,
+        id: `p${i}`,
+        title: `A long paper title about agents, planning and tool use in large language models, part ${i}`,
+        url: `https://arxiv.org/abs/2610.0000${i}`,
+      })),
+      stories: Array.from({ length: 11 }, (_, i) => ({
+        ...input.stories[0]!,
+        id: `hn:${i}`,
+        source: "hn" as const,
+        title: `A fairly long Hacker News story title number ${i} about AI tooling`,
+        url: `https://example.com/a/long/path/to/the/article-${i}`,
+        discussionUrl: `https://news.ycombinator.com/item?id=4100000${i}`,
+      })),
+    };
+    const lines = (count: number) =>
+      Array.from({ length: count }, (_, i) => `${i + 1}: ${summary}`).join("\n");
     generateBody.mockReset();
     generateBody.mockImplementation(async (p: string) =>
-      isSummaries(p) ? "1: S." : "## Highlights\n\nH.\n\n<!-- tables -->",
+      isTrendingSummaries(p)
+        ? lines(52)
+        : isRowSummaries(p)
+          ? lines(21)
+          : isModels(p)
+            ? `### OpenRouter usage\n\n${`- ${summary}\n`.repeat(5)}\n### Hugging Face trending\n\n| Model | Author | Likes | Downloads | Summary |\n| :--- | :--- | ---: | ---: | :--- |\n${hfRows.join("\n")}`
+            : isProse(p)
+              ? `## Highlights\n\n${"x".repeat(2000)}\n\n<!-- tables -->\n\n## Signals\n\n${"x".repeat(2000)}`
+              : `## Top Skills\n\n${"k".repeat(3000)}`,
     );
-    const failed = { ...skills, fetchSuccess: false };
-    const content = (await buildTrendingReport(data, failed, "00:00", "2026-10-19"))!.content;
-    expect(content).toContain(MSG.skillsFailed);
-    expect(generateBody).toHaveBeenCalledTimes(2);
+    const content = (await build(big))!.content;
+    const kb = Buffer.byteLength(content, "utf-8") / 1024;
+    expect(kb).toBeLessThan(60);
+  });
+});
+
+describe("buildAgentsReport", () => {
+  const project = (name: string, active: boolean): ProjectActivity => ({
+    config: { id: name.toLowerCase(), repo: `org/${name.toLowerCase()}`, name },
+    releases: active
+      ? [{ tag_name: "v1", name: "v1", published_at: "2026-10-21T00:00:00Z", prerelease: false }]
+      : [],
+    previews: [],
+    prereleaseCount: 0,
+    hotIssues: [],
+    news: [],
+  });
+  const groups = (active: boolean) => [
+    { title: "Coding Agents", activities: [project("Codex", active)], summary: "## Codex\n- Released v1." },
+    { title: "Agent Tooling", activities: [project("Agent Deck", false)], summary: MSG.projectsNoActivity },
+  ];
+  const spotted = { rows: [spottedRow(1, "agents")], summaries: new Map([[1, "A tool."]]) };
+  const build = (g = groups(true), s: typeof spotted = spotted) =>
+    buildAgentsReport(g, s, "00:00", "2026-10-22");
+
+  it("reads Highlights, the two groups, then Spotted", async () => {
+    generateBody.mockReset();
+    generateBody.mockImplementation(async () => "## Highlights\n\n- Codex shipped v1.");
+    const report = await build();
+    expect(report.id).toBe("ai-agents");
+    expect(report.content).toMatch(/^# AI Agents 2026-10-22\n/);
+    expect(headings(report.content)).toEqual(["Highlights", "Coding Agents", "Agent Tooling", "Spotted"]);
+    expect(report.content).toContain("### Codex");
+    // The Highlights call reads the rendered groups and the Spotted table.
+    const prompt = generateBody.mock.calls[0]![0] as string;
+    expect(prompt).toContain("You are the editor of AI Agents");
+    expect(prompt).toContain("## Coding Agents\n\n### Codex\n- Released v1.");
+    expect(prompt).toContain("| [Story 1](https://example.com/1) |");
+    expect(generateBody).toHaveBeenCalledTimes(1);
   });
 
-  it("is skipped without an LLM call when there is no ranked data", async () => {
+  it("writes Highlights for Spotted alone", async () => {
     generateBody.mockReset();
-    expect(await buildTrendingReport(EMPTY_TRENDING, skills, "00:00", "2026-10-19")).toBeNull();
+    generateBody.mockImplementation(async () => "## Highlights\n\n- A spotted tool.");
+    expect(headings((await build(groups(false))).content)[0]).toBe("Highlights");
+    expect(generateBody).toHaveBeenCalledTimes(1);
+  });
+
+  it("makes no call and has no Highlights when no project is active and Spotted is empty", async () => {
+    generateBody.mockReset();
+    const report = await build(groups(false), NO_SPOTTED);
     expect(generateBody).not.toHaveBeenCalled();
+    expect(headings(report.content)).toEqual(["Coding Agents", "Agent Tooling"]);
+  });
+
+  it("leaves the failure notice under Highlights when the call fails", async () => {
+    generateBody.mockReset();
+    generateBody.mockImplementation(async () => {
+      throw new Error("HTTP 504");
+    });
+    const report = await build();
+    expect(report.content).toContain(`## Highlights\n\n${MSG.summaryFailed}\n\n---\n\n## Coding Agents`);
+  });
+});
+
+describe("buildModelsPage", () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "models-page-"));
+  const NOW = Date.parse("2026-10-22T03:00:00Z");
+  const post = (i: number, site: WebPageItem["site"] = "anthropic"): WebPageItem => ({
+    url: `https://www.${site}.com/news/p${i}`,
+    title: `Post ${i}`,
+    lastmod: `2026-10-${String(10 + (i % 12)).padStart(2, "0")}`,
+    content: site === "anthropic" ? `Body ${i}.` : "",
+    site,
+  });
+  const site = (newItems: WebPageItem[], extra: Partial<WebFetchResult> = {}): WebFetchResult => ({
+    site: "anthropic",
+    isFirstRun: false,
+    newItems,
+    totalDiscovered: 400,
+    fetchSuccess: true,
+    ...extra,
+  });
+  const model = {
+    id: "x/m",
+    name: "M",
+    description: "A coding model.",
+    created: "2026-10-21",
+    contextLength: 262144,
+  };
+  const catalog = (extra: Partial<ModelCatalog> = {}): ModelCatalog => ({
+    stealth: [],
+    newModels: [],
+    ...extra,
+  });
+  let n = 0;
+  const build = (
+    web: WebFetchResult[],
+    cat: ModelCatalog | null,
+    spotted: { rows: SpottedRow[]; summaries: Map<number, string> } = NO_SPOTTED,
+    stateFile = path.join(dir, `state-${++n}.json`),
+    dateStr = "2026-10-22",
+    now = NOW,
+  ) => buildModelsPage(web, {} as never, cat, spotted, "00:00", dateStr, stateFile, now);
+  const stub = () => {
+    generateBody.mockReset();
+    generateBody.mockImplementation(async (prompt: string) =>
+      prompt.includes("You are the editor") ? "## Highlights\n\n- A new model." : "1: Summary one.",
+    );
+  };
+
+  it("reads Highlights, Lab announcements, New on OpenRouter, Stealth models, then Spotted", async () => {
+    stub();
+    const report = await build([site([post(1)])], catalog({ newModels: [model] }), {
+      rows: [spottedRow(1, "models")],
+      summaries: new Map([[1, "A story."]]),
+    });
+    expect(report?.id).toBe("ai-models");
+    expect(report?.content).toMatch(
+      /^# AI Models & Labs 2026-10-22\n\n> Lab posts: 1 \| New models: 1 \| Spotted: 1 \| Generated: 00:00 UTC\n/,
+    );
+    expect(headings(report!.content)).toEqual([
+      "Highlights",
+      "Lab announcements",
+      "New on OpenRouter",
+      "🕵️ Stealth Models on OpenRouter",
+      "Spotted",
+    ]);
+    expect(report?.content).toContain(
+      "| 2026-10-11 | Anthropic | [Post 1](https://www.anthropic.com/news/p1) | Summary one. |",
+    );
+    // The model is numbered after the post; without its summary line it shows its description.
+    expect(report?.content).toContain(
+      "| [M](https://openrouter.ai/x/m) `x/m` | 2026-10-21 | 262K | A coding model. |",
+    );
+    // Two calls: the summaries, then Highlights over the rendered sections.
+    expect(generateBody).toHaveBeenCalledTimes(2);
+    const highlightsPrompt = generateBody.mock.calls[1]![0] as string;
+    expect(highlightsPrompt).toContain("You are the editor of AI Models & Labs");
+    expect(highlightsPrompt).toContain("## New on OpenRouter");
+    expect(highlightsPrompt).toContain("| [Story 1](https://example.com/1) |");
+  });
+
+  it("shows at most LAB_POSTS_MAX posts, newest first, then how many more came in", async () => {
+    stub();
+    const posts = Array.from({ length: LAB_POSTS_MAX + 2 }, (_, i) =>
+      post(i, i % 2 ? "openai" : "anthropic"),
+    );
+    const report = await build([site(posts)], catalog());
+    const rows = report!.content.split("\n").filter((l) => /^\| 2026-/.test(l));
+    expect(rows).toHaveLength(LAB_POSTS_MAX);
+    expect(rows.map((r) => r.slice(2, 12))).toEqual(
+      rows
+        .map((r) => r.slice(2, 12))
+        .sort()
+        .reverse(),
+    );
+    expect(report?.content).toContain("2 more posts not shown.");
+    expect(report?.content).toContain("> Lab posts: 17 |");
+  });
+
+  it("shows one line with the count on a first crawl, with no summaries call for the posts", async () => {
+    stub();
+    const report = await build([site([post(1), post(2)], { isFirstRun: true })], catalog());
+    expect(report?.content).toContain(
+      "## Lab announcements\n\nFirst crawl of Anthropic: 400 posts recorded; new posts are listed from the next run.",
+    );
+    expect(report?.content).not.toContain("| Date | Lab |");
+    expect(generateBody).toHaveBeenCalledTimes(1);
+  });
+
+  it("lists the other lab's posts when one site is on its first crawl", async () => {
+    stub();
+    const report = await build(
+      [
+        site([post(1), post(2)], { isFirstRun: true }),
+        site([post(3, "openai")], { site: "openai", totalDiscovered: 50 }),
+      ],
+      catalog(),
+    );
+    const content = report!.content;
+    expect(content).toContain("| Date | Lab |");
+    expect(content.split("\n").filter((l) => /^\| 2026-/.test(l))).toHaveLength(1);
+    expect(content).toContain(
+      "First crawl of Anthropic: 400 posts recorded; new posts are listed from the next run.",
+    );
+    expect(content).not.toContain("No new posts today.");
+    expect(content).toContain("> Lab posts: 1 |");
+  });
+
+  it("is skipped without an LLM call when nothing is new, and still saves the web state", async () => {
+    stub();
+    saveWebState.mockClear();
+    const old = { id: "stealth/a", name: "A", created: "2026-10-01", expires: null };
+    const stateFile = path.join(dir, "skipped.json");
+    expect(await build([site([])], catalog({ stealth: [old] }), NO_SPOTTED, stateFile)).toBeNull();
+    expect(generateBody).not.toHaveBeenCalled();
+    expect(saveWebState).toHaveBeenCalledOnce();
+    expect(fs.existsSync(stateFile)).toBe(false);
+  });
+
+  it("is published for a 🆕 stealth model alone, or a Spotted row alone", async () => {
+    stub();
+    const fresh = { id: "stealth/b", name: "B", created: "2026-10-21", expires: null };
+    expect(await build([site([])], catalog({ stealth: [fresh] }))).not.toBeNull();
+    const spotted = { rows: [spottedRow(1, "models")], summaries: new Map<number, string>() };
+    const report = await build([site([])], null, spotted);
+    expect(report?.content).toContain("No new posts today.");
+    expect(report?.content).toContain("⚠️ OpenRouter model catalog unavailable.");
+  });
+
+  it("lists a new model again on a same-day re-run, but not the next day", async () => {
+    stub();
+    const stateFile = path.join(dir, "rerun.json");
+    const first = await build([site([])], catalog({ newModels: [model] }), NO_SPOTTED, stateFile);
+    expect(first?.content).toContain("`x/m`");
+    expect(JSON.parse(fs.readFileSync(stateFile, "utf-8")).reported).toEqual({ "x/m": "2026-10-22" });
+    const rerun = await build([site([])], catalog({ newModels: [model] }), NO_SPOTTED, stateFile);
+    expect(rerun?.content).toContain("`x/m`");
+    const nextDay = await build(
+      [site([])],
+      catalog({ newModels: [model] }),
+      NO_SPOTTED,
+      stateFile,
+      "2026-10-23",
+      NOW + 86_400_000,
+    );
+    expect(nextDay).toBeNull();
   });
 });
 
@@ -283,30 +631,41 @@ describe("buildPolicyReport", () => {
     generateBody.mockImplementation(async (prompt: string) =>
       prompt.includes("`N: <2 sentences>`")
         ? "1: The AI Office published guidelines."
-        : "## Highlights\n\nH.\n\n<!-- tables -->\n\n## Signals\n\nS.\n\n## Worth a Look\n\n- W",
+        : "## Highlights\n\nH.",
     );
     const file = path.join(dir, "state.json");
     const report = await buildPolicyReport(data([item]), "00:00", "2026-10-14", file);
     expect(report?.id).toBe("ai-policy");
-    expect(report?.content).toContain("# Policy Watch 2026-10-14");
+    expect(report?.content).toContain("# AI Policy 2026-10-14");
     expect(report?.content).toContain(
       "H.\n\n## EU\n\n| Date | Source | Title | Stage | Summary |\n| :--- | :--- | :--- | :--- | :--- |\n" +
-        "| 2026-10-09 | European Commission | [AI Act guidelines](https://example.eu/a) |  | The AI Office published guidelines. |\n\n## Signals",
+        "| 2026-10-09 | European Commission | [AI Act guidelines](https://example.eu/a) |  | The AI Office published guidelines. |",
     );
     expect(JSON.parse(fs.readFileSync(file, "utf-8"))).toEqual({ reported: { g1: "2026-10-14" } });
   });
 
-  it("puts the upcoming deadlines between the jurisdiction tables and the news", async () => {
-    generateBody.mockImplementation(async () => "## Highlights\n\nH.\n\n<!-- tables -->\n\n## Signals\n\nS.");
+  it("reads Highlights, the jurisdictions, News & commentary, then Coming up with its window line", async () => {
+    generateBody.mockImplementation(async (prompt: string) =>
+      prompt.includes("`N: <2 sentences>`") ? "1: S.\n2: N." : "## Highlights\n\nH.",
+    );
+    const nl = { ...item, id: "nl1", jurisdiction: "nl" as const };
     const news = { ...item, id: "n1", title: "Op-ed", news: true };
     const report = await buildPolicyReport(
-      { ...data([item, news]), deadlines: [deadline] },
+      { ...data([item, nl, news]), deadlines: [deadline] },
       "00:00",
       "2026-10-14",
       path.join(dir, "deadlines.json"),
     );
-    expect(report?.content).toMatch(
-      /## EU\n[\s\S]*\n\n## Upcoming deadlines \(next 30 days\)\n[\s\S]*\| 2026-11-09 \| Have your say \| \[AI Act implementing act\]\(https:\/\/x\.eu\) \|\n\n## News & commentary\n[\s\S]*Op-ed[\s\S]*\n\n## Signals/,
+    expect(headings(report!.content)).toEqual([
+      "Highlights",
+      "EU",
+      "Netherlands",
+      "News & commentary",
+      "Coming up",
+    ]);
+    expect(report?.content).toContain(
+      "## Coming up\n\nDeadlines and dates in the next 30 days.\n\n| Date | Source | Item |\n| :--- | :--- | :--- |\n" +
+        "| 2026-11-09 | Have your say | [AI Act implementing act](https://x.eu) |",
     );
   });
 
@@ -335,15 +694,13 @@ describe("buildPolicyReport", () => {
 
   it("is written on a day with only news, which gets its own section after the jurisdiction tables", async () => {
     generateBody.mockImplementation(async (prompt: string) =>
-      prompt.includes("`N: <2 sentences>`")
-        ? "1: Politico reports."
-        : "## Highlights\n\nH.\n\n<!-- tables -->\n\n## Signals\n\nS.",
+      prompt.includes("`N: <2 sentences>`") ? "1: Politico reports." : "## Highlights\n\nH.",
     );
     const news = { ...item, id: "n1", source: "Politico Europe", news: true };
     const report = await buildPolicyReport(data([news]), "00:00", "2026-10-14", path.join(dir, "news.json"));
     expect(report?.content).toContain(
       "H.\n\n## News & commentary\n\n| Date | Source | Title | Summary |\n| :--- | :--- | :--- | :--- |\n" +
-        "| 2026-10-09 | Politico Europe | [AI Act guidelines](https://example.eu/a) | Politico reports. |\n\n## Signals",
+        "| 2026-10-09 | Politico Europe | [AI Act guidelines](https://example.eu/a) | Politico reports. |",
     );
     expect(report?.content).not.toContain("## EU");
   });
@@ -358,7 +715,7 @@ describe("buildDataReport", () => {
   const stateFile = path.join(dir, "data-state.json");
   const verdictsFile = path.join(dir, "data-verdicts.json");
   const build = (s: DataSection[], vendor: VendorData = vendorOf([]), dataLaw: PolicyItem[] = []) =>
-    buildDataReport(s, vendor, dataLaw, "00:00", "2026-10-17", stateFile, verdictsFile);
+    buildDataReport(s, vendor, dataLaw, NO_SPOTTED, "00:00", "2026-10-17", stateFile, verdictsFile);
 
   const project = (name: string, active: boolean): ProjectActivity => ({
     config: { id: name.toLowerCase(), repo: `org/${name.toLowerCase()}`, name },
@@ -380,7 +737,7 @@ describe("buildDataReport", () => {
   const reply = (prompt: string) => {
     if (prompt.startsWith("You summarize data platform")) return "1: Retiring soon.\n3: Snowflake note.";
     if (prompt.startsWith("You are the editor")) return PROSE;
-    return `## Overview\nText.\n\n${["Delta", "Polaris", "DuckDB"]
+    return `${["Delta", "Polaris", "DuckDB"]
       .filter((n) => prompt.includes(`## ${n} (github.com`))
       .map((n) => `## ${n}\n- Released v1.`)
       .join("\n\n")}`;
@@ -431,10 +788,10 @@ describe("buildDataReport", () => {
     const report = await build(sections(false));
     const content = report!.content;
     expect(report!.id).toBe("ai-data");
-    expect(content).toMatch(/^# Data Engineering Watch 2026-10-17\n/);
+    expect(content).toMatch(/^# Data Engineering 2026-10-17\n/);
     expect(content.indexOf("## Highlights")).toBeLessThan(content.indexOf("## Databricks"));
     expect(content.indexOf("## Databricks")).toBeLessThan(content.indexOf("## Open-source stack"));
-    // The model wrote one; code writes it only for data-law links.
+    // The model wrote one; code drops it.
     expect(content).not.toContain("## Worth a Look");
     // 2026-10-19..21: "Active today: 0" and no sign the stack was tracked at all.
     expect(content).toContain("## Snowflake\n\n**Quiet today:** [Polaris](https://github.com/org/polaris)");
@@ -446,6 +803,33 @@ describe("buildDataReport", () => {
     expect(content).toContain("Projects: 4 | Active today: 2");
     // Two repo sections and the prose; no vendor items, so no summaries call.
     expect(generateBody).toHaveBeenCalledTimes(3);
+  });
+
+  it("has news from a vendor item, a release of the week no report showed or an active project", () => {
+    const weekOnly: DataSection[] = [
+      {
+        key: "data_stack",
+        subject: "oss",
+        activities: [
+          {
+            ...project("Trino", false),
+            weekReleases: [
+              { tag_name: "484", name: "484", published_at: "2026-10-14T00:00:00Z", prerelease: false },
+            ],
+          },
+        ],
+      },
+    ];
+    const shownBefore = {
+      ...vendorOf([]),
+      nextState: { reported: { "release:org/trino@484": "2026-10-15" } },
+    };
+    expect(hasDataNews(sections(false, false), vendorOf([]), "2026-10-17")).toBe(false);
+    const kept = { ...vendorItem("a", {}), deprecation: false, aiInData: false, n: 1 };
+    expect(hasDataNews(sections(false, false), vendorOf([kept]), "2026-10-17")).toBe(true);
+    expect(hasDataNews(sections(true, false), vendorOf([]), "2026-10-17")).toBe(true);
+    expect(hasDataNews(weekOnly, vendorOf([]), "2026-10-17")).toBe(true);
+    expect(hasDataNews(weekOnly, shownBefore, "2026-10-17")).toBe(false);
   });
 
   it("is skipped without an LLM call when there are no vendor items and no repo activity", async () => {
@@ -537,7 +921,7 @@ describe("buildDataReport", () => {
     expect(content).toContain("## Highlights\n- H.");
   });
 
-  it("puts Across platforms after the tables and before Worth a Look, and leaves it out when absent", async () => {
+  it("puts Across platforms after the tables and before EU data law, and leaves it out when absent", async () => {
     generateBody.mockReset();
     const across =
       "## Highlights\n- H.\n\n<!-- tables -->\n\n## Across platforms\n\n- Governance tagging: Snowflake GA,\n  Databricks GA.\n\n---\n\nNote, outside the report: a row needs checking.\n\n## Data × AI\n- X.";
@@ -554,7 +938,7 @@ describe("buildDataReport", () => {
     expect(content).not.toContain("Note, outside the report");
     expect(at("## Open-source stack")).toBeLessThan(at("## Across platforms"));
     expect(at("## Azure / Fabric & GCP")).toBeLessThan(at("## Across platforms"));
-    expect(at("## Across platforms")).toBeLessThan(at("## Worth a Look"));
+    expect(at("## Across platforms")).toBeLessThan(at("## EU data law"));
     expect(content).not.toContain("Data × AI");
 
     generateBody.mockImplementation(async (prompt: string) => reply(prompt));
@@ -621,6 +1005,52 @@ describe("buildDataReport", () => {
     expect(table).not.toContain("Gone");
     // Today's summary is saved with the end date, for the later report days.
     expect(JSON.parse(fs.readFileSync(stateFile, "utf-8")).actions["dbx-old"].summary).toBe("Retiring soon.");
+  });
+
+  it("reads Highlights, Action required, the vendor and repo sections, Across platforms, Spotted, then EU data law", async () => {
+    generateBody.mockReset();
+    generateBody.mockImplementation(async (prompt: string) =>
+      prompt.startsWith("You are the editor")
+        ? "## Highlights\n- H.\n\n<!-- tables -->\n\n## Across platforms\n\n- Tagging on two platforms."
+        : reply(prompt),
+    );
+    const data = await vendorData();
+    const vendor: VendorData = {
+      ...data,
+      nextState: {
+        reported: {},
+        actions: { a: { date: "2026-12-01", title: "T", link: "https://x", source: "S" } },
+      },
+    };
+    const s = sections(true);
+    s[2]!.activities[0] = {
+      ...s[2]!.activities[0]!,
+      weekReleases: [weekRelease("v2.0.0", "2026-10-14T09:00:00Z")],
+    };
+    const policy = [policyItem("nis2", "NIS2 implementing act adopted")];
+    const spotted = { rows: [spottedRow(1, "data")], summaries: new Map([[1, "A story."]]) };
+    const report = await buildDataReport(
+      s,
+      vendor,
+      dataLawOf(policy),
+      spotted,
+      "00:00",
+      "2026-10-17",
+      stateFile,
+      verdictsFile,
+    );
+    expect(headings(report!.content)).toEqual([
+      "Highlights",
+      "Action required",
+      "Databricks",
+      "Snowflake",
+      "Azure / Fabric & GCP",
+      "Open-source stack",
+      "Releases this week",
+      "Across platforms",
+      "Spotted",
+      "EU data law",
+    ]);
   });
 
   it("leaves a release of the last 24h to its repo section, and records it as shown", async () => {
@@ -735,6 +1165,7 @@ describe("buildDataReport", () => {
       releasedThisWeek(),
       { ...vendorOf([]), nextState: state },
       [],
+      NO_SPOTTED,
       "00:00",
       "2026-10-18",
       stateFile,
@@ -746,7 +1177,7 @@ describe("buildDataReport", () => {
     expect(again!.content).toContain("## Releases this week");
   });
 
-  it("leaves the failure notice in Highlights and no Worth a Look when the prose call fails", async () => {
+  it("leaves the failure notice in Highlights and no EU data law when the prose call fails", async () => {
     generateBody.mockReset();
     generateBody.mockImplementation(async (prompt: string) => {
       if (prompt.startsWith("You are the editor")) throw new Error("HTTP 504");
@@ -754,7 +1185,7 @@ describe("buildDataReport", () => {
     });
     const content = (await build(sections(false), await vendorData()))!.content;
     expect(content).toContain(`## Highlights\n\n${MSG.summaryFailed}`);
-    expect(content).not.toContain("## Worth a Look");
+    expect(content).not.toContain("## EU data law");
     expect(content).toContain("## Databricks");
   });
 
@@ -771,7 +1202,7 @@ describe("buildDataReport", () => {
   });
   const dataLawOf = (items: PolicyItem[]) => items.filter((i) => isDataLaw(i, ["Data Act", "NIS2"]));
 
-  it("links the data-law policy items, and only those, at the end of Worth a Look", async () => {
+  it("links the data-law policy items, and only those, under EU data law", async () => {
     generateBody.mockReset();
     generateBody.mockImplementation(async (prompt: string) => reply(prompt));
     const policy = [
@@ -780,12 +1211,12 @@ describe("buildDataReport", () => {
     ];
     const content = (await build(sections(false), vendorOf([]), dataLawOf(policy)))!.content;
     expect(content).toContain(
-      "## Worth a Look\n\n- [Data Act: guidance on smart contracts](https://example.eu/data-act) — Policy Watch, Guidance",
+      "## EU data law\n\n- [Data Act: guidance on smart contracts](https://example.eu/data-act) — AI Policy, Guidance",
     );
     expect(content).not.toContain("https://example.eu/ai-act");
   });
 
-  it("gives the data-law links their own Worth a Look when the prose call fails", async () => {
+  it("keeps the EU data law links when the prose call fails", async () => {
     generateBody.mockReset();
     generateBody.mockImplementation(async (prompt: string) => {
       if (prompt.startsWith("You are the editor")) throw new Error("HTTP 504");
@@ -794,7 +1225,7 @@ describe("buildDataReport", () => {
     const policy = [policyItem("nis2", "NIS2 implementing act adopted")];
     const content = (await build(sections(false), vendorOf([]), dataLawOf(policy)))!.content;
     expect(content).toContain(
-      "## Worth a Look\n\n- [NIS2 implementing act adopted](https://example.eu/nis2) — Policy Watch",
+      "## EU data law\n\n- [NIS2 implementing act adopted](https://example.eu/nis2) — AI Policy",
     );
   });
 

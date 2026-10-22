@@ -372,12 +372,10 @@ const TRUNCATION_NOTICE =
 /** GitHub label colors by label name. Default: "0075ca". */
 const LABEL_COLORS: Record<string, string> = {
   agents: "e11d48",
-  trending: "f9a825",
-  hn: "ff6600",
-  arxiv: "b31b1b",
-  hf: "ff9d00",
+  models: "7c3aed",
   policy: "1d4ed8",
   data: "0d9488",
+  trends: "f9a825",
 };
 
 /**
@@ -424,6 +422,21 @@ const DIGEST_ISSUE_LABELS = new Set([
   "infra-en",
   "community",
   "community-en",
+  // Retired in October 2026: Hacker News, Dev.to and Lobste.rs went to each
+  // page's Spotted section, the lab posts to the models page. Daily, like infra.
+  "hn",
+  "hn-en",
+  "web",
+  "web-en",
+  // Retired in October 2026: trending and the weekly models report became the
+  // weekly Trends page, the daily arXiv report its Research section. Their
+  // labels fall in the daily group, so the next run closes their last issues.
+  "trending",
+  "trending-en",
+  "hf",
+  "hf-en",
+  "arxiv",
+  "arxiv-en",
   "weekly",
   "weekly-en",
   "monthly",

@@ -6,7 +6,6 @@ import {
   isSitemapIndex,
   extractTitle,
   extractText,
-  urlCategory,
   titleFromUrl,
   emptyState,
 } from "../sources/web.ts";
@@ -161,26 +160,6 @@ describe("extractText", () => {
 });
 
 // ---------------------------------------------------------------------------
-// urlCategory
-// ---------------------------------------------------------------------------
-
-describe("urlCategory", () => {
-  it("returns first path segment", () => {
-    expect(urlCategory("https://anthropic.com/news/some-article")).toBe("news");
-    expect(urlCategory("https://openai.com/research/gpt-5")).toBe("research");
-  });
-
-  it("returns 'article' for root URLs", () => {
-    expect(urlCategory("https://example.com/")).toBe("article");
-    expect(urlCategory("https://example.com")).toBe("article");
-  });
-
-  it("returns 'article' for invalid URLs", () => {
-    expect(urlCategory("not a url")).toBe("article");
-  });
-});
-
-// ---------------------------------------------------------------------------
 // titleFromUrl
 // ---------------------------------------------------------------------------
 
@@ -227,15 +206,85 @@ describe("fetchSiteContent", () => {
     vi.spyOn(console, "log").mockImplementation(() => {});
     vi.spyOn(console, "error").mockImplementation(() => {});
     vi.spyOn(globalThis, "fetch").mockRejectedValue(new TypeError("fetch failed"));
-    // Anthropic's single sitemap: OpenAI's sub-sitemaps each fail on their own, without a throw.
-    const result = await fetchSiteContent("anthropic", emptyState());
+    const result = await fetchSiteContent("anthropic", emptyState(), "2026-10-23");
     expect(result).toEqual({
       site: "anthropic",
-      siteName: "Anthropic (Claude)",
       isFirstRun: false,
       newItems: [],
       totalDiscovered: 0,
       fetchSuccess: false,
     });
+  });
+
+  /** Anthropic's sitemap with these paths; every other URL is a post page. */
+  function serveSitemap(...paths: string[]) {
+    vi.spyOn(console, "log").mockImplementation(() => {});
+    const urls = paths.map(
+      (p) => `<url><loc>https://www.anthropic.com${p}</loc><lastmod>2026-10-22</lastmod></url>`,
+    );
+    vi.spyOn(globalThis, "fetch").mockImplementation(async (input) =>
+      String(input).endsWith("/sitemap.xml")
+        ? new Response(`<urlset>${urls.join("")}</urlset>`)
+        : new Response("<title>A post</title><p>Its text.</p>"),
+    );
+  }
+  const newUrls = (r: { newItems: { url: string }[] }) => r.newItems.map((i) => i.url);
+
+  it("lists a run's new posts again on a same-day re-run, and not the next day", async () => {
+    serveSitemap("/news/a", "/news/b");
+    const state = emptyState();
+    state.anthropic.seenUrls = { "https://www.anthropic.com/news/a": "2026-10-21" };
+    const b = ["https://www.anthropic.com/news/b"];
+    expect(newUrls(await fetchSiteContent("anthropic", state, "2026-10-23"))).toEqual(b);
+    expect(newUrls(await fetchSiteContent("anthropic", state, "2026-10-23"))).toEqual(b);
+    expect(newUrls(await fetchSiteContent("anthropic", state, "2026-10-24"))).toEqual([]);
+  });
+
+  it("keeps a first crawl a first crawl on a same-day re-run, so the page shows its count line again", async () => {
+    serveSitemap("/news/a", "/news/b");
+    const state = emptyState();
+    expect((await fetchSiteContent("anthropic", state, "2026-10-23")).isFirstRun).toBe(true);
+    const rerun = await fetchSiteContent("anthropic", state, "2026-10-23");
+    expect(rerun).toMatchObject({ isFirstRun: true, totalDiscovered: 2 });
+    expect((await fetchSiteContent("anthropic", state, "2026-10-24")).isFirstRun).toBe(false);
+  });
+
+  /** OpenAI's sub-sitemaps: `served` maps a sub-sitemap's name to its paths; every other one answers 404. */
+  function serveSubSitemaps(served: Record<string, string[]>) {
+    vi.spyOn(console, "log").mockImplementation(() => {});
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    vi.spyOn(globalThis, "fetch").mockImplementation(async (input) => {
+      const paths = served[String(input).match(/sitemap\.xml\/([^/]+)\/$/)?.[1] ?? ""];
+      if (!paths) return new Response("", { status: 404 });
+      return new Response(
+        `<urlset>${paths.map((p) => `<url><loc>https://openai.com${p}</loc></url>`).join("")}</urlset>`,
+      );
+    });
+  }
+
+  it("keeps the day's new posts through a same-day re-run whose sub-sitemap failed", async () => {
+    const state = emptyState();
+    state.openai.seenUrls = { "https://openai.com/index/a": "seen" };
+    const b = ["https://openai.com/index/b"];
+    serveSubSitemaps({ research: ["/index/b"], release: ["/index/a"] });
+    expect(newUrls(await fetchSiteContent("openai", state, "2026-10-23"))).toEqual(b);
+    serveSubSitemaps({ release: ["/index/a"] });
+    expect(newUrls(await fetchSiteContent("openai", state, "2026-10-23"))).toEqual(b);
+    serveSubSitemaps({ research: ["/index/b"], release: ["/index/a"] });
+    expect(newUrls(await fetchSiteContent("openai", state, "2026-10-23"))).toEqual(b);
+  });
+
+  it("fails the fetch when every sub-sitemap fails, and leaves the state as it was", async () => {
+    const state = emptyState();
+    state.openai.seenUrls = { "https://openai.com/index/a": "seen" };
+    serveSubSitemaps({ research: ["/index/b"] });
+    await fetchSiteContent("openai", state, "2026-10-23");
+    const before = structuredClone(state);
+    serveSubSitemaps({});
+    expect(await fetchSiteContent("openai", state, "2026-10-23")).toMatchObject({
+      fetchSuccess: false,
+      newItems: [],
+    });
+    expect(state).toEqual(before);
   });
 });

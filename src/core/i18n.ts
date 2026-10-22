@@ -12,7 +12,6 @@ export const MSG = {
   projectsNoActivity: "No stable releases, hot issues or news items today.",
   summaryFailed: "⚠️ Summary generation failed.",
   skillsFailed: "⚠️ Skills summary generation failed.",
-  trendingFailed: "⚠️ Trending report generation failed.",
 } as const;
 
 // ---------------------------------------------------------------------------
@@ -29,13 +28,10 @@ export const MSG = {
 // In reading order: the report bar and the sidebar list them this way.
 export const REPORTS = {
   "ai-agents": { emoji: "🤖", name: "AI Agents", label: "agents" },
-  "ai-hn": { emoji: "💬", name: "AI Discussions", label: "hn" },
-  "ai-arxiv": { emoji: "📚", name: "AI Research", label: "arxiv" },
-  "ai-web": { emoji: "🌐", name: "Lab Announcements", label: "web" },
-  "ai-policy": { emoji: "⚖️", name: "Policy Watch", label: "policy" },
-  "ai-data": { emoji: "🗄️", name: "Data Engineering Watch", label: "data" },
-  "ai-trending": { emoji: "📈", name: "Agent & AI Coding Trends", label: "trending" },
-  "ai-hf": { emoji: "🧠", name: "AI Models", label: "hf" },
+  "ai-models": { emoji: "🧠", name: "AI Models & Labs", label: "models" },
+  "ai-policy": { emoji: "⚖️", name: "AI Policy", label: "policy" },
+  "ai-data": { emoji: "🗄️", name: "Data Engineering", label: "data" },
+  "ai-trends": { emoji: "📈", name: "Trends", label: "trends" },
 } as const satisfies Record<string, { emoji: string; name: string; label: string }>;
 
 export type ReportId = keyof typeof REPORTS;
@@ -46,7 +42,7 @@ export const LIVE_REPORT_IDS = Object.keys(REPORTS) as ReportId[];
  * rest are daily. The one list: the issue retention groups (github.ts) and the
  * sidebar's "This week" group (manifest.json `weekly`) derive from it.
  */
-export const WEEKLY_REPORT_IDS: ReportId[] = ["ai-trending", "ai-hf"];
+export const WEEKLY_REPORT_IDS: ReportId[] = ["ai-trends"];
 
 /** A report file's H1. */
 export const reportHeading = (id: ReportId, dateStr: string) => `# ${REPORTS[id].name} ${dateStr}`;
@@ -66,54 +62,56 @@ export const PROJECT_SCOPE = { window: "last 24h", period: "today" } as const;
 
 const SOURCES = "Sources:";
 
-/** The meta line under every report's H1 (the web report adds a source list). */
+/** The meta line under every report's H1. */
 export const REPORT_META = {
-  sourcesHeader: SOURCES,
   sources: (list: string) => `${SOURCES} ${list}`,
   generated: (utcStr: string) => `Generated: ${utcStr} UTC`,
-  /** After a listing's item count when Jev ordered it (ArXiv, policy). */
+  /** After a listing's item count when Jev ordered it (policy). */
   jevRanked: " ranked by [Jev](https://typesafe.ai) relevance",
 } as const;
 
 /** The report bar's first link: the day's overview of every report's highlights. */
 export const OVERVIEW = { emoji: "📅", name: "Overview" } as const;
 
-export const WEB_REPORT = {
-  firstCrawl: "First full crawl",
-  todayUpdate: "Today's update",
-  newContent: (count: number) => `New content: ${count} articles`,
-  sourceCounts: (count: number, total: number) => `${count} new articles (sitemap total: ${total})`,
-  // A failed sitemap fetch would otherwise read "0 new articles (sitemap total: 0)".
-  sourceFailed: "fetch failed",
-  anthropicHeading: "Anthropic",
-  openaiHeading: "OpenAI",
-  // First full crawl only.
-  landscapeHeading: "Content Landscape Overview",
-  issueTitle: (dateStr: string, isFirstRun: boolean) =>
-    `${reportIssueTitle("ai-web", dateStr)}${isFirstRun ? " (First Crawl)" : ""}`,
+/** The dated items of the next 30 days from every page (coming-up.json), on the Overview and in Telegram. */
+export const COMING_UP = {
+  heading: "Coming up",
+  stealthTitle: (name: string) => `${name} (stealth model) expires`,
+  stealthSource: "OpenRouter",
 } as const;
 
 /**
- * Section headings every listing report shares: Highlights → tables → Signals
- * → Worth a Look. Until October 2026 each prompt named its own ("Today's
- * Highlights" in a weekly report, "Research Trend Signal", "Community Pulse",
- * "Worth Deep Reading", "Worth Exploring", …).
+ * Section headings of the LLM-written reports: every page opens with
+ * Highlights; the weekly Trends page ends in Signals, the one place for trend
+ * claims. Until October 2026 each prompt named its own ("Today's Highlights"
+ * in a weekly report, "Research Trend Signal", "Community Pulse", …).
  */
 export const SECTIONS = {
   highlights: "Highlights",
   signals: "Signals",
-  worthALook: "Worth a Look",
 } as const;
 
-// Weekly since October 2026.
-export const TRENDING_REPORT = {
-  sources: "GitHub Trending + GitHub Search API + OpenRouter + npm",
+// Weekly: what is moving. The prose call writes Highlights and Signals around the rest.
+export const TRENDS_REPORT = {
+  sources:
+    "GitHub Trending + GitHub Search API + OpenRouter + npm + Hugging Face + arXiv + Hacker News + Lobste.rs + Dev.to",
+  agentsHeading: "Agents & coding tools",
   skillsHeading: "Claude Code Skills",
   skillsSource: (repo: string) => `> Source: [${repo}](https://github.com/${repo})`,
-  // Tables rendered in code (renderTrendingTables); the prose headings are handed to the LLM.
+  /** Code only: 🔥 GitHub repos in no config.yml section, with the lines to add. */
+  candidatesHeading: "Candidates to track",
+  candidatesIntro:
+    "These repos trended two weeks in a row (🔥) and are not tracked. To track one, add its lines to `config.yml`.",
+  candidatesSection: (key: string) => `\`${key}.repos\`:`,
+  modelsHeading: "Models",
+  openRouterHeading: "OpenRouter usage",
+  hfHeading: "Hugging Face trending",
+  researchHeading: "Research",
+  researchTableHeader: "| Paper | Summary |\n| :--- | :--- |",
+  mostDiscussedHeading: "Most discussed",
+  // Tables rendered in code (renderTrendingTables), one `##` per table, nested under agentsHeading.
   radarHeading: "🚀 Agent & Coding Tool Radar",
   radarHeader: "| Tool | Source | Signal | Summary |\n| :--- | :--- | :--- | :--- |",
-  categoriesHeading: "Top Projects by Category",
   categoryHeader:
     "| Project | Lang | Stars (total / this week, %) | Summary |\n| :--- | :--- | ---: | :--- |",
   categoryTitles: {
@@ -125,16 +123,15 @@ export const TRENDING_REPORT = {
   },
 } as const;
 
-// The discussions report's per-source sections; Dev.to and Lobste.rs on the weekly run only.
-export const DISCUSSIONS_REPORT = {
-  hnHeading: "Hacker News",
-  devtoHeading: "Dev.to",
-  lobstersHeading: "Lobste.rs",
-} as const;
-
-export const ARXIV_REPORT = {
-  source: "[ArXiv](https://arxiv.org/) (cs.AI, cs.CL, cs.LG)",
-  papersHeading: "Key Papers",
+// Community stories routed by topic (src/spotted/), rendered in code on their topic's page.
+export const SPOTTED = {
+  heading: "Spotted",
+  tableHeader: "| Story | Source | Discussion | Summary |\n| :--- | :--- | :--- | :--- |",
+  /** The Source column, and the source of a story matched as project news. */
+  sources: { hn: "Hacker News", lobsters: "Lobste.rs", devto: "Dev.to" },
+  /** The Discussion cell, e.g. "312 points, 95 comments"; a Dev.to story's points are reactions. */
+  counts: (source: "hn" | "lobsters" | "devto", points: number, comments: number) =>
+    `${points} ${source === "devto" ? "reactions" : "points"}, ${comments} comments`,
 } as const;
 
 // Daily: AI legislation, regulation and official guidance. The table is rendered in code.
@@ -149,7 +146,9 @@ export const POLICY_REPORT = {
   } satisfies Record<Jurisdiction, string>,
   // Stage is empty for items from the regular news feeds.
   tableHeader: "| Date | Source | Title | Stage | Summary |\n| :--- | :--- | :--- | :--- | :--- |",
-  deadlinesHeading: "Upcoming deadlines (next 30 days)",
+  /** The last section: open deadlines and calendar dates of the next 30 days (src/policy/deadlines.ts). */
+  deadlinesHeading: "Coming up",
+  deadlinesWindow: "Deadlines and dates in the next 30 days.",
   deadlinesHeader: "| Date | Source | Item |\n| :--- | :--- | :--- |",
   /** The source column of a config.yml `policy.calendar` date. */
   calendarSource: "Calendar",
@@ -187,17 +186,34 @@ export const DATA_REPORT = {
   actionTableHeader: "| Date | Platform | Item | What to do |\n| :--- | :--- | :--- | :--- |",
   /** Marks an AI feature in a data platform (`aiInData`) in the Item cell. */
   aiMarker: "🤖",
+  /** The last section, code only: links to today's AI Policy items that are EU data law. */
+  dataLawHeading: "EU data law",
   noNewItems: "No vendor items, releases, hot issues or news in the tracked data projects, skipping report.",
 } as const;
 
-// Weekly: Hugging Face trending models plus OpenRouter token usage, which
-// moved here from the trending report in October 2026.
-export const MODELS_REPORT = {
-  hfHeading: "Hugging Face Trending",
-  openRouterHeading: "OpenRouter Usage",
+// Daily: Anthropic and OpenAI posts, models newly listed on OpenRouter, stealth models, Spotted.
+export const MODELS_PAGE = {
+  labHeading: "Lab announcements",
+  labTableHeader: "| Date | Lab | Post | Summary |\n| :--- | :--- | :--- | :--- |",
+  /** The Lab column. */
+  labs: { anthropic: "Anthropic", openai: "OpenAI" },
+  /** Below the table when more new posts came in than it shows. */
+  morePosts: (n: number) => `${n} more posts not shown.`,
+  /** A lab's line on its first crawl, when every URL in its sitemaps is new. */
+  firstCrawl: (lab: string, n: number) =>
+    `First crawl of ${lab}: ${n} posts recorded; new posts are listed from the next run.`,
+  noPosts: "No new posts today.",
+  siteFailed: (lab: string) => `⚠️ ${lab}: sitemap fetch failed.`,
+  modelsHeading: "New on OpenRouter",
+  modelsTableHeader: "| Model | Listed | Context | Summary |\n| :--- | :--- | :--- | :--- |",
+  noModels: "No new models listed today.",
+  catalogUnavailable: "⚠️ OpenRouter model catalog unavailable.",
+  counts: (posts: number, models: number, spotted: number) =>
+    `Lab posts: ${posts} | New models: ${models} | Spotted: ${spotted}`,
+  noContent: "No lab posts, new models, new stealth models or Spotted stories, skipping report.",
 } as const;
 
-// Rendered daily at the top of the agents report (buildStealthSection).
+// Rendered daily on the models page (buildStealthSection).
 export const STEALTH_SECTION = {
   title: "🕵️ Stealth Models on OpenRouter",
   none: "No stealth models listed on OpenRouter today.",
@@ -224,17 +240,23 @@ export const FOOTER = {
 
 export const REPORT_LABELS: Record<string, string> = {
   ...Object.fromEntries(LIVE_REPORT_IDS.map((id) => [id, REPORTS[id].name])),
-  // Weekly until October 2026, then folded into ai-agents. The older files
-  // cover inference engines, hence the label.
+  // No longer generated: listed so archived reports stay reachable from the
+  // sidebar and RSS feed (REPORT_FILES) with a title. October 2026: ai-hn
+  // (the daily Hacker News, Dev.to and Lobste.rs stories) moved to each page's
+  // Spotted section and ai-web to ai-models; ai-trending, ai-hf and ai-arxiv
+  // became sections of the weekly Trends page; ai-infra (weekly, its older
+  // files cover inference engines, hence the label) and ai-cli were folded into
+  // ai-agents, ai-community into ai-hn, and ai-ph dropped. The weekly and
+  // monthly rollups were removed earlier.
+  "ai-hn": "AI Discussions",
+  "ai-web": "Lab Announcements",
+  "ai-trending": "Agent & AI Coding Trends",
+  "ai-hf": "AI Models",
+  "ai-arxiv": "AI Research",
   "ai-infra": "AI Infrastructure Digest",
-  // Weekly until October 2026, then folded into the discussions report (ai-hn).
   "ai-community": "Tech Community AI Digest",
-  // No longer generated (October 2026: ai-cli merged into ai-agents, ai-ph
-  // dropped); kept so archived reports keep a title.
   "ai-cli": "AI CLI Tools Digest",
   "ai-ph": "Product Hunt AI Products Digest",
-  // Weekly/monthly rollups are no longer generated; kept so archived reports
-  // still render a proper title in the sidebar and RSS feed.
   "ai-weekly": "AI Tools Weekly Digest",
   "ai-monthly": "AI Tools Monthly Digest",
 };

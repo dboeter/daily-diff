@@ -1,5 +1,5 @@
 /**
- * Plain HTTP for the Policy Watch sources and RSS feeds: one User-Agent, one
+ * Plain HTTP for the AI Policy sources and RSS feeds: one User-Agent, one
  * timeout and one error shape. A hung source would otherwise stall the
  * 40-minute job, so every request is aborted after FETCH_TIMEOUT_MS.
  */

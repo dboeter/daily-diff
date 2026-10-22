@@ -6,7 +6,6 @@
 
 import { fetchOpenRouterData, type OpenRouterData } from "../sources/openrouter.ts";
 import { fetchNpmData, type NpmData } from "./npm.ts";
-import { promotedRecord } from "./promoted.ts";
 import { fetchWeeklyStarGain, GitHubApiError, githubGet, searchSlot } from "../core/github.ts";
 import {
   buildRadarCandidates,
@@ -85,7 +84,6 @@ export const EMPTY_OPENROUTER: OpenRouterData = {
   apps: [],
   topModels: [],
   topModelsDate: "",
-  newModels: [],
   fetchSuccess: false,
 };
 export const EMPTY_NPM: NpmData = { rising: [], top: [], fetchSuccess: false };
@@ -531,12 +529,6 @@ export async function composeTrendingReport(
     ...(rankingFile !== undefined ? { rankingFile } : {}),
     ...(nextMatches !== undefined ? { nextMatches } : {}),
     ...(nextCache ? { nextClassifications: nextCache } : {}),
-    nextStarHistory: nextStarHistory(
-      history,
-      githubRows,
-      dateStr,
-      reportedKeys(report),
-      promotedRecord(report, dateStr),
-    ),
+    nextStarHistory: nextStarHistory(history, githubRows, dateStr, reportedKeys(report)),
   };
 }

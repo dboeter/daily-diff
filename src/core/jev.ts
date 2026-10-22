@@ -1,6 +1,7 @@
 /**
- * TypeSafe Jev client, shared by ArXiv, trending, Policy Watch and the data
- * report's vendor feeds; `judgeItems` is the cached judgment of the last three.
+ * TypeSafe Jev client, shared by ArXiv, trending, AI Policy, the data report's
+ * vendor feeds and Spotted routing; `judgeItems` is the cached judgment of the
+ * last four (`routeStories`, `src/spotted/jev.ts`, for Spotted).
  *
  * Jev is not a chat model: POST /v1/systemone takes a `state` and typed
  * questions and returns probabilities. It is called directly rather than through
@@ -144,7 +145,8 @@ export function saveItemsFile(cache: ItemsFile<unknown>, file: string): void {
 }
 
 // ---------------------------------------------------------------------------
-// Cached judgments (Policy Watch, the data report's vendor items, trending classification)
+// Cached judgments (AI Policy, the data report's vendor items, trending classification,
+// Spotted routing)
 // ---------------------------------------------------------------------------
 
 /**
@@ -170,6 +172,13 @@ export interface VerdictEntry<A> {
 }
 
 export type VerdictCache<A> = ItemsFile<VerdictEntry<A>>;
+
+/** A Jev `choice` question's answer. */
+export interface ChoiceAnswer {
+  choice: string;
+  confidence: number;
+  probabilities: Record<string, number>;
+}
 
 /** Who decided a run's selection: Jev, or the caller's keyword fallback. */
 export type RankedBy = "jev" | "keywords";

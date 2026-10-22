@@ -1,5 +1,5 @@
 /**
- * The Policy Watch sources that are not RSS feeds (RSS feeds are config-driven:
+ * The AI Policy sources that are not RSS feeds (RSS feeds are config-driven:
  * config.yml `policy.feeds`). Adding a source = one module exporting a
  * `PolicySource["fetch"]`, one line in POLICY_SOURCES, and its config.
  */

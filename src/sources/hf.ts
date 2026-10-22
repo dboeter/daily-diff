@@ -29,7 +29,8 @@ export interface HfData {
 // Constants
 // ---------------------------------------------------------------------------
 
-const HF_FETCH_LIMIT = 30;
+/** Trends shows at most this many. */
+const HF_FETCH_LIMIT = 15;
 const API_URL = "https://huggingface.co/api/models";
 
 // ---------------------------------------------------------------------------

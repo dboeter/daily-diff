@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { toRfc822, escapeXml } from "../cli/generate-manifest.ts";
+import { toRfc822, escapeXml, selectFeedItems } from "../cli/generate-manifest.ts";
 
 // ---------------------------------------------------------------------------
 // toRfc822
@@ -60,5 +60,38 @@ describe("escapeXml", () => {
 
   it("handles empty string", () => {
     expect(escapeXml("")).toBe("");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// selectFeedItems
+// ---------------------------------------------------------------------------
+
+describe("selectFeedItems", () => {
+  const entries = [
+    { date: "2026-10-22", reports: ["ai-agents", "ai-data"] },
+    { date: "2026-10-21", reports: ["ai-agents", "ai-policy", "ai-data"] },
+  ];
+
+  it("takes every report, newest day first, for the all-pages feed", () => {
+    expect(selectFeedItems(entries)).toEqual([
+      { date: "2026-10-22", report: "ai-agents" },
+      { date: "2026-10-22", report: "ai-data" },
+      { date: "2026-10-21", report: "ai-agents" },
+      { date: "2026-10-21", report: "ai-policy" },
+      { date: "2026-10-21", report: "ai-data" },
+    ]);
+  });
+
+  it("takes only the given report for its own feed", () => {
+    expect(selectFeedItems(entries, "ai-data")).toEqual([
+      { date: "2026-10-22", report: "ai-data" },
+      { date: "2026-10-21", report: "ai-data" },
+    ]);
+  });
+
+  it("caps a feed at 30 items", () => {
+    const days = Array.from({ length: 40 }, (_, i) => ({ date: `2026-09-${i}`, reports: ["ai-data"] }));
+    expect(selectFeedItems(days, "ai-data")).toHaveLength(30);
   });
 });
