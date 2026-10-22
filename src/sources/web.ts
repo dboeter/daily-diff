@@ -219,7 +219,8 @@ async function discoverUrls(site: "anthropic" | "openai"): Promise<Array<{ loc: 
   const results: Array<{ loc: string; lastmod?: string }> = [];
 
   if (cfg.subSitemapNames && cfg.subSitemapTemplate) {
-    // Sitemap index: fetch each named sub-sitemap
+    // Sitemap index: fetch each named sub-sitemap; a failing one loses only its URLs
+    let failed = 0;
     for (const name of cfg.subSitemapNames) {
       const subUrl = cfg.subSitemapTemplate.replace("{name}", name);
       try {
@@ -227,9 +228,12 @@ async function discoverUrls(site: "anthropic" | "openai"): Promise<Array<{ loc: 
         results.push(...parseSitemapUrls(xml));
         await sleep(100);
       } catch (err) {
+        failed++;
         console.error(`  [web/${site}] sub-sitemap "${name}" failed: ${err}`);
       }
     }
+    // All of them failing is the site failing, not a day without new posts.
+    if (failed === cfg.subSitemapNames.length) throw new Error("every sub-sitemap failed");
   } else {
     // Single sitemap
     const xml = await httpGet(cfg.sitemapUrl);
@@ -308,6 +312,8 @@ async function fetchSite(
   const cfg = SITE_CONFIGS[site];
   const siteState = state[site];
   const today = siteState.newOn?.date === dateStr ? siteState.newOn : undefined;
+  // A first crawl stays one on a same-day re-run, so a post published between the two runs is
+  // counted with it, not listed (once per site: both labs are past their first crawl).
   const isFirstRun = today ? today.firstRun === true : Object.keys(siteState.seenUrls).length === 0;
   const newToday = new Set(today?.urls);
 
@@ -372,9 +378,10 @@ async function fetchSite(
     siteState.seenUrls[loc] = lastmod ?? "seen";
   }
   siteState.lastChecked = new Date().toISOString();
+  // The day's earlier new URLs stay new too when a failing sub-sitemap hid them from this run.
   siteState.newOn = isFirstRun
     ? { date: dateStr, urls: [], firstRun: true }
-    : { date: dateStr, urls: newUrls.map(({ loc }) => loc) };
+    : { date: dateStr, urls: [...new Set([...newToday, ...newUrls.map(({ loc }) => loc)])] };
 
   return {
     site,

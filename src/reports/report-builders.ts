@@ -208,8 +208,10 @@ export function stripModelTitle(md: string): string {
   return body.map((line, j) => (levels[j] === 1 ? `#${line}` : line)).join("\n");
 }
 
-/** A code span holding nothing but Markdown links and the dashes or commas between them. */
-const CODE_LINKS = /`((?:\[[^\]`\n]+\]\([^)`\s]+\)[\s,–—-]*)+)`/g;
+/** A code span: a pair of single backticks on one line, matched left to right. */
+const CODE_SPAN = /`([^`\n]+)`/g;
+/** Nothing but web links and the dashes or commas between them: `[text](url)` in prose about Markdown is code. */
+const LINKS_ONLY = /^(?:\[[^\]\n]+\]\(https?:\/\/[^)\s]+\)[\s,–—-]*)+$/;
 
 /**
  * Take Markdown links out of the backticks the model puts around them, where
@@ -218,7 +220,7 @@ const CODE_LINKS = /`((?:\[[^\]`\n]+\]\([^)`\s]+\)[\s,–—-]*)+)`/g;
  * example. A code span with anything else in it stays.
  */
 export function unwrapCodeLinks(md: string): string {
-  return md.replace(CODE_LINKS, "$1");
+  return md.replace(CODE_SPAN, (span, inner: string) => (LINKS_ONLY.test(inner) ? inner : span));
 }
 
 /**

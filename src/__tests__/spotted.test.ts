@@ -74,6 +74,7 @@ describe("storiesFrom", () => {
             score: 7,
             commentCount: 1,
             publishedAt: "2026-10-21T01:00:00Z",
+            description: "Post text",
           },
         ],
       },
@@ -94,7 +95,7 @@ describe("storiesFrom", () => {
     );
     expect(stories.map((s) => [s.id, s.discussionUrl, s.points, s.description])).toEqual([
       ["hn:1", "https://news.ycombinator.com/item?id=1", 5, "Page text"],
-      ["lobsters:abc", "https://lobste.rs/s/abc", 7, undefined],
+      ["lobsters:abc", "https://lobste.rs/s/abc", 7, "Post text"],
       ["devto:9", "https://dev.to/x/d", 20, undefined],
     ]);
   });

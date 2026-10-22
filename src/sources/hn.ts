@@ -141,7 +141,7 @@ function toHnStory(item: HnFirebaseItem): HnStory {
 const DESCRIPTION_TIMEOUT_MS = 8000;
 /** The `<head>` is near the top; a `text()` on a 20 MB page would be a timeout, not a cap. */
 const DESCRIPTION_MAX_BYTES = 64 * 1024;
-const DESCRIPTION_MAX_CHARS = 300;
+export const DESCRIPTION_MAX_CHARS = 300;
 
 /** Some sites write `name="og:description"`. `\s` before each attribute, so `data-name=` is not one. */
 const META_KEYS = [/\s(?:property|name)=["']og:description["']/i, /\sname=["']description["']/i];

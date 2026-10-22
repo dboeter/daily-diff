@@ -1,6 +1,10 @@
 /**
- * Lobste.rs AI and database stories fetched via tag-based JSON endpoints (e.g., /t/ai.json).
+ * Lobste.rs AI and database stories fetched via tag-based JSON endpoints (e.g., /t/ai.json),
+ * each with the submitter's text or its page's meta description.
  */
+
+import { plainText } from "../core/rss.ts";
+import { DESCRIPTION_MAX_CHARS, pageDescription } from "./hn.ts";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -15,6 +19,8 @@ export interface LobstersStory {
   score: number;
   commentCount: number;
   publishedAt: string;
+  /** The submitter's text, else the linked page's meta description; absent when neither has one. */
+  description?: string;
 }
 
 export interface LobstersData {
@@ -54,9 +60,12 @@ export interface LobstersApiStory {
   score: number;
   comment_count: number;
   created_at: string;
+  /** The submitter's text; most link stories have none. */
+  description_plain?: string;
 }
 
 export function toLobstersStory(s: LobstersApiStory): LobstersStory {
+  const description = plainText(s.description_plain ?? "", DESCRIPTION_MAX_CHARS);
   return {
     id: s.short_id,
     title: s.title,
@@ -65,7 +74,15 @@ export function toLobstersStory(s: LobstersApiStory): LobstersStory {
     score: s.score,
     commentCount: s.comment_count,
     publishedAt: s.created_at,
+    ...(description ? { description } : {}),
   };
+}
+
+/** A link story without the submitter's text gets its page's description, as an HN story does. */
+async function withDescription(story: LobstersStory): Promise<LobstersStory> {
+  if (story.description || story.url === story.commentsUrl) return story;
+  const description = await pageDescription(story.url);
+  return description ? { ...story, description } : story;
 }
 
 // ---------------------------------------------------------------------------
@@ -101,10 +118,13 @@ export async function fetchLobstersData(): Promise<LobstersData> {
     );
 
     const since = Date.now() - LOBSTERS_DAYS * 24 * 60 * 60 * 1000;
-    const stories = [...seen.values()]
-      .filter((s) => new Date(s.publishedAt).getTime() > since)
-      .sort((a, b) => b.score - a.score)
-      .slice(0, LOBSTERS_TOP);
+    const stories = await Promise.all(
+      [...seen.values()]
+        .filter((s) => new Date(s.publishedAt).getTime() > since)
+        .sort((a, b) => b.score - a.score)
+        .slice(0, LOBSTERS_TOP)
+        .map(withDescription),
+    );
 
     console.log(`  [lobsters] ${stories.length} stories (from ${seen.size} unique)`);
     return { stories, fetchSuccess: stories.length > 0 };

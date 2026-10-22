@@ -24,7 +24,7 @@ export interface Story {
   discussionUrl: string; // HN item page, Lobste.rs comments, the Dev.to article
   points: number; // HN points, Lobste.rs score, Dev.to positive reactions
   comments: number;
-  description?: string; // HN page description, Dev.to description
+  description?: string; // HN page description, Lobste.rs text or page description, Dev.to description
   published: string; // ISO
 }
 
@@ -82,6 +82,7 @@ export function storiesFrom(hn: HnData, lobsters: LobstersData, devto: DevtoData
       discussionUrl: s.commentsUrl,
       points: s.score,
       comments: s.commentCount,
+      ...(s.description ? { description: s.description } : {}),
       published: s.publishedAt,
     })),
     ...devto.articles.map((a): Story => ({

@@ -485,6 +485,16 @@ describe("unwrapCodeLinks", () => {
     const md = "Run `npm i [pkg](https://npmjs.com/pkg)` first.";
     expect(unwrapCodeLinks(md)).toBe(md);
   });
+
+  it("leaves link syntax that is not a web link: a placeholder or a relative path", () => {
+    const md = "Markdown links like `[text](url)` now render, as does `[guide](./docs/guide.md)`.";
+    expect(unwrapCodeLinks(md)).toBe(md);
+  });
+
+  it("pairs backticks span by span, so a link between two spans stays outside both", () => {
+    const md = "Set `foo`[docs](https://x.io) `bar` and `[v1](https://g.com/v1)`.";
+    expect(unwrapCodeLinks(md)).toBe("Set `foo`[docs](https://x.io) `bar` and [v1](https://g.com/v1).");
+  });
 });
 
 describe("stripModelTitle", () => {
