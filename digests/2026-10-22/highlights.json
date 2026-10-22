@@ -1,0 +1,26 @@
+{
+  "ai-agents": [
+    "Claude Code v2.1.307 adds API version pinning (`/claude-api api-version`) and OpenTelemetry safety events for every blocked tool call, improving observability and version control",
+    "OpenAI Codex macOS desktop app 26.1016.51333 fails first message in new chats with serialization error and Windows loses Dots entry after update — both breaking regressions"
+  ],
+  "ai-hn": [
+    "DeepInfer launches as high-performance inference framework for DeepSeek models, optimizing open-weight model serving at production scale",
+    "\"Publish fake stats, get cited in LLMs\" investigation shows 50k fabricated statistics propagated into model outputs, highlighting data poisoning risks"
+  ],
+  "ai-arxiv": [
+    "Agent S4 autonomously evolves computer-use interfaces from experience, achieving 21.3% on OSWorld V2 — surpassing GPT-5.5 and Claude Opus 4.8 at 1.5-4.3% of their cost",
+    "DiffResearch replaces autoregressive backbones with diffusion LLMs for ~6x end-to-end speedup in deep research agents with no quality loss"
+  ],
+  "ai-web": [
+    "Anthropic launches Enterprise Frontier Safeguards (EFS) deploying frontier models like Fable 5.1 in customer-controlled cloud with zero data retention",
+    "Anthropic's Frontier Red Team finds current models match human experts on tactical intelligence targeting, conventional weapons engineering, and autonomous IoT replication"
+  ],
+  "ai-policy": [
+    "EU opens feedback on AI Act Articles 75c-75d Implementing Act (deadline Nov 9) shaping GPAI obligations for US vendor integrations",
+    "Anthropic proposes $1B threshold for AI risk regulation in draft bill, mirroring California approach to tie financial scale to government intervention"
+  ],
+  "ai-data": [
+    "Snowflake Declarative Feature Store reaches GA with version-controlled YAML/Python definitions and plan-and-apply deployment via snow CLI",
+    "Azure Databricks enables native Postgres logical replication to stream changes into/out of Lakebase for migrations and continuous sync"
+  ]
+}

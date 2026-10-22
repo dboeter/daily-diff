@@ -44,7 +44,19 @@
     "retiring the fabric data agent custom tool in microsoft foundry: move to fabric iq|2026-10-20": "2026-10-21",
     "feature: you can now use reusable column aliases in googlesql.|2026-10-15": "2026-10-21",
     "feature: conversational analytics now lets you create a conversation with all of the data sources in multiple projects, or create a conversation with a dataset.|2026-10-14": "2026-10-21",
-    "feature: the ai.agg function now supports the output_schema argument, which lets you specify the schema of the function output as a comma-separated list of fields.|2026-10-14": "2026-10-21"
+    "feature: the ai.agg function now supports the output_schema argument, which lets you specify the schema of the function output as a comma-separated list of fields.|2026-10-14": "2026-10-21",
+    "file upload in genie one and genie agents will soon be available by default for compliance security profile workspaces with supported compliance standards|2026-10-16": "2026-10-22",
+    "replicate data in and out of lakebase with postgres logical replication|2026-10-15": "2026-10-22",
+    "saving an unchanged job no longer adds rows to the jobs system tables|2026-10-19": "2026-10-22",
+    "filter data per end user with oauth custom identity claims|2026-10-19": "2026-10-22",
+    "delegate budget access with access control lists (acls)|2026-10-16": "2026-10-22",
+    "delegate access to genie budgets|2026-10-16": "2026-10-22",
+    "october 21, 2026: declarative feature store (general availability)|2026-10-21": "2026-10-22",
+    "oct 16, 2026: parquet direct (preview)|2026-10-16": "2026-10-22",
+    "oct 20, 2026: sensitive data entitlement and access reports (general availability)|2026-10-20": "2026-10-22",
+    "feature: the ai.chunk_document function is a table-valued function that splits unstructured documents into semantically coherent text chunks optimized for vector embeddings and retrieval-augmented generation (rag) workflows.|2026-10-21": "2026-10-22",
+    "new analytical functions in microsoft fabric data warehouse (preview)|2026-10-20": "2026-10-22",
+    "[launched] generally available: azure cosmos db safe key rotation|2026-10-21": "2026-10-22"
   },
   "stages": {
     "snowflake-bcr:2026_08": "2026-10-16 Introduced in the 10.37 release (October 8-16, 2026) as Disabled by Default; account admins can enable for testing."
