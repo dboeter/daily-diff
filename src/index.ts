@@ -15,11 +15,18 @@ import {
   fetchRecentReleases,
   fetchHotIssues,
   isPrerelease,
+  type GitHubRelease,
   fetchSkillsData,
   type SkillsData,
   createGitHubIssue,
 } from "./core/github.ts";
-import { type ProjectActivity, buildProjectDigestPrompt, hasActivity } from "./reports/prompts.ts";
+import {
+  type ProjectActivity,
+  announcementLinks,
+  buildProjectDigestPrompt,
+  hasActivity,
+  isMajorRelease,
+} from "./reports/prompts.ts";
 import { matchProjectNews } from "./reports/agent-news.ts";
 import {
   buildHighlightsPrompt,
@@ -58,7 +65,7 @@ import {
 import { loadWebState, fetchSiteContent, type WebFetchResult, type WebState } from "./sources/web.ts";
 import { fetchTrendingData, type TrendingData } from "./trending/trending.ts";
 import { fetchStealthModels, type OpenRouterStealthModel } from "./sources/openrouter.ts";
-import { fetchHnData, type HnData } from "./sources/hn.ts";
+import { fetchHnData, pageDescription, type HnData } from "./sources/hn.ts";
 import { fetchArxivData, type ArxivData } from "./sources/arxiv.ts";
 import { fetchPolicyData, type PolicyData } from "./policy/policy.ts";
 import { isDataLaw } from "./policy/jev.ts";
@@ -129,10 +136,27 @@ const PREVIEWS_PER_PROJECT = 3;
  * Stable releases and hot issues for one project. A failed release fetch is `fetchFailed`, shown as unavailable.
  * `weekSince` (the data report): also the stable releases since then, as `weekReleases`, from the same request.
  */
+/** An announcement post can run a few sentences: DuckDB 2.0.0's lists its headline features in ~400 characters. */
+const ANNOUNCEMENT_MAX_CHARS = 600;
+
+/** A major release's announcement post description, when its notes link one; a failure only loses it. */
+async function withAnnouncement(r: GitHubRelease): Promise<GitHubRelease> {
+  if (!isMajorRelease(r.tag_name) || isPrerelease(r)) return r;
+  // The first two candidates, in order, until one has a description.
+  for (const link of announcementLinks(r.body).slice(0, 2)) {
+    const announcement = await pageDescription(link, ANNOUNCEMENT_MAX_CHARS);
+    if (announcement) return { ...r, announcement };
+  }
+  return r;
+}
+
 async function fetchProject(cfg: RepoConfig, since: Date, weekSince?: Date): Promise<ProjectFetch> {
   try {
     const [{ recent, noStableYet }, hotIssues] = await Promise.all([
-      fetchRecentReleases(cfg.repo, weekSince ?? since),
+      fetchRecentReleases(cfg.repo, weekSince ?? since).then(async (r) => ({
+        ...r,
+        recent: await Promise.all(r.recent.map(withAnnouncement)),
+      })),
       // Search API, rate-limited separately from releases: a failure here must
       // not discard the releases.
       fetchHotIssues(cfg.repo, since).catch((err): GitHubItem[] => {

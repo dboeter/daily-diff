@@ -57,6 +57,8 @@ export interface GitHubRelease {
   body?: string | null;
   published_at: string;
   prerelease: boolean;
+  /** A major release's announcement post description (index.ts `withAnnouncement`). */
+  announcement?: string;
 }
 
 // ---------------------------------------------------------------------------

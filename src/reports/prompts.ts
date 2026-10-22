@@ -114,7 +114,7 @@ const PREVIEW_BODY_CHARS = 1500;
  * characters held no change and the report listed install commands.
  */
 export function releaseNotes(body: string | null | undefined, maxChars: number): string {
-  return (body ?? "")
+  return compactChangelog(body ?? "")
     .replace(/(```|~~~)[\s\S]*?(\1|$)/g, " ")
     .replace(/<[^>]*>/g, " ")
     .replace(/\[[^\]]*\]\(#[^)]*\)/g, " ")
@@ -123,8 +123,69 @@ export function releaseNotes(body: string | null | undefined, maxChars: number):
     .slice(0, maxChars);
 }
 
+// GitHub's generated notes: "* <PR title> by @user in https://github.com/…/pull/N".
+const CHANGELOG_ENTRY_RE = /^[ \t]*[*-][ \t]+(.+?) by @\S+ in https:\/\/github\.com\/\S+\/pull\/\d+[ \t]*$/gm;
+const NEW_CONTRIBUTOR_RE = /^[ \t]*[*-][ \t]+@\S+ made their first contribution in \S+[ \t]*$/gm;
+
+/**
+ * A generated changelog as PR titles only, with its count. At 400 characters
+ * DuckDB 2.0.0's notes held one intro line and two PR entries, each with its
+ * author and URL, and the report described a major release by two refactors.
+ */
+function compactChangelog(body: string): string {
+  const entries = body.match(CHANGELOG_ENTRY_RE)?.length ?? 0;
+  if (!entries) return body;
+  const header = /^#+[ \t]*What['’]s Changed[ \t]*$/im;
+  const counted = `What's Changed (${entries} merged PRs):`;
+  const first = body.search(CHANGELOG_ENTRY_RE);
+  const withCount = header.test(body)
+    ? body.replace(header, counted)
+    : `${body.slice(0, first)}${counted}\n${body.slice(first)}`;
+  return withCount
+    .replace(CHANGELOG_ENTRY_RE, "$1;")
+    .replace(NEW_CONTRIBUTOR_RE, "")
+    .replace(/^#+[ \t]*New Contributors[ \t]*$/im, "")
+    .replace(/\*\*Full Changelog\*\*:?\s*\S+/g, "");
+}
+
+/** Only a version x.0.0 is a major version (the data prompts' rule). */
+export function isMajorRelease(tag: string): boolean {
+  return /^v?\d+\.0\.0$/.test(tag);
+}
+
+/** Hosts whose pages are never a release announcement: their description is a badge, an invite or a package page. */
+const NOT_ANNOUNCEMENT_HOST =
+  /(?:^|\.)(?:github\.com|githubusercontent\.com|shields\.io|discord\.(?:gg|com)|pypi\.org|npmjs\.com|x\.com|twitter\.com|crates\.io|docs\.rs)$/i;
+/** A post, not a docs or landing page: the prompt describes the release from what this page says. */
+const ANNOUNCEMENT_PATH = /blog|announc|news|release|post/i;
+
+/**
+ * Links in a release's notes that look like its announcement post, in order:
+ * outside code blocks, images and HTML tags (autolinks and `<a href>` kept), on no badge, chat or package host,
+ * with a post-like path.
+ */
+export function announcementLinks(body: string | null | undefined): string[] {
+  const text = (body ?? "")
+    .replace(/(```|~~~)[\s\S]*?(\1|$)/g, " ")
+    .replace(/!\[[^\]]*\]\([^)]*\)/g, " ")
+    // An autolink (`<https://…>`) and an HTML link's href are links, not tags to drop.
+    .replace(/<(https:\/\/[^\s>]+)>/g, " $1 ")
+    .replace(/<a\s[^>]*href=["'](https:\/\/[^"']+)["'][^>]*>/gi, " $1 ")
+    .replace(/<[^>]*>/g, " ");
+  const links = [...text.matchAll(/https:\/\/[^\s)\]>"'`]+/g)].map(([u]) => u.replace(/[.,;:*!?]+$/, ""));
+  return [...new Set(links)].filter((u) => {
+    try {
+      const url = new URL(u);
+      return !NOT_ANNOUNCEMENT_HOST.test(url.hostname) && ANNOUNCEMENT_PATH.test(url.pathname);
+    } catch {
+      return false;
+    }
+  });
+}
+
 function formatRelease(r: GitHubRelease, repo: string, notes: string): string {
-  return `- ${r.tag_name}${r.name && r.name !== r.tag_name ? ` (${r.name})` : ""} — https://github.com/${repo}/releases/tag/${r.tag_name}\n  ${notes || "(no release notes)"}`;
+  const announcement = r.announcement ? `\n  Announcement: ${r.announcement}` : "";
+  return `- ${r.tag_name}${r.name && r.name !== r.tag_name ? ` (${r.name})` : ""} — https://github.com/${repo}/releases/tag/${r.tag_name}${announcement}\n  ${notes || "(no release notes)"}`;
 }
 
 function formatProject(a: ProjectActivity): string {
@@ -183,7 +244,7 @@ Write the report in English with exactly this structure:
 3–5 sentences on the most important changes across these projects ${scope.period}: what shipped, what broke, what got attention. Name projects. No counts of issues, PRs or stars.
 
 Then one section per project above that has something left to report, in the order given, headed \`## <Project name>\`, with at most 3 bullets, one or two sentences each:
-- **Release**: what the stable release(s) change for users — features, breaking changes, fixes that matter. Link the release. Several releases in a range: summarize the range, do not list each one.
+- **Release**: what the stable release(s) change for users — features, breaking changes, fixes that matter. Several releases in a range: summarize the range, do not list each one. Link each release you name as \`[tag](url)\`; a range as its oldest and newest, \`[v1.2.0](url)–[v1.2.5](url)\`. A release with an Announcement: describe it from the announcement, not from its first changelog entries.
 - **Prerelease**: only from a "Prereleases (no stable release yet)" list, and only when it adds notable features or breaking changes; skip routine alpha/rc bumps. Say it is a prerelease and link it.
 - **News**: what the news item says about the project and why it matters. Link it.
 - **Hot issue**: what users are hitting and how serious it is. Link the issue (https://github.com/<repo>/issues/<number>).

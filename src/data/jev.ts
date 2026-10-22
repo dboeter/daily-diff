@@ -255,7 +255,7 @@ export interface KeptVendorItem extends VendorItem {
  * Items by section, deprecations first, then by relevance (no verdict: feed order);
  * numbered in that order. Trace: `data-ranking.json`.
  */
-export type VendorSelection = Selection<Numbered<KeptVendorItem>, DataVerdicts>;
+export type VendorSelection = Selection<Numbered<KeptVendorItem>, DataVerdicts, KeptVendorItem>;
 
 /**
  * Non-deprecations each section gets first. Without floors the cloud block got
@@ -351,5 +351,9 @@ export async function selectVendorItems(
   }));
   const rankingFile = judgment.rankingFile(rows, { weights: DATA_WEIGHTS });
 
-  return { items: numberRows(selected), rankedBy, nextVerdicts: judgment.nextCache, rankingFile };
+  // By relevance, as orderAndCap ranked them; `kept` is in feed order.
+  const alsoNew = [...kept]
+    .filter((i) => !selectedIds.has(i.id))
+    .sort((a, b) => (verdicts.get(b.id)?.relevance ?? -1) - (verdicts.get(a.id)?.relevance ?? -1));
+  return { items: numberRows(selected), alsoNew, rankedBy, nextVerdicts: judgment.nextCache, rankingFile };
 }

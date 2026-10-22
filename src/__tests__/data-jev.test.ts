@@ -182,6 +182,12 @@ describe("selectVendorItems", () => {
     expect(sel.rankingFile).toContain(
       '"id":"gcp3","title":"Feature: preview","source":"BigQuery","kept":false,"overCap":true',
     );
+    // Without verdicts all relevances tie, so the over-cap items keep feed order.
+    expect(sel.alsoNew!.map((i) => i.id)).toEqual([
+      "gcp3",
+      "gcp4",
+      ...Array.from({ length: 8 }, (_, i) => `dbx${i + 6}`),
+    ]);
   });
 
   it("gives slots the floors leave to Databricks first", async () => {

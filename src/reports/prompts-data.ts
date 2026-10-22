@@ -21,6 +21,7 @@ import { TABLES_MARKER, rowList, summaryLine, summaryOutputRule, type Numbered }
 import { NO_TITLE_RULE, RELEASE_BODY_CHARS, releaseNotes } from "./prompts.ts";
 import type { ReleaseRow } from "./data-reports.ts";
 import type { HnData } from "../sources/hn.ts";
+import type { Deadline } from "../core/report-state.ts";
 import type { ArxivData } from "../sources/arxiv.ts";
 import type { HfData } from "../sources/hf.ts";
 import type { DevtoData } from "../sources/devto.ts";
@@ -143,13 +144,26 @@ ${summaryOutputRule(items.length)}
  * Policy report, call 2 of 2: the prose sections around the code-rendered
  * table, which spliceTables inserts at TABLES_MARKER.
  */
-export function buildPolicyProsePrompt(tableMd: string, dateStr: string, readerProfile: string): string {
+export function buildPolicyProsePrompt(
+  tableMd: string,
+  dateStr: string,
+  readerProfile: string,
+  /**
+   * Deadlines of items reported on earlier days, closing within a week. The
+   * Upcoming deadlines table is not in `tableMd`: given it as "new items", on
+   * 2026-10-22 the model opened Highlights with two consultations reported a week earlier.
+   */
+  nearDeadlines: Deadline[] = [],
+): string {
+  const deadlineBlock = nearDeadlines.length
+    ? `\nOpen deadlines of items reported on earlier days (not new today; you may mention one in a sentence, not as a highlight of its own):\n${nearDeadlines.map((d) => `- ${d.date}: [${d.title}](${d.link}) (${d.source})`).join("\n")}\n`
+    : "";
   return `You are a policy analyst covering AI legislation, regulation and official guidance in the EU, the Netherlands and the US. The reader: ${readerProfile}
 
 Below is today's table of new items from official sources and news & commentary outlets, ${dateStr}; the Summary column holds summaries of each item.
 
 ${tableMd}
-
+${deadlineBlock}
 ---
 
 Write the prose sections of the report, in this order:
@@ -162,8 +176,8 @@ Write the prose sections of the report, in this order:
 Rules:
 - ${NO_TITLE_RULE}
 - Do not reproduce or alter the table.
-- Base every claim on the table. Do not invent obligations, dates, stages or legal status: a wrong legal status is worse than none.
-- Mention only items that appear in the table, and link every item you mention.
+- Base every claim on the table${nearDeadlines.length ? " or the open deadlines" : ""}. Do not invent obligations, dates, stages or legal status: a wrong legal status is worse than none.
+- Mention only items that appear in the table${nearDeadlines.length ? " or the open deadlines" : ""}, and link every item you mention.
 - English, professional and concise.
 `;
 }
@@ -190,7 +204,7 @@ export function buildDataSummariesPrompt(
     rowList(
       releases,
       (r) =>
-        `${r.project.name} ${r.release.tag_name} (release, ${r.release.published_at.slice(0, 10)}) — ${releaseNotes(r.release.body, RELEASE_BODY_CHARS) || "(no release notes)"}`,
+        `${r.project.name} ${r.release.tag_name} (release, ${r.release.published_at.slice(0, 10)}) — ${r.release.announcement ? `Announcement: ${r.release.announcement} Notes: ` : ""}${releaseNotes(r.release.body, RELEASE_BODY_CHARS) || "(no release notes)"}`,
     ),
   ]
     .filter(Boolean)
@@ -258,21 +272,22 @@ const WEB_FULL_LAYOUT_MIN = 3;
 export function buildWebReportPrompt(results: WebFetchResult[], dateStr: string): string {
   const isAnyFirstRun = results.some((r) => r.isFirstRun);
   const articleCount = results.reduce((n, r) => n + r.newItems.length, 0);
-  const full = isAnyFirstRun || articleCount >= WEB_FULL_LAYOUT_MIN;
+  // Metadata-only items (OpenAI's slugs) give Signals nothing to read: only articles with text count.
+  const withText = results.reduce((n, r) => n + r.newItems.filter((i) => i.content).length, 0);
+  const full = isAnyFirstRun || withText >= WEB_FULL_LAYOUT_MIN;
   const closingSections = full
     ? `## ${SECTIONS.signals}
-Based on both companies' release cadence and content focus:
+From the articles with an excerpt only:
 - Each company's recent technical priorities (model capabilities / safety / productization / ecosystem)
-- Competitive dynamics: who is setting the agenda, who is following
 - Impact on developers and enterprise users, as the articles state it
-- Hidden signals in titles, phrasing and timing: new terms, dense releases in one category, policy and safety developments
 - Patterns across the articles only: no forward-looking claims the articles don't make
+A metadata-only item may be named, never interpreted: no guesses from its slug, its date or how many were published together.
 
 ## ${SECTIONS.worthALook}
-1-3 pieces most worth reading in full, with brief reasoning. Each bullet opens with the article's title as a Markdown link to its URL.
+1-3 articles with an excerpt most worth reading in full, with brief reasoning. Each bullet opens with the article's title as a Markdown link to its URL.
 
 `
-    : `Write no other sections: with ${articleCount} new article${articleCount === 1 ? "" : "s"}, a Signals or Worth a Look section would only restate it.
+    : `Write no other sections: with ${withText} new article${withText === 1 ? "" : "s"} with text (of ${articleCount}), a Signals or Worth a Look section would only restate it.
 
 `;
 
@@ -566,6 +581,8 @@ export function buildDiscussionsPrompt(data: DiscussionsData, dateStr: string): 
               `   Link: ${s.url}\n` +
               `   Discussion: ${s.hnUrl}\n` +
               `   HN Rank: ${s.hnRank ?? i + 1} | Score: ${s.points} | Comments: ${s.comments} | Author: ${s.author} | Time: ${s.createdAt.slice(0, 16)}` +
+              // Computed here: on 2026-10-22 Signals called 538 comments "far exceeding" 578 points.
+              (s.comments > s.points ? " | Contested: more comments than points" : "") +
               (s.description ? `\n   Page description: ${s.description}` : ""),
           )
           .join("\n\n"),
@@ -580,6 +597,8 @@ Organized by category: a \`### <category>\` heading per category, each followed 
    - **Score / Comments**: copy the numbers from the input verbatim
    - **Summary**: with a page description, 2 sentences from it — what the item is and why it matters to developers; without one, 1 sentence saying only what the title and the link's domain say. You have read neither the article nor the comments: describe no discussion, and no claim, method or result the title and description do not state
    - Select the 2-5 most representative items per category; omit a category if it is empty
+   - Each story appears in exactly one table, under the category that fits it best
+   - Rows within a table in descending Score
 
    Categories:
    - 🔬 Models & Research (new model releases, papers, benchmarks)
@@ -654,7 +673,7 @@ ${sections.join("\n\n")}
 ## ${SECTIONS.signals}
 100-200 words on what developers are discussing, from the titles and counts alone:
    - Which topics are most active (high score + high comments)?
-   - Which stories draw far more comments than points — a sign of a contested topic?${weekly ? "\n   - Practical concerns, tutorials or patterns that recur across the communities" : ""}
+   - Which stories are marked Contested in the input? Call no other story contested, and compare no counts yourself${weekly ? "\n   - Practical concerns, tutorials or patterns that recur across the communities" : ""}
 
 ## ${SECTIONS.worthALook}
 2-3 pieces most worth reading in depth, with brief reasoning. Each bullet opens with the item's title as a Markdown link, the same link as in its table row.

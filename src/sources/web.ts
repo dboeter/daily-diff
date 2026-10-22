@@ -141,6 +141,21 @@ export function parseSitemapUrls(xml: string): Array<{ loc: string; lastmod?: st
   return results;
 }
 
+/**
+ * One entry per URL, with its latest lastmod. OpenAI lists some URLs in two
+ * sub-sitemaps: on 2026-10-22 two of eight "new" articles were listed twice.
+ */
+export function dedupeSitemapUrls(
+  urls: Array<{ loc: string; lastmod?: string }>,
+): Array<{ loc: string; lastmod?: string }> {
+  const byLoc = new Map<string, { loc: string; lastmod?: string }>();
+  for (const u of urls) {
+    const prev = byLoc.get(u.loc);
+    if (!prev || (u.lastmod ?? "") > (prev.lastmod ?? "")) byLoc.set(u.loc, u);
+  }
+  return [...byLoc.values()];
+}
+
 export function isSitemapIndex(xml: string): boolean {
   return /<sitemapindex[\s>]/.test(xml);
 }
@@ -240,7 +255,7 @@ async function discoverUrls(site: "anthropic" | "openai"): Promise<Array<{ loc: 
     );
   }
 
-  return results;
+  return dedupeSitemapUrls(results);
 }
 
 // ---------------------------------------------------------------------------
