@@ -55,6 +55,8 @@ import {
   buildDataReport,
   buildAgentsReport,
   hasDataNews,
+  labPosts,
+  LAB_POSTS_MAX,
   type SavedReport,
 } from "./reports/data-reports.ts";
 import { loadWebState, fetchSiteContent, type WebFetchResult, type WebState } from "./sources/web.ts";
@@ -79,6 +81,7 @@ import {
   nextLog,
   saveSpottedLog,
   selectSpotted,
+  splitPool,
   storiesFrom,
   type SpottedPage,
 } from "./spotted/spotted.ts";
@@ -370,15 +373,22 @@ async function main(): Promise<void> {
     })),
   }));
 
-  // Spotted: the fresh stories whose link no project in either pool took as news, routed to
-  // their topic's page.
+  // Spotted: the fresh stories whose link no project in either pool took as news and no lab post
+  // the models page lists is, routed to their topic's page.
   const matchedIds = new Set(
     [...projectNews.values(), ...dataNews.values()].flat().flatMap((n) => (n.id ? [n.id] : [])),
   );
   const newsLinks = new Set(fresh.filter((s) => matchedIds.has(s.id)).map((s) => linkKey(s.url)));
   // Every copy of a link is routed: copies' titles differ, and one routed nowhere must not hide one
   // a page takes.
-  const unmatched = fresh.filter((s) => !newsLinks.has(linkKey(s.url)));
+  const pool = splitPool(
+    fresh,
+    newsLinks,
+    labPosts(webResults)
+      .slice(0, LAB_POSTS_MAX)
+      .map((p) => p.url),
+  );
+  const unmatched = pool.spotted;
   const topicCache = loadTopicCache();
   const routing = await routeStories(unmatched, {
     apiKey: process.env["TYPESAFE_API_KEY"],
@@ -391,10 +401,11 @@ async function main(): Promise<void> {
   });
   const spottedOf = (page: SpottedPage) => spottedRows.filter((r) => r.page === page);
   // Trends' Most discussed leaves out what today's pages show: a skipped data page shows no Spotted
-  // rows (a data page with project news is never skipped).
+  // rows (a data page with project news is never skipped, nor a models page with a lab post).
   const discussed = weekly
     ? mostDiscussed(spottedLog, dateStr, [
         ...fresh.filter((s) => matchedIds.has(s.id)),
+        ...pool.lab,
         ...(hasDataNews(dataSections, vendorData, dateStr)
           ? spottedRows
           : spottedRows.filter((r) => r.page !== "data")),
@@ -481,8 +492,9 @@ async function main(): Promise<void> {
   // skips the commit step, so they are never published.
   assertLlmHealthy("report");
 
-  // Shown: the Spotted rows and the matched project news of every published page, whether or not
-  // the model mentioned them, and Trends' Most discussed rows, which the routing trace leaves out.
+  // Shown: the Spotted rows, the matched project news and the stories of the listed lab posts of
+  // every published page, whether or not the model mentioned them, and Trends' Most discussed rows,
+  // which the routing trace leaves out.
   const savedIds = new Set(saved.map((r) => r.id));
   const pageActivities = [
     ...agentActivities,
@@ -491,7 +503,7 @@ async function main(): Promise<void> {
   ];
   const dailyShown = new Set([
     ...spottedOf("agents").map((r) => r.id),
-    ...(savedIds.has("ai-models") ? spottedOf("models").map((r) => r.id) : []),
+    ...(savedIds.has("ai-models") ? [...spottedOf("models"), ...pool.lab].map((s) => s.id) : []),
     ...(savedIds.has("ai-data") ? spottedOf("data").map((r) => r.id) : []),
     ...pageActivities.flatMap((a) => a.news.flatMap((n) => (n.id ? [n.id] : []))),
   ]);

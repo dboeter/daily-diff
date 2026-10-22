@@ -5,6 +5,7 @@ import {
   mostDiscussed,
   nextLog,
   selectSpotted,
+  splitPool,
   storiesFrom,
   type SpottedLog,
   type SpottedPage,
@@ -279,6 +280,27 @@ describe("mostDiscussed", () => {
     const ids = mostDiscussed({ items }, DATE, []).map((r) => r.id);
     expect(ids).not.toContain("hn:belowCut");
     expect(ids).toContain("lobsters:sharedCopy");
+  });
+});
+
+describe("splitPool", () => {
+  // On 6 of 14 days of 2026-10 a new lab post was an HN row too: one page now shows both.
+  it("gives every copy of a listed lab post's link to the post, whatever its scheme, www. or slash", () => {
+    const fresh = [
+      story("post", "hn", 10, { url: "http://anthropic.com/news/claude-x/" }),
+      story("postCopy", "lobsters", 5, { url: "https://www.anthropic.com/news/claude-x" }),
+      story("other"),
+    ];
+    const { lab, spotted } = splitPool(fresh, new Set(), ["https://www.anthropic.com/news/claude-x"]);
+    expect(lab.map((s) => s.id)).toEqual(["hn:post", "lobsters:postCopy"]);
+    expect(spotted.map((s) => s.id)).toEqual(["hn:other"]);
+  });
+
+  it("leaves a link a project's news took out of Spotted, and a story naming nothing in it", () => {
+    const fresh = [story("news"), story("plain")];
+    const { lab, spotted } = splitPool(fresh, new Set([linkKey("https://example.com/news")]), []);
+    expect(lab).toEqual([]);
+    expect(spotted.map((s) => s.id)).toEqual(["hn:plain"]);
   });
 });
 

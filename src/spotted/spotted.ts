@@ -165,6 +165,24 @@ export function freshStories(stories: Story[], log: SpottedLog, dateStr: string)
 }
 
 /**
+ * Today's pool by what shows each link, tracked parts first (placement rule 4):
+ * `lab`, the stories whose link is a lab post the models page lists (its row
+ * shows them), and `spotted`, the rest that no project's news took
+ * (`newsLinks`, `linkKey`s), for routing. Every copy of a link goes the same way.
+ */
+export function splitPool(
+  fresh: Story[],
+  newsLinks: Set<string>,
+  labUrls: string[],
+): { lab: Story[]; spotted: Story[] } {
+  const labLinks = new Set(labUrls.map(linkKey));
+  return {
+    lab: fresh.filter((s) => labLinks.has(linkKey(s.url))),
+    spotted: fresh.filter((s) => !labLinks.has(linkKey(s.url)) && !newsLinks.has(linkKey(s.url))),
+  };
+}
+
+/**
  * Each fetched story with its latest counts and `lastSeen` (a story shown on
  * an earlier day too); `shown` set for each of `shownIds` that has none;
  * entries unseen for more than LOG_UNSEEN_DAYS pruned.

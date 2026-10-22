@@ -31,7 +31,7 @@ New daily page `ai-models`: name "AI Models & Labs", label `models`, emoji 🧠,
 
 ## Lab posts are not project news
 
-`collectNewsItems` (`src/reports/agent-news.ts`) drops the web sitemaps: `NewsSources.web` goes. A lab post is a tracked item of this page and appears once, here (placement rule 4).
+`collectNewsItems` (`src/reports/agent-news.ts`) drops the web sitemaps: `NewsSources.web` goes. A lab post is a tracked item of this page and appears once, here (placement rule 4): a community story whose link is a listed lab post leaves Spotted (`splitPool`), so the page does not show the post twice.
 
 ## Retire `ai-hn` and `ai-web`
 
@@ -59,3 +59,4 @@ AGENTS.md: Architecture (fetch and save phases), the file table (`web.ts`, `open
 
 - A model's summary gives what it is for and its modalities, not its context length: the row shows it.
 - The models page has no Coming up section: the stealth table's Expires column dates each stealth model (spec rule 4), and the Overview's Coming up lists the expiries.
+- The 2026-10-23 e2e found the post twice on one page in the making: on 6 of 14 days of 2026-10 a new lab post was an HN row the same day (10-22: Patch the Planet and OpenAI on Google Cloud), and nothing kept the HN copy out of Spotted. `splitPool` now gives every copy of a listed post's link to the post (a post past the 15-row cap is only counted, so its story may still be Spotted), and the story is marked shown with the page. Its re-run also lost the run's 4 lab posts, which the web state already knew: the state now keeps the day's new URLs (`newOn`).

@@ -31,7 +31,7 @@ import {
   modelSources,
 } from "./prompts-data.ts";
 import { generateOr, saveFile, autoGenFooter, LLM_TOKENS_LISTING } from "../core/report.ts";
-import { saveWebState, type WebFetchResult, type WebState } from "../sources/web.ts";
+import { saveWebState, type WebFetchResult, type WebPageItem, type WebState } from "../sources/web.ts";
 import { loadReportedState, newItems, nextReportedState, saveReportedState } from "../core/report-state.ts";
 import type { TrendingData } from "../trending/trending.ts";
 import { saveClassifyCache, saveMatchState } from "../trending/jev.ts";
@@ -265,6 +265,14 @@ export const MODELS_STATE_FILE = "digests/models-state.json";
 /** Lab announcements rows; the rest is one "N more posts not shown." line. */
 export const LAB_POSTS_MAX = 15;
 
+/** The sitemaps' new posts, newest first; a first-crawled site only gets a count line: every URL in its sitemaps is new. */
+export function labPosts(web: WebFetchResult[]): WebPageItem[] {
+  return web
+    .filter((r) => !r.isFirstRun)
+    .flatMap((r) => r.newItems)
+    .sort((a, b) => b.lastmod.localeCompare(a.lastmod));
+}
+
 /**
  * The models page: Highlights, Lab announcements (the sitemaps' new posts,
  * newest first, at most LAB_POSTS_MAX; a lab on its first crawl gets one line
@@ -289,11 +297,7 @@ export async function buildModelsPage(
   saveWebState(webState);
   console.log("  [models] Web state saved.");
   const P = MODELS_PAGE;
-  // A first-crawled site only gets a count line: every URL in its sitemaps is new.
-  const posts = web
-    .filter((r) => !r.isFirstRun)
-    .flatMap((r) => r.newItems)
-    .sort((a, b) => b.lastmod.localeCompare(a.lastmod));
+  const posts = labPosts(web);
   const shownPosts = numberRows(posts.slice(0, LAB_POSTS_MAX));
   const state = loadReportedState(stateFile);
   const fresh = newItems(
