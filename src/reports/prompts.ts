@@ -240,7 +240,7 @@ ${sections}
 ---
 
 Write the report in English: one section per project above that has something left to report, in the order given, headed \`## <Project name>\`, with at most 3 bullets, one or two sentences each. Write no other sections:
-- **Release**: what the stable release(s) change for users — features, breaking changes, fixes that matter. Several releases in a range: summarize the range, do not list each one. Link each release you name as \`[tag](url)\`; a range as its oldest and newest, \`[v1.2.0](url)–[v1.2.5](url)\`. A release with an Announcement: describe it from the announcement, not from its first changelog entries.
+- **Release**: what the stable release(s) change for users — features, breaking changes, fixes that matter. Several releases in a range: summarize the range, do not list each one. Link each release you name as a plain Markdown link, [tag](url), never inside backticks; a range as its oldest and newest, [v1.2.0](url)–[v1.2.5](url). A release with an Announcement: describe it from the announcement, not from its first changelog entries.
 - **Prerelease**: only from a "Prereleases (no stable release yet)" list, and only when it adds notable features or breaking changes; skip routine alpha/rc bumps. Say it is a prerelease and link it.
 - **News**: what the news item says about the project and why it matters. Link it.
 - **Hot issue**: what users are hitting and how serious it is. Link the issue (https://github.com/<repo>/issues/<number>).

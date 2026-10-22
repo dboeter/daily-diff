@@ -7,6 +7,7 @@ import {
   renderResearchTable,
   renderPolicyTable,
   stripModelTitle,
+  unwrapCodeLinks,
   highlightsOnly,
   nestHeadings,
   renderReportBar,
@@ -466,6 +467,23 @@ describe("highlightsOnly", () => {
 
   it("puts the failure notice under the heading", () => {
     expect(highlightsOnly(MSG.summaryFailed)).toBe(`## Highlights\n\n${MSG.summaryFailed}`);
+  });
+});
+
+describe("unwrapCodeLinks", () => {
+  it("takes a link, a release range and an issue link out of backticks", () => {
+    const md =
+      "- **Release**: `[v2.1.307](https://g.com/r/v2.1.307)–[v2.1.308](https://g.com/r/v2.1.308)` update the API.\n" +
+      "- **Hot issue**: `[#142307](https://g.com/i/142307)` — the pinned `certifi==2026.5.20` trusts revoked CAs.";
+    expect(unwrapCodeLinks(md)).toBe(
+      "- **Release**: [v2.1.307](https://g.com/r/v2.1.307)–[v2.1.308](https://g.com/r/v2.1.308) update the API.\n" +
+        "- **Hot issue**: [#142307](https://g.com/i/142307) — the pinned `certifi==2026.5.20` trusts revoked CAs.",
+    );
+  });
+
+  it("leaves a code span with more than links in it", () => {
+    const md = "Run `npm i [pkg](https://npmjs.com/pkg)` first.";
+    expect(unwrapCodeLinks(md)).toBe(md);
   });
 });
 

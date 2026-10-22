@@ -381,6 +381,7 @@ describe("buildSpottedSummariesPrompt", () => {
     expect(prompt).toContain("`N: <1-2 sentences>`");
     expect(prompt).toContain("2 lines in total");
     expect(prompt).toMatch(/Describe no comment thread/);
-    expect(parseRowSummaries("1: One.\n2: Two.").get(2)).toBe("Two.");
+    expect(prompt).toContain("Without one: write `N: —`");
+    expect(parseRowSummaries("1: One.\n2: —").get(2)).toBe("—");
   });
 });

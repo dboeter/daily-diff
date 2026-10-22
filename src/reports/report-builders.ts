@@ -208,6 +208,19 @@ export function stripModelTitle(md: string): string {
   return body.map((line, j) => (levels[j] === 1 ? `#${line}` : line)).join("\n");
 }
 
+/** A code span holding nothing but Markdown links and the dashes or commas between them. */
+const CODE_LINKS = /`((?:\[[^\]`\n]+\]\([^)`\s]+\)[\s,–—-]*)+)`/g;
+
+/**
+ * Take Markdown links out of the backticks the model puts around them, where
+ * they render as literal text: on 2026-10-23 every release and issue link of
+ * the agents report read `[v2.1.307](…)–[v2.1.308](…)`, after the prompt's own
+ * example. A code span with anything else in it stays.
+ */
+export function unwrapCodeLinks(md: string): string {
+  return md.replace(CODE_LINKS, "$1");
+}
+
 /**
  * A reply that was to write only Highlights, cut to its Highlights under the
  * fixed heading: a section the model adds anyway would land above the page's

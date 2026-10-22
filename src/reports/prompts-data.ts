@@ -26,7 +26,9 @@ export function modelSources(hf: HfData, openrouter: OpenRouterData) {
 /**
  * Weekly Trends, call 1 of the first round: one 2-sentence summary per
  * numbered Radar and category table row. The rows were selected and ranked in
- * code; parseRowSummaries reads the reply.
+ * code; parseRowSummaries reads the reply. A row without a description gets
+ * `—`: a sentence from the name alone only restated the row ("Helios DeepSeek
+ * fleet is a newly listed project on OpenRouter", 2026-10-23).
  */
 export function buildTrendingSummariesPrompt(rows: ReturnType<typeof summaryRows>, dateStr: string): string {
   const list = rowList(
@@ -40,7 +42,7 @@ ${list}
 ${summaryLine("2 sentences")} — what it is and why it matters to developers.
 - Ground every sentence only in the given description. Do not invent features, users, releases or numbers.
 - No star, gain, download, token or rank figures: the table shows them next to the summary.
-- If the description is empty, say only what the name shows, in one sentence.
+- If the description is empty, write \`N: —\`: the table shows the name and where it was found.
 ${summaryOutputRule(rows.length)}
 - English.
 `;
@@ -142,8 +144,12 @@ Rules:
 const storyLine = (r: Omit<StoryRow, "n">): string =>
   `${r.title} (${SPOTTED.sources[r.source]}, ${siteOf(r.url) || r.url}, ${SPOTTED.counts(r.source, r.points, r.comments)}) — ${r.description ? `description: ${r.description}` : "(no description)"}`;
 
-/** The story summary rules, shared by Spotted and Trends' Most discussed. */
-const STORY_RULES = `- A story with a description: 2 sentences taken from it. Without one: 1 sentence saying only what the title and the site say.
+/**
+ * The story summary rules, shared by Spotted and Trends' Most discussed. A story
+ * without a description gets `—`: a sentence on its title and site only restated
+ * the row ("The story titled 'X' is from openai.com", 2026-10-23).
+ */
+const STORY_RULES = `- A story with a description: 2 sentences taken from it. Without one: write \`N: —\`; the table shows its title and site.
 - Describe no comment thread or community reaction, and no claim, method or result a story's title and description do not state.`;
 
 /**

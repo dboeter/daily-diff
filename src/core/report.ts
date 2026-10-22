@@ -6,7 +6,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { FOOTER } from "./i18n.ts";
 import { sleep } from "./date.ts";
-import { stripModelTitle } from "../reports/report-builders.ts";
+import { stripModelTitle, unwrapCodeLinks } from "../reports/report-builders.ts";
 
 // ---------------------------------------------------------------------------
 // LLM token budget constants
@@ -284,9 +284,9 @@ export async function callLlm(prompt: string, maxTokens = LLM_TOKENS_DEFAULT): P
   }
 }
 
-/** An LLM-written report body, without the H1 the model sometimes adds above the report's own. */
+/** An LLM-written report body, without the H1 the model sometimes adds above the report's own, its links out of backticks. */
 export async function generateBody(prompt: string, maxTokens?: number): Promise<string> {
-  return stripModelTitle(await callLlm(prompt, maxTokens));
+  return unwrapCodeLinks(stripModelTitle(await callLlm(prompt, maxTokens)));
 }
 
 /** `generateBody` with logging; a failed call is logged and returns `fallback`. */

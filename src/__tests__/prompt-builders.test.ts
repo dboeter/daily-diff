@@ -228,7 +228,11 @@ describe("buildProjectDigestPrompt", () => {
     );
     expect(prompt).toContain("Announcement: Our biggest release.");
     expect(prompt).toContain("describe it from the announcement");
-    expect(prompt).toContain("Link each release you name as `[tag](url)`");
+    expect(prompt).toContain(
+      "Link each release you name as a plain Markdown link, [tag](url), never inside backticks",
+    );
+    // The example itself in backticks was copied, links and all, into every release and issue line.
+    expect(prompt).not.toContain("`[");
   });
 
   it("forbids stating absences", () => {
@@ -343,6 +347,12 @@ describe("buildTrendingSummariesPrompt", () => {
     expect(result).toContain("2 lines in total");
     expect(result).toContain("No other text");
     expect(result).toContain("Do not invent");
+  });
+
+  it("asks for `N: —` for a row without a description, not a sentence from its name", () => {
+    expect(buildTrendingSummariesPrompt(rows, "2026-10-05")).toContain(
+      "If the description is empty, write `N: —`",
+    );
   });
 });
 
