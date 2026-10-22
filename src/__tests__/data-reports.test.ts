@@ -21,6 +21,8 @@ import { selectVendorItems } from "../data/jev.ts";
 import { fetchVendorData } from "../data/vendors.ts";
 import { numberRows } from "../reports/summarized-table.ts";
 
+const NO_SPOTTED = { rows: [], summaries: new Map<number, string>() };
+
 const generateBody = vi.fn(async (_prompt: string) => "## Highlights\n\nText.");
 vi.mock("../core/report.ts", async (importOriginal) => ({
   ...(await importOriginal<typeof import("../core/report.ts")>()),
@@ -358,7 +360,7 @@ describe("buildDataReport", () => {
   const stateFile = path.join(dir, "data-state.json");
   const verdictsFile = path.join(dir, "data-verdicts.json");
   const build = (s: DataSection[], vendor: VendorData = vendorOf([]), dataLaw: PolicyItem[] = []) =>
-    buildDataReport(s, vendor, dataLaw, "00:00", "2026-10-17", stateFile, verdictsFile);
+    buildDataReport(s, vendor, dataLaw, NO_SPOTTED, "00:00", "2026-10-17", stateFile, verdictsFile);
 
   const project = (name: string, active: boolean): ProjectActivity => ({
     config: { id: name.toLowerCase(), repo: `org/${name.toLowerCase()}`, name },
@@ -735,6 +737,7 @@ describe("buildDataReport", () => {
       releasedThisWeek(),
       { ...vendorOf([]), nextState: state },
       [],
+      NO_SPOTTED,
       "00:00",
       "2026-10-18",
       stateFile,

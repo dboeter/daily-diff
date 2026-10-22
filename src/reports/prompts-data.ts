@@ -15,6 +15,7 @@ import {
   MODELS_REPORT,
   MSG,
   SECTIONS,
+  SPOTTED,
   WEB_REPORT,
 } from "../core/i18n.ts";
 import { TABLES_MARKER, rowList, summaryLine, summaryOutputRule, type Numbered } from "./summarized-table.ts";
@@ -27,6 +28,7 @@ import type { DevtoData } from "../sources/devto.ts";
 import type { LobstersData } from "../sources/lobsters.ts";
 import type { PolicyItem } from "../policy/policy.ts";
 import type { KeptVendorItem } from "../data/jev.ts";
+import { siteOf, type SpottedRow } from "../spotted/spotted.ts";
 
 /** Which sources the models report covers; the prompt and the report's sources line both read it. */
 export function modelSources(hf: HfData, openrouter: OpenRouterData) {
@@ -168,6 +170,32 @@ Rules:
 `;
 }
 
+/**
+ * Spotted, one call for every page's rows: one summary per numbered story.
+ * The rows are numbered by selectSpotted; parseRowSummaries reads the reply.
+ * The model sees titles, sites, counts and descriptions, never the article or
+ * the thread: on 2026-10-19 summaries of HN titles alone guessed what an article argues.
+ */
+export function buildSpottedSummariesPrompt(rows: SpottedRow[], dateStr: string): string {
+  const list = rowList(
+    rows,
+    (r) =>
+      `${r.title} (${SPOTTED.sources[r.source]}, ${siteOf(r.url) || r.url}, ${SPOTTED.counts(r.source, r.points, r.comments)}) — ${r.description ? `description: ${r.description}` : "(no description)"}`,
+  );
+  return `You summarize community stories (Hacker News, Lobste.rs, Dev.to) for AI and data practitioners.
+
+Below are ${rows.length} numbered stories as of ${dateStr}, each with its source, the linked site, its counts and, where given, a description (the linked page's own for Hacker News, the author's for Dev.to). You have read neither the article nor the comment thread.
+
+${list}
+
+${summaryLine("1-2 sentences")} — what the story is about.
+- With a description: 2 sentences taken from it. Without one: 1 sentence saying only what the title and the site say.
+- Describe no comment thread or community reaction, and no claim, method or result the title and description do not state.
+${summaryOutputRule(rows.length)}
+- English.
+`;
+}
+
 /** The data report's reader, shared by its two vendor calls. */
 const DATA_READER =
   "a data engineer at a consultancy whose clients run Databricks, Snowflake, Azure / Microsoft Fabric and GCP / BigQuery";
@@ -226,7 +254,7 @@ export function buildDataProsePrompt(sectionsMd: string, dateStr: string): strin
   ];
   return `You are the editor of a daily data engineering report for ${DATA_READER}.
 
-Below are today's report sections, ${dateStr}: vendor release-note tables (⚠️ marks a deprecation, retirement or breaking change; 🤖 an AI feature in a data platform) and the releases and hot issues of tracked open-source projects.
+Below are today's report sections, ${dateStr}: vendor release-note tables (⚠️ marks a deprecation, retirement or breaking change; 🤖 an AI feature in a data platform), the releases and hot issues of tracked open-source projects and, under Spotted, community stories about data engineering.
 
 ${sectionsMd}
 
@@ -524,7 +552,7 @@ export function firstHighlight(md: string): string | null {
   return `${(space > 0 ? cut.slice(0, space) : cut).replace(/[,;:]$/, "")}…`;
 }
 
-/** The discussions report's sources. Dev.to and Lobste.rs are fetched on the weekly run only. */
+/** The discussions report's sources. */
 export interface DiscussionsData {
   hn: HnData;
   devto: DevtoData;
@@ -544,10 +572,9 @@ export function discussionSources({ hn, devto, lobsters }: DiscussionsData) {
 }
 
 /**
- * The discussions report: Hacker News daily, plus Dev.to and Lobste.rs on the
- * weekly run — one report since October 2026, when the weekly community
- * report was folded in. A source that failed or was not fetched gets neither
- * input nor section.
+ * The discussions report: Hacker News, Dev.to and Lobste.rs — one report since
+ * October 2026, when the weekly community report was folded in. A source that
+ * failed gets neither input nor section.
  */
 export function buildDiscussionsPrompt(data: DiscussionsData, dateStr: string): string {
   const { hn, devto, lobsters } = data;
@@ -589,7 +616,7 @@ Organized by category: a \`### <category>\` heading per category, each followed 
   }
   if (hasDevto) {
     inputs.push(
-      `## Dev.to (top AI articles of the week, ${devto.articles.length} articles)\n\n` +
+      `## Dev.to (top AI articles of the last 2 days, ${devto.articles.length} articles)\n\n` +
         devto.articles
           .map(
             (a, i) =>
@@ -613,7 +640,7 @@ The 5-10 most valuable articles as a **Markdown table**:
   }
   if (hasLobsters) {
     inputs.push(
-      `## Lobste.rs (AI/ML stories of the last 7 days, ${lobsters.stories.length} stories)\n\n` +
+      `## Lobste.rs (AI and database stories of the last 2 days, ${lobsters.stories.length} stories)\n\n` +
         lobsters.stories
           .map(
             (s, i) =>
@@ -635,7 +662,7 @@ The 3-8 most notable stories as a **Markdown table**:
    - **Summary**: 2 sentences — why it's worth reading`);
   }
 
-  const when = weekly ? "today on Hacker News and this week on Dev.to and Lobste.rs" : "today on Hacker News";
+  const when = weekly ? "today on Hacker News, Dev.to and Lobste.rs" : "today on Hacker News";
   return `You are an AI industry news analyst. The following are AI-related posts from developer communities as of ${dateStr}. You have only each item's title, link, counts and, where given, a description (the linked page's own for HN, the author's for Dev.to) — not the article and not the comment thread:
 
 ---

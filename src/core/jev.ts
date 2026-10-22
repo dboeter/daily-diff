@@ -171,6 +171,13 @@ export interface VerdictEntry<A> {
 
 export type VerdictCache<A> = ItemsFile<VerdictEntry<A>>;
 
+/** A Jev `choice` question's answer. */
+export interface ChoiceAnswer {
+  choice: string;
+  confidence: number;
+  probabilities: Record<string, number>;
+}
+
 /** Who decided a run's selection: Jev, or the caller's keyword fallback. */
 export type RankedBy = "jev" | "keywords";
 

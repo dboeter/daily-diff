@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import { agentMatcher, agentTerms, matchProjectNews, NEWS_PER_AGENT } from "../reports/agent-news.ts";
 import { DATA_SECTION_KEYS, loadConfig } from "../core/config.ts";
 import type { RepoConfig } from "../core/github.ts";
-import type { HnData, HnStory } from "../sources/hn.ts";
+import type { Story } from "../spotted/spotted.ts";
 import { EMPTY_NPM, EMPTY_OPENROUTER, type TrendingData } from "../trending/trending.ts";
 import type { WebFetchResult } from "../sources/web.ts";
 
@@ -19,22 +19,20 @@ const pi: RepoConfig = {
 };
 const openclaw: RepoConfig = { id: "openclaw", repo: "openclaw/openclaw", name: "OpenClaw" };
 
-function story(title: string, id = title): HnStory {
+function story(title: string, id = title): Story {
   return {
-    id,
+    id: `hn:${id}`,
+    source: "hn",
     title,
     url: `https://example.com/${encodeURIComponent(id)}`,
-    hnUrl: `https://news.ycombinator.com/item?id=${encodeURIComponent(id)}`,
+    discussionUrl: `https://news.ycombinator.com/item?id=${encodeURIComponent(id)}`,
     points: 100,
     comments: 20,
-    author: "alice",
-    createdAt: "2026-10-04T00:00:00Z",
+    published: "2026-10-04T00:00:00Z",
   };
 }
 
-function hn(...titles: string[]): HnData {
-  return { stories: titles.map((t) => story(t)), fetchSuccess: true };
-}
+const hn = (...titles: string[]): Story[] => titles.map((t) => story(t));
 
 const matches = (cfg: RepoConfig, text: string) => agentMatcher(cfg).test(text);
 
@@ -99,7 +97,7 @@ describe("agentMatcher", () => {
 describe("matchProjectNews", () => {
   it("assigns HN stories to the agents they mention", () => {
     const news = matchProjectNews([claudeCode, openclaw], {
-      hn: hn("Claude Code hooks deep dive", "OpenClaw vs Claude Code", "Unrelated GPU news"),
+      stories: hn("Claude Code hooks deep dive", "OpenClaw vs Claude Code", "Unrelated GPU news"),
     });
     expect(news.get("claude-code")!.map((n) => n.title)).toEqual([
       "Claude Code hooks deep dive",
@@ -108,11 +106,32 @@ describe("matchProjectNews", () => {
     expect(news.get("openclaw")!.map((n) => n.title)).toEqual(["OpenClaw vs Claude Code"]);
   });
 
-  it("links HN items to the discussion and carries their score", () => {
-    const [item] = matchProjectNews([openclaw], { hn: hn("OpenClaw 2.0") }).get("openclaw")!;
+  it("links HN items to the discussion and carries their score and story id", () => {
+    const [item] = matchProjectNews([openclaw], { stories: hn("OpenClaw 2.0") }).get("openclaw")!;
     expect(item!.source).toBe("Hacker News");
     expect(item!.url).toContain("news.ycombinator.com");
     expect(item!.detail).toBe("100 points, 20 comments");
+    expect(item!.id).toBe("hn:OpenClaw 2.0");
+  });
+
+  it("matches Lobste.rs and Dev.to stories too, a Dev.to story's points as reactions", () => {
+    const lobsters: Story = {
+      ...story("OpenClaw on a Pi"),
+      id: "lobsters:abc",
+      source: "lobsters",
+      discussionUrl: "https://lobste.rs/s/abc",
+    };
+    const devto: Story = {
+      ...story("OpenClaw tips"),
+      id: "devto:7",
+      source: "devto",
+      discussionUrl: "https://dev.to/a/b",
+    };
+    const items = matchProjectNews([openclaw], { stories: [lobsters, devto] }).get("openclaw")!;
+    expect(items.map((n) => [n.source, n.url, n.detail, n.id])).toEqual([
+      ["Lobste.rs", "https://lobste.rs/s/abc", "100 points, 20 comments", "lobsters:abc"],
+      ["Dev.to", "https://dev.to/a/b", "100 reactions, 20 comments", "devto:7"],
+    ]);
   });
 
   it("matches web pages by URL slug when the title is generic", () => {
@@ -219,7 +238,7 @@ describe("matchProjectNews", () => {
       story("OpenClaw one again", "1"),
       ...Array.from({ length: 10 }, (_, i) => story(`OpenClaw ${i}`, `x${i}`)),
     ];
-    const items = matchProjectNews([openclaw], { hn: { stories, fetchSuccess: true } }).get("openclaw")!;
+    const items = matchProjectNews([openclaw], { stories }).get("openclaw")!;
     expect(items).toHaveLength(NEWS_PER_AGENT);
     expect(new Set(items.map((n) => n.url)).size).toBe(items.length);
   });
@@ -232,7 +251,7 @@ describe("matchProjectNews", () => {
       keywords: ["codex"],
     };
     const news = matchProjectNews([claudeCode, codex, openclaw], {
-      hn: hn("Memory plugin for Claude Code, Codex and OpenClaw", "Codex vs Claude Code"),
+      stories: hn("Memory plugin for Claude Code, Codex and OpenClaw", "Codex vs Claude Code"),
     });
     expect(news.get("claude-code")!.map((n) => n.title)).toEqual(["Codex vs Claude Code"]);
     expect(news.get("openclaw")).toEqual([]);
@@ -271,7 +290,7 @@ describe("data project news", () => {
   });
 
   it("keeps a story naming three data projects, which the agents pool would drop", () => {
-    const sources = { hn: hn("DuckDB vs Polars on Apache Iceberg tables") };
+    const sources = { stories: hn("DuckDB vs Polars on Apache Iceberg tables") };
     const news = matchProjectNews(dataRepos, sources, Infinity);
     for (const id of ["duckdb", "polars", "iceberg"]) expect(news.get(id)).toHaveLength(1);
     expect(matchProjectNews(dataRepos, sources).get("duckdb")).toEqual([]);

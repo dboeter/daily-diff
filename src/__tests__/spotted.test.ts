@@ -1,0 +1,230 @@
+import { describe, expect, it } from "vitest";
+import {
+  freshStories,
+  nextLog,
+  selectSpotted,
+  storiesFrom,
+  type SpottedLog,
+  type SpottedPage,
+  type Story,
+  type StorySource,
+} from "../spotted/spotted.ts";
+import { renderSpottedTable } from "../reports/report-builders.ts";
+import { buildSpottedSummariesPrompt } from "../reports/prompts-data.ts";
+import { numberRows, parseRowSummaries } from "../reports/summarized-table.ts";
+
+const DATE = "2026-10-22";
+
+const story = (id: string, source: StorySource = "hn", points = 10, extra: Partial<Story> = {}): Story => ({
+  id: `${source}:${id}`,
+  source,
+  title: `Story ${id}`,
+  url: `https://example.com/${id}`,
+  discussionUrl: `https://news.ycombinator.com/item?id=${id}`,
+  points,
+  comments: 3,
+  published: "2026-10-21T10:00:00Z",
+  ...extra,
+});
+
+const logged = (
+  s: Story,
+  fields: Partial<SpottedLog["items"][string]> = {},
+): SpottedLog["items"][string] => ({
+  source: s.source,
+  title: s.title,
+  url: s.url,
+  discussionUrl: s.discussionUrl,
+  points: s.points,
+  comments: s.comments,
+  firstSeen: "2026-10-20",
+  lastSeen: "2026-10-20",
+  ...fields,
+});
+
+describe("storiesFrom", () => {
+  it("maps each source's fields and ids", () => {
+    const stories = storiesFrom(
+      {
+        fetchSuccess: true,
+        stories: [
+          {
+            id: "1",
+            title: "HN",
+            url: "https://a.com",
+            hnUrl: "https://news.ycombinator.com/item?id=1",
+            points: 5,
+            comments: 2,
+            author: "x",
+            createdAt: "2026-10-21T00:00:00Z",
+            description: "Page text",
+          },
+        ],
+      },
+      {
+        fetchSuccess: true,
+        stories: [
+          {
+            id: "abc",
+            title: "L",
+            url: "https://b.com",
+            commentsUrl: "https://lobste.rs/s/abc",
+            score: 7,
+            commentCount: 1,
+            author: "y",
+            publishedAt: "2026-10-21T01:00:00Z",
+            tags: ["ai"],
+          },
+        ],
+      },
+      {
+        fetchSuccess: true,
+        articles: [
+          {
+            id: 9,
+            title: "D",
+            description: "",
+            url: "https://dev.to/x/d",
+            publishedAt: "2026-10-21T02:00:00Z",
+            positiveReactionsCount: 20,
+            commentsCount: 4,
+            readingTimeMinutes: 3,
+            tags: [],
+            user: "z",
+          },
+        ],
+      },
+    );
+    expect(stories.map((s) => [s.id, s.discussionUrl, s.points, s.description])).toEqual([
+      ["hn:1", "https://news.ycombinator.com/item?id=1", 5, "Page text"],
+      ["lobsters:abc", "https://lobste.rs/s/abc", 7, undefined],
+      ["devto:9", "https://dev.to/x/d", 20, undefined],
+    ]);
+  });
+});
+
+describe("freshStories", () => {
+  it("drops a story shown on an earlier day, keeps one shown today for a same-day re-run", () => {
+    const [old, today, never, unlogged] = [story("1"), story("2"), story("3"), story("4")];
+    const log: SpottedLog = {
+      items: {
+        [old.id]: logged(old, { shown: "2026-10-21" }),
+        [today.id]: logged(today, { shown: DATE }),
+        [never.id]: logged(never),
+      },
+    };
+    expect(freshStories([old, today, never, unlogged], log, DATE).map((s) => s.id)).toEqual([
+      today.id,
+      never.id,
+      unlogged.id,
+    ]);
+  });
+});
+
+describe("nextLog", () => {
+  it("updates counts and lastSeen of every fetched story, shown before or not", () => {
+    const s = story("1", "hn", 300);
+    const log: SpottedLog = { items: { [s.id]: logged({ ...s, points: 10 }, { shown: "2026-10-21" }) } };
+    const next = nextLog(log, [{ ...s, comments: 95 }], [], DATE);
+    expect(next.items[s.id]).toMatchObject({
+      points: 300,
+      comments: 95,
+      firstSeen: "2026-10-20",
+      lastSeen: DATE,
+      shown: "2026-10-21",
+    });
+  });
+
+  it("sets shown only where it has none", () => {
+    const [a, b] = [story("a"), story("b")];
+    const log: SpottedLog = { items: { [b.id]: logged(b, { shown: "2026-10-20" }) } };
+    const next = nextLog(log, [a, b], [a.id, b.id], DATE);
+    expect(next.items[a.id]).toMatchObject({ firstSeen: DATE, shown: DATE });
+    expect(next.items[b.id]!.shown).toBe("2026-10-20");
+  });
+
+  it("prunes entries last seen more than 8 days ago", () => {
+    const [kept, pruned] = [story("k"), story("p")];
+    const log: SpottedLog = {
+      items: {
+        [kept.id]: logged(kept, { lastSeen: "2026-10-14" }),
+        [pruned.id]: logged(pruned, { lastSeen: "2026-10-13" }),
+      },
+    };
+    expect(Object.keys(nextLog(log, [], [], DATE).items)).toEqual([kept.id]);
+  });
+});
+
+describe("selectSpotted", () => {
+  it("caps each page at 6 HN, 2 Lobste.rs and 2 Dev.to by points, numbered agents, models, data", () => {
+    const stories = [
+      ...Array.from({ length: 8 }, (_, i) => story(`h${i}`, "hn", i)),
+      ...Array.from({ length: 3 }, (_, i) => story(`l${i}`, "lobsters", i)),
+      ...Array.from({ length: 3 }, (_, i) => story(`d${i}`, "devto", i)),
+      story("data1", "hn", 1),
+      story("models1", "devto", 1),
+      story("dropped", "hn", 1000),
+    ];
+    const pageOf = (s: Story): SpottedPage | null =>
+      s.id.includes("data")
+        ? "data"
+        : s.id.includes("models")
+          ? "models"
+          : s.id.includes("dropped")
+            ? null
+            : "agents";
+    const rows = selectSpotted(stories, pageOf);
+    expect(rows.map((r) => [r.n, r.page, r.id])).toEqual([
+      ...[7, 6, 5, 4, 3, 2].map((i, k) => [k + 1, "agents", `hn:h${i}`]),
+      [7, "agents", "lobsters:l2"],
+      [8, "agents", "lobsters:l1"],
+      [9, "agents", "devto:d2"],
+      [10, "agents", "devto:d1"],
+      [11, "models", "devto:models1"],
+      [12, "data", "hn:data1"],
+    ]);
+  });
+});
+
+describe("renderSpottedTable", () => {
+  it("links the story and its discussion with counts, reactions for Dev.to", () => {
+    const rows = numberRows([
+      { ...story("1", "hn", 312), comments: 95, page: "agents" as const },
+      {
+        ...story("2", "devto", 40),
+        discussionUrl: "https://dev.to/a/2",
+        description: "An article | with a pipe",
+        page: "agents" as const,
+      },
+    ]);
+    const md = renderSpottedTable(rows, new Map([[1, "What it is."]]));
+    expect(md).toBe(
+      "## Spotted\n\n" +
+        "| Story | Source | Discussion | Summary |\n| :--- | :--- | :--- | :--- |\n" +
+        "| [Story 1](https://example.com/1) | Hacker News | [312 points, 95 comments](https://news.ycombinator.com/item?id=1) | What it is. |\n" +
+        "| [Story 2](https://example.com/2) | Dev.to | [40 reactions, 3 comments](https://dev.to/a/2) | An article \\| with a pipe |",
+    );
+  });
+
+  it("renders nothing without rows", () => {
+    expect(renderSpottedTable([], new Map())).toBe("");
+  });
+});
+
+describe("buildSpottedSummariesPrompt", () => {
+  it("lists every row by its number, with its site and description, on the summaries contract", () => {
+    const rows = numberRows([
+      { ...story("1"), description: "The page says this.", page: "agents" as const },
+      { ...story("2", "lobsters"), url: "https://www.blog.dev/post", page: "data" as const },
+    ]);
+    const prompt = buildSpottedSummariesPrompt(rows, DATE);
+    expect(prompt).toContain(
+      "1. Story 1 (Hacker News, example.com, 10 points, 3 comments) — description: The page says this.",
+    );
+    expect(prompt).toContain("2. Story 2 (Lobste.rs, blog.dev, 10 points, 3 comments) — (no description)");
+    expect(prompt).toContain("`N: <1-2 sentences>`");
+    expect(prompt).toContain("2 lines in total");
+    expect(prompt).toMatch(/Describe no comment thread/);
+    expect(parseRowSummaries("1: One.\n2: Two.").get(2)).toBe("Two.");
+  });
+});

@@ -88,6 +88,41 @@ describe("fetchHnData", () => {
     expect(result.stories.map((story) => story.points)).toEqual([100, 300]);
   });
 
+  it("keeps stories shown on an earlier day but does not count them toward the cut", async () => {
+    vi.spyOn(globalThis, "fetch").mockImplementation(async (input) => {
+      const url = String(input);
+      if (url.endsWith("/topstories.json")) return jsonResponse(Array.from({ length: 50 }, (_, i) => i + 1));
+      const id = Number(url.match(/item\/(\d+)\.json$/)?.[1]);
+      return jsonResponse({
+        id,
+        type: "story",
+        title: `AI story ${id}`,
+        score: id,
+        url: `https://e.com/${id}`,
+      });
+    });
+
+    expect((await fetchHnData()).stories).toHaveLength(40);
+    const shown = new Set(["2", "5", "7"]);
+    const { stories } = await fetchHnData((id) => shown.has(id));
+    expect(stories.map((s) => s.id)).toEqual(Array.from({ length: 43 }, (_, i) => String(i + 1)));
+  });
+
+  it("admits data engineering stories next to AI ones", async () => {
+    vi.spyOn(globalThis, "fetch").mockImplementation(async (input) => {
+      const url = String(input);
+      if (url.endsWith("/topstories.json")) return jsonResponse([1, 2, 3]);
+      const id = Number(url.match(/item\/(\d+)\.json$/)?.[1]);
+      const titles = ["DuckDB 2.0 released", "Postgres 19 beta", "A new terminal emulator"];
+      return jsonResponse({ id, type: "story", title: titles[id - 1], score: 1, url: `https://e.com/${id}` });
+    });
+
+    expect((await fetchHnData()).stories.map((s) => s.title)).toEqual([
+      "DuckDB 2.0 released",
+      "Postgres 19 beta",
+    ]);
+  });
+
   it("returns an unsuccessful result when the topstories request fails", async () => {
     vi.spyOn(globalThis, "fetch").mockResolvedValue(jsonResponse({ error: "failed" }, 500));
 

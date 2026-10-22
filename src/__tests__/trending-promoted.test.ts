@@ -8,7 +8,7 @@ import {
 import { matchProjectNews } from "../reports/agent-news.ts";
 import type { RepoConfig } from "../core/github.ts";
 import type { Category } from "../trending/rank.ts";
-import type { HnData } from "../sources/hn.ts";
+import type { Story } from "../spotted/spotted.ts";
 
 const DATE = "2026-10-20";
 const record = (repos: [string, Category][], date = "2026-10-19"): { promoted: PromotedRecord } => ({
@@ -116,11 +116,10 @@ describe("promotedRepos", () => {
 
   it("a promoted repo with an ordinary-word name does not match news using the word", () => {
     const [plugins] = promotedRepos(record([["cursor/plugins", "coding_agent"]]), DATE, []).agents;
-    const story = (title: string) => ({ title, hnUrl: `https://hn/${title}`, points: 1, comments: 1 });
-    const hn = {
-      stories: [story("Plugins considered harmful"), story("cursor/plugins hits 12k stars")],
-    } as unknown as HnData;
-    const news = matchProjectNews([plugins!], { hn });
+    const story = (title: string) =>
+      ({ title, source: "hn", discussionUrl: `https://hn/${title}`, points: 1, comments: 1 }) as Story;
+    const stories = [story("Plugins considered harmful"), story("cursor/plugins hits 12k stars")];
+    const news = matchProjectNews([plugins!], { stories });
     expect(news.get(plugins!.id)?.map((n) => n.title)).toEqual(["cursor/plugins hits 12k stars"]);
   });
 });

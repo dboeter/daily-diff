@@ -20,6 +20,7 @@ import {
   mapJev,
   saveItemsFile,
   type AskJev,
+  type ChoiceAnswer,
   type VerdictCache,
 } from "../core/jev.ts";
 import type { Category, GithubRow, RadarRow } from "./rank.ts";
@@ -177,12 +178,6 @@ const CLASSIFY_QUESTIONS = {
     },
   },
 };
-
-interface ChoiceAnswer {
-  choice: string;
-  confidence: number;
-  probabilities: Record<string, number>;
-}
 
 /** Jev's raw answers, as saved. A migrated or hand-added entry may lack the probabilities, or the noul (null). */
 export interface ClassifyAnswers {

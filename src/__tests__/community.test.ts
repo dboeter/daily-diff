@@ -50,6 +50,7 @@ describe("toLobstersStory", () => {
 
     const story = toLobstersStory(raw);
     expect(story).toEqual({
+      id: "xyz123",
       title: "Show Lobsters: Minimal Llama Inference Engine in C",
       url: "https://github.com/example/llama-c",
       commentsUrl: "https://lobste.rs/s/xyz123/minimal_llama",

@@ -10,6 +10,7 @@ import type { TrendingReportData } from "../trending/rank.ts";
 import type { PolicyItem } from "../policy/policy.ts";
 import type { KeptVendorItem } from "../data/jev.ts";
 import type { VendorAction } from "../data/vendors.ts";
+import type { SpottedRow } from "../spotted/spotted.ts";
 import { VENDOR_SECTIONS, vendorSection, type VendorSection } from "../core/config.ts";
 import { summaryText, type Numbered } from "./summarized-table.ts";
 import {
@@ -21,6 +22,7 @@ import {
   TRENDING_REPORT,
   POLICY_REPORT,
   DATA_REPORT,
+  SPOTTED,
   type ReportId,
 } from "../core/i18n.ts";
 
@@ -383,4 +385,20 @@ export function renderVendorTables(
     if (rows.length) tables[section] = `${DATA_REPORT.vendorTableHeader}\n${rows.join("\n")}`;
   }
   return tables;
+}
+
+/**
+ * A page's Spotted section: each story linked to its article, its discussion
+ * linked with its counts, and the summary for its own number (else its
+ * description, truncated). Empty when the page has no rows.
+ */
+export function renderSpottedTable(rows: SpottedRow[], summaries: Map<number, string>): string {
+  if (!rows.length) return "";
+  const lines = rows.map(
+    (r) =>
+      `| [${cell(r.title)}](${cell(r.url)}) | ${SPOTTED.sources[r.source]} | ` +
+      `[${SPOTTED.counts(r.source, r.points, r.comments)}](${cell(r.discussionUrl)}) | ` +
+      `${cell(summaryText(summaries, { n: r.n, description: r.description ?? "" }))} |`,
+  );
+  return `## ${SPOTTED.heading}\n\n${SPOTTED.tableHeader}\n${lines.join("\n")}`;
 }

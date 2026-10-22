@@ -125,7 +125,18 @@ export const TRENDING_REPORT = {
   },
 } as const;
 
-// The discussions report's per-source sections; Dev.to and Lobste.rs on the weekly run only.
+// Community stories routed by topic (src/spotted/), rendered in code on their topic's page.
+export const SPOTTED = {
+  heading: "Spotted",
+  tableHeader: "| Story | Source | Discussion | Summary |\n| :--- | :--- | :--- | :--- |",
+  /** The Source column, and the source of a story matched as project news. */
+  sources: { hn: "Hacker News", lobsters: "Lobste.rs", devto: "Dev.to" },
+  /** The Discussion cell, e.g. "312 points, 95 comments"; a Dev.to story's points are reactions. */
+  counts: (source: "hn" | "lobsters" | "devto", points: number, comments: number) =>
+    `${points} ${source === "devto" ? "reactions" : "points"}, ${comments} comments`,
+} as const;
+
+// The discussions report's per-source sections.
 export const DISCUSSIONS_REPORT = {
   hnHeading: "Hacker News",
   devtoHeading: "Dev.to",

@@ -55,6 +55,7 @@ import {
   renderVendorTables,
   renderVendorActions,
   renderReleaseTable,
+  renderSpottedTable,
   policyTitleLabel,
   type ProjectGroup,
 } from "./report-builders.ts";
@@ -75,6 +76,7 @@ import { DATA_STATE_FILE, type DataState, type VendorData } from "../data/vendor
 import { DATA_VERDICTS_FILE } from "../data/jev.ts";
 import { commitWrites, planWrites } from "../core/new-items.ts";
 import type { DataSectionKey } from "../core/config.ts";
+import type { SpottedRow } from "../spotted/spotted.ts";
 
 /** A finished report: main() writes its file and opens its issue (title and label from REPORTS). */
 export interface SavedReport {
@@ -441,12 +443,15 @@ function newReleases(
  * Highlights. Null when there are no kept vendor items and no repo activity.
  * Worth a Look is code only: links to `dataLaw` (today's Policy Watch items
  * that are EU data law), left out when there are none; it never makes a report
- * on its own.
+ * on its own. Spotted (code-rendered, summarized by main()'s Spotted call)
+ * goes between Across platforms and Worth a Look, and never makes a report on
+ * its own either; the prose call sees it.
  */
 export async function buildDataReport(
   sections: DataSection[],
   vendor: VendorData,
   dataLaw: PolicyItem[],
+  spotted: { rows: SpottedRow[]; summaries: Map<number, string> },
   utcStr: string,
   dateStr: string,
   stateFile = DATA_STATE_FILE,
@@ -516,12 +521,14 @@ export async function buildDataReport(
     },
   ];
 
+  const spottedMd = renderSpottedTable(spotted.rows, spotted.summaries);
   // The prose call sees what the reader sees below Highlights.
   const sectionsMd = groups
     .map((g) => {
       const body = g.activities.some(hasActivity) ? nestHeadings(g.summary, 3) : "";
       return g.preamble || body ? `## ${g.title}\n\n${[g.preamble, body].filter(Boolean).join("\n\n")}` : "";
     })
+    .concat(spottedMd)
     .filter(Boolean)
     .join("\n\n");
   const prose = await generateOr(
@@ -537,7 +544,7 @@ export async function buildDataReport(
   const lawLinks = dataLaw
     .map((i) => `- [${policyTitleLabel(i.title)}](${i.link}) — Policy Watch${i.stage ? `, ${i.stage}` : ""}`)
     .join("\n");
-  const epilogue = [acrossPlatforms, lawLinks ? `## ${SECTIONS.worthALook}\n\n${lawLinks}` : ""]
+  const epilogue = [acrossPlatforms, spottedMd, lawLinks ? `## ${SECTIONS.worthALook}\n\n${lawLinks}` : ""]
     .filter(Boolean)
     .join("\n\n---\n\n");
 

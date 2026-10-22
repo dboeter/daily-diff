@@ -23,6 +23,7 @@ import { type ProjectActivity, buildProjectDigestPrompt, hasActivity } from "./r
 import { matchProjectNews } from "./reports/agent-news.ts";
 import {
   buildHighlightsPrompt,
+  buildSpottedSummariesPrompt,
   forcedHighlightReports,
   withFallbackHighlights,
   type ReportHighlights,
@@ -43,8 +44,10 @@ import {
   buildProjectReportContent,
   buildStealthSection,
   renderReportBar,
+  renderSpottedTable,
   withReportBar,
 } from "./reports/report-builders.ts";
+import { parseRowSummaries } from "./reports/summarized-table.ts";
 import {
   buildWebReport,
   buildTrendingReport,
@@ -66,6 +69,23 @@ import { fetchVendorData, type VendorData } from "./data/vendors.ts";
 import { fetchHfData, type HfData } from "./sources/hf.ts";
 import { fetchDevtoData, type DevtoData } from "./sources/devto.ts";
 import { fetchLobstersData, type LobstersData } from "./sources/lobsters.ts";
+import {
+  freshStories,
+  loadSpottedLog,
+  nextLog,
+  saveSpottedLog,
+  selectSpotted,
+  shownBefore,
+  storiesFrom,
+  type SpottedPage,
+} from "./spotted/spotted.ts";
+import {
+  loadTopicCache,
+  routeStories,
+  saveTopicCache,
+  spottedRankingFile,
+  SPOTTED_PAGE,
+} from "./spotted/jev.ts";
 import { DATA_SECTION_KEYS, loadConfig, type SectionKey } from "./core/config.ts";
 import { resolvePagesUrl } from "./cli/notify.ts";
 import { toCstDateStr, toUtcStr, isWeeklyRun, sleep } from "./core/date.ts";
@@ -165,6 +185,8 @@ async function fetchAllData(
   now: Date,
   webState: WebState,
   weekly: boolean,
+  /** A Hacker News story a page showed on an earlier day (the Spotted log). */
+  hnShown: (storyId: string) => boolean,
 ): Promise<{
   agentFetches: ProjectFetch[];
   infraFetches: ProjectFetch[];
@@ -186,8 +208,8 @@ async function fetchAllData(
   // The data report's Releases this week: its repos release about weekly, so a 24h window saw none on most days.
   const weekSince = new Date(now.getTime() - 7 * DAY_MS);
   console.log(
-    `  Tracking daily: ${[...AGENTS, ...INFRA_REPOS, ...DATA_SECTIONS.flatMap((s) => s.repos)].map((r) => r.id).join(", ")}, web, hn, arxiv, policy, trending (news only)` +
-      (weekly ? " | weekly: skills, trending, hf, devto, lobsters" : ""),
+    `  Tracking daily: ${[...AGENTS, ...INFRA_REPOS, ...DATA_SECTIONS.flatMap((s) => s.repos)].map((r) => r.id).join(", ")}, web, hn, devto, lobsters, arxiv, policy, trending (news only)` +
+      (weekly ? " | weekly: skills, trending, hf" : ""),
   );
 
   const noSkills: SkillsData = { prs: [], issues: [], fetchSuccess: false };
@@ -219,13 +241,13 @@ async function fetchAllData(
     // Fetched every day — the agents report matches trending repos as news —
     // but only reported weekly.
     fetchTrendingData(weekly ? "weekly" : "daily", toCstDateStr(now)),
-    fetchHnData(),
+    fetchHnData(hnShown),
     fetchArxivData(toCstDateStr(now)),
     fetchPolicyData(CONFIG.policy, now, toCstDateStr(now)),
     fetchVendorData(CONFIG.data, now),
     weekly ? fetchHfData() : Promise.resolve<HfData>({ models: [], fetchSuccess: false }),
-    weekly ? fetchDevtoData() : Promise.resolve<DevtoData>({ articles: [], fetchSuccess: false }),
-    weekly ? fetchLobstersData() : Promise.resolve<LobstersData>({ stories: [], fetchSuccess: false }),
+    fetchDevtoData(),
+    fetchLobstersData(),
     // Daily, unlike the rest of OpenRouter: stealth models are free for a short window.
     fetchStealthModels(),
   ]);
@@ -295,6 +317,8 @@ async function main(): Promise<void> {
 
   // 1. Fetch all data in parallel
   const webState = loadWebState();
+  // Before the fetch: HN's cut counts only the stories no page has shown.
+  const spottedLog = loadSpottedLog();
   const {
     agentFetches,
     infraFetches,
@@ -310,12 +334,14 @@ async function main(): Promise<void> {
     devtoData,
     lobstersData,
     stealthModels,
-  } = await fetchAllData(now, webState, weekly);
+  } = await fetchAllData(now, webState, weekly, (id) => shownBefore(spottedLog, `hn:${id}`, dateStr));
+  const stories = storiesFrom(hnData, lobstersData, devtoData);
+  const fresh = freshStories(stories, spottedLog, dateStr);
 
   // Agent news is matched against the other sources' data, so it waits for them.
   // Agents and tooling in one pass: an item naming 3+ of them is a compatibility list.
   const projectNews = matchProjectNews([...AGENTS, ...INFRA_REPOS], {
-    hn: hnData,
+    stories: fresh,
     web: webResults,
     trending: trendingData,
   });
@@ -326,7 +352,7 @@ async function main(): Promise<void> {
   // drop: a story naming DuckDB, Polars and Iceberg is news about the stack.
   const dataNews = matchProjectNews(
     DATA_SECTIONS.flatMap((s) => s.repos),
-    { hn: hnData, web: webResults, trending: trendingData },
+    { stories: fresh, web: webResults, trending: trendingData },
     Infinity,
   );
   const dataSections = DATA_SECTION_KEYS.map((key, i) => ({
@@ -338,12 +364,41 @@ async function main(): Promise<void> {
     })),
   }));
 
-  // 2. The agents report's two sections; every other report makes its own calls in its builder.
+  // Spotted: the fresh stories no project in either pool claimed, routed to their topic's page.
+  const matchedIds = new Set(
+    [...projectNews.values(), ...dataNews.values()].flat().flatMap((n) => (n.id ? [n.id] : [])),
+  );
+  const unmatched = fresh.filter((s) => !matchedIds.has(s.id));
+  const topicCache = loadTopicCache();
+  const routing = await routeStories(unmatched, {
+    apiKey: process.env["TYPESAFE_API_KEY"],
+    cache: topicCache,
+    dateStr,
+  });
+  const spottedRows = selectSpotted(unmatched, (s) => {
+    const topic = routing.topics.get(s.id);
+    return topic ? SPOTTED_PAGE[topic] : null;
+  });
+  const spottedOf = (page: SpottedPage) => spottedRows.filter((r) => r.page === page);
+
+  // 2. The agents report's two sections and every page's Spotted summaries (one call, before the
+  // page builders: the data report's prose call sees its Spotted table); every other report makes
+  // its own calls in its builder.
   console.log("  Generating summaries...");
-  const [agentsSummary, infraSummary] = await Promise.all([
+  const [agentsSummary, infraSummary, spottedSummaries] = await Promise.all([
     summarizeProjects("agents", agentActivities, dateStr),
     summarizeProjects("infra", infraActivities, dateStr),
+    spottedRows.length
+      ? generateOr(
+          "spotted-summaries",
+          buildSpottedSummariesPrompt(spottedRows, dateStr),
+          "",
+          LLM_TOKENS_LISTING,
+        )
+      : "",
   ]);
+  const spottedSummaryMap = parseRowSummaries(spottedSummaries);
+  const agentsSpotted = renderSpottedTable(spottedOf("agents"), spottedSummaryMap);
 
   // 3. Build every report
   // The infra section is a group in the agents report since October 2026.
@@ -358,11 +413,11 @@ async function main(): Promise<void> {
       ],
       period: PROJECT_SCOPE.period,
       preamble: buildStealthSection(stealthModels),
+      ...(agentsSpotted ? { epilogue: `\n\n---\n\n${agentsSpotted}` } : {}),
       footer: autoGenFooter(),
     }),
   };
-  if (!weekly)
-    console.log("  [weekly] Trending and HF reports, Dev.to and Lobste.rs — not scheduled today, skipping.");
+  if (!weekly) console.log("  [weekly] Trending and HF reports — not scheduled today, skipping.");
 
   const built = await Promise.all([
     buildWebReport(webResults, webState, utcStr, dateStr),
@@ -373,6 +428,7 @@ async function main(): Promise<void> {
       dataSections,
       vendorData,
       policyData.items.filter((i) => isDataLaw(i, CONFIG.policy.dataLaw)),
+      { rows: spottedOf("data"), summaries: spottedSummaryMap },
       utcStr,
       dateStr,
     ),
@@ -394,6 +450,25 @@ async function main(): Promise<void> {
   // No report file or issue exists yet; state files may, but the failing exit
   // skips the commit step, so they are never published.
   assertLlmHealthy("report");
+
+  // Shown: the Spotted rows and the matched project news of every published page, whether or not
+  // the model mentioned them.
+  const savedIds = new Set(saved.map((r) => r.id));
+  const pageActivities = [
+    ...agentActivities,
+    ...infraActivities,
+    ...(savedIds.has("ai-data") ? dataSections.flatMap((s) => s.activities) : []),
+  ];
+  const shownIds = new Set([
+    ...spottedOf("agents").map((r) => r.id),
+    ...(savedIds.has("ai-data") ? spottedOf("data").map((r) => r.id) : []),
+    ...pageActivities.flatMap((a) => a.news.flatMap((n) => (n.id ? [n.id] : []))),
+  ]);
+  saveSpottedLog(nextLog(spottedLog, stories, shownIds, dateStr));
+  if (routing.judgment.nextCache) saveTopicCache(routing.judgment.nextCache);
+  console.log(
+    `  Saved ${saveFile(spottedRankingFile(unmatched, routing, shownIds), dateStr, "spotted-ranking.json")}`,
+  );
 
   // The highlights pass reads the bodies, not the link bars.
   const reports: Record<string, string> = Object.fromEntries(saved.map((r) => [r.id, r.content]));

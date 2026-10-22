@@ -1,5 +1,5 @@
 /**
- * Lobste.rs AI stories fetched via tag-based JSON endpoints (e.g., /t/ai.json).
+ * Lobste.rs AI and database stories fetched via tag-based JSON endpoints (e.g., /t/ai.json).
  */
 
 // ---------------------------------------------------------------------------
@@ -7,6 +7,8 @@
 // ---------------------------------------------------------------------------
 
 export interface LobstersStory {
+  /** Lobste.rs `short_id`. */
+  id: string;
   title: string;
   url: string;
   commentsUrl: string;
@@ -28,8 +30,19 @@ export interface LobstersData {
 
 const LOBSTERS_TOP = 20;
 
-/** Tag-based JSON endpoints — Lobste.rs provides these natively. */
-const TAG_URLS = ["https://lobste.rs/t/ai.json", "https://lobste.rs/t/ml.json"];
+/** Stories published this many days back; the Spotted log drops the ones a page already showed. */
+const LOBSTERS_DAYS = 2;
+
+/**
+ * Tag-based JSON endpoints — Lobste.rs provides these natively. Not `ml`: it is
+ * "MetaLanguage, OCaml programming". `vibecoding` ("Using AI/LLM, coding tools.
+ * Don't also tag with `ai`") holds the AI coding stories.
+ */
+const TAG_URLS = [
+  "https://lobste.rs/t/ai.json",
+  "https://lobste.rs/t/vibecoding.json",
+  "https://lobste.rs/t/databases.json",
+];
 
 // ---------------------------------------------------------------------------
 // Response type
@@ -49,6 +62,7 @@ export interface LobstersApiStory {
 
 export function toLobstersStory(s: LobstersApiStory): LobstersStory {
   return {
+    id: s.short_id,
     title: s.title,
     url: s.url || s.comments_url,
     commentsUrl: s.comments_url,
@@ -92,10 +106,9 @@ export async function fetchLobstersData(): Promise<LobstersData> {
       }),
     );
 
-    // Filter to last 7 days (Lobste.rs AI/ML tag volume is low)
-    const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+    const since = Date.now() - LOBSTERS_DAYS * 24 * 60 * 60 * 1000;
     const stories = [...seen.values()]
-      .filter((s) => new Date(s.publishedAt).getTime() > sevenDaysAgo)
+      .filter((s) => new Date(s.publishedAt).getTime() > since)
       .sort((a, b) => b.score - a.score)
       .slice(0, LOBSTERS_TOP);
 

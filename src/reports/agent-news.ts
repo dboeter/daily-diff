@@ -1,10 +1,11 @@
 /**
- * Matches already-fetched news items (HN, Anthropic/OpenAI web pages, GitHub
- * Trending) to the agents they mention. Pure functions — no network I/O.
+ * Matches already-fetched news items (community stories, Anthropic/OpenAI web
+ * pages, GitHub Trending) to the agents they mention. Pure functions — no network I/O.
  */
 
 import type { RepoConfig } from "../core/github.ts";
-import type { HnData } from "../sources/hn.ts";
+import { SPOTTED } from "../core/i18n.ts";
+import type { Story } from "../spotted/spotted.ts";
 import type { WebFetchResult } from "../sources/web.ts";
 import type { TrendingData } from "../trending/trending.ts";
 
@@ -14,10 +15,13 @@ export interface NewsItem {
   url: string;
   /** Short engagement/context line, e.g. "312 points, 95 comments". */
   detail: string;
+  /** A community story's id, so a story matched into a page counts as shown. */
+  id?: string;
 }
 
 export interface NewsSources {
-  hn?: HnData;
+  /** The fresh community stories: HN, Lobste.rs, Dev.to. */
+  stories?: Story[];
   web?: WebFetchResult[];
   trending?: TrendingData;
 }
@@ -67,13 +71,14 @@ export function agentMatcher(cfg: RepoConfig): RegExp {
 export function collectNewsItems(sources: NewsSources): { item: NewsItem; text: string }[] {
   const out: { item: NewsItem; text: string }[] = [];
 
-  for (const s of sources.hn?.stories ?? []) {
+  for (const s of sources.stories ?? []) {
     out.push({
       item: {
-        source: "Hacker News",
+        source: SPOTTED.sources[s.source],
         title: s.title,
-        url: s.hnUrl,
-        detail: `${s.points} points, ${s.comments} comments`,
+        url: s.discussionUrl,
+        detail: SPOTTED.counts(s.source, s.points, s.comments),
+        id: s.id,
       },
       text: s.title,
     });
@@ -115,7 +120,7 @@ export const MAX_AGENTS_PER_ITEM = 2;
 /**
  * News items per tracked project id. An item naming up to `maxPerItem`
  * projects is listed under each; one naming more is dropped (default
- * MAX_AGENTS_PER_ITEM, for the agents and infra pool). Items keep source order (HN rank, then web, then
+ * MAX_AGENTS_PER_ITEM, for the agents and infra pool). Items keep source order (community stories, then web, then
  * trending) and are de-duplicated by URL.
  *
  * A GitHub Trending repo is news only for the project whose own repo it is:
