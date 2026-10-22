@@ -207,7 +207,7 @@ describe("fetchSiteContent", () => {
     vi.spyOn(console, "error").mockImplementation(() => {});
     vi.spyOn(globalThis, "fetch").mockRejectedValue(new TypeError("fetch failed"));
     // Anthropic's single sitemap: OpenAI's sub-sitemaps each fail on their own, without a throw.
-    const result = await fetchSiteContent("anthropic", emptyState());
+    const result = await fetchSiteContent("anthropic", emptyState(), "2026-10-23");
     expect(result).toEqual({
       site: "anthropic",
       isFirstRun: false,
@@ -215,5 +215,38 @@ describe("fetchSiteContent", () => {
       totalDiscovered: 0,
       fetchSuccess: false,
     });
+  });
+
+  /** Anthropic's sitemap with these paths; every other URL is a post page. */
+  function serveSitemap(...paths: string[]) {
+    vi.spyOn(console, "log").mockImplementation(() => {});
+    const urls = paths.map(
+      (p) => `<url><loc>https://www.anthropic.com${p}</loc><lastmod>2026-10-22</lastmod></url>`,
+    );
+    vi.spyOn(globalThis, "fetch").mockImplementation(async (input) =>
+      String(input).endsWith("/sitemap.xml")
+        ? new Response(`<urlset>${urls.join("")}</urlset>`)
+        : new Response("<title>A post</title><p>Its text.</p>"),
+    );
+  }
+  const newUrls = (r: { newItems: { url: string }[] }) => r.newItems.map((i) => i.url);
+
+  it("lists a run's new posts again on a same-day re-run, and not the next day", async () => {
+    serveSitemap("/news/a", "/news/b");
+    const state = emptyState();
+    state.anthropic.seenUrls = { "https://www.anthropic.com/news/a": "2026-10-21" };
+    const b = ["https://www.anthropic.com/news/b"];
+    expect(newUrls(await fetchSiteContent("anthropic", state, "2026-10-23"))).toEqual(b);
+    expect(newUrls(await fetchSiteContent("anthropic", state, "2026-10-23"))).toEqual(b);
+    expect(newUrls(await fetchSiteContent("anthropic", state, "2026-10-24"))).toEqual([]);
+  });
+
+  it("keeps a first crawl a first crawl on a same-day re-run, so the page shows its count line again", async () => {
+    serveSitemap("/news/a", "/news/b");
+    const state = emptyState();
+    expect((await fetchSiteContent("anthropic", state, "2026-10-23")).isFirstRun).toBe(true);
+    const rerun = await fetchSiteContent("anthropic", state, "2026-10-23");
+    expect(rerun).toMatchObject({ isFirstRun: true, totalDiscovered: 2 });
+    expect((await fetchSiteContent("anthropic", state, "2026-10-24")).isFirstRun).toBe(false);
   });
 });

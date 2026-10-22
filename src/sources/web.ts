@@ -6,6 +6,7 @@
  *   - Compare with stored state to find new URLs (an edited post is not an announcement)
  *   - Fetch content only for new URLs; on first run, cap at MAX_CONTENT_FETCH_FIRST_RUN per site
  *   - After every run, mark ALL discovered URLs as seen so future runs stay incremental
+ *   - Keep the run's new URLs under its CST date, so a same-day re-run lists them again
  *
  * State is persisted in digests/web-state.json (committed to git by the Actions workflow).
  */
@@ -30,6 +31,12 @@ interface SiteState {
   lastChecked: string;
   /** url → lastmod string (or "seen" if no lastmod available) */
   seenUrls: Record<string, string>;
+  /**
+   * The last run's CST date and the URLs new on it (none on a first crawl), so
+   * a same-day re-run lists the same posts: it rebuilds the models page, and on
+   * the 2026-10-23 e2e re-run its 4 lab posts were already seen and gone.
+   */
+  newOn?: { date: string; urls: string[]; firstRun?: true };
 }
 
 export interface WebState {
@@ -275,13 +282,17 @@ export function saveWebState(state: WebState): void {
 // Main export
 // ---------------------------------------------------------------------------
 
-/** One site's new pages. Never throws: a failed fetch is an empty result with `fetchSuccess: false`. */
+/**
+ * One site's new pages: URLs not seen before, or new on an earlier run of the
+ * same CST day. Never throws: a failed fetch is an empty result with `fetchSuccess: false`.
+ */
 export async function fetchSiteContent(
   site: "anthropic" | "openai",
   state: WebState,
+  dateStr: string,
 ): Promise<WebFetchResult> {
   try {
-    return await fetchSite(site, state);
+    return await fetchSite(site, state, dateStr);
   } catch (err) {
     console.error(`  [web/${site}] fetch failed: ${err}`);
     const empty = { isFirstRun: false, newItems: [], totalDiscovered: 0, fetchSuccess: false };
@@ -289,10 +300,16 @@ export async function fetchSiteContent(
   }
 }
 
-async function fetchSite(site: "anthropic" | "openai", state: WebState): Promise<WebFetchResult> {
+async function fetchSite(
+  site: "anthropic" | "openai",
+  state: WebState,
+  dateStr: string,
+): Promise<WebFetchResult> {
   const cfg = SITE_CONFIGS[site];
   const siteState = state[site];
-  const isFirstRun = Object.keys(siteState.seenUrls).length === 0;
+  const today = siteState.newOn?.date === dateStr ? siteState.newOn : undefined;
+  const isFirstRun = today ? today.firstRun === true : Object.keys(siteState.seenUrls).length === 0;
+  const newToday = new Set(today?.urls);
 
   console.log(`  [web/${site}] Discovering URLs from sitemap...`);
   const allDiscovered = await discoverUrls(site);
@@ -308,7 +325,7 @@ async function fetchSite(site: "anthropic" | "openai", state: WebState): Promise
 
   // New = a URL not seen before. A moved lastmod is not: on 2026-10-21 Anthropic's sitemap moved
   // the lastmod of all 476 URLs, and OpenAI's tracks sitemap generation.
-  const newUrls = allDiscovered.filter(({ loc }) => !siteState.seenUrls[loc]);
+  const newUrls = allDiscovered.filter(({ loc }) => !siteState.seenUrls[loc] || newToday.has(loc));
 
   // Cap content fetches on first run to avoid excessive runtime
   const toFetch = isFirstRun ? newUrls.slice(0, MAX_CONTENT_FETCH_FIRST_RUN) : newUrls;
@@ -355,6 +372,9 @@ async function fetchSite(site: "anthropic" | "openai", state: WebState): Promise
     siteState.seenUrls[loc] = lastmod ?? "seen";
   }
   siteState.lastChecked = new Date().toISOString();
+  siteState.newOn = isFirstRun
+    ? { date: dateStr, urls: [], firstRun: true }
+    : { date: dateStr, urls: newUrls.map(({ loc }) => loc) };
 
   return {
     site,

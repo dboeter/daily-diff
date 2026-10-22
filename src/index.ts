@@ -240,7 +240,10 @@ async function fetchAllData(
     ),
     // No fetcher here throws: each returns its empty value (fetchSuccess false) on a failure.
     weekly ? fetchSkillsData(CLAUDE_SKILLS_REPO) : Promise.resolve(noSkills),
-    Promise.all([fetchSiteContent("anthropic", webState), fetchSiteContent("openai", webState)]),
+    Promise.all([
+      fetchSiteContent("anthropic", webState, toCstDateStr(now)),
+      fetchSiteContent("openai", webState, toCstDateStr(now)),
+    ]),
     // Fetched every day — the agents report matches trending repos as news —
     // but only reported weekly.
     fetchTrendingData(weekly ? "weekly" : "daily", toCstDateStr(now)),
