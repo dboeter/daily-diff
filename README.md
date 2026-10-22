@@ -36,11 +36,11 @@ A personal daily digest of AI coding agents, agent tooling, AI policy and the da
 
 **[https://dboeter.github.io/daily-diff](https://dboeter.github.io/daily-diff)**
 
-Browse all historical digests in a clean, dark-themed interface — no login required. Reports are rendered from the Markdown files in this repo via GitHub Pages. Each day opens on an overview of every report's highlights; each report links to the day's other reports, the previous and next day, and its own previous report (weekly reports skip days), and long reports get a table of contents. The latest weekly reports stay pinned under **This week** in the sidebar.
+Browse all historical digests in a clean, dark-themed interface — no login required. Reports are rendered from the Markdown files in this repo via GitHub Pages. Each day opens on an overview of every report's highlights, then **Coming up**: the dated items of the next 30 days from every page (policy deadlines, Action required dates in Data Engineering Watch, stealth model expiries); each report links to the day's other reports, the previous and next day, and its own previous report (weekly reports skip days), and long reports get a table of contents. The latest weekly reports stay pinned under **This week** in the sidebar.
 
 ## Telegram Notifications
 
-When `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID` are set, a message is pushed after each run. It links to all reports for that day, with their highlights, plus the Web UI and RSS feed.
+When `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID` are set, a message is pushed after each run. It links to all reports for that day, with their highlights, then up to 5 Coming up items, plus the Web UI and RSS feed.
 
 ## RSS Feed
 
@@ -387,6 +387,7 @@ Files are written to `digests/YYYY-MM-DD/`:
 | `ai-data.md`      | Data Engineering Watch — vendor release notes and repo releases for Databricks, Snowflake, Azure / Fabric & GCP and the open-source data stack (only written when something is new)                                 | daily   | `data`             |
 | `ai-trends.md`    | Trends — agents & coding tools (radar + repos by category), Claude Code Skills, candidates to track, models (OpenRouter usage, Hugging Face trending), research papers of the week, most discussed stories, signals | weekly  | `trends`           |
 | `highlights.json` | Up to 2 highlights per report, for Telegram and the web UI's day overview                                                                                                                                           | daily   | —                  |
+| `coming-up.json`  | The dated items of the next 30 days from every page, nearest first, for Telegram and the web UI's day overview (code, no LLM call)                                                                                  | daily   | —                  |
 
 Archived days also contain `ai-cli.md` (the CLI report, merged into `ai-agents.md` in October 2026), `ai-ph.md` (Product Hunt, dropped in October 2026), `ai-infra.md` (weekly until October 2026, now a section of `ai-agents.md`), `ai-community.md` (weekly until October 2026, then part of `ai-hn.md`), `ai-hn.md` (AI Discussions, daily until October 2026, now each page's Spotted section) `ai-web.md` (Lab Announcements, daily until October 2026, now part of `ai-models.md`), `ai-trending.md` (Agent & AI Coding Trends) and `ai-hf.md` (AI Models), weekly until October 2026, and `ai-arxiv.md` (AI Research, daily until October 2026), all three now part of `ai-trends.md`. Before October 2026, `ai-agents.md` was the OpenClaw ecosystem report.
 

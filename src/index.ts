@@ -55,9 +55,10 @@ import { fetchModelCatalogDaily, type ModelCatalog } from "./sources/openrouter.
 import { fetchHnData, type HnData } from "./sources/hn.ts";
 import { fetchArxivData, saveArxivState, type ArxivData } from "./sources/arxiv.ts";
 import { loadResearchState, nextResearchState, saveResearchState, weekPapers } from "./sources/research.ts";
-import { fetchPolicyData, type PolicyData } from "./policy/policy.ts";
+import { fetchPolicyData, loadPolicyState, type PolicyData } from "./policy/policy.ts";
 import { isDataLaw } from "./policy/jev.ts";
-import { fetchVendorData, type VendorData } from "./data/vendors.ts";
+import { fetchVendorData, loadDataState, type VendorData } from "./data/vendors.ts";
+import { buildComingUp } from "./reports/coming-up.ts";
 import { fetchHfData, type HfData } from "./sources/hf.ts";
 import { fetchDevtoData, type DevtoData } from "./sources/devto.ts";
 import { fetchLobstersData, type LobstersData } from "./sources/lobsters.ts";
@@ -461,6 +462,17 @@ async function main(): Promise<void> {
   }
   if (arxivData.nextState) saveArxivState(arxivData.nextState);
   saveResearchState(nextResearchState(researchState, arxivData, dateStr));
+  // From the states the builders saved, on a day a page is skipped too: it describes state, not a report.
+  const comingUp = buildComingUp(
+    {
+      policy: loadPolicyState(),
+      calendar: CONFIG.policy.calendar,
+      data: loadDataState(),
+      stealth: modelCatalog?.stealth ?? null,
+    },
+    dateStr,
+  );
+  console.log(`  Saved ${saveFile(JSON.stringify(comingUp, null, 2), dateStr, "coming-up.json")}`);
 
   // The highlights pass reads the bodies, not the link bars.
   const reports: Record<string, string> = Object.fromEntries(saved.map((r) => [r.id, r.content]));

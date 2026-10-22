@@ -73,6 +73,13 @@ export const REPORT_META = {
 /** The report bar's first link: the day's overview of every report's highlights. */
 export const OVERVIEW = { emoji: "📅", name: "Overview" } as const;
 
+/** The dated items of the next 30 days from every page (coming-up.json), on the Overview and in Telegram. */
+export const COMING_UP = {
+  heading: "Coming up",
+  stealthTitle: (name: string) => `${name} (stealth model) expires`,
+  stealthSource: "OpenRouter",
+} as const;
+
 /**
  * Section headings of the LLM-written reports: every page opens with
  * Highlights; the weekly Trends page ends in Signals, the one place for trend
