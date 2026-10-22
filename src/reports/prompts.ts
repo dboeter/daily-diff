@@ -161,13 +161,16 @@ const ANNOUNCEMENT_PATH = /blog|announc|news|release|post/i;
 
 /**
  * Links in a release's notes that look like its announcement post, in order:
- * outside code blocks, images and HTML, on no badge, chat or package host,
+ * outside code blocks, images and HTML tags (autolinks and `<a href>` kept), on no badge, chat or package host,
  * with a post-like path.
  */
 export function announcementLinks(body: string | null | undefined): string[] {
   const text = (body ?? "")
     .replace(/(```|~~~)[\s\S]*?(\1|$)/g, " ")
     .replace(/!\[[^\]]*\]\([^)]*\)/g, " ")
+    // An autolink (`<https://…>`) and an HTML link's href are links, not tags to drop.
+    .replace(/<(https:\/\/[^\s>]+)>/g, " $1 ")
+    .replace(/<a\s[^>]*href=["'](https:\/\/[^"']+)["'][^>]*>/gi, " $1 ")
     .replace(/<[^>]*>/g, " ");
   const links = [...text.matchAll(/https:\/\/[^\s)\]>"'`]+/g)].map(([u]) => u.replace(/[.,;:*!?]+$/, ""));
   return [...new Set(links)].filter((u) => {

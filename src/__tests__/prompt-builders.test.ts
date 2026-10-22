@@ -191,6 +191,12 @@ describe("buildProjectDigestPrompt", () => {
       "https://example.com/blog/v2",
       "https://example.com/news/x-2-0",
     ]);
+    expect(announcementLinks("Read <https://example.com/blog/v2> first.")).toEqual([
+      "https://example.com/blog/v2",
+    ]);
+    expect(
+      announcementLinks('<a href="https://example.com/news/v2"><img src="https://example.com/post.png"></a>'),
+    ).toEqual(["https://example.com/news/v2"]);
   });
 
   it("counts a changelog without a What's Changed header, or with a curly apostrophe", () => {
@@ -395,6 +401,7 @@ describe("buildPolicyProsePrompt", () => {
     expect(result).toContain("Do not write a title");
     expect(result).toContain("The reader: A Dutch AI practitioner.");
     expect(result).not.toContain("Open deadlines");
+    expect(result).toContain("Base every claim on the table. Do not invent");
   });
 
   it("lists near deadlines as earlier items, not new ones", () => {
@@ -404,6 +411,7 @@ describe("buildPolicyProsePrompt", () => {
     expect(result).toContain("Open deadlines of items reported on earlier days (not new today");
     expect(result).toContain("- 2026-10-27: [Consultation X](https://x) (Have your say)");
     expect(result).toContain("in the table or the open deadlines");
+    expect(result).toContain("Base every claim on the table or the open deadlines.");
   });
 });
 

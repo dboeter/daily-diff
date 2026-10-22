@@ -176,7 +176,7 @@ Write the prose sections of the report, in this order:
 Rules:
 - ${NO_TITLE_RULE}
 - Do not reproduce or alter the table.
-- Base every claim on the table. Do not invent obligations, dates, stages or legal status: a wrong legal status is worse than none.
+- Base every claim on the table${nearDeadlines.length ? " or the open deadlines" : ""}. Do not invent obligations, dates, stages or legal status: a wrong legal status is worse than none.
 - Mention only items that appear in the table${nearDeadlines.length ? " or the open deadlines" : ""}, and link every item you mention.
 - English, professional and concise.
 `;
