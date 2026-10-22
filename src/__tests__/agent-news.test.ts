@@ -237,7 +237,7 @@ describe("matchProjectNews", () => {
     ).toEqual(["GitHub Trending"]);
   });
 
-  it("de-duplicates by URL and caps the list per agent", () => {
+  it("de-duplicates by link and caps the list per agent", () => {
     const stories = [
       story("OpenClaw one", "1"),
       story("OpenClaw one again", "1"),
@@ -246,6 +246,26 @@ describe("matchProjectNews", () => {
     const items = matchProjectNews([openclaw], { stories }).get("openclaw")!;
     expect(items).toHaveLength(NEWS_PER_AGENT);
     expect(new Set(items.map((n) => n.url)).size).toBe(items.length);
+  });
+
+  it("takes the copies of one article on two sources as one item, the first that matches", () => {
+    const lobsters = (title: string): Story => ({
+      ...story(title, "x"),
+      id: "lobsters:x",
+      source: "lobsters",
+      url: "https://www.example.com/a/",
+      discussionUrl: "https://lobste.rs/s/x",
+    });
+    const hnCopy = (title: string): Story => ({ ...story(title, "1"), url: "https://example.com/a" });
+    const both = matchProjectNews([openclaw], {
+      stories: [hnCopy("OpenClaw 3.0"), lobsters("OpenClaw 3.0")],
+    });
+    expect(both.get("openclaw")!.map((n) => n.id)).toEqual(["hn:1"]);
+    // An HN title that names no project leaves the article to the Lobste.rs copy that does.
+    const one = matchProjectNews([openclaw], {
+      stories: [hnCopy("A 3.0 release"), lobsters("OpenClaw 3.0")],
+    });
+    expect(one.get("openclaw")!.map((n) => n.id)).toEqual(["lobsters:x"]);
   });
 
   it("drops compatibility lists that name three or more agents", () => {

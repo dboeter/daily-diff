@@ -103,7 +103,7 @@ describe("fetchHnData", () => {
 
     expect((await fetchHnData()).stories).toHaveLength(40);
     const shown = new Set(["2", "5", "7"]);
-    const { stories } = await fetchHnData((id) => shown.has(id));
+    const { stories } = await fetchHnData((s) => shown.has(s.id));
     expect(stories.map((s) => s.id)).toEqual(Array.from({ length: 43 }, (_, i) => String(i + 1)));
   });
 

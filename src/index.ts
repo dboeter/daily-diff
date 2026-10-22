@@ -59,7 +59,7 @@ import {
 import { loadWebState, fetchSiteContent, type WebFetchResult, type WebState } from "./sources/web.ts";
 import { fetchTrendingData, type TrendingData } from "./trending/trending.ts";
 import { fetchModelCatalogDaily, type ModelCatalog } from "./sources/openrouter.ts";
-import { fetchHnData, pageDescription, type HnData } from "./sources/hn.ts";
+import { fetchHnData, pageDescription, type HnData, type HnStory } from "./sources/hn.ts";
 import { fetchArxivData, saveArxivState, type ArxivData } from "./sources/arxiv.ts";
 import { loadResearchState, nextResearchState, saveResearchState, weekPapers } from "./sources/research.ts";
 import { fetchPolicyData, loadPolicyState, type PolicyData } from "./policy/policy.ts";
@@ -71,12 +71,13 @@ import { fetchDevtoData, type DevtoData } from "./sources/devto.ts";
 import { fetchLobstersData, type LobstersData } from "./sources/lobsters.ts";
 import {
   freshStories,
+  isFresh,
+  linkKey,
   loadSpottedLog,
   mostDiscussed,
   nextLog,
   saveSpottedLog,
   selectSpotted,
-  shownBefore,
   storiesFrom,
   type SpottedPage,
 } from "./spotted/spotted.ts";
@@ -186,8 +187,8 @@ async function fetchAllData(
   now: Date,
   webState: WebState,
   weekly: boolean,
-  /** A Hacker News story a page showed on an earlier day (the Spotted log). */
-  hnShown: (storyId: string) => boolean,
+  /** A Hacker News story out of the Spotted pool: a page showed it or a copy of its link (`isFresh`). */
+  hnShown: (story: HnStory) => boolean,
 ): Promise<{
   agentFetches: ProjectFetch[];
   infraFetches: ProjectFetch[];
@@ -320,6 +321,7 @@ async function main(): Promise<void> {
   const webState = loadWebState();
   // Before the fetch: HN's cut counts only the stories no page has shown.
   const spottedLog = loadSpottedLog();
+  const inPool = isFresh(spottedLog, dateStr);
   const {
     agentFetches,
     infraFetches,
@@ -335,7 +337,7 @@ async function main(): Promise<void> {
     devtoData,
     lobstersData,
     modelCatalog,
-  } = await fetchAllData(now, webState, weekly, (id) => shownBefore(spottedLog, `hn:${id}`, dateStr));
+  } = await fetchAllData(now, webState, weekly, (s) => !inPool({ id: `hn:${s.id}`, url: s.url }));
   const stories = storiesFrom(hnData, lobstersData, devtoData);
   const fresh = freshStories(stories, spottedLog, dateStr);
 
@@ -364,11 +366,13 @@ async function main(): Promise<void> {
     })),
   }));
 
-  // Spotted: the fresh stories no project in either pool claimed, routed to their topic's page.
+  // Spotted: the fresh stories whose link no project in either pool took as news, routed to
+  // their topic's page.
   const matchedIds = new Set(
     [...projectNews.values(), ...dataNews.values()].flat().flatMap((n) => (n.id ? [n.id] : [])),
   );
-  const unmatched = fresh.filter((s) => !matchedIds.has(s.id));
+  const newsLinks = new Set(fresh.filter((s) => matchedIds.has(s.id)).map((s) => linkKey(s.url)));
+  const unmatched = fresh.filter((s) => !newsLinks.has(linkKey(s.url)));
   const topicCache = loadTopicCache();
   const routing = await routeStories(unmatched, {
     apiKey: process.env["TYPESAFE_API_KEY"],

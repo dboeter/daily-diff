@@ -470,7 +470,7 @@ describe("buildModelsPage", () => {
     stub();
     const report = await build([site([post(1), post(2)], { isFirstRun: true })], catalog());
     expect(report?.content).toContain(
-      "## Lab announcements\n\nFirst crawl: 400 posts recorded; new posts are listed from the next run.",
+      "## Lab announcements\n\nFirst crawl of Anthropic: 400 posts recorded; new posts are listed from the next run.",
     );
     expect(report?.content).not.toContain("| Date | Lab |");
     expect(generateBody).toHaveBeenCalledTimes(1);
@@ -488,8 +488,11 @@ describe("buildModelsPage", () => {
     const content = report!.content;
     expect(content).toContain("| Date | Lab |");
     expect(content.split("\n").filter((l) => /^\| 2026-/.test(l))).toHaveLength(1);
-    expect(content).toContain("First crawl: 400 posts recorded; new posts are listed from the next run.");
+    expect(content).toContain(
+      "First crawl of Anthropic: 400 posts recorded; new posts are listed from the next run.",
+    );
     expect(content).not.toContain("No new posts today.");
+    expect(content).toContain("> Lab posts: 1 |");
   });
 
   it("is skipped without an LLM call when nothing is new, and still saves the web state", async () => {

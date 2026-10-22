@@ -199,8 +199,9 @@ export const MODELS_PAGE = {
   labs: { anthropic: "Anthropic", openai: "OpenAI" },
   /** Below the table when more new posts came in than it shows. */
   morePosts: (n: number) => `${n} more posts not shown.`,
-  /** The section on a first crawl, when every URL in the sitemaps is new. */
-  firstCrawl: (n: number) => `First crawl: ${n} posts recorded; new posts are listed from the next run.`,
+  /** A lab's line on its first crawl, when every URL in its sitemaps is new. */
+  firstCrawl: (lab: string, n: number) =>
+    `First crawl of ${lab}: ${n} posts recorded; new posts are listed from the next run.`,
   noPosts: "No new posts today.",
   siteFailed: (lab: string) => `⚠️ ${lab}: sitemap fetch failed.`,
   modelsHeading: "New on OpenRouter",

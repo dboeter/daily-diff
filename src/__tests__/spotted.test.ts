@@ -132,30 +132,37 @@ describe("linkKey", () => {
     );
   });
 
+  it("keeps a route fragment: a single-page app's posts are different links", () => {
+    expect(linkKey("https://example.com/#/post/1")).toBe("example.com#/post/1");
+    expect(linkKey("https://example.com/#/post/1")).not.toBe(linkKey("https://example.com/#/post/2"));
+    expect(linkKey("https://example.com/app#!/post/1")).toBe("example.com/app#!/post/1");
+  });
+
   it("returns an unparsable URL trimmed", () => {
     expect(linkKey("  not a url ")).toBe("not a url");
   });
 });
 
 describe("freshStories by link", () => {
-  it("keeps the first copy of a link in pool order", () => {
+  it("keeps every copy of a link no page showed, for the news or a row to claim", () => {
     const hn = story("1", "hn", 10, { url: "https://example.com/a" });
     const lobsters = story("x", "lobsters", 10, { url: "https://www.example.com/a/?utm_source=lobsters" });
-    expect(freshStories([hn, lobsters], { items: {} }, DATE).map((s) => s.id)).toEqual([hn.id]);
+    expect(freshStories([hn, lobsters], { items: {} }, DATE).map((s) => s.id)).toEqual([hn.id, lobsters.id]);
   });
 
   it("drops a story whose link a page showed on an earlier day, from any source", () => {
     const shown = story("x", "lobsters", 10, { url: "https://example.com/a" });
-    const today = story("2", "hn", 10, { url: "http://example.com/a#comments" });
-    const sameDay = story("y", "lobsters", 10, { url: "https://example.com/b" });
-    const log: SpottedLog = {
-      items: {
-        [shown.id]: logged(shown, { shown: "2026-10-21" }),
-        [sameDay.id]: logged(sameDay, { shown: DATE }),
-      },
-    };
-    const rerun = story("3", "hn", 10, { url: "https://example.com/b" });
-    expect(freshStories([today, rerun], log, DATE).map((s) => s.id)).toEqual([rerun.id]);
+    const copy = story("2", "hn", 10, { url: "http://example.com/a#comments" });
+    const other = story("3", "hn", 10, { url: "https://example.com/c" });
+    const log: SpottedLog = { items: { [shown.id]: logged(shown, { shown: "2026-10-21" }) } };
+    expect(freshStories([copy, other], log, DATE).map((s) => s.id)).toEqual([other.id]);
+  });
+
+  it("keeps the copy shown today on a same-day re-run and drops the other copies of its link", () => {
+    const shownToday = story("y", "lobsters", 10, { url: "https://example.com/b" });
+    const copy = story("3", "hn", 500, { url: "https://example.com/b" });
+    const log: SpottedLog = { items: { [shownToday.id]: logged(shownToday, { shown: DATE }) } };
+    expect(freshStories([copy, shownToday], log, DATE).map((s) => s.id)).toEqual([shownToday.id]);
   });
 });
 
@@ -290,6 +297,35 @@ describe("selectSpotted", () => {
       [10, "agents", "devto:d1"],
       [11, "models", "devto:models1"],
       [12, "data", "hn:data1"],
+    ]);
+  });
+});
+
+describe("selectSpotted by link", () => {
+  it("leaves a link to another copy when one is routed nowhere or misses its source's cut", () => {
+    const routedNowhere = story("1", "hn", 500, { url: "https://example.com/a" });
+    const copyA = story("x", "lobsters", 5, { url: "https://www.example.com/a/" });
+    const top = Array.from({ length: 6 }, (_, i) => story(`t${i}`, "hn", 100 + i));
+    const belowCut = story("low", "hn", 1, { url: "https://example.com/b" });
+    const copyB = story("d", "devto", 1, { url: "https://example.com/b" });
+    const pageOf = (s: Story): SpottedPage | null => (s === routedNowhere ? null : "agents");
+    const ids = selectSpotted([routedNowhere, copyA, ...top, belowCut, copyB], pageOf).map((r) => r.id);
+    expect(ids).toContain(copyA.id);
+    expect(ids).toContain(copyB.id);
+    expect(ids).not.toContain(belowCut.id);
+  });
+
+  it("takes each link once across pages in numbering order, and a skipped copy takes no slot", () => {
+    const first = story("1", "hn", 100, { url: "https://example.com/a" });
+    const sameSource = story("l1", "lobsters", 50, { url: "https://example.com/a" });
+    const [l2, l3] = [story("l2", "lobsters", 20), story("l3", "lobsters", 10)];
+    const otherPage = story("m", "hn", 5, { url: "https://example.com/a" });
+    const pageOf = (s: Story): SpottedPage => (s === otherPage ? "models" : "agents");
+    const rows = selectSpotted([first, sameSource, l2, l3, otherPage], pageOf);
+    expect(rows.map((r) => [r.n, r.page, r.id])).toEqual([
+      [1, "agents", first.id],
+      [2, "agents", l2.id],
+      [3, "agents", l3.id],
     ]);
   });
 });

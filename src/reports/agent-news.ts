@@ -6,7 +6,7 @@
 
 import type { RepoConfig } from "../core/github.ts";
 import { SPOTTED } from "../core/i18n.ts";
-import type { Story } from "../spotted/spotted.ts";
+import { linkKey, type Story } from "../spotted/spotted.ts";
 import type { TrendingData } from "../trending/trending.ts";
 
 export interface NewsItem {
@@ -66,9 +66,13 @@ export function agentMatcher(cfg: RepoConfig): RegExp {
   return new RegExp(`(?<![\\w/-])(?<!raspberry[\\s-]?)(?:${alternatives.join("|")})(?![\\w/])`, "i");
 }
 
-/** Flatten the fetched sources into one list of candidate news items. */
-export function collectNewsItems(sources: NewsSources): { item: NewsItem; text: string }[] {
-  const out: { item: NewsItem; text: string }[] = [];
+/**
+ * Flatten the fetched sources into one list of candidate news items. `key`
+ * dedupes them: a story's is its article's link (`linkKey`), so its copies on
+ * other sources are one item; a trending repo's is its URL.
+ */
+export function collectNewsItems(sources: NewsSources): { item: NewsItem; text: string; key: string }[] {
+  const out: { item: NewsItem; text: string; key: string }[] = [];
 
   for (const s of sources.stories ?? []) {
     out.push({
@@ -80,6 +84,7 @@ export function collectNewsItems(sources: NewsSources): { item: NewsItem; text: 
         id: s.id,
       },
       text: s.title,
+      key: linkKey(s.url),
     });
   }
 
@@ -93,6 +98,7 @@ export function collectNewsItems(sources: NewsSources): { item: NewsItem; text: 
         detail: `+${r.periodStars} stars on GitHub Trending`,
       },
       text: `${r.fullName.replace("/", " ")} ${r.description}`,
+      key: r.url,
     });
   }
   return out;
@@ -109,7 +115,8 @@ export const MAX_AGENTS_PER_ITEM = 2;
  * News items per tracked project id. An item naming up to `maxPerItem`
  * projects is listed under each; one naming more is dropped (default
  * MAX_AGENTS_PER_ITEM, for the agents and infra pool). Items keep source order (community stories, then
- * trending) and are de-duplicated by URL.
+ * trending), each `key` once: the first copy that matches claims it, so a copy whose title names no
+ * project leaves the article to one whose title does.
  *
  * A GitHub Trending repo is news only for the project whose own repo it is:
  * trending there is a daily event. A third-party repo naming a project is not
@@ -128,15 +135,15 @@ export function matchProjectNews(
     ownUrl: `https://github.com/${cfg.repo}`.toLowerCase(),
   }));
   const result = new Map<string, NewsItem[]>(agents.map((cfg) => [cfg.id, []]));
-  const seen = new Set<string>();
+  const claimed = new Set<string>();
 
-  for (const { item, text } of collectNewsItems(sources)) {
-    if (seen.has(item.url)) continue;
-    seen.add(item.url);
+  for (const { item, text, key } of collectNewsItems(sources)) {
+    if (claimed.has(key)) continue;
     const hits = matchers.filter((m) =>
       item.source === "GitHub Trending" ? item.url.toLowerCase() === m.ownUrl : m.re.test(text),
     );
     if (hits.length === 0 || hits.length > maxPerItem) continue;
+    claimed.add(key);
     for (const { id } of hits) {
       const list = result.get(id)!;
       if (list.length < NEWS_PER_AGENT) list.push(item);

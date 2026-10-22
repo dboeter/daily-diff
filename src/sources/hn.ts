@@ -201,11 +201,11 @@ async function withDescription(story: HnStory): Promise<HnStory> {
 // ---------------------------------------------------------------------------
 
 /**
- * The top AI and data stories. `isShown(id)`: a story a page showed on an
- * earlier day stays in the result, for its latest counts, but does not count
- * toward HN_TOP_STORIES, so the cut yields stories no page has shown.
+ * The top AI and data stories. `isShown(story)`: a story a page showed, or a
+ * copy of its link, stays in the result, for its latest counts, but does not
+ * count toward HN_TOP_STORIES, so the cut yields stories no page has shown.
  */
-export async function fetchHnData(isShown: (storyId: string) => boolean = () => false): Promise<HnData> {
+export async function fetchHnData(isShown: (story: HnStory) => boolean = () => false): Promise<HnData> {
   try {
     const topResp = await fetch(HN_TOPSTORIES_URL, {
       headers: { "User-Agent": "daily-diff/1.0" },
@@ -240,8 +240,9 @@ export async function fetchHnData(isShown: (storyId: string) => boolean = () => 
           continue;
         }
         if (isAiOrDataRelated(item)) {
-          stories.push(toHnStory(item));
-          if (!isShown(String(item.id))) unshown += 1;
+          const story = toHnStory(item);
+          stories.push(story);
+          if (!isShown(story)) unshown += 1;
         }
       }
     }

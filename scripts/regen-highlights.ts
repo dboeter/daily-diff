@@ -44,7 +44,7 @@ async function main() {
   console.log(`Regenerating highlights for ${dateStr}...`);
 
   // Every known report the date has: live ones first in main()'s order, then retired ones
-  // (ai-infra, ai-community…). highlights.json is overwritten whole, so an old date keeps theirs.
+  // (ai-hn, ai-web…). highlights.json is overwritten whole, so an old date keeps theirs.
   const reportIds = Object.keys(REPORT_LABELS);
 
   // Read reports

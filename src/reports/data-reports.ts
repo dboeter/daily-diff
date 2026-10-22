@@ -289,7 +289,7 @@ export async function buildModelsPage(
   saveWebState(webState);
   console.log("  [models] Web state saved.");
   const P = MODELS_PAGE;
-  // A first-crawled site only adds to the count line: every URL in its sitemaps is new.
+  // A first-crawled site only gets a count line: every URL in its sitemaps is new.
   const posts = web
     .filter((r) => !r.isFirstRun)
     .flatMap((r) => r.newItems)
@@ -303,8 +303,10 @@ export async function buildModelsPage(
   );
   const models = numberRows(fresh, shownPosts.length);
   const newStealth = (catalog?.stealth ?? []).some((m) => isNewStealthModel(m, now));
-  const firstCrawlCount = web.filter((r) => r.isFirstRun).reduce((n, r) => n + r.totalDiscovered, 0);
-  if (!posts.length && !firstCrawlCount && !models.length && !newStealth && !spotted.rows.length) {
+  const firstCrawls = web
+    .filter((r) => r.isFirstRun && r.totalDiscovered)
+    .map((r) => P.firstCrawl(P.labs[r.site], r.totalDiscovered));
+  if (!posts.length && !firstCrawls.length && !models.length && !newStealth && !spotted.rows.length) {
     console.log(`  [models] ${P.noContent}`);
     return null;
   }
@@ -327,7 +329,7 @@ export async function buildModelsPage(
         ? P.noPosts
         : "",
     posts.length > LAB_POSTS_MAX ? P.morePosts(posts.length - LAB_POSTS_MAX) : "",
-    firstCrawlCount ? P.firstCrawl(firstCrawlCount) : "",
+    ...firstCrawls,
     ...failed,
   ]
     .filter(Boolean)
@@ -351,8 +353,7 @@ export async function buildModelsPage(
   );
   const highlights = highlightsOnly(prose ?? MSG.summaryFailed);
 
-  const postCount = posts.length + firstCrawlCount;
-  const meta = `> ${P.counts(postCount, models.length, spotted.rows.length)} | ${REPORT_META.generated(utcStr)}`;
+  const meta = `> ${P.counts(posts.length, models.length, spotted.rows.length)} | ${REPORT_META.generated(utcStr)}`;
   const body = `${[highlights, ...tracked].map((s) => `${s}\n\n---\n\n`).join("")}${stealth}${spottedMd}`;
   saveReportedState(nextReportedState(state, fresh, dateStr), stateFile);
   return {

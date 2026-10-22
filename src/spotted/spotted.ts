@@ -1,7 +1,7 @@
 /**
  * Spotted: the community stories (Hacker News, Lobste.rs, Dev.to) of a day,
- * minus the ones a page showed on an earlier day (by id or link), each link
- * once, each routed to its topic's page (`src/spotted/jev.ts`). The log
+ * minus the ones a page showed on an earlier day (by id or link), each routed
+ * to its topic's page (`src/spotted/jev.ts`), each link shown once. The log
  * `digests/spotted-log.json` records what was fetched and what a page showed.
  */
 
@@ -43,16 +43,18 @@ export const siteOf = (url: string): string => {
 };
 
 /**
- * A story's link as a dedupe key: no scheme, `www.`, fragment, trailing slash
- * or `utm_*` parameters, host lowercased. Other parameters stay: an HN text
- * post's link is `news.ycombinator.com/item?id=N`. Unparsable → itself, trimmed.
+ * A story's link as a dedupe key: no scheme, `www.`, trailing slash or `utm_*`
+ * parameters, host lowercased, and no fragment unless it is a route (`#/…`,
+ * `#!/…`: a single-page app's path). Other parameters stay: an HN text post's
+ * link is `news.ycombinator.com/item?id=N`. Unparsable → itself, trimmed.
  */
 export function linkKey(url: string): string {
   try {
     const u = new URL(url.trim());
     for (const k of [...u.searchParams.keys()]) if (k.startsWith("utm_")) u.searchParams.delete(k);
     const query = u.searchParams.toString();
-    return `${u.host.toLowerCase().replace(/^www\./, "")}${u.pathname.replace(/\/$/, "")}${query ? `?${query}` : ""}`;
+    const route = /^#!?\//.test(u.hash) ? u.hash : "";
+    return `${u.host.toLowerCase().replace(/^www\./, "")}${u.pathname.replace(/\/$/, "")}${query ? `?${query}` : ""}${route}`;
   } catch {
     return url.trim();
   }
@@ -135,29 +137,31 @@ export function saveSpottedLog(log: SpottedLog, file = SPOTTED_LOG_FILE): void {
   saveItemsFile(log, file);
 }
 
-/** A page showed the story on an earlier day. One shown today is shown again on a same-day re-run. */
-export function shownBefore(log: SpottedLog, id: string, dateStr: string): boolean {
-  const shown = log.items[id]?.shown;
-  return shown !== undefined && shown !== dateStr;
+/**
+ * Whether a story is in today's pool. One a page showed is in only on a
+ * same-day re-run; one never shown is out once a page showed another copy of
+ * its link (`linkKey`, any source): on an earlier day, or today, when a
+ * same-day re-run shows that copy again.
+ */
+export function isFresh(log: SpottedLog, dateStr: string): (story: Pick<Story, "id" | "url">) => boolean {
+  const shownLinks = new Set(
+    Object.values(log.items)
+      .filter((e) => e.shown)
+      .map((e) => linkKey(e.url)),
+  );
+  return (s) => {
+    const shown = log.items[s.id]?.shown;
+    return shown ? shown === dateStr : !shownLinks.has(linkKey(s.url));
+  };
 }
 
 /**
- * The stories no page showed on an earlier day, by id or by link (`linkKey`,
- * any source), each link once: the first copy in pool order (HN, Lobste.rs,
- * Dev.to: `storiesFrom`) wins.
+ * Today's pool (`isFresh`). Every copy of a link stays: a project's news, or
+ * else a Spotted row, claims it, and a copy that lands nowhere leaves it to
+ * another.
  */
 export function freshStories(stories: Story[], log: SpottedLog, dateStr: string): Story[] {
-  const seen = new Set(
-    Object.values(log.items)
-      .filter((e) => e.shown !== undefined && e.shown !== dateStr)
-      .map((e) => linkKey(e.url)),
-  );
-  return stories.filter((s) => {
-    const key = linkKey(s.url);
-    if (shownBefore(log, s.id, dateStr) || seen.has(key)) return false;
-    seen.add(key);
-    return true;
-  });
+  return stories.filter(isFresh(log, dateStr));
 }
 
 /**
@@ -217,21 +221,39 @@ export interface SpottedSection {
   summaries: Map<number, string>;
 }
 
+/** Up to `cap` of `stories`, in order, skipping a link in `taken`; each one taken claims its link. */
+function claimRows<T extends Pick<Story, "url">>(stories: T[], cap: number, taken: Set<string>): T[] {
+  const rows: T[] = [];
+  for (const s of stories) {
+    if (rows.length === cap) break;
+    const key = linkKey(s.url);
+    if (taken.has(key)) continue;
+    taken.add(key);
+    rows.push(s);
+  }
+  return rows;
+}
+
 /**
  * Each page's rows: per source the top SPOTTED_PER_SOURCE by points, sources
  * in SPOTTED_PER_SOURCE order, numbered across pages in SPOTTED_PAGES order.
+ * Each link once: a row claims its link in that order, so a copy below its
+ * source's cut, or on no page, leaves the link to a copy that makes a row.
  * `pageOf` is null for a story no page takes.
  */
 export function selectSpotted(stories: Story[], pageOf: (story: Story) => SpottedPage | null): SpottedRow[] {
   const sources = Object.keys(SPOTTED_PER_SOURCE) as StorySource[];
+  const taken = new Set<string>();
   return numberRows(
     SPOTTED_PAGES.flatMap((page) =>
       sources.flatMap((source) =>
-        stories
-          .filter((s) => s.source === source && pageOf(s) === page)
-          .sort((a, b) => b.points - a.points)
-          .slice(0, SPOTTED_PER_SOURCE[source])
-          .map((s) => ({ ...s, page })),
+        claimRows(
+          stories
+            .filter((s) => s.source === source && pageOf(s) === page)
+            .sort((a, b) => b.points - a.points),
+          SPOTTED_PER_SOURCE[source],
+          taken,
+        ).map((s) => ({ ...s, page })),
       ),
     ),
   );
@@ -262,28 +284,16 @@ export function mostDiscussed(
       .filter((e) => e.shown)
       .map((e) => linkKey(e.url)),
   ]);
-  const week = Object.entries(log.items).filter(
-    ([id, e]) =>
-      e.firstSeen >= from &&
-      e.firstSeen < dateStr &&
-      !e.shown &&
-      !showingIds.has(id) &&
-      !taken.has(linkKey(e.url)),
-  );
-  return (Object.keys(MOST_DISCUSSED_PER_SOURCE) as StorySource[]).flatMap((source) => {
-    // Only a row claims its link: a copy below one source's cut can be a later source's row.
-    const rows: [string, LoggedStory][] = [];
-    for (const [id, e] of week
-      .filter(([, e]) => e.source === source)
-      .sort(([, a], [, b]) => b.comments - a.comments)) {
-      if (rows.length === MOST_DISCUSSED_PER_SOURCE[source]) break;
-      const key = linkKey(e.url);
-      if (taken.has(key)) continue;
-      taken.add(key);
-      rows.push([id, e]);
-    }
-    return rows.map(([id, e]) => ({
-      id,
+  const week = Object.entries(log.items)
+    .filter(([id, e]) => e.firstSeen >= from && e.firstSeen < dateStr && !e.shown && !showingIds.has(id))
+    .map(([id, e]) => ({ id, ...e }));
+  return (Object.keys(MOST_DISCUSSED_PER_SOURCE) as StorySource[]).flatMap((source) =>
+    claimRows(
+      week.filter((e) => e.source === source).sort((a, b) => b.comments - a.comments),
+      MOST_DISCUSSED_PER_SOURCE[source],
+      taken,
+    ).map((e) => ({
+      id: e.id,
       source: e.source,
       title: e.title,
       url: e.url,
@@ -291,6 +301,6 @@ export function mostDiscussed(
       points: e.points,
       comments: e.comments,
       ...(e.description ? { description: e.description } : {}),
-    }));
-  });
+    })),
+  );
 }

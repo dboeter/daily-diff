@@ -77,7 +77,7 @@ One Jev Choice per story through `judgeItems` (`src/core/jev.ts`), the way `clas
 - Fallback, when there is no `TYPESAFE_API_KEY` or more than half the new calls fail: `fallbackTopic(story)`, keyword lists over the title and description, tried in the order policy, data, agents, research, models, else `other`. Policy goes first: "DeepSeek banned from U.S. federal civilian agencies" names a model company but is a policy story.
 - Move the `ChoiceAnswer` interface from `src/trending/jev.ts` to `src/core/jev.ts` and export it. Both callers import it from there.
 
-Topics map to pages in one table, `SPOTTED_PAGE: Record<Topic, SpottedPage | null>`: `agents` to `agents`, `models` and `research` to `models`, `data` to `data`, `policy` and `other` to null. Research stays a choice of its own so later work can tell it apart from model news. Policy stories are dropped: Policy Watch has its own sources, and the 2026-10-20 revert of the HN-to-policy routing stands.
+Topics map to pages in one table, `PAGE_OF_TOPIC: Record<Topic, SpottedPage | null>`: `agents` to `agents`, `models` and `research` to `models`, `data` to `data`, `policy` and `other` to null. Research stays a choice of its own so later work can tell it apart from model news. Policy stories are dropped: Policy Watch has its own sources, and the 2026-10-20 revert of the HN-to-policy routing stands.
 
 ## Pipeline (`main()`, `src/index.ts`)
 
@@ -107,4 +107,4 @@ The Models page and retiring the Discussions page (ticket 03). The weekly Most d
 
 ## Comments
 
-- Stories are deduplicated by link across sources and days (`linkKey`), and the first source's copy wins.
+- Stories are deduplicated by link across sources and days (`linkKey`). Only a shown copy claims a link: a project's news first (the first copy whose title names the project), then the Spotted rows in numbering order. A copy that lands nowhere (topic `other`, below its source's cut) leaves the link to another copy; a first version let the first copy in pool order claim it, so an HN copy routed to `other` hid its Lobste.rs copy from every page.
