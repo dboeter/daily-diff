@@ -33,20 +33,13 @@ import {
   generateOr,
   parseLlmJson,
   saveFile,
-  autoGenFooter,
   LLM_TOKENS_LISTING,
   assertLlmHealthy,
   reportLlmHealth,
   llmHealthLine,
   isConnectionError,
 } from "./core/report.ts";
-import {
-  buildProjectReportContent,
-  buildStealthSection,
-  renderReportBar,
-  renderSpottedTable,
-  withReportBar,
-} from "./reports/report-builders.ts";
+import { renderReportBar, withReportBar } from "./reports/report-builders.ts";
 import { parseRowSummaries } from "./reports/summarized-table.ts";
 import {
   buildWebReport,
@@ -56,6 +49,7 @@ import {
   buildModelsReport,
   buildPolicyReport,
   buildDataReport,
+  buildAgentsReport,
   type SavedReport,
 } from "./reports/data-reports.ts";
 import { loadWebState, fetchSiteContent, type WebFetchResult, type WebState } from "./sources/web.ts";
@@ -91,14 +85,7 @@ import { resolvePagesUrl } from "./cli/notify.ts";
 import { toCstDateStr, toUtcStr, isWeeklyRun, sleep } from "./core/date.ts";
 import { loadStarHistory } from "./trending/rank.ts";
 import { promotedRepos } from "./trending/promoted.ts";
-import {
-  LIVE_REPORT_IDS,
-  MSG,
-  PROJECT_SCOPE,
-  REPORTS,
-  reportHeading,
-  reportIssueTitle,
-} from "./core/i18n.ts";
+import { LIVE_REPORT_IDS, MSG, PROJECT_SCOPE, REPORTS, reportIssueTitle } from "./core/i18n.ts";
 
 // ---------------------------------------------------------------------------
 // Repo config — loaded from config.yml (throws when a section is missing)
@@ -382,8 +369,8 @@ async function main(): Promise<void> {
   const spottedOf = (page: SpottedPage) => spottedRows.filter((r) => r.page === page);
 
   // 2. The agents report's two sections and every page's Spotted summaries (one call, before the
-  // page builders: the data report's prose call sees its Spotted table); every other report makes
-  // its own calls in its builder.
+  // page builders: the agents and data Highlights calls see their Spotted tables); every other
+  // report makes its own calls in its builder.
   console.log("  Generating summaries...");
   const [agentsSummary, infraSummary, spottedSummaries] = await Promise.all([
     summarizeProjects("agents", agentActivities, dateStr),
@@ -398,28 +385,22 @@ async function main(): Promise<void> {
       : "",
   ]);
   const spottedSummaryMap = parseRowSummaries(spottedSummaries);
-  const agentsSpotted = renderSpottedTable(spottedOf("agents"), spottedSummaryMap);
 
   // 3. Build every report
-  // The infra section is a group in the agents report since October 2026.
-  const agents: SavedReport = {
-    id: "ai-agents",
-    content: buildProjectReportContent({
-      heading: reportHeading("ai-agents", dateStr),
-      utcStr,
-      groups: [
-        { title: CONFIG.agents.title, activities: agentActivities, summary: agentsSummary },
-        { title: CONFIG.infra.title, activities: infraActivities, summary: infraSummary },
-      ],
-      period: PROJECT_SCOPE.period,
-      preamble: buildStealthSection(stealthModels),
-      ...(agentsSpotted ? { epilogue: `\n\n---\n\n${agentsSpotted}` } : {}),
-      footer: autoGenFooter(),
-    }),
-  };
   if (!weekly) console.log("  [weekly] Trending and HF reports — not scheduled today, skipping.");
 
   const built = await Promise.all([
+    // The infra section is a group in the agents report since October 2026.
+    buildAgentsReport(
+      [
+        { title: CONFIG.agents.title, activities: agentActivities, summary: agentsSummary },
+        { title: CONFIG.infra.title, activities: infraActivities, summary: infraSummary },
+      ],
+      stealthModels,
+      { rows: spottedOf("agents"), summaries: spottedSummaryMap },
+      utcStr,
+      dateStr,
+    ),
     buildWebReport(webResults, webState, utcStr, dateStr),
     buildDiscussionsReport({ hn: hnData, devto: devtoData, lobsters: lobstersData }, utcStr, dateStr),
     buildArxivReport(arxivData, utcStr, dateStr),
@@ -441,9 +422,9 @@ async function main(): Promise<void> {
   ]);
   // A builder returns null when its source failed or its LLM call did.
   // In REPORTS order, so the issues are opened in reading order.
-  const saved = [agents, ...built.filter((r): r is SavedReport => r !== null)].sort(
-    (a, b) => LIVE_REPORT_IDS.indexOf(a.id) - LIVE_REPORT_IDS.indexOf(b.id),
-  );
+  const saved = built
+    .filter((r): r is SavedReport => r !== null)
+    .sort((a, b) => LIVE_REPORT_IDS.indexOf(a.id) - LIVE_REPORT_IDS.indexOf(b.id));
 
   // The LLM health gate: the builders each swallow their own failure and just
   // skip a report, so an outage would otherwise publish a day of placeholders.

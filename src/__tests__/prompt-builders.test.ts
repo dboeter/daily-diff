@@ -1,5 +1,7 @@
 import { describe, it, expect } from "vitest";
 import {
+  AGENTS_HIGHLIGHTS_FOCUS,
+  buildPageHighlightsPrompt,
   buildProjectDigestPrompt,
   buildSkillsPrompt,
   hasActivity,
@@ -157,7 +159,7 @@ describe("buildProjectDigestPrompt", () => {
     expect(releaseNotes("~~~\ngo install tool\n~~~\nFixes", 400)).toBe("Fixes");
   });
 
-  it("forbids stating absences in the overview too", () => {
+  it("forbids stating absences", () => {
     const prompt = buildProjectDigestPrompt([makeActivity({ releases: [release] })], scope, "d");
     expect(prompt).toContain("Never state what did not happen");
   });
@@ -170,9 +172,10 @@ describe("buildProjectDigestPrompt", () => {
     expect(prompt).not.toContain("b87");
   });
 
-  it("asks for an overview and one section per project", () => {
+  it("asks for one section per project and no overview", () => {
     const prompt = buildProjectDigestPrompt([makeActivity({ releases: [release] })], scope, "d");
-    expect(prompt).toContain("## Overview");
+    expect(prompt).not.toContain("Overview");
+    expect(prompt).toContain("Write no other sections");
     expect(prompt).toContain("## <Project name>");
     expect(prompt).toContain("today");
   });
@@ -181,6 +184,32 @@ describe("buildProjectDigestPrompt", () => {
     const prompt = buildProjectDigestPrompt([makeActivity({ releases: [release] })], scope, "d");
     expect(prompt).toContain("that has something left to report");
     expect(prompt).toContain("leave out its section entirely");
+  });
+});
+
+describe("buildPageHighlightsPrompt", () => {
+  const prompt = buildPageHighlightsPrompt(
+    "AI Agents",
+    "## Coding Agents\n\n### Codex\n- Released 1.0.",
+    AGENTS_HIGHLIGHTS_FOCUS,
+    "2026-10-22",
+  );
+
+  it("gives the page name, its rendered body and its focus line", () => {
+    expect(prompt).toContain("You are the editor of AI Agents");
+    expect(prompt).toContain("### Codex\n- Released 1.0.");
+    expect(prompt).toContain("a release with breaking changes, a hot regression");
+    expect(prompt).toContain("2026-10-22");
+  });
+
+  it("asks for Highlights only: 3–5 bullets, no links, each item once, ~150 words", () => {
+    expect(prompt).toContain(`Write only \`## ${SECTIONS.highlights}\`: 3–5 bullets`);
+    expect(prompt).toContain("Write no links");
+    expect(prompt).toContain("at most one bullet");
+    expect(prompt).toContain("About 150 words");
+    expect(prompt).not.toContain(SECTIONS.signals);
+    expect(prompt).not.toContain(SECTIONS.worthALook);
+    expect(prompt).not.toContain("Overview");
   });
 });
 
@@ -310,15 +339,13 @@ describe("buildPolicySummariesPrompt", () => {
 });
 
 describe("buildPolicyProsePrompt", () => {
-  it("includes the table, the marker instruction and the section headings in order", () => {
+  it("includes the table and asks for Highlights only: no Signals or Worth a Look", () => {
     const result = buildPolicyProsePrompt("| Date |\n| :--- |", "2026-10-14", "A Dutch AI practitioner.");
     expect(result).toContain("| Date |");
-    expect(result).toContain(`\`${TABLES_MARKER}\` exactly once`);
-    const order = [SECTIONS.highlights, TABLES_MARKER, SECTIONS.signals, SECTIONS.worthALook].map((s) =>
-      result.indexOf(s),
-    );
-    expect(order.every((i) => i >= 0)).toBe(true);
-    expect([...order].sort((a, b) => a - b)).toEqual(order);
+    expect(result).toContain(`Write only \`## ${SECTIONS.highlights}\``);
+    expect(result).not.toContain(TABLES_MARKER);
+    expect(result).not.toContain(SECTIONS.signals);
+    expect(result).not.toContain(SECTIONS.worthALook);
     expect(result).toContain("Do not reproduce or alter the table");
     expect(result).toContain("Do not write a title");
     expect(result).toContain("The reader: A Dutch AI practitioner.");
@@ -627,9 +654,12 @@ describe("buildDataProsePrompt", () => {
     expect(prompt).toContain("breaking changes");
   });
 
-  it("asks for no Data × AI or Worth a Look section", () => {
+  it("asks for no section beyond Highlights and Across platforms", () => {
     expect(prompt).not.toContain("Data × AI");
     expect(prompt).not.toContain("Worth a Look");
+    expect(prompt).not.toContain("Signals");
+    expect(prompt).toContain("Write only these parts");
+    expect(prompt).toContain("Write no links, URLs or other sections");
   });
 });
 

@@ -396,7 +396,7 @@ Shared state files are committed alongside the daily digests: `digests/web-state
 
 ---
 
-Every report opens with its title and a bar of links to the day's overview and other reports. The listing reports share one layout: **Highlights**, the tables, **Signals**, **Worth a Look**.
+Every report opens with its title and a bar of links to the day's overview and other reports. AI Agents, Policy Watch and Data Engineering Watch read **Highlights**, their tracked sections, **Spotted**, then **Coming up** (Policy Watch). The listing reports share one layout: **Highlights**, the tables, **Signals**, **Worth a Look**.
 
 `ai-agents.md` structure:
 
@@ -404,10 +404,11 @@ Every report opens with its title and a bar of links to the day's overview and o
 [Overview] · **🤖 AI Agents** · [💬 AI Discussions] · …
 Generated | Projects: N | Active today: N | Stable releases: N | Prereleases (not covered): N
 
+## Highlights                          — 3-5 bullets over the sections and Spotted (left out when nothing is active or spotted)
+
 ## 🕵️ Stealth Models on OpenRouter   — deterministic table, 🆕 new / ⏳ expiring
 
 ## Coding Agents & Assistants          — config.yml agents.title
-### Overview                           — what shipped, what broke, what got attention
 ### <Agent>                            — one per active agent, at most 3 bullets: Release / News / Hot issue
 Quiet today: <agents with nothing to report>
 Unavailable today: <agents whose release fetch failed, if any>
@@ -431,7 +432,7 @@ Generated | Projects: N | Active today: N | Stable releases: N | Prereleases (no
 ## Releases this week                  — the data repos' stable releases of the last 7 days, each shown once
 ## Across platforms                    — 0-3 bullets: one capability that moved on two or more vendors, compared
 ## Spotted                             — community stories about data engineering that named no tracked project
-## Worth a Look                        — links to today's Policy Watch items that are EU data law (code-rendered)
+## EU data law                        — links to today's Policy Watch items that are EU data law (code-rendered)
 (a section with nothing new is left out)
 ```
 
@@ -473,10 +474,8 @@ Sources: European Commission | N new items ranked by Jev relevance
 ## Highlights
 ## EU             — one table per jurisdiction with items (EU, Netherlands, US federal, US states, Elsewhere), rendered in code:
                    date, source, title link, stage; the LLM writes the summary column
-## Upcoming deadlines (next 30 days) — rendered in code: open consultations of reported items, and policy.calendar dates
 ## News & commentary — items from the news & commentary feeds (`kind: news`), date, source, title link, summary
-## Signals
-## Worth a Look
+## Coming up      — rendered in code: open consultations of reported items, and policy.calendar dates, in the next 30 days
 ```
 
 `ai-trending.md` structure:

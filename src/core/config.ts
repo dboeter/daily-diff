@@ -74,7 +74,7 @@ export interface PolicyFeed {
   news: boolean;
 }
 
-/** A dated milestone for the policy report's Upcoming deadlines section. */
+/** A dated milestone for the policy report's Coming up section. */
 export interface PolicyCalendarEntry {
   /** ISO date. */
   date: string;

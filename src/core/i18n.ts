@@ -94,10 +94,11 @@ export const WEB_REPORT = {
 } as const;
 
 /**
- * Section headings every listing report shares: Highlights → tables → Signals
- * → Worth a Look. Until October 2026 each prompt named its own ("Today's
- * Highlights" in a weekly report, "Research Trend Signal", "Community Pulse",
- * "Worth Deep Reading", "Worth Exploring", …).
+ * Section headings of the LLM-written reports: every page opens with
+ * Highlights; the listing reports also end in Signals → Worth a Look. Until
+ * October 2026 each prompt named its own ("Today's Highlights" in a weekly
+ * report, "Research Trend Signal", "Community Pulse", "Worth Deep Reading",
+ * "Worth Exploring", …).
  */
 export const SECTIONS = {
   highlights: "Highlights",
@@ -160,7 +161,9 @@ export const POLICY_REPORT = {
   } satisfies Record<Jurisdiction, string>,
   // Stage is empty for items from the regular news feeds.
   tableHeader: "| Date | Source | Title | Stage | Summary |\n| :--- | :--- | :--- | :--- | :--- |",
-  deadlinesHeading: "Upcoming deadlines (next 30 days)",
+  /** The last section: open deadlines and calendar dates of the next 30 days (src/policy/deadlines.ts). */
+  deadlinesHeading: "Coming up",
+  deadlinesWindow: "Deadlines and dates in the next 30 days.",
   deadlinesHeader: "| Date | Source | Item |\n| :--- | :--- | :--- |",
   /** The source column of a config.yml `policy.calendar` date. */
   calendarSource: "Calendar",
@@ -196,6 +199,8 @@ export const DATA_REPORT = {
   actionTableHeader: "| Date | Platform | Item | What to do |\n| :--- | :--- | :--- | :--- |",
   /** Marks an AI feature in a data platform (`aiInData`) in the Item cell. */
   aiMarker: "🤖",
+  /** The last section, code only: links to today's Policy Watch items that are EU data law. */
+  dataLawHeading: "EU data law",
   noNewItems: "No vendor items, releases, hot issues or news in the tracked data projects, skipping report.",
 } as const;
 
@@ -206,7 +211,7 @@ export const MODELS_REPORT = {
   openRouterHeading: "OpenRouter Usage",
 } as const;
 
-// Rendered daily at the top of the agents report (buildStealthSection).
+// Rendered daily in the agents report, below Highlights (buildStealthSection).
 export const STEALTH_SECTION = {
   title: "🕵️ Stealth Models on OpenRouter",
   none: "No stealth models listed on OpenRouter today.",

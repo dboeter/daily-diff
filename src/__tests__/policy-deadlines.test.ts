@@ -211,7 +211,7 @@ describe("renderDeadlines", () => {
       },
     ]);
     expect(md).toBe(
-      "## Upcoming deadlines (next 30 days)\n\n| Date | Source | Item |\n| :--- | :--- | :--- |\n" +
+      "## Coming up\n\nDeadlines and dates in the next 30 days.\n\n| Date | Source | Item |\n| :--- | :--- | :--- |\n" +
         "| 2026-11-09 | Have your say | [AI Act \\| implementing act](https://x.eu) |",
     );
   });

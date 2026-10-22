@@ -50,7 +50,7 @@ export interface PolicyState extends ReportedState {
 }
 
 export interface PolicyData extends NewItems<Numbered<PolicyItem>, PolicyState, PolicyVerdicts> {
-  /** The Upcoming deadlines section's rows; shown only when there are items. */
+  /** The Coming up section's rows; shown only when there are items. */
   deadlines: Deadline[];
   /** config.yml `policy.reader_profile`, for the report prompts. */
   readerProfile: string;

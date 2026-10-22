@@ -11,6 +11,7 @@ import {
   MSG,
   POLICY_REPORT,
   PROJECT_SCOPE,
+  REPORTS,
   REPORT_META,
   SECTIONS,
   WEB_REPORT,
@@ -45,10 +46,20 @@ import { saveWebState, type WebFetchResult, type WebState } from "../sources/web
 import type { TrendingData } from "../trending/trending.ts";
 import { saveClassifyCache, saveMatchState } from "../trending/jev.ts";
 import { saveStarHistory, summaryRows } from "../trending/rank.ts";
-import { buildProjectDigestPrompt, buildSkillsPrompt, hasActivity, type ProjectActivity } from "./prompts.ts";
+import {
+  AGENTS_HIGHLIGHTS_FOCUS,
+  buildPageHighlightsPrompt,
+  buildProjectDigestPrompt,
+  buildSkillsPrompt,
+  hasActivity,
+  type ProjectActivity,
+} from "./prompts.ts";
 import type { GitHubRelease, RepoConfig, SkillsData } from "../core/github.ts";
 import {
   buildProjectReportContent,
+  buildStealthSection,
+  groupsMarkdown,
+  highlightsOnly,
   renderTrendingTables,
   renderPolicyTable,
   nestHeadings,
@@ -71,7 +82,7 @@ import type { HfData } from "../sources/hf.ts";
 import { POLICY_STATE_FILE, type PolicyData, type PolicyItem } from "../policy/policy.ts";
 import { POLICY_VERDICTS_FILE } from "../policy/jev.ts";
 import { renderDeadlines } from "../policy/deadlines.ts";
-import type { OpenRouterData } from "../sources/openrouter.ts";
+import type { OpenRouterData, OpenRouterStealthModel } from "../sources/openrouter.ts";
 import { DATA_STATE_FILE, type DataState, type VendorData } from "../data/vendors.ts";
 import { DATA_VERDICTS_FILE } from "../data/jev.ts";
 import { commitWrites, planWrites } from "../core/new-items.ts";
@@ -297,6 +308,48 @@ export async function buildArxivReport(
 }
 
 // ---------------------------------------------------------------------------
+// Agents report — daily
+// ---------------------------------------------------------------------------
+
+/**
+ * The agents report: Highlights, the stealth table, one section per group
+ * (agents, infra; their LLM summaries come from main()) and Spotted. One LLM
+ * call: Highlights over the rendered groups and the Spotted table, none when
+ * no project is active and Spotted is empty (then there is no Highlights). A
+ * failed call leaves the failure notice under the heading.
+ */
+export async function buildAgentsReport(
+  groups: ProjectGroup[],
+  stealthModels: OpenRouterStealthModel[] | null,
+  spotted: { rows: SpottedRow[]; summaries: Map<number, string> },
+  utcStr: string,
+  dateStr: string,
+): Promise<SavedReport> {
+  const spottedMd = renderSpottedTable(spotted.rows, spotted.summaries);
+  let highlights = "";
+  if (groups.some((g) => g.activities.some(hasActivity)) || spottedMd) {
+    const bodyMd = [...groupsMarkdown(groups), spottedMd].filter(Boolean).join("\n\n");
+    const prose = await generateOr(
+      "agents-highlights",
+      buildPageHighlightsPrompt(REPORTS["ai-agents"].name, bodyMd, AGENTS_HIGHLIGHTS_FOCUS, dateStr),
+      null,
+      LLM_TOKENS_LISTING,
+    );
+    highlights = highlightsOnly(prose ?? MSG.summaryFailed);
+  }
+  const content = buildProjectReportContent({
+    heading: reportHeading("ai-agents", dateStr),
+    utcStr,
+    groups,
+    period: PROJECT_SCOPE.period,
+    preamble: (highlights ? `${highlights}\n\n---\n\n` : "") + buildStealthSection(stealthModels),
+    ...(spottedMd ? { epilogue: `\n\n---\n\n${spottedMd}` } : {}),
+    footer: autoGenFooter(),
+  });
+  return { id: "ai-agents", content };
+}
+
+// ---------------------------------------------------------------------------
 // Policy report
 // ---------------------------------------------------------------------------
 
@@ -344,7 +397,7 @@ export async function buildPolicyReport(
   const sources = [...new Set(items.map((i) => i.source))].join(" + ");
   const ranked = policyData.rankedBy === "jev" ? REPORT_META.jevRanked : "";
   const meta = `> ${REPORT_META.sources(sources)} | ${POLICY_REPORT.newItems(items.length)}${ranked} | ${REPORT_META.generated(utcStr)}`;
-  const body = spliceTables(prose, tables(parseRowSummaries(summaries)));
+  const body = spliceTables(highlightsOnly(prose), tables(parseRowSummaries(summaries)));
   // Only once the report exists, like the ArXiv state.
   commitWrites(writes.onReported, files, dateStr);
   return { id: "ai-policy", content: assembleReport("ai-policy", dateStr, meta, body) };
@@ -434,18 +487,18 @@ function newReleases(
  * deprecations, in the state until they pass) between Highlights and them,
  * the open-source stack, Releases this week (code-rendered: the data repos'
  * stable releases of the last 7 days not shown before, summarized by the vendor
- * summaries call), Across platforms and Worth a Look. A section with neither vendor items
+ * summaries call), Across platforms, Spotted and EU data law. A section with neither vendor items
  * nor repo activity is left out. LLM calls: one per active repo section (as in
  * the agents report) and one for the vendor row summaries, in parallel; then
  * one for Highlights and Across platforms over all of it (Across platforms is
  * left out when the model writes none). A failed summaries call leaves the
  * descriptions in the tables; a failed prose call leaves the failure notice in
  * Highlights. Null when there are no kept vendor items and no repo activity.
- * Worth a Look is code only: links to `dataLaw` (today's Policy Watch items
- * that are EU data law), left out when there are none; it never makes a report
- * on its own. Spotted (code-rendered, summarized by main()'s Spotted call)
- * goes between Across platforms and Worth a Look, and never makes a report on
- * its own either; the prose call sees it.
+ * EU data law, the last section, is code only: links to `dataLaw` (today's
+ * Policy Watch items that are EU data law), left out when there are none; it
+ * never makes a report on its own. Spotted (code-rendered, summarized by
+ * main()'s Spotted call) goes between Across platforms and EU data law, and
+ * never makes a report on its own either; the prose call sees it.
  */
 export async function buildDataReport(
   sections: DataSection[],
@@ -523,14 +576,7 @@ export async function buildDataReport(
 
   const spottedMd = renderSpottedTable(spotted.rows, spotted.summaries);
   // The prose call sees what the reader sees below Highlights.
-  const sectionsMd = groups
-    .map((g) => {
-      const body = g.activities.some(hasActivity) ? nestHeadings(g.summary, 3) : "";
-      return g.preamble || body ? `## ${g.title}\n\n${[g.preamble, body].filter(Boolean).join("\n\n")}` : "";
-    })
-    .concat(spottedMd)
-    .filter(Boolean)
-    .join("\n\n");
+  const sectionsMd = [...groupsMarkdown(groups), spottedMd].filter(Boolean).join("\n\n");
   const prose = await generateOr(
     "data-highlights",
     buildDataProsePrompt(sectionsMd, dateStr),
@@ -544,7 +590,11 @@ export async function buildDataReport(
   const lawLinks = dataLaw
     .map((i) => `- [${policyTitleLabel(i.title)}](${i.link}) — Policy Watch${i.stage ? `, ${i.stage}` : ""}`)
     .join("\n");
-  const epilogue = [acrossPlatforms, spottedMd, lawLinks ? `## ${SECTIONS.worthALook}\n\n${lawLinks}` : ""]
+  const epilogue = [
+    acrossPlatforms,
+    spottedMd,
+    lawLinks ? `## ${DATA_REPORT.dataLawHeading}\n\n${lawLinks}` : "",
+  ]
     .filter(Boolean)
     .join("\n\n---\n\n");
 

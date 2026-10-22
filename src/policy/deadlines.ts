@@ -1,5 +1,5 @@
 /**
- * The policy report's "Upcoming deadlines" section, rendered in code: the open
+ * The policy report's "Coming up" section, its last, rendered in code: the open
  * deadlines of every item a report has carried (saved in the policy state by
  * `nextDeadlines`, src/core/report-state.ts, so a consultation stays listed until it closes) plus the dated calendar in
  * config.yml `policy.calendar`. It shows only on report days; it never makes
@@ -12,6 +12,7 @@ import { cell, policyTitleLabel } from "../reports/report-builders.ts";
 import { daysBefore } from "../core/date.ts";
 import type { Deadline } from "../core/report-state.ts";
 
+// POLICY_REPORT.deadlinesWindow states it under the heading.
 const WINDOW_DAYS = 30;
 
 /** Deadlines from today through the next 30 days, soonest first. */
@@ -40,5 +41,5 @@ export function renderDeadlines(deadlines: Deadline[]): string {
   const rows = deadlines.map(
     (d) => `| ${d.date} | ${cell(d.source)} | [${policyTitleLabel(d.title)}](${cell(d.link)}) |`,
   );
-  return `## ${POLICY_REPORT.deadlinesHeading}\n\n${POLICY_REPORT.deadlinesHeader}\n${rows.join("\n")}`;
+  return `## ${POLICY_REPORT.deadlinesHeading}\n\n${POLICY_REPORT.deadlinesWindow}\n\n${POLICY_REPORT.deadlinesHeader}\n${rows.join("\n")}`;
 }

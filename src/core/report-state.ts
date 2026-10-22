@@ -146,7 +146,7 @@ type Dated = Omit<Deadline, "date"> & { id: string; deadline?: string };
  * (feedback closed early).
  * An item no report carried is not added: Jev dropped it. A saved entry not
  * fetched again is kept as it is, extra fields included. Policy Watch's
- * Upcoming deadlines and the data report's Action required table.
+ * Coming up and the data report's Action required table.
  */
 export function nextDeadlines(
   saved: Record<string, Deadline> | undefined,

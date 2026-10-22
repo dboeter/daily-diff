@@ -142,8 +142,8 @@ ${summaryOutputRule(items.length)}
 }
 
 /**
- * Policy report, call 2 of 2: the prose sections around the code-rendered
- * table, which spliceTables inserts at TABLES_MARKER.
+ * Policy report, call 2 of 2: Highlights only, above the code-rendered
+ * table, which spliceTables appends.
  */
 export function buildPolicyProsePrompt(tableMd: string, dateStr: string, readerProfile: string): string {
   return `You are a policy analyst covering AI legislation, regulation and official guidance in the EU, the Netherlands and the US. The reader: ${readerProfile}
@@ -154,12 +154,7 @@ ${tableMd}
 
 ---
 
-Write the prose sections of the report, in this order:
-
-1. \`## ${SECTIONS.highlights}\` — 2-4 sentences on the most consequential items today.
-2. The line \`${TABLES_MARKER}\` exactly once, on its own line. The table is inserted there.
-3. \`## ${SECTIONS.signals}\` — 100-200 words: where policy is moving and what it means for organisations that deploy AI.
-4. \`## ${SECTIONS.worthALook}\` — 1-3 bullets: items worth reading in full, with brief reasoning.
+Write only \`## ${SECTIONS.highlights}\`: 2-4 sentences on the most consequential items today. The table goes below it.
 
 Rules:
 - ${NO_TITLE_RULE}

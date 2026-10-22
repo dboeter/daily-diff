@@ -3,6 +3,7 @@ import os from "node:os";
 import path from "node:path";
 import { describe, it, expect, vi } from "vitest";
 import {
+  buildAgentsReport,
   buildDataReport,
   buildDiscussionsReport,
   buildPolicyReport,
@@ -20,8 +21,23 @@ import type { VendorData, VendorItem } from "../data/vendors.ts";
 import { selectVendorItems } from "../data/jev.ts";
 import { fetchVendorData } from "../data/vendors.ts";
 import { numberRows } from "../reports/summarized-table.ts";
+import type { SpottedRow } from "../spotted/spotted.ts";
 
 const NO_SPOTTED = { rows: [], summaries: new Map<number, string>() };
+/** A page's `##` headings, in order. */
+const headings = (content: string) => [...content.matchAll(/^## (.+)$/gm)].map((m) => m[1]);
+const spottedRow = (n: number, page: SpottedRow["page"]): SpottedRow => ({
+  n,
+  page,
+  id: `hn:${n}`,
+  source: "hn",
+  title: `Story ${n}`,
+  url: `https://example.com/${n}`,
+  discussionUrl: `https://news.ycombinator.com/item?id=${n}`,
+  points: 100,
+  comments: 10,
+  published: "2026-10-22T00:00:00Z",
+});
 
 const generateBody = vi.fn(async (_prompt: string) => "## Highlights\n\nText.");
 vi.mock("../core/report.ts", async (importOriginal) => ({
@@ -216,6 +232,76 @@ describe("buildTrendingReport", () => {
   });
 });
 
+describe("buildAgentsReport", () => {
+  const project = (name: string, active: boolean): ProjectActivity => ({
+    config: { id: name.toLowerCase(), repo: `org/${name.toLowerCase()}`, name },
+    releases: active
+      ? [{ tag_name: "v1", name: "v1", published_at: "2026-10-21T00:00:00Z", prerelease: false }]
+      : [],
+    previews: [],
+    prereleaseCount: 0,
+    hotIssues: [],
+    news: [],
+  });
+  const groups = (active: boolean) => [
+    { title: "Coding Agents", activities: [project("Codex", active)], summary: "## Codex\n- Released v1." },
+    { title: "Agent Tooling", activities: [project("Agent Deck", false)], summary: MSG.projectsNoActivity },
+  ];
+  const spotted = { rows: [spottedRow(1, "agents")], summaries: new Map([[1, "A tool."]]) };
+  const build = (g = groups(true), s: typeof spotted = spotted) =>
+    buildAgentsReport(g, [], s, "00:00", "2026-10-22");
+
+  it("reads Highlights, the stealth table, the two groups, then Spotted", async () => {
+    generateBody.mockReset();
+    generateBody.mockImplementation(async () => "## Highlights\n\n- Codex shipped v1.");
+    const report = await build();
+    expect(report.id).toBe("ai-agents");
+    expect(report.content).toMatch(/^# AI Agents 2026-10-22\n/);
+    expect(headings(report.content)).toEqual([
+      "Highlights",
+      "🕵️ Stealth Models on OpenRouter",
+      "Coding Agents",
+      "Agent Tooling",
+      "Spotted",
+    ]);
+    expect(report.content).toContain("### Codex");
+    // The Highlights call reads the rendered groups and the Spotted table.
+    const prompt = generateBody.mock.calls[0]![0] as string;
+    expect(prompt).toContain("You are the editor of AI Agents");
+    expect(prompt).toContain("## Coding Agents\n\n### Codex\n- Released v1.");
+    expect(prompt).toContain("| [Story 1](https://example.com/1) |");
+    expect(prompt).not.toContain("Stealth");
+    expect(generateBody).toHaveBeenCalledTimes(1);
+  });
+
+  it("writes Highlights for Spotted alone", async () => {
+    generateBody.mockReset();
+    generateBody.mockImplementation(async () => "## Highlights\n\n- A spotted tool.");
+    expect(headings((await build(groups(false))).content)[0]).toBe("Highlights");
+    expect(generateBody).toHaveBeenCalledTimes(1);
+  });
+
+  it("makes no call and has no Highlights when no project is active and Spotted is empty", async () => {
+    generateBody.mockReset();
+    const report = await build(groups(false), NO_SPOTTED);
+    expect(generateBody).not.toHaveBeenCalled();
+    expect(headings(report.content)).toEqual([
+      "🕵️ Stealth Models on OpenRouter",
+      "Coding Agents",
+      "Agent Tooling",
+    ]);
+  });
+
+  it("leaves the failure notice under Highlights when the call fails", async () => {
+    generateBody.mockReset();
+    generateBody.mockImplementation(async () => {
+      throw new Error("HTTP 504");
+    });
+    const report = await build();
+    expect(report.content).toContain(`## Highlights\n\n${MSG.summaryFailed}\n\n---\n\n## 🕵️`);
+  });
+});
+
 describe("buildPolicyReport", () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "policy-report-"));
   const data = (items: PolicyItem[]): PolicyData => ({
@@ -285,7 +371,7 @@ describe("buildPolicyReport", () => {
     generateBody.mockImplementation(async (prompt: string) =>
       prompt.includes("`N: <2 sentences>`")
         ? "1: The AI Office published guidelines."
-        : "## Highlights\n\nH.\n\n<!-- tables -->\n\n## Signals\n\nS.\n\n## Worth a Look\n\n- W",
+        : "## Highlights\n\nH.",
     );
     const file = path.join(dir, "state.json");
     const report = await buildPolicyReport(data([item]), "00:00", "2026-10-14", file);
@@ -293,22 +379,33 @@ describe("buildPolicyReport", () => {
     expect(report?.content).toContain("# Policy Watch 2026-10-14");
     expect(report?.content).toContain(
       "H.\n\n## EU\n\n| Date | Source | Title | Stage | Summary |\n| :--- | :--- | :--- | :--- | :--- |\n" +
-        "| 2026-10-09 | European Commission | [AI Act guidelines](https://example.eu/a) |  | The AI Office published guidelines. |\n\n## Signals",
+        "| 2026-10-09 | European Commission | [AI Act guidelines](https://example.eu/a) |  | The AI Office published guidelines. |",
     );
     expect(JSON.parse(fs.readFileSync(file, "utf-8"))).toEqual({ reported: { g1: "2026-10-14" } });
   });
 
-  it("puts the upcoming deadlines between the jurisdiction tables and the news", async () => {
-    generateBody.mockImplementation(async () => "## Highlights\n\nH.\n\n<!-- tables -->\n\n## Signals\n\nS.");
+  it("reads Highlights, the jurisdictions, News & commentary, then Coming up with its window line", async () => {
+    generateBody.mockImplementation(async (prompt: string) =>
+      prompt.includes("`N: <2 sentences>`") ? "1: S.\n2: N." : "## Highlights\n\nH.",
+    );
+    const nl = { ...item, id: "nl1", jurisdiction: "nl" as const };
     const news = { ...item, id: "n1", title: "Op-ed", news: true };
     const report = await buildPolicyReport(
-      { ...data([item, news]), deadlines: [deadline] },
+      { ...data([item, nl, news]), deadlines: [deadline] },
       "00:00",
       "2026-10-14",
       path.join(dir, "deadlines.json"),
     );
-    expect(report?.content).toMatch(
-      /## EU\n[\s\S]*\n\n## Upcoming deadlines \(next 30 days\)\n[\s\S]*\| 2026-11-09 \| Have your say \| \[AI Act implementing act\]\(https:\/\/x\.eu\) \|\n\n## News & commentary\n[\s\S]*Op-ed[\s\S]*\n\n## Signals/,
+    expect(headings(report!.content)).toEqual([
+      "Highlights",
+      "EU",
+      "Netherlands",
+      "News & commentary",
+      "Coming up",
+    ]);
+    expect(report?.content).toContain(
+      "## Coming up\n\nDeadlines and dates in the next 30 days.\n\n| Date | Source | Item |\n| :--- | :--- | :--- |\n" +
+        "| 2026-11-09 | Have your say | [AI Act implementing act](https://x.eu) |",
     );
   });
 
@@ -337,15 +434,13 @@ describe("buildPolicyReport", () => {
 
   it("is written on a day with only news, which gets its own section after the jurisdiction tables", async () => {
     generateBody.mockImplementation(async (prompt: string) =>
-      prompt.includes("`N: <2 sentences>`")
-        ? "1: Politico reports."
-        : "## Highlights\n\nH.\n\n<!-- tables -->\n\n## Signals\n\nS.",
+      prompt.includes("`N: <2 sentences>`") ? "1: Politico reports." : "## Highlights\n\nH.",
     );
     const news = { ...item, id: "n1", source: "Politico Europe", news: true };
     const report = await buildPolicyReport(data([news]), "00:00", "2026-10-14", path.join(dir, "news.json"));
     expect(report?.content).toContain(
       "H.\n\n## News & commentary\n\n| Date | Source | Title | Summary |\n| :--- | :--- | :--- | :--- |\n" +
-        "| 2026-10-09 | Politico Europe | [AI Act guidelines](https://example.eu/a) | Politico reports. |\n\n## Signals",
+        "| 2026-10-09 | Politico Europe | [AI Act guidelines](https://example.eu/a) | Politico reports. |",
     );
     expect(report?.content).not.toContain("## EU");
   });
@@ -382,7 +477,7 @@ describe("buildDataReport", () => {
   const reply = (prompt: string) => {
     if (prompt.startsWith("You summarize data platform")) return "1: Retiring soon.\n3: Snowflake note.";
     if (prompt.startsWith("You are the editor")) return PROSE;
-    return `## Overview\nText.\n\n${["Delta", "Polaris", "DuckDB"]
+    return `${["Delta", "Polaris", "DuckDB"]
       .filter((n) => prompt.includes(`## ${n} (github.com`))
       .map((n) => `## ${n}\n- Released v1.`)
       .join("\n\n")}`;
@@ -436,7 +531,7 @@ describe("buildDataReport", () => {
     expect(content).toMatch(/^# Data Engineering Watch 2026-10-17\n/);
     expect(content.indexOf("## Highlights")).toBeLessThan(content.indexOf("## Databricks"));
     expect(content.indexOf("## Databricks")).toBeLessThan(content.indexOf("## Open-source stack"));
-    // The model wrote one; code writes it only for data-law links.
+    // The model wrote one; code drops it.
     expect(content).not.toContain("## Worth a Look");
     // 2026-10-19..21: "Active today: 0" and no sign the stack was tracked at all.
     expect(content).toContain("## Snowflake\n\n**Quiet today:** [Polaris](https://github.com/org/polaris)");
@@ -539,7 +634,7 @@ describe("buildDataReport", () => {
     expect(content).toContain("## Highlights\n- H.");
   });
 
-  it("puts Across platforms after the tables and before Worth a Look, and leaves it out when absent", async () => {
+  it("puts Across platforms after the tables and before EU data law, and leaves it out when absent", async () => {
     generateBody.mockReset();
     const across =
       "## Highlights\n- H.\n\n<!-- tables -->\n\n## Across platforms\n\n- Governance tagging: Snowflake GA,\n  Databricks GA.\n\n---\n\nNote, outside the report: a row needs checking.\n\n## Data × AI\n- X.";
@@ -556,7 +651,7 @@ describe("buildDataReport", () => {
     expect(content).not.toContain("Note, outside the report");
     expect(at("## Open-source stack")).toBeLessThan(at("## Across platforms"));
     expect(at("## Azure / Fabric & GCP")).toBeLessThan(at("## Across platforms"));
-    expect(at("## Across platforms")).toBeLessThan(at("## Worth a Look"));
+    expect(at("## Across platforms")).toBeLessThan(at("## EU data law"));
     expect(content).not.toContain("Data × AI");
 
     generateBody.mockImplementation(async (prompt: string) => reply(prompt));
@@ -623,6 +718,52 @@ describe("buildDataReport", () => {
     expect(table).not.toContain("Gone");
     // Today's summary is saved with the end date, for the later report days.
     expect(JSON.parse(fs.readFileSync(stateFile, "utf-8")).actions["dbx-old"].summary).toBe("Retiring soon.");
+  });
+
+  it("reads Highlights, Action required, the vendor and repo sections, Across platforms, Spotted, then EU data law", async () => {
+    generateBody.mockReset();
+    generateBody.mockImplementation(async (prompt: string) =>
+      prompt.startsWith("You are the editor")
+        ? "## Highlights\n- H.\n\n<!-- tables -->\n\n## Across platforms\n\n- Tagging on two platforms."
+        : reply(prompt),
+    );
+    const data = await vendorData();
+    const vendor: VendorData = {
+      ...data,
+      nextState: {
+        reported: {},
+        actions: { a: { date: "2026-12-01", title: "T", link: "https://x", source: "S" } },
+      },
+    };
+    const s = sections(true);
+    s[2]!.activities[0] = {
+      ...s[2]!.activities[0]!,
+      weekReleases: [weekRelease("v2.0.0", "2026-10-14T09:00:00Z")],
+    };
+    const policy = [policyItem("nis2", "NIS2 implementing act adopted")];
+    const spotted = { rows: [spottedRow(1, "data")], summaries: new Map([[1, "A story."]]) };
+    const report = await buildDataReport(
+      s,
+      vendor,
+      dataLawOf(policy),
+      spotted,
+      "00:00",
+      "2026-10-17",
+      stateFile,
+      verdictsFile,
+    );
+    expect(headings(report!.content)).toEqual([
+      "Highlights",
+      "Action required",
+      "Databricks",
+      "Snowflake",
+      "Azure / Fabric & GCP",
+      "Open-source stack",
+      "Releases this week",
+      "Across platforms",
+      "Spotted",
+      "EU data law",
+    ]);
   });
 
   it("leaves a release of the last 24h to its repo section, and records it as shown", async () => {
@@ -749,7 +890,7 @@ describe("buildDataReport", () => {
     expect(again!.content).toContain("## Releases this week");
   });
 
-  it("leaves the failure notice in Highlights and no Worth a Look when the prose call fails", async () => {
+  it("leaves the failure notice in Highlights and no EU data law when the prose call fails", async () => {
     generateBody.mockReset();
     generateBody.mockImplementation(async (prompt: string) => {
       if (prompt.startsWith("You are the editor")) throw new Error("HTTP 504");
@@ -757,7 +898,7 @@ describe("buildDataReport", () => {
     });
     const content = (await build(sections(false), await vendorData()))!.content;
     expect(content).toContain(`## Highlights\n\n${MSG.summaryFailed}`);
-    expect(content).not.toContain("## Worth a Look");
+    expect(content).not.toContain("## EU data law");
     expect(content).toContain("## Databricks");
   });
 
@@ -774,7 +915,7 @@ describe("buildDataReport", () => {
   });
   const dataLawOf = (items: PolicyItem[]) => items.filter((i) => isDataLaw(i, ["Data Act", "NIS2"]));
 
-  it("links the data-law policy items, and only those, at the end of Worth a Look", async () => {
+  it("links the data-law policy items, and only those, under EU data law", async () => {
     generateBody.mockReset();
     generateBody.mockImplementation(async (prompt: string) => reply(prompt));
     const policy = [
@@ -783,12 +924,12 @@ describe("buildDataReport", () => {
     ];
     const content = (await build(sections(false), vendorOf([]), dataLawOf(policy)))!.content;
     expect(content).toContain(
-      "## Worth a Look\n\n- [Data Act: guidance on smart contracts](https://example.eu/data-act) — Policy Watch, Guidance",
+      "## EU data law\n\n- [Data Act: guidance on smart contracts](https://example.eu/data-act) — Policy Watch, Guidance",
     );
     expect(content).not.toContain("https://example.eu/ai-act");
   });
 
-  it("gives the data-law links their own Worth a Look when the prose call fails", async () => {
+  it("keeps the EU data law links when the prose call fails", async () => {
     generateBody.mockReset();
     generateBody.mockImplementation(async (prompt: string) => {
       if (prompt.startsWith("You are the editor")) throw new Error("HTTP 504");
@@ -797,7 +938,7 @@ describe("buildDataReport", () => {
     const policy = [policyItem("nis2", "NIS2 implementing act adopted")];
     const content = (await build(sections(false), vendorOf([]), dataLawOf(policy)))!.content;
     expect(content).toContain(
-      "## Worth a Look\n\n- [NIS2 implementing act adopted](https://example.eu/nis2) — Policy Watch",
+      "## EU data law\n\n- [NIS2 implementing act adopted](https://example.eu/nis2) — Policy Watch",
     );
   });
 

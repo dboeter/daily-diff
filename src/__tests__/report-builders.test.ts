@@ -5,13 +5,14 @@ import {
   renderTrendingTables,
   renderPolicyTable,
   stripModelTitle,
+  highlightsOnly,
   nestHeadings,
   renderReportBar,
   withReportBar,
 } from "../reports/report-builders.ts";
 import type { TrendingReportData } from "../trending/rank.ts";
 import { numberRows } from "../reports/summarized-table.ts";
-import { TRENDING_REPORT } from "../core/i18n.ts";
+import { MSG, TRENDING_REPORT } from "../core/i18n.ts";
 import type { ProjectActivity } from "../reports/prompts.ts";
 import type { GitHubRelease } from "../core/github.ts";
 
@@ -398,6 +399,22 @@ describe("renderPolicyTable", () => {
 // ---------------------------------------------------------------------------
 // stripModelTitle
 // ---------------------------------------------------------------------------
+
+describe("highlightsOnly", () => {
+  it("keeps Highlights and drops a section the model added", () => {
+    expect(highlightsOnly("# Report\n\n## Highlights\n\n- A.\n- B.\n\n## Signals\n\nMore.")).toBe(
+      "## Highlights\n\n- A.\n- B.",
+    );
+  });
+
+  it("puts bare bullets under the heading", () => {
+    expect(highlightsOnly("- A.\n\n## Worth a Look\n\n- x")).toBe("## Highlights\n\n- A.");
+  });
+
+  it("puts the failure notice under the heading", () => {
+    expect(highlightsOnly(MSG.summaryFailed)).toBe(`## Highlights\n\n${MSG.summaryFailed}`);
+  });
+});
 
 describe("stripModelTitle", () => {
   it("drops the model's own H1: code renders the report's", () => {

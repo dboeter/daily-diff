@@ -18,6 +18,7 @@ import {
   OVERVIEW,
   REPORTS,
   REPORT_META,
+  SECTIONS,
   STEALTH_SECTION,
   TRENDING_REPORT,
   POLICY_REPORT,
@@ -36,7 +37,7 @@ export interface ProjectGroup {
   title: string;
   /** Every tracked project, active or not, in config order. */
   activities: ProjectActivity[];
-  /** LLM output: overview plus one `## <Project>` section per active project. */
+  /** LLM output: one `## <Project>` section per active project. */
   summary: string;
   /** Markdown under the heading, before the projects (the data report's vendor table). Shown even when every project is quiet. */
   preamble?: string;
@@ -53,7 +54,7 @@ export interface ProjectReportInput {
   preamble?: string;
   /** Counts shown before the project counts, e.g. the data report's "Vendor items: 16". */
   leadingCounts?: string;
-  /** Markdown after the last group, before the footer (the data report's Worth a Look), with its own separator. */
+  /** Markdown after the last group, before the footer (Spotted, the data report's EU data law), with its own separator. */
   epilogue?: string;
   footer: string;
 }
@@ -72,6 +73,20 @@ function quietProjects(g: ProjectGroup): ProjectActivity[] {
   );
   const active = covered.length > 0 ? covered : withData;
   return g.activities.filter((a) => !active.includes(a) && !a.fetchFailed);
+}
+
+/**
+ * The groups as a prose call reads them: each with its preamble or an active
+ * project, under its `##` title, the projects' sections nested below it (no
+ * quiet lines). Empty groups are left out.
+ */
+export function groupsMarkdown(groups: ProjectGroup[]): string[] {
+  return groups
+    .map((g) => {
+      const body = g.activities.some(hasActivity) ? nestHeadings(g.summary, 3) : "";
+      return g.preamble || body ? `## ${g.title}\n\n${[g.preamble, body].filter(Boolean).join("\n\n")}` : "";
+    })
+    .filter(Boolean);
 }
 
 /**
@@ -182,6 +197,22 @@ export function stripModelTitle(md: string): string {
   return body.map((line, j) => (levels[j] === 1 ? `#${line}` : line)).join("\n");
 }
 
+/**
+ * A reply that was to write only Highlights, cut to its Highlights under the
+ * fixed heading: a section the model adds anyway would land above the page's
+ * tables, and a missing heading would leave bare bullets.
+ */
+export function highlightsOnly(reply: string): string {
+  const lines = stripModelTitle(reply).trim().split("\n");
+  const start = lines[0]?.startsWith("## ") ? 1 : 0;
+  const end = lines.findIndex((l, j) => j >= start && l.startsWith("## "));
+  const body = lines
+    .slice(start, end === -1 ? undefined : end)
+    .join("\n")
+    .trim();
+  return `## ${SECTIONS.highlights}\n\n${body}`;
+}
+
 /** Lines with their heading level (0 = not a heading), ignoring code fences. */
 function headingLevels(lines: string[]): number[] {
   let inFence = false;
@@ -211,7 +242,7 @@ export function nestHeadings(md: string, level: number): string {
 }
 
 // ---------------------------------------------------------------------------
-// Stealth models (daily, top of the agents report)
+// Stealth models (daily, in the agents report below Highlights)
 // ---------------------------------------------------------------------------
 
 /** A stealth model listed within this many days is flagged new (2 days covers a delayed cron). */
@@ -294,14 +325,15 @@ export function renderTrendingTables(report: TrendingReportData, summaries: Map<
 
 /**
  * The policy report's tables, one `##` section per jurisdiction with items, in
- * POLICY_REPORT.headings order, then News & commentary (news-feed items). Each
+ * POLICY_REPORT.headings order, then News & commentary (news-feed items), then
+ * Coming up. Each
  * row shows the summary for its own number (`n`, set by fetchPolicyData).
  * Date, source, title and stage come from the data, never the model.
  */
 export function renderPolicyTable(
   items: Numbered<PolicyItem>[],
   summaries: Map<number, string>,
-  /** The rendered Upcoming deadlines section, which goes between the jurisdictions and the news. */
+  /** The rendered Coming up section, which goes last, after the news. */
   deadlines = "",
 ): string {
   const lead = (it: PolicyItem) =>
@@ -312,7 +344,6 @@ export function renderPolicyTable(
       .map((it) => `${lead(it)}${cell(it.stage ?? "")} | ${cell(summaryText(summaries, it))} |`);
     return rows.length ? `## ${heading}\n\n${POLICY_REPORT.tableHeader}\n${rows.join("\n")}` : "";
   });
-  sections.push(deadlines);
   const newsRows = items
     .filter((it) => it.news)
     .map((it) => `${lead(it)}${cell(summaryText(summaries, it))} |`);
@@ -321,6 +352,7 @@ export function renderPolicyTable(
       `## ${POLICY_REPORT.newsHeading}\n\n${POLICY_REPORT.newsTableHeader}\n${newsRows.join("\n")}`,
     );
   }
+  sections.push(deadlines);
   return sections.filter(Boolean).join("\n\n");
 }
 
