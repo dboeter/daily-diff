@@ -1,12 +1,12 @@
 /**
- * Matches already-fetched news items (community stories, Anthropic/OpenAI web
- * pages, GitHub Trending) to the agents they mention. Pure functions — no network I/O.
+ * Matches already-fetched news items (community stories, GitHub Trending) to the
+ * agents they mention. Lab posts are not project news: they are the models page's
+ * tracked items. Pure functions — no network I/O.
  */
 
 import type { RepoConfig } from "../core/github.ts";
 import { SPOTTED } from "../core/i18n.ts";
 import type { Story } from "../spotted/spotted.ts";
-import type { WebFetchResult } from "../sources/web.ts";
 import type { TrendingData } from "../trending/trending.ts";
 
 export interface NewsItem {
@@ -22,7 +22,6 @@ export interface NewsItem {
 export interface NewsSources {
   /** The fresh community stories: HN, Lobste.rs, Dev.to. */
   stories?: Story[];
-  web?: WebFetchResult[];
   trending?: TrendingData;
 }
 
@@ -84,17 +83,6 @@ export function collectNewsItems(sources: NewsSources): { item: NewsItem; text: 
     });
   }
 
-  for (const site of sources.web ?? []) {
-    for (const p of site.newItems) {
-      // The URL slug often names the product when the title is generic.
-      const slug = p.url.replace(/^https?:\/\/[^/]+/, "").replace(/[/_-]+/g, " ");
-      out.push({
-        item: { source: site.siteName, title: p.title, url: p.url, detail: p.category },
-        text: `${p.title} ${slug}`,
-      });
-    }
-  }
-
   const trending = sources.trending;
   for (const r of trending?.trendingRepos ?? []) {
     out.push({
@@ -120,7 +108,7 @@ export const MAX_AGENTS_PER_ITEM = 2;
 /**
  * News items per tracked project id. An item naming up to `maxPerItem`
  * projects is listed under each; one naming more is dropped (default
- * MAX_AGENTS_PER_ITEM, for the agents and infra pool). Items keep source order (community stories, then web, then
+ * MAX_AGENTS_PER_ITEM, for the agents and infra pool). Items keep source order (community stories, then
  * trending) and are de-duplicated by URL.
  *
  * A GitHub Trending repo is news only for the project whose own repo it is:

@@ -12,13 +12,11 @@
 #   subject  what the projects are; the LLM prompt reads "You are a technical
 #            editor covering <subject>", and README.md shows it
 #   repos    the tracked repositories
-# agents and infra also follow the last weekly trending report's category-table
-# repos (src/trending/promoted.ts); these lists are the curated core.
 
 # ── Agents ────────────────────────────────────────────────────────────────────
 # The first section of the daily agents report. Each agent is covered by its stable releases, a few hot issues (high
-# engagement or a regression/security label) and news: HN, Anthropic/OpenAI and
-# GitHub Trending items that mention it. Issue and PR churn is not reported.
+# engagement or a regression/security label) and news: Hacker News, Lobste.rs,
+# Dev.to and GitHub Trending items that mention it. Issue and PR churn is not reported.
 # Each repo requires: id (slug), repo (owner/repo), name (display name).
 # Optional keywords: terms to match in news items. They replace the display
 # name and repo name (the full owner/repo always matches). Set them when the

@@ -1,5 +1,11 @@
 import { describe, it, expect } from "vitest";
-import { agentMatcher, agentTerms, matchProjectNews, NEWS_PER_AGENT } from "../reports/agent-news.ts";
+import {
+  agentMatcher,
+  agentTerms,
+  matchProjectNews,
+  NEWS_PER_AGENT,
+  type NewsSources,
+} from "../reports/agent-news.ts";
 import { DATA_SECTION_KEYS, loadConfig } from "../core/config.ts";
 import type { RepoConfig } from "../core/github.ts";
 import type { Story } from "../spotted/spotted.ts";
@@ -134,7 +140,8 @@ describe("matchProjectNews", () => {
     ]);
   });
 
-  it("matches web pages by URL slug when the title is generic", () => {
+  // Lab posts are the models page's tracked items, shown there once.
+  it("takes no lab posts as project news", () => {
     const web: WebFetchResult[] = [
       {
         site: "anthropic",
@@ -154,8 +161,8 @@ describe("matchProjectNews", () => {
         ],
       },
     ];
-    const news = matchProjectNews([claudeCode], { web });
-    expect(news.get("claude-code")!.map((n) => n.source)).toEqual(["Anthropic (Claude)"]);
+    const news = matchProjectNews([claudeCode], { web } as NewsSources);
+    expect(news.get("claude-code")).toEqual([]);
   });
 
   // 2026-10-19: vakandi/opencode-rust, vastsa/PI-Desktop and others made 10 of 16 projects "active".

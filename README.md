@@ -1,6 +1,6 @@
 # Daily Diff
 
-A personal daily digest of AI coding agents, agent tooling, AI policy and the data engineering stack, built by a GitHub Actions workflow that runs every night and lands by about 05:00 Amsterdam time. Read it in the [Web UI](#web-ui), the [RSS feed](#rss-feed) or the [MCP server](#mcp-server). The workflow aggregates AI ecosystem signals from 11 data sources, then publishes English digests as GitHub Issues and committed Markdown files: a daily set (AI Agents, AI Discussions, AI Research, Lab Announcements, Policy Watch, Data Engineering Watch) and a weekly set on Mondays (Agent & AI Coding Trends, AI Models).
+A personal daily digest of AI coding agents, agent tooling, AI policy and the data engineering stack, built by a GitHub Actions workflow that runs every night and lands by about 05:00 Amsterdam time. Read it in the [Web UI](#web-ui), the [RSS feed](#rss-feed) or the [MCP server](#mcp-server). The workflow aggregates AI ecosystem signals from 11 data sources, then publishes English digests as GitHub Issues and committed Markdown files: a daily set (AI Agents, AI Models & Labs, AI Research, Policy Watch, Data Engineering Watch) and a weekly set on Mondays (Agent & AI Coding Trends, AI Models).
 
 ### Data Sources
 
@@ -9,14 +9,14 @@ A personal daily digest of AI coding agents, agent tooling, AI policy and the da
 | [GitHub Repos](https://github.com)                                | API                                                                       | Stable releases and hot issues from the agent, infra and data repos in `config.yml`   |
 | [Claude Code Skills](https://github.com/anthropics/skills)        | API                                                                       | Trending skills sorted by community engagement — **weekly**                           |
 | [GitHub Trending](https://github.com/trending)                    | HTML + API                                                                | Weekly trending repos + AI topic search (7-day window) — **weekly**                   |
-| [OpenRouter](https://openrouter.ai/apps)                          | HTML (RSC payload) + Models API                                           | Agent app usage, top/new models — **weekly**; stealth models daily                    |
+| [OpenRouter](https://openrouter.ai/apps)                          | HTML (RSC payload) + Models API                                           | Agent app usage, top/new models — **weekly**; newly listed and stealth models daily   |
 | [npm](https://www.npmjs.com)                                      | Registry search API                                                       | Coding-agent packages by downloads and momentum — **weekly**                          |
 | [Hacker News](https://news.ycombinator.com)                       | [Firebase API](https://github.com/HackerNews/API)                         | Top AI and data stories via topstories scanning, each shown once                      |
 | [ArXiv](https://arxiv.org)                                        | [ArXiv API](https://export.arxiv.org/api/query)                           | Papers from cs.AI, cs.CL, cs.LG (new since the last run), ranked by Jev relevance     |
 | [Hugging Face](https://huggingface.co)                            | [Hub API](https://huggingface.co/api/models)                              | 30 trending models sorted by weekly likes — **weekly**, Mondays only                  |
 | [Dev.to](https://dev.to)                                          | [Forem API](https://dev.to/api)                                           | Top AI/LLM articles of the last 2 days from 5 tags, 15+ reactions                     |
 | [Lobste.rs](https://lobste.rs)                                    | JSON API                                                                  | `ai`, `vibecoding` and `databases` stories of the last 2 days                         |
-| [Anthropic](https://anthropic.com) + [OpenAI](https://openai.com) | Sitemap                                                                   | New articles detected via `lastmod` diff                                              |
+| [Anthropic](https://anthropic.com) + [OpenAI](https://openai.com) | Sitemap                                                                   | New posts: URLs not seen before                                                       |
 | [European Commission](https://digital-strategy.ec.europa.eu)      | [RSS](https://digital-strategy.ec.europa.eu/en/rss.xml)                   | AI Office and digital-policy news, new since the last run, at most 7 days old         |
 | [EDPB](https://www.edpb.europa.eu)                                | [RSS](https://www.edpb.europa.eu/feed/news_en)                            | EU data protection news, every item judged by Jev, at most 7 days old                 |
 | [EUR-Lex](https://eur-lex.europa.eu)                              | [Cellar SPARQL](https://publications.europa.eu/webapi/rdf/sparql)         | EU acts and proposals on AI or a watchlisted act, with their stage                    |
@@ -122,13 +122,13 @@ The `agents` section of `config.yml`, in one daily report. Issue and PR churn is
 
 - **Stable releases** from the last 24h. Nightlies, alphas and release candidates are detected (API flag or tag pattern) and only counted — except for an agent that has never shipped a stable release: its prereleases are covered when they add notable features.
 - **Hot issues**: opened in the last 48h with 10+ comments and 👍 combined (3+ when labelled regression or security), at most 2 per agent.
-- **News**: Hacker News, Lobste.rs and Dev.to stories no page has shown before, new Anthropic/OpenAI pages and GitHub Trending repos that name the agent. An item naming three or more tracked projects is treated as a compatibility list and skipped.
+- **News**: Hacker News, Lobste.rs and Dev.to stories no page has shown before and GitHub Trending repos that name the agent. An item naming three or more tracked projects is treated as a compatibility list and skipped.
 
 Agents with none of these are listed in one "Quiet today" line; an agent whose releases could not be fetched goes in an "Unavailable today" line instead.
 
-**Spotted**: the community stories that named no tracked project get a topic from [Jev](https://typesafe.ai) (agents, models, research, data, policy, other). The agents stories end the agents report in a table, the data stories the data report, at most 6 from Hacker News and 2 each from Lobste.rs and Dev.to per page. A story is shown once: `digests/spotted-log.json` records what a page showed.
+**Spotted**: the community stories that named no tracked project get a topic from [Jev](https://typesafe.ai) (agents, models, research, data, policy, other). The agents stories end the agents report in a table, the models stories AI Models & Labs, the data stories the data report, at most 6 from Hacker News and 2 each from Lobste.rs and Dev.to per page. A story is shown once: `digests/spotted-log.json` records what a page showed.
 
-The table below is the curated core. Each day the report also follows up to 5 repos from the last weekly trending report's Coding Agents table, and up to 5 from its harness, orchestration and tooling tables in the agent tooling section. They are named by their `owner/repo` and matched to news by that path only.
+The report tracks the repos below and no others: trending repos are not added automatically.
 
 <!-- tracked:agents -->
 <!-- generated from config.yml: edit config.yml, then run pnpm readme -->
@@ -249,13 +249,14 @@ Top AI and data stories, fetched from the official [Firebase API](https://github
 | Anthropic    | [anthropic.com](https://www.anthropic.com) | `/news/`, `/research/`, `/engineering/`, `/learn/`                                             |
 | OpenAI       | [openai.com](https://openai.com)           | research, publication, release, company, engineering, milestone, learn-guides, safety, product |
 
-New articles are detected by comparing sitemap `lastmod` timestamps against a persisted state file (`digests/web-state.json`). On the **first run**, up to 25 recent articles per site are fetched and a comprehensive overview report is generated. On subsequent runs, only new or updated URLs trigger a report; if nothing changed, the web report step is skipped entirely.
+A post is new when its URL is not in the persisted state file (`digests/web-state.json`); a moved `lastmod` (an edit, or a sitemap rebuild) does not count. On the **first run** the Lab announcements section is one line with the number of posts recorded; from the next run on, new posts are listed in AI Models & Labs.
 
 ## Features
 
 - **Daily:** one agents report — stable releases, hot issues and news for the `agents` and `infra` repos in `config.yml`, one section and one LLM call each
 - **Daily:** one data report — vendor release notes (`data.feeds`, code-rendered tables, deprecations first) plus stable releases, hot issues and news for the `databricks`, `snowflake` and `data_stack` repos in `config.yml`, one LLM call per repo section, one for the vendor row summaries and one for Highlights and Across platforms
-- **Daily:** Hacker News, Dev.to and Lobste.rs stories, new ArXiv papers, new Anthropic/OpenAI web content (sitemap-based, incremental), and Policy Watch: new AI policy items from official sources (`policy` in `config.yml`)
+- **Daily:** AI Models & Labs — new Anthropic and OpenAI posts (sitemap-based, incremental), models newly listed on OpenRouter and the stealth-model table
+- **Daily:** Hacker News, Dev.to and Lobste.rs stories in each page's Spotted section, new ArXiv papers, and Policy Watch: new AI policy items from official sources (`policy` in `config.yml`)
 - **Weekly (Mondays):** GitHub AI trending + Claude Code Skills; the models report (Hugging Face trending models + OpenRouter token usage)
 - Publishes a GitHub Issue per report; commits Markdown files to `digests/YYYY-MM-DD/`
 - Runs via GitHub Actions; supports manual triggering, with an option to force the weekly reports
@@ -380,33 +381,30 @@ Files are written to `digests/YYYY-MM-DD/`:
 
 | File              | Content                                                                                                                                                                             | Cadence | GitHub Issue label |
 | ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- | ------------------ |
-| `ai-agents.md`    | AI Agents — stealth models, then a section each for the agents and the agent-tooling projects: releases, news and hot issues                                                        | daily   | `agents`           |
-| `ai-hn.md`        | AI Discussions — Hacker News stories, Dev.to articles and Lobste.rs stories                                                                                                         | daily   | `hn`               |
+| `ai-agents.md`    | AI Agents — a section each for the agents and the agent-tooling projects: releases, news and hot issues, then Spotted                                                               | daily   | `agents`           |
+| `ai-models.md`    | AI Models & Labs — new Anthropic and OpenAI posts, models newly listed on OpenRouter, stealth models, Spotted (only written when something is new)                                  | daily   | `models`           |
 | `ai-arxiv.md`     | AI Research — key papers from cs.AI/cs.CL/cs.LG                                                                                                                                     | daily   | `arxiv`            |
-| `ai-web.md`       | Lab Announcements — new Anthropic and OpenAI content (only written when new content exists)                                                                                         | daily   | `web`              |
 | `ai-policy.md`    | Policy Watch — new AI legislation, regulation and guidance items (only written when a new item passes the relevance check)                                                          | daily   | `policy`           |
 | `ai-data.md`      | Data Engineering Watch — vendor release notes and repo releases for Databricks, Snowflake, Azure / Fabric & GCP and the open-source data stack (only written when something is new) | daily   | `data`             |
 | `ai-trending.md`  | Agent & AI Coding Trends — radar + repos by category + signals + Claude Code Skills                                                                                                 | weekly  | `trending`         |
 | `ai-hf.md`        | AI Models — Hugging Face trending models + OpenRouter token usage and new models                                                                                                    | weekly  | `hf`               |
 | `highlights.json` | Up to 2 highlights per report, for Telegram and the web UI's day overview                                                                                                           | daily   | —                  |
 
-Archived days also contain `ai-cli.md` (the CLI report, merged into `ai-agents.md` in October 2026), `ai-ph.md` (Product Hunt, dropped in October 2026), `ai-infra.md` (weekly until October 2026, now a section of `ai-agents.md`) and `ai-community.md` (weekly until October 2026, now part of `ai-hn.md`). Before October 2026, `ai-agents.md` was the OpenClaw ecosystem report.
+Archived days also contain `ai-cli.md` (the CLI report, merged into `ai-agents.md` in October 2026), `ai-ph.md` (Product Hunt, dropped in October 2026), `ai-infra.md` (weekly until October 2026, now a section of `ai-agents.md`), `ai-community.md` (weekly until October 2026, then part of `ai-hn.md`), `ai-hn.md` (AI Discussions, daily until October 2026, now each page's Spotted section) and `ai-web.md` (Lab Announcements, daily until October 2026, now part of `ai-models.md`). Before October 2026, `ai-agents.md` was the OpenClaw ecosystem report.
 
-Shared state files are committed alongside the daily digests: `digests/web-state.json` tracks which web URLs have been seen, `digests/policy-state.json` which policy items were reported (and each legislative item's last reported stage, so it reappears when it moves, and the open deadlines of reported items, listed until they pass), and `digests/policy-verdicts.json` Jev's answers per policy item, so each is asked once (an item first reported today counts as new again, so a same-day re-run reports the same items).
+Shared state files are committed alongside the daily digests: `digests/web-state.json` tracks which web URLs have been seen, `digests/models-state.json` which OpenRouter models a page listed, `digests/policy-state.json` which policy items were reported (and each legislative item's last reported stage, so it reappears when it moves, and the open deadlines of reported items, listed until they pass), and `digests/policy-verdicts.json` Jev's answers per policy item, so each is asked once (an item first reported today counts as new again, so a same-day re-run reports the same items).
 
 ---
 
-Every report opens with its title and a bar of links to the day's overview and other reports. AI Agents, Policy Watch and Data Engineering Watch read **Highlights**, their tracked sections, **Spotted**, then **Coming up** (Policy Watch). The listing reports share one layout: **Highlights**, the tables, **Signals**, **Worth a Look**.
+Every report opens with its title and a bar of links to the day's overview and other reports. AI Agents, AI Models & Labs, Policy Watch and Data Engineering Watch read **Highlights**, their tracked sections, **Spotted**, then **Coming up** (Policy Watch). The listing reports share one layout: **Highlights**, the tables, **Signals**, **Worth a Look**.
 
 `ai-agents.md` structure:
 
 ```
-[Overview] · **🤖 AI Agents** · [💬 AI Discussions] · …
+[Overview] · **🤖 AI Agents** · [🧠 AI Models & Labs] · …
 Generated | Projects: N | Active today: N | Stable releases: N | Prereleases (not covered): N
 
 ## Highlights                          — 3-5 bullets over the sections and Spotted (left out when nothing is active or spotted)
-
-## 🕵️ Stealth Models on OpenRouter   — deterministic table, 🆕 new / ⏳ expiring
 
 ## Coding Agents & Assistants          — config.yml agents.title
 ### <Agent>                            — one per active agent, at most 3 bullets: Release / News / Hot issue
@@ -436,34 +434,16 @@ Generated | Projects: N | Active today: N | Stable releases: N | Prereleases (no
 (a section with nothing new is left out)
 ```
 
-`ai-hn.md` structure:
+`ai-models.md` structure:
 
 ```
-Sources: Hacker News, Dev.to, Lobste.rs
+Lab posts: N | New models: N | Spotted: N | Generated
 
-## Highlights
-## Hacker News
-  ### 🔬 Models & Research  — new model releases / papers / benchmarks
-  ### 🛠️ Tools & Engineering — open-source projects / frameworks / engineering practice
-  ### 🏢 Industry News      — company news / funding / product launches
-  ### 💬 Opinions & Debates — Ask HN / Show HN / hot threads
-## Dev.to
-## Lobste.rs
-## Signals
-## Worth a Look
-```
-
-`ai-web.md` structure:
-
-```
-Sources: anthropic.com (N articles) + openai.com (N articles)
-
-## Highlights
-## Anthropic      (news / research / engineering / learn)
-## OpenAI         (research / release / company / safety / ...)
-## Signals
-## Worth a Look
-[First full crawl also includes: Content Landscape Overview]
+## Highlights                          — 3-5 bullets: what changes what a practitioner builds with
+## Lab announcements                   — Date | Lab | Post | Summary: new Anthropic and OpenAI posts, newest first, at most 15
+## New on OpenRouter                   — Model | Listed | Context | Summary: listed in the last 2 days, each shown once
+## 🕵️ Stealth Models on OpenRouter   — deterministic table, 🆕 new / ⏳ expiring (always shown)
+## Spotted                             — community stories about models and labs that named no tracked project
 ```
 
 `ai-policy.md` structure:

@@ -1,7 +1,6 @@
 import { describe, it, expect } from "vitest";
 import {
   REPORT_META,
-  WEB_REPORT,
   REPORTS,
   LIVE_REPORT_IDS,
   REPORT_LABELS,
@@ -27,13 +26,6 @@ describe("report names", () => {
   it("keeps cadence words out of the names: the archive holds daily and weekly editions", () => {
     for (const id of LIVE_REPORT_IDS) expect(REPORTS[id].name).not.toMatch(/daily|weekly|today/i);
   });
-
-  it("flags the web report's first crawl in its issue title", () => {
-    expect(WEB_REPORT.issueTitle("2026-03-12", true)).toBe(
-      `${reportIssueTitle("ai-web", "2026-03-12")} (First Crawl)`,
-    );
-    expect(WEB_REPORT.issueTitle("2026-03-12", false)).toBe(reportIssueTitle("ai-web", "2026-03-12"));
-  });
 });
 
 // ---------------------------------------------------------------------------
@@ -41,10 +33,6 @@ describe("report names", () => {
 // ---------------------------------------------------------------------------
 
 describe("dynamic content helpers", () => {
-  it("WEB_REPORT.newContent formats count", () => {
-    expect(WEB_REPORT.newContent(10)).toContain("10 articles");
-  });
-
   it("REPORT_META.generated formats timestamp", () => {
     expect(REPORT_META.generated("12:00")).toContain("12:00 UTC");
   });

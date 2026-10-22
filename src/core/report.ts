@@ -19,10 +19,9 @@ import { stripModelTitle } from "../reports/report-builders.ts";
 // make those providers reject the request.
 export const LLM_TOKENS_DEFAULT = 8192;
 /** The agents-report sections, the table-formatted listing reports
- *  (discussions, ArXiv, models) and both trending calls: multi-row tables plus
+ *  (ArXiv, models), the page summaries calls and both trending calls: multi-row tables plus
  *  2-sentence summaries, and the reasoning that counts against the budget. */
 export const LLM_TOKENS_LISTING = 16384;
-export const LLM_TOKENS_WEB = 16384;
 import {
   type LlmProvider,
   createProvider,

@@ -1,6 +1,6 @@
 /**
  * Builders for the data-source reports: LLM call + report Markdown, plus the
- * source's state file (web, ArXiv, trending caches) once its report is built.
+ * source's state file (web, models, ArXiv, trending caches) once its report is built.
  * main() writes the report files and opens the issues once every report is
  * in, so each report's bar can link the others.
  */
@@ -14,14 +14,12 @@ import {
   REPORTS,
   REPORT_META,
   SECTIONS,
-  WEB_REPORT,
+  MODELS_PAGE,
   TRENDING_REPORT,
   reportHeading,
   type ReportId,
 } from "../core/i18n.ts";
 import {
-  buildWebReportPrompt,
-  buildDiscussionsPrompt,
   buildArxivPrompt,
   buildModelsPrompt,
   buildPolicySummariesPrompt,
@@ -30,24 +28,18 @@ import {
   buildPolicyProsePrompt,
   buildDataSummariesPrompt,
   buildDataProsePrompt,
-  discussionSources,
+  buildModelsSummariesPrompt,
   modelSources,
-  type DiscussionsData,
 } from "./prompts-data.ts";
-import {
-  generateBody,
-  generateOr,
-  saveFile,
-  autoGenFooter,
-  LLM_TOKENS_WEB,
-  LLM_TOKENS_LISTING,
-} from "../core/report.ts";
+import { generateBody, generateOr, saveFile, autoGenFooter, LLM_TOKENS_LISTING } from "../core/report.ts";
 import { saveWebState, type WebFetchResult, type WebState } from "../sources/web.ts";
+import { loadReportedState, newItems, nextReportedState, saveReportedState } from "../core/report-state.ts";
 import type { TrendingData } from "../trending/trending.ts";
 import { saveClassifyCache, saveMatchState } from "../trending/jev.ts";
 import { saveStarHistory, summaryRows } from "../trending/rank.ts";
 import {
   AGENTS_HIGHLIGHTS_FOCUS,
+  MODELS_HIGHLIGHTS_FOCUS,
   buildPageHighlightsPrompt,
   buildProjectDigestPrompt,
   buildSkillsPrompt,
@@ -60,6 +52,9 @@ import {
   buildStealthSection,
   groupsMarkdown,
   highlightsOnly,
+  isNewStealthModel,
+  renderLabPostsTable,
+  renderNewModelsTable,
   renderTrendingTables,
   renderPolicyTable,
   nestHeadings,
@@ -82,7 +77,7 @@ import type { HfData } from "../sources/hf.ts";
 import { POLICY_STATE_FILE, type PolicyData, type PolicyItem } from "../policy/policy.ts";
 import { POLICY_VERDICTS_FILE } from "../policy/jev.ts";
 import { renderDeadlines } from "../policy/deadlines.ts";
-import type { OpenRouterData, OpenRouterStealthModel } from "../sources/openrouter.ts";
+import type { ModelCatalog, OpenRouterData } from "../sources/openrouter.ts";
 import { DATA_STATE_FILE, type DataState, type VendorData } from "../data/vendors.ts";
 import { DATA_VERDICTS_FILE } from "../data/jev.ts";
 import { commitWrites, planWrites } from "../core/new-items.ts";
@@ -93,11 +88,9 @@ import type { SpottedRow } from "../spotted/spotted.ts";
 export interface SavedReport {
   id: ReportId;
   content: string;
-  /** Only when it differs from reportIssueTitle (the web report's first crawl). */
-  issueTitle?: string;
 }
 
-/** H1, the meta block (a `>` line, plus the web report's source list), rule, body, footer. */
+/** H1, the meta line, rule, body, footer. */
 function assembleReport(id: ReportId, dateStr: string, meta: string, body: string): string {
   return `${reportHeading(id, dateStr)}\n\n${meta}\n\n---\n\n${body}${autoGenFooter()}`;
 }
@@ -126,54 +119,6 @@ async function buildListingReport(
     console.error(`  [${tag}] Report generation failed: ${err}`);
     return null;
   }
-}
-
-// ---------------------------------------------------------------------------
-// Web report
-// ---------------------------------------------------------------------------
-
-export async function buildWebReport(
-  webResults: WebFetchResult[],
-  webState: WebState,
-  utcStr: string,
-  dateStr: string,
-): Promise<SavedReport | null> {
-  const hasNewContent = webResults.some((r) => r.newItems.length > 0);
-  let saved: SavedReport | null = null;
-
-  if (hasNewContent) {
-    console.log("  [web] Calling LLM for web content report...");
-    try {
-      const summary = await generateBody(buildWebReportPrompt(webResults, dateStr), LLM_TOKENS_WEB);
-      const isFirstRun = webResults.some((r) => r.isFirstRun);
-      const totalNew = webResults.reduce((sum, r) => sum + r.newItems.length, 0);
-
-      const counts = (site: WebFetchResult["site"]) => {
-        const r = webResults.find((w) => w.site === site);
-        if (r && !r.fetchSuccess) return WEB_REPORT.sourceFailed;
-        return WEB_REPORT.sourceCounts(r?.newItems.length ?? 0, r?.totalDiscovered ?? 0);
-      };
-
-      const mode = isFirstRun ? WEB_REPORT.firstCrawl : WEB_REPORT.todayUpdate;
-
-      const meta =
-        `> ${mode} | ${WEB_REPORT.newContent(totalNew)} | ${REPORT_META.generated(utcStr)}\n\n` +
-        `${REPORT_META.sourcesHeader}\n` +
-        `- Anthropic: [anthropic.com](https://www.anthropic.com) — ${counts("anthropic")}\n` +
-        `- OpenAI: [openai.com](https://openai.com) — ${counts("openai")}`;
-      const webContent = assembleReport("ai-web", dateStr, meta, summary);
-
-      saved = { id: "ai-web", content: webContent, issueTitle: WEB_REPORT.issueTitle(dateStr, isFirstRun) };
-    } catch (err) {
-      console.error(`  [web] Report generation failed: ${err}`);
-    }
-  } else {
-    console.log("  [web] No new content detected, skipping report.");
-  }
-
-  saveWebState(webState);
-  console.log("  [web] State saved.");
-  return saved;
 }
 
 // ---------------------------------------------------------------------------
@@ -247,32 +192,6 @@ export async function buildTrendingReport(
 }
 
 // ---------------------------------------------------------------------------
-// Discussions report (Hacker News daily; Dev.to + Lobste.rs on the weekly run)
-// ---------------------------------------------------------------------------
-
-export async function buildDiscussionsReport(
-  data: DiscussionsData,
-  utcStr: string,
-  dateStr: string,
-): Promise<SavedReport | null> {
-  const { hn, devto, lobsters } = data;
-  const { hasHn, hasDevto, hasLobsters } = discussionSources(data);
-  if (!hasHn && !hasDevto && !hasLobsters) {
-    console.log("  [discussions] No data available, skipping report.");
-    return null;
-  }
-  const meta = sourcesMeta(
-    [
-      hasHn && `[Hacker News](https://news.ycombinator.com/) (${hn.stories.length} stories)`,
-      hasDevto && `[Dev.to](https://dev.to/) (${devto.articles.length} articles)`,
-      hasLobsters && `[Lobste.rs](https://lobste.rs/) (${lobsters.stories.length} stories)`,
-    ],
-    utcStr,
-  );
-  return buildListingReport("ai-hn", "discussions", buildDiscussionsPrompt(data, dateStr), meta, dateStr);
-}
-
-// ---------------------------------------------------------------------------
 // ArXiv report
 // ---------------------------------------------------------------------------
 
@@ -312,7 +231,7 @@ export async function buildArxivReport(
 // ---------------------------------------------------------------------------
 
 /**
- * The agents report: Highlights, the stealth table, one section per group
+ * The agents report: Highlights, one section per group
  * (agents, infra; their LLM summaries come from main()) and Spotted. One LLM
  * call: Highlights over the rendered groups and the Spotted table, none when
  * no project is active and Spotted is empty (then there is no Highlights). A
@@ -320,7 +239,6 @@ export async function buildArxivReport(
  */
 export async function buildAgentsReport(
   groups: ProjectGroup[],
-  stealthModels: OpenRouterStealthModel[] | null,
   spotted: { rows: SpottedRow[]; summaries: Map<number, string> },
   utcStr: string,
   dateStr: string,
@@ -342,11 +260,114 @@ export async function buildAgentsReport(
     utcStr,
     groups,
     period: PROJECT_SCOPE.period,
-    preamble: (highlights ? `${highlights}\n\n---\n\n` : "") + buildStealthSection(stealthModels),
+    ...(highlights ? { preamble: `${highlights}\n\n---\n\n` } : {}),
     ...(spottedMd ? { epilogue: `\n\n---\n\n${spottedMd}` } : {}),
     footer: autoGenFooter(),
   });
   return { id: "ai-agents", content };
+}
+
+// ---------------------------------------------------------------------------
+// Models page (Anthropic and OpenAI posts, OpenRouter's new and stealth models) — daily
+// ---------------------------------------------------------------------------
+
+/** `digests/models-state.json`: the OpenRouter models a page listed (model id → CST date). */
+export const MODELS_STATE_FILE = "digests/models-state.json";
+
+/** Lab announcements rows; the rest is one "N more posts not shown." line. */
+export const LAB_POSTS_MAX = 15;
+
+/**
+ * The models page: Highlights, Lab announcements (the sitemaps' new posts,
+ * newest first, at most LAB_POSTS_MAX; on a first crawl one line with the
+ * count), New on OpenRouter (models listed in the last 2 days that no earlier
+ * page listed), the stealth table (always shown) and Spotted. Two LLM calls:
+ * the posts' and models' row summaries, then Highlights over the rendered
+ * sections. A failed summaries call shows the descriptions, a failed
+ * Highlights call the failure notice. Null when there is no new post, new
+ * model, 🆕 stealth model or Spotted row. The web state is saved either way,
+ * the models state only once the page is built.
+ */
+export async function buildModelsPage(
+  web: WebFetchResult[],
+  webState: WebState,
+  catalog: ModelCatalog | null,
+  spotted: { rows: SpottedRow[]; summaries: Map<number, string> },
+  utcStr: string,
+  dateStr: string,
+  stateFile = MODELS_STATE_FILE,
+  now = Date.now(),
+): Promise<SavedReport | null> {
+  saveWebState(webState);
+  console.log("  [models] Web state saved.");
+  const P = MODELS_PAGE;
+  const firstCrawl = web.some((r) => r.isFirstRun);
+  const posts = firstCrawl
+    ? []
+    : web.flatMap((r) => r.newItems).sort((a, b) => b.lastmod.localeCompare(a.lastmod));
+  const shownPosts = numberRows(posts.slice(0, LAB_POSTS_MAX));
+  const state = loadReportedState(stateFile);
+  const fresh = newItems(
+    (catalog?.newModels ?? []).map((m) => ({ ...m, published: m.created })),
+    state,
+    dateStr,
+  );
+  const models = numberRows(fresh).map((m) => ({ ...m, n: m.n + shownPosts.length }));
+  const newStealth = (catalog?.stealth ?? []).some((m) => isNewStealthModel(m, now));
+  const firstCrawlCount = web.filter((r) => r.isFirstRun).reduce((n, r) => n + r.totalDiscovered, 0);
+  if (!posts.length && !firstCrawlCount && !models.length && !newStealth && !spotted.rows.length) {
+    console.log(`  [models] ${P.noContent}`);
+    return null;
+  }
+
+  const summaries = parseRowSummaries(
+    shownPosts.length + models.length > 0
+      ? await generateOr(
+          "models-summaries",
+          buildModelsSummariesPrompt(shownPosts, models, dateStr),
+          "",
+          LLM_TOKENS_LISTING,
+        )
+      : "",
+  );
+  const failed = web.filter((r) => !r.fetchSuccess).map((r) => P.siteFailed(P.labs[r.site]));
+  const labBody = firstCrawl
+    ? P.firstCrawl(firstCrawlCount)
+    : [
+        shownPosts.length ? renderLabPostsTable(shownPosts, summaries) : P.noPosts,
+        posts.length > LAB_POSTS_MAX ? P.morePosts(posts.length - LAB_POSTS_MAX) : "",
+        ...failed,
+      ]
+        .filter(Boolean)
+        .join("\n\n");
+  const modelsBody =
+    catalog === null
+      ? P.catalogUnavailable
+      : models.length
+        ? renderNewModelsTable(models, summaries)
+        : P.noModels;
+  const tracked = [`## ${P.labHeading}\n\n${labBody}`, `## ${P.modelsHeading}\n\n${modelsBody}`];
+  const stealth = buildStealthSection(catalog?.stealth ?? null, now);
+  const spottedMd = renderSpottedTable(spotted.rows, spotted.summaries);
+  // The Highlights call reads everything below Highlights: a 🆕 stealth model is this page's news too.
+  const bodyMd = [...tracked, stealth, spottedMd].filter(Boolean).join("\n\n");
+  const prose = await generateOr(
+    "models-highlights",
+    buildPageHighlightsPrompt(REPORTS["ai-models"].name, bodyMd, MODELS_HIGHLIGHTS_FOCUS, dateStr),
+    null,
+    LLM_TOKENS_LISTING,
+  );
+  const highlights = highlightsOnly(prose ?? MSG.summaryFailed);
+
+  const postCount = firstCrawl ? firstCrawlCount : posts.length;
+  const meta = `> ${P.counts(postCount, models.length, spotted.rows.length)} | ${REPORT_META.generated(utcStr)}`;
+  // buildStealthSection ends in its own separator; the footer brings one, so a trailing one goes.
+  const body = `${[highlights, ...tracked].map((s) => `${s}\n\n---\n\n`).join("")}${stealth}${spottedMd}`;
+  saveReportedState(nextReportedState(state, fresh, dateStr), stateFile);
+  return {
+    id: "ai-models",
+    content: assembleReport("ai-models", dateStr, meta, body.replace(/\n\n---\n\n$/, "")),
+  };
 }
 
 // ---------------------------------------------------------------------------

@@ -145,7 +145,7 @@ const TOOLS = [
         type: {
           type: "string",
           description:
-            "Report type: ai-agents, ai-hn, ai-arxiv, ai-web, ai-policy, ai-data, ai-trending, ai-hf (archive: ai-infra, ai-community, ai-cli, ai-ph)",
+            "Report type: ai-agents, ai-models, ai-arxiv, ai-policy, ai-data, ai-trending, ai-hf (archive: ai-hn, ai-web, ai-infra, ai-community, ai-cli, ai-ph)",
         },
       },
       required: ["date", "type"],

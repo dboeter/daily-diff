@@ -42,9 +42,8 @@ import {
 import { renderReportBar, withReportBar } from "./reports/report-builders.ts";
 import { parseRowSummaries } from "./reports/summarized-table.ts";
 import {
-  buildWebReport,
+  buildModelsPage,
   buildTrendingReport,
-  buildDiscussionsReport,
   buildArxivReport,
   buildModelsReport,
   buildPolicyReport,
@@ -54,7 +53,7 @@ import {
 } from "./reports/data-reports.ts";
 import { loadWebState, fetchSiteContent, type WebFetchResult, type WebState } from "./sources/web.ts";
 import { fetchTrendingData, type TrendingData } from "./trending/trending.ts";
-import { fetchStealthModels, type OpenRouterStealthModel } from "./sources/openrouter.ts";
+import { fetchModelCatalogDaily, type ModelCatalog } from "./sources/openrouter.ts";
 import { fetchHnData, type HnData } from "./sources/hn.ts";
 import { fetchArxivData, type ArxivData } from "./sources/arxiv.ts";
 import { fetchPolicyData, type PolicyData } from "./policy/policy.ts";
@@ -83,8 +82,6 @@ import {
 import { DATA_SECTION_KEYS, loadConfig, type SectionKey } from "./core/config.ts";
 import { resolvePagesUrl } from "./cli/notify.ts";
 import { toCstDateStr, toUtcStr, isWeeklyRun, sleep } from "./core/date.ts";
-import { loadStarHistory } from "./trending/rank.ts";
-import { promotedRepos } from "./trending/promoted.ts";
 import { LIVE_REPORT_IDS, MSG, PROJECT_SCOPE, REPORTS, reportIssueTitle } from "./core/i18n.ts";
 
 // ---------------------------------------------------------------------------
@@ -94,16 +91,8 @@ import { LIVE_REPORT_IDS, MSG, PROJECT_SCOPE, REPORTS, reportIssueTitle } from "
 const CONFIG = loadConfig();
 const CLAUDE_SKILLS_REPO = CONFIG.skillsRepo;
 const DATA_SECTIONS = DATA_SECTION_KEYS.map((key) => CONFIG[key]);
-// The last weekly trending report's category-table repos join the curated
-// lists. Read from the committed state, so Monday's run still uses the previous
-// Monday's record: this run's trending report is saved after the fetch.
-const PROMOTED = promotedRepos(loadStarHistory(), toCstDateStr(new Date()), [
-  ...CONFIG.agents.repos,
-  ...CONFIG.infra.repos,
-  ...DATA_SECTIONS.flatMap((s) => s.repos),
-]);
-const AGENTS = [...CONFIG.agents.repos, ...PROMOTED.agents];
-const INFRA_REPOS = [...CONFIG.infra.repos, ...PROMOTED.infra];
+const AGENTS = CONFIG.agents.repos;
+const INFRA_REPOS = CONFIG.infra.repos;
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -189,13 +178,13 @@ async function fetchAllData(
   hfData: HfData;
   devtoData: DevtoData;
   lobstersData: LobstersData;
-  stealthModels: OpenRouterStealthModel[] | null;
+  modelCatalog: ModelCatalog | null;
 }> {
   const daySince = new Date(now.getTime() - DAY_MS);
   // The data report's Releases this week: its repos release about weekly, so a 24h window saw none on most days.
   const weekSince = new Date(now.getTime() - 7 * DAY_MS);
   console.log(
-    `  Tracking daily: ${[...AGENTS, ...INFRA_REPOS, ...DATA_SECTIONS.flatMap((s) => s.repos)].map((r) => r.id).join(", ")}, web, hn, devto, lobsters, arxiv, policy, trending (news only)` +
+    `  Tracking daily: ${[...AGENTS, ...INFRA_REPOS, ...DATA_SECTIONS.flatMap((s) => s.repos)].map((r) => r.id).join(", ")}, web, openrouter catalog, hn, devto, lobsters, arxiv, policy, trending (news only)` +
       (weekly ? " | weekly: skills, trending, hf" : ""),
   );
 
@@ -215,7 +204,7 @@ async function fetchAllData(
     hfData,
     devtoData,
     lobstersData,
-    stealthModels,
+    modelCatalog,
   ] = await Promise.all([
     Promise.all(AGENTS.map((cfg) => fetchProject(cfg, daySince))),
     Promise.all(INFRA_REPOS.map((cfg) => fetchProject(cfg, daySince))),
@@ -235,8 +224,8 @@ async function fetchAllData(
     weekly ? fetchHfData() : Promise.resolve<HfData>({ models: [], fetchSuccess: false }),
     fetchDevtoData(),
     fetchLobstersData(),
-    // Daily, unlike the rest of OpenRouter: stealth models are free for a short window.
-    fetchStealthModels(),
+    // Daily, unlike the rest of OpenRouter: the models page's new and stealth models.
+    fetchModelCatalogDaily(now.getTime()),
   ]);
 
   return {
@@ -253,7 +242,7 @@ async function fetchAllData(
     hfData,
     devtoData,
     lobstersData,
-    stealthModels,
+    modelCatalog,
   };
 }
 
@@ -320,7 +309,7 @@ async function main(): Promise<void> {
     hfData,
     devtoData,
     lobstersData,
-    stealthModels,
+    modelCatalog,
   } = await fetchAllData(now, webState, weekly, (id) => shownBefore(spottedLog, `hn:${id}`, dateStr));
   const stories = storiesFrom(hnData, lobstersData, devtoData);
   const fresh = freshStories(stories, spottedLog, dateStr);
@@ -329,7 +318,6 @@ async function main(): Promise<void> {
   // Agents and tooling in one pass: an item naming 3+ of them is a compatibility list.
   const projectNews = matchProjectNews([...AGENTS, ...INFRA_REPOS], {
     stories: fresh,
-    web: webResults,
     trending: trendingData,
   });
   const withNews = (f: ProjectFetch): ProjectActivity => ({ ...f, news: projectNews.get(f.config.id) ?? [] });
@@ -339,7 +327,7 @@ async function main(): Promise<void> {
   // drop: a story naming DuckDB, Polars and Iceberg is news about the stack.
   const dataNews = matchProjectNews(
     DATA_SECTIONS.flatMap((s) => s.repos),
-    { stories: fresh, web: webResults, trending: trendingData },
+    { stories: fresh, trending: trendingData },
     Infinity,
   );
   const dataSections = DATA_SECTION_KEYS.map((key, i) => ({
@@ -369,7 +357,7 @@ async function main(): Promise<void> {
   const spottedOf = (page: SpottedPage) => spottedRows.filter((r) => r.page === page);
 
   // 2. The agents report's two sections and every page's Spotted summaries (one call, before the
-  // page builders: the agents and data Highlights calls see their Spotted tables); every other
+  // page builders: their Highlights calls see their Spotted tables); every other
   // report makes its own calls in its builder.
   console.log("  Generating summaries...");
   const [agentsSummary, infraSummary, spottedSummaries] = await Promise.all([
@@ -396,13 +384,18 @@ async function main(): Promise<void> {
         { title: CONFIG.agents.title, activities: agentActivities, summary: agentsSummary },
         { title: CONFIG.infra.title, activities: infraActivities, summary: infraSummary },
       ],
-      stealthModels,
       { rows: spottedOf("agents"), summaries: spottedSummaryMap },
       utcStr,
       dateStr,
     ),
-    buildWebReport(webResults, webState, utcStr, dateStr),
-    buildDiscussionsReport({ hn: hnData, devto: devtoData, lobsters: lobstersData }, utcStr, dateStr),
+    buildModelsPage(
+      webResults,
+      webState,
+      modelCatalog,
+      { rows: spottedOf("models"), summaries: spottedSummaryMap },
+      utcStr,
+      dateStr,
+    ),
     buildArxivReport(arxivData, utcStr, dateStr),
     buildPolicyReport(policyData, utcStr, dateStr),
     buildDataReport(
@@ -442,6 +435,7 @@ async function main(): Promise<void> {
   ];
   const shownIds = new Set([
     ...spottedOf("agents").map((r) => r.id),
+    ...(savedIds.has("ai-models") ? spottedOf("models").map((r) => r.id) : []),
     ...(savedIds.has("ai-data") ? spottedOf("data").map((r) => r.id) : []),
     ...pageActivities.flatMap((a) => a.news.flatMap((n) => (n.id ? [n.id] : []))),
   ]);
@@ -508,8 +502,7 @@ async function main(): Promise<void> {
   // 5. Create the GitHub issues
   if (digestRepo) {
     for (const r of published) {
-      const title = r.issueTitle ?? reportIssueTitle(r.id, dateStr);
-      const url = await createGitHubIssue(title, r.content, REPORTS[r.id].label);
+      const url = await createGitHubIssue(reportIssueTitle(r.id, dateStr), r.content, REPORTS[r.id].label);
       console.log(`  Created ${r.id} issue: ${url}`);
     }
   }

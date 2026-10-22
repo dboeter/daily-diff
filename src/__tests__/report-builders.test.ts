@@ -94,14 +94,13 @@ describe("buildProjectReportContent", () => {
     );
   });
 
-  it("finds the section of a promoted trending repo named by its owner/repo", () => {
+  it("finds the section of a project named by its owner/repo", () => {
     const news = [{ source: "Hacker News", title: "cursor/plugins", url: "u", detail: "d" }];
-    const promoted = (repo: string) =>
-      makeActivity("p", { config: { id: `trending-${repo}`, repo, name: repo, keywords: [repo] }, news });
+    const project = (repo: string) => makeActivity("p", { config: { id: repo, repo, name: repo }, news });
     const result = buildProjectReportContent(
       withAgents({
         summary: "## Overview\nBODY\n\n## cursor/plugins\n- news",
-        activities: [promoted("cursor/plugins"), promoted("ruvnet/ruflo")],
+        activities: [project("cursor/plugins"), project("ruvnet/ruflo")],
       }),
     );
     expect(result).toContain("Active today: 1 |");
@@ -472,10 +471,10 @@ describe("report bar", () => {
   const url = "https://example.com/dd";
 
   it("links the day's other reports and the overview; the current one is bold, unlinked", () => {
-    const bar = renderReportBar("ai-hn", ["ai-agents", "ai-hn", "ai-arxiv"], "2026-10-12", url);
+    const bar = renderReportBar("ai-models", ["ai-agents", "ai-models", "ai-arxiv"], "2026-10-12", url);
     expect(bar).toBe(
       `[📅 Overview](${url}/#2026-10-12) · [🤖 AI Agents](${url}/#2026-10-12/ai-agents) · ` +
-        `**💬 AI Discussions** · [📚 AI Research](${url}/#2026-10-12/ai-arxiv)`,
+        `**🧠 AI Models & Labs** · [📚 AI Research](${url}/#2026-10-12/ai-arxiv)`,
     );
   });
 

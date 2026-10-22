@@ -1,7 +1,8 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   extractJsonArray,
   extractRscPayload,
+  fetchModelCatalogDaily,
   isStealthModel,
   parseOpenRouterApps,
   parseOpenRouterModels,
@@ -194,5 +195,38 @@ describe("selectStealthModels", () => {
       { id: "stealth/new", name: "stealth/new", created: "2026-10-03", expires: "2026-10-20" },
       { id: "stealth/old", name: "stealth/old", created: "2026-09-01", expires: null },
     ]);
+  });
+});
+
+describe("fetchModelCatalogDaily", () => {
+  afterEach(() => vi.unstubAllGlobals());
+  const NOW = Date.parse("2026-10-22T03:00:00Z");
+  const m = (id: string, created: string) => ({
+    id,
+    name: id,
+    description: "",
+    created: Date.parse(created) / 1000,
+    context_length: 1000,
+  });
+
+  it("derives the stealth list and the models listed in 2 days, stealth ones left out, from one fetch", async () => {
+    const fetchMock = vi.fn(async () =>
+      Response.json({
+        data: [m("stealth/s", "2026-10-21"), m("v/new", "2026-10-21"), m("v/old", "2026-10-18")],
+      }),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+    const catalog = await fetchModelCatalogDaily(NOW);
+    expect(fetchMock).toHaveBeenCalledOnce();
+    expect(catalog?.stealth.map((s) => s.id)).toEqual(["stealth/s"]);
+    expect(catalog?.newModels.map((s) => s.id)).toEqual(["v/new"]);
+  });
+
+  it("is null when the catalog fetch fails", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => new Response("", { status: 503 })),
+    );
+    expect(await fetchModelCatalogDaily(NOW)).toBeNull();
   });
 });

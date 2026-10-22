@@ -11,9 +11,7 @@ import {
 import {
   buildTrendingSummariesPrompt,
   buildTrendingProsePrompt,
-  buildWebReportPrompt,
-  buildDiscussionsPrompt,
-  discussionSources,
+  buildModelsSummariesPrompt,
   buildArxivPrompt,
   buildModelsPrompt,
   buildPolicySummariesPrompt,
@@ -28,10 +26,6 @@ import { TABLES_MARKER, numberRows } from "../reports/summarized-table.ts";
 import { MODELS_REPORT, SECTIONS } from "../core/i18n.ts";
 import type { RepoConfig, GitHubItem, GitHubRelease } from "../core/github.ts";
 import { EMPTY_NPM, EMPTY_OPENROUTER, type TrendingData } from "../trending/trending.ts";
-import type { HnData } from "../sources/hn.ts";
-import type { DevtoData } from "../sources/devto.ts";
-import type { LobstersData } from "../sources/lobsters.ts";
-import type { WebFetchResult } from "../sources/web.ts";
 
 // ---------------------------------------------------------------------------
 // Fixtures
@@ -374,240 +368,13 @@ describe("buildModelsPrompt", () => {
 });
 
 // ---------------------------------------------------------------------------
-// buildWebReportPrompt
-// ---------------------------------------------------------------------------
-
-describe("buildWebReportPrompt", () => {
-  it("includes site sections for first run", () => {
-    const results: WebFetchResult[] = [
-      {
-        site: "anthropic",
-        siteName: "Anthropic",
-        isFirstRun: true,
-        newItems: [
-          {
-            url: "https://anthropic.com/news/test",
-            title: "Test",
-            lastmod: "2026-03-09",
-            content: "Content",
-            site: "anthropic",
-            category: "news",
-          },
-        ],
-        totalDiscovered: 50,
-        fetchSuccess: true,
-      },
-    ];
-    const result = buildWebReportPrompt(results, "2026-03-09");
-    expect(result).toContain("First full crawl");
-    expect(result).toContain("Anthropic");
-    expect(result).toContain("Content Landscape Overview"); // first-run-only section
-  });
-
-  it("shows incremental mode for non-first-run", () => {
-    const results: WebFetchResult[] = [
-      {
-        site: "openai",
-        siteName: "OpenAI",
-        isFirstRun: false,
-        newItems: [],
-        totalDiscovered: 100,
-        fetchSuccess: true,
-      },
-    ];
-    const result = buildWebReportPrompt(results, "2026-03-09");
-    expect(result).toContain("Incremental update");
-    expect(result).not.toContain("Content Landscape Overview");
-  });
-
-  // 2026-10-19: one article became ~600 words restated across four sections.
-  it("asks for Highlights and the lab section only with 1-2 new articles", () => {
-    const article = (n: number) => ({
-      url: `https://anthropic.com/news/a${n}`,
-      title: `A${n}`,
-      lastmod: "2026-10-19",
-      content: "Text",
-      site: "anthropic" as const,
-      category: "news",
-    });
-    const site = (count: number): WebFetchResult[] => [
-      {
-        site: "anthropic",
-        siteName: "Anthropic",
-        isFirstRun: false,
-        newItems: Array.from({ length: count }, (_, i) => article(i)),
-        totalDiscovered: 100,
-        fetchSuccess: true,
-      },
-    ];
-    const short = buildWebReportPrompt(site(1), "2026-10-19");
-    expect(short).toContain(`## ${SECTIONS.highlights}\n`);
-    expect(short).toContain("## Anthropic\n");
-    expect(short).not.toContain(`## ${SECTIONS.signals}\n`);
-    expect(short).not.toContain(`## ${SECTIONS.worthALook}\n`);
-    const full = buildWebReportPrompt(site(3), "2026-10-19");
-    expect(full).toContain(`## ${SECTIONS.signals}\n`);
-    expect(full).toContain("no forward-looking claims");
-  });
-});
-
-// ---------------------------------------------------------------------------
-// buildDiscussionsPrompt
-// ---------------------------------------------------------------------------
-
-const noDevto: DevtoData = { articles: [], fetchSuccess: false };
-const noLobsters: LobstersData = { stories: [], fetchSuccess: false };
-const devtoArticle: DevtoData["articles"][number] = {
-  id: 1,
-  title: "MCP lesson",
-  url: "https://dev.to/a/mcp",
-  description: "d",
-  user: "u",
-  positiveReactionsCount: 78,
-  commentsCount: 85,
-  readingTimeMinutes: 5,
-  tags: ["ai"],
-  publishedAt: "2026-10-10T00:00:00Z",
-};
-const hnOnlyPrompt = (hn: HnData, dateStr: string) =>
-  buildDiscussionsPrompt({ hn, devto: noDevto, lobsters: noLobsters }, dateStr);
-
-describe("buildDiscussionsPrompt", () => {
-  it("includes stories with metadata", () => {
-    const data: HnData = {
-      stories: [
-        {
-          id: "123",
-          title: "AI News",
-          url: "https://example.com/ai",
-          hnUrl: "https://news.ycombinator.com/item?id=123",
-          points: 200,
-          comments: 50,
-          author: "bob",
-          createdAt: "2026-03-09T10:00:00Z",
-        },
-      ],
-      fetchSuccess: true,
-    };
-    const result = hnOnlyPrompt(data, "2026-03-09");
-    expect(result).toContain("AI News");
-    expect(result).toContain("Score: 200");
-    expect(result).toContain("Comments: 50");
-    expect(result).toContain("Author: bob");
-  });
-
-  it("mentions Hacker News", () => {
-    const data: HnData = {
-      stories: [
-        {
-          id: "1",
-          title: "Test",
-          url: "https://test.com",
-          hnUrl: "https://news.ycombinator.com/item?id=1",
-          points: 10,
-          comments: 2,
-          author: "a",
-          createdAt: "2026-03-09T10:00:00Z",
-        },
-      ],
-      fetchSuccess: true,
-    };
-    const result = hnOnlyPrompt(data, "2026-03-09");
-    expect(result).toContain("Score: 10");
-    expect(result).toContain("Comments: 2");
-    expect(result).toContain("Hacker News");
-  });
-
-  it("asks for Dev.to and Lobste.rs only when the weekly run fetched them", () => {
-    const daily = hnOnlyPrompt({ stories: [], fetchSuccess: true }, "2026-10-12");
-    expect(daily).toContain("## Hacker News\n");
-    expect(daily).not.toMatch(/## Dev\.to|## Lobste\.rs/);
-
-    const devto: DevtoData = { fetchSuccess: true, articles: [devtoArticle] };
-    const weekly = buildDiscussionsPrompt(
-      { hn: { stories: [], fetchSuccess: false }, devto, lobsters: noLobsters },
-      "2026-10-12",
-    );
-    expect(weekly).toContain("MCP lesson");
-    expect(weekly).toContain("## Dev.to\n");
-    expect(weekly).not.toContain("## Hacker News\n");
-    expect(weekly).not.toContain("## Lobste.rs\n");
-  });
-
-  it("discussionSources: an empty HN stays alone, but not next to a weekly source", () => {
-    const emptyHn: HnData = { stories: [], fetchSuccess: true };
-    const devto: DevtoData = { articles: [devtoArticle], fetchSuccess: true };
-    expect(discussionSources({ hn: emptyHn, devto: noDevto, lobsters: noLobsters }).hasHn).toBe(true);
-    expect(discussionSources({ hn: emptyHn, devto, lobsters: noLobsters })).toEqual({
-      hasHn: false,
-      hasDevto: true,
-      hasLobsters: false,
-    });
-    const failed = { hn: { stories: [], fetchSuccess: false }, devto: noDevto, lobsters: noLobsters };
-    expect(discussionSources(failed).hasHn).toBe(false);
-  });
-
-  it("does not ask for comment-thread content the model never sees", () => {
-    const result = hnOnlyPrompt({ stories: [], fetchSuccess: true }, "2026-10-06");
-    expect(result).toContain("not the article and not the comment thread");
-    expect(result).toContain("describe no discussion");
-    expect(result).not.toMatch(/typical reaction|last cycle/);
-  });
-
-  it("passes a story's page description, and limits a story without one to its title", () => {
-    const story = {
-      id: "1",
-      title: "Neural networks are clean",
-      url: "https://goodfire.ai/clean",
-      hnUrl: "https://news.ycombinator.com/item?id=1",
-      points: 300,
-      comments: 80,
-      author: "a",
-      createdAt: "2026-10-19T00:00:00Z",
-      description: "Sparse features generalize.",
-    };
-    const result = hnOnlyPrompt({ stories: [story], fetchSuccess: true }, "2026-10-19");
-    expect(result).toContain("   Page description: Sparse features generalize.");
-    expect(result).toContain("without one, 1 sentence saying only what the title and the link's domain say");
-  });
-});
-
-// ---------------------------------------------------------------------------
 // Shared section layout
 // ---------------------------------------------------------------------------
 
 describe("listing report layout", () => {
-  // Three articles: with fewer the web prompt leaves out Signals and Worth a Look.
-  const web: WebFetchResult[] = [
-    {
-      site: "openai",
-      siteName: "OpenAI",
-      isFirstRun: false,
-      newItems: [1, 2, 3].map((n) => ({
-        url: `https://openai.com/index/p${n}`,
-        title: `P${n}`,
-        lastmod: "2026-10-12",
-        content: "",
-        site: "openai" as const,
-        category: "release",
-      })),
-      totalDiscovered: 3,
-      fetchSuccess: true,
-    },
-  ];
   const prompts: Record<string, string> = {
-    hn: hnOnlyPrompt({ stories: [], fetchSuccess: true }, "2026-10-12"),
     arxiv: buildArxivPrompt({ papers: [], fetchSuccess: true, rankedBy: "recency" }, "2026-10-12"),
     hf: buildModelsPrompt({ models: [], fetchSuccess: true }, withModels, "2026-10-12"),
-    weekly: buildDiscussionsPrompt(
-      {
-        hn: { stories: [], fetchSuccess: true },
-        devto: { articles: [], fetchSuccess: true },
-        lobsters: { stories: [], fetchSuccess: true },
-      },
-      "2026-10-12",
-    ),
-    web: buildWebReportPrompt(web, "2026-10-12"),
   };
 
   it.each(Object.keys(prompts))("%s: Highlights first, then Signals", (id) => {
@@ -617,7 +384,7 @@ describe("listing report layout", () => {
     expect(p.indexOf(`## ${SECTIONS.signals}\n`)).toBeGreaterThan(h);
   });
 
-  it.each(["hn", "arxiv", "hf", "weekly", "web"])("%s: ends with Worth a Look", (id) => {
+  it.each(["arxiv", "hf"])("%s: ends with Worth a Look", (id) => {
     const p = prompts[id]!;
     expect(p.indexOf(`## ${SECTIONS.worthALook}\n`)).toBeGreaterThan(p.indexOf(`## ${SECTIONS.signals}\n`));
   });
@@ -626,6 +393,41 @@ describe("listing report layout", () => {
     const p = prompts[id]!;
     expect(p).toContain("Do not write a title");
     expect(p).not.toMatch(/Today's|This Week's|^\d\. \*\*/m);
+  });
+});
+
+describe("buildModelsSummariesPrompt", () => {
+  const post = (site: "anthropic" | "openai", content: string) => ({
+    url: `https://${site}.com/news/p`,
+    title: "P",
+    lastmod: "2026-10-22",
+    content,
+    site,
+    category: "news",
+  });
+  const prompt = buildModelsSummariesPrompt(
+    numberRows([post("anthropic", "Page body."), post("openai", "")]),
+    [
+      {
+        n: 3,
+        id: "x/m",
+        name: "M",
+        description: "A coding model.",
+        created: "2026-10-22",
+        contextLength: 262144,
+      },
+    ],
+    "2026-10-22",
+  );
+
+  it("numbers the posts, then the models, and gives each its own rule", () => {
+    expect(prompt).toContain("1. P (Anthropic post, https://anthropic.com/news/p) — page text: Page body.");
+    expect(prompt).toContain("2. P (OpenAI post, https://openai.com/news/p) — (no page text)");
+    expect(prompt).toContain("3. M (OpenRouter model `x/m`) — catalog description: A coding model.");
+    expect(prompt).not.toContain("262144");
+    expect(prompt).toContain("`N: —`, unless its title says more than its URL");
+    expect(prompt).toContain("its marketing claims");
+    expect(prompt).toContain("3 lines in total");
   });
 });
 
@@ -668,11 +470,11 @@ describe("withFallbackHighlights", () => {
     "## Highlights\nThe Commission published the first [harmonised standard](https://x.eu) for the AI Act. Consultations close in November.\n\n<!-- tables -->";
 
   it("fills a published policy or data report the model left out with its first Highlights sentence", () => {
-    const out = withFallbackHighlights({ "ai-hn": ["H."] }, { "ai-hn": "x", "ai-policy": POLICY }, [
+    const out = withFallbackHighlights({ "ai-agents": ["H."] }, { "ai-agents": "x", "ai-policy": POLICY }, [
       "ai-policy",
     ]);
     expect(out).toEqual({
-      "ai-hn": ["H."],
+      "ai-agents": ["H."],
       "ai-policy": ["The Commission published the first harmonised standard for the AI Act."],
     });
   });
@@ -680,7 +482,7 @@ describe("withFallbackHighlights", () => {
   it("keeps the model's highlights, and adds none for other or absent reports", () => {
     const out = withFallbackHighlights(
       { "ai-policy": ["Mine."] },
-      { "ai-policy": POLICY, "ai-web": POLICY },
+      { "ai-policy": POLICY, "ai-models": POLICY },
       ["ai-policy"],
     );
     expect(out).toEqual({ "ai-policy": ["Mine."] });

@@ -2,8 +2,8 @@
  * Web content fetching for AI company news/blog/research.
  *
  * Strategy:
- *   - Discover article URLs via sitemaps (no date filter needed — lastmod is reliable)
- *   - Compare with stored state to find new/updated URLs
+ *   - Discover article URLs via sitemaps
+ *   - Compare with stored state to find new URLs (an edited post is not an announcement)
  *   - Fetch content only for new URLs; on first run, cap at MAX_CONTENT_FETCH_FIRST_RUN per site
  *   - After every run, mark ALL discovered URLs as seen so future runs stay incremental
  *
@@ -304,16 +304,9 @@ async function fetchSite(site: "anthropic" | "openai", state: WebState): Promise
     return b.lastmod.localeCompare(a.lastmod);
   });
 
-  // New = not seen before, OR (for non-metadataOnly sites) lastmod is newer.
-  // For metadataOnly sites (e.g. OpenAI), lastmod reflects sitemap generation
-  // time rather than content publication — ignore lastmod changes to avoid
-  // flagging hundreds of unchanged URLs as "new" on every run.
-  const newUrls = allDiscovered.filter(({ loc, lastmod }) => {
-    const prev = siteState.seenUrls[loc];
-    if (!prev) return true;
-    if (!cfg.metadataOnly && lastmod && lastmod > prev) return true;
-    return false;
-  });
+  // New = a URL not seen before. A moved lastmod is not: on 2026-10-21 Anthropic's sitemap moved
+  // the lastmod of all 476 URLs, and OpenAI's tracks sitemap generation.
+  const newUrls = allDiscovered.filter(({ loc }) => !siteState.seenUrls[loc]);
 
   // Cap content fetches on first run to avoid excessive runtime
   const toFetch = isFirstRun ? newUrls.slice(0, MAX_CONTENT_FETCH_FIRST_RUN) : newUrls;

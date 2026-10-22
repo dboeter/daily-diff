@@ -5,7 +5,8 @@
 import { hasActivity, RELEASE_BODY_CHARS, releaseNotes, type ProjectActivity } from "./prompts.ts";
 import type { ReleaseRow } from "./data-reports.ts";
 import { escapeRegex } from "./agent-news.ts";
-import type { OpenRouterStealthModel } from "../sources/openrouter.ts";
+import type { OpenRouterNewModel, OpenRouterStealthModel } from "../sources/openrouter.ts";
+import type { WebPageItem } from "../sources/web.ts";
 import type { TrendingReportData } from "../trending/rank.ts";
 import type { PolicyItem } from "../policy/policy.ts";
 import type { KeptVendorItem } from "../data/jev.ts";
@@ -20,6 +21,7 @@ import {
   REPORT_META,
   SECTIONS,
   STEALTH_SECTION,
+  MODELS_PAGE,
   TRENDING_REPORT,
   POLICY_REPORT,
   DATA_REPORT,
@@ -242,7 +244,7 @@ export function nestHeadings(md: string, level: number): string {
 }
 
 // ---------------------------------------------------------------------------
-// Stealth models (daily, in the agents report below Highlights)
+// Stealth models (daily, on the models page)
 // ---------------------------------------------------------------------------
 
 /** A stealth model listed within this many days is flagged new (2 days covers a delayed cron). */
@@ -251,6 +253,12 @@ const STEALTH_NEW_DAYS = 2;
 const STEALTH_EXPIRING_DAYS = 3;
 
 const DAY_MS = 24 * 60 * 60 * 1000;
+
+/** A stealth model listed within STEALTH_NEW_DAYS: 🆕 in the table, and it publishes the models page. */
+export function isNewStealthModel(m: OpenRouterStealthModel, now = Date.now()): boolean {
+  const today = Date.parse(new Date(now).toISOString().slice(0, 10));
+  return today - Date.parse(m.created) < STEALTH_NEW_DAYS * DAY_MS;
+}
 
 /**
  * Deterministic stealth-model section. Rendered from the catalog, not by the
@@ -266,7 +274,7 @@ export function buildStealthSection(models: OpenRouterStealthModel[] | null, now
     const today = Date.parse(new Date(now).toISOString().slice(0, 10));
     const rows = models.map((m) => {
       const status: string[] = [];
-      if (today - Date.parse(m.created) < STEALTH_NEW_DAYS * DAY_MS) status.push(S.isNew);
+      if (isNewStealthModel(m, now)) status.push(S.isNew);
       if (m.expires) {
         const days = Math.round((Date.parse(m.expires) - today) / DAY_MS);
         if (days <= STEALTH_EXPIRING_DAYS) status.push(S.expiring(days));
@@ -433,4 +441,33 @@ export function renderSpottedTable(rows: SpottedRow[], summaries: Map<number, st
       `${cell(summaryText(summaries, { n: r.n, description: r.description ?? "" }))} |`,
   );
   return `## ${SPOTTED.heading}\n\n${SPOTTED.tableHeader}\n${lines.join("\n")}`;
+}
+
+/** The models page's Lab announcements rows, each summary by its own number (else the page text, truncated, or "—"). */
+export function renderLabPostsTable(posts: Numbered<WebPageItem>[], summaries: Map<number, string>): string {
+  const lines = posts.map(
+    (p) =>
+      `| ${p.lastmod.slice(0, 10) || "—"} | ${MODELS_PAGE.labs[p.site]} | [${policyTitleLabel(p.title || p.url)}](${cell(p.url)}) | ` +
+      `${cell(summaryText(summaries, { n: p.n, description: p.content }))} |`,
+  );
+  return `${MODELS_PAGE.labTableHeader}\n${lines.join("\n")}`;
+}
+
+/** A context length as a table cell: 262144 → "262K", 1048576 → "1M". */
+function contextCell(tokens: number): string {
+  if (!tokens) return "—";
+  return tokens >= 1e6 ? `${Number((tokens / 1e6).toFixed(1))}M` : `${Math.round(tokens / 1e3)}K`;
+}
+
+/** The models page's New on OpenRouter rows, each summary by its own number (else the description, truncated). */
+export function renderNewModelsTable(
+  models: Numbered<OpenRouterNewModel>[],
+  summaries: Map<number, string>,
+): string {
+  const lines = models.map(
+    (m) =>
+      `| [${cell(m.name)}](https://openrouter.ai/${m.id}) \`${m.id}\` | ${m.created} | ${contextCell(m.contextLength)} | ` +
+      `${cell(summaryText(summaries, m))} |`,
+  );
+  return `${MODELS_PAGE.modelsTableHeader}\n${lines.join("\n")}`;
 }

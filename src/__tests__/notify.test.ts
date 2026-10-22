@@ -56,14 +56,14 @@ describe("buildMessage", () => {
   });
 
   it("builds a daily message with report links", () => {
-    const msg = buildMessage("2026-03-09", ["ai-agents", "ai-hn"], BASE_URL);
+    const msg = buildMessage("2026-03-09", ["ai-agents", "ai-models"], BASE_URL);
     expect(msg).toContain("Daily Diff");
     expect(msg).toContain("2026-03-09");
     expect(msg).toContain("📡");
     expect(msg).toContain(`${BASE_URL}/#2026-03-09/ai-agents`);
     expect(msg).toContain("AI Agents");
-    expect(msg).toContain(`${BASE_URL}/#2026-03-09/ai-hn`);
-    expect(msg).toContain(REPORT_LABELS["ai-hn"]);
+    expect(msg).toContain(`${BASE_URL}/#2026-03-09/ai-models`);
+    expect(msg).toContain(REPORT_LABELS["ai-models"]);
   });
 
   it("includes Web UI and RSS links", () => {
@@ -82,9 +82,9 @@ describe("buildMessage", () => {
   it("includes highlights when provided", () => {
     const highlights: ReportHighlights = {
       "ai-agents": ["Claude Code releases v1.2.0", "Gemini CLI fixes streaming"],
-      "ai-hn": ["OpenClaw adds MCP support"],
+      "ai-models": ["OpenClaw adds MCP support"],
     };
-    const msg = buildMessage("2026-03-09", ["ai-agents", "ai-hn"], BASE_URL, highlights);
+    const msg = buildMessage("2026-03-09", ["ai-agents", "ai-models"], BASE_URL, highlights);
     expect(msg).toContain("◦ Claude Code releases v1.2.0");
     expect(msg).toContain("◦ Gemini CLI fixes streaming");
     expect(msg).toContain("◦ OpenClaw adds MCP support");

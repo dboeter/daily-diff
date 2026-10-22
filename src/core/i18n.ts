@@ -29,9 +29,8 @@ export const MSG = {
 // In reading order: the report bar and the sidebar list them this way.
 export const REPORTS = {
   "ai-agents": { emoji: "🤖", name: "AI Agents", label: "agents" },
-  "ai-hn": { emoji: "💬", name: "AI Discussions", label: "hn" },
+  "ai-models": { emoji: "🧠", name: "AI Models & Labs", label: "models" },
   "ai-arxiv": { emoji: "📚", name: "AI Research", label: "arxiv" },
-  "ai-web": { emoji: "🌐", name: "Lab Announcements", label: "web" },
   "ai-policy": { emoji: "⚖️", name: "Policy Watch", label: "policy" },
   "ai-data": { emoji: "🗄️", name: "Data Engineering Watch", label: "data" },
   "ai-trending": { emoji: "📈", name: "Agent & AI Coding Trends", label: "trending" },
@@ -66,9 +65,8 @@ export const PROJECT_SCOPE = { window: "last 24h", period: "today" } as const;
 
 const SOURCES = "Sources:";
 
-/** The meta line under every report's H1 (the web report adds a source list). */
+/** The meta line under every report's H1. */
 export const REPORT_META = {
-  sourcesHeader: SOURCES,
   sources: (list: string) => `${SOURCES} ${list}`,
   generated: (utcStr: string) => `Generated: ${utcStr} UTC`,
   /** After a listing's item count when Jev ordered it (ArXiv, policy). */
@@ -77,21 +75,6 @@ export const REPORT_META = {
 
 /** The report bar's first link: the day's overview of every report's highlights. */
 export const OVERVIEW = { emoji: "📅", name: "Overview" } as const;
-
-export const WEB_REPORT = {
-  firstCrawl: "First full crawl",
-  todayUpdate: "Today's update",
-  newContent: (count: number) => `New content: ${count} articles`,
-  sourceCounts: (count: number, total: number) => `${count} new articles (sitemap total: ${total})`,
-  // A failed sitemap fetch would otherwise read "0 new articles (sitemap total: 0)".
-  sourceFailed: "fetch failed",
-  anthropicHeading: "Anthropic",
-  openaiHeading: "OpenAI",
-  // First full crawl only.
-  landscapeHeading: "Content Landscape Overview",
-  issueTitle: (dateStr: string, isFirstRun: boolean) =>
-    `${reportIssueTitle("ai-web", dateStr)}${isFirstRun ? " (First Crawl)" : ""}`,
-} as const;
 
 /**
  * Section headings of the LLM-written reports: every page opens with
@@ -135,13 +118,6 @@ export const SPOTTED = {
   /** The Discussion cell, e.g. "312 points, 95 comments"; a Dev.to story's points are reactions. */
   counts: (source: "hn" | "lobsters" | "devto", points: number, comments: number) =>
     `${points} ${source === "devto" ? "reactions" : "points"}, ${comments} comments`,
-} as const;
-
-// The discussions report's per-source sections.
-export const DISCUSSIONS_REPORT = {
-  hnHeading: "Hacker News",
-  devtoHeading: "Dev.to",
-  lobstersHeading: "Lobste.rs",
 } as const;
 
 export const ARXIV_REPORT = {
@@ -211,7 +187,28 @@ export const MODELS_REPORT = {
   openRouterHeading: "OpenRouter Usage",
 } as const;
 
-// Rendered daily in the agents report, below Highlights (buildStealthSection).
+// Daily: Anthropic and OpenAI posts, models newly listed on OpenRouter, stealth models, Spotted.
+export const MODELS_PAGE = {
+  labHeading: "Lab announcements",
+  labTableHeader: "| Date | Lab | Post | Summary |\n| :--- | :--- | :--- | :--- |",
+  /** The Lab column. */
+  labs: { anthropic: "Anthropic", openai: "OpenAI" },
+  /** Below the table when more new posts came in than it shows. */
+  morePosts: (n: number) => `${n} more posts not shown.`,
+  /** The section on a first crawl, when every URL in the sitemaps is new. */
+  firstCrawl: (n: number) => `First crawl: ${n} posts recorded; new posts are listed from the next run.`,
+  noPosts: "No new posts today.",
+  siteFailed: (lab: string) => `⚠️ ${lab}: sitemap fetch failed.`,
+  modelsHeading: "New on OpenRouter",
+  modelsTableHeader: "| Model | Listed | Context | Summary |\n| :--- | :--- | :--- | :--- |",
+  noModels: "No new models listed today.",
+  catalogUnavailable: "⚠️ OpenRouter model catalog unavailable.",
+  counts: (posts: number, models: number, spotted: number) =>
+    `Lab posts: ${posts} | New models: ${models} | Spotted: ${spotted}`,
+  noContent: "No lab posts, new models, new stealth models or Spotted stories, skipping report.",
+} as const;
+
+// Rendered daily on the models page (buildStealthSection).
 export const STEALTH_SECTION = {
   title: "🕵️ Stealth Models on OpenRouter",
   none: "No stealth models listed on OpenRouter today.",
@@ -243,6 +240,10 @@ export const REPORT_LABELS: Record<string, string> = {
   "ai-infra": "AI Infrastructure Digest",
   // Weekly until October 2026, then folded into the discussions report (ai-hn).
   "ai-community": "Tech Community AI Digest",
+  // Daily until October 2026: Hacker News, Dev.to and Lobste.rs stories moved
+  // to each page's Spotted section, the lab posts to ai-models.
+  "ai-hn": "AI Discussions",
+  "ai-web": "Lab Announcements",
   // No longer generated (October 2026: ai-cli merged into ai-agents, ai-ph
   // dropped); kept so archived reports keep a title.
   "ai-cli": "AI CLI Tools Digest",

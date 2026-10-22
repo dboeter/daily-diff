@@ -370,8 +370,8 @@ const TRUNCATION_NOTICE =
 /** GitHub label colors by label name. Default: "0075ca". */
 const LABEL_COLORS: Record<string, string> = {
   agents: "e11d48",
+  models: "7c3aed",
   trending: "f9a825",
-  hn: "ff6600",
   arxiv: "b31b1b",
   hf: "ff9d00",
   policy: "1d4ed8",
@@ -422,6 +422,12 @@ const DIGEST_ISSUE_LABELS = new Set([
   "infra-en",
   "community",
   "community-en",
+  // Retired in October 2026: Hacker News, Dev.to and Lobste.rs went to each
+  // page's Spotted section, the lab posts to the models page. Daily, like infra.
+  "hn",
+  "hn-en",
+  "web",
+  "web-en",
   "weekly",
   "weekly-en",
   "monthly",

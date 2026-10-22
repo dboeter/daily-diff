@@ -5,10 +5,10 @@ import { describe, it, expect, vi } from "vitest";
 import {
   buildAgentsReport,
   buildDataReport,
-  buildDiscussionsReport,
+  buildModelsPage,
   buildPolicyReport,
   buildTrendingReport,
-  buildWebReport,
+  LAB_POSTS_MAX,
   type DataSection,
 } from "../reports/data-reports.ts";
 import { EMPTY_TRENDING, type TrendingData } from "../trending/trending.ts";
@@ -16,7 +16,8 @@ import { MSG } from "../core/i18n.ts";
 import type { ProjectActivity } from "../reports/prompts.ts";
 import type { PolicyData, PolicyItem } from "../policy/policy.ts";
 import { isDataLaw } from "../policy/jev.ts";
-import type { DevtoData } from "../sources/devto.ts";
+import type { WebFetchResult, WebPageItem } from "../sources/web.ts";
+import type { ModelCatalog } from "../sources/openrouter.ts";
 import type { VendorData, VendorItem } from "../data/vendors.ts";
 import { selectVendorItems } from "../data/jev.ts";
 import { fetchVendorData } from "../data/vendors.ts";
@@ -47,10 +48,11 @@ vi.mock("../core/report.ts", async (importOriginal) => ({
   generateOr: (_tag: string, prompt: string, fallback: unknown) => generateBody(prompt).catch(() => fallback),
   saveFile: (...args: unknown[]) => saveFile(...(args as [string, string, string])),
 }));
-// buildWebReport writes digests/web-state.json: keep the tests off the real file.
+// buildModelsPage writes digests/web-state.json: keep the tests off the real file.
+const saveWebState = vi.fn();
 vi.mock("../sources/web.ts", async (importOriginal) => ({
   ...(await importOriginal<typeof import("../sources/web.ts")>()),
-  saveWebState: () => {},
+  saveWebState: () => saveWebState(),
 }));
 /** A vendor result with these items and nothing to save but the pruned state. */
 const vendorOf = (items: VendorData["items"]): VendorData => ({
@@ -60,88 +62,6 @@ const vendorOf = (items: VendorData["items"]): VendorData => ({
   observedState: { reported: {} },
 });
 const saveFile = vi.fn((_content: string, dateStr: string, name: string) => `digests/${dateStr}/${name}`);
-
-const devto: DevtoData = {
-  fetchSuccess: true,
-  articles: [
-    {
-      id: 1,
-      title: "MCP lesson",
-      url: "https://dev.to/a/mcp",
-      description: "d",
-      user: "u",
-      positiveReactionsCount: 78,
-      commentsCount: 85,
-      readingTimeMinutes: 5,
-      tags: ["ai"],
-      publishedAt: "2026-10-10T00:00:00Z",
-    },
-  ],
-};
-
-describe("buildWebReport", () => {
-  it("says a site's fetch failed instead of reporting an empty sitemap", async () => {
-    generateBody.mockClear();
-    const page = {
-      url: "https://www.anthropic.com/news/x",
-      title: "X",
-      lastmod: "2026-10-18",
-      content: "Body.",
-      site: "anthropic" as const,
-      category: "news",
-    };
-    const results = [
-      {
-        site: "anthropic" as const,
-        siteName: "Anthropic",
-        isFirstRun: false,
-        newItems: [page],
-        totalDiscovered: 40,
-        fetchSuccess: true,
-      },
-      {
-        site: "openai" as const,
-        siteName: "OpenAI",
-        isFirstRun: false,
-        newItems: [],
-        totalDiscovered: 0,
-        fetchSuccess: false,
-      },
-    ];
-    const state = { anthropic: {}, openai: {} } as unknown as Parameters<typeof buildWebReport>[1];
-    const content = (await buildWebReport(results, state, "00:00", "2026-10-19"))!.content;
-    expect(content).toContain("— 1 new articles (sitemap total: 40)");
-    expect(content).toContain("[openai.com](https://openai.com) — fetch failed");
-  });
-});
-
-describe("buildDiscussionsReport", () => {
-  it("is still written when HN fails but Dev.to succeeds", async () => {
-    generateBody.mockClear();
-    const report = await buildDiscussionsReport(
-      { hn: { stories: [], fetchSuccess: false }, devto, lobsters: { stories: [], fetchSuccess: false } },
-      "00:00",
-      "2026-10-12",
-    );
-    expect(report?.id).toBe("ai-hn");
-    expect(report?.content).toContain("[Dev.to](https://dev.to/) (1 articles)");
-    expect(report?.content).not.toContain("Hacker News](");
-    expect(report?.content).toContain("## Highlights\n\nText.");
-    expect(generateBody).toHaveBeenCalledOnce();
-  });
-
-  it("is skipped when every source failed, without an LLM call", async () => {
-    generateBody.mockClear();
-    const none = { stories: [], fetchSuccess: false };
-    const report = await buildDiscussionsReport(
-      { hn: none, devto: { articles: [], fetchSuccess: false }, lobsters: none },
-      "00:00",
-      "2026-10-12",
-    );
-    expect(report).toBeNull();
-    expect(generateBody).not.toHaveBeenCalled();
-  });
-});
 
 describe("buildTrendingReport", () => {
   const data: TrendingData = {
@@ -249,28 +169,21 @@ describe("buildAgentsReport", () => {
   ];
   const spotted = { rows: [spottedRow(1, "agents")], summaries: new Map([[1, "A tool."]]) };
   const build = (g = groups(true), s: typeof spotted = spotted) =>
-    buildAgentsReport(g, [], s, "00:00", "2026-10-22");
+    buildAgentsReport(g, s, "00:00", "2026-10-22");
 
-  it("reads Highlights, the stealth table, the two groups, then Spotted", async () => {
+  it("reads Highlights, the two groups, then Spotted", async () => {
     generateBody.mockReset();
     generateBody.mockImplementation(async () => "## Highlights\n\n- Codex shipped v1.");
     const report = await build();
     expect(report.id).toBe("ai-agents");
     expect(report.content).toMatch(/^# AI Agents 2026-10-22\n/);
-    expect(headings(report.content)).toEqual([
-      "Highlights",
-      "🕵️ Stealth Models on OpenRouter",
-      "Coding Agents",
-      "Agent Tooling",
-      "Spotted",
-    ]);
+    expect(headings(report.content)).toEqual(["Highlights", "Coding Agents", "Agent Tooling", "Spotted"]);
     expect(report.content).toContain("### Codex");
     // The Highlights call reads the rendered groups and the Spotted table.
     const prompt = generateBody.mock.calls[0]![0] as string;
     expect(prompt).toContain("You are the editor of AI Agents");
     expect(prompt).toContain("## Coding Agents\n\n### Codex\n- Released v1.");
     expect(prompt).toContain("| [Story 1](https://example.com/1) |");
-    expect(prompt).not.toContain("Stealth");
     expect(generateBody).toHaveBeenCalledTimes(1);
   });
 
@@ -285,11 +198,7 @@ describe("buildAgentsReport", () => {
     generateBody.mockReset();
     const report = await build(groups(false), NO_SPOTTED);
     expect(generateBody).not.toHaveBeenCalled();
-    expect(headings(report.content)).toEqual([
-      "🕵️ Stealth Models on OpenRouter",
-      "Coding Agents",
-      "Agent Tooling",
-    ]);
+    expect(headings(report.content)).toEqual(["Coding Agents", "Agent Tooling"]);
   });
 
   it("leaves the failure notice under Highlights when the call fails", async () => {
@@ -298,7 +207,156 @@ describe("buildAgentsReport", () => {
       throw new Error("HTTP 504");
     });
     const report = await build();
-    expect(report.content).toContain(`## Highlights\n\n${MSG.summaryFailed}\n\n---\n\n## 🕵️`);
+    expect(report.content).toContain(`## Highlights\n\n${MSG.summaryFailed}\n\n---\n\n## Coding Agents`);
+  });
+});
+
+describe("buildModelsPage", () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "models-page-"));
+  const NOW = Date.parse("2026-10-22T03:00:00Z");
+  const post = (i: number, site: WebPageItem["site"] = "anthropic"): WebPageItem => ({
+    url: `https://www.${site}.com/news/p${i}`,
+    title: `Post ${i}`,
+    lastmod: `2026-10-${String(10 + (i % 12)).padStart(2, "0")}`,
+    content: site === "anthropic" ? `Body ${i}.` : "",
+    site,
+    category: "news",
+  });
+  const site = (newItems: WebPageItem[], extra: Partial<WebFetchResult> = {}): WebFetchResult => ({
+    site: "anthropic",
+    siteName: "Anthropic (Claude)",
+    isFirstRun: false,
+    newItems,
+    totalDiscovered: 400,
+    fetchSuccess: true,
+    ...extra,
+  });
+  const model = {
+    id: "x/m",
+    name: "M",
+    description: "A coding model.",
+    created: "2026-10-21",
+    contextLength: 262144,
+  };
+  const catalog = (extra: Partial<ModelCatalog> = {}): ModelCatalog => ({
+    stealth: [],
+    newModels: [],
+    ...extra,
+  });
+  let n = 0;
+  const build = (
+    web: WebFetchResult[],
+    cat: ModelCatalog | null,
+    spotted: { rows: SpottedRow[]; summaries: Map<number, string> } = NO_SPOTTED,
+    stateFile = path.join(dir, `state-${++n}.json`),
+    dateStr = "2026-10-22",
+    now = NOW,
+  ) => buildModelsPage(web, {} as never, cat, spotted, "00:00", dateStr, stateFile, now);
+  const stub = () => {
+    generateBody.mockReset();
+    generateBody.mockImplementation(async (prompt: string) =>
+      prompt.includes("You are the editor") ? "## Highlights\n\n- A new model." : "1: Summary one.",
+    );
+  };
+
+  it("reads Highlights, Lab announcements, New on OpenRouter, Stealth models, then Spotted", async () => {
+    stub();
+    const report = await build([site([post(1)])], catalog({ newModels: [model] }), {
+      rows: [spottedRow(1, "models")],
+      summaries: new Map([[1, "A story."]]),
+    });
+    expect(report?.id).toBe("ai-models");
+    expect(report?.content).toMatch(
+      /^# AI Models & Labs 2026-10-22\n\n> Lab posts: 1 \| New models: 1 \| Spotted: 1 \| Generated: 00:00 UTC\n/,
+    );
+    expect(headings(report!.content)).toEqual([
+      "Highlights",
+      "Lab announcements",
+      "New on OpenRouter",
+      "🕵️ Stealth Models on OpenRouter",
+      "Spotted",
+    ]);
+    expect(report?.content).toContain(
+      "| 2026-10-11 | Anthropic | [Post 1](https://www.anthropic.com/news/p1) | Summary one. |",
+    );
+    // The model is numbered after the post; without its summary line it shows its description.
+    expect(report?.content).toContain(
+      "| [M](https://openrouter.ai/x/m) `x/m` | 2026-10-21 | 262K | A coding model. |",
+    );
+    // Two calls: the summaries, then Highlights over the rendered sections.
+    expect(generateBody).toHaveBeenCalledTimes(2);
+    const highlightsPrompt = generateBody.mock.calls[1]![0] as string;
+    expect(highlightsPrompt).toContain("You are the editor of AI Models & Labs");
+    expect(highlightsPrompt).toContain("## New on OpenRouter");
+    expect(highlightsPrompt).toContain("| [Story 1](https://example.com/1) |");
+  });
+
+  it("shows at most LAB_POSTS_MAX posts, newest first, then how many more came in", async () => {
+    stub();
+    const posts = Array.from({ length: LAB_POSTS_MAX + 2 }, (_, i) =>
+      post(i, i % 2 ? "openai" : "anthropic"),
+    );
+    const report = await build([site(posts)], catalog());
+    const rows = report!.content.split("\n").filter((l) => /^\| 2026-/.test(l));
+    expect(rows).toHaveLength(LAB_POSTS_MAX);
+    expect(rows.map((r) => r.slice(2, 12))).toEqual(
+      rows
+        .map((r) => r.slice(2, 12))
+        .sort()
+        .reverse(),
+    );
+    expect(report?.content).toContain("2 more posts not shown.");
+    expect(report?.content).toContain("> Lab posts: 17 |");
+  });
+
+  it("shows one line with the count on a first crawl, with no summaries call for the posts", async () => {
+    stub();
+    const report = await build([site([post(1), post(2)], { isFirstRun: true })], catalog());
+    expect(report?.content).toContain(
+      "## Lab announcements\n\nFirst crawl: 400 posts recorded; new posts are listed from the next run.",
+    );
+    expect(report?.content).not.toContain("| Date | Lab |");
+    expect(generateBody).toHaveBeenCalledTimes(1);
+  });
+
+  it("is skipped without an LLM call when nothing is new, and still saves the web state", async () => {
+    stub();
+    saveWebState.mockClear();
+    const old = { id: "stealth/a", name: "A", created: "2026-10-01", expires: null };
+    const stateFile = path.join(dir, "skipped.json");
+    expect(await build([site([])], catalog({ stealth: [old] }), NO_SPOTTED, stateFile)).toBeNull();
+    expect(generateBody).not.toHaveBeenCalled();
+    expect(saveWebState).toHaveBeenCalledOnce();
+    expect(fs.existsSync(stateFile)).toBe(false);
+  });
+
+  it("is published for a 🆕 stealth model alone, or a Spotted row alone", async () => {
+    stub();
+    const fresh = { id: "stealth/b", name: "B", created: "2026-10-21", expires: null };
+    expect(await build([site([])], catalog({ stealth: [fresh] }))).not.toBeNull();
+    const spotted = { rows: [spottedRow(1, "models")], summaries: new Map<number, string>() };
+    const report = await build([site([])], null, spotted);
+    expect(report?.content).toContain("No new posts today.");
+    expect(report?.content).toContain("⚠️ OpenRouter model catalog unavailable.");
+  });
+
+  it("lists a new model again on a same-day re-run, but not the next day", async () => {
+    stub();
+    const stateFile = path.join(dir, "rerun.json");
+    const first = await build([site([])], catalog({ newModels: [model] }), NO_SPOTTED, stateFile);
+    expect(first?.content).toContain("`x/m`");
+    expect(JSON.parse(fs.readFileSync(stateFile, "utf-8")).reported).toEqual({ "x/m": "2026-10-22" });
+    const rerun = await build([site([])], catalog({ newModels: [model] }), NO_SPOTTED, stateFile);
+    expect(rerun?.content).toContain("`x/m`");
+    const nextDay = await build(
+      [site([])],
+      catalog({ newModels: [model] }),
+      NO_SPOTTED,
+      stateFile,
+      "2026-10-23",
+      NOW + 86_400_000,
+    );
+    expect(nextDay).toBeNull();
   });
 });
 

@@ -943,11 +943,6 @@ describe("nextStarHistory", () => {
     const rerunRows = rankGithubRepos([], repos, DATE, first);
     expect(rerunRows[0]!.gain).toBe(812);
     expect(nextStarHistory(first, rerunRows, DATE)).toEqual(first);
-    const promoted = { date: DATE, repos: [["a/x", "agent_tooling"]] as [string, "agent_tooling"][] };
-    // A new record replaces the last one; a run without one keeps it.
-    const withPromoted = nextStarHistory(first, rerunRows, DATE, undefined, promoted);
-    expect(withPromoted.promoted).toEqual(promoted);
-    expect(nextStarHistory(withPromoted, rerunRows, DATE).promoted).toEqual(promoted);
     expect(first.repos["a/x"]).toEqual([
       ["2026-09-28", 85_580],
       [DATE, 86_392],
@@ -1016,21 +1011,21 @@ describe("loadStarHistory / saveStarHistory", () => {
     saveStarHistory(withReported, file);
     expect(fs.readFileSync(file, "utf-8")).toContain(`"${DATE}": ["github:a/x","npm:p"]`);
     expect(loadStarHistory(file)).toEqual(withReported);
-    const withPromoted = {
-      ...withReported,
-      promoted: { date: DATE, repos: [["a/x", "coding_agent"]] as [string, "coding_agent"][] },
-    };
-    saveStarHistory(withPromoted, file);
-    expect(loadStarHistory(file)).toEqual(withPromoted);
   });
 
-  it("drops a malformed `promoted`, keeping the rest", () => {
+  // Promotion stopped in October 2026: the committed `promoted` field is ignored, and the next save drops it.
+  it("ignores a saved `promoted` record", () => {
     const file = path.join(tmp(), "s.json");
     fs.writeFileSync(
       file,
-      JSON.stringify({ repos: { "a/x": [[DATE, 1]] }, promoted: { date: DATE, repos: [["a/x", "nope"]] } }),
+      JSON.stringify({
+        repos: { "a/x": [[DATE, 1]] },
+        promoted: { date: DATE, repos: [["a/x", "coding_agent"]] },
+      }),
     );
     expect(loadStarHistory(file)).toEqual(hist({ "a/x": [[DATE, 1]] }));
+    saveStarHistory(loadStarHistory(file), file);
+    expect(fs.readFileSync(file, "utf-8")).not.toContain("promoted");
   });
 
   it("keeps the star points when `reported` is malformed", () => {

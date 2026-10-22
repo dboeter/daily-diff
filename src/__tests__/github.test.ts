@@ -418,6 +418,17 @@ describe("closeSupersededIssues", () => {
     expect(closed).toEqual([1]);
   });
 
+  it("closes the retired discussions and lab reports' last issues as daily ones", async () => {
+    const { closed } = mockIssues([
+      { number: 1, created_at: "2026-10-21T23:10:00Z", labels: ["hn"] },
+      { number: 2, created_at: "2026-10-21T23:10:00Z", labels: ["web"] },
+      { number: 3, created_at: "2026-10-22T23:10:00Z", labels: ["models"] },
+    ]);
+
+    expect(await closeSupersededIssues()).toBe(2);
+    expect(closed.sort()).toEqual([1, 2]);
+  });
+
   it("closes nothing when only the newest day is open", async () => {
     const { closed } = mockIssues([
       { number: 1, created_at: "2026-08-27T23:10:00Z" },

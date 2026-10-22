@@ -196,6 +196,10 @@ Rules:
 export const AGENTS_HIGHLIGHTS_FOCUS =
   "a release with breaking changes, a hot regression, a new capability, a notable spotted tool";
 
+/** The models page's focus: what changes what a practitioner builds with. */
+export const MODELS_HIGHLIGHTS_FOCUS =
+  "a new model or a model's availability or price, a capability, a safety or evaluation finding, a lab's product launch";
+
 /**
  * A page's Highlights, written after its sections: the model reads the rendered
  * body (the tracked sections and Spotted) and writes only `## Highlights`,

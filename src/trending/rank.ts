@@ -14,7 +14,6 @@ import fs from "node:fs";
 import path from "node:path";
 import type { Numbered } from "../reports/summarized-table.ts";
 import type { SearchRepo, TrendingRepo } from "./trending.ts";
-import type { PromotedRecord } from "./promoted.ts";
 import { formatTokens, type OpenRouterApp } from "../sources/openrouter.ts";
 import { momentumRatio, type NpmData, type NpmPackage } from "./npm.ts";
 import { toCstDateStr } from "../core/date.ts";
@@ -103,8 +102,6 @@ export interface StarHistory {
   repos: Record<string, [string, number][]>;
   /** CST date of a weekly report → the lowercased item keys it showed (`reportedKeys`), for 🔥. */
   reported?: Record<string, string[]>;
-  /** The latest weekly report's category-table repos, tracked by the daily agents report (`promotedRepos`). */
-  promoted?: PromotedRecord;
 }
 
 // ---------------------------------------------------------------------------
@@ -120,11 +117,11 @@ export const NEW_REPO_DAYS = 14;
 const NEW_LISTING_DAYS = 14;
 
 /**
- * Total stars an established GitHub repo needs for the category tables, and so
- * to be promoted into the daily agents report; the `pushed:` search asks for no
- * fewer. Raised from 100 on 2026-10-20: the report should follow established
- * projects, and on 2026-10-19 most rows were few-hundred-star repos with one
- * good week. 0 (a trending scrape miss) is unknown and does not pass.
+ * Total stars an established GitHub repo needs for the category tables; the
+ * `pushed:` search asks for no fewer. Raised from 100 on 2026-10-20: the report
+ * should follow established projects, and on 2026-10-19 most rows were
+ * few-hundred-star repos with one good week. 0 (a trending scrape miss) is
+ * unknown and does not pass.
  */
 export const MIN_STARS = 1000;
 /**
@@ -210,20 +207,7 @@ export function loadStarHistory(file = STAR_HISTORY_FILE): StarHistory {
       Object.values(reported).every(
         (keys) => Array.isArray(keys) && keys.every((k) => typeof k === "string"),
       );
-    const { promoted } = parsed;
-    // A malformed `promoted` costs the daily agents report its trending repos until Monday.
-    const validPromoted =
-      typeof promoted?.date === "string" &&
-      Array.isArray(promoted.repos) &&
-      promoted.repos.every(
-        (r) =>
-          Array.isArray(r) && typeof r[0] === "string" && (CATEGORIES as readonly unknown[]).includes(r[1]),
-      );
-    return {
-      repos: parsed.repos,
-      ...(validReported ? { reported } : {}),
-      ...(validPromoted ? { promoted } : {}),
-    };
+    return { repos: parsed.repos, ...(validReported ? { reported } : {}) };
   } catch (err) {
     // Unlike the match file, starting over is safe: the history is never
     // hand-edited, and losing it costs one run of history-API calls, not a decision.
@@ -245,9 +229,8 @@ export function saveStarHistory(history: StarHistory, file = STAR_HISTORY_FILE):
     ([date, keys]) => `    ${JSON.stringify(date)}: ${JSON.stringify(keys)}`,
   );
   const reportedBody = reported.length > 0 ? `,\n  "reported": {\n${reported.join(",\n")}\n  }` : "";
-  const promotedBody = history.promoted ? `,\n  "promoted": ${JSON.stringify(history.promoted)}` : "";
   fs.mkdirSync(path.dirname(file), { recursive: true });
-  fs.writeFileSync(file, `{\n  "repos": ${body}${reportedBody}${promotedBody}\n}\n`, "utf-8");
+  fs.writeFileSync(file, `{\n  "repos": ${body}${reportedBody}\n}\n`, "utf-8");
 }
 
 /**
@@ -287,15 +270,13 @@ export function reportedKeys(report: Pick<TrendingReportData, "radar" | "categor
 /**
  * History after this run: today's points recorded or replaced, unseen repos
  * carried forward, old points pruned; today's report keys recorded or
- * replaced, reports older than a week pruned; today's promoted repos replace
- * the last record (kept when there are none).
+ * replaced, reports older than a week pruned.
  */
 export function nextStarHistory(
   history: StarHistory,
   githubRows: GithubRow[],
   dateStr: string,
   reported?: string[],
-  promoted?: PromotedRecord,
 ): StarHistory {
   const repos: Record<string, [string, number][]> = {};
   for (const [name, points] of Object.entries(history.repos)) {
@@ -313,8 +294,6 @@ export function nextStarHistory(
     .filter(([date]) => daysBetween(date, dateStr) <= STAR_HISTORY_DAYS)
     .sort(([a], [b]) => a.localeCompare(b));
   if (keptReported.length > 0) next.reported = Object.fromEntries(keptReported);
-  const nextPromoted = promoted ?? history.promoted;
-  if (nextPromoted) next.promoted = nextPromoted;
   for (const [name, points] of Object.entries(repos)) {
     const kept = points
       .filter(([date]) => daysBetween(date, dateStr) <= STAR_HISTORY_DAYS)
