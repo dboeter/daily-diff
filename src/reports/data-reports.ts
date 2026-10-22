@@ -142,8 +142,9 @@ export async function buildTrendsReport(
   const { hasHf, hasOpenRouter } = modelSources(hf, trending.openrouter);
   const papers = numberRows(input.papers);
   const stories = numberRows(input.stories, papers.length);
-  if (!rows.length && !hasHf && !hasOpenRouter && !papers.length && !stories.length) {
-    console.log("  [trends] No trending rows, models, papers or stories, skipping report.");
+  const hasSkills = skills.prs.length + skills.issues.length > 0;
+  if (!rows.length && !hasHf && !hasOpenRouter && !hasSkills && !papers.length && !stories.length) {
+    console.log("  [trends] No trending rows, models, Skills activity, papers or stories, skipping report.");
     return null;
   }
 

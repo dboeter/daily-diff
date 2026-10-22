@@ -269,7 +269,7 @@ describe("fetchSiteContent", () => {
     serveSubSitemaps({ research: ["/index/b"], release: ["/index/a"] });
     expect(newUrls(await fetchSiteContent("openai", state, "2026-10-23"))).toEqual(b);
     serveSubSitemaps({ release: ["/index/a"] });
-    expect(newUrls(await fetchSiteContent("openai", state, "2026-10-23"))).toEqual([]);
+    expect(newUrls(await fetchSiteContent("openai", state, "2026-10-23"))).toEqual(b);
     serveSubSitemaps({ research: ["/index/b"], release: ["/index/a"] });
     expect(newUrls(await fetchSiteContent("openai", state, "2026-10-23"))).toEqual(b);
   });

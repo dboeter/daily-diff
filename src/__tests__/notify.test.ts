@@ -64,7 +64,11 @@ describe("buildMessage", () => {
     expect(msg).toContain(`${BASE_URL}/#2026-03-09/ai-agents`);
     expect(msg).toContain("AI Agents");
     expect(msg).toContain(`${BASE_URL}/#2026-03-09/ai-models`);
-    expect(msg).toContain(REPORT_LABELS["ai-models"]);
+    expect(msg).toContain("AI Models &amp; Labs");
+  });
+
+  it("escapes a report label in its link", () => {
+    expect(buildMessage("2026-03-09", ["ai-models"], BASE_URL)).toContain(">AI Models &amp; Labs</a>");
   });
 
   it("includes Web UI and RSS links", () => {

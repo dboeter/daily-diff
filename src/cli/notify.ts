@@ -70,7 +70,7 @@ export function buildMessage(
   for (const r of reports) {
     const label = REPORT_LABELS[r] ?? r;
     lines.push(""); // blank line before each report section
-    lines.push(`• <a href="${PAGES_URL}/#${date}/${r}">${label}</a>`);
+    lines.push(`• <a href="${PAGES_URL}/#${date}/${r}">${escapeHtml(label)}</a>`);
 
     // Add highlights as indented sub-items.
     const items = highlights?.[r];

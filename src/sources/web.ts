@@ -331,7 +331,18 @@ async function fetchSite(
 
   // New = a URL not seen before. A moved lastmod is not: on 2026-10-21 Anthropic's sitemap moved
   // the lastmod of all 476 URLs, and OpenAI's tracks sitemap generation.
-  const newUrls = allDiscovered.filter(({ loc }) => !siteState.seenUrls[loc] || newToday.has(loc));
+  // The day's earlier new URLs that a failing sub-sitemap hid from this run are listed again too.
+  const discovered = new Set(allDiscovered.map(({ loc }) => loc));
+  const hidden = [...newToday]
+    .filter((loc) => !discovered.has(loc))
+    .map((loc) => ({
+      loc,
+      lastmod: siteState.seenUrls[loc] === "seen" ? undefined : siteState.seenUrls[loc],
+    }));
+  const newUrls = [
+    ...allDiscovered.filter(({ loc }) => !siteState.seenUrls[loc] || newToday.has(loc)),
+    ...hidden,
+  ];
 
   // Cap content fetches on first run to avoid excessive runtime
   const toFetch = isFirstRun ? newUrls.slice(0, MAX_CONTENT_FETCH_FIRST_RUN) : newUrls;
@@ -378,10 +389,9 @@ async function fetchSite(
     siteState.seenUrls[loc] = lastmod ?? "seen";
   }
   siteState.lastChecked = new Date().toISOString();
-  // The day's earlier new URLs stay new too when a failing sub-sitemap hid them from this run.
   siteState.newOn = isFirstRun
     ? { date: dateStr, urls: [], firstRun: true }
-    : { date: dateStr, urls: [...new Set([...newToday, ...newUrls.map(({ loc }) => loc)])] };
+    : { date: dateStr, urls: newUrls.map(({ loc }) => loc) };
 
   return {
     site,

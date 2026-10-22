@@ -16,6 +16,7 @@ import {
 import { EMPTY_TRENDING, type TrendingData } from "../trending/trending.ts";
 import { MSG, TRENDS_REPORT } from "../core/i18n.ts";
 import type { ProjectActivity } from "../reports/prompts.ts";
+import type { GitHubItem } from "../core/github.ts";
 import type { PolicyData, PolicyItem } from "../policy/policy.ts";
 import { isDataLaw } from "../policy/jev.ts";
 import type { WebFetchResult, WebPageItem } from "../sources/web.ts";
@@ -232,6 +233,30 @@ describe("buildTrendsReport", () => {
       }),
     ).toBeNull();
     expect(generateBody).not.toHaveBeenCalled();
+  });
+
+  it("is built from Skills activity alone", async () => {
+    generateBody.mockReset();
+    generateBody.mockImplementation(async (p: string) => reply(p));
+    const pr: GitHubItem = {
+      number: 1,
+      title: "Add a skill",
+      state: "open",
+      user: { login: "a" },
+      labels: [],
+      created_at: "2026-10-25T00:00:00Z",
+      updated_at: "2026-10-25T00:00:00Z",
+      comments: 0,
+      html_url: "https://github.com/anthropics/skills/pull/1",
+    };
+    const report = await build({
+      trending: EMPTY_TRENDING,
+      hf: { models: [], fetchSuccess: false },
+      papers: [],
+      stories: [],
+      skills: { ...input.skills, prs: [pr] },
+    });
+    expect(report?.content).toContain(`## ${TRENDS_REPORT.skillsHeading}`);
   });
 
   it("stays under 60 KB with the largest plausible inputs", async () => {
