@@ -152,13 +152,13 @@ const DESCRIPTION_MAX_CHARS = 300;
 const META_KEYS = [/\s(?:property|name)=["']og:description["']/i, /\sname=["']description["']/i];
 
 /** `og:description`, else `<meta name="description">`, as plain text; "" when neither. */
-export function metaDescription(html: string): string {
+export function metaDescription(html: string, maxChars = DESCRIPTION_MAX_CHARS): string {
   const tags = [...html.matchAll(/<meta\b[^>]*>/gi)].map(([tag]) => tag);
   for (const key of META_KEYS) {
     for (const tag of tags) {
       if (!key.test(tag)) continue;
       const content = tag.match(/\scontent=(?:"([^"]*)"|'([^']*)')/i);
-      const text = plainText(content?.[1] ?? content?.[2] ?? "", DESCRIPTION_MAX_CHARS);
+      const text = plainText(content?.[1] ?? content?.[2] ?? "", maxChars);
       if (text) return text;
     }
   }
@@ -185,15 +185,20 @@ async function fetchHead(url: string): Promise<string | null> {
   return Buffer.concat(chunks).toString("utf8");
 }
 
+/** A page's meta description (also the agents and data reports' release announcements); "" on any failure. */
+export async function pageDescription(url: string, maxChars = DESCRIPTION_MAX_CHARS): Promise<string> {
+  try {
+    const html = await fetchHead(url);
+    return html ? metaDescription(html, maxChars) : "";
+  } catch {
+    return "";
+  }
+}
+
 async function withDescription(story: HnStory): Promise<HnStory> {
   if (story.url === story.hnUrl) return story;
-  try {
-    const html = await fetchHead(story.url);
-    const description = html ? metaDescription(html) : "";
-    return description ? { ...story, description } : story;
-  } catch {
-    return story;
-  }
+  const description = await pageDescription(story.url);
+  return description ? { ...story, description } : story;
 }
 
 // ---------------------------------------------------------------------------

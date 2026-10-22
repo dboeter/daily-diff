@@ -202,8 +202,8 @@ export function recentVendorItems(items: VendorItem[], dateStr: string): VendorI
   return items.filter((i) => i.stage !== undefined || i.date >= cutoff);
 }
 
-/** The kept items in report order (selectVendorItems). */
-export type VendorData = NewItems<Numbered<KeptVendorItem>, DataState, DataVerdicts>;
+/** The kept items in report order, and the over-cap ones by relevance (selectVendorItems). */
+export type VendorData = NewItems<Numbered<KeptVendorItem>, DataState, DataVerdicts, KeptVendorItem>;
 
 /** Fetch every feed, keep the new items, and let Jev (or the keyword rules) select them. Never throws. */
 export async function fetchVendorData(
@@ -252,9 +252,12 @@ export async function fetchVendorData(
         ) as Record<string, VendorAction>,
       };
     },
-    select: (candidates) => {
+    select: async (candidates) => {
       console.log(`  [data] ${candidates.length} new vendor items`);
-      return selectVendorItems(candidates, { ...jev, dateStr });
+      const selection = await selectVendorItems(candidates, { ...jev, dateStr });
+      // An over-cap coming-soon note stays unreported: marked reported, it would make
+      // shippedComingSoon skip its GA note, which the reader would then never see.
+      return { ...selection, alsoNew: selection.alsoNew?.filter((i) => !COMING_SOON_RE.test(i.title)) };
     },
   });
 }

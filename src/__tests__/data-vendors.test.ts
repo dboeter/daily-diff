@@ -283,6 +283,24 @@ describe("fetchVendorData across days", () => {
   };
   const retiring = { guid: "ba-p/5374418", title: "Retirement of the custom tool: move to Fabric IQ" };
 
+  it("marks over-cap items reported, except a coming-soon note, whose GA note must still show", async () => {
+    const notes = Array.from({ length: 14 }, (_, i) => ({
+      guid: `n${i}`,
+      title: `Feature ${i} now available`,
+      date: "2026-10-20",
+    }));
+    const soon = { guid: "soon", title: "Feature Z will soon be generally available", date: "2026-10-20" };
+    const data = await run("2026-10-21", [], [...notes, soon], null);
+    expect(data.items).toHaveLength(12);
+    expect(data.alsoNew!.map((i) => i.title)).toEqual([
+      "Feature 12 now available",
+      "Feature 13 now available",
+    ]);
+    const reported = Object.keys(data.nextState.reported);
+    expect(reported).toContain("feature 13 now available|2026-10-20");
+    expect(reported.some((k) => k.includes("will soon be"))).toBe(false);
+  });
+
   it("does not report a stable-id item again when its date moves", async () => {
     const first = await run("2026-10-20", [{ ...retiring, date: "2026-10-19" }], [], null);
     expect(first.items.map((i) => i.title)).toEqual([retiring.title]);

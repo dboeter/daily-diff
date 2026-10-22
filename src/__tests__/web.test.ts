@@ -2,6 +2,7 @@ import { afterEach, describe, it, expect, vi } from "vitest";
 import {
   fetchSiteContent,
   parseSitemapUrls,
+  dedupeSitemapUrls,
   isSitemapIndex,
   extractTitle,
   extractText,
@@ -50,6 +51,21 @@ describe("parseSitemapUrls", () => {
     const result = parseSitemapUrls(xml);
     expect(result[0]!.loc).toBe("https://example.com/page");
     expect(result[0]!.lastmod).toBe("2026-03-09");
+  });
+});
+
+describe("dedupeSitemapUrls", () => {
+  it("keeps one entry per URL, with its latest lastmod", () => {
+    const result = dedupeSitemapUrls([
+      { loc: "https://example.com/a", lastmod: "2026-10-21" },
+      { loc: "https://example.com/b" },
+      { loc: "https://example.com/a", lastmod: "2026-10-22" },
+      { loc: "https://example.com/b", lastmod: "2026-10-20" },
+    ]);
+    expect(result).toEqual([
+      { loc: "https://example.com/a", lastmod: "2026-10-22" },
+      { loc: "https://example.com/b", lastmod: "2026-10-20" },
+    ]);
   });
 });
 

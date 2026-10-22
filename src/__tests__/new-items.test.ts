@@ -105,6 +105,26 @@ describe("collectNewItems", () => {
     expect(Object.keys(data.nextVerdicts!.items)).toEqual(["keep-1", "drop-1"]);
   });
 
+  it("marks the over-cap items reported in nextState only", async () => {
+    const data = await collectNewItems({
+      tag: "test",
+      state: null,
+      dateStr: DATE,
+      fetch: async () => ({ items: [item("row"), item("over")], fetchSuccess: true }),
+      stateItem: (i: Item) => i,
+      select: async ([row, over]) => ({
+        items: [row!],
+        alsoNew: [over!],
+        rankedBy: "jev",
+        nextVerdicts: null,
+        rankingFile: "",
+      }),
+    });
+    expect(data.alsoNew!.map((i) => i.id)).toEqual(["over"]);
+    expect(data.nextState.reported).toEqual({ row: DATE, over: DATE });
+    expect(data.observedState.reported).toEqual({});
+  });
+
   it("returns fetchSuccess false instead of throwing when a step fails", async () => {
     const data = await collectNewItems({
       tag: "test",

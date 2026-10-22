@@ -4,7 +4,9 @@ import {
   buildPageHighlightsPrompt,
   buildProjectDigestPrompt,
   buildSkillsPrompt,
+  announcementLinks,
   hasActivity,
+  isMajorRelease,
   releaseNotes,
   type ProjectActivity,
 } from "../reports/prompts.ts";
@@ -151,6 +153,82 @@ describe("buildProjectDigestPrompt", () => {
     expect(prompt).toContain("Slash commands run safely");
     expect(releaseNotes("```sh\nnpm i tool\n```", 400)).toBe("");
     expect(releaseNotes("~~~\ngo install tool\n~~~\nFixes", 400)).toBe("Fixes");
+  });
+
+  // DuckDB v2.0.0's notes, trimmed (2026-10-21).
+  const duckdbBody =
+    'This release of DuckDB is named "Cyanoptera" after Spatula Cyanoptera.\r\n\r\n' +
+    "Please also refer to the announcement blog post: https://duckdb.org/2026/10/21/announcing-duckdb-200.html\r\n\r\n" +
+    "## What's Changed\r\n" +
+    "* Make `Identifier` a class instead of using string everywhere by @Mytherin in https://github.com/duckdb/duckdb/pull/23161\r\n" +
+    "* Move to tidy-check diff again by @Mytherin in https://github.com/duckdb/duckdb/pull/23196\r\n" +
+    "* Allow `MERGE INTO` in triggers by @Dtenwolde in https://github.com/duckdb/duckdb/pull/23201\r\n\r\n" +
+    "## New Contributors\r\n* @someone made their first contribution in https://github.com/duckdb/duckdb/pull/23000\r\n\r\n" +
+    "**Full Changelog**: https://github.com/duckdb/duckdb/compare/v1.5.0...v2.0.0";
+
+  it("compacts a generated changelog to its PR titles and their count", () => {
+    const notes = releaseNotes(duckdbBody, 1000);
+    expect(notes).toContain("What's Changed (3 merged PRs): Make `Identifier` a class");
+    expect(notes).toContain("Allow `MERGE INTO` in triggers;");
+    expect(notes).not.toMatch(/@Mytherin|pull\/23161|first contribution|Full Changelog/);
+    expect(releaseNotes("## What's Changed\n- Hand-written note", 400)).toBe(
+      "## What's Changed - Hand-written note",
+    );
+  });
+
+  it("skips badges, images, code, chat and package links, and trims trailing punctuation", () => {
+    const body =
+      "[![PyPI](https://img.shields.io/pypi/v/x.svg)](https://pypi.org/project/x)\n" +
+      "![shot](https://user-images.githubusercontent.com/1/2.png)\n" +
+      "```\npip install x --index-url https://download.example.com/whl/release\n```\n" +
+      "Join https://discord.gg/abc or read https://docs.example.com/start.\n" +
+      "**https://example.com/blog/v2**, and https://example.com/news/x-2-0.";
+    expect(announcementLinks(body)).toEqual([
+      "https://example.com/blog/v2",
+      "https://example.com/news/x-2-0",
+    ]);
+    expect(announcementLinks("Read <https://example.com/blog/v2> first.")).toEqual([
+      "https://example.com/blog/v2",
+    ]);
+    expect(
+      announcementLinks('<a href="https://example.com/news/v2"><img src="https://example.com/post.png"></a>'),
+    ).toEqual(["https://example.com/news/v2"]);
+  });
+
+  it("counts a changelog without a What's Changed header, or with a curly apostrophe", () => {
+    const entry =
+      "* Fix a thing by @a in https://github.com/o/r/pull/1\n* Add b by @dependabot[bot] in https://github.com/o/r/pull/2";
+    expect(releaseNotes(`Big release.\n${entry}`, 400)).toBe(
+      "Big release. What's Changed (2 merged PRs): Fix a thing; Add b;",
+    );
+    expect(releaseNotes(`## What’s Changed\n${entry}`, 400)).toBe(
+      "What's Changed (2 merged PRs): Fix a thing; Add b;",
+    );
+  });
+
+  it("finds a major release's announcement and shows it in the prompt", () => {
+    expect(isMajorRelease("v2.0.0")).toBe(true);
+    expect(isMajorRelease("2.0.0")).toBe(true);
+    expect(isMajorRelease("v2.0.1")).toBe(false);
+    expect(isMajorRelease("v2.1.0")).toBe(false);
+    expect(announcementLinks(duckdbBody)).toEqual([
+      "https://duckdb.org/2026/10/21/announcing-duckdb-200.html",
+    ]);
+    expect(announcementLinks("See https://github.com/o/r/pull/1")).toEqual([]);
+    const prompt = buildProjectDigestPrompt(
+      [
+        makeActivity({
+          releases: [
+            { ...release, tag_name: "v2.0.0", body: duckdbBody, announcement: "Our biggest release." },
+          ],
+        }),
+      ],
+      scope,
+      "d",
+    );
+    expect(prompt).toContain("Announcement: Our biggest release.");
+    expect(prompt).toContain("describe it from the announcement");
+    expect(prompt).toContain("Link each release you name as `[tag](url)`");
   });
 
   it("forbids stating absences", () => {
@@ -373,6 +451,18 @@ describe("buildPolicyProsePrompt", () => {
     expect(result).toContain("Do not reproduce or alter the table");
     expect(result).toContain("Do not write a title");
     expect(result).toContain("The reader: A Dutch AI practitioner.");
+    expect(result).not.toContain("Open deadlines");
+    expect(result).toContain("Base every claim on the table. Do not invent");
+  });
+
+  it("lists near deadlines as earlier items, not new ones", () => {
+    const result = buildPolicyProsePrompt("| Date |", "2026-10-22", "A reader.", [
+      { date: "2026-10-27", title: "Consultation X", link: "https://x", source: "Have your say" },
+    ]);
+    expect(result).toContain("Open deadlines of items reported on earlier days (not new today");
+    expect(result).toContain("- 2026-10-27: [Consultation X](https://x) (Have your say)");
+    expect(result).toContain("in the table or the open deadlines");
+    expect(result).toContain("Base every claim on the table or the open deadlines.");
   });
 });
 

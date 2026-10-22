@@ -172,6 +172,8 @@ export const DATA_REPORT = {
   },
   vendorCount: (count: number) => `Vendor items: ${count}`,
   vendorTableHeader: "| Date | Source | Item | Summary |\n| :--- | :--- | :--- | :--- |",
+  /** Leads the line of links under a vendor table: today's kept items over the cap. */
+  alsoNew: "Also new:",
   /** Marks a deprecation, retirement, breaking or behavior change in the Item cell. */
   deprecationMarker: "⚠️",
   /** Written by the prose call after the tables: one capability compared across vendors. */

@@ -35,6 +35,26 @@ export function upcomingDeadlines(
     .sort((a, b) => a.date.localeCompare(b.date) || a.title.localeCompare(b.title));
 }
 
+const NEAR_DAYS = 7;
+
+/**
+ * The deadlines the prose call may mention: closing within a week, of items
+ * reported on earlier days (not today's table, which it sees; not the
+ * calendar, which is no item).
+ */
+export function nearPolicyDeadlines(
+  deadlines: Deadline[],
+  today: { link: string }[],
+  dateStr: string,
+): Deadline[] {
+  const last = daysBefore(dateStr, -NEAR_DAYS);
+  const links = new Set(today.map((i) => i.link));
+  return deadlines.filter(
+    (d) =>
+      d.source !== POLICY_REPORT.calendarSource && d.date >= dateStr && d.date <= last && !links.has(d.link),
+  );
+}
+
 /** The section; empty when nothing is due. */
 export function renderDeadlines(deadlines: Deadline[]): string {
   if (deadlines.length === 0) return "";

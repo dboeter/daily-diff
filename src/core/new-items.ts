@@ -21,9 +21,11 @@ import {
 } from "./report-state.ts";
 
 /** What a report's selection returns (`selectPolicyItems`, `selectVendorItems`). */
-export interface Selection<I, V extends ItemsFile<unknown>> {
+export interface Selection<I, V extends ItemsFile<unknown>, A = never> {
   /** The kept items, in the report's order. */
   items: I[];
+  /** Kept but over the report's cap: listed without a row and marked reported with the kept items. */
+  alsoNew?: A[];
   /** "keywords" when there was no key or more than half the new calls failed. */
   rankedBy: RankedBy;
   /** null when the verdict file was malformed: it is left as it is. */
@@ -32,14 +34,16 @@ export interface Selection<I, V extends ItemsFile<unknown>> {
   rankingFile: string;
 }
 
-export interface NewItems<I, S extends ReportedState, V extends ItemsFile<unknown>> {
+export interface NewItems<I, S extends ReportedState, V extends ItemsFile<unknown>, A = never> {
   /** The kept items, in the selection's order. */
   items: I[];
+  /** The selection's `alsoNew`; absent on a failed fetch. */
+  alsoNew?: A[];
   /** False when every source failed, or the pipeline threw. */
   fetchSuccess: boolean;
   /** Absent when nothing was selected (a failed fetch). */
   rankedBy?: RankedBy;
-  /** Saved once the report exists: today's kept items marked reported. */
+  /** Saved once the report exists: today's kept (and `alsoNew`) items marked reported. */
   nextState: S;
   /** `nextState` without today's kept items. Saved on every successful fetch, so a quiet day keeps it. */
   observedState: S;
@@ -62,6 +66,7 @@ export async function collectNewItems<
   I extends F,
   S extends ReportedState,
   V extends ItemsFile<unknown>,
+  A extends F = never,
 >(opts: {
   tag: string;
   state: S | null;
@@ -69,15 +74,16 @@ export async function collectNewItems<
   fetch: () => Promise<{ items: F[]; fetchSuccess: boolean }>;
   /** How the state keys and dates an item. */
   stateItem: (item: F) => StateItem;
-  select: (candidates: F[]) => Promise<Selection<I, V>>;
+  select: (candidates: F[]) => Promise<Selection<I, V, A>>;
   extend?: Extend<S, I, F>;
-}): Promise<NewItems<I, S, V>> {
+}): Promise<NewItems<I, S, V, A>> {
   const { tag, state, dateStr, stateItem } = opts;
-  const stateFor = (kept: I[], recorded: F[], fetched: F[]): S =>
+  // `extend` sees the kept items only: an over-cap item has no row to carry its fields.
+  const stateFor = (kept: I[], recorded: F[], fetched: F[], alsoNew: A[] = []): S =>
     ({
       ...nextReportedState(
         state,
-        kept.map(stateItem),
+        [...kept, ...alsoNew].map(stateItem),
         dateStr,
         recorded.map(stateItem),
         fetched.map(stateItem),
@@ -93,10 +99,12 @@ export async function collectNewItems<
     const selection = await opts.select(candidates);
     return {
       items: selection.items,
+      ...(selection.alsoNew ? { alsoNew: selection.alsoNew } : {}),
       fetchSuccess,
       rankedBy: selection.rankedBy,
       // Only the kept items: a dropped one is not reported, and its saved verdict stops it being asked again.
-      nextState: stateFor(selection.items, recorded, fetched),
+      // Over-cap ones too, else they return the next day and push that day's items out (2026-10-22).
+      nextState: stateFor(selection.items, recorded, fetched, selection.alsoNew),
       observedState: stateFor([], recorded, fetched),
       nextVerdicts: selection.nextVerdicts,
       ...(candidates.length > 0 ? { rankingFile: selection.rankingFile } : {}),

@@ -11,6 +11,7 @@ import { DATA_REPORT, MODELS_PAGE, MSG, SECTIONS, SPOTTED, TRENDS_REPORT } from 
 import { TABLES_MARKER, rowList, summaryLine, summaryOutputRule, type Numbered } from "./summarized-table.ts";
 import { NO_TITLE_RULE, RELEASE_BODY_CHARS, releaseNotes } from "./prompts.ts";
 import type { ReleaseRow } from "./data-reports.ts";
+import type { Deadline } from "../core/report-state.ts";
 import type { HfData } from "../sources/hf.ts";
 import type { ResearchPaper } from "../sources/research.ts";
 import type { PolicyItem } from "../policy/policy.ts";
@@ -104,13 +105,26 @@ ${summaryOutputRule(items.length)}
  * Policy report, call 2 of 2: Highlights only, above the code-rendered
  * table, which spliceTables appends.
  */
-export function buildPolicyProsePrompt(tableMd: string, dateStr: string, readerProfile: string): string {
+export function buildPolicyProsePrompt(
+  tableMd: string,
+  dateStr: string,
+  readerProfile: string,
+  /**
+   * Deadlines of items reported on earlier days, closing within a week. The
+   * Coming up table is not in `tableMd`: given it as "new items", on
+   * 2026-10-22 the model opened Highlights with two consultations reported a week earlier.
+   */
+  nearDeadlines: Deadline[] = [],
+): string {
+  const deadlineBlock = nearDeadlines.length
+    ? `\nOpen deadlines of items reported on earlier days (not new today; you may mention one in a sentence, not as a highlight of its own):\n${nearDeadlines.map((d) => `- ${d.date}: [${d.title}](${d.link}) (${d.source})`).join("\n")}\n`
+    : "";
   return `You are a policy analyst covering AI legislation, regulation and official guidance in the EU, the Netherlands and the US. The reader: ${readerProfile}
 
 Below is today's table of new items from official sources and news & commentary outlets, ${dateStr}; the Summary column holds summaries of each item.
 
 ${tableMd}
-
+${deadlineBlock}
 ---
 
 Write only \`## ${SECTIONS.highlights}\`: 2-4 sentences on the most consequential items today. The table goes below it.
@@ -118,8 +132,8 @@ Write only \`## ${SECTIONS.highlights}\`: 2-4 sentences on the most consequentia
 Rules:
 - ${NO_TITLE_RULE}
 - Do not reproduce or alter the table.
-- Base every claim on the table. Do not invent obligations, dates, stages or legal status: a wrong legal status is worse than none.
-- Mention only items that appear in the table, and link every item you mention.
+- Base every claim on the table${nearDeadlines.length ? " or the open deadlines" : ""}. Do not invent obligations, dates, stages or legal status: a wrong legal status is worse than none.
+- Mention only items that appear in the table${nearDeadlines.length ? " or the open deadlines" : ""}, and link every item you mention.
 - English, professional and concise.
 `;
 }
@@ -245,7 +259,7 @@ export function buildDataSummariesPrompt(
     rowList(
       releases,
       (r) =>
-        `${r.project.name} ${r.release.tag_name} (release, ${r.release.published_at.slice(0, 10)}) — ${releaseNotes(r.release.body, RELEASE_BODY_CHARS) || "(no release notes)"}`,
+        `${r.project.name} ${r.release.tag_name} (release, ${r.release.published_at.slice(0, 10)}) — ${r.release.announcement ? `Announcement: ${r.release.announcement} Notes: ` : ""}${releaseNotes(r.release.body, RELEASE_BODY_CHARS) || "(no release notes)"}`,
     ),
   ]
     .filter(Boolean)

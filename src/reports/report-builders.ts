@@ -410,9 +410,15 @@ export function renderVendorActions(actions: Record<string, VendorAction>, dateS
 export function renderVendorTables(
   items: Numbered<KeptVendorItem>[],
   summaries: Map<number, string>,
+  /** Over the cap: one line of links under the section's table, no summaries. */
+  alsoNew: KeptVendorItem[] = [],
 ): Partial<Record<VendorSection, string>> {
   const tables: Partial<Record<VendorSection, string>> = {};
   for (const section of VENDOR_SECTIONS) {
+    const links = alsoNew
+      .filter((it) => vendorSection(it.vendor) === section)
+      .map((it) => `[${policyTitleLabel(it.title)}](${it.link})`);
+    const also = links.length ? `*${DATA_REPORT.alsoNew}* ${links.join(" · ")}` : "";
     const rows = items
       .filter((it) => vendorSection(it.vendor) === section)
       .map(
@@ -422,7 +428,8 @@ export function renderVendorTables(
           `[${policyTitleLabel(it.title)}](${cell(it.link)}) | ` +
           `${cell(summaryText(summaries, it))} |`,
       );
-    if (rows.length) tables[section] = `${DATA_REPORT.vendorTableHeader}\n${rows.join("\n")}`;
+    const table = rows.length ? `${DATA_REPORT.vendorTableHeader}\n${rows.join("\n")}` : "";
+    if (table || also) tables[section] = [table, also].filter(Boolean).join("\n\n");
   }
   return tables;
 }

@@ -77,7 +77,7 @@ import type { HfData } from "../sources/hf.ts";
 import type { ResearchPaper } from "../sources/research.ts";
 import { POLICY_STATE_FILE, type PolicyData, type PolicyItem } from "../policy/policy.ts";
 import { POLICY_VERDICTS_FILE } from "../policy/jev.ts";
-import { renderDeadlines } from "../policy/deadlines.ts";
+import { nearPolicyDeadlines, renderDeadlines } from "../policy/deadlines.ts";
 import type { ModelCatalog } from "../sources/openrouter.ts";
 import { DATA_STATE_FILE, type DataState, type VendorData } from "../data/vendors.ts";
 import { DATA_VERDICTS_FILE } from "../data/jev.ts";
@@ -391,7 +391,12 @@ export async function buildPolicyReport(
     ),
     generateOr(
       "policy",
-      buildPolicyProsePrompt(tables(new Map()), dateStr, policyData.readerProfile),
+      buildPolicyProsePrompt(
+        renderPolicyTable(items, new Map()),
+        dateStr,
+        policyData.readerProfile,
+        nearPolicyDeadlines(policyData.deadlines, items, dateStr),
+      ),
       null,
       LLM_TOKENS_LISTING,
     ),
@@ -402,7 +407,7 @@ export async function buildPolicyReport(
   const ranked = policyData.rankedBy === "jev" ? REPORT_META.jevRanked : "";
   const meta = `> ${REPORT_META.sources(sources)} | ${POLICY_REPORT.newItems(items.length)}${ranked} | ${REPORT_META.generated(utcStr)}`;
   const body = spliceTables(highlightsOnly(prose), tables(parseRowSummaries(summaries)));
-  // Only once the report exists, like the ArXiv state.
+  // Only once the report exists.
   commitWrites(writes.onReported, files, dateStr);
   return { id: "ai-policy", content: assembleReport("ai-policy", dateStr, meta, body) };
 }
@@ -550,7 +555,9 @@ export async function buildDataReport(
       : "",
   ]);
   const summaries = parseRowSummaries(rowSummaries);
-  const tables = renderVendorTables(items, summaries);
+  // The prose call does not see the over-cap links: they have no summary to write from.
+  const proseTables = renderVendorTables(items, summaries);
+  const tables = renderVendorTables(items, summaries, vendor.alsoNew);
   // Today's end dates take today's row summary, kept in the state for the later report days.
   // A "—" summary (nothing beyond the title) is no action: the description, truncated, stands in.
   const actions = { ...vendor.nextState.actions };
@@ -565,7 +572,7 @@ export async function buildDataReport(
     return { activities: r?.activities ?? [], summary: r?.summary ?? "" };
   };
   // Report order; Azure and GCP have no repo section.
-  const groups: ProjectGroup[] = [
+  const groupsWith = (tables: ReturnType<typeof renderVendorTables>): ProjectGroup[] => [
     { title: H.databricks, ...repo("databricks"), preamble: tables.databricks },
     { title: H.snowflake, ...repo("snowflake"), preamble: tables.snowflake },
     { title: H.cloud, activities: [], summary: "", preamble: tables.cloud },
@@ -577,10 +584,11 @@ export async function buildDataReport(
       preamble: renderReleaseTable(releases, summaries),
     },
   ];
+  const groups = groupsWith(tables);
 
   const spottedMd = renderSpottedTable(spotted.rows, spotted.summaries);
-  // The prose call sees what the reader sees below Highlights.
-  const sectionsMd = [...groupsMarkdown(groups), spottedMd].filter(Boolean).join("\n\n");
+  // The prose call sees what the reader sees below Highlights, except the over-cap links.
+  const sectionsMd = [...groupsMarkdown(groupsWith(proseTables)), spottedMd].filter(Boolean).join("\n\n");
   const prose = await generateOr(
     "data-highlights",
     buildDataProsePrompt(sectionsMd, dateStr),
