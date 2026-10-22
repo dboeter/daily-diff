@@ -1,5 +1,7 @@
 {
   "reported": {
+    "576716": "2026-10-22",
+    "577618": "2026-10-23",
     "databricks ai runtime sdk replaces serverless_gpu|2026-10-13": "2026-10-19",
     "knowledge assistant and supervisor agent are now legacy|2026-10-12": "2026-10-19",
     "feature views are now generally available|2026-10-12": "2026-10-19",
@@ -56,9 +58,44 @@
     "oct 20, 2026: sensitive data entitlement and access reports (general availability)|2026-10-20": "2026-10-22",
     "feature: the ai.chunk_document function is a table-valued function that splits unstructured documents into semantically coherent text chunks optimized for vector embeddings and retrieval-augmented generation (rag) workflows.|2026-10-21": "2026-10-22",
     "new analytical functions in microsoft fabric data warehouse (preview)|2026-10-20": "2026-10-22",
-    "[launched] generally available: azure cosmos db safe key rotation|2026-10-21": "2026-10-22"
+    "[launched] generally available: azure cosmos db safe key rotation|2026-10-21": "2026-10-22",
+    "https://community.fabric.microsoft.com/t5/Fabric-Updates-Blog/New-analytical-functions-in-Microsoft-Fabric-Data-Warehouse/ba-p/5375432": "2026-10-22",
+    "https://community.fabric.microsoft.com/t5/Fabric-Updates-Blog/Retiring-the-Fabric-data-agent-custom-tool-in-Microsoft-Foundry/ba-p/5374418": "2026-10-21",
+    "genie code tasks in lakeflow jobs are now generally available|2026-10-21": "2026-10-23",
+    "genie code tasks in lakeflow jobs are available by default for workspaces with the compliance security profile enabled starting in november 2026|2026-10-21": "2026-10-23",
+    "lakeflow pipelines system tables are now generally available (ga)|2026-10-21": "2026-10-23",
+    "dataframe caching on serverless compute is now in public preview|2026-10-23": "2026-10-23",
+    "microsoft entra id connector is available in beta|2026-10-22": "2026-10-23",
+    "surveymonkey connector is available in beta|2026-10-20": "2026-10-23",
+    "oct 20, 2026: cortex fine-tuning: new model training no longer available in aws us east 1|2026-10-20": "2026-10-23",
+    "oct 22, 2026: quiesce a primary failover group (general availability)|2026-10-22": "2026-10-23",
+    "oct 22, 2026: snowflake data clean rooms updates|2026-10-22": "2026-10-23",
+    "ipaddress data type (preview)|2026-10-22": "2026-10-23",
+    "feature: the ai.translate function lets you translate text strings between languages.|2026-10-22": "2026-10-23",
+    "https://community.fabric.microsoft.com/t5/Fabric-Updates-Blog/T-SQL-language-enhancements-in-Microsoft-Fabric-Data-Warehouse/ba-p/5375433": "2026-10-23",
+    "oracle eloqua connector is available in beta|2026-10-20": "2026-10-23",
+    "asana connector is available in beta|2026-10-20": "2026-10-23",
+    "lakebase insights moves to per-project settings, with on-demand runs (beta)|2026-10-19": "2026-10-23",
+    "box audit logs managed ingestion connector (beta)|2026-10-23": "2026-10-23",
+    "oct 16, 2026: grok 4.7 and glm 5.3 models (preview)|2026-10-16": "2026-10-23",
+    "https://community.fabric.microsoft.com/t5/Fabric-Updates-Blog/Advanced-NL2SQL-and-advanced-DAX-generation-in-Fabric-data/ba-p/5374654": "2026-10-23",
+    "oct 20, 2026: dbt projects on snowflake updates|2026-10-20": "2026-10-23",
+    "https://community.fabric.microsoft.com/t5/Fabric-Updates-Blog/Explore-and-process-multiple-event-types-with-Schema-aware/ba-p/5376384": "2026-10-23",
+    "oct 19, 2026: tools for cortex ai gateway (preview)|2026-10-19": "2026-10-23",
+    "screen mcp tool calls and results for jailbreaks (beta)|2026-10-21": "2026-10-23",
+    "https://community.fabric.microsoft.com/t5/Fabric-Updates-Blog/Incrementally-migrate-and-re-migrate-database-objects-with/ba-p/5376060": "2026-10-23",
+    "https://community.fabric.microsoft.com/t5/Fabric-Updates-Blog/Create-purpose-built-custom-visuals-in-Real-Time-Dashboards-with/ba-p/5376359": "2026-10-23",
+    "https://community.fabric.microsoft.com/t5/Fabric-Updates-Blog/From-mixed-events-to-real-time-action-Fabric-Eventstreams-Q3/ba-p/5375736": "2026-10-23",
+    "release:SQLMesh/sqlmesh@v0.236.4": "2026-10-23",
+    "release:snowflakedb/snowpark-python@v1.55.3": "2026-10-23",
+    "release:databricks/cli@v1.22.1": "2026-10-23",
+    "release:databricks/cli@v1.22.0": "2026-10-23",
+    "release:duckdb/duckdb@v2.0.0": "2026-10-23",
+    "release:mlflow/mlflow@v3.17.2": "2026-10-23",
+    "release:trinodb/trino@484": "2026-10-23"
   },
   "stages": {
     "snowflake-bcr:2026_08": "2026-10-16 Introduced in the 10.37 release (October 8-16, 2026) as Disabled by Default; account admins can enable for testing."
-  }
+  },
+  "actions": {}
 }

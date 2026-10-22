@@ -1,0 +1,18 @@
+{
+  "ai-agents": [
+    "Claude Code patches sandbox escapes: startup files contained on macOS/Linux, denyWrite globs fixed behind symlinks, MCP config protected from sandboxed commands",
+    "OpenAI Codex regression blocks new chats on macOS and Windows Worktree with \"Cannot serialize value\" error; Local mode works"
+  ],
+  "ai-models": [
+    "Anthropic demonstrates LLMs can produce formal proofs at scale: Claude verified RISC-V assembly security properties across 100+ libraries, finding new bugs",
+    "Recursive releases Flint free open-weight MoE (2.5B active/40B total) built by autoresearch system for coding agents, available on OpenRouter"
+  ],
+  "ai-policy": [
+    "EU Cloud and AI Development Act proposes sovereignty requirements for public-sector cloud procurement, compared to US FOCI/FedRAMP — may shift vendor choices for firms using US providers",
+    "New Mexico AG wins $25B judgment against Meta, warns \"just the beginning\" — expect more state-level AI enforcement actions against US vendors"
+  ],
+  "ai-data": [
+    "Snowflake stops new Cortex fine-tuning model creation in AWS US East 1 (effective Oct 20) — workloads must migrate to other regions",
+    "DuckDB 2.0.0 LTS \"Cinnamon Teal\" released with breaking changes: Quack protocol, async I/O, VARIANT type, extensible parser — test and migrate production workloads"
+  ]
+}
