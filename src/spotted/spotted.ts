@@ -137,19 +137,22 @@ export function saveSpottedLog(log: SpottedLog, file = SPOTTED_LOG_FILE): void {
   saveItemsFile(log, file);
 }
 
+/** A page showed it on an earlier day: what a page shows today, a same-day re-run shows again. */
+const shownEarlier = (shown: string | undefined, dateStr: string): boolean =>
+  shown !== undefined && shown !== dateStr;
+
 /**
  * Whether a story is in today's pool: no page showed it, or another copy of its
  * link (`linkKey`, any source), on an earlier day. A link shown today keeps all
  * its copies in for a same-day re-run, which claims it again.
  */
 export function isFresh(log: SpottedLog, dateStr: string): (story: Pick<Story, "id" | "url">) => boolean {
-  const earlier = (shown?: string) => shown !== undefined && shown !== dateStr;
   const shownLinks = new Set(
     Object.values(log.items)
-      .filter((e) => earlier(e.shown))
+      .filter((e) => shownEarlier(e.shown, dateStr))
       .map((e) => linkKey(e.url)),
   );
-  return (s) => !earlier(log.items[s.id]?.shown) && !shownLinks.has(linkKey(s.url));
+  return (s) => !shownEarlier(log.items[s.id]?.shown, dateStr) && !shownLinks.has(linkKey(s.url));
 }
 
 /**
@@ -263,10 +266,11 @@ export const MOST_DISCUSSED_PER_SOURCE: Record<StorySource, number> = { hn: 5, l
  * Trends' Most discussed: the logged stories first seen in the 7 days before
  * the run (the run's own stories enter the log after the page is built, so
  * each day counts in one week), per source the top MOST_DISCUSSED_PER_SOURCE
- * by comments. A story a daily page showed (`shown`, any day) or takes today
- * (`showing`: the run's project news and Spotted rows) is left out, by id or
- * link; each link once, in the first source whose rows take it. Unnumbered:
- * the page numbers them after its papers.
+ * by comments. A story a page showed on an earlier day (`shown`: a same-day
+ * re-run shows today's rows again) or a daily page shows today (`showing`: the
+ * run's project news and Spotted rows) is left out, by id or link; each link
+ * once, in the first source whose rows take it. Unnumbered: the page numbers
+ * them after its papers.
  */
 export function mostDiscussed(
   log: SpottedLog,
@@ -278,11 +282,17 @@ export function mostDiscussed(
   const taken = new Set([
     ...showing.map((s) => linkKey(s.url)),
     ...Object.values(log.items)
-      .filter((e) => e.shown)
+      .filter((e) => shownEarlier(e.shown, dateStr))
       .map((e) => linkKey(e.url)),
   ]);
   const week = Object.entries(log.items)
-    .filter(([id, e]) => e.firstSeen >= from && e.firstSeen < dateStr && !e.shown && !showingIds.has(id))
+    .filter(
+      ([id, e]) =>
+        e.firstSeen >= from &&
+        e.firstSeen < dateStr &&
+        !shownEarlier(e.shown, dateStr) &&
+        !showingIds.has(id),
+    )
     .map(([id, e]) => ({ id, ...e }));
   return (Object.keys(MOST_DISCUSSED_PER_SOURCE) as StorySource[]).flatMap((source) =>
     claimRows(

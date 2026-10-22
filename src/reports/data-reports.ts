@@ -524,7 +524,8 @@ export function hasDataNews(sections: DataSection[], vendor: VendorData, dateStr
  * one for Highlights and Across platforms over all of it (Across platforms is
  * left out when the model writes none). A failed summaries call leaves the
  * descriptions in the tables; a failed prose call leaves the failure notice in
- * Highlights. Null when there are no kept vendor items and no repo activity.
+ * Highlights. Null without news (`hasDataNews`): no kept vendor item, no release
+ * of the week to list and no repo activity.
  * EU data law, the last section, is code only: links to `dataLaw` (today's
  * AI Policy items that are EU data law), left out when there are none; it
  * never makes a report on its own. Spotted (code-rendered, summarized by

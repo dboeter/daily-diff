@@ -234,6 +234,18 @@ describe("mostDiscussed", () => {
     expect(rows.at(-1)).toMatchObject({ comments: 50, description: "Desc." });
   });
 
+  it("takes the stories shown only today again, so a same-day re-run shows the same rows", () => {
+    const items: SpottedLog["items"] = {};
+    for (const [id, shown] of [
+      ["first", DATE],
+      ["earlier", "2026-10-21"],
+    ] as const) {
+      const s = story(id);
+      items[s.id] = logged(s, { comments: 10, firstSeen: "2026-10-20", shown });
+    }
+    expect(mostDiscussed({ items }, DATE, []).map((r) => r.id)).toEqual(["hn:first"]);
+  });
+
   it("skips a story a page showed or takes today, by id or link, and takes each link once", () => {
     const items: SpottedLog["items"] = {};
     const add = (id: string, source: StorySource, comments: number, url: string, extra = {}) => {

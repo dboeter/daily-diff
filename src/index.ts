@@ -479,24 +479,24 @@ async function main(): Promise<void> {
   assertLlmHealthy("report");
 
   // Shown: the Spotted rows and the matched project news of every published page, whether or not
-  // the model mentioned them, and Trends' Most discussed rows.
+  // the model mentioned them, and Trends' Most discussed rows, which the routing trace leaves out.
   const savedIds = new Set(saved.map((r) => r.id));
   const pageActivities = [
     ...agentActivities,
     ...infraActivities,
     ...(savedIds.has("ai-data") ? dataSections.flatMap((s) => s.activities) : []),
   ];
-  const shownIds = new Set([
+  const dailyShown = new Set([
     ...spottedOf("agents").map((r) => r.id),
     ...(savedIds.has("ai-models") ? spottedOf("models").map((r) => r.id) : []),
     ...(savedIds.has("ai-data") ? spottedOf("data").map((r) => r.id) : []),
     ...pageActivities.flatMap((a) => a.news.flatMap((n) => (n.id ? [n.id] : []))),
-    ...(savedIds.has("ai-trends") ? discussed.map((s) => s.id) : []),
   ]);
+  const shownIds = [...dailyShown, ...(savedIds.has("ai-trends") ? discussed.map((s) => s.id) : [])];
   saveSpottedLog(nextLog(spottedLog, stories, shownIds, dateStr));
   if (routing.judgment.nextCache) saveTopicCache(routing.judgment.nextCache);
   console.log(
-    `  Saved ${saveFile(spottedRankingFile(unmatched, routing, shownIds), dateStr, "spotted-ranking.json")}`,
+    `  Saved ${saveFile(spottedRankingFile(unmatched, routing, dailyShown), dateStr, "spotted-ranking.json")}`,
   );
   // Research: the day's top papers for the weekly Trends page; the arXiv cutoff moves on every run.
   if (arxivData.rankingFile) {

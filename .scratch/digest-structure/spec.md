@@ -25,7 +25,7 @@ The five complaints, and what the archive shows for each.
 1. A page is a topic. A source is a column on a page, never a page.
 2. Cadence is a mode, not a set of sources. Daily pages answer "what's new since yesterday", the weekly page "what's moving". A daily page has no weekly-only sections, and the weekly page repeats no daily news.
 3. Every page has the same two parts. **Tracked** is everything relevant from the lists in `config.yml` (projects, vendors, labs, legislative files, policy feeds), with a quiet line on a day without news. **Spotted** is the best of the open sources (Hacker News, Lobste.rs, Dev.to, GitHub Trending, arXiv, Hugging Face), picked by topic and signal. Nothing moves from Spotted to Tracked without a config edit.
-4. One item, one page, once. An item lands on its tracked page if it names a tracked project, else in its topic's Spotted part, else nowhere. An item shown on one day is not shown again the next. One exception stays: Data links to EU data-law items of Policy Watch, because colleagues read Data only.
+4. One item, one page, once. An item lands on its tracked page if it names a tracked project, else in its topic's Spotted part, else nowhere. An item shown on one day is not shown again the next. Two exceptions stay, both because colleagues read Data only: Data links to EU data-law items of Policy Watch, and a story naming a tracked agent and a tracked data project (or two copies of one article, naming one each) is news on both AI Agents and Data Engineering.
 
 ## Proposed pages
 
