@@ -252,7 +252,7 @@ New articles are detected by comparing sitemap `lastmod` timestamps against a pe
 ## Features
 
 - **Daily:** one agents report — stable releases, hot issues and news for the `agents` and `infra` repos in `config.yml`, one section and one LLM call each
-- **Daily:** one data report — vendor release notes (`data.feeds`, code-rendered tables, deprecations first) plus stable releases, hot issues and news for the `databricks`, `snowflake` and `data_stack` repos in `config.yml`, one LLM call per repo section, one for the vendor row summaries and one for Highlights, Data × AI and Worth a Look
+- **Daily:** one data report — vendor release notes (`data.feeds`, code-rendered tables, deprecations first) plus stable releases, hot issues and news for the `databricks`, `snowflake` and `data_stack` repos in `config.yml`, one LLM call per repo section, one for the vendor row summaries and one for Highlights and Across platforms
 - **Daily:** Hacker News AI stories, new ArXiv papers, new Anthropic/OpenAI web content (sitemap-based, incremental), and Policy Watch: new AI policy items from official sources (`policy` in `config.yml`)
 - **Weekly (Mondays):** GitHub AI trending + Claude Code Skills; the models report (Hugging Face trending models + OpenRouter token usage); Dev.to + Lobste.rs sections in the discussions report
 - Publishes a GitHub Issue per report; commits Markdown files to `digests/YYYY-MM-DD/`
@@ -418,13 +418,15 @@ Unavailable today: <agents whose release fetch failed, if any>
 ```
 Generated | Projects: N | Active today: N | Stable releases: N | Prereleases (not covered): N
 
-## Highlights                          — 3-5 bullets, deprecations and breaking changes first
-## Databricks                          — vendor table (⚠️ = deprecation), then the repos in the ai-agents layout
+## Highlights                          — 3-5 bullets: who is affected, what to do, by when; deprecations first
+## Action required                     — open end dates of reported deprecations, nearest first, until they pass
+## Databricks                          — vendor table (⚠️ = deprecation, 🤖 = AI in data work), then the repos in the ai-agents layout
 ## Snowflake                           — the same
 ## Azure / Fabric & GCP                — vendor table only
-## Open-source stack                   — the data_stack repos
-## Data × AI                           — 2-4 bullets: AI features in data platforms, AI tooling for data work
-## Worth a Look                        — at most 3 bullets
+## Open-source stack                   — the data_stack repos (a quiet line even when all are quiet)
+## Releases this week                  — the data repos' stable releases of the last 7 days, each shown once
+## Across platforms                    — 0-3 bullets: one capability that moved on two or more vendors, compared
+## Worth a Look                        — links to today's Policy Watch items that are EU data law (code-rendered)
 (a section with nothing new is left out)
 ```
 

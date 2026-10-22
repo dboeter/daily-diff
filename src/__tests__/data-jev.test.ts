@@ -1,6 +1,7 @@
 import { describe, it, expect, vi } from "vitest";
 import {
   dataRelevance,
+  dateCandidates,
   keywordVerdict,
   selectVendorItems,
   MAX_VENDOR_ITEMS,
@@ -53,6 +54,14 @@ describe("dataRelevance", () => {
 });
 
 describe("keywordVerdict", () => {
+  it("keeps a post titled 'Retiring …' as a deprecation", () => {
+    // 2026-10-20: "Retiring the Fabric data agent custom tool in Microsoft Foundry: move to Fabric IQ".
+    expect(keywordVerdict(item("a", { title: "Retiring the Fabric data agent custom tool" }))).toEqual({
+      keep: true,
+      deprecation: true,
+    });
+  });
+
   it("keeps a retirement as a deprecation", () => {
     expect(
       keywordVerdict(item("a", { title: "Retirement: Azure Database for MySQL Single Server" })),
@@ -243,5 +252,105 @@ describe("vendor state", () => {
       reported: { kept: "2026-10-01", [key("new")]: DATE },
       stages: { bcr: " Planned" },
     });
+  });
+});
+
+describe("dateCandidates", () => {
+  it("reads the feeds' date formats as ISO dates, US order for slashes, once each", () => {
+    expect(
+      dateCandidates(
+        "Retires on November 19, 2026 (Nov. 19, 2026). Unsupported after 11/6/2026 or 6 December 2026, 2026-12-31.",
+      ),
+    ).toEqual([
+      { iso: "2026-11-19", text: "November 19, 2026" },
+      { iso: "2026-11-06", text: "11/6/2026" },
+      { iso: "2026-12-06", text: "6 December 2026" },
+      { iso: "2026-12-31", text: "2026-12-31" },
+    ]);
+    expect(dateCandidates("No date here, only version 19.1")).toEqual([]);
+  });
+});
+
+describe("selectVendorItems end dates", () => {
+  const deprecation = { ...answers(1, 1, 2) };
+  const ask = vi.fn(async (_state: unknown, questions: object) => {
+    const q = questions as { end_date?: { criteria: Record<string, unknown> } };
+    const dates = Object.keys(q.end_date?.criteria ?? {}).filter((k) => k !== "none");
+    // Jev picks the retirement date; the runtime's release date is no end date.
+    const choice = dates.includes("2026-11-19") ? "2026-11-19" : "none";
+    return {
+      model: "jev-test",
+      answers: { ...deprecation, ...(q.end_date ? { end_date: { choice } } : {}) },
+    };
+  });
+  const pool = [
+    item("deepseek", {
+      title: "DeepSeek V4.1 Flash is scheduled for retirement",
+      description: "It retires on November 19, 2026.",
+    }),
+    item("runtime", { title: "Databricks Runtime 19: October 19, 2026", description: "Metrics are hidden." }),
+    item("mlflow", { title: "Redesigned MLflow Logs tab", description: "The Artifacts tab is deprecated." }),
+  ];
+
+  it("asks for the end date only when the text has dates, and keeps Jev's pick as a deprecation's end date", async () => {
+    ask.mockClear();
+    const { items } = await selectVendorItems(pool, {
+      apiKey: "k",
+      cache: { items: {} },
+      dateStr: DATE,
+      ask,
+    });
+    const criteria = ask.mock.calls.map((c) =>
+      Object.keys((c[1] as { end_date?: { criteria: object } }).end_date?.criteria ?? {}),
+    );
+    expect(criteria).toEqual([["2026-11-19", "none"], ["2026-10-19", "none"], []]);
+    expect(Object.fromEntries(items.map((i) => [i.id, i.endDate]))).toEqual({
+      deepseek: "2026-11-19",
+      runtime: undefined,
+      mlflow: undefined,
+    });
+  });
+
+  it("asks a saved verdict again once its text has dates it was not asked about", async () => {
+    ask.mockClear();
+    const cache = {
+      items: {
+        deepseek: { title: "x", answers: deprecation, decided: "2026-10-16", lastSeen: "2026-10-16" },
+        mlflow: { title: "x", answers: deprecation, decided: "2026-10-16", lastSeen: "2026-10-16" },
+      },
+    };
+    const { items } = await selectVendorItems([pool[0]!, pool[2]!], {
+      apiKey: "k",
+      cache,
+      dateStr: DATE,
+      ask,
+    });
+    expect(ask).toHaveBeenCalledOnce();
+    expect(items.find((i) => i.id === "deepseek")?.endDate).toBe("2026-11-19");
+  });
+
+  it("ignores a pick that is not one of the candidates, or an end date on a non-deprecation", async () => {
+    const odd = vi.fn(async () => ({
+      model: "m",
+      answers: { ...answers(1, 0, 2), end_date: { choice: "2026-11-19" } },
+    }));
+    const { items } = await selectVendorItems([pool[0]!], {
+      apiKey: "k",
+      cache: { items: {} },
+      dateStr: DATE,
+      ask: odd,
+    });
+    expect(items[0]?.endDate).toBeUndefined();
+    const made = vi.fn(async () => ({
+      model: "m",
+      answers: { ...deprecation, end_date: { choice: "2027-01-01" } },
+    }));
+    const r = await selectVendorItems([pool[0]!], {
+      apiKey: "k",
+      cache: { items: {} },
+      dateStr: DATE,
+      ask: made,
+    });
+    expect(r.items[0]?.endDate).toBeUndefined();
   });
 });

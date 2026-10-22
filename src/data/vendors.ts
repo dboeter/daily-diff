@@ -12,6 +12,8 @@ import path from "node:path";
 import {
   loadReportedState,
   markStaleOnFirstSight,
+  nextDeadlines,
+  type Deadline,
   type ReportedState,
   type StateItem,
 } from "../core/report-state.ts";
@@ -41,10 +43,14 @@ export interface VendorItem {
   categories?: string[];
   /** A bundle first seen at an old stage: its stage is recorded, not reported (staleOnFirstSight). */
   recordOnly?: boolean;
+  /** A behavior-change bundle's planned next status change, when its window has a full date (ISO). */
+  endDate?: string;
+  /** From a feed with `stable_id`: the state keys it on `id`. */
+  stableId?: true;
 }
 
 /** An item as a parser returns it, before the feed's vendor and name are added. */
-export type VendorNote = Omit<VendorItem, "vendor" | "source">;
+export type VendorNote = Omit<VendorItem, "vendor" | "source" | "stableId">;
 
 async function fetchRssNotes(feed: DataFeed): Promise<VendorNote[]> {
   const items = await fetchRssFeed(feed.url, VENDOR_DESCRIPTION_MAX_CHARS);
@@ -92,7 +98,12 @@ export async function fetchVendorFeeds(
     }
     console.log(`  [data] ${feed.name}: ${r.value.length} items`);
     return r.value
-      .map((n): VendorItem => ({ ...n, vendor: feed.vendor, source: feed.name }))
+      .map((n): VendorItem => ({
+        ...n,
+        vendor: feed.vendor,
+        source: feed.name,
+        ...(feed.stableId ? { stableId: true as const } : {}),
+      }))
       .filter((item) => {
         const key = dedupeKey(item);
         if (seen.has(key)) return false;
@@ -107,8 +118,19 @@ export async function fetchVendorFeeds(
 // State: which vendor items a run reported (report-state.ts, shared with Policy Watch)
 // ---------------------------------------------------------------------------
 
-/** Note key (title + date, `stateId`) or bundle id → CST date first reported; `stages`: behavior-change bundle id → its last reported stageKey. */
-export type DataState = ReportedState;
+/** An open end date of a reported deprecation: the Action required table's row. */
+export interface VendorAction extends Deadline {
+  /** The row summary of the day it was reported ("what to do"); set by buildDataReport. */
+  summary?: string;
+}
+
+/**
+ * Note key (`stateId`) or bundle id → CST date first reported; `stages`: behavior-change bundle id → its last reported stageKey;
+ * `actions`: item id → the open end date of a reported deprecation, until it passes.
+ */
+export interface DataState extends ReportedState {
+  actions?: Record<string, VendorAction>;
+}
 
 export const DATA_STATE_FILE = path.join("digests", "data-state.json");
 
@@ -126,14 +148,50 @@ export const loadDataState = (file = DATA_STATE_FILE): DataState | null => loadR
  * The state's StateItem: it dates an item by `published`. A note is keyed
  * on dedupeKey, not its id: Databricks lists a note under two guids and the run
  * keeps whichever comes first, and a BigQuery note's id moves when a note is
- * added before it. Bundles keep their id: their stage is what moves.
+ * added before it. A `stable_id` feed's note (Fabric, Azure updates) and a
+ * bundle keep their id: an edited date or title, or a bundle's stage, is what
+ * moves. Such a note's title + date key, saved before 2026-10-22, is its alias.
  */
-const stateId = (i: VendorItem): string => (i.stage === undefined ? dedupeKey(i) : i.id);
+const stateId = (i: VendorItem): string => (i.stage === undefined && !i.stableId ? dedupeKey(i) : i.id);
 export const asStateItem = (i: VendorItem): StateItem => ({
   id: stateId(i),
   published: i.date,
   stage: i.stage,
+  ...(i.stableId && i.stage === undefined ? { aliases: [dedupeKey(i)] } : {}),
 });
+
+/** A note announcing a change ahead: Databricks' "What's coming" page. */
+const COMING_SOON_RE = /\b(?:will soon be|coming soon)\b/i;
+/** A title's status phrase and what follows it, so a coming-soon note and its GA note share a stem. */
+const STATUS_RE =
+  /\s+(?:will soon be|will be|is now|are now|is generally|are generally|is available|are available|now available|(?:is|are) in (?:public )?preview)\b.*$|\s*\((?:general availability|ga|public preview|preview)\)\s*$/i;
+const titleStem = (title: string): string =>
+  title.toLowerCase().replace(/\s+/g, " ").replace(STATUS_RE, "").trim();
+
+/**
+ * Notes that ship what a coming-soon note, reported on an earlier day, announced
+ * ("… will soon be available by default …" → "… are generally available"):
+ * the reader already has it. Matched on the title stem, read from the state's
+ * title + date keys. Same-day pairs stay, for the prose call to mention once.
+ * Checked on the 2026-10-12..21 state: it pairs only the Databricks Apps
+ * package repositories, Genie file upload and feature views notes.
+ */
+export function shippedComingSoon(
+  items: VendorItem[],
+  state: DataState | null,
+  dateStr: string,
+): Set<VendorItem> {
+  const announced = new Set(
+    Object.entries(state?.reported ?? {})
+      .filter(([key, day]) => day < dateStr && COMING_SOON_RE.test(key))
+      .map(([key]) => titleStem(key.slice(0, key.lastIndexOf("|")))),
+  );
+  return new Set(
+    items.filter(
+      (i) => i.stage === undefined && !COMING_SOON_RE.test(i.title) && announced.has(titleStem(i.title)),
+    ),
+  );
+}
 
 /**
  * The age limit. A date ahead of the run is valid (Databricks dates a note by
@@ -164,16 +222,36 @@ export async function fetchVendorData(
     dateStr,
     fetch: async () => {
       const { items, fetchSuccess } = await fetchVendorFeeds(config, now);
+      const shipped = shippedComingSoon(items, state, dateStr);
+      if (shipped.size)
+        console.log(`  [data] ${shipped.size} notes ship a reported coming-soon note, skipped`);
       return {
         // A bundle first seen at a stage over 30 days old (or with no full date) is recorded without
         // reporting, as Policy Watch does: a first run must not open with months-old bundles.
-        items: recentVendorItems(items, dateStr).map((i) =>
-          i.stage !== undefined ? markStaleOnFirstSight({ state, dateStr }, i, i.date) : i,
-        ),
+        items: recentVendorItems(
+          items.filter((i) => !shipped.has(i)),
+          dateStr,
+        ).map((i) => (i.stage !== undefined ? markStaleOnFirstSight({ state, dateStr }, i, i.date) : i)),
         fetchSuccess,
       };
     },
     stateItem: asStateItem,
+    // Only bundles as `fetched`: a note's end date is Jev's (set on kept items), so a refetched note
+    // would wipe its saved date; a bundle's is parsed from the page, so each fetch is current.
+    // A bundle the state knows is not new while its stage holds, so its date (a plan that gained a
+    // day, a reschedule) comes from the fetch.
+    extend: (kept, fetched) => {
+      const bundles = fetched.filter((i) => i.stage !== undefined);
+      const known = bundles.filter((i) => i.endDate && state?.stages?.[i.id] !== undefined);
+      return {
+        actions: nextDeadlines(
+          state?.actions,
+          [...known, ...kept.filter((i) => i.endDate)].map((i) => ({ ...i, deadline: i.endDate })),
+          bundles.map((i) => ({ ...i, deadline: i.endDate })),
+          dateStr,
+        ) as Record<string, VendorAction>,
+      };
+    },
     select: (candidates) => {
       console.log(`  [data] ${candidates.length} new vendor items`);
       return selectVendorItems(candidates, { ...jev, dateStr });

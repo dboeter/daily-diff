@@ -425,7 +425,7 @@ describe("buildDataReport", () => {
     };
   };
 
-  it("renders Highlights, the active sections in order, leaves out a quiet one, and lists quiet projects", async () => {
+  it("renders Highlights, the sections in order, and an all-quiet repo section with its quiet line", async () => {
     generateBody.mockReset();
     generateBody.mockImplementation(async (prompt: string) => reply(prompt));
     const report = await build(sections(false));
@@ -434,13 +434,15 @@ describe("buildDataReport", () => {
     expect(content).toMatch(/^# Data Engineering Watch 2026-10-17\n/);
     expect(content.indexOf("## Highlights")).toBeLessThan(content.indexOf("## Databricks"));
     expect(content.indexOf("## Databricks")).toBeLessThan(content.indexOf("## Open-source stack"));
-    expect(content.indexOf("## Open-source stack")).toBeLessThan(content.indexOf("## Worth a Look"));
-    expect(content).not.toContain("## Snowflake");
+    // The model wrote one; code writes it only for data-law links.
+    expect(content).not.toContain("## Worth a Look");
+    // 2026-10-19..21: "Active today: 0" and no sign the stack was tracked at all.
+    expect(content).toContain("## Snowflake\n\n**Quiet today:** [Polaris](https://github.com/org/polaris)");
+    // No repos and no vendor rows: nothing to show.
     expect(content).not.toContain("## Azure / Fabric & GCP");
     expect(content).not.toContain("<!-- tables -->");
     expect(content).toContain("### Delta");
     expect(content).toContain("**Quiet today:** [MLflow](https://github.com/org/mlflow)");
-    // The header still counts the left-out section's project.
     expect(content).toContain("Projects: 4 | Active today: 2");
     // Two repo sections and the prose; no vendor items, so no summaries call.
     expect(generateBody).toHaveBeenCalledTimes(3);
@@ -485,8 +487,8 @@ describe("buildDataReport", () => {
       "| — | Snowflake BCR | ⚠️ [2026_08 bundle](https://example.com/bundle) | Snowflake note. |",
     );
     expect(at("bundle)")).toBeLessThan(at("sf)"));
-    // Snowflake's repos are quiet: only its table, no quiet line.
-    expect(content.slice(at("## Snowflake"), at("## Azure"))).not.toContain("Quiet today");
+    // Snowflake's repos are quiet: its table, then the quiet line.
+    expect(content.slice(at("## Snowflake"), at("## Azure"))).toContain("**Quiet today:** [Polaris]");
     expect(at("## Azure / Fabric & GCP")).toBeLessThan(at("## Open-source stack"));
     expect(content).toContain("[Feature: new preview](https://example.com/gcp)");
     // Two repo sections, the summaries and the prose; the state is saved once the report exists.
@@ -507,8 +509,7 @@ describe("buildDataReport", () => {
     generateBody.mockImplementation(async (prompt: string) => reply(prompt));
     const content = (await build(sections(false, false), await vendorData()))!.content;
     expect(content).toContain("## Databricks\n\n| Date | Source | Item | Summary |");
-    expect(content).not.toContain("## Open-source stack");
-    expect(content).not.toContain("Quiet today");
+    expect(content).toContain("## Open-source stack\n\n**Quiet today:** [DuckDB]");
     // 2026-10-19: "Projects: 17 | Active today: 0" sat above 16 vendor rows.
     expect(content).toContain("Vendor items: 5 | Projects:");
     expect(generateBody).toHaveBeenCalledTimes(2);
@@ -519,39 +520,230 @@ describe("buildDataReport", () => {
   const prosePrompts = () =>
     generateBody.mock.calls.map((c) => c[0] as string).filter((p) => p.startsWith("You are the editor"));
 
-  it("writes Data × AI from an AI-flagged vendor item, between Open-source stack and Worth a Look", async () => {
+  it("marks an AI-flagged vendor row with 🤖 and drops a Data × AI or Worth a Look section the model wrote", async () => {
     generateBody.mockReset();
     generateBody.mockImplementation(async (prompt: string) =>
       prompt.startsWith("You are the editor") ? PROSE_AI : reply(prompt),
     );
     const content = (await build(sections(false), await vendorData()))!.content;
-    const at = (s: string) => content.indexOf(s);
-    // "Genie" is an AI term in the keyword fallback.
-    expect(prosePrompts()[0]).toContain("## Data × AI");
-    expect(prosePrompts()[0]).toContain("- Genie spaces now available (Azure Databricks)");
-    expect(at("## Open-source stack")).toBeLessThan(at("## Data × AI"));
-    // Report order, though the model wrote Worth a Look first.
-    expect(at("## Data × AI")).toBeLessThan(at("## Worth a Look"));
-    expect(content).toContain("## Data × AI\n- Genie spaces arrive.");
+    // "Genie" is an AI term in the keyword fallback; the retirement is not AI.
+    expect(content).toContain("| 🤖 [Genie spaces now available](https://example.com/dbx-new) |");
+    expect(content).toContain("| ⚠️ [Retirement: legacy runtime](https://example.com/dbx-old) |");
+    expect(prosePrompts()[0]).not.toContain("Data × AI");
+    expect(prosePrompts()[0]).not.toContain("## Worth a Look");
+    expect(content).not.toContain("Data × AI");
+    expect(content).not.toContain("## Worth a Look");
+    expect(content).not.toContain("Read this.");
+    expect(content).toContain("## Highlights\n- H.");
   });
 
-  it("leaves Data × AI out, and does not ask for it, without AI items or project activity", async () => {
+  it("puts Across platforms after the tables and before Worth a Look, and leaves it out when absent", async () => {
+    generateBody.mockReset();
+    const across =
+      "## Highlights\n- H.\n\n<!-- tables -->\n\n## Across platforms\n\n- Governance tagging: Snowflake GA,\n  Databricks GA.\n\n---\n\nNote, outside the report: a row needs checking.\n\n## Data × AI\n- X.";
+    generateBody.mockImplementation(async (prompt: string) =>
+      prompt.startsWith("You are the editor") ? across : reply(prompt),
+    );
+    const policy = [policyItem("nis2", "NIS2 implementing act adopted")];
+    const content = (await build(sections(false), await vendorData(), dataLawOf(policy)))!.content;
+    const at = (s: string) => content.indexOf(s);
+    // Only its bullets: on the 2026-10-21 replay the model appended a note to the editor.
+    expect(content).toContain(
+      "## Across platforms\n\n- Governance tagging: Snowflake GA,\n  Databricks GA.\n\n---",
+    );
+    expect(content).not.toContain("Note, outside the report");
+    expect(at("## Open-source stack")).toBeLessThan(at("## Across platforms"));
+    expect(at("## Azure / Fabric & GCP")).toBeLessThan(at("## Across platforms"));
+    expect(at("## Across platforms")).toBeLessThan(at("## Worth a Look"));
+    expect(content).not.toContain("Data × AI");
+
+    generateBody.mockImplementation(async (prompt: string) => reply(prompt));
+    expect((await build(sections(false), await vendorData()))!.content).not.toContain("Across platforms");
+  });
+
+  it("splits a reply without the tables marker at its first heading after Highlights", async () => {
+    generateBody.mockReset();
+    const noMarker =
+      "## Highlights\n- H.\n\n## Across platforms\n\n- Tagging: Snowflake GA, Databricks preview.\n\n## Data × AI\n- X.";
+    generateBody.mockImplementation(async (prompt: string) =>
+      prompt.startsWith("You are the editor") ? noMarker : reply(prompt),
+    );
+    const content = (await build(sections(false), await vendorData()))!.content;
+    const at = (s: string) => content.indexOf(s);
+    expect(content).toContain("## Highlights\n- H.");
+    expect(at("## Open-source stack")).toBeLessThan(at("## Across platforms"));
+    expect(content).not.toContain("Data × AI");
+  });
+
+  it("lists the open end dates under Action required, nearest first, with today's row summary", async () => {
+    generateBody.mockReset();
+    generateBody.mockImplementation(async (prompt: string) => reply(prompt));
+    const data = await vendorData();
+    const retiring = data.items.find((i) => i.id === "dbx-old")!;
+    const saved = {
+      date: "2026-12-01",
+      title: "Old retirement",
+      link: "https://example.com/saved",
+      source: "Microsoft Fabric",
+      summary: "Move to Fabric IQ.",
+    };
+    const vendor: VendorData = {
+      ...data,
+      items: data.items.map((i) => (i.id === "dbx-old" ? { ...i, endDate: "2026-11-19" } : i)),
+      nextState: {
+        reported: {},
+        actions: {
+          saved,
+          "dbx-old": {
+            date: "2026-11-19",
+            title: retiring.title,
+            link: retiring.link,
+            source: retiring.source,
+          },
+          passed: {
+            date: "2026-10-16",
+            title: "Gone",
+            link: "https://example.com/gone",
+            source: "Snowflake",
+          },
+        },
+      },
+    };
+    const content = (await build(sections(false), vendor))!.content;
+    const at = (s: string) => content.indexOf(s);
+    expect(at("## Highlights")).toBeLessThan(at("## Action required"));
+    expect(at("## Action required")).toBeLessThan(at("## Databricks"));
+    const table = content.slice(at("## Action required"), at("## Databricks"));
+    expect(table).toContain("| Date | Platform | Item | What to do |");
+    expect(table).toContain(
+      "| 2026-11-19 | Azure Databricks | [Retirement: legacy runtime](https://example.com/dbx-old) | Retiring soon. |\n| 2026-12-01 | Microsoft Fabric | [Old retirement](https://example.com/saved) | Move to Fabric IQ. |",
+    );
+    expect(table).not.toContain("Gone");
+    // Today's summary is saved with the end date, for the later report days.
+    expect(JSON.parse(fs.readFileSync(stateFile, "utf-8")).actions["dbx-old"].summary).toBe("Retiring soon.");
+  });
+
+  it("leaves a release of the last 24h to its repo section, and records it as shown", async () => {
+    generateBody.mockReset();
+    generateBody.mockImplementation(async (prompt: string) => reply(prompt));
+    fs.rmSync(stateFile, { force: true });
+    const s = releasedThisWeek();
+    const today = weekRelease("v2.0.1", "2026-10-16T09:00:00Z");
+    s[2]!.activities[0] = {
+      ...s[2]!.activities[0]!,
+      releases: [today],
+      weekReleases: [today, ...s[2]!.activities[0]!.weekReleases!],
+    };
+    const content = (await build(s, vendorOf([])))!.content;
+    const table = content.slice(content.indexOf("## Releases this week"));
+    expect(table).toContain("[v2.0.0]");
+    expect(table).not.toContain("[v2.0.1]");
+    expect(content).toContain("### DuckDB");
+    expect(JSON.parse(fs.readFileSync(stateFile, "utf-8")).reported).toMatchObject({
+      "release:org/duckdb@v2.0.1": "2026-10-17",
+      "release:org/duckdb@v2.0.0": "2026-10-17",
+    });
+  });
+
+  it("shows the description as the action when the row summary is '—'", async () => {
     generateBody.mockReset();
     generateBody.mockImplementation(async (prompt: string) =>
-      prompt.startsWith("You are the editor") ? PROSE_AI : reply(prompt),
+      prompt.startsWith("You summarize data platform") ? "1: —" : reply(prompt),
     );
-    const { items } = await selectVendorItems(
-      [vendorItem("plain", { title: "Retirement: legacy runtime" })],
-      {
-        cache: { items: {} },
-        dateStr: "2026-10-17",
+    const data = await vendorData();
+    const retiring = data.items.find((i) => i.id === "dbx-old")!;
+    const vendor: VendorData = {
+      ...data,
+      items: data.items.map((i) => (i.id === "dbx-old" ? { ...i, endDate: "2026-11-19" } : i)),
+      nextState: {
+        reported: {},
+        actions: {
+          "dbx-old": {
+            date: "2026-11-19",
+            title: retiring.title,
+            link: retiring.link,
+            source: retiring.source,
+          },
+        },
       },
+    };
+    const content = (await build(sections(false), vendor))!.content;
+    expect(content).toContain("(https://example.com/dbx-old) | Description dbx-old. |");
+  });
+
+  it("is still skipped when only open end dates are left", async () => {
+    generateBody.mockReset();
+    const vendor: VendorData = {
+      ...vendorOf([]),
+      nextState: {
+        reported: {},
+        actions: { a: { date: "2026-12-01", title: "T", link: "https://x", source: "S" } },
+      },
+    };
+    expect(await build(sections(false, false), vendor)).toBeNull();
+  });
+
+  const weekRelease = (tag: string, published: string) => ({
+    tag_name: tag,
+    name: tag,
+    body: `## Notes\n${tag} notes.`,
+    published_at: published,
+    prerelease: false,
+  });
+  /** Quiet today, with a stable release earlier this week. */
+  const releasedThisWeek = (): DataSection[] => {
+    const s = sections(false, false);
+    s[2]!.activities[0] = {
+      ...s[2]!.activities[0]!,
+      weekReleases: [weekRelease("v2.0.0", "2026-10-14T09:00:00Z")],
+    };
+    return s;
+  };
+
+  it("lists a release of this week once under Releases this week, and not on the next run", async () => {
+    generateBody.mockReset();
+    generateBody.mockImplementation(async (prompt: string) =>
+      prompt.startsWith("You summarize data platform")
+        ? "1: Major release: drops Python 3.9."
+        : reply(prompt),
     );
-    expect(items.map((i) => i.aiInData)).toEqual([false]);
-    const content = (await build(sections(false, false), vendorOf(items)))!.content;
-    expect(prosePrompts()[0]).not.toContain("Data × AI");
-    expect(content).not.toContain("Data × AI");
-    expect(content).toContain("## Worth a Look");
+    fs.rmSync(stateFile, { force: true });
+    const vendor: VendorData = {
+      ...vendorOf([]),
+      nextState: { reported: { "older|2026-10-10": "2026-10-11" } },
+    };
+    const content = (await build(releasedThisWeek(), vendor))!.content;
+    const at = (s: string) => content.indexOf(s);
+    expect(content).toContain(
+      "## Releases this week\n\n| Project | Version | Date | Summary |\n| :--- | :--- | :--- | :--- |\n| [DuckDB](https://github.com/org/duckdb) | [v2.0.0](https://github.com/org/duckdb/releases/tag/v2.0.0) | 2026-10-14 | Major release: drops Python 3.9. |",
+    );
+    expect(at("## Open-source stack")).toBeLessThan(at("## Releases this week"));
+    // The summaries call lists the release after the (here: no) vendor rows.
+    const summariesPrompt = generateBody.mock.calls
+      .map((c) => c[0] as string)
+      .find((p) => p.startsWith("You summarize data platform"))!;
+    expect(summariesPrompt).toContain("1. DuckDB v2.0.0 (release, 2026-10-14) — ## Notes v2.0.0 notes.");
+    const state = JSON.parse(fs.readFileSync(stateFile, "utf-8"));
+    expect(state.reported).toEqual({
+      "older|2026-10-10": "2026-10-11",
+      "release:org/duckdb@v2.0.0": "2026-10-17",
+    });
+
+    // The next day: already shown, and nothing else new, so no report.
+    generateBody.mockClear();
+    const next = await buildDataReport(
+      releasedThisWeek(),
+      { ...vendorOf([]), nextState: state },
+      [],
+      "00:00",
+      "2026-10-18",
+      stateFile,
+      verdictsFile,
+    );
+    expect(next).toBeNull();
+    // A same-day re-run shows it again.
+    const again = await build(releasedThisWeek(), { ...vendorOf([]), nextState: state });
+    expect(again!.content).toContain("## Releases this week");
   });
 
   it("leaves the failure notice in Highlights and no Worth a Look when the prose call fails", async () => {
@@ -588,7 +780,7 @@ describe("buildDataReport", () => {
     ];
     const content = (await build(sections(false), vendorOf([]), dataLawOf(policy)))!.content;
     expect(content).toContain(
-      "## Worth a Look\n- Read this.\n- [Data Act: guidance on smart contracts](https://example.eu/data-act) — Policy Watch, Guidance",
+      "## Worth a Look\n\n- [Data Act: guidance on smart contracts](https://example.eu/data-act) — Policy Watch, Guidance",
     );
     expect(content).not.toContain("https://example.eu/ai-act");
   });

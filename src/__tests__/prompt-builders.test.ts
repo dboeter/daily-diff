@@ -603,14 +603,33 @@ describe("listing report layout", () => {
 });
 
 describe("buildDataProsePrompt", () => {
-  it("names each item in at most one prose section, and a same-change pair once", () => {
-    const prompt = buildDataProsePrompt("## Databricks\n\n(table)", "2026-10-19", {
-      vendorTitles: ["X"],
-      news: [],
-    });
-    expect(prompt).toContain("at most one of these parts");
-    expect(prompt).toContain("not one the sections already lead with");
+  const prompt = buildDataProsePrompt("## Databricks\n\n(table)", "2026-10-19");
+
+  it("asks Highlights for who is affected, what to do and by when, not a restated row", () => {
+    expect(prompt).toContain("who is affected");
+    expect(prompt).toContain("what to do");
+    expect(prompt).toContain("by when");
+    expect(prompt).toContain("Never restate a row");
     expect(prompt).toContain("describe the same change");
+  });
+
+  it("asks for Across platforms: two platforms per bullet, from the rows, none when nothing qualifies", () => {
+    expect(prompt).toContain("## Across platforms");
+    expect(prompt).toContain("two or more platforms");
+    expect(prompt).toContain("how they differ");
+    expect(prompt).toContain("Leave this heading out");
+    expect(prompt.indexOf("<!-- tables -->")).toBeLessThan(prompt.indexOf("`## Across platforms`"));
+  });
+
+  it("makes a major release a Highlights candidate", () => {
+    expect(prompt).toContain("Releases this week");
+    expect(prompt).toContain("x.0.0");
+    expect(prompt).toContain("breaking changes");
+  });
+
+  it("asks for no Data × AI or Worth a Look section", () => {
+    expect(prompt).not.toContain("Data × AI");
+    expect(prompt).not.toContain("Worth a Look");
   });
 });
 
@@ -686,11 +705,5 @@ describe("withFallbackHighlights", () => {
     expect(firstHighlight("## Highlights\n- *Delta Lake* 4.0 adds `variant` type.")).toBe(
       "Delta Lake 4.0 adds variant type.",
     );
-  });
-});
-
-describe("buildDataProsePrompt Worth a Look", () => {
-  it("links Worth a Look items from the sections", () => {
-    expect(buildDataProsePrompt("sections", "2026-10-20")).toContain("Markdown link, copied from its row");
   });
 });

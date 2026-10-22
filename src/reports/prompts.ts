@@ -25,6 +25,8 @@ export interface ProjectActivity {
   news: NewsItem[];
   /** The release fetch failed: the project could not be checked, so it is neither active nor quiet. */
   fetchFailed?: boolean;
+  /** The data report only: stable releases of the last 7 days, newest first, for Releases this week. */
+  weekReleases?: GitHubRelease[];
 }
 
 /** Wording that differs between the agents and infra sections. */
@@ -97,7 +99,8 @@ export function hasActivity(a: ProjectActivity): boolean {
 
 /** Newest stable releases shown per project; llama.cpp alone tags 35–70 a week. */
 const RELEASES_PER_PROJECT = 10;
-const RELEASE_BODY_CHARS = 400;
+/** A stable release's notes as the model sees them (the agents and data reports). */
+export const RELEASE_BODY_CHARS = 400;
 // A prerelease is reported only if its notes show notable features, so the
 // model needs more of them. DeepSeek Harness notes run 4–19 KB, Chinese first
 // behind "[English](#en-…)" anchor links and <h3> tags: at 400 characters the

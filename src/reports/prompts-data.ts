@@ -18,7 +18,8 @@ import {
   WEB_REPORT,
 } from "../core/i18n.ts";
 import { TABLES_MARKER, rowList, summaryLine, summaryOutputRule, type Numbered } from "./summarized-table.ts";
-import { NO_TITLE_RULE } from "./prompts.ts";
+import { NO_TITLE_RULE, RELEASE_BODY_CHARS, releaseNotes } from "./prompts.ts";
+import type { ReleaseRow } from "./data-reports.ts";
 import type { HnData } from "../sources/hn.ts";
 import type { ArxivData } from "../sources/arxiv.ts";
 import type { HfData } from "../sources/hf.ts";
@@ -175,59 +176,60 @@ const DATA_READER =
  * Data report, vendor call 1 of 2: one summary per numbered vendor table row.
  * The rows are the kept vendor items, numbered by selectVendorItems; parseRowSummaries reads the reply.
  */
-export function buildDataSummariesPrompt(items: Numbered<KeptVendorItem>[], dateStr: string): string {
-  const list = rowList(
-    items,
-    (it) =>
-      `${it.title} (${it.source}${it.date ? `, ${it.date}` : ""}${it.stage ? `, status: ${it.stage}` : ""}${it.deprecation ? ", deprecation or breaking change" : ""}) — ${it.description || "(no description)"}`,
-  );
+export function buildDataSummariesPrompt(
+  items: Numbered<KeptVendorItem>[],
+  dateStr: string,
+  releases: Numbered<ReleaseRow>[] = [],
+): string {
+  const list = [
+    rowList(
+      items,
+      (it) =>
+        `${it.title} (${it.source}${it.date ? `, ${it.date}` : ""}${it.stage ? `, status: ${it.stage}` : ""}${it.deprecation ? ", deprecation or breaking change" : ""}) — ${it.description || "(no description)"}`,
+    ),
+    rowList(
+      releases,
+      (r) =>
+        `${r.project.name} ${r.release.tag_name} (release, ${r.release.published_at.slice(0, 10)}) — ${releaseNotes(r.release.body, RELEASE_BODY_CHARS) || "(no release notes)"}`,
+    ),
+  ]
+    .filter(Boolean)
+    .join("\n");
+  const count = items.length + releases.length;
   return `You summarize data platform release notes for ${DATA_READER}.
 
-Below are ${items.length} numbered release notes and updates, new as of ${dateStr}, each with its source and text.
+Below are ${count} numbered release notes and updates, new as of ${dateStr}, each with its source and text${releases.length ? "; the ones marked (release) are open-source project releases, with their release notes" : ""}.
 
 ${list}
 
-${summaryLine("1-2 sentences")} — what changed, and what it means for client data platforms (for a deprecation or breaking change: what stops working or must be migrated).
+${summaryLine("1-2 sentences")} — what the change enables, breaks or requires for client data platforms: a setting to turn on, a migration, a cloud, region or edition limit (for a deprecation or breaking change: what stops working or must be migrated, and by when).
+- Do not repeat the title or its status words (generally available, preview, now available): the title is shown next to the summary.
 - Ground every sentence only in the given text. Do not invent dates, versions, regions or availability.
-- If the text is empty, say only what the title shows.
-${summaryOutputRule(items.length)}
+- When the text adds nothing beyond the title (or is empty), write \`N: —\` for that item.${releases.length ? "\n- For a release: its most important change for users in 1 sentence; say so first when it is a major version (only a version x.0.0 is a major version) or its notes name breaking changes. Notes are cut at ${RELEASE_BODY_CHARS} characters: summarize what they show, and never say they are cut." : ""}
+${summaryOutputRule(count)}
 - English.
 `;
 }
 
 /**
- * Data report, vendor call 2 of 2: Highlights, Data × AI (only when `dataAi`
- * is given) and Worth a Look around the report's sections (code-rendered
- * vendor tables plus the repo bodies), which buildDataReport splits at
- * TABLES_MARKER and the headings. `dataAi` lists the AI-flagged vendor items
- * and the news matched to tracked projects.
+ * Data report, vendor call 2 of 2: Highlights before the report's sections
+ * (code-rendered vendor tables plus the repo bodies) and Across platforms after
+ * them, which buildDataReport splits at TABLES_MARKER. Highlights say what a
+ * change means for clients (the tables already say what changed); Across
+ * platforms compares one capability across vendors, or is left out.
  */
-export function buildDataProsePrompt(
-  sectionsMd: string,
-  dateStr: string,
-  dataAi?: { vendorTitles: string[]; news: string[] },
-): string {
-  const aiList = (label: string, lines: string[]) =>
-    lines.length ? `\n${label}:\n${lines.map((l) => `- ${l}`).join("\n")}\n` : "";
-  const aiInputs = dataAi
-    ? `${aiList("Vendor items flagged as AI in data work", dataAi.vendorTitles)}${aiList("News matched to tracked projects", dataAi.news)}`
-    : "";
+export function buildDataProsePrompt(sectionsMd: string, dateStr: string): string {
   const parts = [
-    `\`## ${SECTIONS.highlights}\` — 3-5 bullets, one sentence each, on the most consequential changes today. Deprecations, retirements and breaking changes come first.`,
+    `\`## ${SECTIONS.highlights}\` — 3-5 bullets, the most consequential changes today, deprecations, retirements and breaking changes first. Each bullet says who is affected (which client setup: e.g. Azure Databricks workspaces with the compliance security profile, Snowflake Native App providers, BigQuery users of AI functions), what to do (enable, migrate, test, plan for) and by when, if the row gives a date.`,
     `The line \`${TABLES_MARKER}\` exactly once, on its own line. The sections are inserted there.`,
-    ...(dataAi
-      ? [
-          `\`## ${DATA_REPORT.dataAi}\` — 2-4 bullets, at most ~120 words: AI features in data platforms and AI tooling for data work (LLM functions, text-to-SQL, agents, MCP servers), from the flagged vendor items, AI-related releases of the tracked projects and the news listed above. Leave this heading out when nothing is about AI.`,
-        ]
-      : []),
-    `\`## ${SECTIONS.worthALook}\` — at most 3 bullets: items worth reading in full, with brief reasoning, not one the sections already lead with. Each bullet opens with the item's title as a Markdown link, copied from its row in the sections. Leave this heading out when nothing qualifies.`,
+    `\`## ${DATA_REPORT.acrossPlatforms}\` — 0-3 bullets, each one capability that moved on two or more platforms in the rows above (e.g. governance tagging on Snowflake and Databricks, AI functions in SQL on BigQuery and Snowflake), saying how they differ: GA or preview, which clouds, what each covers. Only rows in the sections count; say nothing about features they do not show. Leave this heading out when no capability moved on two platforms: no padding.`,
   ];
   return `You are the editor of a daily data engineering report for ${DATA_READER}.
 
-Below are today's report sections, ${dateStr}: vendor release-note tables (⚠️ marks a deprecation, retirement or breaking change) and the releases and hot issues of tracked open-source projects.
+Below are today's report sections, ${dateStr}: vendor release-note tables (⚠️ marks a deprecation, retirement or breaking change; 🤖 an AI feature in a data platform) and the releases and hot issues of tracked open-source projects.
 
 ${sectionsMd}
-${aiInputs}
+
 ---
 
 Write only these parts, in this order:
@@ -236,11 +238,12 @@ ${parts.map((p, i) => `${i + 1}. ${p}`).join("\n")}
 
 Rules:
 - ${NO_TITLE_RULE}
-- Length: at most ~${dataAi ? 300 : 200} words in total.
-- Do not reproduce the sections, and write no links, URLs or dates outside ${SECTIONS.worthALook}: name each item as the sections do; code links them there. ${SECTIONS.worthALook}'s links are copied from the sections, never made up.
-- Name each item in at most one of these parts: an item in Highlights is not repeated in ${dataAi ? `${DATA_REPORT.dataAi} or ` : ""}${SECTIONS.worthALook}.
-- Two rows that describe the same change (a release note and its behavior change bundle, a "coming soon" note and its GA note) are one item: mention it once.
-- Base every claim on the sections${dataAi ? " and the lists above" : ""}. Do not invent versions, dates or availability.
+- Length: at most ~200 words for ${SECTIONS.highlights}, ~120 for ${DATA_REPORT.acrossPlatforms}.
+- A major release in ${DATA_REPORT.releasesHeading} (a version x.0.0, or one whose summary names breaking changes) is a Highlights candidate: say who must test or migrate.
+- Never restate a row: the reader sees the tables right below. A bullet that only says what changed, without who is affected and what to do, is left out.
+- Write no links, URLs or other sections; name each item as the sections do. Dates only as the "by when" of a row that gives one.
+- Name each item in at most one bullet of ${SECTIONS.highlights}; ${DATA_REPORT.acrossPlatforms} compares rows, so it may name a row again. Two rows that describe the same change (a release note and its behavior change bundle, a "coming soon" note and its GA note) are one item: mention it once.
+- Base every claim on the sections. Do not invent versions, dates or availability.
 - English, professional and concise.
 `;
 }

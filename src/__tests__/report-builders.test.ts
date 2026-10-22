@@ -135,13 +135,24 @@ describe("buildProjectReportContent", () => {
     );
   });
 
-  it("shows an omitted group's unavailable projects", () => {
+  it("shows an all-quiet group's unavailable projects", () => {
     const result = buildProjectReportContent({
       ...input,
-      omitQuietGroups: true,
       groups: [{ title: "Stack", summary: "", activities: [makeActivity("delta", { fetchFailed: true })] }],
     });
     expect(result).toContain("## Stack\n\n**Unavailable today:** [DELTA](https://github.com/org/delta)");
+  });
+
+  it("leaves out a group with neither projects nor a preamble, and shows one with only a preamble", () => {
+    const result = buildProjectReportContent({
+      ...input,
+      groups: [
+        { title: "Empty", summary: "", activities: [] },
+        { title: "Table", summary: "", activities: [], preamble: "| t |" },
+      ],
+    });
+    expect(result).not.toContain("## Empty");
+    expect(result).toContain("## Table\n\n| t |");
   });
 
   it("renders the preamble between the header and the groups", () => {

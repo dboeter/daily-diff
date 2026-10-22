@@ -2,12 +2,14 @@
  * Report content builders — extracted from index.ts for testability.
  */
 
-import { hasActivity, type ProjectActivity } from "./prompts.ts";
+import { hasActivity, RELEASE_BODY_CHARS, releaseNotes, type ProjectActivity } from "./prompts.ts";
+import type { ReleaseRow } from "./data-reports.ts";
 import { escapeRegex } from "./agent-news.ts";
 import type { OpenRouterStealthModel } from "../sources/openrouter.ts";
 import type { TrendingReportData } from "../trending/rank.ts";
 import type { PolicyItem } from "../policy/policy.ts";
 import type { KeptVendorItem } from "../data/jev.ts";
+import type { VendorAction } from "../data/vendors.ts";
 import { VENDOR_SECTIONS, vendorSection, type VendorSection } from "../core/config.ts";
 import { summaryText, type Numbered } from "./summarized-table.ts";
 import {
@@ -47,11 +49,6 @@ export interface ProjectReportInput {
   period: string;
   /** Markdown rendered between the header and the groups, ending with its own separator. */
   preamble?: string;
-  /**
-   * Leave out a group with no active project (the data report). The agents
-   * report shows it with its notice and quiet line. Either way the header counts it.
-   */
-  omitQuietGroups?: boolean;
   /** Counts shown before the project counts, e.g. the data report's "Vendor items: 16". */
   leadingCounts?: string;
   /** Markdown after the last group, before the footer (the data report's Worth a Look), with its own separator. */
@@ -93,19 +90,17 @@ export function buildProjectReportContent(r: ProjectReportInput): string {
     // A project whose release fetch failed was not checked: "Quiet" would claim it shipped nothing.
     const unavailable = g.activities.filter((a) => a.fetchFailed);
     inactiveCount += quiet.length + unavailable.length;
-    // With omitQuietGroups, a group's projects are left out when all are quiet; its preamble still shows.
-    const showProjects = !(r.omitQuietGroups && quiet.length === g.activities.length);
-    if (!showProjects && !g.preamble) return [];
-    const projects = showProjects
-      ? [
-          // The data report passes an empty summary for a group with no active project.
-          nestHeadings(g.summary, 3),
-          quiet.length ? `**Quiet ${r.period}:** ${quiet.map(link).join(", ")}` : "",
-          unavailable.length ? `**Unavailable ${r.period}:** ${unavailable.map(link).join(", ")}` : "",
-        ]
-          .filter(Boolean)
-          .join("\n\n")
-      : "";
+    // A group with neither projects nor a preamble (the data report's Azure / Fabric & GCP on a day
+    // without its vendor rows) has nothing to show. An all-quiet group shows its quiet line.
+    if (!g.activities.length && !g.preamble) return [];
+    const projects = [
+      // The data report passes an empty summary for a group with no active project.
+      nestHeadings(g.summary, 3),
+      quiet.length ? `**Quiet ${r.period}:** ${quiet.map(link).join(", ")}` : "",
+      unavailable.length ? `**Unavailable ${r.period}:** ${unavailable.map(link).join(", ")}` : "",
+    ]
+      .filter(Boolean)
+      .join("\n\n");
     return `## ${g.title}\n\n` + [g.preamble, projects].filter(Boolean).join("\n\n");
   });
 
@@ -330,8 +325,46 @@ export function renderPolicyTable(
 /**
  * The data report's vendor tables, one per vendor section with items. Each row
  * shows the summary for its own number (`n`, set by selectVendorItems).
- * Date, source, title and the deprecation marker come from the data, never the model.
+ * Date, source, title and the ⚠️/🤖 markers come from the data, never the model.
  */
+/**
+ * The data report's Releases this week table; each row's summary by its own
+ * number (after the vendor rows), else its release notes, truncated. Empty
+ * when there are no rows.
+ */
+export function renderReleaseTable(rows: Numbered<ReleaseRow>[], summaries: Map<number, string>): string {
+  if (!rows.length) return "";
+  const lines = rows.map(({ n, project, release }) => {
+    const summary = summaryText(summaries, {
+      n,
+      description: releaseNotes(release.body, RELEASE_BODY_CHARS),
+    });
+    return (
+      `| [${cell(project.name)}](https://github.com/${project.repo}) | ` +
+      `[${cell(release.tag_name)}](https://github.com/${project.repo}/releases/tag/${encodeURIComponent(release.tag_name)}) | ` +
+      `${release.published_at.slice(0, 10)} | ${cell(summary)} |`
+    );
+  });
+  return `${DATA_REPORT.releasesTableHeader}\n${lines.join("\n")}`;
+}
+
+/**
+ * The data report's Action required section: the open end dates (on or after
+ * `dateStr`), nearest first. Empty when none is open.
+ */
+export function renderVendorActions(actions: Record<string, VendorAction>, dateStr: string): string {
+  const rows = Object.values(actions)
+    .filter((a) => a.date >= dateStr)
+    .sort((a, b) => a.date.localeCompare(b.date) || a.title.localeCompare(b.title))
+    .map(
+      (a) =>
+        `| ${a.date} | ${cell(a.source)} | [${policyTitleLabel(a.title)}](${cell(a.link)}) | ${cell(a.summary ?? "—")} |`,
+    );
+  return rows.length
+    ? `## ${DATA_REPORT.actionHeading}\n\n${DATA_REPORT.actionTableHeader}\n${rows.join("\n")}`
+    : "";
+}
+
 export function renderVendorTables(
   items: Numbered<KeptVendorItem>[],
   summaries: Map<number, string>,
@@ -343,7 +376,8 @@ export function renderVendorTables(
       .map(
         (it) =>
           `| ${it.date || "—"} | ${cell(it.source)} | ` +
-          `${it.deprecation ? `${DATA_REPORT.deprecationMarker} ` : ""}[${policyTitleLabel(it.title)}](${cell(it.link)}) | ` +
+          `${it.deprecation ? `${DATA_REPORT.deprecationMarker} ` : ""}${it.aiInData ? `${DATA_REPORT.aiMarker} ` : ""}` +
+          `[${policyTitleLabel(it.title)}](${cell(it.link)}) | ` +
           `${cell(summaryText(summaries, it))} |`,
       );
     if (rows.length) tables[section] = `${DATA_REPORT.vendorTableHeader}\n${rows.join("\n")}`;

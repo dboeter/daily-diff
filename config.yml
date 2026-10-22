@@ -219,16 +219,20 @@ data:
       vendor: databricks
       url: https://learn.microsoft.com/en-us/azure/databricks/feed.xml
       parser: rss
+    # stable_id: the guid survives an edited date (the "Fabric IQ" retirement
+    # post moved from 2026-10-19 to 10-20 and was reported twice).
     - name: Microsoft Fabric
       vendor: azure
       url: https://blog.fabric.microsoft.com/en-us/blog/feed/
       parser: rss
+      stable_id: true
     # All of Azure. Analytics and AI + machine learning are left out: every Azure
     # Databricks update carries both (the Databricks feed covers those).
     - name: Azure updates
       vendor: azure
       url: https://www.microsoft.com/releasecommunications/api/v2/azure/rss
       parser: rss
+      stable_id: true
       categories:
         - Databases
         - Microsoft Fabric

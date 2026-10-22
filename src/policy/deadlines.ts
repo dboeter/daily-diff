@@ -1,54 +1,18 @@
 /**
  * The policy report's "Upcoming deadlines" section, rendered in code: the open
- * deadlines of every item a report has carried (saved in the policy state, so
- * a consultation stays listed until it closes) plus the dated calendar in
+ * deadlines of every item a report has carried (saved in the policy state by
+ * `nextDeadlines`, src/core/report-state.ts, so a consultation stays listed until it closes) plus the dated calendar in
  * config.yml `policy.calendar`. It shows only on report days; it never makes
  * one by itself (it would repeat daily).
  */
 
 import type { PolicyCalendarEntry } from "../core/config.ts";
-import type { PolicyItem } from "./policy.ts";
 import { POLICY_REPORT } from "../core/i18n.ts";
 import { cell, policyTitleLabel } from "../reports/report-builders.ts";
 import { daysBefore } from "../core/date.ts";
-
-export interface Deadline {
-  /** ISO date. */
-  date: string;
-  title: string;
-  link: string;
-  source: string;
-}
+import type { Deadline } from "../core/report-state.ts";
 
 const WINDOW_DAYS = 30;
-
-/**
- * The open deadlines after today's run: the saved ones not yet passed, plus
- * the reported items' deadlines. A saved item fetched again takes its current
- * deadline (an extension), or leaves when it has none (feedback closed early).
- * An item no report carried is not added: Jev dropped it.
- */
-export function nextDeadlines(
-  saved: Record<string, Deadline> | undefined,
-  reported: PolicyItem[],
-  fetched: PolicyItem[],
-  dateStr: string,
-): Record<string, Deadline> {
-  const next = Object.fromEntries(Object.entries(saved ?? {}).filter(([, d]) => d.date >= dateStr));
-  const toDeadline = (i: PolicyItem): Deadline => ({
-    date: i.deadline!,
-    title: i.title,
-    link: i.link,
-    source: i.source,
-  });
-  for (const i of fetched) {
-    if (!(i.id in next)) continue;
-    if (i.deadline && i.deadline >= dateStr) next[i.id] = toDeadline(i);
-    else delete next[i.id];
-  }
-  for (const i of reported) if (i.deadline && i.deadline >= dateStr) next[i.id] = toDeadline(i);
-  return next;
-}
 
 /** Deadlines from today through the next 30 days, soonest first. */
 export function upcomingDeadlines(

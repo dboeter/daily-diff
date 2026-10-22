@@ -171,12 +171,20 @@ export const DATA_REPORT = {
     cloud: "Azure / Fabric & GCP",
     data_stack: "Open-source stack",
   },
-  /** Written by the prose call, between the sections and Worth a Look; not a DataSectionKey. */
-  dataAi: "Data × AI",
   vendorCount: (count: number) => `Vendor items: ${count}`,
   vendorTableHeader: "| Date | Source | Item | Summary |\n| :--- | :--- | :--- | :--- |",
   /** Marks a deprecation, retirement, breaking or behavior change in the Item cell. */
   deprecationMarker: "⚠️",
+  /** Written by the prose call after the tables: one capability compared across vendors. */
+  acrossPlatforms: "Across platforms",
+  /** Code-rendered after Open-source stack: the data repos' stable releases no earlier report showed. */
+  releasesHeading: "Releases this week",
+  releasesTableHeader: "| Project | Version | Date | Summary |\n| :--- | :--- | :--- | :--- |",
+  /** Code-rendered after Highlights: the open end dates of reported deprecations. */
+  actionHeading: "Action required",
+  actionTableHeader: "| Date | Platform | Item | What to do |\n| :--- | :--- | :--- | :--- |",
+  /** Marks an AI feature in a data platform (`aiInData`) in the Item cell. */
+  aiMarker: "🤖",
   noNewItems: "No vendor items, releases, hot issues or news in the tracked data projects, skipping report.",
 } as const;
 

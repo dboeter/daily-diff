@@ -21,8 +21,12 @@ export interface ReportedState {
   stages?: Record<string, string>;
 }
 
-/** What the state reads of an item; `published` dates a stage item's stage. */
-export type StateItem = { id: string; published: string; stage?: string };
+/**
+ * What the state reads of an item; `published` dates a stage item's stage.
+ * `aliases`: keys the state may hold the item under from before its key
+ * changed; one in `reported` counts as the item's own (it ages out with the prune).
+ */
+export type StateItem = { id: string; published: string; stage?: string; aliases?: string[] };
 
 /**
  * How long a reported id is remembered. Both reports drop items older than 7
@@ -61,7 +65,7 @@ export function stageKey(item: { published: string; stage?: string }): string {
 /** Items no earlier day reported; a stage item also when its stage moved. An item reported today is still new. */
 export function newItems<T extends StateItem>(items: T[], state: ReportedState | null, dateStr: string): T[] {
   return items.filter((i) => {
-    const day = state?.reported[i.id];
+    const day = [i.id, ...(i.aliases ?? [])].map((k) => state?.reported[k]).find((d) => d !== undefined);
     if (day === dateStr) return true;
     if (i.stage !== undefined) return state?.stages?.[i.id] !== stageKey(i);
     return day === undefined;
@@ -71,18 +75,25 @@ export function newItems<T extends StateItem>(items: T[], state: ReportedState |
 /**
  * The state after reporting `items` on `dateStr`; ids older than REPORTED_KEEP_DAYS are pruned.
  * `recorded` stage items only get their stage saved: not reported, so a same-day re-run skips them too.
+ * `seen` (every fetched item): one reported under an alias gets that day under its id, so it stays
+ * reported once the alias no longer matches (a stable-id note whose date is edited again).
  */
 export function nextReportedState(
   state: ReportedState | null,
   items: StateItem[],
   dateStr: string,
   recorded: StateItem[] = [],
+  seen: StateItem[] = [],
 ): ReportedState {
   const cutoff = daysBefore(dateStr, REPORTED_KEEP_DAYS);
   const reported = Object.fromEntries(
     Object.entries(state?.reported ?? {}).filter(([, day]) => day >= cutoff),
   );
   const stages = { ...state?.stages };
+  for (const i of seen) {
+    const day = i.aliases?.map((k) => reported[k]).find((d) => d !== undefined);
+    if (day !== undefined) reported[i.id] ??= day;
+  }
   for (const i of items) {
     if (i.stage !== undefined && stages[i.id] !== stageKey(i)) {
       reported[i.id] = dateStr;
@@ -111,4 +122,51 @@ export function markStaleOnFirstSight<T extends { id: string; recordOnly?: boole
   stageDate: string,
 ): T {
   return staleOnFirstSight(ctx, item.id, stageDate) ? { ...item, recordOnly: true } : item;
+}
+
+// ---------------------------------------------------------------------------
+// Deadlines of reported items (an extra state field)
+// ---------------------------------------------------------------------------
+
+export interface Deadline {
+  /** ISO date. */
+  date: string;
+  title: string;
+  link: string;
+  source: string;
+}
+
+/** What nextDeadlines reads of an item: a policy item, or the data report's vendor item. */
+type Dated = Omit<Deadline, "date"> & { id: string; deadline?: string };
+
+/**
+ * The open deadlines after today's run: the saved ones not yet passed, plus
+ * the reported items' deadlines. A saved item fetched again takes its current
+ * deadline (an extension), its extra fields kept, or leaves when it has none
+ * (feedback closed early).
+ * An item no report carried is not added: Jev dropped it. A saved entry not
+ * fetched again is kept as it is, extra fields included. Policy Watch's
+ * Upcoming deadlines and the data report's Action required table.
+ */
+export function nextDeadlines(
+  saved: Record<string, Deadline> | undefined,
+  reported: Dated[],
+  fetched: Dated[],
+  dateStr: string,
+): Record<string, Deadline> {
+  const next = Object.fromEntries(Object.entries(saved ?? {}).filter(([, d]) => d.date >= dateStr));
+  const toDeadline = (i: Dated): Deadline => ({
+    date: i.deadline!,
+    title: i.title,
+    link: i.link,
+    source: i.source,
+  });
+  for (const i of fetched) {
+    if (!(i.id in next)) continue;
+    if (i.deadline && i.deadline >= dateStr) next[i.id] = { ...next[i.id], ...toDeadline(i) };
+    else delete next[i.id];
+  }
+  for (const i of reported)
+    if (i.deadline && i.deadline >= dateStr) next[i.id] = { ...next[i.id], ...toDeadline(i) };
+  return next;
 }

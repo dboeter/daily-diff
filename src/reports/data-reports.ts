@@ -46,24 +46,32 @@ import type { TrendingData } from "../trending/trending.ts";
 import { saveClassifyCache, saveMatchState } from "../trending/jev.ts";
 import { saveStarHistory, summaryRows } from "../trending/rank.ts";
 import { buildProjectDigestPrompt, buildSkillsPrompt, hasActivity, type ProjectActivity } from "./prompts.ts";
-import type { SkillsData } from "../core/github.ts";
+import type { GitHubRelease, RepoConfig, SkillsData } from "../core/github.ts";
 import {
   buildProjectReportContent,
   renderTrendingTables,
   renderPolicyTable,
   nestHeadings,
   renderVendorTables,
+  renderVendorActions,
+  renderReleaseTable,
   policyTitleLabel,
   type ProjectGroup,
 } from "./report-builders.ts";
-import { parseRowSummaries, spliceTables, TABLES_MARKER } from "./summarized-table.ts";
+import {
+  numberRows,
+  parseRowSummaries,
+  spliceTables,
+  summaryText,
+  TABLES_MARKER,
+} from "./summarized-table.ts";
 import { saveArxivState, type ArxivData } from "../sources/arxiv.ts";
 import type { HfData } from "../sources/hf.ts";
 import { POLICY_STATE_FILE, type PolicyData, type PolicyItem } from "../policy/policy.ts";
 import { POLICY_VERDICTS_FILE } from "../policy/jev.ts";
 import { renderDeadlines } from "../policy/deadlines.ts";
 import type { OpenRouterData } from "../sources/openrouter.ts";
-import { DATA_STATE_FILE, type VendorData } from "../data/vendors.ts";
+import { DATA_STATE_FILE, type DataState, type VendorData } from "../data/vendors.ts";
 import { DATA_VERDICTS_FILE } from "../data/jev.ts";
 import { commitWrites, planWrites } from "../core/new-items.ts";
 import type { DataSectionKey } from "../core/config.ts";
@@ -344,6 +352,14 @@ export async function buildPolicyReport(
 // Data report (Databricks, Snowflake, the open-source data stack) — daily
 // ---------------------------------------------------------------------------
 
+/** A Releases this week row: a stable release no earlier report showed. */
+export interface ReleaseRow {
+  /** `release:<owner/repo>@<tag>`, its entry in the data state's `reported`. */
+  key: string;
+  project: RepoConfig;
+  release: GitHubRelease;
+}
+
 /** One repo section of the data report (config.yml `databricks`, `snowflake`, `data_stack`). */
 export interface DataSection {
   key: DataSectionKey;
@@ -352,47 +368,80 @@ export interface DataSection {
   activities: ProjectActivity[];
 }
 
+/** A bullet line: `- `, `* ` or `1. `. */
+const BULLET_RE = /^\s*(?:[-*]|\d+\.)\s/;
+
 /**
- * Split the prose call's reply at TABLES_MARKER: Highlights before it; after
- * it, the Data × AI and Worth a Look sections, each from its heading to the
- * next `## ` heading, so they render in report order whatever order the model used.
+ * Split the prose call's reply at TABLES_MARKER (without one, at its first
+ * `## ` heading after the first line, so a section the model wrote is still
+ * placed or dropped): Highlights before it; after it, only
+ * the Across platforms section's bullets (with their wrapped lines), from its
+ * heading to the next `## ` heading, so a note the model adds there is dropped
+ * (the 2026-10-21 replay ended with one). Any other section it wrote was not
+ * asked for and is dropped; a heading without bullets is left out.
  */
-function splitProse(prose: string): { highlights: string; dataAi: string; worthALook: string } {
+function splitProse(prose: string): { highlights: string; acrossPlatforms: string } {
   const lines = prose.split("\n");
-  const i = lines.findIndex((l) => l.trim() === TABLES_MARKER);
-  // No marker: all of it goes on top, as spliceTables does with a missing marker.
-  if (i === -1) return { highlights: prose.trim(), dataAi: "", worthALook: "" };
-  const after = lines.slice(i + 1);
-  const section = (heading: string) => {
-    const start = after.findIndex((l) => l.trim() === `## ${heading}`);
-    if (start === -1) return "";
-    const end = after.findIndex((l, j) => j > start && l.startsWith("## "));
-    return after
-      .slice(start, end === -1 ? undefined : end)
-      .join("\n")
-      .trim();
-  };
+  const marker = lines.findIndex((l) => l.trim() === TABLES_MARKER);
+  const heading = lines.findIndex((l, j) => j > 0 && l.startsWith("## "));
+  const i = marker !== -1 ? marker : heading !== -1 ? heading : lines.length;
+  // Past the marker, or from the heading itself when there is none.
+  const after = lines.slice(marker !== -1 ? i + 1 : i);
+  const start = after.findIndex((l) => l.trim() === `## ${DATA_REPORT.acrossPlatforms}`);
+  const end = after.findIndex((l, j) => j > start && l.startsWith("## "));
+  const bullets: string[] = [];
+  let inBullet = false;
+  for (const l of start === -1 ? [] : after.slice(start + 1, end === -1 ? undefined : end)) {
+    inBullet = BULLET_RE.test(l) || (inBullet && /^\s+\S/.test(l));
+    if (inBullet) bullets.push(l.trimEnd());
+  }
   return {
     highlights: lines.slice(0, i).join("\n").trim(),
-    dataAi: section(DATA_REPORT.dataAi),
-    worthALook: section(SECTIONS.worthALook),
+    acrossPlatforms: bullets.length ? `## ${DATA_REPORT.acrossPlatforms}\n\n${bullets.join("\n")}` : "",
   };
+}
+
+/**
+ * The data repos' stable releases of the last 7 days that no earlier report
+ * showed (`reported`: the data state, which keeps them as `release:<repo>@<tag>`;
+ * one shown today is shown again on a same-day re-run), newest first.
+ */
+function newReleases(
+  sections: DataSection[],
+  reported: Record<string, string>,
+  dateStr: string,
+): (ReleaseRow & { inSection: boolean })[] {
+  return sections
+    .flatMap((s) => s.activities)
+    .flatMap((a) =>
+      (a.weekReleases ?? []).map((release) => ({
+        key: `release:${a.config.repo}@${release.tag_name}`,
+        project: a.config,
+        release,
+        inSection: a.releases.some((r) => r.tag_name === release.tag_name),
+      })),
+    )
+    .filter((r) => (reported[r.key] ?? dateStr) === dateStr)
+    .sort((a, b) => b.release.published_at.localeCompare(a.release.published_at));
 }
 
 /**
  * The data report: Highlights, then Databricks, Snowflake and Azure / Fabric &
  * GCP (each its code-rendered vendor table, then the vendor's repo section),
- * the open-source stack, Data × AI and Worth a Look. A section with neither vendor items
- * nor repo activity is left out; Data × AI is asked for only when a vendor item
- * is AI-flagged or a tracked project is active (the model picks the AI-related
- * releases and news), and left out when the model writes none. LLM calls: one per active repo section (as in
+ * with Action required (code-rendered: the open end dates of reported
+ * deprecations, in the state until they pass) between Highlights and them,
+ * the open-source stack, Releases this week (code-rendered: the data repos'
+ * stable releases of the last 7 days not shown before, summarized by the vendor
+ * summaries call), Across platforms and Worth a Look. A section with neither vendor items
+ * nor repo activity is left out. LLM calls: one per active repo section (as in
  * the agents report) and one for the vendor row summaries, in parallel; then
- * one for Highlights and Worth a Look over all of it. A failed summaries call
- * leaves the descriptions in the tables; a failed prose call leaves the failure
- * notice in Highlights. Null when there are no kept vendor items and no repo activity.
- * `dataLaw` (today's Policy Watch items that are EU data law) is linked in code
- * at the end of Worth a Look, which it creates if the prose has none; it never
- * makes a report on its own.
+ * one for Highlights and Across platforms over all of it (Across platforms is
+ * left out when the model writes none). A failed summaries call leaves the
+ * descriptions in the tables; a failed prose call leaves the failure notice in
+ * Highlights. Null when there are no kept vendor items and no repo activity.
+ * Worth a Look is code only: links to `dataLaw` (today's Policy Watch items
+ * that are EU data law), left out when there are none; it never makes a report
+ * on its own.
  */
 export async function buildDataReport(
   sections: DataSection[],
@@ -406,10 +455,15 @@ export async function buildDataReport(
   // Before the skip, as in buildPolicyReport: dropped items are then not asked again tomorrow, and
   // a quiet day keeps its record-only bundles.
   const files = { state: stateFile, verdicts: verdictsFile, trace: "data-ranking.json" };
-  const writes = planWrites(vendor);
-  commitWrites(writes.onFetched, files, dateStr);
+  commitWrites(planWrites(vendor).onFetched, files, dateStr);
   const { items } = vendor;
-  if (items.length === 0 && !sections.some((s) => s.activities.some(hasActivity))) {
+  const unshown = newReleases(sections, vendor.nextState.reported, dateStr);
+  // A release of the last 24h is in its repo section: recorded as shown, not listed twice.
+  const releases = numberRows(unshown.filter((r) => !r.inSection)).map((r) => ({
+    ...r,
+    n: r.n + items.length,
+  }));
+  if (items.length === 0 && releases.length === 0 && !sections.some((s) => s.activities.some(hasActivity))) {
     console.log(`  [data] ${DATA_REPORT.noNewItems}`);
     return null;
   }
@@ -424,11 +478,26 @@ export async function buildDataReport(
         return { ...s, summary };
       }),
     ),
-    items.length > 0
-      ? generateOr("data-vendor-summaries", buildDataSummariesPrompt(items, dateStr), "", LLM_TOKENS_LISTING)
+    items.length + releases.length > 0
+      ? generateOr(
+          "data-vendor-summaries",
+          buildDataSummariesPrompt(items, dateStr, releases),
+          "",
+          LLM_TOKENS_LISTING,
+        )
       : "",
   ]);
-  const tables = renderVendorTables(items, parseRowSummaries(rowSummaries));
+  const summaries = parseRowSummaries(rowSummaries);
+  const tables = renderVendorTables(items, summaries);
+  // Today's end dates take today's row summary, kept in the state for the later report days.
+  // A "—" summary (nothing beyond the title) is no action: the description, truncated, stands in.
+  const actions = { ...vendor.nextState.actions };
+  for (const i of items) {
+    if (!actions[i.id] || !i.endDate) continue;
+    const summary = summaryText(summaries, i);
+    actions[i.id] = { ...actions[i.id]!, summary: summary === "—" ? summaryText(new Map(), i) : summary };
+  }
+  const actionTable = renderVendorActions(actions, dateStr);
   const repo = (key: DataSectionKey) => {
     const r = repos.find((s) => s.key === key);
     return { activities: r?.activities ?? [], summary: r?.summary ?? "" };
@@ -439,9 +508,15 @@ export async function buildDataReport(
     { title: H.snowflake, ...repo("snowflake"), preamble: tables.snowflake },
     { title: H.cloud, activities: [], summary: "", preamble: tables.cloud },
     { title: H.data_stack, ...repo("data_stack") },
+    {
+      title: DATA_REPORT.releasesHeading,
+      activities: [],
+      summary: "",
+      preamble: renderReleaseTable(releases, summaries),
+    },
   ];
 
-  // The prose call sees what the reader sees between Highlights and Worth a Look.
+  // The prose call sees what the reader sees below Highlights.
   const sectionsMd = groups
     .map((g) => {
       const body = g.activities.some(hasActivity) ? nestHeadings(g.summary, 3) : "";
@@ -449,49 +524,46 @@ export async function buildDataReport(
     })
     .filter(Boolean)
     .join("\n\n");
-  const aiItems = items.filter((i) => i.aiInData);
-  const active = sections.flatMap((s) => s.activities.filter(hasActivity));
-  const dataAi =
-    aiItems.length || active.length
-      ? {
-          vendorTitles: aiItems.map((i) => `${i.title} (${i.source})`),
-          news: active.flatMap((a) => a.news.map((n) => `${n.title} (${n.source}; ${a.config.name})`)),
-        }
-      : undefined;
   const prose = await generateOr(
     "data-highlights",
-    buildDataProsePrompt(sectionsMd, dateStr, dataAi),
+    buildDataProsePrompt(sectionsMd, dateStr),
     null,
     LLM_TOKENS_LISTING,
   );
-  const {
-    highlights,
-    dataAi: dataAiMd,
-    worthALook,
-  } = prose === null
-    ? { highlights: `## ${SECTIONS.highlights}\n\n${MSG.summaryFailed}`, dataAi: "", worthALook: "" }
-    : splitProse(prose);
+  const { highlights, acrossPlatforms } =
+    prose === null
+      ? { highlights: `## ${SECTIONS.highlights}\n\n${MSG.summaryFailed}`, acrossPlatforms: "" }
+      : splitProse(prose);
   const lawLinks = dataLaw
     .map((i) => `- [${policyTitleLabel(i.title)}](${i.link}) — Policy Watch${i.stage ? `, ${i.stage}` : ""}`)
     .join("\n");
-  const worth = lawLinks ? `${worthALook || `## ${SECTIONS.worthALook}\n`}\n${lawLinks}` : worthALook;
-  // Not asked for: a Data × AI section the model wrote anyway is dropped.
-  const epilogue = [dataAi ? dataAiMd : "", worth].filter(Boolean).join("\n\n---\n\n");
+  const epilogue = [acrossPlatforms, lawLinks ? `## ${SECTIONS.worthALook}\n\n${lawLinks}` : ""]
+    .filter(Boolean)
+    .join("\n\n---\n\n");
 
   const content = buildProjectReportContent({
     heading: reportHeading("ai-data", dateStr),
     utcStr,
     groups,
     period: PROJECT_SCOPE.period,
-    preamble: highlights ? `${highlights}\n\n---\n\n` : "",
-    omitQuietGroups: true,
+    preamble: [highlights, actionTable]
+      .filter(Boolean)
+      .map((s) => `${s}\n\n---\n\n`)
+      .join(""),
     // On 2026-10-19 "Projects: 17 | Active today: 0" was all the header said above 16 vendor rows.
     leadingCounts: DATA_REPORT.vendorCount(items.length),
     ...(epilogue ? { epilogue: `\n\n---\n\n${epilogue}` } : {}),
     footer: autoGenFooter(),
   });
   // Only once the report exists, like the policy state; after a failed fetch it only prunes.
-  commitWrites(writes.onReported, files, dateStr);
+  const nextState: DataState = {
+    ...vendor.nextState,
+    ...(vendor.nextState.actions ? { actions } : {}),
+    // Shown once: the next run skips them (newReleases); pruned with the vendor ids.
+    reported: { ...vendor.nextState.reported, ...Object.fromEntries(unshown.map((r) => [r.key, dateStr])) },
+  };
+  // The reported state as the report left it: today's action summaries and shown releases added.
+  commitWrites(planWrites({ ...vendor, nextState }).onReported, files, dateStr);
   return { id: "ai-data", content };
 }
 

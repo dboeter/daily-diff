@@ -104,6 +104,23 @@ describe("parseBehaviorChangeBundles", () => {
     expect(bundles.map((b) => b.date)).toEqual(["2026-10-13", "2026-09-09", "2026-09-09", "2026-09-09"]);
   });
 
+  it("takes a planned Enabled by Default or Generally Enabled change with a full date as the end date", () => {
+    // On the fixture every planned change is month-only ("a subsequent October 2026 release").
+    expect(bundles.map((b) => b.endDate)).toEqual([undefined, undefined, undefined, undefined]);
+    const row = (planned: string) =>
+      `<table><tr><th>Pending Changes</th></tr><tr><td><strong>2026_09</strong></td><td><p>Introduced in the 10.38 release (October 14-20, 2026) as Disabled by Default; account admins can enable for testing.</p><p>${planned}</p></td></tr></table>`;
+    const [b] = parseBehaviorChangeBundles(
+      row(
+        "Status planned to change in the 10.42 release (November 10-16, 2026) to Generally Enabled; however, this schedule is subject to change.",
+      ),
+    );
+    expect(b!.endDate).toBe("2026-11-16");
+    const [intro] = parseBehaviorChangeBundles(
+      row("Status planned to change in the 10.40 release (November 3-9, 2026) to Disabled by Default."),
+    );
+    expect(intro!.endDate).toBeUndefined();
+  });
+
   it("throws when no bundle parses", () => {
     expect(() => parseBehaviorChangeBundles("<html></html>")).toThrow("no Snowflake behavior-change bundles");
   });
@@ -207,8 +224,141 @@ describe("fetchVendorData", () => {
     ]);
   });
 
+  it("lists a reported bundle's end date once its plan gets a day, and follows a reschedule", async () => {
+    const page = (planned: string) =>
+      `<table><tr><th>Pending Changes</th></tr><tr><td><strong>2026_09</strong></td><td><p>Introduced in the 10.38 release (October 14-20, 2026) as Disabled by Default; account admins can enable for testing.</p><p>Status planned to change in ${planned} to Generally Enabled.</p></td></tr></table>`;
+    const day = (date: string, planned: string, state: Parameters<typeof fetchVendorData>[2]) => {
+      vi.spyOn(console, "log").mockImplementation(() => {});
+      vi.spyOn(globalThis, "fetch").mockImplementation(async () => new Response(page(planned)));
+      return fetchVendorData({ feeds }, new Date(`${date}T01:00:00Z`), state, { cache: { items: {} } });
+    };
+    const d1 = await day("2026-10-21", "a subsequent November 2026 release", null);
+    expect(d1.items.map((i) => i.id)).toEqual(["snowflake-bcr:2026_09"]);
+    expect(d1.nextState.actions).toEqual({});
+    // Same stage, so not new again: the action still has to come from the fetched bundle.
+    const d2 = await day("2026-10-22", "the 10.42 release (November 10-16, 2026)", d1.nextState);
+    expect(d2.items).toEqual([]);
+    expect(d2.observedState.actions?.["snowflake-bcr:2026_09"]?.date).toBe("2026-11-16");
+    // buildDataReport adds the row summary; a reschedule keeps it.
+    const saved = d2.observedState.actions!["snowflake-bcr:2026_09"]!;
+    const d2State = {
+      ...d2.observedState,
+      actions: { "snowflake-bcr:2026_09": { ...saved, summary: "Test it." } },
+    };
+    const d3 = await day("2026-10-23", "the 10.43 release (November 17-23, 2026)", d2State);
+    expect(d3.observedState.actions?.["snowflake-bcr:2026_09"]).toMatchObject({
+      date: "2026-11-23",
+      summary: "Test it.",
+    });
+    // Back to a month-only plan: no date to act by.
+    const d4 = await day("2026-10-24", "a subsequent December 2026 release", d3.observedState);
+    expect(d4.observedState.actions).toEqual({});
+  });
+
   it("reports a known bundle whose stage moved, however old the stage date", async () => {
     const data = await run({ reported: {}, stages: { "snowflake-bcr:2026_07": "2026-08-01 Planned" } });
     expect(data.items.map((i) => i.id)).toEqual(["snowflake-bcr:2026_08", "snowflake-bcr:2026_07"]);
+  });
+});
+
+describe("fetchVendorData across days", () => {
+  const rss = (items: { guid: string; title: string; date: string }[]) =>
+    `<?xml version="1.0"?><rss version="2.0"><channel><title>t</title>${items
+      .map(
+        (i) =>
+          `<item><title>${i.title}</title><link>https://x/${i.guid}</link><guid>${i.guid}</guid><pubDate>${new Date(`${i.date}T00:00:00Z`).toUTCString()}</pubDate><description>d</description></item>`,
+      )
+      .join("")}</channel></rss>`;
+  const feeds: DataFeed[] = [
+    { name: "Microsoft Fabric", vendor: "azure", url: "https://x/fabric.xml", parser: "rss", stableId: true },
+    { name: "Azure Databricks", vendor: "databricks", url: "https://x/dbx.xml", parser: "rss" },
+  ];
+  type Note = { guid: string; title: string; date: string };
+  const run = (day: string, fabric: Note[], dbx: Note[], state: Parameters<typeof fetchVendorData>[2]) => {
+    vi.spyOn(console, "log").mockImplementation(() => {});
+    vi.spyOn(globalThis, "fetch").mockImplementation(
+      async (input) => new Response(rss(String(input).endsWith("fabric.xml") ? fabric : dbx)),
+    );
+    return fetchVendorData({ feeds }, new Date(`${day}T01:00:00Z`), state, { cache: { items: {} } });
+  };
+  const retiring = { guid: "ba-p/5374418", title: "Retirement of the custom tool: move to Fabric IQ" };
+
+  it("does not report a stable-id item again when its date moves", async () => {
+    const first = await run("2026-10-20", [{ ...retiring, date: "2026-10-19" }], [], null);
+    expect(first.items.map((i) => i.title)).toEqual([retiring.title]);
+    const second = await run("2026-10-21", [{ ...retiring, date: "2026-10-20" }], [], first.nextState);
+    expect(second.items).toEqual([]);
+  });
+
+  it("reads a stable-id item's title + date key saved before the change as reported", async () => {
+    const legacy = {
+      reported: { "retirement of the custom tool: move to fabric iq|2026-10-19": "2026-10-20" },
+    };
+    const data = await run("2026-10-21", [{ ...retiring, date: "2026-10-19" }], [], legacy);
+    expect(data.items).toEqual([]);
+    // The old key's day moves to the guid, so a later date edit is still not new.
+    expect(data.observedState.reported["ba-p/5374418"]).toBe("2026-10-20");
+    const moved = await run("2026-10-22", [{ ...retiring, date: "2026-10-21" }], [], data.observedState);
+    expect(moved.items).toEqual([]);
+  });
+
+  it("still keys an Azure Databricks note on title + date, so a second guid is not new", async () => {
+    const note = { title: "Lakebase replication is generally available", date: "2026-10-19" };
+    const first = await run("2026-10-20", [], [{ ...note, guid: "topic#a" }], null);
+    expect(first.items).toHaveLength(1);
+    const second = await run("2026-10-21", [], [{ ...note, guid: "month#a" }], first.nextState);
+    expect(second.items).toEqual([]);
+  });
+
+  const comingSoon = {
+    guid: "whats-coming#pkg",
+    title: "Workspace-level package repositories for Databricks Apps will soon be generally available",
+    date: "2026-10-14",
+  };
+  const ga = {
+    guid: "october#pkg",
+    title: "Workspace-level package repositories for Databricks Apps are generally available",
+    date: "2026-10-14",
+  };
+
+  it("does not report a GA note after its coming-soon note was reported on an earlier day", async () => {
+    const first = await run("2026-10-20", [], [comingSoon], null);
+    expect(first.items.map((i) => i.title)).toEqual([comingSoon.title]);
+    const second = await run("2026-10-21", [], [comingSoon, ga], first.nextState);
+    expect(second.items).toEqual([]);
+  });
+
+  it("reports both when the coming-soon and GA notes arrive on the same day", async () => {
+    const data = await run("2026-10-21", [], [comingSoon, ga], null);
+    expect(data.items.map((i) => i.title).sort()).toEqual([ga.title, comingSoon.title].sort());
+  });
+
+  it("keeps a reported deprecation's end date in the state until it passes; one without a date is not kept", async () => {
+    const ask = vi.fn(async (_s: unknown, questions: object) => ({
+      model: "m",
+      answers: {
+        real_change: { noul: 1 },
+        deprecation: { noul: 1 },
+        ai_in_data: { noul: 0 },
+        significance: { score: 2 },
+        ...("end_date" in questions ? { end_date: { choice: "2026-11-19" } } : {}),
+      },
+    }));
+    const notes = [
+      { guid: "a", title: "Model X is scheduled for retirement on November 19, 2026", date: "2026-10-19" },
+      { guid: "b", title: "Legacy tab is deprecated", date: "2026-10-19" },
+    ];
+    vi.spyOn(console, "log").mockImplementation(() => {});
+    vi.spyOn(globalThis, "fetch").mockImplementation(async () => new Response(rss(notes)));
+    const jev = { apiKey: "k", cache: { items: {} }, ask };
+    const day1 = await fetchVendorData({ feeds: [feeds[1]!] }, new Date("2026-10-21T01:00:00Z"), null, jev);
+    expect(day1.nextState.actions).toEqual({
+      a: { date: "2026-11-19", title: notes[0]!.title, link: "https://x/a", source: "Azure Databricks" },
+    });
+    // A quiet day keeps it; the day after it passes drops it.
+    const quiet = await fetchVendorData({ feeds: [] }, new Date("2026-11-19T01:00:00Z"), day1.nextState, jev);
+    expect(Object.keys(quiet.observedState.actions ?? {})).toEqual(["a"]);
+    const after = await fetchVendorData({ feeds: [] }, new Date("2026-11-20T01:00:00Z"), day1.nextState, jev);
+    expect(after.observedState.actions).toEqual({});
   });
 });
