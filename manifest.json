@@ -1,14 +1,16 @@
 {
-  "generated": "2026-10-22T01:29:58.668Z",
+  "generated": "2026-10-22T23:53:02.232Z",
   "labels": {
     "ai-agents": "AI Agents",
+    "ai-models": "AI Models & Labs",
+    "ai-policy": "AI Policy",
+    "ai-data": "Data Engineering",
+    "ai-trends": "Trends",
     "ai-hn": "AI Discussions",
-    "ai-arxiv": "AI Research",
     "ai-web": "Lab Announcements",
-    "ai-policy": "Policy Watch",
-    "ai-data": "Data Engineering Watch",
     "ai-trending": "Agent & AI Coding Trends",
     "ai-hf": "AI Models",
+    "ai-arxiv": "AI Research",
     "ai-infra": "AI Infrastructure Digest",
     "ai-community": "Tech Community AI Digest",
     "ai-cli": "AI CLI Tools Digest",
@@ -17,63 +19,79 @@
     "ai-monthly": "AI Tools Monthly Digest"
   },
   "weekly": [
-    "ai-trending",
-    "ai-hf"
+    "ai-trends"
   ],
+  "feeds": {
+    "ai-agents": "feeds/ai-agents.xml",
+    "ai-models": "feeds/ai-models.xml",
+    "ai-policy": "feeds/ai-policy.xml",
+    "ai-data": "feeds/ai-data.xml",
+    "ai-trends": "feeds/ai-trends.xml"
+  },
   "overview": "📅 Overview",
+  "comingUp": "Coming up",
   "dates": [
+    {
+      "date": "2026-10-23",
+      "reports": [
+        "ai-agents",
+        "ai-models",
+        "ai-policy",
+        "ai-data"
+      ]
+    },
     {
       "date": "2026-10-22",
       "reports": [
         "ai-agents",
-        "ai-hn",
-        "ai-arxiv",
-        "ai-web",
         "ai-policy",
-        "ai-data"
+        "ai-data",
+        "ai-hn",
+        "ai-web",
+        "ai-arxiv"
       ]
     },
     {
       "date": "2026-10-21",
       "reports": [
         "ai-agents",
-        "ai-hn",
-        "ai-arxiv",
-        "ai-web",
         "ai-policy",
-        "ai-data"
+        "ai-data",
+        "ai-hn",
+        "ai-web",
+        "ai-arxiv"
       ]
     },
     {
       "date": "2026-10-20",
       "reports": [
         "ai-agents",
-        "ai-hn",
-        "ai-arxiv",
-        "ai-web",
         "ai-policy",
-        "ai-data"
+        "ai-data",
+        "ai-hn",
+        "ai-web",
+        "ai-arxiv"
       ]
     },
     {
       "date": "2026-10-19",
       "reports": [
         "ai-agents",
-        "ai-hn",
-        "ai-arxiv",
-        "ai-web",
         "ai-data",
+        "ai-hn",
+        "ai-web",
         "ai-trending",
-        "ai-hf"
+        "ai-hf",
+        "ai-arxiv"
       ]
     },
     {
       "date": "2026-10-18",
       "reports": [
         "ai-agents",
+        "ai-policy",
         "ai-hn",
-        "ai-web",
-        "ai-policy"
+        "ai-web"
       ]
     },
     {
@@ -87,20 +105,20 @@
       "date": "2026-10-16",
       "reports": [
         "ai-agents",
+        "ai-policy",
         "ai-hn",
-        "ai-arxiv",
         "ai-web",
-        "ai-policy"
+        "ai-arxiv"
       ]
     },
     {
       "date": "2026-10-15",
       "reports": [
         "ai-agents",
+        "ai-policy",
         "ai-hn",
-        "ai-arxiv",
         "ai-web",
-        "ai-policy"
+        "ai-arxiv"
       ]
     },
     {
@@ -108,8 +126,8 @@
       "reports": [
         "ai-agents",
         "ai-hn",
-        "ai-arxiv",
-        "ai-web"
+        "ai-web",
+        "ai-arxiv"
       ]
     },
     {
@@ -117,8 +135,8 @@
       "reports": [
         "ai-agents",
         "ai-hn",
-        "ai-arxiv",
-        "ai-web"
+        "ai-web",
+        "ai-arxiv"
       ]
     },
     {
@@ -126,9 +144,9 @@
       "reports": [
         "ai-agents",
         "ai-hn",
-        "ai-arxiv",
         "ai-trending",
         "ai-hf",
+        "ai-arxiv",
         "ai-infra",
         "ai-community"
       ]
@@ -146,8 +164,8 @@
       "reports": [
         "ai-agents",
         "ai-hn",
-        "ai-arxiv",
-        "ai-web"
+        "ai-web",
+        "ai-arxiv"
       ]
     },
     {
@@ -155,8 +173,8 @@
       "reports": [
         "ai-agents",
         "ai-hn",
-        "ai-arxiv",
-        "ai-web"
+        "ai-web",
+        "ai-arxiv"
       ]
     },
     {
@@ -164,8 +182,8 @@
       "reports": [
         "ai-agents",
         "ai-hn",
-        "ai-arxiv",
-        "ai-web"
+        "ai-web",
+        "ai-arxiv"
       ]
     },
     {
@@ -195,9 +213,9 @@
       "reports": [
         "ai-agents",
         "ai-hn",
-        "ai-arxiv",
         "ai-web",
         "ai-trending",
+        "ai-arxiv",
         "ai-infra",
         "ai-community",
         "ai-cli"

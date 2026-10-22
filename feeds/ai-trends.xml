@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Daily Diff: Trends</title>
+    <link>https://dboeter.github.io/daily-diff</link>
+    <description>Daily AI ecosystem digest</description>
+    <language>en</language>
+    <atom:link href="https://dboeter.github.io/daily-diff/feeds/ai-trends.xml" rel="self" type="application/rss+xml"/>
+    <lastBuildDate>Thu, 22 Oct 2026 23:53:02 +0000</lastBuildDate>
+
+  </channel>
+</rss>

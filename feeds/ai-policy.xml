@@ -1,0 +1,617 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Daily Diff: AI Policy</title>
+    <link>https://dboeter.github.io/daily-diff</link>
+    <description>Daily AI ecosystem digest</description>
+    <language>en</language>
+    <atom:link href="https://dboeter.github.io/daily-diff/feeds/ai-policy.xml" rel="self" type="application/rss+xml"/>
+    <lastBuildDate>Thu, 22 Oct 2026 23:53:02 +0000</lastBuildDate>
+    <item>
+      <title>AI Policy 2026-10-23</title>
+      <link>https://dboeter.github.io/daily-diff/#2026-10-23/ai-policy</link>
+      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-10-23/ai-policy</guid>
+      <pubDate>Fri, 23 Oct 2026 00:00:00 +0000</pubDate>
+      <description>AI Policy 2026-10-23 📅 Overview · 🤖 AI Agents · 🧠 AI Models &amp;amp; Labs · ⚖️ AI Policy · 🗄️ Data Engineering Sources: Covington Inside Privacy + Politico Europe + Politico US | 3 new items ranked by Jev relevance | Generated: 2026-10-22 23:49 UTC Highlights The European Commission&amp;#39;s proposed Cloud and AI Development Act is being compared to U.S. frameworks like FOCI and FedRAMP, signaling heightened focus on cloud sovereignty that may affect vendor choices for Dutch firms relying on U.S. ...</description>
+      <content:encoded><![CDATA[<h1>AI Policy 2026-10-23</h1>
+<p><a href="https://dboeter.github.io/daily-diff/#2026-10-23">📅 Overview</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-23/ai-agents">🤖 AI Agents</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-23/ai-models">🧠 AI Models &amp; Labs</a> · <strong>⚖️ AI Policy</strong> · <a href="https://dboeter.github.io/daily-diff/#2026-10-23/ai-data">🗄️ Data Engineering</a></p>
+<blockquote>
+<p>Sources: Covington Inside Privacy + Politico Europe + Politico US | 3 new items ranked by <a href="https://typesafe.ai">Jev</a> relevance | Generated: 2026-10-22 23:49 UTC</p>
+</blockquote>
+<hr>
+<h2>Highlights</h2>
+<p>The European Commission&#39;s proposed Cloud and AI Development Act is being compared to U.S. frameworks like FOCI and FedRAMP, signaling heightened focus on cloud sovereignty that may affect vendor choices for Dutch firms relying on U.S. providers (<a href="https://www.insideprivacy.com/cloud-computing/a-comparison-of-the-eu-cloud-and-ai-development-act-requirementsagainst-the-u-s-foci-regime-and-fedramp/">Covington Inside Privacy</a>). In Brussels, the von der Leyen coalition is fracturing over AI liability rules, with the center-right pushing simplification to reduce burdens on European businesses (<a href="https://www.politico.eu/article/ursula-von-der-leyen-coalition-fractures-over-need-for-ai-liability-rules/?utm_source=RSS_Feed&utm_medium=RSS&utm_campaign=RSS_Syndication">Politico Europe</a>). Meanwhile, New Mexico&#39;s $25 billion judgment against Meta has prompted the state AG to warn this is &quot;just the beginning,&quot; encouraging more state-level enforcement actions that could cascade to the U.S. vendors your clients depend on (<a href="https://www.politico.com/news/2026/10/22/just-the-beginning-new-mexico-ag-warns-ai-industry-after-25b-meta-ruling-01133294">Politico US</a>).</p>
+<h2>News &amp; commentary</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Source</th>
+<th align="left">Title</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-10-22</td>
+<td align="left">Covington Inside Privacy</td>
+<td align="left"><a href="https://www.insideprivacy.com/cloud-computing/a-comparison-of-the-eu-cloud-and-ai-development-act-requirementsagainst-the-u-s-foci-regime-and-fedramp/">A Comparison of the EU Cloud and AI Development Act Requirements Against the U.S. FOCI Regime and FedRAMP</a></td>
+<td align="left">The article describes the European Commission’s Cloud and AI Development Act proposal as seeking to impose sovereignty requirements on cloud computing service providers procurable by the public sector. For organisations deploying AI, this suggests future public-sector cloud procurement may favour providers meeting EU sovereignty criteria, while the excerpt sets out no direct duties for private AI deployers.</td>
+</tr>
+<tr>
+<td align="left">2026-10-22</td>
+<td align="left">Politico Europe</td>
+<td align="left"><a href="https://www.politico.eu/article/ursula-von-der-leyen-coalition-fractures-over-need-for-ai-liability-rules/?utm_source=RSS_Feed&utm_medium=RSS&utm_campaign=RSS_Syndication">Von der Leyen’s coalition fractures over need for AI liability rules</a></td>
+<td align="left">Politico Europe reports that the European Parliament held a heated debate on AI amid a coalition fracture over AI liability rules, with the center-right advocating simplification to boost European business. Organisations deploying AI face uncertainty over whether new liability obligations will emerge or whether deregulatory simplification will prevail.</td>
+</tr>
+<tr>
+<td align="left">2026-10-22</td>
+<td align="left">Politico US</td>
+<td align="left"><a href="https://www.politico.com/news/2026/10/22/just-the-beginning-new-mexico-ag-warns-ai-industry-after-25b-meta-ruling-01133294">‘Just the beginning’: New Mexico AG warns AI industry after $25B Meta ruling</a></td>
+<td align="left">Politico US reports that New Mexico’s Attorney General warned the AI industry after a $25 billion Meta ruling, saying the judgment should encourage more states to take the tech industry to trial. Companies deploying AI should anticipate greater potential for state-level enforcement and litigation against AI-related technology in the United States.</td>
+</tr>
+</tbody></table>
+<h2>Coming up</h2>
+<p>Deadlines and dates in the next 30 days.</p>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Source</th>
+<th align="left">Item</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-11-09</td>
+<td align="left">Have your say</td>
+<td align="left"><a href="https://ec.europa.eu/info/law/better-regulation/have-your-say/initiatives/19292_en">Articles 75c – 75d AI Act Implementing Act</a></td>
+</tr>
+<tr>
+<td align="left">2026-11-11</td>
+<td align="left">Have your say</td>
+<td align="left"><a href="https://ec.europa.eu/info/law/better-regulation/have-your-say/initiatives/14628_en">Cloud and AI Development Act</a></td>
+</tr>
+</tbody></table>
+<hr>
+<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
+]]></content:encoded>
+    </item>
+    <item>
+      <title>AI Policy 2026-10-22</title>
+      <link>https://dboeter.github.io/daily-diff/#2026-10-22/ai-policy</link>
+      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-10-22/ai-policy</guid>
+      <pubDate>Thu, 22 Oct 2026 00:00:00 +0000</pubDate>
+      <description>Policy Watch 2026-10-22 📅 Overview · 🤖 AI Agents · 💬 AI Discussions · 📚 AI Research · 🌐 Lab Announcements · ⚖️ Policy Watch · 🗄️ Data Engineering Watch Sources: Politico Europe + Politico US | 3 new items ranked by Jev relevance | Generated: 2026-10-22 01:26 UTC Highlights The European Commission has opened feedback periods on two significant initiatives: the Articles 75c – 75d AI Act Implementing Act (deadline 9 November) and the Cloud and AI Development Act (deadline 11 November). Meanwh...</description>
+      <content:encoded><![CDATA[<h1>Policy Watch 2026-10-22</h1>
+<p><a href="https://dboeter.github.io/daily-diff/#2026-10-22">📅 Overview</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-22/ai-agents">🤖 AI Agents</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-22/ai-hn">💬 AI Discussions</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-22/ai-arxiv">📚 AI Research</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-22/ai-web">🌐 Lab Announcements</a> · <strong>⚖️ Policy Watch</strong> · <a href="https://dboeter.github.io/daily-diff/#2026-10-22/ai-data">🗄️ Data Engineering Watch</a></p>
+<blockquote>
+<p>Sources: Politico Europe + Politico US | 3 new items ranked by <a href="https://typesafe.ai">Jev</a> relevance | Generated: 2026-10-22 01:26 UTC</p>
+</blockquote>
+<hr>
+<h2>Highlights</h2>
+<p>The European Commission has opened feedback periods on two significant initiatives: the <a href="https://ec.europa.eu/info/law/better-regulation/have-your-say/initiatives/19292_en">Articles 75c – 75d AI Act Implementing Act</a> (deadline 9 November) and the <a href="https://ec.europa.eu/info/law/better-regulation/have-your-say/initiatives/14628_en">Cloud and AI Development Act</a> (deadline 11 November). Meanwhile, EU lawmakers are advancing new fronts — Socialists and Democrats are pushing for dedicated <a href="https://www.politico.eu/article/socialists-and-democrats-push-eu-law-deepfake/">deepfake legislation</a>, and publishers are pressing Brussels and London to challenge <a href="https://www.politico.eu/article/publishers-press-brussels-and-london-to-stop-metas-new-ai-terms/">Meta&#39;s new AI terms</a>. In the US, Anthropic has proposed a <a href="https://www.politico.com/news/2026/10/21/anthropic-bill-ai-risk-threshold-01128458">$1 billion threshold for AI risk regulation</a>, echoing California&#39;s approach.</p>
+<h2>Upcoming deadlines (next 30 days)</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Source</th>
+<th align="left">Item</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-11-09</td>
+<td align="left">Have your say</td>
+<td align="left"><a href="https://ec.europa.eu/info/law/better-regulation/have-your-say/initiatives/19292_en">Articles 75c – 75d AI Act Implementing Act</a></td>
+</tr>
+<tr>
+<td align="left">2026-11-11</td>
+<td align="left">Have your say</td>
+<td align="left"><a href="https://ec.europa.eu/info/law/better-regulation/have-your-say/initiatives/14628_en">Cloud and AI Development Act</a></td>
+</tr>
+</tbody></table>
+<h2>News &amp; commentary</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Source</th>
+<th align="left">Title</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-10-20</td>
+<td align="left">Politico Europe</td>
+<td align="left"><a href="https://www.politico.eu/article/socialists-and-democrats-push-eu-law-deepfake/?utm_source=RSS_Feed&utm_medium=RSS&utm_campaign=RSS_Syndication">Socialists push for EU law on deepfakes</a></td>
+<td align="left">Socialists are pushing for a new EU law on deepfakes to address ownership of AI-copied faces and voices. The legal answer remains unresolved, signalling potential future safeguards that could affect deployers of generative AI.</td>
+</tr>
+<tr>
+<td align="left">2026-10-21</td>
+<td align="left">Politico Europe</td>
+<td align="left"><a href="https://www.politico.eu/article/publishers-press-brussels-and-london-to-stop-metas-new-ai-terms/?utm_source=RSS_Feed&utm_medium=RSS&utm_campaign=RSS_Syndication">Publishers want Brussels and London to stop Meta’s new AI terms</a></td>
+<td align="left">Publishers are urging Brussels and London to halt Meta&#39;s new AI terms, with the European Commission stating Meta must comply with EU law and the UK competition watchdog summoning the company. This regulatory scrutiny of a major US vendor&#39;s terms may shape compliance expectations for organisations integrating such services.</td>
+</tr>
+<tr>
+<td align="left">2026-10-21</td>
+<td align="left">Politico US</td>
+<td align="left"><a href="https://www.politico.com/news/2026/10/21/anthropic-bill-ai-risk-threshold-01128458">Why Anthropic’s draft bill sets $1 billion threshold for AI risk</a></td>
+<td align="left">Anthropic has proposed a draft bill setting a $1 billion threshold for AI risk, mirroring a California law but repurposed to determine when government could block advanced models. The proposal signals a legislative approach linking financial scale to regulatory intervention that could influence US vendor governance.</td>
+</tr>
+</tbody></table>
+<h2>Signals</h2>
+<p>Policy is moving on three tracks relevant to Dutch deployers of US-built AI. First, the AI Act&#39;s implementing details are being finalised — Articles 75c–75d will shape obligations for general-purpose AI models, directly affecting vendor assessments and contractual protections. Second, the Cloud and AI Development Act signals a push to regulate cloud infrastructure and AI development environments, which could reshape data locality and vendor lock-in considerations for mid-sized firms. Third, the deepfake push and Meta terms dispute show rising regulatory appetite for controlling synthetic media and platform terms unilaterally imposed on downstream users. US developments like Anthropic&#39;s threshold proposal indicate a hardening transatlantic baseline: companies integrating frontier models should prepare for tiered obligations tied to compute or capital thresholds, not just use-case risk. For Dutch advisers, the immediate action is feeding deployment realities into the two open consultations before they close.</p>
+<h2>Worth a Look</h2>
+<ul>
+<li><strong><a href="https://ec.europa.eu/info/law/better-regulation/have-your-say/initiatives/19292_en">Articles 75c – 75d AI Act Implementing Act</a></strong> — Directly shapes GPAI obligations your clients inherit via US vendors; feedback window closes 9 November.</li>
+<li><strong><a href="https://ec.europa.eu/info/law/better-regulation/have-your-say/initiatives/14628_en">Cloud and AI Development Act</a></strong> — May redefine cloud provider responsibilities and data governance for AI workloads; consultation ends 11 November.</li>
+<li><strong><a href="https://www.politico.eu/article/publishers-press-brussels-and-london-to-stop-metas-new-ai-terms/">Publishers want Brussels and London to stop Meta&#39;s new AI terms</a></strong> — Illustrates how unilateral vendor term changes can trigger regulatory intervention, a pattern likely to repeat with other US foundation-model providers.</li>
+</ul>
+<hr>
+<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
+]]></content:encoded>
+    </item>
+    <item>
+      <title>AI Policy 2026-10-21</title>
+      <link>https://dboeter.github.io/daily-diff/#2026-10-21/ai-policy</link>
+      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-10-21/ai-policy</guid>
+      <pubDate>Wed, 21 Oct 2026 00:00:00 +0000</pubDate>
+      <description>Policy Watch 2026-10-21 📅 Overview · 🤖 AI Agents · 💬 AI Discussions · 📚 AI Research · 🌐 Lab Announcements · ⚖️ Policy Watch · 🗄️ Data Engineering Watch Sources: Covington Inside Privacy | 1 new items ranked by Jev relevance | Generated: 2026-10-21 01:27 UTC Highlights Two EU consultation deadlines fall within the next three weeks: the implementing act for AI Act Articles 75c–75d on 9 November and the Cloud and AI Development Act on 11 November. In the US, California has enacted new transpa...</description>
+      <content:encoded><![CDATA[<h1>Policy Watch 2026-10-21</h1>
+<p><a href="https://dboeter.github.io/daily-diff/#2026-10-21">📅 Overview</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-21/ai-agents">🤖 AI Agents</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-21/ai-hn">💬 AI Discussions</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-21/ai-arxiv">📚 AI Research</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-21/ai-web">🌐 Lab Announcements</a> · <strong>⚖️ Policy Watch</strong> · <a href="https://dboeter.github.io/daily-diff/#2026-10-21/ai-data">🗄️ Data Engineering Watch</a></p>
+<blockquote>
+<p>Sources: Covington Inside Privacy | 1 new items ranked by <a href="https://typesafe.ai">Jev</a> relevance | Generated: 2026-10-21 01:27 UTC</p>
+</blockquote>
+<hr>
+<h2>Highlights</h2>
+<p>Two EU consultation deadlines fall within the next three weeks: the implementing act for AI Act Articles 75c–75d on 9 November and the Cloud and AI Development Act on 11 November. In the US, California has enacted new transparency rules requiring disclosure of AI use in advertising and depictions of individuals, adding to the patchwork of state-level obligations that affect US vendors supplying the Dutch market.</p>
+<h2>Upcoming deadlines (next 30 days)</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Source</th>
+<th align="left">Item</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-11-09</td>
+<td align="left">Have your say</td>
+<td align="left"><a href="https://ec.europa.eu/info/law/better-regulation/have-your-say/initiatives/19292_en">Articles 75c – 75d AI Act Implementing Act</a></td>
+</tr>
+<tr>
+<td align="left">2026-11-11</td>
+<td align="left">Have your say</td>
+<td align="left"><a href="https://ec.europa.eu/info/law/better-regulation/have-your-say/initiatives/14628_en">Cloud and AI Development Act</a></td>
+</tr>
+</tbody></table>
+<h2>News &amp; commentary</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Source</th>
+<th align="left">Title</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-10-14</td>
+<td align="left">Covington Inside Privacy</td>
+<td align="left"><a href="https://www.insideprivacy.com/advertising-marketing/new-ai-transparency-requirements-enacted-for-advertisers-and-deployers/">New AI Transparency Requirements Enacted for Advertisers and Deployers</a></td>
+<td align="left">State legislatures have passed new AI transparency laws for advertisements, and California Governor Gavin Newsom signed SB 1050 requiring disclosures when advertisements prominently feature a synthetic performer. Organisations that deploy AI in ads must provide such disclosures for synthetic performers.</td>
+</tr>
+</tbody></table>
+<h2>Signals</h2>
+<p>EU policy is moving into the detailed implementation phase of the AI Act, with the Articles 75c–75d implementing act and the Cloud and AI Development Act both open for final stakeholder input. These instruments will shape governance requirements for general-purpose AI models and cloud infrastructure — both directly relevant to organisations that integrate US-built models hosted on hyperscaler platforms. Meanwhile, the new California transparency law signals that US vendors will face expanding disclosure duties at state level, which may flow through to deployers via contractual and compliance cascades. Dutch deployers should track whether the EU consultations produce alignment with existing GDPR and DSA obligations, and monitor US state law developments that could affect vendor roadmaps and liability allocations.</p>
+<h2>Worth a Look</h2>
+<ul>
+<li><a href="https://ec.europa.eu/info/law/better-regulation/have-your-say/initiatives/19292_en">Articles 75c – 75d AI Act Implementing Act</a> — Final chance to influence the implementing rules for general-purpose AI model obligations before the 9 November deadline.</li>
+<li><a href="https://ec.europa.eu/info/law/better-regulation/have-your-say/initiatives/14628_en">Cloud and AI Development Act</a> — Consultation on the regulatory framework for cloud and AI infrastructure that underpins most deployed systems; deadline 11 November.</li>
+<li><a href="https://www.insideprivacy.com/advertising-marketing/new-ai-transparency-requirements-enacted-for-advertisers-and-deployers/">New AI Transparency Requirements Enacted for Advertisers and Deployers</a> — Covington analysis of California’s new disclosure law, relevant for assessing US vendor compliance burdens that may affect Dutch deployers.</li>
+</ul>
+<hr>
+<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
+]]></content:encoded>
+    </item>
+    <item>
+      <title>AI Policy 2026-10-20</title>
+      <link>https://dboeter.github.io/daily-diff/#2026-10-20/ai-policy</link>
+      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-10-20/ai-policy</guid>
+      <pubDate>Tue, 20 Oct 2026 00:00:00 +0000</pubDate>
+      <description>Policy Watch 2026-10-20 📅 Overview · 🤖 AI Agents · 💬 AI Discussions · 📚 AI Research · 🌐 Lab Announcements · ⚖️ Policy Watch · 🗄️ Data Engineering Watch Sources: European Commission + Transformer | 2 new items ranked by Jev relevance | Generated: 2026-10-20 01:42 UTC Highlights The European Commission has published the first harmonised standard supporting the AI Act in the Official Journal, signalling a concrete step toward implementation. Upcoming consultation deadlines on 9 November (Arti...</description>
+      <content:encoded><![CDATA[<h1>Policy Watch 2026-10-20</h1>
+<p><a href="https://dboeter.github.io/daily-diff/#2026-10-20">📅 Overview</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-20/ai-agents">🤖 AI Agents</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-20/ai-hn">💬 AI Discussions</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-20/ai-arxiv">📚 AI Research</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-20/ai-web">🌐 Lab Announcements</a> · <strong>⚖️ Policy Watch</strong> · <a href="https://dboeter.github.io/daily-diff/#2026-10-20/ai-data">🗄️ Data Engineering Watch</a></p>
+<blockquote>
+<p>Sources: European Commission + Transformer | 2 new items ranked by <a href="https://typesafe.ai">Jev</a> relevance | Generated: 2026-10-20 01:42 UTC</p>
+</blockquote>
+<hr>
+<h2>Highlights</h2>
+<p>The European Commission has published the first harmonised standard supporting the AI Act in the Official Journal, signalling a concrete step toward implementation. Upcoming consultation deadlines on 9 November (Articles 75c‑75d AI Act Implementing Act) and 11 November (Cloud and AI Development Act) invite stakeholder input on key AI Act provisions. Meanwhile, a leaked US AI bill critiqued by Transformer suggests Anthropic’s safety‑first stance may be weakened, potentially affecting vendor offerings.</p>
+<h2>EU</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Source</th>
+<th align="left">Title</th>
+<th align="left">Stage</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-10-19</td>
+<td align="left">European Commission</td>
+<td align="left"><a href="https://digital-strategy.ec.europa.eu/en/library/first-harmonised-standard-supporting-ai-act-published-official-journal">First harmonised standard supporting the AI Act published in the Official Journal</a></td>
+<td align="left"></td>
+<td align="left">The European Commission published the reference to the first harmonised standard (EN 18286:2026) supporting the AI Act in the Official Journal. The standard provides a clear legal pathway for providers of high‑risk AI systems to comply with the quality‑management‑system requirements under Article 17 of the AI Act.</td>
+</tr>
+</tbody></table>
+<h2>Upcoming deadlines (next 30 days)</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Source</th>
+<th align="left">Item</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-11-09</td>
+<td align="left">Have your say</td>
+<td align="left"><a href="https://ec.europa.eu/info/law/better-regulation/have-your-say/initiatives/19292_en">Articles 75c – 75d AI Act Implementing Act</a></td>
+</tr>
+<tr>
+<td align="left">2026-11-11</td>
+<td align="left">Have your say</td>
+<td align="left"><a href="https://ec.europa.eu/info/law/better-regulation/have-your-say/initiatives/14628_en">Cloud and AI Development Act</a></td>
+</tr>
+</tbody></table>
+<h2>News &amp; commentary</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Source</th>
+<th align="left">Title</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-10-19</td>
+<td align="left">Transformer</td>
+<td align="left"><a href="https://www.transformernews.ai/p/anthropic-leaked-ai-bill-undermines-safety-first-approach">Anthropic’s weak AI bill undermines its ‘safety first’ approach</a></td>
+<td align="left">The leaked draft bill is weaker than the FRONTIER Act. This makes Anthropic’s safety‑first pitch ring hollow.</td>
+</tr>
+</tbody></table>
+<h2>Signals</h2>
+<p>The publication of a harmonised standard indicates that the EU is moving from framework to technical detail, helping organisations align their AI systems with the AI Act’s requirements for conformity assessment. The two “Have your say” consultations target specific implementing provisions—Articles 75c‑75d likely concerning high‑risk AI obligations, and the Cloud and AI Development Act addressing AI deployment in cloud environments—showing where the Commission seeks clarification before finalising rules. For Dutch practitioners integrating US‑built AI, the critique of a weaker US AI bill highlights that vendor‑side compliance expectations may shift, underscoring the need to monitor both EU standards and US legislative developments to anticipate changes in model documentation, risk management, and contractual clauses.</p>
+<h2>Worth a Look</h2>
+<ul>
+<li><a href="https://digital-strategy.ec.europa.eu/en/library/first-harmonised-standard-supporting-ai-act-published-official-journal">First harmonised standard supporting the AI Act published in the Official Journal</a> – provides the technical benchmark against which AI systems will be assessed for conformity.  </li>
+<li><a href="https://ec.europa.eu/info/law/better-regulation/have-your-say/initiatives/19292_en">Articles 75c – 75d AI Act Implementing Act</a> – consultation on detailed rules for high‑risk AI that will affect compliance timelines and documentation.  </li>
+<li><a href="https://ec.europa.eu/info/law/better-regulation/have-your-say/initiatives/14628_en">Cloud and AI Development Act</a> – seeks input on governance of AI services delivered via cloud, relevant for organisations using US‑hosted models.</li>
+</ul>
+<hr>
+<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
+]]></content:encoded>
+    </item>
+    <item>
+      <title>AI Policy 2026-10-18</title>
+      <link>https://dboeter.github.io/daily-diff/#2026-10-18/ai-policy</link>
+      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-10-18/ai-policy</guid>
+      <pubDate>Sun, 18 Oct 2026 00:00:00 +0000</pubDate>
+      <description>Policy Watch 2026-10-18 📅 Overview · 🤖 AI Agents · 💬 AI Discussions · 🌐 Lab Announcements · ⚖️ Policy Watch Sources: Politico US | 1 new items ranked by Jev relevance | Generated: 2026-10-18 00:52 UTC Highlights Today’s table shows two open EU consultations — on the AI Act implementing provisions (Articles 75c‑75d) closing 9 Nov and on the Cloud and AI Development Act closing 11 Nov — plus a US news item where Anthropic has shared a draft AI safety bill that would curb federal blocking of ad...</description>
+      <content:encoded><![CDATA[<h1>Policy Watch 2026-10-18</h1>
+<p><a href="https://dboeter.github.io/daily-diff/#2026-10-18">📅 Overview</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-18/ai-agents">🤖 AI Agents</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-18/ai-hn">💬 AI Discussions</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-18/ai-web">🌐 Lab Announcements</a> · <strong>⚖️ Policy Watch</strong></p>
+<blockquote>
+<p>Sources: Politico US | 1 new items ranked by <a href="https://typesafe.ai">Jev</a> relevance | Generated: 2026-10-18 00:52 UTC</p>
+</blockquote>
+<hr>
+<h2>Highlights</h2>
+<p>Today’s table shows two open EU consultations — on the AI Act implementing provisions (Articles 75c‑75d) closing 9 Nov and on the Cloud and AI Development Act closing 11 Nov — plus a US news item where Anthropic has shared a draft AI safety bill that would curb federal blocking of advanced models and pre‑empt certain state AI safety laws. These items indicate imminent regulatory deadlines for EU rule‑making and an emerging US federal approach to AI safety.</p>
+<h2>Upcoming deadlines (next 30 days)</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Source</th>
+<th align="left">Item</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-11-09</td>
+<td align="left">Have your say</td>
+<td align="left"><a href="https://ec.europa.eu/info/law/better-regulation/have-your-say/initiatives/19292_en">Articles 75c – 75d AI Act Implementing Act</a></td>
+</tr>
+<tr>
+<td align="left">2026-11-11</td>
+<td align="left">Have your say</td>
+<td align="left"><a href="https://ec.europa.eu/info/law/better-regulation/have-your-say/initiatives/14628_en">Cloud and AI Development Act</a></td>
+</tr>
+</tbody></table>
+<h2>News &amp; commentary</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Source</th>
+<th align="left">Title</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-10-16</td>
+<td align="left">Politico US</td>
+<td align="left"><a href="https://www.politico.com/news/2026/10/16/anthropic-ai-safety-01124654">Anthropic quietly pitches its own AI safety bill to lawmakers</a></td>
+<td align="left">Anthropic quietly pitched its own AI safety bill to lawmakers. For organisations that deploy AI, this would limit the circumstances in which the government could block the release of an advanced model and preempt some state AI safety laws.</td>
+</tr>
+</tbody></table>
+<h2>Signals</h2>
+<p>The EU is seeking stakeholder input on two fronts: the implementing act for Articles 75c‑75d of the AI Act, which will detail conformity‑assessment and post‑market‑monitoring rules for high‑risk systems, and the Cloud and AI Development Act, which aims to harmonise cloud‑service obligations and AI‑specific requirements across the internal market. Both consultations close in early November, giving Dutch‑based deployers a narrow window to shape requirements that will affect how they integrate US‑sourced AI models into retail, insurance and banking workflows. Simultaneously, Anthropic’s draft US AI safety bill signals a push to limit federal authority to halt advanced model releases and to pre‑empt divergent state safety regimes; if adopted, it could simplify cross‑border vendor compliance but may also reduce oversight of high‑impact models. Together, these developments suggest a tightening of EU‑level AI governance while the US moves toward a more permissive, federally‑led safety framework, requiring Dutch firms to monitor both regimes when procuring and deploying third‑party AI.  </p>
+<h2>Worth a Look</h2>
+<ul>
+<li><a href="https://ec.europa.eu/info/law/better-regulation/have-your-say/initiatives/19292_en">Articles 75c – 75d AI Act Implementing Act</a> – open consultation shaping conformity‑assessment and post‑market‑monitoring rules for high‑risk AI.  </li>
+<li><a href="https://ec.europa.eu/info/law/better-regulation/have-your-say/initiatives/14628_en">Cloud and AI Development Act</a> – consultation on harmonising cloud‑service obligations and AI‑specific requirements across the internal market.  </li>
+<li><a href="https://www.politico.com/news/2026/10/16/anthropic-ai-safety-01124654">Anthropic quietly pitches its own AI safety bill to lawmakers</a> – draft bill proposing limits on federal authority to block advanced models and pre‑empting state AI safety laws.</li>
+</ul>
+<hr>
+<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
+]]></content:encoded>
+    </item>
+    <item>
+      <title>AI Policy 2026-10-16</title>
+      <link>https://dboeter.github.io/daily-diff/#2026-10-16/ai-policy</link>
+      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-10-16/ai-policy</guid>
+      <pubDate>Fri, 16 Oct 2026 00:00:00 +0000</pubDate>
+      <description>Policy Watch 2026-10-16 📅 Overview · 🤖 AI Agents · 💬 AI Discussions · 📚 AI Research · 🌐 Lab Announcements · ⚖️ Policy Watch Sources: Tweede Kamer + Politico Europe | 2 new items ranked by Jev relevance | Generated: 2026-10-16 08:53 UTC Highlights The Dutch Tweede Kamer issued a government letter on the risks and regulation of unmanned systems and AI. Two European Commission “Have your say” consultations are open until early November 2026: one on Articles 75c‑75d of the AI Act Implementing A...</description>
+      <content:encoded><![CDATA[<h1>Policy Watch 2026-10-16</h1>
+<p><a href="https://dboeter.github.io/daily-diff/#2026-10-16">📅 Overview</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-16/ai-agents">🤖 AI Agents</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-16/ai-hn">💬 AI Discussions</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-16/ai-arxiv">📚 AI Research</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-16/ai-web">🌐 Lab Announcements</a> · <strong>⚖️ Policy Watch</strong></p>
+<blockquote>
+<p>Sources: Tweede Kamer + Politico Europe | 2 new items ranked by <a href="https://typesafe.ai">Jev</a> relevance | Generated: 2026-10-16 08:53 UTC</p>
+</blockquote>
+<hr>
+<h2>Highlights</h2>
+<p>The Dutch Tweede Kamer issued a government letter on the risks and regulation of unmanned systems and AI. Two European Commission “Have your say” consultations are open until early November 2026: one on Articles 75c‑75d of the AI Act Implementing Act and another on the Cloud and AI Development Act. Politico Europe notes that the EU faces Big‑Tech pressure to revamp its AI law, while Commission officials assert the 2023 AI Act remains adequate for newer models.</p>
+<h2>Netherlands</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Source</th>
+<th align="left">Title</th>
+<th align="left">Stage</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-10-15</td>
+<td align="left">Tweede Kamer</td>
+<td align="left"><a href="https://www.tweedekamer.nl/kamerstukken/detail?id=2026Z22439&did=2026D51606">Risico&#39;s en regulering van onbemenste systemen en AI</a></td>
+<td align="left"></td>
+<td align="left">Risico&#39;s en regulering van onbemenste systemen en AI (Tweede Kamer, 2026-10-15) — Government letter</td>
+</tr>
+</tbody></table>
+<h2>Upcoming deadlines (next 30 days)</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Source</th>
+<th align="left">Item</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-11-09</td>
+<td align="left">Have your say</td>
+<td align="left"><a href="https://ec.europa.eu/info/law/better-regulation/have-your-say/initiatives/19292_en">Articles 75c – 75d AI Act Implementing Act</a></td>
+</tr>
+<tr>
+<td align="left">2026-11-11</td>
+<td align="left">Have your say</td>
+<td align="left"><a href="https://ec.europa.eu/info/law/better-regulation/have-your-say/initiatives/14628_en">Cloud and AI Development Act</a></td>
+</tr>
+</tbody></table>
+<h2>News &amp; commentary</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Source</th>
+<th align="left">Title</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-10-15</td>
+<td align="left">Politico Europe</td>
+<td align="left"><a href="https://www.politico.eu/article/ai-eu-pressure-law-microsoft-brad-smith-google-deepmind-tech/?utm_source=RSS_Feed&utm_medium=RSS&utm_campaign=RSS_Syndication">The EU is facing Big Tech pressure to revamp its AI law</a></td>
+<td align="left">The EU is facing Big Tech pressure to revamp its AI law. European Commission officials insist the 2023 law is strong enough to handle the security risks of the newest AI models.</td>
+</tr>
+</tbody></table>
+<h2>Signals</h2>
+<p>Policy is moving toward concrete implementation steps and national guidance. The upcoming consultations on the AI Act Implementing Act (Articles 75c‑75d) and the Cloud and AI Development Act will shape detailed rules that directly affect how organisations deploy and integrate AI systems, especially those relying on cloud‑based services from US vendors. Simultaneously, the Dutch government letter on unmanned systems and AI signals forthcoming national clarification that may impact sectors using autonomous technologies (e.g., logistics, surveillance). Although the Commission downplays the need for legislative change despite Big‑Tech lobbying, the pressure highlights uncertainty; firms should monitor the consultation outcomes for any adjustments to risk‑management requirements, conformity‑assessment procedures, or cloud‑service obligations that could affect compliance timelines and operational costs.  </p>
+<h2>Worth a Look</h2>
+<ul>
+<li><a href="https://www.tweedekamer.nl/kamerstukken/detail?id=2026Z22439&did=2026D51606">Risico&#39;s en regulering van onbemenste systemen en AI</a> – the Dutch government letter provides early insight into national expectations for unmanned‑system AI.  </li>
+<li><a href="https://ec.europa.eu/info/law/better-regulation/have-your-say/initiatives/19292_en">Articles 75c – 75d AI Act Implementing Act</a> – consultation deadline 2026‑11‑09; defines forthcoming implementation details of the AI Act.  </li>
+<li><a href="https://ec.europa.eu/info/law/better-regulation/have-your-say/initiatives/14628_en">Cloud and AI Development Act</a> – consultation deadline 2026‑11‑11; will set rules for AI development in cloud environments, relevant to US‑vendor deployments.</li>
+</ul>
+<hr>
+<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
+]]></content:encoded>
+    </item>
+    <item>
+      <title>AI Policy 2026-10-15</title>
+      <link>https://dboeter.github.io/daily-diff/#2026-10-15/ai-policy</link>
+      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-10-15/ai-policy</guid>
+      <pubDate>Thu, 15 Oct 2026 00:00:00 +0000</pubDate>
+      <description>Policy Watch 2026-10-15 📅 Overview · 🤖 AI Agents · 💬 AI Discussions · 📚 AI Research · 🌐 Lab Announcements · ⚖️ Policy Watch Sources: EDPB + EUR-Lex + Have your say + Digitale Overheid + Tweede Kamer + Autoriteit Persoonsgegevens + Politico US + Binnenlands Bestuur + Transformer + Politico Europe | 14 new items ranked by Jev relevance | Generated: 2026-10-15 01:23 UTC Highlights The Dutch DPA&amp;#39;s €824.99 million fine against Uber for unlawful automated decision-making and insufficient prof...</description>
+      <content:encoded><![CDATA[<h1>Policy Watch 2026-10-15</h1>
+<p><a href="https://dboeter.github.io/daily-diff/#2026-10-15">📅 Overview</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-15/ai-agents">🤖 AI Agents</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-15/ai-hn">💬 AI Discussions</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-15/ai-arxiv">📚 AI Research</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-15/ai-web">🌐 Lab Announcements</a> · <strong>⚖️ Policy Watch</strong></p>
+<blockquote>
+<p>Sources: EDPB + EUR-Lex + Have your say + Digitale Overheid + Tweede Kamer + Autoriteit Persoonsgegevens + Politico US + Binnenlands Bestuur + Transformer + Politico Europe | 14 new items ranked by <a href="https://typesafe.ai">Jev</a> relevance | Generated: 2026-10-15 01:23 UTC</p>
+</blockquote>
+<hr>
+<h2>Highlights</h2>
+<p>The Dutch DPA&#39;s €824.99 million fine against Uber for unlawful automated decision-making and insufficient profiling information under GDPR Article 22 signals aggressive enforcement of automated processing rules that directly affect deployers of US-built AI systems. The Commission&#39;s adoption of harmonised standards for high-risk AI systems under Implementing Decision (EU) 2026/2274 provides the technical benchmark for AI Act compliance, while the Dutch government&#39;s new guidance on AI additions in software updates gives practical procurement and functional management criteria. The AP&#39;s launch of a dedicated AI supervision directorate — though Binnenlands Bestuur notes it still lacks formal competence — and two open consultations on the AI Act Implementing Act (Articles 75c–75d) and the Cloud and AI Development Act (deadlines 9 and 11 November) indicate the regulatory perimeter is still being drawn.</p>
+<h2>EU</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Source</th>
+<th align="left">Title</th>
+<th align="left">Stage</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-10-08</td>
+<td align="left">EDPB</td>
+<td align="left"><a href="https://www.edpb.europa.eu/news/dutch-dpa-fines-uber-eur-824-990-000-for-unlawful-automated-decision-making-and-insufficient_en">Dutch DPA fines Uber EUR 824 990 000 for unlawful automated decision-making and insufficient information on profiling</a></td>
+<td align="left"></td>
+<td align="left">The Dutch DPA fined Uber €824,990,000 for unlawful fully automated decision-making about drivers and insufficient profiling information under GDPR Articles 22 and 13. Organisations deploying automated decision-making must ensure legal basis, transparency, and compliance with GDPR profiling rules.</td>
+</tr>
+<tr>
+<td align="left">2026-10-12</td>
+<td align="left">EUR-Lex</td>
+<td align="left"><a href="https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32026D2274">Commission Implementing Decision (EU) 2026/2274 of 12 October 2026 on the harmonised standards for high-risk AI systems drafted in support of Regulation (EU) 2024/1689 of the European Parliament and o…</a></td>
+<td align="left">Decision adopted</td>
+<td align="left">The European Commission adopted an implementing decision on harmonised standards for high-risk AI systems under the AI Act. This provides technical specifications that organisations can use to demonstrate conformity for high-risk AI deployments.</td>
+</tr>
+<tr>
+<td align="left">2026-07-02</td>
+<td align="left">Have your say</td>
+<td align="left"><a href="https://ec.europa.eu/info/law/better-regulation/have-your-say/initiatives/14628_en">Cloud and AI Development Act</a></td>
+<td align="left">Adopted by the Commission</td>
+<td align="left">The European Commission adopted the Cloud and AI Development Act initiative. This signals an upcoming regulatory framework for cloud and AI development in the EU.</td>
+</tr>
+<tr>
+<td align="left">2026-10-12</td>
+<td align="left">Have your say</td>
+<td align="left"><a href="https://ec.europa.eu/info/law/better-regulation/have-your-say/initiatives/19292_en">Articles 75c – 75d AI Act Implementing Act</a></td>
+<td align="left">Draft act</td>
+<td align="left">The European Commission published a draft implementing act for Articles 75c–75d of the AI Act. Organisations should monitor this draft as it will detail operational requirements for high-risk AI systems.</td>
+</tr>
+</tbody></table>
+<h2>Netherlands</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Source</th>
+<th align="left">Title</th>
+<th align="left">Stage</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-10-13</td>
+<td align="left">Digitale Overheid</td>
+<td align="left"><a href="https://www.digitaleoverheid.nl/nieuws/handreiking-helpt-bij-ai-toevoegingen-in-software/">Handreiking helpt bij AI-toevoegingen in software</a></td>
+<td align="left"></td>
+<td align="left">The Dutch government published guidance helping purchasers and functional managers assess risks of AI additions in software updates and make agreements. Organisations procuring software with integrated AI features should use this guidance to manage vendor updates responsibly.</td>
+</tr>
+<tr>
+<td align="left">2026-10-13</td>
+<td align="left">Tweede Kamer</td>
+<td align="left"><a href="https://www.tweedekamer.nl/kamerstukken/detail?id=2026Z22040&did=2026D50762">Publieke AI-voorziening funderend onderwijs</a></td>
+<td align="left"></td>
+<td align="left">The Dutch Tweede Kamer released a government letter on a public AI facility for fundamental education. This indicates public sector investment in AI infrastructure for education that may affect sector-specific deployments.</td>
+</tr>
+<tr>
+<td align="left">2026-10-09</td>
+<td align="left">Autoriteit Persoonsgegevens</td>
+<td align="left"><a href="https://autoriteitpersoonsgegevens.nl/actueel/ap-zet-volgende-stap-in-toezicht-op-ai">AP zet volgende stap in toezicht op AI</a></td>
+<td align="left"></td>
+<td align="left">The Dutch AP established a new Directorate for AI/Algorithm Supervision (TCA) to coordinate AI oversight, prepare market surveillance, and develop an AI sandbox with the RDI. Organisations can expect more structured and proactive AI supervision from the Dutch regulator.</td>
+</tr>
+<tr>
+<td align="left">2026-09-22</td>
+<td align="left">Tweede Kamer</td>
+<td align="left"><a href="https://www.tweedekamer.nl/kamerstukken/wetsvoorstellen/detail?cfg=wetsvoorsteldetails&qry=wetsvoorstel%3A36875">Uitvoeringswet verordening cyberweerbaarheid</a></td>
+<td align="left">In the Eerste Kamer</td>
+<td align="left">The Dutch parliament is processing the implementation act for the EU Cyber Resilience Act, which sets horizontal cybersecurity requirements for products with digital elements. Organisations deploying AI-enabled products must align with upcoming cybersecurity obligations for digital products.</td>
+</tr>
+</tbody></table>
+<h2>Upcoming deadlines (next 30 days)</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Source</th>
+<th align="left">Item</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-11-09</td>
+<td align="left">Have your say</td>
+<td align="left"><a href="https://ec.europa.eu/info/law/better-regulation/have-your-say/initiatives/19292_en">Articles 75c – 75d AI Act Implementing Act</a></td>
+</tr>
+<tr>
+<td align="left">2026-11-11</td>
+<td align="left">Have your say</td>
+<td align="left"><a href="https://ec.europa.eu/info/law/better-regulation/have-your-say/initiatives/14628_en">Cloud and AI Development Act</a></td>
+</tr>
+</tbody></table>
+<h2>News &amp; commentary</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Source</th>
+<th align="left">Title</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-10-08</td>
+<td align="left">Politico US</td>
+<td align="left"><a href="https://www.politico.com/news/2026/10/08/ai-safety-framework-floated-by-democratic-duo-01112981">AI safety framework floated by Democratic duo</a></td>
+<td align="left">US Democratic representatives proposed a bill setting minimum safety standards for AI labs, clarifying liability, and granting government emergency shutdown authority. While US legislation, it may influence global AI safety expectations and vendor practices.</td>
+</tr>
+<tr>
+<td align="left">2026-10-13</td>
+<td align="left">Binnenlands Bestuur</td>
+<td align="left"><a href="https://www.binnenlandsbestuur.nl/digitaal/handreiking-voor-software-updates-met-ai-toevoegingen">Handreiking voor software-updates met AI-toevoegingen</a></td>
+<td align="left">Dutch guidance addresses how government organisations can responsibly handle AI functionalities added to already procured software. Public sector buyers and their suppliers should apply this practical framework for AI-enhanced software updates.</td>
+</tr>
+<tr>
+<td align="left">2026-10-13</td>
+<td align="left">Politico US</td>
+<td align="left"><a href="https://www.politico.com/news/2026/10/13/kupor-super-intelligence-task-force-ai-safety-01116286">Kupor: ‘Super Intelligence’ task force will press companies on AI safety</a></td>
+<td align="left">The White House &#39;Super Intelligence&#39; task force will coordinate with law enforcement, assess AI risks, and pressure companies to meet safety commitments. AI vendors and deployers may face increased US federal scrutiny on safety adherence.</td>
+</tr>
+<tr>
+<td align="left">2026-10-12</td>
+<td align="left">Binnenlands Bestuur</td>
+<td align="left"><a href="https://www.binnenlandsbestuur.nl/digitaal/ap-richt-directie-voor-ai-toezicht-op">AP richt directie voor AI-toezicht op, maar er is nog altijd geen bevoegdheid</a></td>
+<td align="left">The Dutch AP created a dedicated AI supervision directorate but currently lacks formal enforcement powers under the AI Act. Organisations should prepare for future enforcement while noting the regulator is building capacity.</td>
+</tr>
+<tr>
+<td align="left">2026-10-09</td>
+<td align="left">Transformer</td>
+<td align="left"><a href="https://www.transformernews.ai/p/democrats-prepare-to-battle-over-ai-regulation">Democrats prepare to battle over AI regulation</a></td>
+<td align="left">US political sources report intensifying Democratic efforts on AI regulation, referencing OpenAI safety staff departures, White House task force leadership, and &#39;kill switch&#39; proposals. This signals a volatile US policy environment affecting global AI governance norms.</td>
+</tr>
+<tr>
+<td align="left">2026-10-13</td>
+<td align="left">Politico Europe</td>
+<td align="left"><a href="https://www.politico.eu/article/europe-ai-strategy-frontier-models-us-china/?utm_source=RSS_Feed&utm_medium=RSS&utm_campaign=RSS_Syndication">Europe’s leaders abandon the race for frontier AI</a></td>
+<td align="left">European leaders are shifting strategy from competing on frontier model development to focusing on practical deployment of existing AI. Organisations should prioritise effective integration and application of available AI technologies over pursuing cutting-edge model ownership.</td>
+</tr>
+</tbody></table>
+<h2>Signals</h2>
+<p>Enforcement is shifting from abstract principles to concrete technical requirements: the Uber decision shows that &quot;deployer&quot; responsibility for Art. 22 GDPR compliance cannot be outsourced to US model providers, and the newly published harmonised standards translate the AI Act&#39;s essential requirements into auditable specifications. For organisations integrating third-party AI, the Dutch guidance on software updates with embedded AI functions effectively extends due-diligence obligations to every patch cycle — a operational burden for companies managing hundreds of vendor dependencies. The AP&#39;s new directorate, even without full legal powers, will likely coordinate market surveillance with other Dutch regulators (AFM, DNB, ACM) and set the tone for national implementation. Meanwhile, the two November consultation deadlines offer a narrowing window to influence the implementing acts that will define post-market monitoring, market surveillance fees, and cloud-service obligations — all of which will cascade into vendor contracts and internal governance frameworks.</p>
+<h2>Worth a Look</h2>
+<ul>
+<li><strong>Commission Implementing Decision (EU) 2026/2274 on harmonised standards for high-risk AI systems</strong> — The definitive technical reference for AI Act conformity assessment; your compliance roadmap and vendor questionnaires should align with these standards.</li>
+<li><strong>Dutch DPA fines Uber EUR 824.99 million (EDPB summary)</strong> — Read the EDPB&#39;s cross-border case analysis to understand how Art. 22 GDPR is being interpreted against large-scale automated decision-making; directly applicable to any profiling or automated scoring you deploy.</li>
+<li><strong>Digitale Overheid handreiking on AI-toevoegingen in software</strong> — Practical procurement and functional-management checklist for software updates that embed AI; use it to audit your current vendor change-management processes.</li>
+</ul>
+<hr>
+<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
+]]></content:encoded>
+    </item>
+  </channel>
+</rss>
