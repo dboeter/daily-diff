@@ -126,7 +126,7 @@ The `agents` section of `config.yml`, in one daily report. Issue and PR churn is
 
 Agents with none of these are listed in one "Quiet today" line; an agent whose releases could not be fetched goes in an "Unavailable today" line instead.
 
-**Spotted**: the community stories that named no tracked project get a topic from [Jev](https://typesafe.ai) (agents, models, research, data, policy, other). The agents stories end the agents report in a table, the models stories AI Models & Labs, the data stories the data report, at most 6 from Hacker News and 2 each from Lobste.rs and Dev.to per page. A story is shown once: `digests/spotted-log.json` records what a page showed.
+**Spotted**: the community stories that named no tracked project get a topic from [Jev](https://typesafe.ai) (agents, models, research, data, policy, other). The agents stories end the agents report in a table, the models stories AI Models & Labs, the data stories the data report, at most 6 from Hacker News and 2 each from Lobste.rs and Dev.to per page. A story is shown once, also when another source links the same article: `digests/spotted-log.json` records what a page showed.
 
 The report tracks the repos below and no others: trending repos are not added automatically.
 
@@ -236,11 +236,11 @@ OpenRouter, npm and the new-repo search feed an **Agent & Coding Tool Radar** ta
 
 The LLM writes a two-sentence summary for each row. The tables open the weekly Trends page under Agents & coding tools, followed by a Claude Code Skills section: [anthropics/skills](https://github.com/anthropics/skills) PRs and issues, fetched without a date filter and sorted by popularity.
 
-The daily trending list and the top 15 repos per topic are still fetched every day, for the agents report's news matching.
+The GitHub Trending page is still fetched every day: a tracked project's own repo on it counts as that project's news.
 
-### Discussions: Hacker News, Dev.to, Lobste.rs
+### Community stories: Hacker News, Dev.to, Lobste.rs
 
-Top AI and data stories, fetched from the official [Firebase API](https://github.com/HackerNews/API). The top 500 stories are scanned in batches of 50 and filtered for AI and data keywords until 40 stories no page has shown are found. The top stories are passed to the LLM for analysis. The same report adds the top Dev.to articles and Lobste.rs stories of the last 2 days (a separate weekly community report until October 2026).
+Top AI and data stories, fetched from the official [Firebase API](https://github.com/HackerNews/API). The top 500 stories are scanned in batches of 50 and filtered for AI and data keywords until 40 stories no page has shown are found. With the top Dev.to articles and Lobste.rs stories of the last 2 days, a story that names a tracked project is that project's news; the others go to a page's Spotted section by topic. The week's most-commented stories that no daily page showed make the Trends page's Most discussed.
 
 ### Official web content (sitemap-based)
 
@@ -476,7 +476,7 @@ Sources: GitHub Trending + GitHub Search API + OpenRouter + npm + Hugging Face +
   ### OpenRouter usage       — top models by tokens
   ### Hugging Face trending  — at most 15 models
 ## Research                  — the week's 10 most relevant arXiv papers
-## Most discussed            — the week's most commented HN, Lobste.rs and Dev.to stories
+## Most discussed            — the week's most commented HN, Lobste.rs and Dev.to stories no daily page showed
 ## Signals                   — patterns across the week's tables
 (a section with nothing in it is left out)
 ```

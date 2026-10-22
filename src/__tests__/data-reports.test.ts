@@ -379,11 +379,9 @@ describe("buildModelsPage", () => {
     lastmod: `2026-10-${String(10 + (i % 12)).padStart(2, "0")}`,
     content: site === "anthropic" ? `Body ${i}.` : "",
     site,
-    category: "news",
   });
   const site = (newItems: WebPageItem[], extra: Partial<WebFetchResult> = {}): WebFetchResult => ({
     site: "anthropic",
-    siteName: "Anthropic (Claude)",
     isFirstRun: false,
     newItems,
     totalDiscovered: 400,
@@ -476,6 +474,22 @@ describe("buildModelsPage", () => {
     );
     expect(report?.content).not.toContain("| Date | Lab |");
     expect(generateBody).toHaveBeenCalledTimes(1);
+  });
+
+  it("lists the other lab's posts when one site is on its first crawl", async () => {
+    stub();
+    const report = await build(
+      [
+        site([post(1), post(2)], { isFirstRun: true }),
+        site([post(3, "openai")], { site: "openai", totalDiscovered: 50 }),
+      ],
+      catalog(),
+    );
+    const content = report!.content;
+    expect(content).toContain("| Date | Lab |");
+    expect(content.split("\n").filter((l) => /^\| 2026-/.test(l))).toHaveLength(1);
+    expect(content).toContain("First crawl: 400 posts recorded; new posts are listed from the next run.");
+    expect(content).not.toContain("No new posts today.");
   });
 
   it("is skipped without an LLM call when nothing is new, and still saves the web state", async () => {

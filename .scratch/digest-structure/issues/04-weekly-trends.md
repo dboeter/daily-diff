@@ -54,3 +54,7 @@ Every daily run, after the arXiv ranking, writes `digests/research-state.json`: 
 ## Docs
 
 AGENTS.md: Architecture, the file table, Report outputs (`ai-trends.md`; the three retired files into the archive-only line), the Trending, ArXiv, Models and Dev.to/Lobste.rs bullets, Key conventions' weekly paragraph. README's report list. GLOSSARY.md if it names the weekly reports.
+
+## Comments
+
+- Most discussed skips stories a daily page showed, today's pages included, by id or link (spec rule 2).

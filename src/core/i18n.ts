@@ -239,26 +239,23 @@ export const FOOTER = {
 
 export const REPORT_LABELS: Record<string, string> = {
   ...Object.fromEntries(LIVE_REPORT_IDS.map((id) => [id, REPORTS[id].name])),
-  // Weekly until October 2026, then folded into ai-agents. The older files
-  // cover inference engines, hence the label.
-  "ai-infra": "AI Infrastructure Digest",
-  // Weekly until October 2026, then folded into the discussions report (ai-hn).
-  "ai-community": "Tech Community AI Digest",
-  // Daily until October 2026: Hacker News, Dev.to and Lobste.rs stories moved
-  // to each page's Spotted section, the lab posts to ai-models.
+  // No longer generated: listed so archived reports stay reachable from the
+  // sidebar and RSS feed (REPORT_FILES) with a title. October 2026: ai-hn
+  // (the daily Hacker News, Dev.to and Lobste.rs stories) moved to each page's
+  // Spotted section and ai-web to ai-models; ai-trending, ai-hf and ai-arxiv
+  // became sections of the weekly Trends page; ai-infra (weekly, its older
+  // files cover inference engines, hence the label) and ai-cli were folded into
+  // ai-agents, ai-community into ai-hn, and ai-ph dropped. The weekly and
+  // monthly rollups were removed earlier.
   "ai-hn": "AI Discussions",
   "ai-web": "Lab Announcements",
-  // Retired in October 2026: trending, the weekly models report and arXiv
-  // research became sections of the weekly Trends page (ai-trends).
   "ai-trending": "Agent & AI Coding Trends",
   "ai-hf": "AI Models",
   "ai-arxiv": "AI Research",
-  // No longer generated (October 2026: ai-cli merged into ai-agents, ai-ph
-  // dropped); kept so archived reports keep a title.
+  "ai-infra": "AI Infrastructure Digest",
+  "ai-community": "Tech Community AI Digest",
   "ai-cli": "AI CLI Tools Digest",
   "ai-ph": "Product Hunt AI Products Digest",
-  // Weekly/monthly rollups are no longer generated; kept so archived reports
-  // still render a proper title in the sidebar and RSS feed.
   "ai-weekly": "AI Tools Weekly Digest",
   "ai-monthly": "AI Tools Monthly Digest",
 };

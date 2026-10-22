@@ -14,9 +14,6 @@ export interface DevtoArticle {
   publishedAt: string;
   positiveReactionsCount: number;
   commentsCount: number;
-  readingTimeMinutes: number;
-  tags: string[];
-  user: string;
 }
 
 export interface DevtoData {
@@ -51,9 +48,6 @@ export interface DevtoApiArticle {
   published_at: string;
   positive_reactions_count: number;
   comments_count: number;
-  reading_time_minutes: number;
-  tag_list: string[];
-  user: { name: string };
 }
 
 export function toDevtoArticle(a: DevtoApiArticle): DevtoArticle {
@@ -65,9 +59,6 @@ export function toDevtoArticle(a: DevtoApiArticle): DevtoArticle {
     publishedAt: a.published_at,
     positiveReactionsCount: a.positive_reactions_count,
     commentsCount: a.comments_count,
-    readingTimeMinutes: a.reading_time_minutes,
-    tags: a.tag_list,
-    user: a.user.name,
   };
 }
 

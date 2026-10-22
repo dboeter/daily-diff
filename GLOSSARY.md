@@ -64,7 +64,7 @@ The dated items of the next 30 days: AI Policy's deadlines and calendar dates, t
 ### Tracking
 
 **Tracked Project**:
-One named entry on the Agents or Infra list (the two sections of the Agents report), followed for its releases, hot issues and news whether or not its repo has any.
+One named entry on a repo list in `config.yml` (Agents and Infra on the AI Agents page; Databricks, Snowflake and the open-source stack on Data Engineering), followed for its releases, hot issues and news whether or not its repo has any.
 _Avoid_: Repo, agent (for a list entry)
 
 **Repo**:
@@ -83,7 +83,7 @@ _Avoid_: Release, preview
 An issue on a Tracked Project's repo with real engagement (comments plus 👍), or less engagement on a regression or security issue, however old.
 
 **News Item**:
-An HN story, web post or trending repo that names a Tracked Project.
+A community story (Hacker News, Lobste.rs, Dev.to) that names a Tracked Project, or a Tracked Project's own repo on GitHub Trending. Lab posts are not News Items.
 _Avoid_: Mention
 
 **News Match**:

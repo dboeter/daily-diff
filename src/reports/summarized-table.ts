@@ -12,8 +12,9 @@
 /** A table row with its number in the report: the summaries call's `N:`. */
 export type Numbered<T> = T & { n: number };
 
-/** Number the rows 1, 2, … in their final order. */
-export const numberRows = <T>(items: T[]): Numbered<T>[] => items.map((it, i) => ({ ...it, n: i + 1 }));
+/** Number the rows in their final order: after + 1, after + 2, … (`after` earlier rows in the same call). */
+export const numberRows = <T>(items: T[], after = 0): Numbered<T>[] =>
+  items.map((it, i) => ({ ...it, n: after + i + 1 }));
 
 /** Where the prose LLM call leaves room for the code-rendered tables. */
 export const TABLES_MARKER = "<!-- tables -->";

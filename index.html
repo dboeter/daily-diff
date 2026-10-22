@@ -350,12 +350,13 @@ function escapeHtml(s) {
   return String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 }
 
-// Manifest data: dates newest first, the weekly report ids, and the overview's
-// label (OVERVIEW in src/core/i18n.ts).
+// Manifest data: dates newest first, the weekly report ids, the overview's
+// label (OVERVIEW in src/core/i18n.ts) and its Coming up heading (COMING_UP).
 let DATES = [];
 let WEEKLY = [];
 let FEEDS = {};
 let OVERVIEW_LABEL = 'Overview';
+let COMING_UP_HEADING = 'Coming up';
 
 // ── State ──
 let currentKey = null;
@@ -532,7 +533,7 @@ async function renderOverview(date) {
     /* days before coming-up.json have no Coming up section */
   }
   if (Array.isArray(comingUp) && comingUp.length) {
-    parts.push('<h2>Coming up</h2>');
+    parts.push(`<h2>${escapeHtml(COMING_UP_HEADING)}</h2>`);
     // Feed links reach this HTML without DOMPurify: only http(s) becomes a link.
     const linked = (c) => /^https?:\/\//i.test(c.link)
       ? `<a href="${escapeHtml(c.link)}">${escapeHtml(c.title)}</a>`
@@ -762,13 +763,14 @@ window.addEventListener('hashchange', followHash);
   try {
     const res = await fetch('./manifest.json');
     if (!res.ok) throw new Error('manifest.json not found');
-    const { dates, labels, weekly, feeds, overview } = await res.json();
+    const { dates, labels, weekly, feeds, overview, comingUp } = await res.json();
     if (!dates?.length) throw new Error('manifest is empty');
     LABELS = labels ?? {};
     DATES = dates;
     WEEKLY = weekly ?? [];
     FEEDS = feeds ?? {};
     OVERVIEW_LABEL = overview ?? 'Overview';
+    COMING_UP_HEADING = comingUp ?? 'Coming up';
 
     allDates = dates;
     buildNav(dates);

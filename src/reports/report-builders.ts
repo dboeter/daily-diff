@@ -15,7 +15,13 @@ import type { StoryRow } from "../spotted/spotted.ts";
 import type { ResearchPaper } from "../sources/research.ts";
 import type { Category } from "../trending/rank.ts";
 import type { RepoConfig } from "../core/github.ts";
-import { VENDOR_SECTIONS, vendorSection, type VendorSection } from "../core/config.ts";
+import {
+  AGENT_SECTION_KEYS,
+  VENDOR_SECTIONS,
+  vendorSection,
+  type AgentSectionKey,
+  type VendorSection,
+} from "../core/config.ts";
 import { summaryText, type Numbered } from "./summarized-table.ts";
 import {
   LIVE_REPORT_IDS,
@@ -474,7 +480,7 @@ export function renderResearchTable(
  * until October 2026: Other Agents (a job-search bot, a vulnerability scanner
  * on 2026-10-19) joins none.
  */
-const CANDIDATE_SECTION: Partial<Record<Category, "agents" | "infra">> = {
+const CANDIDATE_SECTION: Partial<Record<Category, AgentSectionKey>> = {
   coding_agent: "agents",
   harness_framework: "infra",
   multi_agent: "infra",
@@ -492,23 +498,21 @@ export function renderCandidates(
 ): string {
   const T = TRENDS_REPORT;
   const known = new Set(tracked.map((r) => r.repo.toLowerCase()));
-  const groups = (["agents", "infra"] as const)
-    .map((key) => {
-      const repos = [
-        ...new Set(
-          candidates
-            .filter((c) => CANDIDATE_SECTION[c.category] === key && !known.has(c.fullName.toLowerCase()))
-            .map((c) => c.fullName),
-        ),
-      ];
-      if (!repos.length) return "";
-      const entries = repos.map((repo) => {
-        const name = repo.split("/")[1] ?? repo;
-        return `    - id: ${name.toLowerCase()}\n      repo: ${repo}\n      name: ${name}`;
-      });
-      return `${T.candidatesSection(key)}\n\n\`\`\`yaml\n${entries.join("\n")}\n\`\`\``;
-    })
-    .filter(Boolean);
+  const groups = AGENT_SECTION_KEYS.map((key) => {
+    const repos = [
+      ...new Set(
+        candidates
+          .filter((c) => CANDIDATE_SECTION[c.category] === key && !known.has(c.fullName.toLowerCase()))
+          .map((c) => c.fullName),
+      ),
+    ];
+    if (!repos.length) return "";
+    const entries = repos.map((repo) => {
+      const name = repo.split("/")[1] ?? repo;
+      return `    - id: ${name.toLowerCase()}\n      repo: ${repo}\n      name: ${name}`;
+    });
+    return `${T.candidatesSection(key)}\n\n\`\`\`yaml\n${entries.join("\n")}\n\`\`\``;
+  }).filter(Boolean);
   if (!groups.length) return "";
   return `## ${T.candidatesHeading}\n\n${T.candidatesIntro}\n\n${groups.join("\n\n")}`;
 }

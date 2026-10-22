@@ -13,9 +13,6 @@ describe("toDevtoArticle", () => {
       published_at: "2026-03-09T14:20:00Z",
       positive_reactions_count: 142,
       comments_count: 28,
-      reading_time_minutes: 8,
-      tag_list: ["ai", "llm", "langchain"],
-      user: { name: "Alice Developer" },
     };
 
     const article = toDevtoArticle(raw);
@@ -27,9 +24,6 @@ describe("toDevtoArticle", () => {
       publishedAt: "2026-03-09T14:20:00Z",
       positiveReactionsCount: 142,
       commentsCount: 28,
-      readingTimeMinutes: 8,
-      tags: ["ai", "llm", "langchain"],
-      user: "Alice Developer",
     });
   });
 });
@@ -43,9 +37,7 @@ describe("toLobstersStory", () => {
       comments_url: "https://lobste.rs/s/xyz123/minimal_llama",
       score: 45,
       comment_count: 12,
-      submitter_user: { username: "c_dev" },
       created_at: "2026-03-09T16:00:00Z",
-      tags: ["ai", "c"],
     };
 
     const story = toLobstersStory(raw);
@@ -56,9 +48,7 @@ describe("toLobstersStory", () => {
       commentsUrl: "https://lobste.rs/s/xyz123/minimal_llama",
       score: 45,
       commentCount: 12,
-      author: "c_dev",
       publishedAt: "2026-03-09T16:00:00Z",
-      tags: ["ai", "c"],
     });
   });
 
@@ -70,9 +60,7 @@ describe("toLobstersStory", () => {
       comments_url: "https://lobste.rs/s/ask456/fine_tuning",
       score: 20,
       comment_count: 8,
-      submitter_user: { username: "asker" },
       created_at: "2026-03-09T10:00:00Z",
-      tags: ["ai"],
     };
 
     const story = toLobstersStory(raw);

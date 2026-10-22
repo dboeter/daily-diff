@@ -1,7 +1,7 @@
 import fs from "fs";
 import path from "path";
 import { marked } from "marked";
-import { LIVE_REPORT_IDS, OVERVIEW, REPORT_LABELS, WEEKLY_REPORT_IDS } from "../core/i18n.ts";
+import { COMING_UP, LIVE_REPORT_IDS, OVERVIEW, REPORT_LABELS, WEEKLY_REPORT_IDS } from "../core/i18n.ts";
 
 const DIGESTS_DIR = "digests";
 const MANIFEST_PATH = "manifest.json";
@@ -10,27 +10,8 @@ const FEED_PATH = "feed.xml";
 const FEEDS_DIR = "feeds";
 const SITE_URL = "https://dboeter.github.io/daily-diff";
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
-const REPORT_FILES = [
-  // Live reports, in REPORTS (reading) order: the sidebar lists them this way.
-  ...LIVE_REPORT_IDS,
-  // No longer generated — listed only so archived reports stay reachable from
-  // the sidebar and RSS feed. October 2026: ai-cli merged into ai-agents, ai-ph
-  // dropped, ai-infra folded into ai-agents, ai-community into ai-hn, then ai-hn
-  // into the pages' Spotted sections and ai-web into ai-models, then
-  // ai-trending, ai-hf and ai-arxiv into ai-trends; the rollups were removed
-  // earlier.
-  "ai-hn",
-  "ai-web",
-  "ai-trending",
-  "ai-hf",
-  "ai-arxiv",
-  "ai-infra",
-  "ai-community",
-  "ai-cli",
-  "ai-ph",
-  "ai-weekly",
-  "ai-monthly",
-];
+// Live reports in REPORTS (reading) order, then the archive: the sidebar lists them this way.
+const REPORT_FILES = Object.keys(REPORT_LABELS);
 const MAX_FEED_ITEMS = 30;
 
 interface DateEntry {
@@ -48,6 +29,8 @@ interface Manifest {
   feeds: Record<string, string>;
   /** The sidebar label of a day's overview (the report bar's first link). */
   overview: string;
+  /** The heading of the overview's Coming up list (coming-up.json). */
+  comingUp: string;
   dates: DateEntry[];
 }
 
@@ -179,10 +162,11 @@ async function main(): Promise<void> {
 
   const manifest: Manifest = {
     generated: new Date().toISOString(),
-    labels: Object.fromEntries(REPORT_FILES.map((r) => [r, REPORT_LABELS[r] ?? r])),
+    labels: REPORT_LABELS,
     weekly: WEEKLY_REPORT_IDS,
     feeds: Object.fromEntries(LIVE_REPORT_IDS.map((id) => [id, `${FEEDS_DIR}/${id}.xml`])),
     overview: `${OVERVIEW.emoji} ${OVERVIEW.name}`,
+    comingUp: COMING_UP.heading,
     dates: entries,
   };
 

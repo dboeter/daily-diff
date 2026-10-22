@@ -16,7 +16,7 @@ import {
   loadTopicCache,
   routeStories,
   saveTopicCache,
-  SPOTTED_PAGE,
+  PAGE_OF_TOPIC,
   type Topic,
 } from "../src/spotted/jev.ts";
 import type { Story } from "../src/spotted/spotted.ts";
@@ -79,7 +79,7 @@ async function main(): Promise<void> {
   for (const t of routing.topics.values()) counts.set(t, (counts.get(t) ?? 0) + 1);
   console.log("Share per topic:");
   for (const [topic, n] of [...counts].sort((a, b) => b[1] - a[1])) {
-    const page = SPOTTED_PAGE[topic] ?? "dropped";
+    const page = PAGE_OF_TOPIC[topic] ?? "dropped";
     console.log(
       `  ${topic.padEnd(9)} ${String(n).padStart(4)}  ${((100 * n) / stories.length).toFixed(1).padStart(5)}%  → ${page}`,
     );

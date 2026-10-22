@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import type { AskJev } from "../core/jev.ts";
-import { fallbackTopic, routeStories, SPOTTED_PAGE, topicOf, type TopicAnswers } from "../spotted/jev.ts";
+import { fallbackTopic, routeStories, PAGE_OF_TOPIC, topicOf, type TopicAnswers } from "../spotted/jev.ts";
 import type { Story } from "../spotted/spotted.ts";
 
 const DATE = "2026-10-22";
@@ -35,9 +35,9 @@ describe("topicOf", () => {
   });
 });
 
-describe("SPOTTED_PAGE", () => {
+describe("PAGE_OF_TOPIC", () => {
   it("sends models and research to the models page and drops policy and other", () => {
-    expect(SPOTTED_PAGE).toEqual({
+    expect(PAGE_OF_TOPIC).toEqual({
       agents: "agents",
       models: "models",
       research: "models",

@@ -145,7 +145,6 @@ describe("matchProjectNews", () => {
     const web: WebFetchResult[] = [
       {
         site: "anthropic",
-        siteName: "Anthropic (Claude)",
         isFirstRun: false,
         totalDiscovered: 1,
         fetchSuccess: true,
@@ -156,7 +155,6 @@ describe("matchProjectNews", () => {
             lastmod: "2026-10-04",
             content: "",
             site: "anthropic",
-            category: "news",
           },
         ],
       },

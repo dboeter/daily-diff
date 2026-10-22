@@ -90,7 +90,7 @@ export interface TopicAnswers {
  * work can tell it from model news. Policy stories are dropped: AI Policy
  * has its own sources (the HN-to-policy routing was reverted on 2026-10-20).
  */
-export const SPOTTED_PAGE: Record<Topic, SpottedPage | null> = {
+export const PAGE_OF_TOPIC: Record<Topic, SpottedPage | null> = {
   agents: "agents",
   models: "models",
   research: "models",
@@ -259,7 +259,7 @@ export function spottedRankingFile(stories: Story[], routing: Routing, shownIds:
       id: s.id,
       title: s.title,
       topic,
-      page: topic ? SPOTTED_PAGE[topic] : null,
+      page: topic ? PAGE_OF_TOPIC[topic] : null,
       shown: shownIds.has(s.id),
       ...routing.judgment.traceFields(s),
     };

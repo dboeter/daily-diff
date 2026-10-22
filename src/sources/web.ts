@@ -24,7 +24,6 @@ export interface WebPageItem {
   lastmod: string;
   content: string;
   site: "anthropic" | "openai";
-  category: string;
 }
 
 interface SiteState {
@@ -40,7 +39,6 @@ export interface WebState {
 
 export interface WebFetchResult {
   site: "anthropic" | "openai";
-  siteName: string;
   isFirstRun: boolean;
   newItems: WebPageItem[];
   /** Total URLs discovered in sitemap (for context in the report) */
@@ -54,7 +52,6 @@ export interface WebFetchResult {
 // ---------------------------------------------------------------------------
 
 interface SiteConfig {
-  name: string;
   /** For single sitemaps: URL to fetch */
   sitemapUrl: string;
   /** For single sitemaps: only keep URLs starting with these path prefixes */
@@ -70,12 +67,10 @@ interface SiteConfig {
 
 const SITE_CONFIGS: Record<"anthropic" | "openai", SiteConfig> = {
   anthropic: {
-    name: "Anthropic (Claude)",
     sitemapUrl: "https://www.anthropic.com/sitemap.xml",
     prefixes: ["/news/", "/research/", "/engineering/", "/learn/"],
   },
   openai: {
-    name: "OpenAI",
     sitemapUrl: "https://openai.com/sitemap.xml",
     // Fetch only content-focused sub-sitemaps; skip app-category and i18n sitemaps
     subSitemapNames: [
@@ -198,14 +193,6 @@ export function extractText(html: string): string {
     .slice(0, MAX_CONTENT_LENGTH);
 }
 
-export function urlCategory(url: string): string {
-  try {
-    return new URL(url).pathname.split("/").filter(Boolean)[0] ?? "article";
-  } catch {
-    return "article";
-  }
-}
-
 /** Derive a human-readable title from the last URL path segment. */
 export function titleFromUrl(url: string): string {
   try {
@@ -298,7 +285,7 @@ export async function fetchSiteContent(
   } catch (err) {
     console.error(`  [web/${site}] fetch failed: ${err}`);
     const empty = { isFirstRun: false, newItems: [], totalDiscovered: 0, fetchSuccess: false };
-    return { site, siteName: SITE_CONFIGS[site].name, ...empty };
+    return { site, ...empty };
   }
 }
 
@@ -341,7 +328,6 @@ async function fetchSite(site: "anthropic" | "openai", state: WebState): Promise
         lastmod: lastmod ?? "",
         content: "",
         site,
-        category: urlCategory(loc),
       });
     }
   } else {
@@ -355,7 +341,6 @@ async function fetchSite(site: "anthropic" | "openai", state: WebState): Promise
           lastmod: lastmod ?? "",
           content: extractText(html),
           site,
-          category: urlCategory(loc),
         });
       } catch (err) {
         console.error(`  [web/${site}] Failed to fetch ${loc}: ${err}`);
@@ -373,7 +358,6 @@ async function fetchSite(site: "anthropic" | "openai", state: WebState): Promise
 
   return {
     site,
-    siteName: cfg.name,
     isFirstRun,
     newItems: items,
     totalDiscovered: allDiscovered.length,

@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   freshStories,
+  linkKey,
   mostDiscussed,
   nextLog,
   selectSpotted,
@@ -56,7 +57,6 @@ describe("storiesFrom", () => {
             hnUrl: "https://news.ycombinator.com/item?id=1",
             points: 5,
             comments: 2,
-            author: "x",
             createdAt: "2026-10-21T00:00:00Z",
             description: "Page text",
           },
@@ -72,9 +72,7 @@ describe("storiesFrom", () => {
             commentsUrl: "https://lobste.rs/s/abc",
             score: 7,
             commentCount: 1,
-            author: "y",
             publishedAt: "2026-10-21T01:00:00Z",
-            tags: ["ai"],
           },
         ],
       },
@@ -89,9 +87,6 @@ describe("storiesFrom", () => {
             publishedAt: "2026-10-21T02:00:00Z",
             positiveReactionsCount: 20,
             commentsCount: 4,
-            readingTimeMinutes: 3,
-            tags: [],
-            user: "z",
           },
         ],
       },
@@ -119,6 +114,48 @@ describe("freshStories", () => {
       never.id,
       unlogged.id,
     ]);
+  });
+});
+
+describe("linkKey", () => {
+  it("drops the scheme, www., fragment, trailing slash and utm_* parameters, lowercases the host", () => {
+    expect(linkKey("https://WWW.Example.com/Post/?utm_source=hn&utm_medium=x#top")).toBe("example.com/Post");
+    expect(linkKey("http://example.com/post")).toBe(linkKey("https://www.example.com/post/"));
+  });
+
+  it("keeps the other query parameters: an HN text post is its item id", () => {
+    expect(linkKey("https://news.ycombinator.com/item?id=1&utm_campaign=x")).toBe(
+      "news.ycombinator.com/item?id=1",
+    );
+    expect(linkKey("https://news.ycombinator.com/item?id=1")).not.toBe(
+      linkKey("https://news.ycombinator.com/item?id=2"),
+    );
+  });
+
+  it("returns an unparsable URL trimmed", () => {
+    expect(linkKey("  not a url ")).toBe("not a url");
+  });
+});
+
+describe("freshStories by link", () => {
+  it("keeps the first copy of a link in pool order", () => {
+    const hn = story("1", "hn", 10, { url: "https://example.com/a" });
+    const lobsters = story("x", "lobsters", 10, { url: "https://www.example.com/a/?utm_source=lobsters" });
+    expect(freshStories([hn, lobsters], { items: {} }, DATE).map((s) => s.id)).toEqual([hn.id]);
+  });
+
+  it("drops a story whose link a page showed on an earlier day, from any source", () => {
+    const shown = story("x", "lobsters", 10, { url: "https://example.com/a" });
+    const today = story("2", "hn", 10, { url: "http://example.com/a#comments" });
+    const sameDay = story("y", "lobsters", 10, { url: "https://example.com/b" });
+    const log: SpottedLog = {
+      items: {
+        [shown.id]: logged(shown, { shown: "2026-10-21" }),
+        [sameDay.id]: logged(sameDay, { shown: DATE }),
+      },
+    };
+    const rerun = story("3", "hn", 10, { url: "https://example.com/b" });
+    expect(freshStories([today, rerun], log, DATE).map((s) => s.id)).toEqual([rerun.id]);
   });
 });
 
@@ -175,19 +212,54 @@ describe("mostDiscussed", () => {
     add("d1", "devto", 50, "2026-10-21", { description: "Desc." });
     add("old", "hn", 999, "2026-10-14");
     add("today", "hn", 999, DATE);
-    const rows = mostDiscussed({ items }, DATE);
+    const rows = mostDiscussed({ items }, DATE, []);
     expect(rows.map((r) => r.id)).toEqual([
       "hn:h7",
       "hn:h6",
       "hn:h5",
       "hn:h4",
       "hn:h3",
-      "lobsters:l4",
       "lobsters:l3",
       "lobsters:l2",
+      "lobsters:l1",
       "devto:d1",
     ]);
     expect(rows.at(-1)).toMatchObject({ comments: 50, description: "Desc." });
+  });
+
+  it("skips a story a page showed or takes today, by id or link, and takes each link once", () => {
+    const items: SpottedLog["items"] = {};
+    const add = (id: string, source: StorySource, comments: number, url: string, extra = {}) => {
+      const s = story(id, source, 10, { url });
+      items[s.id] = logged(s, { comments, firstSeen: "2026-10-20", ...extra });
+    };
+    add("shown", "hn", 90, "https://example.com/shown", { shown: "2026-10-20" });
+    add("shownCopy", "lobsters", 80, "https://www.example.com/shown/");
+    add("today", "hn", 70, "https://example.com/today");
+    add("todayCopy", "devto", 60, "https://example.com/today#x");
+    add("byLink", "hn", 50, "https://example.com/spotted");
+    add("kept", "hn", 40, "https://example.com/kept");
+    add("keptCopy", "lobsters", 99, "https://example.com/kept?utm_source=x");
+    add("other", "lobsters", 30, "https://example.com/other");
+    const showing = [
+      { id: "hn:today", url: "https://example.com/today" },
+      { id: "devto:fresh", url: "https://example.com/spotted" },
+    ];
+    expect(mostDiscussed({ items }, DATE, showing).map((r) => r.id)).toEqual(["hn:kept", "lobsters:other"]);
+  });
+
+  it("claims a link only for a row: a copy below one source's cut can be the next source's row", () => {
+    const items: SpottedLog["items"] = {};
+    const add = (id: string, source: StorySource, comments: number, url: string) => {
+      const s = story(id, source, 10, { url });
+      items[s.id] = logged(s, { comments, firstSeen: "2026-10-20" });
+    };
+    for (let i = 1; i <= 5; i++) add(`top${i}`, "hn", 100 - i, `https://example.com/top${i}`);
+    add("belowCut", "hn", 10, "https://example.com/shared");
+    add("sharedCopy", "lobsters", 50, "https://example.com/shared");
+    const ids = mostDiscussed({ items }, DATE, []).map((r) => r.id);
+    expect(ids).not.toContain("hn:belowCut");
+    expect(ids).toContain("lobsters:sharedCopy");
   });
 });
 

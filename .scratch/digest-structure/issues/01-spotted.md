@@ -104,3 +104,7 @@ AGENTS.md, current state only: the HN, Dev.to and Lobste.rs bullets under Tracke
 ## Out of scope
 
 The Models page and retiring the Discussions page (ticket 03). The weekly Most discussed (ticket 04).
+
+## Comments
+
+- Stories are deduplicated by link across sources and days (`linkKey`), and the first source's copy wins.

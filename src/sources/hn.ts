@@ -11,13 +11,11 @@ import { plainText } from "../core/rss.ts";
 
 export interface HnStory {
   id: string;
-  hnRank?: number;
   title: string;
   url: string; // external URL, or HN discussion link if no external URL
   hnUrl: string; // always the HN discussion link
   points: number;
   comments: number;
-  author: string;
   createdAt: string;
   /** The linked page's og:description or meta description; absent for a text post or a failed fetch. */
   description?: string;
@@ -49,7 +47,6 @@ interface HnFirebaseItem {
   deleted?: boolean;
   dead?: boolean;
   type?: string;
-  by?: string;
   time?: number;
   title?: string;
   url?: string;
@@ -116,19 +113,17 @@ function isAiOrDataRelated(item: HnFirebaseItem): boolean {
   return [...AI_KEYWORD_PATTERNS, ...DATA_KEYWORD_PATTERNS].some((pattern) => pattern.test(text));
 }
 
-function toHnStory(item: HnFirebaseItem, hnRank: number): HnStory {
+function toHnStory(item: HnFirebaseItem): HnStory {
   const id = String(item.id);
   const hnUrl = `https://news.ycombinator.com/item?id=${id}`;
 
   return {
     id,
-    hnRank,
     title: item.title ?? "(untitled)",
     url: item.url ?? hnUrl,
     hnUrl,
     points: item.score ?? 0,
     comments: item.descendants ?? 0,
-    author: item.by ?? "unknown",
     createdAt: item.time ? new Date(item.time * 1000).toISOString() : new Date(0).toISOString(),
   };
 }
@@ -245,7 +240,7 @@ export async function fetchHnData(isShown: (storyId: string) => boolean = () => 
           continue;
         }
         if (isAiOrDataRelated(item)) {
-          stories.push(toHnStory(item, i + j + 1));
+          stories.push(toHnStory(item));
           if (!isShown(String(item.id))) unshown += 1;
         }
       }

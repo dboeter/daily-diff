@@ -84,7 +84,6 @@ describe("fetchHnData", () => {
 
     expect(result.fetchSuccess).toBe(true);
     expect(result.stories.map((story) => story.id)).toEqual(["102", "103"]);
-    expect(result.stories.map((story) => story.hnRank)).toEqual([2, 3]);
     expect(result.stories.map((story) => story.points)).toEqual([100, 300]);
   });
 

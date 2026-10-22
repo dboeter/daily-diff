@@ -6,7 +6,6 @@ import {
   isSitemapIndex,
   extractTitle,
   extractText,
-  urlCategory,
   titleFromUrl,
   emptyState,
 } from "../sources/web.ts";
@@ -161,26 +160,6 @@ describe("extractText", () => {
 });
 
 // ---------------------------------------------------------------------------
-// urlCategory
-// ---------------------------------------------------------------------------
-
-describe("urlCategory", () => {
-  it("returns first path segment", () => {
-    expect(urlCategory("https://anthropic.com/news/some-article")).toBe("news");
-    expect(urlCategory("https://openai.com/research/gpt-5")).toBe("research");
-  });
-
-  it("returns 'article' for root URLs", () => {
-    expect(urlCategory("https://example.com/")).toBe("article");
-    expect(urlCategory("https://example.com")).toBe("article");
-  });
-
-  it("returns 'article' for invalid URLs", () => {
-    expect(urlCategory("not a url")).toBe("article");
-  });
-});
-
-// ---------------------------------------------------------------------------
 // titleFromUrl
 // ---------------------------------------------------------------------------
 
@@ -231,7 +210,6 @@ describe("fetchSiteContent", () => {
     const result = await fetchSiteContent("anthropic", emptyState());
     expect(result).toEqual({
       site: "anthropic",
-      siteName: "Anthropic (Claude)",
       isFirstRun: false,
       newItems: [],
       totalDiscovered: 0,

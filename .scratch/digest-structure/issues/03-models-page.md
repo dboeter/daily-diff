@@ -54,3 +54,8 @@ New daily page `ai-models`: name "AI Models & Labs", label `models`, emoji 🧠,
 ## Docs
 
 AGENTS.md: Architecture (fetch and save phases), the file table (`web.ts`, `openrouter.ts`, the retired builders), Report outputs (new row for `ai-models.md`, `ai-hn.md` and `ai-web.md` into the archive-only line), the Web, Stealth models, HN and Promoted trending repos bullets, Key conventions' weekly list and listing layout. README's report list.
+
+## Comments
+
+- A model's summary gives what it is for and its modalities, not its context length: the row shows it.
+- The models page has no Coming up section: the stealth table's Expires column dates each stealth model (spec rule 4), and the Overview's Coming up lists the expiries.

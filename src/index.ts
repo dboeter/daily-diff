@@ -85,7 +85,7 @@ import {
   routeStories,
   saveTopicCache,
   spottedRankingFile,
-  SPOTTED_PAGE,
+  PAGE_OF_TOPIC,
 } from "./spotted/jev.ts";
 import { DATA_SECTION_KEYS, loadConfig, type SectionKey } from "./core/config.ts";
 import { resolvePagesUrl } from "./cli/notify.ts";
@@ -377,7 +377,7 @@ async function main(): Promise<void> {
   });
   const spottedRows = selectSpotted(unmatched, (s) => {
     const topic = routing.topics.get(s.id);
-    return topic ? SPOTTED_PAGE[topic] : null;
+    return topic ? PAGE_OF_TOPIC[topic] : null;
   });
   const spottedOf = (page: SpottedPage) => spottedRows.filter((r) => r.page === page);
 
@@ -440,7 +440,10 @@ async function main(): Promise<void> {
               hf: hfData,
               // Both read the days before today: today's papers and stories are saved after the gate.
               papers: weekPapers(researchState, dateStr),
-              stories: mostDiscussed(spottedLog, dateStr),
+              stories: mostDiscussed(spottedLog, dateStr, [
+                ...fresh.filter((s) => matchedIds.has(s.id)),
+                ...spottedRows,
+              ]),
               tracked: [...AGENTS, ...INFRA_REPOS, ...DATA_SECTIONS.flatMap((s) => s.repos)],
             },
             utcStr,

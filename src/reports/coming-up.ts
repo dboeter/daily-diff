@@ -5,7 +5,7 @@
  */
 
 import type { PolicyCalendarEntry } from "../core/config.ts";
-import { COMING_UP } from "../core/i18n.ts";
+import { COMING_UP, type ReportId } from "../core/i18n.ts";
 import type { Deadline } from "../core/report-state.ts";
 import type { DataState } from "../data/vendors.ts";
 import { upcomingDeadlines } from "../policy/deadlines.ts";
@@ -14,7 +14,7 @@ import type { OpenRouterStealthModel } from "../sources/openrouter.ts";
 
 export interface ComingUpEntry extends Deadline {
   /** The report id of the page the item comes from. */
-  page: string;
+  page: ReportId;
 }
 
 /** A null state or catalog (missing, malformed, unavailable) adds nothing. */
@@ -44,7 +44,7 @@ export function buildComingUp(
         : [],
     ),
   );
-  const tag = (page: string, deadlines: Deadline[]): ComingUpEntry[] =>
+  const tag = (page: ReportId, deadlines: Deadline[]): ComingUpEntry[] =>
     // Field by field: a data action also carries its summary.
     deadlines.map((d) => ({ date: d.date, title: d.title, link: d.link, source: d.source, page }));
   return [

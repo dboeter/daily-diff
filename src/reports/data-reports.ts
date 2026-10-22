@@ -83,7 +83,7 @@ import { DATA_STATE_FILE, type DataState, type VendorData } from "../data/vendor
 import { DATA_VERDICTS_FILE } from "../data/jev.ts";
 import { commitWrites, planWrites } from "../core/new-items.ts";
 import type { DataSectionKey } from "../core/config.ts";
-import type { SpottedRow, StoryRow } from "../spotted/spotted.ts";
+import type { SpottedSection, StoryRow } from "../spotted/spotted.ts";
 
 /** A finished report: main() writes its file and opens its issue (title and label from REPORTS). */
 export interface SavedReport {
@@ -91,9 +91,14 @@ export interface SavedReport {
   content: string;
 }
 
-/** H1, the meta line, rule, body, footer. */
+/**
+ * H1, the meta line, rule, body, footer. The footer brings its own separator,
+ * so a body ending in one (Trends' tables, the models page's stealth section)
+ * loses it.
+ */
 function assembleReport(id: ReportId, dateStr: string, meta: string, body: string): string {
-  return `${reportHeading(id, dateStr)}\n\n${meta}\n\n---\n\n${body}${autoGenFooter()}`;
+  const trimmed = body.replace(/\n\n---(?:\n\n)?$/, "");
+  return `${reportHeading(id, dateStr)}\n\n${meta}\n\n---\n\n${trimmed}${autoGenFooter()}`;
 }
 
 // ---------------------------------------------------------------------------
@@ -136,7 +141,7 @@ export async function buildTrendsReport(
   const rows = report ? summaryRows(report) : [];
   const { hasHf, hasOpenRouter } = modelSources(hf, trending.openrouter);
   const papers = numberRows(input.papers);
-  const stories = numberRows(input.stories).map((s) => ({ ...s, n: s.n + papers.length }));
+  const stories = numberRows(input.stories, papers.length);
   if (!rows.length && !hasHf && !hasOpenRouter && !papers.length && !stories.length) {
     console.log("  [trends] No trending rows, models, papers or stories, skipping report.");
     return null;
@@ -195,7 +200,7 @@ export async function buildTrendsReport(
     "ai-trends",
     dateStr,
     `> ${REPORT_META.sources(T.sources)} | ${REPORT_META.generated(utcStr)}`,
-    body.replace(/\n\n---$/, ""),
+    body,
   );
 
   // Only once the page exists.
@@ -222,7 +227,7 @@ export async function buildTrendsReport(
  */
 export async function buildAgentsReport(
   groups: ProjectGroup[],
-  spotted: { rows: SpottedRow[]; summaries: Map<number, string> },
+  spotted: SpottedSection,
   utcStr: string,
   dateStr: string,
 ): Promise<SavedReport> {
@@ -262,20 +267,20 @@ export const LAB_POSTS_MAX = 15;
 
 /**
  * The models page: Highlights, Lab announcements (the sitemaps' new posts,
- * newest first, at most LAB_POSTS_MAX; on a first crawl one line with the
- * count), New on OpenRouter (models listed in the last 2 days that no earlier
- * page listed), the stealth table (always shown) and Spotted. Two LLM calls:
- * the posts' and models' row summaries, then Highlights over the rendered
- * sections. A failed summaries call shows the descriptions, a failed
+ * newest first, at most LAB_POSTS_MAX; a site on its first crawl only adds to
+ * one line with the count), New on OpenRouter (models listed in the last 2 days
+ * that no earlier page listed), the stealth table (always shown) and Spotted.
+ * Two LLM calls: the posts' and models' row summaries, then Highlights over the
+ * rendered sections. A failed summaries call shows the descriptions, a failed
  * Highlights call the failure notice. Null when there is no new post, new
- * model, 🆕 stealth model or Spotted row. The web state is saved either way,
- * the models state only once the page is built.
+ * model, 🆕 stealth model or Spotted row. The web state is saved either way, the
+ * models state only once the page is built.
  */
 export async function buildModelsPage(
   web: WebFetchResult[],
   webState: WebState,
   catalog: ModelCatalog | null,
-  spotted: { rows: SpottedRow[]; summaries: Map<number, string> },
+  spotted: SpottedSection,
   utcStr: string,
   dateStr: string,
   stateFile = MODELS_STATE_FILE,
@@ -284,10 +289,11 @@ export async function buildModelsPage(
   saveWebState(webState);
   console.log("  [models] Web state saved.");
   const P = MODELS_PAGE;
-  const firstCrawl = web.some((r) => r.isFirstRun);
-  const posts = firstCrawl
-    ? []
-    : web.flatMap((r) => r.newItems).sort((a, b) => b.lastmod.localeCompare(a.lastmod));
+  // A first-crawled site only adds to the count line: every URL in its sitemaps is new.
+  const posts = web
+    .filter((r) => !r.isFirstRun)
+    .flatMap((r) => r.newItems)
+    .sort((a, b) => b.lastmod.localeCompare(a.lastmod));
   const shownPosts = numberRows(posts.slice(0, LAB_POSTS_MAX));
   const state = loadReportedState(stateFile);
   const fresh = newItems(
@@ -295,7 +301,7 @@ export async function buildModelsPage(
     state,
     dateStr,
   );
-  const models = numberRows(fresh).map((m) => ({ ...m, n: m.n + shownPosts.length }));
+  const models = numberRows(fresh, shownPosts.length);
   const newStealth = (catalog?.stealth ?? []).some((m) => isNewStealthModel(m, now));
   const firstCrawlCount = web.filter((r) => r.isFirstRun).reduce((n, r) => n + r.totalDiscovered, 0);
   if (!posts.length && !firstCrawlCount && !models.length && !newStealth && !spotted.rows.length) {
@@ -314,15 +320,18 @@ export async function buildModelsPage(
       : "",
   );
   const failed = web.filter((r) => !r.fetchSuccess).map((r) => P.siteFailed(P.labs[r.site]));
-  const labBody = firstCrawl
-    ? P.firstCrawl(firstCrawlCount)
-    : [
-        shownPosts.length ? renderLabPostsTable(shownPosts, summaries) : P.noPosts,
-        posts.length > LAB_POSTS_MAX ? P.morePosts(posts.length - LAB_POSTS_MAX) : "",
-        ...failed,
-      ]
-        .filter(Boolean)
-        .join("\n\n");
+  const labBody = [
+    shownPosts.length
+      ? renderLabPostsTable(shownPosts, summaries)
+      : web.some((r) => !r.isFirstRun)
+        ? P.noPosts
+        : "",
+    posts.length > LAB_POSTS_MAX ? P.morePosts(posts.length - LAB_POSTS_MAX) : "",
+    firstCrawlCount ? P.firstCrawl(firstCrawlCount) : "",
+    ...failed,
+  ]
+    .filter(Boolean)
+    .join("\n\n");
   const modelsBody =
     catalog === null
       ? P.catalogUnavailable
@@ -342,14 +351,13 @@ export async function buildModelsPage(
   );
   const highlights = highlightsOnly(prose ?? MSG.summaryFailed);
 
-  const postCount = firstCrawl ? firstCrawlCount : posts.length;
+  const postCount = posts.length + firstCrawlCount;
   const meta = `> ${P.counts(postCount, models.length, spotted.rows.length)} | ${REPORT_META.generated(utcStr)}`;
-  // buildStealthSection ends in its own separator; the footer brings one, so a trailing one goes.
   const body = `${[highlights, ...tracked].map((s) => `${s}\n\n---\n\n`).join("")}${stealth}${spottedMd}`;
   saveReportedState(nextReportedState(state, fresh, dateStr), stateFile);
   return {
     id: "ai-models",
-    content: assembleReport("ai-models", dateStr, meta, body.replace(/\n\n---\n\n$/, "")),
+    content: assembleReport("ai-models", dateStr, meta, body),
   };
 }
 
@@ -513,7 +521,7 @@ export async function buildDataReport(
   sections: DataSection[],
   vendor: VendorData,
   dataLaw: PolicyItem[],
-  spotted: { rows: SpottedRow[]; summaries: Map<number, string> },
+  spotted: SpottedSection,
   utcStr: string,
   dateStr: string,
   stateFile = DATA_STATE_FILE,
@@ -526,10 +534,10 @@ export async function buildDataReport(
   const { items } = vendor;
   const unshown = newReleases(sections, vendor.nextState.reported, dateStr);
   // A release of the last 24h is in its repo section: recorded as shown, not listed twice.
-  const releases = numberRows(unshown.filter((r) => !r.inSection)).map((r) => ({
-    ...r,
-    n: r.n + items.length,
-  }));
+  const releases = numberRows(
+    unshown.filter((r) => !r.inSection),
+    items.length,
+  );
   if (items.length === 0 && releases.length === 0 && !sections.some((s) => s.activities.some(hasActivity))) {
     console.log(`  [data] ${DATA_REPORT.noNewItems}`);
     return null;

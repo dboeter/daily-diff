@@ -99,7 +99,9 @@ jobs:
           OPENROUTER_FALLBACK_MODELS: nvidia/nemotron-3-ultra-550b-a55b:free,nvidia/nemotron-3.5-super-vl:free
           # Without this the reasoning model spends the whole token budget thinking and returns empty content.
           OPENROUTER_REASONING_EFFORT: low
-          # Jev relevance ranking for the ArXiv report (~$0.02/day); unset falls back to recency.
+          # Jev: arXiv ranking for Trends' Research, Spotted topics, AI Policy and vendor relevance,
+          # trending scope. Unset: no Research papers; Spotted, AI Policy and vendor items fall back to
+          # keyword rules, trending scope to search topic labels.
           TYPESAFE_API_KEY: ${{ secrets.TYPESAFE_API_KEY }}
           # Open States (AI Policy, US states); unset skips that source.
           PLURAL_API_KEY: ${{ secrets.PLURAL_API_KEY }}

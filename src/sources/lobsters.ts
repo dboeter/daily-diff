@@ -14,9 +14,7 @@ export interface LobstersStory {
   commentsUrl: string;
   score: number;
   commentCount: number;
-  author: string;
   publishedAt: string;
-  tags: string[];
 }
 
 export interface LobstersData {
@@ -55,9 +53,7 @@ export interface LobstersApiStory {
   comments_url: string;
   score: number;
   comment_count: number;
-  submitter_user: { username: string };
   created_at: string;
-  tags: string[];
 }
 
 export function toLobstersStory(s: LobstersApiStory): LobstersStory {
@@ -68,9 +64,7 @@ export function toLobstersStory(s: LobstersApiStory): LobstersStory {
     commentsUrl: s.comments_url,
     score: s.score,
     commentCount: s.comment_count,
-    author: s.submitter_user.username,
     publishedAt: s.created_at,
-    tags: s.tags,
   };
 }
 
