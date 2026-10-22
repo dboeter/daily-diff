@@ -2,7 +2,9 @@ import { describe, it, expect } from "vitest";
 import {
   buildProjectDigestPrompt,
   buildSkillsPrompt,
+  announcementLink,
   hasActivity,
+  isMajorRelease,
   releaseNotes,
   type ProjectActivity,
 } from "../reports/prompts.ts";
@@ -155,6 +157,50 @@ describe("buildProjectDigestPrompt", () => {
     expect(prompt).toContain("Slash commands run safely");
     expect(releaseNotes("```sh\nnpm i tool\n```", 400)).toBe("");
     expect(releaseNotes("~~~\ngo install tool\n~~~\nFixes", 400)).toBe("Fixes");
+  });
+
+  // DuckDB v2.0.0's notes, trimmed (2026-10-21).
+  const duckdbBody =
+    'This release of DuckDB is named "Cyanoptera" after Spatula Cyanoptera.\r\n\r\n' +
+    "Please also refer to the announcement blog post: https://duckdb.org/2026/10/21/announcing-duckdb-200.html\r\n\r\n" +
+    "## What's Changed\r\n" +
+    "* Make `Identifier` a class instead of using string everywhere by @Mytherin in https://github.com/duckdb/duckdb/pull/23161\r\n" +
+    "* Move to tidy-check diff again by @Mytherin in https://github.com/duckdb/duckdb/pull/23196\r\n" +
+    "* Allow `MERGE INTO` in triggers by @Dtenwolde in https://github.com/duckdb/duckdb/pull/23201\r\n\r\n" +
+    "## New Contributors\r\n* @someone made their first contribution in https://github.com/duckdb/duckdb/pull/23000\r\n\r\n" +
+    "**Full Changelog**: https://github.com/duckdb/duckdb/compare/v1.5.0...v2.0.0";
+
+  it("compacts a generated changelog to its PR titles and their count", () => {
+    const notes = releaseNotes(duckdbBody, 1000);
+    expect(notes).toContain("What's Changed (3 merged PRs): Make `Identifier` a class");
+    expect(notes).toContain("Allow `MERGE INTO` in triggers;");
+    expect(notes).not.toMatch(/@Mytherin|pull\/23161|first contribution|Full Changelog/);
+    expect(releaseNotes("## What's Changed\n- Hand-written note", 400)).toBe(
+      "## What's Changed - Hand-written note",
+    );
+  });
+
+  it("finds a major release's announcement and shows it in the prompt", () => {
+    expect(isMajorRelease("v2.0.0")).toBe(true);
+    expect(isMajorRelease("2.0.0")).toBe(true);
+    expect(isMajorRelease("v2.0.1")).toBe(false);
+    expect(isMajorRelease("v2.1.0")).toBe(false);
+    expect(announcementLink(duckdbBody)).toBe("https://duckdb.org/2026/10/21/announcing-duckdb-200.html");
+    expect(announcementLink("See https://github.com/o/r/pull/1")).toBeUndefined();
+    const prompt = buildProjectDigestPrompt(
+      [
+        makeActivity({
+          releases: [
+            { ...release, tag_name: "v2.0.0", body: duckdbBody, announcement: "Our biggest release." },
+          ],
+        }),
+      ],
+      scope,
+      "d",
+    );
+    expect(prompt).toContain("Announcement: Our biggest release.");
+    expect(prompt).toContain("describe it from the announcement");
+    expect(prompt).toContain("Link each release you name as `[tag](url)`");
   });
 
   it("forbids stating absences in the overview too", () => {
@@ -322,6 +368,16 @@ describe("buildPolicyProsePrompt", () => {
     expect(result).toContain("Do not reproduce or alter the table");
     expect(result).toContain("Do not write a title");
     expect(result).toContain("The reader: A Dutch AI practitioner.");
+    expect(result).not.toContain("Open deadlines");
+  });
+
+  it("lists near deadlines as earlier items, not new ones", () => {
+    const result = buildPolicyProsePrompt("| Date |", "2026-10-22", "A reader.", [
+      { date: "2026-10-27", title: "Consultation X", link: "https://x", source: "Have your say" },
+    ]);
+    expect(result).toContain("Open deadlines of items reported on earlier days (not new today");
+    expect(result).toContain("- 2026-10-27: [Consultation X](https://x) (Have your say)");
+    expect(result).toContain("in the table or the open deadlines");
   });
 });
 
@@ -421,6 +477,11 @@ describe("buildWebReportPrompt", () => {
     const full = buildWebReportPrompt(site(3), "2026-10-19");
     expect(full).toContain(`## ${SECTIONS.signals}\n`);
     expect(full).toContain("no forward-looking claims");
+    expect(full).toContain("never interpreted");
+    expect(full).not.toContain("Hidden signals");
+    // Metadata-only items (no content) do not count toward the full layout.
+    const slugs = site(3).map((r) => ({ ...r, newItems: r.newItems.map((i) => ({ ...i, content: "" })) }));
+    expect(buildWebReportPrompt(slugs, "2026-10-19")).not.toContain(`## ${SECTIONS.signals}\n`);
   });
 });
 
@@ -467,6 +528,31 @@ describe("buildDiscussionsPrompt", () => {
     expect(result).toContain("Score: 200");
     expect(result).toContain("Comments: 50");
     expect(result).toContain("Author: bob");
+  });
+
+  it("marks only stories with more comments than points as contested, and one table per story", () => {
+    const story = (id: string, points: number, comments: number) => ({
+      id,
+      title: `Story ${id}`,
+      url: `https://example.com/${id}`,
+      hnUrl: `https://news.ycombinator.com/item?id=${id}`,
+      points,
+      comments,
+      author: "a",
+      createdAt: "2026-10-22T00:00:00Z",
+    });
+    // 2026-10-22: 578 points and 538 comments is not contested.
+    const result = hnOnlyPrompt(
+      { stories: [story("1", 578, 538), story("2", 50, 90)], fetchSuccess: true },
+      "d",
+    );
+    expect(result).toContain("Score: 578 | Comments: 538 | Author: a | Time: 2026-10-22T00:00\n");
+    expect(result).toContain(
+      "Comments: 90 | Author: a | Time: 2026-10-22T00:00 | Contested: more comments than points",
+    );
+    expect(result).toContain("compare no counts yourself");
+    expect(result).toContain("Each story appears in exactly one table");
+    expect(result).toContain("descending Score");
   });
 
   it("mentions Hacker News", () => {
@@ -550,7 +636,7 @@ describe("buildDiscussionsPrompt", () => {
 // ---------------------------------------------------------------------------
 
 describe("listing report layout", () => {
-  // Three articles: with fewer the web prompt leaves out Signals and Worth a Look.
+  // Three articles with text: with fewer the web prompt leaves out Signals and Worth a Look.
   const web: WebFetchResult[] = [
     {
       site: "openai",
@@ -560,7 +646,7 @@ describe("listing report layout", () => {
         url: `https://openai.com/index/p${n}`,
         title: `P${n}`,
         lastmod: "2026-10-12",
-        content: "",
+        content: "Text",
         site: "openai" as const,
         category: "release",
       })),

@@ -75,6 +75,22 @@ describe("row numbers", () => {
     expect(tables.databricks).toContain("| S1. |");
   });
 
+  it("lists the over-cap items as links under their section's table", () => {
+    const vendor = numberRows([vendorItem("dbx-1", "databricks")]);
+    const over = [
+      vendorItem("dbx-2", "databricks"),
+      vendorItem("dbx-3", "databricks"),
+      vendorItem("gcp-1", "gcp"),
+    ];
+    const tables = renderVendorTables(vendor, reply, over);
+    expect(tables.databricks).toMatch(
+      /\| S1\. \|\n\n\*Also new:\* \[Title dbx-2\]\(https:\/\/example\.com\/dbx-2\) · \[Title dbx-3\]/,
+    );
+    expect(tables.cloud).toBe("*Also new:* [Title gcp-1](https://example.com/gcp-1)");
+    expect(tables.snowflake).toBeUndefined();
+    expect(renderVendorTables(vendor, reply).databricks).not.toContain("Also new");
+  });
+
   it("shows a vendor row's '—' as '—', and the description only when its line is missing", () => {
     const vendor = numberRows([vendorItem("dbx-1", "databricks"), vendorItem("dbx-2", "databricks")]);
     const tables = renderVendorTables(vendor, parseRowSummaries("1: —"));

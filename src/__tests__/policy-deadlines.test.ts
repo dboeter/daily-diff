@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import { describe, it, expect, vi, afterEach } from "vitest";
 import { parseInitiatives, fetchHaveYourSay } from "../policy/haveyoursay.ts";
-import { upcomingDeadlines, renderDeadlines } from "../policy/deadlines.ts";
+import { upcomingDeadlines, renderDeadlines, nearPolicyDeadlines } from "../policy/deadlines.ts";
 import { nextDeadlines } from "../core/report-state.ts";
 import type { PolicyConfig } from "../core/config.ts";
 import type { PolicyItem } from "../policy/policy.ts";
@@ -218,5 +218,21 @@ describe("renderDeadlines", () => {
 
   it("renders nothing without deadlines", () => {
     expect(renderDeadlines([])).toBe("");
+  });
+});
+
+describe("nearPolicyDeadlines", () => {
+  const d = (date: string, link: string) => ({ date, title: link, link, source: "Have your say" });
+  it("keeps deadlines within 7 days of items not in today's table", () => {
+    const deadlines = [
+      d("2026-10-25", "a"),
+      d("2026-10-29", "b"),
+      d("2026-10-30", "c"),
+      d("2026-10-24", "today"),
+    ];
+    expect(nearPolicyDeadlines(deadlines, [{ link: "today" }], "2026-10-22").map((x) => x.link)).toEqual([
+      "a",
+      "b",
+    ]);
   });
 });
