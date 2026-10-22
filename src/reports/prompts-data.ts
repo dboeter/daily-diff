@@ -5,70 +5,34 @@
  */
 
 import type { WebPageItem } from "../sources/web.ts";
-import type { TrendingData } from "../trending/trending.ts";
 import type { summaryRows } from "../trending/rank.ts";
 import { formatTokens, type OpenRouterData, type OpenRouterNewModel } from "../sources/openrouter.ts";
-import {
-  ARXIV_REPORT,
-  DATA_REPORT,
-  MODELS_PAGE,
-  MODELS_REPORT,
-  MSG,
-  SECTIONS,
-  SPOTTED,
-} from "../core/i18n.ts";
+import { DATA_REPORT, MODELS_PAGE, MSG, SECTIONS, SPOTTED, TRENDS_REPORT } from "../core/i18n.ts";
 import { TABLES_MARKER, rowList, summaryLine, summaryOutputRule, type Numbered } from "./summarized-table.ts";
 import { NO_TITLE_RULE, RELEASE_BODY_CHARS, releaseNotes } from "./prompts.ts";
 import type { ReleaseRow } from "./data-reports.ts";
-import type { ArxivData } from "../sources/arxiv.ts";
 import type { HfData } from "../sources/hf.ts";
+import type { ResearchPaper } from "../sources/research.ts";
 import type { PolicyItem } from "../policy/policy.ts";
 import type { KeptVendorItem } from "../data/jev.ts";
-import { siteOf, type SpottedRow } from "../spotted/spotted.ts";
+import { siteOf, type StoryRow } from "../spotted/spotted.ts";
 
-/** Which sources the models report covers; the prompt and the report's sources line both read it. */
+/** Which sources Trends' Models section covers: no call when neither has data. */
 export function modelSources(hf: HfData, openrouter: OpenRouterData) {
-  return {
-    hasHf: hf.fetchSuccess,
-    hasOpenRouter: openrouter.topModels.length > 0 || openrouter.newModels.length > 0,
-  };
-}
-
-/** OpenRouter model usage. Empty string when there is no model data. */
-function buildModelUsageData(openrouter: OpenRouterData): string {
-  const { topModels, topModelsDate, newModels } = openrouter;
-  const sections: string[] = [];
-  if (topModels.length > 0) {
-    sections.push(
-      `## OpenRouter Top Models by Tokens (${topModelsDate})\n` +
-        topModels.map((m, i) => `${i + 1}. ${m.slug} — ${formatTokens(m.tokens)} tokens`).join("\n"),
-    );
-  }
-  if (newModels.length > 0) {
-    sections.push(
-      `## Models Newly Listed on OpenRouter (last 8 days)\n` +
-        newModels
-          .map(
-            (m) =>
-              `- ${m.name} (\`${m.id}\`) | listed ${m.created} | ${m.contextLength.toLocaleString()} ctx` +
-              (m.description ? `\n  ${m.description.slice(0, 300)}` : ""),
-          )
-          .join("\n"),
-    );
-  }
-  return sections.join("\n\n---\n\n");
+  return { hasHf: hf.fetchSuccess, hasOpenRouter: openrouter.topModels.length > 0 };
 }
 
 /**
- * Weekly trending, call 1 of 2: one 2-sentence summary per numbered table row.
- * The rows were selected and ranked in code; parseRowSummaries reads the reply.
+ * Weekly Trends, call 1 of the first round: one 2-sentence summary per
+ * numbered Radar and category table row. The rows were selected and ranked in
+ * code; parseRowSummaries reads the reply.
  */
 export function buildTrendingSummariesPrompt(rows: ReturnType<typeof summaryRows>, dateStr: string): string {
   const list = rowList(
     rows,
     (r) => `${r.name} — ${r.description || "(no description)"}${r.facts ? ` — ${r.facts}` : ""}`,
   );
-  return `You are a technical analyst covering AI coding tools, agents and agent harnesses. Below are ${rows.length} numbered projects and tools from the agent & AI coding trends report for the week ending ${dateStr}, each with its description and where it was found.
+  return `You are a technical analyst covering AI coding tools, agents and agent harnesses. Below are ${rows.length} numbered projects and tools from the weekly trends report, week ending ${dateStr}, each with its description and where it was found.
 
 ${list}
 
@@ -82,29 +46,28 @@ ${summaryOutputRule(rows.length)}
 }
 
 /**
- * Weekly trending, call 2 of 2: the prose sections around the code-rendered
- * tables. The model places TABLES_MARKER where spliceTables
- * inserts the tables.
+ * Weekly Trends, the second round: Highlights and Signals around the page
+ * rendered from the first round's calls. The model places TABLES_MARKER where
+ * spliceTables inserts the page.
  */
-export function buildTrendingProsePrompt(tablesMd: string, data: TrendingData, dateStr: string): string {
-  return `You are a technical analyst covering AI coding tools, agents and agent harnesses. Below are this week's tables for the agent & AI coding trends report, week ending ${dateStr}. They were selected and ranked in code from GitHub Trending (weekly), GitHub topic search, OpenRouter app rankings and npm downloads; the Summary column holds the project descriptions. 🆕 in the Signal column means created or listed in the last 14 days; 🔥 before a name means the item was also in last week's report.
+export function buildTrendsProsePrompt(pageMd: string, dateStr: string): string {
+  return `You are the editor of a weekly trends report for AI practitioners: agents and coding tools, models, research and the community's most discussed stories. Below is this week's page, week ending ${dateStr}. Its tables were selected and ranked in code from GitHub Trending (weekly), GitHub topic search, OpenRouter app and model rankings, npm downloads, Hugging Face, arXiv (ranked by relevance) and Hacker News, Lobste.rs and Dev.to. 🆕 in a Signal column means created or listed in the last 14 days; 🔥 before a name means the item was also in last week's report.
 
-${tablesMd || "(No projects were selected this week.)"}
+${pageMd || "(The page has no sections this week.)"}
 
 ---
 
-Write the prose sections of the report, in this order:
+Write only these parts, in this order:
 
-1. \`## ${SECTIONS.highlights}\` — 3-5 sentences on the most noteworthy agent and AI-coding developments this week.
-2. The line \`${TABLES_MARKER}\` exactly once, on its own line. The tables are inserted there.
-3. \`## ${SECTIONS.signals}\` — 200-300 words: which kinds of agent or coding tool are getting attention, and any new harness or orchestration patterns.
-4. \`## ${SECTIONS.worthALook}\` — 3-5 bullets: specific projects or directions worth developer focus, with brief reasoning.
+1. \`## ${SECTIONS.highlights}\` — 3-5 bullets on the most noteworthy items of the week, across the page's sections.
+2. The line \`${TABLES_MARKER}\` exactly once, on its own line. The page is inserted there.
+3. \`## ${SECTIONS.signals}\` — 200-300 words: patterns across the week's tables, such as which kinds of agent or coding tool are getting attention, which model families lead usage, and which research directions recur. This is the one place for trend claims: each must rest on two or more rows.
 
 Rules:
 - ${NO_TITLE_RULE}
-- Do not reproduce or alter the tables.
-- Base every claim on the tables and the data above. They show descriptions and counts only, so do not describe releases, adoption or community reactions they do not show.
-- Mention only projects that appear in the tables, and link every project you mention.
+- Do not reproduce or alter the tables, and write no other sections.
+- Base every claim on the page. It shows descriptions, summaries and counts only, so do not describe releases, adoption or community reactions it does not show.
+- Mention only items that appear on the page, and link every item you mention.
 - English, professional and concise.
 `;
 }
@@ -161,28 +124,60 @@ Rules:
 `;
 }
 
+/** A story's line in a summaries prompt: title, source, site, counts and its description. */
+const storyLine = (r: Omit<StoryRow, "n">): string =>
+  `${r.title} (${SPOTTED.sources[r.source]}, ${siteOf(r.url) || r.url}, ${SPOTTED.counts(r.source, r.points, r.comments)}) — ${r.description ? `description: ${r.description}` : "(no description)"}`;
+
+/** The story summary rules, shared by Spotted and Trends' Most discussed. */
+const STORY_RULES = `- A story with a description: 2 sentences taken from it. Without one: 1 sentence saying only what the title and the site say.
+- Describe no comment thread or community reaction, and no claim, method or result a story's title and description do not state.`;
+
 /**
  * Spotted, one call for every page's rows: one summary per numbered story.
  * The rows are numbered by selectSpotted; parseRowSummaries reads the reply.
  * The model sees titles, sites, counts and descriptions, never the article or
  * the thread: on 2026-10-19 summaries of HN titles alone guessed what an article argues.
  */
-export function buildSpottedSummariesPrompt(rows: SpottedRow[], dateStr: string): string {
-  const list = rowList(
-    rows,
-    (r) =>
-      `${r.title} (${SPOTTED.sources[r.source]}, ${siteOf(r.url) || r.url}, ${SPOTTED.counts(r.source, r.points, r.comments)}) — ${r.description ? `description: ${r.description}` : "(no description)"}`,
-  );
+export function buildSpottedSummariesPrompt(rows: StoryRow[], dateStr: string): string {
   return `You summarize community stories (Hacker News, Lobste.rs, Dev.to) for AI and data practitioners.
 
 Below are ${rows.length} numbered stories as of ${dateStr}, each with its source, the linked site, its counts and, where given, a description (the linked page's own for Hacker News, the author's for Dev.to). You have read neither the article nor the comment thread.
 
-${list}
+${rowList(rows, storyLine)}
 
 ${summaryLine("1-2 sentences")} — what the story is about.
-- With a description: 2 sentences taken from it. Without one: 1 sentence saying only what the title and the site say.
-- Describe no comment thread or community reaction, and no claim, method or result the title and description do not state.
+${STORY_RULES}
 ${summaryOutputRule(rows.length)}
+- English.
+`;
+}
+
+/**
+ * Weekly Trends, one call for the Research rows (numbered first) and the Most
+ * discussed rows (numbered after them). parseRowSummaries reads the reply.
+ */
+export function buildTrendsSummariesPrompt(
+  papers: Numbered<ResearchPaper>[],
+  stories: StoryRow[],
+  dateStr: string,
+): string {
+  const list = [
+    rowList(papers, (p) => `${p.title} (arXiv paper) — abstract: ${p.abstract}`),
+    rowList(stories, storyLine),
+  ]
+    .filter(Boolean)
+    .join("\n");
+  const count = papers.length + stories.length;
+  return `You summarize research papers and community stories for AI practitioners.
+
+Below are ${count} numbered items of the week ending ${dateStr}: ${[papers.length && "arXiv papers, each with its abstract (cut)", stories.length && "the week's most discussed community stories (Hacker News, Lobste.rs, Dev.to), each with its source, the linked site, its counts and, where given, a description"].filter(Boolean).join(", then ")}. You have read neither the full papers, the articles nor the comment threads.
+
+${list}
+
+${summaryLine("1-2 sentences")}.
+- A paper: 2 sentences from its abstract: what it shows. No claim, number or result the abstract does not state.
+${STORY_RULES}
+${summaryOutputRule(count)}
 - English.
 `;
 }
@@ -487,82 +482,20 @@ export function firstHighlight(md: string): string | null {
 }
 
 // ---------------------------------------------------------------------------
-// ArXiv prompt
-// ---------------------------------------------------------------------------
-
-export function buildArxivPrompt(data: ArxivData, dateStr: string): string {
-  const papersText = data.papers
-    .map((p, i) => {
-      const authors =
-        p.authors.length > 3 ? p.authors.slice(0, 3).join(", ") + " et al." : p.authors.join(", ");
-      const cats = p.categories.slice(0, 3).join(", ");
-      return (
-        `${i + 1}. **${p.title}**\n` +
-        `   Link: ${p.url}\n` +
-        `   Authors: ${authors} | Categories: ${cats}\n` +
-        `   Published: ${p.published.slice(0, 10)}\n` +
-        `   Abstract: ${p.summary}`
-      );
-    })
-    .join("\n\n");
-
-  const order =
-    data.rankedBy === "jev"
-      ? "pre-selected for relevance to LLM and agent practitioners, most relevant first"
-      : "the most recent submissions";
-  return `You are an AI research analyst. The following are recent AI-related papers from ArXiv as of ${dateStr} (${data.papers.length} papers from cs.AI, cs.CL, cs.LG, ${order}):
-
----
-
-${papersText}
-
----
-
-Write the report in English with these sections. ${NO_TITLE_RULE}
-
-## ${SECTIONS.highlights}
-3-5 sentences on the most significant research directions and breakthroughs.
-
-## ${ARXIV_REPORT.papersHeading}
-The 8-15 most important papers, organized by theme: a \`### <theme>\` heading per theme, each followed by a **Markdown table** with exactly these columns:
-
-   | Paper | Authors | Summary |
-   | :--- | :--- | :--- |
-
-   - **Paper**: title as a Markdown link to its ArXiv URL
-   - **Authors**: abbreviated (first 3 + et al.)
-   - **Summary**: 2 sentences — the key contribution and why it matters
-   - Omit a theme if no paper falls under it
-
-   Themes:
-   - 🧠 Large Language Models (architecture, training, alignment, evaluation)
-   - 🤖 Agents & Reasoning (planning, tool use, multi-agent, chain-of-thought)
-   - 🔧 Methods & Frameworks (new techniques, benchmarks, efficiency improvements)
-   - 📊 Applications (domain-specific, multimodal, code generation)
-
-## ${SECTIONS.signals}
-100-200 words on emerging research directions visible in these submissions.
-
-## ${SECTIONS.worthALook}
-2-3 papers most worth reading in full, with reasoning. Each bullet opens with the paper's title as a Markdown link to its ArXiv URL.
-
-Style: English, concise and professional, preserve all ArXiv links.
-`;
-}
-
-// ---------------------------------------------------------------------------
-// Hugging Face prompt
+// Trends: Models
 // ---------------------------------------------------------------------------
 
 /**
- * The weekly models report: Hugging Face trending models and OpenRouter token
- * usage (in the trending report until October 2026). Either source alone is
- * enough for a report.
+ * Weekly Trends' Models section: OpenRouter token usage and Hugging Face
+ * trending models, only the `###` parts whose source has data. Either source
+ * alone is enough for the call.
  */
-export function buildModelsPrompt(data: HfData, openrouter: OpenRouterData, dateStr: string): string {
-  const M = MODELS_REPORT;
+export function buildTrendsModelsPrompt(data: HfData, openrouter: OpenRouterData, dateStr: string): string {
+  const T = TRENDS_REPORT;
   const { hasHf, hasOpenRouter } = modelSources(data, openrouter);
-  const modelData = buildModelUsageData(openrouter);
+  const usage = openrouter.topModels
+    .map((m, i) => `${i + 1}. ${m.slug} — ${formatTokens(m.tokens)} tokens`)
+    .join("\n");
   const modelsText = data.models
     .map(
       (m, i) =>
@@ -575,34 +508,25 @@ export function buildModelsPrompt(data: HfData, openrouter: OpenRouterData, date
     .join("\n\n");
 
   const inputs = [
+    hasOpenRouter ? `OpenRouter top models by tokens (${openrouter.topModelsDate}):\n\n${usage}` : "",
     hasHf
       ? `Hugging Face Hub trending models (${data.models.length}, sorted by weekly likes):\n\n${modelsText}`
       : "",
-    hasOpenRouter ? `OpenRouter:\n\n${modelData}` : "",
   ].filter(Boolean);
 
-  const hfSection = `## ${M.hfHeading}
-Organized by category: a \`### <category>\` heading per category, each followed by a **Markdown table** with exactly these columns:
+  const parts = [
+    hasOpenRouter &&
+      `\`### ${T.openRouterHeading}\` — 3-5 bullets: which models lead token usage and notable newcomers in the top list. Copy token figures verbatim; link each model as https://openrouter.ai/<slug>.`,
+    hasHf &&
+      `\`### ${T.hfHeading}\` — one **Markdown table** with exactly these columns:
 
    | Model | Author | Likes | Downloads | Summary |
    | :--- | :--- | ---: | ---: | :--- |
 
    - **Model**: model name as a Markdown link to its HF URL
    - **Likes / Downloads**: copy the numbers from the input verbatim (keep the thousands separators; do not recompute or round)
-   - **Summary**: 2 sentences — what it is and why it's trending, including a standout capability or data point
-   - Omit a category if no model falls under it
-
-   Categories:
-   - 🧠 Language Models (LLMs, chat models, instruction-tuned)
-   - 🎨 Multimodal & Generation (image, video, audio, text-to-X)
-   - 🔧 Specialized Models (code, math, medical, embeddings)
-   - 📦 Fine-tunes & Quantizations (community fine-tunes, GGUF, AWQ)
-
-`;
-  const openRouterSection = `## ${M.openRouterHeading}
-3-5 bullets: which models lead token usage, notable newcomers in the top list, and newly listed models worth trying for agentic work. Copy token figures verbatim; link each model as https://openrouter.ai/<id>.
-
-`;
+   - **Summary**: 1-2 sentences — what it is, from its pipeline and tags`,
+  ].filter(Boolean);
 
   return `You are an AI model ecosystem analyst. The following are this week's model signals as of ${dateStr}:
 
@@ -612,20 +536,14 @@ ${inputs.join("\n\n---\n\n")}
 
 ---
 
-Write the report in English with these sections. ${NO_TITLE_RULE}
+Write only these parts, in this order:
 
-## ${SECTIONS.highlights}
-3-5 sentences on the most notable model releases and trends this week.
+${parts.map((p, i) => `${i + 1}. ${p}`).join("\n")}
 
-${hasHf ? hfSection : ""}${hasOpenRouter ? openRouterSection : ""}## ${SECTIONS.signals}
-100-200 words analyzing model ecosystem trends:
-   - Which model families are gaining momentum?
-   - Open-weight vs proprietary trends
-   - Notable quantization or fine-tuning activity
-
-## ${SECTIONS.worthALook}
-2-3 models most worth trying or studying, with reasoning. Each bullet opens with the model's name as a Markdown link, the same link as elsewhere in the report.
-
-Style: English, concise and professional, preserve all links.
+Rules:
+- ${NO_TITLE_RULE}
+- No Highlights, Signals or other sections: they are written elsewhere on the page.
+- Base every claim on the data above. Do not invent releases, benchmarks or capabilities.
+- English, concise and professional, preserve all links.
 `;
 }

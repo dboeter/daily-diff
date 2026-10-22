@@ -43,9 +43,7 @@ import { renderReportBar, withReportBar } from "./reports/report-builders.ts";
 import { parseRowSummaries } from "./reports/summarized-table.ts";
 import {
   buildModelsPage,
-  buildTrendingReport,
-  buildArxivReport,
-  buildModelsReport,
+  buildTrendsReport,
   buildPolicyReport,
   buildDataReport,
   buildAgentsReport,
@@ -55,7 +53,8 @@ import { loadWebState, fetchSiteContent, type WebFetchResult, type WebState } fr
 import { fetchTrendingData, type TrendingData } from "./trending/trending.ts";
 import { fetchModelCatalogDaily, type ModelCatalog } from "./sources/openrouter.ts";
 import { fetchHnData, type HnData } from "./sources/hn.ts";
-import { fetchArxivData, type ArxivData } from "./sources/arxiv.ts";
+import { fetchArxivData, saveArxivState, type ArxivData } from "./sources/arxiv.ts";
+import { loadResearchState, nextResearchState, saveResearchState, weekPapers } from "./sources/research.ts";
 import { fetchPolicyData, type PolicyData } from "./policy/policy.ts";
 import { isDataLaw } from "./policy/jev.ts";
 import { fetchVendorData, type VendorData } from "./data/vendors.ts";
@@ -65,6 +64,7 @@ import { fetchLobstersData, type LobstersData } from "./sources/lobsters.ts";
 import {
   freshStories,
   loadSpottedLog,
+  mostDiscussed,
   nextLog,
   saveSpottedLog,
   selectSpotted,
@@ -375,7 +375,8 @@ async function main(): Promise<void> {
   const spottedSummaryMap = parseRowSummaries(spottedSummaries);
 
   // 3. Build every report
-  if (!weekly) console.log("  [weekly] Trending and HF reports — not scheduled today, skipping.");
+  if (!weekly) console.log("  [weekly] Trends page — not scheduled today, skipping.");
+  const researchState = loadResearchState();
 
   const built = await Promise.all([
     // The infra section is a group in the agents report since October 2026.
@@ -396,7 +397,6 @@ async function main(): Promise<void> {
       utcStr,
       dateStr,
     ),
-    buildArxivReport(arxivData, utcStr, dateStr),
     buildPolicyReport(policyData, utcStr, dateStr),
     buildDataReport(
       dataSections,
@@ -408,8 +408,19 @@ async function main(): Promise<void> {
     ),
     ...(weekly
       ? [
-          buildTrendingReport(trendingData, { ...skillsData, repo: CLAUDE_SKILLS_REPO }, utcStr, dateStr),
-          buildModelsReport(hfData, trendingData.openrouter, utcStr, dateStr),
+          buildTrendsReport(
+            {
+              trending: trendingData,
+              skills: { ...skillsData, repo: CLAUDE_SKILLS_REPO },
+              hf: hfData,
+              // Both read the days before today: today's papers and stories are saved after the gate.
+              papers: weekPapers(researchState, dateStr),
+              stories: mostDiscussed(spottedLog, dateStr),
+              tracked: [...AGENTS, ...INFRA_REPOS, ...DATA_SECTIONS.flatMap((s) => s.repos)],
+            },
+            utcStr,
+            dateStr,
+          ),
         ]
       : []),
   ]);
@@ -444,6 +455,12 @@ async function main(): Promise<void> {
   console.log(
     `  Saved ${saveFile(spottedRankingFile(unmatched, routing, shownIds), dateStr, "spotted-ranking.json")}`,
   );
+  // Research: the day's top papers for the weekly Trends page; the arXiv cutoff moves on every run.
+  if (arxivData.rankingFile) {
+    console.log(`  Saved ${saveFile(arxivData.rankingFile, dateStr, "arxiv-ranking.json")}`);
+  }
+  if (arxivData.nextState) saveArxivState(arxivData.nextState);
+  saveResearchState(nextResearchState(researchState, arxivData, dateStr));
 
   // The highlights pass reads the bodies, not the link bars.
   const reports: Record<string, string> = Object.fromEntries(saved.map((r) => [r.id, r.content]));

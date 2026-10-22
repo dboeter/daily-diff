@@ -11,7 +11,10 @@ import type { TrendingReportData } from "../trending/rank.ts";
 import type { PolicyItem } from "../policy/policy.ts";
 import type { KeptVendorItem } from "../data/jev.ts";
 import type { VendorAction } from "../data/vendors.ts";
-import type { SpottedRow } from "../spotted/spotted.ts";
+import type { StoryRow } from "../spotted/spotted.ts";
+import type { ResearchPaper } from "../sources/research.ts";
+import type { Category } from "../trending/rank.ts";
+import type { RepoConfig } from "../core/github.ts";
 import { VENDOR_SECTIONS, vendorSection, type VendorSection } from "../core/config.ts";
 import { summaryText, type Numbered } from "./summarized-table.ts";
 import {
@@ -22,7 +25,7 @@ import {
   SECTIONS,
   STEALTH_SECTION,
   MODELS_PAGE,
-  TRENDING_REPORT,
+  TRENDS_REPORT,
   POLICY_REPORT,
   DATA_REPORT,
   SPOTTED,
@@ -299,9 +302,9 @@ const POLICY_TITLE_MAX_CHARS = 200;
 export const policyTitleLabel = (title: string): string =>
   cell(title.length > POLICY_TITLE_MAX_CHARS ? `${title.slice(0, POLICY_TITLE_MAX_CHARS)}…` : title);
 
-/** The Radar and category tables; "" when both are empty. */
+/** The Radar and category tables, a `##` heading each; "" when both are empty. */
 export function renderTrendingTables(report: TrendingReportData, summaries: Map<number, string>): string {
-  const T = TRENDING_REPORT;
+  const T = TRENDS_REPORT;
   const summary = (row: { n: number; description: string }) => cell(summaryText(summaries, row));
   const link = (name: string, url: string) => (url ? `[${cell(name)}](${cell(url)})` : cell(name));
   // 🔥: also in last week's report. In the name cell, the one cell both tables share.
@@ -317,15 +320,12 @@ export function renderTrendingTables(report: TrendingReportData, summaries: Map<
     blocks.push(`## ${T.radarHeading}`, `${T.radarHeader}\n${rows.join("\n")}`);
   }
 
-  if (report.categories.length > 0) {
-    blocks.push(`## ${T.categoriesHeading}`);
-    for (const { category, rows } of report.categories) {
-      const lines = rows.map(
-        (r) =>
-          `| ${fire(r)}${link(r.fullName, r.url)} | ${cell(r.language)} | ${cell(r.starsCell)} | ${summary(r)} |`,
-      );
-      blocks.push(`### ${T.categoryTitles[category]}`, `${T.categoryHeader}\n${lines.join("\n")}`);
-    }
+  for (const { category, rows } of report.categories) {
+    const lines = rows.map(
+      (r) =>
+        `| ${fire(r)}${link(r.fullName, r.url)} | ${cell(r.language)} | ${cell(r.starsCell)} | ${summary(r)} |`,
+    );
+    blocks.push(`## ${T.categoryTitles[category]}`, `${T.categoryHeader}\n${lines.join("\n")}`);
   }
 
   return blocks.join("\n\n");
@@ -428,11 +428,16 @@ export function renderVendorTables(
 }
 
 /**
- * A page's Spotted section: each story linked to its article, its discussion
- * linked with its counts, and the summary for its own number (else its
- * description, truncated). Empty when the page has no rows.
+ * A page's Spotted section (or Trends' Most discussed, under `heading`): each
+ * story linked to its article, its discussion linked with its counts, and the
+ * summary for its own number (else its description, truncated). Empty when
+ * the page has no rows.
  */
-export function renderSpottedTable(rows: SpottedRow[], summaries: Map<number, string>): string {
+export function renderSpottedTable(
+  rows: StoryRow[],
+  summaries: Map<number, string>,
+  heading: string = SPOTTED.heading,
+): string {
   if (!rows.length) return "";
   const lines = rows.map(
     (r) =>
@@ -440,7 +445,65 @@ export function renderSpottedTable(rows: SpottedRow[], summaries: Map<number, st
       `[${SPOTTED.counts(r.source, r.points, r.comments)}](${cell(r.discussionUrl)}) | ` +
       `${cell(summaryText(summaries, { n: r.n, description: r.description ?? "" }))} |`,
   );
-  return `## ${SPOTTED.heading}\n\n${SPOTTED.tableHeader}\n${lines.join("\n")}`;
+  return `## ${heading}\n\n${SPOTTED.tableHeader}\n${lines.join("\n")}`;
+}
+
+/** Trends' Research section: each paper linked, its summary by its own number (else its abstract, truncated). */
+export function renderResearchTable(
+  papers: Numbered<ResearchPaper>[],
+  summaries: Map<number, string>,
+): string {
+  if (!papers.length) return "";
+  const T = TRENDS_REPORT;
+  const lines = papers.map(
+    (p) =>
+      `| [${cell(p.title)}](${cell(p.url)}) | ${cell(summaryText(summaries, { n: p.n, description: p.abstract }))} |`,
+  );
+  return `## ${T.researchHeading}\n\n${T.researchTableHeader}\n${lines.join("\n")}`;
+}
+
+/**
+ * The config.yml section a trending category would join, as promotion did
+ * until October 2026: Other Agents (a job-search bot, a vulnerability scanner
+ * on 2026-10-19) joins none.
+ */
+const CANDIDATE_SECTION: Partial<Record<Category, "agents" | "infra">> = {
+  coding_agent: "agents",
+  harness_framework: "infra",
+  multi_agent: "infra",
+  agent_tooling: "infra",
+};
+
+/**
+ * Trends' Candidates to track: the 🔥 GitHub repos in no config.yml section
+ * (`tracked`, compared case-insensitively), grouped by the section they would
+ * join, each with its entry in config.yml's format. Empty when there are none.
+ */
+export function renderCandidates(
+  candidates: { fullName: string; category: Category }[],
+  tracked: RepoConfig[],
+): string {
+  const T = TRENDS_REPORT;
+  const known = new Set(tracked.map((r) => r.repo.toLowerCase()));
+  const groups = (["agents", "infra"] as const)
+    .map((key) => {
+      const repos = [
+        ...new Set(
+          candidates
+            .filter((c) => CANDIDATE_SECTION[c.category] === key && !known.has(c.fullName.toLowerCase()))
+            .map((c) => c.fullName),
+        ),
+      ];
+      if (!repos.length) return "";
+      const entries = repos.map((repo) => {
+        const name = repo.split("/")[1] ?? repo;
+        return `    - id: ${name.toLowerCase()}\n      repo: ${repo}\n      name: ${name}`;
+      });
+      return `${T.candidatesSection(key)}\n\n\`\`\`yaml\n${entries.join("\n")}\n\`\`\``;
+    })
+    .filter(Boolean);
+  if (!groups.length) return "";
+  return `## ${T.candidatesHeading}\n\n${T.candidatesIntro}\n\n${groups.join("\n\n")}`;
 }
 
 /** The models page's Lab announcements rows, each summary by its own number (else the page text, truncated, or "—"). */

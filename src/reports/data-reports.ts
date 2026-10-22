@@ -1,12 +1,11 @@
 /**
- * Builders for the data-source reports: LLM call + report Markdown, plus the
- * source's state file (web, models, ArXiv, trending caches) once its report is built.
+ * Builders for the reports: LLM calls + report Markdown, plus the source's
+ * state file (web, models, trending caches) once its report is built.
  * main() writes the report files and opens the issues once every report is
  * in, so each report's bar can link the others.
  */
 
 import {
-  ARXIV_REPORT,
   DATA_REPORT,
   MSG,
   POLICY_REPORT,
@@ -15,23 +14,23 @@ import {
   REPORT_META,
   SECTIONS,
   MODELS_PAGE,
-  TRENDING_REPORT,
+  TRENDS_REPORT,
   reportHeading,
   type ReportId,
 } from "../core/i18n.ts";
 import {
-  buildArxivPrompt,
-  buildModelsPrompt,
   buildPolicySummariesPrompt,
   buildTrendingSummariesPrompt,
-  buildTrendingProsePrompt,
+  buildTrendsModelsPrompt,
+  buildTrendsProsePrompt,
+  buildTrendsSummariesPrompt,
   buildPolicyProsePrompt,
   buildDataSummariesPrompt,
   buildDataProsePrompt,
   buildModelsSummariesPrompt,
   modelSources,
 } from "./prompts-data.ts";
-import { generateBody, generateOr, saveFile, autoGenFooter, LLM_TOKENS_LISTING } from "../core/report.ts";
+import { generateOr, saveFile, autoGenFooter, LLM_TOKENS_LISTING } from "../core/report.ts";
 import { saveWebState, type WebFetchResult, type WebState } from "../sources/web.ts";
 import { loadReportedState, newItems, nextReportedState, saveReportedState } from "../core/report-state.ts";
 import type { TrendingData } from "../trending/trending.ts";
@@ -53,8 +52,10 @@ import {
   groupsMarkdown,
   highlightsOnly,
   isNewStealthModel,
+  renderCandidates,
   renderLabPostsTable,
   renderNewModelsTable,
+  renderResearchTable,
   renderTrendingTables,
   renderPolicyTable,
   nestHeadings,
@@ -72,17 +73,17 @@ import {
   summaryText,
   TABLES_MARKER,
 } from "./summarized-table.ts";
-import { saveArxivState, type ArxivData } from "../sources/arxiv.ts";
 import type { HfData } from "../sources/hf.ts";
+import type { ResearchPaper } from "../sources/research.ts";
 import { POLICY_STATE_FILE, type PolicyData, type PolicyItem } from "../policy/policy.ts";
 import { POLICY_VERDICTS_FILE } from "../policy/jev.ts";
 import { renderDeadlines } from "../policy/deadlines.ts";
-import type { ModelCatalog, OpenRouterData } from "../sources/openrouter.ts";
+import type { ModelCatalog } from "../sources/openrouter.ts";
 import { DATA_STATE_FILE, type DataState, type VendorData } from "../data/vendors.ts";
 import { DATA_VERDICTS_FILE } from "../data/jev.ts";
 import { commitWrites, planWrites } from "../core/new-items.ts";
 import type { DataSectionKey } from "../core/config.ts";
-import type { SpottedRow } from "../spotted/spotted.ts";
+import type { SpottedRow, StoryRow } from "../spotted/spotted.ts";
 
 /** A finished report: main() writes its file and opens its issue (title and label from REPORTS). */
 export interface SavedReport {
@@ -95,65 +96,64 @@ function assembleReport(id: ReportId, dateStr: string, meta: string, body: strin
   return `${reportHeading(id, dateStr)}\n\n${meta}\n\n---\n\n${body}${autoGenFooter()}`;
 }
 
-/** The meta line of a report with several sources: the ones present, joined. */
-function sourcesMeta(sources: (string | false)[], utcStr: string): string {
-  return `> ${REPORT_META.sources(sources.filter(Boolean).join(" + "))} | ${REPORT_META.generated(utcStr)}`;
+// ---------------------------------------------------------------------------
+// Trends page — weekly, see WEEKLY_REPORT_WEEKDAY in date.ts
+// ---------------------------------------------------------------------------
+
+/** What the Trends page is built from; main() gathers it. */
+export interface TrendsInput {
+  trending: TrendingData;
+  skills: SkillsData & { repo: string };
+  hf: HfData;
+  /** The week's papers (`weekPapers`). */
+  papers: ResearchPaper[];
+  /** The week's most discussed stories (`mostDiscussed`). */
+  stories: Omit<StoryRow, "n">[];
+  /** Every config.yml repo: Candidates to track leaves them out. */
+  tracked: RepoConfig[];
 }
 
 /**
- * The LLM listing reports' shared step: one call, the body under the report's
- * H1 and meta line. Null when the call failed, so the report is skipped.
+ * The weekly Trends page: Highlights, Agents & coding tools (the Radar and
+ * category tables), Claude Code Skills, Candidates to track (code only),
+ * Models, Research, Most discussed, Signals. An empty section is left out; the
+ * page is null when every section is. First round, in parallel: the trending
+ * row summaries, the models call, Skills, and one call for the Research and
+ * Most discussed rows. Second round: the prose call over the page rendered
+ * from them writes Highlights and Signals, and spliceTables puts the page
+ * between them. A failed summaries call shows the descriptions, a failed
+ * models call leaves the notice under Models, a failed prose call the notice
+ * under Highlights; a failed Skills fetch or call leaves MSG.skillsFailed.
  */
-async function buildListingReport(
-  id: ReportId,
-  tag: string,
-  prompt: string,
-  meta: string,
-  dateStr: string,
-): Promise<SavedReport | null> {
-  console.log(`  [${tag}] Calling LLM for ${tag} report...`);
-  try {
-    const body = await generateBody(prompt, LLM_TOKENS_LISTING);
-    return { id, content: assembleReport(id, dateStr, meta, body) };
-  } catch (err) {
-    console.error(`  [${tag}] Report generation failed: ${err}`);
-    return null;
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Trending report
-// ---------------------------------------------------------------------------
-
-/**
- * Three LLM calls: the row summaries, the prose around the code-rendered
- * tables, and the Skills section. A failed summaries call leaves the
- * descriptions in the rows; a failed prose call leaves MSG.trendingFailed and
- * the report is still written (unlike Policy Watch, whose report is skipped:
- * here the tables carry the report); a failed Skills fetch or call leaves MSG.skillsFailed.
- */
-export async function buildTrendingReport(
-  trendingData: TrendingData,
-  skills: SkillsData & { repo: string },
+export async function buildTrendsReport(
+  input: TrendsInput,
   utcStr: string,
   dateStr: string,
 ): Promise<SavedReport | null> {
-  const report = trendingData.report;
-  if (report === undefined) {
-    console.log("  [trending] No ranked data, skipping report.");
+  const T = TRENDS_REPORT;
+  const { trending, skills, hf } = input;
+  const report = trending.report;
+  const rows = report ? summaryRows(report) : [];
+  const { hasHf, hasOpenRouter } = modelSources(hf, trending.openrouter);
+  const papers = numberRows(input.papers);
+  const stories = numberRows(input.stories).map((s) => ({ ...s, n: s.n + papers.length }));
+  if (!rows.length && !hasHf && !hasOpenRouter && !papers.length && !stories.length) {
+    console.log("  [trends] No trending rows, models, papers or stories, skipping report.");
     return null;
   }
-  const rows = summaryRows(report);
-  const [summaries, prose, skillsSummary] = await Promise.all([
-    rows.length > 0
+
+  const [summaries, models, skillsSummary, rowSummaries] = await Promise.all([
+    rows.length
       ? generateOr("trending-summaries", buildTrendingSummariesPrompt(rows, dateStr), "", LLM_TOKENS_LISTING)
       : "",
-    generateOr(
-      "trending",
-      buildTrendingProsePrompt(renderTrendingTables(report, new Map()), trendingData, dateStr),
-      MSG.trendingFailed,
-      LLM_TOKENS_LISTING,
-    ),
+    hasHf || hasOpenRouter
+      ? generateOr(
+          "trends-models",
+          buildTrendsModelsPrompt(hf, trending.openrouter, dateStr),
+          MSG.summaryFailed,
+          LLM_TOKENS_LISTING,
+        )
+      : "",
     // A failed fetch has nothing to summarize: the notice, without a call.
     skills.fetchSuccess
       ? generateOr(
@@ -162,68 +162,51 @@ export async function buildTrendingReport(
           MSG.skillsFailed,
         )
       : MSG.skillsFailed,
+    papers.length + stories.length
+      ? generateOr(
+          "trends-summaries",
+          buildTrendsSummariesPrompt(papers, stories, dateStr),
+          "",
+          LLM_TOKENS_LISTING,
+        )
+      : "",
   ]);
 
-  // Skills ranks the community's most-discussed Claude Code skills — the same
-  // "what's popular" genre as trending repos, so it rides along here.
-  const skillsSection =
-    `\n\n---\n\n## ${TRENDING_REPORT.skillsHeading}\n\n` +
-    `${TRENDING_REPORT.skillsSource(skills.repo)}\n\n` +
+  const rowMap = parseRowSummaries(rowSummaries);
+  const tables = report ? renderTrendingTables(report, parseRowSummaries(summaries)) : "";
+  const page = [
+    // The tables' own `##` headings go below the section's.
+    tables && `## ${T.agentsHeading}\n\n${nestHeadings(tables, 3)}`,
     // Code renders "## Claude Code Skills"; the body's own sections go below it.
-    nestHeadings(skillsSummary, 3);
-
-  const tables = renderTrendingTables(report, parseRowSummaries(summaries));
-  const trendingContent = assembleReport(
-    "ai-trending",
+    `## ${T.skillsHeading}\n\n${T.skillsSource(skills.repo)}\n\n${nestHeadings(skillsSummary, 3)}`,
+    report ? renderCandidates(report.onFire, input.tracked) : "",
+    models && `## ${T.modelsHeading}\n\n${nestHeadings(models, 3)}`,
+    renderResearchTable(papers, rowMap),
+    renderSpottedTable(stories, rowMap, T.mostDiscussedHeading),
+  ]
+    .filter(Boolean)
+    .join("\n\n---\n\n");
+  const prose = await generateOr("trends", buildTrendsProsePrompt(page, dateStr), null, LLM_TOKENS_LISTING);
+  const body = spliceTables(
+    prose ?? `## ${SECTIONS.highlights}\n\n${MSG.summaryFailed}`,
+    `---\n\n${page}\n\n---`,
+  );
+  const content = assembleReport(
+    "ai-trends",
     dateStr,
-    `> ${REPORT_META.sources(TRENDING_REPORT.sources)} | ${REPORT_META.generated(utcStr)}`,
-    spliceTables(prose, tables) + skillsSection,
+    `> ${REPORT_META.sources(T.sources)} | ${REPORT_META.generated(utcStr)}`,
+    body.replace(/\n\n---$/, ""),
   );
 
-  // Only once the report exists, like the ArXiv state.
-  if (report.rankingFile) {
+  // Only once the page exists.
+  if (report?.rankingFile) {
     console.log(`  Saved ${saveFile(report.rankingFile, dateStr, "trending-ranking.json")}`);
   }
-  if (report.nextMatches) saveMatchState(report.nextMatches);
-  if (report.nextClassifications) saveClassifyCache(report.nextClassifications);
-  if (report.nextStarHistory) saveStarHistory(report.nextStarHistory);
+  if (report?.nextMatches) saveMatchState(report.nextMatches);
+  if (report?.nextClassifications) saveClassifyCache(report.nextClassifications);
+  if (report?.nextStarHistory) saveStarHistory(report.nextStarHistory);
 
-  return { id: "ai-trending", content: trendingContent };
-}
-
-// ---------------------------------------------------------------------------
-// ArXiv report
-// ---------------------------------------------------------------------------
-
-export async function buildArxivReport(
-  arxivData: ArxivData,
-  utcStr: string,
-  dateStr: string,
-): Promise<SavedReport | null> {
-  if (!arxivData.fetchSuccess) {
-    console.log("  [arxiv] No data available, skipping report.");
-    return null;
-  }
-
-  // Written before the LLM call: the ranking is useful for tuning even when the report fails.
-  if (arxivData.rankingFile) {
-    console.log(`  Saved ${saveFile(arxivData.rankingFile, dateStr, "arxiv-ranking.json")}`);
-  }
-
-  const meta =
-    `> ${REPORT_META.sources(ARXIV_REPORT.source)} | ` +
-    `${arxivData.papers.length} papers${arxivData.rankedBy === "jev" ? REPORT_META.jevRanked : ""} | ` +
-    REPORT_META.generated(utcStr);
-  const report = await buildListingReport(
-    "ai-arxiv",
-    "arxiv",
-    buildArxivPrompt(arxivData, dateStr),
-    meta,
-    dateStr,
-  );
-  // Only once the report exists: after a failed report the next run takes this pool too.
-  if (report && arxivData.nextState) saveArxivState(arxivData.nextState);
-  return report;
+  return { id: "ai-trends", content };
 }
 
 // ---------------------------------------------------------------------------
@@ -643,29 +626,4 @@ export async function buildDataReport(
   // The reported state as the report left it: today's action summaries and shown releases added.
   commitWrites(planWrites({ ...vendor, nextState }).onReported, files, dateStr);
   return { id: "ai-data", content };
-}
-
-// ---------------------------------------------------------------------------
-// Models report (Hugging Face + OpenRouter usage) — weekly, see WEEKLY_REPORT_WEEKDAY in date.ts
-// ---------------------------------------------------------------------------
-
-export async function buildModelsReport(
-  hfData: HfData,
-  openrouter: OpenRouterData,
-  utcStr: string,
-  dateStr: string,
-): Promise<SavedReport | null> {
-  const { hasHf, hasOpenRouter } = modelSources(hfData, openrouter);
-  if (!hasHf && !hasOpenRouter) {
-    console.log("  [models] No data available, skipping report.");
-    return null;
-  }
-  const meta = sourcesMeta(
-    [
-      hasHf && `[Hugging Face Hub](https://huggingface.co/) (${hfData.models.length} models)`,
-      hasOpenRouter && `[OpenRouter](https://openrouter.ai/rankings)`,
-    ],
-    utcStr,
-  );
-  return buildListingReport("ai-hf", "models", buildModelsPrompt(hfData, openrouter, dateStr), meta, dateStr);
 }

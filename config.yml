@@ -72,7 +72,7 @@ agents:
 
 # ── Claude Code Skills ────────────────────────────────────────────────────────
 # No date filter, sorted by community engagement. A section of the weekly
-# ai-trending report.
+# Trends page (ai-trends).
 
 skills_repo: anthropics/skills
 

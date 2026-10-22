@@ -10,10 +10,10 @@ import {
 } from "../reports/prompts.ts";
 import {
   buildTrendingSummariesPrompt,
-  buildTrendingProsePrompt,
+  buildTrendsProsePrompt,
+  buildTrendsModelsPrompt,
+  buildTrendsSummariesPrompt,
   buildModelsSummariesPrompt,
-  buildArxivPrompt,
-  buildModelsPrompt,
   buildPolicySummariesPrompt,
   buildPolicyProsePrompt,
   buildDataProsePrompt,
@@ -23,9 +23,9 @@ import {
   firstHighlight,
 } from "../reports/prompts-data.ts";
 import { TABLES_MARKER, numberRows } from "../reports/summarized-table.ts";
-import { MODELS_REPORT, SECTIONS } from "../core/i18n.ts";
+import { SECTIONS, TRENDS_REPORT } from "../core/i18n.ts";
 import type { RepoConfig, GitHubItem, GitHubRelease } from "../core/github.ts";
-import { EMPTY_NPM, EMPTY_OPENROUTER, type TrendingData } from "../trending/trending.ts";
+import { EMPTY_OPENROUTER, type TrendingData } from "../trending/trending.ts";
 
 // ---------------------------------------------------------------------------
 // Fixtures
@@ -202,7 +202,7 @@ describe("buildPageHighlightsPrompt", () => {
     expect(prompt).toContain("at most one bullet");
     expect(prompt).toContain("About 150 words");
     expect(prompt).not.toContain(SECTIONS.signals);
-    expect(prompt).not.toContain(SECTIONS.worthALook);
+    expect(prompt).not.toContain("Worth a Look");
     expect(prompt).not.toContain("Overview");
   });
 });
@@ -226,31 +226,14 @@ describe("buildSkillsPrompt", () => {
 });
 
 // ---------------------------------------------------------------------------
-// buildTrendingSummariesPrompt / buildTrendingProsePrompt
+// The Trends page's prompts
 // ---------------------------------------------------------------------------
 
 const withModels: TrendingData["openrouter"] = {
   ...EMPTY_OPENROUTER,
   topModels: [{ slug: "deepseek/deepseek-v4.1-flash", tokens: 25_630_000_000_000 }],
   topModelsDate: "2026-10-04",
-  newModels: [
-    {
-      id: "inclusionai/ling-3.1-flash",
-      name: "Ling 3.1 Flash",
-      description: "MoE",
-      created: "2026-10-04",
-      contextLength: 262_144,
-    },
-  ],
   fetchSuccess: true,
-};
-
-const noTrending: TrendingData = {
-  trendingRepos: [],
-  searchRepos: [],
-  trendingFetchSuccess: false,
-  openrouter: EMPTY_OPENROUTER,
-  npm: EMPTY_NPM,
 };
 
 describe("buildTrendingSummariesPrompt", () => {
@@ -285,24 +268,71 @@ describe("buildTrendingSummariesPrompt", () => {
   });
 });
 
-describe("buildTrendingProsePrompt", () => {
-  it("includes the tables, the marker instruction and the section headings in order", () => {
-    const result = buildTrendingProsePrompt("| Tool |\n| :--- |", noTrending, "2026-10-05");
-    expect(result).toContain("| Tool |");
+describe("buildTrendsProsePrompt", () => {
+  it("includes the page, the marker instruction, Highlights and Signals in order, and no Worth a Look", () => {
+    const result = buildTrendsProsePrompt("## Research\n\n| Paper |\n| :--- |", "2026-10-26");
+    expect(result).toContain("| Paper |");
     expect(result).toContain(`\`${TABLES_MARKER}\` exactly once`);
-    const order = [SECTIONS.highlights, TABLES_MARKER, SECTIONS.signals, SECTIONS.worthALook].map((s) =>
-      result.indexOf(s),
-    );
+    const order = [SECTIONS.highlights, TABLES_MARKER, SECTIONS.signals].map((s) => result.indexOf(s));
     expect(order.every((i) => i >= 0)).toBe(true);
     expect([...order].sort((a, b) => a - b)).toEqual(order);
+    expect(result).toContain("the one place for trend claims");
+    expect(result).not.toContain("Worth a Look");
     expect(result).toContain("Do not reproduce or alter the tables");
   });
+});
 
-  it("leaves OpenRouter model usage to the models report", () => {
-    const result = buildTrendingProsePrompt("", { ...noTrending, openrouter: withModels }, "2026-10-05");
-    expect(result).not.toContain(MODELS_REPORT.openRouterHeading);
-    expect(result).not.toContain("deepseek/deepseek-v4.1-flash");
-    expect(result).toContain("No projects were selected");
+describe("buildTrendsSummariesPrompt", () => {
+  const paper = {
+    n: 1,
+    id: "2610.00001",
+    title: "Agents that plan",
+    url: "https://arxiv.org/abs/2610.00001",
+    published: "2026-10-20T00:00:00Z",
+    relevance: 0.9,
+    abstract: "We show planning helps.",
+    date: "2026-10-21",
+  };
+  const story = {
+    n: 2,
+    id: "lobsters:abc",
+    source: "lobsters" as const,
+    title: "On AI writing",
+    url: "https://example.com/essay",
+    discussionUrl: "https://lobste.rs/s/abc",
+    points: 40,
+    comments: 60,
+  };
+
+  it("numbers the papers with their abstracts, then the stories on Spotted's rules", () => {
+    const result = buildTrendsSummariesPrompt([paper], [story], "2026-10-26");
+    expect(result).toContain("1. Agents that plan (arXiv paper) — abstract: We show planning helps.");
+    expect(result).toContain(
+      "2. On AI writing (Lobste.rs, example.com, 40 points, 60 comments) — (no description)",
+    );
+    expect(result).toContain("A paper: 2 sentences from its abstract: what it shows.");
+    expect(result).toContain("Describe no comment thread");
+    expect(result).toContain("2 lines in total");
+  });
+});
+
+describe("buildTrendsModelsPrompt", () => {
+  it("asks for only the ### parts whose source has data, and no Highlights, Signals or Worth a Look", () => {
+    const both = buildTrendsModelsPrompt({ models: [], fetchSuccess: true }, withModels, "2026-10-26");
+    expect(both).toContain(`\`### ${TRENDS_REPORT.openRouterHeading}\``);
+    expect(both).toContain(`\`### ${TRENDS_REPORT.hfHeading}\``);
+    expect(both).toContain("deepseek/deepseek-v4.1-flash — 25.63T tokens");
+    expect(both).toContain("No Highlights, Signals or other sections");
+    expect(both).not.toContain("## Highlights");
+    expect(both).not.toContain("Worth a Look");
+    const hfOnly = buildTrendsModelsPrompt(
+      { models: [], fetchSuccess: true },
+      EMPTY_OPENROUTER,
+      "2026-10-26",
+    );
+    expect(hfOnly).not.toContain(TRENDS_REPORT.openRouterHeading);
+    const orOnly = buildTrendsModelsPrompt({ models: [], fetchSuccess: false }, withModels, "2026-10-26");
+    expect(orOnly).not.toContain(TRENDS_REPORT.hfHeading);
   });
 });
 
@@ -339,60 +369,10 @@ describe("buildPolicyProsePrompt", () => {
     expect(result).toContain(`Write only \`## ${SECTIONS.highlights}\``);
     expect(result).not.toContain(TABLES_MARKER);
     expect(result).not.toContain(SECTIONS.signals);
-    expect(result).not.toContain(SECTIONS.worthALook);
+    expect(result).not.toContain("Worth a Look");
     expect(result).toContain("Do not reproduce or alter the table");
     expect(result).toContain("Do not write a title");
     expect(result).toContain("The reader: A Dutch AI practitioner.");
-  });
-});
-
-// ---------------------------------------------------------------------------
-// buildModelsPrompt (the models report)
-// ---------------------------------------------------------------------------
-
-describe("buildModelsPrompt", () => {
-  it("adds the OpenRouter section and data when OpenRouter has models", () => {
-    const result = buildModelsPrompt({ models: [], fetchSuccess: true }, withModels, "2026-10-05");
-    expect(result).toContain(`## ${MODELS_REPORT.openRouterHeading}\n`);
-    expect(result).toContain("deepseek/deepseek-v4.1-flash — 25.63T tokens");
-    expect(result).toContain("Ling 3.1 Flash (`inclusionai/ling-3.1-flash`)");
-  });
-
-  it("omits the OpenRouter section without model data, and the HF one without HF data", () => {
-    const hfOnly = buildModelsPrompt({ models: [], fetchSuccess: true }, EMPTY_OPENROUTER, "2026-10-05");
-    expect(hfOnly).not.toContain(`## ${MODELS_REPORT.openRouterHeading}`);
-    expect(hfOnly).toContain(`## ${MODELS_REPORT.hfHeading}\n`);
-    const orOnly = buildModelsPrompt({ models: [], fetchSuccess: false }, withModels, "2026-10-05");
-    expect(orOnly).not.toContain(`## ${MODELS_REPORT.hfHeading}`);
-  });
-});
-
-// ---------------------------------------------------------------------------
-// Shared section layout
-// ---------------------------------------------------------------------------
-
-describe("listing report layout", () => {
-  const prompts: Record<string, string> = {
-    arxiv: buildArxivPrompt({ papers: [], fetchSuccess: true, rankedBy: "recency" }, "2026-10-12"),
-    hf: buildModelsPrompt({ models: [], fetchSuccess: true }, withModels, "2026-10-12"),
-  };
-
-  it.each(Object.keys(prompts))("%s: Highlights first, then Signals", (id) => {
-    const p = prompts[id]!;
-    const h = p.indexOf(`## ${SECTIONS.highlights}\n`);
-    expect(h).toBeGreaterThan(-1);
-    expect(p.indexOf(`## ${SECTIONS.signals}\n`)).toBeGreaterThan(h);
-  });
-
-  it.each(["arxiv", "hf"])("%s: ends with Worth a Look", (id) => {
-    const p = prompts[id]!;
-    expect(p.indexOf(`## ${SECTIONS.worthALook}\n`)).toBeGreaterThan(p.indexOf(`## ${SECTIONS.signals}\n`));
-  });
-
-  it.each(Object.keys(prompts))("%s: no title, no numbered or day-bound headings", (id) => {
-    const p = prompts[id]!;
-    expect(p).toContain("Do not write a title");
-    expect(p).not.toMatch(/Today's|This Week's|^\d\. \*\*/m);
   });
 });
 

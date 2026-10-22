@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   freshStories,
+  mostDiscussed,
   nextLog,
   selectSpotted,
   storiesFrom,
@@ -143,6 +144,12 @@ describe("nextLog", () => {
     expect(next.items[b.id]!.shown).toBe("2026-10-20");
   });
 
+  it("logs a story's description, cut at 300 characters", () => {
+    const s = story("d", "hn", 10, { description: "x".repeat(400) });
+    expect(nextLog({ items: {} }, [s], [], DATE).items[s.id]!.description).toBe("x".repeat(300));
+    expect(nextLog({ items: {} }, [story("e")], [], DATE).items["hn:e"]).not.toHaveProperty("description");
+  });
+
   it("prunes entries last seen more than 8 days ago", () => {
     const [kept, pruned] = [story("k"), story("p")];
     const log: SpottedLog = {
@@ -152,6 +159,35 @@ describe("nextLog", () => {
       },
     };
     expect(Object.keys(nextLog(log, [], [], DATE).items)).toEqual([kept.id]);
+  });
+});
+
+describe("mostDiscussed", () => {
+  it("takes the stories first seen in the 7 days before the run, top 5 HN, 3 Lobste.rs, 3 Dev.to by comments", () => {
+    const items: SpottedLog["items"] = {};
+    const add = (id: string, source: StorySource, comments: number, firstSeen: string, extra = {}) => {
+      const s = story(id, source);
+      items[s.id] = logged(s, { comments, firstSeen, ...extra });
+    };
+    for (let i = 1; i <= 7; i++) add(`h${i}`, "hn", i * 10, "2026-10-20");
+    for (let i = 1; i <= 4; i++)
+      add(`l${i}`, "lobsters", i, "2026-10-15", i === 4 ? { shown: "2026-10-15" } : {});
+    add("d1", "devto", 50, "2026-10-21", { description: "Desc." });
+    add("old", "hn", 999, "2026-10-14");
+    add("today", "hn", 999, DATE);
+    const rows = mostDiscussed({ items }, DATE);
+    expect(rows.map((r) => r.id)).toEqual([
+      "hn:h7",
+      "hn:h6",
+      "hn:h5",
+      "hn:h4",
+      "hn:h3",
+      "lobsters:l4",
+      "lobsters:l3",
+      "lobsters:l2",
+      "devto:d1",
+    ]);
+    expect(rows.at(-1)).toMatchObject({ comments: 50, description: "Desc." });
   });
 });
 

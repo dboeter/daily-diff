@@ -7,12 +7,13 @@ import {
   buildDataReport,
   buildModelsPage,
   buildPolicyReport,
-  buildTrendingReport,
+  buildTrendsReport,
+  type TrendsInput,
   LAB_POSTS_MAX,
   type DataSection,
 } from "../reports/data-reports.ts";
 import { EMPTY_TRENDING, type TrendingData } from "../trending/trending.ts";
-import { MSG } from "../core/i18n.ts";
+import { MSG, TRENDS_REPORT } from "../core/i18n.ts";
 import type { ProjectActivity } from "../reports/prompts.ts";
 import type { PolicyData, PolicyItem } from "../policy/policy.ts";
 import { isDataLaw } from "../policy/jev.ts";
@@ -63,9 +64,29 @@ const vendorOf = (items: VendorData["items"]): VendorData => ({
 });
 const saveFile = vi.fn((_content: string, dateStr: string, name: string) => `digests/${dateStr}/${name}`);
 
-describe("buildTrendingReport", () => {
+describe("buildTrendsReport", () => {
+  const githubRow = (n: number, fullName: string, onFire = false) => ({
+    n,
+    key: `github:${fullName}`,
+    fullName,
+    url: `https://github.com/${fullName}`,
+    description: `${fullName} description.`,
+    language: "TypeScript",
+    totalStars: 5000,
+    gain: 800,
+    gainFrom: "trending" as const,
+    relative: 0.19,
+    starsCell: "5,000 (+800, +19.0%)",
+    isNew: false,
+    onFire,
+  });
   const data: TrendingData = {
     ...EMPTY_TRENDING,
+    openrouter: {
+      ...EMPTY_TRENDING.openrouter,
+      topModels: [{ slug: "a/b", tokens: 1e12 }],
+      fetchSuccess: true,
+    },
     report: {
       radar: [
         {
@@ -80,75 +101,213 @@ describe("buildTrendingReport", () => {
           links: [],
         },
       ],
-      categories: [],
+      categories: [{ category: "coding_agent", rows: [githubRow(2, "o/fast", true)] }],
+      onFire: [{ fullName: "o/fast", category: "coding_agent" }],
       classifiedBy: "jev",
     },
   };
-  const skills = { prs: [], issues: [], fetchSuccess: true, repo: "anthropics/skills" };
-  const isSummaries = (p: string) => p.includes("`N: <2 sentences>`");
+  const input: TrendsInput = {
+    trending: data,
+    skills: { prs: [], issues: [], fetchSuccess: true, repo: "anthropics/skills" },
+    hf: { models: [], fetchSuccess: true },
+    papers: [
+      {
+        id: "p1",
+        title: "Paper 1",
+        url: "https://arxiv.org/abs/p1",
+        published: "2026-10-20T00:00:00Z",
+        relevance: 0.9,
+        abstract: "Paper abstract.",
+        date: "2026-10-21",
+      },
+    ],
+    stories: [
+      {
+        id: "lobsters:x",
+        source: "lobsters",
+        title: "Essay",
+        url: "https://example.com/essay",
+        discussionUrl: "https://lobste.rs/s/x",
+        points: 40,
+        comments: 60,
+      },
+    ],
+    tracked: [],
+  };
+  const isTrendingSummaries = (p: string) => p.includes("`N: <2 sentences>`");
+  const isRowSummaries = (p: string) => p.includes("research papers and community stories");
+  const isModels = (p: string) => p.includes("model ecosystem analyst");
   const isProse = (p: string) => p.includes("<!-- tables -->");
-  const build = () => buildTrendingReport(data, skills, "00:00", "2026-10-19");
+  const reply = (p: string) =>
+    isTrendingSummaries(p)
+      ? "1: Kilo is an agent.\n2: Fast is a coding agent."
+      : isRowSummaries(p)
+        ? "1: The paper shows X.\n2: An essay on Y."
+        : isModels(p)
+          ? "### OpenRouter usage\n\n- a/b leads.\n\n### Hugging Face trending\n\n| Model |\n| :--- |"
+          : isProse(p)
+            ? "## Highlights\n\n- H.\n\n<!-- tables -->\n\n## Signals\n\nS."
+            : "## Top Skills\n\nK.";
+  const build = (over: Partial<TrendsInput> = {}) =>
+    buildTrendsReport({ ...input, ...over }, "00:00", "2026-10-26");
 
-  it("splices the row summaries and the prose, and adds the Skills section", async () => {
+  it("reads Highlights, Agents & coding tools, Skills, Candidates, Models, Research, Most discussed, Signals", async () => {
     generateBody.mockReset();
-    generateBody.mockImplementation(async (p: string) =>
-      isSummaries(p)
-        ? "1: Kilo is an agent."
-        : isProse(p)
-          ? "## Highlights\n\nH.\n\n<!-- tables -->\n\n## Signals\n\nS."
-          : "## Top Skills\n\nK.",
-    );
+    generateBody.mockImplementation(async (p: string) => reply(p));
     const content = (await build())!.content;
-    expect(content).toMatch(/H\.\n\n## [^\n]+\n\n[\s\S]*\| Kilo is an agent\. \|\n\n## Signals/);
-    expect(content).toContain("## Claude Code Skills");
+    expect(headings(content)).toEqual([
+      "Highlights",
+      TRENDS_REPORT.agentsHeading,
+      TRENDS_REPORT.skillsHeading,
+      TRENDS_REPORT.candidatesHeading,
+      TRENDS_REPORT.modelsHeading,
+      TRENDS_REPORT.researchHeading,
+      TRENDS_REPORT.mostDiscussedHeading,
+      "Signals",
+    ]);
+    expect(content).toContain(`### ${TRENDS_REPORT.radarHeading}`);
+    expect(content).toContain(`### ${TRENDS_REPORT.categoryTitles.coding_agent}`);
     expect(content).toContain("### Top Skills\n\nK.");
-    expect(generateBody).toHaveBeenCalledTimes(3);
+    expect(content).toContain("### OpenRouter usage");
+    expect(content).toContain("| Kilo is an agent. |");
+    expect(content).toContain("| [Paper 1](https://arxiv.org/abs/p1) | The paper shows X. |");
+    expect(content).toContain("| An essay on Y. |");
+    expect(content).toContain("    - id: fast\n      repo: o/fast\n      name: fast");
+    expect(content).not.toContain("<!-- tables -->");
   });
 
-  it("shows the descriptions when the summaries call fails", async () => {
+  it("makes four calls in the first round, then the prose call over the rendered page", async () => {
     generateBody.mockReset();
-    generateBody.mockImplementation(async (p: string) => {
-      if (isSummaries(p)) throw new Error("HTTP 504");
-      return isProse(p) ? "## Highlights\n\nH.\n\n<!-- tables -->" : "K.";
-    });
-    expect((await build())!.content).toContain("| Kilo description. |");
+    generateBody.mockImplementation(async (p: string) => reply(p));
+    await build();
+    const prompts = generateBody.mock.calls.map((c) => c[0]);
+    expect(prompts).toHaveLength(5);
+    expect(isProse(prompts[4]!)).toBe(true);
+    expect(prompts.slice(0, 4).some(isProse)).toBe(false);
+    // The prose call reads the page with the first round's summaries in it.
+    expect(prompts[4]).toContain("| The paper shows X. |");
+    expect(prompts[4]).toContain("### OpenRouter usage");
   });
 
-  it("is still written with the failure notice when the prose call fails", async () => {
+  it("leaves out an empty section, and the failure notice under Highlights when the prose call fails", async () => {
     generateBody.mockReset();
     generateBody.mockImplementation(async (p: string) => {
       if (isProse(p)) throw new Error("HTTP 504");
-      return isSummaries(p) ? "1: S." : "K.";
+      return reply(p);
     });
-    const content = (await build())!.content;
-    expect(content).toContain(MSG.trendingFailed);
-    expect(content).toContain("| S. |");
+    const content = (await build({ papers: [], tracked: [{ id: "f", repo: "O/Fast", name: "Fast" }] }))!
+      .content;
+    expect(headings(content)).toEqual([
+      "Highlights",
+      TRENDS_REPORT.agentsHeading,
+      TRENDS_REPORT.skillsHeading,
+      TRENDS_REPORT.modelsHeading,
+      TRENDS_REPORT.mostDiscussedHeading,
+    ]);
+    expect(content).toContain(`## Highlights\n\n${MSG.summaryFailed}`);
   });
 
-  it("shows the Skills failure notice when the Skills call fails", async () => {
+  it("shows the descriptions when a summaries call fails, and the Skills notice without a Skills fetch", async () => {
     generateBody.mockReset();
     generateBody.mockImplementation(async (p: string) => {
-      if (!isSummaries(p) && !isProse(p)) throw new Error("HTTP 504");
-      return "1: S.";
+      if (isTrendingSummaries(p) || isRowSummaries(p)) throw new Error("HTTP 504");
+      return reply(p);
     });
-    expect((await build())!.content).toContain(MSG.skillsFailed);
+    const content = (await build({ skills: { ...input.skills, fetchSuccess: false } }))!.content;
+    expect(content).toContain("| Kilo description. |");
+    expect(content).toContain("| Paper abstract. |");
+    expect(content).toContain(MSG.skillsFailed);
+    expect(generateBody).toHaveBeenCalledTimes(4);
   });
 
-  it("shows the Skills failure notice without a Skills call when the Skills fetch failed", async () => {
+  it("is skipped without an LLM call when no section has data", async () => {
+    generateBody.mockReset();
+    expect(
+      await build({
+        trending: EMPTY_TRENDING,
+        hf: { models: [], fetchSuccess: false },
+        papers: [],
+        stories: [],
+      }),
+    ).toBeNull();
+    expect(generateBody).not.toHaveBeenCalled();
+  });
+
+  it("stays under 60 KB with the largest plausible inputs", async () => {
+    const sentence =
+      "This summary says what the row is and why it matters to developers in two sentences of plain text.";
+    const summary = `${sentence} ${sentence}`.slice(0, 250);
+    const categories = (
+      ["coding_agent", "harness_framework", "multi_agent", "agent_tooling", "other_agent"] as const
+    ).map((category, c) => ({
+      category,
+      rows: Array.from({ length: 8 }, (_, i) => ({
+        ...githubRow(13 + c * 8 + i, `some-owner-${c}/a-fairly-long-repository-name-${i}`, true),
+        description: "d".repeat(300),
+      })),
+    }));
+    const radar = Array.from({ length: 12 }, (_, i) => ({
+      n: i + 1,
+      keys: [`openrouter:${i}`, `npm:pkg-${i}`, `github:radar-owner/radar-tool-${i}`],
+      name: `Radar Tool ${i}`,
+      url: `https://radar-tool-${i}.example.com/`,
+      description: "d".repeat(300),
+      sources: ["OpenRouter", "npm", "GitHub"] as ("OpenRouter" | "npm" | "GitHub")[],
+      signals: ["🆕 week #3 / month #12", "12,345/week, 4.3x", "1,234 (+567, +85.0%)"],
+      isNew: true,
+      onFire: true,
+      links: [],
+    }));
+    const hfRows = Array.from(
+      { length: 15 },
+      (_, i) =>
+        `| [some-org/A-Model-Name-${i}-Instruct-GGUF](https://huggingface.co/some-org/A-Model-Name-${i}-Instruct-GGUF) | some-org | 1,234 | 123,456 | ${summary} |`,
+    );
+    const big: TrendsInput = {
+      ...input,
+      trending: {
+        ...data,
+        report: {
+          radar,
+          categories,
+          onFire: categories.flatMap((g) =>
+            g.rows.map((r) => ({ fullName: r.fullName, category: g.category })),
+          ),
+          classifiedBy: "jev",
+        },
+      },
+      papers: Array.from({ length: 10 }, (_, i) => ({
+        ...input.papers[0]!,
+        id: `p${i}`,
+        title: `A long paper title about agents, planning and tool use in large language models, part ${i}`,
+        url: `https://arxiv.org/abs/2610.0000${i}`,
+      })),
+      stories: Array.from({ length: 11 }, (_, i) => ({
+        ...input.stories[0]!,
+        id: `hn:${i}`,
+        source: "hn" as const,
+        title: `A fairly long Hacker News story title number ${i} about AI tooling`,
+        url: `https://example.com/a/long/path/to/the/article-${i}`,
+        discussionUrl: `https://news.ycombinator.com/item?id=4100000${i}`,
+      })),
+    };
+    const lines = (count: number) =>
+      Array.from({ length: count }, (_, i) => `${i + 1}: ${summary}`).join("\n");
     generateBody.mockReset();
     generateBody.mockImplementation(async (p: string) =>
-      isSummaries(p) ? "1: S." : "## Highlights\n\nH.\n\n<!-- tables -->",
+      isTrendingSummaries(p)
+        ? lines(52)
+        : isRowSummaries(p)
+          ? lines(21)
+          : isModels(p)
+            ? `### OpenRouter usage\n\n${`- ${summary}\n`.repeat(5)}\n### Hugging Face trending\n\n| Model | Author | Likes | Downloads | Summary |\n| :--- | :--- | ---: | ---: | :--- |\n${hfRows.join("\n")}`
+            : isProse(p)
+              ? `## Highlights\n\n${"x".repeat(2000)}\n\n<!-- tables -->\n\n## Signals\n\n${"x".repeat(2000)}`
+              : `## Top Skills\n\n${"k".repeat(3000)}`,
     );
-    const failed = { ...skills, fetchSuccess: false };
-    const content = (await buildTrendingReport(data, failed, "00:00", "2026-10-19"))!.content;
-    expect(content).toContain(MSG.skillsFailed);
-    expect(generateBody).toHaveBeenCalledTimes(2);
-  });
-
-  it("is skipped without an LLM call when there is no ranked data", async () => {
-    generateBody.mockReset();
-    expect(await buildTrendingReport(EMPTY_TRENDING, skills, "00:00", "2026-10-19")).toBeNull();
-    expect(generateBody).not.toHaveBeenCalled();
+    const content = (await build(big))!.content;
+    const kb = Buffer.byteLength(content, "utf-8") / 1024;
+    expect(kb).toBeLessThan(60);
   });
 });
 

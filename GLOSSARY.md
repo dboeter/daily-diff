@@ -18,10 +18,10 @@ The set of reports of one cadence published for one day; there is a Daily Digest
 _Avoid_: Edition, run output
 
 **Daily Digest**:
-The digest published every day: Agents, Discussions, ArXiv and Web.
+The digest published every day: AI Agents, AI Models & Labs, Policy Watch and Data Engineering Watch.
 
 **Weekly Digest**:
-The digest published once a week, alongside that day's Daily Digest: Trending and Models. The same run adds Dev.to and Lobste.rs to that day's Discussions report.
+The digest published once a week, alongside that day's Daily Digest: the Trends page.
 _Avoid_: Weekly rollup (the retired summary of a week's daily digests)
 
 **Report**:
@@ -99,11 +99,11 @@ An item that first appeared in the ecosystem recently, marked 🆕.
 _Avoid_: Fresh, hot (for an item that was already around)
 
 **Rising**:
-An existing item whose usage jumped recently; not New, however steep the jump. Not marked: everything in the trending report is supposed to be rising.
+An existing item whose usage jumped recently; not New, however steep the jump. Not marked: everything in the Trends page's agents tables is supposed to be rising.
 _Avoid_: New, trending (for momentum alone)
 
 **Trending**:
-An item in the weekly trending report two weeks in a row or more, marked 🔥.
+An item in the weekly Trends page's agents tables two weeks in a row or more, marked 🔥.
 _Avoid_: Hot, popular (for a first appearance or a one-week jump)
 
 **Established Repo**:
@@ -121,7 +121,7 @@ A trending item that belongs in one of the Categories; any other item is Out of 
 _Avoid_: Relevant, irrelevant
 
 **Category**:
-The kind of project an In Scope item is, which decides its table in the Trending report. There are five:
+The kind of project an In Scope item is, which decides its table on the Trends page. There are five:
 
 - **Coding Agent**: an agent that writes code.
 - **Agent Harness & Framework**: a harness, SDK, framework or runtime for building agents.
@@ -134,7 +134,7 @@ A product someone runs on its own: a CLI, IDE, app or cloud agent; plugins, MCP 
 _Avoid_: Product, app (for this distinction)
 
 **Radar**:
-The Trending report's list of Standalone Tools worth watching this week, New or not, drawn from GitHub, OpenRouter and npm.
+The Trends page's list of Standalone Tools worth watching this week, New or not, drawn from GitHub, OpenRouter and npm.
 _Avoid_: New-agents list, watchlist
 
 **Cross-source Match**:

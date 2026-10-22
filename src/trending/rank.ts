@@ -1,10 +1,10 @@
 /**
- * Selection, ranking and numbering for the weekly trending report — pure, except
- * for loading and saving the star history (`digests/trending-state.json`).
+ * Selection, ranking and numbering for the weekly Trends page's agents tables —
+ * pure, except for loading and saving the star history (`digests/trending-state.json`).
  *
  * Code decides which items appear, in which order, with which 🆕 and 🔥 flags
- * and which numbers; the LLM only writes the per-row summaries and the prose
- * (`buildTrendingSummariesPrompt`, `buildTrendingProsePrompt`). Two tables:
+ * and which numbers; the LLM only writes the per-row summaries
+ * (`buildTrendingSummariesPrompt`) and the page's prose (`buildTrendsProsePrompt`). Two tables:
  * the Agent & Coding Tool Radar (OpenRouter, npm and new GitHub repos) and the
  * GitHub category tables. Scope and category come from a `Classification` per
  * item (`trending/jev.ts`).
@@ -85,6 +85,11 @@ export interface TrendingReportData {
   radar: Numbered<RadarRow>[];
   /** Fixed CATEGORIES order, empty ones omitted. */
   categories: { category: Category; rows: Numbered<GithubRow>[] }[];
+  /**
+   * The 🔥 GitHub repos with their category: category-table rows and Radar
+   * GitHub members that were in last week's report. Trends' Candidates to track.
+   */
+  onFire: { fullName: string; category: Category }[];
   classifiedBy: "jev" | "topics";
   /** `buildTrendingRankingFile` output when Jev classified or matched, saved next to the report. */
   rankingFile?: string;
@@ -678,7 +683,21 @@ export function selectTrendingReport(
       rows: g.rows.map((r) => ({ ...r, onFire: onFire([r.key]), n: ++n })),
     }));
 
-  return { radar, categories, classifiedBy };
+  const radarFire = radar.flatMap((r) =>
+    r.keys.flatMap((key) => {
+      const category = classifications.get(key)?.category;
+      return key.startsWith("github:") &&
+        lastWeek.has(key.toLowerCase()) &&
+        category &&
+        category !== "out_of_scope"
+        ? [{ fullName: key.slice("github:".length), category }]
+        : [];
+    }),
+  );
+  const tableFire = categories.flatMap((g) =>
+    g.rows.filter((r) => r.onFire).map((r) => ({ fullName: r.fullName, category: g.category })),
+  );
+  return { radar, categories, onFire: [...tableFire, ...radarFire], classifiedBy };
 }
 
 /**

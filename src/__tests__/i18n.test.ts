@@ -44,7 +44,8 @@ describe("dynamic content helpers", () => {
 
 describe("REPORT_LABELS", () => {
   it("keeps the retired reports for archived days", () => {
-    for (const id of ["ai-cli", "ai-ph", "ai-weekly", "ai-monthly"]) expect(REPORT_LABELS[id]).toBeTruthy();
+    for (const id of ["ai-cli", "ai-ph", "ai-weekly", "ai-monthly", "ai-trending", "ai-hf", "ai-arxiv"])
+      expect(REPORT_LABELS[id]).toBeTruthy();
   });
 });
 

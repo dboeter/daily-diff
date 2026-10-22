@@ -280,7 +280,7 @@ export const watchlisted = (
 };
 
 /**
- * EU data law (config.yml `policy.data_law`): linked from the data report's Worth a Look. Not from a US
+ * EU data law (config.yml `policy.data_law`): linked from the data report's EU data law section. Not from a US
  * government source: a US bill can be called "... Data Act". US news feeds still count (Covington on the EU Data Act).
  */
 export const isDataLaw = (

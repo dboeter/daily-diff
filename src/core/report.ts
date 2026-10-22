@@ -18,9 +18,9 @@ import { stripModelTitle } from "../reports/report-builders.ts";
 // the output cap of gpt-4o, the OpenAI and Copilot default; higher budgets would
 // make those providers reject the request.
 export const LLM_TOKENS_DEFAULT = 8192;
-/** The agents-report sections, the table-formatted listing reports
- *  (ArXiv, models), the page summaries calls and both trending calls: multi-row tables plus
- *  2-sentence summaries, and the reasoning that counts against the budget. */
+/** The agents-report sections, the pages' row-summaries and Highlights calls and
+ *  the Trends calls (Skills aside): multi-row tables plus 2-sentence summaries,
+ *  and the reasoning that counts against the budget. */
 export const LLM_TOKENS_LISTING = 16384;
 import {
   type LlmProvider,

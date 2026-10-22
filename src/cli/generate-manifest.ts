@@ -14,10 +14,14 @@ const REPORT_FILES = [
   // No longer generated — listed only so archived reports stay reachable from
   // the sidebar and RSS feed. October 2026: ai-cli merged into ai-agents, ai-ph
   // dropped, ai-infra folded into ai-agents, ai-community into ai-hn, then ai-hn
-  // into the pages' Spotted sections and ai-web into ai-models; the rollups
-  // were removed earlier.
+  // into the pages' Spotted sections and ai-web into ai-models, then
+  // ai-trending, ai-hf and ai-arxiv into ai-trends; the rollups were removed
+  // earlier.
   "ai-hn",
   "ai-web",
+  "ai-trending",
+  "ai-hf",
+  "ai-arxiv",
   "ai-infra",
   "ai-community",
   "ai-cli",

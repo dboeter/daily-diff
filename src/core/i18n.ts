@@ -12,7 +12,6 @@ export const MSG = {
   projectsNoActivity: "No stable releases, hot issues or news items today.",
   summaryFailed: "⚠️ Summary generation failed.",
   skillsFailed: "⚠️ Skills summary generation failed.",
-  trendingFailed: "⚠️ Trending report generation failed.",
 } as const;
 
 // ---------------------------------------------------------------------------
@@ -30,11 +29,9 @@ export const MSG = {
 export const REPORTS = {
   "ai-agents": { emoji: "🤖", name: "AI Agents", label: "agents" },
   "ai-models": { emoji: "🧠", name: "AI Models & Labs", label: "models" },
-  "ai-arxiv": { emoji: "📚", name: "AI Research", label: "arxiv" },
   "ai-policy": { emoji: "⚖️", name: "Policy Watch", label: "policy" },
   "ai-data": { emoji: "🗄️", name: "Data Engineering Watch", label: "data" },
-  "ai-trending": { emoji: "📈", name: "Agent & AI Coding Trends", label: "trending" },
-  "ai-hf": { emoji: "🧠", name: "AI Models", label: "hf" },
+  "ai-trends": { emoji: "📈", name: "Trends", label: "trends" },
 } as const satisfies Record<string, { emoji: string; name: string; label: string }>;
 
 export type ReportId = keyof typeof REPORTS;
@@ -45,7 +42,7 @@ export const LIVE_REPORT_IDS = Object.keys(REPORTS) as ReportId[];
  * rest are daily. The one list: the issue retention groups (github.ts) and the
  * sidebar's "This week" group (manifest.json `weekly`) derive from it.
  */
-export const WEEKLY_REPORT_IDS: ReportId[] = ["ai-trending", "ai-hf"];
+export const WEEKLY_REPORT_IDS: ReportId[] = ["ai-trends"];
 
 /** A report file's H1. */
 export const reportHeading = (id: ReportId, dateStr: string) => `# ${REPORTS[id].name} ${dateStr}`;
@@ -69,7 +66,7 @@ const SOURCES = "Sources:";
 export const REPORT_META = {
   sources: (list: string) => `${SOURCES} ${list}`,
   generated: (utcStr: string) => `Generated: ${utcStr} UTC`,
-  /** After a listing's item count when Jev ordered it (ArXiv, policy). */
+  /** After a listing's item count when Jev ordered it (policy). */
   jevRanked: " ranked by [Jev](https://typesafe.ai) relevance",
 } as const;
 
@@ -78,26 +75,36 @@ export const OVERVIEW = { emoji: "📅", name: "Overview" } as const;
 
 /**
  * Section headings of the LLM-written reports: every page opens with
- * Highlights; the listing reports also end in Signals → Worth a Look. Until
- * October 2026 each prompt named its own ("Today's Highlights" in a weekly
- * report, "Research Trend Signal", "Community Pulse", "Worth Deep Reading",
- * "Worth Exploring", …).
+ * Highlights; the weekly Trends page ends in Signals, the one place for trend
+ * claims. Until October 2026 each prompt named its own ("Today's Highlights"
+ * in a weekly report, "Research Trend Signal", "Community Pulse", …).
  */
 export const SECTIONS = {
   highlights: "Highlights",
   signals: "Signals",
-  worthALook: "Worth a Look",
 } as const;
 
-// Weekly since October 2026.
-export const TRENDING_REPORT = {
-  sources: "GitHub Trending + GitHub Search API + OpenRouter + npm",
+// Weekly: what is moving. The prose call writes Highlights and Signals around the rest.
+export const TRENDS_REPORT = {
+  sources:
+    "GitHub Trending + GitHub Search API + OpenRouter + npm + Hugging Face + arXiv + Hacker News + Lobste.rs + Dev.to",
+  agentsHeading: "Agents & coding tools",
   skillsHeading: "Claude Code Skills",
   skillsSource: (repo: string) => `> Source: [${repo}](https://github.com/${repo})`,
-  // Tables rendered in code (renderTrendingTables); the prose headings are handed to the LLM.
+  /** Code only: 🔥 GitHub repos in no config.yml section, with the lines to add. */
+  candidatesHeading: "Candidates to track",
+  candidatesIntro:
+    "These repos trended two weeks in a row (🔥) and are not tracked. To track one, add its lines to `config.yml`.",
+  candidatesSection: (key: string) => `\`${key}.repos\`:`,
+  modelsHeading: "Models",
+  openRouterHeading: "OpenRouter usage",
+  hfHeading: "Hugging Face trending",
+  researchHeading: "Research",
+  researchTableHeader: "| Paper | Summary |\n| :--- | :--- |",
+  mostDiscussedHeading: "Most discussed",
+  // Tables rendered in code (renderTrendingTables), one `##` per table, nested under agentsHeading.
   radarHeading: "🚀 Agent & Coding Tool Radar",
   radarHeader: "| Tool | Source | Signal | Summary |\n| :--- | :--- | :--- | :--- |",
-  categoriesHeading: "Top Projects by Category",
   categoryHeader:
     "| Project | Lang | Stars (total / this week, %) | Summary |\n| :--- | :--- | ---: | :--- |",
   categoryTitles: {
@@ -118,11 +125,6 @@ export const SPOTTED = {
   /** The Discussion cell, e.g. "312 points, 95 comments"; a Dev.to story's points are reactions. */
   counts: (source: "hn" | "lobsters" | "devto", points: number, comments: number) =>
     `${points} ${source === "devto" ? "reactions" : "points"}, ${comments} comments`,
-} as const;
-
-export const ARXIV_REPORT = {
-  source: "[ArXiv](https://arxiv.org/) (cs.AI, cs.CL, cs.LG)",
-  papersHeading: "Key Papers",
 } as const;
 
 // Daily: AI legislation, regulation and official guidance. The table is rendered in code.
@@ -178,13 +180,6 @@ export const DATA_REPORT = {
   /** The last section, code only: links to today's Policy Watch items that are EU data law. */
   dataLawHeading: "EU data law",
   noNewItems: "No vendor items, releases, hot issues or news in the tracked data projects, skipping report.",
-} as const;
-
-// Weekly: Hugging Face trending models plus OpenRouter token usage, which
-// moved here from the trending report in October 2026.
-export const MODELS_REPORT = {
-  hfHeading: "Hugging Face Trending",
-  openRouterHeading: "OpenRouter Usage",
 } as const;
 
 // Daily: Anthropic and OpenAI posts, models newly listed on OpenRouter, stealth models, Spotted.
@@ -244,6 +239,11 @@ export const REPORT_LABELS: Record<string, string> = {
   // to each page's Spotted section, the lab posts to ai-models.
   "ai-hn": "AI Discussions",
   "ai-web": "Lab Announcements",
+  // Retired in October 2026: trending, the weekly models report and arXiv
+  // research became sections of the weekly Trends page (ai-trends).
+  "ai-trending": "Agent & AI Coding Trends",
+  "ai-hf": "AI Models",
+  "ai-arxiv": "AI Research",
   // No longer generated (October 2026: ai-cli merged into ai-agents, ai-ph
   // dropped); kept so archived reports keep a title.
   "ai-cli": "AI CLI Tools Digest",

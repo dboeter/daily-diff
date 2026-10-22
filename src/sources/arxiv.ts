@@ -30,13 +30,14 @@ export interface ArxivPaper {
 }
 
 export interface ArxivData {
-  papers: ArxivPaper[];
+  /** Most relevant first, `relevance` set on a Jev run (absent for a paper whose scoring call failed). */
+  papers: (ArxivPaper & { relevance?: number })[];
   fetchSuccess: boolean;
   /** How `papers` was cut down from the 48h pool. */
   rankedBy: "jev" | "recency";
   /** `buildRankingFile` output when ranked by Jev, saved next to the report. */
   rankingFile?: string;
-  /** State to save once the report is written; absent when there were no new papers. */
+  /** State to save after the run's health gate; absent when there were no new papers. */
   nextState?: ArxivState;
 }
 
@@ -67,8 +68,8 @@ const ARXIV_PAGE_SIZE = 300;
  * they cover the lighter weekend span; the cap only bounds a run after a gap.
  */
 const ARXIV_MAX_PAGES = 4;
-/** Papers handed to the digest prompt (with full abstracts). */
-export const ARXIV_PROMPT_PAPERS = 40;
+/** Papers kept from the ranked pool; the research state takes its top 15. */
+export const ARXIV_KEPT_PAPERS = 40;
 const API_URL = "https://export.arxiv.org/api/query";
 
 /** ArXiv categories to search. */
@@ -347,7 +348,7 @@ export async function rankByRelevance(
     .sort((a, b) => (b.jev?.relevance ?? -1) - (a.jev?.relevance ?? -1));
 }
 
-/** Papers kept in the ranking file — the prompt's 40 plus the next tier, for tuning. */
+/** Papers kept in the ranking file — the 40 kept papers plus the next tier, for tuning. */
 const RANKING_FILE_PAPERS = 100;
 
 /**
@@ -484,7 +485,9 @@ async function fetchArxiv(dateStr: string, state: ArxivState | null): Promise<Ar
   const apiKey = process.env["TYPESAFE_API_KEY"];
   const ranked = apiKey ? await rankByRelevance(recent, apiKey) : null;
   if (apiKey && !ranked) console.error("  [arxiv] Too many Jev failures — falling back to recency");
-  const papers = (ranked ? ranked.map((r) => r.paper) : recent).slice(0, ARXIV_PROMPT_PAPERS);
+  const papers = (
+    ranked ? ranked.map((r) => (r.jev ? { ...r.paper, relevance: r.jev.relevance } : r.paper)) : recent
+  ).slice(0, ARXIV_KEPT_PAPERS);
   const rankedBy = ranked ? "jev" : "recency";
   const nextState = nextArxivState(recent, cutoff, dateStr);
 

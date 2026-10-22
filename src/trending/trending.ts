@@ -84,7 +84,6 @@ export const EMPTY_OPENROUTER: OpenRouterData = {
   apps: [],
   topModels: [],
   topModelsDate: "",
-  newModels: [],
   fetchSuccess: false,
 };
 export const EMPTY_NPM: NpmData = { rising: [], top: [], fetchSuccess: false };

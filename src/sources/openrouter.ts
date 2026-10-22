@@ -9,9 +9,9 @@
  * sources. Category pages (`/apps/category/cli-agent`) load data client-side,
  * so `/apps` (top 200 per day/week/month + trending) is the widest view.
  *
- * New models and stealth models come from the official `/api/v1/models` catalog.
- * Apps and models feed the weekly trending report; the catalog is also fetched
- * daily for the models page's new and stealth models (`fetchModelCatalogDaily`).
+ * Apps and model usage feed the weekly Trends page. New and stealth models come
+ * from the official `/api/v1/models` catalog, fetched daily for the models
+ * page (`fetchModelCatalogDaily`).
  */
 
 // ---------------------------------------------------------------------------
@@ -61,7 +61,6 @@ export interface OpenRouterData {
   apps: OpenRouterApp[];
   topModels: OpenRouterModel[];
   topModelsDate: string;
-  newModels: OpenRouterNewModel[];
   fetchSuccess: boolean;
 }
 
@@ -89,8 +88,6 @@ const AGENT_MAX_WEEK_RANK = 100;
 const NEW_APP_DAYS = 30;
 /** Cap on apps sent to the LLM. */
 const MAX_APPS = 60;
-/** New-model window: the trending report is weekly, so one week plus a day of slack for a delayed cron. */
-const NEW_MODEL_DAYS = 8;
 /** The models page's window, 2 days for a delayed cron; its state drops the models an earlier page listed. */
 const LISTED_MODEL_DAYS = 2;
 
@@ -332,11 +329,7 @@ async function fetchModelCatalog(): Promise<ApiModel[]> {
   return data;
 }
 
-export function selectNewModels(
-  data: ApiModel[],
-  days = NEW_MODEL_DAYS,
-  now = Date.now(),
-): OpenRouterNewModel[] {
+export function selectNewModels(data: ApiModel[], days: number, now = Date.now()): OpenRouterNewModel[] {
   const cutoff = now / 1000 - days * 24 * 60 * 60;
   return data
     .filter((m) => m.created >= cutoff)
@@ -351,7 +344,7 @@ export function selectNewModels(
 }
 
 export async function fetchOpenRouterData(): Promise<OpenRouterData> {
-  const [apps, top, catalog] = await Promise.all([
+  const [apps, top] = await Promise.all([
     fetchHtml(APPS_URL)
       .then((html) => selectAgentApps(parseOpenRouterApps(html)))
       .catch((err): OpenRouterApp[] => {
@@ -364,26 +357,18 @@ export async function fetchOpenRouterData(): Promise<OpenRouterData> {
         console.error(`  [openrouter] rankings fetch failed: ${err}`);
         return { models: [], date: "" };
       }),
-    fetchModelCatalog().catch((err): ApiModel[] | null => {
-      console.error(`  [openrouter] models fetch failed: ${err}`);
-      return null;
-    }),
   ]);
-  const newModels = catalog ? selectNewModels(catalog) : [];
 
   if (apps.length === 0) console.error("  [openrouter] Parsed 0 apps — payload structure may have changed");
   if (top.models.length === 0)
     console.error("  [openrouter] Parsed 0 ranked models — payload structure may have changed");
-  console.log(
-    `  [openrouter] ${apps.length} agent apps, ${top.models.length} ranked models, ${newModels.length} new models`,
-  );
+  console.log(`  [openrouter] ${apps.length} agent apps, ${top.models.length} ranked models`);
 
   return {
     apps,
     topModels: top.models,
     topModelsDate: top.date,
-    newModels,
-    fetchSuccess: apps.length > 0 || top.models.length > 0 || catalog !== null,
+    fetchSuccess: apps.length > 0 || top.models.length > 0,
   };
 }
 

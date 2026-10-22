@@ -3,6 +3,8 @@ import {
   buildProjectReportContent,
   buildStealthSection,
   renderTrendingTables,
+  renderCandidates,
+  renderResearchTable,
   renderPolicyTable,
   stripModelTitle,
   highlightsOnly,
@@ -12,7 +14,7 @@ import {
 } from "../reports/report-builders.ts";
 import type { TrendingReportData } from "../trending/rank.ts";
 import { numberRows } from "../reports/summarized-table.ts";
-import { MSG, TRENDING_REPORT } from "../core/i18n.ts";
+import { MSG, TRENDS_REPORT } from "../core/i18n.ts";
 import type { ProjectActivity } from "../reports/prompts.ts";
 import type { GitHubRelease } from "../core/github.ts";
 
@@ -264,6 +266,7 @@ function trendingReport(over: Partial<TrendingReportData> = {}): TrendingReportD
         ],
       },
     ],
+    onFire: [],
     classifiedBy: "topics",
     ...over,
   };
@@ -272,14 +275,14 @@ function trendingReport(over: Partial<TrendingReportData> = {}): TrendingReportD
 describe("renderTrendingTables", () => {
   it("renders both sections with summaries, falling back to descriptions", () => {
     const md = renderTrendingTables(trendingReport(), new Map([[1, "Kilo is | an agent."]]));
-    expect(md).toContain(`## ${TRENDING_REPORT.radarHeading}\n\n${TRENDING_REPORT.radarHeader}\n`);
+    expect(md).toContain(`## ${TRENDS_REPORT.radarHeading}\n\n${TRENDS_REPORT.radarHeader}\n`);
     expect(md).toContain(
       "| [Kilo](https://kilo.ai/) | OpenRouter; npm | 🆕 week #3 / month —; 1,000/week, 4.3x | Kilo is \\| an agent. |",
     );
     // No url → plain name; pipe and newline escaped in the description fallback.
     expect(md).toContain("| bare | npm | 10/week, 1.0x | A \\| piped description |");
     expect(md).toContain(
-      `## ${TRENDING_REPORT.categoriesHeading}\n\n### ${TRENDING_REPORT.categoryTitles.coding_agent}`,
+      `## ${TRENDS_REPORT.categoryTitles.coding_agent}\n\n${TRENDS_REPORT.categoryHeader}`,
     );
     // Long description cut at a word boundary under 160 chars.
     const row = md.split("\n").find((l) => l.startsWith("| [o/r]"))!;
@@ -312,11 +315,62 @@ describe("renderTrendingTables", () => {
 
   it("omits empty sections and returns empty when both are", () => {
     const noRadar = renderTrendingTables(trendingReport({ radar: [] }), new Map());
-    expect(noRadar).not.toContain(TRENDING_REPORT.radarHeading);
-    expect(noRadar.startsWith(`## ${TRENDING_REPORT.categoriesHeading}`)).toBe(true);
+    expect(noRadar).not.toContain(TRENDS_REPORT.radarHeading);
+    expect(noRadar.startsWith(`## ${TRENDS_REPORT.categoryTitles.coding_agent}`)).toBe(true);
     const noCategories = renderTrendingTables(trendingReport({ categories: [] }), new Map());
-    expect(noCategories).not.toContain(TRENDING_REPORT.categoriesHeading);
+    expect(noCategories).not.toContain(TRENDS_REPORT.categoryTitles.coding_agent);
     expect(renderTrendingTables(trendingReport({ radar: [], categories: [] }), new Map())).toBe("");
+  });
+});
+
+describe("renderCandidates", () => {
+  const tracked = [{ id: "claude-code", repo: "anthropics/claude-code", name: "Claude Code" }];
+
+  it("lists the 🔥 repos in no config.yml section by the section they would join, with their config lines", () => {
+    const md = renderCandidates(
+      [
+        { fullName: "Org/Fast-Agent", category: "coding_agent" },
+        { fullName: "ANTHROPICS/claude-code", category: "coding_agent" },
+        { fullName: "o/mux", category: "multi_agent" },
+        { fullName: "o/tool", category: "agent_tooling" },
+        { fullName: "o/jobs", category: "other_agent" },
+      ],
+      tracked,
+    );
+    expect(md).toBe(
+      `## ${TRENDS_REPORT.candidatesHeading}\n\n${TRENDS_REPORT.candidatesIntro}\n\n` +
+        "`agents.repos`:\n\n```yaml\n    - id: fast-agent\n      repo: Org/Fast-Agent\n      name: Fast-Agent\n```\n\n" +
+        "`infra.repos`:\n\n```yaml\n    - id: mux\n      repo: o/mux\n      name: mux\n" +
+        "    - id: tool\n      repo: o/tool\n      name: tool\n```",
+    );
+  });
+
+  it("is empty when every 🔥 repo is tracked or an Other Agent, or there are none", () => {
+    expect(
+      renderCandidates([{ fullName: "anthropics/claude-code", category: "coding_agent" }], tracked),
+    ).toBe("");
+    expect(renderCandidates([{ fullName: "o/jobs", category: "other_agent" }], tracked)).toBe("");
+    expect(renderCandidates([], tracked)).toBe("");
+  });
+});
+
+describe("renderResearchTable", () => {
+  it("links each paper, with its summary or else its abstract", () => {
+    const paper = (n: number) => ({
+      n,
+      id: `p${n}`,
+      title: `Paper ${n}`,
+      url: `https://arxiv.org/abs/p${n}`,
+      published: "2026-10-20T00:00:00Z",
+      relevance: 0.5,
+      abstract: `Abstract ${n}.`,
+      date: "2026-10-21",
+    });
+    expect(renderResearchTable([paper(1), paper(2)], new Map([[1, "Shows X."]]))).toBe(
+      `## ${TRENDS_REPORT.researchHeading}\n\n${TRENDS_REPORT.researchTableHeader}\n` +
+        "| [Paper 1](https://arxiv.org/abs/p1) | Shows X. |\n| [Paper 2](https://arxiv.org/abs/p2) | Abstract 2. |",
+    );
+    expect(renderResearchTable([], new Map())).toBe("");
   });
 });
 
@@ -471,16 +525,16 @@ describe("report bar", () => {
   const url = "https://example.com/dd";
 
   it("links the day's other reports and the overview; the current one is bold, unlinked", () => {
-    const bar = renderReportBar("ai-models", ["ai-agents", "ai-models", "ai-arxiv"], "2026-10-12", url);
+    const bar = renderReportBar("ai-models", ["ai-agents", "ai-models", "ai-trends"], "2026-10-12", url);
     expect(bar).toBe(
       `[📅 Overview](${url}/#2026-10-12) · [🤖 AI Agents](${url}/#2026-10-12/ai-agents) · ` +
-        `**🧠 AI Models & Labs** · [📚 AI Research](${url}/#2026-10-12/ai-arxiv)`,
+        `**🧠 AI Models & Labs** · [📈 Trends](${url}/#2026-10-12/ai-trends)`,
     );
   });
 
   it("orders the links like REPORTS, whatever order the reports were saved in", () => {
-    const bar = renderReportBar("ai-agents", ["ai-arxiv", "ai-agents"], "2026-10-12", url);
-    expect(bar.indexOf("AI Agents")).toBeLessThan(bar.indexOf("AI Research"));
+    const bar = renderReportBar("ai-agents", ["ai-trends", "ai-agents"], "2026-10-12", url);
+    expect(bar.indexOf("AI Agents")).toBeLessThan(bar.indexOf("Trends"));
   });
 
   it("goes under the H1", () => {

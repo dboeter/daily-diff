@@ -28,6 +28,11 @@ export interface Story {
   published: string; // ISO
 }
 
+/** What a story table row reads (`renderSpottedTable`): a Spotted row, or a Most discussed row from the log. */
+export type StoryRow = Numbered<
+  Pick<Story, "id" | "source" | "title" | "url" | "discussionUrl" | "points" | "comments" | "description">
+>;
+
 /** The link's host, which often says what a title does not (arxiv.org, a lab's blog); "" for a bad URL. */
 export const siteOf = (url: string): string => {
   try {
@@ -86,6 +91,7 @@ export interface LoggedStory {
   discussionUrl: string;
   points: number; // latest fetched
   comments: number; // latest fetched
+  description?: string; // cut at LOGGED_DESCRIPTION_CHARS, for Trends' Most discussed summaries
   firstSeen: string; // CST date
   lastSeen: string; // CST date
   shown?: string; // CST date a page first showed it
@@ -100,6 +106,9 @@ export const SPOTTED_LOG_FILE = path.join("digests", "spotted-log.json");
  * this long does not return to any source's window.
  */
 const LOG_UNSEEN_DAYS = 8;
+
+/** A logged description's length: enough for a summary, without growing the committed log much. */
+const LOGGED_DESCRIPTION_CHARS = 300;
 
 /** Missing or malformed → empty: the log holds no hand edits, so a malformed one is overwritten. */
 export function loadSpottedLog(file = SPOTTED_LOG_FILE): SpottedLog {
@@ -142,6 +151,7 @@ export function nextLog(
       discussionUrl: s.discussionUrl,
       points: s.points,
       comments: s.comments,
+      ...(s.description ? { description: s.description.slice(0, LOGGED_DESCRIPTION_CHARS) } : {}),
       firstSeen: prev?.firstSeen ?? dateStr,
       lastSeen: dateStr,
       ...(prev?.shown ? { shown: prev.shown } : {}),
@@ -188,5 +198,36 @@ export function selectSpotted(stories: Story[], pageOf: (story: Story) => Spotte
           .map((s) => ({ ...s, page })),
       ),
     ),
+  );
+}
+
+/** Trends' Most discussed per source, sources in this order; every topic counts. */
+export const MOST_DISCUSSED_PER_SOURCE: Record<StorySource, number> = { hn: 5, lobsters: 3, devto: 3 };
+
+/**
+ * Trends' Most discussed: the logged stories first seen in the 7 days before
+ * the run (the run's own stories enter the log after the page is built, so
+ * each day counts in one week), per source the top MOST_DISCUSSED_PER_SOURCE
+ * by comments, shown on a daily page or not. Unnumbered: the page numbers them
+ * after its papers.
+ */
+export function mostDiscussed(log: SpottedLog, dateStr: string): Omit<StoryRow, "n">[] {
+  const from = daysBefore(dateStr, 7);
+  const week = Object.entries(log.items).filter(([, e]) => e.firstSeen >= from && e.firstSeen < dateStr);
+  return (Object.keys(MOST_DISCUSSED_PER_SOURCE) as StorySource[]).flatMap((source) =>
+    week
+      .filter(([, e]) => e.source === source)
+      .sort(([, a], [, b]) => b.comments - a.comments)
+      .slice(0, MOST_DISCUSSED_PER_SOURCE[source])
+      .map(([id, e]) => ({
+        id,
+        source: e.source,
+        title: e.title,
+        url: e.url,
+        discussionUrl: e.discussionUrl,
+        points: e.points,
+        comments: e.comments,
+        ...(e.description ? { description: e.description } : {}),
+      })),
   );
 }

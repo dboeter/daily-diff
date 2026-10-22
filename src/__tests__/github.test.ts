@@ -429,6 +429,18 @@ describe("closeSupersededIssues", () => {
     expect(closed.sort()).toEqual([1, 2]);
   });
 
+  it("closes the retired trending, models and arXiv reports' last issues as daily ones", async () => {
+    const { closed } = mockIssues([
+      { number: 1, created_at: "2026-10-18T23:10:00Z", labels: ["trending"] },
+      { number: 2, created_at: "2026-10-18T23:10:00Z", labels: ["hf"] },
+      { number: 3, created_at: "2026-10-21T23:10:00Z", labels: ["arxiv"] },
+      { number: 4, created_at: "2026-10-22T23:10:00Z", labels: ["models"] },
+    ]);
+
+    expect(await closeSupersededIssues()).toBe(3);
+    expect(closed.sort()).toEqual([1, 2, 3]);
+  });
+
   it("closes nothing when only the newest day is open", async () => {
     const { closed } = mockIssues([
       { number: 1, created_at: "2026-08-27T23:10:00Z" },
@@ -440,12 +452,11 @@ describe("closeSupersededIssues", () => {
   });
 
   it("keeps the newest weekly issue open through the week", async () => {
-    // Monday 2026-10-05 CST: weekly hf + trending, and the daily agents report.
+    // Monday 2026-10-05 CST: weekly Trends and the daily agents report.
     // By Thursday's run, only the daily report is superseded.
     const { closed } = mockIssues([
       { number: 1, created_at: "2026-10-04T22:40:00Z", labels: ["agents"] },
-      { number: 2, created_at: "2026-10-04T22:41:00Z", labels: ["hf"] },
-      { number: 3, created_at: "2026-10-04T22:41:00Z", labels: ["trending"] },
+      { number: 2, created_at: "2026-10-04T22:41:00Z", labels: ["trends"] },
       { number: 4, created_at: "2026-10-07T22:40:00Z", labels: ["agents"] },
     ]);
 
@@ -455,8 +466,8 @@ describe("closeSupersededIssues", () => {
 
   it("closes a weekly issue once the next week's edition is open", async () => {
     const { closed } = mockIssues([
-      { number: 1, created_at: "2026-09-27T22:41:00Z", labels: ["hf"] },
-      { number: 2, created_at: "2026-10-04T22:41:00Z", labels: ["hf"] },
+      { number: 1, created_at: "2026-09-27T22:41:00Z", labels: ["trends"] },
+      { number: 2, created_at: "2026-10-04T22:41:00Z", labels: ["trends"] },
       { number: 3, created_at: "2026-10-04T22:40:00Z", labels: ["agents"] },
     ]);
 
