@@ -433,7 +433,6 @@ function escapeHtml(s) {
 // Highlights heading (SECTIONS).
 let DATES = [];
 let WEEKLY = [];
-let FEEDS = {};
 let COLORS = {};
 let OVERVIEW_LABEL = 'Overview';
 let COMING_UP_HEADING = 'Coming up';
@@ -579,11 +578,7 @@ function pageNav(date, report) {
   const prev = prevReportDay && prevReportDay !== older
     ? `<a href="#${pageKey(prevReportDay.date, report)}">Previous ${escapeHtml(LABELS[report] || report)}: ${prevReportDay.date}</a>`
     : '';
-  // A live page links its own feed (manifest `feeds`); retired reports have none.
-  const feed = report && FEEDS[report]
-    ? `<a href="./${FEEDS[report]}" title="RSS feed of ${escapeHtml(LABELS[report] || report)}">RSS feed</a>`
-    : '';
-  const mid = `<span class="mid">${[prev, feed].filter(Boolean).join(' · ')}</span>`;
+  const mid = `<span class="mid">${prev}</span>`;
   const right = newer ? `<a href="${href(newer)}">${newer.date} →</a>` : '<span></span>';
   return `<nav class="page-nav">${left}${mid}${right}</nav>`;
 }
@@ -941,12 +936,11 @@ window.addEventListener('hashchange', followHash);
   try {
     const res = await fetch('./manifest.json');
     if (!res.ok) throw new Error('manifest.json not found');
-    const { dates, labels, weekly, feeds, colors, overview, comingUp, highlights, proseColumns } = await res.json();
+    const { dates, labels, weekly, colors, overview, comingUp, highlights, proseColumns } = await res.json();
     if (!dates?.length) throw new Error('manifest is empty');
     LABELS = labels ?? {};
     DATES = dates;
     WEEKLY = weekly ?? [];
-    FEEDS = feeds ?? {};
     COLORS = colors ?? {};
     OVERVIEW_LABEL = overview ?? 'Overview';
     COMING_UP_HEADING = comingUp ?? 'Coming up';
