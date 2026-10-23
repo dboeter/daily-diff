@@ -153,6 +153,12 @@
     }
     .date-hdr:hover, .date-hdr.lit { color: var(--text); }
     .date-hdr.search-hit { color: var(--link); }
+    /* The newest run: its day and a tag, so it stands out from the archive. Not green: green means added. */
+    .date-hdr.latest { color: var(--text); font-weight: 600; }
+    .run-tag {
+      margin-left: 4px; padding: 1px 6px; border: 1px solid var(--link); border-radius: 4px;
+      font-size: 11px; font-weight: 500; letter-spacing: 0.04em; text-transform: uppercase; color: var(--link);
+    }
     .arr { font-size: 8px; transition: transform 0.2s; display: inline-block; }
     .date-group.open .arr { transform: rotate(90deg); }
     .rpt-list { max-height: 0; overflow: hidden; transition: max-height 0.25s ease; }
@@ -816,14 +822,24 @@ function buildDateGroup(date, reports, isFirst) {
   grp.dataset.date = date;
 
   const hdr = document.createElement('div');
-  hdr.className = 'date-hdr';
+  hdr.className = 'date-hdr' + (isFirst ? ' latest' : '');
   // Show only the day part (DD) since month is already in the parent header
   const dayLabel = date.slice(8); // "03" from "2026-04-03"
   const dateText = document.createTextNode(dayLabel + '\u00a0');
   const arrSpan = document.createElement('span');
   arrSpan.className = 'arr';
   arrSpan.textContent = '▶';
-  hdr.appendChild(dateText);
+  // The day and its tag in one span: the header spreads its children apart (space-between).
+  const label = document.createElement('span');
+  label.appendChild(dateText);
+  if (isFirst) {
+    // The newest run is "today" on the viewer's own date ('sv' formats as YYYY-MM-DD), else "latest".
+    const tag = document.createElement('span');
+    tag.className = 'run-tag';
+    tag.textContent = date === new Date().toLocaleDateString('sv') ? 'today' : 'latest';
+    label.appendChild(tag);
+  }
+  hdr.appendChild(label);
   hdr.appendChild(arrSpan);
   hdr.onclick = () => grp.classList.toggle('open');
 
