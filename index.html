@@ -298,6 +298,14 @@
       #sidebar.open #mob-toggle { border-bottom-color: var(--border); }
       .side-label { margin-top: 8px; }
       #content { padding: 20px 16px 48px; }
+      .md table.stack, .md table.stack tbody { display: block; }
+      .md table.stack thead { display: none; }
+      .md table.stack tr { display: block; padding: 10px 0; border-bottom: 1px solid var(--border); }
+      /* Inline, so a long title wraps as text and its separator stays on the line before it. */
+      .md table.stack td { display: inline; padding: 0; border: 0; font-size: 13px; color: var(--muted); }
+      .md table.stack td:empty { display: none; }
+      .md table.stack td:not(:empty) ~ td:not(:empty):not(:last-child)::before { content: '·'; margin: 0 6px; }
+      .md table.stack td:last-child { display: block; margin-top: 4px; font-size: 14px; color: var(--text); }
       .md { font-size: 15px; }
       .md h1 { font-size: 22px; }
     }
@@ -599,7 +607,7 @@ async function renderOverview(date) {
       ? `<a href="${escapeHtml(c.link)}">${escapeHtml(c.title)}</a>`
       : escapeHtml(c.title);
     parts.push(`<ul>${comingUp.map((c) =>
-      `<li>${escapeHtml(c.date)} · ${linked(c)} <span class="dim">${escapeHtml(LABELS[c.page] || c.page)}</span></li>`,
+      `<li>${ISO_DATE.test(c.date) ? timeHtml(c.date, date) : escapeHtml(c.date)} · ${linked(c)} <span class="dim">${escapeHtml(LABELS[c.page] || c.page)}</span></li>`,
     ).join('')}</ul>`);
   }
   return parts.join('');
@@ -666,8 +674,26 @@ function decorateReport(root, date, report) {
   }
   if (next?.tagName === 'BLOCKQUOTE') next.classList.add('report-meta');
   for (const td of root.querySelectorAll('td')) {
-    if (/^\d{4}-\d{2}-\d{2}$/.test(td.textContent.trim())) td.classList.add('date');
+    const iso = td.textContent.trim();
+    if (!ISO_DATE.test(iso)) continue;
+    td.classList.add('date');
+    td.innerHTML = timeHtml(iso, date);
   }
+  // On a phone a row of 3+ columns stacks: its other cells on one line, the last (Summary,
+  // What to do) under them at full width. Columns no longer align, so the header is hidden.
+  for (const table of root.querySelectorAll('table')) {
+    if (table.querySelectorAll('thead th').length >= 3) table.classList.add('stack');
+  }
+}
+
+const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+/** "21 Oct", with the year only when it is not the page's own; the ISO date stays in datetime and title. */
+function timeHtml(iso, pageDate) {
+  const [y, m, d] = iso.split('-');
+  const label = `${Number(d)} ${MONTHS[Number(m) - 1]}${y === pageDate.slice(0, 4) ? '' : ` ${y}`}`;
+  return `<time datetime="${iso}" title="${iso}">${label}</time>`;
 }
 
 /**
