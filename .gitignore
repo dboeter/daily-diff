@@ -10,3 +10,4 @@ mcp/.dev.vars
 .claude/*.local.json
 .claude/worktrees/
 .scratch/ai-policy/lab/
+.zed/
