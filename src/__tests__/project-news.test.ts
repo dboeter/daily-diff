@@ -5,7 +5,7 @@ import {
   matchProjectNews,
   NEWS_PER_AGENT,
   type NewsSources,
-} from "../reports/agent-news.ts";
+} from "../reports/project-news.ts";
 import { DATA_SECTION_KEYS, loadConfig } from "../core/config.ts";
 import type { RepoConfig } from "../core/github.ts";
 import type { Story } from "../spotted/spotted.ts";

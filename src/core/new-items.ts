@@ -10,7 +10,7 @@
  * fields) on a successful fetch; the reported state only once the report exists.
  */
 
-import { saveFile } from "./report.ts";
+import { saveFile } from "./llm.ts";
 import { saveItemsFile, type ItemsFile, type RankedBy } from "./jev.ts";
 import {
   newItems,

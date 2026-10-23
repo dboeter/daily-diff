@@ -25,7 +25,7 @@ import {
   firstHighlight,
 } from "../reports/prompts-data.ts";
 import { TABLES_MARKER, numberRows } from "../reports/summarized-table.ts";
-import { SECTIONS, TRENDS_REPORT } from "../core/i18n.ts";
+import { SECTIONS, TRENDS_REPORT } from "../core/strings.ts";
 import type { RepoConfig, GitHubItem, GitHubRelease } from "../core/github.ts";
 import { EMPTY_OPENROUTER, type TrendingData } from "../trending/trending.ts";
 

@@ -7,7 +7,7 @@ import {
   summaryOutputRule,
   TABLES_MARKER,
 } from "../reports/summarized-table.ts";
-import { renderPolicyTable, renderVendorTables } from "../reports/report-builders.ts";
+import { renderPolicyTable, renderVendorTables } from "../reports/markdown.ts";
 import {
   buildDataSummariesPrompt,
   buildPolicySummariesPrompt,

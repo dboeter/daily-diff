@@ -19,7 +19,7 @@ interface ManifestDate {
 }
 
 interface Manifest {
-  /** Report id → label, written from REPORT_LABELS in src/core/i18n.ts. */
+  /** Report id → label, written from REPORT_LABELS in src/core/strings.ts. */
   labels?: Record<string, string>;
   dates: ManifestDate[];
 }

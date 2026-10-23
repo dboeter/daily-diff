@@ -420,7 +420,7 @@ describe("OpenRouterProvider", () => {
     const err = await p.call("prompt", 100).catch((e: unknown) => e);
     expect(String(err)).toContain("openrouter returned no choices");
     expect(String(err)).toContain("free-models-per-min");
-    // report.ts's is429 matches "429" anywhere in the message.
+    // llm.ts's is429 matches "429" anywhere in the message.
     expect(String(err)).toContain("429");
   });
 });

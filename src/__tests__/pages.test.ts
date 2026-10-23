@@ -12,9 +12,9 @@ import {
   type TrendsInput,
   LAB_POSTS_MAX,
   type DataSection,
-} from "../reports/data-reports.ts";
+} from "../reports/pages.ts";
 import { EMPTY_TRENDING, type TrendingData } from "../trending/trending.ts";
-import { MSG, TRENDS_REPORT } from "../core/i18n.ts";
+import { MSG, TRENDS_REPORT } from "../core/strings.ts";
 import type { ProjectActivity } from "../reports/prompts.ts";
 import type { GitHubItem } from "../core/github.ts";
 import type { PolicyData, PolicyItem } from "../policy/policy.ts";
@@ -44,10 +44,10 @@ const spottedRow = (n: number, page: SpottedRow["page"]): SpottedRow => ({
 });
 
 const generateBody = vi.fn(async (_prompt: string) => "## Highlights\n\nText.");
-vi.mock("../core/report.ts", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("../core/report.ts")>()),
+vi.mock("../core/llm.ts", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("../core/llm.ts")>()),
   generateBody: (...args: unknown[]) => generateBody(...(args as [string])),
-  // generateOr calls report.ts's own generateBody, which this mock can't reach: route it here.
+  // generateOr calls llm.ts's own generateBody, which this mock can't reach: route it here.
   generateOr: (_tag: string, prompt: string, fallback: unknown) => generateBody(prompt).catch(() => fallback),
   saveFile: (...args: unknown[]) => saveFile(...(args as [string, string, string])),
 }));

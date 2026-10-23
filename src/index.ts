@@ -27,7 +27,7 @@ import {
   hasActivity,
   isMajorRelease,
 } from "./reports/prompts.ts";
-import { matchProjectNews } from "./reports/agent-news.ts";
+import { matchProjectNews } from "./reports/project-news.ts";
 import {
   buildHighlightsPrompt,
   buildSpottedSummariesPrompt,
@@ -45,8 +45,8 @@ import {
   reportLlmHealth,
   llmHealthLine,
   isConnectionError,
-} from "./core/report.ts";
-import { renderReportBar, withReportBar } from "./reports/report-builders.ts";
+} from "./core/llm.ts";
+import { renderReportBar, withReportBar } from "./reports/markdown.ts";
 import { parseRowSummaries } from "./reports/summarized-table.ts";
 import {
   buildModelsPage,
@@ -58,7 +58,7 @@ import {
   labPosts,
   LAB_POSTS_MAX,
   type SavedReport,
-} from "./reports/data-reports.ts";
+} from "./reports/pages.ts";
 import { loadWebState, fetchSiteContent, type WebFetchResult, type WebState } from "./sources/web.ts";
 import { fetchTrendingData, type TrendingData } from "./trending/trending.ts";
 import { fetchModelCatalogDaily, type ModelCatalog } from "./sources/openrouter.ts";
@@ -95,7 +95,7 @@ import {
 import { DATA_SECTION_KEYS, loadConfig, type SectionKey } from "./core/config.ts";
 import { resolvePagesUrl } from "./cli/notify.ts";
 import { toCstDateStr, toUtcStr, isWeeklyRun, sleep } from "./core/date.ts";
-import { LIVE_REPORT_IDS, MSG, PROJECT_SCOPE, REPORTS, reportIssueTitle } from "./core/i18n.ts";
+import { LIVE_REPORT_IDS, MSG, PROJECT_SCOPE, REPORTS, reportIssueTitle } from "./core/strings.ts";
 
 // ---------------------------------------------------------------------------
 // Repo config — loaded from config.yml (throws when a section is missing)

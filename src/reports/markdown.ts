@@ -1,10 +1,11 @@
 /**
- * Report content builders — extracted from index.ts for testability.
+ * Report Markdown in code: page assembly, the report bar, the code-rendered
+ * tables, and the cleanup of what models write (titles, code links, headings).
  */
 
 import { hasActivity, RELEASE_BODY_CHARS, releaseNotes, type ProjectActivity } from "./prompts.ts";
-import type { ReleaseRow } from "./data-reports.ts";
-import { escapeRegex } from "./agent-news.ts";
+import type { ReleaseRow } from "./pages.ts";
+import { escapeRegex } from "./project-news.ts";
 import type { OpenRouterNewModel, OpenRouterStealthModel } from "../sources/openrouter.ts";
 import type { WebPageItem } from "../sources/web.ts";
 import type { TrendingReportData } from "../trending/rank.ts";
@@ -37,7 +38,7 @@ import {
   DATA_REPORT,
   SPOTTED,
   type ReportId,
-} from "../core/i18n.ts";
+} from "../core/strings.ts";
 
 // ---------------------------------------------------------------------------
 // Project digest (the agents report's agents and infra sections, the data report's repo sections)

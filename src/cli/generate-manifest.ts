@@ -10,7 +10,7 @@ import {
   REPORTS,
   SECTIONS,
   WEEKLY_REPORT_IDS,
-} from "../core/i18n.ts";
+} from "../core/strings.ts";
 
 const DIGESTS_DIR = "digests";
 const MANIFEST_PATH = "manifest.json";

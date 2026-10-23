@@ -1,6 +1,6 @@
 /**
- * Builders for the reports: LLM calls + report Markdown, plus the source's
- * state file (web, models, trending caches) once its report is built.
+ * The page builders (`buildXxxReport`): LLM calls + report Markdown, plus the
+ * source's state file (web, models, trending caches) once its report is built.
  * main() writes the report files and opens the issues once every report is
  * in, so each report's bar can link the others.
  */
@@ -17,7 +17,7 @@ import {
   TRENDS_REPORT,
   reportHeading,
   type ReportId,
-} from "../core/i18n.ts";
+} from "../core/strings.ts";
 import {
   buildPolicySummariesPrompt,
   buildTrendingSummariesPrompt,
@@ -30,7 +30,7 @@ import {
   buildModelsSummariesPrompt,
   modelSources,
 } from "./prompts-data.ts";
-import { generateOr, saveFile, autoGenFooter, LLM_TOKENS_LISTING } from "../core/report.ts";
+import { generateOr, saveFile, autoGenFooter, LLM_TOKENS_LISTING } from "../core/llm.ts";
 import { saveWebState, type WebFetchResult, type WebPageItem, type WebState } from "../sources/web.ts";
 import { loadReportedState, newItems, nextReportedState, saveReportedState } from "../core/report-state.ts";
 import type { TrendingData } from "../trending/trending.ts";
@@ -66,7 +66,7 @@ import {
   renderSpottedTable,
   policyTitleLabel,
   type ProjectGroup,
-} from "./report-builders.ts";
+} from "./markdown.ts";
 import {
   numberRows,
   parseRowSummaries,

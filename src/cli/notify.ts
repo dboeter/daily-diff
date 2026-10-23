@@ -13,7 +13,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
-import { COMING_UP, GOING_AWAY, isReportId, REPORT_LABELS, REPORTS, WORDMARK } from "../core/i18n.ts";
+import { COMING_UP, GOING_AWAY, isReportId, REPORT_LABELS, REPORTS, WORDMARK } from "../core/strings.ts";
 import type { ComingUpEntry } from "../reports/coming-up.ts";
 import type { ReportHighlights } from "../reports/prompts-data.ts";
 

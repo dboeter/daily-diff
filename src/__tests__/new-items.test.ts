@@ -7,9 +7,9 @@ import { judgeItems, loadItemsFile, type VerdictCache } from "../core/jev.ts";
 import { loadReportedState, type ReportedState } from "../core/report-state.ts";
 
 const dir = fs.mkdtempSync(path.join(os.tmpdir(), "new-items-"));
-// The trace goes through report.ts's saveFile, which writes under digests/: kept in the temp dir here.
-vi.mock("../core/report.ts", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("../core/report.ts")>()),
+// The trace goes through llm.ts's saveFile, which writes under digests/: kept in the temp dir here.
+vi.mock("../core/llm.ts", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("../core/llm.ts")>()),
   saveFile: (content: string, ...segments: string[]) => {
     const file = path.join(dir, "digests", ...segments);
     fs.mkdirSync(path.dirname(file), { recursive: true });
