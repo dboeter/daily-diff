@@ -1,6 +1,13 @@
-<img src="favicon.svg" width="56" height="56" alt="Daily Diff mark: a plus over a minus in a diff gutter">
+<img src="banner.png" width="100%" alt="daily diff: what changed overnight in AI and the data stack. A diff hunk: + AI agents and models, + AI policy: EU, NL, US, + Data engineering, − the noise">
 
 # Daily Diff
+
+[![Daily Diff](https://img.shields.io/github/actions/workflow/status/dboeter/daily-diff/daily-digest.yml?style=flat-square&labelColor=151917&label=daily%20run)](https://github.com/dboeter/daily-diff/actions/workflows/daily-digest.yml)
+[![CI](https://img.shields.io/github/actions/workflow/status/dboeter/daily-diff/ci.yml?style=flat-square&labelColor=151917&label=CI)](https://github.com/dboeter/daily-diff/actions/workflows/ci.yml)
+[![Web UI](https://img.shields.io/badge/read-web%20UI-3A423D?style=flat-square&labelColor=151917)](https://dboeter.github.io/daily-diff/)
+[![RSS](https://img.shields.io/badge/feed-RSS-3A423D?style=flat-square&labelColor=151917&logo=rss&logoColor=DCE3DE)](https://dboeter.github.io/daily-diff/feed.xml)
+[![MCP server](https://img.shields.io/badge/MCP-server-3A423D?style=flat-square&labelColor=151917)](#mcp-server)
+[![License: MIT](https://img.shields.io/github/license/dboeter/daily-diff?style=flat-square&labelColor=151917&color=3A423D)](LICENSE)
 
 A personal daily digest of AI coding agents, agent tooling, AI policy and the data engineering stack, built by a GitHub Actions workflow that runs every night and lands by about 05:00 Amsterdam time. Read it in the [Web UI](#web-ui), the [RSS feed](#rss-feed) or the [MCP server](#mcp-server). The workflow collects from the [data sources](#data-sources) below, then publishes English digests as GitHub Issues and committed Markdown files: a daily set (AI Agents, AI Models & Labs, AI Policy, Data Engineering) and a weekly Trends page on Mondays.
 

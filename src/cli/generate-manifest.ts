@@ -155,6 +155,14 @@ async function buildFeedXml(
     `    <link>${SITE_URL}</link>\n` +
     `    <description>Daily AI ecosystem digest</description>\n` +
     `    <language>en</language>\n` +
+    // RSS 2.0 caps a channel image at 144 px wide and takes no SVG: feed-icon.png is favicon.svg rendered at 144.
+    `    <image>\n` +
+    `      <url>${SITE_URL}/feed-icon.png</url>\n` +
+    `      <title>${escapeXml(title)}</title>\n` +
+    `      <link>${SITE_URL}</link>\n` +
+    `      <width>144</width>\n` +
+    `      <height>144</height>\n` +
+    `    </image>\n` +
     `    <atom:link href="${SITE_URL}/${feedPath}" rel="self" type="application/rss+xml"/>\n` +
     `    <lastBuildDate>${buildDate}</lastBuildDate>\n` +
     itemsXml +
