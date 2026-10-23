@@ -21,9 +21,9 @@ A personal daily digest of AI coding agents, AI models, AI policy and the data e
 | `ai-data.md`   | Data Engineering | daily   | Action required (deprecations with an end date), vendor release notes and repo releases for Databricks, Snowflake, Azure / Fabric & GCP and the open-source data stack |
 | `ai-trends.md` | Trends           | Mondays | Trending agents & coding tools, Claude Code Skills, candidates to track, OpenRouter and Hugging Face models, the week's top papers and most discussed stories, Signals |
 
-Every report opens with **Highlights**, then its tracked sections, then **Spotted**: community stories on its topic that named no tracked project. A daily report with nothing new is skipped (AI Agents is always written). Each day also writes `highlights.json` (up to 2 highlights per report) and `coming-up.json` (dated items of the next 30 days from every page), which the Web UI's day overview and the notifications show.
+Every report opens with **Highlights**, then its tracked sections. AI Agents, AI Models & Labs and Data Engineering add **Spotted**: community stories on their topic that named no tracked project; Trends ends with **Signals**. A daily report with nothing new is skipped (AI Agents is always written). Each day also writes `highlights.json` (up to 2 highlights per report) and `coming-up.json` (dated items of the next 30 days from every page), which the Web UI's day overview and the notifications show.
 
-Code renders every table and decides what is new; the LLM writes only the row summaries, Highlights and Signals. Relevance, topic and category judgments come from [Jev](https://typesafe.ai) (TypeSafe), with keyword rules as the fallback without `TYPESAFE_API_KEY`. Each verdict is cached in a committed file under `digests/` and asked once.
+Code decides what is new and renders the tables; the LLM writes the prose: the per-project sections, row summaries, Highlights and Signals. Relevance, topic and category judgments come from [Jev](https://typesafe.ai) (TypeSafe), with keyword rules as the fallback without `TYPESAFE_API_KEY`. Each verdict is cached in a committed file under `digests/` and asked once.
 
 ## Reading
 
@@ -57,7 +57,7 @@ With `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID` set, each run sends a Telegram 
 | Source                                                                                                                                                                                                                                                                                  | Used for                                                                                                                                  |
 | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
 | [GitHub](https://github.com) API                                                                                                                                                                                                                                                        | Stable releases and hot issues of the [tracked repos](#tracked-repos); [anthropics/skills](https://github.com/anthropics/skills) (weekly) |
-| [GitHub Trending](https://github.com/trending) + Search API, [OpenRouter](https://openrouter.ai/apps) apps, [npm](https://www.npmjs.com) registry                                                                                                                                       | Trends' agents & coding tools (weekly); the daily Trending page also feeds project news                                                   |
+| [GitHub Trending](https://github.com/trending) + Search API, [OpenRouter](https://openrouter.ai/apps) apps, [npm](https://www.npmjs.com) registry                                                                                                                                       | Trends' agents & coding tools (weekly); github.com/trending is also fetched daily for project news                                        |
 | [Hacker News](https://github.com/HackerNews/API), [Lobste.rs](https://lobste.rs) (`ai`, `vibecoding`, `databases`), [Dev.to](https://dev.to) (15+ reactions)                                                                                                                            | Project news and Spotted, each story shown once; Trends' Most discussed                                                                   |
 | [Anthropic](https://www.anthropic.com) and [OpenAI](https://openai.com) sitemaps                                                                                                                                                                                                        | Lab announcements: a post is new when its URL is                                                                                          |
 | [OpenRouter](https://openrouter.ai) models API and rankings, [Hugging Face](https://huggingface.co) Hub API                                                                                                                                                                             | New and stealth models (daily); token usage and trending models (weekly)                                                                  |
@@ -70,7 +70,7 @@ With `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID` set, each run sends a Telegram 
 
 ## Tracked repos
 
-Each tracked repo is covered by its stable releases of the last 24h (prereleases are only counted, unless the project has never shipped a stable release), hot issues (opened in the last 48h with 10+ comments and 👍, at most 2) and news (a community story or its own GitHub Trending entry naming it; a story naming three or more agents is a compatibility list and skipped). Projects with none of these are listed in one "Quiet today" line. Only the repos below are tracked: trending repos are suggested under the Trends page's Candidates to track, never added automatically.
+Each tracked repo is covered by its stable releases of the last 24h (prereleases are only counted, unless the project has never shipped a stable release), hot issues (opened in the last 48h with 10+ comments and 👍, 3+ when labelled regression or security; at most 2) and news (a community story or its own GitHub Trending entry naming it; a story naming three or more agents is a compatibility list and skipped). Projects with none of these are listed in one "Quiet today" line. Only the repos below are tracked: trending repos are suggested under the Trends page's Candidates to track, never added automatically.
 
 ### AI Agents
 
@@ -178,15 +178,15 @@ agents:
 
 Repository secrets (**Settings → Secrets and variables → Actions**); `GITHUB_TOKEN` is provided by Actions.
 
-| Secret                                   | Description                                                                                       |
-| ---------------------------------------- | ------------------------------------------------------------------------------------------------- |
-| `LLM_PROVIDER` and the provider's key    | See [LLM providers](#llm-providers)                                                               |
-| `TYPESAFE_API_KEY`                       | Jev judgments (without it: keyword rules, search-topic labels, and no Research section in Trends) |
-| `USA_GOV_API_KEY`                        | [api.data.gov](https://api.data.gov/signup/) key for Congress.gov and Regulations.gov             |
-| `PLURAL_API_KEY`                         | [Open States](https://open.pluralpolicy.com) key for US state bills                               |
-| `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID` | Telegram notifications (bot from [@BotFather](https://t.me/BotFather))                            |
-| `TEAMS_WEBHOOK_URL`                      | Power Automate Workflows webhook for the Teams card                                               |
-| `CLOUDFLARE_API_TOKEN`                   | The `Deploy MCP` workflow only                                                                    |
+| Secret                                   | Description                                                                                                                                              |
+| ---------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `OPENROUTER_API_KEY`                     | The scheduled run's LLM key (the workflow sets `LLM_PROVIDER: openrouter`; for another provider, edit the workflow, see [LLM providers](#llm-providers)) |
+| `TYPESAFE_API_KEY`                       | Jev judgments (without it: keyword rules, search-topic labels, and no Research section in Trends)                                                        |
+| `USA_GOV_API_KEY`                        | [api.data.gov](https://api.data.gov/signup/) key for Congress.gov and Regulations.gov                                                                    |
+| `PLURAL_API_KEY`                         | [Open States](https://open.pluralpolicy.com) key for US state bills                                                                                      |
+| `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID` | Telegram notifications (bot from [@BotFather](https://t.me/BotFather))                                                                                   |
+| `TEAMS_WEBHOOK_URL`                      | Power Automate Workflows webhook for the Teams card                                                                                                      |
+| `CLOUDFLARE_API_TOKEN`                   | The `Deploy MCP` workflow only                                                                                                                           |
 
 A source whose key is unset is skipped; the rest of the run goes on.
 
