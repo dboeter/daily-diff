@@ -88,6 +88,13 @@ export const WORDMARK = "daily diff";
  */
 export const GOING_AWAY = "−";
 
+/**
+ * The table columns of prose (a row's summary, an action's what to do), by header. On a phone the
+ * web UI puts such a cell under the row's other cells at full width; a table without one wraps as
+ * one line. A header renamed in a table below must be renamed here too.
+ */
+export const PROSE_COLUMNS = ["Summary", "What to do"];
+
 /** The dated items of the next 30 days from every page (coming-up.json), on the Overview and in Telegram. */
 export const COMING_UP = {
   heading: "Coming up",
