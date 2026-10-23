@@ -58,9 +58,8 @@ describe("buildMessage", () => {
 
   it("builds a daily message with report links", () => {
     const msg = buildMessage("2026-03-09", ["ai-agents", "ai-models"], BASE_URL);
-    expect(msg).toContain("Daily Diff");
-    expect(msg).toContain("2026-03-09");
-    expect(msg).toContain("📡");
+    expect(msg.split("\n")[0]).toBe("<b>daily diff</b> · 2026-03-09");
+    expect(msg).toContain(`🟪 <a href="${BASE_URL}/#2026-03-09/ai-agents">AI Agents</a>`);
     expect(msg).toContain(`${BASE_URL}/#2026-03-09/ai-agents`);
     expect(msg).toContain("AI Agents");
     expect(msg).toContain(`${BASE_URL}/#2026-03-09/ai-models`);
@@ -73,7 +72,7 @@ describe("buildMessage", () => {
 
   it("includes Web UI and RSS links", () => {
     const msg = buildMessage("2026-03-09", ["ai-agents"], BASE_URL);
-    expect(msg).toContain("🌐 Web UI");
+    expect(msg).toContain(">Web UI</a>");
     expect(msg).toContain("RSS");
     expect(msg).toContain(`${BASE_URL}/feed.xml`);
   });
@@ -126,7 +125,7 @@ describe("buildMessage", () => {
     const msg = buildMessage("2026-03-09", ["ai-agents"], BASE_URL, { "ai-agents": ["x"] }, comingUp);
     expect(msg).toContain("<b>Coming up</b>");
     expect(msg.indexOf("◦ x")).toBeLessThan(msg.indexOf("Coming up"));
-    expect(msg.indexOf("Coming up")).toBeLessThan(msg.indexOf("🌐 Web UI"));
+    expect(msg.indexOf("Coming up")).toBeLessThan(msg.indexOf(">Web UI</a>"));
     expect(msg).toContain(
       `• 2026-03-11 · <a href="https://example.com/d?n=1&amp;x=1">AI Act &lt;GPAI&gt; rules</a> (${REPORT_LABELS["ai-policy"]})`,
     );
@@ -179,7 +178,7 @@ describe("buildTeamsCard", () => {
 
   it("still has the title and the report link without highlights", () => {
     const empty = buildTeamsCard("2026-10-17", [], BASE_URL).attachments[0]!.content;
-    expect(empty.body).toHaveLength(2);
+    expect(empty.body).toHaveLength(3);
     expect(empty.actions[0]!.url).toBe(`${BASE_URL}/#2026-10-17/ai-data`);
   });
 });

@@ -1,3 +1,5 @@
+<img src="favicon.svg" width="56" height="56" alt="Daily Diff mark: a plus over a minus in a diff gutter">
+
 # Daily Diff
 
 A personal daily digest of AI coding agents, agent tooling, AI policy and the data engineering stack, built by a GitHub Actions workflow that runs every night and lands by about 05:00 Amsterdam time. Read it in the [Web UI](#web-ui), the [RSS feed](#rss-feed) or the [MCP server](#mcp-server). The workflow collects from the [data sources](#data-sources) below, then publishes English digests as GitHub Issues and committed Markdown files: a daily set (AI Agents, AI Models & Labs, AI Policy, Data Engineering) and a weekly Trends page on Mondays.
@@ -400,7 +402,7 @@ Every report opens with its title and a bar of links to the day's overview and o
 `ai-agents.md` structure:
 
 ```
-[Overview] · **🤖 AI Agents** · [🧠 AI Models & Labs] · …
+[⬛ Overview] · **🟪 AI Agents** · [🟦 AI Models & Labs] · …
 Generated | Projects: N | Active today: N | Stable releases: N | Prereleases (not covered): N
 
 ## Highlights                          — 3-5 bullets over the sections and Spotted (left out when nothing is active or spotted)
