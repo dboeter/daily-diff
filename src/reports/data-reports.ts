@@ -51,6 +51,7 @@ import {
   buildStealthSection,
   groupsMarkdown,
   highlightsOnly,
+  signListItems,
   isNewStealthModel,
   renderCandidates,
   renderLabPostsTable,
@@ -194,7 +195,7 @@ export async function buildTrendsReport(
     .join("\n\n---\n\n");
   const prose = await generateOr("trends", buildTrendsProsePrompt(page, dateStr), null, LLM_TOKENS_LISTING);
   const body = spliceTables(
-    prose ?? `## ${SECTIONS.highlights}\n\n${MSG.summaryFailed}`,
+    prose === null ? `## ${SECTIONS.highlights}\n\n${MSG.summaryFailed}` : signListItems(prose),
     `---\n\n${page}\n\n---`,
   );
   const content = assembleReport(
@@ -474,7 +475,7 @@ function splitProse(prose: string): { highlights: string; acrossPlatforms: strin
     if (inBullet) bullets.push(l.trimEnd());
   }
   return {
-    highlights: lines.slice(0, i).join("\n").trim(),
+    highlights: signListItems(lines.slice(0, i).join("\n").trim()),
     acrossPlatforms: bullets.length ? `## ${DATA_REPORT.acrossPlatforms}\n\n${bullets.join("\n")}` : "",
   };
 }

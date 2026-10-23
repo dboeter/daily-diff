@@ -4,7 +4,7 @@
 
 import type { RepoConfig, GitHubItem, GitHubRelease } from "../core/github.ts";
 import type { NewsItem } from "./agent-news.ts";
-import { SECTIONS } from "../core/i18n.ts";
+import { GOING_AWAY, SECTIONS } from "../core/i18n.ts";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -83,6 +83,11 @@ const REPO_LENGTH_RULE =
 export const NO_TITLE_RULE =
   "Do not write a title, a date line or any `#` heading: code adds the report title. " +
   "Use exactly the `##` headings given, in the given order.";
+
+/** Asks for the gutter sign (GOING_AWAY) on each bullet or highlight about something going away. */
+export const goingAwayRule = (item: "bullet" | "highlight") =>
+  `Start a ${item} with "${GOING_AWAY} " (the minus sign) when its item is going away: a deprecation, ` +
+  `retirement, removal, end of support or shutdown. Give every other ${item} no sign.`;
 
 /** Sort by comment count desc, take top N. */
 export function topN(items: GitHubItem[], n: number): GitHubItem[] {
@@ -282,6 +287,7 @@ Write only \`## ${SECTIONS.highlights}\`: 3–5 bullets, most consequential firs
 
 Rules:
 - ${NO_TITLE_RULE}
+- ${goingAwayRule("bullet")}
 - About 150 words in total. Write no other sections.
 - Name each item in at most one bullet. Write no links or URLs: the sections below link every item.
 - Base every claim on the sections. Do not invent versions, dates or features.

@@ -24,6 +24,7 @@ import {
 } from "../core/config.ts";
 import { summaryText, type Numbered } from "./summarized-table.ts";
 import {
+  GOING_AWAY,
   LIVE_REPORT_IDS,
   OVERVIEW,
   REPORTS,
@@ -228,6 +229,19 @@ export function unwrapCodeLinks(md: string): string {
  * fixed heading: a section the model adds anyway would land above the page's
  * tables, and a missing heading would leave bare bullets.
  */
+/**
+ * Models write the gutter's minus (GOING_AWAY) as a hyphen or a dash, and `- - text` would nest a
+ * list: a list item opening with one becomes the minus sign.
+ */
+export function signListItems(md: string): string {
+  return md.replace(/^(\s*[-*]\s+)[-–—−](?=\s)/gm, `$1${GOING_AWAY}`);
+}
+
+/** `signListItems` for one highlights.json entry. */
+export function signHighlight(text: string): string {
+  return text.replace(/^[-–—−](?=\s)/, GOING_AWAY);
+}
+
 export function highlightsOnly(reply: string): string {
   const lines = stripModelTitle(reply).trim().split("\n");
   const start = lines[0]?.startsWith("## ") ? 1 : 0;
@@ -236,7 +250,7 @@ export function highlightsOnly(reply: string): string {
     .slice(start, end === -1 ? undefined : end)
     .join("\n")
     .trim();
-  return `## ${SECTIONS.highlights}\n\n${body}`;
+  return `## ${SECTIONS.highlights}\n\n${signListItems(body)}`;
 }
 
 /** Lines with their heading level (0 = not a heading), ignoring code fences. */

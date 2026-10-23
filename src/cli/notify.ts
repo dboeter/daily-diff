@@ -13,7 +13,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
-import { COMING_UP, REPORT_LABELS, REPORTS } from "../core/i18n.ts";
+import { COMING_UP, GOING_AWAY, isReportId, REPORT_LABELS, REPORTS, WORDMARK } from "../core/i18n.ts";
 import type { ComingUpEntry } from "../reports/coming-up.ts";
 import type { ReportHighlights } from "../reports/prompts-data.ts";
 
@@ -33,6 +33,12 @@ export function resolvePagesUrl(override?: string): string {
 
 function escapeHtml(s: string): string {
   return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
+
+/** A highlight behind its gutter sign. An unsigned one is an addition: the model signs only what goes away. */
+function gutterLine(h: string, format: (s: string) => string = (s) => s): string {
+  const gone = h.startsWith(`${GOING_AWAY} `);
+  return `${gone ? GOING_AWAY : "+"} ${format(gone ? h.slice(GOING_AWAY.length + 1) : h)}`;
 }
 
 const COMING_UP_MAX = 5;
@@ -65,24 +71,25 @@ export function buildMessage(
   comingUp?: ComingUpEntry[] | null,
 ): string {
   const PAGES_URL = resolvePagesUrl(pagesUrl);
-  const lines: string[] = [`📡 <b>Daily Diff · ${date}</b>`];
+  const lines: string[] = [`<b>${WORDMARK}</b> · ${date}`];
 
   for (const r of reports) {
     const label = REPORT_LABELS[r] ?? r;
+    const mark = isReportId(r) ? REPORTS[r].emoji : "•";
     lines.push(""); // blank line before each report section
-    lines.push(`• <a href="${PAGES_URL}/#${date}/${r}">${escapeHtml(label)}</a>`);
+    lines.push(`${mark} <a href="${PAGES_URL}/#${date}/${r}">${escapeHtml(label)}</a>`);
 
     // Add highlights as indented sub-items.
     const items = highlights?.[r];
     if (items?.length) {
       for (const h of items) {
-        lines.push(`  ◦ ${escapeHtml(h)}`);
+        lines.push(`  ${gutterLine(h, escapeHtml)}`);
       }
     }
   }
 
   if (comingUp?.length) {
-    lines.push("", `📅 <b>${COMING_UP.heading}</b>`);
+    lines.push("", `<b>${COMING_UP.heading}</b>`);
     for (const c of comingUp.slice(0, COMING_UP_MAX)) {
       const page = REPORT_LABELS[c.page] ?? c.page;
       lines.push(
@@ -91,7 +98,7 @@ export function buildMessage(
     }
   }
 
-  lines.push(`\n<a href="${PAGES_URL}">🌐 Web UI</a>  ·  <a href="${PAGES_URL}/feed.xml">⊕ RSS</a>`);
+  lines.push(`\n<a href="${PAGES_URL}">Web UI</a>  ·  <a href="${PAGES_URL}/feed.xml">RSS</a>`);
   return lines.join("\n");
 }
 
@@ -117,14 +124,22 @@ export function buildTeamsCard(date: string, highlights: string[], pagesUrl?: st
           type: "AdaptiveCard",
           version: "1.2",
           body: [
-            { type: "TextBlock", text: `${emoji} ${name}`, weight: "Bolder", size: "Medium", wrap: true },
+            { type: "TextBlock", text: WORDMARK, isSubtle: true, size: "Small", wrap: true },
+            {
+              type: "TextBlock",
+              text: `${emoji} ${name}`,
+              weight: "Bolder",
+              size: "Medium",
+              spacing: "Small",
+              wrap: true,
+            },
             { type: "TextBlock", text: date, isSubtle: true, spacing: "None", wrap: true },
             // A TextBlock parses Markdown (`*`, `_`, `[x](y)`, a leading `- `), which
             // LLM-written highlights can contain by accident; a TextRun is plain
             // text, so the highlight needs no escaping.
             ...highlights.map((h) => ({
               type: "RichTextBlock",
-              inlines: [{ type: "TextRun", text: `• ${h}` }],
+              inlines: [{ type: "TextRun", text: gutterLine(h) }],
             })),
           ],
           actions: [

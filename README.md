@@ -1,3 +1,5 @@
+<img src="favicon.svg" width="56" height="56" alt="Daily Diff mark: a plus over a minus in a diff gutter">
+
 # Daily Diff
 
 A personal daily digest of AI coding agents, agent tooling, AI policy and the data engineering stack, built by a GitHub Actions workflow that runs every night and lands by about 05:00 Amsterdam time. Read it in the [Web UI](#web-ui), the [RSS feed](#rss-feed) or the [MCP server](#mcp-server). The workflow collects from the [data sources](#data-sources) below, then publishes English digests as GitHub Issues and committed Markdown files: a daily set (AI Agents, AI Models & Labs, AI Policy, Data Engineering) and a weekly Trends page on Mondays.
@@ -36,7 +38,7 @@ A personal daily digest of AI coding agents, agent tooling, AI policy and the da
 
 **[https://dboeter.github.io/daily-diff](https://dboeter.github.io/daily-diff)**
 
-Browse all historical digests in a clean, dark-themed interface — no login required. Reports are rendered from the Markdown files in this repo via GitHub Pages. Each day opens on an overview of every report's highlights, then **Coming up**: the dated items of the next 30 days from every page (policy deadlines, Action required dates in Data Engineering, stealth model expiries); each report links to the day's other reports, the previous and next day, and its own previous report (weekly reports skip days), and long reports get a table of contents. The latest weekly reports stay pinned under **This week** in the sidebar.
+Browse all historical digests in dark or light theme, no login required. Reports are rendered from the Markdown files in this repo via GitHub Pages. Each day opens on an overview of every report's highlights, then **Coming up**: the dated items of the next 30 days from every page (policy deadlines, Action required dates in Data Engineering, stealth model expiries); each report links to the day's other reports, the previous and next day, and its own previous report (weekly reports skip days), and long reports get a table of contents. The latest weekly reports stay pinned under **This week** in the sidebar.
 
 ## Telegram Notifications
 
@@ -400,7 +402,7 @@ Every report opens with its title and a bar of links to the day's overview and o
 `ai-agents.md` structure:
 
 ```
-[Overview] · **🤖 AI Agents** · [🧠 AI Models & Labs] · …
+[⬛ Overview] · **🟪 AI Agents** · [🟦 AI Models & Labs] · …
 Generated | Projects: N | Active today: N | Stable releases: N | Prereleases (not covered): N
 
 ## Highlights                          — 3-5 bullets over the sections and Spotted (left out when nothing is active or spotted)

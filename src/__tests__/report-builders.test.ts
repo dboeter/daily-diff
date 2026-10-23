@@ -555,8 +555,8 @@ describe("report bar", () => {
   it("links the day's other reports and the overview; the current one is bold, unlinked", () => {
     const bar = renderReportBar("ai-models", ["ai-agents", "ai-models", "ai-trends"], "2026-10-12", url);
     expect(bar).toBe(
-      `[📅 Overview](${url}/#2026-10-12) · [🤖 AI Agents](${url}/#2026-10-12/ai-agents) · ` +
-        `**🧠 AI Models & Labs** · [📈 Trends](${url}/#2026-10-12/ai-trends)`,
+      `[⬛ Overview](${url}/#2026-10-12) · [🟪 AI Agents](${url}/#2026-10-12/ai-agents) · ` +
+        `**🟦 AI Models & Labs** · [🟫 Trends](${url}/#2026-10-12/ai-trends)`,
     );
   });
 

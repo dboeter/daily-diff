@@ -9,13 +9,14 @@ import type { summaryRows } from "../trending/rank.ts";
 import { formatTokens, type OpenRouterData, type OpenRouterNewModel } from "../sources/openrouter.ts";
 import { DATA_REPORT, MODELS_PAGE, MSG, SECTIONS, SPOTTED, TRENDS_REPORT } from "../core/i18n.ts";
 import { TABLES_MARKER, rowList, summaryLine, summaryOutputRule, type Numbered } from "./summarized-table.ts";
-import { NO_TITLE_RULE, RELEASE_BODY_CHARS, releaseNotes } from "./prompts.ts";
+import { goingAwayRule, NO_TITLE_RULE, RELEASE_BODY_CHARS, releaseNotes } from "./prompts.ts";
 import type { ReleaseRow } from "./data-reports.ts";
 import type { Deadline } from "../core/report-state.ts";
 import type { HfData } from "../sources/hf.ts";
 import type { ResearchPaper } from "../sources/research.ts";
 import type { PolicyItem } from "../policy/policy.ts";
 import type { KeptVendorItem } from "../data/jev.ts";
+import { signHighlight } from "./report-builders.ts";
 import { siteOf, type StoryRow } from "../spotted/spotted.ts";
 
 /** Which sources Trends' Models section covers: no call when neither has data. */
@@ -68,6 +69,7 @@ Write only these parts, in this order:
 
 Rules:
 - ${NO_TITLE_RULE}
+- In ${SECTIONS.highlights}: ${goingAwayRule("bullet")}
 - Do not reproduce or alter the tables, and write no other sections.
 - Base every claim on the page. It shows descriptions, summaries and counts only, so do not describe releases, adoption or community reactions it does not show.
 - Mention only items that appear on the page, and link every item you mention.
@@ -313,6 +315,7 @@ ${parts.map((p, i) => `${i + 1}. ${p}`).join("\n")}
 
 Rules:
 - ${NO_TITLE_RULE}
+- In ${SECTIONS.highlights}: ${goingAwayRule("bullet")}
 - Length: at most ~200 words for ${SECTIONS.highlights}, ~120 for ${DATA_REPORT.acrossPlatforms}.
 - A major release in ${DATA_REPORT.releasesHeading} (a version x.0.0, or one whose summary names breaking changes) is a Highlights candidate: say who must test or migrate.
 - Never restate a row: the reader sees the tables right below. A bullet that only says what changed, without who is affected and what to do, is left out.
@@ -391,7 +394,8 @@ Return ONLY valid JSON, no markdown fences, no explanation. Format:
 Rules:
 - Use the exact report IDs from the [brackets] above as keys
 - Omit a report's key entirely when nothing in it qualifies, or when it contains only failure messages
-- At most ${maxPerReport} highlights per report, each at most ${HIGHLIGHT_MAX_CHARS} characters${forcedRule}`;
+- At most ${maxPerReport} highlights per report, each at most ${HIGHLIGHT_MAX_CHARS} characters
+- ${goingAwayRule("highlight")}${forcedRule}`;
 }
 
 const FORCED_REASON: Record<string, string> = {
@@ -411,15 +415,18 @@ export function forcedHighlightReports(hasVendorItems: boolean): string[] {
 }
 
 /**
- * The highlights with a fallback for each `forced` report the model left out:
- * the first sentence of that report's own Highlights section.
+ * The highlights as saved: each one's going-away sign normalized (`signHighlight`), with a
+ * fallback for each `forced` report the model left out: the first sentence of that report's own
+ * Highlights section.
  */
 export function withFallbackHighlights(
   highlights: ReportHighlights,
   reportContents: Record<string, string>,
   forced: readonly string[],
 ): ReportHighlights {
-  const out = { ...highlights };
+  const out = Object.fromEntries(
+    Object.entries(highlights).map(([id, items]) => [id, items.map(signHighlight)]),
+  );
   for (const id of forced) {
     const content = reportContents[id];
     if (out[id]?.length || !content) continue;
