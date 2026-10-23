@@ -5,6 +5,7 @@ import {
   COMING_UP,
   LIVE_REPORT_IDS,
   OVERVIEW,
+  PROSE_COLUMNS,
   REPORT_LABELS,
   REPORTS,
   SECTIONS,
@@ -43,6 +44,8 @@ interface Manifest {
   comingUp: string;
   /** The Highlights heading (SECTIONS), whose list the web UI renders as a diff hunk. */
   highlights: string;
+  /** The table headers of prose columns (PROSE_COLUMNS), stacked full width on a phone. */
+  proseColumns: string[];
   dates: DateEntry[];
 }
 
@@ -181,6 +184,7 @@ async function main(): Promise<void> {
     overview: OVERVIEW.name,
     comingUp: COMING_UP.heading,
     highlights: SECTIONS.highlights,
+    proseColumns: PROSE_COLUMNS,
     dates: entries,
   };
 

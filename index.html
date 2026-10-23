@@ -303,8 +303,8 @@
       .md table.stack tr { display: block; padding: 10px 0; border-bottom: 1px solid var(--border); }
       /* Inline, so a long title wraps as text and its separator stays on the line before it. */
       .md table.stack td { display: inline; padding: 0; border: 0; font-size: 13px; color: var(--muted); }
-      .md table.stack td:not(:empty) ~ td:not(:empty):not(:last-child)::before { content: '·'; margin: 0 6px; }
-      .md table.stack td:last-child { display: block; margin-top: 4px; font-size: 14px; color: var(--text); }
+      .md table.stack td:not(:empty):not(.prose) ~ td:not(:empty):not(.prose)::before { content: '·'; margin: 0 6px; }
+      .md table.stack td.prose { display: block; margin-top: 4px; font-size: 14px; color: var(--text); }
       .md table.stack td:empty { display: none; }
       .md { font-size: 15px; }
       .md h1 { font-size: 22px; }
@@ -425,6 +425,7 @@ let COLORS = {};
 let OVERVIEW_LABEL = 'Overview';
 let COMING_UP_HEADING = 'Coming up';
 let HIGHLIGHTS_HEADING = 'Highlights';
+let PROSE_COLUMNS = ['Summary', 'What to do'];
 
 // ── State ──
 let currentKey = null;
@@ -680,10 +681,16 @@ function decorateReport(root, date, report) {
     // Only a bare date: one the model linked or emphasized keeps its markup.
     if (!td.children.length) td.innerHTML = timeHtml(iso, date);
   }
-  // On a phone a row of 3+ columns stacks: its other cells on one line, the last (Summary,
+  // On a phone a row of 3+ columns stacks: its cells on one line, a prose column (Summary,
   // What to do) under them at full width. Columns no longer align, so the header is hidden.
   for (const table of root.querySelectorAll('table')) {
-    if (table.querySelectorAll('thead th').length >= 3) table.classList.add('stack');
+    const headers = [...table.querySelectorAll('thead th')].map((th) => th.textContent.trim());
+    if (headers.length < 3) continue;
+    table.classList.add('stack');
+    headers.forEach((h, i) => {
+      if (!PROSE_COLUMNS.includes(h)) return;
+      for (const td of table.querySelectorAll(`tbody td:nth-child(${i + 1})`)) td.classList.add('prose');
+    });
   }
 }
 
@@ -921,7 +928,7 @@ window.addEventListener('hashchange', followHash);
   try {
     const res = await fetch('./manifest.json');
     if (!res.ok) throw new Error('manifest.json not found');
-    const { dates, labels, weekly, feeds, colors, overview, comingUp, highlights } = await res.json();
+    const { dates, labels, weekly, feeds, colors, overview, comingUp, highlights, proseColumns } = await res.json();
     if (!dates?.length) throw new Error('manifest is empty');
     LABELS = labels ?? {};
     DATES = dates;
@@ -931,6 +938,7 @@ window.addEventListener('hashchange', followHash);
     OVERVIEW_LABEL = overview ?? 'Overview';
     COMING_UP_HEADING = comingUp ?? 'Coming up';
     HIGHLIGHTS_HEADING = highlights ?? 'Highlights';
+    PROSE_COLUMNS = proseColumns ?? PROSE_COLUMNS;
 
     allDates = dates;
     buildNav(dates);
