@@ -1,4 +1,4 @@
-<img src="favicon.svg" width="56" height="56" alt="Daily Diff mark: a plus over a minus in a diff gutter">
+<img src="banner.png" width="100%" alt="daily diff: what changed overnight in AI and the data stack. A diff hunk: + AI agents and models, + AI policy: EU, NL, US, + Data engineering, − the noise">
 
 # Daily Diff
 
