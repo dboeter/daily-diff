@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
-import { formatItem, topN } from "../reports/prompts.ts";
+import { formatItem, signListItems, topN } from "../reports/prompts.ts";
+import { highlightsOnly } from "../reports/report-builders.ts";
 import type { GitHubItem } from "../core/github.ts";
 
 // ---------------------------------------------------------------------------
@@ -123,3 +124,19 @@ describe("topN", () => {
 // ---------------------------------------------------------------------------
 // formatDiscussion
 // ---------------------------------------------------------------------------
+
+describe("signListItems", () => {
+  it("turns a hyphen or dash opening a list item into the minus sign, so it nests no list", () => {
+    const md =
+      "- - **Snowflake** retires X\n- – Fabric ends Y\n* — BigQuery drops Z\n- **DuckDB** 2.0 ships\n  - nested - stays";
+    expect(signListItems(md)).toBe(
+      "- − **Snowflake** retires X\n- − Fabric ends Y\n* − BigQuery drops Z\n- **DuckDB** 2.0 ships\n  - nested - stays",
+    );
+  });
+
+  it("lands in a page's Highlights through highlightsOnly", () => {
+    expect(highlightsOnly("## Highlights\n\n- - **X** is retired\n- **Y** ships")).toBe(
+      "## Highlights\n\n- − **X** is retired\n- **Y** ships",
+    );
+  });
+});

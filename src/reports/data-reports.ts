@@ -43,6 +43,7 @@ import {
   buildProjectDigestPrompt,
   buildSkillsPrompt,
   hasActivity,
+  signListItems,
   type ProjectActivity,
 } from "./prompts.ts";
 import type { GitHubRelease, RepoConfig, SkillsData } from "../core/github.ts";
@@ -474,7 +475,7 @@ function splitProse(prose: string): { highlights: string; acrossPlatforms: strin
     if (inBullet) bullets.push(l.trimEnd());
   }
   return {
-    highlights: lines.slice(0, i).join("\n").trim(),
+    highlights: signListItems(lines.slice(0, i).join("\n").trim()),
     acrossPlatforms: bullets.length ? `## ${DATA_REPORT.acrossPlatforms}\n\n${bullets.join("\n")}` : "",
   };
 }

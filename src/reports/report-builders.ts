@@ -2,7 +2,13 @@
  * Report content builders — extracted from index.ts for testability.
  */
 
-import { hasActivity, RELEASE_BODY_CHARS, releaseNotes, type ProjectActivity } from "./prompts.ts";
+import {
+  hasActivity,
+  RELEASE_BODY_CHARS,
+  releaseNotes,
+  signListItems,
+  type ProjectActivity,
+} from "./prompts.ts";
 import type { ReleaseRow } from "./data-reports.ts";
 import { escapeRegex } from "./agent-news.ts";
 import type { OpenRouterNewModel, OpenRouterStealthModel } from "../sources/openrouter.ts";
@@ -236,7 +242,7 @@ export function highlightsOnly(reply: string): string {
     .slice(start, end === -1 ? undefined : end)
     .join("\n")
     .trim();
-  return `## ${SECTIONS.highlights}\n\n${body}`;
+  return `## ${SECTIONS.highlights}\n\n${signListItems(body)}`;
 }
 
 /** Lines with their heading level (0 = not a heading), ignoring code fences. */

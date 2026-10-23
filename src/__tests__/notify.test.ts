@@ -89,26 +89,33 @@ describe("buildMessage", () => {
       "ai-models": ["OpenClaw adds MCP support"],
     };
     const msg = buildMessage("2026-03-09", ["ai-agents", "ai-models"], BASE_URL, highlights);
-    expect(msg).toContain("◦ Claude Code releases v1.2.0");
-    expect(msg).toContain("◦ Gemini CLI fixes streaming");
-    expect(msg).toContain("◦ OpenClaw adds MCP support");
+    expect(msg).toContain("  + Claude Code releases v1.2.0");
+    expect(msg).toContain("  + Gemini CLI fixes streaming");
+    expect(msg).toContain("  + OpenClaw adds MCP support");
+  });
+
+  it("puts − before a highlight about something going away, + before the rest", () => {
+    const highlights: ReportHighlights = { "ai-data": ["− Snowflake retires X", "DuckDB 2.0 ships"] };
+    const lines = buildMessage("2026-03-09", ["ai-data"], BASE_URL, highlights).split("\n");
+    expect(lines).toContain("  − Snowflake retires X");
+    expect(lines).toContain("  + DuckDB 2.0 ships");
   });
 
   it("escapes HTML in highlights", () => {
     const msg = buildMessage("2026-03-09", ["ai-agents"], BASE_URL, { "ai-agents": ["a <b> & c"] });
-    expect(msg).toContain("◦ a &lt;b&gt; &amp; c");
+    expect(msg).toContain("+ a &lt;b&gt; &amp; c");
   });
 
   it("works without highlights (null)", () => {
     const msg = buildMessage("2026-03-09", ["ai-agents"], BASE_URL, null);
     expect(msg).toContain("AI Agents");
-    expect(msg).not.toContain("◦");
+    expect(msg).not.toMatch(/^ {2}[+−] /m);
   });
 
   it("works without highlights (undefined)", () => {
     const msg = buildMessage("2026-03-09", ["ai-agents"], BASE_URL);
     expect(msg).toContain("AI Agents");
-    expect(msg).not.toContain("◦");
+    expect(msg).not.toMatch(/^ {2}[+−] /m);
   });
 
   const entry = (n: number): ComingUpEntry => ({
@@ -124,7 +131,7 @@ describe("buildMessage", () => {
     comingUp[0] = { ...comingUp[0]!, title: "AI Act <GPAI> rules" };
     const msg = buildMessage("2026-03-09", ["ai-agents"], BASE_URL, { "ai-agents": ["x"] }, comingUp);
     expect(msg).toContain("<b>Coming up</b>");
-    expect(msg.indexOf("◦ x")).toBeLessThan(msg.indexOf("Coming up"));
+    expect(msg.indexOf("+ x")).toBeLessThan(msg.indexOf("Coming up"));
     expect(msg.indexOf("Coming up")).toBeLessThan(msg.indexOf(">Web UI</a>"));
     expect(msg).toContain(
       `• 2026-03-11 · <a href="https://example.com/d?n=1&amp;x=1">AI Act &lt;GPAI&gt; rules</a> (${REPORT_LABELS["ai-policy"]})`,
@@ -167,7 +174,7 @@ describe("buildTeamsCard", () => {
       .filter((b) => b.type === "RichTextBlock")
       .map((b) => (b as { inlines: { type: string; text: string }[] }).inlines[0]!);
     expect(runs.map((r) => r.type)).toEqual(["TextRun", "TextRun"]);
-    expect(runs.map((r) => r.text)).toEqual(["• Spark *4.1* drops `_legacy_` [API](x)", "• - not a list"]);
+    expect(runs.map((r) => r.text)).toEqual(["+ Spark *4.1* drops `_legacy_` [API](x)", "+ - not a list"]);
   });
 
   it("links the report on Pages", () => {

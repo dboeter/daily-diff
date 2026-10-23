@@ -257,6 +257,16 @@
       display: flex; align-items: center; gap: 8px; transition: color 0.15s;
     }
     .md h2 .tile { margin-right: 10px; vertical-align: 0.1em; }
+    /* Highlights as a diff hunk: + for what arrived, − for what is going away (gutterList). */
+    .md ul.gutter { list-style: none; padding: 0; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+    .md ul.gutter > li { position: relative; margin: 0; padding: 10px 14px 10px 40px; background: var(--added-bg); }
+    .md ul.gutter > li + li { border-top: 1px solid var(--border); }
+    .md ul.gutter > li::before {
+      content: '+'; position: absolute; left: 0; width: 40px; text-align: center;
+      font-family: var(--mono); font-weight: 600; color: var(--added);
+    }
+    .md ul.gutter > li.gone { background: var(--removed-bg); }
+    .md ul.gutter > li.gone::before { content: '−'; color: var(--removed); }
     .md summary::-webkit-details-marker { display: none; }
     .md summary::before { content: '▶'; font-size: 8px; flex-shrink: 0; }
     .md details[open] summary::before { content: '▼'; }
@@ -569,7 +579,7 @@ async function renderOverview(date) {
     parts.push(`<h2>${tileHtml(id)}<a href="#${pageKey(date, id)}">${escapeHtml(LABELS[id] || id)}</a></h2>`);
     const items = Array.isArray(highlights[id]) ? highlights[id] : [];
     parts.push(items.length
-      ? `<ul>${items.map((h) => `<li>${escapeHtml(h)}</li>`).join('')}</ul>`
+      ? `<ul class="highlights">${items.map((h) => `<li>${escapeHtml(h)}</li>`).join('')}</ul>`
       : '<p class="dim">No highlights picked.</p>');
   }
   let comingUp = [];
@@ -592,6 +602,23 @@ async function renderOverview(date) {
   return parts.join('');
 }
 
+// Highlights carry the gutter sign (GOING_AWAY in src/reports/prompts.ts) from this date on:
+// "− " opens one going away, the rest are additions. Earlier days have no signs, so no gutter.
+const SIGNED_SINCE = '2026-10-24';
+const GOING_AWAY = '− ';
+
+/** A Highlights list as a diff hunk; the sign moves from the text to the gutter. */
+function gutterList(ul) {
+  ul.classList.add('gutter');
+  for (const li of ul.children) {
+    const first = li.firstChild;
+    if (first?.nodeType === Node.TEXT_NODE && first.textContent.startsWith(GOING_AWAY)) {
+      first.textContent = first.textContent.slice(GOING_AWAY.length);
+      li.classList.add('gone');
+    }
+  }
+}
+
 /** A report's square; a retired report has no color in the manifest and gets the neutral one. */
 function tileHtml(id) {
   const color = COLORS[id];
@@ -608,8 +635,13 @@ function isReportBar(p) {
  * The report's square on its H1, the report bar as tabs and the meta line under them. The bar
  * stays one Markdown line for GitHub Issues; its emoji give way to the squares here.
  */
-function decorateReport(root, report) {
+function decorateReport(root, date, report) {
   root.classList.add('report');
+  if (date >= SIGNED_SINCE) {
+    const highlights = [...root.querySelectorAll(':scope > h2')].find((h) => h.textContent.trim() === 'Highlights');
+    const list = highlights?.nextElementSibling;
+    if (list?.tagName === 'UL') gutterList(list);
+  }
   if (COLORS[report]) root.style.setProperty('--tile', COLORS[report]);
   const h1 = root.querySelector(':scope > h1:first-child');
   if (!h1) return;
@@ -715,8 +747,10 @@ async function loadReport(date, report, push = true) {
     setContent(`${pageNav(date, report)}<div class="md fade">${html}</div>`);
     if (report) {
       const md = document.querySelector('#content .md');
-      decorateReport(md, report);
+      decorateReport(md, date, report);
       addToc(md);
+    } else if (date >= SIGNED_SINCE) {
+      document.querySelectorAll('#content ul.highlights').forEach(gutterList);
     }
   } catch (e) {
     // The user has already switched to another report — don't overwrite its

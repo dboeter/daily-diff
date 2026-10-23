@@ -577,6 +577,18 @@ describe("withFallbackHighlights", () => {
     expect(long.endsWith("word…")).toBe(true);
   });
 
+  it("saves a going-away highlight with the minus sign, however the model wrote it", () => {
+    const out = withFallbackHighlights(
+      { "ai-data": ["- Snowflake retires X", "– Fabric ends Y", "DuckDB 2.0 ships", "-dash inside"] },
+      { "ai-policy": "## Highlights\n\n- − **EUR-Lex** drops a form. More." },
+      ["ai-policy"],
+    );
+    expect(out).toEqual({
+      "ai-data": ["− Snowflake retires X", "− Fabric ends Y", "DuckDB 2.0 ships", "-dash inside"],
+      "ai-policy": ["− EUR-Lex drops a form."],
+    });
+  });
+
   it("forces ai-data only on a day with kept vendor items", () => {
     expect(forcedHighlightReports(false)).toEqual(["ai-policy"]);
     expect(forcedHighlightReports(true)).toEqual(["ai-policy", "ai-data"]);

@@ -15,6 +15,7 @@ import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { COMING_UP, isReportId, REPORT_LABELS, REPORTS } from "../core/i18n.ts";
 import type { ComingUpEntry } from "../reports/coming-up.ts";
+import { GOING_AWAY } from "../reports/prompts.ts";
 import type { ReportHighlights } from "../reports/prompts-data.ts";
 
 const PAGES_URL_DEFAULT = "https://dboeter.github.io/daily-diff";
@@ -33,6 +34,12 @@ export function resolvePagesUrl(override?: string): string {
 
 function escapeHtml(s: string): string {
   return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
+
+/** A highlight behind its gutter sign: − when it is going away, else +. */
+function gutterLine(h: string, format: (s: string) => string = (s) => s): string {
+  const gone = h.startsWith(`${GOING_AWAY} `);
+  return `${gone ? GOING_AWAY : "+"} ${format(gone ? h.slice(GOING_AWAY.length + 1) : h)}`;
 }
 
 const COMING_UP_MAX = 5;
@@ -77,7 +84,7 @@ export function buildMessage(
     const items = highlights?.[r];
     if (items?.length) {
       for (const h of items) {
-        lines.push(`  ◦ ${escapeHtml(h)}`);
+        lines.push(`  ${gutterLine(h, escapeHtml)}`);
       }
     }
   }
@@ -133,7 +140,7 @@ export function buildTeamsCard(date: string, highlights: string[], pagesUrl?: st
             // text, so the highlight needs no escaping.
             ...highlights.map((h) => ({
               type: "RichTextBlock",
-              inlines: [{ type: "TextRun", text: `• ${h}` }],
+              inlines: [{ type: "TextRun", text: gutterLine(h) }],
             })),
           ],
           actions: [
