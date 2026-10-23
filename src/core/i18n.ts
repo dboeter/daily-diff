@@ -78,6 +78,16 @@ export const REPORT_META = {
 /** The report bar's first link: the day's overview of every report's highlights. */
 export const OVERVIEW = { emoji: "⬛", name: "Overview" } as const;
 
+/** The digest's name as its wordmark writes it, lowercase, where plain text opens a message (Telegram, Teams). */
+export const WORDMARK = "daily diff";
+
+/**
+ * The diff gutter's sign on a highlight about something going away (deprecation, retirement,
+ * removal, end of support, shutdown), the minus sign U+2212; an unsigned highlight reads as +.
+ * Only the model writing Highlights knows which is which, so it writes the sign.
+ */
+export const GOING_AWAY = "−";
+
 /** The dated items of the next 30 days from every page (coming-up.json), on the Overview and in Telegram. */
 export const COMING_UP = {
   heading: "Coming up",

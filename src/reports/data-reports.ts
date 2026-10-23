@@ -43,7 +43,6 @@ import {
   buildProjectDigestPrompt,
   buildSkillsPrompt,
   hasActivity,
-  signListItems,
   type ProjectActivity,
 } from "./prompts.ts";
 import type { GitHubRelease, RepoConfig, SkillsData } from "../core/github.ts";
@@ -52,6 +51,7 @@ import {
   buildStealthSection,
   groupsMarkdown,
   highlightsOnly,
+  signListItems,
   isNewStealthModel,
   renderCandidates,
   renderLabPostsTable,
@@ -195,7 +195,7 @@ export async function buildTrendsReport(
     .join("\n\n---\n\n");
   const prose = await generateOr("trends", buildTrendsProsePrompt(page, dateStr), null, LLM_TOKENS_LISTING);
   const body = spliceTables(
-    prose ?? `## ${SECTIONS.highlights}\n\n${MSG.summaryFailed}`,
+    prose === null ? `## ${SECTIONS.highlights}\n\n${MSG.summaryFailed}` : signListItems(prose),
     `---\n\n${page}\n\n---`,
   );
   const content = assembleReport(

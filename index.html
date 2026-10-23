@@ -28,6 +28,7 @@
       --removed-bg: rgba(240,113,106,0.08);
       --code-bg:    #151917;
       --link:       #8DBBFF;
+      /* The mark stays a dark tile in both themes: its green and red are fixed (logo colors). */
       --mark-bg:    #1A1F1C;
       --sans: 'IBM Plex Sans', system-ui, sans-serif;
       --mono: 'IBM Plex Mono', ui-monospace, monospace;
@@ -407,13 +408,15 @@ function escapeHtml(s) {
 }
 
 // Manifest data: dates newest first, the weekly report ids, the overview's
-// label (OVERVIEW in src/core/i18n.ts) and its Coming up heading (COMING_UP).
+// label (OVERVIEW in src/core/i18n.ts), its Coming up heading (COMING_UP) and the
+// Highlights heading (SECTIONS).
 let DATES = [];
 let WEEKLY = [];
 let FEEDS = {};
 let COLORS = {};
 let OVERVIEW_LABEL = 'Overview';
 let COMING_UP_HEADING = 'Coming up';
+let HIGHLIGHTS_HEADING = 'Highlights';
 
 // ── State ──
 let currentKey = null;
@@ -602,18 +605,19 @@ async function renderOverview(date) {
   return parts.join('');
 }
 
-// Highlights carry the gutter sign (GOING_AWAY in src/reports/prompts.ts) from this date on:
-// "− " opens one going away, the rest are additions. Earlier days have no signs, so no gutter.
+// Highlights carry the gutter sign (GOING_AWAY in src/core/i18n.ts) from this date on: it opens
+// one going away, the rest are additions. Earlier days have no signs, so no gutter.
 const SIGNED_SINCE = '2026-10-24';
-const GOING_AWAY = '− ';
+const GOING_AWAY = '−';
 
 /** A Highlights list as a diff hunk; the sign moves from the text to the gutter. */
 function gutterList(ul) {
   ul.classList.add('gutter');
   for (const li of ul.children) {
-    const first = li.firstChild;
-    if (first?.nodeType === Node.TEXT_NODE && first.textContent.startsWith(GOING_AWAY)) {
-      first.textContent = first.textContent.slice(GOING_AWAY.length);
+    // A loose list (blank lines between items) wraps each item's text in a <p>.
+    const first = li.firstElementChild?.tagName === 'P' ? li.firstElementChild.firstChild : li.firstChild;
+    if (first?.nodeType === Node.TEXT_NODE && first.textContent.startsWith(`${GOING_AWAY} `)) {
+      first.textContent = first.textContent.slice(GOING_AWAY.length + 1);
       li.classList.add('gone');
     }
   }
@@ -638,7 +642,7 @@ function isReportBar(p) {
 function decorateReport(root, date, report) {
   root.classList.add('report');
   if (date >= SIGNED_SINCE) {
-    const highlights = [...root.querySelectorAll(':scope > h2')].find((h) => h.textContent.trim() === 'Highlights');
+    const highlights = [...root.querySelectorAll(':scope > h2')].find((h) => h.textContent.trim() === HIGHLIGHTS_HEADING);
     const list = highlights?.nextElementSibling;
     if (list?.tagName === 'UL') gutterList(list);
   }
@@ -890,7 +894,7 @@ window.addEventListener('hashchange', followHash);
   try {
     const res = await fetch('./manifest.json');
     if (!res.ok) throw new Error('manifest.json not found');
-    const { dates, labels, weekly, feeds, colors, overview, comingUp } = await res.json();
+    const { dates, labels, weekly, feeds, colors, overview, comingUp, highlights } = await res.json();
     if (!dates?.length) throw new Error('manifest is empty');
     LABELS = labels ?? {};
     DATES = dates;
@@ -899,6 +903,7 @@ window.addEventListener('hashchange', followHash);
     COLORS = colors ?? {};
     OVERVIEW_LABEL = overview ?? 'Overview';
     COMING_UP_HEADING = comingUp ?? 'Coming up';
+    HIGHLIGHTS_HEADING = highlights ?? 'Highlights';
 
     allDates = dates;
     buildNav(dates);

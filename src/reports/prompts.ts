@@ -4,7 +4,7 @@
 
 import type { RepoConfig, GitHubItem, GitHubRelease } from "../core/github.ts";
 import type { NewsItem } from "./agent-news.ts";
-import { SECTIONS } from "../core/i18n.ts";
+import { GOING_AWAY, SECTIONS } from "../core/i18n.ts";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -84,26 +84,10 @@ export const NO_TITLE_RULE =
   "Do not write a title, a date line or any `#` heading: code adds the report title. " +
   "Use exactly the `##` headings given, in the given order.";
 
-/**
- * The diff gutter's − on a highlight about something going away; an unsigned one reads as +
- * (added). Only the model writing Highlights knows which is which, so it writes the sign.
- */
-export const GOING_AWAY = "−";
-export const GOING_AWAY_RULE =
-  `Start a bullet with \`${GOING_AWAY} \` (the minus sign) when its item is going away: a deprecation, ` +
-  "retirement, removal, end of support or shutdown. Give every other bullet no sign.";
-
-/**
- * Models write the minus as a hyphen or a dash, and `- - text` would nest a list: a list item
- * opening with one becomes the minus sign. `signHighlight` does the same for a highlights.json entry.
- */
-export function signListItems(md: string): string {
-  return md.replace(/^(\s*[-*]\s+)[-–—−](?=\s)/gm, `$1${GOING_AWAY}`);
-}
-
-export function signHighlight(text: string): string {
-  return text.replace(/^[-–—−](?=\s)/, GOING_AWAY);
-}
+/** Asks for the gutter sign (GOING_AWAY) on each bullet or highlight about something going away. */
+export const goingAwayRule = (item: "bullet" | "highlight") =>
+  `Start a ${item} with "${GOING_AWAY} " (the minus sign) when its item is going away: a deprecation, ` +
+  `retirement, removal, end of support or shutdown. Give every other ${item} no sign.`;
 
 /** Sort by comment count desc, take top N. */
 export function topN(items: GitHubItem[], n: number): GitHubItem[] {
@@ -303,7 +287,7 @@ Write only \`## ${SECTIONS.highlights}\`: 3–5 bullets, most consequential firs
 
 Rules:
 - ${NO_TITLE_RULE}
-- ${GOING_AWAY_RULE}
+- ${goingAwayRule("bullet")}
 - About 150 words in total. Write no other sections.
 - Name each item in at most one bullet. Write no links or URLs: the sections below link every item.
 - Base every claim on the sections. Do not invent versions, dates or features.

@@ -7,6 +7,7 @@ import {
   OVERVIEW,
   REPORT_LABELS,
   REPORTS,
+  SECTIONS,
   WEEKLY_REPORT_IDS,
 } from "../core/i18n.ts";
 
@@ -40,6 +41,8 @@ interface Manifest {
   overview: string;
   /** The heading of the overview's Coming up list (coming-up.json). */
   comingUp: string;
+  /** The Highlights heading (SECTIONS), whose list the web UI renders as a diff hunk. */
+  highlights: string;
   dates: DateEntry[];
 }
 
@@ -177,6 +180,7 @@ async function main(): Promise<void> {
     colors: Object.fromEntries(LIVE_REPORT_IDS.map((id) => [id, REPORTS[id].color])),
     overview: OVERVIEW.name,
     comingUp: COMING_UP.heading,
+    highlights: SECTIONS.highlights,
     dates: entries,
   };
 

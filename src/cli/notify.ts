@@ -13,9 +13,8 @@
 import fs from "node:fs";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
-import { COMING_UP, isReportId, REPORT_LABELS, REPORTS } from "../core/i18n.ts";
+import { COMING_UP, GOING_AWAY, isReportId, REPORT_LABELS, REPORTS, WORDMARK } from "../core/i18n.ts";
 import type { ComingUpEntry } from "../reports/coming-up.ts";
-import { GOING_AWAY } from "../reports/prompts.ts";
 import type { ReportHighlights } from "../reports/prompts-data.ts";
 
 const PAGES_URL_DEFAULT = "https://dboeter.github.io/daily-diff";
@@ -36,7 +35,7 @@ function escapeHtml(s: string): string {
   return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 }
 
-/** A highlight behind its gutter sign: − when it is going away, else +. */
+/** A highlight behind its gutter sign. An unsigned one is an addition: the model signs only what goes away. */
 function gutterLine(h: string, format: (s: string) => string = (s) => s): string {
   const gone = h.startsWith(`${GOING_AWAY} `);
   return `${gone ? GOING_AWAY : "+"} ${format(gone ? h.slice(GOING_AWAY.length + 1) : h)}`;
@@ -72,7 +71,7 @@ export function buildMessage(
   comingUp?: ComingUpEntry[] | null,
 ): string {
   const PAGES_URL = resolvePagesUrl(pagesUrl);
-  const lines: string[] = [`<b>daily diff</b> · ${date}`];
+  const lines: string[] = [`<b>${WORDMARK}</b> · ${date}`];
 
   for (const r of reports) {
     const label = REPORT_LABELS[r] ?? r;
@@ -125,7 +124,7 @@ export function buildTeamsCard(date: string, highlights: string[], pagesUrl?: st
           type: "AdaptiveCard",
           version: "1.2",
           body: [
-            { type: "TextBlock", text: "daily diff", isSubtle: true, size: "Small", wrap: true },
+            { type: "TextBlock", text: WORDMARK, isSubtle: true, size: "Small", wrap: true },
             {
               type: "TextBlock",
               text: `${emoji} ${name}`,
