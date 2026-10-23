@@ -25,14 +25,15 @@ export const MSG = {
  * Weekly" in the H1, "AI Infrastructure Digest" in the sidebar). Names stay
  * cadence-neutral: the archive holds daily and weekly issues of a report.
  */
-// In reading order: the report bar and the sidebar list them this way.
+// In reading order: the report bar and the sidebar list them this way. `color` is the report's
+// square in the web UI (sidebar, tabs, H1; manifest.json `colors`); keep it close to the emoji.
 export const REPORTS = {
-  "ai-agents": { emoji: "🤖", name: "AI Agents", label: "agents" },
-  "ai-models": { emoji: "🧠", name: "AI Models & Labs", label: "models" },
-  "ai-policy": { emoji: "⚖️", name: "AI Policy", label: "policy" },
-  "ai-data": { emoji: "🗄️", name: "Data Engineering", label: "data" },
-  "ai-trends": { emoji: "📈", name: "Trends", label: "trends" },
-} as const satisfies Record<string, { emoji: string; name: string; label: string }>;
+  "ai-agents": { emoji: "🤖", color: "#9D7BDB", name: "AI Agents", label: "agents" },
+  "ai-models": { emoji: "🧠", color: "#55ACEE", name: "AI Models & Labs", label: "models" },
+  "ai-policy": { emoji: "⚖️", color: "#F4900C", name: "AI Policy", label: "policy" },
+  "ai-data": { emoji: "🗄️", color: "#FDCB58", name: "Data Engineering", label: "data" },
+  "ai-trends": { emoji: "📈", color: "#C1694F", name: "Trends", label: "trends" },
+} as const satisfies Record<string, { emoji: string; color: string; name: string; label: string }>;
 
 export type ReportId = keyof typeof REPORTS;
 export const LIVE_REPORT_IDS = Object.keys(REPORTS) as ReportId[];

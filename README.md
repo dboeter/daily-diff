@@ -36,7 +36,7 @@ A personal daily digest of AI coding agents, agent tooling, AI policy and the da
 
 **[https://dboeter.github.io/daily-diff](https://dboeter.github.io/daily-diff)**
 
-Browse all historical digests in a clean, dark-themed interface — no login required. Reports are rendered from the Markdown files in this repo via GitHub Pages. Each day opens on an overview of every report's highlights, then **Coming up**: the dated items of the next 30 days from every page (policy deadlines, Action required dates in Data Engineering, stealth model expiries); each report links to the day's other reports, the previous and next day, and its own previous report (weekly reports skip days), and long reports get a table of contents. The latest weekly reports stay pinned under **This week** in the sidebar.
+Browse all historical digests in dark or light theme, no login required. Reports are rendered from the Markdown files in this repo via GitHub Pages. Each day opens on an overview of every report's highlights, then **Coming up**: the dated items of the next 30 days from every page (policy deadlines, Action required dates in Data Engineering, stealth model expiries); each report links to the day's other reports, the previous and next day, and its own previous report (weekly reports skip days), and long reports get a table of contents. The latest weekly reports stay pinned under **This week** in the sidebar.
 
 ## Telegram Notifications
 

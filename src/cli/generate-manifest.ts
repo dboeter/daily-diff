@@ -1,7 +1,14 @@
 import fs from "fs";
 import path from "path";
 import { marked } from "marked";
-import { COMING_UP, LIVE_REPORT_IDS, OVERVIEW, REPORT_LABELS, WEEKLY_REPORT_IDS } from "../core/i18n.ts";
+import {
+  COMING_UP,
+  LIVE_REPORT_IDS,
+  OVERVIEW,
+  REPORT_LABELS,
+  REPORTS,
+  WEEKLY_REPORT_IDS,
+} from "../core/i18n.ts";
 
 const DIGESTS_DIR = "digests";
 const MANIFEST_PATH = "manifest.json";
@@ -27,6 +34,8 @@ interface Manifest {
   weekly: string[];
   /** Report id → its own feed's path, for the web UI's per-page feed link. */
   feeds: Record<string, string>;
+  /** Live report id → its square's color in the web UI; a retired report has none. */
+  colors: Record<string, string>;
   /** The sidebar label of a day's overview (the report bar's first link). */
   overview: string;
   /** The heading of the overview's Coming up list (coming-up.json). */
@@ -165,7 +174,8 @@ async function main(): Promise<void> {
     labels: REPORT_LABELS,
     weekly: WEEKLY_REPORT_IDS,
     feeds: Object.fromEntries(LIVE_REPORT_IDS.map((id) => [id, `${FEEDS_DIR}/${id}.xml`])),
-    overview: `${OVERVIEW.emoji} ${OVERVIEW.name}`,
+    colors: Object.fromEntries(LIVE_REPORT_IDS.map((id) => [id, REPORTS[id].color])),
+    overview: OVERVIEW.name,
     comingUp: COMING_UP.heading,
     dates: entries,
   };
