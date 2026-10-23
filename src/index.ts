@@ -34,7 +34,7 @@ import {
   forcedHighlightReports,
   withFallbackHighlights,
   type ReportHighlights,
-} from "./reports/prompts-data.ts";
+} from "./reports/prompts-pages.ts";
 import {
   callLlm,
   generateOr,

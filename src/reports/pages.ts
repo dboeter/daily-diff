@@ -29,7 +29,7 @@ import {
   buildDataProsePrompt,
   buildModelsSummariesPrompt,
   modelSources,
-} from "./prompts-data.ts";
+} from "./prompts-pages.ts";
 import { generateOr, saveFile, autoGenFooter, LLM_TOKENS_LISTING } from "../core/llm.ts";
 import { saveWebState, type WebFetchResult, type WebPageItem, type WebState } from "../sources/web.ts";
 import { loadReportedState, newItems, nextReportedState, saveReportedState } from "../core/report-state.ts";

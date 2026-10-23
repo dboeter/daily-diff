@@ -18,7 +18,7 @@ import {
   forcedHighlightReports,
   withFallbackHighlights,
   type ReportHighlights,
-} from "../src/reports/prompts-data.ts";
+} from "../src/reports/prompts-pages.ts";
 import { buildMessage } from "../src/cli/notify.ts";
 import { REPORT_LABELS } from "../src/core/strings.ts";
 

@@ -12,7 +12,7 @@ import {
   buildDataSummariesPrompt,
   buildPolicySummariesPrompt,
   buildTrendingSummariesPrompt,
-} from "../reports/prompts-data.ts";
+} from "../reports/prompts-pages.ts";
 import type { PolicyItem } from "../policy/policy.ts";
 import type { KeptVendorItem } from "../data/jev.ts";
 

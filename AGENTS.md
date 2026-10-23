@@ -65,7 +65,7 @@ Every chat-model call goes through `callLlm` (`src/core/llm.ts`), at most 5 conc
 | `src/core/report-state.ts`        | `ReportedState`: which items a report already showed, stages, deadlines                                                                                                            |
 | `src/core/new-items.ts`           | `collectNewItems` and the save protocol (`planWrites`/`commitWrites`) of AI Policy and the data report                                                                             |
 | `src/reports/prompts.ts`          | Repo-section and page Highlights prompts, shared prompt rules                                                                                                                      |
-| `src/reports/prompts-data.ts`     | Data-source prompts: Trends, models page, AI Policy, data report, Spotted, `highlights.json`                                                                                       |
+| `src/reports/prompts-pages.ts`    | Page prompts (row summaries, prose): Trends, models page, AI Policy, data report, Spotted, `highlights.json`                                                                       |
 | `src/reports/markdown.ts`         | Markdown assembly and the code-rendered tables                                                                                                                                     |
 | `src/reports/summarized-table.ts` | Tables with LLM row summaries: row numbers, the `N: text` contract and parser, `TABLES_MARKER`                                                                                     |
 | `src/reports/pages.ts`            | The page builders (`buildXxxReport`): LLM calls and Markdown, returned as a `SavedReport`                                                                                          |
@@ -206,7 +206,7 @@ Every Jev judgment except ArXiv's goes through `judgeItems` (`src/core/jev.ts`) 
 ## Adding a new report type
 
 1. Create a data fetcher (or add to an existing one). For a repo-backed report, add its key to `SECTION_KEYS` in `src/core/config.ts`: that loads it as a `SectionConfig` (`title`, `subject`, `repos`) and lists it in README.md, which then needs a `<!-- tracked:<key> -->` … `<!-- /tracked:<key> -->` marker pair (`pnpm readme` fills it in). Its prompt wording comes from `PROJECT_SCOPE` (`src/core/strings.ts`) and its `subject`. Any other `config.yml` key needs its own `RawConfig`/`RadarConfig`/`loadConfig` entry: a section with no schema entry is silently ignored. Decide daily vs weekly: a weekly report gates its fetch and save on `isWeeklyRun`, and its id goes in `WEEKLY_REPORT_IDS`.
-2. Add a `buildXxxPrompt` function in `src/reports/prompts-data.ts` (data-source prompts) or `src/reports/prompts.ts` (repo-level prompts).
+2. Add a `buildXxxPrompt` function in `src/reports/prompts-pages.ts` (page prompts) or `src/reports/prompts.ts` (repo-level prompts).
 3. Add its square emoji and matching color, name and issue label to `REPORTS` in `src/core/strings.ts` (a square no other report uses, never green or red; the name cadence-neutral: no "daily"/"weekly"); the H1, issue title and labels derive from it.
 4. Add a `buildXxxReport` function in `src/reports/pages.ts` that returns a `SavedReport` and makes the report's LLM calls.
 5. Wire it into `fetchAllData` and the save phase in `src/index.ts`. The fetcher never throws: it catches its own failure and returns its empty value (`fetchSuccess: false`).

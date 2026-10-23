@@ -1,7 +1,7 @@
 /**
- * LLM prompt builders for data-source reports (trending, the models page, Spotted, policy, data).
- *
- * Separated from prompts.ts to keep each module focused.
+ * Page prompts: the row-summaries and prose calls of Trends, the models page,
+ * AI Policy, the data report and Spotted, and the highlights.json prompt. The
+ * repo-section prompts and the shared prompt rules are in prompts.ts.
  */
 
 import type { WebPageItem } from "../sources/web.ts";

@@ -23,7 +23,7 @@ import {
   forcedHighlightReports,
   buildHighlightsPrompt,
   firstHighlight,
-} from "../reports/prompts-data.ts";
+} from "../reports/prompts-pages.ts";
 import { TABLES_MARKER, numberRows } from "../reports/summarized-table.ts";
 import { SECTIONS, TRENDS_REPORT } from "../core/strings.ts";
 import type { RepoConfig, GitHubItem, GitHubRelease } from "../core/github.ts";
