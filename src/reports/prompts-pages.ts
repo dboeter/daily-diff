@@ -1,7 +1,9 @@
 /**
- * Page prompts: the row-summaries and prose calls of Trends, the models page,
- * AI Policy, the data report and Spotted, and the highlights.json prompt. The
- * repo-section prompts and the shared prompt rules are in prompts.ts.
+ * Page prompts: the row summaries of Trends, the models page, AI Policy, the
+ * data report and Spotted; the prose of Trends, AI Policy and the data report;
+ * Trends' Hugging Face table; and the highlights.json prompt. The agents and
+ * models pages' Highlights, the repo sections and the shared prompt rules are in
+ * prompts.ts.
  */
 
 import type { WebPageItem } from "../sources/web.ts";

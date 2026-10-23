@@ -49,7 +49,7 @@ Every chat-model call goes through `callLlm` (`src/core/llm.ts`), at most 5 conc
 
 ## Source files
 
-`src/` is grouped by area. Within an area folder the area prefix is dropped (`policy/jev.ts`, not `policy/policy-jev.ts`). Tests stay flat in `src/__tests__/`, named `<module>.test.ts`, with the area prefix on most `policy/`, `data/`, `spotted/` and `trending/` modules (`policy-jev.test.ts` tests `policy/jev.ts`).
+`src/` is grouped by area. Within an area folder the area prefix is dropped (`policy/jev.ts`, not `policy/policy-jev.ts`). Tests stay flat in `src/__tests__/`, named `<module>.test.ts`, with the area prefix on most `policy/`, `data/`, `spotted/` and `trending/` modules (`policy-jev.test.ts` tests `policy/jev.ts`); `community.test.ts` (Dev.to, Hugging Face, Lobste.rs) and `prompt-builders.test.ts` (both prompt files) cover several.
 
 | Path                              | Responsibility                                                                                                                                                                     |
 | --------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -65,7 +65,7 @@ Every chat-model call goes through `callLlm` (`src/core/llm.ts`), at most 5 conc
 | `src/core/report-state.ts`        | `ReportedState`: which items a report already showed, stages, deadlines                                                                                                            |
 | `src/core/new-items.ts`           | `collectNewItems` and the save protocol (`planWrites`/`commitWrites`) of AI Policy and the data report                                                                             |
 | `src/reports/prompts.ts`          | Repo-section and page Highlights prompts, shared prompt rules                                                                                                                      |
-| `src/reports/prompts-pages.ts`    | Page prompts (row summaries, prose): Trends, models page, AI Policy, data report, Spotted, `highlights.json`                                                                       |
+| `src/reports/prompts-pages.ts`    | Page prompts: row summaries (Trends, models page, AI Policy, data report, Spotted), prose (Trends, AI Policy, data report), `highlights.json`                                      |
 | `src/reports/markdown.ts`         | Markdown assembly and the code-rendered tables                                                                                                                                     |
 | `src/reports/summarized-table.ts` | Tables with LLM row summaries: row numbers, the `N: text` contract and parser, `TABLES_MARKER`                                                                                     |
 | `src/reports/pages.ts`            | The page builders (`buildXxxReport`): LLM calls and Markdown, returned as a `SavedReport`                                                                                          |
