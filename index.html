@@ -4,7 +4,18 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Daily Diff</title>
+  <meta name="description" content="AI coding agents, AI policy and the data engineering stack, every morning.">
   <link rel="icon" href="./favicon-16.svg" type="image/svg+xml">
+  <!-- apple-touch-icon.png, og-image.png and feed-icon.png are PNG renders of favicon.svg: iOS, link previews and RSS take no SVG. og:image needs an absolute URL. -->
+  <link rel="apple-touch-icon" href="./apple-touch-icon.png">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Daily Diff">
+  <meta property="og:description" content="AI coding agents, AI policy and the data engineering stack, every morning.">
+  <meta property="og:url" content="https://dboeter.github.io/daily-diff/">
+  <meta property="og:image" content="https://dboeter.github.io/daily-diff/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
   <link rel="alternate" type="application/rss+xml" title="Daily Diff RSS" href="./feed.xml">
@@ -313,14 +324,14 @@
 </head>
 <body>
 <div id="app">
-  <!-- The mark: a diff gutter, + over −. favicon-16.svg is the tab icon, redrawn on a 16 px grid (whole-pixel shapes, square ends) so it stays sharp; favicon.svg is the README mark. -->
+  <!-- The mark: a diff gutter, + over −. favicon-16.svg is the tab icon, redrawn on a 16 px grid (whole-pixel shapes, square ends) so it stays sharp; favicon.svg is this drawing on a fixed background, for the README. -->
   <svg width="0" height="0" style="position:absolute" aria-hidden="true">
     <symbol id="mark" viewBox="0 0 64 64">
       <rect width="64" height="64" rx="14" fill="var(--mark-bg)"/>
-      <path d="M12 22h10M17 17v10" stroke="#4CC38A" stroke-width="5" stroke-linecap="round"/>
-      <path d="M12 42h10" stroke="#F0716A" stroke-width="5" stroke-linecap="round"/>
-      <rect x="29" y="18" width="23" height="8" rx="4" fill="#4CC38A"/>
-      <rect x="29" y="38" width="15" height="8" rx="4" fill="#F0716A"/>
+      <g stroke-width="7" stroke-linecap="round">
+        <path d="M13.5 25.5h15M21 18v15M39.5 25.5h11" stroke="#4CC38A"/>
+        <path d="M13.5 45.5h15M39.5 45.5h4" stroke="#F0716A"/>
+      </g>
     </symbol>
   </svg>
   <div id="hdr">
