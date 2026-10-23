@@ -303,9 +303,9 @@
       .md table.stack tr { display: block; padding: 10px 0; border-bottom: 1px solid var(--border); }
       /* Inline, so a long title wraps as text and its separator stays on the line before it. */
       .md table.stack td { display: inline; padding: 0; border: 0; font-size: 13px; color: var(--muted); }
-      .md table.stack td:empty { display: none; }
       .md table.stack td:not(:empty) ~ td:not(:empty):not(:last-child)::before { content: '·'; margin: 0 6px; }
       .md table.stack td:last-child { display: block; margin-top: 4px; font-size: 14px; color: var(--text); }
+      .md table.stack td:empty { display: none; }
       .md { font-size: 15px; }
       .md h1 { font-size: 22px; }
     }
@@ -607,7 +607,7 @@ async function renderOverview(date) {
       ? `<a href="${escapeHtml(c.link)}">${escapeHtml(c.title)}</a>`
       : escapeHtml(c.title);
     parts.push(`<ul>${comingUp.map((c) =>
-      `<li>${ISO_DATE.test(c.date) ? timeHtml(c.date, date) : escapeHtml(c.date)} · ${linked(c)} <span class="dim">${escapeHtml(LABELS[c.page] || c.page)}</span></li>`,
+      `<li>${typeof c.date === 'string' && ISO_DATE.test(c.date) ? timeHtml(c.date, date) : escapeHtml(c.date)} · ${linked(c)} <span class="dim">${escapeHtml(LABELS[c.page] || c.page)}</span></li>`,
     ).join('')}</ul>`);
   }
   return parts.join('');
@@ -677,7 +677,8 @@ function decorateReport(root, date, report) {
     const iso = td.textContent.trim();
     if (!ISO_DATE.test(iso)) continue;
     td.classList.add('date');
-    td.innerHTML = timeHtml(iso, date);
+    // Only a bare date: one the model linked or emphasized keeps its markup.
+    if (!td.children.length) td.innerHTML = timeHtml(iso, date);
   }
   // On a phone a row of 3+ columns stacks: its other cells on one line, the last (Summary,
   // What to do) under them at full width. Columns no longer align, so the header is hidden.
