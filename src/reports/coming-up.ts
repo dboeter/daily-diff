@@ -9,7 +9,7 @@ import { COMING_UP, type ReportId } from "../core/strings.ts";
 import type { Deadline } from "../core/report-state.ts";
 import type { DataState } from "../data/vendors.ts";
 import { upcomingDeadlines } from "../policy/deadlines.ts";
-import type { PolicyState } from "../policy/policy.ts";
+import type { PolicyState } from "../policy/items.ts";
 import type { OpenRouterStealthModel } from "../sources/openrouter.ts";
 
 export interface ComingUpEntry extends Deadline {

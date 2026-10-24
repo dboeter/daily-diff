@@ -33,8 +33,9 @@ import {
 import { generateOr, saveFile, autoGenFooter, LLM_TOKENS_LISTING } from "../core/llm.ts";
 import { saveLabsState, type LabsFetchResult, type LabPost, type LabsState } from "../sources/labs.ts";
 import { loadReportedState, newItems, nextReportedState, saveReportedState } from "../core/report-state.ts";
-import type { TrendingData } from "../trending/trending.ts";
-import { saveClassifyCache, saveMatchState } from "../trending/jev.ts";
+import type { TrendingData } from "../trending/compose.ts";
+import { saveTrendingVerdicts } from "../trending/classify.ts";
+import { saveMatchState } from "../trending/match.ts";
 import { saveStarHistory, summaryRows } from "../trending/rank.ts";
 import {
   AGENTS_HIGHLIGHTS_FOCUS,
@@ -74,17 +75,17 @@ import {
   summaryText,
   TABLES_MARKER,
 } from "./summarized-table.ts";
-import type { HfData } from "../sources/hf.ts";
+import type { HfData } from "../sources/huggingface.ts";
 import type { ResearchPaper } from "../trending/research.ts";
-import { POLICY_STATE_FILE, type PolicyData, type PolicyItem } from "../policy/policy.ts";
-import { POLICY_VERDICTS_FILE } from "../policy/jev.ts";
+import { POLICY_STATE_FILE, type PolicyData, type PolicyItem } from "../policy/items.ts";
+import { POLICY_VERDICTS_FILE } from "../policy/relevance.ts";
 import { nearPolicyDeadlines, renderDeadlines } from "../policy/deadlines.ts";
 import type { ModelCatalog } from "../sources/openrouter.ts";
 import { DATA_STATE_FILE, type DataState, type VendorData } from "../data/vendors.ts";
-import { DATA_VERDICTS_FILE } from "../data/jev.ts";
+import { DATA_VERDICTS_FILE } from "../data/relevance.ts";
 import { commitWrites, planWrites } from "../core/new-items.ts";
 import type { DataSectionKey } from "../core/config.ts";
-import type { SpottedSection, StoryRow } from "../spotted/spotted.ts";
+import type { SpottedSection, StoryRow } from "../spotted/pool.ts";
 
 /** A finished report: main() writes its file and opens its issue (title and label from REPORTS). */
 export interface SavedReport {
@@ -210,7 +211,7 @@ export async function buildTrendsReport(
     console.log(`  Saved ${saveFile(report.traceFile, dateStr, "trending-trace.json")}`);
   }
   if (report?.nextMatches) saveMatchState(report.nextMatches);
-  if (report?.nextClassifications) saveClassifyCache(report.nextClassifications);
+  if (report?.nextTrendingVerdicts) saveTrendingVerdicts(report.nextTrendingVerdicts);
   if (report?.nextStarHistory) saveStarHistory(report.nextStarHistory);
 
   return { id: "ai-trends", content };

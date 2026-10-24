@@ -8,9 +8,9 @@
  * the item's deadline. Breaks when the markup changes: zero parsed throws.
  */
 
-import type { PolicyItem } from "./policy.ts";
+import type { PolicyItem } from "./items.ts";
 import type { PolicySourceContext } from "./sources.ts";
-import { keywordHit } from "./jev.ts";
+import { keywordHit } from "./relevance.ts";
 import { plainText } from "../core/rss.ts";
 import { fetchOk } from "../core/http.ts";
 

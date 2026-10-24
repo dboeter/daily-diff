@@ -60,16 +60,16 @@ import {
   type SavedReport,
 } from "./reports/pages.ts";
 import { loadLabsState, fetchSiteContent, type LabsFetchResult, type LabsState } from "./sources/labs.ts";
-import { fetchTrendingData, type TrendingData } from "./trending/trending.ts";
+import { fetchTrendingData, type TrendingData } from "./trending/compose.ts";
 import { fetchModelCatalogDaily, type ModelCatalog } from "./sources/openrouter.ts";
 import { fetchHnData, pageDescription, type HnData, type HnStory } from "./sources/hn.ts";
 import { fetchArxivData, saveArxivState, type ArxivData } from "./sources/arxiv.ts";
 import { loadResearchState, nextResearchState, saveResearchState, weekPapers } from "./trending/research.ts";
-import { fetchPolicyData, loadPolicyState, type PolicyData } from "./policy/policy.ts";
-import { isDataLaw } from "./policy/jev.ts";
+import { fetchPolicyData, loadPolicyState, type PolicyData } from "./policy/items.ts";
+import { isDataLaw } from "./policy/relevance.ts";
 import { fetchVendorData, loadDataState, type VendorData } from "./data/vendors.ts";
 import { buildComingUp } from "./reports/coming-up.ts";
-import { fetchHfData, type HfData } from "./sources/hf.ts";
+import { fetchHfData, type HfData } from "./sources/huggingface.ts";
 import { fetchDevtoData, type DevtoData } from "./sources/devto.ts";
 import { fetchLobstersData, type LobstersData } from "./sources/lobsters.ts";
 import {
@@ -84,14 +84,14 @@ import {
   splitPool,
   storiesFrom,
   type SpottedPage,
-} from "./spotted/spotted.ts";
+} from "./spotted/pool.ts";
 import {
-  loadTopicCache,
+  loadSpottedVerdicts,
   routeStories,
-  saveTopicCache,
+  saveSpottedVerdicts,
   spottedTraceFile,
   PAGE_OF_TOPIC,
-} from "./spotted/jev.ts";
+} from "./spotted/topics.ts";
 import { DATA_SECTION_KEYS, loadConfig, type SectionKey } from "./core/config.ts";
 import { resolvePagesUrl } from "./cli/notify.ts";
 import { toCstDateStr, toUtcStr, isWeeklyRun, sleep } from "./core/date.ts";
@@ -389,10 +389,10 @@ async function main(): Promise<void> {
       .map((p) => p.url),
   );
   const unmatched = pool.spotted;
-  const topicCache = loadTopicCache();
+  const spottedVerdicts = loadSpottedVerdicts();
   const routing = await routeStories(unmatched, {
     apiKey: process.env["TYPESAFE_API_KEY"],
-    cache: topicCache,
+    cache: spottedVerdicts,
     dateStr,
   });
   const spottedRows = selectSpotted(unmatched, (s) => {
@@ -509,7 +509,7 @@ async function main(): Promise<void> {
   ]);
   const shownIds = [...dailyShown, ...(savedIds.has("ai-trends") ? discussed.map((s) => s.id) : [])];
   saveSpottedLog(nextLog(spottedLog, stories, shownIds, dateStr));
-  if (routing.judgment.nextCache) saveTopicCache(routing.judgment.nextCache);
+  if (routing.judgment.nextCache) saveSpottedVerdicts(routing.judgment.nextCache);
   console.log(
     `  Saved ${saveFile(spottedTraceFile(unmatched, routing, dailyShown), dateStr, "spotted-trace.json")}`,
   );

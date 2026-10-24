@@ -23,7 +23,7 @@ import path from "node:path";
 import { loadConfig } from "../src/core/config.ts";
 import { toCstDateStr } from "../src/core/date.ts";
 import { askJev, mapJev } from "../src/core/jev.ts";
-import { fetchPolicySources, type PolicyItem } from "../src/policy/policy.ts";
+import { fetchPolicySources, type PolicyItem } from "../src/policy/items.ts";
 import { newItems } from "../src/core/report-state.ts";
 import {
   loadPolicyVerdicts,
@@ -32,7 +32,7 @@ import {
   watchlisted,
   watchlistFor,
   type PolicyAnswers,
-} from "../src/policy/jev.ts";
+} from "../src/policy/relevance.ts";
 import { fullText } from "./jev-lab-text.ts";
 
 const LAB_DIR = path.join(".scratch", "ai-policy", "lab");
@@ -501,7 +501,8 @@ function report(): void {
   if (saved) {
     const same = judged.filter((i) => {
       const e = saved.items[i.id];
-      return e && e.stage === i.stage;
+      // Policy's verdict fingerprint is the item's stage (`selectPolicyItems`).
+      return e && e.fingerprint === i.stage;
     });
     const savedFlips = same.filter(
       (i) =>

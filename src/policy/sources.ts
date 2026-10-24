@@ -5,13 +5,13 @@
  */
 
 import type { PolicyConfig } from "../core/config.ts";
-import type { PolicyItem, PolicyState } from "./policy.ts";
+import type { PolicyItem, PolicyState } from "./items.ts";
 import { fetchEurLex } from "./eurlex.ts";
 import { fetchEuroparl } from "./europarl.ts";
-import { fetchNlParliament } from "./nl.ts";
+import { fetchTweedeKamer } from "./tweedekamer.ts";
 import { fetchHaveYourSay } from "./haveyoursay.ts";
 import { fetchOpenStates } from "./openstates.ts";
-import { fetchUsRules } from "./usrules.ts";
+import { fetchFederalRegister } from "./federalregister.ts";
 import { fetchCongress } from "./congress.ts";
 import { fetchInternetConsultatie } from "./internetconsultatie.ts";
 
@@ -37,9 +37,9 @@ export interface PolicySource {
 export const POLICY_SOURCES: PolicySource[] = [
   { name: "EUR-Lex", fetch: fetchEurLex },
   { name: "European Parliament", fetch: fetchEuroparl },
-  { name: "Tweede Kamer", fetch: fetchNlParliament },
+  { name: "Tweede Kamer", fetch: fetchTweedeKamer },
   { name: "Have your say", fetch: fetchHaveYourSay },
-  { name: "Federal Register + Regulations.gov", fetch: fetchUsRules },
+  { name: "Federal Register + Regulations.gov", fetch: fetchFederalRegister },
   { name: "Congress.gov", fetch: fetchCongress },
   { name: "Open States", fetch: fetchOpenStates },
   { name: "Internetconsultatie", fetch: fetchInternetConsultatie },
