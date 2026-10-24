@@ -211,7 +211,7 @@ export async function buildTrendsReport(
     console.log(`  Saved ${saveFile(report.traceFile, dateStr, "trending-trace.json")}`);
   }
   if (report?.nextMatches) saveMatchState(report.nextMatches);
-  if (report?.nextClassifications) saveTrendingVerdicts(report.nextClassifications);
+  if (report?.nextTrendingVerdicts) saveTrendingVerdicts(report.nextTrendingVerdicts);
   if (report?.nextStarHistory) saveStarHistory(report.nextStarHistory);
 
   return { id: "ai-trends", content };

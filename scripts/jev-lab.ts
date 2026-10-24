@@ -501,7 +501,7 @@ function report(): void {
   if (saved) {
     const same = judged.filter((i) => {
       const e = saved.items[i.id];
-      return e && e.stage === i.stage;
+      return e && e.fingerprint === i.stage;
     });
     const savedFlips = same.filter(
       (i) =>

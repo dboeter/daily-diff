@@ -526,7 +526,7 @@ export async function composeTrendingReport(
     ...report,
     ...(traceFile !== undefined ? { traceFile } : {}),
     ...(nextMatches !== undefined ? { nextMatches } : {}),
-    ...(nextCache ? { nextClassifications: nextCache } : {}),
+    ...(nextCache ? { nextTrendingVerdicts: nextCache } : {}),
     nextStarHistory: nextStarHistory(history, githubRows, dateStr, reportedKeys(report)),
   };
 }

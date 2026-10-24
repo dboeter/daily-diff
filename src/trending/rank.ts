@@ -97,7 +97,7 @@ export interface TrendingReportData {
   /** Match state to save once the report is written; absent when the file could not be read. */
   nextMatches?: MatchState;
   /** Trending verdicts to save once the report is written; absent when the file could not be read. */
-  nextClassifications?: TrendingVerdicts;
+  nextTrendingVerdicts?: TrendingVerdicts;
   /** Star history to save once the report is written. */
   nextStarHistory?: StarHistory;
 }

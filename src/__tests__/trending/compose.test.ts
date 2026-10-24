@@ -390,7 +390,7 @@ describe("composeTrendingReport", () => {
     expect(report.classifiedBy).toBe("topics");
     expect(report.traceFile).toBeUndefined();
     expect(report.radar[0]!.keys).toEqual(["openrouter:1", "npm:@kilocode/cli"]);
-    expect(report.nextClassifications).toEqual(noCache());
+    expect(report.nextTrendingVerdicts).toEqual(noCache());
   });
 
   it("asks Jev only about items missing from the trending verdicts, and uses saved verdicts without a key", async () => {
@@ -402,7 +402,7 @@ describe("composeTrendingReport", () => {
       trendingVerdicts: noCache(),
       fetchGain: zeroGain,
     });
-    expect(Object.keys(first.nextClassifications!.items)).toHaveLength(5);
+    expect(Object.keys(first.nextTrendingVerdicts!.items)).toHaveLength(5);
 
     const counted = vi.fn(ask);
     const second = await composeTrendingReport(data, DATE, {
@@ -410,13 +410,13 @@ describe("composeTrendingReport", () => {
       matchState: null,
       ask: counted,
       history: { repos: {} },
-      trendingVerdicts: first.nextClassifications!,
+      trendingVerdicts: first.nextTrendingVerdicts!,
       fetchGain: zeroGain,
     });
     expect(counted).not.toHaveBeenCalled();
     expect(second.classifiedBy).toBe("jev");
     expect([second.radar, second.categories]).toEqual([first.radar, first.categories]);
-    expect(second.nextClassifications).toEqual(first.nextClassifications);
+    expect(second.nextTrendingVerdicts).toEqual(first.nextTrendingVerdicts);
     expect(JSON.parse(second.traceFile!).items[0]).toMatchObject({ key: "github:a/agent", decided: DATE });
 
     // The topic fallback would put b/weights (topic coding-agent) in coding_agent; the saved verdict keeps it out.
@@ -425,7 +425,7 @@ describe("composeTrendingReport", () => {
       matchState: null,
       ask: notCalled,
       history: { repos: {} },
-      trendingVerdicts: first.nextClassifications!,
+      trendingVerdicts: first.nextTrendingVerdicts!,
       fetchGain: zeroGain,
     });
     expect(keyless.categories).toEqual(first.categories);
@@ -442,6 +442,6 @@ describe("composeTrendingReport", () => {
       fetchGain: zeroGain,
     });
     expect(counted).toHaveBeenCalledTimes(5);
-    expect(report.nextClassifications).toBeUndefined();
+    expect(report.nextTrendingVerdicts).toBeUndefined();
   });
 });

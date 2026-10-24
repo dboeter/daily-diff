@@ -318,10 +318,11 @@ describe("trending verdicts", () => {
     expect(lines).toHaveLength(7); // "{", "items" line, 2 items, "}", "}", "" after the final newline
     expect(loadTrendingVerdicts(file)).toEqual(nextCache);
     fs.writeFileSync(file, "{ not json");
-    vi.spyOn(console, "error").mockImplementation(() => {});
+    const error = vi.spyOn(console, "error").mockImplementation(() => {});
     expect(loadTrendingVerdicts(file)).toBeNull();
     fs.writeFileSync(file, '{"items": []}');
     expect(loadTrendingVerdicts(file)).toBeNull();
+    error.mockRestore();
   });
 });
 
@@ -400,7 +401,7 @@ describe("buildTrendingTraceFile", () => {
 // Migration of the pre-judgeItems cache (scripts/migrate-verdict-fingerprints.ts)
 // ---------------------------------------------------------------------------
 
-describe("trending verdicts migration", () => {
+describe("verdict fingerprint migration", () => {
   type OldEntry = { name: string; category: string; standalone: number | null; desc?: string };
   const old = JSON.parse(
     fs.readFileSync(new URL("../fixtures/trending-classifications-v1.json", import.meta.url), "utf-8"),

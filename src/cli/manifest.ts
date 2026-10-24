@@ -1,5 +1,6 @@
 import fs from "fs";
 import path from "path";
+import { pathToFileURL } from "url";
 import { marked } from "marked";
 import {
   COMING_UP,
@@ -215,9 +216,7 @@ async function main(): Promise<void> {
 }
 
 // Run only when executed directly (not imported for testing)
-const isDirectRun =
-  process.argv[1] && (process.argv[1].endsWith("manifest.ts") || process.argv[1].endsWith("manifest.js"));
-if (isDirectRun) {
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   main().catch((err) => {
     console.error(err);
     process.exit(1);
