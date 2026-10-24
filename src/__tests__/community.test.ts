@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { toDevtoArticle, type DevtoApiArticle } from "../sources/devto.ts";
 import { fetchLobstersData, toLobstersStory, type LobstersApiStory } from "../sources/lobsters.ts";
-import { toHfModel, type HfApiModel } from "../sources/hf.ts";
+import { toHfModel, type HfApiModel } from "../sources/huggingface.ts";
 
 describe("toDevtoArticle", () => {
   it("maps raw Forem API article to DevtoArticle structure", () => {

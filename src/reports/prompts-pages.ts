@@ -14,7 +14,7 @@ import { TABLES_MARKER, rowList, summaryLine, summaryOutputRule, type Numbered }
 import { goingAwayRule, NO_TITLE_RULE, RELEASE_BODY_CHARS, releaseNotes } from "./prompts.ts";
 import type { ReleaseRow } from "./pages.ts";
 import type { Deadline } from "../core/report-state.ts";
-import type { HfData } from "../sources/hf.ts";
+import type { HfData } from "../sources/huggingface.ts";
 import type { ResearchPaper } from "../trending/research.ts";
 import type { PolicyItem } from "../policy/items.ts";
 import type { KeptVendorItem } from "../data/relevance.ts";

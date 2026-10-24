@@ -75,7 +75,7 @@ import {
   summaryText,
   TABLES_MARKER,
 } from "./summarized-table.ts";
-import type { HfData } from "../sources/hf.ts";
+import type { HfData } from "../sources/huggingface.ts";
 import type { ResearchPaper } from "../trending/research.ts";
 import { POLICY_STATE_FILE, type PolicyData, type PolicyItem } from "../policy/items.ts";
 import { POLICY_VERDICTS_FILE } from "../policy/relevance.ts";

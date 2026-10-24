@@ -69,7 +69,7 @@ import { fetchPolicyData, loadPolicyState, type PolicyData } from "./policy/item
 import { isDataLaw } from "./policy/relevance.ts";
 import { fetchVendorData, loadDataState, type VendorData } from "./data/vendors.ts";
 import { buildComingUp } from "./reports/coming-up.ts";
-import { fetchHfData, type HfData } from "./sources/hf.ts";
+import { fetchHfData, type HfData } from "./sources/huggingface.ts";
 import { fetchDevtoData, type DevtoData } from "./sources/devto.ts";
 import { fetchLobstersData, type LobstersData } from "./sources/lobsters.ts";
 import {
