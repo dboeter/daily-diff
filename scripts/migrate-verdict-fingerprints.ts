@@ -2,7 +2,7 @@
  * One-off migration (October 2026), for the move of the trending
  * classification cache onto judgeItems:
  *
- * - `digests/trending-verdicts.json`: an entry held the decision
+ * - `digests/trending-classifications.json` (now `trending-verdicts.json`): an entry held the decision
  *   (`name`, `category`, `standalone`, `desc`); it now holds Jev's answers, like
  *   the policy and data verdicts (`title`, `answers`, `fingerprint`). An entry
  *   without `desc` was a hand fix, never asked again: it becomes `pinned`.
@@ -19,7 +19,7 @@ import { loadItemsFile, saveItemsFile, type VerdictEntry } from "../src/core/jev
 import { TRENDING_VERDICTS_FILE, type ClassifyAnswers } from "../src/trending/classify.ts";
 import { POLICY_VERDICTS_FILE } from "../src/policy/relevance.ts";
 
-/** A `trending-verdicts.json` entry before the migration. */
+/** A `trending-classifications.json` entry before the migration. */
 interface OldClassifyEntry {
   name: string;
   category: string;

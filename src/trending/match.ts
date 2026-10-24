@@ -8,6 +8,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { askJev, mapJev, type AskJev, type ChoiceAnswer } from "../core/jev.ts";
 import type { RadarRow } from "./rank.ts";
+import { normKey } from "./classify.ts";
 
 // ---------------------------------------------------------------------------
 // Cross-source matching, cached in digests/trending-matches.json
@@ -66,8 +67,6 @@ export const MATCH_UNSEEN_DAYS = 180;
 const DAY_MS = 24 * 60 * 60 * 1000;
 const OPENROUTER_PREFIX = "openrouter:";
 
-/** GitHub names are case-insensitive: the trending page and the file may differ in case. */
-export const normKey = (key: string) => (key.startsWith("github:") ? key.toLowerCase() : key);
 const sourceOf = (key: string): MatchSource | null =>
   key.startsWith("npm:") ? "npm" : key.startsWith("github:") ? "github" : null;
 const appIdOf = (appKey: string) => appKey.slice(OPENROUTER_PREFIX.length);

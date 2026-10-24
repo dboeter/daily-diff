@@ -16,7 +16,7 @@ import type { Category, GithubRow } from "./rank.ts";
 import type { SearchTopic } from "./compose.ts";
 import type { OpenRouterApp } from "../sources/openrouter.ts";
 import type { NpmPackage } from "./npm.ts";
-import { normKey, type MatchTrace } from "./match.ts";
+import type { MatchTrace } from "./match.ts";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -303,6 +303,9 @@ export async function classifyTrendingItems(
   );
   return { classifications, classifiedBy, nextCache: judgment.nextCache };
 }
+
+/** GitHub names are case-insensitive: the trending page and the file may differ in case. */
+export const normKey = (key: string) => (key.startsWith("github:") ? key.toLowerCase() : key);
 
 // ---------------------------------------------------------------------------
 // Trending verdicts, digests/trending-verdicts.json

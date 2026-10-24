@@ -501,6 +501,7 @@ function report(): void {
   if (saved) {
     const same = judged.filter((i) => {
       const e = saved.items[i.id];
+      // Policy's verdict fingerprint is the item's stage (`selectPolicyItems`).
       return e && e.fingerprint === i.stage;
     });
     const savedFlips = same.filter(
