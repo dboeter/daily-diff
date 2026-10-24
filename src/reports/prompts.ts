@@ -84,10 +84,17 @@ export const NO_TITLE_RULE =
   "Do not write a title, a date line or any `#` heading: code adds the report title. " +
   "Use exactly the `##` headings given, in the given order.";
 
-/** Asks for the gutter sign (GOING_AWAY) on each bullet or highlight about something going away. */
+/**
+ * Asks for the gutter sign (GOING_AWAY) on each bullet or highlight about something going away.
+ * The bullet form spells out the marker: told only to "start a bullet with −", a model wrote − as
+ * the marker on every bullet (models page, 2026-10-24).
+ */
 export const goingAwayRule = (item: "bullet" | "highlight") =>
-  `Start a ${item} with "${GOING_AWAY} " (the minus sign) when its item is going away: a deprecation, ` +
-  `retirement, removal, end of support or shutdown. Give every other ${item} no sign.`;
+  (item === "bullet"
+    ? `Write every bullet as "- text". When its item is going away (a deprecation, retirement, removal, ` +
+      `end of support or shutdown), put "${GOING_AWAY} " (the minus sign) after the marker: "- ${GOING_AWAY} text".`
+    : `Start a highlight with "${GOING_AWAY} " (the minus sign) when its item is going away: a deprecation, ` +
+      `retirement, removal, end of support or shutdown.`) + ` Give every other ${item} no sign.`;
 
 /** Sort by comment count desc, take top N. */
 export function topN(items: GitHubItem[], n: number): GitHubItem[] {

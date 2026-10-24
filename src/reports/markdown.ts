@@ -225,17 +225,30 @@ export function unwrapCodeLinks(md: string): string {
   return md.replace(CODE_SPAN, (span, inner: string) => (LINKS_ONLY.test(inner) ? inner : span));
 }
 
-/**
- * A reply that was to write only Highlights, cut to its Highlights under the
- * fixed heading: a section the model adds anyway would land above the page's
- * tables, and a missing heading would leave bare bullets.
- */
+/** A line that opens with a dash or the minus sign but no list marker. */
+const UNMARKED_SIGN = /^[–—−][ \t]+/;
+
 /**
  * Models write the gutter's minus (GOING_AWAY) as a hyphen or a dash, and `- - text` would nest a
  * list: a list item opening with one becomes the minus sign.
+ *
+ * A model may also drop the list marker and open every bullet with the sign, which Markdown renders
+ * as one paragraph (the models page of 2026-10-24, where no item was going away). A `##` section
+ * whose every unindented line opens that way gets `- ` markers. One such line among prose or list
+ * items is left alone: it may be a wrapped line, and its sign cannot be told from a marker.
  */
 export function signListItems(md: string): string {
-  return md.replace(/^(\s*[-*]\s+)[-–—−](?=\s)/gm, `$1${GOING_AWAY}`);
+  const listed = md
+    .split(/^(?=## )/m)
+    .map((section) => {
+      const lines = section.split("\n");
+      // Headings, `---` rules and comments such as TABLES_MARKER are no lines of text.
+      const body = lines.filter((l) => /^\S/.test(l) && !/^(## |<!--|([-*_])\2{2,}\s*$)/.test(l));
+      if (!body.length || !body.every((l) => UNMARKED_SIGN.test(l))) return section;
+      return lines.map((l) => l.replace(UNMARKED_SIGN, "- ")).join("\n");
+    })
+    .join("");
+  return listed.replace(/^(\s*[-*]\s+)[-–—−](?=\s)/gm, `$1${GOING_AWAY}`);
 }
 
 /** `signListItems` for one highlights.json entry. */
@@ -243,6 +256,11 @@ export function signHighlight(text: string): string {
   return text.replace(/^[-–—−](?=\s)/, GOING_AWAY);
 }
 
+/**
+ * A reply that was to write only Highlights, cut to its Highlights under the
+ * fixed heading: a section the model adds anyway would land above the page's
+ * tables, and a missing heading would leave bare bullets.
+ */
 export function highlightsOnly(reply: string): string {
   const lines = stripModelTitle(reply).trim().split("\n");
   const start = lines[0]?.startsWith("## ") ? 1 : 0;

@@ -5,8 +5,90 @@
     <link>https://dboeter.github.io/daily-diff</link>
     <description>Daily AI ecosystem digest</description>
     <language>en</language>
+    <image>
+      <url>https://dboeter.github.io/daily-diff/feed-icon.png</url>
+      <title>Daily Diff: AI Policy</title>
+      <link>https://dboeter.github.io/daily-diff</link>
+      <width>144</width>
+      <height>144</height>
+    </image>
     <atom:link href="https://dboeter.github.io/daily-diff/feeds/ai-policy.xml" rel="self" type="application/rss+xml"/>
-    <lastBuildDate>Thu, 22 Oct 2026 23:53:02 +0000</lastBuildDate>
+    <lastBuildDate>Sat, 24 Oct 2026 01:32:47 +0000</lastBuildDate>
+    <item>
+      <title>AI Policy 2026-10-24</title>
+      <link>https://dboeter.github.io/daily-diff/#2026-10-24/ai-policy</link>
+      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-10-24/ai-policy</guid>
+      <pubDate>Sat, 24 Oct 2026 00:00:00 +0000</pubDate>
+      <description>AI Policy 2026-10-24 ⬛ Overview · 🟪 AI Agents · 🟦 AI Models &amp;amp; Labs · 🟧 AI Policy · 🟨 Data Engineering Sources: Digitale Overheid + Politico US | 2 new items ranked by Jev relevance | Generated: 2026-10-24 01:29 UTC Highlights The Dutch Digital Government publishes new research reports on the practical operation of the Algorithm Framework and Register, identifying improvement points for compliance. Texas sues OpenAI and Sam Altman, alleging false safety marketing and harm to consumers, si...</description>
+      <content:encoded><![CDATA[<h1>AI Policy 2026-10-24</h1>
+<p><a href="https://dboeter.github.io/daily-diff/#2026-10-24">⬛ Overview</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-24/ai-agents">🟪 AI Agents</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-24/ai-models">🟦 AI Models &amp; Labs</a> · <strong>🟧 AI Policy</strong> · <a href="https://dboeter.github.io/daily-diff/#2026-10-24/ai-data">🟨 Data Engineering</a></p>
+<blockquote>
+<p>Sources: Digitale Overheid + Politico US | 2 new items ranked by <a href="https://typesafe.ai">Jev</a> relevance | Generated: 2026-10-24 01:29 UTC</p>
+</blockquote>
+<hr>
+<h2>Highlights</h2>
+<p>The Dutch Digital Government publishes new research reports on the practical operation of the Algorithm Framework and Register, identifying improvement points for compliance. Texas sues OpenAI and Sam Altman, alleging false safety marketing and harm to consumers, signaling heightened product-liability risk for major US AI vendors. These developments underscore both domestic transparency obligations and upstream vendor risk for Dutch deployers integrating foreign models.</p>
+<h2>Netherlands</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Source</th>
+<th align="left">Title</th>
+<th align="left">Stage</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-10-23</td>
+<td align="left">Digitale Overheid</td>
+<td align="left"><a href="https://www.digitaleoverheid.nl/nieuws/nieuwe-inzichten-over-het-algoritmekader-en-register/">Nieuwe inzichten over het Algoritmekader en -register</a></td>
+<td align="left"></td>
+<td align="left">The Dutch Digital Government published new research reports from the ADR examining how the Algorithm Framework and Register function in practice, identifying both successes and improvement areas. Organisations deploying AI should study these findings to assess their own compliance with the Algorithm Framework and Register requirements.</td>
+</tr>
+</tbody></table>
+<h2>News &amp; commentary</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Source</th>
+<th align="left">Title</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-10-23</td>
+<td align="left">Politico US</td>
+<td align="left"><a href="https://www.politico.com/news/2026/10/23/texas-sues-openai-over-product-safety-01134162">Texas sues OpenAI, Sam Altman over product safety</a></td>
+<td align="left">Texas Attorney General sued OpenAI and Sam Altman alleging ChatGPT was falsely marketed as safe and caused harm to Texans including children. This litigation highlights growing regulatory focus on AI product safety claims and potential liability for organisations deploying AI systems that may cause consumer harm.</td>
+</tr>
+</tbody></table>
+<h2>Coming up</h2>
+<p>Deadlines and dates in the next 30 days.</p>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Source</th>
+<th align="left">Item</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-11-09</td>
+<td align="left">Have your say</td>
+<td align="left"><a href="https://ec.europa.eu/info/law/better-regulation/have-your-say/initiatives/19292_en">Articles 75c – 75d AI Act Implementing Act</a></td>
+</tr>
+<tr>
+<td align="left">2026-11-11</td>
+<td align="left">Have your say</td>
+<td align="left"><a href="https://ec.europa.eu/info/law/better-regulation/have-your-say/initiatives/14628_en">Cloud and AI Development Act</a></td>
+</tr>
+</tbody></table>
+<hr>
+<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
+]]></content:encoded>
+    </item>
     <item>
       <title>AI Policy 2026-10-23</title>
       <link>https://dboeter.github.io/daily-diff/#2026-10-23/ai-policy</link>

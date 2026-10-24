@@ -1,0 +1,18 @@
+{
+  "ai-agents": [
+    "Claude Code adds Monitor tool and plugin monitors for Bedrock, Vertex, and Foundry, enabling cross-cloud observability",
+    "Omnara launches as open-source self-hostable alternative to Claude Managed Agents and OpenAI's Agents API"
+  ],
+  "ai-models": [
+    "Kimi K3.1 Pro launches as 3T-class open-weight model with 1M-token context for long-horizon coding and 3D tasks",
+    "Claude formally verifies security properties across 123 open-source libraries, uncovering previously undetected bugs"
+  ],
+  "ai-policy": [
+    "Dutch Digital Government publishes research on Algorithm Framework and Register compliance, identifying improvement areas for organizations deploying AI",
+    "Texas sues OpenAI over false safety marketing, signaling heightened product-liability risk for AI vendors and deployers"
+  ],
+  "ai-data": [
+    "Azure Databricks Files API 3.0 Beta enables multipart uploads over 5GB and conditional operations for Unity Catalog volumes",
+    "Snowflake Custom runtime images for ML Jobs GA lets you build, validate, and register custom container images for production ML workloads"
+  ]
+}

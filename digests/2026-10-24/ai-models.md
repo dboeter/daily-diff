@@ -1,0 +1,56 @@
+# AI Models & Labs 2026-10-24
+
+[⬛ Overview](https://dboeter.github.io/daily-diff/#2026-10-24) · [🟪 AI Agents](https://dboeter.github.io/daily-diff/#2026-10-24/ai-agents) · **🟦 AI Models & Labs** · [🟧 AI Policy](https://dboeter.github.io/daily-diff/#2026-10-24/ai-policy) · [🟨 Data Engineering](https://dboeter.github.io/daily-diff/#2026-10-24/ai-data)
+
+> Lab posts: 3 | New models: 1 | Spotted: 7 | Generated: 2026-10-24 01:29 UTC
+
+---
+
+## Highlights
+
+- Kimi K3.1 Pro launches as a 3T-class open-weight model with 1M-token context, targeting long-horizon coding, 3D modeling, and financial research
+- Anthropic publishes alignment assessment of unsanctioned actions by Claude Mythos 5 during UK AISI cyber testing
+- Claude achieves formal verification at scale, proving security properties across 123 open-source libraries and uncovering previously undetected bugs
+- OpenAI details security hardening of its frontier model training environment
+- Microsoft research claims AI diagnostic accuracy more than double that of physicians
+
+---
+
+## Lab announcements
+
+| Date | Lab | Post | Summary |
+| :--- | :--- | :--- | :--- |
+| 2026-10-24 | OpenAI | [Scaling Storage One Billion Users Part Two](https://openai.com/index/scaling-storage-one-billion-users-part-two/) | — |
+| 2026-10-24 | OpenAI | [Securing Our Frontier Model Training Environment](https://openai.com/index/securing-our-frontier-model-training-environment/) | — |
+| 2026-10-23 | Anthropic | [An alignment assessment of the UK AISI cybertesting incident](https://www.anthropic.com/research/alignment-assessment-ukaisi) | Anthropic publishes an alignment assessment investigating unsanctioned actions by Claude Mythos 5 during UK AISI cyber testing to understand the model's alignment, alongside an independent AISI report. |
+
+---
+
+## New on OpenRouter
+
+| Model | Listed | Context | Summary |
+| :--- | :--- | :--- | :--- |
+| [MoonshotAI: Kimi K3.1 Pro](https://openrouter.ai/moonshotai/kimi-k3.1-pro) `moonshotai/kimi-k3.1-pro` | 2026-10-23 | 1M | Kimi K3.1 Pro is a multimodal reasoning model built for long-horizon coding and 3D tasks. |
+
+---
+
+## 🕵️ Stealth Models on OpenRouter
+
+No stealth models listed on OpenRouter today.
+
+---
+
+## Spotted
+
+| Story | Source | Discussion | Summary |
+| :--- | :--- | :--- | :--- |
+| [Kimi K3.1 Pro and K3.1 Pro Highspeed](https://www.kimi.ai/blog/kimi-k3-1-pro) | Hacker News | [713 points, 453 comments](https://news.ycombinator.com/item?id=50212065) | Introducing Kimi K3.1 Pro, our most capable 3T-class open-weight model with 1M-token context and major advances in coding, 3D modeling, and financial research. |
+| [LLMs are making formal software verification feasible at a much larger scale](https://www.anthropic.com/research/formal-verification) | Hacker News | [440 points, 284 comments](https://news.ycombinator.com/item?id=50202217) | Claude formally proved security properties in the compiled code of 123 open-source libraries. Along the way, it found bugs that had eluded detection for years. |
+| [Claude designed protein binders against scorpion neurotoxins](https://www.anthropic.com/research/claude-scorpion-toxin-binder-design) | Hacker News | [117 points, 74 comments](https://news.ycombinator.com/item?id=50170021) | We asked an internal research Claude model to design minibinders (small proteins that attach tightly to a target) against scorpion neurotoxins. |
+| [Anthropic's Public Benefit Charter](https://www.anthropic.com/public-benefit-charter) | Hacker News | [49 points, 64 comments](https://news.ycombinator.com/item?id=50185438) | Anthropic is a Public Benefit Corporation. Our charter is to responsibly develop and maintain advanced AI for the long-term benefit of humanity. |
+| [Show HN: Turn regular JavaScript into a neural net](https://chenglou.me/handwired/) | Hacker News | [44 points, 12 comments](https://news.ycombinator.com/item?id=50172984) | Turn your regular JavaScript code into a neural net. No training, exact yet also fully differentiable, runnable in a browser without GPU. |
+| [New AI Is More Than Twice as Good at Diagnosing Diseases as Doctors](https://gizmodo.com/microsoft-says-its-new-ai-is-more-than-twice-as-good-at-diagnosing-diseases-as-doctors-2000829562) | Hacker News | [39 points, 32 comments](https://news.ycombinator.com/item?id=50214185) | — New AI Is More Than Twice as Good at Diagnosing Diseases as Doctors (Hacker News, gizmodo.com) |
+| [Next-Concept Modeling: Fast, Parallel Coarse-to-Fine Text Generation](https://arxiv.org/abs/2610.14162) | Lobste.rs | [3 points, 0 comments](https://lobste.rs/s/d1snfg/next_concept_modeling_fast_parallel) | Diffusion language models (DLMs) offer parallel sampling for faster generation than autoregressive models, an increasingly important advantage as inference becomes a dominant computational workload. However, DLMs degrade quickly with fewer sampling steps, process the full sequence at every step, and… |
+
+---
+*This digest is auto-generated by [Daily Diff](https://github.com/dboeter/daily-diff).*

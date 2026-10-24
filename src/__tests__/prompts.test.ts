@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { formatItem, topN } from "../reports/prompts.ts";
+import { formatItem, goingAwayRule, topN } from "../reports/prompts.ts";
 import { highlightsOnly, signListItems } from "../reports/markdown.ts";
 import type { GitHubItem } from "../core/github.ts";
 
@@ -138,5 +138,35 @@ describe("signListItems", () => {
     expect(highlightsOnly("## Highlights\n\n- - **X** is retired\n- **Y** ships")).toBe(
       "## Highlights\n\n- − **X** is retired\n- **Y** ships",
     );
+  });
+
+  it("makes a list of a section whose every bullet opens with the sign instead of a marker", () => {
+    expect(highlightsOnly("## Highlights\n\n− **X** launches\n− **Y** ships")).toBe(
+      "## Highlights\n\n- **X** launches\n- **Y** ships",
+    );
+  });
+
+  it("lists each section of a longer reply on its own, with wrapped lines kept", () => {
+    expect(
+      signListItems("## Highlights\n\n- **Y** ships\n\n## Signals\n\n– Z grows,\n  fast\n— W slows"),
+    ).toBe("## Highlights\n\n- **Y** ships\n\n## Signals\n\n- Z grows,\n  fast\n- W slows");
+  });
+
+  it("lists a section whose sign lines are followed by a rule or the tables marker", () => {
+    expect(signListItems("## Highlights\n\n− X\n− Y\n\n<!-- tables -->\n\n---\n\n## Signals")).toBe(
+      "## Highlights\n\n- X\n- Y\n\n<!-- tables -->\n\n---\n\n## Signals",
+    );
+  });
+
+  it("leaves one unmarked sign line among prose or list items alone", () => {
+    const md =
+      "## Highlights\n\n- **X** ships a long thing\n— and more\n\nProse that wraps\n– after a dash\n\n```\n— code\n```";
+    expect(signListItems(md)).toBe(md);
+  });
+
+  it("asks for the marker on every bullet and the sign after it", () => {
+    expect(goingAwayRule("bullet")).toContain('Write every bullet as "- text"');
+    expect(goingAwayRule("bullet")).toContain('"- − text"');
+    expect(goingAwayRule("highlight")).toMatch(/^Start a highlight with "− "/);
   });
 });

@@ -5,8 +5,169 @@
     <link>https://dboeter.github.io/daily-diff</link>
     <description>Daily AI ecosystem digest</description>
     <language>en</language>
+    <image>
+      <url>https://dboeter.github.io/daily-diff/feed-icon.png</url>
+      <title>Daily Diff: Data Engineering</title>
+      <link>https://dboeter.github.io/daily-diff</link>
+      <width>144</width>
+      <height>144</height>
+    </image>
     <atom:link href="https://dboeter.github.io/daily-diff/feeds/ai-data.xml" rel="self" type="application/rss+xml"/>
-    <lastBuildDate>Thu, 22 Oct 2026 23:53:02 +0000</lastBuildDate>
+    <lastBuildDate>Sat, 24 Oct 2026 01:32:47 +0000</lastBuildDate>
+    <item>
+      <title>Data Engineering 2026-10-24</title>
+      <link>https://dboeter.github.io/daily-diff/#2026-10-24/ai-data</link>
+      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-10-24/ai-data</guid>
+      <pubDate>Sat, 24 Oct 2026 00:00:00 +0000</pubDate>
+      <description>Data Engineering 2026-10-24 ⬛ Overview · 🟪 AI Agents · 🟦 AI Models &amp;amp; Labs · 🟧 AI Policy · 🟨 Data Engineering Generated: 2026-10-24 01:29 UTC | Vendor items: 11 | Projects: 17 | Active today: 1 | Stable releases: 0 | Prereleases (not covered): 0 Highlights Azure Databricks workspaces with Unity Catalog volumes: Files API 3.0 (Beta) enables multipart uploads over 5 GB and conditional operations; test large-file and versioned workflows. Azure Databricks workspaces using serverless compute: ...</description>
+      <content:encoded><![CDATA[<h1>Data Engineering 2026-10-24</h1>
+<p><a href="https://dboeter.github.io/daily-diff/#2026-10-24">⬛ Overview</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-24/ai-agents">🟪 AI Agents</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-24/ai-models">🟦 AI Models &amp; Labs</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-24/ai-policy">🟧 AI Policy</a> · <strong>🟨 Data Engineering</strong></p>
+<blockquote>
+<p>Generated: 2026-10-24 01:29 UTC | Vendor items: 11 | Projects: 17 | Active today: 1 | Stable releases: 0 | Prereleases (not covered): 0</p>
+</blockquote>
+<hr>
+<h2>Highlights</h2>
+<ul>
+<li>Azure Databricks workspaces with Unity Catalog volumes: Files API 3.0 (Beta) enables multipart uploads over 5 GB and conditional operations; test large-file and versioned workflows.</li>
+<li>Azure Databricks workspaces using serverless compute: Serverless job environments from pyproject.toml (Beta) requires enabling Project‑Scoped Shared Compute on the Previews page; configure job environments via pyproject.toml in Jobs UI, API, or bundles.</li>
+<li>Azure Databricks workspaces using Asset Bundles: Shared Serverless for Asset Bundles (Beta) requires enabling Project‑Scoped Shared Compute; notebooks and files in the same bundle can share serverless compute and a bundle‑root pyproject.toml environment.</li>
+<li>Snowflake on GCP clients using Snowpark Container Services: GEN_ARM_G1 and GEN_X64_G1 instance families (1–28 vCPU) are now GA; migrate workloads to the new general‑purpose instances.</li>
+<li>Snowflake clients running ML Jobs on Container Runtime: Custom runtime images (GA) let you build, validate, and register custom container images as Custom Runtime Environments; register images for production ML workloads.</li>
+</ul>
+<hr>
+<h2>Databricks</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Source</th>
+<th align="left">Item</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-10-23</td>
+<td align="left">Azure Databricks</td>
+<td align="left"><a href="https://learn.microsoft.com/azure/databricks/release-notes/product/2026/october#files-api-30-for-unity-catalog-volumes-is-now-in-beta">Files API 3.0 for Unity Catalog volumes is now in Beta</a></td>
+<td align="left">Enables multipart uploads for files larger than 5 GB to Unity Catalog volumes and conditional operations (upload, download, delete based on version) to prevent unintended changes.</td>
+</tr>
+<tr>
+<td align="left">2026-10-23</td>
+<td align="left">Azure Databricks</td>
+<td align="left"><a href="https://learn.microsoft.com/azure/databricks/release-notes/product/2026/october#google-analytics-aggregated-connector-is-available-in-beta">Google Analytics Aggregated connector is available in Beta</a></td>
+<td align="left">Enables ingesting aggregated Google Analytics 4 report data into Azure Databricks via Lakeflow Connect with incremental ingestion and service account or OAuth U2M authentication; workspace admins control access via the Previews page.</td>
+</tr>
+<tr>
+<td align="left">2026-10-22</td>
+<td align="left">Azure Databricks</td>
+<td align="left"><a href="https://learn.microsoft.com/azure/databricks/release-notes/product/2026/october#serverless-job-environments-from-pyprojecttoml-beta">Serverless job environments from pyproject.toml (Beta)</a></td>
+<td align="left">Allows serverless notebook and Python script tasks to configure job environments via pyproject.toml in the Jobs UI, API, or bundles; requires enabling Project‑Scoped Shared Compute on the Previews page.</td>
+</tr>
+<tr>
+<td align="left">2026-10-22</td>
+<td align="left">Azure Databricks</td>
+<td align="left"><a href="https://learn.microsoft.com/azure/databricks/release-notes/product/2026/october#shared-serverless-for-asset-bundles-beta">Shared Serverless for Asset Bundles (Beta)</a></td>
+<td align="left">Allows notebooks and files in the same asset bundle to share serverless compute and a bundle‑root pyproject.toml environment; requires enabling Project‑Scoped Shared Compute on the Previews page.</td>
+</tr>
+<tr>
+<td align="left">2026-10-22</td>
+<td align="left">Azure Databricks</td>
+<td align="left">🤖 <a href="https://learn.microsoft.com/azure/databricks/ai-bi/release-notes/2026#genie-one-enhancements">Genie One enhancements</a></td>
+<td align="left">Adds conversation outline for navigation, skill uploads, extraction of snippets from external tool queries (e.g., dbt), and remembered sign‑in email in the Genie mobile app.</td>
+</tr>
+<tr>
+<td align="left">2026-10-22</td>
+<td align="left">Azure Databricks</td>
+<td align="left">🤖 <a href="https://learn.microsoft.com/azure/databricks/ai-bi/release-notes/2026#dashboard-enhancements">Dashboard enhancements</a></td>
+<td align="left">Adds private bookmarks for dashboard viewers, bulk import of up to 100 Power BI or Tableau files as AI/BI dashboards, field picker tooltips, layered combo charts, custom waterfall totals, and improved Sankey labels.</td>
+</tr>
+</tbody></table>
+<p><strong>Quiet today:</strong> <a href="https://github.com/delta-io/delta">Delta Lake</a>, <a href="https://github.com/unitycatalog/unitycatalog">Unity Catalog</a>, <a href="https://github.com/mlflow/mlflow">MLflow</a>, <a href="https://github.com/databricks/cli">Databricks CLI</a>, <a href="https://github.com/databricks/dbt-databricks">dbt-databricks</a></p>
+<hr>
+<h2>Snowflake</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Source</th>
+<th align="left">Item</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-10-23</td>
+<td align="left">Snowflake</td>
+<td align="left"><a href="https://docs.snowflake.com/en/release-notes/2026/other/2026-10-23-spcs-gcp-gen-instances-ga">October 23, 2026: Snowpark Container Services GEN_ARM_G1 and GEN_X64_G1 instances on Google Cloud (General availability)</a></td>
+<td align="left">Makes GEN_ARM_G1 and GEN_X64_G1 instance families generally available for Snowpark Container Services on Google Cloud, offering general‑purpose compute from 1 to 28 vCPU.</td>
+</tr>
+<tr>
+<td align="left">2026-10-22</td>
+<td align="left">Snowflake</td>
+<td align="left">🤖 <a href="https://docs.snowflake.com/en/release-notes/2026/other/2026-10-22-custom-runtime-images-ml-jobs-ga">October 22, 2026: Custom runtime images for ML Jobs (General availability)</a></td>
+<td align="left">Allows building, validating, and registering custom container images as Custom Runtime Environments for ML Jobs on Container Runtime, referenced via runtimeenvironment=&quot;cre@ &quot;.</td>
+</tr>
+<tr>
+<td align="left">2026-10-22</td>
+<td align="left">Snowflake</td>
+<td align="left">🤖 <a href="https://docs.snowflake.com/en/release-notes/2026/other/2026-10-22-skill-plugin-sharing-ga">Oct 22, 2026: Skill and plugin sharing in CoCo (General availability)</a></td>
+<td align="left">Makes skill and plugin sharing in CoCo generally available.</td>
+</tr>
+<tr>
+<td align="left">2026-10-23</td>
+<td align="left">Snowflake</td>
+<td align="left">🤖 <a href="https://docs.snowflake.com/en/release-notes/2026/other/2026-10-23-cortex-search-retrieve-preview">Oct 23, 2026: Retrieve Cortex Search (Public Preview)</a></td>
+<td align="left">Introduces the CORTEXSEARCHRETRIEVE table function for low‑latency Cortex Search queries from SQL, supporting single queries or per‑row LATERAL joins.</td>
+</tr>
+<tr>
+<td align="left">2026-10-23</td>
+<td align="left">Snowflake</td>
+<td align="left">🤖 <a href="https://docs.snowflake.com/en/release-notes/2026/other/2026-10-23-cortex-rest-api-responses-api">Oct 23, 2026: Responses API for the Cortex REST API (Preview)</a></td>
+<td align="left">Adds an OpenAI‑compatible Responses API endpoint on the Cortex REST API and Cortex AI Gateway to call OpenAI models via the OpenAI SDK or other clients.</td>
+</tr>
+</tbody></table>
+<p><strong>Quiet today:</strong> <a href="https://github.com/snowflakedb/snowpark-python">Snowpark Python</a>, <a href="https://github.com/snowflakedb/snowflake-connector-python">Snowflake Connector for Python</a>, <a href="https://github.com/apache/polaris">Apache Polaris</a></p>
+<hr>
+<h2>Open-source stack</h2>
+<h3>Apache Airflow</h3>
+<ul>
+<li><strong>Hot issue</strong>: Task state store writes from <code>on_retry_callback</code> fail with a 404 error because the execution API cannot find the task instance; the issue is closed but highlights a callback timing problem in Airflow 3.3.2. <a href="https://github.com/apache/airflow/issues/75406">apache/airflow#75406</a></li>
+</ul>
+<p><strong>Quiet today:</strong> <a href="https://github.com/dbt-labs/dbt">dbt Core</a>, <a href="https://github.com/SQLMesh/sqlmesh">SQLMesh</a>, <a href="https://github.com/dagster-io/dagster">Dagster</a>, <a href="https://github.com/dlt-hub/dlt">dlt</a>, <a href="https://github.com/apache/iceberg">Apache Iceberg</a>, <a href="https://github.com/duckdb/duckdb">DuckDB</a>, <a href="https://github.com/pola-rs/polars">Polars</a>, <a href="https://github.com/trinodb/trino">Trino</a></p>
+<hr>
+<h2>Across platforms</h2>
+<ul>
+<li>AI-assisted data interaction: Databricks Genie One and Dashboard enhancements (Beta) add conversation outlines, skill uploads, and bulk BI import for consumers; Snowflake Retrieve Cortex Search (Preview) and Cortex REST API Responses API (Preview) expose a SQL table function and an OpenAI‑compatible endpoint for developers.</li>
+<li>Managed compute for custom workloads: Databricks Serverless job environments and Shared Serverless (Beta, Azure) let notebooks share pyproject.toml‑defined Python environments; Snowflake Snowpark Container Services GEN instances on GCP (GA) provide 1–28 vCPU container compute for general‑purpose workloads.</li>
+<li>Environment-as-code for ML and data tasks: Databricks pyproject.toml for serverless environments (Beta) uses Python packaging standards; Snowflake Custom runtime images for ML Jobs (GA) uses container images. Both GA/Beta, Databricks on Azure serverless, Snowflake on Container Runtime.</li>
+</ul>
+<hr>
+<h2>Spotted</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Story</th>
+<th align="left">Source</th>
+<th align="left">Discussion</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a href="https://github.com/ClickHouse/ClickBench/pull/2165">Remove pgrust: the entry is cheating (per-query kernels and result caching)</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50205816">182 points, 142 comments</a></td>
+<td align="left">This removes the pgrust entry (added in #1163, updated to v0.4-preview in #2106) from the benchmark. The results it reports are produced by machinery written specifically for the 43 ClickBench quer...</td>
+</tr>
+<tr>
+<td align="left"><a href="https://fishbowl.pastiche.org/2026/10/23/hibernate-origin-story">The Hibernate Origin Story (Outsider Edition)</a></td>
+<td align="left">Lobste.rs</td>
+<td align="left"><a href="https://lobste.rs/s/ydmw6s/hibernate_origin_story_outsider_edition">10 points, 3 comments</a></td>
+<td align="left">I had nothing to do with the development of Hibernate, except that I happened to be in the room at the time holding a beer. But it is still a fun story.</td>
+</tr>
+</tbody></table>
+<hr>
+<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
+]]></content:encoded>
+    </item>
     <item>
       <title>Data Engineering 2026-10-23</title>
       <link>https://dboeter.github.io/daily-diff/#2026-10-23/ai-data</link>

@@ -1,5 +1,5 @@
 {
-  "generated": "2026-10-22T23:53:02.232Z",
+  "generated": "2026-10-24T01:32:47.376Z",
   "labels": {
     "ai-agents": "AI Agents",
     "ai-models": "AI Models & Labs",
@@ -28,9 +28,30 @@
     "ai-data": "feeds/ai-data.xml",
     "ai-trends": "feeds/ai-trends.xml"
   },
-  "overview": "📅 Overview",
+  "colors": {
+    "ai-agents": "#9D7BDB",
+    "ai-models": "#55ACEE",
+    "ai-policy": "#F4900C",
+    "ai-data": "#FDCB58",
+    "ai-trends": "#C1694F"
+  },
+  "overview": "Overview",
   "comingUp": "Coming up",
+  "highlights": "Highlights",
+  "proseColumns": [
+    "Summary",
+    "What to do"
+  ],
   "dates": [
+    {
+      "date": "2026-10-24",
+      "reports": [
+        "ai-agents",
+        "ai-models",
+        "ai-policy",
+        "ai-data"
+      ]
+    },
     {
       "date": "2026-10-23",
       "reports": [
