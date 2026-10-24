@@ -139,4 +139,16 @@ describe("signListItems", () => {
       "## Highlights\n\n- − **X** is retired\n- **Y** ships",
     );
   });
+
+  it("makes a list of a section whose every bullet opens with the sign instead of a marker", () => {
+    expect(highlightsOnly("## Highlights\n\n− **X** launches\n− **Y** ships")).toBe(
+      "## Highlights\n\n- **X** launches\n- **Y** ships",
+    );
+  });
+
+  it("keeps the sign on an unmarked line in a section that has list items", () => {
+    expect(signListItems("## Highlights\n\n- **Y** ships\n\n− **X** is retired\n\n## Signals\n\n– Z")).toBe(
+      "## Highlights\n\n- **Y** ships\n\n- − **X** is retired\n\n## Signals\n\n- Z",
+    );
+  });
 });
