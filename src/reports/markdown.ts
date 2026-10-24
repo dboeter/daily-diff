@@ -13,7 +13,7 @@ import type { PolicyItem } from "../policy/policy.ts";
 import type { KeptVendorItem } from "../data/jev.ts";
 import type { VendorAction } from "../data/vendors.ts";
 import type { StoryRow } from "../spotted/spotted.ts";
-import type { ResearchPaper } from "../sources/research.ts";
+import type { ResearchPaper } from "../trending/research.ts";
 import type { Category } from "../trending/rank.ts";
 import type { RepoConfig } from "../core/github.ts";
 import {

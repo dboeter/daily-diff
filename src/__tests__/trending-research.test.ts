@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { nextResearchState, weekPapers, type ResearchState } from "../sources/research.ts";
+import { nextResearchState, weekPapers, type ResearchState } from "../trending/research.ts";
 import type { ArxivData, ArxivPaper } from "../sources/arxiv.ts";
 
 const DATE = "2026-10-26";

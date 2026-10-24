@@ -64,7 +64,7 @@ import { fetchTrendingData, type TrendingData } from "./trending/trending.ts";
 import { fetchModelCatalogDaily, type ModelCatalog } from "./sources/openrouter.ts";
 import { fetchHnData, pageDescription, type HnData, type HnStory } from "./sources/hn.ts";
 import { fetchArxivData, saveArxivState, type ArxivData } from "./sources/arxiv.ts";
-import { loadResearchState, nextResearchState, saveResearchState, weekPapers } from "./sources/research.ts";
+import { loadResearchState, nextResearchState, saveResearchState, weekPapers } from "./trending/research.ts";
 import { fetchPolicyData, loadPolicyState, type PolicyData } from "./policy/policy.ts";
 import { isDataLaw } from "./policy/jev.ts";
 import { fetchVendorData, loadDataState, type VendorData } from "./data/vendors.ts";

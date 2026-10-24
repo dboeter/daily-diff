@@ -15,7 +15,7 @@ import { goingAwayRule, NO_TITLE_RULE, RELEASE_BODY_CHARS, releaseNotes } from "
 import type { ReleaseRow } from "./pages.ts";
 import type { Deadline } from "../core/report-state.ts";
 import type { HfData } from "../sources/hf.ts";
-import type { ResearchPaper } from "../sources/research.ts";
+import type { ResearchPaper } from "../trending/research.ts";
 import type { PolicyItem } from "../policy/policy.ts";
 import type { KeptVendorItem } from "../data/jev.ts";
 import { signHighlight } from "./markdown.ts";

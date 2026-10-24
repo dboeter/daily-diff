@@ -7,7 +7,7 @@
 import path from "node:path";
 import { daysBefore } from "../core/date.ts";
 import { loadItemsFile, saveItemsFile, type ItemsFile } from "../core/jev.ts";
-import type { ArxivData } from "./arxiv.ts";
+import type { ArxivData } from "../sources/arxiv.ts";
 
 /** One saved paper, keyed by its arXiv id. */
 export interface ResearchEntry {
