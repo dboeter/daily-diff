@@ -32,7 +32,7 @@ import {
   watchlisted,
   watchlistFor,
   type PolicyAnswers,
-} from "../src/policy/jev.ts";
+} from "../src/policy/relevance.ts";
 import { fullText } from "./jev-lab-text.ts";
 
 const LAB_DIR = path.join(".scratch", "ai-policy", "lab");

@@ -7,7 +7,7 @@
  * (`buildTrendingSummariesPrompt`) and the page's prose (`buildTrendsProsePrompt`). Two tables:
  * the Agent & Coding Tool Radar (OpenRouter, npm and new GitHub repos) and the
  * GitHub category tables. Scope and category come from a `Classification` per
- * item (`trending/jev.ts`).
+ * item (`trending/classify.ts`).
  */
 
 import fs from "node:fs";
@@ -18,7 +18,8 @@ import { formatTokens, type OpenRouterApp } from "../sources/openrouter.ts";
 import { momentumRatio, type NpmData, type NpmPackage } from "./npm.ts";
 import { toCstDateStr } from "../core/date.ts";
 import { STAR_GAIN_DAYS } from "../core/github.ts";
-import { inScope, onRadar, type Classification, type TrendingVerdicts, type MatchState } from "./jev.ts";
+import { inScope, onRadar, type Classification, type TrendingVerdicts } from "./classify.ts";
+import { type MatchState } from "./match.ts";
 
 // ---------------------------------------------------------------------------
 // Types

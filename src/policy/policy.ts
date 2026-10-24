@@ -1,7 +1,7 @@
 /**
  * AI Policy fetching and state. Sources: the RSS feeds in config.yml
  * `policy.feeds`, and the registered non-RSS sources (`policy/sources.ts`).
- * New items are scored by Jev (`policy/jev.ts`). The state records which items
+ * New items are scored by Jev (`policy/relevance.ts`). The state records which items
  * a run reported, so the daily report shows each item once, and a stage item
  * again when its stage moves. What a run observes (record-only stages, deadline
  * changes) is saved on every successful fetch; what it reports, only once the
@@ -12,7 +12,7 @@ import path from "node:path";
 import { fetchRssFeed, recentNewsItems, type FeedItem } from "../core/rss.ts";
 import { JURISDICTIONS, type Jurisdiction, type PolicyConfig } from "../core/config.ts";
 import { POLICY_SOURCES, type PolicySource } from "./sources.ts";
-import { loadPolicyVerdicts, selectPolicyItems, type PolicyVerdicts } from "./jev.ts";
+import { loadPolicyVerdicts, selectPolicyItems, type PolicyVerdicts } from "./relevance.ts";
 import type { AskJev } from "../core/jev.ts";
 import { upcomingDeadlines } from "./deadlines.ts";
 import { loadReportedState, nextDeadlines, type Deadline, type ReportedState } from "../core/report-state.ts";

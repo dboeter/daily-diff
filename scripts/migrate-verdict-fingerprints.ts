@@ -16,8 +16,8 @@
 
 import { pathToFileURL } from "node:url";
 import { loadItemsFile, saveItemsFile, type VerdictEntry } from "../src/core/jev.ts";
-import { TRENDING_VERDICTS_FILE, type ClassifyAnswers } from "../src/trending/jev.ts";
-import { POLICY_VERDICTS_FILE } from "../src/policy/jev.ts";
+import { TRENDING_VERDICTS_FILE, type ClassifyAnswers } from "../src/trending/classify.ts";
+import { POLICY_VERDICTS_FILE } from "../src/policy/relevance.ts";
 
 /** A `trending-verdicts.json` entry before the migration. */
 interface OldClassifyEntry {

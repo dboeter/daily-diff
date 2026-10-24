@@ -3,27 +3,29 @@ import os from "node:os";
 import path from "node:path";
 import { describe, it, expect, vi } from "vitest";
 import {
-  applyMatchAnswers,
   buildTrendingTraceFile,
   classificationOf,
   classifyTrendingItems,
   fallbackClassification,
   inScope,
   loadTrendingVerdicts,
-  loadMatchState,
-  matchApps,
   onRadar,
-  pendingMatchQuestions,
-  pruneMatchState,
   saveTrendingVerdicts,
-  saveMatchState,
   STANDALONE_MIN_NOUL,
   type Classification,
   type ClassifyAnswers,
   type TrendingVerdicts,
   type ClassifyItem,
+} from "../trending/classify.ts";
+import {
+  applyMatchAnswers,
+  loadMatchState,
+  matchApps,
+  pendingMatchQuestions,
+  pruneMatchState,
+  saveMatchState,
   type MatchState,
-} from "../trending/jev.ts";
+} from "../trending/match.ts";
 import { judgeItems, type AskJev } from "../core/jev.ts";
 import { migrateClassifyEntry, migratePolicyEntry } from "../../scripts/migrate-verdict-fingerprints.ts";
 import { urlMerge, type GithubRow, type RadarRow } from "../trending/rank.ts";

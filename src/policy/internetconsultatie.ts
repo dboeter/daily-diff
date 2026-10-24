@@ -10,7 +10,7 @@
 
 import type { PolicyItem } from "./policy.ts";
 import type { PolicySourceContext } from "./sources.ts";
-import { keywordHit } from "./jev.ts";
+import { keywordHit } from "./relevance.ts";
 import { plainText } from "../core/rss.ts";
 import { fetchOk } from "../core/http.ts";
 

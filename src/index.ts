@@ -66,7 +66,7 @@ import { fetchHnData, pageDescription, type HnData, type HnStory } from "./sourc
 import { fetchArxivData, saveArxivState, type ArxivData } from "./sources/arxiv.ts";
 import { loadResearchState, nextResearchState, saveResearchState, weekPapers } from "./trending/research.ts";
 import { fetchPolicyData, loadPolicyState, type PolicyData } from "./policy/policy.ts";
-import { isDataLaw } from "./policy/jev.ts";
+import { isDataLaw } from "./policy/relevance.ts";
 import { fetchVendorData, loadDataState, type VendorData } from "./data/vendors.ts";
 import { buildComingUp } from "./reports/coming-up.ts";
 import { fetchHfData, type HfData } from "./sources/hf.ts";
@@ -91,7 +91,7 @@ import {
   saveSpottedVerdicts,
   spottedTraceFile,
   PAGE_OF_TOPIC,
-} from "./spotted/jev.ts";
+} from "./spotted/topics.ts";
 import { DATA_SECTION_KEYS, loadConfig, type SectionKey } from "./core/config.ts";
 import { resolvePagesUrl } from "./cli/notify.ts";
 import { toCstDateStr, toUtcStr, isWeeklyRun, sleep } from "./core/date.ts";

@@ -6,7 +6,7 @@ import {
   selectVendorItems,
   MAX_VENDOR_ITEMS,
   type DataAnswers,
-} from "../data/jev.ts";
+} from "../data/relevance.ts";
 import { asStateItem, recentVendorItems, type VendorItem } from "../data/vendors.ts";
 import { newItems, nextReportedState, type ReportedState } from "../core/report-state.ts";
 

@@ -146,7 +146,7 @@ export function parseArxivEntries(xml: string): ArxivPaper[] {
 }
 
 // ---------------------------------------------------------------------------
-// Relevance ranking (Jev) — the client is in jev.ts
+// Relevance ranking (Jev) — the client is in core/jev.ts
 // ---------------------------------------------------------------------------
 
 /**

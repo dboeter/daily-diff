@@ -12,7 +12,7 @@ import {
   loadPolicyVerdicts,
   type PolicyAnswers,
   type PolicyVerdicts,
-} from "../policy/jev.ts";
+} from "../policy/relevance.ts";
 import type { PolicyItem } from "../policy/policy.ts";
 import { saveItemsFile } from "../core/jev.ts";
 import type { Jurisdiction, PolicyConfig } from "../core/config.ts";

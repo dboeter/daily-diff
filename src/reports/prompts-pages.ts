@@ -17,7 +17,7 @@ import type { Deadline } from "../core/report-state.ts";
 import type { HfData } from "../sources/hf.ts";
 import type { ResearchPaper } from "../trending/research.ts";
 import type { PolicyItem } from "../policy/policy.ts";
-import type { KeptVendorItem } from "../data/jev.ts";
+import type { KeptVendorItem } from "../data/relevance.ts";
 import { signHighlight } from "./markdown.ts";
 import { siteOf, type StoryRow } from "../spotted/spotted.ts";
 

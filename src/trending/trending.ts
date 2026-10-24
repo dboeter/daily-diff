@@ -31,14 +31,11 @@ import {
   buildTrendingTraceFile,
   classifyTrendingItems,
   loadTrendingVerdicts,
-  loadMatchState,
-  matchApps,
   type Classification,
   type TrendingVerdicts,
   type ClassifyItem,
-  type MatchState,
-  type MatchTrace,
-} from "./jev.ts";
+} from "./classify.ts";
+import { loadMatchState, matchApps, type MatchState, type MatchTrace } from "./match.ts";
 import { askJev, type AskJev } from "../core/jev.ts";
 
 // ---------------------------------------------------------------------------

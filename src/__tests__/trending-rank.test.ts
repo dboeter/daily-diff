@@ -23,7 +23,7 @@ import {
   type StarHistory,
 } from "../trending/rank.ts";
 import type { AskJev } from "../core/jev.ts";
-import type { Classification } from "../trending/jev.ts";
+import type { Classification } from "../trending/classify.ts";
 import { GitHubApiError } from "../core/github.ts";
 import {
   composeTrendingReport,

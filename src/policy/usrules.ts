@@ -15,7 +15,7 @@
 
 import type { PolicyItem } from "./policy.ts";
 import type { PolicySourceContext } from "./sources.ts";
-import { keywordHit, watchlisted } from "./jev.ts";
+import { keywordHit, watchlisted } from "./relevance.ts";
 import { apiKeyFor, fetchOk } from "../core/http.ts";
 import { daysBefore } from "../core/date.ts";
 
@@ -87,7 +87,7 @@ function frItem(d: FrDoc): PolicyItem {
     title: agency ? `${agency}: ${d.title}` : d.title,
     link: d.html_url,
     published: d.publication_date,
-    // Carries the dockets and RINs, which is what the watchlist match (policy/jev.ts) reads.
+    // Carries the dockets and RINs, which is what the watchlist match (policy/relevance.ts) reads.
     description: [`${d.subtype ?? d.type}.`, d.abstract ?? "", ids.length ? `(${ids.join("; ")})` : ""]
       .filter(Boolean)
       .join(" "),

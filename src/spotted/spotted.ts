@@ -1,7 +1,7 @@
 /**
  * Spotted: the community stories (Hacker News, Lobste.rs, Dev.to) of a day,
  * minus the ones a page showed on an earlier day (by id or link), each routed
- * to its topic's page (`src/spotted/jev.ts`), each link shown once. The log
+ * to its topic's page (`src/spotted/topics.ts`), each link shown once. The log
  * `digests/spotted-log.json` records what was fetched and what a page showed.
  */
 

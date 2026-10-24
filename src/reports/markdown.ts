@@ -10,7 +10,7 @@ import type { OpenRouterNewModel, OpenRouterStealthModel } from "../sources/open
 import type { LabPost } from "../sources/labs.ts";
 import type { TrendingReportData } from "../trending/rank.ts";
 import type { PolicyItem } from "../policy/policy.ts";
-import type { KeptVendorItem } from "../data/jev.ts";
+import type { KeptVendorItem } from "../data/relevance.ts";
 import type { VendorAction } from "../data/vendors.ts";
 import type { StoryRow } from "../spotted/spotted.ts";
 import type { ResearchPaper } from "../trending/research.ts";

@@ -18,7 +18,7 @@ import {
   saveSpottedVerdicts,
   PAGE_OF_TOPIC,
   type Topic,
-} from "../src/spotted/jev.ts";
+} from "../src/spotted/topics.ts";
 import type { Story } from "../src/spotted/spotted.ts";
 
 const FIRST = "2026-10-13";

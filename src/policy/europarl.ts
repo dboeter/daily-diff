@@ -70,7 +70,7 @@ export function parseProcedure(json: unknown): PolicyItem | null {
   return {
     id: `ep:${p.label}`,
     title: p.process_title?.["en"] ?? p.label,
-    // Carries the procedure reference, which is what the watchlist match (policy/jev.ts) reads.
+    // Carries the procedure reference, which is what the watchlist match (policy/relevance.ts) reads.
     link: `https://oeil.secure.europarl.europa.eu/oeil/en/procedure-file?reference=${p.label}`,
     published: latest.date,
     description: `European Parliament procedure ${p.label}.`,

@@ -13,7 +13,7 @@
 
 import type { PolicyItem } from "./policy.ts";
 import type { PolicySourceContext } from "./sources.ts";
-import { keywordHit } from "./jev.ts";
+import { keywordHit } from "./relevance.ts";
 import { markStaleOnFirstSight } from "../core/report-state.ts";
 import { NEWS_MAX_AGE_DAYS, tagText } from "../core/rss.ts";
 import { fetchOk } from "../core/http.ts";
@@ -167,7 +167,7 @@ async function fetchBill(dossier: string, ctx: PolicySourceContext): Promise<Pol
     title: zaak?.Kamerstukdossier[0]?.Citeertitel ?? zaak?.Titel ?? `Kamerstuk ${dossier}`,
     link: `https://www.tweedekamer.nl/kamerstukken/wetsvoorstellen/detail?cfg=wetsvoorsteldetails&qry=wetsvoorstel%3A${dossier}`,
     published: latest.date,
-    // Carries the dossier number, which is what the watchlist match (policy/jev.ts) reads.
+    // Carries the dossier number, which is what the watchlist match (policy/relevance.ts) reads.
     description: `Dutch bill, Kamerstuk ${dossier}. ${zaak?.Titel ?? ""}`.trim(),
     source: "Tweede Kamer",
     jurisdiction: "nl",
