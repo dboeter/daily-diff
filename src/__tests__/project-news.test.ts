@@ -10,7 +10,7 @@ import { DATA_SECTION_KEYS, loadConfig } from "../core/config.ts";
 import type { RepoConfig } from "../core/github.ts";
 import type { Story } from "../spotted/spotted.ts";
 import { EMPTY_NPM, EMPTY_OPENROUTER, type TrendingData } from "../trending/trending.ts";
-import type { WebFetchResult } from "../sources/web.ts";
+import type { LabsFetchResult } from "../sources/labs.ts";
 
 // ---------------------------------------------------------------------------
 // Fixtures
@@ -142,7 +142,7 @@ describe("matchProjectNews", () => {
 
   // Lab posts are the models page's tracked items, shown there once.
   it("takes no lab posts as project news", () => {
-    const web: WebFetchResult[] = [
+    const labs: LabsFetchResult[] = [
       {
         site: "anthropic",
         isFirstRun: false,
@@ -159,7 +159,7 @@ describe("matchProjectNews", () => {
         ],
       },
     ];
-    const news = matchProjectNews([claudeCode], { web } as NewsSources);
+    const news = matchProjectNews([claudeCode], { labs } as NewsSources);
     expect(news.get("claude-code")).toEqual([]);
   });
 

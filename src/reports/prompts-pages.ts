@@ -6,7 +6,7 @@
  * prompts.ts.
  */
 
-import type { WebPageItem } from "../sources/web.ts";
+import type { LabPost } from "../sources/labs.ts";
 import type { summaryRows } from "../trending/rank.ts";
 import { formatTokens, type OpenRouterData, type OpenRouterNewModel } from "../sources/openrouter.ts";
 import { DATA_REPORT, MODELS_PAGE, MSG, SECTIONS, SPOTTED, TRENDS_REPORT } from "../core/strings.ts";
@@ -212,7 +212,7 @@ ${summaryOutputRule(count)}
  * An OpenAI post has no page content: its title comes from the URL slug.
  */
 export function buildModelsSummariesPrompt(
-  posts: Numbered<WebPageItem>[],
+  posts: Numbered<LabPost>[],
   models: Numbered<OpenRouterNewModel>[],
   dateStr: string,
 ): string {

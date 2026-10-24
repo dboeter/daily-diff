@@ -59,7 +59,7 @@ import {
   LAB_POSTS_MAX,
   type SavedReport,
 } from "./reports/pages.ts";
-import { loadWebState, fetchSiteContent, type WebFetchResult, type WebState } from "./sources/web.ts";
+import { loadLabsState, fetchSiteContent, type LabsFetchResult, type LabsState } from "./sources/labs.ts";
 import { fetchTrendingData, type TrendingData } from "./trending/trending.ts";
 import { fetchModelCatalogDaily, type ModelCatalog } from "./sources/openrouter.ts";
 import { fetchHnData, pageDescription, type HnData, type HnStory } from "./sources/hn.ts";
@@ -189,7 +189,7 @@ async function fetchProject(cfg: RepoConfig, since: Date, weekSince?: Date): Pro
 
 async function fetchAllData(
   now: Date,
-  webState: WebState,
+  labsState: LabsState,
   weekly: boolean,
   /** A Hacker News story out of the Spotted pool: a page showed it or a copy of its link (`isFresh`). */
   hnShown: (story: HnStory) => boolean,
@@ -199,7 +199,7 @@ async function fetchAllData(
   /** One list per data report section, in DATA_SECTIONS order. */
   dataFetches: ProjectFetch[][];
   skillsData: SkillsData;
-  webResults: WebFetchResult[];
+  labResults: LabsFetchResult[];
   trendingData: TrendingData;
   hnData: HnData;
   arxivData: ArxivData;
@@ -214,7 +214,7 @@ async function fetchAllData(
   // The data report's Releases this week: its repos release about weekly, so a 24h window saw none on most days.
   const weekSince = new Date(now.getTime() - 7 * DAY_MS);
   console.log(
-    `  Tracking daily: ${[...AGENTS, ...INFRA_REPOS, ...DATA_SECTIONS.flatMap((s) => s.repos)].map((r) => r.id).join(", ")}, web, openrouter catalog, hn, devto, lobsters, arxiv, policy, trending (news only)` +
+    `  Tracking daily: ${[...AGENTS, ...INFRA_REPOS, ...DATA_SECTIONS.flatMap((s) => s.repos)].map((r) => r.id).join(", ")}, labs, openrouter catalog, hn, devto, lobsters, arxiv, policy, trending (news only)` +
       (weekly ? " | weekly: skills, trending, hf" : ""),
   );
 
@@ -225,7 +225,7 @@ async function fetchAllData(
     infraFetches,
     dataFetches,
     skillsData,
-    webResults,
+    labResults,
     trendingData,
     hnData,
     arxivData,
@@ -244,8 +244,8 @@ async function fetchAllData(
     // No fetcher here throws: each returns its empty value (fetchSuccess false) on a failure.
     weekly ? fetchSkillsData(CLAUDE_SKILLS_REPO) : Promise.resolve(noSkills),
     Promise.all([
-      fetchSiteContent("anthropic", webState, toCstDateStr(now)),
-      fetchSiteContent("openai", webState, toCstDateStr(now)),
+      fetchSiteContent("anthropic", labsState, toCstDateStr(now)),
+      fetchSiteContent("openai", labsState, toCstDateStr(now)),
     ]),
     // Fetched every day — the agents report matches trending repos as news —
     // but only reported weekly.
@@ -266,7 +266,7 @@ async function fetchAllData(
     infraFetches,
     dataFetches,
     skillsData,
-    webResults,
+    labResults,
     trendingData,
     hnData,
     arxivData,
@@ -325,7 +325,7 @@ async function main(): Promise<void> {
   );
 
   // 1. Fetch all data in parallel
-  const webState = loadWebState();
+  const labsState = loadLabsState();
   // Before the fetch: HN's cut counts only the stories no page has shown.
   const spottedLog = loadSpottedLog();
   const inPool = isFresh(spottedLog, dateStr);
@@ -334,7 +334,7 @@ async function main(): Promise<void> {
     infraFetches,
     dataFetches,
     skillsData,
-    webResults,
+    labResults,
     trendingData,
     hnData,
     arxivData,
@@ -344,7 +344,7 @@ async function main(): Promise<void> {
     devtoData,
     lobstersData,
     modelCatalog,
-  } = await fetchAllData(now, webState, weekly, (s) => !inPool({ id: `hn:${s.id}`, url: s.url }));
+  } = await fetchAllData(now, labsState, weekly, (s) => !inPool({ id: `hn:${s.id}`, url: s.url }));
   const stories = storiesFrom(hnData, lobstersData, devtoData);
   const fresh = freshStories(stories, spottedLog, dateStr);
 
@@ -384,7 +384,7 @@ async function main(): Promise<void> {
   const pool = splitPool(
     fresh,
     newsLinks,
-    labPosts(webResults)
+    labPosts(labResults)
       .slice(0, LAB_POSTS_MAX)
       .map((p) => p.url),
   );
@@ -446,8 +446,8 @@ async function main(): Promise<void> {
       dateStr,
     ),
     buildModelsPage(
-      webResults,
-      webState,
+      labResults,
+      labsState,
       modelCatalog,
       { rows: spottedOf("models"), summaries: spottedSummaryMap },
       utcStr,

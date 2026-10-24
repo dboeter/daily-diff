@@ -19,7 +19,7 @@ import type { ProjectActivity } from "../reports/prompts.ts";
 import type { GitHubItem } from "../core/github.ts";
 import type { PolicyData, PolicyItem } from "../policy/policy.ts";
 import { isDataLaw } from "../policy/jev.ts";
-import type { WebFetchResult, WebPageItem } from "../sources/web.ts";
+import type { LabsFetchResult, LabPost } from "../sources/labs.ts";
 import type { ModelCatalog } from "../sources/openrouter.ts";
 import type { VendorData, VendorItem } from "../data/vendors.ts";
 import { selectVendorItems } from "../data/jev.ts";
@@ -51,11 +51,11 @@ vi.mock("../core/llm.ts", async (importOriginal) => ({
   generateOr: (_tag: string, prompt: string, fallback: unknown) => generateBody(prompt).catch(() => fallback),
   saveFile: (...args: unknown[]) => saveFile(...(args as [string, string, string])),
 }));
-// buildModelsPage writes digests/web-state.json: keep the tests off the real file.
-const saveWebState = vi.fn();
-vi.mock("../sources/web.ts", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("../sources/web.ts")>()),
-  saveWebState: () => saveWebState(),
+// buildModelsPage writes digests/labs-state.json: keep the tests off the real file.
+const saveLabsState = vi.fn();
+vi.mock("../sources/labs.ts", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("../sources/labs.ts")>()),
+  saveLabsState: () => saveLabsState(),
 }));
 /** A vendor result with these items and nothing to save but the pruned state. */
 const vendorOf = (items: VendorData["items"]): VendorData => ({
@@ -399,14 +399,14 @@ describe("buildAgentsReport", () => {
 describe("buildModelsPage", () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "models-page-"));
   const NOW = Date.parse("2026-10-22T03:00:00Z");
-  const post = (i: number, site: WebPageItem["site"] = "anthropic"): WebPageItem => ({
+  const post = (i: number, site: LabPost["site"] = "anthropic"): LabPost => ({
     url: `https://www.${site}.com/news/p${i}`,
     title: `Post ${i}`,
     lastmod: `2026-10-${String(10 + (i % 12)).padStart(2, "0")}`,
     content: site === "anthropic" ? `Body ${i}.` : "",
     site,
   });
-  const site = (newItems: WebPageItem[], extra: Partial<WebFetchResult> = {}): WebFetchResult => ({
+  const site = (newItems: LabPost[], extra: Partial<LabsFetchResult> = {}): LabsFetchResult => ({
     site: "anthropic",
     isFirstRun: false,
     newItems,
@@ -428,13 +428,13 @@ describe("buildModelsPage", () => {
   });
   let n = 0;
   const build = (
-    web: WebFetchResult[],
+    labs: LabsFetchResult[],
     cat: ModelCatalog | null,
     spotted: { rows: SpottedRow[]; summaries: Map<number, string> } = NO_SPOTTED,
     stateFile = path.join(dir, `state-${++n}.json`),
     dateStr = "2026-10-22",
     now = NOW,
-  ) => buildModelsPage(web, {} as never, cat, spotted, "00:00", dateStr, stateFile, now);
+  ) => buildModelsPage(labs, {} as never, cat, spotted, "00:00", dateStr, stateFile, now);
   const stub = () => {
     generateBody.mockReset();
     generateBody.mockImplementation(async (prompt: string) =>
@@ -521,14 +521,14 @@ describe("buildModelsPage", () => {
     expect(content).toContain("> Lab posts: 1 |");
   });
 
-  it("is skipped without an LLM call when nothing is new, and still saves the web state", async () => {
+  it("is skipped without an LLM call when nothing is new, and still saves the labs state", async () => {
     stub();
-    saveWebState.mockClear();
+    saveLabsState.mockClear();
     const old = { id: "stealth/a", name: "A", created: "2026-10-01", expires: null };
     const stateFile = path.join(dir, "skipped.json");
     expect(await build([site([])], catalog({ stealth: [old] }), NO_SPOTTED, stateFile)).toBeNull();
     expect(generateBody).not.toHaveBeenCalled();
-    expect(saveWebState).toHaveBeenCalledOnce();
+    expect(saveLabsState).toHaveBeenCalledOnce();
     expect(fs.existsSync(stateFile)).toBe(false);
   });
 

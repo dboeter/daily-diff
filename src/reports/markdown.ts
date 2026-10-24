@@ -7,7 +7,7 @@ import { hasActivity, RELEASE_BODY_CHARS, releaseNotes, type ProjectActivity } f
 import type { ReleaseRow } from "./pages.ts";
 import { escapeRegex } from "./project-news.ts";
 import type { OpenRouterNewModel, OpenRouterStealthModel } from "../sources/openrouter.ts";
-import type { WebPageItem } from "../sources/web.ts";
+import type { LabPost } from "../sources/labs.ts";
 import type { TrendingReportData } from "../trending/rank.ts";
 import type { PolicyItem } from "../policy/policy.ts";
 import type { KeptVendorItem } from "../data/jev.ts";
@@ -566,7 +566,7 @@ export function renderCandidates(
 }
 
 /** The models page's Lab announcements rows, each summary by its own number (else the page text, truncated, or "—"). */
-export function renderLabPostsTable(posts: Numbered<WebPageItem>[], summaries: Map<number, string>): string {
+export function renderLabPostsTable(posts: Numbered<LabPost>[], summaries: Map<number, string>): string {
   const lines = posts.map(
     (p) =>
       `| ${p.lastmod.slice(0, 10) || "—"} | ${MODELS_PAGE.labs[p.site]} | [${policyTitleLabel(p.title || p.url)}](${cell(p.url)}) | ` +
