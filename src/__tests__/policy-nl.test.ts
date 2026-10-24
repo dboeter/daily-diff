@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import { describe, it, expect, vi, afterEach } from "vitest";
-import { billStage, fetchNlParliament, parseZaken } from "../policy/nl.ts";
+import { billStage, fetchTweedeKamer, parseZaken } from "../policy/tweedekamer.ts";
 import { newItems, nextReportedState } from "../core/report-state.ts";
 import type { PolicyConfig } from "../core/config.ts";
 import type { PolicyState } from "../policy/items.ts";
@@ -96,7 +96,7 @@ describe("parseZaken", () => {
   });
 });
 
-describe("fetchNlParliament", () => {
+describe("fetchTweedeKamer", () => {
   const config: PolicyConfig = {
     readerProfile: "A practitioner.",
     watchlist: { eu: [], nl: ["36875"], usFederal: [], usStates: [] },
@@ -112,7 +112,7 @@ describe("fetchNlParliament", () => {
       return new Response(JSON.stringify({ value: [] }));
     });
   const run = (state: PolicyState | null, dateStr: string) =>
-    fetchNlParliament({ config, now: new Date(`${dateStr}T00:00:00Z`), dateStr, state });
+    fetchTweedeKamer({ config, now: new Date(`${dateStr}T00:00:00Z`), dateStr, state });
 
   it("reports dossier 36875's stage once, and not the next day", async () => {
     mockFetch();

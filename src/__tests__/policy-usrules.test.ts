@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
-import { fetchUsRules } from "../policy/usrules.ts";
+import { fetchFederalRegister } from "../policy/federalregister.ts";
 import type { PolicyConfig } from "../core/config.ts";
 
 // Shapes from live responses (2026-10-14): federalregister.gov/api/v1/documents.json and
@@ -107,12 +107,12 @@ afterEach(() => {
   vi.unstubAllEnvs();
 });
 
-describe("fetchUsRules", () => {
+describe("fetchFederalRegister", () => {
   it("keeps Federal Register documents that name AI, presidential documents and watchlisted dockets/RINs", async () => {
     vi.stubEnv("USA_GOV_API_KEY", "");
     vi.spyOn(console, "log").mockImplementation(() => {});
     const fetchSpy = route(frOk, regsOk);
-    const items = await fetchUsRules(ctx);
+    const items = await fetchFederalRegister(ctx);
     expect(items.map((i) => i.id)).toEqual(["us-fr:2026-1", "us-fr:2026-2", "us-fr:2026-3", "us-fr:2026-4"]);
     expect(items[0]).toEqual(
       expect.objectContaining({
@@ -137,7 +137,7 @@ describe("fetchUsRules", () => {
   it("adds Regulations.gov documents whose docket the Federal Register did not return, deadline in Eastern time", async () => {
     vi.stubEnv("USA_GOV_API_KEY", "k");
     const fetchSpy = route(frOk, regsOk);
-    const items = await fetchUsRules(ctx);
+    const items = await fetchFederalRegister(ctx);
     expect(items.filter((i) => i.source === "Regulations.gov")).toEqual([
       expect.objectContaining({
         // Same id as the Federal Register document, so the state dedupes it on a later day too.
@@ -161,7 +161,7 @@ describe("fetchUsRules", () => {
     vi.spyOn(console, "error").mockImplementation(() => {});
     const fail = () => new Response("", { status: 500 });
     route(fail, regsOk);
-    expect((await fetchUsRules(ctx)).map((i) => i.id)).toEqual([
+    expect((await fetchFederalRegister(ctx)).map((i) => i.id)).toEqual([
       "us-fr:2026-8",
       "us-fr:2026-1",
       "regs:FCC-2026-3961-0002",
@@ -169,6 +169,6 @@ describe("fetchUsRules", () => {
       "us-fr:2026-20143",
     ]);
     route(fail, fail);
-    await expect(fetchUsRules(ctx)).rejects.toThrow("HTTP 500");
+    await expect(fetchFederalRegister(ctx)).rejects.toThrow("HTTP 500");
   });
 });

@@ -91,7 +91,7 @@ export async function fetchEuroparl(ctx: PolicySourceContext): Promise<PolicyIte
     try {
       const res = await fetchOk(`${API_URL}/${year}-${num}?format=application%2Fld%2Bjson`);
       const item = parseProcedure(await res.json());
-      // A newly watchlisted procedure opens without its old stage, as in policy/nl.ts.
+      // A newly watchlisted procedure opens without its old stage, as in policy/tweedekamer.ts.
       if (item) items.push(markStaleOnFirstSight(ctx, item, item.published));
     } catch (err) {
       console.error(`  [policy] European Parliament ${ref} failed: ${err}`);

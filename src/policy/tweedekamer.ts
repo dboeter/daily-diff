@@ -178,7 +178,7 @@ async function fetchBill(dossier: string, ctx: PolicySourceContext): Promise<Pol
 }
 
 /** The keyword search and one bill per watchlisted dossier; a failing part is skipped, all failing throws. */
-export async function fetchNlParliament(ctx: PolicySourceContext): Promise<PolicyItem[]> {
+export async function fetchTweedeKamer(ctx: PolicySourceContext): Promise<PolicyItem[]> {
   const dossiers = ctx.config.watchlist.nl.filter((w) => DOSSIER_RE.test(w));
   const parts = [
     { name: "Zaak search", run: () => fetchZaken(ctx.now) },

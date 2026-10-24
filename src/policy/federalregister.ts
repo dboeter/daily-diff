@@ -98,7 +98,7 @@ function frItem(d: FrDoc): PolicyItem {
   };
 }
 
-async function fetchFederalRegister(since: string): Promise<FrDoc[]> {
+async function fetchFrDocs(since: string): Promise<FrDoc[]> {
   const params = new URLSearchParams({
     per_page: String(FR_PER_PAGE),
     "conditions[publication_date][gte]": since,
@@ -143,11 +143,11 @@ function regsItem(d: RegsDoc): PolicyItem {
 }
 
 /** Throws only when both sources fail; a missing key skips Regulations.gov. */
-export async function fetchUsRules(ctx: PolicySourceContext): Promise<PolicyItem[]> {
+export async function fetchFederalRegister(ctx: PolicySourceContext): Promise<PolicyItem[]> {
   const since = daysBefore(ctx.dateStr, LOOKBACK_DAYS);
   const key = apiKeyFor("USA_GOV_API_KEY", "Regulations.gov");
   const [fr, regs] = await Promise.allSettled([
-    fetchFederalRegister(since),
+    fetchFrDocs(since),
     key ? fetchRegulationsGov(since, key) : Promise.resolve([]),
   ]);
   if (fr.status === "rejected" && regs.status === "rejected") throw fr.reason;
