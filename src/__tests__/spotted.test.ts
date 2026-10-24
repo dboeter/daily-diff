@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
 import {
+  type SpottedLog,
+  type SpottedPage,
+  type Story,
+  type StorySource,
   freshStories,
   linkKey,
   mostDiscussed,
@@ -7,14 +11,7 @@ import {
   selectSpotted,
   splitPool,
   storiesFrom,
-  type SpottedLog,
-  type SpottedPage,
-  type Story,
-  type StorySource,
 } from "../spotted/pool.ts";
-import { renderSpottedTable } from "../reports/markdown.ts";
-import { buildSpottedSummariesPrompt } from "../reports/prompts-pages.ts";
-import { numberRows, parseRowSummaries } from "../reports/summarized-table.ts";
 
 const DATE = "2026-10-22";
 
@@ -362,49 +359,5 @@ describe("selectSpotted by link", () => {
       [2, "agents", l2.id],
       [3, "agents", l3.id],
     ]);
-  });
-});
-
-describe("renderSpottedTable", () => {
-  it("links the story and its discussion with counts, reactions for Dev.to", () => {
-    const rows = numberRows([
-      { ...story("1", "hn", 312), comments: 95, page: "agents" as const },
-      {
-        ...story("2", "devto", 40),
-        discussionUrl: "https://dev.to/a/2",
-        description: "An article | with a pipe",
-        page: "agents" as const,
-      },
-    ]);
-    const md = renderSpottedTable(rows, new Map([[1, "What it is."]]));
-    expect(md).toBe(
-      "## Spotted\n\n" +
-        "| Story | Source | Discussion | Summary |\n| :--- | :--- | :--- | :--- |\n" +
-        "| [Story 1](https://example.com/1) | Hacker News | [312 points, 95 comments](https://news.ycombinator.com/item?id=1) | What it is. |\n" +
-        "| [Story 2](https://example.com/2) | Dev.to | [40 reactions, 3 comments](https://dev.to/a/2) | An article \\| with a pipe |",
-    );
-  });
-
-  it("renders nothing without rows", () => {
-    expect(renderSpottedTable([], new Map())).toBe("");
-  });
-});
-
-describe("buildSpottedSummariesPrompt", () => {
-  it("lists every row by its number, with its site and description, on the summaries contract", () => {
-    const rows = numberRows([
-      { ...story("1"), description: "The page says this.", page: "agents" as const },
-      { ...story("2", "lobsters"), url: "https://www.blog.dev/post", page: "data" as const },
-    ]);
-    const prompt = buildSpottedSummariesPrompt(rows, DATE);
-    expect(prompt).toContain(
-      "1. Story 1 (Hacker News, example.com, 10 points, 3 comments) — description: The page says this.",
-    );
-    expect(prompt).toContain("2. Story 2 (Lobste.rs, blog.dev, 10 points, 3 comments) — (no description)");
-    expect(prompt).toContain("`N: <1-2 sentences>`");
-    expect(prompt).toContain("2 lines in total");
-    expect(prompt).toMatch(/Describe no comment thread/);
-    expect(prompt).toContain("Without one: write `N: —`");
-    expect(parseRowSummaries("1: One.\n2: —").get(2)).toBe("—");
   });
 });

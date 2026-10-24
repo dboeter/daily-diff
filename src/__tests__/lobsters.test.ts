@@ -1,32 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { toDevtoArticle, type DevtoApiArticle } from "../sources/devto.ts";
-import { fetchLobstersData, toLobstersStory, type LobstersApiStory } from "../sources/lobsters.ts";
-import { toHfModel, type HfApiModel } from "../sources/huggingface.ts";
-
-describe("toDevtoArticle", () => {
-  it("maps raw Forem API article to DevtoArticle structure", () => {
-    const raw: DevtoApiArticle = {
-      id: 98765,
-      title: "Building Agents with LangChain and Local LLMs",
-      description: "A complete walkthrough of deploying local agent systems.",
-      url: "https://dev.to/alice/building-agents-98765",
-      published_at: "2026-03-09T14:20:00Z",
-      positive_reactions_count: 142,
-      comments_count: 28,
-    };
-
-    const article = toDevtoArticle(raw);
-    expect(article).toEqual({
-      id: 98765,
-      title: "Building Agents with LangChain and Local LLMs",
-      description: "A complete walkthrough of deploying local agent systems.",
-      url: "https://dev.to/alice/building-agents-98765",
-      publishedAt: "2026-03-09T14:20:00Z",
-      positiveReactionsCount: 142,
-      commentsCount: 28,
-    });
-  });
-});
+import { type LobstersApiStory, fetchLobstersData, toLobstersStory } from "../sources/lobsters.ts";
 
 describe("toLobstersStory", () => {
   it("maps raw Lobste.rs JSON story to LobstersStory structure", () => {
@@ -116,47 +89,5 @@ describe("fetchLobstersData", () => {
       ["ask", undefined],
     ]);
     expect(pages).toEqual(["https://example.com/post"]);
-  });
-});
-
-describe("toHfModel", () => {
-  it("maps Hugging Face Hub API response to HfModel structure", () => {
-    const raw: HfApiModel = {
-      _id: "meta-llama/Llama-3.3-70B-Instruct",
-      id: "meta-llama/Llama-3.3-70B-Instruct",
-      author: "meta-llama",
-      likes: 1250,
-      downloads: 85000,
-      tags: ["text-generation", "transformers", "en"],
-      pipeline_tag: "text-generation",
-      lastModified: "2026-03-08T18:00:00.000Z",
-    };
-
-    const model = toHfModel(raw);
-    expect(model).toEqual({
-      id: "meta-llama/Llama-3.3-70B-Instruct",
-      author: "meta-llama",
-      likes: 1250,
-      downloads: 85000,
-      tags: ["text-generation", "transformers", "en"],
-      pipelineTag: "text-generation",
-      lastModified: "2026-03-08T18:00:00.000Z",
-      url: "https://huggingface.co/meta-llama/Llama-3.3-70B-Instruct",
-    });
-  });
-
-  it("infers author from model id if author field is missing", () => {
-    const raw: HfApiModel = {
-      _id: "deepseek-ai/DeepSeek-V3",
-      id: "deepseek-ai/DeepSeek-V3",
-      likes: 3500,
-      downloads: 120000,
-    };
-
-    const model = toHfModel(raw);
-    expect(model.author).toBe("deepseek-ai");
-    expect(model.tags).toEqual([]);
-    expect(model.pipelineTag).toBe("");
-    expect(model.lastModified).toBe("");
   });
 });

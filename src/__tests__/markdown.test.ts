@@ -1,23 +1,26 @@
-import { describe, it, expect } from "vitest";
+import { describe, expect, it } from "vitest";
+import type { GitHubRelease } from "../core/github.ts";
+import { MSG, TRENDS_REPORT } from "../core/strings.ts";
 import {
   buildProjectReportContent,
   buildStealthSection,
-  renderTrendingTables,
-  renderCandidates,
-  renderResearchTable,
-  renderPolicyTable,
-  stripModelTitle,
-  unwrapCodeLinks,
   highlightsOnly,
   nestHeadings,
+  renderCandidates,
+  renderPolicyTable,
   renderReportBar,
+  renderResearchTable,
+  renderSpottedTable,
+  renderTrendingTables,
+  signListItems,
+  stripModelTitle,
+  unwrapCodeLinks,
   withReportBar,
 } from "../reports/markdown.ts";
-import type { TrendingReportData } from "../trending/rank.ts";
+import { type ProjectActivity, goingAwayRule } from "../reports/prompts.ts";
 import { numberRows } from "../reports/summarized-table.ts";
-import { MSG, TRENDS_REPORT } from "../core/strings.ts";
-import type { ProjectActivity } from "../reports/prompts.ts";
-import type { GitHubRelease } from "../core/github.ts";
+import type { Story, StorySource } from "../spotted/pool.ts";
+import type { TrendingReportData } from "../trending/rank.ts";
 
 // ---------------------------------------------------------------------------
 // Fixtures
@@ -45,6 +48,79 @@ const stableRelease: GitHubRelease = {
   published_at: "2026-10-04T00:00:00Z",
   prerelease: false,
 };
+
+// ---------------------------------------------------------------------------
+// Brief (GitHub issue) variant
+// ---------------------------------------------------------------------------
+
+// ---------------------------------------------------------------------------
+// Trending tables
+// ---------------------------------------------------------------------------
+
+function trendingReport(over: Partial<TrendingReportData> = {}): TrendingReportData {
+  return {
+    radar: [
+      {
+        n: 1,
+        keys: ["openrouter:1", "npm:kilo"],
+        name: "Kilo",
+        url: "https://kilo.ai/",
+        description: "",
+        sources: ["OpenRouter", "npm"],
+        signals: ["🆕 week #3 / month —", "1,000/week, 4.3x"],
+        isNew: true,
+        links: [],
+      },
+      {
+        n: 2,
+        keys: ["npm:bare"],
+        name: "bare",
+        url: "",
+        description: "A | piped\ndescription",
+        sources: ["npm"],
+        signals: ["10/week, 1.0x"],
+        isNew: false,
+        links: [],
+      },
+    ],
+    categories: [
+      {
+        category: "coding_agent",
+        rows: [
+          {
+            n: 3,
+            key: "github:o/r",
+            fullName: "o/r",
+            url: "https://github.com/o/r",
+            description: "word ".repeat(60),
+            language: "Rust",
+            totalStars: 100,
+            gain: 7,
+            gainFrom: "trending",
+            relative: null,
+            starsCell: "100 (+7)",
+            isNew: false,
+          },
+        ],
+      },
+    ],
+    onFire: [],
+    classifiedBy: "topics",
+    ...over,
+  };
+}
+
+const story = (id: string, source: StorySource = "hn", points = 10, extra: Partial<Story> = {}): Story => ({
+  id: `${source}:${id}`,
+  source,
+  title: `Story ${id}`,
+  url: `https://example.com/${id}`,
+  discussionUrl: `https://news.ycombinator.com/item?id=${id}`,
+  points,
+  comments: 3,
+  published: "2026-10-21T10:00:00Z",
+  ...extra,
+});
 
 describe("buildProjectReportContent", () => {
   const agents = {
@@ -211,67 +287,6 @@ describe("buildStealthSection", () => {
     expect(buildStealthSection(null, now)).toContain("catalog unavailable");
   });
 });
-
-// ---------------------------------------------------------------------------
-// Brief (GitHub issue) variant
-// ---------------------------------------------------------------------------
-
-// ---------------------------------------------------------------------------
-// Trending tables
-// ---------------------------------------------------------------------------
-
-function trendingReport(over: Partial<TrendingReportData> = {}): TrendingReportData {
-  return {
-    radar: [
-      {
-        n: 1,
-        keys: ["openrouter:1", "npm:kilo"],
-        name: "Kilo",
-        url: "https://kilo.ai/",
-        description: "",
-        sources: ["OpenRouter", "npm"],
-        signals: ["🆕 week #3 / month —", "1,000/week, 4.3x"],
-        isNew: true,
-        links: [],
-      },
-      {
-        n: 2,
-        keys: ["npm:bare"],
-        name: "bare",
-        url: "",
-        description: "A | piped\ndescription",
-        sources: ["npm"],
-        signals: ["10/week, 1.0x"],
-        isNew: false,
-        links: [],
-      },
-    ],
-    categories: [
-      {
-        category: "coding_agent",
-        rows: [
-          {
-            n: 3,
-            key: "github:o/r",
-            fullName: "o/r",
-            url: "https://github.com/o/r",
-            description: "word ".repeat(60),
-            language: "Rust",
-            totalStars: 100,
-            gain: 7,
-            gainFrom: "trending",
-            relative: null,
-            starsCell: "100 (+7)",
-            isNew: false,
-          },
-        ],
-      },
-    ],
-    onFire: [],
-    classifiedBy: "topics",
-    ...over,
-  };
-}
 
 describe("renderTrendingTables", () => {
   it("renders both sections with summaries, falling back to descriptions", () => {
@@ -569,5 +584,80 @@ describe("report bar", () => {
     expect(withReportBar("# T 2026-10-12\n\n> meta\n\nbody", "BAR")).toBe(
       "# T 2026-10-12\n\nBAR\n\n> meta\n\nbody",
     );
+  });
+});
+
+// ---------------------------------------------------------------------------
+// formatDiscussion
+// ---------------------------------------------------------------------------
+
+describe("signListItems", () => {
+  it("turns a hyphen or dash opening a list item into the minus sign, so it nests no list", () => {
+    const md =
+      "- - **Snowflake** retires X\n- – Fabric ends Y\n* — BigQuery drops Z\n- **DuckDB** 2.0 ships\n  - nested - stays";
+    expect(signListItems(md)).toBe(
+      "- − **Snowflake** retires X\n- − Fabric ends Y\n* − BigQuery drops Z\n- **DuckDB** 2.0 ships\n  - nested - stays",
+    );
+  });
+
+  it("lands in a page's Highlights through highlightsOnly", () => {
+    expect(highlightsOnly("## Highlights\n\n- - **X** is retired\n- **Y** ships")).toBe(
+      "## Highlights\n\n- − **X** is retired\n- **Y** ships",
+    );
+  });
+
+  it("makes a list of a section whose every bullet opens with the sign instead of a marker", () => {
+    expect(highlightsOnly("## Highlights\n\n− **X** launches\n− **Y** ships")).toBe(
+      "## Highlights\n\n- **X** launches\n- **Y** ships",
+    );
+  });
+
+  it("lists each section of a longer reply on its own, with wrapped lines kept", () => {
+    expect(
+      signListItems("## Highlights\n\n- **Y** ships\n\n## Signals\n\n– Z grows,\n  fast\n— W slows"),
+    ).toBe("## Highlights\n\n- **Y** ships\n\n## Signals\n\n- Z grows,\n  fast\n- W slows");
+  });
+
+  it("lists a section whose sign lines are followed by a rule or the tables marker", () => {
+    expect(signListItems("## Highlights\n\n− X\n− Y\n\n<!-- tables -->\n\n---\n\n## Signals")).toBe(
+      "## Highlights\n\n- X\n- Y\n\n<!-- tables -->\n\n---\n\n## Signals",
+    );
+  });
+
+  it("leaves one unmarked sign line among prose or list items alone", () => {
+    const md =
+      "## Highlights\n\n- **X** ships a long thing\n— and more\n\nProse that wraps\n– after a dash\n\n```\n— code\n```";
+    expect(signListItems(md)).toBe(md);
+  });
+
+  it("asks for the marker on every bullet and the sign after it", () => {
+    expect(goingAwayRule("bullet")).toContain('Write every bullet as "- text"');
+    expect(goingAwayRule("bullet")).toContain('"- − text"');
+    expect(goingAwayRule("highlight")).toMatch(/^Start a highlight with "− "/);
+  });
+});
+
+describe("renderSpottedTable", () => {
+  it("links the story and its discussion with counts, reactions for Dev.to", () => {
+    const rows = numberRows([
+      { ...story("1", "hn", 312), comments: 95, page: "agents" as const },
+      {
+        ...story("2", "devto", 40),
+        discussionUrl: "https://dev.to/a/2",
+        description: "An article | with a pipe",
+        page: "agents" as const,
+      },
+    ]);
+    const md = renderSpottedTable(rows, new Map([[1, "What it is."]]));
+    expect(md).toBe(
+      "## Spotted\n\n" +
+        "| Story | Source | Discussion | Summary |\n| :--- | :--- | :--- | :--- |\n" +
+        "| [Story 1](https://example.com/1) | Hacker News | [312 points, 95 comments](https://news.ycombinator.com/item?id=1) | What it is. |\n" +
+        "| [Story 2](https://example.com/2) | Dev.to | [40 reactions, 3 comments](https://dev.to/a/2) | An article \\| with a pipe |",
+    );
+  });
+
+  it("renders nothing without rows", () => {
+    expect(renderSpottedTable([], new Map())).toBe("");
   });
 });

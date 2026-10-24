@@ -1,15 +1,16 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { describe, it, expect } from "vitest";
+import { describe, expect, it } from "vitest";
 import {
+  type StateItem,
   loadReportedState,
-  newItems,
-  nextReportedState,
   markStaleOnFirstSight,
+  newItems,
+  nextDeadlines,
+  nextReportedState,
   saveReportedState,
   staleOnFirstSight,
-  type StateItem,
 } from "../core/report-state.ts";
 
 const item = (id: string, published = "2026-10-13T08:00:00.000Z"): StateItem => ({ id, published });
@@ -126,5 +127,43 @@ describe("markStaleOnFirstSight", () => {
     const it_ = { id: "new", title: "T" };
     expect(markStaleOnFirstSight(ctx, it_, "2026-09-13")).toEqual({ ...it_, recordOnly: true });
     expect(markStaleOnFirstSight(ctx, it_, "2026-09-14")).toBe(it_);
+  });
+});
+
+describe("nextDeadlines", () => {
+  const deadlineItem = (id: string, deadline?: string) => ({
+    id,
+    title: `Title ${id}`,
+    link: `https://example.eu/${id}`,
+    published: "2026-10-01",
+    source: "Have your say",
+    ...(deadline ? { deadline } : {}),
+  });
+  const prev = {
+    old: { date: "2026-10-13", title: "Closed yesterday", link: "l", source: "s" },
+    kept: { date: "2026-11-01", title: "Reported last week", link: "l", source: "s" },
+    moved: { date: "2026-10-20", title: "Extended", link: "l", source: "s" },
+    gone: { date: "2026-10-30", title: "Withdrawn", link: "l", source: "s" },
+  };
+
+  it("keeps earlier open deadlines, adds today's, updates moved ones and drops passed or removed ones", () => {
+    const next = nextDeadlines(
+      prev,
+      [deadlineItem("new", "2026-10-25"), deadlineItem("nodeadline")],
+      [deadlineItem("moved", "2026-10-27"), deadlineItem("gone"), deadlineItem("new", "2026-10-25")],
+      "2026-10-14",
+    );
+    expect(Object.keys(next).sort()).toEqual(["kept", "moved", "new"]);
+    expect(next["moved"]?.date).toBe("2026-10-27");
+    expect(next["new"]).toEqual({
+      date: "2026-10-25",
+      title: "Title new",
+      link: "https://example.eu/new",
+      source: "Have your say",
+    });
+  });
+
+  it("does not add a fetched item that was never reported", () => {
+    expect(nextDeadlines({}, [], [deadlineItem("dropped", "2026-10-25")], "2026-10-14")).toEqual({});
   });
 });

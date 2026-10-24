@@ -1,14 +1,13 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import {
+  type DataAnswers,
+  MAX_VENDOR_ITEMS,
   dataRelevance,
   dateCandidates,
   keywordVerdict,
   selectVendorItems,
-  MAX_VENDOR_ITEMS,
-  type DataAnswers,
 } from "../data/relevance.ts";
-import { asStateItem, recentVendorItems, type VendorItem } from "../data/vendors.ts";
-import { newItems, nextReportedState, type ReportedState } from "../core/report-state.ts";
+import type { VendorItem } from "../data/vendors.ts";
 
 const answers = (real: number, deprecation: number, significance: number, ai = 0): DataAnswers => ({
   real_change: { noul: real },
@@ -197,65 +196,6 @@ describe("selectVendorItems", () => {
       (i) => i.id,
     );
     expect(ids).toEqual([...Array.from({ length: 11 }, (_, i) => `dbx${i}`), "gcp0"]);
-  });
-});
-
-describe("vendor state", () => {
-  // What fetchVendorData's pipeline does with the state (new-items.ts): the age limit, then the state's keys.
-  const newVendorItems = (items: VendorItem[], state: ReportedState | null, dateStr: string) => {
-    const recent = recentVendorItems(items, dateStr);
-    const fresh = new Set(newItems(recent.map(asStateItem), state, dateStr).map((i) => i.id));
-    return recent.filter((i) => fresh.has(asStateItem(i).id));
-  };
-  const nextDataState = (state: ReportedState | null, items: VendorItem[], dateStr: string) =>
-    nextReportedState(state, items.map(asStateItem), dateStr);
-  // The state keys a note on title + date (data/vendors.ts stateId), as item() builds them.
-  const key = (id: string) => `title ${id}|2026-10-16`;
-
-  it("keeps items reported today for a same-day re-run and drops earlier ones", () => {
-    const state = { reported: { [key("today")]: DATE, [key("earlier")]: "2026-10-15" }, stages: {} };
-    const fresh = newVendorItems([item("today"), item("earlier"), item("new")], state, DATE);
-    expect(fresh.map((i) => i.id)).toEqual(["today", "new"]);
-  });
-
-  it("drops items older than 7 days on every run, keeps future dates, and lets bundles skip the limit", () => {
-    const items = [
-      item("old", { date: "2026-10-09" }),
-      item("edge", { date: "2026-10-10" }),
-      item("future", { date: "2026-10-19" }),
-      item("bcr", { date: "", stage: "Planned" }),
-    ];
-    expect(newVendorItems(items, null, DATE).map((i) => i.id)).toEqual(["edge", "future", "bcr"]);
-    expect(newVendorItems(items, { reported: {}, stages: {} }, DATE).map((i) => i.id)).toEqual([
-      "edge",
-      "future",
-      "bcr",
-    ]);
-  });
-
-  it("does not report a note again under its other guid", () => {
-    const state = nextDataState(null, [item("topic-page-guid", { title: "Same note" })], "2026-10-16");
-    expect(newVendorItems([item("monthly-page-guid", { title: "Same note" })], state, DATE)).toEqual([]);
-  });
-
-  it("reports a bundle again when its stage moves, not before", () => {
-    const bundle = item("bcr", { date: "", stage: "Enabled by default" });
-    const state = nextDataState(null, [bundle], "2026-10-10");
-    expect(newVendorItems([bundle], state, DATE)).toEqual([]);
-    const moved = { ...bundle, stage: "Generally enabled" };
-    expect(newVendorItems([moved], state, DATE)).toEqual([moved]);
-  });
-
-  it("prunes reported ids after 30 days and never prunes stages", () => {
-    const state = nextDataState(
-      { reported: { gone: "2026-09-01", kept: "2026-10-01" }, stages: { bcr: " Planned" } },
-      [item("new")],
-      DATE,
-    );
-    expect(state).toEqual({
-      reported: { kept: "2026-10-01", [key("new")]: DATE },
-      stages: { bcr: " Planned" },
-    });
   });
 });
 

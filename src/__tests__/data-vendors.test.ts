@@ -1,153 +1,31 @@
 import fs from "node:fs";
-import { describe, it, expect, vi, afterEach } from "vitest";
-import { fetchVendorData, fetchVendorFeeds } from "../data/vendors.ts";
-import { parseBehaviorChangeBundles, parseSnowflakeReleases } from "../data/snowflake.ts";
-import { parseBigQueryNotes } from "../data/bigquery.ts";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import type { DataFeed } from "../core/config.ts";
+import { type ReportedState, newItems, nextReportedState } from "../core/report-state.ts";
+import {
+  type VendorItem,
+  asStateItem,
+  fetchVendorData,
+  fetchVendorFeeds,
+  recentVendorItems,
+} from "../data/vendors.ts";
 
 const fixture = (name: string) => fs.readFileSync(new URL(`./fixtures/${name}`, import.meta.url), "utf-8");
 
 afterEach(() => vi.restoreAllMocks());
 
-describe("parseSnowflakeReleases", () => {
-  const notes = parseSnowflakeReleases(fixture("snowflake-releases.html"));
-
-  it("reads the dated releases from __NEXT_DATA__ and skips Upcoming", () => {
-    expect(notes.map((n) => n.date)).toEqual([
-      "2026-10-16",
-      "2026-10-16",
-      "2026-10-15",
-      "2026-10-07",
-      "2026-10-07",
-    ]);
-    expect(notes[0]).toMatchObject({
-      id: "/release-notes/2026/other/2026-10-16-cortex-ai-gateway-regions#Oct 16, 2026: Cortex AI Gateway on Azure, Google Cloud, and AWS New Zealand",
-      title: "Oct 16, 2026: Cortex AI Gateway on Azure, Google Cloud, and AWS New Zealand",
-      link: "https://docs.snowflake.com/en/release-notes/2026/other/2026-10-16-cortex-ai-gateway-regions",
-      categories: ["Feature Update"],
-    });
-  });
-
-  it("keys a server release's announcements by source and title: they share the source", () => {
-    const server = notes.filter((n) => n.link.endsWith("/release-notes/2026/10_36"));
-    expect(server).toHaveLength(2);
-    expect(new Set(server.map((n) => n.id)).size).toBe(2);
-  });
-
-  it("takes the content when the summary is an MDX import line", () => {
-    const dcr = notes.find((n) => n.title.includes("Clean Rooms"))!;
-    expect(dcr.description).toMatch(/^Clean Rooms API Version: 18\.9 The following updates/);
-  });
-
-  // 2026-10-19: "10.37 Release Notes (with behavior changes)" repeated the 2026_08 bundle row.
-  it("skips a release header that only points at the behavior change bundles", () => {
-    const page = (content: string) =>
-      `<script id="__NEXT_DATA__" type="application/json">${JSON.stringify({
-        props: {
-          pageProps: {
-            releases: [
-              {
-                title: "10.37 Release Notes (with behavior changes): Oct 08, 2026 - Oct 16, 2026",
-                source: "/release-notes/2026/10_37",
-                date: ["2026-10-08", "2026-10-16"],
-                changeType: "Server Release",
-                content,
-              },
-            ],
-          },
-        },
-      })}</script>`;
-    const pointer =
-      "<h2>Behavior change bundles</h2><p>This release contains the following behavior change bundles:</p>";
-    expect(parseSnowflakeReleases(page(pointer))).toEqual([]);
-    expect(
-      parseSnowflakeReleases(page(`${pointer}<h2>New features</h2><p>${"Dynamic tables ".repeat(20)}</p>`)),
-    ).toHaveLength(1);
-  });
-
-  it("throws when the JSON or the releases are missing: the markup changed", () => {
-    expect(() => parseSnowflakeReleases("<html></html>")).toThrow("no __NEXT_DATA__");
-    expect(() =>
-      parseSnowflakeReleases(
-        '<script id="__NEXT_DATA__" type="application/json">{"props":{"pageProps":{"releases":[]}}}</script>',
-      ),
-    ).toThrow("no Snowflake releases");
-  });
+const item = (id: string, over: Partial<VendorItem> = {}): VendorItem => ({
+  id,
+  vendor: "databricks",
+  source: "Azure Databricks",
+  title: `Title ${id}`,
+  link: `https://example.com/${id}`,
+  date: "2026-10-16",
+  description: "",
+  ...over,
 });
 
-describe("parseBehaviorChangeBundles", () => {
-  const bundles = parseBehaviorChangeBundles(fixture("snowflake-bcr.html"));
-
-  it("reads one stage item per bundle of the pending table, not the implemented history", () => {
-    expect(bundles.map((b) => b.id)).toEqual([
-      "snowflake-bcr:2026_08",
-      "snowflake-bcr:2026_07",
-      "snowflake-bcr:2026_06",
-      "snowflake-bcr:2026_05",
-    ]);
-    expect(bundles[2]).toMatchObject({
-      title: "Behavior change bundle 2026_06",
-      link: "https://docs.snowflake.com/en/release-notes/bcr-bundles/2026_06_bundle",
-    });
-  });
-
-  it("takes the latest status that happened as the stage, else the planned introduction", () => {
-    expect(bundles.map((b) => b.stage)).toEqual([
-      "Planned to be introduced, Disabled by Default, in the 10.37 release (October 7-13, 2026), subject to change; once introduced, account admins can enable for testing.",
-      "Introduced in the 10.32 release (September 5-9, 2026) as Disabled by Default; account admins can enable for testing.",
-      "Status changed in the 10.32 release (September 5-9, 2026) to Enabled by Default; account admins can disable for opt-out.",
-      "Status changed in the 10.32 release (September 5-9, 2026) to Generally Enabled; account admins can no longer enable or disable this bundle.",
-    ]);
-  });
-
-  it("dates a bundle by the end of its stage's release window", () => {
-    expect(bundles.map((b) => b.date)).toEqual(["2026-10-13", "2026-09-09", "2026-09-09", "2026-09-09"]);
-  });
-
-  it("takes a planned Enabled by Default or Generally Enabled change with a full date as the end date", () => {
-    // On the fixture every planned change is month-only ("a subsequent October 2026 release").
-    expect(bundles.map((b) => b.endDate)).toEqual([undefined, undefined, undefined, undefined]);
-    const row = (planned: string) =>
-      `<table><tr><th>Pending Changes</th></tr><tr><td><strong>2026_09</strong></td><td><p>Introduced in the 10.38 release (October 14-20, 2026) as Disabled by Default; account admins can enable for testing.</p><p>${planned}</p></td></tr></table>`;
-    const [b] = parseBehaviorChangeBundles(
-      row(
-        "Status planned to change in the 10.42 release (November 10-16, 2026) to Generally Enabled; however, this schedule is subject to change.",
-      ),
-    );
-    expect(b!.endDate).toBe("2026-11-16");
-    const [intro] = parseBehaviorChangeBundles(
-      row("Status planned to change in the 10.40 release (November 3-9, 2026) to Disabled by Default."),
-    );
-    expect(intro!.endDate).toBeUndefined();
-  });
-
-  it("throws when no bundle parses", () => {
-    expect(() => parseBehaviorChangeBundles("<html></html>")).toThrow("no Snowflake behavior-change bundles");
-  });
-});
-
-describe("parseBigQueryNotes", () => {
-  const notes = parseBigQueryNotes(fixture("bigquery.xml"));
-
-  it("splits each day's entry into its notes, keyed by anchor and title", () => {
-    expect(notes.map((n) => n.id.split("#")[0])).toEqual(
-      expect.arrayContaining(["October_16_2026", "October_15_2026"]),
-    );
-    expect(notes[1]!.id).toBe("October_15_2026#Feature: You can copy tables across regions.");
-    expect(new Set(notes.map((n) => n.id)).size).toBe(notes.length);
-    expect(notes[1]).toMatchObject({
-      title: "Feature: You can copy tables across regions.",
-      date: "2026-10-15",
-      link: "https://docs.cloud.google.com/bigquery/docs/release-notes#October_15_2026",
-      categories: ["Feature"],
-    });
-    expect(notes[2]!.description).toMatch(/^You can now use column aliases in GoogleSQL\./);
-  });
-
-  it("throws when no entry parses", () => {
-    expect(() => parseBigQueryNotes("<html></html>")).toThrow("no BigQuery entries");
-  });
-});
+const DATE = "2026-10-17";
 
 describe("fetchVendorFeeds", () => {
   const feeds: DataFeed[] = [
@@ -378,5 +256,64 @@ describe("fetchVendorData across days", () => {
     expect(Object.keys(quiet.observedState.actions ?? {})).toEqual(["a"]);
     const after = await fetchVendorData({ feeds: [] }, new Date("2026-11-20T01:00:00Z"), day1.nextState, jev);
     expect(after.observedState.actions).toEqual({});
+  });
+});
+
+describe("vendor state", () => {
+  // What fetchVendorData's pipeline does with the state (new-items.ts): the age limit, then the state's keys.
+  const newVendorItems = (items: VendorItem[], state: ReportedState | null, dateStr: string) => {
+    const recent = recentVendorItems(items, dateStr);
+    const fresh = new Set(newItems(recent.map(asStateItem), state, dateStr).map((i) => i.id));
+    return recent.filter((i) => fresh.has(asStateItem(i).id));
+  };
+  const nextDataState = (state: ReportedState | null, items: VendorItem[], dateStr: string) =>
+    nextReportedState(state, items.map(asStateItem), dateStr);
+  // The state keys a note on title + date (data/vendors.ts stateId), as item() builds them.
+  const key = (id: string) => `title ${id}|2026-10-16`;
+
+  it("keeps items reported today for a same-day re-run and drops earlier ones", () => {
+    const state = { reported: { [key("today")]: DATE, [key("earlier")]: "2026-10-15" }, stages: {} };
+    const fresh = newVendorItems([item("today"), item("earlier"), item("new")], state, DATE);
+    expect(fresh.map((i) => i.id)).toEqual(["today", "new"]);
+  });
+
+  it("drops items older than 7 days on every run, keeps future dates, and lets bundles skip the limit", () => {
+    const items = [
+      item("old", { date: "2026-10-09" }),
+      item("edge", { date: "2026-10-10" }),
+      item("future", { date: "2026-10-19" }),
+      item("bcr", { date: "", stage: "Planned" }),
+    ];
+    expect(newVendorItems(items, null, DATE).map((i) => i.id)).toEqual(["edge", "future", "bcr"]);
+    expect(newVendorItems(items, { reported: {}, stages: {} }, DATE).map((i) => i.id)).toEqual([
+      "edge",
+      "future",
+      "bcr",
+    ]);
+  });
+
+  it("does not report a note again under its other guid", () => {
+    const state = nextDataState(null, [item("topic-page-guid", { title: "Same note" })], "2026-10-16");
+    expect(newVendorItems([item("monthly-page-guid", { title: "Same note" })], state, DATE)).toEqual([]);
+  });
+
+  it("reports a bundle again when its stage moves, not before", () => {
+    const bundle = item("bcr", { date: "", stage: "Enabled by default" });
+    const state = nextDataState(null, [bundle], "2026-10-10");
+    expect(newVendorItems([bundle], state, DATE)).toEqual([]);
+    const moved = { ...bundle, stage: "Generally enabled" };
+    expect(newVendorItems([moved], state, DATE)).toEqual([moved]);
+  });
+
+  it("prunes reported ids after 30 days and never prunes stages", () => {
+    const state = nextDataState(
+      { reported: { gone: "2026-09-01", kept: "2026-10-01" }, stages: { bcr: " Planned" } },
+      [item("new")],
+      DATE,
+    );
+    expect(state).toEqual({
+      reported: { kept: "2026-10-01", [key("new")]: DATE },
+      stages: { bcr: " Planned" },
+    });
   });
 });

@@ -1,5 +1,17 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { fetchTrendingData, parseTrendingHtml, searchAiRepos } from "../trending/compose.ts";
+import type { AskJev } from "../core/jev.ts";
+import type { TrendingVerdicts } from "../trending/classify.ts";
+import {
+  type SearchRepo,
+  type TrendingData,
+  composeTrendingReport,
+  EMPTY_OPENROUTER,
+  fetchTrendingData,
+  parseTrendingHtml,
+  searchAiRepos,
+} from "../trending/compose.ts";
+import { type MatchState } from "../trending/match.ts";
+import type { NpmPackage } from "../trending/npm.ts";
 import { MIN_STARS, NEW_REPO_MIN_STARS } from "../trending/rank.ts";
 
 const SAMPLE_HTML = `
@@ -52,6 +64,43 @@ const SAMPLE_HTML = `
   </div>
 </main>
 `;
+
+// ---------------------------------------------------------------------------
+// Jev classification
+// ---------------------------------------------------------------------------
+
+const MODEL = "jev-1.13.0";
+
+function choice(pick: string, p = 0.9) {
+  return { type: "choice", choice: pick, confidence: p, probabilities: { [pick]: p, none: 1 - p } };
+}
+
+/** A stub `ask` answering the classification questions. */
+const classifyAnswer =
+  (category: string, standalone: number): AskJev =>
+  async () => ({
+    model: MODEL,
+    answers: { category: choice(category), standalone_tool: { noul: standalone } },
+  });
+
+// ---------------------------------------------------------------------------
+// Match cache
+// ---------------------------------------------------------------------------
+
+const DATE = "2026-10-05";
+
+const entry = (o: Partial<MatchState["apps"][string]> = {}) => ({
+  title: "Kilo Code",
+  rejected: [],
+  lastSeen: DATE,
+  ...o,
+});
+
+const notCalled: AskJev = vi.fn(async () => {
+  throw new Error("ask must not be called");
+});
+
+/** A stub `ask` answering match questions: picks per question id, at probability `p`. */
 
 describe("parseTrendingHtml", () => {
   it("parses multiple trending repository cards", () => {
@@ -226,5 +275,173 @@ describe("fetchTrendingData", () => {
     await vi.runAllTimersAsync();
     await pending;
     expect(fetchSpy.mock.calls.some(([u]) => String(u).includes("/search/"))).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Composition
+// ---------------------------------------------------------------------------
+
+describe("composeTrendingReport", () => {
+  const search = (fullName: string): SearchRepo => ({
+    fullName,
+    description: null,
+    language: null,
+    stargazersCount: 1000,
+    pushedAt: "2026-10-04T00:00:00Z",
+    createdAt: "2024-01-01T00:00:00Z",
+    url: `https://github.com/${fullName}`,
+    topic: "coding-agent",
+  });
+  const npmPkg = (name: string) =>
+    ({ name, description: "", weekly: 1000, monthly: 4000, url: "", lastPublish: DATE }) as NpmPackage;
+  const data: TrendingData = {
+    trendingRepos: [],
+    searchRepos: [{ ...search("a/agent"), description: "A coding agent" }, search("b/weights")],
+    trendingFetchSuccess: true,
+    openrouter: {
+      ...EMPTY_OPENROUTER,
+      apps: [
+        {
+          appId: 1,
+          title: "Kilo Code",
+          description: "",
+          url: "https://kilocode.ai/docs",
+          categories: [],
+          createdAt: "2025-01-01T00:00:00Z",
+          weekTokens: 0,
+          dayRank: null,
+          weekRank: 1,
+          monthRank: 1,
+          growthPercent: null,
+        },
+      ],
+      fetchSuccess: true,
+    },
+    npm: { rising: [], top: [npmPkg("kilo-plugin"), npmPkg("@kilocode/cli")], fetchSuccess: true },
+  };
+  const categories: Record<string, [string, number]> = {
+    "a/agent": ["coding_agent", 0.9],
+    "b/weights": ["out_of_scope", 0.1],
+    "kilo-plugin": ["agent_tooling", 0.1],
+    "@kilocode/cli": ["coding_agent", 0.9],
+    "Kilo Code": ["coding_agent", 0.9],
+  };
+  /** Classification answers only; a match question fails the test. */
+  const ask: AskJev = async (state, questions) => {
+    if (!("category" in questions)) throw new Error("unexpected match call");
+    const [category, standalone] = categories[(state as { name: string }).name]!;
+    return classifyAnswer(category, standalone)(state, questions, "key");
+  };
+  const saved = (): MatchState => ({ apps: { "1": entry({ npm: "@kilocode/cli" }) } });
+
+  const noCache = (): TrendingVerdicts => ({ items: {} });
+  /** Stands in for the history API, which would be asked about a/agent. */
+  const zeroGain = async () => 0;
+
+  it("lets Jev decide scope and Radar, and merges a saved match into one Radar row", async () => {
+    const report = await composeTrendingReport(data, DATE, {
+      apiKey: "key",
+      matchState: saved(),
+      ask,
+      history: { repos: {} },
+      trendingVerdicts: noCache(),
+      fetchGain: zeroGain,
+    });
+    expect(report.classifiedBy).toBe("jev");
+    expect(report.radar.map((r) => r.keys)).toEqual([["openrouter:1", "npm:@kilocode/cli"]]);
+    expect(report.categories.map((c) => [c.category, c.rows.map((r) => r.fullName)])).toEqual([
+      ["coding_agent", ["a/agent"]],
+    ]);
+    expect(report.nextMatches?.apps["1"]).toMatchObject({ npm: "@kilocode/cli", lastSeen: DATE });
+    expect(JSON.parse(report.traceFile!).matches).toEqual([
+      {
+        app: "openrouter:1",
+        title: "Kilo Code",
+        source: "npm",
+        choice: "npm:@kilocode/cli",
+        result: "cached",
+      },
+    ]);
+  });
+
+  it("skips matching and saves no state when the match file is unreadable", async () => {
+    const report = await composeTrendingReport(data, DATE, {
+      apiKey: "key",
+      matchState: null,
+      ask,
+      history: { repos: {} },
+      trendingVerdicts: noCache(),
+      fetchGain: zeroGain,
+    });
+    expect(report.radar.map((r) => r.keys)).toEqual([["openrouter:1"], ["npm:@kilocode/cli"]]);
+    expect(report.nextMatches).toBeUndefined();
+  });
+
+  it("falls back to topic labels without a key and writes no trace", async () => {
+    const report = await composeTrendingReport(data, DATE, {
+      apiKey: "",
+      matchState: saved(),
+      ask: notCalled,
+      history: { repos: {} },
+      trendingVerdicts: noCache(),
+      fetchGain: zeroGain,
+    });
+    expect(report.classifiedBy).toBe("topics");
+    expect(report.traceFile).toBeUndefined();
+    expect(report.radar[0]!.keys).toEqual(["openrouter:1", "npm:@kilocode/cli"]);
+    expect(report.nextClassifications).toEqual(noCache());
+  });
+
+  it("asks Jev only about items missing from the trending verdicts, and uses saved verdicts without a key", async () => {
+    const first = await composeTrendingReport(data, DATE, {
+      apiKey: "key",
+      matchState: null,
+      ask,
+      history: { repos: {} },
+      trendingVerdicts: noCache(),
+      fetchGain: zeroGain,
+    });
+    expect(Object.keys(first.nextClassifications!.items)).toHaveLength(5);
+
+    const counted = vi.fn(ask);
+    const second = await composeTrendingReport(data, DATE, {
+      apiKey: "key",
+      matchState: null,
+      ask: counted,
+      history: { repos: {} },
+      trendingVerdicts: first.nextClassifications!,
+      fetchGain: zeroGain,
+    });
+    expect(counted).not.toHaveBeenCalled();
+    expect(second.classifiedBy).toBe("jev");
+    expect([second.radar, second.categories]).toEqual([first.radar, first.categories]);
+    expect(second.nextClassifications).toEqual(first.nextClassifications);
+    expect(JSON.parse(second.traceFile!).items[0]).toMatchObject({ key: "github:a/agent", decided: DATE });
+
+    // The topic fallback would put b/weights (topic coding-agent) in coding_agent; the saved verdict keeps it out.
+    const keyless = await composeTrendingReport(data, DATE, {
+      apiKey: "",
+      matchState: null,
+      ask: notCalled,
+      history: { repos: {} },
+      trendingVerdicts: first.nextClassifications!,
+      fetchGain: zeroGain,
+    });
+    expect(keyless.categories).toEqual(first.categories);
+  });
+
+  it("asks every item and saves no cache when the cache file is unreadable", async () => {
+    const counted = vi.fn(ask);
+    const report = await composeTrendingReport(data, DATE, {
+      apiKey: "key",
+      matchState: null,
+      ask: counted,
+      history: { repos: {} },
+      trendingVerdicts: null,
+      fetchGain: zeroGain,
+    });
+    expect(counted).toHaveBeenCalledTimes(5);
+    expect(report.nextClassifications).toBeUndefined();
   });
 });
