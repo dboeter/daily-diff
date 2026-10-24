@@ -3,7 +3,7 @@ import { describe, it, expect, vi, afterEach } from "vitest";
 import { billStage, fetchNlParliament, parseZaken } from "../policy/nl.ts";
 import { newItems, nextReportedState } from "../core/report-state.ts";
 import type { PolicyConfig } from "../core/config.ts";
-import type { PolicyState } from "../policy/policy.ts";
+import type { PolicyState } from "../policy/items.ts";
 
 // Live responses, 2026-10-14: the Tweede Kamer OData and KOOP SRU.
 const text = (name: string): string =>

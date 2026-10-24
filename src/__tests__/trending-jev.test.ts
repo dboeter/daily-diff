@@ -34,7 +34,7 @@ import {
   EMPTY_OPENROUTER,
   type SearchRepo,
   type TrendingData,
-} from "../trending/trending.ts";
+} from "../trending/compose.ts";
 import type { OpenRouterApp } from "../sources/openrouter.ts";
 import type { NpmPackage } from "../trending/npm.ts";
 

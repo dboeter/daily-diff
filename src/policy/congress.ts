@@ -13,7 +13,7 @@
  * Requests per run: at most MAX_PAGES list pages plus MAX_ACTION_REQUESTS.
  */
 
-import type { PolicyItem } from "./policy.ts";
+import type { PolicyItem } from "./items.ts";
 import type { PolicySourceContext } from "./sources.ts";
 import { keywordHit, watchlisted } from "./relevance.ts";
 import { apiKeyFor, fetchOk } from "../core/http.ts";

@@ -9,7 +9,7 @@
  * earlier run reported.
  */
 
-import type { PolicyItem } from "./policy.ts";
+import type { PolicyItem } from "./items.ts";
 import type { PolicySourceContext } from "./sources.ts";
 import { fetchOk } from "../core/http.ts";
 import { daysBefore } from "../core/date.ts";

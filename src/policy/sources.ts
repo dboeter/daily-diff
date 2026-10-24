@@ -5,7 +5,7 @@
  */
 
 import type { PolicyConfig } from "../core/config.ts";
-import type { PolicyItem, PolicyState } from "./policy.ts";
+import type { PolicyItem, PolicyState } from "./items.ts";
 import { fetchEurLex } from "./eurlex.ts";
 import { fetchEuroparl } from "./europarl.ts";
 import { fetchNlParliament } from "./nl.ts";

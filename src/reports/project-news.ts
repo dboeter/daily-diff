@@ -6,8 +6,8 @@
 
 import type { RepoConfig } from "../core/github.ts";
 import { SPOTTED } from "../core/strings.ts";
-import { linkKey, type Story } from "../spotted/spotted.ts";
-import type { TrendingData } from "../trending/trending.ts";
+import { linkKey, type Story } from "../spotted/pool.ts";
+import type { TrendingData } from "../trending/compose.ts";
 
 export interface NewsItem {
   source: string;

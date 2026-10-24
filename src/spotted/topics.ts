@@ -16,7 +16,7 @@ import {
   type VerdictCache,
 } from "../core/jev.ts";
 import { DATA_KEYWORD_PATTERNS } from "../sources/hn.ts";
-import { siteOf, type SpottedPage, type Story } from "./spotted.ts";
+import { siteOf, type SpottedPage, type Story } from "./pool.ts";
 
 const TOPIC_QUESTIONS = {
   topic: {

@@ -8,7 +8,7 @@
 import path from "node:path";
 import { judgeItems, loadItemsFile, type AskJev, type VerdictCache } from "../core/jev.ts";
 import type { Jurisdiction, PolicyConfig } from "../core/config.ts";
-import type { PolicyItem } from "./policy.ts";
+import type { PolicyItem } from "./items.ts";
 import type { Selection } from "../core/new-items.ts";
 
 /**

@@ -11,7 +11,7 @@
  *   dossier, from the Tweede Kamer vote on.
  */
 
-import type { PolicyItem } from "./policy.ts";
+import type { PolicyItem } from "./items.ts";
 import type { PolicySourceContext } from "./sources.ts";
 import { keywordHit } from "./relevance.ts";
 import { markStaleOnFirstSight } from "../core/report-state.ts";

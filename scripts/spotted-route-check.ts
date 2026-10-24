@@ -19,7 +19,7 @@ import {
   PAGE_OF_TOPIC,
   type Topic,
 } from "../src/spotted/topics.ts";
-import type { Story } from "../src/spotted/spotted.ts";
+import type { Story } from "../src/spotted/pool.ts";
 
 const FIRST = "2026-10-13";
 const LAST = "2026-10-22";

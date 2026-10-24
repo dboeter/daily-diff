@@ -13,7 +13,7 @@ import {
   type PolicyAnswers,
   type PolicyVerdicts,
 } from "../policy/relevance.ts";
-import type { PolicyItem } from "../policy/policy.ts";
+import type { PolicyItem } from "../policy/items.ts";
 import { saveItemsFile } from "../core/jev.ts";
 import type { Jurisdiction, PolicyConfig } from "../core/config.ts";
 

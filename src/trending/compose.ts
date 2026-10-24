@@ -1,7 +1,8 @@
 /**
- * Trending data: GitHub trending and AI topic search (daily, for agent news;
- * weekly for the trending report), plus OpenRouter app/model popularity and
- * npm coding-agent downloads on the weekly run.
+ * The Trends page's data and composition: GitHub Trending and the AI topic
+ * search (daily, for agent news; weekly for the Trends page), plus OpenRouter
+ * app/model popularity and npm coding-agent downloads on the weekly run, and
+ * `composeTrendingReport`, which classifies, ranks, matches and selects the page's rows.
  */
 
 import { fetchOpenRouterData, type OpenRouterData } from "../sources/openrouter.ts";

@@ -11,7 +11,7 @@ import {
   type SpottedPage,
   type Story,
   type StorySource,
-} from "../spotted/spotted.ts";
+} from "../spotted/pool.ts";
 import { renderSpottedTable } from "../reports/markdown.ts";
 import { buildSpottedSummariesPrompt } from "../reports/prompts-pages.ts";
 import { numberRows, parseRowSummaries } from "../reports/summarized-table.ts";

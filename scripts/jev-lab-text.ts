@@ -8,7 +8,7 @@
 
 import zlib from "node:zlib";
 import { plainText } from "../src/core/rss.ts";
-import type { PolicyItem } from "../src/policy/policy.ts";
+import type { PolicyItem } from "../src/policy/items.ts";
 
 const UA = { "User-Agent": "Mozilla/5.0 (compatible; daily-diff/1.0)" };
 const TIMEOUT_MS = 30_000;

@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import type { AskJev } from "../core/jev.ts";
 import { fallbackTopic, routeStories, PAGE_OF_TOPIC, topicOf, type TopicAnswers } from "../spotted/topics.ts";
-import type { Story } from "../spotted/spotted.ts";
+import type { Story } from "../spotted/pool.ts";
 
 const DATE = "2026-10-22";
 const MODEL = "jev-2026-10";

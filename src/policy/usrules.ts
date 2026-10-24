@@ -13,7 +13,7 @@
  * there: the Federal Register already judged it. Both give `deadline`.
  */
 
-import type { PolicyItem } from "./policy.ts";
+import type { PolicyItem } from "./items.ts";
 import type { PolicySourceContext } from "./sources.ts";
 import { keywordHit, watchlisted } from "./relevance.ts";
 import { apiKeyFor, fetchOk } from "../core/http.ts";

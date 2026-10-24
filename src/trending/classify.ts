@@ -13,7 +13,7 @@ import { createHash } from "node:crypto";
 import path from "node:path";
 import { judgeItems, loadItemsFile, saveItemsFile, type AskJev, type VerdictCache } from "../core/jev.ts";
 import type { Category, GithubRow } from "./rank.ts";
-import type { SearchTopic } from "./trending.ts";
+import type { SearchTopic } from "./compose.ts";
 import type { OpenRouterApp } from "../sources/openrouter.ts";
 import type { NpmPackage } from "./npm.ts";
 import { normKey, type MatchTrace } from "./match.ts";
@@ -67,7 +67,7 @@ export function onRadar(c: Classification): boolean {
 // ---------------------------------------------------------------------------
 
 /**
- * Search topic → category, for every `SEARCH_TOPICS` entry in `trending.ts`
+ * Search topic → category, for every `SEARCH_TOPICS` entry in `compose.ts`
  * (tsc checks both ways); each topic was chosen for one kind of project, so it
  * is a fair first guess at the category. Typed by string for the lookup: a
  * test row can carry any topic, which reads as out of scope.

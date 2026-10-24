@@ -60,12 +60,12 @@ import {
   type SavedReport,
 } from "./reports/pages.ts";
 import { loadLabsState, fetchSiteContent, type LabsFetchResult, type LabsState } from "./sources/labs.ts";
-import { fetchTrendingData, type TrendingData } from "./trending/trending.ts";
+import { fetchTrendingData, type TrendingData } from "./trending/compose.ts";
 import { fetchModelCatalogDaily, type ModelCatalog } from "./sources/openrouter.ts";
 import { fetchHnData, pageDescription, type HnData, type HnStory } from "./sources/hn.ts";
 import { fetchArxivData, saveArxivState, type ArxivData } from "./sources/arxiv.ts";
 import { loadResearchState, nextResearchState, saveResearchState, weekPapers } from "./trending/research.ts";
-import { fetchPolicyData, loadPolicyState, type PolicyData } from "./policy/policy.ts";
+import { fetchPolicyData, loadPolicyState, type PolicyData } from "./policy/items.ts";
 import { isDataLaw } from "./policy/relevance.ts";
 import { fetchVendorData, loadDataState, type VendorData } from "./data/vendors.ts";
 import { buildComingUp } from "./reports/coming-up.ts";
@@ -84,7 +84,7 @@ import {
   splitPool,
   storiesFrom,
   type SpottedPage,
-} from "./spotted/spotted.ts";
+} from "./spotted/pool.ts";
 import {
   loadSpottedVerdicts,
   routeStories,

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
-import { fetchPolicyData, type PolicyItem } from "../policy/policy.ts";
+import { fetchPolicyData, type PolicyItem } from "../policy/items.ts";
 import type { PolicyConfig } from "../core/config.ts";
 
 const item = (id: string, published = "2026-10-13T08:00:00.000Z"): PolicyItem => ({

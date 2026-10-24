@@ -13,11 +13,11 @@ import {
   LAB_POSTS_MAX,
   type DataSection,
 } from "../reports/pages.ts";
-import { EMPTY_TRENDING, type TrendingData } from "../trending/trending.ts";
+import { EMPTY_TRENDING, type TrendingData } from "../trending/compose.ts";
 import { MSG, TRENDS_REPORT } from "../core/strings.ts";
 import type { ProjectActivity } from "../reports/prompts.ts";
 import type { GitHubItem } from "../core/github.ts";
-import type { PolicyData, PolicyItem } from "../policy/policy.ts";
+import type { PolicyData, PolicyItem } from "../policy/items.ts";
 import { isDataLaw } from "../policy/relevance.ts";
 import type { LabsFetchResult, LabPost } from "../sources/labs.ts";
 import type { ModelCatalog } from "../sources/openrouter.ts";
@@ -25,7 +25,7 @@ import type { VendorData, VendorItem } from "../data/vendors.ts";
 import { selectVendorItems } from "../data/relevance.ts";
 import { fetchVendorData } from "../data/vendors.ts";
 import { numberRows } from "../reports/summarized-table.ts";
-import type { SpottedRow } from "../spotted/spotted.ts";
+import type { SpottedRow } from "../spotted/pool.ts";
 
 const NO_SPOTTED = { rows: [], summaries: new Map<number, string>() };
 /** A page's `##` headings, in order. */

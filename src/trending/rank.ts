@@ -13,7 +13,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import type { Numbered } from "../reports/summarized-table.ts";
-import type { SearchRepo, TrendingRepo } from "./trending.ts";
+import type { SearchRepo, TrendingRepo } from "./compose.ts";
 import { formatTokens, type OpenRouterApp } from "../sources/openrouter.ts";
 import { momentumRatio, type NpmData, type NpmPackage } from "./npm.ts";
 import { toCstDateStr } from "../core/date.ts";

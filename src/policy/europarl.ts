@@ -6,7 +6,7 @@
  * and 2026-10-14, so there is no discovery of new procedures.
  */
 
-import type { PolicyItem } from "./policy.ts";
+import type { PolicyItem } from "./items.ts";
 import type { PolicySourceContext } from "./sources.ts";
 import { fetchOk } from "../core/http.ts";
 import { markStaleOnFirstSight } from "../core/report-state.ts";

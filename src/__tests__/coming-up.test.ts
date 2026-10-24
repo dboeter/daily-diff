@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { buildComingUp } from "../reports/coming-up.ts";
-import type { PolicyState } from "../policy/policy.ts";
+import type { PolicyState } from "../policy/items.ts";
 import type { DataState } from "../data/vendors.ts";
 import type { OpenRouterStealthModel } from "../sources/openrouter.ts";
 

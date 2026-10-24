@@ -8,8 +8,8 @@ import {
 } from "../reports/project-news.ts";
 import { DATA_SECTION_KEYS, loadConfig } from "../core/config.ts";
 import type { RepoConfig } from "../core/github.ts";
-import type { Story } from "../spotted/spotted.ts";
-import { EMPTY_NPM, EMPTY_OPENROUTER, type TrendingData } from "../trending/trending.ts";
+import type { Story } from "../spotted/pool.ts";
+import { EMPTY_NPM, EMPTY_OPENROUTER, type TrendingData } from "../trending/compose.ts";
 import type { LabsFetchResult } from "../sources/labs.ts";
 
 // ---------------------------------------------------------------------------

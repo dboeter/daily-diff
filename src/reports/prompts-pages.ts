@@ -16,10 +16,10 @@ import type { ReleaseRow } from "./pages.ts";
 import type { Deadline } from "../core/report-state.ts";
 import type { HfData } from "../sources/hf.ts";
 import type { ResearchPaper } from "../trending/research.ts";
-import type { PolicyItem } from "../policy/policy.ts";
+import type { PolicyItem } from "../policy/items.ts";
 import type { KeptVendorItem } from "../data/relevance.ts";
 import { signHighlight } from "./markdown.ts";
-import { siteOf, type StoryRow } from "../spotted/spotted.ts";
+import { siteOf, type StoryRow } from "../spotted/pool.ts";
 
 /** Which sources Trends' Models section covers: no call when neither has data. */
 export function modelSources(hf: HfData, openrouter: OpenRouterData) {

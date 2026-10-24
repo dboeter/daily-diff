@@ -13,7 +13,7 @@ import {
   buildPolicySummariesPrompt,
   buildTrendingSummariesPrompt,
 } from "../reports/prompts-pages.ts";
-import type { PolicyItem } from "../policy/policy.ts";
+import type { PolicyItem } from "../policy/items.ts";
 import type { KeptVendorItem } from "../data/relevance.ts";
 
 const policyItem = (id: string, jurisdiction: PolicyItem["jurisdiction"], news = false): PolicyItem => ({

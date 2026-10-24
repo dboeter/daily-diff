@@ -4,7 +4,7 @@ import { parseInitiatives, fetchHaveYourSay } from "../policy/haveyoursay.ts";
 import { upcomingDeadlines, renderDeadlines, nearPolicyDeadlines } from "../policy/deadlines.ts";
 import { nextDeadlines } from "../core/report-state.ts";
 import type { PolicyConfig } from "../core/config.ts";
-import type { PolicyItem } from "../policy/policy.ts";
+import type { PolicyItem } from "../policy/items.ts";
 import { newItems, nextReportedState } from "../core/report-state.ts";
 
 const FIXTURE = JSON.parse(
