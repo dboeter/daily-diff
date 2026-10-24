@@ -2,7 +2,7 @@
  * One-off migration (October 2026), for the move of the trending
  * classification cache onto judgeItems:
  *
- * - `digests/trending-classifications.json`: an entry held the decision
+ * - `digests/trending-verdicts.json`: an entry held the decision
  *   (`name`, `category`, `standalone`, `desc`); it now holds Jev's answers, like
  *   the policy and data verdicts (`title`, `answers`, `fingerprint`). An entry
  *   without `desc` was a hand fix, never asked again: it becomes `pinned`.
@@ -16,10 +16,10 @@
 
 import { pathToFileURL } from "node:url";
 import { loadItemsFile, saveItemsFile, type VerdictEntry } from "../src/core/jev.ts";
-import { CLASSIFY_FILE, type ClassifyAnswers } from "../src/trending/jev.ts";
+import { TRENDING_VERDICTS_FILE, type ClassifyAnswers } from "../src/trending/jev.ts";
 import { POLICY_VERDICTS_FILE } from "../src/policy/jev.ts";
 
-/** A `trending-classifications.json` entry before the migration. */
+/** A `trending-verdicts.json` entry before the migration. */
 interface OldClassifyEntry {
   name: string;
   category: string;
@@ -59,6 +59,6 @@ function migrateFile(file: string, migrate: (e: Entry) => unknown): void {
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
-  migrateFile(CLASSIFY_FILE, migrateClassifyEntry);
+  migrateFile(TRENDING_VERDICTS_FILE, migrateClassifyEntry);
   migrateFile(POLICY_VERDICTS_FILE, migratePolicyEntry);
 }

@@ -1,7 +1,7 @@
 /**
  * Spotted topic routing: one Jev choice per community story, through
- * `judgeItems`, cached in `digests/spotted-topics.json` (hand-editable, like
- * `trending-classifications.json`). Without a key, or when more than half the
+ * `judgeItems`, cached in `digests/spotted-verdicts.json` (hand-editable, like
+ * `trending-verdicts.json`). Without a key, or when more than half the
  * new calls fail, `fallbackTopic` decides by keywords.
  */
 
@@ -201,17 +201,17 @@ export function fallbackTopic(story: Pick<Story, "title" | "description">): Topi
 // Routing
 // ---------------------------------------------------------------------------
 
-export type TopicCache = VerdictCache<TopicAnswers>;
+export type SpottedVerdicts = VerdictCache<TopicAnswers>;
 
-export const TOPICS_FILE = path.join("digests", "spotted-topics.json");
+export const SPOTTED_VERDICTS_FILE = path.join("digests", "spotted-verdicts.json");
 const TOPICS_UNSEEN_DAYS = 30;
 
 /** Missing file → empty cache. Unreadable or malformed → null: every story is asked and nothing is saved. */
-export function loadTopicCache(file = TOPICS_FILE): TopicCache | null {
+export function loadSpottedVerdicts(file = SPOTTED_VERDICTS_FILE): SpottedVerdicts | null {
   return loadItemsFile(file, "spotted");
 }
 
-export function saveTopicCache(cache: TopicCache, file = TOPICS_FILE): void {
+export function saveSpottedVerdicts(cache: SpottedVerdicts, file = SPOTTED_VERDICTS_FILE): void {
   saveItemsFile(cache, file);
 }
 
@@ -227,7 +227,7 @@ export interface Routing {
  */
 export async function routeStories(
   stories: Story[],
-  opts: { apiKey?: string; cache: TopicCache | null; dateStr: string; ask?: AskJev },
+  opts: { apiKey?: string; cache: SpottedVerdicts | null; dateStr: string; ask?: AskJev },
 ): Promise<Routing> {
   const judgment = await judgeItems(stories, {
     ...opts,

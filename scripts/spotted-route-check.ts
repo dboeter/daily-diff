@@ -13,9 +13,9 @@ import fs from "node:fs";
 import path from "node:path";
 import { daysBefore } from "../src/core/date.ts";
 import {
-  loadTopicCache,
+  loadSpottedVerdicts,
   routeStories,
-  saveTopicCache,
+  saveSpottedVerdicts,
   PAGE_OF_TOPIC,
   type Topic,
 } from "../src/spotted/jev.ts";
@@ -66,13 +66,13 @@ async function main(): Promise<void> {
   console.log(
     "Note: the archive has no page descriptions, so this routes on title and site only, less than production sees.",
   );
-  const cache = loadTopicCache(CACHE);
+  const cache = loadSpottedVerdicts(CACHE);
   const routing = await routeStories(stories, {
     apiKey: process.env["TYPESAFE_API_KEY"],
     cache,
     dateStr: LAST,
   });
-  if (routing.judgment.nextCache) saveTopicCache(routing.judgment.nextCache, CACHE);
+  if (routing.judgment.nextCache) saveSpottedVerdicts(routing.judgment.nextCache, CACHE);
   console.log(`Routed by: ${routing.judgment.rankedBy === "jev" ? "Jev" : "keyword fallback (no Jev)"}\n`);
 
   const counts = new Map<Topic, number>();

@@ -43,7 +43,7 @@ The pipeline runs in four sequential phases in `src/index.ts`:
 1. **`fetchAllData`**: all network I/O in parallel. No fetcher throws: a failure is its empty value with `fetchSuccess: false`, so `fetchAllData` has no fallbacks. The weekly-only fetches (Skills, OpenRouter apps and rankings, npm, Hugging Face, the trending topic search and the Trends ranking, `composeTrendingReport`) are gated on `isWeeklyRun`.
 2. **News matching and Spotted routing**: `matchProjectNews` (`src/reports/project-news.ts`) assigns the fresh community stories (`freshStories`) and GitHub Trending repos to the projects they name, once for the agents and infra projects and once for the data projects (a separate pool). The fresh stories no project and no listed lab post took (`splitPool`) are routed to a topic by Jev (`routeStories`) and selected for their page's Spotted table (`selectSpotted`).
 3. **Agents and Spotted summaries**: one LLM call per agents-report section and one for every page's Spotted rows, made in `main()` before the page builders, so the pages' Highlights calls see their Spotted tables.
-4. **Save phase**: the `buildXxxReport` functions (`src/reports/pages.ts`) make every other LLM call (row summaries first, then a Highlights/prose call over the rendered page) and return the reports. Some builders already save state: the labs and models states, AI Policy's and the data report's observed state, verdicts and traces, the trending trace. `main()` then runs the LLM health gate, adds each report bar (`renderReportBar`), writes the reports and the remaining state files (Spotted log, topic cache, ArXiv and research states), generates `highlights.json` and `coming-up.json`, and opens the GitHub Issues.
+4. **Save phase**: the `buildXxxReport` functions (`src/reports/pages.ts`) make every other LLM call (row summaries first, then a Highlights/prose call over the rendered page) and return the reports. Some builders already save state: the labs and models states, AI Policy's and the data report's observed state, verdicts and traces, the trending trace. `main()` then runs the LLM health gate, adds each report bar (`renderReportBar`), writes the reports and the remaining state files (Spotted log, Spotted verdicts, ArXiv and research states), generates `highlights.json` and `coming-up.json`, and opens the GitHub Issues.
 
 Every chat-model call goes through `callLlm` (`src/core/llm.ts`), at most 5 concurrent.
 
@@ -106,12 +106,12 @@ Weekly = `WEEKLY_REPORT_WEEKDAY` (Monday, CST) or `DIGEST_FORCE_WEEKLY=1` (the w
 
 Every Jev judgment except ArXiv's goes through `judgeItems` (`src/core/jev.ts`) and caches Jev's raw answers per item in a committed file, one item per line:
 
-| File                                    | Judgment                    | Asked again when        | Pruned after |
-| --------------------------------------- | --------------------------- | ----------------------- | ------------ |
-| `digests/policy-verdicts.json`          | AI Policy relevance         | the stage changes       | 30 days      |
-| `digests/data-verdicts.json`            | vendor item relevance       | the text gains dates    | 30 days      |
-| `digests/trending-classifications.json` | trending scope and category | the description changes | 180 days     |
-| `digests/spotted-topics.json`           | Spotted topic               | never                   | 30 days      |
+| File                             | Judgment                    | Asked again when        | Pruned after |
+| -------------------------------- | --------------------------- | ----------------------- | ------------ |
+| `digests/policy-verdicts.json`   | AI Policy relevance         | the stage changes       | 30 days      |
+| `digests/data-verdicts.json`     | vendor item relevance       | the text gains dates    | 30 days      |
+| `digests/trending-verdicts.json` | trending scope and category | the description changes | 180 days     |
+| `digests/spotted-verdicts.json`  | Spotted topic               | never                   | 30 days      |
 
 - **To fix a verdict**, edit its `answers` and set `"pinned": true`, so it is never asked again. A score answer's `probabilities` decide AI Policy's impact and `other` gates, so edit them too (or delete them, and its `score` decides). To have Jev ask again, delete the entry.
 - A file that fails to parse means every item is asked and the file is left as it is.

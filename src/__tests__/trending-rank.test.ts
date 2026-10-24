@@ -1075,7 +1075,7 @@ describe("composeTrendingReport with star history", () => {
         matchState: null,
         ask: notCalled,
         history: h,
-        classifyCache: { items: {} },
+        trendingVerdicts: { items: {} },
         fetchGain: noFetch,
       },
     );
@@ -1105,7 +1105,7 @@ describe("composeTrendingReport with star history", () => {
         matchState: null,
         ask: notCalled,
         history: h,
-        classifyCache: { items: {} },
+        trendingVerdicts: { items: {} },
         fetchGain: noFetch,
       },
     );
@@ -1145,7 +1145,7 @@ describe("composeTrendingReport with star history", () => {
         matchState: null,
         ask: notCalled,
         history: hist({ "snap/agent": [["2026-09-28", 8_000]] }),
-        classifyCache: { items: {} },
+        trendingVerdicts: { items: {} },
         fetchGain,
       },
     );
@@ -1176,7 +1176,7 @@ describe("composeTrendingReport with star history", () => {
       matchState: null,
       ask: notCalled,
       history: hist({}),
-      classifyCache: { items: {} },
+      trendingVerdicts: { items: {} },
       fetchGain,
     });
     expect(fetchGain.mock.calls.map(([repo]) => repo)).toEqual(["a/agent", "b/agent"]);

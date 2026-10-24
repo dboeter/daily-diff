@@ -5,7 +5,7 @@
  * a `Classification`: from Jev (`classifyTrendingItems`, through `judgeItems`) when `TYPESAFE_API_KEY` is set,
  * else from `fallbackClassification`, which reads the GitHub topic query that
  * found a repo. The policy functions (`inScope`, `onRadar`) are the same either
- * way. Jev's verdicts are saved in `digests/trending-classifications.json`, so
+ * way. Jev's verdicts are saved in `digests/trending-verdicts.json`, so
  * each item is asked once. Jev also matches OpenRouter apps to npm/GitHub rows
  * that URL merging missed; those decisions are saved in `digests/trending-matches.json`.
  */
@@ -266,11 +266,11 @@ export function isTaggedAgentApp(item: ClassifyItem): boolean {
  */
 export async function classifyTrendingItems(
   items: ClassifyItem[],
-  opts: { apiKey?: string; cache: ClassifyCache | null; dateStr: string; ask?: AskJev },
+  opts: { apiKey?: string; cache: TrendingVerdicts | null; dateStr: string; ask?: AskJev },
 ): Promise<{
   classifications: Map<string, Classification>;
   classifiedBy: "jev" | "topics";
-  nextCache: ClassifyCache | null;
+  nextCache: TrendingVerdicts | null;
 }> {
   const judgment = await judgeItems(
     items
@@ -655,11 +655,11 @@ export async function matchApps(
 }
 
 // ---------------------------------------------------------------------------
-// Classification cache, digests/trending-classifications.json
+// Trending verdicts, digests/trending-verdicts.json
 // ---------------------------------------------------------------------------
 
 /**
- * `digests/trending-classifications.json`: Jev's answers per item key (GitHub
+ * `digests/trending-verdicts.json`: Jev's answers per item key (GitHub
  * keys lowercased, `normKey`), so each item is asked once instead of every
  * week: a project's scope does not change while its description stays the
  * same. The entry's `fingerprint` is the hash of the description Jev read, so
@@ -667,9 +667,9 @@ export async function matchApps(
  * placeholder description would otherwise stay out of scope); `pinned` keeps a
  * hand fix. Hand-editable; see AGENTS.md.
  */
-export type ClassifyCache = VerdictCache<ClassifyAnswers>;
+export type TrendingVerdicts = VerdictCache<ClassifyAnswers>;
 
-export const CLASSIFY_FILE = path.join("digests", "trending-classifications.json");
+export const TRENDING_VERDICTS_FILE = path.join("digests", "trending-verdicts.json");
 /** An item off every list this long is dropped, which keeps the file bounded; if it returns, it costs one call. */
 export const CLASSIFY_UNSEEN_DAYS = 180;
 
@@ -690,12 +690,12 @@ const descHash = (item: ClassifyItem): string =>
     .slice(0, 8);
 
 /** Missing file → empty cache. Unreadable or malformed → null: every item is asked and nothing is saved. */
-export function loadClassifyCache(file = CLASSIFY_FILE): ClassifyCache | null {
+export function loadTrendingVerdicts(file = TRENDING_VERDICTS_FILE): TrendingVerdicts | null {
   return loadItemsFile(file, "trending");
 }
 
 /** One item per line, like the star history: ~200 items a week would make a pretty-printed file long. */
-export function saveClassifyCache(cache: ClassifyCache, file = CLASSIFY_FILE): void {
+export function saveTrendingVerdicts(cache: TrendingVerdicts, file = TRENDING_VERDICTS_FILE): void {
   saveItemsFile(cache, file);
 }
 

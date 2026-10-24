@@ -18,7 +18,7 @@ import { formatTokens, type OpenRouterApp } from "../sources/openrouter.ts";
 import { momentumRatio, type NpmData, type NpmPackage } from "./npm.ts";
 import { toCstDateStr } from "../core/date.ts";
 import { STAR_GAIN_DAYS } from "../core/github.ts";
-import { inScope, onRadar, type Classification, type ClassifyCache, type MatchState } from "./jev.ts";
+import { inScope, onRadar, type Classification, type TrendingVerdicts, type MatchState } from "./jev.ts";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -95,8 +95,8 @@ export interface TrendingReportData {
   traceFile?: string;
   /** Match state to save once the report is written; absent when the file could not be read. */
   nextMatches?: MatchState;
-  /** Classification cache to save once the report is written; absent when the file could not be read. */
-  nextClassifications?: ClassifyCache;
+  /** Trending verdicts to save once the report is written; absent when the file could not be read. */
+  nextClassifications?: TrendingVerdicts;
   /** Star history to save once the report is written. */
   nextStarHistory?: StarHistory;
 }

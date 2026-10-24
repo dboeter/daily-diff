@@ -30,11 +30,11 @@ import {
 import {
   buildTrendingTraceFile,
   classifyTrendingItems,
-  loadClassifyCache,
+  loadTrendingVerdicts,
   loadMatchState,
   matchApps,
   type Classification,
-  type ClassifyCache,
+  type TrendingVerdicts,
   type ClassifyItem,
   type MatchState,
   type MatchTrace,
@@ -436,7 +436,7 @@ export interface ComposeDeps {
   /** Weekly only: daily runs never compose, so they never read or write the file. */
   history: StarHistory;
   /** Null (unreadable file): every item is asked and the file is left as it is. */
-  classifyCache: ClassifyCache | null;
+  trendingVerdicts: TrendingVerdicts | null;
   fetchGain: (repo: string) => Promise<number>;
 }
 
@@ -454,7 +454,7 @@ export async function composeTrendingReport(
     matchState = loadMatchState(),
     ask = askJev,
     history = loadStarHistory(),
-    classifyCache = loadClassifyCache(),
+    trendingVerdicts = loadTrendingVerdicts(),
     fetchGain = fetchWeeklyStarGain,
   } = deps;
   // Every GitHub row is classified: the new ones are Radar candidates, the rest
@@ -479,7 +479,7 @@ export async function composeTrendingReport(
   // fail; only the rest is asked, and `classifiedBy` describes those.
   const { classifications, classifiedBy, nextCache } = await classifyTrendingItems(firstItems, {
     apiKey,
-    cache: classifyCache,
+    cache: trendingVerdicts,
     dateStr,
     ask,
   });

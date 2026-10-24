@@ -34,7 +34,7 @@ import { generateOr, saveFile, autoGenFooter, LLM_TOKENS_LISTING } from "../core
 import { saveLabsState, type LabsFetchResult, type LabPost, type LabsState } from "../sources/labs.ts";
 import { loadReportedState, newItems, nextReportedState, saveReportedState } from "../core/report-state.ts";
 import type { TrendingData } from "../trending/trending.ts";
-import { saveClassifyCache, saveMatchState } from "../trending/jev.ts";
+import { saveTrendingVerdicts, saveMatchState } from "../trending/jev.ts";
 import { saveStarHistory, summaryRows } from "../trending/rank.ts";
 import {
   AGENTS_HIGHLIGHTS_FOCUS,
@@ -210,7 +210,7 @@ export async function buildTrendsReport(
     console.log(`  Saved ${saveFile(report.traceFile, dateStr, "trending-trace.json")}`);
   }
   if (report?.nextMatches) saveMatchState(report.nextMatches);
-  if (report?.nextClassifications) saveClassifyCache(report.nextClassifications);
+  if (report?.nextClassifications) saveTrendingVerdicts(report.nextClassifications);
   if (report?.nextStarHistory) saveStarHistory(report.nextStarHistory);
 
   return { id: "ai-trends", content };

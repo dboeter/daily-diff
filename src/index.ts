@@ -86,9 +86,9 @@ import {
   type SpottedPage,
 } from "./spotted/spotted.ts";
 import {
-  loadTopicCache,
+  loadSpottedVerdicts,
   routeStories,
-  saveTopicCache,
+  saveSpottedVerdicts,
   spottedTraceFile,
   PAGE_OF_TOPIC,
 } from "./spotted/jev.ts";
@@ -389,10 +389,10 @@ async function main(): Promise<void> {
       .map((p) => p.url),
   );
   const unmatched = pool.spotted;
-  const topicCache = loadTopicCache();
+  const spottedVerdicts = loadSpottedVerdicts();
   const routing = await routeStories(unmatched, {
     apiKey: process.env["TYPESAFE_API_KEY"],
-    cache: topicCache,
+    cache: spottedVerdicts,
     dateStr,
   });
   const spottedRows = selectSpotted(unmatched, (s) => {
@@ -509,7 +509,7 @@ async function main(): Promise<void> {
   ]);
   const shownIds = [...dailyShown, ...(savedIds.has("ai-trends") ? discussed.map((s) => s.id) : [])];
   saveSpottedLog(nextLog(spottedLog, stories, shownIds, dateStr));
-  if (routing.judgment.nextCache) saveTopicCache(routing.judgment.nextCache);
+  if (routing.judgment.nextCache) saveSpottedVerdicts(routing.judgment.nextCache);
   console.log(
     `  Saved ${saveFile(spottedTraceFile(unmatched, routing, dailyShown), dateStr, "spotted-trace.json")}`,
   );

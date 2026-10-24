@@ -9,18 +9,18 @@ import {
   classifyTrendingItems,
   fallbackClassification,
   inScope,
-  loadClassifyCache,
+  loadTrendingVerdicts,
   loadMatchState,
   matchApps,
   onRadar,
   pendingMatchQuestions,
   pruneMatchState,
-  saveClassifyCache,
+  saveTrendingVerdicts,
   saveMatchState,
   STANDALONE_MIN_NOUL,
   type Classification,
   type ClassifyAnswers,
-  type ClassifyCache,
+  type TrendingVerdicts,
   type ClassifyItem,
   type MatchState,
 } from "../trending/jev.ts";
@@ -167,7 +167,7 @@ describe("classifyTrendingItems", () => {
       if (names.includes((state as { name: string }).name)) throw new Error("HTTP 529");
       return classifyAnswer("coding_agent", 0.9)(state, {}, "k");
     };
-  const run = (list: ClassifyItem[], ask: AskJev, cache: ClassifyCache | null = { items: {} }) =>
+  const run = (list: ClassifyItem[], ask: AskJev, cache: TrendingVerdicts | null = { items: {} }) =>
     classifyTrendingItems(list, { apiKey: "k", cache, dateStr: DATE, ask });
 
   it("sends the topic and omits an empty description", async () => {
@@ -457,10 +457,10 @@ describe("loadMatchState", () => {
 });
 
 // ---------------------------------------------------------------------------
-// Classification cache
+// Trending verdicts
 // ---------------------------------------------------------------------------
 
-describe("classification cache", () => {
+describe("trending verdicts", () => {
   // The generic cache rules (reuse, prune, hand-edit spread, invalid entry asked again) are judgeItems' (jev.test.ts).
   const npmItem = (name: string, description = ""): ClassifyItem => ({
     kind: "npm",
@@ -469,7 +469,7 @@ describe("classification cache", () => {
   });
   const run = (
     list: ClassifyItem[],
-    cache: ClassifyCache,
+    cache: TrendingVerdicts,
     ask: AskJev = classifyAnswer("coding_agent", 0.9),
   ) => classifyTrendingItems(list, { apiKey: "k", cache, dateStr: DATE, ask });
 
@@ -508,7 +508,7 @@ describe("classification cache", () => {
   });
 
   it("never asks a pinned entry again, and compares GitHub keys case-insensitively", async () => {
-    const cache: ClassifyCache = {
+    const cache: TrendingVerdicts = {
       items: {
         "github:o/r": {
           title: "o/r",
@@ -547,18 +547,18 @@ describe("classification cache", () => {
 
   it("reads back what it saved, one item per line; a missing file is empty, an invalid one null", async () => {
     const file = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "trending-classify-")), "c.json");
-    expect(loadClassifyCache(file)).toEqual({ items: {} });
+    expect(loadTrendingVerdicts(file)).toEqual({ items: {} });
     const { nextCache } = await run([npmItem("a"), npmItem("b")], { items: {} });
-    saveClassifyCache(nextCache!, file);
+    saveTrendingVerdicts(nextCache!, file);
     const lines = fs.readFileSync(file, "utf-8").split("\n");
     expect(lines.filter((l) => l.startsWith('    "npm:'))).toHaveLength(2);
     expect(lines).toHaveLength(7); // "{", "items" line, 2 items, "}", "}", "" after the final newline
-    expect(loadClassifyCache(file)).toEqual(nextCache);
+    expect(loadTrendingVerdicts(file)).toEqual(nextCache);
     fs.writeFileSync(file, "{ not json");
     vi.spyOn(console, "error").mockImplementation(() => {});
-    expect(loadClassifyCache(file)).toBeNull();
+    expect(loadTrendingVerdicts(file)).toBeNull();
     fs.writeFileSync(file, '{"items": []}');
-    expect(loadClassifyCache(file)).toBeNull();
+    expect(loadTrendingVerdicts(file)).toBeNull();
   });
 });
 
@@ -619,7 +619,7 @@ describe("composeTrendingReport", () => {
   };
   const saved = (): MatchState => ({ apps: { "1": entry({ npm: "@kilocode/cli" }) } });
 
-  const noCache = (): ClassifyCache => ({ items: {} });
+  const noCache = (): TrendingVerdicts => ({ items: {} });
   /** Stands in for the history API, which would be asked about a/agent. */
   const zeroGain = async () => 0;
 
@@ -629,7 +629,7 @@ describe("composeTrendingReport", () => {
       matchState: saved(),
       ask,
       history: { repos: {} },
-      classifyCache: noCache(),
+      trendingVerdicts: noCache(),
       fetchGain: zeroGain,
     });
     expect(report.classifiedBy).toBe("jev");
@@ -655,7 +655,7 @@ describe("composeTrendingReport", () => {
       matchState: null,
       ask,
       history: { repos: {} },
-      classifyCache: noCache(),
+      trendingVerdicts: noCache(),
       fetchGain: zeroGain,
     });
     expect(report.radar.map((r) => r.keys)).toEqual([["openrouter:1"], ["npm:@kilocode/cli"]]);
@@ -668,7 +668,7 @@ describe("composeTrendingReport", () => {
       matchState: saved(),
       ask: notCalled,
       history: { repos: {} },
-      classifyCache: noCache(),
+      trendingVerdicts: noCache(),
       fetchGain: zeroGain,
     });
     expect(report.classifiedBy).toBe("topics");
@@ -677,13 +677,13 @@ describe("composeTrendingReport", () => {
     expect(report.nextClassifications).toEqual(noCache());
   });
 
-  it("asks Jev only about items missing from the classification cache, and uses saved verdicts without a key", async () => {
+  it("asks Jev only about items missing from the trending verdicts, and uses saved verdicts without a key", async () => {
     const first = await composeTrendingReport(data, DATE, {
       apiKey: "key",
       matchState: null,
       ask,
       history: { repos: {} },
-      classifyCache: noCache(),
+      trendingVerdicts: noCache(),
       fetchGain: zeroGain,
     });
     expect(Object.keys(first.nextClassifications!.items)).toHaveLength(5);
@@ -694,7 +694,7 @@ describe("composeTrendingReport", () => {
       matchState: null,
       ask: counted,
       history: { repos: {} },
-      classifyCache: first.nextClassifications!,
+      trendingVerdicts: first.nextClassifications!,
       fetchGain: zeroGain,
     });
     expect(counted).not.toHaveBeenCalled();
@@ -709,7 +709,7 @@ describe("composeTrendingReport", () => {
       matchState: null,
       ask: notCalled,
       history: { repos: {} },
-      classifyCache: first.nextClassifications!,
+      trendingVerdicts: first.nextClassifications!,
       fetchGain: zeroGain,
     });
     expect(keyless.categories).toEqual(first.categories);
@@ -722,7 +722,7 @@ describe("composeTrendingReport", () => {
       matchState: null,
       ask: counted,
       history: { repos: {} },
-      classifyCache: null,
+      trendingVerdicts: null,
       fetchGain: zeroGain,
     });
     expect(counted).toHaveBeenCalledTimes(5);
@@ -805,7 +805,7 @@ describe("buildTrendingTraceFile", () => {
 // Migration of the pre-judgeItems cache (scripts/migrate-verdict-fingerprints.ts)
 // ---------------------------------------------------------------------------
 
-describe("classification cache migration", () => {
+describe("trending verdicts migration", () => {
   type OldEntry = { name: string; category: string; standalone: number | null; desc?: string };
   const old = JSON.parse(
     fs.readFileSync(new URL("./fixtures/trending-classifications-v1.json", import.meta.url), "utf-8"),
@@ -816,7 +816,7 @@ describe("classification cache migration", () => {
     const migrated = Object.fromEntries(
       Object.entries(old.items).map(([k, e]) => [k, migrateClassifyEntry(e as never)]),
     );
-    saveClassifyCache({ items: migrated }, file);
+    saveTrendingVerdicts({ items: migrated }, file);
     // The entry's own hash, except for the hand fix, whose description has changed since.
     const items = Object.entries(old.items).map(([id, e]) => ({
       id,
@@ -828,7 +828,7 @@ describe("classification cache migration", () => {
       request: () => ({ state: {}, questions: {} }),
       decide: (a: ClassifyAnswers) => classificationOf(a),
       fingerprint: (i) => i.hash,
-      cache: loadClassifyCache(file),
+      cache: loadTrendingVerdicts(file),
       dateStr: DATE,
       unseenDays: 180,
     });
