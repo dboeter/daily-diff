@@ -92,7 +92,18 @@
     "release:databricks/cli@v1.22.0": "2026-10-23",
     "release:duckdb/duckdb@v2.0.0": "2026-10-23",
     "release:mlflow/mlflow@v3.17.2": "2026-10-23",
-    "release:trinodb/trino@484": "2026-10-23"
+    "release:trinodb/trino@484": "2026-10-23",
+    "files api 3.0 for unity catalog volumes is now in beta|2026-10-23": "2026-10-24",
+    "google analytics aggregated connector is available in beta|2026-10-23": "2026-10-24",
+    "serverless job environments from pyproject.toml (beta)|2026-10-22": "2026-10-24",
+    "shared serverless for asset bundles (beta)|2026-10-22": "2026-10-24",
+    "genie one enhancements|2026-10-22": "2026-10-24",
+    "dashboard enhancements|2026-10-22": "2026-10-24",
+    "october 23, 2026: snowpark container services gen_arm_g1 and gen_x64_g1 instances on google cloud (general availability)|2026-10-23": "2026-10-24",
+    "october 22, 2026: custom runtime images for ml jobs (general availability)|2026-10-22": "2026-10-24",
+    "oct 22, 2026: skill and plugin sharing in coco (general availability)|2026-10-22": "2026-10-24",
+    "oct 23, 2026: retrieve cortex search (public preview)|2026-10-23": "2026-10-24",
+    "oct 23, 2026: responses api for the cortex rest api (preview)|2026-10-23": "2026-10-24"
   },
   "stages": {
     "snowflake-bcr:2026_08": "2026-10-16 Introduced in the 10.37 release (October 8-16, 2026) as Disabled by Default; account admins can enable for testing."
