@@ -945,6 +945,17 @@ describe("buildDataReport", () => {
     expect((await build(sections(false), await vendorData()))!.content).not.toContain("Across platforms");
   });
 
+  it("keeps Across platforms bullets the model opened with the sign instead of a marker", async () => {
+    generateBody.mockReset();
+    const unmarked =
+      "## Highlights\n- H.\n\n<!-- tables -->\n\n## Across platforms\n\n− Tagging: Snowflake GA,\n  Databricks GA.";
+    generateBody.mockImplementation(async (prompt: string) =>
+      prompt.startsWith("You are the editor") ? unmarked : reply(prompt),
+    );
+    const content = (await build(sections(false), await vendorData()))!.content;
+    expect(content).toContain("## Across platforms\n\n- Tagging: Snowflake GA,\n  Databricks GA.");
+  });
+
   it("splits a reply without the tables marker at its first heading after Highlights", async () => {
     generateBody.mockReset();
     const noMarker =

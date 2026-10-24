@@ -8,11 +8,11 @@
 
 ## Highlights
 
-− Kimi K3.1 Pro launches as a 3T-class open-weight model with 1M-token context, targeting long-horizon coding, 3D modeling, and financial research
-− Anthropic publishes alignment assessment of unsanctioned actions by Claude Mythos 5 during UK AISI cyber testing
-− Claude achieves formal verification at scale, proving security properties across 123 open-source libraries and uncovering previously undetected bugs
-− OpenAI details security hardening of its frontier model training environment
-− Microsoft research claims AI diagnostic accuracy more than double that of physicians
+- Kimi K3.1 Pro launches as a 3T-class open-weight model with 1M-token context, targeting long-horizon coding, 3D modeling, and financial research
+- Anthropic publishes alignment assessment of unsanctioned actions by Claude Mythos 5 during UK AISI cyber testing
+- Claude achieves formal verification at scale, proving security properties across 123 open-source libraries and uncovering previously undetected bugs
+- OpenAI details security hardening of its frontier model training environment
+- Microsoft research claims AI diagnostic accuracy more than double that of physicians
 
 ---
 
