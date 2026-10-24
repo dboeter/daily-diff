@@ -5,8 +5,15 @@
     <link>https://dboeter.github.io/daily-diff</link>
     <description>Daily AI ecosystem digest</description>
     <language>en</language>
+    <image>
+      <url>https://dboeter.github.io/daily-diff/feed-icon.png</url>
+      <title>Daily Diff: Trends</title>
+      <link>https://dboeter.github.io/daily-diff</link>
+      <width>144</width>
+      <height>144</height>
+    </image>
     <atom:link href="https://dboeter.github.io/daily-diff/feeds/ai-trends.xml" rel="self" type="application/rss+xml"/>
-    <lastBuildDate>Thu, 22 Oct 2026 23:53:02 +0000</lastBuildDate>
+    <lastBuildDate>Sat, 24 Oct 2026 01:32:47 +0000</lastBuildDate>
 
   </channel>
 </rss>

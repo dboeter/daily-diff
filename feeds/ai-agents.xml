@@ -5,8 +5,132 @@
     <link>https://dboeter.github.io/daily-diff</link>
     <description>Daily AI ecosystem digest</description>
     <language>en</language>
+    <image>
+      <url>https://dboeter.github.io/daily-diff/feed-icon.png</url>
+      <title>Daily Diff: AI Agents</title>
+      <link>https://dboeter.github.io/daily-diff</link>
+      <width>144</width>
+      <height>144</height>
+    </image>
     <atom:link href="https://dboeter.github.io/daily-diff/feeds/ai-agents.xml" rel="self" type="application/rss+xml"/>
-    <lastBuildDate>Thu, 22 Oct 2026 23:53:02 +0000</lastBuildDate>
+    <lastBuildDate>Sat, 24 Oct 2026 01:32:47 +0000</lastBuildDate>
+    <item>
+      <title>AI Agents 2026-10-24</title>
+      <link>https://dboeter.github.io/daily-diff/#2026-10-24/ai-agents</link>
+      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-10-24/ai-agents</guid>
+      <pubDate>Sat, 24 Oct 2026 00:00:00 +0000</pubDate>
+      <description>AI Agents 2026-10-24 ⬛ Overview · 🟪 AI Agents · 🟦 AI Models &amp;amp; Labs · 🟧 AI Policy · 🟨 Data Engineering Generated: 2026-10-24 01:29 UTC | Projects: 16 | Active today: 6 | Stable releases: 3 | Prereleases (not covered): 2 Highlights Hermes Agent v0.22.5 delivers a stable rollup of roughly 81 pull requests across CLI, installers, Microsoft Store, Docker, and Hermes Cloud Oh My Pi on Windows x64 crashes with stack overflow when resuming a session that has a pending edit tool call Claude Code ...</description>
+      <content:encoded><![CDATA[<h1>AI Agents 2026-10-24</h1>
+<p><a href="https://dboeter.github.io/daily-diff/#2026-10-24">⬛ Overview</a> · <strong>🟪 AI Agents</strong> · <a href="https://dboeter.github.io/daily-diff/#2026-10-24/ai-models">🟦 AI Models &amp; Labs</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-24/ai-policy">🟧 AI Policy</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-24/ai-data">🟨 Data Engineering</a></p>
+<blockquote>
+<p>Generated: 2026-10-24 01:29 UTC | Projects: 16 | Active today: 6 | Stable releases: 3 | Prereleases (not covered): 2</p>
+</blockquote>
+<hr>
+<h2>Highlights</h2>
+<ul>
+<li>Hermes Agent v0.22.5 delivers a stable rollup of roughly 81 pull requests across CLI, installers, Microsoft Store, Docker, and Hermes Cloud</li>
+<li>Oh My Pi on Windows x64 crashes with stack overflow when resuming a session that has a pending edit tool call</li>
+<li>Claude Code v2.1.310 introduces the Monitor tool and plugin monitors for Bedrock, Vertex, and Foundry</li>
+<li>OpenShell trends on GitHub as a safe private runtime for autonomous AI agents, gaining over a thousand stars</li>
+<li>Omnara launches as an open-source self-hostable alternative to Claude Managed Agents and OpenAI&#39;s Agents API</li>
+</ul>
+<hr>
+<h2>Coding Agents &amp; Assistants</h2>
+<h3>Claude Code</h3>
+<ul>
+<li><strong>Release</strong>: <a href="https://github.com/anthropics/claude-code/releases/tag/v2.1.310">v2.1.310</a> adds the Monitor tool and plugin monitors on Bedrock, Vertex, and Foundry; fixes request failures behind gateways that reject the <code>effort-2025-11-24</code> beta value or mid-conversation system messages with automatic retry logic.</li>
+</ul>
+<h3>Kilo Code</h3>
+<ul>
+<li><strong>Hot issue</strong>: <a href="https://github.com/Kilo-Org/kilocode/issues/15379">#15379</a> — selecting and copying text from chat history steals focus to the prompt input, breaking Cmd+C and copy context actions on macOS (v7.8.15, VS Code 1.143).</li>
+</ul>
+<h3>Oh My Pi</h3>
+<ul>
+<li><strong>Hot issue</strong>: <a href="https://github.com/can1357/oh-my-pi/issues/16857">#16857</a> — Windows x64 crashes with stack overflow (0xC00000FD) when resuming a session with a pending <code>edit</code> tool call, caused by unbounded recursion in the native module (~500 frames).</li>
+</ul>
+<h3>DeepSeek Harness</h3>
+<ul>
+<li><strong>Prerelease</strong>: <a href="https://github.com/deepseek-ai/deepseek-harness/releases/tag/dsh-v0.2.1-rc.3">dsh-v0.2.1-rc.3</a> adds &quot;More&quot; menus to left sidebar, conversation views, and right sidebar for plugin browsing/creation; fixes draft loss when switching sessions; aligns API key adapter model list updates with account login mode.</li>
+</ul>
+<h3>Hermes Agent</h3>
+<ul>
+<li><strong>Release</strong>: <a href="https://github.com/nousresearch/hermes-agent/releases/tag/v0.22.5">v0.22.5</a> rolls up ~81 PRs since v0.22.4 into a stable release for CLI, installers, Microsoft Store, Docker, and Hermes Cloud.</li>
+<li><strong>Hot issue</strong>: <a href="https://github.com/NousResearch/hermes-agent/issues/143426">#143426</a> — Linux desktop launches at 6% window opacity due to default translucency via <code>setOpacity</code>; Settings hides the opacity control (Ubuntu 26.04, GNOME 50, Wayland/XWayland).</li>
+<li><strong>Hot issue</strong>: <a href="https://github.com/NousResearch/hermes-agent/issues/143379">#143379</a> — RFC on doc-chain substrate network governance, read semantics, and compaction for durable record provenance across session compression.</li>
+</ul>
+<p><strong>Quiet today:</strong> <a href="https://github.com/google-gemini/gemini-cli">Gemini CLI</a>, <a href="https://github.com/anomalyco/opencode">OpenCode</a>, <a href="https://github.com/earendil-works/pi">Pi</a>, <a href="https://github.com/1jehuang/jcode">jcode</a>, <a href="https://github.com/cline/cline">Cline</a>, <a href="https://github.com/CommandCodeAI/command-code">Command Code</a></p>
+<p><strong>Unavailable today:</strong> <a href="https://github.com/openai/codex">OpenAI Codex</a></p>
+<hr>
+<h2>Agent Tooling</h2>
+<h3>OpenShell</h3>
+<ul>
+<li><strong>News</strong>: GitHub Trending highlights OpenShell as &quot;the safe, private runtime for autonomous AI agents,&quot; surging +1,119 stars — signaling strong developer interest in NVIDIA&#39;s agent sandbox. <a href="https://github.com/NVIDIA/OpenShell">GitHub Trending</a></li>
+</ul>
+<p><strong>Quiet today:</strong> <a href="https://github.com/herdrdev/herdr">herdr</a>, <a href="https://github.com/mksglu/context-mode">context-mode</a>, <a href="https://github.com/asheshgoplani/agent-deck">Agent Deck</a></p>
+<hr>
+<h2>Spotted</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Story</th>
+<th align="left">Source</th>
+<th align="left">Discussion</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a href="https://openai.com/index/scaling-ai-research-for-complex-biological-data/">Using thousands of AI agents to uncover new leads in biological data</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50180752">159 points, 105 comments</a></td>
+<td align="left">— Using thousands of AI agents to uncover new leads in biological data (Hacker News, openai.com)</td>
+</tr>
+<tr>
+<td align="left"><a href="https://www.anthropic.com/research/attack-surface-reduction">Using Claude to reduce the attack surface of code</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50175779">135 points, 91 comments</a></td>
+<td align="left">Automated attack surface analysis and reduction can meaningfully improve the security of deployed software in the near term. In this post, we preview data we’ve collected from applying attack surface reduction techniques to large open-source codebases using Claude.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://github.com/omnara-ai/omnara">Show HN: Omnara – Open-source alternative to Claude Managed Agents</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50183892">111 points, 34 comments</a></td>
+<td align="left">The open-source managed agent platform. A self-hostable alternative to Claude Managed Agents and OpenAI&#39;s Agents API.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://claude.com/resources/articles/claude-duet">Claude Duet</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50186455">92 points, 13 comments</a></td>
+<td align="left">Claude Duet is a new app where Claude works as a proactive agent. The research preview opens by waitlist today for Pro and Max subscribers in the US.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://www.typeui.sh/micro-interactions">Show HN: UI micro interactions prompts for AI</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50199290">79 points, 44 comments</a></td>
+<td align="left">— Show HN: UI micro interactions prompts for AI (Hacker News, typeui.sh)</td>
+</tr>
+<tr>
+<td align="left"><a href="https://alterauth.com/">Launch HN: Alter (YC S25) – Access control for multi-user agents</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50176908">68 points, 49 comments</a></td>
+<td align="left">PAM for AI agents, enforced at runtime: vaulted credentials, per-action policy, approval before risky calls complete, and an audit trail for every call through Alter.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://dev.to/kumuda/i-built-a-pixel-hero-that-nags-me-to-drink-water-and-runs-100-on-my-laptop-2ilb">I Built a Pixel Hero That Nags Me to Drink Water (and Runs 100% on My Laptop)</a></td>
+<td align="left">Dev.to</td>
+<td align="left"><a href="https://dev.to/kumuda/i-built-a-pixel-hero-that-nags-me-to-drink-water-and-runs-100-on-my-laptop-2ilb">45 reactions, 4 comments</a></td>
+<td align="left">This is a submission for the Hacktoberfest Open-Source AI Challenge Week 3: Slow and Steady.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://dev.to/rajan_mishra_a9f78ad216b4/hush-i-hid-10-emergencies-in-my-own-notifications-an-on-device-gemma-os-found-all-10-m3g">Hush: I Hid 10 Emergencies in My Own Notifications. An On-Device Gemma OS Found All 10.</a></td>
+<td align="left">Dev.to</td>
+<td align="left"><a href="https://dev.to/rajan_mishra_a9f78ad216b4/hush-i-hid-10-emergencies-in-my-own-notifications-an-on-device-gemma-os-found-all-10-m3g">17 reactions, 3 comments</a></td>
+<td align="left">This is a submission for the Hacktoberfest Open-Source AI Challenge Week 3: Slow and Steady.</td>
+</tr>
+</tbody></table>
+<hr>
+<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
+]]></content:encoded>
+    </item>
     <item>
       <title>AI Agents 2026-10-23</title>
       <link>https://dboeter.github.io/daily-diff/#2026-10-23/ai-agents</link>
