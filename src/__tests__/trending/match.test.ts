@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import type { AskJev } from "../../core/jev.ts";
 import {
   type MatchState,
@@ -13,28 +13,7 @@ import {
   saveMatchState,
 } from "../../trending/match.ts";
 import { type RadarRow, urlMerge } from "../../trending/rank.ts";
-
-// ---------------------------------------------------------------------------
-// Jev classification
-// ---------------------------------------------------------------------------
-
-const MODEL = "jev-1.13.0";
-
-function choice(pick: string, p = 0.9) {
-  return { type: "choice", choice: pick, confidence: p, probabilities: { [pick]: p, none: 1 - p } };
-}
-
-/** A stub `ask` answering the classification questions. */
-
-// ---------------------------------------------------------------------------
-// Match cache
-// ---------------------------------------------------------------------------
-
-const DATE = "2026-10-05";
-
-const DAY_MS = 24 * 60 * 60 * 1000;
-
-const daysBefore = (n: number) => new Date(Date.parse(DATE) - n * DAY_MS).toISOString().slice(0, 10);
+import { DATE, MODEL, choice, daysBefore, notCalled } from "./helpers.ts";
 
 function radarRow(key: string, o: Partial<RadarRow> = {}): RadarRow {
   return {
@@ -55,10 +34,6 @@ const entry = (o: Partial<MatchState["apps"][string]> = {}) => ({
   rejected: [],
   lastSeen: DATE,
   ...o,
-});
-
-const notCalled: AskJev = vi.fn(async () => {
-  throw new Error("ask must not be called");
 });
 
 /** A stub `ask` answering match questions: picks per question id, at probability `p`. */

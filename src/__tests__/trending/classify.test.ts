@@ -22,6 +22,7 @@ import {
 import type { NpmPackage } from "../../trending/npm.ts";
 import { type GithubRow } from "../../trending/rank.ts";
 import { migrateClassifyEntry, migratePolicyEntry } from "../../../scripts/migrate-verdict-fingerprints.ts";
+import { DATE, MODEL, classifyAnswer, daysBefore } from "./helpers.ts";
 
 function githubRow(topic?: string): GithubRow {
   return {
@@ -47,37 +48,11 @@ const classify = (topic?: string) =>
 // Jev classification
 // ---------------------------------------------------------------------------
 
-const MODEL = "jev-1.13.0";
-
-function choice(pick: string, p = 0.9) {
-  return { type: "choice", choice: pick, confidence: p, probabilities: { [pick]: p, none: 1 - p } };
-}
-
-/** A stub `ask` answering the classification questions. */
-const classifyAnswer =
-  (category: string, standalone: number): AskJev =>
-  async () => ({
-    model: MODEL,
-    answers: { category: choice(category), standalone_tool: { noul: standalone } },
-  });
-
 const githubItem = (topic?: string, description = ""): ClassifyItem => ({
   kind: "github",
   key: "github:o/r",
   row: { ...githubRow(topic), description },
 });
-
-// ---------------------------------------------------------------------------
-// Match cache
-// ---------------------------------------------------------------------------
-
-const DATE = "2026-10-05";
-
-const DAY_MS = 24 * 60 * 60 * 1000;
-
-const daysBefore = (n: number) => new Date(Date.parse(DATE) - n * DAY_MS).toISOString().slice(0, 10);
-
-/** A stub `ask` answering match questions: picks per question id, at probability `p`. */
 
 describe("fallbackClassification", () => {
   it.each([

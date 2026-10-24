@@ -13,6 +13,7 @@ import {
 import { type MatchState } from "../../trending/match.ts";
 import type { NpmPackage } from "../../trending/npm.ts";
 import { MIN_STARS, NEW_REPO_MIN_STARS } from "../../trending/rank.ts";
+import { DATE, classifyAnswer, notCalled } from "./helpers.ts";
 
 const SAMPLE_HTML = `
 <main>
@@ -65,42 +66,12 @@ const SAMPLE_HTML = `
 </main>
 `;
 
-// ---------------------------------------------------------------------------
-// Jev classification
-// ---------------------------------------------------------------------------
-
-const MODEL = "jev-1.13.0";
-
-function choice(pick: string, p = 0.9) {
-  return { type: "choice", choice: pick, confidence: p, probabilities: { [pick]: p, none: 1 - p } };
-}
-
-/** A stub `ask` answering the classification questions. */
-const classifyAnswer =
-  (category: string, standalone: number): AskJev =>
-  async () => ({
-    model: MODEL,
-    answers: { category: choice(category), standalone_tool: { noul: standalone } },
-  });
-
-// ---------------------------------------------------------------------------
-// Match cache
-// ---------------------------------------------------------------------------
-
-const DATE = "2026-10-05";
-
 const entry = (o: Partial<MatchState["apps"][string]> = {}) => ({
   title: "Kilo Code",
   rejected: [],
   lastSeen: DATE,
   ...o,
 });
-
-const notCalled: AskJev = vi.fn(async () => {
-  throw new Error("ask must not be called");
-});
-
-/** A stub `ask` answering match questions: picks per question id, at probability `p`. */
 
 describe("parseTrendingHtml", () => {
   it("parses multiple trending repository cards", () => {
