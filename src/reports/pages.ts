@@ -297,7 +297,7 @@ export async function buildModelsPage(
   now = Date.now(),
 ): Promise<SavedReport | null> {
   saveLabsState(labsState);
-  console.log("  [models] Web state saved.");
+  console.log("  [models] Labs state saved.");
   const P = MODELS_PAGE;
   const posts = labPosts(labs);
   const shownPosts = numberRows(posts.slice(0, LAB_POSTS_MAX));

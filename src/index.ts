@@ -199,7 +199,7 @@ async function fetchAllData(
   /** One list per data report section, in DATA_SECTIONS order. */
   dataFetches: ProjectFetch[][];
   skillsData: SkillsData;
-  labResults: LabsFetchResult[];
+  labsResults: LabsFetchResult[];
   trendingData: TrendingData;
   hnData: HnData;
   arxivData: ArxivData;
@@ -225,7 +225,7 @@ async function fetchAllData(
     infraFetches,
     dataFetches,
     skillsData,
-    labResults,
+    labsResults,
     trendingData,
     hnData,
     arxivData,
@@ -266,7 +266,7 @@ async function fetchAllData(
     infraFetches,
     dataFetches,
     skillsData,
-    labResults,
+    labsResults,
     trendingData,
     hnData,
     arxivData,
@@ -334,7 +334,7 @@ async function main(): Promise<void> {
     infraFetches,
     dataFetches,
     skillsData,
-    labResults,
+    labsResults,
     trendingData,
     hnData,
     arxivData,
@@ -384,7 +384,7 @@ async function main(): Promise<void> {
   const pool = splitPool(
     fresh,
     newsLinks,
-    labPosts(labResults)
+    labPosts(labsResults)
       .slice(0, LAB_POSTS_MAX)
       .map((p) => p.url),
   );
@@ -446,7 +446,7 @@ async function main(): Promise<void> {
       dateStr,
     ),
     buildModelsPage(
-      labResults,
+      labsResults,
       labsState,
       modelCatalog,
       { rows: spottedOf("models"), summaries: spottedSummaryMap },
