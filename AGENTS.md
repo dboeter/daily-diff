@@ -194,7 +194,7 @@ Every Jev judgment except ArXiv's goes through `judgeItems` (`src/core/jev.ts`) 
 
 ## Web UI & RSS Feed
 
-- `index.html` reads `manifest.json` (`pnpm manifest`, `src/cli/generate-manifest.ts`) to build the sidebar and fetches `digests/YYYY-MM-DD/<report>.md` on demand. `#YYYY-MM-DD` is the day's overview (each report's highlights, then Coming up from `coming-up.json`); `#YYYY-MM-DD/<report>` is a report. The sidebar pins the latest weekly reports under "This week" (manifest `weekly`) and tags the newest day `today` (`latest` when it is not the viewer's own date).
+- `index.html` reads `manifest.json` (`pnpm manifest`, `src/cli/manifest.ts`) to build the sidebar and fetches `digests/YYYY-MM-DD/<report>.md` on demand. `#YYYY-MM-DD` is the day's overview (each report's highlights, then Coming up from `coming-up.json`); `#YYYY-MM-DD/<report>` is a report. The sidebar pins the latest weekly reports under "This week" (manifest `weekly`) and tags the newest day `today` (`latest` when it is not the viewer's own date).
 - Each report's bar is rendered in code with absolute Pages URLs, so its links work in GitHub Issues too.
 - From `SIGNED_SINCE` on, Highlights render as a diff hunk (`gutterList`): − for a bullet that opens with `GOING_AWAY`, + for the rest. No code checks the model's sign: a keyword rule would sign a release with breaking changes as going away. AI Policy's Highlights are prose, so its page has no gutter.
 - The look is "Gutter": the mark is a diff gutter (+ over −), drawn into `favicon.svg`, `favicon-16.svg` and the PNGs (`apple-touch-icon.png`, `feed-icon.png`, `og-image.png`, `banner.png`). IBM Plex Sans, Plex Mono for dates, counts and code. Green and red mean added and going away, and nothing else.
@@ -211,7 +211,7 @@ Every Jev judgment except ArXiv's goes through `judgeItems` (`src/core/jev.ts`) 
 4. Add a `buildXxxReport` function in `src/reports/pages.ts` that returns a `SavedReport` and makes the report's LLM calls.
 5. Wire it into `fetchAllData` and the save phase in `src/index.ts`. The fetcher never throws: it catches its own failure and returns its empty value (`fetchSuccess: false`).
 6. Add a label color entry in `LABEL_COLORS` in `src/core/github.ts`.
-7. When retiring a report, move its id and label into the archive part of `REPORT_LABELS` (`src/core/strings.ts`; `REPORT_FILES` in `src/cli/generate-manifest.ts` is its keys), add its issue label to `DIGEST_ISSUE_LABELS` (`src/core/github.ts`), and add its id to the archive list in `get_report`'s type description in `mcp/src/index.ts`.
+7. When retiring a report, move its id and label into the archive part of `REPORT_LABELS` (`src/core/strings.ts`; `REPORT_FILES` in `src/cli/manifest.ts` is its keys), add its issue label to `DIGEST_ISSUE_LABELS` (`src/core/github.ts`), and add its id to the archive list in `get_report`'s type description in `mcp/src/index.ts`.
 8. Update README.md and this file.
 
 ## Agent skills

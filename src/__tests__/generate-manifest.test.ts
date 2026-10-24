@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { toRfc822, escapeXml, selectFeedItems } from "../cli/generate-manifest.ts";
+import { toRfc822, escapeXml, selectFeedItems } from "../cli/manifest.ts";
 
 // ---------------------------------------------------------------------------
 // toRfc822
