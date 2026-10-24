@@ -206,8 +206,8 @@ export async function buildTrendsReport(
   );
 
   // Only once the page exists.
-  if (report?.rankingFile) {
-    console.log(`  Saved ${saveFile(report.rankingFile, dateStr, "trending-ranking.json")}`);
+  if (report?.traceFile) {
+    console.log(`  Saved ${saveFile(report.traceFile, dateStr, "trending-trace.json")}`);
   }
   if (report?.nextMatches) saveMatchState(report.nextMatches);
   if (report?.nextClassifications) saveClassifyCache(report.nextClassifications);
@@ -387,7 +387,7 @@ export async function buildPolicyReport(
   // The trace, the verdicts and the observed state before the no-items skip, unlike the trending
   // cache: on a day Jev drops every item there is no report, and the dropped items would be asked
   // again every day until they leave the feed's age window.
-  const files = { state: stateFile, verdicts: verdictsFile, trace: "policy-ranking.json" };
+  const files = { state: stateFile, verdicts: verdictsFile, trace: "policy-trace.json" };
   const writes = planWrites(policyData);
   commitWrites(writes.onFetched, files, dateStr);
   if (!policyData.fetchSuccess || policyData.items.length === 0) {
@@ -552,7 +552,7 @@ export async function buildDataReport(
 ): Promise<SavedReport | null> {
   // Before the skip, as in buildPolicyReport: dropped items are then not asked again tomorrow, and
   // a quiet day keeps its record-only bundles.
-  const files = { state: stateFile, verdicts: verdictsFile, trace: "data-ranking.json" };
+  const files = { state: stateFile, verdicts: verdictsFile, trace: "data-trace.json" };
   commitWrites(planWrites(vendor).onFetched, files, dateStr);
   if (!hasDataNews(sections, vendor, dateStr)) {
     console.log(`  [data] ${DATA_REPORT.noNewItems}`);

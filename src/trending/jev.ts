@@ -704,11 +704,11 @@ export function saveClassifyCache(cache: ClassifyCache, file = CLASSIFY_FILE): v
 // ---------------------------------------------------------------------------
 
 /**
- * `digests/YYYY-MM-DD/trending-ranking.json`, one item per line, like
- * `arxiv-ranking.json`. Every classified item, not a top slice: a misclassified
+ * `digests/YYYY-MM-DD/trending-trace.json`, one item per line, like
+ * `arxiv-trace.json`. Every classified item, not a top slice: a misclassified
  * out-of-scope repo is the main thing to trace, and it never reaches the report.
  */
-export function buildTrendingRankingFile(
+export function buildTrendingTraceFile(
   items: ClassifyItem[],
   classifications: Map<string, Classification>,
   classifiedBy: "jev" | "topics",

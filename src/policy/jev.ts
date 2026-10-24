@@ -328,7 +328,7 @@ export function loadPolicyVerdicts(file = POLICY_VERDICTS_FILE): PolicyVerdicts 
 // Selection
 // ---------------------------------------------------------------------------
 
-/** Items most relevant first; items without a verdict after, in feed order. Trace: `policy-ranking.json`. */
+/** Items most relevant first; items without a verdict after, in feed order. Trace: `policy-trace.json`. */
 export type PolicySelection = Selection<PolicyItem, PolicyVerdicts>;
 
 export async function selectPolicyItems(
@@ -378,7 +378,7 @@ export async function selectPolicyItems(
     watchlisted: onWatchlist(i),
     keyword: fallbackKeywordHit(i),
   }));
-  const rankingFile = judgment.rankingFile(rows, { weights: POLICY_WEIGHTS, newsWeights: NEWS_WEIGHTS });
+  const traceFile = judgment.traceFile(rows, { weights: POLICY_WEIGHTS, newsWeights: NEWS_WEIGHTS });
 
-  return { items: selected, rankedBy, nextVerdicts: judgment.nextCache, rankingFile };
+  return { items: selected, rankedBy, nextVerdicts: judgment.nextCache, traceFile };
 }

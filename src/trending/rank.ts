@@ -91,8 +91,8 @@ export interface TrendingReportData {
    */
   onFire: { fullName: string; category: Category }[];
   classifiedBy: "jev" | "topics";
-  /** `buildTrendingRankingFile` output when Jev classified or matched, saved next to the report. */
-  rankingFile?: string;
+  /** `buildTrendingTraceFile` output when Jev classified or matched, saved next to the report. */
+  traceFile?: string;
   /** Match state to save once the report is written; absent when the file could not be read. */
   nextMatches?: MatchState;
   /** Classification cache to save once the report is written; absent when the file could not be read. */

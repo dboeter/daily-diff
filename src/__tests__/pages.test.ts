@@ -617,13 +617,13 @@ describe("buildPolicyReport", () => {
     const dropped: PolicyData = {
       ...data([]),
       nextVerdicts: { items: { x: { title: "X", answers: {} as never, lastSeen: "2026-10-14" } } },
-      rankingFile: "{}\n",
+      traceFile: "{}\n",
     };
     expect(
       await buildPolicyReport(dropped, "00:00", "2026-10-14", path.join(dir, "s.json"), verdicts),
     ).toBeNull();
     expect(generateBody).not.toHaveBeenCalled();
-    expect(saveFile).toHaveBeenCalledWith("{}\n", "2026-10-14", "policy-ranking.json");
+    expect(saveFile).toHaveBeenCalledWith("{}\n", "2026-10-14", "policy-trace.json");
     expect(Object.keys(JSON.parse(fs.readFileSync(verdicts, "utf-8")).items)).toEqual(["x"]);
   });
 
@@ -754,7 +754,7 @@ describe("buildDataReport", () => {
   });
   // Through the keyword fallback, so the order is the selection's: feed order here is not report order.
   const vendorData = async (): Promise<VendorData> => {
-    const { items, rankingFile, nextVerdicts } = await selectVendorItems(
+    const { items, traceFile, nextVerdicts } = await selectVendorItems(
       [
         vendorItem("sf", {
           vendor: "snowflake",
@@ -776,7 +776,7 @@ describe("buildDataReport", () => {
     );
     return {
       ...vendorOf(items),
-      rankingFile,
+      traceFile,
       nextVerdicts,
       nextState: { reported: { "dbx-new": "2026-10-17" }, stages: {} },
     };
@@ -884,7 +884,7 @@ describe("buildDataReport", () => {
     expect(saveFile).toHaveBeenCalledWith(
       expect.stringContaining('"rankedBy": "keywords"'),
       "2026-10-17",
-      "data-ranking.json",
+      "data-trace.json",
     );
   });
 

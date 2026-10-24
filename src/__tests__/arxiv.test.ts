@@ -12,7 +12,7 @@ import {
   rankByRelevance,
   submissionCutoff,
   nextArxivState,
-  buildRankingFile,
+  buildTraceFile,
   type JevScore,
   type ArxivPaper,
 } from "../sources/arxiv.ts";
@@ -192,9 +192,9 @@ describe("Jev relevance ranking", () => {
     expect(ranked).toBeNull();
   });
 
-  it("writes the raw judgments of scored papers to the ranking file", () => {
+  it("writes the raw judgments of scored papers to the trace", () => {
     const file = JSON.parse(
-      buildRankingFile([
+      buildTraceFile([
         { paper: paper("a"), jev: jev(0.9) },
         { paper: paper("b"), jev: null },
       ]),

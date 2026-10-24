@@ -30,8 +30,8 @@ export interface Selection<I, V extends ItemsFile<unknown>, A = never> {
   rankedBy: RankedBy;
   /** null when the verdict file was malformed: it is left as it is. */
   nextVerdicts: V | null;
-  /** The day's `*-ranking.json` trace: every new item, kept or dropped. */
-  rankingFile: string;
+  /** The day's `*-trace.json` trace: every new item, kept or dropped. */
+  traceFile: string;
 }
 
 export interface NewItems<I, S extends ReportedState, V extends ItemsFile<unknown>, A = never> {
@@ -49,7 +49,7 @@ export interface NewItems<I, S extends ReportedState, V extends ItemsFile<unknow
   observedState: S;
   nextVerdicts?: V | null;
   /** The day's trace; absent when there were no candidates. */
-  rankingFile?: string;
+  traceFile?: string;
 }
 
 /** The fields a report adds to its state; `kept` is [] for the observed state. */
@@ -107,7 +107,7 @@ export async function collectNewItems<
       nextState: stateFor(selection.items, recorded, fetched, selection.alsoNew),
       observedState: stateFor([], recorded, fetched),
       nextVerdicts: selection.nextVerdicts,
-      ...(candidates.length > 0 ? { rankingFile: selection.rankingFile } : {}),
+      ...(candidates.length > 0 ? { traceFile: selection.traceFile } : {}),
     };
   } catch (err) {
     console.error(`  [${tag}] Failed: ${err}`);
@@ -140,12 +140,12 @@ export interface ReportFiles {
 export function planWrites(
   data: Pick<
     NewItems<unknown, ReportedState, ItemsFile<unknown>>,
-    "fetchSuccess" | "nextState" | "observedState" | "nextVerdicts" | "rankingFile"
+    "fetchSuccess" | "nextState" | "observedState" | "nextVerdicts" | "traceFile"
   >,
 ): { onFetched: Write[]; onReported: Write[] } {
   return {
     onFetched: [
-      ...(data.rankingFile ? [{ kind: "trace" as const, content: data.rankingFile }] : []),
+      ...(data.traceFile ? [{ kind: "trace" as const, content: data.traceFile }] : []),
       ...(data.nextVerdicts ? [{ kind: "verdicts" as const, cache: data.nextVerdicts }] : []),
       ...(data.fetchSuccess ? [{ kind: "state" as const, state: data.observedState }] : []),
     ],

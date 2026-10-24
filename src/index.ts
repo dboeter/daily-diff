@@ -89,7 +89,7 @@ import {
   loadTopicCache,
   routeStories,
   saveTopicCache,
-  spottedRankingFile,
+  spottedTraceFile,
   PAGE_OF_TOPIC,
 } from "./spotted/jev.ts";
 import { DATA_SECTION_KEYS, loadConfig, type SectionKey } from "./core/config.ts";
@@ -511,11 +511,11 @@ async function main(): Promise<void> {
   saveSpottedLog(nextLog(spottedLog, stories, shownIds, dateStr));
   if (routing.judgment.nextCache) saveTopicCache(routing.judgment.nextCache);
   console.log(
-    `  Saved ${saveFile(spottedRankingFile(unmatched, routing, dailyShown), dateStr, "spotted-ranking.json")}`,
+    `  Saved ${saveFile(spottedTraceFile(unmatched, routing, dailyShown), dateStr, "spotted-trace.json")}`,
   );
   // Research: the day's top papers for the weekly Trends page; the arXiv cutoff moves on every run.
-  if (arxivData.rankingFile) {
-    console.log(`  Saved ${saveFile(arxivData.rankingFile, dateStr, "arxiv-ranking.json")}`);
+  if (arxivData.traceFile) {
+    console.log(`  Saved ${saveFile(arxivData.traceFile, dateStr, "arxiv-trace.json")}`);
   }
   if (arxivData.nextState) saveArxivState(arxivData.nextState);
   saveResearchState(nextResearchState(researchState, arxivData, dateStr));

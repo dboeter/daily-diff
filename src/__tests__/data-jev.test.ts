@@ -120,9 +120,7 @@ describe("selectVendorItems", () => {
       lastSeen: DATE,
     });
     expect(sel.nextVerdicts?.items["bcr"]).toBeUndefined();
-    expect(sel.rankingFile).toContain(
-      '"id":"ad","title":"Title ad","source":"Azure Databricks","kept":false',
-    );
+    expect(sel.traceFile).toContain('"id":"ad","title":"Title ad","source":"Azure Databricks","kept":false');
   });
 
   it("falls back to the keyword rules without a key, keeping feed order after deprecations", async () => {
@@ -179,7 +177,7 @@ describe("selectVendorItems", () => {
       "gcp1",
       "gcp2",
     ]);
-    expect(sel.rankingFile).toContain(
+    expect(sel.traceFile).toContain(
       '"id":"gcp3","title":"Feature: preview","source":"BigQuery","kept":false,"overCap":true',
     );
     // Without verdicts all relevances tie, so the over-cap items keep feed order.

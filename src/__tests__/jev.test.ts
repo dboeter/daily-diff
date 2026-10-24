@@ -160,7 +160,7 @@ describe("judgeItems", () => {
 
   it("writes the trace header, then one row per line", async () => {
     const j = await judge([item("x")], { items: {} }, stub({ x: 1 }));
-    const file = j.rankingFile([{ id: "x", ...j.traceFields(item("x")) }, { id: "y" }], {
+    const file = j.traceFile([{ id: "x", ...j.traceFields(item("x")) }, { id: "y" }], {
       weights: { score: 1 },
     });
     expect(file).toBe(

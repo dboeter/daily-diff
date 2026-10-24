@@ -202,7 +202,7 @@ export interface Judgment<I, A, D> {
    */
   traceFields(item: I): Record<string, unknown>;
   /** The trace file: `header` entries after `models` and `rankedBy`, then one row per line. */
-  rankingFile(rows: object[], header: Record<string, unknown>): string;
+  traceFile(rows: object[], header: Record<string, unknown>): string;
 }
 
 const round = (n: number): number => Math.round(n * 1000) / 1000;
@@ -318,7 +318,7 @@ export async function judgeItems<I extends { id: string; title: string }, A, D e
         decided: v?.decided ?? null,
       };
     },
-    rankingFile(rows, header) {
+    traceFile(rows, header) {
       const head = Object.entries({ models, rankedBy, ...header }).map(
         ([k, v]) => `${JSON.stringify(k)}: ${JSON.stringify(v)},\n`,
       );

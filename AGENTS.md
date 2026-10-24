@@ -93,7 +93,7 @@ Files written to `digests/YYYY-MM-DD/`:
 | `highlights.json` | —        | Up to 2 highlights per report, for Telegram, Teams and the overview; one about something going away opens with `GOING_AWAY`. A published `ai-policy`, or an `ai-data` with a Jev-kept vendor item, that the model left out gets the first sentence of its own Highlights (`withFallbackHighlights`) |
 | `coming-up.json`  | —        | By code: the dated items of the next 30 days from every page's saved state (deadlines, Action required dates, stealth model expiries), so written on a day a page is skipped too                                                                                                                    |
 
-Each Jev judgment also writes a trace (`arxiv-ranking.json`, `policy-ranking.json`, `data-ranking.json`, `trending-ranking.json`, `spotted-ranking.json`): every judged item with its answers and decision, so a misranked item can be traced without rerunning Jev. Traces are not reports and not in `REPORT_FILES`.
+Each Jev judgment also writes a trace (`arxiv-trace.json`, `policy-trace.json`, `data-trace.json`, `trending-trace.json`, `spotted-trace.json`): every judged item with its answers and decision, so a misjudged item can be traced without rerunning Jev. Older day folders name them `*-ranking.json`. Traces are not reports and not in `REPORT_FILES`.
 
 Weekly = `WEEKLY_REPORT_WEEKDAY` (Monday, CST) or `DIGEST_FORCE_WEEKLY=1` (the workflow's `force_weekly` dispatch input). Archive-only files, retired or merged into the pages above in October 2026: `ai-cli`, `ai-ph`, `ai-infra`, `ai-community`, `ai-hn`, `ai-web`, `ai-trending`, `ai-hf`, `ai-arxiv`; before then `ai-agents.md` was the OpenClaw ecosystem report.
 
