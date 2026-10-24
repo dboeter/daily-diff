@@ -18,7 +18,7 @@ import { upcomingDeadlines } from "./deadlines.ts";
 import { loadReportedState, nextDeadlines, type Deadline, type ReportedState } from "../core/report-state.ts";
 import { collectNewItems, type NewItems } from "../core/new-items.ts";
 import { numberRows, type Numbered } from "../reports/summarized-table.ts";
-import { POLICY_REPORT } from "../core/i18n.ts";
+import { POLICY_REPORT } from "../core/strings.ts";
 
 export interface PolicyItem extends FeedItem {
   /** The feed's display name (config.yml policy.feeds). */

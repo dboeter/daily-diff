@@ -12,10 +12,10 @@ import {
   nestHeadings,
   renderReportBar,
   withReportBar,
-} from "../reports/report-builders.ts";
+} from "../reports/markdown.ts";
 import type { TrendingReportData } from "../trending/rank.ts";
 import { numberRows } from "../reports/summarized-table.ts";
-import { MSG, TRENDS_REPORT } from "../core/i18n.ts";
+import { MSG, TRENDS_REPORT } from "../core/strings.ts";
 import type { ProjectActivity } from "../reports/prompts.ts";
 import type { GitHubRelease } from "../core/github.ts";
 

@@ -1,5 +1,5 @@
 /**
- * Web content fetching for AI company news/blog/research.
+ * The lab posts of the models page: new posts on the Anthropic and OpenAI sitemaps.
  *
  * Strategy:
  *   - Discover article URLs via sitemaps
@@ -8,7 +8,7 @@
  *   - After every run, mark ALL discovered URLs as seen so future runs stay incremental
  *   - Keep the run's new URLs under its CST date, so a same-day re-run lists them again
  *
- * State is persisted in digests/web-state.json (committed to git by the Actions workflow).
+ * State is persisted in digests/labs-state.json (committed to git by the Actions workflow).
  */
 
 import fs from "node:fs";
@@ -19,7 +19,7 @@ import { sleep } from "../core/date.ts";
 // Types
 // ---------------------------------------------------------------------------
 
-export interface WebPageItem {
+export interface LabPost {
   url: string;
   title: string;
   lastmod: string;
@@ -39,15 +39,15 @@ interface SiteState {
   newOn?: { date: string; urls: string[]; firstRun?: true };
 }
 
-export interface WebState {
+export interface LabsState {
   anthropic: SiteState;
   openai: SiteState;
 }
 
-export interface WebFetchResult {
+export interface LabsFetchResult {
   site: "anthropic" | "openai";
   isFirstRun: boolean;
-  newItems: WebPageItem[];
+  newItems: LabPost[];
   /** Total URLs discovered in sitemap (for context in the report) */
   totalDiscovered: number;
   /** False when the fetch threw (a sub-sitemap that fails is skipped on its own). */
@@ -229,7 +229,7 @@ async function discoverUrls(site: "anthropic" | "openai"): Promise<Array<{ loc: 
         await sleep(100);
       } catch (err) {
         failed++;
-        console.error(`  [web/${site}] sub-sitemap "${name}" failed: ${err}`);
+        console.error(`  [labs/${site}] sub-sitemap "${name}" failed: ${err}`);
       }
     }
     // All of them failing is the site failing, not a day without new posts.
@@ -260,24 +260,24 @@ async function discoverUrls(site: "anthropic" | "openai"): Promise<Array<{ loc: 
 // State persistence
 // ---------------------------------------------------------------------------
 
-const STATE_FILE = path.join("digests", "web-state.json");
+const STATE_FILE = path.join("digests", "labs-state.json");
 
-export function emptyState(): WebState {
+export function emptyState(): LabsState {
   return {
     anthropic: { lastChecked: "", seenUrls: {} },
     openai: { lastChecked: "", seenUrls: {} },
   };
 }
 
-export function loadWebState(): WebState {
+export function loadLabsState(): LabsState {
   try {
-    return JSON.parse(fs.readFileSync(STATE_FILE, "utf-8")) as WebState;
+    return JSON.parse(fs.readFileSync(STATE_FILE, "utf-8")) as LabsState;
   } catch {
     return emptyState();
   }
 }
 
-export function saveWebState(state: WebState): void {
+export function saveLabsState(state: LabsState): void {
   fs.mkdirSync(path.dirname(STATE_FILE), { recursive: true });
   fs.writeFileSync(STATE_FILE, JSON.stringify(state, null, 2), "utf-8");
 }
@@ -292,13 +292,13 @@ export function saveWebState(state: WebState): void {
  */
 export async function fetchSiteContent(
   site: "anthropic" | "openai",
-  state: WebState,
+  state: LabsState,
   dateStr: string,
-): Promise<WebFetchResult> {
+): Promise<LabsFetchResult> {
   try {
     return await fetchSite(site, state, dateStr);
   } catch (err) {
-    console.error(`  [web/${site}] fetch failed: ${err}`);
+    console.error(`  [labs/${site}] fetch failed: ${err}`);
     const empty = { isFirstRun: false, newItems: [], totalDiscovered: 0, fetchSuccess: false };
     return { site, ...empty };
   }
@@ -306,9 +306,9 @@ export async function fetchSiteContent(
 
 async function fetchSite(
   site: "anthropic" | "openai",
-  state: WebState,
+  state: LabsState,
   dateStr: string,
-): Promise<WebFetchResult> {
+): Promise<LabsFetchResult> {
   const cfg = SITE_CONFIGS[site];
   const siteState = state[site];
   const today = siteState.newOn?.date === dateStr ? siteState.newOn : undefined;
@@ -317,9 +317,9 @@ async function fetchSite(
   const isFirstRun = today ? today.firstRun === true : Object.keys(siteState.seenUrls).length === 0;
   const newToday = new Set(today?.urls);
 
-  console.log(`  [web/${site}] Discovering URLs from sitemap...`);
+  console.log(`  [labs/${site}] Discovering URLs from sitemap...`);
   const allDiscovered = await discoverUrls(site);
-  console.log(`  [web/${site}] Discovered ${allDiscovered.length} URLs`);
+  console.log(`  [labs/${site}] Discovered ${allDiscovered.length} URLs`);
 
   // Newest first
   allDiscovered.sort((a, b) => {
@@ -348,12 +348,12 @@ async function fetchSite(
   const toFetch = isFirstRun ? newUrls.slice(0, MAX_CONTENT_FETCH_FIRST_RUN) : newUrls;
 
   console.log(
-    `  [web/${site}] ${isFirstRun ? "First run" : "Incremental"}: ` +
+    `  [labs/${site}] ${isFirstRun ? "First run" : "Incremental"}: ` +
       `${newUrls.length} new URLs, fetching content for ${toFetch.length}`,
   );
 
   // Build items — either from full page fetches or from sitemap metadata only
-  const items: WebPageItem[] = [];
+  const items: LabPost[] = [];
   if (cfg.metadataOnly) {
     for (const { loc, lastmod } of toFetch) {
       items.push({
@@ -377,7 +377,7 @@ async function fetchSite(
           site,
         });
       } catch (err) {
-        console.error(`  [web/${site}] Failed to fetch ${loc}: ${err}`);
+        console.error(`  [labs/${site}] Failed to fetch ${loc}: ${err}`);
       }
       await sleep(FETCH_DELAY_MS);
     }

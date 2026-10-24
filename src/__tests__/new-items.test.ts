@@ -7,9 +7,9 @@ import { judgeItems, loadItemsFile, type VerdictCache } from "../core/jev.ts";
 import { loadReportedState, type ReportedState } from "../core/report-state.ts";
 
 const dir = fs.mkdtempSync(path.join(os.tmpdir(), "new-items-"));
-// The trace goes through report.ts's saveFile, which writes under digests/: kept in the temp dir here.
-vi.mock("../core/report.ts", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("../core/report.ts")>()),
+// The trace goes through llm.ts's saveFile, which writes under digests/: kept in the temp dir here.
+vi.mock("../core/llm.ts", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("../core/llm.ts")>()),
   saveFile: (content: string, ...segments: string[]) => {
     const file = path.join(dir, "digests", ...segments);
     fs.mkdirSync(path.dirname(file), { recursive: true });
@@ -61,7 +61,7 @@ function run(items: Item[] | null, state: ReportedState | null, cache: VerdictCa
         items: candidates.filter((i) => j.verdicts.get(i.id)?.keep),
         rankedBy: j.rankedBy,
         nextVerdicts: j.nextCache,
-        rankingFile: j.rankingFile([], {}),
+        traceFile: j.traceFile([], {}),
       };
     },
   });
@@ -72,7 +72,7 @@ function filesFor(name: string) {
   const files = {
     state: path.join(dir, `${name}-state.json`),
     verdicts: path.join(dir, `${name}-verdicts.json`),
-    trace: `${name}-ranking.json`,
+    trace: `${name}-trace.json`,
   };
   return {
     files,
@@ -117,7 +117,7 @@ describe("collectNewItems", () => {
         alsoNew: [over!],
         rankedBy: "jev",
         nextVerdicts: null,
-        rankingFile: "",
+        traceFile: "",
       }),
     });
     expect(data.alsoNew!.map((i) => i.id)).toEqual(["over"]);

@@ -28,7 +28,7 @@ import {
   type TrendingReportData,
 } from "./rank.ts";
 import {
-  buildTrendingRankingFile,
+  buildTrendingTraceFile,
   classifyTrendingItems,
   loadClassifyCache,
   loadMatchState,
@@ -520,13 +520,13 @@ export async function composeTrendingReport(
     `  [trending] Radar: ${report.radar.length} rows | ` +
       (report.categories.map((c) => `${c.category}: ${c.rows.length}`).join(", ") || "no category rows"),
   );
-  const rankingFile =
+  const traceFile =
     classifiedBy === "jev" || matchCalled
-      ? buildTrendingRankingFile(items, classifications, classifiedBy, matchTrace, matchModels)
+      ? buildTrendingTraceFile(items, classifications, classifiedBy, matchTrace, matchModels)
       : undefined;
   return {
     ...report,
-    ...(rankingFile !== undefined ? { rankingFile } : {}),
+    ...(traceFile !== undefined ? { traceFile } : {}),
     ...(nextMatches !== undefined ? { nextMatches } : {}),
     ...(nextCache ? { nextClassifications: nextCache } : {}),
     nextStarHistory: nextStarHistory(history, githubRows, dateStr, reportedKeys(report)),

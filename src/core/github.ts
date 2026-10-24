@@ -3,7 +3,7 @@
  * Reads GITHUB_TOKEN and DIGEST_REPO from environment at call time.
  */
 
-import { LIVE_REPORT_IDS, REPORTS, WEEKLY_REPORT_IDS } from "./i18n.ts";
+import { LIVE_REPORT_IDS, REPORTS, WEEKLY_REPORT_IDS } from "./strings.ts";
 import { toCstDateStr, sleep } from "./date.ts";
 
 // ---------------------------------------------------------------------------

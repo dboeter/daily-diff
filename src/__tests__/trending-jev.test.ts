@@ -4,7 +4,7 @@ import path from "node:path";
 import { describe, it, expect, vi } from "vitest";
 import {
   applyMatchAnswers,
-  buildTrendingRankingFile,
+  buildTrendingTraceFile,
   classificationOf,
   classifyTrendingItems,
   fallbackClassification,
@@ -638,7 +638,7 @@ describe("composeTrendingReport", () => {
       ["coding_agent", ["a/agent"]],
     ]);
     expect(report.nextMatches?.apps["1"]).toMatchObject({ npm: "@kilocode/cli", lastSeen: DATE });
-    expect(JSON.parse(report.rankingFile!).matches).toEqual([
+    expect(JSON.parse(report.traceFile!).matches).toEqual([
       {
         app: "openrouter:1",
         title: "Kilo Code",
@@ -662,7 +662,7 @@ describe("composeTrendingReport", () => {
     expect(report.nextMatches).toBeUndefined();
   });
 
-  it("falls back to topic labels without a key and writes no ranking file", async () => {
+  it("falls back to topic labels without a key and writes no trace", async () => {
     const report = await composeTrendingReport(data, DATE, {
       apiKey: "",
       matchState: saved(),
@@ -672,7 +672,7 @@ describe("composeTrendingReport", () => {
       fetchGain: zeroGain,
     });
     expect(report.classifiedBy).toBe("topics");
-    expect(report.rankingFile).toBeUndefined();
+    expect(report.traceFile).toBeUndefined();
     expect(report.radar[0]!.keys).toEqual(["openrouter:1", "npm:@kilocode/cli"]);
     expect(report.nextClassifications).toEqual(noCache());
   });
@@ -701,7 +701,7 @@ describe("composeTrendingReport", () => {
     expect(second.classifiedBy).toBe("jev");
     expect([second.radar, second.categories]).toEqual([first.radar, first.categories]);
     expect(second.nextClassifications).toEqual(first.nextClassifications);
-    expect(JSON.parse(second.rankingFile!).items[0]).toMatchObject({ key: "github:a/agent", decided: DATE });
+    expect(JSON.parse(second.traceFile!).items[0]).toMatchObject({ key: "github:a/agent", decided: DATE });
 
     // The topic fallback would put b/weights (topic coding-agent) in coding_agent; the saved verdict keeps it out.
     const keyless = await composeTrendingReport(data, DATE, {
@@ -734,7 +734,7 @@ describe("composeTrendingReport", () => {
 // Trace
 // ---------------------------------------------------------------------------
 
-describe("buildTrendingRankingFile", () => {
+describe("buildTrendingTraceFile", () => {
   it("writes every item and match on its own line, rounded to 3 decimals", () => {
     const row = { ...githubRow("coding-agent"), gain: 812, gainFrom: "api" as const, relative: 0.0712345 };
     const items: ClassifyItem[] = [
@@ -753,7 +753,7 @@ describe("buildTrendingRankingFile", () => {
       ],
       ["npm:x", { category: null, standalone: null }],
     ]);
-    const file = buildTrendingRankingFile(
+    const file = buildTrendingTraceFile(
       items,
       classifications,
       "jev",

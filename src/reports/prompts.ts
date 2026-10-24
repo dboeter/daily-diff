@@ -3,8 +3,8 @@
  */
 
 import type { RepoConfig, GitHubItem, GitHubRelease } from "../core/github.ts";
-import type { NewsItem } from "./agent-news.ts";
-import { GOING_AWAY, SECTIONS } from "../core/i18n.ts";
+import type { NewsItem } from "./project-news.ts";
+import { GOING_AWAY, SECTIONS } from "../core/strings.ts";
 
 // ---------------------------------------------------------------------------
 // Types

@@ -241,13 +241,13 @@ describe("selectPolicyItems", () => {
       cache: { items: {} },
       ask,
     });
-    const trace = JSON.parse(sel.rankingFile) as { models: string[]; items: { id: string; kept: boolean }[] };
+    const trace = JSON.parse(sel.traceFile) as { models: string[]; items: { id: string; kept: boolean }[] };
     expect(trace.models).toEqual(["jev-1.0"]);
     expect(trace.items.map((i) => [i.id, i.kept])).toEqual([
       ["a", true],
       ["b", false],
     ]);
-    expect(sel.rankingFile.split("\n").filter((l) => l.startsWith('{"id"'))).toHaveLength(2);
+    expect(sel.traceFile.split("\n").filter((l) => l.startsWith('{"id"'))).toHaveLength(2);
   });
 });
 

@@ -1,18 +1,19 @@
 /**
- * Report content builders — extracted from index.ts for testability.
+ * Report Markdown in code: page assembly, the report bar, the code-rendered
+ * tables, and the cleanup of what models write (titles, code links, headings).
  */
 
 import { hasActivity, RELEASE_BODY_CHARS, releaseNotes, type ProjectActivity } from "./prompts.ts";
-import type { ReleaseRow } from "./data-reports.ts";
-import { escapeRegex } from "./agent-news.ts";
+import type { ReleaseRow } from "./pages.ts";
+import { escapeRegex } from "./project-news.ts";
 import type { OpenRouterNewModel, OpenRouterStealthModel } from "../sources/openrouter.ts";
-import type { WebPageItem } from "../sources/web.ts";
+import type { LabPost } from "../sources/labs.ts";
 import type { TrendingReportData } from "../trending/rank.ts";
 import type { PolicyItem } from "../policy/policy.ts";
 import type { KeptVendorItem } from "../data/jev.ts";
 import type { VendorAction } from "../data/vendors.ts";
 import type { StoryRow } from "../spotted/spotted.ts";
-import type { ResearchPaper } from "../sources/research.ts";
+import type { ResearchPaper } from "../trending/research.ts";
 import type { Category } from "../trending/rank.ts";
 import type { RepoConfig } from "../core/github.ts";
 import {
@@ -37,7 +38,7 @@ import {
   DATA_REPORT,
   SPOTTED,
   type ReportId,
-} from "../core/i18n.ts";
+} from "../core/strings.ts";
 
 // ---------------------------------------------------------------------------
 // Project digest (the agents report's agents and infra sections, the data report's repo sections)
@@ -565,7 +566,7 @@ export function renderCandidates(
 }
 
 /** The models page's Lab announcements rows, each summary by its own number (else the page text, truncated, or "—"). */
-export function renderLabPostsTable(posts: Numbered<WebPageItem>[], summaries: Map<number, string>): string {
+export function renderLabPostsTable(posts: Numbered<LabPost>[], summaries: Map<number, string>): string {
   const lines = posts.map(
     (p) =>
       `| ${p.lastmod.slice(0, 10) || "—"} | ${MODELS_PAGE.labs[p.site]} | [${policyTitleLabel(p.title || p.url)}](${cell(p.url)}) | ` +

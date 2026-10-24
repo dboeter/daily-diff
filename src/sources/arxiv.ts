@@ -35,8 +35,8 @@ export interface ArxivData {
   fetchSuccess: boolean;
   /** How `papers` was cut down from the 48h pool. */
   rankedBy: "jev" | "recency";
-  /** `buildRankingFile` output when ranked by Jev, saved next to the report. */
-  rankingFile?: string;
+  /** `buildTraceFile` output when ranked by Jev, saved next to the report. */
+  traceFile?: string;
   /** State to save after the run's health gate; absent when there were no new papers. */
   nextState?: ArxivState;
 }
@@ -348,17 +348,17 @@ export async function rankByRelevance(
     .sort((a, b) => (b.jev?.relevance ?? -1) - (a.jev?.relevance ?? -1));
 }
 
-/** Papers kept in the ranking file — the 40 kept papers plus the next tier, for tuning. */
-const RANKING_FILE_PAPERS = 100;
+/** Papers kept in the trace — the 40 kept papers plus the next tier, for tuning. */
+const TRACE_PAPERS = 100;
 
 /**
- * The ranking file: per-paper raw judgments for the top of the ranking, one
+ * The trace: per-paper raw judgments for the top of the ranking, one
  * paper per line. Kept so a misranked paper can be traced to an answer or a
  * weight, and so weights can be retuned on past days without rerunning Jev.
  */
-export function buildRankingFile(ranked: RankedPaper[]): string {
+export function buildTraceFile(ranked: RankedPaper[]): string {
   const rows = ranked
-    .slice(0, RANKING_FILE_PAPERS)
+    .slice(0, TRACE_PAPERS)
     .flatMap(({ paper, jev }) => (jev ? [{ paper, jev }] : []))
     .map(({ paper, jev }) => {
       const a = jev.answers;
@@ -499,7 +499,7 @@ async function fetchArxiv(dateStr: string, state: ArxivState | null): Promise<Ar
     papers,
     fetchSuccess: papers.length > 0,
     rankedBy,
-    ...(ranked ? { rankingFile: buildRankingFile(ranked) } : {}),
+    ...(ranked ? { traceFile: buildTraceFile(ranked) } : {}),
     ...(nextState ? { nextState } : {}),
   };
 }

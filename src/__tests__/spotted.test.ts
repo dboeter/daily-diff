@@ -12,8 +12,8 @@ import {
   type Story,
   type StorySource,
 } from "../spotted/spotted.ts";
-import { renderSpottedTable } from "../reports/report-builders.ts";
-import { buildSpottedSummariesPrompt } from "../reports/prompts-data.ts";
+import { renderSpottedTable } from "../reports/markdown.ts";
+import { buildSpottedSummariesPrompt } from "../reports/prompts-pages.ts";
 import { numberRows, parseRowSummaries } from "../reports/summarized-table.ts";
 
 const DATE = "2026-10-22";
