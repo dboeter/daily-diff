@@ -1,0 +1,282 @@
+import { describe, it, expect, vi, afterEach } from "vitest";
+import fs from "node:fs";
+import { toRepoConfig, loadConfig } from "../../core/config.ts";
+
+// ---------------------------------------------------------------------------
+// toRepoConfig
+// ---------------------------------------------------------------------------
+
+describe("toRepoConfig", () => {
+  it("converts a basic entry", () => {
+    const result = toRepoConfig({ id: "test", repo: "org/test", name: "Test" });
+    expect(result).toEqual({ id: "test", repo: "org/test", name: "Test" });
+  });
+
+  it("includes keywords when non-empty", () => {
+    const result = toRepoConfig({ id: "pi", repo: "org/pi", name: "Pi", keywords: ["pi agent"] });
+    expect(result).toEqual({ id: "pi", repo: "org/pi", name: "Pi", keywords: ["pi agent"] });
+  });
+
+  it("omits keywords when empty", () => {
+    const result = toRepoConfig({ id: "test", repo: "org/test", name: "Test", keywords: [] });
+    expect(result).not.toHaveProperty("keywords");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// loadConfig
+// ---------------------------------------------------------------------------
+
+describe("loadConfig", () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  const VALID = `
+agents:
+  title: Agents Title
+  subject: agents subject
+  repos:
+    - id: custom
+      repo: org/custom
+      name: Custom Tool
+      keywords: [custom tool]
+skills_repo: custom/skills
+policy:
+  reader_profile: A practitioner.
+  watchlist:
+    eu: [ai-act]
+    nl: []
+    us_federal: []
+    us_states: []
+  data_law: [Data Act, "2022/868"]
+  feeds:
+    - name: Commission
+      url: https://example.eu/rss.xml
+      jurisdiction: eu
+    - name: Supervisor
+      url: https://example.nl/rss.xml
+      jurisdiction: nl
+      jev_only: true
+      kind: news
+  calendar:
+    - date: 2026-12-02
+      label: Milestone
+      link: https://example.eu/timeline
+infra:
+  title: Infra Title
+  subject: infra subject
+  repos:
+    - id: custom-engine
+      repo: org/custom-engine
+      name: Custom Engine
+databricks:
+  title: Databricks Title
+  subject: databricks subject
+  repos:
+    - id: delta
+      repo: org/delta
+      name: Delta
+snowflake:
+  title: Snowflake Title
+  subject: snowflake subject
+  repos:
+    - id: polaris
+      repo: org/polaris
+      name: Polaris
+data_stack:
+  title: Stack Title
+  subject: stack subject
+  repos:
+    - id: duckdb
+      repo: org/duckdb
+      name: DuckDB
+data:
+  feeds:
+    - name: Azure updates
+      vendor: azure
+      url: https://example.com/azure/rss
+      parser: rss
+      categories: [Databases]
+    - name: BigQuery
+      vendor: gcp
+      url: https://example.com/bq.xml
+      parser: bigquery
+`;
+
+  function load(yamlText: string) {
+    vi.spyOn(fs, "existsSync").mockReturnValue(true);
+    vi.spyOn(fs, "readFileSync").mockReturnValue(yamlText);
+    return loadConfig("test.yml");
+  }
+
+  it("loads every section and skills_repo from valid YAML", () => {
+    expect(load(VALID)).toEqual({
+      agents: {
+        title: "Agents Title",
+        subject: "agents subject",
+        repos: [{ id: "custom", repo: "org/custom", name: "Custom Tool", keywords: ["custom tool"] }],
+      },
+      skillsRepo: "custom/skills",
+      policy: {
+        readerProfile: "A practitioner.",
+        watchlist: { eu: ["ai-act"], nl: [], usFederal: [], usStates: [] },
+        feeds: [
+          {
+            name: "Commission",
+            url: "https://example.eu/rss.xml",
+            jurisdiction: "eu",
+            jevOnly: false,
+            news: false,
+          },
+          {
+            name: "Supervisor",
+            url: "https://example.nl/rss.xml",
+            jurisdiction: "nl",
+            jevOnly: true,
+            news: true,
+          },
+        ],
+        dataLaw: ["Data Act", "2022/868"],
+        calendar: [{ date: "2026-12-02", label: "Milestone", link: "https://example.eu/timeline" }],
+      },
+      infra: {
+        title: "Infra Title",
+        subject: "infra subject",
+        repos: [{ id: "custom-engine", repo: "org/custom-engine", name: "Custom Engine" }],
+      },
+      databricks: {
+        title: "Databricks Title",
+        subject: "databricks subject",
+        repos: [{ id: "delta", repo: "org/delta", name: "Delta" }],
+      },
+      snowflake: {
+        title: "Snowflake Title",
+        subject: "snowflake subject",
+        repos: [{ id: "polaris", repo: "org/polaris", name: "Polaris" }],
+      },
+      data_stack: {
+        title: "Stack Title",
+        subject: "stack subject",
+        repos: [{ id: "duckdb", repo: "org/duckdb", name: "DuckDB" }],
+      },
+      data: {
+        feeds: [
+          {
+            name: "Azure updates",
+            vendor: "azure",
+            url: "https://example.com/azure/rss",
+            parser: "rss",
+            categories: ["Databases"],
+          },
+          { name: "BigQuery", vendor: "gcp", url: "https://example.com/bq.xml", parser: "bigquery" },
+        ],
+      },
+    });
+  });
+
+  it("throws when the data section or a data feed field is missing or unknown", () => {
+    expect(() => load(VALID.slice(0, VALID.indexOf("data:")))).toThrow('missing section "data"');
+    expect(() => load(VALID.replace("      vendor: gcp\n", ""))).toThrow(
+      "data.feeds[1].vendor must be one of",
+    );
+    expect(() => load(VALID.replace("parser: bigquery", "parser: atom"))).toThrow(
+      "data.feeds[1].parser must be one of",
+    );
+    expect(() => load(VALID.replace("url: https://example.com/bq.xml", ""))).toThrow(
+      "data.feeds[1] needs name and url",
+    );
+    expect(() =>
+      load(VALID.replace("parser: bigquery", "parser: bigquery\n      categories: [Feature]")),
+    ).toThrow("data.feeds[1].categories must be a list, on an rss feed");
+  });
+
+  it("throws when a policy feed has no known jurisdiction", () => {
+    expect(() => load(VALID.replace("jurisdiction: eu", "jurisdiction: uk"))).toThrow(
+      "policy.feeds[0].jurisdiction must be one of",
+    );
+  });
+
+  it("appends a policy feed's query, URL-encoded JSON, to its url", () => {
+    const yaml = VALID.replace(
+      "url: https://example.nl/rss.xml",
+      `url: https://www.rijksoverheid.nl/api/rss
+      query: { filters: [{ field: content_type, values: ["pro:newsDocument"], type: all }], resultSearchTerm: "", pageTitle: Nieuws }`,
+    );
+    expect(load(yaml).policy.feeds[1]!.url).toBe(
+      "https://www.rijksoverheid.nl/api/rss?query=%7B%22filters%22%3A%5B%7B%22field%22%3A%22content_type%22%2C%22values%22%3A%5B%22pro%3AnewsDocument%22%5D%2C%22type%22%3A%22all%22%7D%5D%2C%22resultSearchTerm%22%3A%22%22%2C%22pageTitle%22%3A%22Nieuws%22%7D",
+    );
+  });
+
+  it("throws when a policy feed has an unknown kind", () => {
+    expect(() => load(VALID.replace("kind: news", "kind: blog"))).toThrow(
+      "policy.feeds[1].kind must be news",
+    );
+  });
+
+  it("throws when the file does not exist", () => {
+    vi.spyOn(fs, "existsSync").mockReturnValue(false);
+    expect(() => loadConfig("/nonexistent/config.yml")).toThrow("not found");
+  });
+
+  it("throws when a section is missing", () => {
+    expect(() => load(VALID.replace(/infra:[\s\S]*$/, ""))).toThrow('missing section "infra"');
+    expect(() => load(VALID.replace(/data_stack:[\s\S]*$/, ""))).toThrow('missing section "data_stack"');
+  });
+
+  it("throws when repos is empty", () => {
+    expect(() =>
+      load(VALID.replace(/repos:\n {4}- id: custom\n[\s\S]*?skills_repo/, "repos: []\nskills_repo")),
+    ).toThrow("agents.repos must be a non-empty list");
+  });
+
+  it("throws when title or subject is missing", () => {
+    expect(() => load(VALID.replace("  title: Infra Title\n", ""))).toThrow(
+      "infra.title must be a non-empty string",
+    );
+    expect(() => load(VALID.replace("  subject: agents subject\n", ""))).toThrow(
+      "agents.subject must be a non-empty string",
+    );
+  });
+
+  it("throws when a repo entry lacks a field", () => {
+    expect(() => load(VALID.replace("      name: Custom Engine\n", ""))).toThrow(
+      "infra.repos[0] needs id, repo and name",
+    );
+  });
+
+  it("throws when skills_repo is empty", () => {
+    expect(() => load(VALID.replace("skills_repo: custom/skills", "skills_repo: ''"))).toThrow(
+      "skills_repo must be a non-empty string",
+    );
+  });
+
+  it("throws when the policy section or its reader profile is missing", () => {
+    expect(() => load(VALID.replace(/policy:[\s\S]*?infra:/, "infra:"))).toThrow('missing section "policy"');
+    expect(() => load(VALID.replace("  reader_profile: A practitioner.\n", ""))).toThrow(
+      "policy.reader_profile must be a non-empty string",
+    );
+  });
+
+  it("throws when a policy calendar entry has no valid date", () => {
+    expect(() => load(VALID.replace("date: 2026-12-02", "date: December"))).toThrow(
+      "policy.calendar[0] needs date (YYYY-MM-DD), label and link",
+    );
+  });
+
+  it("throws when policy.data_law is not a list", () => {
+    expect(() => load(VALID.replace('  data_law: [Data Act, "2022/868"]\n', ""))).toThrow(
+      "policy.data_law must be a list",
+    );
+  });
+
+  it("throws when a policy watchlist is not a list", () => {
+    expect(() => load(VALID.replace("    nl: []\n", ""))).toThrow("policy.watchlist.nl must be a list");
+  });
+
+  it("throws when a policy feed lacks a name or url", () => {
+    expect(() => load(VALID.replace("      url: https://example.eu/rss.xml\n", ""))).toThrow(
+      "policy.feeds[0] needs name and url",
+    );
+  });
+});

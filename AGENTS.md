@@ -49,7 +49,7 @@ Every chat-model call goes through `callLlm` (`src/core/llm.ts`), at most 5 conc
 
 ## Source files
 
-`src/` is grouped by area. Within an area folder the area prefix is dropped (`policy/relevance.ts`, not `policy/policy-relevance.ts`). Tests stay flat in `src/__tests__/`, named `<module>.test.ts`, with the area prefix on most `policy/`, `data/`, `spotted/` and `trending/` modules (`policy-jev.test.ts` tests `policy/relevance.ts`); `community.test.ts` (Dev.to, Hugging Face, Lobste.rs) and `prompt-builders.test.ts` (both prompt files) cover several.
+`src/` is grouped by area. Within an area folder the area prefix is dropped (`policy/relevance.ts`, not `policy/policy-relevance.ts`). Tests mirror `src/` under `src/__tests__/`: the tests of `policy/relevance.ts` are in `__tests__/policy/relevance.test.ts`. Fixtures are in `__tests__/fixtures/`.
 
 | Path                              | Responsibility                                                                                                                                                                                                                          |
 | --------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
