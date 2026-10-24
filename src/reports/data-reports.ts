@@ -468,9 +468,11 @@ function splitProse(prose: string): { highlights: string; acrossPlatforms: strin
   const after = lines.slice(marker !== -1 ? i + 1 : i);
   const start = after.findIndex((l) => l.trim() === `## ${DATA_REPORT.acrossPlatforms}`);
   const end = after.findIndex((l, j) => j > start && l.startsWith("## "));
+  const section = start === -1 ? [] : after.slice(start + 1, end === -1 ? undefined : end);
   const bullets: string[] = [];
   let inBullet = false;
-  for (const l of start === -1 ? [] : after.slice(start + 1, end === -1 ? undefined : end)) {
+  // signListItems first: bullets opened with the sign instead of a marker would match no BULLET_RE.
+  for (const l of signListItems(section.join("\n")).split("\n")) {
     inBullet = BULLET_RE.test(l) || (inBullet && /^\s+\S/.test(l));
     if (inBullet) bullets.push(l.trimEnd());
   }
