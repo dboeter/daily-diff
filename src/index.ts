@@ -27,14 +27,14 @@ import {
   hasActivity,
   isMajorRelease,
 } from "./reports/prompts.ts";
-import { matchProjectNews } from "./reports/agent-news.ts";
+import { matchProjectNews } from "./reports/project-news.ts";
 import {
   buildHighlightsPrompt,
   buildSpottedSummariesPrompt,
   forcedHighlightReports,
   withFallbackHighlights,
   type ReportHighlights,
-} from "./reports/prompts-data.ts";
+} from "./reports/prompts-pages.ts";
 import {
   callLlm,
   generateOr,
@@ -45,8 +45,8 @@ import {
   reportLlmHealth,
   llmHealthLine,
   isConnectionError,
-} from "./core/report.ts";
-import { renderReportBar, withReportBar } from "./reports/report-builders.ts";
+} from "./core/llm.ts";
+import { renderReportBar, withReportBar } from "./reports/markdown.ts";
 import { parseRowSummaries } from "./reports/summarized-table.ts";
 import {
   buildModelsPage,
@@ -58,13 +58,13 @@ import {
   labPosts,
   LAB_POSTS_MAX,
   type SavedReport,
-} from "./reports/data-reports.ts";
-import { loadWebState, fetchSiteContent, type WebFetchResult, type WebState } from "./sources/web.ts";
+} from "./reports/pages.ts";
+import { loadLabsState, fetchSiteContent, type LabsFetchResult, type LabsState } from "./sources/labs.ts";
 import { fetchTrendingData, type TrendingData } from "./trending/trending.ts";
 import { fetchModelCatalogDaily, type ModelCatalog } from "./sources/openrouter.ts";
 import { fetchHnData, pageDescription, type HnData, type HnStory } from "./sources/hn.ts";
 import { fetchArxivData, saveArxivState, type ArxivData } from "./sources/arxiv.ts";
-import { loadResearchState, nextResearchState, saveResearchState, weekPapers } from "./sources/research.ts";
+import { loadResearchState, nextResearchState, saveResearchState, weekPapers } from "./trending/research.ts";
 import { fetchPolicyData, loadPolicyState, type PolicyData } from "./policy/policy.ts";
 import { isDataLaw } from "./policy/jev.ts";
 import { fetchVendorData, loadDataState, type VendorData } from "./data/vendors.ts";
@@ -89,13 +89,13 @@ import {
   loadTopicCache,
   routeStories,
   saveTopicCache,
-  spottedRankingFile,
+  spottedTraceFile,
   PAGE_OF_TOPIC,
 } from "./spotted/jev.ts";
 import { DATA_SECTION_KEYS, loadConfig, type SectionKey } from "./core/config.ts";
 import { resolvePagesUrl } from "./cli/notify.ts";
 import { toCstDateStr, toUtcStr, isWeeklyRun, sleep } from "./core/date.ts";
-import { LIVE_REPORT_IDS, MSG, PROJECT_SCOPE, REPORTS, reportIssueTitle } from "./core/i18n.ts";
+import { LIVE_REPORT_IDS, MSG, PROJECT_SCOPE, REPORTS, reportIssueTitle } from "./core/strings.ts";
 
 // ---------------------------------------------------------------------------
 // Repo config — loaded from config.yml (throws when a section is missing)
@@ -189,7 +189,7 @@ async function fetchProject(cfg: RepoConfig, since: Date, weekSince?: Date): Pro
 
 async function fetchAllData(
   now: Date,
-  webState: WebState,
+  labsState: LabsState,
   weekly: boolean,
   /** A Hacker News story out of the Spotted pool: a page showed it or a copy of its link (`isFresh`). */
   hnShown: (story: HnStory) => boolean,
@@ -199,7 +199,7 @@ async function fetchAllData(
   /** One list per data report section, in DATA_SECTIONS order. */
   dataFetches: ProjectFetch[][];
   skillsData: SkillsData;
-  webResults: WebFetchResult[];
+  labsResults: LabsFetchResult[];
   trendingData: TrendingData;
   hnData: HnData;
   arxivData: ArxivData;
@@ -214,7 +214,7 @@ async function fetchAllData(
   // The data report's Releases this week: its repos release about weekly, so a 24h window saw none on most days.
   const weekSince = new Date(now.getTime() - 7 * DAY_MS);
   console.log(
-    `  Tracking daily: ${[...AGENTS, ...INFRA_REPOS, ...DATA_SECTIONS.flatMap((s) => s.repos)].map((r) => r.id).join(", ")}, web, openrouter catalog, hn, devto, lobsters, arxiv, policy, trending (news only)` +
+    `  Tracking daily: ${[...AGENTS, ...INFRA_REPOS, ...DATA_SECTIONS.flatMap((s) => s.repos)].map((r) => r.id).join(", ")}, labs, openrouter catalog, hn, devto, lobsters, arxiv, policy, trending (news only)` +
       (weekly ? " | weekly: skills, trending, hf" : ""),
   );
 
@@ -225,7 +225,7 @@ async function fetchAllData(
     infraFetches,
     dataFetches,
     skillsData,
-    webResults,
+    labsResults,
     trendingData,
     hnData,
     arxivData,
@@ -244,8 +244,8 @@ async function fetchAllData(
     // No fetcher here throws: each returns its empty value (fetchSuccess false) on a failure.
     weekly ? fetchSkillsData(CLAUDE_SKILLS_REPO) : Promise.resolve(noSkills),
     Promise.all([
-      fetchSiteContent("anthropic", webState, toCstDateStr(now)),
-      fetchSiteContent("openai", webState, toCstDateStr(now)),
+      fetchSiteContent("anthropic", labsState, toCstDateStr(now)),
+      fetchSiteContent("openai", labsState, toCstDateStr(now)),
     ]),
     // Fetched every day — the agents report matches trending repos as news —
     // but only reported weekly.
@@ -266,7 +266,7 @@ async function fetchAllData(
     infraFetches,
     dataFetches,
     skillsData,
-    webResults,
+    labsResults,
     trendingData,
     hnData,
     arxivData,
@@ -325,7 +325,7 @@ async function main(): Promise<void> {
   );
 
   // 1. Fetch all data in parallel
-  const webState = loadWebState();
+  const labsState = loadLabsState();
   // Before the fetch: HN's cut counts only the stories no page has shown.
   const spottedLog = loadSpottedLog();
   const inPool = isFresh(spottedLog, dateStr);
@@ -334,7 +334,7 @@ async function main(): Promise<void> {
     infraFetches,
     dataFetches,
     skillsData,
-    webResults,
+    labsResults,
     trendingData,
     hnData,
     arxivData,
@@ -344,7 +344,7 @@ async function main(): Promise<void> {
     devtoData,
     lobstersData,
     modelCatalog,
-  } = await fetchAllData(now, webState, weekly, (s) => !inPool({ id: `hn:${s.id}`, url: s.url }));
+  } = await fetchAllData(now, labsState, weekly, (s) => !inPool({ id: `hn:${s.id}`, url: s.url }));
   const stories = storiesFrom(hnData, lobstersData, devtoData);
   const fresh = freshStories(stories, spottedLog, dateStr);
 
@@ -384,7 +384,7 @@ async function main(): Promise<void> {
   const pool = splitPool(
     fresh,
     newsLinks,
-    labPosts(webResults)
+    labPosts(labsResults)
       .slice(0, LAB_POSTS_MAX)
       .map((p) => p.url),
   );
@@ -446,8 +446,8 @@ async function main(): Promise<void> {
       dateStr,
     ),
     buildModelsPage(
-      webResults,
-      webState,
+      labsResults,
+      labsState,
       modelCatalog,
       { rows: spottedOf("models"), summaries: spottedSummaryMap },
       utcStr,
@@ -511,11 +511,11 @@ async function main(): Promise<void> {
   saveSpottedLog(nextLog(spottedLog, stories, shownIds, dateStr));
   if (routing.judgment.nextCache) saveTopicCache(routing.judgment.nextCache);
   console.log(
-    `  Saved ${saveFile(spottedRankingFile(unmatched, routing, dailyShown), dateStr, "spotted-ranking.json")}`,
+    `  Saved ${saveFile(spottedTraceFile(unmatched, routing, dailyShown), dateStr, "spotted-trace.json")}`,
   );
   // Research: the day's top papers for the weekly Trends page; the arXiv cutoff moves on every run.
-  if (arxivData.rankingFile) {
-    console.log(`  Saved ${saveFile(arxivData.rankingFile, dateStr, "arxiv-ranking.json")}`);
+  if (arxivData.traceFile) {
+    console.log(`  Saved ${saveFile(arxivData.traceFile, dateStr, "arxiv-trace.json")}`);
   }
   if (arxivData.nextState) saveArxivState(arxivData.nextState);
   saveResearchState(nextResearchState(researchState, arxivData, dateStr));

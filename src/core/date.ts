@@ -32,7 +32,7 @@ export function weekdayOf(dateStr: string): number {
 }
 
 /**
- * The Trends page (WEEKLY_REPORT_IDS, i18n.ts) runs weekly, not daily — both
+ * The Trends page (WEEKLY_REPORT_IDS, strings.ts) runs weekly, not daily — both
  * the fetch and the report, except that Trending is still fetched daily for
  * news matching. Its Research and Most discussed sections read what the daily
  * runs saved (the research state, the Spotted log). Sampled over September

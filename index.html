@@ -72,7 +72,7 @@
       line-height: 1.5;
       overflow: hidden;
     }
-    /* A report's square (REPORTS color in src/core/i18n.ts, manifest `colors`); set as --tile. */
+    /* A report's square (REPORTS color in src/core/strings.ts, manifest `colors`); set as --tile. */
     .tile {
       display: inline-block; flex-shrink: 0; width: 10px; height: 10px; border-radius: 2px;
       background: var(--tile, var(--muted));
@@ -233,7 +233,7 @@
     .md li > ul, .md li > ol { margin-top: 4px; margin-bottom: 0; }
     .md blockquote { border-left: 2px solid var(--border); padding: 4px 16px; margin: 12px 0; color: var(--muted); }
     /* A report's header block: H1, report bar as tabs, meta line (withReportBar in
-       src/reports/report-builders.ts; decorateReport turns the bar into tabs). Reports from
+       src/reports/markdown.ts; decorateReport turns the bar into tabs). Reports from
        before the bar go straight from the H1 to the meta line. */
     .md .report-tabs {
       display: flex; flex-wrap: wrap; gap: 4px 22px; margin: 18px 0 0;
@@ -402,7 +402,7 @@ function renderMarkdown(raw) {
   });
 }
 
-// Report id → label, from manifest.json (`labels`, written from REPORT_LABELS in src/core/i18n.ts).
+// Report id → label, from manifest.json (`labels`, written from REPORT_LABELS in src/core/strings.ts).
 let LABELS = {};
 
 // ── Theme ──
@@ -435,7 +435,7 @@ function escapeHtml(s) {
 }
 
 // Manifest data: dates newest first, the weekly report ids, the overview's
-// label (OVERVIEW in src/core/i18n.ts), its Coming up heading (COMING_UP) and the
+// label (OVERVIEW in src/core/strings.ts), its Coming up heading (COMING_UP) and the
 // Highlights heading (SECTIONS).
 let DATES = [];
 let WEEKLY = [];
@@ -628,7 +628,7 @@ async function renderOverview(date) {
   return parts.join('');
 }
 
-// Highlights carry the gutter sign (GOING_AWAY in src/core/i18n.ts) from this date on: it opens
+// Highlights carry the gutter sign (GOING_AWAY in src/core/strings.ts) from this date on: it opens
 // one going away, the rest are additions. Earlier days have no signs, so no gutter.
 const SIGNED_SINCE = '2026-10-24';
 const GOING_AWAY = '−';

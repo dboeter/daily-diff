@@ -12,15 +12,15 @@
 
 import fs from "node:fs";
 import path from "node:path";
-import { callLlm, parseLlmJson } from "../src/core/report.ts";
+import { callLlm, parseLlmJson } from "../src/core/llm.ts";
 import {
   buildHighlightsPrompt,
   forcedHighlightReports,
   withFallbackHighlights,
   type ReportHighlights,
-} from "../src/reports/prompts-data.ts";
+} from "../src/reports/prompts-pages.ts";
 import { buildMessage } from "../src/cli/notify.ts";
-import { REPORT_LABELS } from "../src/core/i18n.ts";
+import { REPORT_LABELS } from "../src/core/strings.ts";
 
 const DATE = process.argv[2] && !process.argv[2].startsWith("-") ? process.argv[2] : null;
 const NOTIFY = process.argv.includes("--notify");

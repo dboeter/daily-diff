@@ -7,12 +7,12 @@ import {
   summaryOutputRule,
   TABLES_MARKER,
 } from "../reports/summarized-table.ts";
-import { renderPolicyTable, renderVendorTables } from "../reports/report-builders.ts";
+import { renderPolicyTable, renderVendorTables } from "../reports/markdown.ts";
 import {
   buildDataSummariesPrompt,
   buildPolicySummariesPrompt,
   buildTrendingSummariesPrompt,
-} from "../reports/prompts-data.ts";
+} from "../reports/prompts-pages.ts";
 import type { PolicyItem } from "../policy/policy.ts";
 import type { KeptVendorItem } from "../data/jev.ts";
 

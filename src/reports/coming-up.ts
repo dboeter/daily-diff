@@ -5,7 +5,7 @@
  */
 
 import type { PolicyCalendarEntry } from "../core/config.ts";
-import { COMING_UP, type ReportId } from "../core/i18n.ts";
+import { COMING_UP, type ReportId } from "../core/strings.ts";
 import type { Deadline } from "../core/report-state.ts";
 import type { DataState } from "../data/vendors.ts";
 import { upcomingDeadlines } from "../policy/deadlines.ts";

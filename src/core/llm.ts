@@ -1,12 +1,13 @@
 /**
- * LLM invocation, file I/O, and GitHub issue creation helpers.
+ * LLM calls: `callLlm` (limiter, retries), token budgets, the health gate and
+ * JSON parsing. `saveFile` and the report footer live here too.
  */
 
 import fs from "node:fs";
 import path from "node:path";
-import { FOOTER } from "./i18n.ts";
+import { FOOTER } from "./strings.ts";
 import { sleep } from "./date.ts";
-import { stripModelTitle, unwrapCodeLinks } from "../reports/report-builders.ts";
+import { stripModelTitle, unwrapCodeLinks } from "../reports/markdown.ts";
 
 // ---------------------------------------------------------------------------
 // LLM token budget constants

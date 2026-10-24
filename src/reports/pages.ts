@@ -1,6 +1,6 @@
 /**
- * Builders for the reports: LLM calls + report Markdown, plus the source's
- * state file (web, models, trending caches) once its report is built.
+ * The page builders (`buildXxxReport`): LLM calls + report Markdown, plus the
+ * source's state file (labs, models, trending caches) once its report is built.
  * main() writes the report files and opens the issues once every report is
  * in, so each report's bar can link the others.
  */
@@ -17,7 +17,7 @@ import {
   TRENDS_REPORT,
   reportHeading,
   type ReportId,
-} from "../core/i18n.ts";
+} from "../core/strings.ts";
 import {
   buildPolicySummariesPrompt,
   buildTrendingSummariesPrompt,
@@ -29,9 +29,9 @@ import {
   buildDataProsePrompt,
   buildModelsSummariesPrompt,
   modelSources,
-} from "./prompts-data.ts";
-import { generateOr, saveFile, autoGenFooter, LLM_TOKENS_LISTING } from "../core/report.ts";
-import { saveWebState, type WebFetchResult, type WebPageItem, type WebState } from "../sources/web.ts";
+} from "./prompts-pages.ts";
+import { generateOr, saveFile, autoGenFooter, LLM_TOKENS_LISTING } from "../core/llm.ts";
+import { saveLabsState, type LabsFetchResult, type LabPost, type LabsState } from "../sources/labs.ts";
 import { loadReportedState, newItems, nextReportedState, saveReportedState } from "../core/report-state.ts";
 import type { TrendingData } from "../trending/trending.ts";
 import { saveClassifyCache, saveMatchState } from "../trending/jev.ts";
@@ -66,7 +66,7 @@ import {
   renderSpottedTable,
   policyTitleLabel,
   type ProjectGroup,
-} from "./report-builders.ts";
+} from "./markdown.ts";
 import {
   numberRows,
   parseRowSummaries,
@@ -75,7 +75,7 @@ import {
   TABLES_MARKER,
 } from "./summarized-table.ts";
 import type { HfData } from "../sources/hf.ts";
-import type { ResearchPaper } from "../sources/research.ts";
+import type { ResearchPaper } from "../trending/research.ts";
 import { POLICY_STATE_FILE, type PolicyData, type PolicyItem } from "../policy/policy.ts";
 import { POLICY_VERDICTS_FILE } from "../policy/jev.ts";
 import { nearPolicyDeadlines, renderDeadlines } from "../policy/deadlines.ts";
@@ -206,8 +206,8 @@ export async function buildTrendsReport(
   );
 
   // Only once the page exists.
-  if (report?.rankingFile) {
-    console.log(`  Saved ${saveFile(report.rankingFile, dateStr, "trending-ranking.json")}`);
+  if (report?.traceFile) {
+    console.log(`  Saved ${saveFile(report.traceFile, dateStr, "trending-trace.json")}`);
   }
   if (report?.nextMatches) saveMatchState(report.nextMatches);
   if (report?.nextClassifications) saveClassifyCache(report.nextClassifications);
@@ -268,8 +268,8 @@ export const MODELS_STATE_FILE = "digests/models-state.json";
 export const LAB_POSTS_MAX = 15;
 
 /** The sitemaps' new posts, newest first; a first-crawled site only gets a count line: every URL in its sitemaps is new. */
-export function labPosts(web: WebFetchResult[]): WebPageItem[] {
-  return web
+export function labPosts(labs: LabsFetchResult[]): LabPost[] {
+  return labs
     .filter((r) => !r.isFirstRun)
     .flatMap((r) => r.newItems)
     .sort((a, b) => b.lastmod.localeCompare(a.lastmod));
@@ -283,12 +283,12 @@ export function labPosts(web: WebFetchResult[]): WebPageItem[] {
  * Two LLM calls: the posts' and models' row summaries, then Highlights over the
  * rendered sections. A failed summaries call shows the descriptions, a failed
  * Highlights call the failure notice. Null when there is no new post, new
- * model, 🆕 stealth model or Spotted row. The web state is saved either way, the
+ * model, 🆕 stealth model or Spotted row. The labs state is saved either way, the
  * models state only once the page is built.
  */
 export async function buildModelsPage(
-  web: WebFetchResult[],
-  webState: WebState,
+  labs: LabsFetchResult[],
+  labsState: LabsState,
   catalog: ModelCatalog | null,
   spotted: SpottedSection,
   utcStr: string,
@@ -296,10 +296,10 @@ export async function buildModelsPage(
   stateFile = MODELS_STATE_FILE,
   now = Date.now(),
 ): Promise<SavedReport | null> {
-  saveWebState(webState);
-  console.log("  [models] Web state saved.");
+  saveLabsState(labsState);
+  console.log("  [models] Labs state saved.");
   const P = MODELS_PAGE;
-  const posts = labPosts(web);
+  const posts = labPosts(labs);
   const shownPosts = numberRows(posts.slice(0, LAB_POSTS_MAX));
   const state = loadReportedState(stateFile);
   const fresh = newItems(
@@ -309,7 +309,7 @@ export async function buildModelsPage(
   );
   const models = numberRows(fresh, shownPosts.length);
   const newStealth = (catalog?.stealth ?? []).some((m) => isNewStealthModel(m, now));
-  const firstCrawls = web
+  const firstCrawls = labs
     .filter((r) => r.isFirstRun && r.totalDiscovered)
     .map((r) => P.firstCrawl(P.labs[r.site], r.totalDiscovered));
   if (!posts.length && !firstCrawls.length && !models.length && !newStealth && !spotted.rows.length) {
@@ -327,11 +327,11 @@ export async function buildModelsPage(
         )
       : "",
   );
-  const failed = web.filter((r) => !r.fetchSuccess).map((r) => P.siteFailed(P.labs[r.site]));
+  const failed = labs.filter((r) => !r.fetchSuccess).map((r) => P.siteFailed(P.labs[r.site]));
   const labBody = [
     shownPosts.length
       ? renderLabPostsTable(shownPosts, summaries)
-      : web.some((r) => !r.isFirstRun)
+      : labs.some((r) => !r.isFirstRun)
         ? P.noPosts
         : "",
     posts.length > LAB_POSTS_MAX ? P.morePosts(posts.length - LAB_POSTS_MAX) : "",
@@ -387,7 +387,7 @@ export async function buildPolicyReport(
   // The trace, the verdicts and the observed state before the no-items skip, unlike the trending
   // cache: on a day Jev drops every item there is no report, and the dropped items would be asked
   // again every day until they leave the feed's age window.
-  const files = { state: stateFile, verdicts: verdictsFile, trace: "policy-ranking.json" };
+  const files = { state: stateFile, verdicts: verdictsFile, trace: "policy-trace.json" };
   const writes = planWrites(policyData);
   commitWrites(writes.onFetched, files, dateStr);
   if (!policyData.fetchSuccess || policyData.items.length === 0) {
@@ -552,7 +552,7 @@ export async function buildDataReport(
 ): Promise<SavedReport | null> {
   // Before the skip, as in buildPolicyReport: dropped items are then not asked again tomorrow, and
   // a quiet day keeps its record-only bundles.
-  const files = { state: stateFile, verdicts: verdictsFile, trace: "data-ranking.json" };
+  const files = { state: stateFile, verdicts: verdictsFile, trace: "data-trace.json" };
   commitWrites(planWrites(vendor).onFetched, files, dateStr);
   if (!hasDataNews(sections, vendor, dateStr)) {
     console.log(`  [data] ${DATA_REPORT.noNewItems}`);

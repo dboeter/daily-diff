@@ -15,7 +15,7 @@ export const MSG = {
 } as const;
 
 // ---------------------------------------------------------------------------
-// Report headers & labels (used in report-builders.ts, index.ts)
+// Report headers & labels (used in markdown.ts, index.ts)
 // ---------------------------------------------------------------------------
 
 /**
@@ -247,7 +247,7 @@ export const STEALTH_SECTION = {
 } as const;
 
 // ---------------------------------------------------------------------------
-// Footer (used in report.ts)
+// Footer (used in llm.ts)
 // ---------------------------------------------------------------------------
 
 export const FOOTER = {

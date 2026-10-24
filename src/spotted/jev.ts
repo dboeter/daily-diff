@@ -249,10 +249,10 @@ export async function routeStories(
 }
 
 /**
- * `digests/YYYY-MM-DD/spotted-ranking.json`: every routed story with its
+ * `digests/YYYY-MM-DD/spotted-trace.json`: every routed story with its
  * topic, page, whether a page showed it, and its answers.
  */
-export function spottedRankingFile(stories: Story[], routing: Routing, shownIds: Set<string>): string {
+export function spottedTraceFile(stories: Story[], routing: Routing, shownIds: Set<string>): string {
   const rows = stories.map((s) => {
     const topic = routing.topics.get(s.id) ?? null;
     return {
@@ -264,5 +264,5 @@ export function spottedRankingFile(stories: Story[], routing: Routing, shownIds:
       ...routing.judgment.traceFields(s),
     };
   });
-  return routing.judgment.rankingFile(rows, {});
+  return routing.judgment.traceFile(rows, {});
 }

@@ -7,8 +7,8 @@
  */
 
 import type { PolicyCalendarEntry } from "../core/config.ts";
-import { POLICY_REPORT } from "../core/i18n.ts";
-import { cell, policyTitleLabel } from "../reports/report-builders.ts";
+import { POLICY_REPORT } from "../core/strings.ts";
+import { cell, policyTitleLabel } from "../reports/markdown.ts";
 import { daysBefore } from "../core/date.ts";
 import type { Deadline } from "../core/report-state.ts";
 

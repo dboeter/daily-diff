@@ -1,22 +1,24 @@
 /**
- * LLM prompt builders for data-source reports (trending, the models page, Spotted, policy, data).
- *
- * Separated from prompts.ts to keep each module focused.
+ * Page prompts: the row summaries of Trends, the models page, AI Policy, the
+ * data report and Spotted; the prose of Trends, AI Policy and the data report;
+ * Trends' Hugging Face table; and the highlights.json prompt. The agents and
+ * models pages' Highlights, the repo sections and the shared prompt rules are in
+ * prompts.ts.
  */
 
-import type { WebPageItem } from "../sources/web.ts";
+import type { LabPost } from "../sources/labs.ts";
 import type { summaryRows } from "../trending/rank.ts";
 import { formatTokens, type OpenRouterData, type OpenRouterNewModel } from "../sources/openrouter.ts";
-import { DATA_REPORT, MODELS_PAGE, MSG, SECTIONS, SPOTTED, TRENDS_REPORT } from "../core/i18n.ts";
+import { DATA_REPORT, MODELS_PAGE, MSG, SECTIONS, SPOTTED, TRENDS_REPORT } from "../core/strings.ts";
 import { TABLES_MARKER, rowList, summaryLine, summaryOutputRule, type Numbered } from "./summarized-table.ts";
 import { goingAwayRule, NO_TITLE_RULE, RELEASE_BODY_CHARS, releaseNotes } from "./prompts.ts";
-import type { ReleaseRow } from "./data-reports.ts";
+import type { ReleaseRow } from "./pages.ts";
 import type { Deadline } from "../core/report-state.ts";
 import type { HfData } from "../sources/hf.ts";
-import type { ResearchPaper } from "../sources/research.ts";
+import type { ResearchPaper } from "../trending/research.ts";
 import type { PolicyItem } from "../policy/policy.ts";
 import type { KeptVendorItem } from "../data/jev.ts";
-import { signHighlight } from "./report-builders.ts";
+import { signHighlight } from "./markdown.ts";
 import { siteOf, type StoryRow } from "../spotted/spotted.ts";
 
 /** Which sources Trends' Models section covers: no call when neither has data. */
@@ -210,7 +212,7 @@ ${summaryOutputRule(count)}
  * An OpenAI post has no page content: its title comes from the URL slug.
  */
 export function buildModelsSummariesPrompt(
-  posts: Numbered<WebPageItem>[],
+  posts: Numbered<LabPost>[],
   models: Numbered<OpenRouterNewModel>[],
   dateStr: string,
 ): string {

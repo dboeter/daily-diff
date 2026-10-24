@@ -1,11 +1,11 @@
 /**
  * Matches already-fetched news items (community stories, GitHub Trending) to the
- * agents they mention. Lab posts are not project news: they are the models page's
+ * tracked projects they mention. Lab posts are not project news: they are the models page's
  * tracked items. Pure functions — no network I/O.
  */
 
 import type { RepoConfig } from "../core/github.ts";
-import { SPOTTED } from "../core/i18n.ts";
+import { SPOTTED } from "../core/strings.ts";
 import { linkKey, type Story } from "../spotted/spotted.ts";
 import type { TrendingData } from "../trending/trending.ts";
 

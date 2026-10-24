@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { formatItem, goingAwayRule, topN } from "../reports/prompts.ts";
-import { highlightsOnly, signListItems } from "../reports/report-builders.ts";
+import { highlightsOnly, signListItems } from "../reports/markdown.ts";
 import type { GitHubItem } from "../core/github.ts";
 
 // ---------------------------------------------------------------------------

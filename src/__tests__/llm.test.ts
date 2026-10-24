@@ -4,7 +4,7 @@ import { EmptyResponseError, TruncatedResponseError } from "../providers/index.t
 
 // ---------------------------------------------------------------------------
 // Mock provider — intercepts createProvider() so the module-level `provider`
-// in report.ts uses our controllable mock instead of a real SDK client.
+// in llm.ts uses our controllable mock instead of a real SDK client.
 // ---------------------------------------------------------------------------
 
 const { mockCall } = vi.hoisted(() => ({
@@ -35,7 +35,7 @@ import {
   llmHealthLine,
   assertLlmHealthy,
   reportLlmHealth,
-} from "../core/report.ts";
+} from "../core/llm.ts";
 
 // ---------------------------------------------------------------------------
 // is429

@@ -253,7 +253,7 @@ export interface KeptVendorItem extends VendorItem {
 
 /**
  * Items by section, deprecations first, then by relevance (no verdict: feed order);
- * numbered in that order. Trace: `data-ranking.json`.
+ * numbered in that order. Trace: `data-trace.json`.
  */
 export type VendorSelection = Selection<Numbered<KeptVendorItem>, DataVerdicts, KeptVendorItem>;
 
@@ -349,11 +349,11 @@ export async function selectVendorItems(
     ...judgment.traceFields(i),
     ...(i.stage !== undefined ? { stage: i.stage } : { keyword: keywordVerdict(i) }),
   }));
-  const rankingFile = judgment.rankingFile(rows, { weights: DATA_WEIGHTS });
+  const traceFile = judgment.traceFile(rows, { weights: DATA_WEIGHTS });
 
   // By relevance, as orderAndCap ranked them; `kept` is in feed order.
   const alsoNew = [...kept]
     .filter((i) => !selectedIds.has(i.id))
     .sort((a, b) => (verdicts.get(b.id)?.relevance ?? -1) - (verdicts.get(a.id)?.relevance ?? -1));
-  return { items: numberRows(selected), alsoNew, rankedBy, nextVerdicts: judgment.nextCache, rankingFile };
+  return { items: numberRows(selected), alsoNew, rankedBy, nextVerdicts: judgment.nextCache, traceFile };
 }

@@ -8,7 +8,7 @@ import {
   extractText,
   titleFromUrl,
   emptyState,
-} from "../sources/web.ts";
+} from "../sources/labs.ts";
 
 // ---------------------------------------------------------------------------
 // parseSitemapUrls

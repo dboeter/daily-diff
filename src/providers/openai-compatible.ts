@@ -34,7 +34,7 @@ export abstract class OpenAICompatibleProvider implements LlmProvider {
       apiKey: opts.apiKey,
       baseURL: opts.baseURL,
       timeout: LLM_REQUEST_TIMEOUT_MS,
-      // Retries are callLlm's (report.ts), with budgets per error class.
+      // Retries are callLlm's (llm.ts), with budgets per error class.
       maxRetries: 0,
     });
   }
@@ -49,7 +49,7 @@ export abstract class OpenAICompatibleProvider implements LlmProvider {
     // OpenRouter can answer 2xx with `{ error: { code, message } }` and no `choices`
     // (2026-10-08/09: web and HN died on `choices[0]` with the reason lost). Put the
     // body's error in the message: it shows in the log, and a body-level 429
-    // matches `is429` in report.ts, so it rides the retry ladder.
+    // matches `is429` in llm.ts, so it rides the retry ladder.
     if (!Array.isArray(response.choices)) {
       const body = JSON.stringify((response as { error?: unknown }).error ?? response);
       throw new Error(`${this.name} returned no choices: ${body.slice(0, 500)}`);
