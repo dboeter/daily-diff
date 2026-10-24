@@ -7,18 +7,19 @@
  * (`buildTrendingSummariesPrompt`) and the page's prose (`buildTrendsProsePrompt`). Two tables:
  * the Agent & Coding Tool Radar (OpenRouter, npm and new GitHub repos) and the
  * GitHub category tables. Scope and category come from a `Classification` per
- * item (`trending/jev.ts`).
+ * item (`trending/classify.ts`).
  */
 
 import fs from "node:fs";
 import path from "node:path";
 import type { Numbered } from "../reports/summarized-table.ts";
-import type { SearchRepo, TrendingRepo } from "./trending.ts";
+import type { SearchRepo, TrendingRepo } from "./compose.ts";
 import { formatTokens, type OpenRouterApp } from "../sources/openrouter.ts";
 import { momentumRatio, type NpmData, type NpmPackage } from "./npm.ts";
 import { toCstDateStr } from "../core/date.ts";
 import { STAR_GAIN_DAYS } from "../core/github.ts";
-import { inScope, onRadar, type Classification, type ClassifyCache, type MatchState } from "./jev.ts";
+import { inScope, onRadar, type Classification, type TrendingVerdicts } from "./classify.ts";
+import { type MatchState } from "./match.ts";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -95,8 +96,8 @@ export interface TrendingReportData {
   traceFile?: string;
   /** Match state to save once the report is written; absent when the file could not be read. */
   nextMatches?: MatchState;
-  /** Classification cache to save once the report is written; absent when the file could not be read. */
-  nextClassifications?: ClassifyCache;
+  /** Trending verdicts to save once the report is written; absent when the file could not be read. */
+  nextTrendingVerdicts?: TrendingVerdicts;
   /** Star history to save once the report is written. */
   nextStarHistory?: StarHistory;
 }

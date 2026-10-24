@@ -1,7 +1,7 @@
 /**
  * TypeSafe Jev client, shared by ArXiv, trending, AI Policy, the data report's
  * vendor feeds and Spotted routing; `judgeItems` is the cached judgment of the
- * last four (`routeStories`, `src/spotted/jev.ts`, for Spotted).
+ * last four (`routeStories`, `src/spotted/topics.ts`, for Spotted).
  *
  * Jev is not a chat model: POST /v1/systemone takes a `state` and typed
  * questions and returns probabilities. It is called directly rather than through

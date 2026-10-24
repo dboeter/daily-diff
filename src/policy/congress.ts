@@ -13,9 +13,9 @@
  * Requests per run: at most MAX_PAGES list pages plus MAX_ACTION_REQUESTS.
  */
 
-import type { PolicyItem } from "./policy.ts";
+import type { PolicyItem } from "./items.ts";
 import type { PolicySourceContext } from "./sources.ts";
-import { keywordHit, watchlisted } from "./jev.ts";
+import { keywordHit, watchlisted } from "./relevance.ts";
 import { apiKeyFor, fetchOk } from "../core/http.ts";
 import { daysBefore } from "../core/date.ts";
 
@@ -154,7 +154,7 @@ export async function fetchCongress(ctx: PolicySourceContext): Promise<PolicyIte
       title: `${label} ${b.number}: ${b.title}`,
       link: `https://www.congress.gov/bill/${ordinal(b.congress)}-congress/${slug}/${b.number}`,
       published: stage.date,
-      // Carries the bill id, which is what the watchlist match (policy/jev.ts) reads.
+      // Carries the bill id, which is what the watchlist match (policy/relevance.ts) reads.
       description:
         `US federal bill ${billId(b)} (${ordinal(b.congress)} Congress). ` +
         `Latest action: ${b.latestAction?.text ?? "none"}`,

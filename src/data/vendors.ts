@@ -19,7 +19,7 @@ import {
 } from "../core/report-state.ts";
 import { collectNewItems, type NewItems } from "../core/new-items.ts";
 import type { Numbered } from "../reports/summarized-table.ts";
-import { loadDataVerdicts, selectVendorItems, type DataVerdicts, type KeptVendorItem } from "./jev.ts";
+import { loadDataVerdicts, selectVendorItems, type DataVerdicts, type KeptVendorItem } from "./relevance.ts";
 import type { AskJev } from "../core/jev.ts";
 import { daysBefore, toCstDateStr } from "../core/date.ts";
 
