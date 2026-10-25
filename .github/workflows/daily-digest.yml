@@ -107,6 +107,8 @@ jobs:
           PLURAL_API_KEY: ${{ secrets.PLURAL_API_KEY }}
           # api.data.gov key: Congress.gov and Regulations.gov (AI Policy, US federal); unset skips those two.
           USA_GOV_API_KEY: ${{ secrets.USA_GOV_API_KEY }}
+          # AgentMail inbox subscribed to the Commission's digital-strategy mailing (AI Policy, EU); unset skips it.
+          AGENTMAIL_API_KEY: ${{ secrets.AGENTMAIL_API_KEY }}
           DIGEST_REPO: ${{ github.repository }}
           DIGEST_FORCE_WEEKLY: ${{ inputs.force_weekly && '1' || '' }}
         run: pnpm start

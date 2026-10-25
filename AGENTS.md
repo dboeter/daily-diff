@@ -33,6 +33,7 @@ export ANTHROPIC_API_KEY=sk-ant-xxxxx   # or the chosen provider's key: OPENROUT
 #                                 # AI Policy and vendor-feed relevance (else keyword fallbacks, no Research papers)
 # export PLURAL_API_KEY=xxxxx     # Open States: AI Policy's US state bills
 # export USA_GOV_API_KEY=xxxxx    # api.data.gov: Congress.gov bills and Regulations.gov documents
+# export AGENTMAIL_API_KEY=xxxxx  # AgentMail inbox with the Commission's digital-strategy mailing (AI Policy, EU)
 # export DIGEST_FORCE_WEEKLY=1    # run the weekly Trends page on a non-Monday
 ```
 
@@ -163,7 +164,7 @@ Every Jev judgment except ArXiv's goes through `judgeItems` (`src/core/jev.ts`) 
 ### AI Policy (`ai-policy`)
 
 - **Scope**: AI legislation, regulation and official guidance, ~95% EU, the Netherlands and the US (`.scratch/ai-policy/spec.md`), for the reader in `policy.reader_profile`.
-- **Sources**: RSS feeds in `policy.feeds` (each with its `jurisdiction`; `kind: news` for the News & commentary outlets; `jev_only` for feeds whose relevant items need not name AI), and the non-RSS sources in `POLICY_SOURCES` (`src/policy/sources.ts`): a new source is one module, one line there and its config. A failing source is logged and skipped; the report is skipped only when all fail. Open States was built from its OpenAPI schema without a key and has never returned a live response: its search noise and free-tier limit are unverified.
+- **Sources**: RSS feeds in `policy.feeds` (each with its `jurisdiction`; `kind: news` for the News & commentary outlets; `jev_only` for feeds whose relevant items need not name AI), and the non-RSS sources in `POLICY_SOURCES` (`src/policy/sources.ts`): a new source is one module, one line there and its config. A failing source is logged and skipped; the report is skipped only when all fail. The Commission mail source (`policy/commission-mail.ts`) reads every inbox on `AGENTMAIL_API_KEY`: the digital-strategy RSS feed is a curated subset of the site, so a site page takes the feed's Drupal guid as its id (`<node> at https://digital-strategy.ec.europa.eu`), and `fetchPolicyData` keeps one item per id. Open States was built from its OpenAPI schema without a key and has never returned a live response: its search noise and free-tier limit are unverified.
 - **Watchlist** (`policy.watchlist`, per jurisdiction): act numbers, procedures, dossiers, dockets, RINs and bills. European Parliament procedures and Dutch bills are found only through it (the EP discovery feed answers HTTP 500; Dutch AI bills are named after the EU regulation, so no keyword finds them): add new ones there. A non-news item naming an entry of its jurisdiction's list is always kept.
 - **Relevance**: `selectPolicyItems` (`src/policy/relevance.ts`; weights in `policyRelevance`); US items also need an impact on the reader. Only kept items enter the state, so a dropped item is checked again the next day, from its saved verdict.
 - Code renders the tables (one per jurisdiction, News & commentary, Coming up); the LLM writes only row summaries and Highlights, so a legal status or date never comes from the model.
