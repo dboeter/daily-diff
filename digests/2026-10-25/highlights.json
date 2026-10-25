@@ -1,0 +1,12 @@
+{
+  "ai-agents": [
+    "Hermes Agent unified gateway merge regresses CLI, TUI, desktop, API server, cron, and editor integrations, routing all conversations through single gateway",
+    "OpenAI Codex VS Code extension 26.1021.22027 fails to start UI on Windows 1.143.1, blocking Plus and Pro users"
+  ],
+  "ai-models": [
+    "Dream Labs releases Dream-1 World Action Model controlling unseen robots and tasks at $3/hour"
+  ],
+  "ai-data": [
+    "dbt-databricks v1.12.8 pins certifi>=2026.10.23 for CA certificate bundle security fix; Databricks teams should upgrade"
+  ]
+}
