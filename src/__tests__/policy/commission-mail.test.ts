@@ -62,7 +62,7 @@ describe("fetchCommissionMail", () => {
         return Response.json({
           messages: [
             { message_id: "<new>", timestamp: "2026-10-21T15:09:24.000Z" },
-            // The same items a day earlier: one row per item.
+            // The same items a day earlier: one row per item, dated by the earliest mail.
             { message_id: "<dup>", timestamp: "2026-10-20T15:09:24.000Z" },
             // Outside the 7-day news window: never fetched.
             { message_id: "<old>", timestamp: "2026-10-01T15:09:24.000Z" },
@@ -84,7 +84,7 @@ describe("fetchCommissionMail", () => {
       id: "17594 at https://digital-strategy.ec.europa.eu",
       title: "Requirements for qualified independent external evaluators of General-Purpose AI models",
       link: "https://digital-strategy.ec.europa.eu/en/page-961661",
-      published: "2026-10-21T15:09:24.000Z",
+      published: "2026-10-20T15:09:24.000Z",
       description: expect.any(String),
       source: "European Commission",
       jurisdiction: "eu",
@@ -95,18 +95,24 @@ describe("fetchCommissionMail", () => {
     expect((fetchSpy.mock.calls[0]![1]?.headers as Record<string, string>)["Authorization"]).toBe("Bearer k");
   });
 
-  it("keeps the redirect as the link when it does not resolve", async () => {
+  it("skips an item whose id cannot be read this run, so a later run reports it under its own id", async () => {
     vi.stubEnv("AGENTMAIL_API_KEY", "k");
-    vi.spyOn(console, "error").mockImplementation(() => {});
+    const error = vi.spyOn(console, "error").mockImplementation(() => {});
     vi.spyOn(globalThis, "fetch").mockImplementation(async (input) => {
       const url = String(input);
       if (url.endsWith("/inboxes")) return Response.json({ inboxes: [{ inbox_id: "a" }] });
       if (url.includes("/messages?"))
         return Response.json({ messages: [{ message_id: "m", timestamp: "2026-10-21T15:09:24.000Z" }] });
       if (url.includes("/messages/")) return Response.json({ html: HTML });
-      throw new TypeError("fetch failed");
+      // 961653 fails, 961628 is a site page without its node (a block page); 961661 resolves.
+      if (url.includes("/961653/")) throw new TypeError("fetch failed");
+      if (url.includes("/961628/")) return redirected("https://digital-strategy.ec.europa.eu/en/page");
+      return redirected("https://digital-strategy.ec.europa.eu/en/gpai", page(17594));
     });
-    expect((await fetchCommissionMail(ctx))[0]!.link).toBe(`${REDIRECT}961653/en/2549`);
+    expect((await fetchCommissionMail(ctx)).map((i) => i.id)).toEqual([
+      "17594 at https://digital-strategy.ec.europa.eu",
+    ]);
+    expect(error).toHaveBeenCalledTimes(2);
   });
 
   it("throws when the mail API fails, so the run counts the source as failed", async () => {

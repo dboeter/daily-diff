@@ -85,7 +85,7 @@ describe("fetchPolicyData", () => {
     vi.spyOn(globalThis, "fetch").mockResolvedValue(
       new Response(rss([["new AI rules", "Tue, 13 Oct 2026 08:00:00 +0000"]])),
     );
-    const mailed = { ...item("new AI rules"), title: "new AI rules" };
+    const mailed = { ...item("new AI rules"), title: "new AI rules", description: "from the mail" };
     const data = await fetchPolicyData(
       config,
       new Date("2026-10-13T23:00:00Z"),
@@ -94,7 +94,8 @@ describe("fetchPolicyData", () => {
       { apiKey: "k", cache: { items: {} }, ask },
       [{ name: "Mail", fetch: async () => [mailed] }],
     );
-    expect(data.items.map((i) => i.id)).toEqual(["new AI rules"]);
+    // The feed's copy, which comes after the sources.
+    expect(data.items.map((i) => [i.id, i.description])).toEqual([["new AI rules", ""]]);
   });
 
   it("drops sponsored content from a feed", async () => {

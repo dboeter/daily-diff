@@ -67,53 +67,71 @@ const NODE_RE = /"currentPath":"node\\\/(\d+)"/;
  * guid ("17580 at https://digital-strategy.ec.europa.eu"), so a page of the site gets that id: the
  * mail's copy of an RSS item is then the same item, in this run and in the reported state. Any
  * status will do: the Funding & Tenders portal answers 404 to this client after redirecting.
+ * Null when the redirect fails or a site page shows no node: a fallback id would differ from the
+ * next night's and report the item twice, so it waits for a later run within the news window.
  */
-async function resolve(redirect: string): Promise<{ link: string; id: string }> {
+async function resolve(redirect: string): Promise<{ link: string; id: string } | null> {
   try {
     const res = await fetch(redirect, {
       headers: { "User-Agent": "daily-diff/1.0" },
       signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
     });
-    const link = res.url.split("?")[0] || redirect;
-    const node = link.startsWith(SITE) ? (await res.text()).match(NODE_RE)?.[1] : undefined;
-    return { link, id: node ? `${node} at ${SITE}` : link };
+    const link = res.url.split("?")[0];
+    if (!link) throw new Error("no target URL");
+    if (!link.startsWith(SITE)) return { link, id: link };
+    const node = (await res.text()).match(NODE_RE)?.[1];
+    if (!node) throw new Error(`HTTP ${res.status}, no node id on ${link}`);
+    return { link, id: `${node} at ${SITE}` };
   } catch (err) {
-    console.error(`  [policy] Commission mail: ${redirect} did not resolve: ${err}`);
-    return { link: redirect, id: redirect };
+    console.error(`  [policy] Commission mail: ${redirect} skipped this run: ${err}`);
+    return null;
   }
 }
 
-/** Mail of every inbox on the key from the news age window; a message without item links adds nothing. */
+/**
+ * Mail of every inbox on the key from the news age window; a message without item links adds nothing.
+ * The message list is newest first (live, 2026-10-25), so `limit=100` always holds the window's ~7 mails.
+ */
 export async function fetchCommissionMail(ctx: PolicySourceContext): Promise<PolicyItem[]> {
   const key = apiKeyFor("AGENTMAIL_API_KEY", "Commission mail");
   if (!key) return [];
   const oldest = ctx.now.getTime() - NEWS_MAX_AGE_DAYS * DAY_MS;
   const { inboxes } = await getJson<{ inboxes: { inbox_id: string }[] }>(`${API}/inboxes`, key);
-  const byId = new Map<string, PolicyItem>();
+  // Redirect → the item and the earliest mail that carried it.
+  const byRedirect = new Map<string, MailItem & { published: string }>();
   for (const { inbox_id } of inboxes) {
     const inbox = `${API}/inboxes/${encodeURIComponent(inbox_id)}/messages`;
     const { messages } = await getJson<{ messages: Message[] }>(`${inbox}?limit=100`, key);
-    for (const msg of messages.filter((m) => Date.parse(m.timestamp) >= oldest)) {
-      const { html } = await getJson<{ html?: string }>(
-        `${inbox}/${encodeURIComponent(msg.message_id)}`,
-        key,
-      );
-      for (const item of parseMailItems(html ?? "")) {
-        const { link, id } = await resolve(item.redirect);
-        if (byId.has(id)) continue;
-        byId.set(id, {
-          id,
-          title: item.title,
-          link,
-          published: msg.timestamp,
-          description: item.description,
-          // As the site's RSS feed (config.yml): the duplicate of an RSS item is then judged the same way.
-          source: "European Commission",
-          jurisdiction: "eu",
-          jevOnly: false,
-        });
+    const recent = messages.filter((m) => Date.parse(m.timestamp) >= oldest);
+    const bodies = await Promise.all(
+      recent.map((m) => getJson<{ html?: string }>(`${inbox}/${encodeURIComponent(m.message_id)}`, key)),
+    );
+    recent.forEach((msg, n) => {
+      for (const item of parseMailItems(bodies[n]!.html ?? "")) {
+        const known = byRedirect.get(item.redirect);
+        if (!known || msg.timestamp < known.published)
+          byRedirect.set(item.redirect, { ...item, published: msg.timestamp });
       }
-    }
+    });
   }
+  // One request per item, in parallel: a hung host then costs one timeout, not one per item.
+  const items = [...byRedirect.values()];
+  const targets = await Promise.all(items.map((i) => resolve(i.redirect)));
+  const byId = new Map<string, PolicyItem>();
+  items.forEach((item, n) => {
+    const target = targets[n];
+    if (!target || byId.has(target.id)) return;
+    byId.set(target.id, {
+      id: target.id,
+      title: item.title,
+      link: target.link,
+      published: item.published,
+      description: item.description,
+      // As the site's RSS feed (config.yml): the duplicate of an RSS item is then judged the same way.
+      source: "European Commission",
+      jurisdiction: "eu",
+      jevOnly: false,
+    });
+  });
   return [...byId.values()];
 }
