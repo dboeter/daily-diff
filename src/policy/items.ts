@@ -128,7 +128,8 @@ export async function fetchPolicyData(
     dateStr,
     fetch: async () => {
       const results = await fetchPolicySources(config, now, dateStr, state, sources);
-      // One row per id: the Commission mailing repeats items of the Commission's RSS feed, under the same link.
+      // One row per id: the Commission mailing repeats items of the Commission's RSS feed, under its guid.
+      // The last copy wins: feeds come after sources, so the RSS item (its own pubDate) is the one shown.
       const byId = new Map(results.flatMap((r) => r ?? []).map((i) => [i.id, i] as const));
       return { items: [...byId.values()], fetchSuccess: results.some((r) => r !== null) };
     },

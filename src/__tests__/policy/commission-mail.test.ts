@@ -36,11 +36,14 @@ describe("fetchCommissionMail", () => {
   });
   const ctx = { config: {} as PolicyConfig, now: NOW, dateStr: "2026-10-22", state: null };
 
-  const redirected = (url: string) => {
-    const res = new Response("<html></html>");
+  const redirected = (url: string, html = "<html></html>") => {
+    const res = new Response(html);
     Object.defineProperty(res, "url", { value: url });
     return res;
   };
+  // A digital-strategy page's Drupal settings, as the site serves them.
+  const page = (node: number) =>
+    `<script type="application/json">{"path":{"currentPath":"node\\/${node}","currentPathIsAdmin":false}}</script>`;
 
   it("skips without AGENTMAIL_API_KEY", async () => {
     vi.stubEnv("AGENTMAIL_API_KEY", "");
@@ -50,7 +53,7 @@ describe("fetchCommissionMail", () => {
     expect(fetchSpy).not.toHaveBeenCalled();
   });
 
-  it("maps recent mail to EU items keyed on the resolved page link, once per link", async () => {
+  it("maps recent mail to EU items keyed like the site's RSS feed, once per item", async () => {
     vi.stubEnv("AGENTMAIL_API_KEY", "k");
     const fetchSpy = vi.spyOn(globalThis, "fetch").mockImplementation(async (input) => {
       const url = String(input);
@@ -59,21 +62,26 @@ describe("fetchCommissionMail", () => {
         return Response.json({
           messages: [
             { message_id: "<new>", timestamp: "2026-10-21T15:09:24.000Z" },
-            // The same items a day earlier: one row per link.
+            // The same items a day earlier: one row per item.
             { message_id: "<dup>", timestamp: "2026-10-20T15:09:24.000Z" },
             // Outside the 7-day news window: never fetched.
             { message_id: "<old>", timestamp: "2026-10-01T15:09:24.000Z" },
           ],
         });
       if (url.includes("/messages/")) return Response.json({ html: HTML });
-      return redirected(
-        `https://digital-strategy.ec.europa.eu/en/page-${url.split("/item/")[1]!.split("/")[0]}?x=1`,
-      );
+      // 961628: a page off the site, keyed on its link; the others are site pages, keyed on their node.
+      const item = Number(url.split("/item/")[1]!.split("/")[0]);
+      if (item === 961628) return redirected("https://smart-networks.europa.eu/6g/");
+      return redirected(`https://digital-strategy.ec.europa.eu/en/page-${item}?x=1`, page(item - 944067));
     });
     const items = await fetchCommissionMail(ctx);
-    expect(items).toHaveLength(3);
+    expect(items.map((i) => i.id)).toEqual([
+      "17586 at https://digital-strategy.ec.europa.eu",
+      "https://smart-networks.europa.eu/6g/",
+      "17594 at https://digital-strategy.ec.europa.eu",
+    ]);
     expect(items[2]).toEqual({
-      id: "https://digital-strategy.ec.europa.eu/en/page-961661",
+      id: "17594 at https://digital-strategy.ec.europa.eu",
       title: "Requirements for qualified independent external evaluators of General-Purpose AI models",
       link: "https://digital-strategy.ec.europa.eu/en/page-961661",
       published: "2026-10-21T15:09:24.000Z",

@@ -57,20 +57,29 @@ async function getJson<T>(url: string, key: string): Promise<T> {
   return (await (await fetchOk(url, { headers: { Authorization: `Bearer ${key}` } })).json()) as T;
 }
 
+const SITE = "https://digital-strategy.ec.europa.eu";
+
+/** The Drupal node of a digital-strategy page, from its settings JSON ("currentPath":"node\/17580"). */
+const NODE_RE = /"currentPath":"node\\\/(\d+)"/;
+
 /**
- * The redirect's target page, so an item the RSS feed also carries gets the same id (its link).
- * Any status will do: the Funding & Tenders portal answers 404 to this client after redirecting.
+ * The redirect's target page and the item's id. The site's RSS feed keys its items on the Drupal
+ * guid ("17580 at https://digital-strategy.ec.europa.eu"), so a page of the site gets that id: the
+ * mail's copy of an RSS item is then the same item, in this run and in the reported state. Any
+ * status will do: the Funding & Tenders portal answers 404 to this client after redirecting.
  */
-async function resolve(redirect: string): Promise<string> {
+async function resolve(redirect: string): Promise<{ link: string; id: string }> {
   try {
     const res = await fetch(redirect, {
       headers: { "User-Agent": "daily-diff/1.0" },
       signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
     });
-    return res.url.split("?")[0] || redirect;
+    const link = res.url.split("?")[0] || redirect;
+    const node = link.startsWith(SITE) ? (await res.text()).match(NODE_RE)?.[1] : undefined;
+    return { link, id: node ? `${node} at ${SITE}` : link };
   } catch (err) {
     console.error(`  [policy] Commission mail: ${redirect} did not resolve: ${err}`);
-    return redirect;
+    return { link: redirect, id: redirect };
   }
 }
 
@@ -80,7 +89,7 @@ export async function fetchCommissionMail(ctx: PolicySourceContext): Promise<Pol
   if (!key) return [];
   const oldest = ctx.now.getTime() - NEWS_MAX_AGE_DAYS * DAY_MS;
   const { inboxes } = await getJson<{ inboxes: { inbox_id: string }[] }>(`${API}/inboxes`, key);
-  const byLink = new Map<string, PolicyItem>();
+  const byId = new Map<string, PolicyItem>();
   for (const { inbox_id } of inboxes) {
     const inbox = `${API}/inboxes/${encodeURIComponent(inbox_id)}/messages`;
     const { messages } = await getJson<{ messages: Message[] }>(`${inbox}?limit=100`, key);
@@ -90,10 +99,10 @@ export async function fetchCommissionMail(ctx: PolicySourceContext): Promise<Pol
         key,
       );
       for (const item of parseMailItems(html ?? "")) {
-        const link = await resolve(item.redirect);
-        if (byLink.has(link)) continue;
-        byLink.set(link, {
-          id: link,
+        const { link, id } = await resolve(item.redirect);
+        if (byId.has(id)) continue;
+        byId.set(id, {
+          id,
           title: item.title,
           link,
           published: msg.timestamp,
@@ -106,5 +115,5 @@ export async function fetchCommissionMail(ctx: PolicySourceContext): Promise<Pol
       }
     }
   }
-  return [...byLink.values()];
+  return [...byId.values()];
 }
