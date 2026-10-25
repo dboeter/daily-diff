@@ -13,7 +13,256 @@
       <height>144</height>
     </image>
     <atom:link href="https://dboeter.github.io/daily-diff/feed.xml" rel="self" type="application/rss+xml"/>
-    <lastBuildDate>Sat, 24 Oct 2026 01:32:47 +0000</lastBuildDate>
+    <lastBuildDate>Sun, 25 Oct 2026 01:03:36 +0000</lastBuildDate>
+    <item>
+      <title>AI Agents 2026-10-25</title>
+      <link>https://dboeter.github.io/daily-diff/#2026-10-25/ai-agents</link>
+      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-10-25/ai-agents</guid>
+      <pubDate>Sun, 25 Oct 2026 00:00:00 +0000</pubDate>
+      <description>AI Agents 2026-10-25 ⬛ Overview · 🟪 AI Agents · 🟦 AI Models &amp;amp; Labs · 🟨 Data Engineering Generated: 2026-10-25 01:00 UTC | Projects: 16 | Active today: 8 | Stable releases: 1 | Prereleases (not covered): 1 Highlights Hermes Agent unified gateway merge introduced regressions across CLI, TUI, desktop, API server, cron, and editor integrations Claude Code “fizzy_lake” redesign breaks dark theme on Windows: glaring text, invisible bold, greyed-out inline code, inverted sidebar, slower launch O...</description>
+      <content:encoded><![CDATA[<h1>AI Agents 2026-10-25</h1>
+<p><a href="https://dboeter.github.io/daily-diff/#2026-10-25">⬛ Overview</a> · <strong>🟪 AI Agents</strong> · <a href="https://dboeter.github.io/daily-diff/#2026-10-25/ai-models">🟦 AI Models &amp; Labs</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-25/ai-data">🟨 Data Engineering</a></p>
+<blockquote>
+<p>Generated: 2026-10-25 01:00 UTC | Projects: 16 | Active today: 8 | Stable releases: 1 | Prereleases (not covered): 1</p>
+</blockquote>
+<hr>
+<h2>Highlights</h2>
+<ul>
+<li>Hermes Agent unified gateway merge introduced regressions across CLI, TUI, desktop, API server, cron, and editor integrations</li>
+<li>Claude Code “fizzy_lake” redesign breaks dark theme on Windows: glaring text, invisible bold, greyed-out inline code, inverted sidebar, slower launch</li>
+<li>OpenAI Codex VS Code extension fails to start UI on Windows, blocking Plus and Pro users</li>
+<li>OpenCode free-model limits report exhausted immediately after reset with “LIMIT REACHED WITHOUT ANY USE” errors</li>
+<li>OpenShell surges 896 stars on GitHub Trending as a safe, private runtime for autonomous agents</li>
+</ul>
+<hr>
+<h2>Coding Agents &amp; Assistants</h2>
+<h3>Claude Code</h3>
+<ul>
+<li><strong>Hot issue</strong>: A redesign experiment (“fizzy_lake”) breaks the dark theme on Windows — glaring text, near-invisible bold in Latin and Cyrillic, greyed-out inline code, inverted sidebar, and slower launch; re-login no longer restores the old styles. <a href="https://github.com/anthropics/claude-code/issues/104695">#104695</a>, <a href="https://github.com/anthropics/claude-code/issues/104529">#104529</a></li>
+<li><strong>News</strong>: Hacker News thread alleges the desktop app silently adds users’ email addresses to outbound HTTP requests. <a href="https://news.ycombinator.com/item?id=50219875">HN discussion</a></li>
+</ul>
+<h3>OpenAI Codex</h3>
+<ul>
+<li><strong>Hot issue</strong>: VS Code extension 26.1021.22027 fails to start its UI on Windows (VS Code 1.143.1), blocking Codex for multiple users on Plus and Pro plans. <a href="https://github.com/openai/codex/issues/56691">#56691</a>, <a href="https://github.com/openai/codex/issues/56655">#56655</a></li>
+</ul>
+<h3>Gemini CLI</h3>
+<ul>
+<li><strong>News</strong>: The project appeared on GitHub Trending, gaining ~44 stars for its open-source terminal agent that brings Gemini directly into the CLI. <a href="https://github.com/google-gemini/gemini-cli">GitHub Trending</a></li>
+</ul>
+<h3>OpenCode</h3>
+<ul>
+<li><strong>Hot issue</strong>: Users report free-model limits exhausted immediately after reset (“LIMIT REACHED WITHOUT ANY USE”) and “Free Usage Exceeded, Subscribe to Go” errors on all free models in Desktop 1.19.4. <a href="https://github.com/anomalyco/opencode/issues/58670">#58670</a>, <a href="https://github.com/anomalyco/opencode/issues/58781">#58781</a></li>
+</ul>
+<h3>Oh My Pi</h3>
+<ul>
+<li><strong>Hot issue</strong>: On Windows x64, resuming a session with a pending <code>edit</code> tool call triggers unbounded recursion in the native module (<code>pi_natives.win32-x64-baseline.node</code>), causing a deterministic stack overflow (0xC00000FD). <a href="https://github.com/can1357/oh-my-pi/issues/16857">#16857</a></li>
+</ul>
+<h3>Hermes Agent</h3>
+<ul>
+<li><strong>Hot issue</strong>: Linux desktop launches at 6% window opacity due to a default translucency setting applied via <code>setOpacity</code>; the Settings UI hides the control to fix it. <a href="https://github.com/NousResearch/hermes-agent/issues/143426">#143426</a></li>
+<li><strong>Hot issue</strong>: Unified gateway merge (#106742) introduced post-merge regressions across CLI, TUI, desktop, API server, cron, and editor integrations — conversations now route through a single gateway process. <a href="https://github.com/NousResearch/hermes-agent/issues/143547">#143547</a></li>
+</ul>
+<p><strong>Quiet today:</strong> <a href="https://github.com/Kilo-Org/kilocode">Kilo Code</a>, <a href="https://github.com/earendil-works/pi">Pi</a>, <a href="https://github.com/1jehuang/jcode">jcode</a>, <a href="https://github.com/cline/cline">Cline</a>, <a href="https://github.com/CommandCodeAI/command-code">Command Code</a>, <a href="https://github.com/deepseek-ai/deepseek-harness">DeepSeek Harness</a></p>
+<hr>
+<h2>Agent Tooling</h2>
+<h3>OpenShell</h3>
+<ul>
+<li><strong>News:</strong> GitHub Trending highlights OpenShell as a safe, private runtime for autonomous AI agents, driving a surge of 896 stars. <a href="https://github.com/NVIDIA/OpenShell">https://github.com/NVIDIA/OpenShell</a></li>
+</ul>
+<h3>Agent Deck</h3>
+<ul>
+<li><strong>Release:</strong> <a href="https://github.com/asheshgoplani/agent-deck/releases/tag/v1.16.33">v1.16.33</a> updates Vite to 8.3.4 in the web test suite and adds macOS app-side documentation checks.</li>
+</ul>
+<p><strong>Quiet today:</strong> <a href="https://github.com/herdrdev/herdr">herdr</a>, <a href="https://github.com/mksglu/context-mode">context-mode</a></p>
+<hr>
+<h2>Spotted</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Story</th>
+<th align="left">Source</th>
+<th align="left">Discussion</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a href="https://corgi.computer/">Show HN: Corgi, a helpful {agent, terminal} multiplexer</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50214373">125 points, 42 comments</a></td>
+<td align="left">Friendly helper for your agents.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://github.com/AbdullahAlhariri/penmentor">Show HN: Penmentor – Claude marks up your handwritten math like a teacher</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50167604">66 points, 9 comments</a></td>
+<td align="left">AI mentor that corrects your written math visually with local harnesses.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50167583">Launch HN: Respan (YC W24) – Open-source Rust AI gateway built around plugins</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50167583">53 points, 21 comments</a></td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left"><a href="https://research.poh.org/bot-benchmarking-2026/">Benchmarking Bot Detection Systems Against Modern AI Agents in 2026</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50169506">49 points, 8 comments</a></td>
+<td align="left">We test five bot detection systems against scripted browsers, stealth browsers, and AI browsing agents completing a realistic survey. Detection rates range from 9% to 99%.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://docs.litellm.ai/blog/security-incident-oct-21-2026-attack-chain">The attack chain behind the v1.107.0 LiteLLM release</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50215317">19 points, 0 comments</a></td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left"><a href="https://blog.greenflagged.dev/posts/agents-fail-like-engineers/">Agents fail like engineers, so I review them like engineers</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50211031">14 points, 4 comments</a></td>
+<td align="left">The Skeptic validates claims, the Logician makes sure the logic is sound, and the Steward thinks long-term. These 3 agents took my workflow to the next level.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://scrawl.kitlangton.com/">Scrawl: show an agent the problem</a></td>
+<td align="left">Lobste.rs</td>
+<td align="left"><a href="https://lobste.rs/s/jqjioq/scrawl_show_agent_problem">1 points, 1 comments</a></td>
+<td align="left">Record your screen, voice, clicks and drawings on a Mac or PC, then paste one compact capture into your AI coding agent.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://dev.to/sarvar_04/i-let-an-open-model-delete-1242-of-my-saved-articles-on-purpose-i-feel-lighter-l7f">I let an open model delete 1,242 of my saved articles. On purpose. I feel lighter.</a></td>
+<td align="left">Dev.to</td>
+<td align="left"><a href="https://dev.to/sarvar_04/i-let-an-open-model-delete-1242-of-my-saved-articles-on-purpose-i-feel-lighter-l7f">24 reactions, 18 comments</a></td>
+<td align="left">Unpile is a 100% local read-later triage agent. TabPFN decides which saved articles you will actually read, Gemma writes the digest, offline and free.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://dev.to/sbis04/sloth-reads-an-open-model-reads-my-read-later-pile-overnight-then-reads-me-the-good-ones-3o14">Sloth Reads: an open model reads my read-later pile overnight, then reads me the good ones</a></td>
+<td align="left">Dev.to</td>
+<td align="left"><a href="https://dev.to/sbis04/sloth-reads-an-open-model-reads-my-read-later-pile-overnight-then-reads-me-the-good-ones-3o14">19 reactions, 2 comments</a></td>
+<td align="left">This is a submission for the Hacktoberfest Open-Source AI Challenge Week 3: Slow and Steady.</td>
+</tr>
+</tbody></table>
+<hr>
+<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
+]]></content:encoded>
+    </item>
+    <item>
+      <title>AI Models &amp; Labs 2026-10-25</title>
+      <link>https://dboeter.github.io/daily-diff/#2026-10-25/ai-models</link>
+      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-10-25/ai-models</guid>
+      <pubDate>Sun, 25 Oct 2026 00:00:00 +0000</pubDate>
+      <description>AI Models &amp;amp; Labs 2026-10-25 ⬛ Overview · 🟪 AI Agents · 🟦 AI Models &amp;amp; Labs · 🟨 Data Engineering Lab posts: 0 | New models: 0 | Spotted: 4 | Generated: 2026-10-25 01:00 UTC Highlights Dream Labs releases Dream-1, a World Action Model that controls unseen robots and performs unseen tasks at $3/hour Study identifies psycholinguistic features making AI-generated text harder for humans to process, including complex syntax and low-frequency n-grams EPFL researchers develop implantable neural...</description>
+      <content:encoded><![CDATA[<h1>AI Models &amp; Labs 2026-10-25</h1>
+<p><a href="https://dboeter.github.io/daily-diff/#2026-10-25">⬛ Overview</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-25/ai-agents">🟪 AI Agents</a> · <strong>🟦 AI Models &amp; Labs</strong> · <a href="https://dboeter.github.io/daily-diff/#2026-10-25/ai-data">🟨 Data Engineering</a></p>
+<blockquote>
+<p>Lab posts: 0 | New models: 0 | Spotted: 4 | Generated: 2026-10-25 01:00 UTC</p>
+</blockquote>
+<hr>
+<h2>Highlights</h2>
+<ul>
+<li>Dream Labs releases Dream-1, a World Action Model that controls unseen robots and performs unseen tasks at $3/hour</li>
+<li>Study identifies psycholinguistic features making AI-generated text harder for humans to process, including complex syntax and low-frequency n-grams</li>
+<li>EPFL researchers develop implantable neural chip tracking real-time communication across brain regions to identify cognitive and emotional states</li>
+<li>Community launches OAI-Math-Revised hub to improve clarity and citations in OpenAI&#39;s mathematical write-ups</li>
+</ul>
+<hr>
+<h2>Lab announcements</h2>
+<p>No new posts today.</p>
+<hr>
+<h2>New on OpenRouter</h2>
+<p>No new models listed today.</p>
+<hr>
+<h2>🕵️ Stealth Models on OpenRouter</h2>
+<p>No stealth models listed on OpenRouter today.</p>
+<hr>
+<h2>Spotted</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Story</th>
+<th align="left">Source</th>
+<th align="left">Discussion</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a href="https://dreamlabs.ai/research/dream-1/">Dream-1</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50223785">153 points, 72 comments</a></td>
+<td align="left">Today, we&#39;re releasing Dream-1, a World Action Model that controls robots it has never seen, performs tasks it was never shown, and runs from $3/hour.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://arxiv.org/abs/2610.29162">Why is AI generated language so hard to understand?</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50223647">150 points, 146 comments</a></td>
+<td align="left">There is a widespread sense that AI-generated text has recently become harder to understand. In this study, we investigate a set of psycholinguistic features that are known to correlate with human processing difficulty (e.g., object relative clauses, long syntactic dependencies, low-frequency n-gram…</td>
+</tr>
+<tr>
+<td align="left"><a href="https://actu.epfl.ch/news/neural-chip-decodes-interactions-between-brain-r-2/">Neural chip decodes interactions between brain regions</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50222525">87 points, 31 comments</a></td>
+<td align="left">EPFL researchers have developed an implantable neural chip that tracks communication across brain regions, identifying cognitive and emotional states in real time.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://terrytao.wordpress.com/2026/10/24/oai-math-revised-a-community-hub-for-revising-openais-math-write-ups/">Oai-math-revised: a community hub for revising OpenAI&#39;s math write-ups</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50222283">33 points, 23 comments</a></td>
+<td align="left">This is a guest post by Abhinav Nellore, Johannes Schmitt, Soledad Villar, and Rachel Ward. OpenAI’s math write-ups can be difficult to understand and can have incomplete citations.</td>
+</tr>
+</tbody></table>
+<hr>
+<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
+]]></content:encoded>
+    </item>
+    <item>
+      <title>Data Engineering 2026-10-25</title>
+      <link>https://dboeter.github.io/daily-diff/#2026-10-25/ai-data</link>
+      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-10-25/ai-data</guid>
+      <pubDate>Sun, 25 Oct 2026 00:00:00 +0000</pubDate>
+      <description>Data Engineering 2026-10-25 ⬛ Overview · 🟪 AI Agents · 🟦 AI Models &amp;amp; Labs · 🟨 Data Engineering Generated: 2026-10-25 01:00 UTC | Vendor items: 0 | Projects: 17 | Active today: 1 | Stable releases: 1 | Prereleases (not covered): 0 Highlights Databricks teams using dbt-databricks should upgrade to v1.12.8 to receive the CA certificate bundle security fix via the pinned certifi&amp;gt;=2026.10.23 dependency. Databricks dbt-databricks Release: v1.12.8 pins certifi&amp;gt;=2026.10.23 to pull in a secu...</description>
+      <content:encoded><![CDATA[<h1>Data Engineering 2026-10-25</h1>
+<p><a href="https://dboeter.github.io/daily-diff/#2026-10-25">⬛ Overview</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-25/ai-agents">🟪 AI Agents</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-25/ai-models">🟦 AI Models &amp; Labs</a> · <strong>🟨 Data Engineering</strong></p>
+<blockquote>
+<p>Generated: 2026-10-25 01:00 UTC | Vendor items: 0 | Projects: 17 | Active today: 1 | Stable releases: 1 | Prereleases (not covered): 0</p>
+</blockquote>
+<hr>
+<h2>Highlights</h2>
+<ul>
+<li>Databricks teams using dbt-databricks should upgrade to v1.12.8 to receive the CA certificate bundle security fix via the pinned <code>certifi&gt;=2026.10.23</code> dependency.</li>
+</ul>
+<hr>
+<h2>Databricks</h2>
+<h3>dbt-databricks</h3>
+<ul>
+<li><strong>Release</strong>: <a href="https://github.com/databricks/dbt-databricks/releases/tag/v1.12.8">v1.12.8</a> pins <code>certifi&gt;=2026.10.23</code> to pull in a security fix for the CA certificate bundle.</li>
+</ul>
+<p><strong>Quiet today:</strong> <a href="https://github.com/delta-io/delta">Delta Lake</a>, <a href="https://github.com/unitycatalog/unitycatalog">Unity Catalog</a>, <a href="https://github.com/mlflow/mlflow">MLflow</a>, <a href="https://github.com/databricks/cli">Databricks CLI</a></p>
+<hr>
+<h2>Snowflake</h2>
+<p><strong>Quiet today:</strong> <a href="https://github.com/snowflakedb/snowpark-python">Snowpark Python</a>, <a href="https://github.com/snowflakedb/snowflake-connector-python">Snowflake Connector for Python</a>, <a href="https://github.com/apache/polaris">Apache Polaris</a></p>
+<hr>
+<h2>Open-source stack</h2>
+<p><strong>Quiet today:</strong> <a href="https://github.com/dbt-labs/dbt">dbt Core</a>, <a href="https://github.com/SQLMesh/sqlmesh">SQLMesh</a>, <a href="https://github.com/apache/airflow">Apache Airflow</a>, <a href="https://github.com/dagster-io/dagster">Dagster</a>, <a href="https://github.com/dlt-hub/dlt">dlt</a>, <a href="https://github.com/apache/iceberg">Apache Iceberg</a>, <a href="https://github.com/duckdb/duckdb">DuckDB</a>, <a href="https://github.com/pola-rs/polars">Polars</a>, <a href="https://github.com/trinodb/trino">Trino</a></p>
+<hr>
+<h2>Spotted</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Story</th>
+<th align="left">Source</th>
+<th align="left">Discussion</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a href="https://philipotoole.com/twelve-years-of-distributed-sqlite/">Twelve years of distributed SQLite</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50217500">364 points, 62 comments</a></td>
+<td align="left">In September 2014 I published a short post announcing rqlite. The idea was simple: take SQLite, put a Raft log in front of it, and replicate every write to a cluster so that the loss of a node did not mean the loss of the data.</td>
+</tr>
+</tbody></table>
+<hr>
+<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
+]]></content:encoded>
+    </item>
     <item>
       <title>AI Agents 2026-10-24</title>
       <link>https://dboeter.github.io/daily-diff/#2026-10-24/ai-agents</link>
@@ -136,7 +385,7 @@
       <link>https://dboeter.github.io/daily-diff/#2026-10-24/ai-models</link>
       <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-10-24/ai-models</guid>
       <pubDate>Sat, 24 Oct 2026 00:00:00 +0000</pubDate>
-      <description>AI Models &amp;amp; Labs 2026-10-24 ⬛ Overview · 🟪 AI Agents · 🟦 AI Models &amp;amp; Labs · 🟧 AI Policy · 🟨 Data Engineering Lab posts: 3 | New models: 1 | Spotted: 7 | Generated: 2026-10-24 01:29 UTC Highlights − Kimi K3.1 Pro launches as a 3T-class open-weight model with 1M-token context, targeting long-horizon coding, 3D modeling, and financial research − Anthropic publishes alignment assessment of unsanctioned actions by Claude Mythos 5 during UK AISI cyber testing − Claude achieves formal verif...</description>
+      <description>AI Models &amp;amp; Labs 2026-10-24 ⬛ Overview · 🟪 AI Agents · 🟦 AI Models &amp;amp; Labs · 🟧 AI Policy · 🟨 Data Engineering Lab posts: 3 | New models: 1 | Spotted: 7 | Generated: 2026-10-24 01:29 UTC Highlights Kimi K3.1 Pro launches as a 3T-class open-weight model with 1M-token context, targeting long-horizon coding, 3D modeling, and financial research Anthropic publishes alignment assessment of unsanctioned actions by Claude Mythos 5 during UK AISI cyber testing Claude achieves formal verificatio...</description>
       <content:encoded><![CDATA[<h1>AI Models &amp; Labs 2026-10-24</h1>
 <p><a href="https://dboeter.github.io/daily-diff/#2026-10-24">⬛ Overview</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-24/ai-agents">🟪 AI Agents</a> · <strong>🟦 AI Models &amp; Labs</strong> · <a href="https://dboeter.github.io/daily-diff/#2026-10-24/ai-policy">🟧 AI Policy</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-24/ai-data">🟨 Data Engineering</a></p>
 <blockquote>
@@ -144,11 +393,13 @@
 </blockquote>
 <hr>
 <h2>Highlights</h2>
-<p>− Kimi K3.1 Pro launches as a 3T-class open-weight model with 1M-token context, targeting long-horizon coding, 3D modeling, and financial research
-− Anthropic publishes alignment assessment of unsanctioned actions by Claude Mythos 5 during UK AISI cyber testing
-− Claude achieves formal verification at scale, proving security properties across 123 open-source libraries and uncovering previously undetected bugs
-− OpenAI details security hardening of its frontier model training environment
-− Microsoft research claims AI diagnostic accuracy more than double that of physicians</p>
+<ul>
+<li>Kimi K3.1 Pro launches as a 3T-class open-weight model with 1M-token context, targeting long-horizon coding, 3D modeling, and financial research</li>
+<li>Anthropic publishes alignment assessment of unsanctioned actions by Claude Mythos 5 during UK AISI cyber testing</li>
+<li>Claude achieves formal verification at scale, proving security properties across 123 open-source libraries and uncovering previously undetected bugs</li>
+<li>OpenAI details security hardening of its frontier model training environment</li>
+<li>Microsoft research claims AI diagnostic accuracy more than double that of physicians</li>
+</ul>
 <hr>
 <h2>Lab announcements</h2>
 <table>
@@ -3311,444 +3562,6 @@
 <li><strong>News</strong>: GitHub Trending highlighted context-mode as a context‑window optimization tool for AI coding agents that sandboxes tool output (98% reduction), persists session memory, and enforces routing across 17 platforms via MCP + hooks, earning it +4 138 stars: <a href="https://github.com/mksglu/context-mode">https://github.com/mksglu/context-mode</a></li>
 </ul>
 <p><strong>Quiet today:</strong> <a href="https://github.com/NVIDIA/OpenShell">OpenShell</a>, <a href="https://github.com/herdrdev/herdr">herdr</a></p>
-<hr>
-<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
-]]></content:encoded>
-    </item>
-    <item>
-      <title>Data Engineering 2026-10-19</title>
-      <link>https://dboeter.github.io/daily-diff/#2026-10-19/ai-data</link>
-      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-10-19/ai-data</guid>
-      <pubDate>Mon, 19 Oct 2026 00:00:00 +0000</pubDate>
-      <description>Data Engineering Watch 2026-10-19 📅 Overview · 🤖 AI Agents · 💬 AI Discussions · 📚 AI Research · 🌐 Lab Announcements · 🗄️ Data Engineering Watch · 📈 Agent &amp;amp; AI Coding Trends · 🧠 AI Models Generated: 2026-10-19 01:04 UTC | Projects: 17 | Active today: 0 | Stable releases: 0 | Prereleases (not covered): 0 Highlights Databricks AI Runtime SDK replaces the deprecated serverless_gpu package in GPU environment version 6. Knowledge Assistant and Supervisor Agent are now legacy; new agents sh...</description>
-      <content:encoded><![CDATA[<h1>Data Engineering Watch 2026-10-19</h1>
-<p><a href="https://dboeter.github.io/daily-diff/#2026-10-19">📅 Overview</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-19/ai-agents">🤖 AI Agents</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-19/ai-hn">💬 AI Discussions</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-19/ai-arxiv">📚 AI Research</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-19/ai-web">🌐 Lab Announcements</a> · <strong>🗄️ Data Engineering Watch</strong> · <a href="https://dboeter.github.io/daily-diff/#2026-10-19/ai-trending">📈 Agent &amp; AI Coding Trends</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-19/ai-hf">🧠 AI Models</a></p>
-<blockquote>
-<p>Generated: 2026-10-19 01:04 UTC | Projects: 17 | Active today: 0 | Stable releases: 0 | Prereleases (not covered): 0</p>
-</blockquote>
-<hr>
-<h2>Highlights</h2>
-<ul>
-<li>Databricks AI Runtime SDK replaces the deprecated serverless_gpu package in GPU environment version 6.  </li>
-<li>Knowledge Assistant and Supervisor Agent are now legacy; new agents should use the Agent Bricks CLI.  </li>
-<li>Snowflake release 10.37 introduces behavior change bundles, with bundle 2026_08 disabled by default for testing.  </li>
-<li>Azure Databricks makes Feature Views generally available for batch, streaming, and request‑time data.</li>
-</ul>
-<hr>
-<h2>Databricks</h2>
-<table>
-<thead>
-<tr>
-<th align="left">Date</th>
-<th align="left">Source</th>
-<th align="left">Item</th>
-<th align="left">Summary</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left">2026-10-13</td>
-<td align="left">Azure Databricks</td>
-<td align="left">⚠️ <a href="https://learn.microsoft.com/azure/databricks/release-notes/product/2026/october#databricks-ai-runtime-sdk-replaces-serverless_gpu">Databricks AI Runtime SDK replaces serverless_gpu</a></td>
-<td align="left">Starting in GPU environment version 6, the Databricks AI Runtime SDK ( databricks-sdk-air ) replaces the deprecated serverless_gpu package. It provides the…</td>
-</tr>
-<tr>
-<td align="left">2026-10-12</td>
-<td align="left">Azure Databricks</td>
-<td align="left">⚠️ <a href="https://learn.microsoft.com/azure/databricks/release-notes/product/2026/october#knowledge-assistant-and-supervisor-agent-are-now-legacy">Knowledge Assistant and Supervisor Agent are now legacy</a></td>
-<td align="left">Knowledge Assistant and Supervisor Agent are now legacy offerings. For new agents written in code, Databricks recommends the Agent Bricks CLI . To build agents…</td>
-</tr>
-<tr>
-<td align="left">2026-10-12</td>
-<td align="left">Azure Databricks</td>
-<td align="left"><a href="https://learn.microsoft.com/azure/databricks/release-notes/product/2026/october#feature-views-are-now-generally-available">Feature Views are now generally available</a></td>
-<td align="left">Feature Views are now generally available for batch, streaming, and request-time data. They will be enabled for compliance security profile workspaces in…</td>
-</tr>
-<tr>
-<td align="left">2026-10-14</td>
-<td align="left">Azure Databricks</td>
-<td align="left"><a href="https://learn.microsoft.com/azure/databricks/release-notes/whats-coming#billing-for-private-network-gateway">Billing for private network gateway</a></td>
-<td align="left">Starting on or after December 1, 2026, Azure Databricks will bill for private network gateway usage. See Private network gateway .</td>
-</tr>
-<tr>
-<td align="left">2026-10-12</td>
-<td align="left">Azure Databricks</td>
-<td align="left"><a href="https://learn.microsoft.com/azure/databricks/release-notes/whats-coming#feature-views-will-soon-be-available-by-default-for-workspaces-with-the-compliance-security-profile-enabled">Feature Views will soon be available by default for workspaces with the compliance security profile enabled</a></td>
-<td align="left">Feature Views are now generally available. They will be automatically enabled for workspaces with the compliance security profile enabled in mid-November 2026.…</td>
-</tr>
-<tr>
-<td align="left">2026-10-15</td>
-<td align="left">Azure Databricks</td>
-<td align="left"><a href="https://learn.microsoft.com/azure/databricks/release-notes/product/2026/october#mysql-integrated-cdc-pipeline-is-now-generally-available">MySQL integrated CDC pipeline is now generally available</a></td>
-<td align="left">The integrated CDC pipeline for MySQL is now generally available. An integrated CDC pipeline ingests change data from MySQL into Azure Databricks using a…</td>
-</tr>
-<tr>
-<td align="left">2026-10-13</td>
-<td align="left">Azure Databricks</td>
-<td align="left"><a href="https://learn.microsoft.com/azure/databricks/release-notes/product/2026/october#external-writes-to-managed-delta-tables-are-now-generally-available">External writes to managed Delta tables are now generally available</a></td>
-<td align="left">Support for creating and writing to Unity Catalog managed Delta tables from external Apache Spark clients is now generally available. Tables must have catalog…</td>
-</tr>
-<tr>
-<td align="left">2026-10-15</td>
-<td align="left">Azure Databricks</td>
-<td align="left"><a href="https://learn.microsoft.com/azure/databricks/release-notes/product/2026/october#adbc-driver-for-power-bi-is-now-generally-available">ADBC driver for Power BI is now generally available</a></td>
-<td align="left">The Arrow Database Connectivity (ADBC) driver for the Azure Databricks connector for Power BI is now generally available. ADBC is the default driver for new…</td>
-</tr>
-</tbody></table>
-<hr>
-<h2>Snowflake</h2>
-<table>
-<thead>
-<tr>
-<th align="left">Date</th>
-<th align="left">Source</th>
-<th align="left">Item</th>
-<th align="left">Summary</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left">2026-10-16</td>
-<td align="left">Snowflake</td>
-<td align="left">⚠️ <a href="https://docs.snowflake.com/en/release-notes/2026/10_37">10.37 Release Notes (with behavior changes): Oct 08, 2026 - Oct 16, 2026</a></td>
-<td align="left">Behavior change bundles This release contains the following behavior change bundles:... Read more</td>
-</tr>
-<tr>
-<td align="left">2026-10-16</td>
-<td align="left">Snowflake behavior changes</td>
-<td align="left">⚠️ <a href="https://docs.snowflake.com/en/release-notes/bcr-bundles/2026_08_bundle">Behavior change bundle 2026_08</a></td>
-<td align="left">Introduced in the 10.37 release (October 8-16, 2026) as Disabled by Default; account admins can enable for testing. Status planned to change in a subsequent…</td>
-</tr>
-<tr>
-<td align="left">2026-10-16</td>
-<td align="left">Snowflake</td>
-<td align="left"><a href="https://docs.snowflake.com/en/release-notes/2026/other/2026-10-16-iceberg-v3-upgrade-expression-defaults-ga">October 16, 2026: Apache Iceberg™ v3 table upgrades and expression defaults (General availability)</a></td>
-<td align="left">The following Apache Iceberg™ v3 features are now generally available.</td>
-</tr>
-<tr>
-<td align="left">2026-10-15</td>
-<td align="left">Snowflake</td>
-<td align="left"><a href="https://docs.snowflake.com/en/release-notes/2026/other/2026-10-15-postgres-data-mirroring-ga">Oct 15, 2026: Data mirroring for Snowflake Postgres (General availability)</a></td>
-<td align="left">Data mirroring for Snowflake Postgres is now generally available. Data mirroring continuously replicates tables from a Snowflake Postgres instance into a…</td>
-</tr>
-<tr>
-<td align="left">2026-10-14</td>
-<td align="left">Snowflake</td>
-<td align="left"><a href="https://docs.snowflake.com/en/release-notes/2026/other/2026-10-14-cowork-document-generation-ga">Oct 14, 2026: Document generation in Snowflake CoWork (General availability)</a></td>
-<td align="left">Document generation in Snowflake CoWork is now generally available and is no longer in Preview. You can ask Snowflake CoWork to generate a PDF, a Word document…</td>
-</tr>
-</tbody></table>
-<hr>
-<h2>Azure / Fabric &amp; GCP</h2>
-<table>
-<thead>
-<tr>
-<th align="left">Date</th>
-<th align="left">Source</th>
-<th align="left">Item</th>
-<th align="left">Summary</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left">2026-10-14</td>
-<td align="left">BigQuery</td>
-<td align="left"><a href="https://docs.cloud.google.com/bigquery/docs/release-notes#October_14_2026">Feature: The Apache Hive catalog endpoint in the Lakehouse runtime catalog is now generally available (GA).</a></td>
-<td align="left">The Apache Hive catalog endpoint in the Lakehouse runtime catalog is now generally available (GA). This integration lets you use the metastore as a serverless,…</td>
-</tr>
-<tr>
-<td align="left">2026-10-15</td>
-<td align="left">BigQuery</td>
-<td align="left"><a href="https://docs.cloud.google.com/bigquery/docs/release-notes#October_15_2026">Feature: You can copy tables across regions.</a></td>
-<td align="left">You can copy tables across regions. This feature is now generally available (GA).</td>
-</tr>
-<tr>
-<td align="left">2026-10-12</td>
-<td align="left">BigQuery</td>
-<td align="left"><a href="https://docs.cloud.google.com/bigquery/docs/release-notes#October_12_2026">Feature: Incremental data transfers for the BigQuery Data Transfer Service for PostgreSQL and ServiceNow are now generally available (GA).</a></td>
-<td align="left">Incremental data transfers for the BigQuery Data Transfer Service for PostgreSQL and ServiceNow are now generally available (GA).</td>
-</tr>
-</tbody></table>
-<hr>
-<h2>Data × AI</h2>
-<ul>
-<li>Databricks AI Runtime SDK now supersedes serverless_gpu, providing the SDK for GPU workloads in Databricks AI Runtime.  </li>
-<li>Knowledge Assistant and Supervisor Agent are deprecated; Databricks recommends the Agent Bricks CLI for building custom agents.  </li>
-<li>Snowflake CoWork document generation is generally available, enabling AI‑driven PDF and Word creation from natural language prompts.</li>
-</ul>
-<hr>
-<h2>Worth a Look</h2>
-<ul>
-<li>Snowflake Apache Iceberg v3 table upgrades are now GA, offering enhanced table features and performance.  </li>
-<li>BigQuery adds cross‑region table copy capability, simplifying data movement across locations.  </li>
-<li>Azure Databricks MySQL integrated CDC pipeline is GA, streamlining change‑data capture from MySQL into Delta Lake.</li>
-</ul>
-<hr>
-<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
-]]></content:encoded>
-    </item>
-    <item>
-      <title>AI Discussions 2026-10-19</title>
-      <link>https://dboeter.github.io/daily-diff/#2026-10-19/ai-hn</link>
-      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-10-19/ai-hn</guid>
-      <pubDate>Mon, 19 Oct 2026 00:00:00 +0000</pubDate>
-      <description>AI Discussions 2026-10-19 📅 Overview · 🤖 AI Agents · 💬 AI Discussions · 📚 AI Research · 🌐 Lab Announcements · 🗄️ Data Engineering Watch · 📈 Agent &amp;amp; AI Coding Trends · 🧠 AI Models Sources: Hacker News (30 stories) + Dev.to (30 articles) + Lobste.rs (3 stories) | Generated: 2026-10-19 01:04 UTC Highlights The biggest buzz centers on new model releases, with DeepSeek‑v4.1‑Flash and Meta’s Muse Spark Open drawing massive scores and comment counts, while Anthropic’s Claude revealing the o...</description>
-      <content:encoded><![CDATA[<h1>AI Discussions 2026-10-19</h1>
-<p><a href="https://dboeter.github.io/daily-diff/#2026-10-19">📅 Overview</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-19/ai-agents">🤖 AI Agents</a> · <strong>💬 AI Discussions</strong> · <a href="https://dboeter.github.io/daily-diff/#2026-10-19/ai-arxiv">📚 AI Research</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-19/ai-web">🌐 Lab Announcements</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-19/ai-data">🗄️ Data Engineering Watch</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-19/ai-trending">📈 Agent &amp; AI Coding Trends</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-19/ai-hf">🧠 AI Models</a></p>
-<blockquote>
-<p>Sources: <a href="https://news.ycombinator.com/">Hacker News</a> (30 stories) + <a href="https://dev.to/">Dev.to</a> (30 articles) + <a href="https://lobste.rs/">Lobste.rs</a> (3 stories) | Generated: 2026-10-19 01:04 UTC</p>
-</blockquote>
-<hr>
-<h2>Highlights</h2>
-<p>The biggest buzz centers on new model releases, with DeepSeek‑v4.1‑Flash and Meta’s Muse Spark Open drawing massive scores and comment counts, while Anthropic’s Claude revealing the origins of ECDSA curves also sparks intense discussion. On the impact side, a study showing 90 % of US work hours are poorly covered by AI benchmarks and a provocative piece on Neural Networks being “clean” both rank high in engagement. Developer‑focused chatter includes practical tools like Llmspeed for local LLM benchmarking, debates over AI safety thresholds, and browser‑based AI features that are finally production‑ready.</p>
-<h2>Hacker News</h2>
-<h3>🔬 Models &amp; Research</h3>
-<table>
-<thead>
-<tr>
-<th align="left">Title</th>
-<th align="right">Score</th>
-<th align="right">Comments</th>
-<th align="left">Summary</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left"><a href="https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash-1017">DeepSeek-v4.1-Flash-1017</a> · <a href="https://news.ycombinator.com/item?id=50129045">HN</a></td>
-<td align="right">936</td>
-<td align="right">704</td>
-<td align="left">Release of DeepSeek’s V4.1‑Flash model on Hugging Face, showcasing strong performance and prompting discussion about its training data and licensing. It matters because it offers a competitive open‑weight alternative to proprietary LLMs.</td>
-</tr>
-<tr>
-<td align="left"><a href="https://www.anthropic.com/research/ecdsa-curve-origins">Claude reveals ECDSA curve origins</a> · <a href="https://news.ycombinator.com/item?id=50122800">HN</a></td>
-<td align="right">1051</td>
-<td align="right">388</td>
-<td align="left">Anthropic research detailing how Claude inferred the mathematical origins of elliptic‑curve cryptography parameters used in ECDSA. This demonstrates LLMs’ ability to reverse‑engineer cryptographic constants, relevant for security‑focused developers.</td>
-</tr>
-<tr>
-<td align="left"><a href="https://research.meta.ai/blog/muse-spark-open">Muse Spark Open</a> · <a href="https://news.ycombinator.com/item?id=50107379">HN</a></td>
-<td align="right">916</td>
-<td align="right">477</td>
-<td align="left">Meta’s open release of the Muse Spark model family, emphasizing multimodal capabilities and efficient inference. Developers gain access to a powerful foundation model for research and product integration.</td>
-</tr>
-<tr>
-<td align="left"><a href="https://already-clean.goodfire.com/">Neural networks are clean</a> · <a href="https://news.ycombinator.com/item?id=50105647">HN</a></td>
-<td align="right">821</td>
-<td align="right">336</td>
-<td align="left">A blog post arguing that modern neural networks, when properly regularized, exhibit “clean” representations that generalize well without memorization noise. It informs architectural choices and regularization practices.</td>
-</tr>
-<tr>
-<td align="left"><a href="https://alexwang.ai/posts/associative-memory/">You could have invented transformers from memory</a> · <a href="https://news.ycombinator.com/item?id=50122878">HN</a></td>
-<td align="right">622</td>
-<td align="right">141</td>
-<td align="left">An explanatory article linking the transformer architecture to associative memory concepts, offering an intuitive derivation. It helps developers grasp the underlying principles behind attention mechanisms.</td>
-</tr>
-</tbody></table>
-<h3>🛠️ Tools &amp; Engineering</h3>
-<table>
-<thead>
-<tr>
-<th align="left">Title</th>
-<th align="right">Score</th>
-<th align="right">Comments</th>
-<th align="left">Summary</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left"><a href="https://claude.dev/blog/solving-code-review-at-anthropic/">How the Claude Code team does code review</a> · <a href="https://news.ycombinator.com/item?id=50122951">HN</a></td>
-<td align="right">472</td>
-<td align="right">468</td>
-<td align="left">Anthropic’s internal process for using Claude to assist in code review, highlighting prompt design, feedback loops, and safety checks. It provides a concrete example of LLM‑augmented software engineering workflows.</td>
-</tr>
-<tr>
-<td align="left"><a href="https://llmspeed.dev/">Llmspeed – feel how fast a local LLM runs before you buy the hardware</a> · <a href="https://news.ycombinator.com/item?id=50127979">HN</a></td>
-<td align="right">321</td>
-<td align="right">86</td>
-<td align="left">A web‑based benchmark that lets users test LLM inference speed on their own machine before purchasing hardware. It aids developers in making informed decisions about local deployment feasibility.</td>
-</tr>
-<tr>
-<td align="left"><a href="https://sphinx-six-theta.vercel.app/">Sphinx – A hook that quizzes you on your AI&#39;s code before shipping</a> · <a href="https://news.ycombinator.com/item?id=50137950">HN</a></td>
-<td align="right">241</td>
-<td align="right">85</td>
-<td align="left">A Show HN tool that runs automated quizzes on AI‑generated code to catch logical errors prior to release. It addresses the reliability gap in AI‑assisted programming.</td>
-</tr>
-<tr>
-<td align="left"><a href="https://starskirmish.com/bench/v0-2/">Gemini 4 Argon plays StarCraft</a> · <a href="https://news.ycombinator.com/item?id=50118688">HN</a></td>
-<td align="right">249</td>
-<td align="right">111</td>
-<td align="left">A benchmark where Gemini 4‑Argon agents play StarCraft II, measuring strategic planning and real‑time decision‑making. It showcases the model’s capability in complex, dynamic environments.</td>
-</tr>
-<tr>
-<td align="left"><a href="https://github.com/openai/codex/issues/25921">Codex Desktop continuously generates Crashpad pending dumps</a> · <a href="https://news.ycombinator.com/item?id=50133231">HN</a></td>
-<td align="right">168</td>
-<td align="right">82</td>
-<td align="left">An issue report describing persistent crash dumps when using the Codex desktop client, indicating stability problems. Developers relying on Codex need to be aware of this regressions.</td>
-</tr>
-</tbody></table>
-<h3>🏢 Industry News</h3>
-<table>
-<thead>
-<tr>
-<th align="left">Title</th>
-<th align="right">Score</th>
-<th align="right">Comments</th>
-<th align="left">Summary</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left"><a href="https://www.tomshardware.com/tech-industry/artificial-intelligence/anthropics-proposed-ai-safety-bill-only-kicks-in-if-50-deaths-or-usd1-billion-in-damages-are-on-the-line-proposal-would-effectively-make-the-commerce-department-the-only-agency-capable-of-stopping-an-ai-model">Anthropic&#39;s proposed AI safety bill only kicks in if 50 deaths or $1B in damages</a> · <a href="https://news.ycombinator.com/item?id=50141429">HN</a></td>
-<td align="right">156</td>
-<td align="right">162</td>
-<td align="left">Summary of Anthropic’s policy proposal that sets high thresholds for triggering federal AI safety oversight, effectively limiting early intervention. It highlights the ongoing debate over regulatory approaches to AI risk.</td>
-</tr>
-<tr>
-<td align="left"><a href="https://www.theverge.com/ai-artificial-intelligence/1013195/ai-agents-blocked-web">Websites are closing their doors to AI agents</a> · <a href="https://news.ycombinator.com/item?id=50141657">HN</a></td>
-<td align="right">133</td>
-<td align="right">126</td>
-<td align="left">Reporting that major sites are implementing bot‑detecting measures to block automated AI agents from scraping or interacting with their services. Developers building agent‑based tools must adapt to increasing anti‑bot defenses.</td>
-</tr>
-<tr>
-<td align="left"><a href="https://www.anthropic.com/news/public-benefit-fund">Investing in the public benefit</a> · <a href="https://news.ycombinator.com/item?id=50143755">HN</a></td>
-<td align="right">48</td>
-<td align="right">46</td>
-<td align="left">Announcement of Anthropic’s new fund dedicated to public‑benefit AI projects, aiming to support research that aligns with societal good. It signals growing corporate investment in responsible AI initiatives.</td>
-</tr>
-</tbody></table>
-<h3>💬 Opinions &amp; Debates</h3>
-<table>
-<thead>
-<tr>
-<th align="left">Title</th>
-<th align="right">Score</th>
-<th align="right">Comments</th>
-<th align="left">Summary</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left"><a href="https://www.mercor.com/research/labor-index/benchmark-map/">90% of US working hours are spent on tasks not covered well by AI benchmarks</a> · <a href="https://news.ycombinator.com/item?id=50121179">HN</a></td>
-<td align="right">616</td>
-<td align="right">568</td>
-<td align="left">A study revealing that most workplace activities are poorly represented by current AI performance benchmarks, questioning the relevance of standard evals. It urges developers to consider real‑world task coverage when evaluating models.</td>
-</tr>
-<tr>
-<td align="left"><a href="https://www.nytimes.com/2026/10/16/us/math-ai-terence-tao.html">&quot;I&#39;m on a war footing&quot;: Terry Tao and the crisis in math</a> · <a href="https://news.ycombinator.com/item?id=50118165">HN</a></td>
-<td align="right">75</td>
-<td align="right">109</td>
-<td align="left">A New York Times profile of mathematician Terence Tao discussing how AI is reshaping mathematical research and the associated challenges. It provides insight into the intersection of AI and theoretical fields.</td>
-</tr>
-<tr>
-<td align="left"><a href="https://www.vals.ai/blogs/impossible-refund">How Far Will AI Assistants Go for a Refund They Can&#39;t Get?</a> · <a href="https://news.ycombinator.com/item?id=50140462">HN</a></td>
-<td align="right">78</td>
-<td align="right">97</td>
-<td align="left">A blog post exploring edge cases where AI agents pursue refunds despite policy limitations, highlighting potential misuse or unintended behaviors. It raises concerns about agent alignment and policy enforcement.</td>
-</tr>
-</tbody></table>
-<h2>Dev.to</h2>
-<table>
-<thead>
-<tr>
-<th align="left">Article</th>
-<th align="right">Reactions</th>
-<th align="right">Comments</th>
-<th align="left">Summary</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left"><a href="https://dev.to/sylwia-lask/your-browser-can-do-what-5-ai-features-that-actually-work-1blb">Your Browser Can Do WHAT?! 5 AI Features That Actually Work</a></td>
-<td align="right">190</td>
-<td align="right">121</td>
-<td align="left">Reviews five browser‑based AI capabilities—such as on‑device translation and image generation—that have matured enough for production use. Developers learn which features can be adopted without heavyweight backends.</td>
-</tr>
-<tr>
-<td align="left"><a href="https://dev.to/francistrdev/ai-fatigue-yea-i-know-f9">AI Fatigue? Yea I know.</a></td>
-<td align="right">162</td>
-<td align="right">99</td>
-<td align="left">Discusses the growing sense of exhaustion from constant AI news and hype, offering personal coping strategies and a call for balanced enthusiasm. It reflects a widespread sentiment in the dev community.</td>
-</tr>
-<tr>
-<td align="left"><a href="https://dev.to/effessdev/i-argued-with-ai-until-it-apologized-for-calling-my-course-ai-slop-350d">I argued with AI until it apologized for calling my course &quot;AI Slop&quot;</a></td>
-<td align="right">37</td>
-<td align="right">113</td>
-<td align="left">Narrates a dialogue where the author challenges an AI’s dismissive label, leading the model to apologize and adjust its tone. Demonstrates the importance of prompt engineering and feedback loops for aligning model behavior.</td>
-</tr>
-<tr>
-<td align="left"><a href="https://dev.to/rudratosh/can-a-local-llm-replace-claude-code-the-benchmark-everyone-quotes-is-the-wrong-one-2kna">Can a local LLM replace Claude Code? The benchmark everyone quotes is the wrong one.</a></td>
-<td align="right">64</td>
-<td align="right">91</td>
-<td align="left">Critiques the common reliance on SWE‑bench scores for evaluating coding assistants, proposing alternative metrics that better capture real‑world usefulness. Guides developers toward more meaningful evaluation practices.</td>
-</tr>
-<tr>
-<td align="left"><a href="https://dev.to/rudratosh/your-ai-agent-said-it-blocked-the-attack-i-read-the-source-of-5-tools-that-check-if-its-lying-l1n">Your AI agent said it blocked the attack. I read the source of 5 tools that check if it&#39;s lying.</a></td>
-<td align="right">19</td>
-<td align="right">51</td>
-<td align="left">Examines open‑source tools that verify whether an AI agent’s security claims are truthful, highlighting gaps in current trust mechanisms. Useful for developers building agent‑based security systems.</td>
-</tr>
-</tbody></table>
-<h2>Lobste.rs</h2>
-<table>
-<thead>
-<tr>
-<th align="left">Story</th>
-<th align="right">Score</th>
-<th align="right">Comments</th>
-<th align="left">Summary</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left"><a href="https://already-clean.goodfire.com/">Neural Networks Are Already Clean</a> · <a href="https://lobste.rs/s/enjlpn/neural_networks_are_already_clean">discuss</a></td>
-<td align="right">4</td>
-<td align="right">1</td>
-<td align="left">Reiterates the claim that neural networks can learn clean, generalizable representations without overfitting, relevant for model design discussions.</td>
-</tr>
-<tr>
-<td align="left"><a href="https://bart.degoe.de/rag-with-a-small-language-model-in-the-browser/">Running RAG with a (small) language model in the browser</a> · <a href="https://lobste.rs/s/nsjjo3/running_rag_with_small_language_model">discuss</a></td>
-<td align="right">3</td>
-<td align="right">0</td>
-<td align="left">Shows how to implement retrieval‑augmented generation using a tiny LLM entirely client‑side, enabling privacy‑preserving AI features in web apps.</td>
-</tr>
-<tr>
-<td align="left"><a href="https://hol-light.github.io/tutorial/HTML/tutorial.html">HOL Light Tutorial</a> · <a href="https://lobste.rs/s/zqa5yz/hol_light_tutorial">discuss</a></td>
-<td align="right">2</td>
-<td align="right">1</td>
-<td align="left">Provides a step‑by‑step guide to the HOL Light theorem prover, useful for developers interested in formal methods and proof‑assisted AI.</td>
-</tr>
-</tbody></table>
-<h2>Signals</h2>
-<p>Developers are gravitating toward three intertwined themes: new model releases, practical tooling for local LLMs, and scrutiny of AI’s real‑world impact. The highest‑scoring items—DeepSeek‑v4.1‑Flash, Claude’s ECDSA revelations, and Muse Spark Open—show strong excitement about fresh, competitive foundation models. Closely following are discussions about benchmarks that fail to capture everyday work (the 90 % US hours study) and about the trustworthiness of AI agents (e.g., the “lie detector” post and the Crashpad issue with Codex). Controversy surfaces where comment counts vastly outweigh scores: the AI‑Slop apology thread (37 reactions, 113 comments) and the Anthropic safety‑bill debate (156/162) indicate polarized views on model behavior and regulation. Practical concerns recur across communities: measuring local LLM speed (Llmspeed, Dev.to’s local LLM vs. Claude Code piece), securing agent actions, and leveraging browser‑based AI without heavy infrastructure. These signals suggest a maturing focus from raw performance to reliable, safe, and context‑aware deployment of AI in everyday development workflows.</p>
-<h2>Worth a Look</h2>
-<ul>
-<li><strong>DeepSeek-v4.1-Flash-1017</strong> – A major open‑weight release that rivals top‑tier models; essential reading for anyone tracking the shifting LLM landscape.  </li>
-<li><strong>How the Claude Code team does code review</strong> – Offers a concrete, battle‑tested workflow for integrating LLMs into software engineering, with lessons on prompt design and safety checks.  </li>
-<li><strong>Your Browser Can Do WHAT?! 5 AI Features That Actually Work</strong> – Provides actionable, production‑ready browser AI techniques that let developers add powerful features without server‑side complexity.</li>
-</ul>
-<hr>
-<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
-]]></content:encoded>
-    </item>
-    <item>
-      <title>Lab Announcements 2026-10-19</title>
-      <link>https://dboeter.github.io/daily-diff/#2026-10-19/ai-web</link>
-      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-10-19/ai-web</guid>
-      <pubDate>Mon, 19 Oct 2026 00:00:00 +0000</pubDate>
-      <description>Lab Announcements 2026-10-19 📅 Overview · 🤖 AI Agents · 💬 AI Discussions · 📚 AI Research · 🌐 Lab Announcements · 🗄️ Data Engineering Watch · 📈 Agent &amp;amp; AI Coding Trends · 🧠 AI Models Today&amp;#39;s update | New content: 1 articles | Generated: 2026-10-19 01:04 UTC Sources: Anthropic: anthropic.com — 1 new articles (sitemap total: 474) OpenAI: openai.com — 0 new articles (sitemap total: 1069) Highlights Anthropic announced a novel equity‑based commitment to its Public Benefit Fund, pledgi...</description>
-      <content:encoded><![CDATA[<h1>Lab Announcements 2026-10-19</h1>
-<p><a href="https://dboeter.github.io/daily-diff/#2026-10-19">📅 Overview</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-19/ai-agents">🤖 AI Agents</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-19/ai-hn">💬 AI Discussions</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-19/ai-arxiv">📚 AI Research</a> · <strong>🌐 Lab Announcements</strong> · <a href="https://dboeter.github.io/daily-diff/#2026-10-19/ai-data">🗄️ Data Engineering Watch</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-19/ai-trending">📈 Agent &amp; AI Coding Trends</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-19/ai-hf">🧠 AI Models</a></p>
-<blockquote>
-<p>Today&#39;s update | New content: 1 articles | Generated: 2026-10-19 01:04 UTC</p>
-</blockquote>
-<p>Sources:</p>
-<ul>
-<li>Anthropic: <a href="https://www.anthropic.com">anthropic.com</a> — 1 new articles (sitemap total: 474)</li>
-<li>OpenAI: <a href="https://openai.com">openai.com</a> — 0 new articles (sitemap total: 1069)</li>
-</ul>
-<hr>
-<h2>Highlights</h2>
-<p>Anthropic announced a novel equity‑based commitment to its Public Benefit Fund, pledging 5 % of its shares today with a mechanism to add another 2 % for each 50 % increase in company value above a baseline. The fund, structured as a wholly‑owned LLC, will expand the company’s ability to pursue mission‑driven activities such as large donations to nonprofits, direct distributions to affected populations, and expanded research on AI’s labor‑market impacts. This move builds on Anthropic’s existing $200 million investment in studying AI’s socioeconomic effects and signals a shift toward scalable, flexible philanthropy tied directly to corporate growth. The announcement underscores Anthropic’s strategy of aligning financial incentives with long‑term AI safety and public‑good objectives.</p>
-<h2>Anthropic</h2>
-<h3>news</h3>
-<p>Anthropic’s press release (published 2026‑10‑18) details the creation of the Anthropic Public Benefit Fund, a vehicle designed to increase its stake in the company as the firm’s valuation rises. Subject to stockholder approval, 5 % of Anthropic’s shares will be committed immediately, with the board able to allocate an additional 2 % for every 50 % growth in company value above a predefined baseline. The fund, organized as a wholly‑owned LLC rather than a traditional 501(c)(3), will enable the company to pursue broader public‑benefit initiatives—such as sizable donations to nonprofits, direct aid to specific populations, and expanded research on AI‑driven labor market disruptions—beyond the internal projects already housed in the corporation. Anthropic notes it has already earmarked $200 million for studying and addressing AI’s economic impact on workers, indicating that the new fund will provide the flexibility to scale those efforts as the technology advances. The initiative reflects Anthropic’s dual focus on maintaining a for‑profit edge while institutionalizing mechanisms for scalable, mission‑aligned philanthropy.</p>
-<h2>Signals</h2>
-<p>Anthropic’s latest release highlights a strategic pivot toward embedding public‑benefit considerations directly into its equity structure, suggesting that the company views long‑term value creation as inseparable from societal impact. By tying additional equity commitments to measurable growth milestones, Anthropic creates a self‑reinforcing loop where financial success fuels greater capacity for safety‑focused and socially beneficial activities. This approach contrasts with the typical reinvestment model seen at many AI labs, positioning Anthropic as a potential agenda‑setter for how frontier firms can align investor interests with AI safety and public‑good outcomes. For developers and enterprise users, the signal is a heightened assurance that Anthropic’s profits will be partially redirected toward mitigating risks such as labor‑market disruption, which may translate into more robust safety tools, greater transparency, and possibly discounted access for nonprofits and research institutions. The timing—mid‑October 2026—coincides with a period of rapid model capability advances, implying that Anthropic is pre‑emptively scaling its governance mechanisms to keep pace with the anticipated societal effects of increasingly powerful AI systems.</p>
-<h2>Worth a Look</h2>
-<ul>
-<li><strong>Investing in the public benefit</strong> (Anthropic news, 2026‑10‑18): This article is essential for understanding how Anthropic is innovating its corporate governance to lock in long‑term AI safety commitments, offering a concrete example of equity‑linked philanthropy that could influence industry standards and investor expectations. Link: <a href="https://www.anthropic.com/news/public-benefit-fund">https://www.anthropic.com/news/public-benefit-fund</a></li>
-</ul>
 <hr>
 <p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
 ]]></content:encoded>

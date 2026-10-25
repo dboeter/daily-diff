@@ -13,7 +13,137 @@
       <height>144</height>
     </image>
     <atom:link href="https://dboeter.github.io/daily-diff/feeds/ai-agents.xml" rel="self" type="application/rss+xml"/>
-    <lastBuildDate>Sat, 24 Oct 2026 01:32:47 +0000</lastBuildDate>
+    <lastBuildDate>Sun, 25 Oct 2026 01:03:36 +0000</lastBuildDate>
+    <item>
+      <title>AI Agents 2026-10-25</title>
+      <link>https://dboeter.github.io/daily-diff/#2026-10-25/ai-agents</link>
+      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-10-25/ai-agents</guid>
+      <pubDate>Sun, 25 Oct 2026 00:00:00 +0000</pubDate>
+      <description>AI Agents 2026-10-25 ⬛ Overview · 🟪 AI Agents · 🟦 AI Models &amp;amp; Labs · 🟨 Data Engineering Generated: 2026-10-25 01:00 UTC | Projects: 16 | Active today: 8 | Stable releases: 1 | Prereleases (not covered): 1 Highlights Hermes Agent unified gateway merge introduced regressions across CLI, TUI, desktop, API server, cron, and editor integrations Claude Code “fizzy_lake” redesign breaks dark theme on Windows: glaring text, invisible bold, greyed-out inline code, inverted sidebar, slower launch O...</description>
+      <content:encoded><![CDATA[<h1>AI Agents 2026-10-25</h1>
+<p><a href="https://dboeter.github.io/daily-diff/#2026-10-25">⬛ Overview</a> · <strong>🟪 AI Agents</strong> · <a href="https://dboeter.github.io/daily-diff/#2026-10-25/ai-models">🟦 AI Models &amp; Labs</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-25/ai-data">🟨 Data Engineering</a></p>
+<blockquote>
+<p>Generated: 2026-10-25 01:00 UTC | Projects: 16 | Active today: 8 | Stable releases: 1 | Prereleases (not covered): 1</p>
+</blockquote>
+<hr>
+<h2>Highlights</h2>
+<ul>
+<li>Hermes Agent unified gateway merge introduced regressions across CLI, TUI, desktop, API server, cron, and editor integrations</li>
+<li>Claude Code “fizzy_lake” redesign breaks dark theme on Windows: glaring text, invisible bold, greyed-out inline code, inverted sidebar, slower launch</li>
+<li>OpenAI Codex VS Code extension fails to start UI on Windows, blocking Plus and Pro users</li>
+<li>OpenCode free-model limits report exhausted immediately after reset with “LIMIT REACHED WITHOUT ANY USE” errors</li>
+<li>OpenShell surges 896 stars on GitHub Trending as a safe, private runtime for autonomous agents</li>
+</ul>
+<hr>
+<h2>Coding Agents &amp; Assistants</h2>
+<h3>Claude Code</h3>
+<ul>
+<li><strong>Hot issue</strong>: A redesign experiment (“fizzy_lake”) breaks the dark theme on Windows — glaring text, near-invisible bold in Latin and Cyrillic, greyed-out inline code, inverted sidebar, and slower launch; re-login no longer restores the old styles. <a href="https://github.com/anthropics/claude-code/issues/104695">#104695</a>, <a href="https://github.com/anthropics/claude-code/issues/104529">#104529</a></li>
+<li><strong>News</strong>: Hacker News thread alleges the desktop app silently adds users’ email addresses to outbound HTTP requests. <a href="https://news.ycombinator.com/item?id=50219875">HN discussion</a></li>
+</ul>
+<h3>OpenAI Codex</h3>
+<ul>
+<li><strong>Hot issue</strong>: VS Code extension 26.1021.22027 fails to start its UI on Windows (VS Code 1.143.1), blocking Codex for multiple users on Plus and Pro plans. <a href="https://github.com/openai/codex/issues/56691">#56691</a>, <a href="https://github.com/openai/codex/issues/56655">#56655</a></li>
+</ul>
+<h3>Gemini CLI</h3>
+<ul>
+<li><strong>News</strong>: The project appeared on GitHub Trending, gaining ~44 stars for its open-source terminal agent that brings Gemini directly into the CLI. <a href="https://github.com/google-gemini/gemini-cli">GitHub Trending</a></li>
+</ul>
+<h3>OpenCode</h3>
+<ul>
+<li><strong>Hot issue</strong>: Users report free-model limits exhausted immediately after reset (“LIMIT REACHED WITHOUT ANY USE”) and “Free Usage Exceeded, Subscribe to Go” errors on all free models in Desktop 1.19.4. <a href="https://github.com/anomalyco/opencode/issues/58670">#58670</a>, <a href="https://github.com/anomalyco/opencode/issues/58781">#58781</a></li>
+</ul>
+<h3>Oh My Pi</h3>
+<ul>
+<li><strong>Hot issue</strong>: On Windows x64, resuming a session with a pending <code>edit</code> tool call triggers unbounded recursion in the native module (<code>pi_natives.win32-x64-baseline.node</code>), causing a deterministic stack overflow (0xC00000FD). <a href="https://github.com/can1357/oh-my-pi/issues/16857">#16857</a></li>
+</ul>
+<h3>Hermes Agent</h3>
+<ul>
+<li><strong>Hot issue</strong>: Linux desktop launches at 6% window opacity due to a default translucency setting applied via <code>setOpacity</code>; the Settings UI hides the control to fix it. <a href="https://github.com/NousResearch/hermes-agent/issues/143426">#143426</a></li>
+<li><strong>Hot issue</strong>: Unified gateway merge (#106742) introduced post-merge regressions across CLI, TUI, desktop, API server, cron, and editor integrations — conversations now route through a single gateway process. <a href="https://github.com/NousResearch/hermes-agent/issues/143547">#143547</a></li>
+</ul>
+<p><strong>Quiet today:</strong> <a href="https://github.com/Kilo-Org/kilocode">Kilo Code</a>, <a href="https://github.com/earendil-works/pi">Pi</a>, <a href="https://github.com/1jehuang/jcode">jcode</a>, <a href="https://github.com/cline/cline">Cline</a>, <a href="https://github.com/CommandCodeAI/command-code">Command Code</a>, <a href="https://github.com/deepseek-ai/deepseek-harness">DeepSeek Harness</a></p>
+<hr>
+<h2>Agent Tooling</h2>
+<h3>OpenShell</h3>
+<ul>
+<li><strong>News:</strong> GitHub Trending highlights OpenShell as a safe, private runtime for autonomous AI agents, driving a surge of 896 stars. <a href="https://github.com/NVIDIA/OpenShell">https://github.com/NVIDIA/OpenShell</a></li>
+</ul>
+<h3>Agent Deck</h3>
+<ul>
+<li><strong>Release:</strong> <a href="https://github.com/asheshgoplani/agent-deck/releases/tag/v1.16.33">v1.16.33</a> updates Vite to 8.3.4 in the web test suite and adds macOS app-side documentation checks.</li>
+</ul>
+<p><strong>Quiet today:</strong> <a href="https://github.com/herdrdev/herdr">herdr</a>, <a href="https://github.com/mksglu/context-mode">context-mode</a></p>
+<hr>
+<h2>Spotted</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Story</th>
+<th align="left">Source</th>
+<th align="left">Discussion</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a href="https://corgi.computer/">Show HN: Corgi, a helpful {agent, terminal} multiplexer</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50214373">125 points, 42 comments</a></td>
+<td align="left">Friendly helper for your agents.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://github.com/AbdullahAlhariri/penmentor">Show HN: Penmentor – Claude marks up your handwritten math like a teacher</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50167604">66 points, 9 comments</a></td>
+<td align="left">AI mentor that corrects your written math visually with local harnesses.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50167583">Launch HN: Respan (YC W24) – Open-source Rust AI gateway built around plugins</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50167583">53 points, 21 comments</a></td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left"><a href="https://research.poh.org/bot-benchmarking-2026/">Benchmarking Bot Detection Systems Against Modern AI Agents in 2026</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50169506">49 points, 8 comments</a></td>
+<td align="left">We test five bot detection systems against scripted browsers, stealth browsers, and AI browsing agents completing a realistic survey. Detection rates range from 9% to 99%.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://docs.litellm.ai/blog/security-incident-oct-21-2026-attack-chain">The attack chain behind the v1.107.0 LiteLLM release</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50215317">19 points, 0 comments</a></td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left"><a href="https://blog.greenflagged.dev/posts/agents-fail-like-engineers/">Agents fail like engineers, so I review them like engineers</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50211031">14 points, 4 comments</a></td>
+<td align="left">The Skeptic validates claims, the Logician makes sure the logic is sound, and the Steward thinks long-term. These 3 agents took my workflow to the next level.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://scrawl.kitlangton.com/">Scrawl: show an agent the problem</a></td>
+<td align="left">Lobste.rs</td>
+<td align="left"><a href="https://lobste.rs/s/jqjioq/scrawl_show_agent_problem">1 points, 1 comments</a></td>
+<td align="left">Record your screen, voice, clicks and drawings on a Mac or PC, then paste one compact capture into your AI coding agent.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://dev.to/sarvar_04/i-let-an-open-model-delete-1242-of-my-saved-articles-on-purpose-i-feel-lighter-l7f">I let an open model delete 1,242 of my saved articles. On purpose. I feel lighter.</a></td>
+<td align="left">Dev.to</td>
+<td align="left"><a href="https://dev.to/sarvar_04/i-let-an-open-model-delete-1242-of-my-saved-articles-on-purpose-i-feel-lighter-l7f">24 reactions, 18 comments</a></td>
+<td align="left">Unpile is a 100% local read-later triage agent. TabPFN decides which saved articles you will actually read, Gemma writes the digest, offline and free.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://dev.to/sbis04/sloth-reads-an-open-model-reads-my-read-later-pile-overnight-then-reads-me-the-good-ones-3o14">Sloth Reads: an open model reads my read-later pile overnight, then reads me the good ones</a></td>
+<td align="left">Dev.to</td>
+<td align="left"><a href="https://dev.to/sbis04/sloth-reads-an-open-model-reads-my-read-later-pile-overnight-then-reads-me-the-good-ones-3o14">19 reactions, 2 comments</a></td>
+<td align="left">This is a submission for the Hacktoberfest Open-Source AI Challenge Week 3: Slow and Steady.</td>
+</tr>
+</tbody></table>
+<hr>
+<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
+]]></content:encoded>
+    </item>
     <item>
       <title>AI Agents 2026-10-24</title>
       <link>https://dboeter.github.io/daily-diff/#2026-10-24/ai-agents</link>
