@@ -453,14 +453,11 @@ describe("source fidelity rules", () => {
 
   // 2026-10-27 forced weekly run: "DeepSeek's model family dominates", "half the OpenRouter top 20"
   // with MiniMax (a Hugging Face row only), and "harnesses are converging" from shared descriptions.
-  it("each Signal rests on its rows' figures, counted in one table, with no unsupported trend verb", () => {
+  it("each Signal rests on a fact and its rows' figures, with no unsupported trend verb", () => {
     expect(prompts.trends).toContain(
-      "links the rows it rests on, and every name and figure in it appears in those rows",
+      "links the rows that fact names; every other name and figure in it appears in those rows",
     );
     expect(prompts.trends).toContain("never on what their summaries, descriptions or titles have in common");
-    expect(prompts.trends).toContain(
-      'counts a share in one table, from its rows as shown ("4 of the 19 rows", never "half the top 20")',
-    );
     expect(prompts.trends).toContain(
       "uses no trend verb the figures cannot show (dominates, is accelerating, is converging)",
     );
@@ -567,5 +564,20 @@ describe("buildTrendsProsePrompt", () => {
       '- These rows have no summary or description: no Highlight for them. "Strix", "o/x"',
     );
     expect(buildTrendsProsePrompt("page", "2026-10-26")).not.toContain("no Highlight for them");
+  });
+
+  it("carries the facts block and takes every comparison from it", () => {
+    const p = buildTrendsProsePrompt(
+      "page",
+      "2026-10-26",
+      [],
+      "- Agent Tooling: largest absolute gain: [a/b](u).",
+    );
+    expect(p).toContain("Facts computed in code from the tables above");
+    expect(p).toContain("- Agent Tooling: largest absolute gain: [a/b](u).");
+    expect(p).toContain('Comparisons ("largest", "most"');
+    expect(p).toContain("come only from the facts block, quoted as given");
+    expect(p).toContain("opens with one fact from the facts block");
+    expect(buildTrendsProsePrompt("page", "2026-10-26")).not.toContain("Facts computed in code");
   });
 });

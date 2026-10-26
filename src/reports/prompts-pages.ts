@@ -67,18 +67,21 @@ ${summaryOutputRule(rows.length)}
  * rendered from the first round's calls. The model places TABLES_MARKER where
  * spliceTables inserts the page. Signals rest on row figures: the row summaries are
  * written from descriptions without figures, so "summaries support it" let the model
- * build trends from shared wording (forced weekly run, 2026-10-27).
+ * build trends from shared wording (forced weekly run, 2026-10-27). Comparisons come
+ * from `facts` (`trendsFacts`): derived by the model, they misread the tables.
  */
 export function buildTrendsProsePrompt(
   pageMd: string,
   dateStr: string,
   /** Rows with neither a summary nor a description ("—"): the page says nothing about them, so no Highlight. */
   noSummaryNames: string[] = [],
+  /** `trendsFacts`: the comparisons computed in code from the tables' rows. */
+  facts = "",
 ): string {
   return `You are the editor of a weekly trends report for AI practitioners: agents and coding tools, models, research and the community's most discussed stories. Below is this week's page, week ending ${dateStr}. Its tables were selected and ranked in code from GitHub Trending (weekly), GitHub topic search, OpenRouter app and model rankings, npm downloads, Hugging Face, arXiv (ranked by relevance) and Hacker News, Lobste.rs and Dev.to. 🆕 in a Signal column means created or listed in the last 14 days; 🔥 before a name means the item was also in last week's report.
 
 ${pageMd || "(The page has no sections this week.)"}
-
+${facts ? `\nFacts computed in code from the tables above (each names its table, row and window):\n\n${facts}\n` : ""}
 ---
 
 Write only these parts, in this order:
@@ -86,9 +89,8 @@ Write only these parts, in this order:
 1. \`## ${SECTIONS.highlights}\` — 1-3 bullets on the most noteworthy items of the week for a data or AI engineer, most relevant first, across the page's sections.
 2. The line \`${TABLES_MARKER}\` exactly once, on its own line. The page is inserted there.
 3. \`## ${SECTIONS.signals}\` — 100-300 words, 2-4 short paragraphs: what the tables' figures show, such as the largest star gains, rank moves against last week's page and the usage leaders. This is the one place for trend claims, and each Signal:
-   - links the rows it rests on, and every name and figure in it appears in those rows;
+   - opens with one fact from the facts block, as given, and links the rows that fact names; every other name and figure in it appears in those rows, and it lists no rows beyond them;
    - rests on those rows' figures (stars gained, %, rank, tokens, downloads, likes), never on what their summaries, descriptions or titles have in common: three tools that all support Codex are not a signal;
-   - counts a share in one table, from its rows as shown ("4 of the 19 rows", never "half the top 20");
    - uses no trend verb the figures cannot show (dominates, is accelerating, is converging): one snapshot shows no change over time.
    The Research table has no figures, so it gives no Signal. Fewer Signals beat an unsupported one.
 
@@ -98,7 +100,8 @@ Rules:
 - Do not reproduce or alter the tables, and write no other sections.
 - Each table gives its window in its intro line, and a claim keeps it, in Highlights too: OpenRouter usage is one day's snapshot, so say "on <its date>", never "this week".
 - Base every claim on the page. It shows descriptions, summaries and counts only, so do not describe releases, adoption or community reactions it does not show.
-- Mention only items that appear on the page, and link every item you mention.
+- Mention only items that appear on the page, and link every item you mention: each Signal and each Highlight carries the link of every row it names.
+- Comparisons ("largest", "most", "leads", "nearly double", counts and shares such as "3 of the top 10") come only from the facts block, quoted as given, with its table and window. Compute none yourself, and compare no rows the facts block does not compare.
 ${sourceFidelityRules()}
 - English, professional and concise.
 `;

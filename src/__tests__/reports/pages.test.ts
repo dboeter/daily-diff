@@ -8,6 +8,7 @@ import {
   buildModelsPage,
   buildPolicyReport,
   buildTrendsReport,
+  checkTrendsLinks,
   hasDataNews,
   type TrendsInput,
   LAB_POSTS_MAX,
@@ -1442,5 +1443,37 @@ describe("buildDataReport", () => {
       expect(await build(sections(false, false), data)).toBeNull();
       expect(fs.existsSync(stateFile)).toBe(false);
     });
+  });
+});
+
+describe("checkTrendsLinks", () => {
+  const prose = (signals: string[], highlights = "- [A](https://a) rose.") =>
+    `## Highlights\n\n${highlights}\n\n<!-- tables -->\n\n## Signals\n\n${signals.join("\n\n")}\n`;
+
+  it("drops a Signal without a link while a linked one remains, and logs it", () => {
+    const log = vi.spyOn(console, "log").mockImplementation(() => {});
+    const out = checkTrendsLinks(prose(["[a/b](https://x) gained most.", "Stars rose overall."]));
+    expect(out).toContain("[a/b](https://x) gained most.");
+    expect(out).not.toContain("Stars rose overall.");
+    expect(out).toContain("## Highlights\n\n- [A](https://a) rose.");
+    expect(log).toHaveBeenCalledWith("  [trends] Signal without a link: Stars rose overall.");
+    log.mockRestore();
+  });
+
+  it("keeps every Signal when none has a link, so the section never goes empty", () => {
+    const log = vi.spyOn(console, "log").mockImplementation(() => {});
+    const p = prose(["One.", "Two."]);
+    expect(checkTrendsLinks(p)).toBe(p);
+    expect(log).toHaveBeenCalledTimes(2);
+    log.mockRestore();
+  });
+
+  it("logs a Highlight without a link and keeps it", () => {
+    const log = vi.spyOn(console, "log").mockImplementation(() => {});
+    const p = prose(["[a](https://x) one."], "- Plain bullet.\n- [B](https://b) linked.");
+    expect(checkTrendsLinks(p)).toBe(p);
+    expect(log).toHaveBeenCalledWith("  [trends] Highlight without a link: - Plain bullet.");
+    expect(log).toHaveBeenCalledTimes(1);
+    log.mockRestore();
   });
 });

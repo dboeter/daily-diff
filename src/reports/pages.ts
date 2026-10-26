@@ -38,6 +38,7 @@ import type { TrendingData } from "../trending/compose.ts";
 import { saveTrendingVerdicts } from "../trending/classify.ts";
 import { saveMatchState } from "../trending/match.ts";
 import { lastWeekKeys, saveStarHistory, summaryRows, weekAgo } from "../trending/rank.ts";
+import { trendsFacts } from "../trending/facts.ts";
 import {
   AGENTS_HIGHLIGHTS_FOCUS,
   MODELS_HIGHLIGHTS_FOCUS,
@@ -127,14 +128,46 @@ export interface TrendsInput {
 }
 
 /**
+ * The Trends prose's link check: a Signals paragraph without a Markdown link is logged and
+ * dropped while a linked one remains, so the section never goes empty; a Highlights bullet
+ * without one is logged only. The prompt asks for links, and the free model left 2 of 3
+ * Highlights and all but one Signal without one (2026-10-27 check).
+ */
+export function checkTrendsLinks(prose: string): string {
+  const hasLink = (s: string) => /\]\([^)\s]+\)/.test(s);
+  const at = prose.indexOf(TABLES_MARKER);
+  const head = at === -1 ? prose : prose.slice(0, at);
+  for (const bullet of head.split("\n").filter((l) => /^\s*[-*] /.test(l))) {
+    if (!hasLink(bullet)) console.log(`  [trends] Highlight without a link: ${bullet.trim().slice(0, 80)}`);
+  }
+  if (at === -1) return prose;
+  const tail = prose.slice(at + TABLES_MARKER.length);
+  const heading = `## ${SECTIONS.signals}`;
+  const h = tail.indexOf(heading);
+  if (h === -1) return prose;
+  const paragraphs = tail
+    .slice(h + heading.length)
+    .split(/\n\s*\n/)
+    .map((p) => p.trim())
+    .filter(Boolean);
+  const unlinked = paragraphs.filter((p) => !hasLink(p));
+  for (const p of unlinked) console.log(`  [trends] Signal without a link: ${p.slice(0, 80)}`);
+  if (!unlinked.length || unlinked.length === paragraphs.length) return prose;
+  const kept = paragraphs.filter(hasLink);
+  return `${prose.slice(0, at + TABLES_MARKER.length)}${tail.slice(0, h)}${heading}\n\n${kept.join("\n\n")}\n`;
+}
+
+/**
  * The weekly Trends page: Highlights, Agents & coding tools (the Radar and
  * category tables), Skills: PRs and requests this week, Candidates to track (code only),
  * Models, Research, Most discussed, Signals. An empty section is left out; the
  * page is null when every section is. First round, in parallel: the trending
  * row summaries, the Hugging Face row summaries, Skills, and the Research rows'
  * call (the Most discussed rows come summarized from main()'s Spotted call).
- * Second round: the prose call over the page rendered from them writes
- * Highlights and Signals, and spliceTables puts the page between them; a row
+ * Second round: the prose call over the page rendered from them and the
+ * code-computed comparisons (`trendsFacts`) writes Highlights and Signals,
+ * checkTrendsLinks drops a Signal without a link, and spliceTables puts the
+ * page between them; a row
  * showing "—" is named to it as no Highlight. A failed summaries call shows the
  * descriptions (Hugging Face: task and size), a failed prose call the notice
  * under Highlights; a failed Skills fetch or call leaves MSG.skillsFailed, and
@@ -224,12 +257,23 @@ export async function buildTrendsReport(
       page,
       dateStr,
       unsummarizedRows(report, trendingSummaries, hfTableRows, hfSummaries),
+      trendsFacts({
+        radar: report?.radar ?? [],
+        tables: (report?.categories ?? []).map((c) => ({
+          title: T.categoryTitles[c.category],
+          rows: c.rows,
+        })),
+        openrouter: { models: trending.openrouter.topModels, date: trending.openrouter.topModelsDate },
+        hf: hfTableRows,
+      }),
     ),
     null,
     LLM_TOKENS_LISTING,
   );
   const body = spliceTables(
-    prose === null ? `## ${SECTIONS.highlights}\n\n${MSG.summaryFailed}` : signListItems(prose),
+    prose === null
+      ? `## ${SECTIONS.highlights}\n\n${MSG.summaryFailed}`
+      : signListItems(checkTrendsLinks(prose)),
     `---\n\n${page}\n\n---`,
   );
   const content = assembleReport(
