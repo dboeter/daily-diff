@@ -70,6 +70,8 @@ export interface TrendingData {
   trendingRepos: TrendingRepo[];
   searchRepos: SearchRepo[];
   trendingFetchSuccess: boolean;
+  /** The trending page's window, which `periodStars` counts over; absent in old fixtures. */
+  period?: TrendingPeriod;
   /** Weekly run only; EMPTY_OPENROUTER on daily runs. */
   openrouter: OpenRouterData;
   /** Weekly run only; EMPTY_NPM on daily runs. */
@@ -371,7 +373,14 @@ async function fetchTrending(period: TrendingPeriod, dateStr: string): Promise<T
     weekly ? fetchNpmData().catch((): NpmData => EMPTY_NPM) : EMPTY_NPM,
   ]);
 
-  const data: TrendingData = { trendingRepos, searchRepos, trendingFetchSuccess: success, openrouter, npm };
+  const data: TrendingData = {
+    trendingRepos,
+    searchRepos,
+    trendingFetchSuccess: success,
+    period,
+    openrouter,
+    npm,
+  };
   if (!weekly || !hasTrendingData(data)) return data;
 
   // Caught here, not by fetchTrendingData's catch-all, which would also wipe

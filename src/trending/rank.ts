@@ -450,8 +450,19 @@ export function buildRadarCandidates(
     return { ...rest, signals: [(r.isNew ? "🆕 " : "") + signal] };
   };
 
-  const openrouterRows = openrouter.map((a) => {
+  // A new app with no description and no usage gives its row nothing to say
+  // (4 of 11 Radar rows on 2026-10-26: "🆕 week — / month —", summary "—").
+  const isNewApp = (a: OpenRouterApp) => {
     const listed = ageDays(a.createdAt, dateStr);
+    return listed !== null && listed <= NEW_LISTING_DAYS;
+  };
+  const sayable = (a: OpenRouterApp) =>
+    !isNewApp(a) ||
+    a.description.trim() !== "" ||
+    a.weekTokens > 0 ||
+    a.weekRank !== null ||
+    a.monthRank !== null;
+  const openrouterRows = openrouter.filter(sayable).map((a) => {
     const growth =
       a.growthPercent !== null
         ? ` · 📈 ${a.growthPercent >= 0 ? "+" : ""}${a.growthPercent.toLocaleString("en-US")}%`
@@ -467,7 +478,7 @@ export function buildRadarCandidates(
         (a.weekTokens > 0 ? `, ${formatTokens(a.weekTokens)} tokens/week` : "") +
         growth,
       // By listing date only: ranked this week but not this month is Rising, not New.
-      isNew: listed !== null && listed <= NEW_LISTING_DAYS,
+      isNew: isNewApp(a),
       links: linksOf(repoLink(a.url), hostLink(a.url)),
     });
   });
@@ -479,7 +490,7 @@ export function buildRadarCandidates(
       url: p.url,
       description: p.description,
       sources: ["npm"],
-      signal: `${fmt(p.weekly)}/week, ${momentumRatio(p).toFixed(1)}x`,
+      signal: `${fmt(p.weekly)} downloads/week, ${momentumRatio(p).toFixed(1)}x`,
       // The registry search carries no first-publish date (`date` is the last
       // publish), and download momentum is Rising, not New: npm rows are never 🆕.
       isNew: false,
@@ -702,7 +713,8 @@ export function selectTrendingReport(
     const eligible = githubRows.filter(
       (r) => isCategoryRepo(r) && classifications.get(r.key)?.category === category,
     );
-    const rows = interleaveGains(eligible);
+    // Picked by absolute and relative gain, shown by the gain the row displays.
+    const rows = interleaveGains(eligible).sort((a, b) => (b.gain ?? -1) - (a.gain ?? -1));
     for (const r of eligible) if (!rows.includes(r)) dropAll(dropped, [r.key], "cap");
     return { category, rows };
   })

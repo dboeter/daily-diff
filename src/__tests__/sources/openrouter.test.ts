@@ -6,10 +6,21 @@ import {
   isStealthModel,
   parseOpenRouterApps,
   parseOpenRouterModels,
+  publicUrl,
   selectAgentApps,
   selectStealthModels,
   type OpenRouterApp,
 } from "../../sources/openrouter.ts";
+
+describe("publicUrl", () => {
+  it("rejects .local and localhost origins, which no reader can open", () => {
+    expect(publicUrl("https://birdstrike.local/")).toBe("");
+    expect(publicUrl("http://localhost:3000/")).toBe("");
+    expect(publicUrl("not a url")).toBe("");
+    expect(publicUrl(null)).toBe("");
+    expect(publicUrl("https://strix.ai/")).toBe("https://strix.ai/");
+  });
+});
 
 /** Wrap payload text in RSC script chunks, split at the given offsets. */
 function rscHtml(payload: string, splits: number[] = []): string {

@@ -271,6 +271,25 @@ describe("rankGithubRepos", () => {
 describe("buildRadarCandidates", () => {
   const signal = (rows: RadarRow[], key: string) => rows.find((r) => r.keys[0] === key)!.signals[0];
 
+  it("drops a new app with neither description nor usage, and keeps an older one", () => {
+    const rows = buildRadarCandidates(
+      [
+        app(1, { createdAt: "2026-09-21T10:00:00Z", weekRank: null, monthRank: null, description: "" }),
+        app(2, {
+          createdAt: "2026-09-21T10:00:00Z",
+          weekRank: null,
+          monthRank: null,
+          description: "A CLI agent.",
+        }),
+        app(3, { createdAt: "2026-01-01T10:00:00Z", weekRank: null, monthRank: null, description: "" }),
+      ],
+      NO_NPM,
+      [],
+      DATE,
+    );
+    expect(rows.map((r) => r.keys[0])).toEqual(["openrouter:2", "openrouter:3"]);
+  });
+
   it("formats OpenRouter signals and flags apps listed in the last 14 days as new", () => {
     const rows = buildRadarCandidates(
       [
@@ -307,8 +326,8 @@ describe("buildRadarCandidates", () => {
       [],
       DATE,
     );
-    expect(signal(rows, "npm:at-three")).toBe("700/week, 3.0x");
-    expect(signal(rows, "npm:steady")).toBe("12,560/week, 0.5x");
+    expect(signal(rows, "npm:at-three")).toBe("700 downloads/week, 3.0x");
+    expect(signal(rows, "npm:steady")).toBe("12,560 downloads/week, 0.5x");
     expect(rows.find((r) => r.keys[0] === "npm:steady")).toMatchObject({ sources: ["npm"], isNew: false });
   });
 
@@ -388,7 +407,7 @@ describe("urlMerge", () => {
       keys: ["github:Kilo-Org/kilocode", "npm:@kilocode/cli"],
       name: "Kilo-Org/kilocode",
       sources: ["GitHub", "npm"],
-      signals: ["🆕 1,030 (+1,030)", "1,000/week, 1.1x"],
+      signals: ["🆕 1,030 (+1,030)", "1,000 downloads/week, 1.1x"],
       isNew: true,
     });
   });
@@ -667,13 +686,14 @@ describe("selectTrendingReport", () => {
     );
     const coding: Classification = { category: "coding_agent", standalone: null };
     const report = selectTrendingReport(github, [], new Map(github.map((r) => [r.key, coding])), "jev");
+    // Picked alternately, shown by the displayed gain.
     expect(report.categories[0]!.rows.map((r) => r.fullName)).toEqual([
       "c/big1",
-      "c/small1",
       "c/big2",
-      "c/small2",
       "c/big3",
       "c/mid",
+      "c/small1",
+      "c/small2",
       "c/none",
     ]);
   });
@@ -699,9 +719,8 @@ describe("selectTrendingReport", () => {
     const coding: Classification = { category: "coding_agent", standalone: null };
     const report = selectTrendingReport(github, [], new Map(github.map((r) => [r.key, coding])), "jev");
     expect(report.categories[0]!.rows.map((r) => r.fullName)).toEqual([
-      "c/big1",
+      ...Array.from({ length: 7 }, (_, i) => `c/big${i + 1}`),
       "c/fifty",
-      ...Array.from({ length: 6 }, (_, i) => `c/big${i + 2}`),
     ]);
   });
 

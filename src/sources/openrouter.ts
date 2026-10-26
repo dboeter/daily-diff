@@ -18,6 +18,20 @@
 // Types
 // ---------------------------------------------------------------------------
 
+/**
+ * An app's origin URL, or "" when no reader can open it: a `.local` (mDNS) or
+ * `localhost` host (birdstrike.local on the 2026-10-26 Radar), or no URL.
+ */
+export function publicUrl(url: string | null | undefined): string {
+  if (!url) return "";
+  try {
+    const host = new URL(url).hostname.toLowerCase();
+    return host === "localhost" || host.endsWith(".localhost") || host.endsWith(".local") ? "" : url;
+  } catch {
+    return "";
+  }
+}
+
 export interface OpenRouterApp {
   appId: number;
   title: string;
@@ -194,7 +208,7 @@ export function parseOpenRouterApps(html: string): OpenRouterApp[] {
         appId: e.app_id,
         title: e.app.title,
         description: e.app.description ?? "",
-        url: e.app.origin_url ?? "",
+        url: publicUrl(e.app.origin_url),
         categories: e.app.categories ?? [],
         createdAt: e.app.created_at,
         weekTokens: 0,

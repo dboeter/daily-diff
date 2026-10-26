@@ -49,6 +49,7 @@ import {
 } from "./prompts.ts";
 import type { GitHubRelease, RepoConfig, SkillsData } from "../core/github.ts";
 import {
+  renderOpenRouterUsage,
   buildProjectReportContent,
   buildStealthSection,
   groupsMarkdown,
@@ -157,10 +158,10 @@ export async function buildTrendsReport(
     rows.length
       ? generateOr("trending-summaries", buildTrendingSummariesPrompt(rows, dateStr), "", LLM_TOKENS_LISTING)
       : "",
-    hasHf || hasOpenRouter
+    hasHf
       ? generateOr(
           "trends-models",
-          buildTrendsModelsPrompt(hf, trending.openrouter, dateStr),
+          buildTrendsModelsPrompt(hf, dateStr),
           MSG.summaryFailed,
           LLM_TOKENS_LISTING,
         )
@@ -194,7 +195,15 @@ export async function buildTrendsReport(
     skillsSummary &&
       `## ${T.skillsHeading}\n\n${T.skillsSource(skills.repo)}\n\n${nestHeadings(skillsSummary, 3)}`,
     report ? renderCandidates(report.onFire, input.tracked) : "",
-    models && `## ${T.modelsHeading}\n\n${nestHeadings(models, 3)}`,
+    (hasOpenRouter || models) &&
+      // Nested apart: the code part opens at `##`, the model's at `###`.
+      `## ${T.modelsHeading}\n\n${[
+        renderOpenRouterUsage(trending.openrouter.topModels, trending.openrouter.topModelsDate),
+        models,
+      ]
+        .filter(Boolean)
+        .map((part) => nestHeadings(part, 3))
+        .join("\n\n")}`,
     renderResearchTable(papers, rowMap),
     renderSpottedTable(stories, rowMap, T.mostDiscussedHeading),
   ]

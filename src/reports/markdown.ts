@@ -6,7 +6,12 @@
 import { hasActivity, RELEASE_BODY_CHARS, releaseNotes, type ProjectActivity } from "./prompts.ts";
 import type { ReleaseRow } from "./pages.ts";
 import { escapeRegex } from "./project-news.ts";
-import type { OpenRouterNewModel, OpenRouterStealthModel } from "../sources/openrouter.ts";
+import {
+  formatTokens,
+  type OpenRouterModel,
+  type OpenRouterNewModel,
+  type OpenRouterStealthModel,
+} from "../sources/openrouter.ts";
 import type { LabPost } from "../sources/labs.ts";
 import type { TrendingReportData } from "../trending/rank.ts";
 import type { PolicyItem } from "../policy/items.ts";
@@ -441,13 +446,13 @@ export function renderTrendingTables(report: TrendingReportData, summaries: Map<
         `| ${fire(r)}${link(r.name, r.url)} | ${cell(r.sources.join("; "))} | ${cell(r.signals.join("; "))} | ` +
         `${summary(r)} |`,
     );
-    blocks.push(`## ${T.radarHeading}`, `${T.radarHeader}\n${rows.join("\n")}`);
+    blocks.push(`## ${T.radarHeading}`, T.radarLegend, `${T.radarHeader}\n${rows.join("\n")}`);
   }
 
   for (const { category, rows } of report.categories) {
     const lines = rows.map(
       (r) =>
-        `| ${fire(r)}${link(r.fullName, r.url)} | ${cell(r.language)} | ${cell(r.starsCell)} | ${summary(r)} |`,
+        `| ${fire(r)}${link(r.fullName, r.url)} | ${cell(r.language || "—")} | ${cell(r.starsCell)} | ${summary(r)} |`,
     );
     blocks.push(`## ${T.categoryTitles[category]}`, `${T.categoryHeader}\n${lines.join("\n")}`);
   }
@@ -665,6 +670,20 @@ export function renderCandidates(
     ? `\n\n<details><summary>${T.candidatesConfig}</summary>\n\n${yaml.join("\n\n")}\n\n</details>`
     : "";
   return `## ${T.candidatesHeading}\n\n${T.candidatesIntro}\n\n${list}${details}`;
+}
+
+/**
+ * Trends' OpenRouter usage, in code: on 2026-10-26 the model wrote "round out
+ * the top five" after six models and picked "newcomers" by no rule. Ranks are
+ * the rankings page's order; each model name links its OpenRouter page.
+ */
+export function renderOpenRouterUsage(models: OpenRouterModel[], date: string): string {
+  if (!models.length) return "";
+  const T = TRENDS_REPORT;
+  const rows = models.map(
+    (m, i) => `| ${i + 1} | [${cell(m.slug)}](https://openrouter.ai/${m.slug}) | ${formatTokens(m.tokens)} |`,
+  );
+  return `## ${T.openRouterHeading}\n\n${T.openRouterIntro(date)}\n\n${T.openRouterHeader}\n${rows.join("\n")}`;
 }
 
 /** The models page's Lab announcements rows, each summary by its own number (else the page text, truncated, or "—"). */

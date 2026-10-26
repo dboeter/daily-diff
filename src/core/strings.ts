@@ -138,6 +138,10 @@ export const TRENDS_REPORT = {
   candidatesConfig: "config.yml lines to track one",
   modelsHeading: "Models",
   openRouterHeading: "OpenRouter usage",
+  /** Code only: the rankings snapshot is one day's tokens. */
+  openRouterIntro: (date: string) =>
+    `Top models by tokens (prompt + completion) on OpenRouter${date ? ` on ${date}` : ""}, one day's snapshot.`,
+  openRouterHeader: "| # | Model | Tokens |\n| ---: | :--- | ---: |",
   hfHeading: "Hugging Face trending",
   researchHeading: "Research",
   researchTableHeader: "| Paper | Summary |\n| :--- | :--- |",
@@ -145,6 +149,11 @@ export const TRENDS_REPORT = {
   // Tables rendered in code (renderTrendingTables), one `##` per table, nested under agentsHeading.
   radarHeading: "🚀 Agent & Coding Tool Radar",
   radarHeader: "| Tool | Source | Signal | Summary |\n| :--- | :--- | :--- | :--- |",
+  radarLegend:
+    "*New tools (🆕: created or listed in the last 14 days) first, then each source's top movers; 🔥 also on last week's Trends page. " +
+    "OpenRouter: the app's rank this week / this month among OpenRouter apps, its tokens in the last 7 days, 📈 OpenRouter's own growth figure. " +
+    "npm: downloads in the last 7 days, and that week against the average week of the last 30 days. " +
+    "GitHub: total stars (stars gained in the last 7 days, % on a week ago).*",
   categoryHeader:
     "| Project | Lang | Stars (total / this week, %) | Summary |\n| :--- | :--- | ---: | :--- |",
   categoryTitles: {

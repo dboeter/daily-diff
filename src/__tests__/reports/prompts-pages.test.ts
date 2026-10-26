@@ -27,18 +27,10 @@ import {
   SOURCE_FIDELITY_RULES,
 } from "../../reports/prompts.ts";
 import type { Story, StorySource } from "../../spotted/pool.ts";
-import { EMPTY_OPENROUTER, type TrendingData } from "../../trending/compose.ts";
 
 // ---------------------------------------------------------------------------
 // The Trends page's prompts
 // ---------------------------------------------------------------------------
-
-const withModels: TrendingData["openrouter"] = {
-  ...EMPTY_OPENROUTER,
-  topModels: [{ slug: "deepseek/deepseek-v4.1-flash", tokens: 25_630_000_000_000 }],
-  topModelsDate: "2026-10-04",
-  fetchSuccess: true,
-};
 
 const DATE = "2026-10-22";
 
@@ -144,22 +136,29 @@ describe("buildTrendsSummariesPrompt", () => {
 });
 
 describe("buildTrendsModelsPrompt", () => {
-  it("asks for only the ### parts whose source has data, and no Highlights, Signals or Worth a Look", () => {
-    const both = buildTrendsModelsPrompt({ models: [], fetchSuccess: true }, withModels, "2026-10-26");
-    expect(both).toContain(`\`### ${TRENDS_REPORT.openRouterHeading}\``);
-    expect(both).toContain(`\`### ${TRENDS_REPORT.hfHeading}\``);
-    expect(both).toContain("deepseek/deepseek-v4.1-flash — 25.63T tokens");
-    expect(both).toContain("No Highlights, Signals or other sections");
-    expect(both).not.toContain("## Highlights");
-    expect(both).not.toContain("Worth a Look");
-    const hfOnly = buildTrendsModelsPrompt(
-      { models: [], fetchSuccess: true },
-      EMPTY_OPENROUTER,
+  const model = (id: string) => ({
+    id,
+    url: `https://huggingface.co/${id}`,
+    author: "o",
+    pipelineTag: "text-generation",
+    likes: 1200,
+    downloads: 3400,
+    tags: ["qwen3_5", "transformers"],
+  });
+
+  it("asks for the Hugging Face table only, ranked, without tags or uncensored re-uploads", () => {
+    const p = buildTrendsModelsPrompt(
+      { models: [model("o/Qwen3.8-27B"), model("o/DeepSeek-UNCENSORED-FP8")], fetchSuccess: true } as never,
       "2026-10-26",
     );
-    expect(hfOnly).not.toContain(TRENDS_REPORT.openRouterHeading);
-    const orOnly = buildTrendsModelsPrompt({ models: [], fetchSuccess: false }, withModels, "2026-10-26");
-    expect(orOnly).not.toContain(TRENDS_REPORT.hfHeading);
+    expect(p).toContain(`\`### ${TRENDS_REPORT.hfHeading}\``);
+    expect(p).not.toContain(TRENDS_REPORT.openRouterHeading);
+    expect(p).toContain("| # | Model | Author | Likes | Downloads | Summary |");
+    expect(p).toContain("1. **o/Qwen3.8-27B**");
+    expect(p).not.toContain("UNCENSORED");
+    expect(p).not.toContain("qwen3_5");
+    expect(p).toContain("No Highlights, Signals or other sections");
+    expect(p).not.toContain("Worth a Look");
   });
 });
 

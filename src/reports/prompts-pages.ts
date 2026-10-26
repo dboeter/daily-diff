@@ -8,7 +8,7 @@
 
 import type { LabPost } from "../sources/labs.ts";
 import type { summaryRows } from "../trending/rank.ts";
-import { formatTokens, type OpenRouterData, type OpenRouterNewModel } from "../sources/openrouter.ts";
+import type { OpenRouterData, OpenRouterNewModel } from "../sources/openrouter.ts";
 import { DATA_REPORT, MODELS_PAGE, MSG, SECTIONS, SPOTTED, TRENDS_REPORT } from "../core/strings.ts";
 import { TABLES_MARKER, rowList, summaryLine, summaryOutputRule, type Numbered } from "./summarized-table.ts";
 import {
@@ -542,59 +542,41 @@ export function firstHighlight(md: string): string | null {
 // ---------------------------------------------------------------------------
 
 /**
- * Weekly Trends' Models section: OpenRouter token usage and Hugging Face
- * trending models, only the `###` parts whose source has data. Either source
- * alone is enough for the call.
+ * Weekly Trends' Models section, Hugging Face part (code renders OpenRouter
+ * usage: `renderOpenRouterUsage`). The input numbers the models in the Hub's
+ * trending order and leaves out the tags: on 2026-10-26 the summaries printed
+ * `model_type` tags ("Qwen 3.5" for Qwen3.8-27B). Uncensored re-uploads are
+ * left out (`hfRows`).
  */
-export function buildTrendsModelsPrompt(data: HfData, openrouter: OpenRouterData, dateStr: string): string {
+export function buildTrendsModelsPrompt(data: HfData, dateStr: string): string {
   const T = TRENDS_REPORT;
-  const { hasHf, hasOpenRouter } = modelSources(data, openrouter);
-  const usage = openrouter.topModels
-    .map((m, i) => `${i + 1}. ${m.slug} — ${formatTokens(m.tokens)} tokens`)
-    .join("\n");
-  const modelsText = data.models
+  const modelsText = hfRows(data.models)
     .map(
       (m, i) =>
         `${i + 1}. **${m.id}**\n` +
         `   Link: ${m.url}\n` +
         `   Author: ${m.author} | Pipeline: ${m.pipelineTag || "N/A"}\n` +
-        `   Likes: ${m.likes.toLocaleString()} | Downloads: ${m.downloads.toLocaleString()}\n` +
-        `   Tags: ${m.tags.slice(0, 5).join(", ")}`,
+        `   Likes: ${m.likes.toLocaleString()} | Downloads: ${m.downloads.toLocaleString()}`,
     )
     .join("\n\n");
 
-  const inputs = [
-    hasOpenRouter ? `OpenRouter top models by tokens (${openrouter.topModelsDate}):\n\n${usage}` : "",
-    hasHf
-      ? `Hugging Face Hub trending models (${data.models.length}, sorted by weekly likes):\n\n${modelsText}`
-      : "",
-  ].filter(Boolean);
+  return `You are an AI model ecosystem analyst. The following are the Hugging Face Hub's trending models as of ${dateStr}, in the Hub's trending order:
 
-  const parts = [
-    hasOpenRouter &&
-      `\`### ${T.openRouterHeading}\` — 3-5 bullets: which models lead token usage and notable newcomers in the top list. Copy token figures verbatim; link each model as https://openrouter.ai/<slug>.`,
-    hasHf &&
-      `\`### ${T.hfHeading}\` — one **Markdown table** with exactly these columns:
+---
 
-   | Model | Author | Likes | Downloads | Summary |
-   | :--- | :--- | ---: | ---: | :--- |
+${modelsText}
 
+---
+
+Write only \`### ${T.hfHeading}\`: one **Markdown table** with exactly these columns:
+
+   | # | Model | Author | Likes | Downloads | Summary |
+   | ---: | :--- | :--- | ---: | ---: | :--- |
+
+   - **#**: the model's number from the input
    - **Model**: model name as a Markdown link to its HF URL
    - **Likes / Downloads**: copy the numbers from the input verbatim (keep the thousands separators; do not recompute or round)
-   - **Summary**: 1-2 sentences — what it is, from its pipeline and tags`,
-  ].filter(Boolean);
-
-  return `You are an AI model ecosystem analyst. The following are this week's model signals as of ${dateStr}:
-
----
-
-${inputs.join("\n\n---\n\n")}
-
----
-
-Write only these parts, in this order:
-
-${parts.map((p, i) => `${i + 1}. ${p}`).join("\n")}
+   - **Summary**: one sentence: what it is, from its name and pipeline (size, modality). Never name a base model or version the name does not state.
 
 Rules:
 - ${NO_TITLE_RULE}
@@ -602,4 +584,12 @@ Rules:
 - Base every claim on the data above. Do not invent releases, benchmarks or capabilities.
 - English, concise and professional, preserve all links.
 `;
+}
+
+/** Re-uploads that only strip safety tuning: not a release of their own. */
+const UNCENSORED_RE = /uncensored|abliterated/i;
+
+/** The Hub's trending models minus uncensored re-uploads. */
+export function hfRows<M extends { id: string }>(models: M[]): M[] {
+  return models.filter((m) => !UNCENSORED_RE.test(m.id));
 }

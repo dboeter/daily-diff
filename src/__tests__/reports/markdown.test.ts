@@ -8,6 +8,7 @@ import {
   highlightsOnly,
   nestHeadings,
   renderCandidates,
+  renderOpenRouterUsage,
   renderPolicyTable,
   renderReportBar,
   renderResearchTable,
@@ -62,7 +63,7 @@ function trendingReport(over: Partial<TrendingReportData> = {}): TrendingReportD
         url: "https://kilo.ai/",
         description: "",
         sources: ["OpenRouter", "npm"],
-        signals: ["🆕 week #3 / month —", "1,000/week, 4.3x"],
+        signals: ["🆕 week #3 / month —", "1,000 downloads/week, 4.3x"],
         isNew: true,
         links: [],
       },
@@ -73,7 +74,7 @@ function trendingReport(over: Partial<TrendingReportData> = {}): TrendingReportD
         url: "",
         description: "A | piped\ndescription",
         sources: ["npm"],
-        signals: ["10/week, 1.0x"],
+        signals: ["10 downloads/week, 1.0x"],
         isNew: false,
         links: [],
       },
@@ -327,15 +328,34 @@ describe("buildStealthSection", () => {
   });
 });
 
+describe("renderOpenRouterUsage", () => {
+  it("ranks and links every model in code, with the snapshot's day", () => {
+    const md = renderOpenRouterUsage(
+      [
+        { slug: "a/one", tokens: 33_560_000_000_000 },
+        { slug: "b/two", tokens: 18_000_000_000_000 },
+      ],
+      "2026-10-25",
+    );
+    expect(md).toContain(TRENDS_REPORT.openRouterIntro("2026-10-25"));
+    expect(md).toContain("| 1 | [a/one](https://openrouter.ai/a/one) | 33.56T |");
+    expect(md).toContain("| 2 | [b/two](https://openrouter.ai/b/two) | 18.00T |");
+    expect(md).not.toContain("[link]");
+    expect(renderOpenRouterUsage([], "")).toBe("");
+  });
+});
+
 describe("renderTrendingTables", () => {
   it("renders both sections with summaries, falling back to descriptions", () => {
     const md = renderTrendingTables(trendingReport(), new Map([[1, "Kilo is | an agent."]]));
-    expect(md).toContain(`## ${TRENDS_REPORT.radarHeading}\n\n${TRENDS_REPORT.radarHeader}\n`);
     expect(md).toContain(
-      "| [Kilo](https://kilo.ai/) | OpenRouter; npm | 🆕 week #3 / month —; 1,000/week, 4.3x | Kilo is \\| an agent. |",
+      `## ${TRENDS_REPORT.radarHeading}\n\n${TRENDS_REPORT.radarLegend}\n\n${TRENDS_REPORT.radarHeader}\n`,
+    );
+    expect(md).toContain(
+      "| [Kilo](https://kilo.ai/) | OpenRouter; npm | 🆕 week #3 / month —; 1,000 downloads/week, 4.3x | Kilo is \\| an agent. |",
     );
     // No url → plain name; pipe and newline escaped in the description fallback.
-    expect(md).toContain("| bare | npm | 10/week, 1.0x | A \\| piped description |");
+    expect(md).toContain("| bare | npm | 10 downloads/week, 1.0x | A \\| piped description |");
     expect(md).toContain(
       `## ${TRENDS_REPORT.categoryTitles.coding_agent}\n\n${TRENDS_REPORT.categoryHeader}`,
     );
@@ -364,7 +384,7 @@ describe("renderTrendingTables", () => {
   it("shows — when there is neither summary nor description", () => {
     const md = renderTrendingTables(trendingReport(), new Map());
     expect(md).toContain(
-      "| [Kilo](https://kilo.ai/) | OpenRouter; npm | 🆕 week #3 / month —; 1,000/week, 4.3x | — |",
+      "| [Kilo](https://kilo.ai/) | OpenRouter; npm | 🆕 week #3 / month —; 1,000 downloads/week, 4.3x | — |",
     );
   });
 

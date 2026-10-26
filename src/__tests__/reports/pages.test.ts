@@ -13,7 +13,7 @@ import {
   LAB_POSTS_MAX,
   type DataSection,
 } from "../../reports/pages.ts";
-import { EMPTY_TRENDING, type TrendingData } from "../../trending/compose.ts";
+import { EMPTY_OPENROUTER, EMPTY_TRENDING, type TrendingData } from "../../trending/compose.ts";
 import { MSG, TRENDS_REPORT } from "../../core/strings.ts";
 import type { ProjectActivity } from "../../reports/prompts.ts";
 import type { GitHubItem } from "../../core/github.ts";
@@ -157,7 +157,7 @@ describe("buildTrendsReport", () => {
       : isRowSummaries(p)
         ? "1: The paper shows X.\n2: An essay on Y."
         : isModels(p)
-          ? "### OpenRouter usage\n\n- a/b leads.\n\n### Hugging Face trending\n\n| Model |\n| :--- |"
+          ? "### Hugging Face trending\n\n| Model |\n| :--- |"
           : isProse(p)
             ? "## Highlights\n\n- H.\n\n<!-- tables -->\n\n## Signals\n\nS."
             : "## Open PRs worth watching\n\nK.";
@@ -233,6 +233,22 @@ describe("buildTrendsReport", () => {
     expect(generateBody).toHaveBeenCalledTimes(4);
   });
 
+  it("renders OpenRouter usage in code next to the model's Hugging Face table, both at ###", async () => {
+    generateBody.mockReset();
+    generateBody.mockImplementation(async (p: string) => reply(p));
+    const openrouter = {
+      ...EMPTY_OPENROUTER,
+      topModels: [{ slug: "a/b", tokens: 1e12 }],
+      topModelsDate: "2026-10-25",
+      fetchSuccess: true,
+    };
+    const content = (await build({ trending: { ...input.trending, openrouter } }))!.content;
+    expect(content).toContain(`### ${TRENDS_REPORT.openRouterHeading}`);
+    expect(content).toContain("| 1 | [a/b](https://openrouter.ai/a/b) |");
+    expect(content).toContain(`### ${TRENDS_REPORT.hfHeading}`);
+    expect(content).not.toContain("####");
+  });
+
   it("leaves the Skills section out, without a call, when no item moved this week", async () => {
     generateBody.mockReset();
     generateBody.mockImplementation(async (p: string) => reply(p));
@@ -301,7 +317,7 @@ describe("buildTrendsReport", () => {
       url: `https://radar-tool-${i}.example.com/`,
       description: "d".repeat(300),
       sources: ["OpenRouter", "npm", "GitHub"] as ("OpenRouter" | "npm" | "GitHub")[],
-      signals: ["🆕 week #3 / month #12", "12,345/week, 4.3x", "1,234 (+567, +85.0%)"],
+      signals: ["🆕 week #3 / month #12", "12,345 downloads/week, 4.3x", "1,234 (+567, +85.0%)"],
       isNew: true,
       onFire: true,
       links: [],

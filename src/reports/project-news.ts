@@ -99,7 +99,7 @@ export function collectNewsItems(sources: NewsSources): { item: NewsItem; text: 
         source: "GitHub Trending",
         title: `${r.fullName}${r.description ? ` — ${r.description}` : ""}`,
         url: r.url,
-        detail: `+${r.periodStars} stars on GitHub Trending`,
+        detail: `+${r.periodStars} stars ${trending?.period === "weekly" ? "this week" : "today"} on GitHub Trending`,
       },
       text: `${r.fullName.replace("/", " ")} ${r.description}`,
       key: r.url,
