@@ -406,18 +406,30 @@ async function main(): Promise<void> {
       return topic ? PAGE_OF_TOPIC[topic] : null;
     },
     spottedDropped,
+    {
+      dateStr,
+      probabilityOf: (s) => {
+        const topic = routing.topics.get(s.id);
+        return topic ? routing.judgment.verdicts.get(s.id)?.answers.topic.probabilities?.[topic] : undefined;
+      },
+    },
   );
   const spottedOf = (page: SpottedPage) => spottedRows.filter((r) => r.page === page);
   // Trends' Most discussed leaves out what today's pages show: a skipped data page shows no Spotted
   // rows (a data page with project news is never skipped, nor a models page with a lab post).
   const discussed = weekly
-    ? mostDiscussed(spottedLog, dateStr, [
-        ...fresh.filter((s) => matchedIds.has(s.id)),
-        ...pool.lab,
-        ...(hasDataNews(dataSections, vendorData, dateStr)
-          ? spottedRows
-          : spottedRows.filter((r) => r.page !== "data")),
-      ])
+    ? mostDiscussed(
+        spottedLog,
+        dateStr,
+        [
+          ...fresh.filter((s) => matchedIds.has(s.id)),
+          ...pool.lab,
+          ...(hasDataNews(dataSections, vendorData, dateStr)
+            ? spottedRows
+            : spottedRows.filter((r) => r.page !== "data")),
+        ],
+        (id) => spottedVerdicts?.items[id]?.answers.topic.choice,
+      )
     : [];
 
   // 2. The agents report's two sections and every page's Spotted summaries (one call, before the

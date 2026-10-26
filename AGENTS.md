@@ -175,8 +175,8 @@ Every Jev judgment except ArXiv's goes through `judgeItems` (`src/core/jev.ts`) 
 ### Community and Spotted
 
 - **Sources**: HN's top 500 filtered by AI and data keywords (`src/sources/hn.ts`), Dev.to (`DEVTO_MIN_REACTIONS`), Lobste.rs (`ai`, `vibecoding`, `databases`). A story's description is its page's meta description (Lobste.rs: the submitter's text first; Dev.to: the article's own). The model sees titles, counts and descriptions, never the article or the thread: a row without a description gets `—`, and the prompts forbid describing comment threads.
-- **Spotted**: the fresh stories (no page showed them on an earlier day, by id or `linkKey`) that no project news or listed lab post took, routed by Jev to a topic; `PAGE_OF_TOPIC` maps it to a page (policy and other are dropped). Each link is shown once. At most `SPOTTED_PER_SOURCE` rows per source and page, each source by points, with no combined score: points, scores and reactions are not comparable.
-- **Log** `digests/spotted-log.json`: every fetched story with its latest counts and `shown`, saved after the LLM health gate, pruned after 8 days. Trends' Most discussed reads it.
+- **Spotted**: the fresh stories (no page showed them on an earlier day, by id or `linkKey`) that no project news or listed lab post took, routed by Jev to a topic; `PAGE_OF_TOPIC` maps it to a page (policy and other are dropped). Each link is shown once. A story needs a topic probability of `SPOTTED_MIN_TOPIC_PROBABILITY` (0.6) or more, is at most `SPOTTED_MAX_AGE_DAYS` (7) old and is no Dev.to contest entry; once a page has 3 rows, a further row needs `SPOTTED_MIN_POINTS` of its source. At most `SPOTTED_PER_SOURCE` rows per source and page, each source ranked by topic probability (in tenths), then points, with no combined score: points, scores and reactions are not comparable.
+- **Log** `digests/spotted-log.json`: every fetched story with its latest counts and `shown`, saved after the LLM health gate, pruned after 8 days. Trends' Most discussed reads it: a row needs `MOST_DISCUSSED_MIN_COMMENTS` of its source and a topic other than `other` (from `spotted-verdicts.json`).
 
 ## Key conventions
 
