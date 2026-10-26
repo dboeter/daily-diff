@@ -5,6 +5,7 @@ import {
   buildDataProsePrompt,
   buildDataSummariesPrompt,
   buildHighlightsPrompt,
+  highlightsSection,
   buildModelsSummariesPrompt,
   buildPolicyProsePrompt,
   buildPolicySummariesPrompt,
@@ -483,7 +484,29 @@ describe("Highlights pick, they don't restate", () => {
   it("highlights.json leads each report with its page's first bullet", () => {
     const p = buildHighlightsPrompt({ "ai-data": "## Highlights\n\n- lead" });
     expect(p).toContain("A report's first highlight covers the first bullet of its `## Highlights`");
-    expect(p).toContain("One subject per highlight");
+    expect(p).toContain("one subject per highlight");
+  });
+
+  it("highlights.json sees each page's Highlights only, never a table row below them", () => {
+    const data =
+      "# Data\n\n## Highlights\n\n- − **Polars** py-2.1.0 disallows mixed arithmetic.\n\n---\n\n## Snowflake\n\n| 1 | Coding agent MCP tool | minor note |";
+    const policy =
+      "## Highlights\n\nThe Commission published a standard.\n\n<!-- tables -->\n\n## EU\n\n| Draft guidance row |";
+    const p = buildHighlightsPrompt({ "ai-data": data, "ai-policy": policy });
+    expect(p).toContain("- − **Polars** py-2.1.0 disallows mixed arithmetic.");
+    expect(p).toContain("The Commission published a standard.");
+    expect(p).not.toContain("Coding agent MCP tool");
+    expect(p).not.toContain("Draft guidance row");
+    expect(highlightsSection(data)).toBe(
+      "## Highlights\n\n- − **Polars** py-2.1.0 disallows mixed arithmetic.",
+    );
+    expect(highlightsSection("## Agents\n\n- x")).toBeNull();
+  });
+
+  it("highlights.json asks for no consequence the Highlights do not state", () => {
+    const p = buildHighlightsPrompt({ "ai-agents": "## Highlights\n\n- A ships." });
+    expect(p).not.toMatch(/why it matters/i);
+    expect(p).toContain("add no consequence, audience or benefit it does not state");
   });
 });
 

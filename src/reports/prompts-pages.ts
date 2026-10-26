@@ -359,10 +359,28 @@ export interface ReportHighlights {
 // section labels, keeps the worst case under that limit.
 const HIGHLIGHTS_MAX_PER_REPORT = 2;
 const HIGHLIGHT_MAX_CHARS = 140;
-// Repo reports open with a link list and an activity-count table; a 2000-char
-// window ended there, so the model only had counts to work with ("3
-// prereleases", "337 open issues"). 8000 reaches through the comparison prose.
+// A report saved before its page had a Highlights section (the archive before October 2026) is sent
+// as its first 8000 chars, so scripts/regen-highlights.ts still covers an old date.
 const HIGHLIGHTS_EXCERPT_CHARS = 8000;
+
+/**
+ * A report's `## Highlights` section (heading included), up to the next heading, `---` rule or
+ * TABLES_MARKER; null when the report has none. highlights.json sees only this, so it can restate
+ * only what the page picked: on 2026-10-26 it read the whole page and led with a Snowflake note
+ * the data page had left out as minor.
+ */
+export function highlightsSection(md: string): string | null {
+  const lines = md.split("\n");
+  const start = lines.findIndex((l) => l.trim() === `## ${SECTIONS.highlights}`);
+  if (start < 0) return null;
+  const end = lines.findIndex(
+    (l, i) => i > start && (l.startsWith("#") || l.trim() === "---" || l.trim() === TABLES_MARKER),
+  );
+  return lines
+    .slice(start, end === -1 ? undefined : end)
+    .join("\n")
+    .trim();
+}
 
 export function buildHighlightsPrompt(
   reportContents: Record<string, string>,
@@ -374,32 +392,27 @@ export function buildHighlightsPrompt(
     : "";
 
   const sections = Object.entries(reportContents)
-    .map(([id, content]) => `## [${id}]\n\n${content.slice(0, HIGHLIGHTS_EXCERPT_CHARS)}`)
+    .map(
+      ([id, content]) =>
+        `## [${id}]\n\n${highlightsSection(content) ?? content.slice(0, HIGHLIGHTS_EXCERPT_CHARS)}`,
+    )
     .join("\n\n---\n\n");
 
   // The count is a maximum, not a quota, and the exclusion list is explicit: a
   // fixed 6-per-report quota padded every section with routine noise
-  // ("2 nightly builds", "200 commits", star counts).
-  return `You are a selective news editor. The following are today's AI ecosystem report excerpts, each labeled with a report ID. The reader is a developer who wants to know what actually changed in the AI tooling world today and why it matters to them, who follows AI policy for work (the ai-policy report), and who passes data-platform changes on to data-engineering colleagues working on Databricks, Snowflake and the open-source data stack (the ai-data report).
+  // ("2 nightly builds", "200 commits", star counts). No "why it matters" ask:
+  // on 2026-10-26 it made the model add consequences no page stated.
+  return `You are a selective news editor. The following are the Highlights of today's AI ecosystem reports, each labeled with a report ID. Each report's editor already picked them from the report's rows. The reader is a developer who wants to know what actually changed in the AI tooling world today, who follows AI policy for work (the ai-policy report), and who passes data-platform changes on to data-engineering colleagues working on Databricks, Snowflake and the open-source data stack (the ai-data report).
 
 ${sections}
 
 ---
 
-For each report, pick AT MOST ${maxPerReport} highlights that this reader would genuinely care about. Fewer is better than filler: return 1 or 0 when only 1 or 0 items qualify.
+For each report, pick AT MOST ${maxPerReport} of its Highlights that this reader would genuinely care about, and restate or shorten each as one sentence of at most ${HIGHLIGHT_MAX_CHARS} characters. Fewer is better than filler: return 1 or 0 when only 1 or 0 items qualify.
 
-Each highlight is one sentence of at most ${HIGHLIGHT_MAX_CHARS} characters that says what happened AND why it matters (the concrete change, capability or consequence).
-Good: "Claude Code adds background subagents, so long refactors keep running while you keep chatting"
+Say the concrete change, capability or consequence the Highlight states; add no consequence, audience or benefit it does not state.
+Good: "Claude Code adds background subagents that keep running while you chat"
 Bad: "Claude Code v2.1.288 released" (no content)  ·  "Copilot CLI ships three prereleases" (routine)
-
-Qualifies:
-- A user-visible feature, breaking change, or deprecation, named concretely
-- A security fix or vulnerability with real impact
-- Support for a specific new model or hardware platform
-- A concrete announcement, launch, paper result, or project with a clear new capability
-- A discussion with a specific, non-obvious takeaway
-- A law, regulation, official guidance or enforcement decision that was published, adopted or moved to a new stage, or a consultation opening, with what it means for organisations that deploy AI
-- For ai-data: a deprecation, retirement or breaking change in Databricks, Snowflake, Azure / Fabric, BigQuery or a tracked data project, or a major platform feature (generally available or in public preview), with what it means for client data platforms
 
 Never include:
 - Routine releases: nightlies, alphas, prereleases, build-number ranges, or a version number without saying what it changes
@@ -415,8 +428,7 @@ Rules:
 - Omit a report's key entirely when nothing in it qualifies, or when it contains only failure messages
 - At most ${maxPerReport} highlights per report, each at most ${HIGHLIGHT_MAX_CHARS} characters
 - A report's first highlight covers the first bullet of its \`## ${SECTIONS.highlights}\` (the page's lead), unless that bullet says there is no news
-- One subject per highlight, and keep its window ("this week") as the report gives it
-- Say only what the report excerpt says: the "why it matters" part comes from the excerpt, not from you
+- Each highlight restates one item of its report's Highlights above, never another subject; one subject per highlight, and keep its window ("this week") as the report gives it
 ${sourceFidelityRules()}
 - ${goingAwayRule("highlight")}${forcedRule}`;
 }
