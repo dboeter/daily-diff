@@ -299,7 +299,7 @@ export function snapshotKey(repo: string, i: GitHubItem): string {
 
 /** Missing → empty; malformed → empty, logged: the file only holds yesterday's totals. */
 export function loadHotIssueSnapshot(file = HOT_ISSUES_SNAPSHOT_FILE): HotIssueSnapshot {
-  return loadItemsFile<HotIssueSnapshotEntry>(file, "hot-issues") ?? { items: {} };
+  return loadItemsFile<HotIssueSnapshotEntry>(file, "hot-issues", "no baselines today") ?? { items: {} };
 }
 
 /** The total an earlier day saw, if at most SNAPSHOT_BASELINE_MAX_DAYS old. */

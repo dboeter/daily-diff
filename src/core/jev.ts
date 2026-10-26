@@ -121,7 +121,11 @@ export interface ItemsFile<T> {
  * every item is asked and nothing is saved, since an empty cache saved after
  * the report would overwrite a hand edit.
  */
-export function loadItemsFile<T>(file: string, tag: string): ItemsFile<T> | null {
+export function loadItemsFile<T>(
+  file: string,
+  tag: string,
+  ifUnreadable = "every item is asked",
+): ItemsFile<T> | null {
   if (!fs.existsSync(file)) return { items: {} };
   try {
     const parsed = JSON.parse(fs.readFileSync(file, "utf-8")) as Partial<ItemsFile<T>> | null;
@@ -129,7 +133,7 @@ export function loadItemsFile<T>(file: string, tag: string): ItemsFile<T> | null
     if (!items || typeof items !== "object" || Array.isArray(items)) throw new Error("no `items` object");
     return parsed as ItemsFile<T>;
   } catch (err) {
-    console.error(`  [${tag}] Cannot read ${file}, every item is asked: ${err}`);
+    console.error(`  [${tag}] Cannot read ${file}, ${ifUnreadable}: ${err}`);
     return null;
   }
 }
