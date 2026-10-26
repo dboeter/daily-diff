@@ -12,6 +12,7 @@ import {
   renderResearchTable,
   renderSpottedTable,
   renderTrendingTables,
+  renderVendorTables,
   signListItems,
   stripModelTitle,
   unwrapCodeLinks,
@@ -19,6 +20,7 @@ import {
 } from "../../reports/markdown.ts";
 import { type ProjectActivity, goingAwayRule } from "../../reports/prompts.ts";
 import { numberRows } from "../../reports/summarized-table.ts";
+import type { KeptVendorItem } from "../../data/relevance.ts";
 import type { Story, StorySource } from "../../spotted/pool.ts";
 import type { TrendingReportData } from "../../trending/rank.ts";
 
@@ -270,7 +272,9 @@ describe("buildProjectReportContent", () => {
 
   it("renders the preamble between the header and the groups", () => {
     const result = buildProjectReportContent({ ...input, preamble: "PREAMBLE\n\n---\n\n" });
-    expect(result).toMatch(/Prereleases \(not covered\): 7\n\n---\n\nPREAMBLE\n\n---\n\n## Coding Agents\n/);
+    expect(result).toMatch(
+      /Prereleases \(not covered\): 7 \| Generated: [^\n]+ UTC\n\n---\n\nPREAMBLE\n\n---\n\n## Coding Agents\n/,
+    );
   });
 
   it("renders each group under its own heading with its own quiet line; the header counts all", () => {
@@ -306,7 +310,7 @@ describe("buildStealthSection", () => {
 
   it("flags new and soon-expiring models", () => {
     const out = buildStealthSection([model("2026-10-03", "2026-10-05")], now);
-    expect(out).toContain("## 🕵️ Stealth Models on OpenRouter");
+    expect(out).toContain("## Stealth Models on OpenRouter");
     expect(out).toContain(
       "| [Space Bunny Alpha](https://openrouter.ai/stealth/space-bunny-alpha) `stealth/space-bunny-alpha` | 2026-10-03 | 2026-10-05 | 🆕 new, ⏳ expires in 1d |",
     );
@@ -713,5 +717,80 @@ describe("renderSpottedTable links", () => {
     expect(renderSpottedTable([{ ...row, url: "https://example.com/a" }], new Map())).toContain(
       "| [Show HN: Agentsh](https://example.com/a) |",
     );
+  });
+});
+
+// ---------------------------------------------------------------------------
+// One rendering convention across pages (ticket 17, 2026-10-26)
+// ---------------------------------------------------------------------------
+
+describe("rendering conventions", () => {
+  const vendorRow = (n: number, extra: Partial<KeptVendorItem>): KeptVendorItem & { n: number } => ({
+    n,
+    id: `v${n}`,
+    vendor: "snowflake",
+    source: "Snowflake",
+    title: `Item ${n}`,
+    link: `https://example.com/${n}`,
+    date: "2026-10-26",
+    description: "",
+    deprecation: false,
+    aiInData: false,
+    ...extra,
+  });
+
+  it("vendor tables: no date prefix, no Source column for one source, newest first (Snowflake 2026-10-26)", () => {
+    const rows = [
+      vendorRow(1, { title: "October 23, 2026: Coding agent MCP tool", date: "2026-10-23", aiInData: true }),
+      vendorRow(2, {
+        title: "Oct 26, 2026: Custom error messages for feature policy rules",
+        date: "2026-10-26",
+      }),
+    ];
+    const table = renderVendorTables(
+      rows,
+      new Map([
+        [1, "One."],
+        [2, "Two."],
+      ]),
+    ).snowflake!;
+    expect(table).toBe(
+      "| Date | Item | Summary |\n| :--- | :--- | :--- |\n" +
+        "| 2026-10-26 | [Custom error messages for feature policy rules](https://example.com/2) | Two. |\n" +
+        "| 2026-10-23 | 🤖 [Coding agent MCP tool](https://example.com/1) | One. |",
+    );
+  });
+
+  it("vendor tables keep the Source column when a section mixes sources, deprecations first", () => {
+    const rows = [
+      vendorRow(1, { vendor: "azure", source: "Microsoft Fabric", date: "2026-10-20" }),
+      vendorRow(2, { vendor: "gcp", source: "BigQuery", date: "2026-10-25" }),
+      vendorRow(3, { vendor: "azure", source: "Microsoft Fabric", date: "2026-10-01", deprecation: true }),
+    ];
+    const table = renderVendorTables(rows, new Map()).cloud!;
+    expect(table.split("\n")[0]).toBe("| Date | Source | Item | Summary |");
+    const at = (s: string) => table.indexOf(s);
+    expect(at("example.com/3")).toBeLessThan(at("example.com/2"));
+    expect(at("example.com/2")).toBeLessThan(at("example.com/1"));
+  });
+
+  it("writes every bullet label as **Label:**, the form releaseFallbackSection uses", () => {
+    const result = buildProjectReportContent({
+      heading: "# AI Agents 2026-10-26",
+      utcStr: "04:31",
+      period: "today",
+      footer: "",
+      groups: [
+        {
+          title: "Coding Agents",
+          summary: "## ALPHA\n- **Release**: [v1](https://x) does a thing.\n- **Hot issue:** already right.",
+          activities: [makeActivity("alpha")],
+        },
+      ],
+    });
+    expect(result).toContain("- **Release:** [v1](https://x) does a thing.");
+    expect(result).toContain("- **Hot issue:** already right.");
+    // The meta line ends with when it was generated, as on every page.
+    expect(result).toMatch(/\n> Projects: 1 \| .*Prereleases \(not covered\): 0 \| Generated: 04:31 UTC\n/);
   });
 });

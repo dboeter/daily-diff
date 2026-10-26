@@ -442,7 +442,7 @@ describe("buildModelsPage", () => {
     );
   };
 
-  it("reads Highlights, Lab announcements, New on OpenRouter, Stealth models, then Spotted", async () => {
+  it("reads Highlights, Lab announcements, New on OpenRouter, then Spotted", async () => {
     stub();
     const report = await build([site([post(1)])], catalog({ newModels: [model] }), {
       rows: [spottedRow(1, "models")],
@@ -456,9 +456,10 @@ describe("buildModelsPage", () => {
       "Highlights",
       "Lab announcements",
       "New on OpenRouter",
-      "🕵️ Stealth Models on OpenRouter",
       "Spotted",
     ]);
+    // No stealth model in the catalog: named in one line, no heading over a placeholder.
+    expect(report?.content).toContain("Nothing new from OpenRouter's stealth models today.");
     expect(report?.content).toContain(
       "| 2026-10-11 | Anthropic | [Post 1](https://www.anthropic.com/news/p1) | Summary one. |",
     );
@@ -532,13 +533,25 @@ describe("buildModelsPage", () => {
     expect(fs.existsSync(stateFile)).toBe(false);
   });
 
+  it("names its empty tracked sections in one line (2026-10-26: three placeholder sections)", async () => {
+    stub();
+    const spotted = { rows: [spottedRow(1, "models")], summaries: new Map<number, string>() };
+    const content = (await build([site([])], catalog(), spotted))!.content;
+    expect(headings(content)).toEqual(["Highlights", "Spotted"]);
+    expect(content).toContain(
+      "Nothing new from Anthropic or OpenAI, OpenRouter's new listings or OpenRouter's stealth models today.",
+    );
+  });
+
   it("is published for a 🆕 stealth model alone, or a Spotted row alone", async () => {
     stub();
     const fresh = { id: "stealth/b", name: "B", created: "2026-10-21", expires: null };
     expect(await build([site([])], catalog({ stealth: [fresh] }))).not.toBeNull();
     const spotted = { rows: [spottedRow(1, "models")], summaries: new Map<number, string>() };
     const report = await build([site([])], null, spotted);
-    expect(report?.content).toContain("No new posts today.");
+    // The lab section has nothing to show: one line names it. An unavailable catalog is news.
+    expect(report?.content).toContain("Nothing new from Anthropic or OpenAI today.");
+    expect(report?.content).not.toContain("## Lab announcements");
     expect(report?.content).toContain("⚠️ OpenRouter model catalog unavailable.");
   });
 
@@ -857,7 +870,7 @@ describe("buildDataReport", () => {
     const at = (s: string) => content.indexOf(s);
     // Databricks: the retirement (row 1) before the feature (row 2), both before the repo body.
     expect(content).toContain(
-      "| 2026-10-19 | Azure Databricks | ⚠️ [Retirement: legacy runtime](https://example.com/dbx-old) | Retiring soon. |",
+      "| 2026-10-19 | ⚠️ [Retirement: legacy runtime](https://example.com/dbx-old) | Retiring soon. |",
     );
     expect(at("dbx-old)")).toBeLessThan(at("dbx-new)"));
     expect(at("dbx-new)")).toBeLessThan(at("### Delta"));
@@ -892,7 +905,8 @@ describe("buildDataReport", () => {
     generateBody.mockReset();
     generateBody.mockImplementation(async (prompt: string) => reply(prompt));
     const content = (await build(sections(false, false), await vendorData()))!.content;
-    expect(content).toContain("## Databricks\n\n| Date | Source | Item | Summary |");
+    // Every Databricks row is from one source: no Source column.
+    expect(content).toContain("## Databricks\n\n| Date | Item | Summary |");
     expect(content).toContain("## Open-source stack\n\n**Quiet today:** [DuckDB]");
     // 2026-10-19: "Projects: 17 | Active today: 0" sat above 16 vendor rows.
     expect(content).toContain("Vendor items: 5 | Projects:");

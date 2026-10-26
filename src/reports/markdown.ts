@@ -119,6 +119,13 @@ export function releaseFallbackSection(a: ProjectActivity): string {
 }
 
 /**
+ * A bullet's bold label in one form, the colon inside (`**Release:**`), as releaseFallbackSection
+ * writes it: the prompt lists `**Release**:` and models copy either form (2026-10-25 vs 10-26).
+ */
+export const boldLabelColonInside = (md: string): string =>
+  md.replace(/^(\s*[-*]\s+)\*\*([^*\n]+?)\*\*:/gm, "$1**$2:**");
+
+/**
  * A group's projects as rendered: the model's summary without text outside a `##` section and
  * without a project section that has no bullet (both are absence notes the prompt forbids), plus a
  * code section for each project with a stable release the model did not cover. `quiet` is every
@@ -137,7 +144,7 @@ function groupProjects(g: ProjectGroup): { body: string; quiet: ProjectActivity[
           (chunk) =>
             !g.activities.some((a) => sectionHeading(a.config.name).test(chunk) && !covers(chunk, a)),
         )
-        .map((chunk) => chunk.trim());
+        .map((chunk) => boldLabelColonInside(chunk.trim()));
   const body = [...kept, ...fallback.map(releaseFallbackSection)].filter(Boolean).join("\n\n");
   const active = failed ? g.activities.filter(hasActivity) : [...covered, ...fallback];
   return { body, quiet: g.activities.filter((a) => !active.includes(a) && !a.fetchFailed) };
@@ -191,9 +198,17 @@ export function buildProjectReportContent(r: ProjectReportInput): string {
 
   return (
     `${r.heading}\n\n` +
-    `> ${REPORT_META.generated(r.utcStr)} | ${r.leadingCounts ? `${r.leadingCounts} | ` : ""}Projects: ${all.length} | ` +
-    `Active ${r.period}: ${all.length - inactiveCount} | ` +
-    `Stable releases: ${releases} | Prereleases (not covered): ${prereleases}\n\n` +
+    REPORT_META.line(
+      [
+        r.leadingCounts ?? "",
+        `Projects: ${all.length}`,
+        `Active ${r.period}: ${all.length - inactiveCount}`,
+        `Stable releases: ${releases}`,
+        `Prereleases (not covered): ${prereleases}`,
+      ],
+      r.utcStr,
+    ) +
+    `\n\n` +
     `---\n\n` +
     (r.preamble ?? "") +
     sections.join("\n\n---\n\n") +
@@ -374,8 +389,8 @@ export function isNewStealthModel(m: OpenRouterStealthModel, now = Date.now()): 
 
 /**
  * Deterministic stealth-model section. Rendered from the catalog, not by the
- * LLM, so it can't be dropped or invented, and it always appears: "none
- * listed" and "catalog unavailable" are news too.
+ * LLM, so it can't be dropped or invented. "Catalog unavailable" is news too;
+ * the models page names a catalog without stealth models in its "Nothing new" line.
  */
 export function buildStealthSection(models: OpenRouterStealthModel[] | null, now = Date.now()): string {
   const S = STEALTH_SECTION;
@@ -474,10 +489,13 @@ export function renderPolicyTable(
 }
 
 /**
- * The data report's vendor tables, one per vendor section with items. Each row
- * shows the summary for its own number (`n`, set by selectVendorItems).
- * Date, source, title and the ⚠️/🤖 markers come from the data, never the model.
+ * A vendor item's link text without the date its title opens with: Snowflake titles its notes
+ * "October 23, 2026: …" or "Oct 26, 2026: …", which the Date column already shows. The stored
+ * title keeps it: title + date is the item's state key.
  */
+export const vendorTitleLabel = (title: string): string =>
+  policyTitleLabel(title.replace(/^(?:[A-Z][a-z]+\.? \d{1,2}, \d{4}|\d{4}-\d{2}-\d{2}):\s*/, ""));
+
 /**
  * The data report's Releases this week table; each row's summary by its own
  * number (after the vendor rows), else its release notes, truncated. Empty
@@ -509,13 +527,18 @@ export function renderVendorActions(actions: Record<string, VendorAction>, dateS
     .sort((a, b) => a.date.localeCompare(b.date) || a.title.localeCompare(b.title))
     .map(
       (a) =>
-        `| ${a.date} | ${cell(a.source)} | [${policyTitleLabel(a.title)}](${cell(a.link)}) | ${cell(a.summary ?? "—")} |`,
+        `| ${a.date} | ${cell(a.source)} | [${vendorTitleLabel(a.title)}](${cell(a.link)}) | ${cell(a.summary ?? "—")} |`,
     );
   return rows.length
     ? `## ${DATA_REPORT.actionHeading}\n\n${DATA_REPORT.actionTableHeader}\n${rows.join("\n")}`
     : "";
 }
 
+/**
+ * The data report's vendor tables, one per vendor section with items. Each row
+ * shows the summary for its own number (`n`, set by selectVendorItems).
+ * Date, source, title and the ⚠️/🤖 markers come from the data, never the model.
+ */
 export function renderVendorTables(
   items: Numbered<KeptVendorItem>[],
   summaries: Map<number, string>,
@@ -526,18 +549,24 @@ export function renderVendorTables(
   for (const section of VENDOR_SECTIONS) {
     const links = alsoNew
       .filter((it) => vendorSection(it.vendor) === section)
-      .map((it) => `[${policyTitleLabel(it.title)}](${it.link})`);
+      .map((it) => `[${vendorTitleLabel(it.title)}](${it.link})`);
     const also = links.length ? `*${DATA_REPORT.alsoNew}* ${links.join(" · ")}` : "";
-    const rows = items
+    // Deprecations first, then newest first (undated last); a row keeps its number, so its summary follows it.
+    const sectionItems = items
       .filter((it) => vendorSection(it.vendor) === section)
-      .map(
-        (it) =>
-          `| ${it.date || "—"} | ${cell(it.source)} | ` +
-          `${it.deprecation ? `${DATA_REPORT.deprecationMarker} ` : ""}${it.aiInData ? `${DATA_REPORT.aiMarker} ` : ""}` +
-          `[${policyTitleLabel(it.title)}](${cell(it.link)}) | ` +
-          `${cell(summaryText(summaries, it))} |`,
+      .sort(
+        (a, b) => Number(b.deprecation) - Number(a.deprecation) || (b.date || "").localeCompare(a.date || ""),
       );
-    const table = rows.length ? `${DATA_REPORT.vendorTableHeader}\n${rows.join("\n")}` : "";
+    const oneSource = new Set(sectionItems.map((it) => it.source)).size === 1;
+    const rows = sectionItems.map(
+      (it) =>
+        `| ${it.date || "—"} | ${oneSource ? "" : `${cell(it.source)} | `}` +
+        `${it.deprecation ? `${DATA_REPORT.deprecationMarker} ` : ""}${it.aiInData ? `${DATA_REPORT.aiMarker} ` : ""}` +
+        `[${vendorTitleLabel(it.title)}](${cell(it.link)}) | ` +
+        `${cell(summaryText(summaries, it))} |`,
+    );
+    const header = oneSource ? DATA_REPORT.vendorTableHeaderOneSource : DATA_REPORT.vendorTableHeader;
+    const table = rows.length ? `${header}\n${rows.join("\n")}` : "";
     if (table || also) tables[section] = [table, also].filter(Boolean).join("\n\n");
   }
   return tables;

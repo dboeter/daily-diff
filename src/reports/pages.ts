@@ -204,7 +204,7 @@ export async function buildTrendsReport(
   const content = assembleReport(
     "ai-trends",
     dateStr,
-    `> ${REPORT_META.sources(T.sources)} | ${REPORT_META.generated(utcStr)}`,
+    REPORT_META.line([REPORT_META.sources(T.sources)], utcStr),
     body,
   );
 
@@ -356,11 +356,32 @@ export async function buildModelsPage(
       : models.length
         ? renderNewModelsTable(models, summaries)
         : P.noModels;
-  const tracked = [`## ${P.labHeading}\n\n${labBody}`, `## ${P.modelsHeading}\n\n${modelsBody}`];
-  const stealth = buildStealthSection(catalog?.stealth ?? null, now);
+  // A section with nothing to show is named in one line instead of a heading over a placeholder.
+  const sections = [
+    {
+      name: P.emptyNames.labs,
+      md: `## ${P.labHeading}\n\n${labBody}`,
+      empty: !labBody || labBody === P.noPosts,
+    },
+    {
+      name: P.emptyNames.models,
+      md: `## ${P.modelsHeading}\n\n${modelsBody}`,
+      empty: modelsBody === P.noModels,
+    },
+    {
+      name: P.emptyNames.stealth,
+      md: buildStealthSection(catalog?.stealth ?? null, now).replace(/\n\n---\n\n$/, ""),
+      empty: catalog?.stealth?.length === 0,
+    },
+  ];
+  const empty = sections.filter((s) => s.empty).map((s) => s.name);
+  const tracked = [
+    ...sections.filter((s) => !s.empty).map((s) => s.md),
+    ...(empty.length ? [P.nothingNew(empty)] : []),
+  ];
   const spottedMd = renderSpottedTable(spotted.rows, spotted.summaries);
   // The Highlights call reads everything below Highlights: a 🆕 stealth model is this page's news too.
-  const bodyMd = [...tracked, stealth, spottedMd].filter(Boolean).join("\n\n");
+  const bodyMd = [...tracked, spottedMd].filter(Boolean).join("\n\n");
   const prose = await generateOr(
     "models-highlights",
     buildPageHighlightsPrompt(
@@ -375,8 +396,8 @@ export async function buildModelsPage(
   );
   const highlights = highlightsOnly(prose ?? MSG.summaryFailed);
 
-  const meta = `> ${P.counts(posts.length, models.length, spotted.rows.length)} | ${REPORT_META.generated(utcStr)}`;
-  const body = `${[highlights, ...tracked].map((s) => `${s}\n\n---\n\n`).join("")}${stealth}${spottedMd}`;
+  const meta = REPORT_META.line([P.counts(posts.length, models.length, spotted.rows.length)], utcStr);
+  const body = `${[highlights, ...tracked].map((s) => `${s}\n\n---\n\n`).join("")}${spottedMd}`;
   saveReportedState(nextReportedState(state, fresh, dateStr), stateFile);
   return {
     id: "ai-models",
@@ -436,7 +457,10 @@ export async function buildPolicyReport(
 
   const sources = [...new Set(items.map((i) => i.source))].join(" + ");
   const ranked = policyData.rankedBy === "jev" ? REPORT_META.jevRanked : "";
-  const meta = `> ${REPORT_META.sources(sources)} | ${POLICY_REPORT.newItems(items.length)}${ranked} | ${REPORT_META.generated(utcStr)}`;
+  const meta = REPORT_META.line(
+    [REPORT_META.sources(sources), `${POLICY_REPORT.newItems(items.length)}${ranked}`],
+    utcStr,
+  );
   const body = spliceTables(
     highlightsOnly(prose),
     tables(

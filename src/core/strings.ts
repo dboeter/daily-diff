@@ -66,14 +66,20 @@ export const reportIssueTitle = (id: ReportId, dateStr: string) =>
 export const PROJECT_SCOPE = { window: "last 24h", period: "today" } as const;
 
 const SOURCES = "Sources:";
+const generated = (utcStr: string) => `Generated: ${utcStr} UTC`;
 
 /** The meta line under every report's H1. */
 export const REPORT_META = {
   sources: (list: string) => `${SOURCES} ${list}`,
-  generated: (utcStr: string) => `Generated: ${utcStr} UTC`,
+  generated,
+  /** The meta line itself, one template on every page: the page's counts, then when it was generated. */
+  line: (parts: string[], utcStr: string) => `> ${[...parts, generated(utcStr)].filter(Boolean).join(" | ")}`,
   /** After a listing's item count when Jev ordered it (policy). */
   jevRanked: " ranked by [Jev](https://typesafe.ai) relevance",
 } as const;
+
+/** "1 comment", "2 comments". */
+export const plural = (n: number, noun: string) => `${n} ${noun}${n === 1 ? "" : "s"}`;
 
 /** The report bar's first link: the day's overview of every report's highlights. */
 export const OVERVIEW = { emoji: "⬛", name: "Overview" } as const;
@@ -156,7 +162,7 @@ export const SPOTTED = {
   sources: { hn: "Hacker News", lobsters: "Lobste.rs", devto: "Dev.to" },
   /** The Discussion cell, e.g. "312 points, 95 comments"; a Dev.to story's points are reactions. */
   counts: (source: "hn" | "lobsters" | "devto", points: number, comments: number) =>
-    `${points} ${source === "devto" ? "reactions" : "points"}, ${comments} comments`,
+    `${plural(points, source === "devto" ? "reaction" : "point")}, ${plural(comments, "comment")}`,
 } as const;
 
 // Daily: AI legislation, regulation and official guidance. The table is rendered in code.
@@ -197,6 +203,8 @@ export const DATA_REPORT = {
   },
   vendorCount: (count: number) => `Vendor items: ${count}`,
   vendorTableHeader: "| Date | Source | Item | Summary |\n| :--- | :--- | :--- | :--- |",
+  /** A section whose rows all share one source: the Source column would repeat it in every row. */
+  vendorTableHeaderOneSource: "| Date | Item | Summary |\n| :--- | :--- | :--- |",
   /** Leads the line of links under a vendor table: today's kept items over the cap. */
   alsoNew: "Also new:",
   /** Marks a deprecation, retirement, breaking or behavior change in the Item cell. */
@@ -233,6 +241,14 @@ export const MODELS_PAGE = {
   modelsTableHeader: "| Model | Listed | Context | Summary |\n| :--- | :--- | :--- | :--- |",
   noModels: "No new models listed today.",
   catalogUnavailable: "⚠️ OpenRouter model catalog unavailable.",
+  /** One line in place of the tracked sections with nothing to show, named by `emptyNames`. */
+  emptyNames: {
+    labs: "Anthropic or OpenAI",
+    models: "OpenRouter's new listings",
+    stealth: "OpenRouter's stealth models",
+  },
+  nothingNew: (names: string[]) =>
+    `Nothing new from ${names.length > 1 ? `${names.slice(0, -1).join(", ")} or ${names.at(-1)}` : names[0]} today.`,
   counts: (posts: number, models: number, spotted: number) =>
     `Lab posts: ${posts} | New models: ${models} | Spotted: ${spotted}`,
   noContent: "No lab posts, new models, new stealth models or Spotted stories, skipping report.",
@@ -240,7 +256,7 @@ export const MODELS_PAGE = {
 
 // Rendered daily on the models page (buildStealthSection).
 export const STEALTH_SECTION = {
-  title: "🕵️ Stealth Models on OpenRouter",
+  title: "Stealth Models on OpenRouter",
   none: "No stealth models listed on OpenRouter today.",
   unavailable: "⚠️ OpenRouter model catalog unavailable — stealth model status unknown.",
   header: "| Model | Listed | Expires | Status |\n| :--- | :--- | :--- | :--- |",

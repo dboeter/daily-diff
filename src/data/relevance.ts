@@ -295,7 +295,8 @@ export interface KeptVendorItem extends VendorItem {
 
 /**
  * Items by section, deprecations first, then by relevance (no verdict: feed order);
- * numbered in that order. Trace: `data-trace.json`.
+ * numbered in that order. The tables show each section newest first (renderVendorTables).
+ * Trace: `data-trace.json`.
  */
 export type VendorSelection = Selection<Numbered<KeptVendorItem>, DataVerdicts, KeptVendorItem>;
 
