@@ -3,6 +3,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import type { DataFeed } from "../../core/config.ts";
 import { type ReportedState, newItems, nextReportedState } from "../../core/report-state.ts";
 import {
+  type DataState,
   type VendorItem,
   asStateItem,
   fetchVendorData,
@@ -83,10 +84,10 @@ describe("fetchVendorData", () => {
     { name: "Snowflake BCR", vendor: "snowflake", url: "https://x/bcr", parser: "snowflake-bcr" },
   ];
   const now = new Date("2026-10-17T00:00:00Z");
-  const run = (state: Parameters<typeof fetchVendorData>[2]) => {
+  const run = (state: DataState | null) => {
     vi.spyOn(console, "log").mockImplementation(() => {});
     vi.spyOn(globalThis, "fetch").mockImplementation(async () => new Response(fixture("snowflake-bcr.html")));
-    return fetchVendorData({ feeds }, now, state, { cache: { items: {} } });
+    return fetchVendorData({ feeds }, now, { state, jev: { cache: { items: {} } } });
   };
 
   it("records a bundle first seen at a stage over 30 days old without reporting it", async () => {
@@ -105,10 +106,13 @@ describe("fetchVendorData", () => {
   it("lists a reported bundle's end date once its plan gets a day, and follows a reschedule", async () => {
     const page = (planned: string) =>
       `<table><tr><th>Pending Changes</th></tr><tr><td><strong>2026_09</strong></td><td><p>Introduced in the 10.38 release (October 14-20, 2026) as Disabled by Default; account admins can enable for testing.</p><p>Status planned to change in ${planned} to Generally Enabled.</p></td></tr></table>`;
-    const day = (date: string, planned: string, state: Parameters<typeof fetchVendorData>[2]) => {
+    const day = (date: string, planned: string, state: DataState | null) => {
       vi.spyOn(console, "log").mockImplementation(() => {});
       vi.spyOn(globalThis, "fetch").mockImplementation(async () => new Response(page(planned)));
-      return fetchVendorData({ feeds }, new Date(`${date}T01:00:00Z`), state, { cache: { items: {} } });
+      return fetchVendorData({ feeds }, new Date(`${date}T01:00:00Z`), {
+        state,
+        jev: { cache: { items: {} } },
+      });
     };
     const d1 = await day("2026-10-21", "a subsequent November 2026 release", null);
     expect(d1.items.map((i) => i.id)).toEqual(["snowflake-bcr:2026_09"]);
@@ -152,12 +156,12 @@ describe("fetchVendorData across days", () => {
     { name: "Azure Databricks", vendor: "databricks", url: "https://x/dbx.xml", parser: "rss" },
   ];
   type Note = { guid: string; title: string; date: string };
-  const run = (day: string, fabric: Note[], dbx: Note[], state: Parameters<typeof fetchVendorData>[2]) => {
+  const run = (day: string, fabric: Note[], dbx: Note[], state: DataState | null) => {
     vi.spyOn(console, "log").mockImplementation(() => {});
     vi.spyOn(globalThis, "fetch").mockImplementation(
       async (input) => new Response(rss(String(input).endsWith("fabric.xml") ? fabric : dbx)),
     );
-    return fetchVendorData({ feeds }, new Date(`${day}T01:00:00Z`), state, { cache: { items: {} } });
+    return fetchVendorData({ feeds }, new Date(`${day}T01:00:00Z`), { state, jev: { cache: { items: {} } } });
   };
   const retiring = { guid: "ba-p/5374418", title: "Retirement of the custom tool: move to Fabric IQ" };
 
@@ -247,14 +251,23 @@ describe("fetchVendorData across days", () => {
     vi.spyOn(console, "log").mockImplementation(() => {});
     vi.spyOn(globalThis, "fetch").mockImplementation(async () => new Response(rss(notes)));
     const jev = { apiKey: "k", cache: { items: {} }, ask };
-    const day1 = await fetchVendorData({ feeds: [feeds[1]!] }, new Date("2026-10-21T01:00:00Z"), null, jev);
+    const day1 = await fetchVendorData({ feeds: [feeds[1]!] }, new Date("2026-10-21T01:00:00Z"), {
+      state: null,
+      jev,
+    });
     expect(day1.nextState.actions).toEqual({
       a: { date: "2026-11-19", title: notes[0]!.title, link: "https://x/a", source: "Azure Databricks" },
     });
     // A quiet day keeps it; the day after it passes drops it.
-    const quiet = await fetchVendorData({ feeds: [] }, new Date("2026-11-19T01:00:00Z"), day1.nextState, jev);
+    const quiet = await fetchVendorData({ feeds: [] }, new Date("2026-11-19T01:00:00Z"), {
+      state: day1.nextState,
+      jev,
+    });
     expect(Object.keys(quiet.observedState.actions ?? {})).toEqual(["a"]);
-    const after = await fetchVendorData({ feeds: [] }, new Date("2026-11-20T01:00:00Z"), day1.nextState, jev);
+    const after = await fetchVendorData({ feeds: [] }, new Date("2026-11-20T01:00:00Z"), {
+      state: day1.nextState,
+      jev,
+    });
     expect(after.observedState.actions).toEqual({});
   });
 });

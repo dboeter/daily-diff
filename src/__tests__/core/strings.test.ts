@@ -34,8 +34,8 @@ describe("report names", () => {
 // ---------------------------------------------------------------------------
 
 describe("dynamic content helpers", () => {
-  it("REPORT_META.generated formats timestamp", () => {
-    expect(REPORT_META.generated("12:00")).toContain("12:00 UTC");
+  it("REPORT_META.line ends with the generation timestamp", () => {
+    expect(REPORT_META.line(["Items: 2"], "12:00")).toBe("> Items: 2 | Generated: 12:00 UTC");
   });
 });
 

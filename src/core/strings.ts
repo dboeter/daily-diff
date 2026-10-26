@@ -71,7 +71,6 @@ const generated = (utcStr: string) => `Generated: ${utcStr} UTC`;
 /** The meta line under every report's H1. */
 export const REPORT_META = {
   sources: (list: string) => `${SOURCES} ${list}`,
-  generated,
   /** The meta line itself, one template on every page: the page's counts, then when it was generated. */
   line: (parts: string[], utcStr: string) => `> ${[...parts, generated(utcStr)].filter(Boolean).join(" | ")}`,
   /** After a listing's item count when Jev ordered it (policy). */

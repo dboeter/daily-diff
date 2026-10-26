@@ -317,7 +317,7 @@ ${summaryOutputRule(count)}
 export function buildDataProsePrompt(
   sectionsMd: string,
   dateStr: string,
-  /** Kept vendor rows under "Notable" significance (`minor`): in the tables, never a Highlight. */
+  /** Kept vendor rows under "Notable" significance or unsure of it (`minor`): in the tables, never a Highlight. */
   minorTitles: string[] = [],
 ): string {
   const parts = [

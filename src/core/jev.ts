@@ -173,6 +173,12 @@ export interface VerdictEntry<A> {
 
 export type VerdictCache<A> = ItemsFile<VerdictEntry<A>>;
 
+/**
+ * Under this confidence a score answer is unknown, not low: the bar of AI Policy's US impact gate
+ * and the data report's significance.
+ */
+export const LOW_CONFIDENCE = 0.4;
+
 /** A Jev `choice` question's answer. */
 export interface ChoiceAnswer {
   choice: string;

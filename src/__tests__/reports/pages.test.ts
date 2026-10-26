@@ -23,7 +23,7 @@ import type { LabsFetchResult, LabPost } from "../../sources/labs.ts";
 import type { ModelCatalog } from "../../sources/openrouter.ts";
 import type { VendorData, VendorItem } from "../../data/vendors.ts";
 import { selectVendorItems } from "../../data/relevance.ts";
-import { fetchVendorData } from "../../data/vendors.ts";
+import { type DataState, fetchVendorData } from "../../data/vendors.ts";
 import { numberRows } from "../../reports/summarized-table.ts";
 import type { SpottedRow } from "../../spotted/pool.ts";
 
@@ -1308,11 +1308,12 @@ describe("buildDataReport", () => {
         parser: "snowflake-bcr" as const,
       },
     ];
-    const fetchWith = async (resp: () => Response, state: Parameters<typeof fetchVendorData>[2]) => {
+    const fetchWith = async (resp: () => Response, state: DataState | null) => {
       vi.spyOn(console, "log").mockImplementation(() => {});
       const spy = vi.spyOn(globalThis, "fetch").mockImplementation(async () => resp());
-      const data = await fetchVendorData({ feeds }, new Date("2026-10-17T00:00:00Z"), state, {
-        cache: { items: {} },
+      const data = await fetchVendorData({ feeds }, new Date("2026-10-17T00:00:00Z"), {
+        state,
+        jev: { cache: { items: {} } },
       });
       spy.mockRestore();
       return data;

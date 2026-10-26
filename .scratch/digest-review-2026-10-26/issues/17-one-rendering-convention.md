@@ -1,6 +1,6 @@
 # 17: One rendering convention across pages
 
-Status: done
+Status: partial
 Blocked by: None (can start immediately)
 Findings: S10, X6, M8, D9, D10, D11, D12 — see `../review.md`
 
@@ -12,8 +12,8 @@ Decision needed (D11): AGENTS.md says "− for a bullet that opens with GOING_AW
 
 - [x] Counts pluralise correctly
 - [x] One Report Bar/banner template for all pages; one Release label form
-- [x] Empty Tracked sections collapse into one "Nothing new from …" line
-- [x] Vendor Item text has no date prefix; a single-source section has no Source column; vendor rows sort newest first
+- [ ] Empty Tracked sections collapse into one "Nothing new from …" line (models page only: see Comments)
+- [x] Vendor Item text has no date prefix; a single-source section has no Source column; vendor rows sort newest first (deprecations first, then newest)
 - [x] Every row marker (🤖, 🆕, ⏳) and heading emoji is documented or removed
 - [x] Highlight signs follow the maintainer's D11 decision and AGENTS.md matches
 
@@ -29,3 +29,5 @@ Decision needed (D11): AGENTS.md says "− for a bullet that opens with GOING_AW
 - Markers: 🤖 and ⚠️ are documented in AGENTS.md (data report, Tables), 🆕/⏳ on stealth rows and the Trends category heading emoji too; 🕵️ is removed from the stealth heading, the only daily-page heading with an emoji.
 - D11: the code already writes no `+` (`signListItems` only normalises the `GOING_AWAY` opener); AGENTS.md now says the Markdown carries no `+` and only the web UI draws the gutter.
 - Not in the boxes, left: X6 (3) Trends Highlights in bold and (4) no blank line after `## Highlights` on ai-data.
+
+**Review (2026-10-26):** only the models page collapses empty sections. On the data report, Databricks and Snowflake each carry a vendor table and a repo group: with no vendor rows the section keeps its heading for the repos' quiet line (documented as intended), and Azure / Fabric & GCP, which has no repos, is left out with no line. Naming it in a "Nothing new" line means changing the shared group rendering (`buildProjectReportContent`), so the box is unticked. Vendor rows sort deprecations first, then newest first (`renderVendorTables`), not newest first alone.

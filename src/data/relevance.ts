@@ -10,6 +10,7 @@ import path from "node:path";
 import {
   droppedFor,
   judgeItems,
+  LOW_CONFIDENCE,
   loadItemsFile,
   renderedAt,
   sourceCounts,
@@ -180,31 +181,39 @@ const KEEP_MIN_RELEVANCE = 0.5;
 const DEPRECATION_MIN = 0.5;
 /** How far under KEEP_MIN_RELEVANCE a section's best item may be when the section has no kept item. */
 const NEAR_CUT_MARGIN = 0.05;
-/** Significance level 1 ("Notable"): a kept item under it is `minor`. */
+/** Significance level 1 ("Notable"): a kept item under it, or not confidently at it, is `minor`. */
 const NOTABLE_LEVEL = 1;
 
-/** Under this confidence a significance score is unknown, not low. */
-const LOW_CONFIDENCE = 0.4;
-/** The level an unknown significance counts as: "Notable", the middle. */
+/** The level an unknown significance (under LOW_CONFIDENCE) counts as in relevance: "Notable", the middle. */
 const UNKNOWN_LEVEL = 1;
 /**
- * A real change this likely is enough for an item that is about a Tracked project or at least
+ * A real change this likely is enough for an item that is about a Tracked project or confidently
  * "Notable": on 2026-10-26 Snowflake's "Recompact Iceberg table data" (real change 0.46) was dropped.
  */
 const REAL_CHANGE_EXEMPT_MIN = 0.4;
 
+const unsure = (a: Pick<DataAnswers, "significance">): boolean =>
+  a.significance.confidence !== undefined && a.significance.confidence < LOW_CONFIDENCE;
+
 /**
- * The significance level the keep decision uses: Jev's score, or UNKNOWN_LEVEL when Jev is unsure.
+ * The significance level relevance uses: Jev's score, or UNKNOWN_LEVEL when Jev is unsure.
  * On 2026-10-26 the Fabric FNTK item (0.53 at confidence 0.30) fell 0.01 under the cut on it.
  */
 export function significanceLevel(a: Pick<DataAnswers, "significance">): number {
-  const { score, confidence } = a.significance;
-  return confidence !== undefined && confidence < LOW_CONFIDENCE ? UNKNOWN_LEVEL : score;
+  return unsure(a) ? UNKNOWN_LEVEL : a.significance.score;
 }
 
 /**
+ * Significance known to be "Notable" or more. An unknown one does not count: it neither exempts an
+ * item from the relevance bar nor makes it a Highlight (on 2026-10-26, "Custom error messages for
+ * feature policy rules", 0.52 at confidence 0.25).
+ */
+const confidentlyNotable = (a: Pick<DataAnswers, "significance">): boolean =>
+  !unsure(a) && a.significance.score >= NOTABLE_LEVEL;
+
+/**
  * Weighted relevance in 0–1, the keep decision and the deprecation flag. An item about a Tracked
- * data project (`tracked`) or at least "Notable" is kept on a real change of REAL_CHANGE_EXEMPT_MIN.
+ * data project (`tracked`) or confidently "Notable" is kept on a real change of REAL_CHANGE_EXEMPT_MIN.
  * Throws on an unexpected answer shape.
  */
 export function dataRelevance(
@@ -220,7 +229,7 @@ export function dataRelevance(
   if (!Number.isFinite(relevance)) throw new Error(`Unexpected Jev answers: ${JSON.stringify(a)}`);
   const real = a.real_change.noul >= REAL_CHANGE_MIN;
   const deprecation = real && a.deprecation.noul >= DEPRECATION_MIN;
-  const exempt = (tracked || level >= UNKNOWN_LEVEL) && a.real_change.noul >= REAL_CHANGE_EXEMPT_MIN;
+  const exempt = (tracked || confidentlyNotable(a)) && a.real_change.noul >= REAL_CHANGE_EXEMPT_MIN;
   return { relevance, keep: deprecation || (real && relevance >= KEEP_MIN_RELEVANCE) || exempt, deprecation };
 }
 
@@ -289,7 +298,7 @@ export interface KeptVendorItem extends VendorItem {
   endDate?: string;
   /** The 🤖 marker: Jev's `ai_in_data`, else an AI keyword in title or description. */
   aiInData: boolean;
-  /** Significance under "Notable" and no deprecation: shown in its table, never a Highlight. */
+  /** No deprecation and significance under "Notable" or unknown: shown in its table, never a Highlight. */
   minor?: boolean;
 }
 
@@ -399,8 +408,7 @@ export async function selectVendorItems(
     const jevEnd = datesOf(i).some((c) => c.iso === picked) ? picked : undefined;
     const endDate = d.deprecation ? (i.endDate ?? jevEnd) : undefined;
     const answers = verdicts.get(i.id)?.answers;
-    const minor =
-      !d.deprecation && answers?.significance !== undefined && significanceLevel(answers) < NOTABLE_LEVEL;
+    const minor = !d.deprecation && answers?.significance !== undefined && !confidentlyNotable(answers);
     return d.keep
       ? [
           {

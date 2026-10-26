@@ -138,6 +138,20 @@ describe("selectPolicyItems", () => {
     expect(sel.items.map((i) => i.id)).toEqual(["high", "low"]);
   });
 
+  it("returns items in report order, so a trace row's rank is its row number", async () => {
+    const ask = stub({ nl: answers(1, 1, 1, 2), eu: answers(1, 0, 1, 1) });
+    const sel = await selectPolicyItems([item("nl", { jurisdiction: "nl" }), item("eu")], {
+      ...base,
+      apiKey: "k",
+      cache: { items: {} },
+      ask,
+    });
+    // EU's section comes before the Netherlands' though the Dutch item is more relevant.
+    expect(sel.items.map((i) => i.id)).toEqual(["eu", "nl"]);
+    const rows = (JSON.parse(sel.traceFile!) as { items: { id: string; rank?: number }[] }).items;
+    expect(Object.fromEntries(rows.map((r) => [r.id, r.rank]))).toEqual({ eu: 1, nl: 2 });
+  });
+
   it("asks the impact question with the reader profile for US items only", async () => {
     const ask = stub({ eu: answers(1, 1, 1, 2), us: answers(1, 1, 1, 2, 2) });
     await selectPolicyItems([item("eu"), item("us", { jurisdiction: "us_federal" })], {

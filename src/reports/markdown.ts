@@ -416,7 +416,7 @@ export function buildStealthSection(models: OpenRouterStealthModel[] | null, now
     });
     body = `${S.header}\n${rows.join("\n")}`;
   }
-  return `## ${S.title}\n\n${body}\n\n---\n\n`;
+  return `## ${S.title}\n\n${body}`;
 }
 
 // ---------------------------------------------------------------------------
@@ -578,12 +578,6 @@ export function renderVendorTables(
 }
 
 /**
- * A page's Spotted section (or Trends' Most discussed, under `heading`): each
- * story linked to its article, its discussion linked with its counts, and the
- * summary for its own number (else its description, truncated). Empty when
- * the page has no rows.
- */
-/**
  * A story's link: its title, or for a story linking a GitHub repo the title with the repo as the
  * link text, so the link reads what it opens ("Show HN: Agentsh" linked microsoft/Agensh, 2026-10-26).
  */
@@ -592,6 +586,12 @@ function storyLink(r: Pick<StoryRow, "title" | "url">): string {
   return repo ? `${cell(r.title)} ([${cell(repo)}](${cell(r.url)}))` : `[${cell(r.title)}](${cell(r.url)})`;
 }
 
+/**
+ * A page's Spotted section (or Trends' Most discussed, under `heading`): each
+ * story linked to its article, its discussion linked with its counts, and the
+ * summary for its own number (else its description, truncated). Empty when
+ * the page has no rows.
+ */
 export function renderSpottedTable(
   rows: StoryRow[],
   summaries: Map<number, string>,

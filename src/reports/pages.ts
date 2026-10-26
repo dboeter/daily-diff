@@ -383,7 +383,7 @@ export async function buildModelsPage(
     },
     {
       name: P.emptyNames.stealth,
-      md: buildStealthSection(catalog?.stealth ?? null, now).replace(/\n\n---\n\n$/, ""),
+      md: buildStealthSection(catalog?.stealth ?? null, now),
       empty: catalog?.stealth?.length === 0,
     },
   ];

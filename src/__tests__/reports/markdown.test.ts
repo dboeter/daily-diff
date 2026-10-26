@@ -223,6 +223,17 @@ describe("buildProjectReportContent", () => {
     expect(result).toContain("**Quiet today:** [GAMMA](https://github.com/org/gamma)");
   });
 
+  it("never labels a no-stable-yet project's prerelease as a Release or counts it as stable", () => {
+    // fetchProject sends such a project's prereleases as `previews`; `releases` stays stable-only.
+    const beta = makeActivity("beta", {
+      previews: [{ ...stableRelease, tag_name: "v0.3.0-beta.1", prerelease: true }],
+    });
+    const result = buildProjectReportContent(withAgents({ summary: "", activities: [beta] }));
+    expect(result).not.toContain("**Release:**");
+    expect(result).toContain("Stable releases: 0 |");
+    expect(result).toContain("**Quiet today:** [BETA](https://github.com/org/beta)");
+  });
+
   it("drops a project section without a bullet; a project without a release then goes quiet", () => {
     const news = [{ source: "Hacker News", title: "BETA", url: "u", detail: "d" }];
     const result = buildProjectReportContent(

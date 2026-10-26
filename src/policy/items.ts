@@ -10,7 +10,7 @@
 
 import path from "node:path";
 import { fetchRssFeed, recentNewsItems, type FeedItem } from "../core/rss.ts";
-import { JURISDICTIONS, type Jurisdiction, type PolicyConfig } from "../core/config.ts";
+import type { Jurisdiction, PolicyConfig } from "../core/config.ts";
 import { POLICY_SOURCES, type PolicySource } from "./sources.ts";
 import { loadPolicyVerdicts, selectPolicyItems, type PolicyVerdicts } from "./relevance.ts";
 import { sourceCounts, type AskJev } from "../core/jev.ts";
@@ -149,10 +149,6 @@ export async function fetchPolicyData(
   },
   sources: PolicySource[] = POLICY_SOURCES,
 ): Promise<PolicyData> {
-  // The report has one section per jurisdiction in JURISDICTIONS order, then News & commentary. Sorted
-  // (stable, so relevance order holds within a section) and then numbered, so the row numbers run on
-  // down the page; the table and the summaries prompt both read each row's own number.
-  const rank = (i: PolicyItem) => (i.news ? JURISDICTIONS.length : JURISDICTIONS.indexOf(i.jurisdiction));
   // Per source name: items fetched (null: failed), and the source each item came from. Item `source`
   // fields differ from the registry names ("Commission mail" fetches "European Commission" items).
   const names = [...sources.map((s) => s.name), ...config.feeds.map((f) => f.name)];
@@ -191,7 +187,9 @@ export async function fetchPolicyData(
         dateStr,
         ...jev,
       });
-      return { ...selection, items: numberRows([...selection.items].sort((a, b) => rank(a) - rank(b))) };
+      // selectPolicyItems returns report order, so the row numbers run on down the page; the table
+      // and the summaries prompt both read each row's own number.
+      return { ...selection, items: numberRows(selection.items) };
     },
     extend: (kept, fetchedItems): Pick<PolicyState, "deadlines" | "zeroSince"> => ({
       deadlines: nextDeadlines(state?.deadlines, kept, fetchedItems, dateStr),

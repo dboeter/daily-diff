@@ -76,6 +76,13 @@ describe("dataRelevance", () => {
     expect(dataRelevance(fntk).keep).toBe(true);
   });
 
+  it("does not exempt an untracked item whose significance is only unknown", () => {
+    // Real change 0.45 is under REAL_CHANGE_MIN; Notable at confidence 0.2 is not known to be Notable.
+    const unsure: DataAnswers = { ...answers(0.45, 0, 1.5), significance: { score: 1.5, confidence: 0.2 } };
+    expect(dataRelevance(unsure).keep).toBe(false);
+    expect(dataRelevance(unsure, true).keep).toBe(true);
+  });
+
   it("always keeps a deprecation that is a real change, whatever its relevance", () => {
     const v = dataRelevance(answers(0.6, 0.6, 0));
     expect(v.relevance).toBeLessThan(0.5);
@@ -130,6 +137,23 @@ describe("selectVendorItems", () => {
   const ask = vi.fn(async (state: unknown) => {
     const id = (state as { title: string }).title.replace("Title ", "");
     return { model: "jev-test", answers: byId[id]! };
+  });
+
+  it("ticket 04 replay: the 2026-10-26 low-confidence Snowflake note is kept but minor (no Highlight)", async () => {
+    // Saved answers from digests/2026-10-26/data-trace.json (D5).
+    const d5: DataAnswers = {
+      real_change: { noul: 0.99 },
+      deprecation: { noul: 0.01 },
+      ai_in_data: { noul: 0.02 },
+      significance: { score: 0.52, confidence: 0.25 },
+    };
+    const sel = await selectVendorItems([item("d5", { vendor: "snowflake", source: "Snowflake" })], {
+      apiKey: "k",
+      cache: { items: {} },
+      dateStr: DATE,
+      ask: async () => ({ model: "jev-test", answers: d5 }),
+    });
+    expect(sel.items.map((i) => [i.id, i.minor])).toEqual([["d5", true]]);
   });
 
   it("orders deprecations first, then by relevance; bundles skip Jev; saves the answers", async () => {

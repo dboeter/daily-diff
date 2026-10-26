@@ -214,13 +214,17 @@ export type VendorData = NewItems<Numbered<KeptVendorItem>, DataState, DataVerdi
 export async function fetchVendorData(
   config: DataConfig,
   now: Date,
-  state = loadDataState(),
-  jev: { apiKey?: string; cache: DataVerdicts | null; ask?: AskJev } = {
-    apiKey: process.env["TYPESAFE_API_KEY"],
-    cache: loadDataVerdicts(),
-  },
-  /** The Tracked data projects: an item naming one is kept on a weaker real-change answer. */
-  trackedProjects: RepoConfig[] = [],
+  {
+    state = loadDataState(),
+    jev = { apiKey: process.env["TYPESAFE_API_KEY"], cache: loadDataVerdicts() },
+    trackedProjects = [],
+  }: {
+    /** null: a first run. Default: `digests/data-state.json`. */
+    state?: DataState | null;
+    jev?: { apiKey?: string; cache: DataVerdicts | null; ask?: AskJev };
+    /** The Tracked data projects: an item naming one is kept on a weaker real-change answer. */
+    trackedProjects?: RepoConfig[];
+  } = {},
 ): Promise<VendorData> {
   const matchers = trackedProjects.map(agentMatcher);
   const tracked = (i: VendorItem) => matchers.some((re) => re.test(`${i.title} ${i.description}`));
