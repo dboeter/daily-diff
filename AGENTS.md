@@ -119,7 +119,7 @@ Every Jev judgment except ArXiv's goes through `judgeItems` (`src/core/jev.ts`) 
 - A file that fails to parse means every item is asked and the file is left as it is.
 - Without `TYPESAFE_API_KEY`, or with more than half the new calls failing, each judgment falls back to keyword rules (trending: the search topic label) for the items without a saved verdict. Saved verdicts are always used.
 - `digests/trending-matches.json` holds Jev's OpenRouter app → npm package / GitHub repo matches, outside `judgeItems`: a malformed file turns matching off for the run and is left as it is. Code never overwrites a match. **To fix a wrong match**, delete its `npm` or `github` field and add the key (`npm:<name>` or `github:<owner/repo>`) to `rejected`; to force one, set the field.
-- ArXiv scores papers with Jev directly, uncached. Jev is not a chat model, so it bypasses `callLlm` and `llmStats`.
+- ArXiv scores papers with Jev directly, uncached. Jev is not a chat model, so it bypasses `callLlm` and `llmStats`. When more than half the calls fail, a request Jev rejects (HTTP 400 from a malformed question) included, ArXiv ranks by recency and saves no papers to the research state that day (`[arxiv] Too many Jev failures … ranked by recency` in the log, the first error just above it).
 
 ### Reported state
 
@@ -164,7 +164,7 @@ Every Jev judgment except ArXiv's goes through `judgeItems` (`src/core/jev.ts`) 
 - **Markers**: 🆕 means new only (a repo created, an OpenRouter app listed, in the last 14 days; `GLOSSARY.md`), never momentum. 🔥 marks a row also in the report dated exactly 7 days earlier. Each agents table's heading carries its category's emoji (`TRENDS_REPORT.categoryTitles`, 🚀 for the Radar). A 🔥 GitHub repo in no `config.yml` section is listed under Candidates to track, linked, by the section its Jev category fits (`coding_agent` → `agents`, `agent_tooling` → `infra`, any other → "No matching section"), with its config lines collapsed below; nothing joins a section without a config edit.
 - **Scope**: Jev decides scope and category (`classifyTrendingItems`); a Radar row needs `standalone_tool`. OpenRouter apps tagged `cli-agent`, `ide-extension`, `cloud-agent` or `personal-agent` skip Jev: most have no description.
 - **Skills: PRs and requests this week** (`src/trending/skills.ts`): the `anthropics/skills` PRs and issues updated in the last 7 days, a closed one only if it closed in those 7 days; one the Skills section of the page dated exactly 7 days earlier named is skipped unless it closed this week. The prompt leaves out items not about coding agents or data/AI engineering. No item: no section and no call.
-- **Research**: the 10 most relevant papers that the daily ArXiv ranking saved in `digests/research-state.json` in the 7 days before the run (`digests/arxiv-state.json` holds the fetch cutoff). **Most discussed**: the week's stories from the Spotted log that no page showed.
+- **Research**: the 10 most relevant papers that the daily ArXiv ranking saved in `digests/research-state.json` in the 7 days before the run (`digests/arxiv-state.json` holds the fetch cutoff). A paper applying LLMs or agents to one field outside software and data engineering (Jev's `domain_application`) loses up to `DOMAIN_APPLICATION_PENALTY` (20%) of its relevance; a trace row without that answer gets no penalty. **Most discussed**: the week's stories from the Spotted log that no page showed.
 
 ### AI Policy (`ai-policy`)
 

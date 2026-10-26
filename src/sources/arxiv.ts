@@ -201,9 +201,9 @@ const RELEVANCE_QUESTIONS = {
       false: "The paper studies models that answer in a single step without tools, and not code",
     },
   },
-  // Not weighted yet: recorded in the trace to tune a weight from. On
-  // 2026-10-26 four of ten Research papers were agents for one field (3D image
-  // annotation, investing), and about_agents_or_code scored them 0.96-0.98.
+  // Weighed as DOMAIN_APPLICATION_PENALTY: on 2026-10-26 four of ten Research
+  // papers were agents for one field (3D image annotation, investing), and
+  // about_agents_or_code scored them 0.96-0.98, as high as the coding-agent papers.
   domain_application: {
     type: "noul",
     instructions:
@@ -295,6 +295,13 @@ const RELEVANCE_WEIGHTS = {
   widely_used_models: 0.1,
   code_released: 0.1,
 };
+/**
+ * Share of the relevance a paper loses at `domain_application` 1, scaled by the
+ * noul: separate from RELEVANCE_WEIGHTS, which sum to 1. From 0.46 up it drops
+ * the 2026-10-26 top paper (nnInteractive Agent, 0.958) below the on-topic ones
+ * at 0.87; the cost is that an unsure 0.5 still loses 10%.
+ */
+export const DOMAIN_APPLICATION_PENALTY = 0.2;
 /** Top level of the `about_llms` score, to normalize it to 0–1. */
 const ABOUT_LLMS_MAX_LEVEL = RELEVANCE_QUESTIONS.about_llms.criteria.length - 1;
 
@@ -312,16 +319,17 @@ export interface JevAnswers {
   /** `score` is the probability-weighted level (Σ level × p), between 0 and the top level. */
   about_llms: { score: number };
   about_agents_or_code: { noul: number };
-  /** Optional: absent from traces written before it was asked. */
+  /** Optional: absent from traces written before it was asked, and then no penalty. */
   domain_application?: { noul: number };
   proposes_technique: { noul: number };
   works_without_training: { noul: number };
   widely_used_models: { noul: number };
 }
 
-/** Weighted relevance in 0–1. */
+/** Weighted relevance in 0–1, less DOMAIN_APPLICATION_PENALTY for a paper serving one outside field. */
 export function relevanceOf(answers: JevAnswers, codeReleased: boolean): number {
-  const value =
+  const domain = answers.domain_application?.noul ?? 0;
+  const weighted =
     (RELEVANCE_WEIGHTS.about_llms * answers.about_llms.score) / ABOUT_LLMS_MAX_LEVEL +
     RELEVANCE_WEIGHTS.about_agents_or_code * answers.about_agents_or_code.noul +
     RELEVANCE_WEIGHTS.training_free_technique *
@@ -329,6 +337,7 @@ export function relevanceOf(answers: JevAnswers, codeReleased: boolean): number 
       answers.works_without_training.noul +
     RELEVANCE_WEIGHTS.widely_used_models * answers.widely_used_models.noul +
     (codeReleased ? RELEVANCE_WEIGHTS.code_released : 0);
+  const value = weighted * (1 - DOMAIN_APPLICATION_PENALTY * domain);
   // Throw rather than return NaN: a NaN score would sort arbitrarily yet count as a
   // success, so a changed response shape would never trip the recency fallback.
   if (!Number.isFinite(value)) throw new Error(`Unexpected Jev answers: ${JSON.stringify(answers)}`);
@@ -412,6 +421,7 @@ export function buildTraceFile(ranked: RankedPaper[], sources?: SourceCounts): s
   const models = [...new Set(ranked.flatMap((r) => (r.jev ? [r.jev.model] : [])))];
   return (
     `{\n"models": ${JSON.stringify(models)},\n"weights": ${JSON.stringify(RELEVANCE_WEIGHTS)},\n` +
+    `"domain_application_penalty": ${DOMAIN_APPLICATION_PENALTY},\n` +
     (sources ? `"sources": ${JSON.stringify(sources)},\n` : "") +
     `"papers": [\n${rows.join(",\n")}\n]\n}\n`
   );
@@ -523,7 +533,11 @@ async function fetchArxiv(dateStr: string, state: ArxivState | null): Promise<Ar
 
   const apiKey = process.env["TYPESAFE_API_KEY"];
   const ranked = apiKey ? await rankByRelevance(recent, apiKey) : null;
-  if (apiKey && !ranked) console.error("  [arxiv] Too many Jev failures — falling back to recency");
+  // A request Jev rejects (HTTP 400, e.g. a malformed question) fails every paper and lands here too.
+  if (apiKey && !ranked)
+    console.error(
+      "  [arxiv] Too many Jev failures (first error above): ranked by recency, no papers saved to the research state today",
+    );
   const papers = (
     ranked ? ranked.map((r) => (r.jev ? { ...r.paper, relevance: r.jev.relevance } : r.paper)) : recent
   ).slice(0, ARXIV_KEPT_PAPERS);
