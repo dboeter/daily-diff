@@ -91,8 +91,9 @@ export interface TopicAnswers {
 
 /**
  * The page each topic lands on. Research stays a topic of its own so later
- * work can tell it from model news. Policy stories are dropped: AI Policy
- * has its own sources (the HN-to-policy routing was reverted on 2026-10-20).
+ * work can tell it from model news. Policy and other have no page: AI Policy
+ * has its own sources (the HN-to-policy routing was reverted on 2026-10-20), so
+ * their best stories go on the Overview's "Also talked about" (`selectTalkedAbout`).
  */
 export const PAGE_OF_TOPIC: Record<Topic, SpottedPage | null> = {
   agents: "agents",

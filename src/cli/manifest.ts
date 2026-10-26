@@ -4,6 +4,7 @@ import { pathToFileURL } from "url";
 import { marked } from "marked";
 import {
   COMING_UP,
+  TALKED_ABOUT,
   LIVE_REPORT_IDS,
   OVERVIEW,
   PROSE_COLUMNS,
@@ -43,6 +44,8 @@ interface Manifest {
   overview: string;
   /** The heading of the overview's Coming up list (coming-up.json). */
   comingUp: string;
+  /** The heading of the overview's Also talked about list (talked-about.json). */
+  talkedAbout: string;
   /** The Highlights heading (SECTIONS), whose list the web UI renders as a diff hunk. */
   highlights: string;
   /** The table headers of prose columns (PROSE_COLUMNS), stacked full width on a phone. */
@@ -192,6 +195,7 @@ async function main(): Promise<void> {
     colors: Object.fromEntries(LIVE_REPORT_IDS.map((id) => [id, REPORTS[id].color])),
     overview: OVERVIEW.name,
     comingUp: COMING_UP.heading,
+    talkedAbout: TALKED_ABOUT.heading,
     highlights: SECTIONS.highlights,
     proseColumns: PROSE_COLUMNS,
     dates: entries,

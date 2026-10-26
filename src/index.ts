@@ -84,6 +84,7 @@ import {
   nextLog,
   saveSpottedLog,
   selectSpotted,
+  selectTalkedAbout,
   splitPool,
   storiesFrom,
   type SpottedPage,
@@ -99,7 +100,7 @@ import {
 import { DATA_SECTION_KEYS, loadConfig, type SectionKey } from "./core/config.ts";
 import { resolvePagesUrl } from "./cli/notify.ts";
 import { toCstDateStr, toUtcStr, isWeeklyRun, sleep } from "./core/date.ts";
-import { LIVE_REPORT_IDS, MSG, PROJECT_SCOPE, REPORTS, reportIssueTitle } from "./core/strings.ts";
+import { LIVE_REPORT_IDS, MSG, PROJECT_SCOPE, REPORTS, reportIssueTitle, SPOTTED } from "./core/strings.ts";
 
 // ---------------------------------------------------------------------------
 // Repo config — loaded from config.yml (throws when a section is missing)
@@ -420,6 +421,17 @@ async function main(): Promise<void> {
     },
   );
   const spottedOf = (page: SpottedPage) => spottedRows.filter((r) => r.page === page);
+  // The Overview's "Also talked about": stories routed to a topic with no page (policy, other).
+  const talkedAbout = selectTalkedAbout(
+    unmatched,
+    (s) => routing.topics.get(s.id),
+    (s) => {
+      const topic = routing.topics.get(s.id);
+      return topic ? PAGE_OF_TOPIC[topic] : null;
+    },
+    dateStr,
+    new Set(spottedRows.map((r) => linkKey(r.url))),
+  );
   // Trends' Most discussed leaves out what today's pages show: a skipped data page shows no Spotted
   // rows (a data page with project news is never skipped, nor a models page with a lab post).
   const discussed = weekly
@@ -429,6 +441,7 @@ async function main(): Promise<void> {
         [
           ...fresh.filter((s) => matchedIds.has(s.id)),
           ...pool.lab,
+          ...talkedAbout,
           ...(hasDataNews(dataSections, vendorData, dateStr)
             ? spottedRows
             : spottedRows.filter((r) => r.page !== "data")),
@@ -527,6 +540,7 @@ async function main(): Promise<void> {
     ...(savedIds.has("ai-data") ? dataSections.flatMap((s) => s.activities) : []),
   ];
   const dailyShown = new Set([
+    ...talkedAbout.map((s) => s.id),
     ...spottedOf("agents").map((r) => r.id),
     ...(savedIds.has("ai-models") ? [...spottedOf("models"), ...pool.lab].map((s) => s.id) : []),
     ...(savedIds.has("ai-data") ? spottedOf("data").map((r) => r.id) : []),
@@ -573,6 +587,11 @@ async function main(): Promise<void> {
     dateStr,
   );
   console.log(`  Saved ${saveFile(JSON.stringify(comingUp, null, 2), dateStr, "coming-up.json")}`);
+  const talkedFile = talkedAbout.map((t) => ({
+    ...t,
+    counts: SPOTTED.counts(t.source, t.points, t.comments),
+  }));
+  console.log(`  Saved ${saveFile(JSON.stringify(talkedFile, null, 2), dateStr, "talked-about.json")}`);
 
   // The highlights pass reads the bodies, not the link bars.
   const reports: Record<string, string> = Object.fromEntries(saved.map((r) => [r.id, r.content]));

@@ -58,6 +58,9 @@ The part of a daily page built from the lists in `config.yml` (projects, vendor 
 The part of a daily page holding the best community stories (Hacker News, Lobste.rs, Dev.to) that name no Tracked Project, routed to the page by topic and shown once.
 _Avoid_: Discussions, Worth a Look
 
+**Also talked about**:
+The Overview's list of the day's most-discussed community stories whose topic has no page (policy, other): AI and work, security incidents, AI law in the news. Agents, models, research and data stories go to a page's Spotted instead.
+
 **Coming up**:
 The dated items of the next 30 days: AI Policy's deadlines and calendar dates, the data page's Action required dates, Stealth Model expiries. All pages' items are listed on the Overview and in the Telegram message; AI Policy also ends with its own.
 

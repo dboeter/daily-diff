@@ -12,6 +12,7 @@ import {
   mostDiscussed,
   nextLog,
   selectSpotted,
+  selectTalkedAbout,
   splitPool,
   storiesFrom,
 } from "../../spotted/pool.ts";
@@ -503,5 +504,57 @@ describe("cap-cut stories stay eligible", () => {
     const s = story("s");
     const log = nextLog({ items: {} }, [s], [s.id], "2026-10-25", [s.id]);
     expect(log.items[s.id]!.cut).toBeUndefined();
+  });
+});
+
+describe("selectTalkedAbout", () => {
+  const PAGE: Record<string, SpottedPage | null> = {
+    agents: "agents",
+    models: "models",
+    research: "models",
+    data: "data",
+  };
+
+  it("takes stories routed to no page, by points over the floor, skipping a link Spotted took", () => {
+    const policy = story("p", "hn", 300);
+    const other = story("o", "hn", 80);
+    const quiet = story("q", "hn", 10);
+    const onPage = story("a", "hn", 900);
+    const taken = story("t", "hn", 500, { url: "https://example.com/taken" });
+    const topic: Record<string, string> = {
+      [policy.id]: "policy",
+      [other.id]: "other",
+      [quiet.id]: "other",
+      [onPage.id]: "agents",
+      [taken.id]: "other",
+    };
+    const rows = selectTalkedAbout(
+      [policy, other, quiet, onPage, taken],
+      (s) => topic[s.id],
+      (s) => PAGE[topic[s.id]!] ?? null,
+      DATE,
+      new Set([linkKey("https://example.com/taken")]),
+    );
+    expect(rows.map((r) => [r.id, r.topic])).toEqual([
+      [policy.id, "policy"],
+      [other.id, "other"],
+    ]);
+  });
+
+  it("ticket 14 replay: the 2026-10-26 pool puts the AI-found PHP RCE on the Overview", () => {
+    const day = JSON.parse(
+      fs.readFileSync(new URL("../fixtures/spotted-2026-10-26.json", import.meta.url), "utf-8"),
+    ) as {
+      pool: (Story & { topic: string | null })[];
+    };
+    const rows = selectTalkedAbout(
+      day.pool,
+      (s) => (s as (typeof day.pool)[number]).topic ?? undefined,
+      (s) => PAGE[(s as (typeof day.pool)[number]).topic ?? ""] ?? null,
+      "2026-10-26",
+      new Set(),
+    );
+    expect(rows.map((r) => r.title)).toContain("PHP2Shell: AI uncovers critical RCE in PHP");
+    expect(rows.length).toBeLessThanOrEqual(5);
   });
 });
