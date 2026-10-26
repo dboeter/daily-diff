@@ -1,6 +1,6 @@
 # 03: Page Highlights and Signals claim only what the source says
 
-Status: partial
+Status: done
 Blocked by: None (can start immediately)
 Findings: S2, D1, A5, M2, M3, M4, D2, T2, T9, T17, D7 — see `../review.md`
 
@@ -14,13 +14,13 @@ The `## Highlights` sections, Trends Signals and the Highlights sent to Telegram
 - [x] Study results carry their scope (sample, single run, peer review) when the source gives it
 - [x] Trend and causal claims need support from at least the rows cited; no trend from titles alone
 - [x] GOING_AWAY is reserved for retirements, deprecations and removed features with an end, not a bug fix that now raises
-- [ ] Regenerating the 2026-10-26 Highlights (`regen-highlights`) no longer shows the D1, A5 and M3 claims (not verified: needs live LLM run)
+- [x] Regenerating the 2026-10-26 page Highlights of ai-agents, ai-models and ai-data with the current prompts, then highlights.json over those pages, no longer shows the D1, A5 and M3 claims
 
 ## Comments
 
 `SOURCE_FIDELITY_RULES` (`src/reports/prompts.ts`) holds the five rules and goes into every Highlights prompt (`buildPageHighlightsPrompt`, Trends prose, policy prose, data prose) and `buildHighlightsPrompt` (highlights.json). The data Highlights no longer require "what to do" on every bullet, which pushed the model to invent actions; Signals' trend claims must rest on row summaries, not titles. `goingAwayRule` now says a bug fix, a breaking change or a call that now raises an error is not going away. Tests: `source fidelity rules` and `goingAwayRule` in `prompts-pages.test.ts`.
 
-Unticked: the regen check needs an LLM key, which this session lacks. Run `pnpm tsx scripts/regen-highlights.ts 2026-10-26` and look for "GA" on the two Snowflake notes, "audit … immediately" and the Cerebras throughput stated as achieved.
+The regen box was checked live below: first on the old page Highlights (left unticked), then on regenerated ones (ticked).
 
 **Live regen check (2026-10-26):** box stays unticked. Ran regen-highlights' code path for 2026-10-26 (same report files, `forcedHighlightReports(false)`, `buildHighlightsPrompt`, `callLlm(…, 2048)`, `withFallbackHighlights`) with the workflow's OpenRouter settings, writing to the scratchpad, not `digests/` (script `/tmp/claude-1000/-home-daanb-daily-diff/17511462-fc0b-4e67-8c0b-3c7720ab573d/scratchpad/llm-check/check.mts`, output `/tmp/claude-1000/-home-daanb-daily-diff/17511462-fc0b-4e67-8c0b-3c7720ab573d/scratchpad/llm-check/highlights-run1.json`, prompt `/tmp/claude-1000/-home-daanb-daily-diff/17511462-fc0b-4e67-8c0b-3c7720ab573d/scratchpad/llm-check/highlights-run1.prompt.txt`). One `callLlm` call, answered by the fallback `nvidia/nemotron-3-ultra-550b-a55b:free` both times; the first request was cut off at 2048 tokens (2120 reasoning tokens) and retried at 4096.
 
@@ -29,3 +29,12 @@ Unticked: the regen check needs an LLM key, which this session lacks. Run `pnpm 
 - M3 still there: `"Cerebras deploys trillion-parameter models on WSE-3T wafers achieving 1,000–2,000+ tokens per second"`.
 
 D1 and M3 come from the pages' own Highlights, written by the old prompts: `ai-data.md` reads "Coding agent MCP tool (GA 2026-10-23)" and `ai-models.md` "Cerebras deploys … achieving 1,000–2,000+ tokens per second", and `buildHighlightsPrompt` tells the model to cover each page's first Highlights bullet, so the new rule ("only when the item's own row or text uses them") is met by the excerpt. On the 10-26 files the box can only test what highlights.json adds by itself (A5, which passed on one sample). D1 and M3 can be checked only on pages whose Highlights the new prompts wrote: the box needs rewording or a later date. Also seen: `"Coding agent evaluation research converges with SWE-VERIFIER, SWE-DIVE, and PAUSE all appearing this week"` (ai-trends), a trend built from three paper titles, which the fifth rule forbids; and the Polars bullet lost its `−` sign and still says "requiring pipeline migration across Databricks, Snowflake, Fabric, BigQuery" (D2, also carried from the page).
+
+**Live check on regenerated page Highlights (2026-10-26):** box ticked (one sample, one model). Script `/tmp/claude-1000/-home-daanb-daily-diff/17511462-fc0b-4e67-8c0b-3c7720ab573d/scratchpad/llm-check2/check2.mts`, log `/tmp/claude-1000/-home-daanb-daily-diff/17511462-fc0b-4e67-8c0b-3c7720ab573d/scratchpad/llm-check2/run.log`: each page's Highlights prompt built as `src/reports/pages.ts` does, from the committed page's body below Highlights (`---` rules dropped): `buildPageHighlightsPrompt` with `AGENTS_HIGHLIGHTS_FOCUS` / `MODELS_HIGHLIGHTS_FOCUS`, and `buildDataProsePrompt` with both kept Snowflake notes as `minor` (significance 0.82 and 0.52, under level 1, in `data-trace.json`); the new Highlights spliced into copies in `/tmp/claude-1000/-home-daanb-daily-diff/17511462-fc0b-4e67-8c0b-3c7720ab573d/scratchpad/llm-check2/pages/`, then `buildHighlightsPrompt` + `withFallbackHighlights` over those copies (`forcedHighlightReports(false)`, as `regen-highlights`). Output `/tmp/claude-1000/-home-daanb-daily-diff/17511462-fc0b-4e67-8c0b-3c7720ab573d/scratchpad/llm-check2/highlights.json`, prompts and raw replies beside it. 4 calls, all answered by the fallback `nvidia/nemotron-3-ultra-550b-a55b:free`.
+
+- D1 gone: the new data Highlights has one bullet, Polars; highlights.json says `"Snowflake adds CODINGAGENT tool type to MCP servers (Oct 23), enabling managed coding agents without stored agent objects"`, no "GA" (the row says none).
+- A5 gone: `"Hermes Agent leaks secrets via CLI flags (--password=, --token=) and Azure keys that bypass egress controls, plus `gateway status` prints MCP command lines with API keys in plaintext"`, no call to action.
+- M3 gone: the page now says `"Cerebras says it maps trillion-parameter frontier models across WSE-3T wafers to deliver inference at 1,000–2,000+ tokens per second."` and highlights.json `"Cerebras claims trillion-parameter model inference at 1,000–2,000+ tokens/sec on WSE-3T wafers, offering a high-throughput hardware alternative"`.
+- Still added beyond the rows, in highlights.json only (its "why it matters" ask): "significantly reducing inference costs for developers" (the Minimaxir row's description is only "What is \"the true cost of a token\"?") and "offering a high-throughput hardware alternative". highlights.json also picked the Snowflake MCP note, which the page left out as `minor`: the highlights.json step sees only the page, not the `minor` list.
+- The Polars lead lost its `−` on the page itself: the current `goingAwayRule` calls a breaking change not going away, so the unsigned highlights.json entry matches its page. The Trends page was not regenerated, so the SWE-VERIFIER trend sentence (old prompts) is still on it; the new highlights.json did not pick it.
+
