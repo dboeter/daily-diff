@@ -6,7 +6,7 @@
 import { LIVE_REPORT_IDS, REPORTS, WEEKLY_REPORT_IDS } from "./strings.ts";
 import { daysBefore, toCstDateStr, sleep } from "./date.ts";
 import { loadItemsFile, type ItemsFile } from "./jev.ts";
-import { newItems, type ReportedState, type StateItem } from "./report-state.ts";
+import { newItems, nextReportedState, type ReportedState, type StateItem } from "./report-state.ts";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -250,11 +250,22 @@ export const HOT_ISSUES_STATE_FILE = "digests/hot-issues-state.json";
 
 /**
  * A hot issue as a state item, `issue:<owner/repo>#<n>`: a page shows an issue
- * once, and more engagement or a new label does not bring it back. The state's
- * 30-day prune means an issue still active a month after it was shown can return once.
+ * once, and more engagement, a new label or time does not bring it back: the state is never pruned.
  */
 export function hotIssueStateItem(repo: string, i: GitHubItem): StateItem {
   return { id: `issue:${repo}#${i.number}`, published: i.created_at };
+}
+
+/**
+ * The hot-issue state after `dateStr` showed `items`. Never pruned, so an issue is shown once, ever;
+ * the file grows by a few ids a day.
+ */
+export function nextHotIssuesState(
+  state: ReportedState | null,
+  items: StateItem[],
+  dateStr: string,
+): ReportedState {
+  return nextReportedState(state, items, dateStr, [], [], { prune: false });
 }
 
 /** Whether an earlier day showed the issue (`hotIssueStateItem`); one shown today is not a repeat. */

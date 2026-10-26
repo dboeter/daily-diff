@@ -14,6 +14,7 @@ import {
   hotIssueCandidates,
   hotIssuesToCheck,
   hotIssueStateItem,
+  nextHotIssuesState,
   isPrerelease,
   isRepeatHotIssue,
   loadHotIssueSnapshot,
@@ -307,6 +308,21 @@ describe("hot issue repeats", () => {
 
   it("keeps it on a same-day re-run", () => {
     expect(pick([opencode(58781)], "2026-10-25")).toEqual([58781]);
+  });
+
+  it("still skips an issue shown 40 days ago, after later saves", () => {
+    const shown = nextHotIssuesState(null, [hotIssueStateItem(REPO, opencode(58781))], "2026-09-16");
+    const later = nextHotIssuesState(shown, [], "2026-10-25");
+    expect(later.reported).toEqual({ [`issue:${REPO}#58781`]: "2026-09-16" });
+    expect(hotIssueCandidates([opencode(58781)], isRepeatHotIssue(later, "2026-10-26", REPO))).toEqual([]);
+  });
+
+  it("keeps a same-day re-run's issues after a no-prune save", () => {
+    const today = nextHotIssuesState(shown25, [hotIssueStateItem(REPO, opencode(58781))], "2026-10-25");
+    expect(today.reported[`issue:${REPO}#58781`]).toBe("2026-10-25");
+    expect(
+      hotIssueCandidates([opencode(58781)], isRepeatHotIssue(today, "2026-10-25", REPO)).map((i) => i.number),
+    ).toEqual([58781]);
   });
 
   it("does not treat an issue opened months ago and never shown as a repeat", () => {

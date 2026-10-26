@@ -73,7 +73,8 @@ export function newItems<T extends StateItem>(items: T[], state: ReportedState |
 }
 
 /**
- * The state after reporting `items` on `dateStr`; ids older than REPORTED_KEEP_DAYS are pruned.
+ * The state after reporting `items` on `dateStr`; ids older than REPORTED_KEEP_DAYS are pruned,
+ * unless `prune` is false (the hot-issue state: an issue is shown once, ever).
  * `recorded` stage items only get their stage saved: not reported, so a same-day re-run skips them too.
  * `seen` (every fetched item): one reported under an alias gets that day under its id, so it stays
  * reported once the alias no longer matches (a stable-id note whose date is edited again).
@@ -84,10 +85,11 @@ export function nextReportedState(
   dateStr: string,
   recorded: StateItem[] = [],
   seen: StateItem[] = [],
+  { prune = true }: { prune?: boolean } = {},
 ): ReportedState {
   const cutoff = daysBefore(dateStr, REPORTED_KEEP_DAYS);
   const reported = Object.fromEntries(
-    Object.entries(state?.reported ?? {}).filter(([, day]) => day >= cutoff),
+    Object.entries(state?.reported ?? {}).filter(([, day]) => !prune || day >= cutoff),
   );
   const stages = { ...state?.stages };
   for (const i of seen) {

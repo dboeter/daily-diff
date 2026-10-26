@@ -85,6 +85,14 @@ describe("nextReportedState", () => {
     );
     expect(state.reported).toEqual({ kept: "2026-09-14" });
   });
+
+  it("keeps every id with prune: false, and the default still prunes", () => {
+    const before = { reported: { old: "2026-09-04", kept: "2026-09-14" } };
+    expect(nextReportedState(before, [], "2026-10-14", [], [], { prune: false }).reported).toEqual(
+      before.reported,
+    );
+    expect(nextReportedState(before, [], "2026-10-14").reported).toEqual({ kept: "2026-09-14" });
+  });
 });
 
 describe("state file", () => {

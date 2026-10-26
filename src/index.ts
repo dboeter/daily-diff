@@ -19,6 +19,7 @@ import {
   fetchRecentReleases,
   fetchHotIssues,
   HOT_ISSUES_STATE_FILE,
+  nextHotIssuesState,
   hotIssueStateItem,
   isRepeatHotIssue,
   isPrerelease,
@@ -99,7 +100,7 @@ import {
   type Story,
 } from "./spotted/pool.ts";
 import { saveItemsFile, sourceCounts, type DroppedReason } from "./core/jev.ts";
-import { loadReportedState, nextReportedState, saveReportedState } from "./core/report-state.ts";
+import { loadReportedState, saveReportedState } from "./core/report-state.ts";
 import {
   loadSpottedVerdicts,
   routeStories,
@@ -578,7 +579,7 @@ async function main(): Promise<void> {
   const cutIds = [...spottedDropped].flatMap(([id, reason]) => (reason === "cap" ? [id] : []));
   saveSpottedLog(nextLog(spottedLog, stories, shownIds, dateStr, cutIds));
   saveReportedState(
-    nextReportedState(
+    nextHotIssuesState(
       hotIssuesState,
       pageActivities.flatMap((a) => a.hotIssues.map((i) => hotIssueStateItem(a.config.repo, i))),
       dateStr,
