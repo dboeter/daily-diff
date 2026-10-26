@@ -115,6 +115,17 @@ export const SOURCE_FIDELITY_RULES = [
 /** SOURCE_FIDELITY_RULES as prompt rule lines. */
 export const sourceFidelityRules = (): string => SOURCE_FIDELITY_RULES.map((r) => `- ${r}`).join("\n");
 
+/**
+ * How a release summary orders its changes. On 2026-10-26 the Polars row spent its words on 3 of
+ * 88 performance items and the Cline row led with minor items and called a fix an addition.
+ */
+export const RELEASE_ORDER =
+  "breaking changes first, then fixes that change behavior (call a fix a fix, never 'adds' or 'introduces'), then headline features, performance last";
+
+/** Identifiers and names exactly as the source writes them: a reader copies them. */
+export const IDENTIFIER_RULE =
+  "Copy identifiers (types, functions, settings, flags) verbatim from the text, in `code`; write a project or repo name exactly as given, even at the start of a sentence (pstack-claude, never Pstack-claude).";
+
 /** Sort by comment count desc, take top N. */
 export function topN(items: GitHubItem[], n: number): GitHubItem[] {
   return [...items].sort((a, b) => b.comments - a.comments).slice(0, n);
@@ -271,15 +282,16 @@ ${sections}
 ---
 
 Write the report in English: one section per project above that has something left to report, in the order given, headed \`## <Project name>\`, with at most 3 bullets, one or two sentences each. Write no other sections:
-- **Release**: what the stable release(s) change for users — features, breaking changes, fixes that matter. Several releases in a range: summarize the range, do not list each one. Link each release you name as a plain Markdown link, [tag](url), never inside backticks; a range as its oldest and newest, [v1.2.0](url)–[v1.2.5](url). A release with an Announcement: describe it from the announcement, not from its first changelog entries.
+- **Release**: what the stable release(s) change for users, in this order: ${RELEASE_ORDER}. Several releases in a range: summarize the range, do not list each one. Link each release you name as a plain Markdown link, [tag](url), never inside backticks; a range as its oldest and newest, [v1.2.0](url)–[v1.2.5](url). A release with an Announcement: describe it from the announcement, not from its first changelog entries.
 - **Prerelease**: only from a "Prereleases (no stable release yet)" list, and only when it adds notable features or breaking changes; skip routine alpha/rc bumps. Say it is a prerelease and link it.
 - **News**: what the news item says about the project and why it matters. Link it.
-- **Hot issue**: what users are hitting and how serious it is. Link the issue (https://github.com/<repo>/issues/<number>).
+- **Hot issue**: what users are hitting and how serious it is. For a security issue, say where the problem shows, who is affected and its fix status (open, or fixed in a named release), as far as the data says. Link the issue (https://github.com/<repo>/issues/<number>).
 
 Rules:
 - Use only the data above. Omit a bullet type that has no data. Never state what did not happen ("no release today", "no breaking issues were reported").
 - A news item may mention a project only in passing: skip it unless the project is its actual subject.
 - If every item for a project is skipped, leave out its section entirely; the report lists it as quiet.
+- ${IDENTIFIER_RULE}
 - Style: concise and concrete, for developers who use these tools.
 `;
 }

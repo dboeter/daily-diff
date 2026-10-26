@@ -136,7 +136,7 @@ describe("buildTrendsReport", () => {
     ],
     tracked: [],
   };
-  const isTrendingSummaries = (p: string) => p.includes("`N: <2 sentences>`");
+  const isTrendingSummaries = (p: string) => p.includes("one fact from the description that sets it apart");
   const isRowSummaries = (p: string) => p.includes("research papers and community stories");
   const isModels = (p: string) => p.includes("model ecosystem analyst");
   const isProse = (p: string) => p.includes("<!-- tables -->");

@@ -14,6 +14,8 @@ import { TABLES_MARKER, rowList, summaryLine, summaryOutputRule, type Numbered }
 import {
   goingAwayRule,
   HIGHLIGHTS_PICK_RULE,
+  IDENTIFIER_RULE,
+  RELEASE_ORDER,
   NO_TITLE_RULE,
   RELEASE_BODY_CHARS,
   releaseNotes,
@@ -49,8 +51,10 @@ export function buildTrendingSummariesPrompt(rows: ReturnType<typeof summaryRows
 
 ${list}
 
-${summaryLine("2 sentences")} — what it is and why it matters to developers.
+${summaryLine("1-2 sentences")} — what it is, then one fact from the description that sets it apart from similar tools.
 - Ground every sentence only in the given description. Do not invent features, users, releases or numbers.
+- No "It matters because" or "why it matters" clause, and no sentence that restates the first in other words.
+- ${IDENTIFIER_RULE}
 - No star, gain, download, token or rank figures: the table shows them next to the summary.
 - If the description is empty, write \`N: —\`: the table shows the name and where it was found.
 ${summaryOutputRule(rows.length)}
@@ -208,7 +212,7 @@ Below are ${count} numbered items of the week ending ${dateStr}: ${[papers.lengt
 ${list}
 
 ${summaryLine("1-2 sentences")}.
-- A paper: 2 sentences from its abstract: what it shows. No claim, number or result the abstract does not state.
+- A paper: 1 sentence starting with its name (the short name before the colon, else the title): what it does, then its headline result, with the number when the abstract gives one. No claim, number or result the abstract does not state.
 ${STORY_RULES}
 ${summaryOutputRule(count)}
 - English.
@@ -251,6 +255,7 @@ ${summaryLine("1-2 sentences")}.
 - A post without page text: write \`N: —\`, unless its title says more than its URL does.
 - A model: 1 sentence from its catalog description: what it is for, and what it takes in and gives back (text, images, audio) when the description says. Not its context length: the row shows it. Leave out its marketing claims (best, leading, state-of-the-art).
 - Ground every sentence only in the given text. Do not invent versions, prices, dates or benchmarks.
+- ${IDENTIFIER_RULE}
 ${summaryOutputRule(count)}
 - English.
 `;
@@ -293,7 +298,8 @@ ${list}
 ${summaryLine("1-2 sentences")} — what the change enables, breaks or requires for client data platforms: a setting to turn on, a migration, a cloud, region or edition limit (for a deprecation or breaking change: what stops working or must be migrated, and by when).
 - Do not repeat the title or its status words (generally available, preview, now available): the title is shown next to the summary.
 - Ground every sentence only in the given text. Do not invent dates, versions, regions or availability.
-- When the text adds nothing beyond the title (or is empty), write \`N: —\` for that item.${releases.length ? "\n- For a release: its most important change for users in 1 sentence; say so first when it is a major version (only a version x.0.0 is a major version) or its notes name breaking changes. Notes are cut at ${RELEASE_BODY_CHARS} characters: summarize what they show, and never say they are cut." : ""}
+- ${IDENTIFIER_RULE}
+- When the text adds nothing beyond the title (or is empty), write \`N: —\` for that item.${releases.length ? `\n- For a release: its most important changes for users in 1 sentence, in this order: ${RELEASE_ORDER}; say so first when it is a major version (only a version x.0.0 is a major version). Notes are cut at ${RELEASE_BODY_CHARS} characters: summarize what they show, and never say they are cut.` : ""}
 ${summaryOutputRule(count)}
 - English.
 `;

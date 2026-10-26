@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { SECTIONS, TRENDS_REPORT } from "../../core/strings.ts";
+import type { ReleaseRow } from "../../reports/pages.ts";
 import {
   buildDataProsePrompt,
+  buildDataSummariesPrompt,
   buildHighlightsPrompt,
   buildModelsSummariesPrompt,
   buildPolicyProsePrompt,
@@ -20,6 +22,8 @@ import {
   AGENTS_HIGHLIGHTS_FOCUS,
   buildPageHighlightsPrompt,
   goingAwayRule,
+  IDENTIFIER_RULE,
+  RELEASE_ORDER,
   SOURCE_FIDELITY_RULES,
 } from "../../reports/prompts.ts";
 import type { Story, StorySource } from "../../spotted/pool.ts";
@@ -73,9 +77,11 @@ describe("buildTrendingSummariesPrompt", () => {
     );
   });
 
-  it("asks for one `N: <2 sentences>` line per row and nothing else", () => {
+  it("asks for one `N: <1-2 sentences>` line per row and nothing else", () => {
     const result = buildTrendingSummariesPrompt(rows, "2026-10-05");
-    expect(result).toContain("`N: <2 sentences>`");
+    expect(result).toContain("`N: <1-2 sentences>`");
+    expect(result).toContain('No "It matters because"');
+    expect(result).toContain(IDENTIFIER_RULE);
     expect(result).toContain("2 lines in total");
     expect(result).toContain("No other text");
     expect(result).toContain("Do not invent");
@@ -130,7 +136,8 @@ describe("buildTrendsSummariesPrompt", () => {
     expect(result).toContain(
       "2. On AI writing (Lobste.rs, example.com, 40 points, 60 comments) — (no description)",
     );
-    expect(result).toContain("A paper: 2 sentences from its abstract: what it shows.");
+    expect(result).toContain("A paper: 1 sentence starting with its name");
+    expect(result).toContain("then its headline result, with the number when the abstract gives one");
     expect(result).toContain("Describe no comment thread");
     expect(result).toContain("2 lines in total");
   });
@@ -447,5 +454,18 @@ describe("Highlights pick, they don't restate", () => {
     const p = buildHighlightsPrompt({ "ai-data": "## Highlights\n\n- lead" });
     expect(p).toContain("A report's first highlight covers the first bullet of its `## Highlights`");
     expect(p).toContain("One subject per highlight");
+  });
+});
+
+describe("summaries lead with impact", () => {
+  it("the data summaries order release changes by impact and copy identifiers", () => {
+    const release = {
+      key: "release:pola-rs/polars@py-2.1.0",
+      project: { name: "Polars", repo: "pola-rs/polars" },
+      release: { tag_name: "py-2.1.0", name: "", body: "notes", published_at: "2026-10-25T00:00:00Z" },
+    } as unknown as ReleaseRow;
+    const p = buildDataSummariesPrompt([], "2026-10-26", numberRows([release]));
+    expect(p).toContain(RELEASE_ORDER);
+    expect(p).toContain(IDENTIFIER_RULE);
   });
 });

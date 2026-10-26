@@ -52,6 +52,43 @@ export function parseRowSummaries(text: string): Map<number, string> {
   return summaries;
 }
 
+/** Letters and digits only, lowercased: `CODINGAGENT` and `CODING_AGENT` compare equal. */
+const tokenKey = (t: string) => t.toLowerCase().replace(/[^a-z0-9]/g, "");
+
+/**
+ * The summaries with every backticked token checked against its row's source text: a token the
+ * source spells differently takes the source's spelling, and one the source lacks loses its
+ * backticks, so a reader never copies an identifier the model made up. On 2026-10-26 a
+ * Snowflake row read `CODINGAGENT` for the source's `CODING_AGENT`.
+ */
+export function checkCodeTokens(
+  summaries: Map<number, string>,
+  sources: Map<number, string>,
+  tag: string,
+): Map<number, string> {
+  const checked = new Map<number, string>();
+  for (const [n, text] of summaries) {
+    const source = sources.get(n);
+    if (source === undefined) {
+      checked.set(n, text);
+      continue;
+    }
+    const sourceTokens = source.match(/[\w.:/@-]+/g) ?? [];
+    checked.set(
+      n,
+      text.replace(/`([^`\n]+)`/g, (whole, token: string) => {
+        if (source.includes(token)) return whole;
+        const match = sourceTokens.find((t) => tokenKey(t) === tokenKey(token) && tokenKey(t) !== "");
+        console.warn(
+          `  [${tag}] row ${n}: \`${token}\` is not in its source${match ? `; using \`${match}\`` : ""}`,
+        );
+        return match ? `\`${match}\`` : token;
+      }),
+    );
+  }
+  return checked;
+}
+
 // ---------------------------------------------------------------------------
 // Rendering
 // ---------------------------------------------------------------------------

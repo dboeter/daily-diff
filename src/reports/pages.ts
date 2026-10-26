@@ -71,6 +71,7 @@ import {
 } from "./markdown.ts";
 import {
   numberRows,
+  checkCodeTokens,
   parseRowSummaries,
   spliceTables,
   summaryText,
@@ -319,15 +320,22 @@ export async function buildModelsPage(
     return null;
   }
 
-  const summaries = parseRowSummaries(
-    shownPosts.length + models.length > 0
-      ? await generateOr(
-          "models-summaries",
-          buildModelsSummariesPrompt(shownPosts, models, dateStr),
-          "",
-          LLM_TOKENS_LISTING,
-        )
-      : "",
+  const summaries = checkCodeTokens(
+    parseRowSummaries(
+      shownPosts.length + models.length > 0
+        ? await generateOr(
+            "models-summaries",
+            buildModelsSummariesPrompt(shownPosts, models, dateStr),
+            "",
+            LLM_TOKENS_LISTING,
+          )
+        : "",
+    ),
+    new Map([
+      ...shownPosts.map((p): [number, string] => [p.n, `${p.title} ${p.url} ${p.content ?? ""}`]),
+      ...models.map((m): [number, string] => [m.n, `${m.name} ${m.id} ${m.description ?? ""}`]),
+    ]),
+    "models-summaries",
   );
   const failed = labs.filter((r) => !r.fetchSuccess).map((r) => P.siteFailed(P.labs[r.site]));
   const labBody = [
@@ -429,7 +437,16 @@ export async function buildPolicyReport(
   const sources = [...new Set(items.map((i) => i.source))].join(" + ");
   const ranked = policyData.rankedBy === "jev" ? REPORT_META.jevRanked : "";
   const meta = `> ${REPORT_META.sources(sources)} | ${POLICY_REPORT.newItems(items.length)}${ranked} | ${REPORT_META.generated(utcStr)}`;
-  const body = spliceTables(highlightsOnly(prose), tables(parseRowSummaries(summaries)));
+  const body = spliceTables(
+    highlightsOnly(prose),
+    tables(
+      checkCodeTokens(
+        parseRowSummaries(summaries),
+        new Map(items.map((i) => [i.n, `${i.title} ${i.description}`])),
+        "policy-summaries",
+      ),
+    ),
+  );
   // Only once the report exists.
   commitWrites(writes.onReported, files, dateStr);
   return { id: "ai-policy", content: assembleReport("ai-policy", dateStr, meta, body) };
@@ -593,7 +610,17 @@ export async function buildDataReport(
         )
       : "",
   ]);
-  const summaries = parseRowSummaries(rowSummaries);
+  const summaries = checkCodeTokens(
+    parseRowSummaries(rowSummaries),
+    new Map([
+      ...items.map((i): [number, string] => [i.n, `${i.title} ${i.description}`]),
+      ...releases.map((r): [number, string] => [
+        r.n,
+        `${r.project.name} ${r.release.tag_name} ${r.release.body ?? ""}`,
+      ]),
+    ]),
+    "data-vendor-summaries",
+  );
   // The prose call does not see the over-cap links: they have no summary to write from.
   const proseTables = renderVendorTables(items, summaries);
   const tables = renderVendorTables(items, summaries, vendor.alsoNew);
