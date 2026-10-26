@@ -142,8 +142,7 @@ export async function githubGet<T>(
 // ---------------------------------------------------------------------------
 
 /**
- * The search API allows 30 requests a minute, shared by fetchHotIssues and the
- * trending topic queries. Spacing every search call SEARCH_INTERVAL_MS apart
+ * The search API allows 30 requests a minute, used by the trending topic queries. Spacing every search call SEARCH_INTERVAL_MS apart
  * keeps any 60 s window under 30, however many repos and topics there are, at
  * the cost of ~2 s of fetch-phase time per request.
  */
@@ -211,12 +210,21 @@ export const HOT_ISSUE_MIN_ENGAGEMENT = 10;
 export const HOT_ISSUE_MIN_ENGAGEMENT_LABELLED = 3;
 /** Hot issues reported per repo, so one noisy tracker cannot flood the report. */
 export const HOT_ISSUES_PER_REPO = 2;
-/**
- * Candidates per repo without a snapshot baseline whose gain is fetched (1–3
- * core REST calls each), highest total first. Bounds a run's extra calls: the
- * Actions GITHUB_TOKEN allows 1,000 core requests an hour.
- */
+/** Candidates per repo without a snapshot baseline whose gain is fetched (1–3 core REST calls each), highest total first. */
 export const HOT_ISSUE_MAX_CHECKED = 10;
+/**
+ * Per-issue count calls per run, shared by every repo: with the list pages and
+ * the releases it keeps a daily run under the Actions GITHUB_TOKEN's 1,000 core
+ * requests an hour (33 repos × 10 × 3 would be 990 alone).
+ */
+export const HOT_ISSUE_MAX_COUNT_CALLS = 250;
+/**
+ * Issue list pages (100 items, pull requests included) read per repo. Live on
+ * 2026-10-26, the open issues updated in 37h ran to 815 items in openai/codex
+ * and 826 in anthropics/claude-code (9 pages); the 24h window holds ~550 issues
+ * plus the pull requests, so 8 pages covers it. Hitting the cap is logged.
+ */
+export const HOT_ISSUE_MAX_PAGES = 8;
 /** Matched against each label name, so "area:security" and "type: regression" count. */
 const HOT_LABEL = /regression|security/i;
 export function issueEngagement(i: GitHubItem): number {
@@ -278,15 +286,16 @@ export function isRepeatHotIssue(
 }
 
 // ---------------------------------------------------------------------------
-// Hot-issue snapshot: each search result's total, the baseline of the next run's gain
+// Hot-issue snapshot: each listed issue's total, the baseline of the next run's gain
 // ---------------------------------------------------------------------------
 
 /** `digests/hot-issues-snapshot.json`: `<owner/repo>#<n>` → `HotIssueSnapshotEntry`, one per line. */
 export const HOT_ISSUES_SNAPSHOT_FILE = "digests/hot-issues-snapshot.json";
-/** A baseline older than this many days is not used: the gain would span too long to call hot. */
+/**
+ * A baseline older than this many days is not used: the gain would span too
+ * long to call hot. An entry older than that is never read, so it is pruned.
+ */
 const SNAPSHOT_BASELINE_MAX_DAYS = 2;
-/** Entries not seen in a search for this many days are pruned. */
-const SNAPSHOT_KEEP_DAYS = 8;
 
 /** One day's observation: comments + 👍 (`issueEngagement`) and the CST date seen. */
 export interface SnapshotTotal {
@@ -324,14 +333,14 @@ export function snapshotBaseline(
     : undefined;
 }
 
-/** The snapshot with today's search totals (`seen`: key → total) recorded, pruned of entries unseen for 8 days. */
+/** The snapshot with today's listed totals (`seen`: key → total) recorded, pruned of entries older than SNAPSHOT_BASELINE_MAX_DAYS. */
 export function nextHotIssueSnapshot(
   snapshot: HotIssueSnapshot,
   seen: Record<string, number>,
   dateStr: string,
 ): HotIssueSnapshot {
   const items: Record<string, HotIssueSnapshotEntry> = {};
-  const cutoff = daysBefore(dateStr, SNAPSHOT_KEEP_DAYS);
+  const cutoff = daysBefore(dateStr, SNAPSHOT_BASELINE_MAX_DAYS);
   for (const [key, e] of Object.entries(snapshot.items)) if (e.date >= cutoff) items[key] = e;
   for (const [key, total] of Object.entries(seen)) {
     const old = items[key];
@@ -367,7 +376,7 @@ export function engagementGained(activity: IssueActivity, since: Date): number {
   return activity.comments.filter(isNew).length + activity.thumbs.filter(isNew).length;
 }
 
-/** What `selectHotIssues` reads besides the search results. */
+/** What `selectHotIssues` reads besides the listed issues. */
 export interface HotIssueContext {
   repo: string;
   snapshot: HotIssueSnapshot;
@@ -422,6 +431,7 @@ export function selectHotIssues(items: GitHubItem[], ctx: HotIssueContext): HotI
 }
 
 const ACTIVITY_PAGE = 100;
+const LIST_PAGE = 100;
 
 /**
  * An issue's comments and 👍 that may be new since `since`, in 0–3 core calls.
@@ -429,11 +439,18 @@ const ACTIVITY_PAGE = 100;
  * too (engagementGained drops them); one page, oldest first. Reactions have
  * no `since` and come oldest first: past one page, the last page holds the
  * newest, and when all of a short last page is new the page before is read too.
+ * Order checked live on 2026-10-26: anthropics/claude-code#45596 (1,195 👍)
+ * had April 2026 reactions on page 1 and its last page ended 2026-10-23.
  * Over 100 new of either the count is low, but far past the bar.
  */
-async function fetchIssueActivity(repo: string, i: GitHubItem, since: Date): Promise<IssueActivity> {
+async function fetchIssueActivity(
+  repo: string,
+  i: GitHubItem,
+  since: Date,
+): Promise<{ activity: IssueActivity; calls: number }> {
   const base = `https://api.github.com/repos/${repo}/issues/${i.number}`;
   const perPage = String(ACTIVITY_PAGE);
+  let calls = i.comments > 0 ? 1 : 0;
   const comments =
     i.comments > 0
       ? await githubGet<{ created_at: string }[]>(`${base}/comments`, {
@@ -442,12 +459,14 @@ async function fetchIssueActivity(repo: string, i: GitHubItem, since: Date): Pro
         })
       : [];
   const totalThumbs = i.reactions?.["+1"] ?? 0;
-  const thumbsPage = (page: number) =>
-    githubGet<{ created_at: string }[]>(`${base}/reactions`, {
+  const thumbsPage = (page: number) => {
+    calls++;
+    return githubGet<{ created_at: string }[]>(`${base}/reactions`, {
       content: "+1",
       per_page: perPage,
       page: String(page),
     });
+  };
   let thumbs: { created_at: string }[] = [];
   if (totalThumbs > 0) {
     const last = Math.ceil(totalThumbs / ACTIVITY_PAGE);
@@ -456,38 +475,80 @@ async function fetchIssueActivity(repo: string, i: GitHubItem, since: Date): Pro
       thumbs = [...(await thumbsPage(last - 1)), ...thumbs];
     }
   }
-  return { comments, thumbs };
+  return { activity: { comments, thumbs }, calls };
 }
 
-/** A run's hot-issue inputs, shared by every repo; `seen` collects each search result's total for the snapshot. */
+/** A run's GitHub calls for hot issues, summed over every repo (`hotIssueCallsLine`). */
+export interface HotIssueCalls {
+  listPages: number;
+  countCalls: number;
+  /** Candidates not counted: the run had used HOT_ISSUE_MAX_COUNT_CALLS. */
+  skipped: number;
+}
+
+/** A run's hot-issue inputs, shared by every repo; `seen` collects each listed issue's total for the snapshot. */
 export interface HotIssueRun {
   snapshot: HotIssueSnapshot;
   dateStr: string;
   isRepeat: (repo: string) => (i: GitHubItem) => boolean;
   seen: Record<string, number>;
+  calls: HotIssueCalls;
+}
+
+export function newHotIssueCalls(): HotIssueCalls {
+  return { listPages: 0, countCalls: 0, skipped: 0 };
+}
+
+/** The run's one hot-issue log line. */
+export function hotIssueCallsLine(c: HotIssueCalls): string {
+  return (
+    `[github] hot issues: ${c.listPages} list pages, ${c.countCalls} count calls` +
+    (c.skipped ? `, ${c.skipped} candidates skipped past the run cap of ${HOT_ISSUE_MAX_COUNT_CALLS}` : "")
+  );
+}
+
+/** The most core calls `fetchIssueActivity` makes for an issue. */
+function maxActivityCalls(i: GitHubItem): number {
+  const thumbs = i.reactions?.["+1"] ?? 0;
+  return (i.comments > 0 ? 1 : 0) + (thumbs > ACTIVITY_PAGE ? 2 : thumbs > 0 ? 1 : 0);
 }
 
 /**
- * Hot issues for a repo: one search for the 100 most-engaged open issues with
- * activity since `since`, however old (paced by searchSlot). The gain comes
+ * The repo's open issues updated since `since`, however old, from the core
+ * issues list (newest update first, at most HOT_ISSUE_MAX_PAGES pages), pull
+ * requests dropped. Paging stops on a short page, measured before the pull
+ * requests are dropped: they share the list's pages.
+ */
+async function listUpdatedIssues(repo: string, since: Date, calls: HotIssueCalls): Promise<GitHubItem[]> {
+  const issues: GitHubItem[] = [];
+  for (let page = 1; page <= HOT_ISSUE_MAX_PAGES; page++) {
+    const items = await githubGet<GitHubItem[]>(`https://api.github.com/repos/${repo}/issues`, {
+      state: "open",
+      since: since.toISOString(),
+      sort: "updated",
+      direction: "desc",
+      per_page: String(LIST_PAGE),
+      page: String(page),
+    });
+    calls.listPages++;
+    issues.push(...items.filter((i) => !i.pull_request));
+    if (items.length < LIST_PAGE) return issues;
+  }
+  console.log(`  [github] ${repo}: hot-issue list stopped at ${HOT_ISSUE_MAX_PAGES} pages`);
+  return issues;
+}
+
+/**
+ * Hot issues for a repo. Every open issue updated since `since` is listed
+ * (`listUpdatedIssues`) and its total goes into `run.seen`. The gain comes
  * from the snapshot or the issue's age where it can (`knownGain`), else from
- * the API for up to HOT_ISSUE_MAX_CHECKED candidates (core calls, one issue at
- * a time). Every result's total goes into `run.seen`. A failed gain fetch skips
- * that issue; a failed search should still be treated as "no hot issues", not a failed repo.
+ * the API for up to HOT_ISSUE_MAX_CHECKED candidates (one issue at a time),
+ * while the run's HOT_ISSUE_MAX_COUNT_CALLS last. A failed gain fetch skips
+ * that issue; a failed list should be treated as "no hot issues", not a failed repo.
  */
 export async function fetchHotIssues(repo: string, since: Date, run: HotIssueRun): Promise<HotIssue[]> {
-  const result = await githubGet<{ items: GitHubItem[] }>(
-    "https://api.github.com/search/issues",
-    {
-      q: `repo:${repo} is:issue is:open updated:>=${since.toISOString().slice(0, 19)}Z`,
-      // Comments plus every reaction: the search sort closest to issueEngagement (comments + 👍).
-      sort: "interactions",
-      order: "desc",
-      per_page: "100",
-    },
-    searchSlot,
-  );
-  for (const i of result.items) run.seen[snapshotKey(repo, i)] = issueEngagement(i);
+  const issues = await listUpdatedIssues(repo, since, run.calls);
+  for (const i of issues) run.seen[snapshotKey(repo, i)] = issueEngagement(i);
   const activity = new Map<number, IssueActivity>();
   const ctx: HotIssueContext = {
     repo,
@@ -497,14 +558,23 @@ export async function fetchHotIssues(repo: string, since: Date, run: HotIssueRun
     isRepeat: run.isRepeat(repo),
     activity,
   };
-  for (const issue of hotIssuesToCheck(result.items, ctx)) {
+  for (const issue of hotIssuesToCheck(issues, ctx)) {
+    // Reserved before the first await: repos run in parallel and share the cap.
+    const cost = maxActivityCalls(issue);
+    if (run.calls.countCalls + cost > HOT_ISSUE_MAX_COUNT_CALLS) {
+      run.calls.skipped++;
+      continue;
+    }
+    run.calls.countCalls += cost;
     try {
-      activity.set(issue.number, await fetchIssueActivity(repo, issue, since));
+      const fetched = await fetchIssueActivity(repo, issue, since);
+      run.calls.countCalls -= cost - fetched.calls;
+      activity.set(issue.number, fetched.activity);
     } catch (err) {
       console.error(`  [github] ${repo}#${issue.number} engagement fetch failed, skipped: ${err}`);
     }
   }
-  return selectHotIssues(result.items, ctx);
+  return selectHotIssues(issues, ctx);
 }
 
 /** One `stargazers/history` bucket: a calendar week from Sunday, newest bucket first. */

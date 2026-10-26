@@ -15,6 +15,8 @@ import {
   HOT_ISSUES_SNAPSHOT_FILE,
   loadHotIssueSnapshot,
   nextHotIssueSnapshot,
+  newHotIssueCalls,
+  hotIssueCallsLine,
   type RepoConfig,
   fetchRecentReleases,
   fetchHotIssues,
@@ -181,8 +183,7 @@ async function fetchProject(
         ...r,
         recent: await Promise.all(r.recent.map(withAnnouncement)),
       })),
-      // Search API, rate-limited separately from releases: a failure here must
-      // not discard the releases.
+      // A failed hot-issue fetch must not discard the releases.
       fetchHotIssues(cfg.repo, since, hot).catch((err): HotIssue[] => {
         console.error(`  [${cfg.id}] hot issues fetch failed: ${err}`);
         return [];
@@ -360,6 +361,7 @@ async function main(): Promise<void> {
     dateStr,
     isRepeat: (repo) => isRepeatHotIssue(hotIssuesState, dateStr, repo),
     seen: {},
+    calls: newHotIssueCalls(),
   };
   const {
     agentFetches,
@@ -383,6 +385,7 @@ async function main(): Promise<void> {
     (s) => !inPool({ id: `hn:${s.id}`, url: s.url }),
     hotIssueRun,
   );
+  console.log(`  ${hotIssueCallsLine(hotIssueRun.calls)}`);
   const stories = storiesFrom(hnData, lobstersData, devtoData);
   const fresh = freshStories(
     [...stories, ...carriedStories(spottedLog, stories, dateStr)],
@@ -589,7 +592,7 @@ async function main(): Promise<void> {
     ),
     HOT_ISSUES_STATE_FILE,
   );
-  // Every repo's search results, published page or not, so each has a baseline tomorrow.
+  // Every repo's listed issues, published page or not, so each has a baseline tomorrow.
   saveItemsFile(
     nextHotIssueSnapshot(hotIssueRun.snapshot, hotIssueRun.seen, dateStr),
     HOT_ISSUES_SNAPSHOT_FILE,

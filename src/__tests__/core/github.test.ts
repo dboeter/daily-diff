@@ -11,6 +11,10 @@ import {
   gainFromHistory,
   GitHubApiError,
   HOT_ISSUE_MAX_CHECKED,
+  HOT_ISSUE_MAX_COUNT_CALLS,
+  HOT_ISSUE_MAX_PAGES,
+  hotIssueCallsLine,
+  newHotIssueCalls,
   hotIssueCandidates,
   hotIssuesToCheck,
   hotIssueStateItem,
@@ -255,18 +259,18 @@ describe("hotIssuesToCheck", () => {
 });
 
 describe("nextHotIssueSnapshot", () => {
-  it("records every search total with today's date and prunes entries unseen for 8 days", () => {
+  it("records every listed total with today's date and prunes entries past the baseline age (2 days)", () => {
     const next = nextHotIssueSnapshot(
       snap({
-        "org/repo#1": { date: "2026-09-26", total: 5 },
-        "org/repo#2": { date: "2026-09-25", total: 5 },
+        "org/repo#1": { date: "2026-10-02", total: 5 },
+        "org/repo#2": { date: "2026-10-01", total: 5 },
         "org/repo#3": { date: "2026-10-03", total: 7 },
       }),
       { "org/repo#3": 9, "org/repo#4": 1 },
       TODAY,
     );
     expect(next.items).toEqual({
-      "org/repo#1": { date: "2026-09-26", total: 5 },
+      "org/repo#1": { date: "2026-10-02", total: 5 },
       "org/repo#3": { date: TODAY, total: 9, baseline: { date: "2026-10-03", total: 7 } },
       "org/repo#4": { date: TODAY, total: 1 },
     });
@@ -332,13 +336,19 @@ describe("hot issue repeats", () => {
 });
 
 describe("fetchHotIssues", () => {
-  /** Search returns `items`; each issue's comments and 👍 come from `activity` by number (all new by default). */
+  /**
+   * The issues list returns `items`, 100 a page; each issue's comments and 👍
+   * come from `activity` by number (all new by default).
+   */
   function mockGitHub(items: GitHubItem[], activity: Record<number, IssueActivity | "fail"> = {}) {
     return vi.spyOn(globalThis, "fetch").mockImplementation((input) => {
       const url = new URL(String(input));
       const json = (body: unknown) =>
         Promise.resolve({ ok: true, json: () => Promise.resolve(body) } as Response);
-      if (url.pathname === "/search/issues") return json({ items });
+      if (url.pathname === "/repos/org/repo/issues") {
+        const page = Number(url.searchParams.get("page"));
+        return json(items.slice((page - 1) * 100, page * 100));
+      }
       const m = /\/issues\/(\d+)\/(comments|reactions)$/.exec(url.pathname)!;
       const n = Number(m[1]);
       const a = activity[n];
@@ -372,15 +382,22 @@ describe("fetchHotIssues", () => {
     items: GitHubItem[],
     activity?: Record<number, IssueActivity | "fail">,
     snapshot: HotIssueSnapshot = EMPTY,
+    calls = newHotIssueCalls(),
   ) {
     const spy = mockGitHub(items, activity);
-    const hotRun: HotIssueRun = { snapshot, dateStr: TODAY, isRepeat: () => () => false, seen: {} };
-    const pending = fetchHotIssues("org/repo", SINCE, hotRun);
-    await vi.runAllTimersAsync(); // searchSlot spacing from the previous test
-    return { hot: await pending, urls: paths(spy), seen: hotRun.seen };
+    const hotRun: HotIssueRun = {
+      snapshot,
+      dateStr: TODAY,
+      isRepeat: () => () => false,
+      seen: {},
+      calls,
+    };
+    const hot = await fetchHotIssues("org/repo", SINCE, hotRun);
+    return { hot, urls: paths(spy), seen: hotRun.seen, calls };
   }
+  const LIST = "/repos/org/repo/issues";
 
-  it("searches 100 open issues updated in the window, then counts the gain of an old one", async () => {
+  it("lists the open issues updated in the window, then counts the gain of an old one", async () => {
     const { hot, urls, seen } = await run(
       [
         issue({ number: 7, comments: 12, created_at: "2026-10-03T23:00:00Z" }),
@@ -390,13 +407,16 @@ describe("fetchHotIssues", () => {
       { 9: { comments: [...dated(57, BEFORE_WINDOW), ...dated(3, IN_WINDOW)], thumbs: [] } },
     );
 
-    const search = urls[0]!;
-    expect(search.pathname).toBe("/search/issues");
-    expect(search.searchParams.get("q")).toBe(
-      "repo:org/repo is:issue is:open updated:>=2026-10-03T22:37:00Z",
-    );
-    expect(search.searchParams.get("sort")).toBe("interactions");
-    expect(search.searchParams.get("per_page")).toBe("100");
+    const list = urls[0]!;
+    expect(list.pathname).toBe(LIST);
+    expect(Object.fromEntries(list.searchParams)).toEqual({
+      state: "open",
+      since: SINCE.toISOString(),
+      sort: "updated",
+      direction: "desc",
+      per_page: "100",
+      page: "1",
+    });
     const comments = urls.filter((u) => u.pathname.endsWith("/comments"));
     expect(comments.map((u) => u.pathname)).toEqual(["/repos/org/repo/issues/9/comments"]);
     expect(comments[0]!.searchParams.get("since")).toBe(SINCE.toISOString());
@@ -412,14 +432,14 @@ describe("fetchHotIssues", () => {
         "org/repo#9": { date: "2026-10-03", total: 45 },
       }),
     );
-    expect(urls.map((u) => u.pathname)).toEqual(["/search/issues"]);
+    expect(urls.map((u) => u.pathname)).toEqual([LIST]);
     expect(hot.map((i) => [i.number, i.gain])).toEqual([[9, 15]]);
   });
 
   it("fetches nothing for an issue whose total is under the bar", async () => {
     const { hot, urls } = await run([issue({ number: 1, comments: 5, thumbs: 4 })]);
     expect(hot).toEqual([]);
-    expect(urls.map((u) => u.pathname)).toEqual(["/search/issues"]);
+    expect(urls.map((u) => u.pathname)).toEqual([LIST]);
   });
 
   it(`counts the gain of at most ${HOT_ISSUE_MAX_CHECKED} old issues without a baseline per repo`, async () => {
@@ -443,6 +463,71 @@ describe("fetchHotIssues", () => {
       ["+1", "2"],
     ]);
     expect(hot.map((x) => x.gain)).toEqual([10]);
+  });
+
+  it("reads the next page while a page is full, counting pull requests, and records every listed issue", async () => {
+    // 100 on page 1 (3 of them pull requests), 20 on page 2: the surging old issue is #110, on page 2.
+    const items = Array.from({ length: 120 }, (_, n) =>
+      issue({ number: n + 1, comments: n === 109 ? 14 : 1, isPr: n < 3 }),
+    );
+    const { hot, urls, seen, calls } = await run(items, {
+      110: { comments: [...dated(2, BEFORE_WINDOW), ...dated(12, IN_WINDOW)], thumbs: [] },
+    });
+    const pages = urls.filter((u) => u.pathname === LIST).map((u) => u.searchParams.get("page"));
+    expect(pages).toEqual(["1", "2"]);
+    expect(Object.keys(seen)).toHaveLength(117);
+    expect(seen["org/repo#1"]).toBeUndefined();
+    expect(hot.map((i) => [i.number, i.gain])).toEqual([[110, 12]]);
+    expect(calls).toEqual({ listPages: 2, countCalls: 1, skipped: 0 });
+  });
+
+  it(`stops after ${HOT_ISSUE_MAX_PAGES} list pages and logs it`, async () => {
+    const log = vi.spyOn(console, "log").mockImplementation(() => {});
+    const items = Array.from({ length: (HOT_ISSUE_MAX_PAGES + 1) * 100 }, (_, n) => issue({ number: n + 1 }));
+    const { urls, seen } = await run(items);
+    expect(urls.filter((u) => u.pathname === LIST)).toHaveLength(HOT_ISSUE_MAX_PAGES);
+    expect(Object.keys(seen)).toHaveLength(HOT_ISSUE_MAX_PAGES * 100);
+    expect(log).toHaveBeenCalledWith(expect.stringContaining(`stopped at ${HOT_ISSUE_MAX_PAGES} pages`));
+  });
+
+  it("finds a small-total old issue that surged, from its snapshot baseline, with no count call", async () => {
+    const { hot, urls } = await run(
+      [issue({ number: 5, comments: 300 }), issue({ number: 8, comments: 16, thumbs: 2 })],
+      {},
+      snap({
+        "org/repo#5": { date: "2026-10-03", total: 299 },
+        "org/repo#8": { date: "2026-10-03", total: 6 },
+      }),
+    );
+    expect(urls.map((u) => u.pathname)).toEqual([LIST]);
+    expect(hot.map((i) => [i.number, i.gain])).toEqual([[8, 12]]);
+  });
+
+  it(`skips candidates once the run used ${HOT_ISSUE_MAX_COUNT_CALLS} count calls, across repos`, async () => {
+    // One call left: #1 needs two (comments and 👍), #2 needs one (comments only).
+    const calls = { ...newHotIssueCalls(), countCalls: HOT_ISSUE_MAX_COUNT_CALLS - 1 };
+    const { hot, urls } = await run(
+      [issue({ number: 1, comments: 30, thumbs: 5 }), issue({ number: 2, comments: 20 })],
+      {},
+      EMPTY,
+      calls,
+    );
+    expect(urls.filter((u) => u.pathname !== LIST).map((u) => u.pathname)).toEqual([
+      "/repos/org/repo/issues/2/comments",
+    ]);
+    expect(hot.map((i) => i.number)).toEqual([2]);
+    expect(calls).toEqual({ listPages: 1, countCalls: HOT_ISSUE_MAX_COUNT_CALLS, skipped: 1 });
+    expect(hotIssueCallsLine(calls)).toBe(
+      `[github] hot issues: 1 list pages, ${HOT_ISSUE_MAX_COUNT_CALLS} count calls, 1 candidates skipped past the run cap of ${HOT_ISSUE_MAX_COUNT_CALLS}`,
+    );
+  });
+
+  it("returns the unused part of an issue's reserved count calls", async () => {
+    // 150 👍 reserves 3 calls; all 50 on the last page are old, so the page before is not read.
+    const { calls } = await run([issue({ number: 4, comments: 1, thumbs: 150 })], {
+      4: { comments: [], thumbs: dated(150, BEFORE_WINDOW) },
+    });
+    expect(calls.countCalls).toBe(2);
   });
 
   it("skips an issue whose gain fetch fails, keeping the others", async () => {
