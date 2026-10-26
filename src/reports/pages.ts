@@ -8,6 +8,7 @@
 import {
   DATA_REPORT,
   MSG,
+  nothingNew,
   POLICY_REPORT,
   PROJECT_SCOPE,
   REPORTS,
@@ -385,7 +386,7 @@ export async function buildModelsPage(
   const empty = sections.filter((s) => s.empty).map((s) => s.name);
   const tracked = [
     ...sections.filter((s) => !s.empty).map((s) => s.md),
-    ...(empty.length ? [P.nothingNew(empty)] : []),
+    ...(empty.length ? [nothingNew(empty)] : []),
   ];
   const spottedMd = renderSpottedTable(spotted.rows, spotted.summaries);
   // The Highlights call reads everything below Highlights: a 🆕 stealth model is this page's news too.
@@ -584,7 +585,7 @@ export function hasDataNews(sections: DataSection[], vendor: VendorData, dateStr
  * the open-source stack, Releases this week (code-rendered: the data repos'
  * stable releases of the last 7 days not shown before, summarized by the vendor
  * summaries call), Across platforms, Spotted and EU data law. A section with neither vendor items
- * nor repo activity is left out. LLM calls: one per active repo section (as in
+ * nor repo activity is named in one "Nothing new from …" line instead (`nothingNew`). LLM calls: one per active repo section (as in
  * the agents report) and one for the vendor row summaries, in parallel; then
  * one for Highlights and Across platforms over all of it (Across platforms is
  * left out when the model writes none). A failed summaries call leaves the
@@ -671,10 +672,10 @@ export async function buildDataReport(
   };
   // Report order; Azure and GCP have no repo section.
   const groupsWith = (tables: ReturnType<typeof renderVendorTables>): ProjectGroup[] => [
-    { title: H.databricks, ...repo("databricks"), preamble: tables.databricks },
-    { title: H.snowflake, ...repo("snowflake"), preamble: tables.snowflake },
-    { title: H.cloud, activities: [], summary: "", preamble: tables.cloud },
-    { title: H.data_stack, ...repo("data_stack") },
+    { title: H.databricks, ...repo("databricks"), preamble: tables.databricks, namedWhenEmpty: true },
+    { title: H.snowflake, ...repo("snowflake"), preamble: tables.snowflake, namedWhenEmpty: true },
+    { title: H.cloud, activities: [], summary: "", preamble: tables.cloud, namedWhenEmpty: true },
+    { title: H.data_stack, ...repo("data_stack"), namedWhenEmpty: true },
     {
       title: DATA_REPORT.releasesHeading,
       activities: [],

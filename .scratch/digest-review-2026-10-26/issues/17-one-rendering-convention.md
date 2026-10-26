@@ -1,6 +1,6 @@
 # 17: One rendering convention across pages
 
-Status: partial
+Status: done
 Blocked by: None (can start immediately)
 Findings: S10, X6, M8, D9, D10, D11, D12 — see `../review.md`
 
@@ -12,7 +12,7 @@ Decision needed (D11): AGENTS.md says "− for a bullet that opens with GOING_AW
 
 - [x] Counts pluralise correctly
 - [x] One Report Bar/banner template for all pages; one Release label form
-- [ ] Empty Tracked sections collapse into one "Nothing new from …" line (models page only: see Comments)
+- [x] Empty Tracked sections collapse into one "Nothing new from …" line
 - [x] Vendor Item text has no date prefix; a single-source section has no Source column; vendor rows sort newest first (deprecations first, then newest)
 - [x] Every row marker (🤖, 🆕, ⏳) and heading emoji is documented or removed
 - [x] Highlight signs follow the maintainer's D11 decision and AGENTS.md matches
@@ -31,3 +31,5 @@ Decision needed (D11): AGENTS.md says "− for a bullet that opens with GOING_AW
 - Not in the boxes, left: X6 (3) Trends Highlights in bold and (4) no blank line after `## Highlights` on ai-data.
 
 **Review (2026-10-26):** only the models page collapses empty sections. On the data report, Databricks and Snowflake each carry a vendor table and a repo group: with no vendor rows the section keeps its heading for the repos' quiet line (documented as intended), and Azure / Fabric & GCP, which has no repos, is left out with no line. Naming it in a "Nothing new" line means changing the shared group rendering (`buildProjectReportContent`), so the box is unticked. Vendor rows sort deprecations first, then newest first (`renderVendorTables`), not newest first alone.
+
+**Built (2026-10-26, follow-up):** the data report now collapses too. A data group marked `namedWhenEmpty` (Databricks, Snowflake, Azure / Fabric & GCP, Open-source stack) with no vendor table, no project section and no unavailable repo loses its heading and is named in one line after the sections, its quiet repos linked in brackets so readers still see they are tracked: "Nothing new from Snowflake ([Polaris](…)) or Azure / Fabric & GCP today." (`buildProjectReportContent`). A section with vendor rows keeps its heading and its repos' quiet line; Releases this week is still left out when empty; the agents page is unchanged (its groups do not set the flag). The models page's wording moved to a shared `nothingNew(names, period)` in `src/core/strings.ts`. Tests: `buildDataReport` › "renders Highlights, the sections in order, and names the empty sections with their quiet repos in one line" and "is written on a day with only vendor items" (pages.test); the models page tests still pass on the shared helper.

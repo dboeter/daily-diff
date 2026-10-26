@@ -39,6 +39,7 @@ import {
   GOING_AWAY,
   LIVE_REPORT_IDS,
   MSG,
+  nothingNew,
   OVERVIEW,
   REPORTS,
   REPORT_META,
@@ -64,6 +65,12 @@ export interface ProjectGroup {
   activities: ProjectActivity[];
   /** LLM output: one `## <Project>` section per active project. */
   summary: string;
+  /**
+   * A tracked source of the data report: with nothing to show (no preamble, no project section, no
+   * unavailable project) it is named, with its quiet projects, in the page's one "Nothing new from …"
+   * line instead of a heading. Without it an empty group shows its quiet line, or nothing.
+   */
+  namedWhenEmpty?: boolean;
   /** Markdown under the heading, before the projects (the data report's vendor table). Shown even when every project is quiet. */
   preamble?: string;
 }
@@ -197,11 +204,17 @@ export function buildProjectReportContent(r: ProjectReportInput): string {
   const prereleases = all.reduce((n, a) => n + a.prereleaseCount, 0);
   const link = (a: ProjectActivity) => `[${a.config.name}](https://github.com/${a.config.repo})`;
   let inactiveCount = 0;
+  const nothingNewFrom: string[] = [];
   const sections = r.groups.flatMap((g) => {
     const { body, quiet } = groupProjects(g);
     // A project whose release fetch failed was not checked: "Quiet" would claim it shipped nothing.
     const unavailable = g.activities.filter((a) => a.fetchFailed);
     inactiveCount += quiet.length + unavailable.length;
+    if (g.namedWhenEmpty && !body && !g.preamble && !unavailable.length) {
+      // The quiet repos stay named: the line is the only sign they are tracked.
+      nothingNewFrom.push(quiet.length ? `${g.title} (${quiet.map(link).join(", ")})` : g.title);
+      return [];
+    }
     // A group with neither projects nor a preamble (the data report's Azure / Fabric & GCP on a day
     // without its vendor rows) has nothing to show. An all-quiet group shows its quiet line.
     if (!g.activities.length && !g.preamble) return [];
@@ -215,6 +228,7 @@ export function buildProjectReportContent(r: ProjectReportInput): string {
       .join("\n\n");
     return `## ${g.title}\n\n` + [g.preamble, projects].filter(Boolean).join("\n\n");
   });
+  if (nothingNewFrom.length) sections.push(nothingNew(nothingNewFrom, r.period));
 
   return (
     `${r.heading}\n\n` +

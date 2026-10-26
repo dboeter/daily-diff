@@ -857,7 +857,7 @@ describe("buildDataReport", () => {
     };
   };
 
-  it("renders Highlights, the sections in order, and an all-quiet repo section with its quiet line", async () => {
+  it("renders Highlights, the sections in order, and names the empty sections with their quiet repos in one line", async () => {
     generateBody.mockReset();
     generateBody.mockImplementation(async (prompt: string) => reply(prompt));
     const report = await build(sections(false));
@@ -868,10 +868,15 @@ describe("buildDataReport", () => {
     expect(content.indexOf("## Databricks")).toBeLessThan(content.indexOf("## Open-source stack"));
     // The model wrote one; code drops it.
     expect(content).not.toContain("## Worth a Look");
-    // 2026-10-19..21: "Active today: 0" and no sign the stack was tracked at all.
-    expect(content).toContain("## Snowflake\n\n**Quiet today:** [Polaris](https://github.com/org/polaris)");
-    // No repos and no vendor rows: nothing to show.
+    // 2026-10-19..21: "Active today: 0" and no sign the stack was tracked at all. An empty section
+    // goes in one line, its quiet repos named in it.
+    expect(content).toContain(
+      "Nothing new from Snowflake ([Polaris](https://github.com/org/polaris)) or Azure / Fabric & GCP today.",
+    );
+    expect(content).not.toContain("## Snowflake");
     expect(content).not.toContain("## Azure / Fabric & GCP");
+    // After the sections, before Spotted and the footer.
+    expect(content.indexOf("## Open-source stack")).toBeLessThan(content.indexOf("Nothing new from"));
     expect(content).not.toContain("<!-- tables -->");
     expect(content).toContain("### Delta");
     expect(content).toContain("**Quiet today:** [MLflow](https://github.com/org/mlflow)");
@@ -969,7 +974,11 @@ describe("buildDataReport", () => {
     const content = (await build(sections(false, false), await vendorData()))!.content;
     // Every Databricks row is from one source: no Source column.
     expect(content).toContain("## Databricks\n\n| Date | Item | Summary |");
-    expect(content).toContain("## Open-source stack\n\n**Quiet today:** [DuckDB]");
+    // Databricks' table keeps its section (and its quiet repos' line); the empty ones share one line.
+    expect(content).toContain("**Quiet today:** [Delta](https://github.com/org/delta)");
+    expect(content).toContain(
+      "Nothing new from Open-source stack ([DuckDB](https://github.com/org/duckdb)) today.",
+    );
     // 2026-10-19: "Projects: 17 | Active today: 0" sat above 16 vendor rows.
     expect(content).toContain("Vendor items: 5 | Projects:");
     expect(generateBody).toHaveBeenCalledTimes(2);

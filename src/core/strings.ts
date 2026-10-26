@@ -87,6 +87,10 @@ export const REPORT_META = {
 /** "1 comment", "2 comments". */
 export const plural = (n: number, noun: string) => `${n} ${noun}${n === 1 ? "" : "s"}`;
 
+/** One line naming a page's tracked sections with nothing to show (the models page, the data report). */
+export const nothingNew = (names: string[], period = "today") =>
+  `Nothing new from ${names.length > 1 ? `${names.slice(0, -1).join(", ")} or ${names.at(-1)}` : names[0]} ${period}.`;
+
 /** The report bar's first link: the day's overview of every report's highlights. */
 export const OVERVIEW = { emoji: "⬛", name: "Overview" } as const;
 
@@ -264,8 +268,6 @@ export const MODELS_PAGE = {
     models: "OpenRouter's new listings",
     stealth: "OpenRouter's stealth models",
   },
-  nothingNew: (names: string[]) =>
-    `Nothing new from ${names.length > 1 ? `${names.slice(0, -1).join(", ")} or ${names.at(-1)}` : names[0]} today.`,
   counts: (posts: number, models: number, spotted: number) =>
     `Lab posts: ${posts} | New models: ${models} | Spotted: ${spotted}`,
   noContent: "No lab posts, new models, new stealth models or Spotted stories, skipping report.",
