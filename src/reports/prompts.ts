@@ -250,7 +250,8 @@ function formatProject(a: ProjectActivity): string {
     ? `\n\n### Prereleases (no stable release yet)\n` +
       a.previews.map((r) => formatRelease(r, cfg.repo, releaseNotes(r.body, PREVIEW_BODY_CHARS))).join("\n")
     : "";
-  const issues = a.hotIssues.map((i) => `${formatItem(i)}\n  ${hotIssueGain(i.gain)}`).join("\n") || "None";
+  const issues =
+    a.hotIssues.map((i) => `${formatItem(i)}\n  ${hotIssueGain(i.gain, i.gainSince)}`).join("\n") || "None";
   const news =
     a.news
       .map(

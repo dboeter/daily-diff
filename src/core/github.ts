@@ -4,7 +4,8 @@
  */
 
 import { LIVE_REPORT_IDS, REPORTS, WEEKLY_REPORT_IDS } from "./strings.ts";
-import { toCstDateStr, sleep } from "./date.ts";
+import { daysBefore, toCstDateStr, sleep } from "./date.ts";
+import { loadItemsFile, type ItemsFile } from "./jev.ts";
 import { newItems, type ReportedState, type StateItem } from "./report-state.ts";
 
 // ---------------------------------------------------------------------------
@@ -211,9 +212,9 @@ export const HOT_ISSUE_MIN_ENGAGEMENT_LABELLED = 3;
 /** Hot issues reported per repo, so one noisy tracker cannot flood the report. */
 export const HOT_ISSUES_PER_REPO = 2;
 /**
- * Candidates per repo whose gain is fetched (1–3 core REST calls each), highest
- * total first. Bounds a run's extra calls: the Actions GITHUB_TOKEN allows
- * 1,000 core requests an hour.
+ * Candidates per repo without a snapshot baseline whose gain is fetched (1–3
+ * core REST calls each), highest total first. Bounds a run's extra calls: the
+ * Actions GITHUB_TOKEN allows 1,000 core requests an hour.
  */
 export const HOT_ISSUE_MAX_CHECKED = 10;
 /** Matched against each label name, so "area:security" and "type: regression" count. */
@@ -229,9 +230,13 @@ function hotIssueBar(i: GitHubItem): number {
     : HOT_ISSUE_MIN_ENGAGEMENT;
 }
 
-/** A hot issue with `gain`: its comments + 👍 created in the report window. */
+/**
+ * A hot issue with `gain`: its comments + 👍 gained since `gainSince` (a CST
+ * date, from a snapshot baseline older than yesterday), else in the report window.
+ */
 export interface HotIssue extends GitHubItem {
   gain: number;
+  gainSince?: string;
 }
 
 /** An issue's comments and 👍 reactions, as far as fetched; only `created_at` is read. */
@@ -261,10 +266,78 @@ export function isRepeatHotIssue(
   return (i) => newItems([hotIssueStateItem(repo, i)], state, dateStr).length === 0;
 }
 
+// ---------------------------------------------------------------------------
+// Hot-issue snapshot: each search result's total, the baseline of the next run's gain
+// ---------------------------------------------------------------------------
+
+/** `digests/hot-issues-snapshot.json`: `<owner/repo>#<n>` → `HotIssueSnapshotEntry`, one per line. */
+export const HOT_ISSUES_SNAPSHOT_FILE = "digests/hot-issues-snapshot.json";
+/** A baseline older than this many days is not used: the gain would span too long to call hot. */
+const SNAPSHOT_BASELINE_MAX_DAYS = 2;
+/** Entries not seen in a search for this many days are pruned. */
+const SNAPSHOT_KEEP_DAYS = 8;
+
+/** One day's observation: comments + 👍 (`issueEngagement`) and the CST date seen. */
+export interface SnapshotTotal {
+  date: string;
+  total: number;
+}
+
 /**
- * The issues worth counting the gain of: open, not shown on an earlier day
- * (`isRepeat`), and with a total over the bar, since the gain cannot exceed
- * the total. Highest total first, at most HOT_ISSUE_MAX_CHECKED.
+ * The latest observation, plus `baseline`, the last one from an earlier day:
+ * a same-day re-run measures its gain from the same baseline as the first run.
+ */
+export interface HotIssueSnapshotEntry extends SnapshotTotal {
+  baseline?: SnapshotTotal;
+}
+
+export type HotIssueSnapshot = ItemsFile<HotIssueSnapshotEntry>;
+
+export function snapshotKey(repo: string, i: GitHubItem): string {
+  return `${repo}#${i.number}`;
+}
+
+/** Missing → empty; malformed → empty, logged: the file only holds yesterday's totals. */
+export function loadHotIssueSnapshot(file = HOT_ISSUES_SNAPSHOT_FILE): HotIssueSnapshot {
+  return loadItemsFile<HotIssueSnapshotEntry>(file, "hot-issues") ?? { items: {} };
+}
+
+/** The total an earlier day saw, if at most SNAPSHOT_BASELINE_MAX_DAYS old. */
+export function snapshotBaseline(
+  entry: HotIssueSnapshotEntry | undefined,
+  dateStr: string,
+): SnapshotTotal | undefined {
+  const b = entry && (entry.date < dateStr ? entry : entry.baseline);
+  return b && b.date >= daysBefore(dateStr, SNAPSHOT_BASELINE_MAX_DAYS)
+    ? { date: b.date, total: b.total }
+    : undefined;
+}
+
+/** The snapshot with today's search totals (`seen`: key → total) recorded, pruned of entries unseen for 8 days. */
+export function nextHotIssueSnapshot(
+  snapshot: HotIssueSnapshot,
+  seen: Record<string, number>,
+  dateStr: string,
+): HotIssueSnapshot {
+  const items: Record<string, HotIssueSnapshotEntry> = {};
+  const cutoff = daysBefore(dateStr, SNAPSHOT_KEEP_DAYS);
+  for (const [key, e] of Object.entries(snapshot.items)) if (e.date >= cutoff) items[key] = e;
+  for (const [key, total] of Object.entries(seen)) {
+    const old = items[key];
+    const baseline = old && (old.date < dateStr ? { date: old.date, total: old.total } : old.baseline);
+    items[key] = { date: dateStr, total, ...(baseline ? { baseline } : {}) };
+  }
+  return { items };
+}
+
+// ---------------------------------------------------------------------------
+// Hot-issue selection
+// ---------------------------------------------------------------------------
+
+/**
+ * The issues that can be hot: open, not shown on an earlier day (`isRepeat`),
+ * and with a total over the bar, since the gain cannot exceed the total.
+ * Highest total first.
  */
 export function hotIssueCandidates(
   items: GitHubItem[],
@@ -274,8 +347,7 @@ export function hotIssueCandidates(
     .filter(
       (i) => !i.pull_request && i.state === "open" && issueEngagement(i) >= hotIssueBar(i) && !isRepeat(i),
     )
-    .sort((a, b) => issueEngagement(b) - issueEngagement(a))
-    .slice(0, HOT_ISSUE_MAX_CHECKED);
+    .sort((a, b) => issueEngagement(b) - issueEngagement(a));
 }
 
 /** Comments and 👍 created at or after `since`; an edited older comment does not count. */
@@ -284,16 +356,55 @@ export function engagementGained(activity: IssueActivity, since: Date): number {
   return activity.comments.filter(isNew).length + activity.thumbs.filter(isNew).length;
 }
 
+/** What `selectHotIssues` reads besides the search results. */
+export interface HotIssueContext {
+  repo: string;
+  snapshot: HotIssueSnapshot;
+  /** Today, CST. */
+  dateStr: string;
+  /** The report window's start. */
+  since: Date;
+  isRepeat?: (i: GitHubItem) => boolean;
+  /** By issue number: the API-counted activity of the issues `hotIssuesToCheck` named. */
+  activity?: Map<number, IssueActivity>;
+}
+
 /**
- * Pick the hot issues: gained engagement over the bar since `since`, whenever
- * opened. Highest gain first, capped at HOT_ISSUES_PER_REPO.
+ * A candidate's gain without an API call: today's total minus the snapshot
+ * baseline, or the whole total for an issue opened in the window. Undefined:
+ * only the API can tell.
  */
-export function selectHotIssues(
-  checked: { issue: GitHubItem; activity: IssueActivity }[],
-  since: Date,
-): HotIssue[] {
-  return checked
-    .map(({ issue, activity }) => ({ ...issue, gain: engagementGained(activity, since) }))
+function knownGain(i: GitHubItem, ctx: HotIssueContext): { gain: number; gainSince?: string } | undefined {
+  const base = snapshotBaseline(ctx.snapshot.items[snapshotKey(ctx.repo, i)], ctx.dateStr);
+  if (base) {
+    const gain = Math.max(0, issueEngagement(i) - base.total);
+    // A baseline from yesterday spans about the 24h window; an older one is named.
+    return base.date < daysBefore(ctx.dateStr, 1) ? { gain, gainSince: base.date } : { gain };
+  }
+  if (new Date(i.created_at) >= ctx.since) return { gain: issueEngagement(i) };
+  return undefined;
+}
+
+/** The candidates without a known gain whose activity to fetch: at most HOT_ISSUE_MAX_CHECKED, highest total first. */
+export function hotIssuesToCheck(items: GitHubItem[], ctx: HotIssueContext): GitHubItem[] {
+  return hotIssueCandidates(items, ctx.isRepeat)
+    .filter((i) => !knownGain(i, ctx))
+    .slice(0, HOT_ISSUE_MAX_CHECKED);
+}
+
+/**
+ * Pick the hot issues: gained engagement over the bar, whenever opened.
+ * Highest gain first, capped at HOT_ISSUES_PER_REPO. A candidate with neither
+ * a known gain nor fetched activity is skipped.
+ */
+export function selectHotIssues(items: GitHubItem[], ctx: HotIssueContext): HotIssue[] {
+  return hotIssueCandidates(items, ctx.isRepeat)
+    .flatMap((i): HotIssue[] => {
+      const known = knownGain(i, ctx);
+      if (known) return [{ ...i, ...known }];
+      const activity = ctx.activity?.get(i.number);
+      return activity ? [{ ...i, gain: engagementGained(activity, ctx.since) }] : [];
+    })
     .filter((i) => i.gain >= hotIssueBar(i))
     .sort((a, b) => b.gain - a.gain)
     .slice(0, HOT_ISSUES_PER_REPO);
@@ -337,18 +448,23 @@ async function fetchIssueActivity(repo: string, i: GitHubItem, since: Date): Pro
   return { comments, thumbs };
 }
 
+/** A run's hot-issue inputs, shared by every repo; `seen` collects each search result's total for the snapshot. */
+export interface HotIssueRun {
+  snapshot: HotIssueSnapshot;
+  dateStr: string;
+  isRepeat: (repo: string) => (i: GitHubItem) => boolean;
+  seen: Record<string, number>;
+}
+
 /**
- * Hot issues for a repo: one search for the 50 most-engaged open issues with
- * activity since `since`, however old (paced by searchSlot), then the gain of
- * up to HOT_ISSUE_MAX_CHECKED candidates (core calls, one issue at a time).
- * A failed gain fetch skips that issue; a failed search should still be
- * treated as "no hot issues", not a failed repo.
+ * Hot issues for a repo: one search for the 100 most-engaged open issues with
+ * activity since `since`, however old (paced by searchSlot). The gain comes
+ * from the snapshot or the issue's age where it can (`knownGain`), else from
+ * the API for up to HOT_ISSUE_MAX_CHECKED candidates (core calls, one issue at
+ * a time). Every result's total goes into `run.seen`. A failed gain fetch skips
+ * that issue; a failed search should still be treated as "no hot issues", not a failed repo.
  */
-export async function fetchHotIssues(
-  repo: string,
-  since: Date,
-  isRepeat?: (i: GitHubItem) => boolean,
-): Promise<HotIssue[]> {
+export async function fetchHotIssues(repo: string, since: Date, run: HotIssueRun): Promise<HotIssue[]> {
   const result = await githubGet<{ items: GitHubItem[] }>(
     "https://api.github.com/search/issues",
     {
@@ -356,19 +472,28 @@ export async function fetchHotIssues(
       // Comments plus every reaction: the search sort closest to issueEngagement (comments + 👍).
       sort: "interactions",
       order: "desc",
-      per_page: "50",
+      per_page: "100",
     },
     searchSlot,
   );
-  const checked: { issue: GitHubItem; activity: IssueActivity }[] = [];
-  for (const issue of hotIssueCandidates(result.items, isRepeat)) {
+  for (const i of result.items) run.seen[snapshotKey(repo, i)] = issueEngagement(i);
+  const activity = new Map<number, IssueActivity>();
+  const ctx: HotIssueContext = {
+    repo,
+    snapshot: run.snapshot,
+    dateStr: run.dateStr,
+    since,
+    isRepeat: run.isRepeat(repo),
+    activity,
+  };
+  for (const issue of hotIssuesToCheck(result.items, ctx)) {
     try {
-      checked.push({ issue, activity: await fetchIssueActivity(repo, issue, since) });
+      activity.set(issue.number, await fetchIssueActivity(repo, issue, since));
     } catch (err) {
       console.error(`  [github] ${repo}#${issue.number} engagement fetch failed, skipped: ${err}`);
     }
   }
-  return selectHotIssues(checked, since);
+  return selectHotIssues(result.items, ctx);
 }
 
 /** One `stargazers/history` bucket: a calendar week from Sunday, newest bucket first. */

@@ -1,3 +1,6 @@
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import {
   closeSupersededIssues,
@@ -9,12 +12,19 @@ import {
   GitHubApiError,
   HOT_ISSUE_MAX_CHECKED,
   hotIssueCandidates,
+  hotIssuesToCheck,
   hotIssueStateItem,
   isPrerelease,
   isRepeatHotIssue,
+  loadHotIssueSnapshot,
+  nextHotIssueSnapshot,
   selectHotIssues,
   type GitHubItem,
   type GitHubRelease,
+  type HotIssueContext,
+  type HotIssueRun,
+  type HotIssueSnapshot,
+  type HotIssueSnapshotEntry,
   type IssueActivity,
 } from "../../core/github.ts";
 import { nextReportedState } from "../../core/report-state.ts";
@@ -79,7 +89,7 @@ function issue(o: {
     state: o.state ?? "open",
     user: { login: "alice" },
     labels: (o.labels ?? []).map((name) => ({ name })),
-    created_at: o.created_at ?? "2026-10-04T01:00:00Z",
+    created_at: o.created_at ?? BEFORE_WINDOW,
     updated_at: "2026-10-04T05:00:00Z",
     comments: o.comments ?? 0,
     reactions: { "+1": o.thumbs ?? 0 },
@@ -88,88 +98,186 @@ function issue(o: {
   };
 }
 
-// The window of fetchHotIssues: `since` and a time inside and before it.
+// The window of fetchHotIssues: `since` and a time inside and before it; TODAY is the CST date of the run.
 const IN_WINDOW = "2026-10-04T03:00:00Z";
 const BEFORE_WINDOW = "2026-09-01T00:00:00Z";
+const TODAY = "2026-10-04";
+const EMPTY: HotIssueSnapshot = { items: {} };
 const dated = (n: number, created_at: string) => Array.from({ length: n }, () => ({ created_at }));
-/** An issue with its activity: `newComments`/`newThumbs` created in the window, `oldComments` before it. */
-function checked(
-  i: GitHubItem,
-  o: { newComments?: number; oldComments?: number; newThumbs?: number },
-): { issue: GitHubItem; activity: IssueActivity } {
+/** An issue's activity: `newComments`/`newThumbs` created in the window, `oldComments` before it. */
+function act(o: { newComments?: number; oldComments?: number; newThumbs?: number }): IssueActivity {
   return {
-    issue: i,
-    activity: {
-      comments: [...dated(o.oldComments ?? 0, BEFORE_WINDOW), ...dated(o.newComments ?? 0, IN_WINDOW)],
-      thumbs: dated(o.newThumbs ?? 0, IN_WINDOW),
-    },
+    comments: [...dated(o.oldComments ?? 0, BEFORE_WINDOW), ...dated(o.newComments ?? 0, IN_WINDOW)],
+    thumbs: dated(o.newThumbs ?? 0, IN_WINDOW),
   };
 }
+function ctx(o: Partial<HotIssueContext> = {}): HotIssueContext {
+  return { repo: "org/repo", snapshot: EMPTY, dateStr: TODAY, since: SINCE, ...o };
+}
+/** Old issues counted by the API: `activity` by issue number. */
+function selectByApi(entries: [GitHubItem, IssueActivity][]) {
+  return selectHotIssues(
+    entries.map(([i]) => i),
+    ctx({ activity: new Map(entries.map(([i, a]) => [i.number, a])) }),
+  );
+}
+const snap = (items: Record<string, HotIssueSnapshotEntry>): HotIssueSnapshot => ({ items });
 
-describe("selectHotIssues", () => {
+describe("selectHotIssues, gain counted by the API", () => {
   it("does not keep an old issue with a large total but 2 new comments in the window", () => {
-    const old = issue({ number: 1, comments: 400, thumbs: 90, created_at: "2026-03-01T00:00:00Z" });
-    expect(selectHotIssues([checked(old, { oldComments: 98, newComments: 2 })], SINCE)).toEqual([]);
+    const old = issue({ number: 1, comments: 400, thumbs: 90 });
+    expect(selectByApi([[old, act({ oldComments: 98, newComments: 2 })]])).toEqual([]);
   });
 
   it("keeps an issue opened months ago with 12 new comments in the window, with its gain", () => {
-    const old = issue({ number: 1, comments: 40, created_at: "2026-06-01T00:00:00Z" });
-    const hot = selectHotIssues([checked(old, { oldComments: 28, newComments: 12 })], SINCE);
-    expect(hot.map((i) => [i.number, i.gain])).toEqual([[1, 12]]);
+    const old = issue({ number: 1, comments: 40 });
+    const hot = selectByApi([[old, act({ oldComments: 28, newComments: 12 })]]);
+    expect(hot.map((i) => [i.number, i.gain, i.gainSince])).toEqual([[1, 12, undefined]]);
   });
 
   it("keeps a labelled regression with 3 new 👍, not an unlabelled issue with 9", () => {
-    const hot = selectHotIssues(
-      [
-        checked(issue({ number: 1, thumbs: 3, labels: ["Regression"] }), { newThumbs: 3 }),
-        checked(issue({ number: 2, thumbs: 9 }), { newThumbs: 9 }),
-        checked(issue({ number: 3, thumbs: 2, labels: ["area:security"] }), { newThumbs: 2 }),
-      ],
-      SINCE,
-    );
+    const hot = selectByApi([
+      [issue({ number: 1, thumbs: 3, labels: ["Regression"] }), act({ newThumbs: 3 })],
+      [issue({ number: 2, thumbs: 9 }), act({ newThumbs: 9 })],
+      [issue({ number: 3, thumbs: 2, labels: ["area:security"] }), act({ newThumbs: 2 })],
+    ]);
     expect(hot.map((i) => i.number)).toEqual([1]);
   });
 
   it("does not count comments edited in the window but created before it", () => {
     // The comments endpoint's `since` filters on updated_at, so edited old comments come back.
     const i = issue({ number: 1, comments: 20 });
-    expect(selectHotIssues([checked(i, { oldComments: 15, newComments: 5 })], SINCE)).toEqual([]);
+    expect(selectByApi([[i, act({ oldComments: 15, newComments: 5 })]])).toEqual([]);
   });
 
   it("sorts by gain, not total, and caps at two per repo", () => {
-    const hot = selectHotIssues(
-      [
-        checked(issue({ number: 1, comments: 300 }), { newComments: 11 }),
-        checked(issue({ number: 2, comments: 30 }), { newComments: 25 }),
-        checked(issue({ number: 3, comments: 20 }), { newComments: 4, newThumbs: 10 }),
-      ],
-      SINCE,
-    );
+    const hot = selectByApi([
+      [issue({ number: 1, comments: 300 }), act({ newComments: 11 })],
+      [issue({ number: 2, comments: 30 }), act({ newComments: 25 })],
+      [issue({ number: 3, comments: 20 }), act({ newComments: 4, newThumbs: 10 })],
+    ]);
     expect(hot.map((i) => [i.number, i.gain])).toEqual([
       [2, 25],
       [3, 14],
     ]);
   });
+
+  it("skips an old issue without a baseline whose activity was not fetched", () => {
+    expect(selectHotIssues([issue({ number: 1, comments: 40 })], ctx())).toEqual([]);
+  });
 });
 
-describe("hotIssueCandidates", () => {
+describe("selectHotIssues, gain from the snapshot", () => {
+  const YESTERDAY = "2026-10-03";
+
+  it("takes the gain from yesterday's total and needs no fetch", () => {
+    const i = issue({ number: 1, comments: 30 });
+    const c = ctx({ snapshot: snap({ "org/repo#1": { date: YESTERDAY, total: 18 } }) });
+    expect(hotIssuesToCheck([i], c)).toEqual([]);
+    expect(selectHotIssues([i], c).map((x) => [x.gain, x.gainSince])).toEqual([[12, undefined]]);
+  });
+
+  it("is not hot when the total barely moved since yesterday", () => {
+    const i = issue({ number: 1, comments: 400 });
+    const c = ctx({ snapshot: snap({ "org/repo#1": { date: YESTERDAY, total: 395 } }) });
+    expect(selectHotIssues([i], c)).toEqual([]);
+  });
+
+  it("names the date of a two-day-old baseline", () => {
+    const i = issue({ number: 1, comments: 30 });
+    const c = ctx({ snapshot: snap({ "org/repo#1": { date: "2026-10-02", total: 10 } }) });
+    expect(selectHotIssues([i], c).map((x) => [x.gain, x.gainSince])).toEqual([[20, "2026-10-02"]]);
+  });
+
+  it("falls back to the API when the baseline is over 2 days old", () => {
+    const i = issue({ number: 1, comments: 30 });
+    const c = ctx({ snapshot: snap({ "org/repo#1": { date: "2026-10-01", total: 10 } }) });
+    expect(hotIssuesToCheck([i], c).map((x) => x.number)).toEqual([1]);
+    const hot = selectHotIssues([i], { ...c, activity: new Map([[1, act({ newComments: 3 })]]) });
+    expect(hot).toEqual([]);
+  });
+
+  it("measures a same-day re-run from the earlier day's baseline, not the first run's total", () => {
+    const i = issue({ number: 1, comments: 30 });
+    const first = snap({ "org/repo#1": { date: YESTERDAY, total: 18 } });
+    const afterFirstRun = nextHotIssueSnapshot(first, { "org/repo#1": 29 }, TODAY);
+    expect(afterFirstRun.items["org/repo#1"]).toEqual({
+      date: TODAY,
+      total: 29,
+      baseline: { date: YESTERDAY, total: 18 },
+    });
+    expect(selectHotIssues([i], ctx({ snapshot: afterFirstRun })).map((x) => x.gain)).toEqual([12]);
+  });
+
+  it("counts the whole total of an issue opened in the window, with no fetch", () => {
+    const i = issue({ number: 1, comments: 12, created_at: IN_WINDOW });
+    expect(hotIssuesToCheck([i], ctx())).toEqual([]);
+    expect(selectHotIssues([i], ctx()).map((x) => x.gain)).toEqual([12]);
+  });
+
+  it("keeps Codex #56691 (53 now, 40 yesterday) hot without a fetch", () => {
+    // 2026-10-26: 53 comments + 👍, 13 of them in the last 24h, behind older threads in a top-10-by-total cut.
+    const codex = issue({ number: 56691, comments: 45, thumbs: 8 });
+    const c = ctx({
+      repo: "openai/codex",
+      dateStr: "2026-10-26",
+      since: new Date("2026-10-25T20:00:00Z"),
+      snapshot: snap({ "openai/codex#56691": { date: "2026-10-25", total: 40 } }),
+    });
+    expect(hotIssuesToCheck([codex], c)).toEqual([]);
+    expect(selectHotIssues([codex], c).map((x) => [x.number, x.gain])).toEqual([[56691, 13]]);
+  });
+});
+
+describe("hotIssuesToCheck", () => {
   it("keeps open issues whose total clears the bar that applies, highest total first", () => {
-    const candidates = hotIssueCandidates([
-      issue({ number: 1, comments: 4, thumbs: 6 }),
-      issue({ number: 2, comments: 30 }),
-      issue({ number: 3, comments: 9 }),
-      issue({ number: 4, comments: 3, labels: ["regression"] }),
-      issue({ number: 5, comments: 2, labels: ["security"] }),
-      issue({ number: 6, comments: 50, isPr: true }),
-    ]);
+    const candidates = hotIssuesToCheck(
+      [
+        issue({ number: 1, comments: 4, thumbs: 6 }),
+        issue({ number: 2, comments: 30 }),
+        issue({ number: 3, comments: 9 }),
+        issue({ number: 4, comments: 3, labels: ["regression"] }),
+        issue({ number: 5, comments: 2, labels: ["security"] }),
+        issue({ number: 6, comments: 50, isPr: true }),
+      ],
+      ctx(),
+    );
     expect(candidates.map((i) => i.number)).toEqual([2, 1, 4]);
   });
 
-  it(`checks at most ${HOT_ISSUE_MAX_CHECKED} per repo`, () => {
+  it(`checks at most ${HOT_ISSUE_MAX_CHECKED} old issues without a baseline per repo`, () => {
     const items = Array.from({ length: 15 }, (_, n) => issue({ number: n + 1, comments: 10 + n }));
-    const candidates = hotIssueCandidates(items);
+    const candidates = hotIssuesToCheck(items, ctx());
     expect(candidates).toHaveLength(HOT_ISSUE_MAX_CHECKED);
     expect(candidates[0]!.number).toBe(15);
+  });
+});
+
+describe("nextHotIssueSnapshot", () => {
+  it("records every search total with today's date and prunes entries unseen for 8 days", () => {
+    const next = nextHotIssueSnapshot(
+      snap({
+        "org/repo#1": { date: "2026-09-26", total: 5 },
+        "org/repo#2": { date: "2026-09-25", total: 5 },
+        "org/repo#3": { date: "2026-10-03", total: 7 },
+      }),
+      { "org/repo#3": 9, "org/repo#4": 1 },
+      TODAY,
+    );
+    expect(next.items).toEqual({
+      "org/repo#1": { date: "2026-09-26", total: 5 },
+      "org/repo#3": { date: TODAY, total: 9, baseline: { date: "2026-10-03", total: 7 } },
+      "org/repo#4": { date: TODAY, total: 1 },
+    });
+  });
+
+  it("reads a malformed file as empty", () => {
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "hot-snapshot-"));
+    const file = path.join(dir, "hot-issues-snapshot.json");
+    fs.writeFileSync(file, "{ not json");
+    expect(loadHotIssueSnapshot(file)).toEqual({ items: {} });
+    expect(loadHotIssueSnapshot(path.join(dir, "missing.json"))).toEqual({ items: {} });
   });
 });
 
@@ -244,18 +352,24 @@ describe("fetchHotIssues", () => {
     vi.useRealTimers();
   });
 
-  async function run(items: GitHubItem[], activity?: Record<number, IssueActivity | "fail">) {
+  async function run(
+    items: GitHubItem[],
+    activity?: Record<number, IssueActivity | "fail">,
+    snapshot: HotIssueSnapshot = EMPTY,
+  ) {
     const spy = mockGitHub(items, activity);
-    const pending = fetchHotIssues("org/repo", SINCE);
+    const hotRun: HotIssueRun = { snapshot, dateStr: TODAY, isRepeat: () => () => false, seen: {} };
+    const pending = fetchHotIssues("org/repo", SINCE, hotRun);
     await vi.runAllTimersAsync(); // searchSlot spacing from the previous test
-    return { hot: await pending, urls: paths(spy) };
+    return { hot: await pending, urls: paths(spy), seen: hotRun.seen };
   }
 
-  it("searches open issues updated in the window, then counts each candidate's gain", async () => {
-    const { hot, urls } = await run(
+  it("searches 100 open issues updated in the window, then counts the gain of an old one", async () => {
+    const { hot, urls, seen } = await run(
       [
-        issue({ number: 7, comments: 12, created_at: "2026-10-03T01:00:00Z" }),
-        issue({ number: 9, comments: 60, created_at: "2026-06-01T00:00:00Z" }),
+        issue({ number: 7, comments: 12, created_at: "2026-10-03T23:00:00Z" }),
+        issue({ number: 9, comments: 60 }),
+        issue({ number: 11, comments: 2 }),
       ],
       { 9: { comments: [...dated(57, BEFORE_WINDOW), ...dated(3, IN_WINDOW)], thumbs: [] } },
     );
@@ -266,9 +380,24 @@ describe("fetchHotIssues", () => {
       "repo:org/repo is:issue is:open updated:>=2026-10-03T22:37:00Z",
     );
     expect(search.searchParams.get("sort")).toBe("interactions");
-    const comments = urls.find((u) => u.pathname === "/repos/org/repo/issues/9/comments")!;
-    expect(comments.searchParams.get("since")).toBe(SINCE.toISOString());
+    expect(search.searchParams.get("per_page")).toBe("100");
+    const comments = urls.filter((u) => u.pathname.endsWith("/comments"));
+    expect(comments.map((u) => u.pathname)).toEqual(["/repos/org/repo/issues/9/comments"]);
+    expect(comments[0]!.searchParams.get("since")).toBe(SINCE.toISOString());
     expect(hot.map((i) => [i.number, i.gain])).toEqual([[7, 12]]);
+    expect(seen).toEqual({ "org/repo#7": 12, "org/repo#9": 60, "org/repo#11": 2 });
+  });
+
+  it("makes no gain call for an issue with a baseline from yesterday", async () => {
+    const { hot, urls } = await run(
+      [issue({ number: 9, comments: 60 })],
+      {},
+      snap({
+        "org/repo#9": { date: "2026-10-03", total: 45 },
+      }),
+    );
+    expect(urls.map((u) => u.pathname)).toEqual(["/search/issues"]);
+    expect(hot.map((i) => [i.number, i.gain])).toEqual([[9, 15]]);
   });
 
   it("fetches nothing for an issue whose total is under the bar", async () => {
@@ -277,7 +406,7 @@ describe("fetchHotIssues", () => {
     expect(urls.map((u) => u.pathname)).toEqual(["/search/issues"]);
   });
 
-  it(`counts the gain of at most ${HOT_ISSUE_MAX_CHECKED} candidates per repo`, async () => {
+  it(`counts the gain of at most ${HOT_ISSUE_MAX_CHECKED} old issues without a baseline per repo`, async () => {
     const items = Array.from({ length: 12 }, (_, n) => issue({ number: n + 1, comments: 20 + n }));
     const { urls } = await run(items);
     const checkedIssues = new Set(

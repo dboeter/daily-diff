@@ -65,9 +65,12 @@ export const reportIssueTitle = (id: ReportId, dateStr: string) =>
  */
 export const PROJECT_SCOPE = { window: "last 24h", period: "today" } as const;
 
-/** A hot issue's engagement gained in the window (`selectHotIssues`), next to its totals in the prompt. */
-export const hotIssueGain = (gain: number) =>
-  `Gained: +${gain} comments and 👍 in the ${PROJECT_SCOPE.window}`;
+/**
+ * A hot issue's engagement gained (`selectHotIssues`), next to its totals in the prompt:
+ * since `since` when its snapshot baseline is older than yesterday, else in the window.
+ */
+export const hotIssueGain = (gain: number, since?: string) =>
+  `Gained: +${gain} comments and 👍 ${since ? `since ${since}` : `in the ${PROJECT_SCOPE.window}`}`;
 
 const SOURCES = "Sources:";
 const generated = (utcStr: string) => `Generated: ${utcStr} UTC`;

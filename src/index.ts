@@ -10,8 +10,11 @@
  */
 
 import {
-  type GitHubItem,
   type HotIssue,
+  type HotIssueRun,
+  HOT_ISSUES_SNAPSHOT_FILE,
+  loadHotIssueSnapshot,
+  nextHotIssueSnapshot,
   type RepoConfig,
   fetchRecentReleases,
   fetchHotIssues,
@@ -95,7 +98,7 @@ import {
   type SpottedPage,
   type Story,
 } from "./spotted/pool.ts";
-import { sourceCounts, type DroppedReason } from "./core/jev.ts";
+import { saveItemsFile, sourceCounts, type DroppedReason } from "./core/jev.ts";
 import { loadReportedState, nextReportedState, saveReportedState } from "./core/report-state.ts";
 import {
   loadSpottedVerdicts,
@@ -163,12 +166,12 @@ async function withAnnouncement(r: GitHubRelease): Promise<GitHubRelease> {
 /**
  * Stable releases and hot issues for one project. A failed release fetch is `fetchFailed`, shown as unavailable.
  * `weekSince` (the data report): also the stable releases since then, as `weekReleases`, from the same request.
- * `hotRepeat`: the repo's hot issues an earlier day showed (`isRepeatHotIssue`), left out.
+ * `hot`: the run's hot-issue inputs (`HotIssueRun`): snapshot, repeats, and the totals it collects.
  */
 async function fetchProject(
   cfg: RepoConfig,
   since: Date,
-  hotRepeat: (repo: string) => (i: GitHubItem) => boolean,
+  hot: HotIssueRun,
   weekSince?: Date,
 ): Promise<ProjectFetch> {
   try {
@@ -179,7 +182,7 @@ async function fetchProject(
       })),
       // Search API, rate-limited separately from releases: a failure here must
       // not discard the releases.
-      fetchHotIssues(cfg.repo, since, hotRepeat(cfg.repo)).catch((err): HotIssue[] => {
+      fetchHotIssues(cfg.repo, since, hot).catch((err): HotIssue[] => {
         console.error(`  [${cfg.id}] hot issues fetch failed: ${err}`);
         return [];
       }),
@@ -211,7 +214,7 @@ async function fetchAllData(
   weekly: boolean,
   /** A Hacker News story out of the Spotted pool: a page showed it or a copy of its link (`isFresh`). */
   hnShown: (story: HnStory) => boolean,
-  hotRepeat: (repo: string) => (i: GitHubItem) => boolean,
+  hot: HotIssueRun,
 ): Promise<{
   agentFetches: ProjectFetch[];
   infraFetches: ProjectFetch[];
@@ -255,11 +258,11 @@ async function fetchAllData(
     lobstersData,
     modelCatalog,
   ] = await Promise.all([
-    Promise.all(AGENTS.map((cfg) => fetchProject(cfg, daySince, hotRepeat))),
-    Promise.all(INFRA_REPOS.map((cfg) => fetchProject(cfg, daySince, hotRepeat))),
+    Promise.all(AGENTS.map((cfg) => fetchProject(cfg, daySince, hot))),
+    Promise.all(INFRA_REPOS.map((cfg) => fetchProject(cfg, daySince, hot))),
     Promise.all(
       DATA_SECTIONS.map((s) =>
-        Promise.all(s.repos.map((cfg) => fetchProject(cfg, daySince, hotRepeat, weekSince))),
+        Promise.all(s.repos.map((cfg) => fetchProject(cfg, daySince, hot, weekSince))),
       ),
     ),
     // No fetcher here throws: each returns its empty value (fetchSuccess false) on a failure.
@@ -351,6 +354,12 @@ async function main(): Promise<void> {
   const spottedLog = loadSpottedLog();
   const inPool = isFresh(spottedLog, dateStr);
   const hotIssuesState = loadReportedState(HOT_ISSUES_STATE_FILE);
+  const hotIssueRun: HotIssueRun = {
+    snapshot: loadHotIssueSnapshot(),
+    dateStr,
+    isRepeat: (repo) => isRepeatHotIssue(hotIssuesState, dateStr, repo),
+    seen: {},
+  };
   const {
     agentFetches,
     infraFetches,
@@ -371,7 +380,7 @@ async function main(): Promise<void> {
     labsState,
     weekly,
     (s) => !inPool({ id: `hn:${s.id}`, url: s.url }),
-    (repo) => isRepeatHotIssue(hotIssuesState, dateStr, repo),
+    hotIssueRun,
   );
   const stories = storiesFrom(hnData, lobstersData, devtoData);
   const fresh = freshStories(
@@ -575,6 +584,11 @@ async function main(): Promise<void> {
       dateStr,
     ),
     HOT_ISSUES_STATE_FILE,
+  );
+  // Every repo's search results, published page or not, so each has a baseline tomorrow.
+  saveItemsFile(
+    nextHotIssueSnapshot(hotIssueRun.snapshot, hotIssueRun.seen, dateStr),
+    HOT_ISSUES_SNAPSHOT_FILE,
   );
   if (routing.judgment.nextCache) saveSpottedVerdicts(routing.judgment.nextCache);
   console.log(
