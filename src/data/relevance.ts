@@ -111,8 +111,8 @@ export interface DataAnswers {
   deprecation: { noul: number };
   /** Not weighed: flags an item as AI in data work (`aiInData`, the 🤖 marker). */
   ai_in_data: { noul: number };
-  /** Probability-weighted level, 0–2. */
-  significance: { score: number };
+  /** Probability-weighted level, 0–2, and how sure Jev is of it. */
+  significance: { score: number; confidence?: number };
 }
 
 // ---------------------------------------------------------------------------
@@ -178,20 +178,50 @@ const REAL_CHANGE_MIN = 0.5;
 const KEEP_MIN_RELEVANCE = 0.5;
 /** A deprecation at this noul or more, if a real change, is always kept: consultants warn clients early. */
 const DEPRECATION_MIN = 0.5;
+/** How far under KEEP_MIN_RELEVANCE a section's best item may be when the section has no kept item. */
+const NEAR_CUT_MARGIN = 0.05;
 /** Significance level 1 ("Notable"): a kept item under it is `minor`. */
 const NOTABLE_LEVEL = 1;
 
-/** Weighted relevance in 0–1, the keep decision and the deprecation flag. Throws on an unexpected answer shape. */
-export function dataRelevance(a: DataAnswers): { relevance: number; keep: boolean; deprecation: boolean } {
+/** Under this confidence a significance score is unknown, not low. */
+const LOW_CONFIDENCE = 0.4;
+/** The level an unknown significance counts as: "Notable", the middle. */
+const UNKNOWN_LEVEL = 1;
+/**
+ * A real change this likely is enough for an item that is about a Tracked project or at least
+ * "Notable": on 2026-10-26 Snowflake's "Recompact Iceberg table data" (real change 0.46) was dropped.
+ */
+const REAL_CHANGE_EXEMPT_MIN = 0.4;
+
+/**
+ * The significance level the keep decision uses: Jev's score, or UNKNOWN_LEVEL when Jev is unsure.
+ * On 2026-10-26 the Fabric FNTK item (0.53 at confidence 0.30) fell 0.01 under the cut on it.
+ */
+export function significanceLevel(a: Pick<DataAnswers, "significance">): number {
+  const { score, confidence } = a.significance;
+  return confidence !== undefined && confidence < LOW_CONFIDENCE ? UNKNOWN_LEVEL : score;
+}
+
+/**
+ * Weighted relevance in 0–1, the keep decision and the deprecation flag. An item about a Tracked
+ * data project (`tracked`) or at least "Notable" is kept on a real change of REAL_CHANGE_EXEMPT_MIN.
+ * Throws on an unexpected answer shape.
+ */
+export function dataRelevance(
+  a: DataAnswers,
+  tracked = false,
+): { relevance: number; keep: boolean; deprecation: boolean } {
+  const level = significanceLevel(a);
   const relevance =
     DATA_WEIGHTS.real_change * a.real_change?.noul +
-    (DATA_WEIGHTS.significance * a.significance?.score) / MAX_LEVEL +
+    (DATA_WEIGHTS.significance * level) / MAX_LEVEL +
     DATA_WEIGHTS.deprecation * a.deprecation?.noul;
   // A NaN would sort arbitrarily yet count as a success (see relevanceOf in arxiv.ts).
   if (!Number.isFinite(relevance)) throw new Error(`Unexpected Jev answers: ${JSON.stringify(a)}`);
   const real = a.real_change.noul >= REAL_CHANGE_MIN;
   const deprecation = real && a.deprecation.noul >= DEPRECATION_MIN;
-  return { relevance, keep: deprecation || (real && relevance >= KEEP_MIN_RELEVANCE), deprecation };
+  const exempt = (tracked || level >= UNKNOWN_LEVEL) && a.real_change.noul >= REAL_CHANGE_EXEMPT_MIN;
+  return { relevance, keep: deprecation || (real && relevance >= KEEP_MIN_RELEVANCE) || exempt, deprecation };
 }
 
 /**
@@ -309,9 +339,11 @@ export async function selectVendorItems(
     ask?: AskJev;
     /** Items per feed (null: failed), for the trace's `sources` header. */
     fetched?: Record<string, number | null>;
+    /** Whether an item is about a Tracked data project (its title or description names one). */
+    tracked?: (item: VendorItem) => boolean;
   },
 ): Promise<VendorSelection> {
-  const { fetched, ...jev } = opts;
+  const { fetched, tracked = () => false, ...jev } = opts;
   // Behavior-change bundles are deprecations by definition: no question to ask.
   const judgment = await judgeItems(
     items.filter((i) => i.stage === undefined),
@@ -325,7 +357,7 @@ export async function selectVendorItems(
           questions: dates.length ? { ...QUESTIONS, end_date: endDateQuestion(dates) } : QUESTIONS,
         };
       },
-      decide: (a: DataAnswers) => dataRelevance(a),
+      decide: (a: DataAnswers, item) => dataRelevance(a, tracked(item)),
       // A verdict saved before the end-date question (or over other dates) is asked again.
       fingerprint: (item) => {
         const dates = datesOf(item);
@@ -338,8 +370,26 @@ export async function selectVendorItems(
 
   const decide = (i: VendorItem): { keep: boolean; deprecation: boolean } =>
     i.stage !== undefined ? { keep: true, deprecation: true } : (verdicts.get(i.id) ?? keywordVerdict(i));
+  // A section with no kept item takes its best item within NEAR_CUT_MARGIN of the keep bar.
+  const nearCut = new Set(
+    VENDOR_SECTIONS.flatMap((sec) => {
+      const inSection = items.filter((i) => vendorSection(i.vendor) === sec);
+      if (inSection.some((i) => decide(i).keep)) return [];
+      const best = inSection
+        .flatMap((i) => {
+          const v = verdicts.get(i.id);
+          return v &&
+            v.answers.real_change.noul >= REAL_CHANGE_MIN &&
+            v.relevance >= KEEP_MIN_RELEVANCE - NEAR_CUT_MARGIN
+            ? [{ id: i.id, relevance: v.relevance }]
+            : [];
+        })
+        .sort((a, b) => b.relevance - a.relevance)[0];
+      return best ? [best.id] : [];
+    }),
+  );
   const kept = items.flatMap((i): KeptVendorItem[] => {
-    const d = decide(i);
+    const d = nearCut.has(i.id) ? { ...decide(i), keep: true } : decide(i);
     // `?.`: dataRelevance does not check this answer, and a hand-added entry may lack it.
     const ai = verdicts.get(i.id)?.answers.ai_in_data?.noul;
     const aiInData = ai === undefined ? aiKeywordHit(`${i.title} ${i.description}`) : ai >= AI_IN_DATA_MIN;
@@ -347,8 +397,9 @@ export async function selectVendorItems(
     // Only a candidate counts: "none", or a date Jev made up, is no end date.
     const jevEnd = datesOf(i).some((c) => c.iso === picked) ? picked : undefined;
     const endDate = d.deprecation ? (i.endDate ?? jevEnd) : undefined;
-    const significance = verdicts.get(i.id)?.answers.significance?.score;
-    const minor = !d.deprecation && significance !== undefined && significance < NOTABLE_LEVEL;
+    const answers = verdicts.get(i.id)?.answers;
+    const minor =
+      !d.deprecation && answers?.significance !== undefined && significanceLevel(answers) < NOTABLE_LEVEL;
     return d.keep
       ? [
           {

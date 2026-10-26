@@ -3,6 +3,7 @@ import {
   type DataAnswers,
   MAX_VENDOR_ITEMS,
   dataRelevance,
+  significanceLevel,
   dateCandidates,
   keywordVerdict,
   selectVendorItems,
@@ -39,6 +40,40 @@ describe("dataRelevance", () => {
     expect(dataRelevance(answers(1, 0, 0)).keep).toBe(false);
     expect(dataRelevance(answers(0.3, 0, 2)).keep).toBe(false);
     expect(dataRelevance(answers(0.3, 0.9, 2))).toMatchObject({ keep: false, deprecation: false });
+  });
+
+  it("counts a low-confidence significance as unknown (Notable), not low", () => {
+    const sure = { ...answers(0.95, 0.02, 0.53), significance: { score: 0.53, confidence: 0.8 } };
+    const unsure = { ...answers(0.95, 0.02, 0.53), significance: { score: 0.53, confidence: 0.3 } };
+    expect(significanceLevel(sure)).toBe(0.53);
+    expect(significanceLevel(unsure)).toBe(1);
+    expect(dataRelevance(unsure).relevance).toBeGreaterThan(dataRelevance(sure).relevance);
+  });
+
+  it("keeps a Tracked-project or Notable item on a weaker real change, not on a weak one", () => {
+    expect(dataRelevance(answers(0.46, 0.03, 0.5), true).keep).toBe(true);
+    expect(dataRelevance(answers(0.46, 0.03, 0.5)).keep).toBe(false);
+    expect(dataRelevance(answers(0.45, 0, 1.2)).keep).toBe(true);
+    expect(dataRelevance(answers(0.35, 0, 2), true).keep).toBe(false);
+  });
+
+  it("ticket 12 replay: the 2026-10-26 answers keep the Iceberg note and the Fabric FNTK item", () => {
+    // Saved answers from digests/2026-10-26/data-trace.json.
+    const recompact: DataAnswers = {
+      real_change: { noul: 0.46 },
+      deprecation: { noul: 0.03 },
+      ai_in_data: { noul: 0 },
+      significance: { score: 0.79, confidence: 0.53 },
+    };
+    const fntk: DataAnswers = {
+      real_change: { noul: 0.95 },
+      deprecation: { noul: 0.02 },
+      ai_in_data: { noul: 0.9 },
+      significance: { score: 0.53, confidence: 0.3 },
+    };
+    // "Recompact Iceberg table data" names Apache Iceberg (keyword "iceberg table"), a Tracked project.
+    expect(dataRelevance(recompact, true).keep).toBe(true);
+    expect(dataRelevance(fntk).keep).toBe(true);
   });
 
   it("always keeps a deprecation that is a real change, whatever its relevance", () => {
@@ -310,5 +345,38 @@ describe("selectVendorItems end dates", () => {
       ask: made,
     });
     expect(r.items[0]?.endDate).toBeUndefined();
+  });
+});
+
+describe("selectVendorItems near the cut", () => {
+  it("gives a section without a kept item its best item within 0.05 of the bar", async () => {
+    const byTitle: Record<string, DataAnswers> = {
+      // relevance 0.4*1 + 0.4*0.22/2 + 0 = 0.444 (no keep), 0.4*1 + 0.4*0.1/2 = 0.42 (no keep)
+      near: { ...answers(1, 0, 0.22) },
+      far: { ...answers(1, 0, 0.1) },
+    };
+    const ask = vi.fn(async (state: unknown) => ({
+      model: "jev-test",
+      answers: byTitle[(state as { title: string }).title.replace("Title ", "")]!,
+    }));
+    const sel = await selectVendorItems([item("near", { vendor: "gcp" }), item("far", { vendor: "gcp" })], {
+      apiKey: "k",
+      cache: { items: {} },
+      dateStr: DATE,
+      ask,
+    });
+    expect(sel.items.map((i) => i.id)).toEqual([]);
+    const near2: Record<string, DataAnswers> = { ...byTitle, near: answers(1, 0, 0.3) }; // 0.46: within 0.05 of 0.5
+    const ask2 = vi.fn(async (state: unknown) => ({
+      model: "jev-test",
+      answers: near2[(state as { title: string }).title.replace("Title ", "")]!,
+    }));
+    const sel2 = await selectVendorItems([item("near", { vendor: "gcp" }), item("far", { vendor: "gcp" })], {
+      apiKey: "k",
+      cache: { items: {} },
+      dateStr: DATE,
+      ask: ask2,
+    });
+    expect(sel2.items.map((i) => i.id)).toEqual(["near"]);
   });
 });

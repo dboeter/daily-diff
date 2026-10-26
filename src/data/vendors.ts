@@ -21,6 +21,8 @@ import { collectNewItems, type NewItems } from "../core/new-items.ts";
 import type { Numbered } from "../reports/summarized-table.ts";
 import { loadDataVerdicts, selectVendorItems, type DataVerdicts, type KeptVendorItem } from "./relevance.ts";
 import type { AskJev } from "../core/jev.ts";
+import type { RepoConfig } from "../core/github.ts";
+import { agentMatcher } from "../reports/project-news.ts";
 import { daysBefore, toCstDateStr } from "../core/date.ts";
 
 export interface VendorItem {
@@ -217,7 +219,11 @@ export async function fetchVendorData(
     apiKey: process.env["TYPESAFE_API_KEY"],
     cache: loadDataVerdicts(),
   },
+  /** The Tracked data projects: an item naming one is kept on a weaker real-change answer. */
+  trackedProjects: RepoConfig[] = [],
 ): Promise<VendorData> {
+  const matchers = trackedProjects.map(agentMatcher);
+  const tracked = (i: VendorItem) => matchers.some((re) => re.test(`${i.title} ${i.description}`));
   const dateStr = toCstDateStr(now);
   let counts: Record<string, number | null> = {};
   return collectNewItems({
@@ -260,7 +266,7 @@ export async function fetchVendorData(
     },
     select: async (candidates) => {
       console.log(`  [data] ${candidates.length} new vendor items`);
-      const selection = await selectVendorItems(candidates, { ...jev, dateStr, fetched: counts });
+      const selection = await selectVendorItems(candidates, { ...jev, dateStr, fetched: counts, tracked });
       // An over-cap coming-soon note stays unreported: marked reported, it would make
       // shippedComingSoon skip its GA note, which the reader would then never see.
       return { ...selection, alsoNew: selection.alsoNew?.filter((i) => !COMING_SOON_RE.test(i.title)) };
