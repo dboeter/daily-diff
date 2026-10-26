@@ -11,7 +11,13 @@ import type { summaryRows } from "../trending/rank.ts";
 import { formatTokens, type OpenRouterData, type OpenRouterNewModel } from "../sources/openrouter.ts";
 import { DATA_REPORT, MODELS_PAGE, MSG, SECTIONS, SPOTTED, TRENDS_REPORT } from "../core/strings.ts";
 import { TABLES_MARKER, rowList, summaryLine, summaryOutputRule, type Numbered } from "./summarized-table.ts";
-import { goingAwayRule, NO_TITLE_RULE, RELEASE_BODY_CHARS, releaseNotes } from "./prompts.ts";
+import {
+  goingAwayRule,
+  NO_TITLE_RULE,
+  RELEASE_BODY_CHARS,
+  releaseNotes,
+  sourceFidelityRules,
+} from "./prompts.ts";
 import type { ReleaseRow } from "./pages.ts";
 import type { Deadline } from "../core/report-state.ts";
 import type { HfData } from "../sources/huggingface.ts";
@@ -67,7 +73,7 @@ Write only these parts, in this order:
 
 1. \`## ${SECTIONS.highlights}\` — 3-5 bullets on the most noteworthy items of the week, across the page's sections.
 2. The line \`${TABLES_MARKER}\` exactly once, on its own line. The page is inserted there.
-3. \`## ${SECTIONS.signals}\` — 200-300 words: patterns across the week's tables, such as which kinds of agent or coding tool are getting attention, which model families lead usage, and which research directions recur. This is the one place for trend claims: each must rest on two or more rows.
+3. \`## ${SECTIONS.signals}\` — 200-300 words: patterns across the week's tables, such as which kinds of agent or coding tool are getting attention, which model families lead usage, and which research directions recur. This is the one place for trend claims: each must rest on two or more rows whose summaries (not only titles) support it, and names them.
 
 Rules:
 - ${NO_TITLE_RULE}
@@ -75,6 +81,7 @@ Rules:
 - Do not reproduce or alter the tables, and write no other sections.
 - Base every claim on the page. It shows descriptions, summaries and counts only, so do not describe releases, adoption or community reactions it does not show.
 - Mention only items that appear on the page, and link every item you mention.
+${sourceFidelityRules()}
 - English, professional and concise.
 `;
 }
@@ -140,6 +147,7 @@ Rules:
 - Do not reproduce or alter the table.
 - Base every claim on the table${nearDeadlines.length ? " or the open deadlines" : ""}. Do not invent obligations, dates, stages or legal status: a wrong legal status is worse than none.
 - Mention only items that appear in the table${nearDeadlines.length ? " or the open deadlines" : ""}, and link every item you mention.
+${sourceFidelityRules()}
 - English, professional and concise.
 `;
 }
@@ -299,7 +307,7 @@ ${summaryOutputRule(count)}
  */
 export function buildDataProsePrompt(sectionsMd: string, dateStr: string): string {
   const parts = [
-    `\`## ${SECTIONS.highlights}\` — 3-5 bullets, the most consequential changes today, deprecations, retirements and breaking changes first. Each bullet says who is affected (which client setup: e.g. Azure Databricks workspaces with the compliance security profile, Snowflake Native App providers, BigQuery users of AI functions), what to do (enable, migrate, test, plan for) and by when, if the row gives a date.`,
+    `\`## ${SECTIONS.highlights}\` — 3-5 bullets, the most consequential changes today, deprecations, retirements and breaking changes first. Each bullet says who is affected (which client setup: e.g. Azure Databricks workspaces with the compliance security profile, Snowflake Native App providers, BigQuery users of AI functions), what to do when the row says or its change requires it (enable, migrate, test, plan for) and by when, if the row gives a date.`,
     `The line \`${TABLES_MARKER}\` exactly once, on its own line. The sections are inserted there.`,
     `\`## ${DATA_REPORT.acrossPlatforms}\` — 0-3 bullets, each one capability that moved on two or more platforms in the rows above (e.g. governance tagging on Snowflake and Databricks, AI functions in SQL on BigQuery and Snowflake), saying how they differ: GA or preview, which clouds, what each covers. Only rows in the sections count; say nothing about features they do not show. Leave this heading out when no capability moved on two platforms: no padding.`,
   ];
@@ -324,6 +332,7 @@ Rules:
 - Write no links, URLs or other sections; name each item as the sections do. Dates only as the "by when" of a row that gives one.
 - Name each item in at most one bullet of ${SECTIONS.highlights}; ${DATA_REPORT.acrossPlatforms} compares rows, so it may name a row again. Two rows that describe the same change (a release note and its behavior change bundle, a "coming soon" note and its GA note) are one item: mention it once.
 - Base every claim on the sections. Do not invent versions, dates or availability.
+${sourceFidelityRules()}
 - English, professional and concise.
 `;
 }
@@ -397,6 +406,8 @@ Rules:
 - Use the exact report IDs from the [brackets] above as keys
 - Omit a report's key entirely when nothing in it qualifies, or when it contains only failure messages
 - At most ${maxPerReport} highlights per report, each at most ${HIGHLIGHT_MAX_CHARS} characters
+- Say only what the report excerpt says: the "why it matters" part comes from the excerpt, not from you
+${sourceFidelityRules()}
 - ${goingAwayRule("highlight")}${forcedRule}`;
 }
 

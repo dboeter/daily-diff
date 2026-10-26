@@ -94,7 +94,26 @@ export const goingAwayRule = (item: "bullet" | "highlight") =>
     ? `Write every bullet as "- text". When its item is going away (a deprecation, retirement, removal, ` +
       `end of support or shutdown), put "${GOING_AWAY} " (the minus sign) after the marker: "- ${GOING_AWAY} text".`
     : `Start a highlight with "${GOING_AWAY} " (the minus sign) when its item is going away: a deprecation, ` +
-      `retirement, removal, end of support or shutdown.`) + ` Give every other ${item} no sign.`;
+      `retirement, removal, end of support or shutdown.`) +
+  ` Going away means a feature, model, API or product that is removed or gets an end date; a bug fix, ` +
+  `a breaking change or a call that now raises an error is not going away. Give every other ${item} no sign.`;
+
+/**
+ * What a Highlights, Signals or highlights.json claim may say beyond its source: nothing. On
+ * 2026-10-26 the models wrote "GA" for two Snowflake notes that said no such thing, added "audit
+ * your invocations immediately", stated a vendor's design target as achieved throughput, dropped
+ * the limits of a 200-case self-published study and built a trend from three paper titles.
+ */
+export const SOURCE_FIDELITY_RULES = [
+  "Release-stage words (GA, generally available, preview, beta, deprecated) only when the item's own row or text uses them.",
+  "No call to action, audience or conclusion the source does not state: never add advice such as 'audit now' or 'upgrade immediately'.",
+  "A vendor's or a self-published figure is that source's claim: attribute it ('X says', 'according to X'), and never state a target or estimate as achieved. An open issue is a report ('users report'), not an established fact.",
+  "A study result keeps its scope when the source gives it: sample size, a single run, not peer reviewed.",
+  "A trend or causal claim needs the rows' summaries to support it: never infer a trend from titles alone.",
+];
+
+/** SOURCE_FIDELITY_RULES as prompt rule lines. */
+export const sourceFidelityRules = (): string => SOURCE_FIDELITY_RULES.map((r) => `- ${r}`).join("\n");
 
 /** Sort by comment count desc, take top N. */
 export function topN(items: GitHubItem[], n: number): GitHubItem[] {
@@ -298,6 +317,7 @@ Rules:
 - About 150 words in total. Write no other sections.
 - Name each item in at most one bullet. Write no links or URLs: the sections below link every item.
 - Base every claim on the sections. Do not invent versions, dates or features.
+${sourceFidelityRules()}
 - English, concise and concrete.
 `;
 }

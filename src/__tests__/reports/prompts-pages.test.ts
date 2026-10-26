@@ -16,6 +16,12 @@ import {
   withFallbackHighlights,
 } from "../../reports/prompts-pages.ts";
 import { TABLES_MARKER, numberRows, parseRowSummaries } from "../../reports/summarized-table.ts";
+import {
+  AGENTS_HIGHLIGHTS_FOCUS,
+  buildPageHighlightsPrompt,
+  goingAwayRule,
+  SOURCE_FIDELITY_RULES,
+} from "../../reports/prompts.ts";
 import type { Story, StorySource } from "../../spotted/pool.ts";
 import { EMPTY_OPENROUTER, type TrendingData } from "../../trending/compose.ts";
 
@@ -375,4 +381,50 @@ describe("buildSpottedSummariesPrompt", () => {
     expect(prompt).toContain("Without one: write `N: —`");
     expect(parseRowSummaries("1: One.\n2: —").get(2)).toBe("—");
   });
+});
+
+// ---------------------------------------------------------------------------
+// Source fidelity: every Highlights, Signals and highlights.json prompt
+// ---------------------------------------------------------------------------
+
+describe("source fidelity rules", () => {
+  const prompts = {
+    page: buildPageHighlightsPrompt("AI Agents", "## Agents", AGENTS_HIGHLIGHTS_FOCUS, "2026-10-26"),
+    trends: buildTrendsProsePrompt("## Research", "2026-10-26"),
+    policy: buildPolicyProsePrompt("| Date |", "2026-10-26", "A reader."),
+    data: buildDataProsePrompt("## Snowflake", "2026-10-26"),
+    highlights: buildHighlightsPrompt({ "ai-data": "## Highlights" }),
+  };
+
+  it.each(Object.entries(prompts))("the %s prompt carries every rule", (_, prompt) => {
+    for (const rule of SOURCE_FIDELITY_RULES) expect(prompt).toContain(rule);
+  });
+
+  it("stage words, calls to action, attribution, study scope and trends are each covered", () => {
+    const rules = SOURCE_FIDELITY_RULES.join(" ");
+    expect(rules).toMatch(/GA, generally available, preview, beta/);
+    expect(rules).toMatch(/No call to action/);
+    expect(rules).toMatch(/X says/);
+    expect(rules).toMatch(/sample size, a single run, not peer reviewed/);
+    expect(rules).toMatch(/never infer a trend from titles alone/);
+  });
+
+  it("the data Highlights ask for an action only when the row gives or requires one", () => {
+    expect(prompts.data).toContain("what to do when the row says or its change requires it");
+  });
+
+  it("Signals' trend claims must rest on summaries, not titles", () => {
+    expect(prompts.trends).toContain("whose summaries (not only titles) support it");
+  });
+});
+
+describe("goingAwayRule", () => {
+  it.each(["bullet", "highlight"] as const)(
+    "keeps bug fixes and breaking changes out of the %s sign",
+    (item) => {
+      expect(goingAwayRule(item)).toContain(
+        "a bug fix, a breaking change or a call that now raises an error is not going away",
+      );
+    },
+  );
 });
