@@ -117,9 +117,12 @@ export async function fetchHfData(): Promise<HfData> {
 /** Re-uploads that only strip safety tuning: not a release of their own. */
 const UNCENSORED_RE = /uncensored|abliterated/i;
 
-/** A name segment that marks a quantised or reformatted copy of a release. */
+/**
+ * A name segment that marks a quantised or reformatted copy of a release. GSQ and RCO are
+ * from `ISTA-DASLab/DeepSeek-V4.1-Flash-1017-GSQ-RCO-GGUF` (2026-10-26).
+ */
 const VARIANT_TOKEN_RE =
-  /^(?:gguf|fp8|fp4|nvfp4|awq|gptq|mlx|bnb|int4|int8|[2-8]bit|exl2|exl3|quantized|onnx)$/i;
+  /^(?:gguf|fp8|fp4|nvfp4|awq|gptq|gsq|rco|mlx|bnb|int4|int8|[2-8]bit|exl2|exl3|quantized|onnx)$/i;
 
 /** One release: its original upload and the quantised copies of it in the same list. */
 export interface HfRow extends HfModel {
@@ -130,9 +133,9 @@ const baseName = (id: string) => (id.split("/").pop() ?? id).toLowerCase();
 
 /**
  * Whether `variant` is a quantised or reformatted copy of `base`: its name is
- * the base's name plus segments, one of which is a format token
- * (`ISTA-DASLab/DeepSeek-V4.1-Flash-1017-GSQ-RCO-GGUF` of
- * `deepseek-ai/DeepSeek-V4.1-Flash-1017`, `unsloth/flint-GGUF` of `RecursiveSI/flint`).
+ * the base's name plus format tokens only (`ISTA-DASLab/DeepSeek-V4.1-Flash-1017-GSQ-RCO-GGUF`
+ * of `deepseek-ai/DeepSeek-V4.1-Flash-1017`, `unsloth/flint-GGUF` of `RecursiveSI/flint`).
+ * Any other segment is another release: `unsloth/Qwen3.6-35B-A3B-GGUF` is not `Qwen/Qwen3.6`.
  */
 export function isVariantOf(variant: string, base: string): boolean {
   const v = baseName(variant);
@@ -141,7 +144,7 @@ export function isVariantOf(variant: string, base: string): boolean {
   return v
     .slice(b.length + 1)
     .split(/[-_]/)
-    .some((seg) => VARIANT_TOKEN_RE.test(seg));
+    .every((seg) => VARIANT_TOKEN_RE.test(seg));
 }
 
 /**

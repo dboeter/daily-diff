@@ -1,0 +1,50 @@
+[
+  {
+    "_id": "6ad2e0265a59c8bc18707765",
+    "id": "deepseek-ai/DeepSeek-V4.1-Flash-1017",
+    "author": "deepseek-ai",
+    "lastModified": "2026-10-17T05:46:55.000Z",
+    "likes": 3158,
+    "trendingScore": 1065,
+    "downloads": 95889,
+    "safetensors": {
+      "parameters": { "BF16": 1976441856, "F32": 42307282, "F8_E4M3": 204015223296, "I8": 557171343360 },
+      "total": 763205315794
+    },
+    "tags": [
+      "transformers",
+      "safetensors",
+      "deepseek_v41",
+      "text-generation",
+      "image-text-to-text",
+      "license:mit",
+      "eval-results",
+      "endpoints_compatible",
+      "8-bit",
+      "fp8",
+      "region:us"
+    ],
+    "pipeline_tag": "image-text-to-text"
+  },
+  {
+    "_id": "6ad8ca4a526b39219b923c41",
+    "id": "RecursiveSI/flint",
+    "author": "RecursiveSI",
+    "lastModified": "2026-10-21T14:24:03.000Z",
+    "likes": 906,
+    "trendingScore": 869,
+    "downloads": 8470,
+    "safetensors": { "parameters": { "BF16": 39785287456 }, "total": 39785287456 },
+    "tags": [
+      "transformers",
+      "safetensors",
+      "flint",
+      "text-generation",
+      "conversational",
+      "license:apache-2.0",
+      "endpoints_compatible",
+      "region:us"
+    ],
+    "pipeline_tag": "text-generation"
+  }
+]

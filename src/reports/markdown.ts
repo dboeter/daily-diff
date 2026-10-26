@@ -144,6 +144,13 @@ export function releaseFallbackSection(a: ProjectActivity): string {
 export const boldLabelColonInside = (md: string): string =>
   md.replace(/^(\s*[-*]\s+)\*\*([^*\n]+?)\*\*:/gm, "$1**$2:**");
 
+/** A model-written project section with its backticked tokens checked against that project's prompt block. */
+function checkProjectTokens(section: string, g: ProjectGroup): string {
+  const a = g.activities.find((p) => sectionHeading(p.config.name).test(section));
+  if (!a) return section;
+  return checkCodeTokens(new Map([[0, section]]), new Map([[0, formatProject(a)]]), g.title).get(0)!;
+}
+
 /**
  * A group's projects as rendered: the model's summary without text outside a `##` section and
  * without a project section that has no bullet (both are absence notes the prompt forbids), plus a
@@ -152,13 +159,6 @@ export const boldLabelColonInside = (md: string): string =>
  * (`checkCodeTokens`). `quiet` is every other checked project without a section; after a failed
  * call (MSG.summaryFailed) the data decides.
  */
-/** A model-written project section with its backticked tokens checked against that project's prompt block. */
-function checkProjectTokens(section: string, g: ProjectGroup): string {
-  const a = g.activities.find((p) => sectionHeading(p.config.name).test(section));
-  if (!a) return section;
-  return checkCodeTokens(new Map([[0, section]]), new Map([[0, formatProject(a)]]), g.title).get(0)!;
-}
-
 function groupProjects(g: ProjectGroup): { body: string; quiet: ProjectActivity[] } {
   const failed = g.summary.trim() === MSG.summaryFailed;
   const covered = g.activities.filter((a) => covers(g.summary, a));
@@ -477,9 +477,7 @@ export function unsummarizedRows(
   return [
     ...radar.filter((r) => summaryText(summaries, r) === "—").map((r) => r.name),
     ...tables.filter((r) => summaryText(summaries, r) === "—").map((r) => r.fullName),
-    ...hf
-      .filter((r) => summaryText(hfSummaries, { n: r.n, description: hfDescription(r) }) === "—")
-      .map((r) => r.id),
+    ...hf.filter((r) => hfSummaryText(hfSummaries, r) === "—").map((r) => r.id),
   ];
 }
 
@@ -751,6 +749,15 @@ export function renderOpenRouterUsage(
 }
 
 /**
+ * A Hugging Face row's summary cell: the model's line, else its task and size. A "—" line
+ * counts as none: the prompt allows it for an unknown task even when the size is known.
+ */
+export function hfSummaryText(summaries: Map<number, string>, r: Numbered<HfRow>): string {
+  const line = summaries.get(r.n);
+  return line && line !== "—" ? line : summaryText(new Map(), { n: r.n, description: hfDescription(r) });
+}
+
+/**
  * Trends' Hugging Face table, in code like OpenRouter usage: the rank is the
  * row's place in the Hub's order, 🔥 a row also on the page dated 7 days
  * earlier (`lastWeek`: `lastWeekKeys`), quantised copies follow the original's
@@ -770,7 +777,7 @@ export function renderHfTable(
       : "";
     return (
       `| ${i + 1} | ${fire}[${cell(r.id)}](${cell(r.url)})${variants} | ${r.likes.toLocaleString("en-US")} | ` +
-      `${r.downloads.toLocaleString("en-US")} | ${cell(summaryText(summaries, { n: r.n, description: hfDescription(r) }))} |`
+      `${r.downloads.toLocaleString("en-US")} | ${cell(hfSummaryText(summaries, r))} |`
     );
   });
   return `## ${T.hfHeading}\n\n${T.hfIntro}\n\n${T.hfHeader}\n${lines.join("\n")}`;

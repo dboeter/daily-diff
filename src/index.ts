@@ -478,8 +478,7 @@ async function main(): Promise<void> {
 
   // 2. The agents report's two sections and the story summaries of every page's Spotted rows and
   // Trends' Most discussed (one call, before the page builders: their Highlights calls see their
-  // story tables); every other
-  // report makes its own calls in its builder.
+  // story tables); every other report makes its own calls in its builder.
   console.log("  Generating summaries...");
   // Trends' Most discussed rows (weekly) join the same call, numbered after the Spotted rows.
   const discussedRows = numberRows(discussed, spottedRows.length);

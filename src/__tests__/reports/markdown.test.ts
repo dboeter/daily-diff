@@ -480,6 +480,24 @@ describe("renderHfTable", () => {
     expect(renderHfTable([], new Map())).toBe("");
   });
 
+  it("fills a row the model left — with its size and task; only a row with no data stays —", () => {
+    const rows = numberRows([
+      model("o/sized", { pipelineTag: "" }),
+      model("o/tasked"),
+      model("o/bare", { pipelineTag: "", parameters: null }),
+    ]);
+    const dashes = new Map([
+      [1, "—"],
+      [2, "—"],
+      [3, "—"],
+    ]);
+    const md = renderHfTable(rows, dashes);
+    expect(md).toContain("| 27B parameters |");
+    expect(md).toContain("| Image text to text, 27B parameters |");
+    expect(md).toMatch(/\[o\/bare\][^\n]*\| — \|$/m);
+    expect(unsummarizedRows(undefined, new Map(), rows, dashes)).toEqual(["o/bare"]);
+  });
+
   it("names the rows that show — for the prose call: no summary, no description", () => {
     const hf = numberRows([model("o/a"), model("o/b", { pipelineTag: "", parameters: null })]);
     const report = {

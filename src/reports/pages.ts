@@ -165,7 +165,9 @@ export async function buildTrendsReport(
     rows.length
       ? generateOr("trending-summaries", buildTrendingSummariesPrompt(rows, dateStr), "", LLM_TOKENS_LISTING)
       : "",
-    hfTableRows.length ? generateOr("trends-models", buildHfSummariesPrompt(hfTableRows, dateStr), "") : "",
+    hfTableRows.length
+      ? generateOr("trends-hf-summaries", buildHfSummariesPrompt(hfTableRows, dateStr), "")
+      : "",
     // No item, no call: the notice only when the fetch failed, else no section.
     hasSkills
       ? generateOr(
