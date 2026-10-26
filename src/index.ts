@@ -162,7 +162,7 @@ async function withAnnouncement(r: GitHubRelease): Promise<GitHubRelease> {
 /**
  * Stable releases and hot issues for one project. A failed release fetch is `fetchFailed`, shown as unavailable.
  * `weekSince` (the data report): also the stable releases since then, as `weekReleases`, from the same request.
- * `hotRepeat`: the repo's hot issues an earlier day showed unchanged (`isRepeatHotIssue`), left out.
+ * `hotRepeat`: the repo's hot issues an earlier day showed (`isRepeatHotIssue`), left out.
  */
 async function fetchProject(
   cfg: RepoConfig,

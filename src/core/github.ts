@@ -211,14 +211,6 @@ export const HOT_ISSUE_MIN_ENGAGEMENT_LABELLED = 3;
 export const HOT_ISSUES_PER_REPO = 2;
 /** Matched against each label name, so "area:security" and "type: regression" count. */
 const HOT_LABEL = /regression|security/i;
-/**
- * Minimum look-back for an issue's creation date. Engagement takes days to
- * build: on 2026-10-04 not one tracked agent had an issue opened in the last
- * 24h with 10+ comments and 👍, while the previous week had dozens. 48h finds
- * them; the hot-issues state keeps the overlap from repeating an unchanged issue.
- */
-export const HOT_ISSUE_MIN_WINDOW_MS = 48 * 60 * 60 * 1000;
-
 export function issueEngagement(i: GitHubItem): number {
   return i.comments + (i.reactions?.["+1"] ?? 0);
 }
@@ -232,22 +224,15 @@ function isHot(i: GitHubItem): boolean {
 export const HOT_ISSUES_STATE_FILE = "digests/hot-issues-state.json";
 
 /**
- * A hot issue as a state item, `issue:<owner/repo>#<n> <labels> ×<power of two>`:
- * its regression/security labels and engagement's power of two are in the id,
- * so a new such label or doubled engagement shows it again, and a few more
- * comments do not. Not a stage item: `stages` is never pruned, and an issue
- * leaves the creation window within days, so the 30-day prune of `reported` suffices.
+ * A hot issue as a state item, `issue:<owner/repo>#<n>`: a page shows an issue
+ * once, and more engagement or a new label does not bring it back. The state's
+ * 30-day prune means an issue still active a month after it was shown can return once.
  */
 export function hotIssueStateItem(repo: string, i: GitHubItem): StateItem {
-  const labels = i.labels.map((l) => l.name).filter((n) => HOT_LABEL.test(n));
-  const level = Math.floor(Math.log2(Math.max(1, issueEngagement(i))));
-  return {
-    id: `issue:${repo}#${i.number} ${labels.sort().join(",")} ×${2 ** level}`,
-    published: i.created_at,
-  };
+  return { id: `issue:${repo}#${i.number}`, published: i.created_at };
 }
 
-/** Whether an earlier day showed the issue at its current labels and engagement level (`hotIssueStateItem`); one shown today is not a repeat. */
+/** Whether an earlier day showed the issue (`hotIssueStateItem`); one shown today is not a repeat. */
 export function isRepeatHotIssue(
   state: ReportedState | null,
   dateStr: string,
@@ -257,34 +242,23 @@ export function isRepeatHotIssue(
 }
 
 /**
- * Pick the hot issues from a list: open, opened since `createdSince`, past the
- * engagement bar and no unchanged repeat (`isRepeat`). Highest engagement
- * first, capped at HOT_ISSUES_PER_REPO. Long-running mega-threads are excluded
- * by the creation date — they would otherwise top the list every day.
+ * Pick the hot issues from a list: open, past the engagement bar, whenever
+ * opened, and not shown on an earlier day (`isRepeat`). Highest engagement
+ * first, capped at HOT_ISSUES_PER_REPO after the repeats are dropped.
  */
 export function selectHotIssues(
   items: GitHubItem[],
-  createdSince: Date,
   isRepeat: (i: GitHubItem) => boolean = () => false,
 ): GitHubItem[] {
   return items
-    .filter(
-      (i) =>
-        !i.pull_request &&
-        i.state === "open" &&
-        new Date(i.created_at) >= createdSince &&
-        isHot(i) &&
-        !isRepeat(i),
-    )
+    .filter((i) => !i.pull_request && i.state === "open" && isHot(i) && !isRepeat(i))
     .sort((a, b) => issueEngagement(b) - issueEngagement(a))
     .slice(0, HOT_ISSUES_PER_REPO);
 }
 
 /**
- * Hot issues for a repo, in one request: the 50 most-commented open issues
- * opened since `since` (widened to HOT_ISSUE_MIN_WINDOW_MS), via the search API — the
- * issues list endpoint can only filter by update time, and its top-commented
- * page is all months-old mega-threads.
+ * Hot issues for a repo, in one request: the 50 most-engaged open issues with
+ * activity since `since`, however old, via the search API.
  *
  * Paced by searchSlot. A failure should still be treated as "no hot issues",
  * not a failed repo.
@@ -294,18 +268,18 @@ export async function fetchHotIssues(
   since: Date,
   isRepeat?: (i: GitHubItem) => boolean,
 ): Promise<GitHubItem[]> {
-  const createdSince = new Date(Math.min(since.getTime(), Date.now() - HOT_ISSUE_MIN_WINDOW_MS));
   const result = await githubGet<{ items: GitHubItem[] }>(
     "https://api.github.com/search/issues",
     {
-      q: `repo:${repo} is:issue is:open created:>=${createdSince.toISOString().slice(0, 19)}Z`,
-      sort: "comments",
+      q: `repo:${repo} is:issue is:open updated:>=${since.toISOString().slice(0, 19)}Z`,
+      // Comments plus every reaction: the search sort closest to issueEngagement (comments + 👍).
+      sort: "interactions",
       order: "desc",
       per_page: "50",
     },
     searchSlot,
   );
-  return selectHotIssues(result.items, createdSince, isRepeat);
+  return selectHotIssues(result.items, isRepeat);
 }
 
 /** One `stargazers/history` bucket: a calendar week from Sunday, newest bucket first. */

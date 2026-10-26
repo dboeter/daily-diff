@@ -87,47 +87,35 @@ function issue(o: {
 
 describe("selectHotIssues", () => {
   it("keeps issues past the engagement threshold, highest first", () => {
-    const hot = selectHotIssues(
-      [
-        issue({ number: 1, comments: 4, thumbs: 6 }),
-        issue({ number: 2, comments: 30 }),
-        issue({ number: 3, comments: 9 }),
-      ],
-      SINCE,
-    );
+    const hot = selectHotIssues([
+      issue({ number: 1, comments: 4, thumbs: 6 }),
+      issue({ number: 2, comments: 30 }),
+      issue({ number: 3, comments: 9 }),
+    ]);
     expect(hot.map((i) => i.number)).toEqual([2, 1]);
   });
 
   it("lowers the bar for regression and security labels, but does not drop it", () => {
-    const hot = selectHotIssues(
-      [
-        issue({ number: 1, comments: 3, labels: ["Regression"] }),
-        issue({ number: 2, comments: 4, labels: ["area:security"] }),
-        issue({ number: 3, comments: 2, labels: ["regression"] }),
-        issue({ number: 4, comments: 5, labels: ["bug"] }),
-      ],
-      SINCE,
-    );
+    const hot = selectHotIssues([
+      issue({ number: 1, comments: 3, labels: ["Regression"] }),
+      issue({ number: 2, comments: 4, labels: ["area:security"] }),
+      issue({ number: 3, comments: 2, labels: ["regression"] }),
+      issue({ number: 4, comments: 5, labels: ["bug"] }),
+    ]);
     expect(hot.map((i) => i.number)).toEqual([2, 1]);
   });
 
-  it("drops issues opened before the window, however busy", () => {
-    const hot = selectHotIssues(
-      [issue({ number: 1, comments: 500, created_at: "2026-06-01T00:00:00Z" })],
-      SINCE,
-    );
-    expect(hot).toEqual([]);
+  it("keeps an issue opened months ago that is over the bar", () => {
+    const hot = selectHotIssues([issue({ number: 1, comments: 40, created_at: "2026-06-01T00:00:00Z" })]);
+    expect(hot.map((i) => i.number)).toEqual([1]);
   });
 
   it("drops pull requests", () => {
-    expect(selectHotIssues([issue({ number: 1, comments: 50, isPr: true })], SINCE)).toEqual([]);
+    expect(selectHotIssues([issue({ number: 1, comments: 50, isPr: true })])).toEqual([]);
   });
 
   it("caps the result at two per repo", () => {
-    const hot = selectHotIssues(
-      [10, 20, 30].map((c, n) => issue({ number: n + 1, comments: c })),
-      SINCE,
-    );
+    const hot = selectHotIssues([10, 20, 30].map((c, n) => issue({ number: n + 1, comments: c })));
     expect(hot.map((i) => i.number)).toEqual([3, 2]);
   });
 });
@@ -136,7 +124,6 @@ describe("hot issue repeats", () => {
   // OpenCode #58781 and #58670: shown on 2026-10-25, shown again word for word on 10-26 though
   // both were closed "not planned" on 10-25.
   const REPO = "anomalyco/opencode";
-  const WINDOW = new Date("2026-10-24T00:00:00Z");
   const opencode = (n: number, o: { comments?: number; labels?: string[]; state?: string } = {}) =>
     issue({ number: n, created_at: "2026-10-24T10:00:00Z", comments: o.comments ?? 20, ...o });
   const shown25 = nextReportedState(
@@ -145,24 +132,16 @@ describe("hot issue repeats", () => {
     "2026-10-25",
   );
   const pick = (items: GitHubItem[], dateStr = "2026-10-26") =>
-    selectHotIssues(items, WINDOW, isRepeatHotIssue(shown25, dateStr, REPO)).map((i) => i.number);
+    selectHotIssues(items, isRepeatHotIssue(shown25, dateStr, REPO)).map((i) => i.number);
 
   it("drops a closed issue, however hot", () => {
-    expect(selectHotIssues([opencode(58781, { state: "closed", comments: 90 })], WINDOW)).toEqual([]);
+    expect(selectHotIssues([opencode(58781, { state: "closed", comments: 90 })])).toEqual([]);
   });
 
-  it("skips an issue an earlier day showed unchanged, or with a few more comments", () => {
-    expect(pick([opencode(58781), opencode(58670, { comments: 25 })])).toEqual([]);
-  });
-
-  it("shows it again once its engagement doubles or it gains a regression/security label", () => {
-    expect(pick([opencode(58781, { comments: 40 }), opencode(58670, { labels: ["regression"] })])).toEqual([
-      58781, 58670,
-    ]);
-  });
-
-  it("ignores labels other than regression/security", () => {
-    expect(pick([opencode(58781, { labels: ["needs-triage"] })])).toEqual([]);
+  it("skips an issue an earlier day showed, even when its engagement or labels grew", () => {
+    expect(pick([opencode(58781, { comments: 400 }), opencode(58670, { labels: ["regression"] })])).toEqual(
+      [],
+    );
   });
 
   it("keeps it on a same-day re-run", () => {
@@ -182,33 +161,24 @@ describe("fetchHotIssues", () => {
     } as Response);
   }
 
-  it("searches issues created in the window, most commented first", async () => {
+  it("searches open issues updated in the window, whenever opened, most engaged first", async () => {
     vi.useFakeTimers({ now: new Date("2026-10-04T22:37:00Z") });
-    const fetchSpy = mockSearch([issue({ number: 7, comments: 12, created_at: "2026-10-03T01:00:00Z" })]);
-
-    const pending = fetchHotIssues("org/repo", new Date("2026-09-27T22:37:00Z"));
-    await vi.runAllTimersAsync(); // searchSlot spacing from the previous test
-    const hot = await pending;
-
-    const url = new URL(String(fetchSpy.mock.calls[0]![0]));
-    expect(url.pathname).toBe("/search/issues");
-    expect(url.searchParams.get("q")).toBe("repo:org/repo is:issue is:open created:>=2026-09-27T22:37:00Z");
-    expect(url.searchParams.get("sort")).toBe("comments");
-    expect(hot.map((i) => i.number)).toEqual([7]);
-    vi.useRealTimers();
-  });
-
-  it("widens a 24h window to 48h so engagement has time to build", async () => {
-    vi.useFakeTimers({ now: new Date("2026-10-04T22:37:00Z") });
-    const fetchSpy = mockSearch([issue({ number: 8, comments: 15, created_at: "2026-10-03T01:00:00Z" })]);
+    const fetchSpy = mockSearch([
+      issue({ number: 7, comments: 12, created_at: "2026-10-03T01:00:00Z" }),
+      issue({ number: 9, comments: 60, created_at: "2026-06-01T00:00:00Z" }),
+    ]);
 
     const pending = fetchHotIssues("org/repo", new Date("2026-10-03T22:37:00Z"));
     await vi.runAllTimersAsync(); // searchSlot spacing from the previous test
     const hot = await pending;
 
-    const q = new URL(String(fetchSpy.mock.calls[0]![0])).searchParams.get("q");
-    expect(q).toContain("created:>=2026-10-02T22:37:00Z");
-    expect(hot.map((i) => i.number)).toEqual([8]);
+    const url = new URL(String(fetchSpy.mock.calls[0]![0]));
+    const q = url.searchParams.get("q");
+    expect(url.pathname).toBe("/search/issues");
+    expect(q).toBe("repo:org/repo is:issue is:open updated:>=2026-10-03T22:37:00Z");
+    expect(q).not.toContain("created:");
+    expect(url.searchParams.get("sort")).toBe("interactions");
+    expect(hot.map((i) => i.number)).toEqual([9, 7]);
     vi.useRealTimers();
   });
 });
