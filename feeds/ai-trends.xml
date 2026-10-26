@@ -13,7 +13,664 @@
       <height>144</height>
     </image>
     <atom:link href="https://dboeter.github.io/daily-diff/feeds/ai-trends.xml" rel="self" type="application/rss+xml"/>
-    <lastBuildDate>Sun, 25 Oct 2026 01:03:36 +0000</lastBuildDate>
-
+    <lastBuildDate>Mon, 26 Oct 2026 04:36:17 +0000</lastBuildDate>
+    <item>
+      <title>Trends 2026-10-26</title>
+      <link>https://dboeter.github.io/daily-diff/#2026-10-26/ai-trends</link>
+      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-10-26/ai-trends</guid>
+      <pubDate>Mon, 26 Oct 2026 00:00:00 +0000</pubDate>
+      <description>Trends 2026-10-26 ⬛ Overview · 🟪 AI Agents · 🟦 AI Models &amp;amp; Labs · 🟨 Data Engineering · 🟫 Trends Sources: GitHub Trending + GitHub Search API + OpenRouter + npm + Hugging Face + arXiv + Hacker News + Lobste.rs + Dev.to | Generated: 2026-10-26 04:31 UTC Highlights DeepSeek V4.1 Flash variants dominate OpenRouter with 51.56T combined weekly tokens (33.56T + 18.00T), far outpacing the next tier of models Claude Code holds #2 on OpenRouter at 12.67T tokens/week with +34% growth, while Strix s...</description>
+      <content:encoded><![CDATA[<h1>Trends 2026-10-26</h1>
+<p><a href="https://dboeter.github.io/daily-diff/#2026-10-26">⬛ Overview</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-26/ai-agents">🟪 AI Agents</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-26/ai-models">🟦 AI Models &amp; Labs</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-26/ai-data">🟨 Data Engineering</a> · <strong>🟫 Trends</strong></p>
+<blockquote>
+<p>Sources: GitHub Trending + GitHub Search API + OpenRouter + npm + Hugging Face + arXiv + Hacker News + Lobste.rs + Dev.to | Generated: 2026-10-26 04:31 UTC</p>
+</blockquote>
+<hr>
+<h2>Highlights</h2>
+<ul>
+<li>DeepSeek V4.1 Flash variants dominate OpenRouter with <strong>51.56T combined weekly tokens</strong> (33.56T + 18.00T), far outpacing the next tier of models</li>
+<li><strong>Claude Code</strong> holds #2 on OpenRouter at 12.67T tokens/week with <strong>+34% growth</strong>, while <strong>Strix</strong> surges <strong>+131%</strong> to 1.52T tokens/week</li>
+<li><strong>Cloudflare/security-audit-skill</strong> adds 15K stars in a week (<strong>+47%</strong>), equipping agents with verified, machine-readable security audit capabilities</li>
+<li><strong>JetBrains/thinkrail</strong> (+157% stars) and <strong>sandbox-quantum/switch</strong> (+105% stars) signal rapid adoption for agent-native IDEs and chat-embedded teammates</li>
+<li>Research converges on <strong>coding agent evaluation</strong>: SWE-VERIFIER (selective verification), SWE-DIVE (multi-turn dynamic simulation), and PAUSE (pre-edit planning intervention) all appear this week</li>
+</ul>
+<hr>
+<h2>Agents &amp; coding tools</h2>
+<h3>🚀 Agent &amp; Coding Tool Radar</h3>
+<table>
+<thead>
+<tr>
+<th align="left">Tool</th>
+<th align="left">Source</th>
+<th align="left">Signal</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a href="https://hunterswarm.com/">HunterSwarm</a></td>
+<td align="left">OpenRouter</td>
+<td align="left">🆕 week #128 / month —, 26.6B tokens/week</td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left"><a href="https://birdstrike.local/">Prime Agent + Birdstrike Security</a></td>
+<td align="left">OpenRouter</td>
+<td align="left">🆕 week — / month —</td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left"><a href="https://openpave.ai/">OpenPAVE</a></td>
+<td align="left">OpenRouter</td>
+<td align="left">🆕 week — / month —</td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left"><a href="https://realswe.com/">Real-SWE</a></td>
+<td align="left">OpenRouter</td>
+<td align="left">🆕 week — / month —</td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left">🔥 <a href="https://claude.ai/code">Claude Code</a></td>
+<td align="left">OpenRouter</td>
+<td align="left">week #2 / month #2, 12.67T tokens/week · 📈 +34%</td>
+<td align="left">Claude Code is Anthropic&#39;s agentic coding tool that reads your entire codebase, plans and executes changes across files, runs tests, and iterates on failures from natural language prompts. It matters because it lets developers drive complex, multi-file edits and test-driven fixes entirely through conversation.</td>
+</tr>
+<tr>
+<td align="left">🔥 <a href="https://www.npmjs.com/package/@reason-machines/cli">@reason-machines/cli</a></td>
+<td align="left">npm</td>
+<td align="left">30,245/week, 2.3x</td>
+<td align="left">The Reason CLI manages sessions and coding agents with optional local device execution. It matters because it gives developers a unified command-line interface to orchestrate agent workflows and run them locally.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://pi.dev/">pi</a></td>
+<td align="left">OpenRouter</td>
+<td align="left">week #6 / month #8, 5.22T tokens/week · 📈 +57%</td>
+<td align="left">Pi is a coding agent positioned as personally yours among many alternatives. It matters because it frames the agent as a personalized tool rather than a generic service.</td>
+</tr>
+<tr>
+<td align="left">🔥 <a href="https://strix.ai/">Strix</a></td>
+<td align="left">OpenRouter</td>
+<td align="left">week #14 / month #15, 1.52T tokens/week · 📈 +131%</td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left"><a href="https://github.com/deepseek-ai/deepseek-harness">DeepSeek Harness</a></td>
+<td align="left">OpenRouter</td>
+<td align="left">week #8 / month #12, 2.89T tokens/week · 📈 +76%</td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left"><a href="https://proto.erp.ai/">Proto Agent</a></td>
+<td align="left">OpenRouter</td>
+<td align="left">week #16 / month #20, 932.9B tokens/week · 📈 +66%</td>
+<td align="left">Proto Agent is a personal agent tailored for business use. It matters because it targets professional workflows with a focus on individual productivity.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://zcode.z.ai/">ZCode</a></td>
+<td align="left">OpenRouter</td>
+<td align="left">week #20 / month #23, 603.7B tokens/week · 📈 +30%</td>
+<td align="left">ZCode integrates top AI agents into existing developer toolchains to enable seamless planning, coding, review, and deployment. It matters because it reduces friction by connecting agents to the tools developers already use.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://geniusplugin.vercel.app/">Aura</a></td>
+<td align="left">OpenRouter</td>
+<td align="left">week #23 / month #28, 447.2B tokens/week · 📈 +78%</td>
+<td align="left">Aura is an AI tool for game developers that builds, tests, and verifies code, supporting Unreal Engine and Unity. It matters because it provides a specialized, studio-trusted agent for game development workflows across major engines.</td>
+</tr>
+</tbody></table>
+<h3>🧑‍💻 Coding Agents</h3>
+<table>
+<thead>
+<tr>
+<th align="left">Project</th>
+<th align="left">Lang</th>
+<th align="right">Stars (total / this week, %)</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a href="https://github.com/anomalyco/opencode">anomalyco/opencode</a></td>
+<td align="left">TypeScript</td>
+<td align="right">221,595 (+5,921, +2.7%)</td>
+<td align="left">OpenCode is an open-source coding agent. It matters because it gives developers a transparent, community-driven alternative to proprietary agents.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://github.com/JetBrains/thinkrail">JetBrains/thinkrail</a></td>
+<td align="left">TypeScript</td>
+<td align="right">1,964 (+1,200, +157%)</td>
+<td align="left">Thinkrail is a lightweight IDE that integrates the Pi agent and adapts to individual work styles. It matters because it offers a customizable, agent-native development environment built around personal coding vibes.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://github.com/WhiteTowerAI/ohmygame">WhiteTowerAI/ohmygame</a></td>
+<td align="left">TypeScript</td>
+<td align="right">1,145 (+209, +22%)</td>
+<td align="left">OhMyGame is an open-source, all-in-one AI game studio that provides a game canvas and lets developers bring their own API keys. It matters because it enables solo developers to build games with AI assistance in a single, self-hosted application.</td>
+</tr>
+<tr>
+<td align="left">🔥 <a href="https://github.com/michael-denyer/pstack-claude">michael-denyer/pstack-claude</a></td>
+<td align="left">JavaScript</td>
+<td align="right">3,438 (+463, +16%)</td>
+<td align="left">Pstack-claude ports rigorous agent workflows from Cursor primitives to multiple harnesses including Claude Code, Codex, Copilot, Pi, OpenCode, Muse, Gemini, and Prime Agent. It matters because it lets teams reuse structured agent workflows across different coding agent platforms.</td>
+</tr>
+<tr>
+<td align="left">🔥 <a href="https://github.com/GCWing/OpenBitFun">GCWing/OpenBitFun</a></td>
+<td align="left">Rust</td>
+<td align="right">3,225 (+372, +13%)</td>
+<td align="left">OpenBitFun pairs a high-performance Rust agent runtime with a polished desktop app, extending code-agent depth to general-purpose tasks. It matters because it offers a fast, local-first agent that works beyond software development.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://github.com/vastsa/PI-Desktop">vastsa/PI-Desktop</a></td>
+<td align="left">TypeScript</td>
+<td align="right">7,270 (+276, +3.9%)</td>
+<td align="left">PI-Desktop is a local-first desktop client for the Pi agent harness built with Electron and a Rust core, supporting user-installable plugins. It matters because it provides a plugin-extensible, offline-capable interface for the Pi coding agent.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://github.com/LodyAI/Lody">LodyAI/Lody</a></td>
+<td align="left">TypeScript</td>
+<td align="right">1,565 (+130, +9.1%)</td>
+<td align="left">Lody enables sharing coding agents across team members on both phone and desktop. It matters because it facilitates collaborative agent use across devices and platforms.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://github.com/superplanehq/superplane">superplanehq/superplane</a></td>
+<td align="left">Go</td>
+<td align="right">8,240 (+251, +3.1%)</td>
+<td align="left">Superplane is an open-source factory for one-shot engineering tasks. It matters because it automates the creation of complete engineering artifacts in a single run.</td>
+</tr>
+</tbody></table>
+<h3>🧰 Agent Harnesses &amp; Frameworks</h3>
+<table>
+<thead>
+<tr>
+<th align="left">Project</th>
+<th align="left">Lang</th>
+<th align="right">Stars (total / this week, %)</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">🔥 <a href="https://github.com/ruvnet/ruflo">ruvnet/ruflo</a></td>
+<td align="left">TypeScript</td>
+<td align="right">79,320 (+2,987, +3.9%)</td>
+<td align="left">Ruflo is an agent harness for deploying multi-agent swarms, coordinating autonomous workflows, and building conversational AI systems with adaptive memory, self-learning, federation, and RAG integration. It matters because it provides a feature-rich, integrated platform for orchestrating multiple coding agents like Claude Code and Codex.</td>
+</tr>
+<tr>
+<td align="left">🔥 <a href="https://github.com/DSH-APP/DSHA">DSH-APP/DSHA</a></td>
+<td align="left">Java</td>
+<td align="right">2,340 (+736, +46%)</td>
+<td align="left">DSHA runs DeepSeek Harness on Android without root or Termux, providing a full Ubuntu environment with zero ptrace overhead, real-time AI output, ADB direct connection, and data persistence. It matters because it brings a complete, low-overhead agent harness to mobile devices.</td>
+</tr>
+<tr>
+<td align="left">🔥 <a href="https://github.com/dataelement/dsh-desktop">dataelement/dsh-desktop</a></td>
+<td align="left">JavaScript</td>
+<td align="right">16,933 (+1,723, +11%)</td>
+<td align="left">DSHDesktop is the desktop version of DeepSeek Harness. It matters because it brings the DeepSeek agent harness to desktop platforms for local use.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://github.com/HarnessRouter/harnessrouter">HarnessRouter/harnessrouter</a></td>
+<td align="left">Python</td>
+<td align="right">3,643 (+525, +17%)</td>
+<td align="left">HarnessRouter Community Edition is a self-hosted, Apache-2.0 unified interface that runs multiple agent harnesses like Codex, Claude Code, Hermes, PI, and DSH through one API with sessions, streaming, and failure handling. It matters because it standardizes agent interaction via the Unified Harness Protocol while keeping keys and infrastructure under developer control.</td>
+</tr>
+<tr>
+<td align="left">🔥 <a href="https://github.com/herdrdev/herdr">herdrdev/herdr</a></td>
+<td align="left">Rust</td>
+<td align="right">45,880 (+1,233, +2.8%)</td>
+<td align="left">Herdr is a runtime environment for hosting coding agents. It matters because it provides a dedicated execution layer for agent workloads.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://github.com/FailproofAI/failproofai">FailproofAI/failproofai</a></td>
+<td align="left">TypeScript</td>
+<td align="right">6,630 (+812, +14%)</td>
+<td align="left">FailproofAI provides observability and policy enforcement for AI agent harnesses, capturing every run for runtime reliability. It matters because it adds governance and reliability tracking to agent executions.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://github.com/androoAGI/starnet">androoAGI/starnet</a></td>
+<td align="left">JavaScript</td>
+<td align="right">1,614 (+93, +6.1%)</td>
+<td align="left">Starnet is a local-first desktop agent harness with a pixel-art interface where developers can watch their agent crews execute tasks using their own API keys. It matters because it offers a transparent, visual, and self-hosted environment for managing agent teams.</td>
+</tr>
+<tr>
+<td align="left">🔥 <a href="https://github.com/alibaba/open-code-review">alibaba/open-code-review</a></td>
+<td align="left">Go</td>
+<td align="right">48,278 (+689, +1.4%)</td>
+<td align="left">Alibaba&#39;s open-code-review is a hybrid code review tool combining deterministic pipelines with an LLM agent, offering line-level comments and built-in multi-language security rules, compatible with OpenAI and Anthropic. It matters because it delivers scalable, secure, and precise automated code reviews with broad language support.</td>
+</tr>
+</tbody></table>
+<h3>🕸️ Multi-Agent &amp; Orchestration</h3>
+<table>
+<thead>
+<tr>
+<th align="left">Project</th>
+<th align="left">Lang</th>
+<th align="right">Stars (total / this week, %)</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a href="https://github.com/stablyai/orca">stablyai/orca</a></td>
+<td align="left">TypeScript</td>
+<td align="right">106,045 (+9,622, +10%)</td>
+<td align="left">Orca is a cross-platform platform for managing a fleet of coding agents like Grok Bot and Claude Code using your own subscriptions. It matters because it unifies access to multiple agents across desktop, mobile, and remote environments.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://github.com/sandbox-quantum/switch">sandbox-quantum/switch</a></td>
+<td align="left">Python</td>
+<td align="right">1,623 (+832, +105%)</td>
+<td align="left">Switch deploys open-source AI teammates into chat platforms like Slack, Teams, Discord, Telegram, and Mattermost, self-hosted with any agent harness and model. It matters because it embeds agent collaboration directly into team communication tools.</td>
+</tr>
+<tr>
+<td align="left">🔥 <a href="https://github.com/paperclipai/paperclip">paperclipai/paperclip</a></td>
+<td align="left">TypeScript</td>
+<td align="right">107,358 (+3,228, +3.1%)</td>
+<td align="left">Paperclip is an open-source application for managing AI agents in the workplace. It matters because it centralizes agent orchestration for team productivity.</td>
+</tr>
+<tr>
+<td align="left">🔥 <a href="https://github.com/mvschwarz/openrig">mvschwarz/openrig</a></td>
+<td align="left">TypeScript</td>
+<td align="right">8,196 (+394, +5%)</td>
+<td align="left">Openrig lets developers build persistent agent networks from Claude Code, Codex, and Pi with defined roles, shared context, and work ownership. It matters because it enables structured, long-lived multi-agent teams rather than one-off interactions.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://github.com/happier-dev/happier">happier-dev/happier</a></td>
+<td align="left">TypeScript</td>
+<td align="right">2,060 (+69, +3.5%)</td>
+<td align="left">Happier is a cross-platform client and orchestrator supporting over ten coding agents with full end-to-end encryption. It matters because it provides a secure, unified interface for diverse agents across all devices.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://github.com/OrchestratorInc/agent-orchestrator">OrchestratorInc/agent-orchestrator</a></td>
+<td align="left">Go</td>
+<td align="right">13,646 (+316, +2.4%)</td>
+<td align="left">Agent-orchestrator is an open-source Apache-2.0 orchestrator for over 30 coding agents that plans, runs, and supervises teams from task to merged PR across desktop and mobile. It matters because it offers a comprehensive, cross-platform command center for large-scale agent teamwork.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://github.com/eneskirca/nodeterm">eneskirca/nodeterm</a></td>
+<td align="left">TypeScript</td>
+<td align="right">2,108 (+69, +3.4%)</td>
+<td align="left">Nodeterm manages AI coding agent sessions as draggable nodes on an infinite canvas, backed by tmux terminals, available on macOS, Linux, and browser. It matters because it visualizes and parallelizes multiple agent terminals in a spatial, intuitive workspace.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://github.com/Yeachan-Heo/oh-my-claudecode">Yeachan-Heo/oh-my-claudecode</a></td>
+<td align="left">TypeScript</td>
+<td align="right">40,266 (+216, +0.5%)</td>
+<td align="left">Oh-my-claudecode provides team-oriented multi-agent orchestration specifically for Claude Code. It matters because it extends Claude Code with collaborative, multi-agent workflows for group development.</td>
+</tr>
+</tbody></table>
+<h3>🔌 Agent Tooling</h3>
+<table>
+<thead>
+<tr>
+<th align="left">Project</th>
+<th align="left">Lang</th>
+<th align="right">Stars (total / this week, %)</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a href="https://github.com/cloudflare/security-audit-skill">cloudflare/security-audit-skill</a></td>
+<td align="left">JavaScript</td>
+<td align="right">47,208 (+15,072, +47%)</td>
+<td align="left">Cloudflare&#39;s security-audit-skill equips coding agents with a multi-phase security audit capability that produces independently verified, machine-readable findings. It matters because it automates rigorous, verifiable security reviews within agent workflows.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://github.com/Graphify-Labs/graphify">Graphify-Labs/graphify</a></td>
+<td align="left">Python</td>
+<td align="right">135,415 (+6,903, +5.4%)</td>
+<td align="left">Graphify converts codebases, docs, schemas, configs, and PDFs into a queryable knowledge graph via a skill for Claude Code, Cursor, Codex, and Gemini CLI, using local deterministic AST parsing without a vector store. It matters because it gives agents a precise, explainable, and local semantic map of the entire project.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://github.com/kajisho5/ffmpeg-skill">kajisho5/ffmpeg-skill</a></td>
+<td align="left">Python</td>
+<td align="right">2,880 (+892, +45%)</td>
+<td align="left">FFmpeg-skill provides coding agents with 42 local FFmpeg tools via a machine-readable contract and MCP server, enabling video editing without cloud or API keys. It matters because it extends agent capabilities to media processing tasks entirely on-device.</td>
+</tr>
+<tr>
+<td align="left">🔥 <a href="https://github.com/heygen-com/hyperframes">heygen-com/hyperframes</a></td>
+<td align="left">TypeScript</td>
+<td align="right">72,305 (+5,612, +8.4%)</td>
+<td align="left">Hyperframes lets agents write HTML and render video output. It matters because it gives coding agents a direct path to generate and preview video content programmatically.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://github.com/akitaonrails/ai-memory">akitaonrails/ai-memory</a></td>
+<td align="left">Rust</td>
+<td align="right">13,560 (+3,254, +32%)</td>
+<td align="left">AI-memory provides long-term memory for agent coding CLIs and facilitates handoffs between different agent vendors. It matters because it enables context persistence and interoperability across agent platforms.</td>
+</tr>
+<tr>
+<td align="left">🔥 <a href="https://github.com/ccch1mneyyy/dsh-TUI">ccch1mneyyy/dsh-TUI</a></td>
+<td align="left">TypeScript</td>
+<td align="right">5,821 (+1,011, +21%)</td>
+<td align="left">DSH-TUI is the officially recommended terminal UI plugin for DeepSeek Harness, featuring high performance, low overhead, a pixel whale theme, smooth mouse interaction, and one-command npm install. It matters because it delivers a polished, efficient, and easy-to-install text interface for the DSH agent.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://github.com/multica-ai/andrej-karpathy-skills">multica-ai/andrej-karpathy-skills</a></td>
+<td align="left"></td>
+<td align="right">223,938 (+2,937, +1.3%)</td>
+<td align="left">Andrej-karpathy-skills is a single CLAUDE.md file that improves Claude Code behavior based on Andrej Karpathy&#39;s observations of LLM coding pitfalls. It matters because it distills expert insights into a portable configuration that sharpens agent coding practices.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://github.com/lennney/stop-that-shit">lennney/stop-that-shit</a></td>
+<td align="left">JavaScript</td>
+<td align="right">3,169 (+432, +16%)</td>
+<td align="left">Stop-that-shit is a multi-platform hook and skill guard for Codex and GPT agents that blocks unrequested hashes, checksums, and task-scope creep. It matters because it prevents agents from generating unnecessary artifacts and drifting beyond their assigned scope.</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>Claude Code Skills</h2>
+<blockquote>
+<p>Source: <a href="https://github.com/anthropics/skills">anthropics/skills</a></p>
+</blockquote>
+<h3>Top Skills</h3>
+<ul>
+<li><strong>mcp-builder compatibility fix (#1742)</strong> — Updates <code>streamablehttp_client</code> to <code>streamable_http_client</code> and custom headers handling for MCP ≥2.0; critical for MCP server builders. <a href="https://github.com/anthropics/skills/pull/1742">PR #1742</a></li>
+<li><strong>skill-creator trigger evaluation overhaul (#1298)</strong> — Fixes false misses, Windows <code>select()</code> failures, and runtime error handling in skill evaluation harness. <a href="https://github.com/anthropics/skills/pull/1298">PR #1298</a></li>
+<li><strong>notion-spec-to-implementation &amp; quantitative-resume-auditor (#1245)</strong> — Two new skills: converts Notion specs into implementable tasks with acceptance criteria; audits resumes against job descriptions with scoring. <a href="https://github.com/anthropics/skills/pull/1245">PR #1245</a></li>
+<li><strong>proofcore-contract-auditor (#1771)</strong> — Web3 skill for static analysis of Solidity/Rust contracts with cryptographic audit proofs anchored on TON blockchain. <a href="https://github.com/anthropics/skills/pull/1771">PR #1771</a></li>
+<li><strong>md2video-audio (#1703)</strong> — Zero-cost skill compiling Markdown to MP4 videos with realistic voiceovers via Marp and TTS. <a href="https://github.com/anthropics/skills/pull/1703">PR #1703</a></li>
+</ul>
+<h3>Community Demand</h3>
+<ul>
+<li><strong>Namespace security &amp; trust boundaries (#492, 46 comments)</strong> — Community skills published under <code>anthropic/</code> namespace impersonate official skills; users grant elevated permissions mistakenly. <a href="https://github.com/anthropics/skills/issues/492">Issue #492</a></li>
+<li><strong>Org-wide skill sharing in Claude.ai (#228, 17 comments, 8 👍)</strong> — Current workflow requires manual .skill file transfer; native shared library or sharing links needed. <a href="https://github.com/anthropics/skills/issues/228">Issue #228</a></li>
+<li><strong>Evaluation harness broken: 0% trigger rate (#556, 13 comments, 7 👍)</strong> — <code>run_eval.py</code> with <code>claude -p</code> never triggers skills/commands across all test queries. <a href="https://github.com/anthropics/skills/issues/556">Issue #556</a></li>
+</ul>
+<h3>Pending Skills</h3>
+<ul>
+<li><strong>webapp-testing: remove <code>shell=True</code> command injection risk (#1980)</strong> — Security fix replacing shell command chains with safe <code>subprocess</code> usage; updated 2026-10-25. <a href="https://github.com/anthropics/skills/pull/1980">PR #1980</a></li>
+<li><strong>skill-creator: direct <code>package_skill.py</code> execution &amp; path fixes (#1681)</strong> — Resolves <code>ModuleNotFoundError</code> and outdated CLI help; updated 2026-10-24. <a href="https://github.com/anthropics/skills/pull/1681">PR #1681</a></li>
+<li><strong>pyxel retro game development skill (#525)</strong> — Long-running PR (since 2026-03) for Pyxel game creation, debugging, headless runs, frame inspection; updated 2026-10-23. <a href="https://github.com/anthropics/skills/pull/525">PR #525</a></li>
+</ul>
+<h3>Takeaway</h3>
+<p>The community&#39;s most concentrated demand is <strong>trustworthy skill distribution and reliable evaluation</strong> — fixing namespace impersonation, enabling org sharing, and repairing the broken evaluation harness that prevents skill validation.</p>
+<hr>
+<h2>Candidates to track</h2>
+<p>These repos trended two weeks in a row (🔥) and are not tracked. To track one, add its lines to <code>config.yml</code>.</p>
+<p><code>agents.repos</code>:</p>
+<pre><code class="language-yaml">    - id: pstack-claude
+      repo: michael-denyer/pstack-claude
+      name: pstack-claude
+    - id: openbitfun
+      repo: GCWing/OpenBitFun
+      name: OpenBitFun
+</code></pre>
+<p><code>infra.repos</code>:</p>
+<pre><code class="language-yaml">    - id: ruflo
+      repo: ruvnet/ruflo
+      name: ruflo
+    - id: dsha
+      repo: DSH-APP/DSHA
+      name: DSHA
+    - id: dsh-desktop
+      repo: dataelement/dsh-desktop
+      name: dsh-desktop
+    - id: open-code-review
+      repo: alibaba/open-code-review
+      name: open-code-review
+    - id: paperclip
+      repo: paperclipai/paperclip
+      name: paperclip
+    - id: openrig
+      repo: mvschwarz/openrig
+      name: openrig
+    - id: hyperframes
+      repo: heygen-com/hyperframes
+      name: hyperframes
+    - id: dsh-tui
+      repo: ccch1mneyyy/dsh-TUI
+      name: dsh-TUI
+</code></pre>
+<hr>
+<h2>Models</h2>
+<h3>OpenRouter usage</h3>
+<ul>
+<li><strong>deepseek/deepseek-v4.1-flash-20261017</strong> leads with <strong>33.56T tokens</strong>, followed by <strong>deepseek/deepseek-v4.1-flash-20260910</strong> at <strong>18.00T tokens</strong> (<a href="https://openrouter.ai/deepseek/deepseek-v4.1-flash-20261017">link</a>, <a href="https://openrouter.ai/deepseek/deepseek-v4.1-flash-20260910">link</a>)</li>
+<li><strong>z-ai/glm-5.3-flash-20260826</strong> ranks third with <strong>13.24T tokens</strong>; <strong>tencent/hy4-preview-20260827</strong> at <strong>8.97T tokens</strong> (<a href="https://openrouter.ai/z-ai/glm-5.3-flash-20260826">link</a>, <a href="https://openrouter.ai/tencent/hy4-preview-20260827">link</a>)</li>
+<li><strong>openai/gpt-6-luna-20260922</strong> (<strong>8.35T tokens</strong>) and <strong>anthropic/claude-opus-5.5-20260921</strong> (<strong>8.27T tokens</strong>) round out the top five (<a href="https://openrouter.ai/openai/gpt-6-luna-20260922">link</a>, <a href="https://openrouter.ai/anthropic/claude-opus-5.5-20260921">link</a>)</li>
+<li>Notable newcomers: <strong>stepfun/step-5-preview-20261008</strong> (<strong>3.63T tokens</strong>), <strong>typesafe/jev-1.13-20260917</strong> (<strong>2.98T tokens</strong>), <strong>anthropic/claude-haiku-5.5-20261007</strong> (<strong>2.68T tokens</strong>) (<a href="https://openrouter.ai/stepfun/step-5-preview-20261008">link</a>, <a href="https://openrouter.ai/typesafe/jev-1.13-20260917">link</a>, <a href="https://openrouter.ai/anthropic/claude-haiku-5.5-20261007">link</a>)</li>
+</ul>
+<h3>Hugging Face trending</h3>
+<table>
+<thead>
+<tr>
+<th align="left">Model</th>
+<th align="left">Author</th>
+<th align="right">Likes</th>
+<th align="right">Downloads</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a href="https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash-1017">deepseek-ai/DeepSeek-V4.1-Flash-1017</a></td>
+<td align="left">deepseek-ai</td>
+<td align="right">3,015</td>
+<td align="right">85,275</td>
+<td align="left">Multimodal model for image-text-to-text generation, based on DeepSeek V4.1 architecture with transformers and safetensors.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://huggingface.co/RecursiveSI/flint">RecursiveSI/flint</a></td>
+<td align="left">RecursiveSI</td>
+<td align="right">863</td>
+<td align="right">6,444</td>
+<td align="left">Text-generation conversational model using transformers, tagged as flint for chat applications.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://huggingface.co/black-forest-labs/flux-3-image-klein-comfy">black-forest-labs/flux-3-image-klein-comfy</a></td>
+<td align="left">black-forest-labs</td>
+<td align="right">1,613</td>
+<td align="right">660,874</td>
+<td align="left">Image-to-image diffusion model (Flux 3 Klein) optimized for ComfyUI, supporting image generation and editing.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://huggingface.co/XHToken/Spark-X2.6-4B">XHToken/Spark-X2.6-4B</a></td>
+<td align="left">XHToken</td>
+<td align="right">532</td>
+<td align="right">3,488</td>
+<td align="left">Text-generation LLM based on Spark 2.5 architecture, using transformers and safetensors.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://huggingface.co/Lightricks/LTX-2.5">Lightricks/LTX-2.5</a></td>
+<td align="left">Lightricks</td>
+<td align="right">9,350</td>
+<td align="right">2,107,108</td>
+<td align="left">Image-to-video diffusion model enabling text-to-video, video-to-video, and image-text-to-video generation.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://huggingface.co/Nanbeige/Nanbeige4.3-33B">Nanbeige/Nanbeige4.3-33B</a></td>
+<td align="left">Nanbeige</td>
+<td align="right">410</td>
+<td align="right">0</td>
+<td align="left">33B parameter text-generation LLM built on LLaMA architecture with transformers.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://huggingface.co/MiniMaxAI/MiniMax-M3.1-Flash">MiniMaxAI/MiniMax-M3.1-Flash</a></td>
+<td align="left">MiniMaxAI</td>
+<td align="right">354</td>
+<td align="right">7,355</td>
+<td align="left">Multimodal image-text-to-text model (MiniMax M3 VL) for vision-language tasks.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://huggingface.co/OpenMOSS-Team/MOSS-Image-SFT">OpenMOSS-Team/MOSS-Image-SFT</a></td>
+<td align="left">OpenMOSS-Team</td>
+<td align="right">731</td>
+<td align="right">10,757</td>
+<td align="left">Text-to-image diffusion model (MOSS-Image) fine-tuned for English prompts using diffusers.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://huggingface.co/abenzerps/Qwen-Image-2.1-Uncensored-Quantized">abenzerps/Qwen-Image-2.1-Uncensored-Quantized</a></td>
+<td align="left">abenzerps</td>
+<td align="right">5,045</td>
+<td align="right">2,235,846</td>
+<td align="left">Quantized (GGUF) Qwen image generation model for ComfyUI, uncensored version.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://huggingface.co/Qwen/Qwen3.8-27B">Qwen/Qwen3.8-27B</a></td>
+<td align="left">Qwen</td>
+<td align="right">18,406</td>
+<td align="right">7,762,014</td>
+<td align="left">Multimodal 27B parameter model (Qwen 3.5) for image-text-to-text and conversational tasks.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://huggingface.co/InternScience/Sage-A1.5">InternScience/Sage-A1.5</a></td>
+<td align="left">InternScience</td>
+<td align="right">292</td>
+<td align="right">3,875</td>
+<td align="left">MOE-based text-generation model (Qwen 3.5 MOE) with image-text-to-text capabilities.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://huggingface.co/fishaudio/drama-3">fishaudio/drama-3</a></td>
+<td align="left">fishaudio</td>
+<td align="right">1,016</td>
+<td align="right">21,375</td>
+<td align="left">Multi-speaker text-to-speech model (Fish Omni) for audio synthesis.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://huggingface.co/ISTA-DASLab/DeepSeek-V4.1-Flash-1017-GSQ-RCO-GGUF">ISTA-DASLab/DeepSeek-V4.1-Flash-1017-GSQ-RCO-GGUF</a></td>
+<td align="left">ISTA-DASLab</td>
+<td align="right">291</td>
+<td align="right">412,392</td>
+<td align="left">Quantized (GGUF, GSQ, RCO mixed-precision) version of DeepSeek V4.1 Flash for efficient text generation.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://huggingface.co/unsloth/flint-GGUF">unsloth/flint-GGUF</a></td>
+<td align="left">unsloth</td>
+<td align="right">254</td>
+<td align="right">103,369</td>
+<td align="left">GGUF-quantized version of RecursiveSI/flint, optimized by Unsloth for text generation.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://huggingface.co/dealignai/DeepSeek-V4.1-Flash-1017-UNCENSORED-FP8">dealignai/DeepSeek-V4.1-Flash-1017-UNCENSORED-FP8</a></td>
+<td align="left">dealignai</td>
+<td align="right">371</td>
+<td align="right">6,792</td>
+<td align="left">FP8-quantized, uncensored multimodal DeepSeek V4.1 Flash for image-text-to-text generation.</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>Research</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Paper</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a href="http://arxiv.org/abs/2610.31080v1">nnInteractive Agent: General-Purpose AI Agents as 3D Image Annotators</a></td>
+<td align="left">The paper shows that general-purpose AI agents can take over 3D annotation work without additional training by interpreting plain-language requests, locating targets, prompting nnInteractive, and inspecting and correcting 3D results.</td>
+</tr>
+<tr>
+<td align="left"><a href="http://arxiv.org/abs/2610.30284v1">SWE-VERIFIER: Selective Verification for Cost-Efficient Coding Agents</a></td>
+<td align="left">SWE-Verifier introduces a lightweight generative model that selectively triggers candidate sampling and verification by scoring a coding agent&#39;s proposed action to determine when additional sampling is needed.</td>
+</tr>
+<tr>
+<td align="left"><a href="http://arxiv.org/abs/2610.30557v1">Governed Self-Evolution for Autonomous Investing: A Multi-Agent LLM System with an Invariant Core</a></td>
+<td align="left">Steward is a multi-agent LLM system for autonomous investing with an invariant core where nine role-specialised agents jointly decide, with four analysts emitting typed reports from diverse data sources for a Portfolio Manager to set target positions.</td>
+</tr>
+<tr>
+<td align="left"><a href="http://arxiv.org/abs/2610.30116v1">Environment Duels: A Microcosm of LLM Co-Evolution</a></td>
+<td align="left">Environment Duels presents a dynamic agentic benchmark where models author interactive environments with privileged hints and solve them, revealing that solving and authoring capabilities are distinct across nine frontier LLMs.</td>
+</tr>
+<tr>
+<td align="left"><a href="http://arxiv.org/abs/2610.29792v1">MAPS: Macro-Adaptive Parallel Reasoning for Regulating Search Momentum in Retrieval-Augmented Generation</a></td>
+<td align="left">MAPS characterizes the evolution of query intent in retrieval-augmented generation by introducing macro-adaptive parallel reasoning to regulate search momentum and address redundant sub-queries and insufficiently diverse exploration.</td>
+</tr>
+<tr>
+<td align="left"><a href="http://arxiv.org/abs/2610.29870v1">PAUSE: Search-Free Steering of Coding Agents Before Their First Source-Code Edit</a></td>
+<td align="left">PAUSE proposes a single planning intervention to steer coding agents before their first source-code edit, which occurs at a median of 60% trajectory progress after exploration, bug reproduction, and testing.</td>
+</tr>
+<tr>
+<td align="left"><a href="http://arxiv.org/abs/2610.30917v1">Harnessing Language Models as Optimization Modeling Agents</a></td>
+<td align="left">OPTICYCLE and OPTISTATE are two lightweight inference harnesses for optimization modeling that achieve competitive performance on nine benchmarks comprising 2,634 problems without additional training.</td>
+</tr>
+<tr>
+<td align="left"><a href="http://arxiv.org/abs/2610.30047v1">SWE-DIVE: Multi-Turn Coding Agent Evaluation with Dynamic User Simulation</a></td>
+<td align="left">SWE-DIVE introduces a multi-turn coding agent evaluation framework with dynamic user simulation to benchmark agents on iterative, less-structured interactions beyond one-shot GitHub issues.</td>
+</tr>
+<tr>
+<td align="left"><a href="http://arxiv.org/abs/2610.31158v1">Beyond Watching and Searching: Benchmarking Agents for Video-centered Deep Research Reports</a></td>
+<td align="left">The paper introduces Video-Centered Deep Research Report Generation where agents identify research questions, retrieve multimodal evidence, and produce interactive reports linked to video moments, presenting a skill-based workflow for this task.</td>
+</tr>
+<tr>
+<td align="left"><a href="http://arxiv.org/abs/2610.30524v1">LLM2Cert: LLM Synthesis of Certificates with SMT/Lean Verification</a></td>
+<td align="left">LLM2Cert synthesizes Lyapunov functions and barrier certificates using LLMs and verifies them with SMT/Lean solvers, addressing limitations of numerical solvers that require relaxations, are conservative, or scale poorly.</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>Most discussed</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Story</th>
+<th align="left">Source</th>
+<th align="left">Discussion</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a href="https://www.reuters.com/technology/us-banning-chinese-ai-deepseek-government-agency-it-systems-2026-10-19/">DeepSeek banned from U.S. federal civilian agencies under new DHS order</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50154244">578 points, 543 comments</a></td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left"><a href="https://www.apollo.com/wealth/insights-news/insights/daily-spark/no-signs-of-ai-payoff-outside-the-tech-sector">No signs of AI payoff outside the tech sector</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50224463">466 points, 451 comments</a></td>
+<td align="left">Despite massive investments and widespread hype around artificial intelligence, the technology has delivered zero financial payoff to corporate America outside of tech. Subscribe for daily updates.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://redact.dev/blog/whatsapp-help-pages-hidden-ai-instructions">WhatsApp&#39;s help pages hid LLM instructions: dont recommend a regulator</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50159341">742 points, 220 comments</a></td>
+<td align="left">WhatsApp removed hidden notes telling AI not to recommend a regulator and not to cite GDPR or CCPA once a lawyer came up. We quote both notes.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://peec.ai/blog/publish-stats-get-cited-the-tactic-that-put-my-data-all-over-the-web">Publish fake stats, get cited in LLMs</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50165801">368 points, 207 comments</a></td>
+<td align="left">How 50,000 fake stats kept getting cited by ChatGPT. Read more on the Peec AI blog.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://www.wiz.io/blog/php2shell-php-rce">PHP2Shell: AI uncovers critical RCE in PHP</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50180836">452 points, 185 comments</a></td>
+<td align="left">Core PHP engine flaws enable remote code execution and Heartbleed-style memory disclosure across the web.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://noyb.eu/en/ai-eu-member-states-approve-digital-expropriation-europeans-ai-companies">AI: EU Member States approve “digital expropriation” of Europeans for AI companies</a></td>
+<td align="left">Lobste.rs</td>
+<td align="left"><a href="https://lobste.rs/s/zu7jjb/ai_eu_member_states_approve_digital">0 points, 0 comments</a></td>
+<td align="left">On Wednesday, EU Member States passed a highly controversial change to the GDPR, creating massive loopholes for AI.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://dev.to/slabb/agents-should-never-hold-your-api-keys-nvidia-just-open-sourced-the-runtime-that-enforces-it-3jm4">Agents should never hold your API keys. NVIDIA just open-sourced the runtime that enforces it</a></td>
+<td align="left">Dev.to</td>
+<td align="left"><a href="https://dev.to/slabb/agents-should-never-hold-your-api-keys-nvidia-just-open-sourced-the-runtime-that-enforces-it-3jm4">15 reactions, 48 comments</a></td>
+<td align="left">NVIDIA open-sourced OpenShell: a runtime where agent fleets get kernel-level sandboxes, credentials live behind a gateway instead of in the agent&#39;s environment, and every policy change is checked by a Z3 SMT prover before a human approves it. Walkthrough of what it actually does.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://dev.to/adamthedeveloper/dont-be-a-proxy-between-me-and-your-ai-mcn">Don&#39;t Be a Proxy Between Me and Your AI</a></td>
+<td align="left">Dev.to</td>
+<td align="left"><a href="https://dev.to/adamthedeveloper/dont-be-a-proxy-between-me-and-your-ai-mcn">66 reactions, 39 comments</a></td>
+<td align="left">I&#39;ve had this conversation more times than I&#39;d like to admit. I raise a technical question in a...</td>
+</tr>
+<tr>
+<td align="left"><a href="https://dev.to/startupcafe/build-in-public-is-everywhere-does-it-actually-get-you-customers-2hlh">&quot;Build in Public&quot; Is Everywhere. Does It Actually Get You Customers? 🤔</a></td>
+<td align="left">Dev.to</td>
+<td align="left"><a href="https://dev.to/startupcafe/build-in-public-is-everywhere-does-it-actually-get-you-customers-2hlh">51 reactions, 32 comments</a></td>
+<td align="left">What founders report, what that evidence can&#39;t prove, and a four-week experiment you can run on your...</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>Signals</h2>
+<p>DeepSeek’s model and harness stack leads across usage and infrastructure. The V4.1 Flash family commands over 51T weekly tokens on OpenRouter — more than the next three model families combined — while DeepSeek Harness grows <strong>+76%</strong> on OpenRouter and spawns three trending repos: DSHA (Android, +46% stars), dsh-desktop (+11%), and dsh-TUI (+21%). This full-stack momentum suggests practitioners are adopting DeepSeek not just as a model but as an integrated agent runtime.</p>
+<p>Agent harness unification is accelerating. HarnessRouter now runs Codex, Claude Code, Hermes, PI, and DSH behind one API; pstack-claude ports structured workflows across eight platforms including Prime Agent and Muse; Openrig builds persistent, role-defined networks from Claude Code, Codex, and Pi. The pattern points to a standardizing “harness layer” that decouples workflow logic from any single agent backend.</p>
+<p>Coding agent evaluation has become a concentrated research theme. Three papers this week — SWE-VERIFIER, SWE-DIVE, PAUSE — each address a different failure mode: uncontrolled sampling cost, single-shot brittleness, and late planning intervention. Together they frame a maturing benchmark agenda for agent reliability.</p>
+<p>Security tooling for agents is scaling fast. Cloudflare’s security-audit-skill (+47% stars) adds verified, machine-readable audits; lennney/stop-that-shit blocks scope creep and hash spam; NVIDIA’s OpenShell (community-discussed) enforces credential isolation via SMT-verified policy. The cluster signals that governance is shifting from post-hoc review to runtime enforcement.</p>
+<p>Local-first, self-hosted infrastructure remains a strong current. DSHA runs a full Ubuntu agent environment on Android without root; PI-Desktop and Starnet ship desktop clients with plugin architectures; HarnessRouter and Orca emphasize self-hosted orchestration with user-owned keys. Practitioners are optimizing for data sovereignty and offline capability alongside raw model performance.</p>
+<hr>
+<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
+]]></content:encoded>
+    </item>
   </channel>
 </rss>

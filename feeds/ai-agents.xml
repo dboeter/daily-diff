@@ -13,7 +13,111 @@
       <height>144</height>
     </image>
     <atom:link href="https://dboeter.github.io/daily-diff/feeds/ai-agents.xml" rel="self" type="application/rss+xml"/>
-    <lastBuildDate>Sun, 25 Oct 2026 01:03:36 +0000</lastBuildDate>
+    <lastBuildDate>Mon, 26 Oct 2026 04:36:17 +0000</lastBuildDate>
+    <item>
+      <title>AI Agents 2026-10-26</title>
+      <link>https://dboeter.github.io/daily-diff/#2026-10-26/ai-agents</link>
+      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-10-26/ai-agents</guid>
+      <pubDate>Mon, 26 Oct 2026 00:00:00 +0000</pubDate>
+      <description>AI Agents 2026-10-26 ⬛ Overview · 🟪 AI Agents · 🟦 AI Models &amp;amp; Labs · 🟨 Data Engineering · 🟫 Trends Generated: 2026-10-26 04:31 UTC | Projects: 16 | Active today: 5 | Stable releases: 3 | Prereleases (not covered): 0 Highlights Hermes Agent leaks secrets: CLI flags bypass chat egress and approval-card redaction, while gateway status prints MCP command lines with API keys in plaintext OpenCode free-tier regression in Desktop 1.19.4: &amp;quot;Free Usage Exceeded&amp;quot; errors persist without li...</description>
+      <content:encoded><![CDATA[<h1>AI Agents 2026-10-26</h1>
+<p><a href="https://dboeter.github.io/daily-diff/#2026-10-26">⬛ Overview</a> · <strong>🟪 AI Agents</strong> · <a href="https://dboeter.github.io/daily-diff/#2026-10-26/ai-models">🟦 AI Models &amp; Labs</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-26/ai-data">🟨 Data Engineering</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-26/ai-trends">🟫 Trends</a></p>
+<blockquote>
+<p>Generated: 2026-10-26 04:31 UTC | Projects: 16 | Active today: 5 | Stable releases: 3 | Prereleases (not covered): 0</p>
+</blockquote>
+<hr>
+<h2>Highlights</h2>
+<ul>
+<li>Hermes Agent leaks secrets: CLI flags bypass chat egress and approval-card redaction, while <code>gateway status</code> prints MCP command lines with API keys in plaintext</li>
+<li>OpenCode free-tier regression in Desktop 1.19.4: &quot;Free Usage Exceeded&quot; errors persist without limit reset</li>
+<li>Cline SDK v0.2.0 and CLI v3.0.74 introduce live-session reattachment and cross-app task attachment with Hub health timeout</li>
+<li>Command Code DeepSeek harness returns 503 after <code>/compact</code>, freezing sessions and blocking input</li>
+<li>Skyvern rewrite achieves 2.3× speedup and 90.5% Odysseys benchmark score via progressive disclosure</li>
+</ul>
+<hr>
+<h2>Coding Agents &amp; Assistants</h2>
+<h3>OpenCode</h3>
+<ul>
+<li><strong>Hot issue</strong>: Users report free models suddenly returning &quot;Free Usage Exceeded, Subscribe to Go&quot; errors in Desktop 1.19.4, with limits not resetting as expected <a href="https://github.com/anomalyco/opencode/issues/58781">#58781</a>, <a href="https://github.com/anomalyco/opencode/issues/58670">#58670</a>.</li>
+<li><strong>News</strong>: Project hit GitHub Trending with +5,921 stars, highlighting its open-source coding agent positioning <a href="https://github.com/anomalyco/opencode">GitHub Trending</a>.</li>
+</ul>
+<h3>Cline</h3>
+<ul>
+<li><strong>Release</strong>: <a href="https://github.com/cline/cline/releases/tag/sdk%2Fsdk%2Fv0.2.0">sdk/sdk/v0.2.0</a> reattaches to live sessions instead of replacing runtimes; <a href="https://github.com/cline/cline/releases/tag/cli-v3.0.74">cli-v3.0.74</a> attaches to running tasks across apps, adds Hub health timeout, and prevents hangs on frozen Hubs.</li>
+</ul>
+<h3>Command Code</h3>
+<ul>
+<li><strong>Hot issue</strong>: DeepSeek Harness Cloudflare returns 503 after <code>/compact</code> command, freezing the session and blocking input submission <a href="https://github.com/CommandCodeAI/command-code/issues/1067">#1067</a>.</li>
+</ul>
+<h3>Hermes Agent</h3>
+<ul>
+<li><strong>Hot issue</strong>: Secrets passed as CLI flags (<code>--password=</code>, <code>--token=</code>, <code>docker login -p</code>) and Azure keys bypass chat egress and approval-card redaction <a href="https://github.com/NousResearch/hermes-agent/issues/143982">#143982</a>.</li>
+<li><strong>Hot issue</strong>: <code>hermes gateway status</code> prints MCP child-process command lines verbatim, exposing API keys in plaintext <a href="https://github.com/NousResearch/hermes-agent/issues/143938">#143938</a>.</li>
+</ul>
+<p><strong>Quiet today:</strong> <a href="https://github.com/anthropics/claude-code">Claude Code</a>, <a href="https://github.com/google-gemini/gemini-cli">Gemini CLI</a>, <a href="https://github.com/Kilo-Org/kilocode">Kilo Code</a>, <a href="https://github.com/earendil-works/pi">Pi</a>, <a href="https://github.com/can1357/oh-my-pi">Oh My Pi</a>, <a href="https://github.com/1jehuang/jcode">jcode</a>, <a href="https://github.com/deepseek-ai/deepseek-harness">DeepSeek Harness</a></p>
+<p><strong>Unavailable today:</strong> <a href="https://github.com/openai/codex">OpenAI Codex</a></p>
+<hr>
+<h2>Agent Tooling</h2>
+<p>(no reportable changes for Agent Deck v1.16.34 — only dependency updates)</p>
+<p><strong>Quiet today:</strong> <a href="https://github.com/NVIDIA/OpenShell">OpenShell</a>, <a href="https://github.com/herdrdev/herdr">herdr</a>, <a href="https://github.com/mksglu/context-mode">context-mode</a></p>
+<hr>
+<h2>Spotted</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Story</th>
+<th align="left">Source</th>
+<th align="left">Discussion</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a href="https://deallocatedobjects.com/posts/making-my-blog-readable-by-ai-agents">Making My Blog Readable by AI Agents</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50225443">35 points, 9 comments</a></td>
+<td align="left">A lot of the people reading this blog now aren’t people. They’re agents: Claude, ChatGPT, Perplexity and friends, fetching a page because somebody asked them a question.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://www.skyvern.com/blog/deleting-rag-from-our-web-agent-made-it-2-3x-faster/">Progressive disclosure in agents to make them 2.3x faster</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50222826">21 points, 2 comments</a></td>
+<td align="left">We rewrote Skyvern from scratch using Pi as inspiration, making it 2.3x faster and score 90.5% on Odysseys benchmark.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://adrs.systems">Show HN: ADRs for AI – Deliberation records for human–AI work, versioned in Git</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50227041">18 points, 13 comments</a></td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left"><a href="https://cowagent.ai/en/">CowAgent – Open-Source Super AI Assistant</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50218141">11 points, 2 comments</a></td>
+<td align="left">An open-source super AI assistant &amp; Agent Harness. Plans tasks, runs tools and skills, autonomously grows with memory and knowledge.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://github.com/microsoft/Agensh">Show HN: Agentsh – A Decentralized, Scalable Multiagent Harness</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50223759">10 points, 1 comments</a></td>
+<td align="left">A Decentralized, Scalable Multiagent Harness. Contribute to microsoft/Agensh development by creating an account on GitHub.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://github.com/google-deepmind/detectorscope">DetectorScope: AI text detectors that show their work</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50222061">9 points, 2 comments</a></td>
+<td align="left">Build AI text detectors whose decisions are mechanistically grounded and human-auditable (EMNLP 2026) - google-deepmind/detectorscope</td>
+</tr>
+<tr>
+<td align="left"><a href="https://dev.to/khushighosh/let-it-die-the-lazy-email-agent-on-tabpfn-gemma-and-temporal-10o0">Let It Die: The Lazy Email Agent on TabPFN, Gemma and Temporal</a></td>
+<td align="left">Dev.to</td>
+<td align="left"><a href="https://dev.to/khushighosh/let-it-die-the-lazy-email-agent-on-tabpfn-gemma-and-temporal-10o0">16 reactions, 4 comments</a></td>
+<td align="left">This is a submission for the Hacktoberfest Open-Source AI Challenge Week 3: Slow and Steady          ...</td>
+</tr>
+</tbody></table>
+<hr>
+<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
+]]></content:encoded>
+    </item>
     <item>
       <title>AI Agents 2026-10-25</title>
       <link>https://dboeter.github.io/daily-diff/#2026-10-25/ai-agents</link>

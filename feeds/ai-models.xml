@@ -13,7 +13,82 @@
       <height>144</height>
     </image>
     <atom:link href="https://dboeter.github.io/daily-diff/feeds/ai-models.xml" rel="self" type="application/rss+xml"/>
-    <lastBuildDate>Sun, 25 Oct 2026 01:03:36 +0000</lastBuildDate>
+    <lastBuildDate>Mon, 26 Oct 2026 04:36:17 +0000</lastBuildDate>
+    <item>
+      <title>AI Models &amp; Labs 2026-10-26</title>
+      <link>https://dboeter.github.io/daily-diff/#2026-10-26/ai-models</link>
+      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-10-26/ai-models</guid>
+      <pubDate>Mon, 26 Oct 2026 00:00:00 +0000</pubDate>
+      <description>AI Models &amp;amp; Labs 2026-10-26 ⬛ Overview · 🟪 AI Agents · 🟦 AI Models &amp;amp; Labs · 🟨 Data Engineering · 🟫 Trends Lab posts: 0 | New models: 0 | Spotted: 5 | Generated: 2026-10-26 04:31 UTC Highlights OpenAI and Anthropic cut LLM prices by up to 80% in recent months, reshaping token economics Cerebras deploys trillion-parameter models on WSE-3T wafers, achieving 1,000–2,000+ tokens per second A decade-old CNN outperforms frontier LLMs including GPT-6 Astra and Claude Fable 5.1 in skin cancer...</description>
+      <content:encoded><![CDATA[<h1>AI Models &amp; Labs 2026-10-26</h1>
+<p><a href="https://dboeter.github.io/daily-diff/#2026-10-26">⬛ Overview</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-26/ai-agents">🟪 AI Agents</a> · <strong>🟦 AI Models &amp; Labs</strong> · <a href="https://dboeter.github.io/daily-diff/#2026-10-26/ai-data">🟨 Data Engineering</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-26/ai-trends">🟫 Trends</a></p>
+<blockquote>
+<p>Lab posts: 0 | New models: 0 | Spotted: 5 | Generated: 2026-10-26 04:31 UTC</p>
+</blockquote>
+<hr>
+<h2>Highlights</h2>
+<ul>
+<li>OpenAI and Anthropic cut LLM prices by up to 80% in recent months, reshaping token economics</li>
+<li>Cerebras deploys trillion-parameter models on WSE-3T wafers, achieving 1,000–2,000+ tokens per second</li>
+<li>A decade-old CNN outperforms frontier LLMs including GPT-6 Astra and Claude Fable 5.1 in skin cancer diagnosis</li>
+<li>Study finds Grok recommends Republican candidates while OpenAI models favor Democrats, with &gt;90% disagreement across 500 races</li>
+<li>TechCrunch catalogs major AI project failures including delayed Siri AI and OpenAI&#39;s &quot;super app&quot; launch</li>
+</ul>
+<hr>
+<h2>Lab announcements</h2>
+<p>No new posts today.</p>
+<hr>
+<h2>New on OpenRouter</h2>
+<p>No new models listed today.</p>
+<hr>
+<h2>🕵️ Stealth Models on OpenRouter</h2>
+<p>No stealth models listed on OpenRouter today.</p>
+<hr>
+<h2>Spotted</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Story</th>
+<th align="left">Source</th>
+<th align="left">Discussion</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a href="https://lynchlab.net/llm-skin-cancer">A 10-year-old CNN outperforms frontier LLMs for skin cancer diagnosis</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50233779">491 points, 222 comments</a></td>
+<td align="left">I am a dermatologist. I tested the ability of GPT-6 Astra and Claude Fable 5.1 to diagnosis skin cancer and found that they were less accurate than I expected.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://www.cerebras.ai/blog/how-we-deploy-trillion-parameter-frontier-models-on-cerebras">Cerebras Deploys Trillion-Parameter AI Models</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50227356">354 points, 131 comments</a></td>
+<td align="left">Learn how Cerebras maps trillion-parameter frontier models across WSE-3T wafers to deliver scalable inference at 1,000–2,000+ tokens per second.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://minimaxir.com/2026/10/cheap-llms/">OpenAI and Anthropic cut their LLM prices by up to 80% within a few months. Why?</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50236102">213 points, 239 comments</a></td>
+<td align="left">What is “the true cost of a token”?</td>
+</tr>
+<tr>
+<td align="left"><a href="https://techcrunch.com/2026/10/24/forced-to-pick-groks-ai-model-chooses-republicans-openais-picks-democrats/">Forced to pick, Grok&#39;s AI model chooses Republicans. OpenAI&#39;s picks Democrats</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50227174">9 points, 1 comments</a></td>
+<td align="left">A new study found Grok&#39;s AI overwhelmingly recommends Republican candidates while OpenAI&#39;s GPT favors Democrats, with the two AI models disagreeing in more than 90% of nearly 500 election races.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://techcrunch.com/2026/10/24/the-ai-graveyard-a-running-list-of-projects-and-startups-that-didnt-make-it/">The AI graveyard: a running list of projects and startups that didn&#39;t make it</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50231249">8 points, 0 comments</a></td>
+<td align="left">From Apple&#39;s repeatedly delayed Siri AI to OpenAI&#39;s messy &quot;super app&quot; launch, here&#39;s a look at the AI projects that shut down or missed expectations.</td>
+</tr>
+</tbody></table>
+<hr>
+<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
+]]></content:encoded>
+    </item>
     <item>
       <title>AI Models &amp; Labs 2026-10-25</title>
       <link>https://dboeter.github.io/daily-diff/#2026-10-25/ai-models</link>
