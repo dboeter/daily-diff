@@ -187,6 +187,18 @@ describe("selectVendorItems", () => {
     ]);
   });
 
+  it("traces a kept item at its row number and an over-cap one as cut by the cap", async () => {
+    const many = Array.from({ length: MAX_VENDOR_ITEMS + 2 }, (_, i) =>
+      item(`dbx${i}`, { title: "Feature now available" }),
+    );
+    const sel = await selectVendorItems(many, { cache: { items: {} }, dateStr: DATE });
+    const trace = JSON.parse(sel.traceFile) as { items: Record<string, unknown>[] };
+    const row = (id: string) => trace.items.find((i) => i["id"] === id);
+    const kept = sel.items[3]!;
+    expect(row(kept.id)).toMatchObject({ rendered: true, rank: kept.n });
+    expect(row(`dbx${MAX_VENDOR_ITEMS + 1}`)).toMatchObject({ rendered: false, dropped_reason: "cap" });
+  });
+
   it("gives slots the floors leave to Databricks first", async () => {
     const many = [
       ...Array.from({ length: 14 }, (_, i) => item(`dbx${i}`, { title: "Feature now available" })),

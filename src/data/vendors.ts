@@ -87,7 +87,7 @@ const dedupeKey = (i: VendorItem): string => `${i.title.toLowerCase().replace(/\
 export async function fetchVendorFeeds(
   config: DataConfig,
   _now: Date,
-): Promise<{ items: VendorItem[]; fetchSuccess: boolean }> {
+): Promise<{ items: VendorItem[]; fetchSuccess: boolean; counts: Record<string, number | null> }> {
   const results = await Promise.allSettled(config.feeds.map((f) => PARSERS[f.parser](f)));
   const seen = new Set<string>();
   const items = results.flatMap((r, i) => {
@@ -111,7 +111,10 @@ export async function fetchVendorFeeds(
         return true;
       });
   });
-  return { items, fetchSuccess: results.some((r) => r.status === "fulfilled") };
+  const counts = Object.fromEntries(
+    results.map((r, i) => [config.feeds[i]!.name, r.status === "fulfilled" ? r.value.length : null]),
+  );
+  return { items, fetchSuccess: results.some((r) => r.status === "fulfilled"), counts };
 }
 
 // ---------------------------------------------------------------------------
@@ -216,12 +219,15 @@ export async function fetchVendorData(
   },
 ): Promise<VendorData> {
   const dateStr = toCstDateStr(now);
+  let counts: Record<string, number | null> = {};
   return collectNewItems({
     tag: "data",
     state,
     dateStr,
     fetch: async () => {
-      const { items, fetchSuccess } = await fetchVendorFeeds(config, now);
+      const fetched = await fetchVendorFeeds(config, now);
+      const { items, fetchSuccess } = fetched;
+      counts = fetched.counts;
       const shipped = shippedComingSoon(items, state, dateStr);
       if (shipped.size)
         console.log(`  [data] ${shipped.size} notes ship a reported coming-soon note, skipped`);
@@ -254,7 +260,7 @@ export async function fetchVendorData(
     },
     select: async (candidates) => {
       console.log(`  [data] ${candidates.length} new vendor items`);
-      const selection = await selectVendorItems(candidates, { ...jev, dateStr });
+      const selection = await selectVendorItems(candidates, { ...jev, dateStr, fetched: counts });
       // An over-cap coming-soon note stays unreported: marked reported, it would make
       // shippedComingSoon skip its GA note, which the reader would then never see.
       return { ...selection, alsoNew: selection.alsoNew?.filter((i) => !COMING_SOON_RE.test(i.title)) };

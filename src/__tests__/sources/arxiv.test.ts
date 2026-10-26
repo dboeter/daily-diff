@@ -212,6 +212,8 @@ describe("Jev relevance ranking", () => {
         works_without_training: 0.123,
         widely_used_models: 0,
         code_released: false,
+        rendered: true,
+        rank: 1,
       },
     ]);
   });

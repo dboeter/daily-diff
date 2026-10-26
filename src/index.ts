@@ -38,6 +38,8 @@ import {
 import {
   callLlm,
   generateOr,
+  llmTraceFile,
+  markLlmFallback,
   parseLlmJson,
   saveFile,
   LLM_TOKENS_LISTING,
@@ -85,6 +87,7 @@ import {
   storiesFrom,
   type SpottedPage,
 } from "./spotted/pool.ts";
+import { sourceCounts, type DroppedReason } from "./core/jev.ts";
 import {
   loadSpottedVerdicts,
   routeStories,
@@ -395,10 +398,15 @@ async function main(): Promise<void> {
     cache: spottedVerdicts,
     dateStr,
   });
-  const spottedRows = selectSpotted(unmatched, (s) => {
-    const topic = routing.topics.get(s.id);
-    return topic ? PAGE_OF_TOPIC[topic] : null;
-  });
+  const spottedDropped = new Map<string, DroppedReason>();
+  const spottedRows = selectSpotted(
+    unmatched,
+    (s) => {
+      const topic = routing.topics.get(s.id);
+      return topic ? PAGE_OF_TOPIC[topic] : null;
+    },
+    spottedDropped,
+  );
   const spottedOf = (page: SpottedPage) => spottedRows.filter((r) => r.page === page);
   // Trends' Most discussed leaves out what today's pages show: a skipped data page shows no Spotted
   // rows (a data page with project news is never skipped, nor a models page with a lab post).
@@ -511,7 +519,24 @@ async function main(): Promise<void> {
   saveSpottedLog(nextLog(spottedLog, stories, shownIds, dateStr));
   if (routing.judgment.nextCache) saveSpottedVerdicts(routing.judgment.nextCache);
   console.log(
-    `  Saved ${saveFile(spottedTraceFile(unmatched, routing, dailyShown), dateStr, "spotted-trace.json")}`,
+    `  Saved ${saveFile(
+      spottedTraceFile(unmatched, routing, dailyShown, {
+        rows: spottedRows,
+        dropped: spottedDropped,
+        sources: sourceCounts(
+          {
+            hn: hnData.fetchSuccess ? stories.filter((s) => s.source === "hn").length : null,
+            lobsters: lobstersData.fetchSuccess
+              ? stories.filter((s) => s.source === "lobsters").length
+              : null,
+            devto: devtoData.fetchSuccess ? stories.filter((s) => s.source === "devto").length : null,
+          },
+          unmatched.map((s) => s.source),
+        ),
+      }),
+      dateStr,
+      "spotted-trace.json",
+    )}`,
   );
   // Research: the day's top papers for the weekly Trends page; the arXiv cutoff moves on every run.
   if (arxivData.traceFile) {
@@ -560,7 +585,7 @@ async function main(): Promise<void> {
   const attemptJson = async (prompt: string): Promise<ReportHighlights> => {
     for (let attempt = 1; attempt <= 2; attempt++) {
       try {
-        return parseLlmJson<ReportHighlights>(await callLlm(prompt));
+        return parseLlmJson<ReportHighlights>(await callLlm(prompt, undefined, "highlights"));
       } catch (err) {
         const tag = attempt < 2 ? "retrying" : "giving up";
         console.error(`  [highlights] attempt ${attempt} failed (${tag}): ${err}`);
@@ -572,6 +597,8 @@ async function main(): Promise<void> {
         }
       }
     }
+    // withFallbackHighlights then writes them from the reports' own Highlights.
+    markLlmFallback("highlights");
     return {};
   };
 
@@ -584,6 +611,7 @@ async function main(): Promise<void> {
 
   const highlightsPath = saveFile(JSON.stringify(highlights, null, 2), dateStr, "highlights.json");
   console.log(`  Saved ${highlightsPath}`);
+  console.log(`  Saved ${saveFile(llmTraceFile(), dateStr, "llm-trace.json")}`);
 
   // 5. Create the GitHub issues
   if (digestRepo) {

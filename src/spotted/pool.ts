@@ -7,7 +7,7 @@
 
 import path from "node:path";
 import { daysBefore } from "../core/date.ts";
-import { loadItemsFile, saveItemsFile, type ItemsFile } from "../core/jev.ts";
+import { loadItemsFile, saveItemsFile, type DroppedReason, type ItemsFile } from "../core/jev.ts";
 import { numberRows, type Numbered } from "../reports/summarized-table.ts";
 import type { HnData } from "../sources/hn.ts";
 import type { LobstersData } from "../sources/lobsters.ts";
@@ -240,13 +240,27 @@ export interface SpottedSection {
   summaries: Map<number, string>;
 }
 
-/** Up to `cap` of `stories`, in order, skipping a link in `taken`; each one taken claims its link. */
-function claimRows<T extends Pick<Story, "url">>(stories: T[], cap: number, taken: Set<string>): T[] {
+/**
+ * Up to `cap` of `stories`, in order, skipping a link in `taken`; each one taken claims its link.
+ * `onDrop` hears every story left out and why.
+ */
+function claimRows<T extends Pick<Story, "url">>(
+  stories: T[],
+  cap: number,
+  taken: Set<string>,
+  onDrop?: (story: T, reason: DroppedReason) => void,
+): T[] {
   const rows: T[] = [];
   for (const s of stories) {
-    if (rows.length === cap) break;
+    if (rows.length === cap) {
+      onDrop?.(s, "cap");
+      continue;
+    }
     const key = linkKey(s.url);
-    if (taken.has(key)) continue;
+    if (taken.has(key)) {
+      onDrop?.(s, "repeat");
+      continue;
+    }
     taken.add(key);
     rows.push(s);
   }
@@ -258,11 +272,17 @@ function claimRows<T extends Pick<Story, "url">>(stories: T[], cap: number, take
  * in SPOTTED_PER_SOURCE order, numbered across pages in SPOTTED_PAGES order.
  * Each link once: a row claims its link in that order, so a copy below its
  * source's cut, or on no page, leaves the link to a copy that makes a row.
- * `pageOf` is null for a story no page takes.
+ * `pageOf` is null for a story no page takes. `dropped`, when given, gets every story without a row
+ * and why (for the trace).
  */
-export function selectSpotted(stories: Story[], pageOf: (story: Story) => SpottedPage | null): SpottedRow[] {
+export function selectSpotted(
+  stories: Story[],
+  pageOf: (story: Story) => SpottedPage | null,
+  dropped?: Map<string, DroppedReason>,
+): SpottedRow[] {
   const sources = Object.keys(SPOTTED_PER_SOURCE) as StorySource[];
   const taken = new Set<string>();
+  for (const s of stories) if (pageOf(s) === null) dropped?.set(s.id, "routing");
   return numberRows(
     SPOTTED_PAGES.flatMap((page) =>
       sources.flatMap((source) =>
@@ -272,6 +292,7 @@ export function selectSpotted(stories: Story[], pageOf: (story: Story) => Spotte
             .sort((a, b) => b.points - a.points),
           SPOTTED_PER_SOURCE[source],
           taken,
+          (s, reason) => dropped?.set(s.id, reason),
         ).map((s) => ({ ...s, page })),
       ),
     ),

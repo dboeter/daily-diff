@@ -35,6 +35,7 @@ import {
   llmHealthLine,
   assertLlmHealthy,
   reportLlmHealth,
+  llmTraceFile,
 } from "../../core/llm.ts";
 
 // ---------------------------------------------------------------------------
@@ -507,6 +508,16 @@ describe("generateOr", () => {
   it("returns the fallback when the call fails", async () => {
     mockCall.mockRejectedValueOnce(new Error("boom"));
     expect(await generateOr("t", "p", null)).toBeNull();
+  });
+
+  it("traces each call by label: ok with its length, or fallback when it failed", async () => {
+    mockCall.mockResolvedValueOnce("Text.").mockRejectedValueOnce(new Error("boom"));
+    await generateOr("agents", "p", null);
+    await generateOr("policy", "p", null);
+    const calls = JSON.parse(llmTraceFile()).calls;
+    expect(calls).toHaveLength(2);
+    expect(calls[0]).toMatchObject({ label: "agents", outcome: "ok", chars: 5 });
+    expect(calls[1]).toMatchObject({ label: "policy", outcome: "fallback" });
   });
 });
 

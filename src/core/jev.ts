@@ -180,6 +180,40 @@ export interface ChoiceAnswer {
   probabilities: Record<string, number>;
 }
 
+/**
+ * Why a judged item got no row: below the keep bar (`threshold`), cut by a row cap (`cap`), routed to
+ * no page or out of scope (`routing`), its link already taken by another row (`repeat`); a row on a
+ * page the run did not publish (`unpublished`, Spotted only: the other traces are saved before the skip).
+ */
+export type DroppedReason = "threshold" | "cap" | "routing" | "repeat" | "unpublished";
+
+/** A trace row's outcome, written by the code that selected the rows. */
+export type TraceOutcome =
+  { rendered: true; rank: number } | { rendered: false; rank: null; dropped_reason: DroppedReason };
+
+export const renderedAt = (rank: number): TraceOutcome => ({ rendered: true, rank });
+export const droppedFor = (reason: DroppedReason): TraceOutcome => ({
+  rendered: false,
+  rank: null,
+  dropped_reason: reason,
+});
+
+/**
+ * A trace header's `sources`: per source, the items its fetch returned (null: the fetch failed, 0: it
+ * returned nothing) and how many of them the trace judged (absent where items have no single source).
+ */
+export type SourceCounts = Record<string, { fetched: number | null; judged?: number }>;
+
+/** `fetched` per source name, `judged` counted from the judged items' sources; a source in neither list is left out. */
+export function sourceCounts(fetched: Record<string, number | null>, judgedSources: string[]): SourceCounts {
+  const judged = new Map<string, number>();
+  for (const s of judgedSources) judged.set(s, (judged.get(s) ?? 0) + 1);
+  const names = [...new Set([...Object.keys(fetched), ...judged.keys()])];
+  return Object.fromEntries(
+    names.map((n) => [n, { fetched: fetched[n] ?? null, judged: judged.get(n) ?? 0 }]),
+  );
+}
+
 /** Who decided a run's selection: Jev, or the caller's keyword fallback. */
 export type RankedBy = "jev" | "keywords";
 

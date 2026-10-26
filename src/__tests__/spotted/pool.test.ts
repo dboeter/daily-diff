@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import type { DroppedReason } from "../../core/jev.ts";
 import {
   type SpottedLog,
   type SpottedPage,
@@ -345,6 +346,20 @@ describe("selectSpotted by link", () => {
     expect(ids).toContain(copyA.id);
     expect(ids).toContain(copyB.id);
     expect(ids).not.toContain(belowCut.id);
+  });
+
+  it("tells why each story got no row: routed nowhere, its link taken, or past its source's cap", () => {
+    const nowhere = story("n", "hn", 900);
+    const original = story("o", "lobsters", 50, { url: "https://example.com/same" });
+    const copy = story("c", "lobsters", 40, { url: "https://example.com/same" });
+    const lobsters = [story("l1", "lobsters", 30), story("l2", "lobsters", 20)];
+    const dropped = new Map<string, DroppedReason>();
+    selectSpotted([nowhere, original, copy, ...lobsters], (s) => (s === nowhere ? null : "agents"), dropped);
+    expect(Object.fromEntries(dropped)).toEqual({
+      [nowhere.id]: "routing",
+      [copy.id]: "repeat",
+      [lobsters[1]!.id]: "cap",
+    });
   });
 
   it("takes each link once across pages in numbering order, and a skipped copy takes no slot", () => {

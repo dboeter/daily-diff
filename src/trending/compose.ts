@@ -37,7 +37,7 @@ import {
   type ClassifyItem,
 } from "./classify.ts";
 import { loadMatchState, matchApps, type MatchState, type MatchTrace } from "./match.ts";
-import { askJev, type AskJev } from "../core/jev.ts";
+import { askJev, type AskJev, type DroppedReason } from "../core/jev.ts";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -506,6 +506,7 @@ export async function composeTrendingReport(
     console.log(`  [trending] Cross-source matches applied: ${links.length}`);
   }
 
+  const dropped = new Map<string, DroppedReason>();
   const report = selectTrendingReport(
     githubRows,
     candidates,
@@ -513,6 +514,7 @@ export async function composeTrendingReport(
     classifiedBy,
     links,
     lastWeekKeys(history, dateStr),
+    dropped,
   );
   console.log(
     `  [trending] Radar: ${report.radar.length} rows | ` +
@@ -520,7 +522,16 @@ export async function composeTrendingReport(
   );
   const traceFile =
     classifiedBy === "jev" || matchCalled
-      ? buildTrendingTraceFile(items, classifications, classifiedBy, matchTrace, matchModels)
+      ? buildTrendingTraceFile(items, classifications, classifiedBy, matchTrace, matchModels, {
+          report,
+          dropped,
+          sources: {
+            "GitHub Trending": { fetched: data.trendingFetchSuccess ? data.trendingRepos.length : null },
+            "topic search": { fetched: data.searchRepos.length },
+            "OpenRouter apps": { fetched: data.openrouter.fetchSuccess ? data.openrouter.apps.length : null },
+            npm: { fetched: data.npm.fetchSuccess ? data.npm.rising.length + data.npm.top.length : null },
+          },
+        })
       : undefined;
   return {
     ...report,

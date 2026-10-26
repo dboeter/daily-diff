@@ -75,6 +75,31 @@ function releaseSlot(): void {
 
 export const llmStats = { attempted: 0, failed: 0 };
 
+/**
+ * One `callLlm` call, for the day's `llm-trace.json`: `label` names the call site (`generateOr`'s
+ * tag); `fallback` is a failed call whose caller then used its fallback (a placeholder, the rows'
+ * descriptions); `chars` is the answer's length, so a thin answer to a listing call stands out.
+ */
+export interface LlmCallRecord {
+  label: string;
+  outcome: "ok" | "failed" | "fallback";
+  chars?: number;
+  error?: string;
+}
+export const llmCalls: LlmCallRecord[] = [];
+
+/** The last failed call at `label` used its fallback. Labels are one call site each per run. */
+export function markLlmFallback(label: string): void {
+  const call = [...llmCalls].reverse().find((c) => c.label === label && c.outcome === "failed");
+  if (call) call.outcome = "fallback";
+}
+
+/** `llm-trace.json`: the run's tally, then one call per line in completion order. */
+export function llmTraceFile(): string {
+  const { attempted, failed } = llmStats;
+  return `{\n"attempted": ${attempted},\n"failed": ${failed},\n"calls": [\n${llmCalls.map((c) => JSON.stringify(c)).join(",\n")}\n]\n}\n`;
+}
+
 /** Fraction of LLM calls that exhausted their retries. 0 when none were made. */
 export function llmFailureRatio(): number {
   return llmStats.attempted === 0 ? 0 : llmStats.failed / llmStats.attempted;
@@ -84,6 +109,7 @@ export function llmFailureRatio(): number {
 export function resetLlmStats(): void {
   llmStats.attempted = 0;
   llmStats.failed = 0;
+  llmCalls.length = 0;
 }
 
 /**
@@ -140,10 +166,19 @@ export function reportLlmHealth(): void {
     return;
   }
   console.warn(`  [llm] ${line} — some reports are degraded`);
+  appendStepSummary(`⚠️ **Degraded LLM output** — ${line}`);
+}
+
+/** A line on the Actions run page (`$GITHUB_STEP_SUMMARY`); nothing on a local run. */
+export function appendStepSummary(line: string): void {
   const summaryPath = process.env["GITHUB_STEP_SUMMARY"];
-  if (summaryPath) {
-    fs.appendFileSync(summaryPath, `⚠️ **Degraded LLM output** — ${line}\n`, "utf-8");
-  }
+  if (summaryPath) fs.appendFileSync(summaryPath, `${line}\n`, "utf-8");
+}
+
+/** A warning in the log and on the Actions run page. */
+export function warnStep(line: string): void {
+  console.warn(`  ${line}`);
+  appendStepSummary(`⚠️ ${line}`);
 }
 
 /** A rate limit clears in seconds, so a short ladder is enough: 5 s, 10 s, 20 s. */
@@ -235,14 +270,20 @@ export function isRetryable(err: unknown): boolean {
   return is429(err) || isProviderUnavailable(err) || isConnectionError(err);
 }
 
-export async function callLlm(prompt: string, maxTokens = LLM_TOKENS_DEFAULT): Promise<string> {
+export async function callLlm(
+  prompt: string,
+  maxTokens = LLM_TOKENS_DEFAULT,
+  label = "unlabelled",
+): Promise<string> {
   llmStats.attempted++;
   let budget = maxTokens;
   for (let attempt = 0; ;) {
     await acquireSlot();
     let released = false;
     try {
-      return await provider.call(prompt, budget);
+      const text = await provider.call(prompt, budget);
+      llmCalls.push({ label, outcome: "ok", chars: text.length });
+      return text;
     } catch (err) {
       // A cut-off response gets one retry at double the budget, apart from the
       // 429/connection ladder: a second cut-off fails the call rather than
@@ -278,6 +319,7 @@ export async function callLlm(prompt: string, maxTokens = LLM_TOKENS_DEFAULT): P
         continue;
       }
       llmStats.failed++;
+      llmCalls.push({ label, outcome: "failed", error: String(err).slice(0, 300) });
       throw err;
     } finally {
       if (!released) releaseSlot();
@@ -286,8 +328,8 @@ export async function callLlm(prompt: string, maxTokens = LLM_TOKENS_DEFAULT): P
 }
 
 /** An LLM-written report body, without the H1 the model sometimes adds above the report's own, its links out of backticks. */
-export async function generateBody(prompt: string, maxTokens?: number): Promise<string> {
-  return unwrapCodeLinks(stripModelTitle(await callLlm(prompt, maxTokens)));
+export async function generateBody(prompt: string, maxTokens?: number, label?: string): Promise<string> {
+  return unwrapCodeLinks(stripModelTitle(await callLlm(prompt, maxTokens, label)));
 }
 
 /** `generateBody` with logging; a failed call is logged and returns `fallback`. */
@@ -298,8 +340,9 @@ export function generateOr<T>(
   maxTokens?: number,
 ): Promise<string | T> {
   console.log(`  [${tag}] Calling LLM...`);
-  return generateBody(prompt, maxTokens).catch((err) => {
+  return generateBody(prompt, maxTokens, tag).catch((err) => {
     console.error(`  [${tag}] LLM call failed: ${err}`);
+    markLlmFallback(tag);
     return fallback;
   });
 }

@@ -48,7 +48,7 @@ export interface NewItems<I, S extends ReportedState, V extends ItemsFile<unknow
   /** `nextState` without today's kept items. Saved on every successful fetch, so a quiet day keeps it. */
   observedState: S;
   nextVerdicts?: V | null;
-  /** The day's trace; absent when there were no candidates. */
+  /** The day's trace; absent when the pipeline threw. */
   traceFile?: string;
 }
 
@@ -107,7 +107,8 @@ export async function collectNewItems<
       nextState: stateFor(selection.items, recorded, fetched, selection.alsoNew),
       observedState: stateFor([], recorded, fetched),
       nextVerdicts: selection.nextVerdicts,
-      ...(candidates.length > 0 ? { traceFile: selection.traceFile } : {}),
+      // Also with no candidates: the trace's per-source counts tell a quiet day from a broken source.
+      traceFile: selection.traceFile,
     };
   } catch (err) {
     console.error(`  [${tag}] Failed: ${err}`);

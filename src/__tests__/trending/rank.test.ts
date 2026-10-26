@@ -22,7 +22,7 @@ import {
   type RadarRow,
   type StarHistory,
 } from "../../trending/rank.ts";
-import type { AskJev } from "../../core/jev.ts";
+import type { AskJev, DroppedReason } from "../../core/jev.ts";
 import type { Classification } from "../../trending/classify.ts";
 import { GitHubApiError } from "../../core/github.ts";
 import {
@@ -622,6 +622,29 @@ describe("selectTrendingReport", () => {
     ]);
     expect(report.categories[0]!.rows.map((r) => r.n)).toEqual([1, 2, 3, 4, 5, 6, 7, 8]);
     expect(report.categories[1]!.rows[0]!.n).toBe(9);
+  });
+
+  it("tells why an established repo got no category row: over the cap, or out of scope", () => {
+    const github = rankGithubRepos(
+      [],
+      Array.from({ length: 11 }, (_, i) => search(`c/r${i}`, { stargazersCount: 1100 - i })),
+      DATE,
+    );
+    const classifications = new Map<string, Classification>(
+      github.map((r, i) => [
+        r.key,
+        { category: i === 0 ? "out_of_scope" : "coding_agent", standalone: null },
+      ]),
+    );
+    const dropped = new Map<string, DroppedReason>();
+    const report = selectTrendingReport(github, [], classifications, "topics", [], new Set(), dropped);
+    const shown = new Set(report.categories.flatMap((g) => g.rows.map((r) => r.key)));
+    const cut = github.slice(1).filter((r) => !shown.has(r.key));
+    expect(cut).toHaveLength(2);
+    expect(Object.fromEntries(dropped)).toEqual({
+      [github[0]!.key]: "routing",
+      ...Object.fromEntries(cut.map((r) => [r.key, "cap"])),
+    });
   });
 
   it("alternates the top absolute and the top relative gains in a category", () => {

@@ -20,6 +20,7 @@ import { toCstDateStr } from "../core/date.ts";
 import { STAR_GAIN_DAYS } from "../core/github.ts";
 import { inScope, onRadar, type Classification, type TrendingVerdicts } from "./classify.ts";
 import { type MatchState } from "./match.ts";
+import type { DroppedReason } from "../core/jev.ts";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -581,19 +582,31 @@ export function urlMerge(rows: RadarRow[]): RadarRow[] {
 export function radarPool(
   radarCandidates: RadarRow[],
   classifications: Map<string, Classification>,
+  /** Gets each left-out candidate's keys and why (for the trace); a key keeps its first reason. */
+  dropped?: Map<string, DroppedReason>,
 ): RadarRow[] {
   // An unclassified candidate is dropped: nothing vouches for its scope.
   const eligible = radarCandidates.filter((r) => {
     const c = classifications.get(r.keys[0]!);
-    return c !== undefined && onRadar(c);
+    const ok = c !== undefined && onRadar(c);
+    if (!ok) dropAll(dropped, r.keys, "routing");
+    return ok;
   });
   const fresh = eligible.filter((r) => r.isNew);
   const established = eligible.filter((r) => !r.isNew);
   // 🆕 first, capped; established next; leftover 🆕 backfill a short established list.
-  return [...fresh.slice(0, RADAR_POOL_NEW), ...established, ...fresh.slice(RADAR_POOL_NEW)].slice(
-    0,
-    RADAR_POOL,
-  );
+  const ordered = [...fresh.slice(0, RADAR_POOL_NEW), ...established, ...fresh.slice(RADAR_POOL_NEW)];
+  for (const r of ordered.slice(RADAR_POOL)) dropAll(dropped, r.keys, "cap");
+  return ordered.slice(0, RADAR_POOL);
+}
+
+/** Set `reason` on each key not yet in `dropped`. */
+function dropAll(
+  dropped: Map<string, DroppedReason> | undefined,
+  keys: string[],
+  reason: DroppedReason,
+): void {
+  for (const k of keys) if (!dropped?.has(k)) dropped?.set(k, reason);
 }
 
 /**
@@ -656,10 +669,12 @@ export function selectTrendingReport(
   links: [string, string][] = [],
   /** `lastWeekKeys`: a row with a key in it is 🔥. */
   lastWeek: Set<string> = new Set(),
+  /** Gets every left-out candidate's key and why (for the trace); a key keeps its first reason. */
+  dropped?: Map<string, DroppedReason>,
 ): TrendingReportData {
   const onFire = (keys: string[]) => keys.some((k) => lastWeek.has(k.toLowerCase()));
   // A merged row is 🆕 when any member is, so split again after merging.
-  const merged = mergeRows(urlMerge(radarPool(radarCandidates, classifications)), links);
+  const merged = mergeRows(urlMerge(radarPool(radarCandidates, classifications, dropped)), links);
   const mergedFresh = merged.filter((r) => r.isNew);
   const mergedEstablished = merged.filter((r) => !r.isNew);
   const freshCount = Math.min(
@@ -671,13 +686,26 @@ export function selectTrendingReport(
     ...mergedFresh.slice(0, freshCount),
     ...mergedEstablished.slice(0, RADAR_MAX - freshCount),
   ].map((r) => ({ ...r, onFire: onFire(r.keys), n: ++n }));
+  for (const r of [...mergedFresh.slice(freshCount), ...mergedEstablished.slice(RADAR_MAX - freshCount)]) {
+    dropAll(dropped, r.keys, "cap");
+  }
 
-  const categories = CATEGORIES.map((category) => ({
-    category,
-    rows: interleaveGains(
-      githubRows.filter((r) => isCategoryRepo(r) && classifications.get(r.key)?.category === category),
-    ),
-  }))
+  for (const r of githubRows) {
+    if (r.isNew) continue;
+    const category = classifications.get(r.key)?.category;
+    if (!isCategoryRepo(r)) dropAll(dropped, [r.key], "threshold");
+    else if (!(CATEGORIES as readonly unknown[]).includes(category)) {
+      dropAll(dropped, [r.key], "routing");
+    }
+  }
+  const categories = CATEGORIES.map((category) => {
+    const eligible = githubRows.filter(
+      (r) => isCategoryRepo(r) && classifications.get(r.key)?.category === category,
+    );
+    const rows = interleaveGains(eligible);
+    for (const r of eligible) if (!rows.includes(r)) dropAll(dropped, [r.key], "cap");
+    return { category, rows };
+  })
     .filter((g) => g.rows.length > 0)
     .map((g) => ({
       category: g.category,

@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { judgeItems, retryDelayMs, type VerdictCache } from "../../core/jev.ts";
+import { judgeItems, retryDelayMs, sourceCounts, type VerdictCache } from "../../core/jev.ts";
 
 describe("Jev client", () => {
   it("honors retry-after and otherwise backs off exponentially, capped", () => {
@@ -168,5 +168,15 @@ describe("judgeItems", () => {
         '{"id":"x","relevance":1,"score":1,"decided":null},\n{"id":"y"}\n]\n}\n',
     );
     expect(j.traceFields(item("unknown"))).toEqual({ relevance: null, decided: null });
+  });
+});
+
+describe("sourceCounts", () => {
+  it("keeps a source that fetched nothing and one that failed, and counts judged items", () => {
+    expect(sourceCounts({ A: 3, Empty: 0, Failed: null }, ["A", "A"])).toEqual({
+      A: { fetched: 3, judged: 2 },
+      Empty: { fetched: 0, judged: 0 },
+      Failed: { fetched: null, judged: 0 },
+    });
   });
 });

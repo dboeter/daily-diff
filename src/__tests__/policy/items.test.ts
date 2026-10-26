@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
-import { fetchPolicyData, type PolicyItem } from "../../policy/items.ts";
+import { fetchPolicyData, nextZeroSince, quietSources, type PolicyItem } from "../../policy/items.ts";
 import type { PolicyConfig } from "../../core/config.ts";
 
 const item = (id: string, published = "2026-10-13T08:00:00.000Z"): PolicyItem => ({
@@ -210,6 +210,8 @@ describe("fetchPolicyData", () => {
           source: "Commission",
         },
       },
+      // Fetched items but none judged: quiet from today.
+      zeroSince: { Stages: "2026-10-14" },
     });
     expect(data.nextState.reported["new AI rules"]).toBe("2026-10-14");
   });
@@ -269,5 +271,17 @@ describe("fetchPolicyData", () => {
       ["rules", false],
       ["news", true],
     ]);
+  });
+});
+
+describe("quiet sources", () => {
+  it("keeps the first quiet date, clears a source with a judged item, and warns after 7 days", () => {
+    const day1 = nextZeroSince(undefined, ["A", "B"], ["B"], "2026-10-01");
+    expect(day1).toEqual({ A: "2026-10-01" });
+    const day2 = nextZeroSince(day1, ["A", "B"], [], "2026-10-02");
+    expect(day2).toEqual({ A: "2026-10-01", B: "2026-10-02" });
+    expect(nextZeroSince(day2, ["A", "B"], ["A"], "2026-10-03")).toEqual({ B: "2026-10-02" });
+    expect(quietSources(day2, "2026-10-06")).toEqual([]);
+    expect(quietSources(day2, "2026-10-07")).toEqual([["A", "2026-10-01"]]);
   });
 });

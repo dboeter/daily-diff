@@ -249,6 +249,23 @@ describe("selectPolicyItems", () => {
     ]);
     expect(sel.traceFile.split("\n").filter((l) => l.startsWith('{"id"'))).toHaveLength(2);
   });
+
+  it("traces each item's outcome and the sources header passed in", async () => {
+    const sources = { Commission: { fetched: 2, judged: 2 }, Broken: { fetched: null, judged: 0 } };
+    const sel = await selectPolicyItems(
+      [item("ai", { title: "Rules on artificial intelligence" }), item("fish", { title: "Fishing quotas" })],
+      { ...base, sources, cache: { items: {} } },
+    );
+    expect(sel.rankedBy).toBe("keywords");
+    const trace = JSON.parse(sel.traceFile) as { sources: unknown; items: Record<string, unknown>[] };
+    expect(trace.sources).toEqual(sources);
+    expect(trace.items.find((i) => i["id"] === "ai")).toMatchObject({ rendered: true, rank: 1 });
+    expect(trace.items.find((i) => i["id"] === "fish")).toMatchObject({
+      rendered: false,
+      rank: null,
+      dropped_reason: "threshold",
+    });
+  });
 });
 
 describe("policy verdict file", () => {

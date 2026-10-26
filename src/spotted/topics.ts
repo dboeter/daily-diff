@@ -7,16 +7,20 @@
 
 import path from "node:path";
 import {
+  droppedFor,
   judgeItems,
   loadItemsFile,
+  renderedAt,
   saveItemsFile,
   type AskJev,
+  type DroppedReason,
+  type SourceCounts,
   type ChoiceAnswer,
   type Judgment,
   type VerdictCache,
 } from "../core/jev.ts";
 import { DATA_KEYWORD_PATTERNS } from "../sources/hn.ts";
-import { siteOf, type SpottedPage, type Story } from "./pool.ts";
+import { siteOf, type SpottedPage, type SpottedRow, type Story } from "./pool.ts";
 
 const TOPIC_QUESTIONS = {
   topic: {
@@ -250,19 +254,35 @@ export async function routeStories(
 
 /**
  * `digests/YYYY-MM-DD/spotted-trace.json`: every routed story with its
- * topic, page, whether a page showed it, and its answers.
+ * topic, page, whether a page showed it (`rendered`, `rank`: its row number), why
+ * not (`selectSpotted`'s `dropped`, or its page went unpublished), and its answers.
  */
-export function spottedTraceFile(stories: Story[], routing: Routing, shownIds: Set<string>): string {
+export function spottedTraceFile(
+  stories: Story[],
+  routing: Routing,
+  shownIds: Set<string>,
+  selection: {
+    rows: Pick<SpottedRow, "id" | "n">[];
+    dropped: Map<string, DroppedReason>;
+    sources: SourceCounts;
+  },
+): string {
+  const rowOf = new Map(selection.rows.map((r) => [r.id, r.n]));
   const rows = stories.map((s) => {
     const topic = routing.topics.get(s.id) ?? null;
+    const n = rowOf.get(s.id);
     return {
       id: s.id,
       title: s.title,
+      source: s.source,
       topic,
       page: topic ? PAGE_OF_TOPIC[topic] : null,
       shown: shownIds.has(s.id),
+      ...(n !== undefined && shownIds.has(s.id)
+        ? renderedAt(n)
+        : droppedFor(selection.dropped.get(s.id) ?? "unpublished")),
       ...routing.judgment.traceFields(s),
     };
   });
-  return routing.judgment.traceFile(rows, {});
+  return routing.judgment.traceFile(rows, { sources: selection.sources });
 }

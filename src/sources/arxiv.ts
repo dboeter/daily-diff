@@ -11,7 +11,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { sleep } from "../core/date.ts";
-import { askJev, jevFailedTooOften, mapJev } from "../core/jev.ts";
+import { askJev, droppedFor, jevFailedTooOften, mapJev, renderedAt, type SourceCounts } from "../core/jev.ts";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -356,11 +356,11 @@ const TRACE_PAPERS = 100;
  * paper per line. Kept so a misranked paper can be traced to an answer or a
  * weight, and so weights can be retuned on past days without rerunning Jev.
  */
-export function buildTraceFile(ranked: RankedPaper[]): string {
+export function buildTraceFile(ranked: RankedPaper[], sources?: SourceCounts): string {
   const rows = ranked
     .slice(0, TRACE_PAPERS)
-    .flatMap(({ paper, jev }) => (jev ? [{ paper, jev }] : []))
-    .map(({ paper, jev }) => {
+    .flatMap(({ paper, jev }, i) => (jev ? [{ paper, jev, rank: i + 1 }] : []))
+    .map(({ paper, jev, rank }) => {
       const a = jev.answers;
       const round = (n: number): number => Math.round(n * 1000) / 1000;
       return JSON.stringify({
@@ -373,11 +373,14 @@ export function buildTraceFile(ranked: RankedPaper[]): string {
         works_without_training: round(a.works_without_training.noul),
         widely_used_models: round(a.widely_used_models.noul),
         code_released: jev.codeReleased,
+        // Rendered = kept for the research state.
+        ...(rank <= ARXIV_KEPT_PAPERS ? renderedAt(rank) : droppedFor("cap")),
       });
     });
   const models = [...new Set(ranked.flatMap((r) => (r.jev ? [r.jev.model] : [])))];
   return (
     `{\n"models": ${JSON.stringify(models)},\n"weights": ${JSON.stringify(RELEVANCE_WEIGHTS)},\n` +
+    (sources ? `"sources": ${JSON.stringify(sources)},\n` : "") +
     `"papers": [\n${rows.join(",\n")}\n]\n}\n`
   );
 }
@@ -440,8 +443,11 @@ async function fetchArxiv(dateStr: string, state: ArxivState | null): Promise<Ar
   const cutoff = submissionCutoff(state, dateStr, new Date());
   const seen = new Map<string, ArxivPaper>();
   let requests = 0;
+  // Papers parsed per category over its pages; null when its first page failed.
+  const fetched: Record<string, number | null> = {};
 
   for (const cat of CATEGORIES) {
+    fetched[cat] = null;
     for (let page = 0; page < ARXIV_MAX_PAGES; page++) {
       if (requests++ > 0) await sleep(REQUEST_DELAY_MS);
       try {
@@ -463,6 +469,7 @@ async function fetchArxiv(dateStr: string, state: ArxivState | null): Promise<Ar
         }
 
         const parsedPapers = parseArxivEntries(await resp.text());
+        fetched[cat] = (fetched[cat] ?? 0) + parsedPapers.length;
         for (const paper of parsedPapers) {
           if (!seen.has(paper.id)) seen.set(paper.id, paper);
         }
@@ -499,7 +506,14 @@ async function fetchArxiv(dateStr: string, state: ArxivState | null): Promise<Ar
     papers,
     fetchSuccess: papers.length > 0,
     rankedBy,
-    ...(ranked ? { traceFile: buildTraceFile(ranked) } : {}),
+    ...(ranked
+      ? {
+          traceFile: buildTraceFile(
+            ranked,
+            Object.fromEntries(Object.entries(fetched).map(([cat, n]) => [cat, { fetched: n }])),
+          ),
+        }
+      : {}),
     ...(nextState ? { nextState } : {}),
   };
 }

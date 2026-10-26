@@ -13,7 +13,9 @@ import { fetchRssFeed, recentNewsItems, type FeedItem } from "../core/rss.ts";
 import { JURISDICTIONS, type Jurisdiction, type PolicyConfig } from "../core/config.ts";
 import { POLICY_SOURCES, type PolicySource } from "./sources.ts";
 import { loadPolicyVerdicts, selectPolicyItems, type PolicyVerdicts } from "./relevance.ts";
-import type { AskJev } from "../core/jev.ts";
+import { sourceCounts, type AskJev } from "../core/jev.ts";
+import { daysBefore } from "../core/date.ts";
+import { warnStep } from "../core/llm.ts";
 import { upcomingDeadlines } from "./deadlines.ts";
 import { loadReportedState, nextDeadlines, type Deadline, type ReportedState } from "../core/report-state.ts";
 import { collectNewItems, type NewItems } from "../core/new-items.ts";
@@ -47,6 +49,8 @@ export interface PolicyItem extends FeedItem {
 export interface PolicyState extends ReportedState {
   /** Item id → the open deadline of a reported item; dropped once passed (policy/deadlines.ts). */
   deadlines?: Record<string, Deadline>;
+  /** Primary source name → the first day of its run of days with no judged item (`nextZeroSince`). */
+  zeroSince?: Record<string, string>;
 }
 
 export interface PolicyData extends NewItems<Numbered<PolicyItem>, PolicyState, PolicyVerdicts> {
@@ -107,6 +111,33 @@ export async function fetchPolicySources(
   ]);
 }
 
+/**
+ * Days a primary source may go without a judged item before the run warns. A week: the official
+ * sources publish on weekdays, so a quiet weekend or a slow week alone does not warn.
+ */
+export const QUIET_SOURCE_WARN_DAYS = 7;
+
+/**
+ * Each primary source (a registered source, or a feed without `kind: news`) without a judged item
+ * today keeps the first day of its quiet run; a source with one leaves the map. A failed fetch counts
+ * as quiet: a broken source is what the warning is for. Same-day re-runs keep the date.
+ */
+export function nextZeroSince(
+  prev: Record<string, string> | undefined,
+  primary: string[],
+  judgedSources: string[],
+  dateStr: string,
+): Record<string, string> {
+  const judged = new Set(judgedSources);
+  return Object.fromEntries(primary.filter((n) => !judged.has(n)).map((n) => [n, prev?.[n] ?? dateStr]));
+}
+
+/** The sources quiet for QUIET_SOURCE_WARN_DAYS days or more, today included. */
+export function quietSources(zeroSince: Record<string, string>, dateStr: string): [string, string][] {
+  const from = daysBefore(dateStr, QUIET_SOURCE_WARN_DAYS - 1);
+  return Object.entries(zeroSince).filter(([, since]) => since <= from);
+}
+
 export async function fetchPolicyData(
   config: PolicyConfig,
   now: Date,
@@ -122,12 +153,22 @@ export async function fetchPolicyData(
   // (stable, so relevance order holds within a section) and then numbered, so the row numbers run on
   // down the page; the table and the summaries prompt both read each row's own number.
   const rank = (i: PolicyItem) => (i.news ? JURISDICTIONS.length : JURISDICTIONS.indexOf(i.jurisdiction));
+  // Per source name: items fetched (null: failed), and the source each item came from. Item `source`
+  // fields differ from the registry names ("Commission mail" fetches "European Commission" items).
+  const names = [...sources.map((s) => s.name), ...config.feeds.map((f) => f.name)];
+  const primary = [...sources.map((s) => s.name), ...config.feeds.filter((f) => !f.news).map((f) => f.name)];
+  let fetched: Record<string, number | null> = {};
+  const originOf = new Map<string, string>();
+  let zeroSince = state?.zeroSince;
   const data = await collectNewItems({
     tag: "policy",
     state,
     dateStr,
     fetch: async () => {
       const results = await fetchPolicySources(config, now, dateStr, state, sources);
+      fetched = Object.fromEntries(names.map((n, i) => [n, results[i]?.length ?? null]));
+      // Last copy wins, as in byId below.
+      results.forEach((r, i) => r?.forEach((item) => originOf.set(item.id, names[i]!)));
       // One row per id: the Commission mailing repeats items of the Commission's RSS feed, under its guid.
       // The last copy wins: feeds come after sources, so the RSS item (its own pubDate) is the one shown.
       const byId = new Map(results.flatMap((r) => r ?? []).map((i) => [i.id, i] as const));
@@ -138,16 +179,23 @@ export async function fetchPolicyData(
     stateItem: (i: PolicyItem) => i,
     select: async (candidates) => {
       console.log(`  [policy] ${POLICY_REPORT.newItems(candidates.length)}`);
+      const judged = candidates.map((c) => originOf.get(c.id) ?? c.source);
+      zeroSince = nextZeroSince(state?.zeroSince, primary, judged, dateStr);
+      for (const [name, since] of quietSources(zeroSince, dateStr)) {
+        warnStep(`[policy] WARN ${name}: no judged item since ${since}; check whether the source is broken`);
+      }
       const selection = await selectPolicyItems(candidates, {
         readerProfile: config.readerProfile,
         watchlist: config.watchlist,
+        sources: sourceCounts(fetched, judged),
         dateStr,
         ...jev,
       });
       return { ...selection, items: numberRows([...selection.items].sort((a, b) => rank(a) - rank(b))) };
     },
-    extend: (kept, fetched): Pick<PolicyState, "deadlines"> => ({
-      deadlines: nextDeadlines(state?.deadlines, kept, fetched, dateStr),
+    extend: (kept, fetchedItems): Pick<PolicyState, "deadlines" | "zeroSince"> => ({
+      deadlines: nextDeadlines(state?.deadlines, kept, fetchedItems, dateStr),
+      ...(zeroSince ? { zeroSince } : {}),
     }),
   });
   return {

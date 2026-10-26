@@ -7,7 +7,15 @@
  */
 
 import path from "node:path";
-import { judgeItems, loadItemsFile, type AskJev, type VerdictCache } from "../core/jev.ts";
+import {
+  droppedFor,
+  judgeItems,
+  loadItemsFile,
+  renderedAt,
+  sourceCounts,
+  type AskJev,
+  type VerdictCache,
+} from "../core/jev.ts";
 import type { VendorItem } from "./vendors.ts";
 import { numberRows, type Numbered } from "../reports/summarized-table.ts";
 import { VENDOR_SECTIONS, vendorSection, type VendorSection } from "../core/config.ts";
@@ -290,13 +298,21 @@ const datesOf = (i: VendorItem) => dateCandidates(`${i.title} ${i.description}`)
 
 export async function selectVendorItems(
   items: VendorItem[],
-  opts: { apiKey?: string; cache: DataVerdicts | null; dateStr: string; ask?: AskJev },
+  opts: {
+    apiKey?: string;
+    cache: DataVerdicts | null;
+    dateStr: string;
+    ask?: AskJev;
+    /** Items per feed (null: failed), for the trace's `sources` header. */
+    fetched?: Record<string, number | null>;
+  },
 ): Promise<VendorSelection> {
+  const { fetched, ...jev } = opts;
   // Behavior-change bundles are deprecations by definition: no question to ask.
   const judgment = await judgeItems(
     items.filter((i) => i.stage === undefined),
     {
-      ...opts,
+      ...jev,
       tag: "data",
       request: (item) => {
         const dates = datesOf(item);
@@ -338,22 +354,37 @@ export async function selectVendorItems(
 
   const keptById = new Map(kept.map((i) => [i.id, i]));
   const selectedIds = new Set(selected.map((i) => i.id));
+  const numbered = numberRows(selected);
+  const rowOf = new Map(numbered.map((i) => [i.id, i.n]));
   const rows = items.map((i) => ({
     id: i.id,
     title: i.title,
     source: i.source,
     kept: selectedIds.has(i.id),
     ...(keptById.has(i.id) && !selectedIds.has(i.id) ? { overCap: true } : {}),
+    ...(rowOf.has(i.id)
+      ? renderedAt(rowOf.get(i.id)!)
+      : droppedFor(keptById.has(i.id) ? "cap" : "threshold")),
     deprecation: decide(i).deprecation,
     ...(keptById.get(i.id)?.endDate ? { endDate: keptById.get(i.id)!.endDate } : {}),
     ...judgment.traceFields(i),
     ...(i.stage !== undefined ? { stage: i.stage } : { keyword: keywordVerdict(i) }),
   }));
-  const traceFile = judgment.traceFile(rows, { weights: DATA_WEIGHTS });
+  const traceFile = judgment.traceFile(rows, {
+    ...(fetched
+      ? {
+          sources: sourceCounts(
+            fetched,
+            items.map((i) => i.source),
+          ),
+        }
+      : {}),
+    weights: DATA_WEIGHTS,
+  });
 
   // By relevance, as orderAndCap ranked them; `kept` is in feed order.
   const alsoNew = [...kept]
     .filter((i) => !selectedIds.has(i.id))
     .sort((a, b) => (verdicts.get(b.id)?.relevance ?? -1) - (verdicts.get(a.id)?.relevance ?? -1));
-  return { items: numberRows(selected), alsoNew, rankedBy, nextVerdicts: judgment.nextCache, traceFile };
+  return { items: numbered, alsoNew, rankedBy, nextVerdicts: judgment.nextCache, traceFile };
 }

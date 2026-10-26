@@ -6,7 +6,15 @@
  */
 
 import path from "node:path";
-import { judgeItems, loadItemsFile, type AskJev, type VerdictCache } from "../core/jev.ts";
+import {
+  droppedFor,
+  judgeItems,
+  loadItemsFile,
+  renderedAt,
+  type AskJev,
+  type SourceCounts,
+  type VerdictCache,
+} from "../core/jev.ts";
 import type { Jurisdiction, PolicyConfig } from "../core/config.ts";
 import type { PolicyItem } from "./items.ts";
 import type { Selection } from "../core/new-items.ts";
@@ -337,13 +345,15 @@ export async function selectPolicyItems(
     readerProfile: string;
     /** A non-news item naming an entry of its own jurisdiction's list is always kept. */
     watchlist: PolicyConfig["watchlist"];
+    /** The trace's `sources` header (`sourceCounts`); absent when the caller has no fetch counts. */
+    sources?: SourceCounts;
     apiKey?: string;
     cache: PolicyVerdicts | null;
     dateStr: string;
     ask?: AskJev;
   },
 ): Promise<PolicySelection> {
-  const { readerProfile, watchlist, ...jev } = opts;
+  const { readerProfile, watchlist, sources, ...jev } = opts;
   const judgment = await judgeItems(items, {
     ...jev,
     tag: "policy",
@@ -374,11 +384,17 @@ export async function selectPolicyItems(
     source: i.source,
     jurisdiction: i.jurisdiction,
     kept: selected.includes(i),
+    // No cap, and the state filters repeats before selection: a dropped item fell below the bar.
+    ...(selected.includes(i) ? renderedAt(selected.indexOf(i) + 1) : droppedFor("threshold")),
     ...judgment.traceFields(i),
     watchlisted: onWatchlist(i),
     keyword: fallbackKeywordHit(i),
   }));
-  const traceFile = judgment.traceFile(rows, { weights: POLICY_WEIGHTS, newsWeights: NEWS_WEIGHTS });
+  const traceFile = judgment.traceFile(rows, {
+    ...(sources ? { sources } : {}),
+    weights: POLICY_WEIGHTS,
+    newsWeights: NEWS_WEIGHTS,
+  });
 
   return { items: selected, rankedBy, nextVerdicts: judgment.nextCache, traceFile };
 }
