@@ -60,6 +60,31 @@ export function linkKey(url: string): string {
   }
 }
 
+/** Boilerplate a linked page's meta description carries in place of content. */
+const DESCRIPTION_BOILERPLATE = [
+  /Contribute to [\w.-]+\/[\w.-]+ development by creating an account on GitHub\.?/gi,
+  /\s+-\s+[\w.-]+\/[\w.-]+\s*$/, // GitHub's trailing " - owner/repo"
+  /\bSubscribe (now |today )?(for|to)\b[^.]*\.?/gi,
+  /(\.{3}|…)\s*$/,
+];
+
+/**
+ * A story's description without page boilerplate, whitespace collapsed; undefined when nothing is
+ * left. On 2026-10-26 a Spotted row read "Contribute to microsoft/Agensh development by creating an
+ * account on GitHub." and a Most discussed row "Subscribe for daily updates."
+ */
+export function cleanStoryDescription(description: string | undefined): string | undefined {
+  let d = (description ?? "").replace(/\s+/g, " ").trim();
+  for (const re of DESCRIPTION_BOILERPLATE) d = d.replace(re, "").trim();
+  return d || undefined;
+}
+
+/** `cleanStoryDescription` as an optional `description` field. */
+const describedBy = (description: string | undefined) => {
+  const d = cleanStoryDescription(description);
+  return d ? { description: d } : {};
+};
+
 /** Every fetched story, shown before or not: the log takes the latest counts of each. */
 export function storiesFrom(hn: HnData, lobsters: LobstersData, devto: DevtoData): Story[] {
   return [
@@ -71,7 +96,7 @@ export function storiesFrom(hn: HnData, lobsters: LobstersData, devto: DevtoData
       discussionUrl: s.hnUrl,
       points: s.points,
       comments: s.comments,
-      ...(s.description ? { description: s.description } : {}),
+      ...describedBy(s.description),
       published: s.createdAt,
     })),
     ...lobsters.stories.map((s): Story => ({
@@ -82,7 +107,7 @@ export function storiesFrom(hn: HnData, lobsters: LobstersData, devto: DevtoData
       discussionUrl: s.commentsUrl,
       points: s.score,
       comments: s.commentCount,
-      ...(s.description ? { description: s.description } : {}),
+      ...describedBy(s.description),
       published: s.publishedAt,
     })),
     ...devto.articles.map((a): Story => ({
@@ -93,7 +118,7 @@ export function storiesFrom(hn: HnData, lobsters: LobstersData, devto: DevtoData
       discussionUrl: a.url,
       points: a.positiveReactionsCount,
       comments: a.commentsCount,
-      ...(a.description ? { description: a.description } : {}),
+      ...describedBy(a.description),
       published: a.publishedAt,
     })),
   ];
@@ -207,7 +232,7 @@ export function carriedStories(log: SpottedLog, fetched: Story[], dateStr: strin
       discussionUrl: e.discussionUrl,
       points: e.points,
       comments: e.comments,
-      ...(e.description ? { description: e.description } : {}),
+      ...describedBy(e.description),
       published: `${e.firstSeen}T00:00:00Z`,
     }));
 }
@@ -501,7 +526,8 @@ export function mostDiscussed(
       discussionUrl: e.discussionUrl,
       points: e.points,
       comments: e.comments,
-      ...(e.description ? { description: e.description } : {}),
+      // Logged before descriptions were cleaned at fetch.
+      ...describedBy(e.description),
     })),
   );
 }

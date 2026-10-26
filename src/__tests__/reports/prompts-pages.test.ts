@@ -469,3 +469,26 @@ describe("summaries lead with impact", () => {
     expect(p).toContain(IDENTIFIER_RULE);
   });
 });
+
+describe("story summaries are written, not copied", () => {
+  it("Spotted and Most discussed both ask for own words and one concrete fact", () => {
+    const row = {
+      n: 1,
+      id: "hn:1",
+      source: "hn" as const,
+      title: "T",
+      url: "https://x.com",
+      discussionUrl: "d",
+      points: 1,
+      comments: 1,
+      description: "D.",
+    };
+    for (const p of [
+      buildSpottedSummariesPrompt([row], "2026-10-26"),
+      buildTrendsSummariesPrompt([], [row], "2026-10-26"),
+    ]) {
+      expect(p).toContain("in your own words, what it is about, with one concrete fact");
+      expect(p).toContain("Never copy the description");
+    }
+  });
+});

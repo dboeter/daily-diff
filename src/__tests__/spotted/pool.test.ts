@@ -9,6 +9,7 @@ import {
   freshStories,
   linkKey,
   carriedStories,
+  cleanStoryDescription,
   mostDiscussed,
   nextLog,
   selectSpotted,
@@ -556,5 +557,26 @@ describe("selectTalkedAbout", () => {
     );
     expect(rows.map((r) => r.title)).toContain("PHP2Shell: AI uncovers critical RCE in PHP");
     expect(rows.length).toBeLessThanOrEqual(5);
+  });
+});
+
+describe("cleanStoryDescription", () => {
+  it.each([
+    [
+      "A Decentralized, Scalable Multiagent Harness. Contribute to microsoft/Agensh development by creating an account on GitHub.",
+      "A Decentralized, Scalable Multiagent Harness.",
+    ],
+    [
+      "Build AI text detectors that are human-auditable (EMNLP 2026) - google-deepmind/detectorscope",
+      "Build AI text detectors that are human-auditable (EMNLP 2026)",
+    ],
+    ["Subscribe for daily updates.", undefined],
+    [
+      "This is a submission for the Challenge Week 3: Slow and Steady          ...",
+      "This is a submission for the Challenge Week 3: Slow and Steady",
+    ],
+    ["Contribute to o/r development by creating an account on GitHub.", undefined],
+  ])("cleans %j", (raw, clean) => {
+    expect(cleanStoryDescription(raw)).toBe(clean);
   });
 });

@@ -549,6 +549,15 @@ export function renderVendorTables(
  * summary for its own number (else its description, truncated). Empty when
  * the page has no rows.
  */
+/**
+ * A story's link: its title, or for a story linking a GitHub repo the title with the repo as the
+ * link text, so the link reads what it opens ("Show HN: Agentsh" linked microsoft/Agensh, 2026-10-26).
+ */
+function storyLink(r: Pick<StoryRow, "title" | "url">): string {
+  const repo = /^https:\/\/github\.com\/([\w.-]+\/[\w.-]+?)(?:\.git)?\/?$/i.exec(r.url)?.[1];
+  return repo ? `${cell(r.title)} ([${cell(repo)}](${cell(r.url)}))` : `[${cell(r.title)}](${cell(r.url)})`;
+}
+
 export function renderSpottedTable(
   rows: StoryRow[],
   summaries: Map<number, string>,
@@ -557,7 +566,7 @@ export function renderSpottedTable(
   if (!rows.length) return "";
   const lines = rows.map(
     (r) =>
-      `| [${cell(r.title)}](${cell(r.url)}) | ${SPOTTED.sources[r.source]} | ` +
+      `| ${storyLink(r)} | ${SPOTTED.sources[r.source]} | ` +
       `[${SPOTTED.counts(r.source, r.points, r.comments)}](${cell(r.discussionUrl)}) | ` +
       `${cell(summaryText(summaries, { n: r.n, description: r.description ?? "" }))} |`,
   );

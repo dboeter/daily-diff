@@ -164,10 +164,12 @@ const storyLine = (r: Omit<StoryRow, "n">): string =>
 /**
  * The story summary rules, shared by Spotted and Trends' Most discussed. A story
  * without a description gets `—`: a sentence on its title and site only restated
- * the row ("The story titled 'X' is from openai.com", 2026-10-23).
+ * the row ("The story titled 'X' is from openai.com", 2026-10-23). Told to take 2 sentences from
+ * the description, the model copied it whole (every Spotted row on 2026-10-25 and 10-26).
  */
-const STORY_RULES = `- A story with a description: 2 sentences taken from it. Without one: write \`N: —\`; the table shows its title and site.
-- Describe no comment thread or community reaction, and no claim, method or result a story's title and description do not state.`;
+const STORY_RULES = `- A story with a description: in your own words, what it is about, with one concrete fact from the description (a number, a named tool, a finding). Never copy the description: the reader can open the link. Without one: write \`N: —\`; the table shows its title and site.
+- Describe no comment thread or community reaction, and no claim, method or result a story's title and description do not state.
+- A first-person story ("I tested…", "We built…") is the author's: say who did it ("the author tested…").`;
 
 /**
  * Spotted, one call for every page's rows: one summary per numbered story.

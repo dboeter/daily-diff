@@ -695,3 +695,23 @@ describe("renderSpottedTable", () => {
     expect(renderSpottedTable([], new Map())).toBe("");
   });
 });
+
+describe("renderSpottedTable links", () => {
+  it("labels a GitHub repo link with the repo name, keeping the title", () => {
+    const row = {
+      n: 1,
+      id: "hn:1",
+      source: "hn" as const,
+      title: "Show HN: Agentsh",
+      url: "https://github.com/microsoft/Agensh",
+      discussionUrl: "https://news.ycombinator.com/item?id=1",
+      points: 10,
+      comments: 2,
+    };
+    const md = renderSpottedTable([row], new Map());
+    expect(md).toContain("| Show HN: Agentsh ([microsoft/Agensh](https://github.com/microsoft/Agensh)) |");
+    expect(renderSpottedTable([{ ...row, url: "https://example.com/a" }], new Map())).toContain(
+      "| [Show HN: Agentsh](https://example.com/a) |",
+    );
+  });
+});
