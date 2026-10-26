@@ -3,7 +3,13 @@
  * tables, and the cleanup of what models write (titles, code links, headings).
  */
 
-import { hasActivity, RELEASE_BODY_CHARS, releaseNotes, type ProjectActivity } from "./prompts.ts";
+import {
+  formatProject,
+  hasActivity,
+  RELEASE_BODY_CHARS,
+  releaseNotes,
+  type ProjectActivity,
+} from "./prompts.ts";
 import type { ReleaseRow } from "./pages.ts";
 import { escapeRegex } from "./project-news.ts";
 import {
@@ -28,7 +34,7 @@ import {
   type AgentSectionKey,
   type VendorSection,
 } from "../core/config.ts";
-import { summaryText, type Numbered } from "./summarized-table.ts";
+import { checkCodeTokens, summaryText, type Numbered } from "./summarized-table.ts";
 import {
   GOING_AWAY,
   LIVE_REPORT_IDS,
@@ -133,9 +139,18 @@ export const boldLabelColonInside = (md: string): string =>
 /**
  * A group's projects as rendered: the model's summary without text outside a `##` section and
  * without a project section that has no bullet (both are absence notes the prompt forbids), plus a
- * code section for each project with a stable release the model did not cover. `quiet` is every
- * other checked project without a section; after a failed call (MSG.summaryFailed) the data decides.
+ * code section for each project with a stable release the model did not cover. Each project
+ * section's backticked tokens are checked against the project's block in the prompt
+ * (`checkCodeTokens`). `quiet` is every other checked project without a section; after a failed
+ * call (MSG.summaryFailed) the data decides.
  */
+/** A model-written project section with its backticked tokens checked against that project's prompt block. */
+function checkProjectTokens(section: string, g: ProjectGroup): string {
+  const a = g.activities.find((p) => sectionHeading(p.config.name).test(section));
+  if (!a) return section;
+  return checkCodeTokens(new Map([[0, section]]), new Map([[0, formatProject(a)]]), g.title).get(0)!;
+}
+
 function groupProjects(g: ProjectGroup): { body: string; quiet: ProjectActivity[] } {
   const failed = g.summary.trim() === MSG.summaryFailed;
   const covered = g.activities.filter((a) => covers(g.summary, a));
@@ -149,7 +164,7 @@ function groupProjects(g: ProjectGroup): { body: string; quiet: ProjectActivity[
           (chunk) =>
             !g.activities.some((a) => sectionHeading(a.config.name).test(chunk) && !covers(chunk, a)),
         )
-        .map((chunk) => boldLabelColonInside(chunk.trim()));
+        .map((chunk) => boldLabelColonInside(checkProjectTokens(chunk.trim(), g)));
   const body = [...kept, ...fallback.map(releaseFallbackSection)].filter(Boolean).join("\n\n");
   const active = failed ? g.activities.filter(hasActivity) : [...covered, ...fallback];
   return { body, quiet: g.activities.filter((a) => !active.includes(a) && !a.fetchFailed) };

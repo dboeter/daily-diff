@@ -234,7 +234,8 @@ function formatRelease(r: GitHubRelease, repo: string, notes: string): string {
   return `- ${r.tag_name}${r.name && r.name !== r.tag_name ? ` (${r.name})` : ""} — https://github.com/${repo}/releases/tag/${r.tag_name}${announcement}\n  ${notes || "(no release notes)"}`;
 }
 
-function formatProject(a: ProjectActivity): string {
+/** A project's block in the digest prompt; also the source its section's backticked tokens are checked against. */
+export function formatProject(a: ProjectActivity): string {
   const { config: cfg } = a;
   const shown = a.releases.slice(0, RELEASES_PER_PROJECT);
   const releaseNote =

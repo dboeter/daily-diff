@@ -223,6 +223,73 @@ describe("buildProjectReportContent", () => {
     expect(result).toContain("**Quiet today:** [GAMMA](https://github.com/org/gamma)");
   });
 
+  describe("backticked tokens in a project section", () => {
+    // Hermes Agent on 2026-10-26 (review A11): the two hot issues' titles and the body excerpt the
+    // prompt saw (formatItem's first 300 characters), and the section the model wrote.
+    const issue = (number: number, title: string, body: string) => ({
+      number,
+      title,
+      body,
+      state: "open",
+      user: { login: "u" },
+      labels: [],
+      created_at: "2026-10-25T00:00:00Z",
+      updated_at: "2026-10-26T00:00:00Z",
+      comments: 12,
+      html_url: `https://github.com/NousResearch/hermes-agent/issues/${number}`,
+      gain: 12,
+    });
+    const hermes: ProjectActivity = {
+      ...makeActivity("hermes"),
+      config: { id: "hermes", repo: "NousResearch/hermes-agent", name: "Hermes Agent" },
+      hotIssues: [
+        issue(
+          143982,
+          "[Bug]: Secrets passed as command-line flags (--password=, --token=, docker login -p) and Azure AccountKey/SharedAccessKey pass the chat egress and approval-card redaction",
+          "### Bug Description\n\nTwo common credential shapes pass the chat egress scrub (`redact_for_egress`) and the approval-card scrub (`_redact_approval_command`) unmasked:\n\n1. **Secrets given as command-line flags:** `--password=…`, `--password …`, `--token=…`, `--api-key=…`, `docker login -p …`.",
+        ),
+        issue(
+          143938,
+          "gateway status prints MCP child-process command-line secrets verbatim (process-tree path has no redaction)",
+          "## Symptom\n\n`hermes gateway status` prints the gateway's full child-process tree, including each child's complete command line. When an MCP server is configured with a credential in its launch command (for example an `--api-key` argument), the live key value is printed in plaintext.",
+        ),
+      ],
+    };
+    const section = [
+      "## Hermes Agent",
+      "- **Hot issue**: Secrets passed as CLI flags (`--password=`, `--token=`, `docker login -p`) and Azure keys bypass chat egress and approval-card redaction [#143982](https://github.com/NousResearch/hermes-agent/issues/143982).",
+      "- **Hot issue**: `hermes gateway status` prints MCP child-process command lines verbatim, exposing API keys in plaintext [#143938](https://github.com/NousResearch/hermes-agent/issues/143938).",
+    ].join("\n");
+    const render = (summary: string) =>
+      buildProjectReportContent(withAgents({ summary, activities: [hermes] }));
+
+    it("keeps every token of the 2026-10-26 Hermes section, all in its source", () => {
+      const result = render(section);
+      for (const token of ["--password=", "--token=", "docker login -p", "hermes gateway status"]) {
+        expect(result).toContain(`\`${token}\``);
+      }
+    });
+
+    it("respells a token to its source's form and unwraps one the source lacks", () => {
+      const result = render(
+        `${section}\n- **Hot issue**: \`redactForEgress\` and \`mask_secrets()\` miss these flags [#143982](https://github.com/NousResearch/hermes-agent/issues/143982).`,
+      );
+      expect(result).toContain("`redact_for_egress` and mask_secrets() miss");
+    });
+
+    it("checks a section only against its own project's source", () => {
+      const other = makeActivity("alpha", { releases: [stableRelease] });
+      const result = buildProjectReportContent(
+        withAgents({
+          summary: `## ALPHA\n- **Release**: adds \`hermes gateway status\`.\n\n${section}`,
+          activities: [other, hermes],
+        }),
+      );
+      expect(result).toContain("adds hermes gateway status.");
+      expect(result).toContain("- **Hot issue:** `hermes gateway status` prints");
+    });
+  });
+
   it("never labels a no-stable-yet project's prerelease as a Release or counts it as stable", () => {
     // fetchProject sends such a project's prereleases as `previews`; `releases` stays stable-only.
     const beta = makeActivity("beta", {
