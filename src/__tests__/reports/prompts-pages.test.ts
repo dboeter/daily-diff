@@ -10,7 +10,7 @@ import {
   buildPolicySummariesPrompt,
   buildSpottedSummariesPrompt,
   buildTrendingSummariesPrompt,
-  buildTrendsModelsPrompt,
+  buildHfSummariesPrompt,
   buildTrendsProsePrompt,
   buildTrendsSummariesPrompt,
   firstHighlight,
@@ -135,30 +135,29 @@ describe("buildTrendsSummariesPrompt", () => {
   });
 });
 
-describe("buildTrendsModelsPrompt", () => {
-  const model = (id: string) => ({
-    id,
-    url: `https://huggingface.co/${id}`,
-    author: "o",
-    pipelineTag: "text-generation",
-    likes: 1200,
-    downloads: 3400,
-    tags: ["qwen3_5", "transformers"],
-  });
-
-  it("asks for the Hugging Face table only, ranked, without tags or uncensored re-uploads", () => {
-    const p = buildTrendsModelsPrompt(
-      { models: [model("o/Qwen3.8-27B"), model("o/DeepSeek-UNCENSORED-FP8")], fetchSuccess: true } as never,
-      "2026-10-26",
+describe("buildHfSummariesPrompt", () => {
+  it("asks for one summary per numbered release from task, size and license, never the model_type tag", () => {
+    const row = {
+      id: "Qwen/Qwen3.8-27B",
+      url: "https://huggingface.co/Qwen/Qwen3.8-27B",
+      author: "Qwen",
+      pipelineTag: "image-text-to-text",
+      parameters: 27.4e9,
+      likes: 18406,
+      downloads: 7762014,
+      tags: ["qwen3_5", "transformers", "license:apache-2.0"],
+      lastModified: "",
+      variants: [],
+      n: 1,
+    };
+    const p = buildHfSummariesPrompt([row], "2026-10-26");
+    expect(p).toContain(
+      "1. Qwen/Qwen3.8-27B | task: image-text-to-text | parameters: 27B | license: apache-2.0",
     );
-    expect(p).toContain(`\`### ${TRENDS_REPORT.hfHeading}\``);
-    expect(p).not.toContain(TRENDS_REPORT.openRouterHeading);
-    expect(p).toContain("| # | Model | Author | Likes | Downloads | Summary |");
-    expect(p).toContain("1. **o/Qwen3.8-27B**");
-    expect(p).not.toContain("UNCENSORED");
     expect(p).not.toContain("qwen3_5");
-    expect(p).toContain("No Highlights, Signals or other sections");
-    expect(p).not.toContain("Worth a Look");
+    expect(p).toContain("`N: <one sentence>`");
+    expect(p).toContain("1 lines in total");
+    expect(p).not.toContain(TRENDS_REPORT.hfHeading);
   });
 });
 
@@ -485,5 +484,14 @@ describe("story summaries are written, not copied", () => {
     const p = buildSpottedSummariesPrompt([row], "2026-10-26");
     expect(p).toContain("in your own words, what it is about, with one concrete fact");
     expect(p).toContain("Never copy the description");
+  });
+});
+
+describe("buildTrendsProsePrompt", () => {
+  it("names the rows without summary or description as no Highlight, like the data report's minor rows", () => {
+    expect(buildTrendsProsePrompt("page", "2026-10-26", ["Strix", "o/x"])).toContain(
+      '- These rows have no summary or description: no Highlight for them. "Strix", "o/x"',
+    );
+    expect(buildTrendsProsePrompt("page", "2026-10-26")).not.toContain("no Highlight for them");
   });
 });

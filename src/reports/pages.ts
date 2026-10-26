@@ -22,7 +22,7 @@ import {
 import {
   buildPolicySummariesPrompt,
   buildTrendingSummariesPrompt,
-  buildTrendsModelsPrompt,
+  buildHfSummariesPrompt,
   buildTrendsProsePrompt,
   buildTrendsSummariesPrompt,
   buildPolicyProsePrompt,
@@ -37,7 +37,7 @@ import { loadReportedState, newItems, nextReportedState, saveReportedState } fro
 import type { TrendingData } from "../trending/compose.ts";
 import { saveTrendingVerdicts } from "../trending/classify.ts";
 import { saveMatchState } from "../trending/match.ts";
-import { saveStarHistory, summaryRows } from "../trending/rank.ts";
+import { lastWeekKeys, saveStarHistory, summaryRows, weekAgo } from "../trending/rank.ts";
 import {
   AGENTS_HIGHLIGHTS_FOCUS,
   MODELS_HIGHLIGHTS_FOCUS,
@@ -50,7 +50,9 @@ import {
 } from "./prompts.ts";
 import type { GitHubRelease, RepoConfig, SkillsData } from "../core/github.ts";
 import {
+  renderHfTable,
   renderOpenRouterUsage,
+  unsummarizedRows,
   buildProjectReportContent,
   buildStealthSection,
   groupsMarkdown,
@@ -79,7 +81,7 @@ import {
   summaryText,
   TABLES_MARKER,
 } from "./summarized-table.ts";
-import type { HfData } from "../sources/huggingface.ts";
+import { hfKeys, hfReleaseRows, type HfData } from "../sources/huggingface.ts";
 import type { ResearchPaper } from "../trending/research.ts";
 import { POLICY_STATE_FILE, type PolicyData, type PolicyItem } from "../policy/items.ts";
 import { POLICY_VERDICTS_FILE } from "../policy/relevance.ts";
@@ -129,11 +131,12 @@ export interface TrendsInput {
  * category tables), Skills: PRs and requests this week, Candidates to track (code only),
  * Models, Research, Most discussed, Signals. An empty section is left out; the
  * page is null when every section is. First round, in parallel: the trending
- * row summaries, the models call, Skills, and the Research rows' call (the Most
- * discussed rows come summarized from main()'s Spotted call). Second round: the prose call over the page rendered
- * from them writes Highlights and Signals, and spliceTables puts the page
- * between them. A failed summaries call shows the descriptions, a failed
- * models call leaves the notice under Models, a failed prose call the notice
+ * row summaries, the Hugging Face row summaries, Skills, and the Research rows'
+ * call (the Most discussed rows come summarized from main()'s Spotted call).
+ * Second round: the prose call over the page rendered from them writes
+ * Highlights and Signals, and spliceTables puts the page between them; a row
+ * showing "—" is named to it as no Highlight. A failed summaries call shows the
+ * descriptions (Hugging Face: task and size), a failed prose call the notice
  * under Highlights; a failed Skills fetch or call leaves MSG.skillsFailed, and
  * a fetched week with no Skills item leaves the section out.
  */
@@ -147,6 +150,9 @@ export async function buildTrendsReport(
   const report = trending.report;
   const rows = report ? summaryRows(report) : [];
   const { hasHf, hasOpenRouter } = modelSources(hf, trending.openrouter);
+  const hfTableRows = hasHf ? numberRows(hfReleaseRows(hf.models)) : [];
+  // The weekly state carries last week's 🔥 keys and usage ranking; without a ranked report, neither.
+  const history = report?.nextStarHistory;
   const papers = numberRows(input.papers);
   const stories = input.stories.rows;
   const hasSkills = skills.prs.length + skills.issues.length > 0;
@@ -159,14 +165,7 @@ export async function buildTrendsReport(
     rows.length
       ? generateOr("trending-summaries", buildTrendingSummariesPrompt(rows, dateStr), "", LLM_TOKENS_LISTING)
       : "",
-    hasHf
-      ? generateOr(
-          "trends-models",
-          buildTrendsModelsPrompt(hf, dateStr),
-          MSG.summaryFailed,
-          LLM_TOKENS_LISTING,
-        )
-      : "",
+    hfTableRows.length ? generateOr("trends-models", buildHfSummariesPrompt(hfTableRows, dateStr), "") : "",
     // No item, no call: the notice only when the fetch failed, else no section.
     hasSkills
       ? generateOr(
@@ -183,7 +182,14 @@ export async function buildTrendsReport(
   ]);
 
   const rowMap = parseRowSummaries(rowSummaries);
-  const tables = report ? renderTrendingTables(report, parseRowSummaries(summaries)) : "";
+  const trendingSummaries = parseRowSummaries(summaries);
+  const hfSummaries = parseRowSummaries(models);
+  const tables = report ? renderTrendingTables(report, trendingSummaries) : "";
+  const hfTable = renderHfTable(
+    hfTableRows,
+    hfSummaries,
+    history ? lastWeekKeys(history, dateStr) : new Set(),
+  );
   const page = [
     // The tables' own `##` headings go below the section's.
     tables && `## ${T.agentsHeading}\n\n${nestHeadings(tables, 3)}`,
@@ -191,21 +197,35 @@ export async function buildTrendsReport(
     skillsSummary &&
       `## ${T.skillsHeading}\n\n${T.skillsSource(skills.repo)}\n\n${nestHeadings(skillsSummary, 3)}`,
     report ? renderCandidates(report.onFire, input.tracked) : "",
-    (hasOpenRouter || models) &&
-      // Nested apart: the code part opens at `##`, the model's at `###`.
-      `## ${T.modelsHeading}\n\n${[
-        renderOpenRouterUsage(trending.openrouter.topModels, trending.openrouter.topModelsDate),
-        models,
-      ]
-        .filter(Boolean)
-        .map((part) => nestHeadings(part, 3))
-        .join("\n\n")}`,
+    (hasOpenRouter || hfTable) &&
+      `## ${T.modelsHeading}\n\n${nestHeadings(
+        [
+          renderOpenRouterUsage(
+            trending.openrouter.topModels,
+            trending.openrouter.topModelsDate,
+            weekAgo(history?.modelRanking, dateStr),
+          ),
+          hfTable,
+        ]
+          .filter(Boolean)
+          .join("\n\n"),
+        3,
+      )}`,
     renderResearchTable(papers, rowMap),
     renderSpottedTable(stories, input.stories.summaries, T.mostDiscussedHeading),
   ]
     .filter(Boolean)
     .join("\n\n---\n\n");
-  const prose = await generateOr("trends", buildTrendsProsePrompt(page, dateStr), null, LLM_TOKENS_LISTING);
+  const prose = await generateOr(
+    "trends",
+    buildTrendsProsePrompt(
+      page,
+      dateStr,
+      unsummarizedRows(report, trendingSummaries, hfTableRows, hfSummaries),
+    ),
+    null,
+    LLM_TOKENS_LISTING,
+  );
   const body = spliceTables(
     prose === null ? `## ${SECTIONS.highlights}\n\n${MSG.summaryFailed}` : signListItems(prose),
     `---\n\n${page}\n\n---`,
@@ -223,7 +243,11 @@ export async function buildTrendsReport(
   }
   if (report?.nextMatches) saveMatchState(report.nextMatches);
   if (report?.nextTrendingVerdicts) saveTrendingVerdicts(report.nextTrendingVerdicts);
-  if (report?.nextStarHistory) saveStarHistory(report.nextStarHistory);
+  if (history) {
+    // The Hugging Face rows join the week's keys, so next week's table can mark 🔥.
+    const shown = [...(history.reported?.[dateStr] ?? []), ...hfTableRows.flatMap(hfKeys)];
+    saveStarHistory({ ...history, reported: { ...history.reported, [dateStr]: shown } });
+  }
 
   return { id: "ai-trends", content };
 }

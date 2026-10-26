@@ -20,6 +20,7 @@ import {
 } from "../sources/openrouter.ts";
 import type { LabPost } from "../sources/labs.ts";
 import type { TrendingReportData } from "../trending/rank.ts";
+import { hfDescription, hfKeys, type HfRow } from "../sources/huggingface.ts";
 import type { PolicyItem } from "../policy/items.ts";
 import type { KeptVendorItem } from "../data/relevance.ts";
 import type { VendorAction } from "../data/vendors.ts";
@@ -460,6 +461,28 @@ const POLICY_TITLE_MAX_CHARS = 200;
 export const policyTitleLabel = (title: string): string =>
   cell(title.length > POLICY_TITLE_MAX_CHARS ? `${title.slice(0, POLICY_TITLE_MAX_CHARS)}…` : title);
 
+/**
+ * The Radar, category and Hugging Face rows whose cell shows "—": no summary
+ * and no description to fall back on. The page says nothing about them, so
+ * the prose call is told they make no Highlight (Strix on 2026-10-26).
+ */
+export function unsummarizedRows(
+  report: TrendingReportData | undefined,
+  summaries: Map<number, string>,
+  hf: Numbered<HfRow>[] = [],
+  hfSummaries: Map<number, string> = new Map(),
+): string[] {
+  const radar = report?.radar ?? [];
+  const tables = report?.categories.flatMap((c) => c.rows) ?? [];
+  return [
+    ...radar.filter((r) => summaryText(summaries, r) === "—").map((r) => r.name),
+    ...tables.filter((r) => summaryText(summaries, r) === "—").map((r) => r.fullName),
+    ...hf
+      .filter((r) => summaryText(hfSummaries, { n: r.n, description: hfDescription(r) }) === "—")
+      .map((r) => r.id),
+  ];
+}
+
 /** The Radar and category tables, a `##` heading each; "" when both are empty. */
 export function renderTrendingTables(report: TrendingReportData, summaries: Map<number, string>): string {
   const T = TRENDS_REPORT;
@@ -706,13 +729,51 @@ export function renderCandidates(
  * the top five" after six models and picked "newcomers" by no rule. Ranks are
  * the rankings page's order; each model name links its OpenRouter page.
  */
-export function renderOpenRouterUsage(models: OpenRouterModel[], date: string): string {
+export function renderOpenRouterUsage(
+  models: OpenRouterModel[],
+  date: string,
+  /** The slugs, in rank order, that the run dated 7 days earlier saved; no Last week column without them. */
+  lastWeek?: string[],
+): string {
   if (!models.length) return "";
   const T = TRENDS_REPORT;
+  const lastWeekCell = (slug: string) => {
+    if (!lastWeek) return "";
+    const rank = lastWeek.indexOf(slug);
+    return ` ${rank === -1 ? T.openRouterNewcomer : rank + 1} |`;
+  };
   const rows = models.map(
-    (m, i) => `| ${i + 1} | [${cell(m.slug)}](https://openrouter.ai/${m.slug}) | ${formatTokens(m.tokens)} |`,
+    (m, i) =>
+      `| ${i + 1} | [${cell(m.slug)}](https://openrouter.ai/${m.slug}) | ${formatTokens(m.tokens)} |${lastWeekCell(m.slug)}`,
   );
-  return `## ${T.openRouterHeading}\n\n${T.openRouterIntro(date)}\n\n${T.openRouterHeader}\n${rows.join("\n")}`;
+  const header = lastWeek ? T.openRouterHeaderLastWeek : T.openRouterHeader;
+  return `## ${T.openRouterHeading}\n\n${T.openRouterIntro(date, lastWeek !== undefined)}\n\n${header}\n${rows.join("\n")}`;
+}
+
+/**
+ * Trends' Hugging Face table, in code like OpenRouter usage: the rank is the
+ * row's place in the Hub's order, 🔥 a row also on the page dated 7 days
+ * earlier (`lastWeek`: `lastWeekKeys`), quantised copies follow the original's
+ * link. The model writes only the summary, else the row shows its task and size.
+ */
+export function renderHfTable(
+  rows: Numbered<HfRow>[],
+  summaries: Map<number, string>,
+  lastWeek: Set<string> = new Set(),
+): string {
+  if (!rows.length) return "";
+  const T = TRENDS_REPORT;
+  const lines = rows.map((r, i) => {
+    const fire = hfKeys(r).some((k) => lastWeek.has(k)) ? "🔥 " : "";
+    const variants = r.variants.length
+      ? ` (+ ${r.variants.map((v) => `[${cell(v.id)}](${cell(v.url)})`).join(", ")})`
+      : "";
+    return (
+      `| ${i + 1} | ${fire}[${cell(r.id)}](${cell(r.url)})${variants} | ${r.likes.toLocaleString("en-US")} | ` +
+      `${r.downloads.toLocaleString("en-US")} | ${cell(summaryText(summaries, { n: r.n, description: hfDescription(r) }))} |`
+    );
+  });
+  return `## ${T.hfHeading}\n\n${T.hfIntro}\n\n${T.hfHeader}\n${lines.join("\n")}`;
 }
 
 /** The models page's Lab announcements rows, each summary by its own number (else the page text, truncated, or "—"). */

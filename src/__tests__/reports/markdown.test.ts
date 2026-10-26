@@ -19,6 +19,8 @@ import {
   stripModelTitle,
   unwrapCodeLinks,
   withReportBar,
+  renderHfTable,
+  unsummarizedRows,
 } from "../../reports/markdown.ts";
 import { type ProjectActivity, goingAwayRule } from "../../reports/prompts.ts";
 import { numberRows } from "../../reports/summarized-table.ts";
@@ -420,6 +422,99 @@ describe("renderOpenRouterUsage", () => {
     expect(md).toContain("| 2 | [b/two](https://openrouter.ai/b/two) | 18.00T |");
     expect(md).not.toContain("[link]");
     expect(renderOpenRouterUsage([], "")).toBe("");
+  });
+
+  it("adds last week's rank, and new for a model not ranked then, only with a saved ranking", () => {
+    const models = [
+      { slug: "a/one", tokens: 2e12 },
+      { slug: "c/three", tokens: 1e12 },
+    ];
+    const md = renderOpenRouterUsage(models, "2026-10-25", ["b/two", "a/one"]);
+    expect(md).toContain(TRENDS_REPORT.openRouterHeaderLastWeek);
+    expect(md).toContain(TRENDS_REPORT.openRouterIntro("2026-10-25", true));
+    expect(md).toContain("| 1 | [a/one](https://openrouter.ai/a/one) | 2.00T | 2 |");
+    expect(md).toContain(
+      `| 2 | [c/three](https://openrouter.ai/c/three) | 1.00T | ${TRENDS_REPORT.openRouterNewcomer} |`,
+    );
+    expect(renderOpenRouterUsage(models, "2026-10-25")).not.toContain("Last week");
+  });
+});
+
+describe("renderHfTable", () => {
+  const model = (id: string, o: object = {}) => ({
+    id,
+    author: id.split("/")[0]!,
+    likes: 18406,
+    downloads: 7762014,
+    tags: ["qwen3_5"],
+    pipelineTag: "image-text-to-text",
+    parameters: 27.4e9,
+    lastModified: "",
+    url: `https://huggingface.co/${id}`,
+    variants: [],
+    ...o,
+  });
+
+  it("ranks in code, marks 🔥 by last week's keys, links variants, and gives the windows", () => {
+    const rows = numberRows([
+      model("Qwen/Qwen3.8-27B"),
+      model("o/flint", { variants: [model("u/flint-GGUF")], pipelineTag: "", parameters: null }),
+    ]);
+    const md = renderHfTable(
+      rows,
+      new Map([[1, "A 27B vision-language model."]]),
+      new Set(["hf:u/flint-gguf"]),
+    );
+    expect(md).toContain(TRENDS_REPORT.hfHeader);
+    expect(md).toContain("Likes (total)");
+    expect(md).toContain("Downloads (30 days)");
+    expect(md).toContain(
+      "| 1 | [Qwen/Qwen3.8-27B](https://huggingface.co/Qwen/Qwen3.8-27B) | 18,406 | 7,762,014 | A 27B vision-language model. |",
+    );
+    expect(md).toContain(
+      "| 2 | 🔥 [o/flint](https://huggingface.co/o/flint) (+ [u/flint-GGUF](https://huggingface.co/u/flint-GGUF)) | 18,406 | 7,762,014 | — |",
+    );
+    expect(md).not.toContain("qwen3_5");
+    // A failed call: the task and size.
+    expect(renderHfTable(rows.slice(0, 1), new Map())).toContain("| Image text to text, 27B parameters |");
+    expect(renderHfTable([], new Map())).toBe("");
+  });
+
+  it("names the rows that show — for the prose call: no summary, no description", () => {
+    const hf = numberRows([model("o/a"), model("o/b", { pipelineTag: "", parameters: null })]);
+    const report = {
+      radar: [
+        {
+          n: 1,
+          name: "Strix",
+          description: "",
+          keys: [],
+          url: "",
+          sources: [],
+          signals: [],
+          isNew: false,
+          links: [],
+        },
+        {
+          n: 2,
+          name: "Pi",
+          description: "A coding agent.",
+          keys: [],
+          url: "",
+          sources: [],
+          signals: [],
+          isNew: false,
+          links: [],
+        },
+      ],
+      categories: [],
+      onFire: [],
+      classifiedBy: "jev",
+    } as unknown as TrendingReportData;
+    expect(unsummarizedRows(report, new Map(), hf, new Map())).toEqual(["Strix", "o/b"]);
+    expect(
+      unsummarizedRows(report, new Map([[1, "Strix tests apps."]]), hf, new Map([[2, "A model."]])),
+    ).toEqual([]);
   });
 });
 

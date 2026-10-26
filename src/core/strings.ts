@@ -149,10 +149,19 @@ export const TRENDS_REPORT = {
   modelsHeading: "Models",
   openRouterHeading: "OpenRouter usage",
   /** Code only: the rankings snapshot is one day's tokens. */
-  openRouterIntro: (date: string) =>
-    `Top models by tokens (prompt + completion) on OpenRouter${date ? ` on ${date}` : ""}, one day's snapshot.`,
+  openRouterIntro: (date: string, lastWeek = false) =>
+    `Top models by tokens (prompt + completion) on OpenRouter${date ? ` on ${date}` : ""}, one day's snapshot.` +
+    (lastWeek ? " Last week: the model's rank on last week's page, new when it was not ranked there." : ""),
   openRouterHeader: "| # | Model | Tokens |\n| ---: | :--- | ---: |",
+  /** With a ranking saved by the run dated 7 days earlier: its rank, or "new" for a model not in it. */
+  openRouterHeaderLastWeek: "| # | Model | Tokens | Last week |\n| ---: | :--- | ---: | :---: |",
+  openRouterNewcomer: "new",
   hfHeading: "Hugging Face trending",
+  /** Code only (`renderHfTable`). */
+  hfIntro:
+    "*Ranked by likes gained in the last 7 days; 🔥 also on last week's Trends page; quantised copies of a release share its row.*",
+  hfHeader:
+    "| # | Model | Likes (total) | Downloads (30 days) | Summary |\n| ---: | :--- | ---: | ---: | :--- |",
   researchHeading: "Research",
   researchTableHeader: "| Paper | Summary |\n| :--- | :--- |",
   mostDiscussedHeading: "Most discussed",
@@ -161,8 +170,9 @@ export const TRENDS_REPORT = {
   radarHeader: "| Tool | Source | Signal | Summary |\n| :--- | :--- | :--- | :--- |",
   radarLegend:
     "*New tools (🆕: created or listed in the last 14 days) first, then each source's top movers; 🔥 also on last week's Trends page. " +
-    "OpenRouter: the app's rank this week / this month among OpenRouter apps, its tokens in the last 7 days, 📈 OpenRouter's own growth figure. " +
-    "npm: downloads in the last 7 days, and that week against the average week of the last 30 days. " +
+    "OpenRouter: the app's rank this week / this month among OpenRouter apps, its tokens in the last 7 days. " +
+    "npm: downloads in the last 7 days. " +
+    "OpenRouter and npm \"vs previous week\": against the row's figure on last week's page, none when it was not there. " +
     "GitHub: total stars (stars gained in the last 7 days, % on a week ago).*",
   categoryHeader:
     "| Project | Lang | Stars (total / this week, %) | Summary |\n| :--- | :--- | ---: | :--- |",

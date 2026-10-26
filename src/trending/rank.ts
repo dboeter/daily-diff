@@ -15,7 +15,7 @@ import path from "node:path";
 import type { Numbered } from "../reports/summarized-table.ts";
 import type { SearchRepo, TrendingRepo } from "./compose.ts";
 import { formatTokens, type OpenRouterApp } from "../sources/openrouter.ts";
-import { momentumRatio, type NpmData, type NpmPackage } from "./npm.ts";
+import type { NpmData, NpmPackage } from "./npm.ts";
 import { toCstDateStr } from "../core/date.ts";
 import { STAR_GAIN_DAYS } from "../core/github.ts";
 import { inScope, onRadar, type Classification, type TrendingVerdicts } from "./classify.ts";
@@ -107,8 +107,15 @@ export interface TrendingReportData {
 export interface StarHistory {
   /** Key: `fullName` lowercased — GitHub names are case-insensitive, and the trending page and search may differ in case. */
   repos: Record<string, [string, number][]>;
-  /** CST date of a weekly report → the lowercased item keys it showed (`reportedKeys`), for 🔥. */
+  /** CST date of a weekly report → the lowercased item keys it showed (`reportedKeys`, plus `hf:<id>`), for 🔥. */
   reported?: Record<string, string[]>;
+  /**
+   * CST date → the figure each shown Radar member's Signal leads with (OpenRouter tokens in the
+   * last 7 days, npm downloads in the last 7 days), by lowercased key: next week's "vs previous week".
+   */
+  figures?: Record<string, Record<string, number>>;
+  /** CST date → OpenRouter usage's model slugs in rank order, for next week's Last week column. */
+  modelRanking?: Record<string, string[]>;
 }
 
 // ---------------------------------------------------------------------------
@@ -206,15 +213,24 @@ export function loadStarHistory(file = STAR_HISTORY_FILE): StarHistory {
     if (typeof parsed?.repos !== "object" || parsed.repos === null || Array.isArray(parsed.repos)) {
       throw new Error("no `repos` object");
     }
-    const { reported } = parsed;
-    // A missing or malformed `reported` costs one week of 🔥, nothing else.
-    const validReported =
-      typeof reported === "object" &&
-      reported !== null &&
-      Object.values(reported).every(
-        (keys) => Array.isArray(keys) && keys.every((k) => typeof k === "string"),
+    const { reported, figures, modelRanking } = parsed;
+    const isRecord = (v: unknown): v is Record<string, unknown> =>
+      typeof v === "object" && v !== null && !Array.isArray(v);
+    const isStrings = (v: unknown) => Array.isArray(v) && v.every((k) => typeof k === "string");
+    // A missing or malformed field costs one week of its comparison (🔥, figures, ranks), nothing else.
+    const validReported = isRecord(reported) && Object.values(reported).every(isStrings);
+    const validFigures =
+      isRecord(figures) &&
+      Object.values(figures).every(
+        (f) => isRecord(f) && Object.values(f).every((v) => typeof v === "number"),
       );
-    return { repos: parsed.repos, ...(validReported ? { reported } : {}) };
+    const validRanking = isRecord(modelRanking) && Object.values(modelRanking).every(isStrings);
+    return {
+      repos: parsed.repos,
+      ...(validReported ? { reported } : {}),
+      ...(validFigures ? { figures } : {}),
+      ...(validRanking ? { modelRanking } : {}),
+    };
   } catch (err) {
     // Unlike the match file, starting over is safe: the history is never
     // hand-edited, and losing it costs one run of history-API calls, not a decision.
@@ -232,12 +248,19 @@ export function saveStarHistory(history: StarHistory, file = STAR_HISTORY_FILE):
     ([name, points]) => `    ${JSON.stringify(name)}: ${JSON.stringify(points)}`,
   );
   const body = lines.length > 0 ? `{\n${lines.join(",\n")}\n  }` : "{}";
-  const reported = Object.entries(history.reported ?? {}).map(
-    ([date, keys]) => `    ${JSON.stringify(date)}: ${JSON.stringify(keys)}`,
-  );
-  const reportedBody = reported.length > 0 ? `,\n  "reported": {\n${reported.join(",\n")}\n  }` : "";
+  // One date per line, like the repos.
+  const byDate = (name: string, field: Record<string, unknown> | undefined) => {
+    const lines = Object.entries(field ?? {}).map(
+      ([date, value]) => `    ${JSON.stringify(date)}: ${JSON.stringify(value)}`,
+    );
+    return lines.length > 0 ? `,\n  ${JSON.stringify(name)}: {\n${lines.join(",\n")}\n  }` : "";
+  };
+  const rest =
+    byDate("reported", history.reported) +
+    byDate("figures", history.figures) +
+    byDate("modelRanking", history.modelRanking);
   fs.mkdirSync(path.dirname(file), { recursive: true });
-  fs.writeFileSync(file, `{\n  "repos": ${body}${reportedBody}\n}\n`, "utf-8");
+  fs.writeFileSync(file, `{\n  "repos": ${body}${rest}\n}\n`, "utf-8");
 }
 
 /**
@@ -260,10 +283,17 @@ export function starBaseline(history: StarHistory, fullName: string, dateStr: st
  * and a missed Monday breaks the run of weeks, so its rows get no 🔥.
  */
 export function lastWeekKeys(history: StarHistory, dateStr: string): Set<string> {
-  const entry = Object.entries(history.reported ?? {}).find(
-    ([date]) => daysBetween(date, dateStr) === STAR_GAIN_DAYS,
-  );
-  return new Set(entry?.[1] ?? []);
+  return new Set(weekAgo(history.reported, dateStr) ?? []);
+}
+
+/** The entry dated exactly STAR_GAIN_DAYS before `dateStr`, the rule `lastWeekKeys` explains. */
+export function weekAgo<T>(byDate: Record<string, T> | undefined, dateStr: string): T | undefined {
+  return Object.entries(byDate ?? {}).find(([date]) => daysBetween(date, dateStr) === STAR_GAIN_DAYS)?.[1];
+}
+
+/** The previous weekly run's Radar figures by lowercased key (`StarHistory.figures`). */
+export function lastWeekFigures(history: StarHistory, dateStr: string): Map<string, number> {
+  return new Map(Object.entries(weekAgo(history.figures, dateStr) ?? {}));
 }
 
 /** Every item key the report shows, merged Radar members included, lowercased like the star history. */
@@ -284,6 +314,8 @@ export function nextStarHistory(
   githubRows: GithubRow[],
   dateStr: string,
   reported?: string[],
+  /** Today's shown Radar figures (`StarHistory.figures`) and OpenRouter usage slugs. */
+  today: { figures?: Record<string, number>; modelRanking?: string[] } = {},
 ): StarHistory {
   const repos: Record<string, [string, number][]> = {};
   for (const [name, points] of Object.entries(history.repos)) {
@@ -296,11 +328,18 @@ export function nextStarHistory(
   }
   // Repos not seen this run are kept until pruned: a forced mid-week run must not drop Monday's points.
   const next: StarHistory = { repos: {} };
-  const allReported = { ...history.reported, ...(reported ? { [dateStr]: reported } : {}) };
-  const keptReported = Object.entries(allReported)
-    .filter(([date]) => daysBetween(date, dateStr) <= STAR_HISTORY_DAYS)
-    .sort(([a], [b]) => a.localeCompare(b));
-  if (keptReported.length > 0) next.reported = Object.fromEntries(keptReported);
+  const byDate = <T>(old: Record<string, T> | undefined, todays: T | undefined) => {
+    const kept = Object.entries({ ...old, ...(todays !== undefined ? { [dateStr]: todays } : {}) })
+      .filter(([date]) => daysBetween(date, dateStr) <= STAR_HISTORY_DAYS)
+      .sort(([a], [b]) => a.localeCompare(b));
+    return kept.length > 0 ? Object.fromEntries(kept) : undefined;
+  };
+  const keptReported = byDate(history.reported, reported);
+  const keptFigures = byDate(history.figures, today.figures);
+  const keptRanking = byDate(history.modelRanking, today.modelRanking);
+  if (keptReported) next.reported = keptReported;
+  if (keptFigures) next.figures = keptFigures;
+  if (keptRanking) next.modelRanking = keptRanking;
   for (const [name, points] of Object.entries(repos)) {
     const kept = points
       .filter(([date]) => daysBetween(date, dateStr) <= STAR_HISTORY_DAYS)
@@ -438,12 +477,40 @@ const linksOf = (...links: (string | null)[]) => [...new Set(links.filter((l): l
 
 const SOURCE_ORDER: RadarSource[] = ["OpenRouter", "npm", "GitHub"];
 
+/**
+ * " (+28% vs previous week)": the change against the figure the previous
+ * weekly run saved for the same key (`lastWeekFigures`); "" without one. It
+ * replaces OpenRouter's own growth figure and the npm 30-day ratio, whose
+ * baselines did not reconcile with the previous page (2026-10-26).
+ */
+function vsPreviousWeek(key: string, now: number, previous: Map<string, number>): string {
+  const before = previous.get(key.toLowerCase());
+  if (before === undefined || before <= 0 || now <= 0) return "";
+  return ` (${fmtPercent(now / before - 1)} vs previous week)`;
+}
+
+/**
+ * The figure each Radar member's Signal leads with, by lowercased key:
+ * OpenRouter tokens and npm downloads in the last 7 days. GitHub members are
+ * left out: their star gain already counts against a week ago.
+ */
+export function radarFigures(openrouter: OpenRouterApp[], npm: NpmData): Map<string, number> {
+  return new Map([
+    ...openrouter
+      .filter((a) => a.weekTokens > 0)
+      .map((a): [string, number] => [openrouterKey(a).toLowerCase(), a.weekTokens]),
+    ...[...npm.rising, ...npm.top].map((p): [string, number] => [npmKey(p).toLowerCase(), p.weekly]),
+  ]);
+}
+
 /** Every Radar candidate, 🆕 first, before scope filtering and merging. */
 export function buildRadarCandidates(
   openrouter: OpenRouterApp[],
   npm: NpmData,
   githubRows: GithubRow[],
   dateStr: string,
+  /** `lastWeekFigures`: each row's figure is shown against it. */
+  previous: Map<string, number> = new Map(),
 ): RadarRow[] {
   const row = (r: Omit<RadarRow, "signals"> & { signal: string }): RadarRow => {
     const { signal, ...rest } = r;
@@ -462,24 +529,28 @@ export function buildRadarCandidates(
     a.weekTokens > 0 ||
     a.weekRank !== null ||
     a.monthRank !== null;
+  // An app without a description borrows its GitHub repo's when the trending page or topic search
+  // has it: DeepSeek Harness linked deepseek-ai/deepseek-harness and showed "—" on 2026-10-26.
+  const repoDescription = new Map(
+    githubRows.filter((r) => r.description).map((r) => [`repo:${r.fullName.toLowerCase()}`, r.description]),
+  );
   const openrouterRows = openrouter.filter(sayable).map((a) => {
-    const growth =
-      a.growthPercent !== null
-        ? ` · 📈 ${a.growthPercent >= 0 ? "+" : ""}${a.growthPercent.toLocaleString("en-US")}%`
-        : "";
+    const key = openrouterKey(a);
+    const repo = repoLink(a.url);
     return row({
-      keys: [openrouterKey(a)],
+      keys: [key],
       name: a.title,
       url: a.url,
-      description: a.description,
+      description: a.description.trim() || (repo !== null ? (repoDescription.get(repo) ?? "") : ""),
       sources: ["OpenRouter"],
       signal:
         `week ${rankStr(a.weekRank)} / month ${rankStr(a.monthRank)}` +
-        (a.weekTokens > 0 ? `, ${formatTokens(a.weekTokens)} tokens/week` : "") +
-        growth,
+        (a.weekTokens > 0
+          ? `, ${formatTokens(a.weekTokens)} tokens/week${vsPreviousWeek(key, a.weekTokens, previous)}`
+          : ""),
       // By listing date only: ranked this week but not this month is Rising, not New.
       isNew: isNewApp(a),
-      links: linksOf(repoLink(a.url), hostLink(a.url)),
+      links: linksOf(repo, hostLink(a.url)),
     });
   });
 
@@ -490,7 +561,7 @@ export function buildRadarCandidates(
       url: p.url,
       description: p.description,
       sources: ["npm"],
-      signal: `${fmt(p.weekly)} downloads/week, ${momentumRatio(p).toFixed(1)}x`,
+      signal: `${fmt(p.weekly)} downloads/week${vsPreviousWeek(npmKey(p), p.weekly, previous)}`,
       // The registry search carries no first-publish date (`date` is the last
       // publish), and download momentum is Rising, not New: npm rows are never 🆕.
       isNew: false,

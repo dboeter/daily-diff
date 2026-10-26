@@ -4,6 +4,7 @@ import os from "node:os";
 import path from "node:path";
 import {
   buildRadarCandidates,
+  lastWeekFigures,
   lastWeekKeys,
   loadStarHistory,
   mergeRows,
@@ -304,8 +305,9 @@ describe("buildRadarCandidates", () => {
       DATE,
     );
     // Ranked this week but not this month is Rising, not New.
-    expect(signal(rows, "openrouter:1")).toBe("week #12 / month —, 2.64T tokens/week · 📈 +776%");
-    expect(signal(rows, "openrouter:2")).toBe("week #3 / month #5 · 📈 -12%");
+    // OpenRouter's own growth figure is not shown: its baseline is not last week's page (T15).
+    expect(signal(rows, "openrouter:1")).toBe("week #12 / month —, 2.64T tokens/week");
+    expect(signal(rows, "openrouter:2")).toBe("week #3 / month #5");
     // Listed 14 days ago: new; 15 days: not.
     expect(signal(rows, "openrouter:3")).toBe("🆕 week #10 / month #20");
     expect(signal(rows, "openrouter:4")).toBe("week #10 / month #20");
@@ -314,6 +316,66 @@ describe("buildRadarCandidates", () => {
       sources: ["OpenRouter"],
       isNew: true,
     });
+  });
+
+  it("shows each figure against the one last week's page saved, and none without one", () => {
+    // 2026-10-19 → 10-26: Claude Code 9.92T → 12.67T is +28%, @reason-machines/cli 22,777 → 30,245 is +33%;
+    // the page showed OpenRouter's "+34%" and npm's "2.3x" (T15).
+    const previous = lastWeekFigures(
+      {
+        repos: {},
+        figures: { "2026-10-19": { "openrouter:1": 9.92e12, "npm:@reason-machines/cli": 22_777 } },
+      },
+      "2026-10-26",
+    );
+    const rows = buildRadarCandidates(
+      [app(1, { weekRank: 2, monthRank: 2, weekTokens: 12.67e12 }), app(2, { weekTokens: 1e9 })],
+      npmData([], [pkg("@reason-machines/cli", { weekly: 30_245, monthly: 60_000 })]),
+      [],
+      "2026-10-26",
+      previous,
+    );
+    expect(signal(rows, "openrouter:1")).toBe(
+      "week #2 / month #2, 12.67T tokens/week (+28% vs previous week)",
+    );
+    expect(signal(rows, "npm:@reason-machines/cli")).toBe("30,245 downloads/week (+33% vs previous week)");
+    expect(signal(rows, "openrouter:2")).toBe("week #10 / month #20, 1.0B tokens/week");
+    // A forced mid-week run is not "last week": no comparison.
+    expect(
+      lastWeekFigures({ repos: {}, figures: { "2026-10-22": { "openrouter:1": 1 } } }, "2026-10-26").size,
+    ).toBe(0);
+  });
+
+  it("gives an app without a description its GitHub repo's description", () => {
+    const github = rankGithubRepos(
+      [],
+      [
+        {
+          fullName: "deepseek-ai/deepseek-harness",
+          description: "A harness for DeepSeek models.",
+          language: "Rust",
+          stargazersCount: 5000,
+          pushedAt: "2026-10-04T00:00:00Z",
+          createdAt: "2026-01-01T00:00:00Z",
+          url: "https://github.com/deepseek-ai/deepseek-harness",
+          topic: "agent-harness",
+        },
+      ],
+      DATE,
+    );
+    const rows = buildRadarCandidates(
+      [
+        app(1, { description: "", url: "https://github.com/deepseek-ai/deepseek-harness" }),
+        app(2, { description: "" }),
+      ],
+      NO_NPM,
+      github,
+      DATE,
+    );
+    expect(rows.find((r) => r.keys[0] === "openrouter:1")!.description).toBe(
+      "A harness for DeepSeek models.",
+    );
+    expect(rows.find((r) => r.keys[0] === "openrouter:2")!.description).toBe("");
   });
 
   it("formats npm signals and never flags a package as new, whatever its momentum", () => {
@@ -326,8 +388,8 @@ describe("buildRadarCandidates", () => {
       [],
       DATE,
     );
-    expect(signal(rows, "npm:at-three")).toBe("700 downloads/week, 3.0x");
-    expect(signal(rows, "npm:steady")).toBe("12,560 downloads/week, 0.5x");
+    expect(signal(rows, "npm:at-three")).toBe("700 downloads/week");
+    expect(signal(rows, "npm:steady")).toBe("12,560 downloads/week");
     expect(rows.find((r) => r.keys[0] === "npm:steady")).toMatchObject({ sources: ["npm"], isNew: false });
   });
 
@@ -407,7 +469,7 @@ describe("urlMerge", () => {
       keys: ["github:Kilo-Org/kilocode", "npm:@kilocode/cli"],
       name: "Kilo-Org/kilocode",
       sources: ["GitHub", "npm"],
-      signals: ["🆕 1,030 (+1,030)", "1,000 downloads/week, 1.1x"],
+      signals: ["🆕 1,030 (+1,030)", "1,000 downloads/week"],
       isNew: true,
     });
   });
@@ -1055,6 +1117,31 @@ describe("loadStarHistory / saveStarHistory", () => {
     expect(loadStarHistory(file)).toEqual(withReported);
   });
 
+  it("saves and prunes the Radar figures and the usage ranking by date, like `reported`", () => {
+    const file = path.join(tmp(), "s.json");
+    const h = {
+      ...hist({}),
+      figures: { [DATE]: { "openrouter:1": 9.92e12, "npm:p": 22_777 } },
+      modelRanking: { [DATE]: ["a/one", "b/two"] },
+    };
+    saveStarHistory(h, file);
+    expect(fs.readFileSync(file, "utf-8")).toContain(`"${DATE}": ["a/one","b/two"]`);
+    expect(loadStarHistory(file)).toEqual(h);
+    const next = nextStarHistory(h, [], "2026-10-12", [], {
+      figures: { "openrouter:1": 12.67e12 },
+      modelRanking: ["b/two"],
+    });
+    expect(next.figures).toEqual({ [DATE]: h.figures[DATE], "2026-10-12": { "openrouter:1": 12.67e12 } });
+    expect(next.modelRanking).toEqual({ [DATE]: ["a/one", "b/two"], "2026-10-12": ["b/two"] });
+    // Eight days on, the 2026-10-05 entries are pruned.
+    expect(nextStarHistory(next, [], "2026-10-13").figures).toEqual({
+      "2026-10-12": { "openrouter:1": 12.67e12 },
+    });
+    // A malformed field costs its comparison only.
+    fs.writeFileSync(file, JSON.stringify({ repos: {}, figures: { [DATE]: { x: "1" } }, modelRanking: [] }));
+    expect(loadStarHistory(file)).toEqual(hist({}));
+  });
+
   // Promotion stopped in October 2026: the committed `promoted` field is ignored, and the next save drops it.
   it("ignores a saved `promoted` record", () => {
     const file = path.join(tmp(), "s.json");
@@ -1129,6 +1216,43 @@ describe("composeTrendingReport with star history", () => {
       ["2026-09-28", 1_000],
       [DATE, 1_500],
     ]);
+  });
+
+  it("shows Radar figures vs last week's saved ones and saves the shown rows' figures and the usage ranking", async () => {
+    const h = { ...hist({}), figures: { "2026-09-28": { "openrouter:1": 1e12 } } };
+    const report = await composeTrendingReport(
+      {
+        ...data([]),
+        openrouter: {
+          ...EMPTY_OPENROUTER,
+          apps: [
+            app(1, { categories: ["cli-agent"], weekTokens: 1.5e12, description: "A CLI agent." }),
+            // No figure saved last week: no comparison.
+            app(2, { weekTokens: 2e12, description: "A chat app." }),
+          ],
+          topModels: [
+            { slug: "a/one", tokens: 2e12 },
+            { slug: "b/two", tokens: 1e12 },
+          ],
+          fetchSuccess: true,
+        },
+      },
+      DATE,
+      {
+        apiKey: "",
+        matchState: null,
+        ask: notCalled,
+        history: h,
+        trendingVerdicts: { items: {} },
+        fetchGain: noFetch,
+      },
+    );
+    expect(report.radar.map((r) => r.signals[0])).toEqual([
+      "week #10 / month #20, 1.50T tokens/week (+50% vs previous week)",
+      "week #10 / month #20, 2.00T tokens/week",
+    ]);
+    expect(report.nextStarHistory?.figures?.[DATE]).toEqual({ "openrouter:1": 1.5e12, "openrouter:2": 2e12 });
+    expect(report.nextStarHistory?.modelRanking?.[DATE]).toEqual(["a/one", "b/two"]);
   });
 
   it("marks 🔥 the rows last week's report showed and records this week's", async () => {

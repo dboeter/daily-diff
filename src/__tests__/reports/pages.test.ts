@@ -65,6 +65,12 @@ const vendorOf = (items: VendorData["items"]): VendorData => ({
   observedState: { reported: {} },
 });
 const saveFile = vi.fn((_content: string, dateStr: string, name: string) => `digests/${dateStr}/${name}`);
+// buildTrendsReport writes digests/trending-state.json: keep the tests off the real file.
+const saveStarHistory = vi.fn();
+vi.mock("../../trending/rank.ts", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("../../trending/rank.ts")>()),
+  saveStarHistory: (...args: unknown[]) => saveStarHistory(...args),
+}));
 
 describe("buildTrendsReport", () => {
   const githubRow = (n: number, fullName: string, onFire = false) => ({
@@ -122,7 +128,22 @@ describe("buildTrendsReport", () => {
   const input: TrendsInput = {
     trending: data,
     skills: { prs: [skillPr], issues: [], fetchSuccess: true, repo: "anthropics/skills" },
-    hf: { models: [], fetchSuccess: true },
+    hf: {
+      models: [
+        {
+          id: "o/Model-7B",
+          author: "o",
+          likes: 1200,
+          downloads: 3400,
+          tags: [],
+          pipelineTag: "text-generation",
+          parameters: 7e9,
+          lastModified: "",
+          url: "https://huggingface.co/o/Model-7B",
+        },
+      ],
+      fetchSuccess: true,
+    },
     papers: [
       {
         id: "p1",
@@ -162,7 +183,7 @@ describe("buildTrendsReport", () => {
       : isRowSummaries(p)
         ? "1: The paper shows X."
         : isModels(p)
-          ? "### Hugging Face trending\n\n| Model |\n| :--- |"
+          ? "1: A 7B text model."
           : isProse(p)
             ? "## Highlights\n\n- H.\n\n<!-- tables -->\n\n## Signals\n\nS."
             : "## Open PRs worth watching\n\nK.";
@@ -266,7 +287,44 @@ describe("buildTrendsReport", () => {
     expect(content).toContain(`### ${TRENDS_REPORT.openRouterHeading}`);
     expect(content).toContain("| 1 | [a/b](https://openrouter.ai/a/b) |");
     expect(content).toContain(`### ${TRENDS_REPORT.hfHeading}`);
+    expect(content).toContain(
+      "| 1 | [o/Model-7B](https://huggingface.co/o/Model-7B) | 1,200 | 3,400 | A 7B text model. |",
+    );
     expect(content).not.toContain("####");
+  });
+
+  it("reads last week's 🔥 keys and usage ranking from the weekly state, and saves the Hugging Face keys to it", async () => {
+    generateBody.mockReset();
+    generateBody.mockImplementation(async (p: string) => reply(p));
+    saveStarHistory.mockReset();
+    const openrouter = {
+      ...EMPTY_OPENROUTER,
+      topModels: [{ slug: "a/b", tokens: 1e12 }],
+      fetchSuccess: true,
+    };
+    const nextStarHistory = {
+      repos: {},
+      reported: { "2026-10-19": ["hf:o/model-7b"], "2026-10-26": ["github:o/fast"] },
+      modelRanking: { "2026-10-19": ["x/y", "a/b"] },
+    };
+    const content = (await build({
+      trending: { ...input.trending, openrouter, report: { ...input.trending.report!, nextStarHistory } },
+    }))!.content;
+    expect(content).toContain("| 1 | 🔥 [o/Model-7B](https://huggingface.co/o/Model-7B) |");
+    expect(content).toContain("| 1 | [a/b](https://openrouter.ai/a/b) | 1.00T | 2 |");
+    expect(saveStarHistory).toHaveBeenCalledWith({
+      ...nextStarHistory,
+      reported: { ...nextStarHistory.reported, "2026-10-26": ["github:o/fast", "hf:o/model-7b"] },
+    });
+  });
+
+  it("tells the prose call a row with neither summary nor description makes no Highlight", async () => {
+    generateBody.mockReset();
+    generateBody.mockImplementation(async (p: string) => (isModels(p) ? "" : reply(p)));
+    const bare = { ...input.hf.models[0]!, pipelineTag: "", parameters: null };
+    await build({ hf: { models: [bare], fetchSuccess: true } });
+    const prose = generateBody.mock.calls.map((c) => c[0]).find(isProse)!;
+    expect(prose).toContain('no Highlight for them. "o/Model-7B"');
   });
 
   it("leaves the Skills section out, without a call, when no item moved this week", async () => {
@@ -342,13 +400,14 @@ describe("buildTrendsReport", () => {
       onFire: true,
       links: [],
     }));
-    const hfRows = Array.from(
-      { length: 15 },
-      (_, i) =>
-        `| [some-org/A-Model-Name-${i}-Instruct-GGUF](https://huggingface.co/some-org/A-Model-Name-${i}-Instruct-GGUF) | some-org | 1,234 | 123,456 | ${summary} |`,
-    );
+    const hfModels = Array.from({ length: 15 }, (_, i) => ({
+      ...input.hf.models[0]!,
+      id: `some-org/A-Model-Name-${i}-Instruct`,
+      url: `https://huggingface.co/some-org/A-Model-Name-${i}-Instruct`,
+    }));
     const big: TrendsInput = {
       ...input,
+      hf: { models: hfModels, fetchSuccess: true },
       trending: {
         ...data,
         report: {
@@ -388,7 +447,7 @@ describe("buildTrendsReport", () => {
         : isRowSummaries(p)
           ? lines(10)
           : isModels(p)
-            ? `### OpenRouter usage\n\n${`- ${summary}\n`.repeat(5)}\n### Hugging Face trending\n\n| Model | Author | Likes | Downloads | Summary |\n| :--- | :--- | ---: | ---: | :--- |\n${hfRows.join("\n")}`
+            ? lines(15)
             : isProse(p)
               ? `## Highlights\n\n${"x".repeat(2000)}\n\n<!-- tables -->\n\n## Signals\n\n${"x".repeat(2000)}`
               : `## Top Skills\n\n${"k".repeat(3000)}`,

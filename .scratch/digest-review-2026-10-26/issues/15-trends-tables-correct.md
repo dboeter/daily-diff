@@ -9,12 +9,12 @@ Findings: T3, T4, T5, T11, T12, T13, T15, T19, T20, A8, S8 — see `../review.md
 Every figure on the Trends page is right, has its window and is explained, and every row says something. On 2026-10-26 the category tables were not sorted by 7-day gain as AGENTS.md says and skipped larger gainers, "round out the top five" named six models, growth figures did not reconcile with last week, a Radar row linked `birdstrike.local`, 6 of 11 Radar rows had no description, Hugging Face rows repeated last week unmarked and printed `model_type` tags, and the agents page showed a weekly "+5,921 stars" as if daily.
 
 - [x] Category rows sort by displayed 7-day gain, or AGENTS.md states the real order; the trace says why a large gainer is absent
-- [ ] Ranks, "top N" and "newcomer" are computed in code, not by the model (OpenRouter usage only: see Comments)
-- [ ] The Radar has a one-line legend (🔥, 🆕, inclusion rule, units, "vs previous week"), and its growth figures reconcile with the previous Weekly Digest (legend done; reconciling needs a design decision, see Comments)
-- [ ] Every figure carries its window, on Trends and wherever a Trending gain appears on a daily page (done for the Radar, category tables, OpenRouter usage and the agents page; the Hugging Face Likes and Downloads columns still have none)
+- [x] Ranks, "top N" and "newcomer" are computed in code, not by the model
+- [x] The Radar has a one-line legend (🔥, 🆕, inclusion rule, units, "vs previous week"), and its growth figures reconcile with the previous Weekly Digest
+- [x] Every figure carries its window, on Trends and wherever a Trending gain appears on a daily page
 - [x] `.local` and `localhost` links are rejected; an empty Lang cell shows "—"
-- [ ] A 🆕 row with neither description nor usage is dropped; a row without summary falls back to the repo or site description and cannot be a Highlight (drop done; site-description fetch and the Highlight rule not done)
-- [ ] Hugging Face rows get the repeat marker, one row per release (no uncensored variants), a rank, and a summary built from pipeline tag, size or card text, never `model_type` (partial; not verified: needs live LLM run)
+- [x] A 🆕 row with neither description nor usage is dropped; a row without summary falls back to the repo or site description and cannot be a Highlight
+- [ ] Hugging Face rows get the repeat marker, one row per release (no uncensored variants), a rank, and a summary built from pipeline tag, size or card text, never `model_type` (code done and tested; summary wording not verified: needs live LLM run)
 - [x] OpenRouter usage links on model names instead of bare "link"
 
 ## Comments
@@ -27,3 +27,12 @@ Every figure on the Trends page is right, has its window and is explained, and e
 - Hugging Face: uncensored/abliterated re-uploads are dropped in code, tags (the `model_type` source) are no longer in the prompt, and the table asks for a `#` column. Not done: the 🔥 repeat marker and base/GGUF grouping into one row per release.
 
 **Review (2026-10-26):** ranks are code-written for OpenRouter usage (`renderOpenRouterUsage`) only. The Hugging Face table's `#` column is still model-written (`buildTrendsModelsPrompt` asks for "the model's number from the input"), and "newcomer" was removed from the output rather than computed. Box unticked.
+
+**Remaining boxes (2026-10-26, second pass):**
+
+- Reconcile (decision 1): `digests/trending-state.json` gains `figures` (date → shown Radar row key → OpenRouter tokens or npm downloads in the last 7 days). An OpenRouter or npm Signal shows ` (+28% vs previous week)` against the figure saved by the run dated exactly 7 days earlier (`lastWeekFigures`, the `lastWeekKeys` rule); none without one. OpenRouter's own 📈 and the npm 30-day ratio are gone from the Signal (their baselines were the T15 mismatch); the legend says what "vs previous week" compares. Tests: `shows each figure against the one last week's page saved` replays T15's 10-19 → 10-26 figures (Claude Code 9.92T → 12.67T = +28%, @reason-machines/cli 22,777 → 30,245 = +33%), and `shows Radar figures vs last week's saved ones and saves …` covers compose.
+- Newcomer (decision 2): `modelRanking` (date → OpenRouter usage slugs) in the same state; with last week's ranking the usage table gets a Last week column (its rank, or "new"). Not 🆕: GLOSSARY defines 🆕 as newly created or listed, and entering the top list is not that. The Hugging Face `#` is code-written (`renderHfTable`).
+- Hugging Face (decision 3): code table `renderHfTable`: `#` = place in the Hub's likes-in-7-days order, 🔥 by `hf:<id>` keys saved in `reported`, `hfReleaseRows` folds quantised copies (name = original + segments with a format token: GGUF, FP8, AWQ, …) into the original's row with their links and drops uncensored re-uploads; on the frozen 2026-10-26 list (`fixtures/hf-2026-10-26.json`) 15 rows become 11 (DeepSeek-1017 + ISTA GGUF, flint + unsloth GGUF). Windows: "Likes (total)", "Downloads (30 days)": the API's `downloads` for openai-community/gpt2 was 21.8M against `downloadsAllTime` 951M (curl, 2026-10-26). The fetch now also asks for `safetensors`, so the summary prompt gets task, parameter count and license, no tags; a failed call shows task and size.
+- No-summary rows (decision 4): an OpenRouter app without a description borrows its GitHub repo's description from the trending/search rows (DeepSeek Harness on 10-26); no new fetch, so an app whose only text would be its website's meta description (Strix) still shows "—". Such rows, and Hugging Face rows with neither summary nor task/size, are named to the prose call as "no Highlight" (`unsummarizedRows`, mirroring the data report's `minor` list).
+- First effect: 2026-10-26 saved no figures, ranking or `hf:` keys, so the 2026-11-02 run shows no "vs previous week", no Last week column and no Hugging Face 🔥; they start on 2026-11-09. Hugging Face 🔥 keys are saved only when the trending ranking succeeded (the state is written from `report.nextStarHistory`).
+- HF box unticked: the summary wording comes from a live LLM call, not run here.

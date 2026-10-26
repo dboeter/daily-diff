@@ -15,7 +15,9 @@ import {
   MIN_STARS,
   NEW_REPO_MIN_STARS,
   nextStarHistory,
+  lastWeekFigures,
   lastWeekKeys,
+  radarFigures,
   reportedKeys,
   npmKey,
   openrouterKey,
@@ -508,7 +510,13 @@ export async function composeTrendingReport(
   // The trace reads the final rows' gains. Same keys as firstItems: the gains re-rank rows, they
   // neither add nor drop any, so the cache built from firstItems marks every item seen.
   const items = itemsFor(githubRows);
-  const candidates = buildRadarCandidates(data.openrouter.apps, data.npm, githubRows, dateStr);
+  const candidates = buildRadarCandidates(
+    data.openrouter.apps,
+    data.npm,
+    githubRows,
+    dateStr,
+    lastWeekFigures(history, dateStr),
+  );
 
   // Matching needs a readable state file; without one (null) it is skipped and nothing is saved.
   let links: [string, string][] = [];
@@ -551,11 +559,20 @@ export async function composeTrendingReport(
           },
         })
       : undefined;
+  const shown = reportedKeys(report);
   return {
     ...report,
     ...(traceFile !== undefined ? { traceFile } : {}),
     ...(nextMatches !== undefined ? { nextMatches } : {}),
     ...(nextCache ? { nextTrendingVerdicts: nextCache } : {}),
-    nextStarHistory: nextStarHistory(history, githubRows, dateStr, reportedKeys(report)),
+    nextStarHistory: nextStarHistory(history, githubRows, dateStr, shown, {
+      // The shown rows' figures only: a row new to the Radar next week shows no comparison.
+      figures: Object.fromEntries(
+        [...radarFigures(data.openrouter.apps, data.npm)].filter(([k]) => shown.includes(k)),
+      ),
+      ...(data.openrouter.topModels.length > 0 && {
+        modelRanking: data.openrouter.topModels.map((m) => m.slug),
+      }),
+    }),
   };
 }

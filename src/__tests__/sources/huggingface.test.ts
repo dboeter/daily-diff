@@ -1,5 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { type HfApiModel, toHfModel } from "../../sources/huggingface.ts";
+import fs from "node:fs";
+import {
+  type HfApiModel,
+  type HfModel,
+  hfDescription,
+  hfReleaseRows,
+  isVariantOf,
+  toHfModel,
+} from "../../sources/huggingface.ts";
 
 describe("toHfModel", () => {
   it("maps Hugging Face Hub API response to HfModel structure", () => {
@@ -22,6 +30,7 @@ describe("toHfModel", () => {
       downloads: 85000,
       tags: ["text-generation", "transformers", "en"],
       pipelineTag: "text-generation",
+      parameters: null,
       lastModified: "2026-03-08T18:00:00.000Z",
       url: "https://huggingface.co/meta-llama/Llama-3.3-70B-Instruct",
     });
@@ -40,5 +49,51 @@ describe("toHfModel", () => {
     expect(model.tags).toEqual([]);
     expect(model.pipelineTag).toBe("");
     expect(model.lastModified).toBe("");
+  });
+});
+
+describe("hfReleaseRows", () => {
+  // The 15 rows of the 2026-10-26 Trends page, in the Hub's order.
+  const fixture = JSON.parse(
+    fs.readFileSync(new URL("../fixtures/hf-2026-10-26.json", import.meta.url), "utf-8"),
+  ) as { models: HfModel[] };
+
+  it("gives one row per release on the 2026-10-26 list, without uncensored re-uploads", () => {
+    const rows = hfReleaseRows(fixture.models);
+    const ids = rows.map((r) => r.id);
+    expect(ids).not.toContain("abenzerps/Qwen-Image-2.1-Uncensored-Quantized");
+    expect(ids).not.toContain("dealignai/DeepSeek-V4.1-Flash-1017-UNCENSORED-FP8");
+    expect(ids).not.toContain("ISTA-DASLab/DeepSeek-V4.1-Flash-1017-GSQ-RCO-GGUF");
+    expect(ids).not.toContain("unsloth/flint-GGUF");
+    expect(rows[0]!.id).toBe("deepseek-ai/DeepSeek-V4.1-Flash-1017");
+    expect(rows[0]!.variants.map((v) => v.id)).toEqual(["ISTA-DASLab/DeepSeek-V4.1-Flash-1017-GSQ-RCO-GGUF"]);
+    expect(rows.find((r) => r.id === "RecursiveSI/flint")!.variants.map((v) => v.id)).toEqual([
+      "unsloth/flint-GGUF",
+    ]);
+    expect(ids).toContain("black-forest-labs/flux-3-image-klein-comfy");
+    expect(ids).toContain("InternScience/Sage-A1.5");
+    expect(rows).toHaveLength(11);
+  });
+
+  it("folds only copies whose extra name segments include a format token", () => {
+    expect(isVariantOf("unsloth/flint-GGUF", "RecursiveSI/flint")).toBe(true);
+    expect(isVariantOf("o/Qwen3.8-27B-AWQ-4bit", "Qwen/Qwen3.8-27B")).toBe(true);
+    expect(isVariantOf("o/Qwen3.8-27B-Instruct", "Qwen/Qwen3.8-27B")).toBe(false);
+    expect(isVariantOf("o/flintstone-GGUF", "RecursiveSI/flint")).toBe(false);
+  });
+
+  it("puts a release at its best-ranked copy's place, led by the original", () => {
+    const m = (id: string) => ({ ...fixture.models[0]!, id });
+    const rows = hfReleaseRows([m("a/Other"), m("u/X-GGUF"), m("o/X")]);
+    expect(rows.map((r) => r.id)).toEqual(["a/Other", "o/X"]);
+    expect(rows[1]!.variants.map((v) => v.id)).toEqual(["u/X-GGUF"]);
+  });
+
+  it("describes a row by its task and size, never a tag", () => {
+    expect(hfDescription({ pipelineTag: "image-text-to-text", parameters: 27.4e9 })).toBe(
+      "Image text to text, 27B parameters",
+    );
+    expect(hfDescription({ pipelineTag: "", parameters: 4.3e8 })).toBe("430M parameters");
+    expect(hfDescription({ pipelineTag: "", parameters: null })).toBe("");
   });
 });

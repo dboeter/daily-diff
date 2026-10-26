@@ -1,7 +1,7 @@
 /**
- * Page prompts: the row summaries of Trends, the models page, AI Policy, the
- * data report and Spotted; the prose of Trends, AI Policy and the data report;
- * Trends' Hugging Face table; and the highlights.json prompt. The agents and
+ * Page prompts: the row summaries of Trends (its Hugging Face table included),
+ * the models page, AI Policy, the data report and Spotted; the prose of Trends,
+ * AI Policy and the data report; and the highlights.json prompt. The agents and
  * models pages' Highlights, the repo sections and the shared prompt rules are in
  * prompts.ts.
  */
@@ -9,7 +9,7 @@
 import type { LabPost } from "../sources/labs.ts";
 import type { summaryRows } from "../trending/rank.ts";
 import type { OpenRouterData, OpenRouterNewModel } from "../sources/openrouter.ts";
-import { DATA_REPORT, MODELS_PAGE, MSG, SECTIONS, SPOTTED, TRENDS_REPORT } from "../core/strings.ts";
+import { DATA_REPORT, MODELS_PAGE, MSG, SECTIONS, SPOTTED } from "../core/strings.ts";
 import { TABLES_MARKER, rowList, summaryLine, summaryOutputRule, type Numbered } from "./summarized-table.ts";
 import {
   goingAwayRule,
@@ -23,7 +23,7 @@ import {
 } from "./prompts.ts";
 import type { ReleaseRow } from "./pages.ts";
 import type { Deadline } from "../core/report-state.ts";
-import type { HfData } from "../sources/huggingface.ts";
+import { formatParameters, type HfData, type HfRow } from "../sources/huggingface.ts";
 import type { ResearchPaper } from "../trending/research.ts";
 import type { PolicyItem } from "../policy/items.ts";
 import type { KeptVendorItem } from "../data/relevance.ts";
@@ -67,7 +67,12 @@ ${summaryOutputRule(rows.length)}
  * rendered from the first round's calls. The model places TABLES_MARKER where
  * spliceTables inserts the page.
  */
-export function buildTrendsProsePrompt(pageMd: string, dateStr: string): string {
+export function buildTrendsProsePrompt(
+  pageMd: string,
+  dateStr: string,
+  /** Rows with neither a summary nor a description ("—"): the page says nothing about them, so no Highlight. */
+  noSummaryNames: string[] = [],
+): string {
   return `You are the editor of a weekly trends report for AI practitioners: agents and coding tools, models, research and the community's most discussed stories. Below is this week's page, week ending ${dateStr}. Its tables were selected and ranked in code from GitHub Trending (weekly), GitHub topic search, OpenRouter app and model rankings, npm downloads, Hugging Face, arXiv (ranked by relevance) and Hacker News, Lobste.rs and Dev.to. 🆕 in a Signal column means created or listed in the last 14 days; 🔥 before a name means the item was also in last week's report.
 
 ${pageMd || "(The page has no sections this week.)"}
@@ -82,7 +87,7 @@ Write only these parts, in this order:
 
 Rules:
 - ${NO_TITLE_RULE}
-- In ${SECTIONS.highlights}: ${goingAwayRule("bullet")} ${HIGHLIGHTS_PICK_RULE}
+- In ${SECTIONS.highlights}: ${goingAwayRule("bullet")} ${HIGHLIGHTS_PICK_RULE}${noSummaryNames.length ? `\n- These rows have no summary or description: no Highlight for them. ${noSummaryNames.map((t) => `"${t}"`).join(", ")}` : ""}
 - Do not reproduce or alter the tables, and write no other sections.
 - Base every claim on the page. It shows descriptions, summaries and counts only, so do not describe releases, adoption or community reactions it does not show.
 - Mention only items that appear on the page, and link every item you mention.
@@ -531,54 +536,37 @@ export function firstHighlight(md: string): string | null {
 // ---------------------------------------------------------------------------
 
 /**
- * Weekly Trends' Models section, Hugging Face part (code renders OpenRouter
- * usage: `renderOpenRouterUsage`). The input numbers the models in the Hub's
- * trending order and leaves out the tags: on 2026-10-26 the summaries printed
- * `model_type` tags ("Qwen 3.5" for Qwen3.8-27B). Uncensored re-uploads are
- * left out (`hfRows`).
+ * Weekly Trends' Hugging Face table: one summary per numbered release row
+ * (`hfReleaseRows`); code renders the table (`renderHfTable`), its ranks,
+ * figures and 🔥. The input has no tags: on 2026-10-26 the summaries printed
+ * `model_type` tags ("Qwen 3.5" for Qwen3.8-27B, "Spark 2.5" for Spark-X2.6-4B).
  */
-export function buildTrendsModelsPrompt(data: HfData, dateStr: string): string {
-  const T = TRENDS_REPORT;
-  const modelsText = hfRows(data.models)
-    .map(
-      (m, i) =>
-        `${i + 1}. **${m.id}**\n` +
-        `   Link: ${m.url}\n` +
-        `   Author: ${m.author} | Pipeline: ${m.pipelineTag || "N/A"}\n` +
-        `   Likes: ${m.likes.toLocaleString()} | Downloads: ${m.downloads.toLocaleString()}`,
-    )
-    .join("\n\n");
+export function buildHfSummariesPrompt(rows: Numbered<HfRow>[], dateStr: string): string {
+  const list = rowList(rows, (m) =>
+    [
+      m.id,
+      `task: ${m.pipelineTag || "unknown"}`,
+      m.parameters !== null ? `parameters: ${formatParameters(m.parameters)}` : "",
+      license(m.tags),
+    ]
+      .filter(Boolean)
+      .join(" | "),
+  );
+  return `You are an AI model ecosystem analyst. Below are ${rows.length} numbered models trending on the Hugging Face Hub, week ending ${dateStr}, each with its task (pipeline tag), parameter count and license where known.
 
-  return `You are an AI model ecosystem analyst. The following are the Hugging Face Hub's trending models as of ${dateStr}, in the Hub's trending order:
+${list}
 
----
-
-${modelsText}
-
----
-
-Write only \`### ${T.hfHeading}\`: one **Markdown table** with exactly these columns:
-
-   | # | Model | Author | Likes | Downloads | Summary |
-   | ---: | :--- | :--- | ---: | ---: | :--- |
-
-   - **#**: the model's number from the input
-   - **Model**: model name as a Markdown link to its HF URL
-   - **Likes / Downloads**: copy the numbers from the input verbatim (keep the thousands separators; do not recompute or round)
-   - **Summary**: one sentence: what it is, from its name and pipeline (size, modality). Never name a base model or version the name does not state.
-
-Rules:
-- ${NO_TITLE_RULE}
-- No Highlights, Signals or other sections: they are written elsewhere on the page.
-- Base every claim on the data above. Do not invent releases, benchmarks or capabilities.
-- English, concise and professional, preserve all links.
+${summaryLine("one sentence")}: what the model is for, from its task, size and name (e.g. "27B image-text-to-text model for visual question answering and chat.").
+- Never name a base model, architecture, family or version the model's name does not state.
+- No likes, download or rank figures: the table shows them.
+- If the task is unknown and the name says nothing about what the model does, write \`N: —\`.
+${summaryOutputRule(rows.length)}
+- English.
 `;
 }
 
-/** Re-uploads that only strip safety tuning: not a release of their own. */
-const UNCENSORED_RE = /uncensored|abliterated/i;
-
-/** The Hub's trending models minus uncensored re-uploads. */
-export function hfRows<M extends { id: string }>(models: M[]): M[] {
-  return models.filter((m) => !UNCENSORED_RE.test(m.id));
+/** "Apache-2.0 license" from a `license:` tag; "" without one. */
+function license(tags: string[]): string {
+  const tag = tags.find((t) => t.startsWith("license:"));
+  return tag ? `license: ${tag.slice("license:".length)}` : "";
 }
