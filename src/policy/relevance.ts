@@ -176,8 +176,8 @@ export interface PolicyAnswers {
   impact?: ScoreAnswer;
 }
 
-/** A Jev score answer; `probabilities` may be missing from a hand-edited verdict. */
-type ScoreAnswer = { score: number; probabilities?: Record<string, number> };
+/** A Jev score answer; `probabilities` and `confidence` may be missing from a hand-edited verdict. */
+type ScoreAnswer = { score: number; confidence?: number; probabilities?: Record<string, number> };
 
 /**
  * Weights for the order, summing to 1. Being about AI policy is the largest
@@ -208,6 +208,14 @@ const GATE_MIN_PROBABILITY = 0.5;
 const US_IMPACT_LEVEL = 1;
 /** Elsewhere: only major events (spec). */
 const OTHER_SIGNIFICANCE_LEVEL = 2;
+/**
+ * Under this confidence a US impact score is unknown, not low, and a notable
+ * item (significance level 1 or more) passes the impact gate. On 2026-10-26 the
+ * DHS order removing DeepSeek from federal systems, relevance 0.85, was dropped
+ * on impact 0.48 at confidence 0.28. The same bar as the data report's.
+ */
+const LOW_CONFIDENCE = 0.4;
+const NOTABLE_LEVEL = 1;
 
 const isUs = (j: Jurisdiction): boolean => j === "us_federal" || j === "us_states";
 
@@ -223,6 +231,11 @@ function reachesLevel(a: ScoreAnswer, level: number): boolean {
   if (!Number.isFinite(p)) throw new Error(`Unexpected Jev probabilities: ${JSON.stringify(a)}`);
   return p >= GATE_MIN_PROBABILITY;
 }
+
+const unknownImpact = (a: PolicyAnswers): boolean =>
+  a.impact!.confidence !== undefined &&
+  a.impact!.confidence < LOW_CONFIDENCE &&
+  reachesLevel(a.significance, NOTABLE_LEVEL);
 
 /** Weighted relevance in 0–1 and the keep decision. Throws on an unexpected answer shape. */
 export function policyRelevance(
@@ -245,7 +258,7 @@ export function policyRelevance(
   const keep =
     a.about_ai_policy.noul >= ABOUT_MIN &&
     relevance >= KEEP_MIN_RELEVANCE &&
-    (!isUs(jurisdiction) || reachesLevel(a.impact!, US_IMPACT_LEVEL)) &&
+    (!isUs(jurisdiction) || reachesLevel(a.impact!, US_IMPACT_LEVEL) || unknownImpact(a)) &&
     (jurisdiction !== "other" || reachesLevel(a.significance, OTHER_SIGNIFICANCE_LEVEL));
   return { relevance, keep };
 }

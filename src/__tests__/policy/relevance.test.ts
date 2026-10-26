@@ -91,6 +91,24 @@ describe("policyRelevance", () => {
     expect(() => policyRelevance(withProbs({ 0: 0.2, 1: NaN }, 1), "us_federal")).toThrow("Unexpected");
   });
 
+  it("ticket 13 replay: a low-confidence impact counts as unknown for a notable US item", () => {
+    // Saved answers of us-fr:2026-21447 (DHS DeepSeek order) from digests/2026-10-26/policy-trace.json.
+    const dhs: PolicyAnswers = {
+      about_ai_policy: { noul: 0.95 },
+      binding: { noul: 0.93 },
+      new_stage: { noul: 0.96 },
+      significance: { score: 1.25, confidence: 0.33, probabilities: { 0: 0.1, 1: 0.55, 2: 0.35 } },
+      impact: { score: 0.48, confidence: 0.28, probabilities: { 0: 0.57, 1: 0.38, 2: 0.05 } },
+    };
+    expect(policyRelevance(dhs, "us_federal").keep).toBe(true);
+    // A confident "little effect" still drops it, and so does low confidence on a minor item.
+    expect(policyRelevance({ ...dhs, impact: { ...dhs.impact!, confidence: 0.6 } }, "us_federal").keep).toBe(
+      false,
+    );
+    const minor = { score: 0.3, probabilities: { 0: 0.7, 1: 0.3, 2: 0 } };
+    expect(policyRelevance({ ...dhs, significance: minor }, "us_federal").keep).toBe(false);
+  });
+
   it("throws on an unexpected answer shape, so the call counts as failed", () => {
     expect(() => policyRelevance({ about_ai_policy: {} } as PolicyAnswers, "eu")).toThrow("Unexpected");
     expect(() => policyRelevance(answers(1, 1, 1, 2), "us_federal")).toThrow("Unexpected");

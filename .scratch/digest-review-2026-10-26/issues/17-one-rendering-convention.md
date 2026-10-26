@@ -16,3 +16,7 @@ Decision needed (D11): AGENTS.md says "− for a bullet that opens with GOING_AW
 - [ ] Vendor Item text has no date prefix; a single-source section has no Source column; vendor rows sort newest first
 - [ ] Every row marker (🤖, 🆕, ⏳) and heading emoji is documented or removed
 - [ ] Highlight signs follow the maintainer's D11 decision and AGENTS.md matches
+
+## Comments
+
+**Maintainer's choice on D11 (2026-10-26):** no signs in the Markdown. Highlights stay plain bullets, with the `GOING_AWAY` (`−`) opener on a bullet about something going away; only the web UI draws the +/− gutter. AGENTS.md's `SIGNED_SINCE`/gutter text is to be updated to match when this ticket is built.
