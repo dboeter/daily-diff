@@ -20,3 +20,5 @@ The Trends page's Claude Code Skills section shows skills PRs and issues that mo
 - The fetch now asks for the PRs and issues updated most recently (any state), so a PR closed this week is seen; `selectSkillsItems` keeps the last 7 days and skips what the page dated 7 days earlier named unless it closed in the window. The 2026-10-19 page named items as bare `#N` (no links), so both forms are read.
 - Section renamed "Skills: open PRs worth watching"; subsections Open PRs worth watching / Closed this week / Requests / Takeaway.
 - Off-audience: a prompt rule only. A code filter would be a `judgeItems` gate with its own verdict cache, as the other pages do.
+- Review fix: a closed item is kept only when `closed_at` falls in the 7-day window (a comment on a PR closed months ago no longer lands under Closed this week). Test: `drops a closed item that closed before the window` (skills.test).
+- Review fix: heading renamed "Skills: PRs and requests this week" (`skillsHeading`), since issues and closed PRs are included; AGENTS.md and README updated. `shownSkillsNumbers` still reads pages with the old heading.

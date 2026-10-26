@@ -92,6 +92,7 @@ import {
   splitPool,
   storiesFrom,
   type SpottedPage,
+  type Story,
 } from "./spotted/pool.ts";
 import { sourceCounts, type DroppedReason } from "./core/jev.ts";
 import { loadReportedState, nextReportedState, saveReportedState } from "./core/report-state.ts";
@@ -432,30 +433,23 @@ async function main(): Promise<void> {
     dateStr,
   });
   const spottedDropped = new Map<string, DroppedReason>();
-  const spottedRows = selectSpotted(
-    unmatched,
-    (s) => {
+  const pageOf = (s: Story): SpottedPage | null => {
+    const topic = routing.topics.get(s.id);
+    return topic ? PAGE_OF_TOPIC[topic] : null;
+  };
+  const spottedRows = selectSpotted(unmatched, pageOf, spottedDropped, {
+    dateStr,
+    probabilityOf: (s) => {
       const topic = routing.topics.get(s.id);
-      return topic ? PAGE_OF_TOPIC[topic] : null;
+      return topic ? routing.judgment.verdicts.get(s.id)?.answers.topic.probabilities?.[topic] : undefined;
     },
-    spottedDropped,
-    {
-      dateStr,
-      probabilityOf: (s) => {
-        const topic = routing.topics.get(s.id);
-        return topic ? routing.judgment.verdicts.get(s.id)?.answers.topic.probabilities?.[topic] : undefined;
-      },
-    },
-  );
+  });
   const spottedOf = (page: SpottedPage) => spottedRows.filter((r) => r.page === page);
   // The Overview's "Also talked about": stories routed to a topic with no page (policy, other).
   const talkedAbout = selectTalkedAbout(
     unmatched,
     (s) => routing.topics.get(s.id),
-    (s) => {
-      const topic = routing.topics.get(s.id);
-      return topic ? PAGE_OF_TOPIC[topic] : null;
-    },
+    pageOf,
     dateStr,
     new Set(spottedRows.map((r) => linkKey(r.url))),
   );
@@ -593,6 +587,7 @@ async function main(): Promise<void> {
       spottedTraceFile(unmatched, routing, dailyShown, {
         rows: spottedRows,
         dropped: spottedDropped,
+        talkedAbout: new Set(talkedAbout.map((s) => s.id)),
         sources: sourceCounts(
           {
             hn: hnData.fetchSuccess ? stories.filter((s) => s.source === "hn").length : null,

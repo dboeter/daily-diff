@@ -257,6 +257,7 @@ export async function routeStories(
  * `digests/YYYY-MM-DD/spotted-trace.json`: every routed story with its
  * topic, page, whether a page showed it (`rendered`, `rank`: its row number), why
  * not (`selectSpotted`'s `dropped`, or its page went unpublished), and its answers.
+ * A story the Overview's "Also talked about" showed gets `talked_about: true` and no drop reason.
  */
 export function spottedTraceFile(
   stories: Story[],
@@ -265,6 +266,8 @@ export function spottedTraceFile(
   selection: {
     rows: Pick<SpottedRow, "id" | "n">[];
     dropped: Map<string, DroppedReason>;
+    /** The ids `selectTalkedAbout` took. */
+    talkedAbout?: Set<string>;
     sources: SourceCounts;
   },
 ): string {
@@ -281,7 +284,9 @@ export function spottedTraceFile(
       shown: shownIds.has(s.id),
       ...(n !== undefined && shownIds.has(s.id)
         ? renderedAt(n)
-        : droppedFor(selection.dropped.get(s.id) ?? "unpublished")),
+        : selection.talkedAbout?.has(s.id)
+          ? { rendered: false, rank: null, talked_about: true }
+          : droppedFor(selection.dropped.get(s.id) ?? "unpublished")),
       ...routing.judgment.traceFields(s),
     };
   });

@@ -69,6 +69,8 @@ export interface SearchRepo {
 export interface TrendingData {
   trendingRepos: TrendingRepo[];
   searchRepos: SearchRepo[];
+  /** False when every topic search failed; absent on daily runs (no search) and in old fixtures. */
+  searchFetchSuccess?: boolean;
   trendingFetchSuccess: boolean;
   /** The trending page's window, which `periodStars` counts over; absent in old fixtures. */
   period?: TrendingPeriod;
@@ -266,7 +268,10 @@ interface SearchQuery {
  * needs the second query for new repos and the star gain to rank. Not daily:
  * search results stopped counting as agent news on 2026-10-19 (`matchProjectNews`).
  */
-export async function searchAiRepos(pushedSince: string, createdSince: string): Promise<SearchRepo[]> {
+export async function searchAiRepos(
+  pushedSince: string,
+  createdSince: string,
+): Promise<{ repos: SearchRepo[]; success: boolean }> {
   // Space-separated: githubGet URL-encodes `q`, and an encoded "+" is a literal plus.
   const queries: SearchQuery[] = SEARCH_TOPICS.flatMap((topic): SearchQuery[] => [
     {
@@ -285,7 +290,9 @@ export async function searchAiRepos(pushedSince: string, createdSince: string): 
     },
   ]);
 
-  // A short page is the last one. A failed page keeps the pages before it.
+  // A short page is the last one. A failed page keeps the pages before it. Any answered first page
+  // counts as success: an empty result is then "nothing found", not a failed search.
+  let success = false;
   const searchPages = async ({ q, name, perPage, maxPages }: SearchQuery): Promise<SearchApiItem[]> => {
     const items: SearchApiItem[] = [];
     for (let page = 1; page <= maxPages; page++) {
@@ -296,6 +303,7 @@ export async function searchAiRepos(pushedSince: string, createdSince: string): 
           searchSlot,
         );
         items.push(...pageItems);
+        success = true;
         if (pageItems.length < perPage) break;
       } catch (err) {
         console.error(`  [trending/search] "${name}" page ${page}: ${err}`);
@@ -331,7 +339,7 @@ export async function searchAiRepos(pushedSince: string, createdSince: string): 
     console.log(`  [trending/search] "${name}": ${added} new repos`);
   });
 
-  return all;
+  return { repos: all, success };
 }
 
 // ---------------------------------------------------------------------------
@@ -366,16 +374,17 @@ async function fetchTrending(period: TrendingPeriod, dateStr: string): Promise<T
   const daysAgo = (n: number) => new Date(Date.now() - n * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
   const weekly = period === "weekly";
 
-  const [{ repos: trendingRepos, success }, searchRepos, openrouter, npm] = await Promise.all([
+  const [{ repos: trendingRepos, success }, search, openrouter, npm] = await Promise.all([
     fetchGitHubTrending(period),
-    weekly ? searchAiRepos(daysAgo(SEARCH_PUSHED_DAYS), daysAgo(NEW_REPO_DAYS)) : [],
+    weekly ? searchAiRepos(daysAgo(SEARCH_PUSHED_DAYS), daysAgo(NEW_REPO_DAYS)) : undefined,
     weekly ? fetchOpenRouterData().catch((): OpenRouterData => EMPTY_OPENROUTER) : EMPTY_OPENROUTER,
     weekly ? fetchNpmData().catch((): NpmData => EMPTY_NPM) : EMPTY_NPM,
   ]);
 
   const data: TrendingData = {
     trendingRepos,
-    searchRepos,
+    searchRepos: search?.repos ?? [],
+    ...(search && { searchFetchSuccess: search.success }),
     trendingFetchSuccess: success,
     period,
     openrouter,
@@ -536,7 +545,7 @@ export async function composeTrendingReport(
           dropped,
           sources: {
             "GitHub Trending": { fetched: data.trendingFetchSuccess ? data.trendingRepos.length : null },
-            "topic search": { fetched: data.searchRepos.length },
+            "topic search": { fetched: data.searchFetchSuccess === false ? null : data.searchRepos.length },
             "OpenRouter apps": { fetched: data.openrouter.fetchSuccess ? data.openrouter.apps.length : null },
             npm: { fetched: data.npm.fetchSuccess ? data.npm.rising.length + data.npm.top.length : null },
           },

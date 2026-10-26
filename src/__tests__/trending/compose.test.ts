@@ -188,13 +188,25 @@ describe("searchAiRepos", () => {
       [`topic:coding-agent pushed:>2026-09-30 stars:>=${MIN_STARS} page 2`]: ["p/two", "n/new"],
       [`topic:ai-coding pushed:>2026-09-30 stars:>=${MIN_STARS} page 1`]: ["p/two", "c/three"],
     });
-    const repos = await run("2026-09-23");
+    const { repos, success } = await run("2026-09-23");
+    expect(success).toBe(true);
     // 6 topics × 2 queries, plus page 2 of the one full page.
     expect(urls).toHaveLength(13);
     expect(urls.every((u) => u.includes("&per_page=100&"))).toBe(true);
     expect(repos).toHaveLength(103);
     expect(repos[0]).toMatchObject({ fullName: "n/new", topic: "coding-agent" });
     expect(repos.at(-1)).toMatchObject({ fullName: "c/three", topic: "ai-coding" });
+  });
+
+  it("reports failure when every search fails, so the trace's fetched is null", async () => {
+    vi.spyOn(console, "log").mockImplementation(() => {});
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    vi.spyOn(globalThis, "fetch").mockResolvedValue({
+      ok: false,
+      status: 500,
+      text: async () => "",
+    } as Response);
+    expect(await run("2026-09-23")).toEqual({ repos: [], success: false });
   });
 
   it("retries a dropped connection, and keeps the pages before a failed one", async () => {
@@ -211,7 +223,7 @@ describe("searchAiRepos", () => {
       const names = at === `${pushed} page 1` ? full : [];
       return { ok: true, json: async () => ({ items: names.map(item) }) } as Response;
     });
-    const repos = await run("2026-09-23");
+    const { repos } = await run("2026-09-23");
     expect(attempts).toBe(2);
     expect(repos).toHaveLength(100);
     expect(errors).toHaveBeenCalledWith(

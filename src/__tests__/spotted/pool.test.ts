@@ -440,6 +440,21 @@ describe("selectSpotted floors", () => {
     // Under 3 rows no floor applies: a 1-point story still makes a row.
     expect(selectSpotted([lob], agents).map((r) => r.id)).toEqual([lob.id]);
   });
+
+  it("labels a story cap only when it would otherwise have made a row", () => {
+    const top = [story("l1", "lobsters", 30), story("l2", "lobsters", 20)];
+    const fill = [story("a", "hn", 400), story("b", "hn", 300)];
+    const underFloor = story("l3", "lobsters", 1);
+    const copy = story("l4", "lobsters", 10, { url: top[0]!.url });
+    const capped = story("l5", "lobsters", 5);
+    const dropped = new Map<string, DroppedReason>();
+    selectSpotted([...fill, ...top, underFloor, copy, capped], agents, dropped);
+    expect(Object.fromEntries(dropped)).toEqual({
+      [underFloor.id]: "threshold",
+      [copy.id]: "repeat",
+      [capped.id]: "cap",
+    });
+  });
 });
 
 describe("ticket 10 replay: the 2026-10-26 pool", () => {
@@ -576,6 +591,11 @@ describe("cleanStoryDescription", () => {
       "This is a submission for the Challenge Week 3: Slow and Steady",
     ],
     ["Contribute to o/r development by creating an account on GitHub.", undefined],
+    [
+      "A CLI to subscribe to RSS feeds and read offline.",
+      "A CLI to subscribe to RSS feeds and read offline.",
+    ],
+    ["Agents that plan. Subscribe to our newsletter.", "Agents that plan."],
   ])("cleans %j", (raw, clean) => {
     expect(cleanStoryDescription(raw)).toBe(clean);
   });

@@ -64,7 +64,8 @@ export function linkKey(url: string): string {
 const DESCRIPTION_BOILERPLATE = [
   /Contribute to [\w.-]+\/[\w.-]+ development by creating an account on GitHub\.?/gi,
   /\s+-\s+[\w.-]+\/[\w.-]+\s*$/, // GitHub's trailing " - owner/repo"
-  /\bSubscribe (now |today )?(for|to)\b[^.]*\.?/gi,
+  // A sentence that opens with it: "A CLI to subscribe to RSS feeds" is content.
+  /(?:^|(?<=[.!?] ))Subscribe (now |today )?(for|to)\b[^.]*\.?/gi,
   /(\.{3}|…)\s*$/,
 ];
 
@@ -315,10 +316,6 @@ function claimRows<T extends Pick<Story, "url">>(
 ): T[] {
   const rows: T[] = [];
   for (const s of stories) {
-    if (rows.length === cap) {
-      onDrop?.(s, "cap");
-      continue;
-    }
     if (passes && !passes(s, rows.length)) {
       onDrop?.(s, "threshold");
       continue;
@@ -326,6 +323,11 @@ function claimRows<T extends Pick<Story, "url">>(
     const key = linkKey(s.url);
     if (taken.has(key)) {
       onDrop?.(s, "repeat");
+      continue;
+    }
+    // Checked last: `cap` means the story would have been a row, which is what carries it to tomorrow.
+    if (rows.length === cap) {
+      onDrop?.(s, "cap");
       continue;
     }
     taken.add(key);

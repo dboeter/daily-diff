@@ -24,7 +24,7 @@ const item = (number: number, updated: string, over: Partial<GitHubItem> = {}): 
 describe("shownSkillsNumbers / loadShownSkills", () => {
   it("reads the Skills section's links to the skills repo only, not the rest of the page", () => {
     const md =
-      "## Radar\n\n[o/r](https://github.com/o/r/pull/5) #5\n\n---\n\n## Skills: open PRs worth watching\n\n" +
+      "## Radar\n\n[o/r](https://github.com/o/r/pull/5) #5\n\n---\n\n## Skills: PRs and requests this week\n\n" +
       "[PR](https://github.com/anthropics/skills/pull/12) [Issue](https://github.com/anthropics/skills/issues/3) " +
       "[x](https://github.com/other/skills/pull/99)\n\n---\n\n## Models\n\n#77";
     expect([...shownSkillsNumbers(md, REPO)].sort((a, b) => a - b)).toEqual([3, 12]);
@@ -59,6 +59,19 @@ describe("selectSkillsItems", () => {
       NOW,
     );
     expect(out.prs.map((p) => p.number)).toEqual([1980]);
+  });
+
+  it("drops a closed item that closed before the window, however recently it was updated", () => {
+    const out = selectSkillsItems(
+      data([
+        item(900, "2026-10-25T00:00:00Z", { state: "closed", closed_at: "2026-06-01T00:00:00Z" }),
+        item(901, "2026-10-25T00:00:00Z", { state: "closed", closed_at: "2026-10-24T00:00:00Z" }),
+        item(902, "2026-10-25T00:00:00Z"),
+      ]),
+      new Set(),
+      NOW,
+    );
+    expect(out.prs.map((p) => p.number)).toEqual([901, 902]);
   });
 
   it("skips an item last week's page showed unless it closed this week", () => {

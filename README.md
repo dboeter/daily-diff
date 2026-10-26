@@ -19,7 +19,7 @@ A personal daily digest of AI coding agents, AI models, AI policy and the data e
 | `ai-models.md` | AI Models & Labs | daily   | New Anthropic and OpenAI posts, models newly listed on OpenRouter, stealth models, Spotted                                                                             |
 | `ai-policy.md` | AI Policy        | daily   | New AI legislation, regulation and guidance for the EU, the Netherlands and the US, news & commentary, upcoming deadlines                                              |
 | `ai-data.md`   | Data Engineering | daily   | Action required (deprecations with an end date), vendor release notes and repo releases for Databricks, Snowflake, Azure / Fabric & GCP and the open-source data stack |
-| `ai-trends.md` | Trends           | Mondays | Trending agents & coding tools, open Claude Code Skills PRs worth watching, candidates to track, OpenRouter and Hugging Face models, the week's top papers and most discussed stories, Signals |
+| `ai-trends.md` | Trends           | Mondays | Trending agents & coding tools, the week's Claude Code Skills PRs and requests, candidates to track, OpenRouter and Hugging Face models, the week's top papers and most discussed stories, Signals |
 
 Every report opens with **Highlights**, then its tracked sections. AI Agents, AI Models & Labs and Data Engineering add **Spotted**: community stories on their topic that named no tracked project; Trends ends with **Signals**. A daily report with nothing new is skipped (AI Agents is always written). Each day also writes `highlights.json` (up to 2 highlights per report) and `coming-up.json` (dated items of the next 30 days from every page), which the Web UI's day overview and the notifications show.
 

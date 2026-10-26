@@ -3,6 +3,7 @@ import type { AskJev } from "../../core/jev.ts";
 import {
   fallbackTopic,
   routeStories,
+  spottedTraceFile,
   PAGE_OF_TOPIC,
   topicOf,
   type TopicAnswers,
@@ -112,5 +113,33 @@ describe("routeStories", () => {
     });
     expect(routed.judgment.rankedBy).toBe("keywords");
     expect(routed.topics.get(s.id)).toBe("data");
+  });
+});
+
+describe("spottedTraceFile", () => {
+  it("marks a talked-about story talked_about, with no drop reason", async () => {
+    const [row, talked, other] = [story("1", "a"), story("2", "b"), story("3", "c")];
+    const routing = await routeStories([row, talked, other], {
+      cache: null,
+      dateStr: DATE,
+      ask: answer("agents"),
+      apiKey: "k",
+    });
+    const trace = JSON.parse(
+      spottedTraceFile([row, talked, other], routing, new Set([row.id, talked.id]), {
+        rows: [{ id: row.id, n: 1 }],
+        dropped: new Map([
+          [talked.id, "routing"],
+          [other.id, "routing"],
+        ]),
+        talkedAbout: new Set([talked.id]),
+        sources: {},
+      }),
+    ) as { items: Record<string, unknown>[] };
+    const byId = (id: string) => trace.items.find((i) => i["id"] === id)!;
+    expect(byId(row.id)).toMatchObject({ rendered: true, rank: 1 });
+    expect(byId(talked.id)).toMatchObject({ shown: true, rendered: false, talked_about: true });
+    expect(byId(talked.id)).not.toHaveProperty("dropped_reason");
+    expect(byId(other.id)).toMatchObject({ shown: false, dropped_reason: "routing" });
   });
 });

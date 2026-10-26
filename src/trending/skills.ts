@@ -37,12 +37,18 @@ export function loadShownSkills(repo: string, dateStr: string, dir = "digests"):
 }
 
 /**
- * The items updated in the last SKILLS_WINDOW_DAYS. One last week's page showed
- * is kept only when it closed or merged in the window: its state changed.
+ * The items updated in the last SKILLS_WINDOW_DAYS. A closed item is kept only when it closed (or
+ * merged: GitHub sets `closed_at` then too) in the window, so a comment on a PR closed months ago
+ * does not put it under "Closed this week". One last week's page showed is kept only when it closed
+ * in the window: its state changed.
  */
 export function selectSkillsItems(data: SkillsData, shown: Set<number>, now: Date): SkillsData {
   const since = now.getTime() - SKILLS_WINDOW_DAYS * DAY_MS;
   const inWindow = (iso: string | null | undefined) => !!iso && Date.parse(iso) >= since;
-  const keep = (i: GitHubItem) => inWindow(i.updated_at) && (!shown.has(i.number) || inWindow(i.closed_at));
+  const closedThisWeek = (i: GitHubItem) => inWindow(i.closed_at);
+  const keep = (i: GitHubItem) =>
+    inWindow(i.updated_at) &&
+    (i.state !== "closed" || closedThisWeek(i)) &&
+    (!shown.has(i.number) || closedThisWeek(i));
   return { ...data, prs: data.prs.filter(keep), issues: data.issues.filter(keep) };
 }

@@ -125,7 +125,7 @@ export interface TrendsInput {
 
 /**
  * The weekly Trends page: Highlights, Agents & coding tools (the Radar and
- * category tables), Skills: open PRs worth watching, Candidates to track (code only),
+ * category tables), Skills: PRs and requests this week, Candidates to track (code only),
  * Models, Research, Most discussed, Signals. An empty section is left out; the
  * page is null when every section is. First round, in parallel: the trending
  * row summaries, the models call, Skills, and one call for the Research and
