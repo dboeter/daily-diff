@@ -17,6 +17,8 @@ export interface NewsItem {
   detail: string;
   /** A community story's id, so a story matched into a page counts as shown. */
   id?: string;
+  /** A community story's description: matching reads it, so the model must see it too. */
+  description?: string;
 }
 
 export interface NewsSources {
@@ -82,8 +84,10 @@ export function collectNewsItems(sources: NewsSources): { item: NewsItem; text: 
         url: s.discussionUrl,
         detail: SPOTTED.counts(s.source, s.points, s.comments),
         id: s.id,
+        ...(s.description ? { description: s.description } : {}),
       },
-      text: s.title,
+      // The description too: on 2026-10-25 a Dev.to story about OpenShell named it only there.
+      text: `${s.title} ${s.description ?? ""}`,
       key: linkKey(s.url),
     });
   }

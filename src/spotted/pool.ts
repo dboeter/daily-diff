@@ -114,6 +114,7 @@ export interface LoggedStory {
   firstSeen: string; // CST date
   lastSeen: string; // CST date
   shown?: string; // CST date a page first showed it
+  cut?: string; // CST date Spotted's per-source cap alone left it out: next day's pool takes it again
 }
 
 export type SpottedLog = ItemsFile<LoggedStory>;
@@ -184,8 +185,37 @@ export function splitPool(
 }
 
 /**
+ * The stories Spotted's cap cut yesterday (`cut`) that no page showed and today's fetch did not
+ * return, rebuilt from the log for one more chance in today's pool. On 2026-10-25 a Dev.to story
+ * about OpenShell (agents 0.99) was cut by the cap and Dev.to's 2-day window dropped it the next day.
+ * Its publish date is unknown: the log's first-seen date stands in.
+ */
+export function carriedStories(log: SpottedLog, fetched: Story[], dateStr: string): Story[] {
+  const yesterday = daysBefore(dateStr, 1);
+  const fetchedIds = new Set(fetched.map((s) => s.id));
+  const fetchedLinks = new Set(fetched.map((s) => linkKey(s.url)));
+  return Object.entries(log.items)
+    .filter(
+      ([id, e]) =>
+        e.cut === yesterday && !e.shown && !fetchedIds.has(id) && !fetchedLinks.has(linkKey(e.url)),
+    )
+    .map(([id, e]) => ({
+      id,
+      source: e.source,
+      title: e.title,
+      url: e.url,
+      discussionUrl: e.discussionUrl,
+      points: e.points,
+      comments: e.comments,
+      ...(e.description ? { description: e.description } : {}),
+      published: `${e.firstSeen}T00:00:00Z`,
+    }));
+}
+
+/**
  * Each fetched story with its latest counts and `lastSeen` (a story shown on
- * an earlier day too); `shown` set for each of `shownIds` that has none;
+ * an earlier day too); `shown` set for each of `shownIds` that has none; `cut`
+ * set to today for each of `cutIds` (Spotted's cap left it out) that no page showed;
  * entries unseen for more than LOG_UNSEEN_DAYS pruned.
  */
 export function nextLog(
@@ -193,6 +223,7 @@ export function nextLog(
   fetched: Story[],
   shownIds: Iterable<string>,
   dateStr: string,
+  cutIds: Iterable<string> = [],
 ): SpottedLog {
   const items = { ...log.items };
   for (const s of fetched) {
@@ -208,11 +239,16 @@ export function nextLog(
       firstSeen: prev?.firstSeen ?? dateStr,
       lastSeen: dateStr,
       ...(prev?.shown ? { shown: prev.shown } : {}),
+      ...(prev?.cut ? { cut: prev.cut } : {}),
     };
   }
   for (const id of shownIds) {
     const e = items[id];
     if (e && !e.shown) items[id] = { ...e, shown: dateStr };
+  }
+  for (const id of cutIds) {
+    const e = items[id];
+    if (e && !e.shown) items[id] = { ...e, cut: dateStr };
   }
   const oldest = daysBefore(dateStr, LOG_UNSEEN_DAYS);
   return { items: Object.fromEntries(Object.entries(items).filter(([, e]) => e.lastSeen >= oldest)) };

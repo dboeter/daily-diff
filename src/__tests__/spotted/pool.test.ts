@@ -8,6 +8,7 @@ import {
   type StorySource,
   freshStories,
   linkKey,
+  carriedStories,
   mostDiscussed,
   nextLog,
   selectSpotted,
@@ -479,5 +480,28 @@ describe("ticket 10 replay: the 2026-10-26 pool", () => {
     const rows = mostDiscussed({ items: day.week }, "2026-10-26", [], (id) => day.topics[id]);
     expect(rows.some((r) => r.source === "lobsters" && r.comments === 0)).toBe(false);
     expect(rows.every((r) => day.topics[r.id] !== "other")).toBe(true);
+  });
+});
+
+describe("cap-cut stories stay eligible", () => {
+  it("nextLog marks a cap-cut story cut; carriedStories brings it back the next day only, unless refetched or shown", () => {
+    const cut = story("cut", "devto", 15);
+    const refetched = story("again", "devto", 20);
+    const log = nextLog({ items: {} }, [cut, refetched], [], "2026-10-25", [cut.id, refetched.id]);
+    expect(log.items[cut.id]!.cut).toBe("2026-10-25");
+
+    const carried = carriedStories(log, [refetched], "2026-10-26");
+    expect(carried.map((s) => s.id)).toEqual([cut.id]);
+    expect(carried[0]).toMatchObject({ title: cut.title, url: cut.url, published: "2026-10-25T00:00:00Z" });
+    expect(carriedStories(log, [], "2026-10-27")).toEqual([]);
+
+    const shown = nextLog(log, [], [cut.id], "2026-10-26");
+    expect(carriedStories(shown, [refetched], "2026-10-26")).toEqual([]);
+  });
+
+  it("a story a page showed is never marked cut", () => {
+    const s = story("s");
+    const log = nextLog({ items: {} }, [s], [s.id], "2026-10-25", [s.id]);
+    expect(log.items[s.id]!.cut).toBeUndefined();
   });
 });

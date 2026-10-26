@@ -75,6 +75,7 @@ import { fetchHfData, type HfData } from "./sources/huggingface.ts";
 import { fetchDevtoData, type DevtoData } from "./sources/devto.ts";
 import { fetchLobstersData, type LobstersData } from "./sources/lobsters.ts";
 import {
+  carriedStories,
   freshStories,
   isFresh,
   linkKey,
@@ -349,7 +350,11 @@ async function main(): Promise<void> {
     modelCatalog,
   } = await fetchAllData(now, labsState, weekly, (s) => !inPool({ id: `hn:${s.id}`, url: s.url }));
   const stories = storiesFrom(hnData, lobstersData, devtoData);
-  const fresh = freshStories(stories, spottedLog, dateStr);
+  const fresh = freshStories(
+    [...stories, ...carriedStories(spottedLog, stories, dateStr)],
+    spottedLog,
+    dateStr,
+  );
 
   // Agent news is matched against the other sources' data, so it waits for them.
   // Agents and tooling in one pass: an item naming 3+ of them is a compatibility list.
@@ -528,7 +533,8 @@ async function main(): Promise<void> {
     ...pageActivities.flatMap((a) => a.news.flatMap((n) => (n.id ? [n.id] : []))),
   ]);
   const shownIds = [...dailyShown, ...(savedIds.has("ai-trends") ? discussed.map((s) => s.id) : [])];
-  saveSpottedLog(nextLog(spottedLog, stories, shownIds, dateStr));
+  const cutIds = [...spottedDropped].flatMap(([id, reason]) => (reason === "cap" ? [id] : []));
+  saveSpottedLog(nextLog(spottedLog, stories, shownIds, dateStr, cutIds));
   if (routing.judgment.nextCache) saveSpottedVerdicts(routing.judgment.nextCache);
   console.log(
     `  Saved ${saveFile(

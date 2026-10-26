@@ -140,6 +140,9 @@ export function hasActivity(a: ProjectActivity): boolean {
   return a.releases.length > 0 || a.previews.length > 0 || a.hotIssues.length > 0 || a.news.length > 0;
 }
 
+/** A news story's description as the model sees it: enough to show the project is its subject. */
+const NEWS_DESCRIPTION_CHARS = 300;
+
 /** Newest stable releases shown per project; llama.cpp alone tags 35–70 a week. */
 const RELEASES_PER_PROJECT = 10;
 /** A stable release's notes as the model sees them (the agents and data reports). */
@@ -248,7 +251,13 @@ function formatProject(a: ProjectActivity): string {
       a.previews.map((r) => formatRelease(r, cfg.repo, releaseNotes(r.body, PREVIEW_BODY_CHARS))).join("\n")
     : "";
   const issues = a.hotIssues.map((i) => formatItem(i)).join("\n") || "None";
-  const news = a.news.map((n) => `- [${n.source}] ${n.title} — ${n.url} (${n.detail})`).join("\n") || "None";
+  const news =
+    a.news
+      .map(
+        (n) =>
+          `- [${n.source}] ${n.title} — ${n.url} (${n.detail})${n.description ? `\n  Description: ${n.description.slice(0, NEWS_DESCRIPTION_CHARS)}` : ""}`,
+      )
+      .join("\n") || "None";
 
   return `## ${cfg.name} (github.com/${cfg.repo})
 
@@ -289,7 +298,7 @@ Write the report in English: one section per project above that has something le
 
 Rules:
 - Use only the data above. Omit a bullet type that has no data. Never state what did not happen ("no release today", "no breaking issues were reported").
-- A news item may mention a project only in passing: skip it unless the project is its actual subject.
+- A news item may mention a project only in passing: skip it unless the project is its actual subject, judged from its title and description.
 - A project with a stable release always gets its section and a **Release** bullet naming its most user-visible changes, even when they are small.
 - If every item of a project without a stable release is skipped, leave out its section entirely; code lists it as quiet.
 - ${IDENTIFIER_RULE}
