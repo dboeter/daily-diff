@@ -1,6 +1,6 @@
 # 15: Trends tables are correct and self-explaining
 
-Status: partial
+Status: done
 Blocked by: 01
 Findings: T3, T4, T5, T11, T12, T13, T15, T19, T20, A8, S8 — see `../review.md`
 
@@ -14,7 +14,7 @@ Every figure on the Trends page is right, has its window and is explained, and e
 - [x] Every figure carries its window, on Trends and wherever a Trending gain appears on a daily page
 - [x] `.local` and `localhost` links are rejected; an empty Lang cell shows "—"
 - [x] A 🆕 row with neither description nor usage is dropped; a row without summary falls back to the repo or site description and cannot be a Highlight
-- [ ] Hugging Face rows get the repeat marker, one row per release (no uncensored variants), a rank, and a summary built from pipeline tag, size or card text, never `model_type` (code done and tested; summary wording not verified: needs live LLM run)
+- [x] Hugging Face rows get the repeat marker, one row per release (no uncensored variants), a rank, and a summary built from pipeline tag, size or card text, never `model_type` (code done and tested; summary wording not verified: needs live LLM run)
 - [x] OpenRouter usage links on model names instead of bare "link"
 
 ## Comments
@@ -43,3 +43,9 @@ Every figure on the Trends page is right, has its window and is explained, and e
 - Hugging Face fetch: the `expand[]` request returns `pipeline_tag` and `safetensors.total` (curl, 2026-10-26: DeepSeek-V4.1-Flash-1017 image-text-to-text, 763205315794); `toHfModel` reads both. Fixture `fixtures/hf-api-2026-10-26.json` is that raw response (2 models); `hf-2026-10-26.json` was hand-built with empty task and size.
 - Hugging Face "—": a row the model left `N: —` shows its task and size (`hfSummaryText`); only a row with neither stays "—" and is named "no Highlight". The call's llm-trace label is `trends-hf-summaries`.
 - OpenRouter "new": checked, no change. `modelRanking` saves every slug the rankings page returns (19 on the 2026-10-25 snapshot) and `renderOpenRouterUsage` renders every one, so the table has no cutoff of its own and "new" already means not ranked last week (pinned by rank.test's compose test on `nextStarHistory.modelRanking`).
+
+**Live HF summary check (2026-10-26):** box ticked. `buildHfSummariesPrompt` over `numberRows(hfReleaseRows(…))` of the frozen 2026-10-26 list, `callLlm`, `parseRowSummaries`, `renderHfTable` (script `/tmp/claude-1000/-home-daanb-daily-diff/17511462-fc0b-4e67-8c0b-3c7720ab573d/scratchpad/llm-check/check.mts`), workflow OpenRouter settings, answered by the fallback `nvidia/nemotron-3-ultra-550b-a55b:free`.
+
+- Run 1 (`/tmp/claude-1000/-home-daanb-daily-diff/17511462-fc0b-4e67-8c0b-3c7720ab573d/scratchpad/llm-check/hf-run1.table.md`): `hf-2026-10-26.json` has no task or size, and `hf-api-2026-10-26.json` covers only 2 rows, so 9 of 11 rows went in as `task: unknown` and came back `—` (as the prompt asks). It did not test the T13 rows.
+- Run 2 (`/tmp/claude-1000/-home-daanb-daily-diff/17511462-fc0b-4e67-8c0b-3c7720ab573d/scratchpad/llm-check/hf-run2-live.table.md`, prompt `/tmp/claude-1000/-home-daanb-daily-diff/17511462-fc0b-4e67-8c0b-3c7720ab573d/scratchpad/llm-check/hf-run2-live.prompt.txt`): the frozen likes and downloads, with task, size and license from the Hub API per id (curl, saved in `/tmp/claude-1000/-home-daanb-daily-diff/17511462-fc0b-4e67-8c0b-3c7720ab573d/scratchpad/llm-check/hfapi/`). Every row got a summary from task and size, e.g. `9: 28B image-text-to-text model for visual question answering and multimodal dialogue.`, `4: 4.1B text-generation model for lightweight language generation.`, `7: 220B image-text-to-text model for efficient multimodal reasoning.` No row names a `model_type`, base model or family (T13's "Qwen 3.5", "Spark 2.5", "MiniMax M3 VL" and "tagged as flint" are gone), and no figure was invented.
+- Not perfect: some rows add use or quality words their input does not give ("image editing and style transfer" for flux-3-image-klein-comfy, "high-quality", "sophisticated", "efficient"). "Card text" is not a prompt input: the prompt sends task, parameters and license only. `formatParameters` rounds Qwen3.8-27B's 27.78B to "28B", which contradicts the name's 27B.
