@@ -37,7 +37,20 @@ export function loadShownSkills(repo: string, dateStr: string, dir = "digests"):
 }
 
 /**
- * The items updated in the last SKILLS_WINDOW_DAYS. A closed item is kept only when it closed (or
+ * Title terms of the items in the audience's reach (coding agents, data/AI engineering): the repo's
+ * developer skills, evals and triggering, skill distribution, Claude Code sessions, hooks and memory.
+ * Titles only: PR templates put "Claude Code", "MCP" or "marketplace" in nearly every body, the
+ * off-audience ones included. A new skill whose title names none of these is dropped until added here.
+ */
+const AUDIENCE_TITLE_RE =
+  /skill-creator|claude-api|mcp-builder|\bmcp\b|webapp-testing|run_eval|\beval|trigger|claude code|marketplace|\bplugins?\b|namespace|skill sharing|\bhooks?\b|\bsessions?\b|\bmemory\b/i;
+
+export function isAudienceSkillsItem(item: GitHubItem): boolean {
+  return AUDIENCE_TITLE_RE.test(item.title);
+}
+
+/**
+ * The items updated in the last SKILLS_WINDOW_DAYS whose title is in the audience's reach. A closed item is kept only when it closed (or
  * merged: GitHub sets `closed_at` then too) in the window, so a comment on a PR closed months ago
  * does not put it under "Closed this week". One last week's page showed is kept only when it closed
  * in the window: its state changed.
@@ -48,6 +61,7 @@ export function selectSkillsItems(data: SkillsData, shown: Set<number>, now: Dat
   const closedThisWeek = (i: GitHubItem) => inWindow(i.closed_at);
   const keep = (i: GitHubItem) =>
     inWindow(i.updated_at) &&
+    isAudienceSkillsItem(i) &&
     (i.state !== "closed" || closedThisWeek(i)) &&
     (!shown.has(i.number) || closedThisWeek(i));
   return { ...data, prs: data.prs.filter(keep), issues: data.issues.filter(keep) };

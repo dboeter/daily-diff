@@ -3,14 +3,19 @@ import os from "node:os";
 import path from "node:path";
 import { describe, it, expect } from "vitest";
 import type { GitHubItem } from "../../core/github.ts";
-import { loadShownSkills, selectSkillsItems, shownSkillsNumbers } from "../../trending/skills.ts";
+import {
+  isAudienceSkillsItem,
+  loadShownSkills,
+  selectSkillsItems,
+  shownSkillsNumbers,
+} from "../../trending/skills.ts";
 
 const REPO = "anthropics/skills";
 const NOW = new Date("2026-10-26T03:00:00Z");
 
 const item = (number: number, updated: string, over: Partial<GitHubItem> = {}): GitHubItem => ({
   number,
-  title: `Item ${number}`,
+  title: `skill-creator: item ${number}`,
   state: "open",
   user: { login: "a" },
   labels: [],
@@ -94,5 +99,39 @@ describe("selectSkillsItems", () => {
     const out = selectSkillsItems(data([item(1, "2026-09-01T00:00:00Z")]), new Set(), NOW);
     expect(out.prs.length + out.issues.length).toBe(0);
     expect(out.fetchSuccess).toBe(true);
+  });
+
+  /** The eleven items of the 2026-10-26 page, with their GitHub titles. */
+  const PAGE_2026_10_26: [number, string, boolean][] = [
+    [1742, "fix(mcp-builder): support mcp>=2 streamable_http_client import and custom headers", true],
+    [1298, "fix(skill-creator): isolate trigger evals and handle Windows and runtime failures", true],
+    [1245, "Add notion-spec-to-implementation and quantitative-resume-auditor skills", false],
+    [1771, "feat(skills): add proofcore-contract-auditor for smart contract notarization", false],
+    [1703, "Add md2video-audio skill", false],
+    [
+      492,
+      "Security: Community skills distributed under anthropic/ namespace enable trust boundary abuse",
+      true,
+    ],
+    [228, "Enable org-wide skill sharing in Claude.ai", true],
+    [556, "run_eval.py: claude -p never triggers skills/commands (0% trigger rate across all queries)", true],
+    [1980, "webapp-testing: avoid shell=True in with_server.py", true],
+    [1681, "fix(skill-creator): support direct execution of package_skill.py and update usage paths", true],
+    [525, "Add pyxel skill for retro game development", false],
+  ];
+
+  it("drops the off-audience items of the 2026-10-26 page (blockchain, resumes, video, games)", () => {
+    for (const [number, title, kept] of PAGE_2026_10_26) {
+      expect(isAudienceSkillsItem(item(number, NOW.toISOString(), { title })), title).toBe(kept);
+    }
+  });
+
+  it("leaves nothing when every item is off-audience, so the section and its Takeaway are left out", () => {
+    const off = PAGE_2026_10_26.filter(([, , kept]) => !kept).map(([n, title]) =>
+      item(n, "2026-10-25T00:00:00Z", { title }),
+    );
+    const spam = item(2069, "2026-10-25T00:00:00Z", { title: "Motiongeraphy" });
+    const out = selectSkillsItems(data(off, [spam]), new Set(), NOW);
+    expect(out.prs.length + out.issues.length).toBe(0);
   });
 });
