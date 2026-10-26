@@ -1,279 +1,217 @@
 {
   "apps": {
-    "190604": {
-      "title": "Cline",
-      "lastSeen": "2026-10-19",
+    "189563": {
+      "title": "OpenHands",
+      "lastSeen": "2026-10-26",
       "rejected": [
         "npm:@reason-machines/cli",
-        "github:longsurf-ai/openchart",
-        "github:sisyphuslabs/omo-dori-mode-experimental",
-        "npm:@onepointfour-packs/flaredeck-agent",
-        "npm:@earendil-works/pi-coding-agent",
-        "github:pullboard-dev/pullboard",
-        "github:YuyaoGe/doc2harness",
-        "github:shuyu-labs/transwork",
-        "github:longsurf-ai/endo",
-        "github:vakandi/opencode-rust",
-        "github:tony3liu/eido",
-        "github:serhatandic/kuvo-code",
-        "github:Hermes-Deck/hermes-deck",
-        "github:electric-dragon-80000v/pi-cowboy"
+        "npm:@earendil-works/pi-coding-agent"
+      ]
+    },
+    "190604": {
+      "title": "Cline",
+      "lastSeen": "2026-10-26",
+      "rejected": [
+        "npm:@reason-machines/cli",
+        "npm:@earendil-works/pi-coding-agent"
+      ]
+    },
+    "2237546": {
+      "title": "Cursor",
+      "lastSeen": "2026-10-26",
+      "rejected": [
+        "npm:@reason-machines/cli",
+        "npm:@earendil-works/pi-coding-agent"
       ]
     },
     "2262242": {
       "title": "Kilo Code",
-      "lastSeen": "2026-10-19",
+      "lastSeen": "2026-10-26",
       "rejected": [
         "npm:@reason-machines/cli",
-        "github:longsurf-ai/openchart",
-        "github:sisyphuslabs/omo-dori-mode-experimental",
-        "npm:@onepointfour-packs/flaredeck-agent",
-        "npm:@earendil-works/pi-coding-agent",
-        "github:pullboard-dev/pullboard",
-        "github:YuyaoGe/doc2harness",
-        "github:shuyu-labs/transwork",
-        "github:longsurf-ai/endo",
-        "github:vakandi/opencode-rust",
-        "github:tony3liu/eido",
-        "github:serhatandic/kuvo-code",
-        "github:Hermes-Deck/hermes-deck",
-        "github:electric-dragon-80000v/pi-cowboy"
+        "npm:@earendil-works/pi-coding-agent"
+      ]
+    },
+    "2267189": {
+      "title": "Zed Editor",
+      "lastSeen": "2026-10-26",
+      "rejected": [
+        "npm:@reason-machines/cli",
+        "npm:@earendil-works/pi-coding-agent"
       ]
     },
     "2627404": {
       "title": "Claude Code",
-      "lastSeen": "2026-10-19",
+      "lastSeen": "2026-10-26",
       "rejected": [
         "npm:@reason-machines/cli",
-        "github:longsurf-ai/openchart",
-        "github:sisyphuslabs/omo-dori-mode-experimental",
-        "npm:@onepointfour-packs/flaredeck-agent",
-        "npm:@earendil-works/pi-coding-agent",
-        "github:pullboard-dev/pullboard",
-        "github:YuyaoGe/doc2harness",
-        "github:shuyu-labs/transwork",
-        "github:longsurf-ai/endo",
-        "github:vakandi/opencode-rust",
-        "github:tony3liu/eido",
-        "github:serhatandic/kuvo-code",
-        "github:Hermes-Deck/hermes-deck",
-        "github:electric-dragon-80000v/pi-cowboy"
+        "npm:@earendil-works/pi-coding-agent"
       ]
     },
     "2637375": {
       "title": "Lemonade",
-      "lastSeen": "2026-10-12",
+      "lastSeen": "2026-10-26",
       "rejected": [
         "npm:@reason-machines/cli",
-        "github:longsurf-ai/openchart",
-        "github:sisyphuslabs/omo-dori-mode-experimental"
+        "npm:@earendil-works/pi-coding-agent"
       ]
     },
     "2668297": {
       "title": "Codex",
-      "lastSeen": "2026-10-12",
+      "lastSeen": "2026-10-26",
       "rejected": [
         "npm:@reason-machines/cli",
-        "github:longsurf-ai/openchart",
-        "github:sisyphuslabs/omo-dori-mode-experimental"
+        "npm:@earendil-works/pi-coding-agent"
       ]
     },
     "2725608": {
       "title": "OpenClaw",
-      "lastSeen": "2026-10-19",
+      "lastSeen": "2026-10-26",
       "rejected": [
         "npm:@reason-machines/cli",
-        "github:longsurf-ai/openchart",
-        "github:sisyphuslabs/omo-dori-mode-experimental",
-        "npm:@onepointfour-packs/flaredeck-agent",
-        "npm:@earendil-works/pi-coding-agent",
-        "github:pullboard-dev/pullboard",
-        "github:YuyaoGe/doc2harness",
-        "github:shuyu-labs/transwork",
-        "github:longsurf-ai/endo",
-        "github:vakandi/opencode-rust",
-        "github:tony3liu/eido",
-        "github:serhatandic/kuvo-code",
-        "github:Hermes-Deck/hermes-deck",
-        "github:electric-dragon-80000v/pi-cowboy"
+        "npm:@earendil-works/pi-coding-agent"
+      ]
+    },
+    "2823243": {
+      "title": "ZCode",
+      "lastSeen": "2026-10-26",
+      "rejected": [
+        "npm:@reason-machines/cli",
+        "npm:@earendil-works/pi-coding-agent"
       ]
     },
     "2853275": {
       "title": "pi",
-      "lastSeen": "2026-10-19",
+      "lastSeen": "2026-10-26",
       "rejected": [
         "npm:@reason-machines/cli",
-        "github:longsurf-ai/openchart",
-        "github:sisyphuslabs/omo-dori-mode-experimental",
-        "npm:@onepointfour-packs/flaredeck-agent",
-        "npm:@earendil-works/pi-coding-agent",
-        "github:pullboard-dev/pullboard",
-        "github:YuyaoGe/doc2harness",
-        "github:shuyu-labs/transwork",
-        "github:longsurf-ai/endo",
-        "github:vakandi/opencode-rust",
-        "github:tony3liu/eido",
-        "github:serhatandic/kuvo-code",
-        "github:Hermes-Deck/hermes-deck",
-        "github:electric-dragon-80000v/pi-cowboy"
+        "npm:@earendil-works/pi-coding-agent"
       ]
     },
     "3003505": {
       "title": "Strix",
-      "lastSeen": "2026-10-19",
+      "lastSeen": "2026-10-26",
       "rejected": [
         "npm:@reason-machines/cli",
-        "github:longsurf-ai/openchart",
-        "github:sisyphuslabs/omo-dori-mode-experimental",
-        "npm:@onepointfour-packs/flaredeck-agent",
-        "npm:@earendil-works/pi-coding-agent",
-        "github:pullboard-dev/pullboard",
-        "github:YuyaoGe/doc2harness",
-        "github:shuyu-labs/transwork",
-        "github:longsurf-ai/endo",
-        "github:vakandi/opencode-rust",
-        "github:tony3liu/eido",
-        "github:serhatandic/kuvo-code",
-        "github:Hermes-Deck/hermes-deck",
-        "github:electric-dragon-80000v/pi-cowboy"
+        "npm:@earendil-works/pi-coding-agent"
       ]
     },
     "3067167": {
       "title": "Hermes Agent",
-      "lastSeen": "2026-10-19",
+      "lastSeen": "2026-10-26",
       "rejected": [
         "npm:@reason-machines/cli",
-        "github:longsurf-ai/openchart",
-        "github:sisyphuslabs/omo-dori-mode-experimental",
-        "npm:@onepointfour-packs/flaredeck-agent",
-        "npm:@earendil-works/pi-coding-agent",
-        "github:pullboard-dev/pullboard",
-        "github:YuyaoGe/doc2harness",
-        "github:shuyu-labs/transwork",
-        "github:longsurf-ai/endo",
-        "github:vakandi/opencode-rust",
-        "github:tony3liu/eido",
-        "github:serhatandic/kuvo-code",
-        "github:Hermes-Deck/hermes-deck",
-        "github:electric-dragon-80000v/pi-cowboy"
+        "npm:@earendil-works/pi-coding-agent"
+      ]
+    },
+    "3248223": {
+      "title": "goose",
+      "lastSeen": "2026-10-26",
+      "rejected": [
+        "npm:@reason-machines/cli",
+        "npm:@earendil-works/pi-coding-agent"
+      ]
+    },
+    "3296290": {
+      "title": "Mira is the leading AI agent inside Telegram",
+      "lastSeen": "2026-10-26",
+      "rejected": [
+        "npm:@reason-machines/cli",
+        "npm:@earendil-works/pi-coding-agent"
       ]
     },
     "3682314": {
       "title": "omp",
-      "lastSeen": "2026-10-19",
+      "lastSeen": "2026-10-26",
       "rejected": [
         "npm:@reason-machines/cli",
-        "github:longsurf-ai/openchart",
-        "github:sisyphuslabs/omo-dori-mode-experimental",
-        "npm:@onepointfour-packs/flaredeck-agent",
-        "npm:@earendil-works/pi-coding-agent",
-        "github:pullboard-dev/pullboard",
-        "github:YuyaoGe/doc2harness",
-        "github:shuyu-labs/transwork",
-        "github:longsurf-ai/endo",
-        "github:vakandi/opencode-rust",
-        "github:tony3liu/eido",
-        "github:serhatandic/kuvo-code",
-        "github:Hermes-Deck/hermes-deck",
-        "github:electric-dragon-80000v/pi-cowboy"
+        "npm:@earendil-works/pi-coding-agent"
+      ]
+    },
+    "3980383": {
+      "title": "mimocode",
+      "lastSeen": "2026-10-26",
+      "rejected": [
+        "npm:@reason-machines/cli",
+        "npm:@earendil-works/pi-coding-agent"
       ]
     },
     "4132065": {
       "title": "Hello Minds, powered by Ethoswarm",
-      "lastSeen": "2026-10-19",
+      "lastSeen": "2026-10-26",
       "rejected": [
-        "npm:@onepointfour-packs/flaredeck-agent",
         "npm:@reason-machines/cli",
-        "npm:@earendil-works/pi-coding-agent",
-        "github:pullboard-dev/pullboard",
-        "github:YuyaoGe/doc2harness",
-        "github:shuyu-labs/transwork",
-        "github:longsurf-ai/endo",
-        "github:longsurf-ai/openchart",
-        "github:vakandi/opencode-rust",
-        "github:tony3liu/eido",
-        "github:serhatandic/kuvo-code",
-        "github:Hermes-Deck/hermes-deck",
-        "github:electric-dragon-80000v/pi-cowboy",
-        "github:sisyphuslabs/omo-dori-mode-experimental"
+        "npm:@earendil-works/pi-coding-agent"
+      ]
+    },
+    "4706207": {
+      "title": "DeepSeek Harness",
+      "lastSeen": "2026-10-26",
+      "rejected": [
+        "npm:@reason-machines/cli",
+        "npm:@earendil-works/pi-coding-agent"
       ]
     },
     "4725308": {
       "title": "Proto Agent",
-      "lastSeen": "2026-10-19",
+      "lastSeen": "2026-10-26",
       "rejected": [
-        "npm:@onepointfour-packs/flaredeck-agent",
         "npm:@reason-machines/cli",
-        "npm:@earendil-works/pi-coding-agent",
-        "github:pullboard-dev/pullboard",
-        "github:YuyaoGe/doc2harness",
-        "github:shuyu-labs/transwork",
-        "github:longsurf-ai/endo",
-        "github:longsurf-ai/openchart",
-        "github:vakandi/opencode-rust",
-        "github:tony3liu/eido",
-        "github:serhatandic/kuvo-code",
-        "github:Hermes-Deck/hermes-deck",
-        "github:electric-dragon-80000v/pi-cowboy",
-        "github:sisyphuslabs/omo-dori-mode-experimental"
+        "npm:@earendil-works/pi-coding-agent"
+      ]
+    },
+    "4749832": {
+      "title": "Aura",
+      "lastSeen": "2026-10-26",
+      "rejected": [
+        "npm:@reason-machines/cli",
+        "npm:@earendil-works/pi-coding-agent"
+      ]
+    },
+    "4780809": {
+      "title": "CodeGPT",
+      "lastSeen": "2026-10-26",
+      "rejected": [
+        "npm:@reason-machines/cli",
+        "npm:@earendil-works/pi-coding-agent"
+      ]
+    },
+    "4832946": {
+      "title": "Digen AI",
+      "lastSeen": "2026-10-26",
+      "rejected": [
+        "npm:@reason-machines/cli",
+        "npm:@earendil-works/pi-coding-agent"
       ]
     },
     "4885443": {
       "title": "ai-copilot-prod",
       "lastSeen": "2026-10-19",
       "rejected": [
-        "npm:@onepointfour-packs/flaredeck-agent",
         "npm:@reason-machines/cli",
-        "npm:@earendil-works/pi-coding-agent",
-        "github:pullboard-dev/pullboard",
-        "github:YuyaoGe/doc2harness",
-        "github:shuyu-labs/transwork",
-        "github:longsurf-ai/endo",
-        "github:longsurf-ai/openchart",
-        "github:vakandi/opencode-rust",
-        "github:tony3liu/eido",
-        "github:serhatandic/kuvo-code",
-        "github:Hermes-Deck/hermes-deck",
-        "github:electric-dragon-80000v/pi-cowboy",
-        "github:sisyphuslabs/omo-dori-mode-experimental"
+        "npm:@earendil-works/pi-coding-agent"
       ]
     },
     "5194536": {
       "title": "Diligent NS Name Matching v2",
       "lastSeen": "2026-10-19",
       "rejected": [
-        "npm:@onepointfour-packs/flaredeck-agent",
         "npm:@reason-machines/cli",
-        "npm:@earendil-works/pi-coding-agent",
-        "github:pullboard-dev/pullboard",
-        "github:YuyaoGe/doc2harness",
-        "github:shuyu-labs/transwork",
-        "github:longsurf-ai/endo",
-        "github:longsurf-ai/openchart",
-        "github:vakandi/opencode-rust",
-        "github:tony3liu/eido",
-        "github:serhatandic/kuvo-code",
-        "github:Hermes-Deck/hermes-deck",
-        "github:electric-dragon-80000v/pi-cowboy",
-        "github:sisyphuslabs/omo-dori-mode-experimental"
+        "npm:@earendil-works/pi-coding-agent"
       ]
     },
     "5217301": {
       "title": "isdlc.ai",
       "lastSeen": "2026-10-12",
       "rejected": [
-        "npm:@reason-machines/cli",
-        "github:longsurf-ai/openchart",
-        "github:sisyphuslabs/omo-dori-mode-experimental"
+        "npm:@reason-machines/cli"
       ]
     },
     "5223849": {
       "title": "codex-fleet conductor",
       "lastSeen": "2026-10-12",
       "rejected": [
-        "npm:@reason-machines/cli",
-        "github:longsurf-ai/openchart",
-        "github:sisyphuslabs/omo-dori-mode-experimental"
+        "npm:@reason-machines/cli"
       ]
     },
     "5268002": {
@@ -281,79 +219,63 @@
       "lastSeen": "2026-10-19",
       "rejected": [
         "npm:@reason-machines/cli",
-        "github:longsurf-ai/openchart",
-        "github:sisyphuslabs/omo-dori-mode-experimental",
-        "npm:@onepointfour-packs/flaredeck-agent",
-        "npm:@earendil-works/pi-coding-agent",
-        "github:pullboard-dev/pullboard",
-        "github:YuyaoGe/doc2harness",
-        "github:shuyu-labs/transwork",
-        "github:longsurf-ai/endo",
-        "github:vakandi/opencode-rust",
-        "github:tony3liu/eido",
-        "github:serhatandic/kuvo-code",
-        "github:Hermes-Deck/hermes-deck",
-        "github:electric-dragon-80000v/pi-cowboy"
+        "npm:@earendil-works/pi-coding-agent"
       ]
     },
     "5297627": {
       "title": "HunterSwarm",
       "lastSeen": "2026-10-19",
       "rejected": [
-        "npm:@onepointfour-packs/flaredeck-agent",
         "npm:@reason-machines/cli",
-        "npm:@earendil-works/pi-coding-agent",
-        "github:pullboard-dev/pullboard",
-        "github:YuyaoGe/doc2harness",
-        "github:shuyu-labs/transwork",
-        "github:longsurf-ai/endo",
-        "github:longsurf-ai/openchart",
-        "github:vakandi/opencode-rust",
-        "github:tony3liu/eido",
-        "github:serhatandic/kuvo-code",
-        "github:Hermes-Deck/hermes-deck",
-        "github:electric-dragon-80000v/pi-cowboy",
-        "github:sisyphuslabs/omo-dori-mode-experimental"
+        "npm:@earendil-works/pi-coding-agent"
       ]
     },
     "5298878": {
       "title": "rn-lean agents",
       "lastSeen": "2026-10-19",
       "rejected": [
-        "npm:@onepointfour-packs/flaredeck-agent",
         "npm:@reason-machines/cli",
-        "npm:@earendil-works/pi-coding-agent",
-        "github:pullboard-dev/pullboard",
-        "github:YuyaoGe/doc2harness",
-        "github:shuyu-labs/transwork",
-        "github:longsurf-ai/endo",
-        "github:longsurf-ai/openchart",
-        "github:vakandi/opencode-rust",
-        "github:tony3liu/eido",
-        "github:serhatandic/kuvo-code",
-        "github:Hermes-Deck/hermes-deck",
-        "github:electric-dragon-80000v/pi-cowboy",
-        "github:sisyphuslabs/omo-dori-mode-experimental"
+        "npm:@earendil-works/pi-coding-agent"
       ]
     },
     "5339479": {
       "title": "alt-data-harness",
       "lastSeen": "2026-10-19",
       "rejected": [
-        "npm:@onepointfour-packs/flaredeck-agent",
         "npm:@reason-machines/cli",
-        "npm:@earendil-works/pi-coding-agent",
-        "github:pullboard-dev/pullboard",
-        "github:YuyaoGe/doc2harness",
-        "github:shuyu-labs/transwork",
-        "github:longsurf-ai/endo",
-        "github:longsurf-ai/openchart",
-        "github:vakandi/opencode-rust",
-        "github:tony3liu/eido",
-        "github:serhatandic/kuvo-code",
-        "github:Hermes-Deck/hermes-deck",
-        "github:electric-dragon-80000v/pi-cowboy",
-        "github:sisyphuslabs/omo-dori-mode-experimental"
+        "npm:@earendil-works/pi-coding-agent"
+      ]
+    },
+    "5341223": {
+      "title": "Prime Agent + Birdstrike Security",
+      "lastSeen": "2026-10-26",
+      "rejected": [
+        "npm:@reason-machines/cli",
+        "npm:@earendil-works/pi-coding-agent"
+      ]
+    },
+    "5378936": {
+      "title": "HunterSwarm",
+      "lastSeen": "2026-10-26",
+      "rejected": [
+        "npm:@reason-machines/cli",
+        "npm:@earendil-works/pi-coding-agent"
+      ]
+    },
+    "5390824": {
+      "title": "OpenPAVE",
+      "lastSeen": "2026-10-26",
+      "rejected": [
+        "npm:@reason-machines/cli",
+        "npm:@earendil-works/pi-coding-agent"
+      ]
+    },
+    "5393423": {
+      "title": "Real-SWE",
+      "lastSeen": "2026-10-26",
+      "rejected": [
+        "npm:@reason-machines/cli",
+        "npm:@earendil-works/pi-coding-agent"
       ]
     }
   }

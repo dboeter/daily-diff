@@ -1,0 +1,18 @@
+{
+  "ai-agents": [
+    "Hermes Agent leaks API keys via CLI flags and `gateway status` output, bypassing redaction — audit your invocations immediately",
+    "Cline SDK v0.2.0 and CLI v3.0.74 add live-session reattachment and cross-app task attachment with Hub health timeout"
+  ],
+  "ai-models": [
+    "OpenAI and Anthropic cut LLM prices up to 80%, reshaping token economics for production workloads",
+    "Cerebras deploys trillion-parameter models on WSE-3T wafers delivering 1,000–2,000+ tokens/sec inference"
+  ],
+  "ai-data": [
+    "− Polars py-2.1.0 breaks mixed string/numeric arithmetic in eager mode — test and migrate pipelines on Databricks, Snowflake, Fabric, BigQuery",
+    "Snowflake Coding Agent MCP tool GA lets MCP servers expose coding agents without stored agent objects for AI-assisted development"
+  ],
+  "ai-trends": [
+    "Cloudflare/security-audit-skill adds 15K stars, equipping agents with verified machine-readable security audit capabilities",
+    "JetBrains/thinkrail (+157% stars) and sandbox-quantum/switch (+105%) signal rapid adoption of agent-native IDEs and chat-embedded teammates"
+  ]
+}

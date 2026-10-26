@@ -104,7 +104,10 @@
     "oct 22, 2026: skill and plugin sharing in coco (general availability)|2026-10-22": "2026-10-24",
     "oct 23, 2026: retrieve cortex search (public preview)|2026-10-23": "2026-10-24",
     "oct 23, 2026: responses api for the cortex rest api (preview)|2026-10-23": "2026-10-24",
-    "release:databricks/dbt-databricks@v1.12.8": "2026-10-25"
+    "release:databricks/dbt-databricks@v1.12.8": "2026-10-25",
+    "october 23, 2026: coding agent mcp tool|2026-10-23": "2026-10-26",
+    "oct 26, 2026: custom error messages for feature policy rules|2026-10-26": "2026-10-26",
+    "release:pola-rs/polars@py-2.1.0": "2026-10-26"
   },
   "stages": {
     "snowflake-bcr:2026_08": "2026-10-16 Introduced in the 10.37 release (October 8-16, 2026) as Disabled by Default; account admins can enable for testing."
