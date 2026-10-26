@@ -65,7 +65,9 @@ ${summaryOutputRule(rows.length)}
 /**
  * Weekly Trends, the second round: Highlights and Signals around the page
  * rendered from the first round's calls. The model places TABLES_MARKER where
- * spliceTables inserts the page.
+ * spliceTables inserts the page. Signals rest on row figures: the row summaries are
+ * written from descriptions without figures, so "summaries support it" let the model
+ * build trends from shared wording (forced weekly run, 2026-10-27).
  */
 export function buildTrendsProsePrompt(
   pageMd: string,
@@ -83,12 +85,18 @@ Write only these parts, in this order:
 
 1. \`## ${SECTIONS.highlights}\` — 1-3 bullets on the most noteworthy items of the week for a data or AI engineer, most relevant first, across the page's sections.
 2. The line \`${TABLES_MARKER}\` exactly once, on its own line. The page is inserted there.
-3. \`## ${SECTIONS.signals}\` — 200-300 words: patterns across the week's tables, such as which kinds of agent or coding tool are getting attention, which model families lead usage, and which research directions recur. This is the one place for trend claims: each must rest on two or more rows whose summaries (not only titles) support it, and names them.
+3. \`## ${SECTIONS.signals}\` — 100-300 words, 2-4 short paragraphs: what the tables' figures show, such as the largest star gains, rank moves against last week's page and the usage leaders. This is the one place for trend claims, and each Signal:
+   - links the rows it rests on, and every name and figure in it appears in those rows;
+   - rests on those rows' figures (stars gained, %, rank, tokens, downloads, likes), never on what their summaries, descriptions or titles have in common: three tools that all support Codex are not a signal;
+   - counts a share in one table, from its rows as shown ("4 of the 19 rows", never "half the top 20");
+   - uses no trend verb the figures cannot show (dominates, is accelerating, is converging): one snapshot shows no change over time.
+   The Research table has no figures, so it gives no Signal. Fewer Signals beat an unsupported one.
 
 Rules:
 - ${NO_TITLE_RULE}
 - In ${SECTIONS.highlights}: ${goingAwayRule("bullet")} ${HIGHLIGHTS_PICK_RULE}${noSummaryNames.length ? `\n- These rows have no summary or description: no Highlight for them. ${noSummaryNames.map((t) => `"${t}"`).join(", ")}` : ""}
 - Do not reproduce or alter the tables, and write no other sections.
+- Each table gives its window in its intro line, and a claim keeps it, in Highlights too: OpenRouter usage is one day's snapshot, so say "on <its date>", never "this week".
 - Base every claim on the page. It shows descriptions, summaries and counts only, so do not describe releases, adoption or community reactions it does not show.
 - Mention only items that appear on the page, and link every item you mention.
 ${sourceFidelityRules()}

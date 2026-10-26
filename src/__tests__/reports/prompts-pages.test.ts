@@ -444,15 +444,34 @@ describe("source fidelity rules", () => {
     expect(rules).toMatch(/X says/);
     expect(rules).toMatch(/sample size, a single run, not peer reviewed/);
     expect(rules).toMatch(/Several items on one theme in the same period are not a trend/);
-    expect(rules).toMatch(/never titles or co-occurrence alone/);
+    expect(rules).toMatch(/never titles, descriptions or co-occurrence alone/);
   });
 
   it("the data Highlights ask for an action only when the row gives or requires one", () => {
     expect(prompts.data).toContain("what to do when the row says or its change requires it");
   });
 
-  it("Signals' trend claims must rest on summaries, not titles", () => {
-    expect(prompts.trends).toContain("whose summaries (not only titles) support it");
+  // 2026-10-27 forced weekly run: "DeepSeek's model family dominates", "half the OpenRouter top 20"
+  // with MiniMax (a Hugging Face row only), and "harnesses are converging" from shared descriptions.
+  it("each Signal rests on its rows' figures, counted in one table, with no unsupported trend verb", () => {
+    expect(prompts.trends).toContain(
+      "links the rows it rests on, and every name and figure in it appears in those rows",
+    );
+    expect(prompts.trends).toContain("never on what their summaries, descriptions or titles have in common");
+    expect(prompts.trends).toContain(
+      'counts a share in one table, from its rows as shown ("4 of the 19 rows", never "half the top 20")',
+    );
+    expect(prompts.trends).toContain(
+      "uses no trend verb the figures cannot show (dominates, is accelerating, is converging)",
+    );
+    expect(prompts.trends).toContain("The Research table has no figures, so it gives no Signal.");
+    expect(prompts.trends).not.toContain("which model families lead usage");
+  });
+
+  it("usage claims keep the table's window, in Highlights too", () => {
+    expect(prompts.trends).toContain(
+      'in Highlights too: OpenRouter usage is one day\'s snapshot, so say "on <its date>", never "this week"',
+    );
   });
 });
 
