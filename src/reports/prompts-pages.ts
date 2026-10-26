@@ -9,7 +9,7 @@
 import type { LabPost } from "../sources/labs.ts";
 import type { summaryRows } from "../trending/rank.ts";
 import type { OpenRouterData, OpenRouterNewModel } from "../sources/openrouter.ts";
-import { DATA_REPORT, MODELS_PAGE, MSG, SECTIONS, SPOTTED } from "../core/strings.ts";
+import { DATA_REPORT, GOING_AWAY, MODELS_PAGE, MSG, SECTIONS, SPOTTED } from "../core/strings.ts";
 import { TABLES_MARKER, rowList, summaryLine, summaryOutputRule, type Numbered } from "./summarized-table.ts";
 import {
   goingAwayRule,
@@ -438,7 +438,8 @@ export function forcedHighlightReports(hasVendorItems: boolean): string[] {
 }
 
 /**
- * The highlights as saved: each one's going-away sign normalized (`signHighlight`), with a
+ * The highlights as saved: each one's going-away sign normalized (`signHighlight`), a report's
+ * first one signed when its page's lead bullet is, with a
  * fallback for each `forced` report the model left out: the first sentence of that report's own
  * Highlights section.
  */
@@ -450,6 +451,13 @@ export function withFallbackHighlights(
   const out = Object.fromEntries(
     Object.entries(highlights).map(([id, items]) => [id, items.map(signHighlight)]),
   );
+  // The prompt has a report's first highlight cover its page's lead bullet, so a lead signed going
+  // away keeps its sign; the model dropped it on the Polars lead (regen of 2026-10-26).
+  for (const [id, items] of Object.entries(out)) {
+    const lead = reportContents[id] ? firstHighlight(reportContents[id]) : null;
+    if (items[0] && lead?.startsWith(`${GOING_AWAY} `) && !items[0].startsWith(`${GOING_AWAY} `))
+      items[0] = `${GOING_AWAY} ${items[0]}`;
+  }
   for (const id of forced) {
     const content = reportContents[id];
     if (out[id]?.length || !content) continue;
@@ -546,7 +554,7 @@ export function buildHfSummariesPrompt(rows: Numbered<HfRow>[], dateStr: string)
     [
       m.id,
       `task: ${m.pipelineTag || "unknown"}`,
-      m.parameters !== null ? `parameters: ${formatParameters(m.parameters)}` : "",
+      m.parameters !== null ? `parameters: ${formatParameters(m.parameters, m.id)}` : "",
       license(m.tags),
     ]
       .filter(Boolean)
@@ -556,7 +564,8 @@ export function buildHfSummariesPrompt(rows: Numbered<HfRow>[], dateStr: string)
 
 ${list}
 
-${summaryLine("one sentence")}: what the model is for, from its task, size and name (e.g. "27B image-text-to-text model for visual question answering and chat.").
+${summaryLine("one sentence")}: what the model is, from its task, size, license and name only (e.g. "27B image-text-to-text model, Apache-2.0 license."). You have no model card: say nothing else about it.
+- No use the task does not name (not "style transfer" for image-to-image) and no quality or speed word ("high-quality", "sophisticated", "efficient", "powerful").
 - Never name a base model, architecture, family or version the model's name does not state.
 - No likes, download or rank figures: the table shows them.
 - If the task is unknown and the name says nothing about what the model does, write \`N: —\`.

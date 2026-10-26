@@ -154,6 +154,12 @@ describe("buildHfSummariesPrompt", () => {
     expect(p).toContain(
       "1. Qwen/Qwen3.8-27B | task: image-text-to-text | parameters: 27B | license: apache-2.0",
     );
+    expect(buildHfSummariesPrompt([{ ...row, parameters: 27.78e9 }], "2026-10-26")).toContain(
+      "parameters: 27B |",
+    );
+    expect(p).toContain("from its task, size, license and name only");
+    expect(p).toContain("You have no model card");
+    expect(p).toMatch(/no quality or speed word \("high-quality", "sophisticated", "efficient"/);
     expect(p).not.toContain("qwen3_5");
     expect(p).toContain("`N: <one sentence>`");
     expect(p).toContain("1 lines in total");
@@ -326,6 +332,31 @@ describe("withFallbackHighlights", () => {
     });
   });
 
+  it("keeps the going-away sign of a page's signed lead on the report's first highlight", () => {
+    const data = "## Highlights\n\n- − **Polars** py-2.1.0 disallows mixed arithmetic. More.\n- Other.";
+    const out = withFallbackHighlights(
+      {
+        "ai-data": ["Polars py-2.1.0 breaks mixed arithmetic", "Snowflake ships X"],
+        "ai-models": ["− Y ends", "Z"],
+      },
+      {
+        "ai-data": data,
+        "ai-models": "## Highlights\n\n- − Y ends.",
+        "ai-agents": "## Highlights\n\n- A ships.",
+      },
+      [],
+    );
+    expect(out["ai-data"]).toEqual(["− Polars py-2.1.0 breaks mixed arithmetic", "Snowflake ships X"]);
+    expect(out["ai-models"]).toEqual(["− Y ends", "Z"]);
+    expect(
+      withFallbackHighlights(
+        { "ai-agents": ["A ships"] },
+        { "ai-agents": "## Highlights\n\n- A ships." },
+        [],
+      ),
+    ).toEqual({ "ai-agents": ["A ships"] });
+  });
+
   it("forces ai-data only on a day with kept vendor items", () => {
     expect(forcedHighlightReports(false)).toEqual(["ai-policy"]);
     expect(forcedHighlightReports(true)).toEqual(["ai-policy", "ai-data"]);
@@ -411,7 +442,8 @@ describe("source fidelity rules", () => {
     expect(rules).toMatch(/No call to action/);
     expect(rules).toMatch(/X says/);
     expect(rules).toMatch(/sample size, a single run, not peer reviewed/);
-    expect(rules).toMatch(/never infer a trend from titles alone/);
+    expect(rules).toMatch(/Several items on one theme in the same period are not a trend/);
+    expect(rules).toMatch(/never titles or co-occurrence alone/);
   });
 
   it("the data Highlights ask for an action only when the row gives or requires one", () => {

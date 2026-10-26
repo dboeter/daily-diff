@@ -109,7 +109,7 @@ export const SOURCE_FIDELITY_RULES = [
   "No call to action, audience or conclusion the source does not state: never add advice such as 'audit now' or 'upgrade immediately'.",
   "A vendor's or a self-published figure is that source's claim: attribute it ('X says', 'according to X'), and never state a target or estimate as achieved. An open issue is a report ('users report'), not an established fact.",
   "A study result keeps its scope when the source gives it: sample size, a single run, not peer reviewed.",
-  "A trend or causal claim needs the rows' summaries to support it: never infer a trend from titles alone.",
+  "Several items on one theme in the same period are not a trend: a trend or causal claim needs a row summary that states it, never titles or co-occurrence alone.",
 ];
 
 /** SOURCE_FIDELITY_RULES as prompt rule lines. */

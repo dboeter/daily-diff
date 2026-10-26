@@ -176,19 +176,34 @@ export function hfReleaseRows(models: HfModel[]): HfRow[] {
   return rows.sort((a, b) => position(a) - position(b));
 }
 
-/** A parameter count as people write it: 27.4e9 → "27B", 763e9 → "763B", 4.3e8 → "430M". */
-export function formatParameters(n: number): string {
-  if (n >= 1e9) return `${Number((n / 1e9).toFixed(n >= 1e10 ? 0 : 1))}B`;
-  return `${Math.round(n / 1e6)}M`;
+/** A size a model's name states: "27B" in "Qwen/Qwen3.8-27B"; never an active count such as "A3B". */
+const NAME_SIZE = /(?<![A-Za-z0-9.])(\d+(?:\.\d+)?)([MBT])(?![A-Za-z0-9])/i;
+const SCALE: Record<string, number> = { M: 1e6, B: 1e9, T: 1e12 };
+
+/**
+ * A parameter count as people write it. The size the model's name states when it is within 10% of
+ * the count (Qwen3.8-27B counts 27.78B, and "28B" contradicted its name); else rounded down, as
+ * names are: 1.2e12 → "1.2T", 27.4e9 → "27B", 7.6e9 → "7.6B", 6e8 → "600M".
+ */
+export function formatParameters(n: number, name = ""): string {
+  const m = NAME_SIZE.exec(name.split("/").pop() ?? "");
+  if (m) {
+    const stated = Number(m[1]) * SCALE[m[2]!.toUpperCase()]!;
+    if (Math.abs(stated - n) <= 0.1 * n) return `${m[1]}${m[2]!.toUpperCase()}`;
+  }
+  const down = (x: number, digits: number) => Math.floor(x * 10 ** digits) / 10 ** digits;
+  if (n >= 1e12) return `${down(n / 1e12, 1)}T`;
+  if (n >= 1e9) return `${down(n / 1e9, n >= 1e10 ? 0 : 1)}B`;
+  return `${Math.floor(n / 1e6)}M`;
 }
 
 /**
  * What a row shows without a summary: its task and size ("Image text to text,
  * 763B parameters"); "" with neither, and then the row is never a Highlight.
  */
-export function hfDescription(m: Pick<HfModel, "pipelineTag" | "parameters">): string {
+export function hfDescription(m: Pick<HfModel, "id" | "pipelineTag" | "parameters">): string {
   const task = m.pipelineTag.replace(/-/g, " ");
-  const size = m.parameters !== null ? `${formatParameters(m.parameters)} parameters` : "";
+  const size = m.parameters !== null ? `${formatParameters(m.parameters, m.id)} parameters` : "";
   const text = [task, size].filter(Boolean).join(", ");
   return text.charAt(0).toUpperCase() + text.slice(1);
 }
