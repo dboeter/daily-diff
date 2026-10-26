@@ -201,6 +201,35 @@ const RELEVANCE_QUESTIONS = {
       false: "The paper studies models that answer in a single step without tools, and not code",
     },
   },
+  // Not weighted yet: recorded in the trace to tune a weight from. On
+  // 2026-10-26 four of ten Research papers were agents for one field (3D image
+  // annotation, investing), and about_agents_or_code scored them 0.96-0.98.
+  domain_application: {
+    type: "noul",
+    instructions:
+      "Does the paper described by `title` and `abstract` apply language models or agents to one field outside software and data engineering?",
+    criteria: {
+      true: {
+        what: "The contribution serves one specific field",
+        examples: [
+          "medical imaging",
+          "finance or investing",
+          "chemistry",
+          "optimization modeling",
+          "formal mathematics",
+        ],
+      },
+      false: {
+        what: "The contribution is general, or about code, software or data work",
+        examples: [
+          "a coding agent",
+          "an agent harness or memory method",
+          "a text-to-SQL agent",
+          "an LLM evaluation method",
+        ],
+      },
+    },
+  },
   proposes_technique: {
     type: "noul",
     instructions: "Does the paper in `abstract` propose a new technique, method, or system?",
@@ -283,6 +312,8 @@ export interface JevAnswers {
   /** `score` is the probability-weighted level (Σ level × p), between 0 and the top level. */
   about_llms: { score: number };
   about_agents_or_code: { noul: number };
+  /** Optional: absent from traces written before it was asked. */
+  domain_application?: { noul: number };
   proposes_technique: { noul: number };
   works_without_training: { noul: number };
   widely_used_models: { noul: number };
@@ -369,6 +400,7 @@ export function buildTraceFile(ranked: RankedPaper[], sources?: SourceCounts): s
         relevance: round(jev.relevance),
         about_llms: round(a.about_llms.score),
         about_agents_or_code: round(a.about_agents_or_code.noul),
+        ...(a.domain_application ? { domain_application: round(a.domain_application.noul) } : {}),
         proposes_technique: round(a.proposes_technique.noul),
         works_without_training: round(a.works_without_training.noul),
         widely_used_models: round(a.widely_used_models.noul),

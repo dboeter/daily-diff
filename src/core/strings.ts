@@ -132,8 +132,10 @@ export const TRENDS_REPORT = {
   /** Code only: 🔥 GitHub repos in no config.yml section, with the lines to add. */
   candidatesHeading: "Candidates to track",
   candidatesIntro:
-    "These repos trended two weeks in a row (🔥) and are not tracked. To track one, add its lines to `config.yml`.",
+    "These repos trended two weeks in a row (🔥) and are not tracked, by the config.yml section they fit.",
   candidatesSection: (key: string) => `\`${key}.repos\`:`,
+  candidatesNoSection: "No matching section:",
+  candidatesConfig: "config.yml lines to track one",
   modelsHeading: "Models",
   openRouterHeading: "OpenRouter usage",
   hfHeading: "Hugging Face trending",

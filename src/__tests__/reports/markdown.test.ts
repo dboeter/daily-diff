@@ -1,3 +1,4 @@
+import fs from "node:fs";
 import { describe, expect, it } from "vitest";
 import type { GitHubRelease } from "../../core/github.ts";
 import { MSG, TRENDS_REPORT } from "../../core/strings.ts";
@@ -380,7 +381,7 @@ describe("renderTrendingTables", () => {
 describe("renderCandidates", () => {
   const tracked = [{ id: "claude-code", repo: "anthropics/claude-code", name: "Claude Code" }];
 
-  it("lists the 🔥 repos in no config.yml section by the section they would join, with their config lines", () => {
+  it("links the 🔥 repos in no config.yml section by the section their category fits, config lines collapsed", () => {
     const md = renderCandidates(
       [
         { fullName: "Org/Fast-Agent", category: "coding_agent" },
@@ -393,17 +394,35 @@ describe("renderCandidates", () => {
     );
     expect(md).toBe(
       `## ${TRENDS_REPORT.candidatesHeading}\n\n${TRENDS_REPORT.candidatesIntro}\n\n` +
+        "- `agents.repos`: [Org/Fast-Agent](https://github.com/Org/Fast-Agent)\n" +
+        "- `infra.repos`: [o/tool](https://github.com/o/tool)\n" +
+        `- ${TRENDS_REPORT.candidatesNoSection} [o/mux](https://github.com/o/mux), [o/jobs](https://github.com/o/jobs)\n\n` +
+        `<details><summary>${TRENDS_REPORT.candidatesConfig}</summary>\n\n` +
         "`agents.repos`:\n\n```yaml\n    - id: fast-agent\n      repo: Org/Fast-Agent\n      name: Fast-Agent\n```\n\n" +
-        "`infra.repos`:\n\n```yaml\n    - id: mux\n      repo: o/mux\n      name: mux\n" +
-        "    - id: tool\n      repo: o/tool\n      name: tool\n```",
+        "`infra.repos`:\n\n```yaml\n    - id: tool\n      repo: o/tool\n      name: tool\n```\n\n</details>",
     );
   });
 
-  it("is empty when every 🔥 repo is tracked or an Other Agent, or there are none", () => {
+  it("files the 2026-10-26 harnesses and multi-agent systems under no section, not infra.repos", () => {
+    const candidates = JSON.parse(
+      fs.readFileSync(new URL("../fixtures/candidates-2026-10-26.json", import.meta.url), "utf-8"),
+    ) as Parameters<typeof renderCandidates>[0];
+    const lines = renderCandidates(candidates, tracked).split("\n");
+    const infra = lines.find((l) => l.startsWith("- `infra.repos`:")) ?? "";
+    const none = lines.find((l) => l.startsWith(`- ${TRENDS_REPORT.candidatesNoSection}`)) ?? "";
+    for (const r of ["ruvnet/ruflo", "paperclipai/paperclip", "alibaba/open-code-review", "DSH-APP/DSHA"]) {
+      expect(infra).not.toContain(r);
+      expect(none).toContain(r);
+    }
+  });
+
+  it("has no config lines when only unmatched repos remain, and is empty when every 🔥 repo is tracked", () => {
+    const md = renderCandidates([{ fullName: "o/jobs", category: "other_agent" }], tracked);
+    expect(md).toContain(`- ${TRENDS_REPORT.candidatesNoSection} [o/jobs]`);
+    expect(md).not.toContain("<details>");
     expect(
       renderCandidates([{ fullName: "anthropics/claude-code", category: "coding_agent" }], tracked),
     ).toBe("");
-    expect(renderCandidates([{ fullName: "o/jobs", category: "other_agent" }], tracked)).toBe("");
     expect(renderCandidates([], tracked)).toBe("");
   });
 });

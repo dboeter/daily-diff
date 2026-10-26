@@ -617,21 +617,21 @@ export function renderResearchTable(
 }
 
 /**
- * The config.yml section a trending category would join, as promotion did
- * until October 2026: Other Agents (a job-search bot, a vulnerability scanner
- * on 2026-10-19) joins none.
+ * The config.yml section a trending category fits. `infra` is sandboxes,
+ * session multiplexers and context tools, so harnesses, frameworks and
+ * multi-agent systems (ruflo, paperclip on 2026-10-26) fit none, nor do Other
+ * Agents (a job-search bot, a vulnerability scanner on 2026-10-19).
  */
 const CANDIDATE_SECTION: Partial<Record<Category, AgentSectionKey>> = {
   coding_agent: "agents",
-  harness_framework: "infra",
-  multi_agent: "infra",
   agent_tooling: "infra",
 };
 
 /**
  * Trends' Candidates to track: the 🔥 GitHub repos in no config.yml section
- * (`tracked`, compared case-insensitively), grouped by the section they would
- * join, each with its entry in config.yml's format. Empty when there are none.
+ * (`tracked`, compared case-insensitively), linked and grouped by the section
+ * their category fits, then those that fit none. The config.yml lines are for
+ * the maintainer, so they sit collapsed below. Empty when there are none.
  */
 export function renderCandidates(
   candidates: { fullName: string; category: Category }[],
@@ -639,23 +639,32 @@ export function renderCandidates(
 ): string {
   const T = TRENDS_REPORT;
   const known = new Set(tracked.map((r) => r.repo.toLowerCase()));
-  const groups = AGENT_SECTION_KEYS.map((key) => {
-    const repos = [
-      ...new Set(
-        candidates
-          .filter((c) => CANDIDATE_SECTION[c.category] === key && !known.has(c.fullName.toLowerCase()))
-          .map((c) => c.fullName),
-      ),
-    ];
-    if (!repos.length) return "";
-    const entries = repos.map((repo) => {
+  const fresh = candidates.filter((c) => !known.has(c.fullName.toLowerCase()));
+  const reposOf = (key: AgentSectionKey | undefined) => [
+    ...new Set(fresh.filter((c) => CANDIDATE_SECTION[c.category] === key).map((c) => c.fullName)),
+  ];
+  const links = (repos: string[]) => repos.map((r) => `[${r}](https://github.com/${r})`).join(", ");
+  const groups = AGENT_SECTION_KEYS.map((key) => ({ key, repos: reposOf(key) })).filter(
+    (g) => g.repos.length,
+  );
+  const unmatched = reposOf(undefined);
+  if (!groups.length && !unmatched.length) return "";
+  const list = [
+    ...groups.map((g) => `- ${T.candidatesSection(g.key)} ${links(g.repos)}`),
+    ...(unmatched.length ? [`- ${T.candidatesNoSection} ${links(unmatched)}`] : []),
+  ].join("\n");
+  const yaml = groups.map((g) => {
+    const entries = g.repos.map((repo) => {
       const name = repo.split("/")[1] ?? repo;
       return `    - id: ${name.toLowerCase()}\n      repo: ${repo}\n      name: ${name}`;
     });
-    return `${T.candidatesSection(key)}\n\n\`\`\`yaml\n${entries.join("\n")}\n\`\`\``;
-  }).filter(Boolean);
-  if (!groups.length) return "";
-  return `## ${T.candidatesHeading}\n\n${T.candidatesIntro}\n\n${groups.join("\n\n")}`;
+    return `${T.candidatesSection(g.key)}\n\n\`\`\`yaml\n${entries.join("\n")}\n\`\`\``;
+  });
+  // The blank line after </summary> lets the Markdown inside <details> render.
+  const details = yaml.length
+    ? `\n\n<details><summary>${T.candidatesConfig}</summary>\n\n${yaml.join("\n\n")}\n\n</details>`
+    : "";
+  return `## ${T.candidatesHeading}\n\n${T.candidatesIntro}\n\n${list}${details}`;
 }
 
 /** The models page's Lab announcements rows, each summary by its own number (else the page text, truncated, or "—"). */

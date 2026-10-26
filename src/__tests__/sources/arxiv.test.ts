@@ -217,6 +217,17 @@ describe("Jev relevance ranking", () => {
       },
     ]);
   });
+
+  it("traces domain_application without weighing it", () => {
+    const base = answers(2, 0.98, 1, 1);
+    const withDomain = { ...base, domain_application: { noul: 0.97 } };
+    expect(relevanceOf(withDomain, false)).toBe(relevanceOf(base, false));
+    const file = JSON.parse(
+      buildTraceFile([{ paper: paper("a"), jev: { ...jev(0.9), answers: withDomain } }]),
+    );
+    expect(file.papers[0].domain_application).toBe(0.97);
+    expect(file.weights.domain_application).toBeUndefined();
+  });
 });
 
 describe("ArXiv pool cutoff", () => {
