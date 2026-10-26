@@ -175,7 +175,7 @@ describe("hasActivity", () => {
   it("is true for a release, a previewed prerelease, a hot issue or a news item", () => {
     expect(hasActivity(makeActivity({ releases: [release] }))).toBe(true);
     expect(hasActivity(makeActivity({ previews: [{ ...release, prerelease: true }] }))).toBe(true);
-    expect(hasActivity(makeActivity({ hotIssues: [makeItem()] }))).toBe(true);
+    expect(hasActivity(makeActivity({ hotIssues: [{ ...makeItem(), gain: 12 }] }))).toBe(true);
     expect(
       hasActivity(makeActivity({ news: [{ source: "Hacker News", title: "t", url: "u", detail: "d" }] })),
     ).toBe(true);
@@ -188,7 +188,7 @@ describe("buildProjectDigestPrompt", () => {
       [
         makeActivity({
           releases: [release],
-          hotIssues: [makeItem({ title: "Crash on start" })],
+          hotIssues: [{ ...makeItem({ title: "Crash on start" }), gain: 14 }],
           news: [{ source: "Hacker News", title: "TestTool 1.0", url: "https://hn/1", detail: "9 points" }],
         }),
       ],
@@ -199,6 +199,7 @@ describe("buildProjectDigestPrompt", () => {
     expect(prompt).toContain("https://github.com/org/test/releases/tag/v1.0.0");
     expect(prompt).toContain("Release notes");
     expect(prompt).toContain("Crash on start");
+    expect(prompt).toContain("Gained: +14 comments and 👍 in the last 24h");
     expect(prompt).toContain("[Hacker News] TestTool 1.0 — https://hn/1 (9 points)");
     expect(prompt).toContain("2026-10-04 (last 24h)");
     expect(prompt).toContain("AI coding agents");

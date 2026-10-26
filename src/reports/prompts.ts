@@ -2,9 +2,9 @@
  * LLM prompt builders and item formatting.
  */
 
-import type { RepoConfig, GitHubItem, GitHubRelease } from "../core/github.ts";
+import type { RepoConfig, GitHubItem, GitHubRelease, HotIssue } from "../core/github.ts";
 import type { NewsItem } from "./project-news.ts";
-import { GOING_AWAY, SECTIONS } from "../core/strings.ts";
+import { GOING_AWAY, hotIssueGain, SECTIONS } from "../core/strings.ts";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -22,7 +22,7 @@ export interface ProjectActivity {
   previews: GitHubRelease[];
   /** Nightlies, alphas, RCs not in `previews` — counted in the report header, never sent to the model. */
   prereleaseCount: number;
-  hotIssues: GitHubItem[];
+  hotIssues: HotIssue[];
   news: NewsItem[];
   /** The release fetch failed: the project could not be checked, so it is neither active nor quiet. */
   fetchFailed?: boolean;
@@ -250,7 +250,7 @@ function formatProject(a: ProjectActivity): string {
     ? `\n\n### Prereleases (no stable release yet)\n` +
       a.previews.map((r) => formatRelease(r, cfg.repo, releaseNotes(r.body, PREVIEW_BODY_CHARS))).join("\n")
     : "";
-  const issues = a.hotIssues.map((i) => formatItem(i)).join("\n") || "None";
+  const issues = a.hotIssues.map((i) => `${formatItem(i)}\n  ${hotIssueGain(i.gain)}`).join("\n") || "None";
   const news =
     a.news
       .map(

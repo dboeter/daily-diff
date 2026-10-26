@@ -195,10 +195,11 @@ export function isPrerelease(r: GitHubRelease): boolean {
 }
 
 /**
- * Minimum comments + 👍 for an issue to count as hot. Measured 2026-10-04 on
- * the issues opened in the previous week: the ones worth reporting (Claude
- * Code auto-mode classifier failures, Codex Remote pairing loops, OpenCode
- * free-tier errors) sat at 11–98, routine bug reports at 0–9.
+ * Minimum comments + 👍 gained in the window for an issue to count as hot.
+ * Measured 2026-10-04 on the totals of the issues opened in the previous week:
+ * the ones worth reporting (Claude Code auto-mode classifier failures, Codex
+ * Remote pairing loops, OpenCode free-tier errors) sat at 11–98, routine bug
+ * reports at 0–9. A one-day-old issue's total is its gain, so the bar carried over.
  */
 export const HOT_ISSUE_MIN_ENGAGEMENT = 10;
 /**
@@ -209,15 +210,34 @@ export const HOT_ISSUE_MIN_ENGAGEMENT = 10;
 export const HOT_ISSUE_MIN_ENGAGEMENT_LABELLED = 3;
 /** Hot issues reported per repo, so one noisy tracker cannot flood the report. */
 export const HOT_ISSUES_PER_REPO = 2;
+/**
+ * Candidates per repo whose gain is fetched (1–3 core REST calls each), highest
+ * total first. Bounds a run's extra calls: the Actions GITHUB_TOKEN allows
+ * 1,000 core requests an hour.
+ */
+export const HOT_ISSUE_MAX_CHECKED = 10;
 /** Matched against each label name, so "area:security" and "type: regression" count. */
 const HOT_LABEL = /regression|security/i;
 export function issueEngagement(i: GitHubItem): number {
   return i.comments + (i.reactions?.["+1"] ?? 0);
 }
 
-function isHot(i: GitHubItem): boolean {
-  const labelled = i.labels.some((l) => HOT_LABEL.test(l.name));
-  return issueEngagement(i) >= (labelled ? HOT_ISSUE_MIN_ENGAGEMENT_LABELLED : HOT_ISSUE_MIN_ENGAGEMENT);
+/** The engagement an issue needs to be hot: lower with a regression or security label. */
+function hotIssueBar(i: GitHubItem): number {
+  return i.labels.some((l) => HOT_LABEL.test(l.name))
+    ? HOT_ISSUE_MIN_ENGAGEMENT_LABELLED
+    : HOT_ISSUE_MIN_ENGAGEMENT;
+}
+
+/** A hot issue with `gain`: its comments + 👍 created in the report window. */
+export interface HotIssue extends GitHubItem {
+  gain: number;
+}
+
+/** An issue's comments and 👍 reactions, as far as fetched; only `created_at` is read. */
+export interface IssueActivity {
+  comments: { created_at: string }[];
+  thumbs: { created_at: string }[];
 }
 
 /** `digests/hot-issues-state.json`: the hot issues a page showed, a `ReportedState` of `hotIssueStateItem`s. */
@@ -242,32 +262,93 @@ export function isRepeatHotIssue(
 }
 
 /**
- * Pick the hot issues from a list: open, past the engagement bar, whenever
- * opened, and not shown on an earlier day (`isRepeat`). Highest engagement
- * first, capped at HOT_ISSUES_PER_REPO after the repeats are dropped.
+ * The issues worth counting the gain of: open, not shown on an earlier day
+ * (`isRepeat`), and with a total over the bar, since the gain cannot exceed
+ * the total. Highest total first, at most HOT_ISSUE_MAX_CHECKED.
  */
-export function selectHotIssues(
+export function hotIssueCandidates(
   items: GitHubItem[],
   isRepeat: (i: GitHubItem) => boolean = () => false,
 ): GitHubItem[] {
   return items
-    .filter((i) => !i.pull_request && i.state === "open" && isHot(i) && !isRepeat(i))
+    .filter(
+      (i) => !i.pull_request && i.state === "open" && issueEngagement(i) >= hotIssueBar(i) && !isRepeat(i),
+    )
     .sort((a, b) => issueEngagement(b) - issueEngagement(a))
-    .slice(0, HOT_ISSUES_PER_REPO);
+    .slice(0, HOT_ISSUE_MAX_CHECKED);
+}
+
+/** Comments and 👍 created at or after `since`; an edited older comment does not count. */
+export function engagementGained(activity: IssueActivity, since: Date): number {
+  const isNew = (x: { created_at: string }) => new Date(x.created_at) >= since;
+  return activity.comments.filter(isNew).length + activity.thumbs.filter(isNew).length;
 }
 
 /**
- * Hot issues for a repo, in one request: the 50 most-engaged open issues with
- * activity since `since`, however old, via the search API.
- *
- * Paced by searchSlot. A failure should still be treated as "no hot issues",
- * not a failed repo.
+ * Pick the hot issues: gained engagement over the bar since `since`, whenever
+ * opened. Highest gain first, capped at HOT_ISSUES_PER_REPO.
+ */
+export function selectHotIssues(
+  checked: { issue: GitHubItem; activity: IssueActivity }[],
+  since: Date,
+): HotIssue[] {
+  return checked
+    .map(({ issue, activity }) => ({ ...issue, gain: engagementGained(activity, since) }))
+    .filter((i) => i.gain >= hotIssueBar(i))
+    .sort((a, b) => b.gain - a.gain)
+    .slice(0, HOT_ISSUES_PER_REPO);
+}
+
+const ACTIVITY_PAGE = 100;
+
+/**
+ * An issue's comments and 👍 that may be new since `since`, in 0–3 core calls.
+ * Comments: `since` filters on updated_at, so edited old comments come back
+ * too (engagementGained drops them); one page, oldest first. Reactions have
+ * no `since` and come oldest first: past one page, the last page holds the
+ * newest, and when all of a short last page is new the page before is read too.
+ * Over 100 new of either the count is low, but far past the bar.
+ */
+async function fetchIssueActivity(repo: string, i: GitHubItem, since: Date): Promise<IssueActivity> {
+  const base = `https://api.github.com/repos/${repo}/issues/${i.number}`;
+  const perPage = String(ACTIVITY_PAGE);
+  const comments =
+    i.comments > 0
+      ? await githubGet<{ created_at: string }[]>(`${base}/comments`, {
+          since: since.toISOString(),
+          per_page: perPage,
+        })
+      : [];
+  const totalThumbs = i.reactions?.["+1"] ?? 0;
+  const thumbsPage = (page: number) =>
+    githubGet<{ created_at: string }[]>(`${base}/reactions`, {
+      content: "+1",
+      per_page: perPage,
+      page: String(page),
+    });
+  let thumbs: { created_at: string }[] = [];
+  if (totalThumbs > 0) {
+    const last = Math.ceil(totalThumbs / ACTIVITY_PAGE);
+    thumbs = await thumbsPage(last);
+    if (last > 1 && thumbs.every((r) => new Date(r.created_at) >= since)) {
+      thumbs = [...(await thumbsPage(last - 1)), ...thumbs];
+    }
+  }
+  return { comments, thumbs };
+}
+
+/**
+ * Hot issues for a repo: one search for the 50 most-engaged open issues with
+ * activity since `since`, however old (paced by searchSlot), then the gain of
+ * up to HOT_ISSUE_MAX_CHECKED candidates (core calls, one issue at a time).
+ * A failed gain fetch skips that issue; a failed search should still be
+ * treated as "no hot issues", not a failed repo.
  */
 export async function fetchHotIssues(
   repo: string,
   since: Date,
   isRepeat?: (i: GitHubItem) => boolean,
-): Promise<GitHubItem[]> {
+): Promise<HotIssue[]> {
   const result = await githubGet<{ items: GitHubItem[] }>(
     "https://api.github.com/search/issues",
     {
@@ -279,7 +360,15 @@ export async function fetchHotIssues(
     },
     searchSlot,
   );
-  return selectHotIssues(result.items, isRepeat);
+  const checked: { issue: GitHubItem; activity: IssueActivity }[] = [];
+  for (const issue of hotIssueCandidates(result.items, isRepeat)) {
+    try {
+      checked.push({ issue, activity: await fetchIssueActivity(repo, issue, since) });
+    } catch (err) {
+      console.error(`  [github] ${repo}#${issue.number} engagement fetch failed, skipped: ${err}`);
+    }
+  }
+  return selectHotIssues(checked, since);
 }
 
 /** One `stargazers/history` bucket: a calendar week from Sunday, newest bucket first. */

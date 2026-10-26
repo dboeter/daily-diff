@@ -11,6 +11,7 @@
 
 import {
   type GitHubItem,
+  type HotIssue,
   type RepoConfig,
   fetchRecentReleases,
   fetchHotIssues,
@@ -178,7 +179,7 @@ async function fetchProject(
       })),
       // Search API, rate-limited separately from releases: a failure here must
       // not discard the releases.
-      fetchHotIssues(cfg.repo, since, hotRepeat(cfg.repo)).catch((err): GitHubItem[] => {
+      fetchHotIssues(cfg.repo, since, hotRepeat(cfg.repo)).catch((err): HotIssue[] => {
         console.error(`  [${cfg.id}] hot issues fetch failed: ${err}`);
         return [];
       }),

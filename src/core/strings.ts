@@ -65,6 +65,10 @@ export const reportIssueTitle = (id: ReportId, dateStr: string) =>
  */
 export const PROJECT_SCOPE = { window: "last 24h", period: "today" } as const;
 
+/** A hot issue's engagement gained in the window (`selectHotIssues`), next to its totals in the prompt. */
+export const hotIssueGain = (gain: number) =>
+  `Gained: +${gain} comments and 👍 in the ${PROJECT_SCOPE.window}`;
+
 const SOURCES = "Sources:";
 const generated = (utcStr: string) => `Generated: ${utcStr} UTC`;
 
