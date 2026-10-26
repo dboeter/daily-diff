@@ -7,11 +7,14 @@ import {
   fetchWeeklyStarGain,
   gainFromHistory,
   GitHubApiError,
+  hotIssueStateItem,
   isPrerelease,
+  isRepeatHotIssue,
   selectHotIssues,
   type GitHubItem,
   type GitHubRelease,
 } from "../../core/github.ts";
+import { nextReportedState } from "../../core/report-state.ts";
 
 const SINCE = new Date("2026-10-03T22:37:00Z");
 
@@ -65,11 +68,12 @@ function issue(o: {
   thumbs?: number;
   labels?: string[];
   isPr?: boolean;
+  state?: string;
 }): GitHubItem {
   return {
     number: o.number,
     title: `Issue ${o.number}`,
-    state: "open",
+    state: o.state ?? "open",
     user: { login: "alice" },
     labels: (o.labels ?? []).map((name) => ({ name })),
     created_at: o.created_at ?? "2026-10-04T01:00:00Z",
@@ -128,6 +132,48 @@ describe("selectHotIssues", () => {
   });
 });
 
+describe("hot issue repeats", () => {
+  // OpenCode #58781 and #58670: shown on 2026-10-25, shown again word for word on 10-26 though
+  // both were closed "not planned" on 10-25.
+  const REPO = "anomalyco/opencode";
+  const WINDOW = new Date("2026-10-24T00:00:00Z");
+  const opencode = (n: number, o: { comments?: number; labels?: string[]; state?: string } = {}) =>
+    issue({ number: n, created_at: "2026-10-24T10:00:00Z", comments: o.comments ?? 20, ...o });
+  const shown25 = nextReportedState(
+    null,
+    [opencode(58781), opencode(58670)].map((i) => hotIssueStateItem(REPO, i)),
+    "2026-10-25",
+  );
+  const pick = (items: GitHubItem[], dateStr = "2026-10-26") =>
+    selectHotIssues(items, WINDOW, isRepeatHotIssue(shown25, dateStr, REPO)).map((i) => i.number);
+
+  it("drops a closed issue, however hot", () => {
+    expect(selectHotIssues([opencode(58781, { state: "closed", comments: 90 })], WINDOW)).toEqual([]);
+  });
+
+  it("skips an issue an earlier day showed unchanged, or with a few more comments", () => {
+    expect(pick([opencode(58781), opencode(58670, { comments: 25 })])).toEqual([]);
+  });
+
+  it("shows it again once its engagement doubles or it gains a regression/security label", () => {
+    expect(pick([opencode(58781, { comments: 40 }), opencode(58670, { labels: ["regression"] })])).toEqual([
+      58781, 58670,
+    ]);
+  });
+
+  it("ignores labels other than regression/security", () => {
+    expect(pick([opencode(58781, { labels: ["needs-triage"] })])).toEqual([]);
+  });
+
+  it("keeps it on a same-day re-run", () => {
+    expect(pick([opencode(58781)], "2026-10-25")).toEqual([58781]);
+  });
+
+  it("lets a skipped repeat free its slot for the next hot issue", () => {
+    expect(pick([opencode(58781), opencode(58670), opencode(1, { comments: 11 })])).toEqual([1]);
+  });
+});
+
 describe("fetchHotIssues", () => {
   function mockSearch(items: GitHubItem[]) {
     return vi.spyOn(globalThis, "fetch").mockResolvedValue({
@@ -146,7 +192,7 @@ describe("fetchHotIssues", () => {
 
     const url = new URL(String(fetchSpy.mock.calls[0]![0]));
     expect(url.pathname).toBe("/search/issues");
-    expect(url.searchParams.get("q")).toBe("repo:org/repo is:issue created:>=2026-09-27T22:37:00Z");
+    expect(url.searchParams.get("q")).toBe("repo:org/repo is:issue is:open created:>=2026-09-27T22:37:00Z");
     expect(url.searchParams.get("sort")).toBe("comments");
     expect(hot.map((i) => i.number)).toEqual([7]);
     vi.useRealTimers();

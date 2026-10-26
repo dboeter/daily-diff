@@ -14,6 +14,9 @@ import {
   type RepoConfig,
   fetchRecentReleases,
   fetchHotIssues,
+  HOT_ISSUES_STATE_FILE,
+  hotIssueStateItem,
+  isRepeatHotIssue,
   isPrerelease,
   type GitHubRelease,
   fetchSkillsData,
@@ -90,6 +93,7 @@ import {
   type SpottedPage,
 } from "./spotted/pool.ts";
 import { sourceCounts, type DroppedReason } from "./core/jev.ts";
+import { loadReportedState, nextReportedState, saveReportedState } from "./core/report-state.ts";
 import {
   loadSpottedVerdicts,
   routeStories,
@@ -156,8 +160,14 @@ async function withAnnouncement(r: GitHubRelease): Promise<GitHubRelease> {
 /**
  * Stable releases and hot issues for one project. A failed release fetch is `fetchFailed`, shown as unavailable.
  * `weekSince` (the data report): also the stable releases since then, as `weekReleases`, from the same request.
+ * `hotRepeat`: the repo's hot issues an earlier day showed unchanged (`isRepeatHotIssue`), left out.
  */
-async function fetchProject(cfg: RepoConfig, since: Date, weekSince?: Date): Promise<ProjectFetch> {
+async function fetchProject(
+  cfg: RepoConfig,
+  since: Date,
+  hotRepeat: (repo: string) => (i: GitHubItem) => boolean,
+  weekSince?: Date,
+): Promise<ProjectFetch> {
   try {
     const [{ recent, noStableYet }, hotIssues] = await Promise.all([
       fetchRecentReleases(cfg.repo, weekSince ?? since).then(async (r) => ({
@@ -166,7 +176,7 @@ async function fetchProject(cfg: RepoConfig, since: Date, weekSince?: Date): Pro
       })),
       // Search API, rate-limited separately from releases: a failure here must
       // not discard the releases.
-      fetchHotIssues(cfg.repo, since).catch((err): GitHubItem[] => {
+      fetchHotIssues(cfg.repo, since, hotRepeat(cfg.repo)).catch((err): GitHubItem[] => {
         console.error(`  [${cfg.id}] hot issues fetch failed: ${err}`);
         return [];
       }),
@@ -198,6 +208,7 @@ async function fetchAllData(
   weekly: boolean,
   /** A Hacker News story out of the Spotted pool: a page showed it or a copy of its link (`isFresh`). */
   hnShown: (story: HnStory) => boolean,
+  hotRepeat: (repo: string) => (i: GitHubItem) => boolean,
 ): Promise<{
   agentFetches: ProjectFetch[];
   infraFetches: ProjectFetch[];
@@ -241,10 +252,12 @@ async function fetchAllData(
     lobstersData,
     modelCatalog,
   ] = await Promise.all([
-    Promise.all(AGENTS.map((cfg) => fetchProject(cfg, daySince))),
-    Promise.all(INFRA_REPOS.map((cfg) => fetchProject(cfg, daySince))),
+    Promise.all(AGENTS.map((cfg) => fetchProject(cfg, daySince, hotRepeat))),
+    Promise.all(INFRA_REPOS.map((cfg) => fetchProject(cfg, daySince, hotRepeat))),
     Promise.all(
-      DATA_SECTIONS.map((s) => Promise.all(s.repos.map((cfg) => fetchProject(cfg, daySince, weekSince)))),
+      DATA_SECTIONS.map((s) =>
+        Promise.all(s.repos.map((cfg) => fetchProject(cfg, daySince, hotRepeat, weekSince))),
+      ),
     ),
     // No fetcher here throws: each returns its empty value (fetchSuccess false) on a failure.
     weekly ? fetchSkillsData(CLAUDE_SKILLS_REPO) : Promise.resolve(noSkills),
@@ -340,6 +353,7 @@ async function main(): Promise<void> {
   // Before the fetch: HN's cut counts only the stories no page has shown.
   const spottedLog = loadSpottedLog();
   const inPool = isFresh(spottedLog, dateStr);
+  const hotIssuesState = loadReportedState(HOT_ISSUES_STATE_FILE);
   const {
     agentFetches,
     infraFetches,
@@ -355,7 +369,13 @@ async function main(): Promise<void> {
     devtoData,
     lobstersData,
     modelCatalog,
-  } = await fetchAllData(now, labsState, weekly, (s) => !inPool({ id: `hn:${s.id}`, url: s.url }));
+  } = await fetchAllData(
+    now,
+    labsState,
+    weekly,
+    (s) => !inPool({ id: `hn:${s.id}`, url: s.url }),
+    (repo) => isRepeatHotIssue(hotIssuesState, dateStr, repo),
+  );
   const stories = storiesFrom(hnData, lobstersData, devtoData);
   const fresh = freshStories(
     [...stories, ...carriedStories(spottedLog, stories, dateStr)],
@@ -555,6 +575,14 @@ async function main(): Promise<void> {
   const shownIds = [...dailyShown, ...(savedIds.has("ai-trends") ? discussed.map((s) => s.id) : [])];
   const cutIds = [...spottedDropped].flatMap(([id, reason]) => (reason === "cap" ? [id] : []));
   saveSpottedLog(nextLog(spottedLog, stories, shownIds, dateStr, cutIds));
+  saveReportedState(
+    nextReportedState(
+      hotIssuesState,
+      pageActivities.flatMap((a) => a.hotIssues.map((i) => hotIssueStateItem(a.config.repo, i))),
+      dateStr,
+    ),
+    HOT_ISSUES_STATE_FILE,
+  );
   if (routing.judgment.nextCache) saveSpottedVerdicts(routing.judgment.nextCache);
   console.log(
     `  Saved ${saveFile(

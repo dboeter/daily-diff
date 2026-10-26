@@ -70,7 +70,7 @@ With `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID` set, each run sends a Telegram 
 
 ## Tracked repos
 
-Each tracked repo is covered by its stable releases of the last 24h (prereleases are only counted, unless the project has never shipped a stable release), hot issues (opened in the last 48h with 10+ comments and 👍, 3+ when labelled regression or security; at most 2) and news (a community story or its own GitHub Trending entry naming it; a story naming three or more agents is a compatibility list and skipped). Projects with none of these are listed in one "Quiet today" line. Only the repos below are tracked: trending repos are suggested under the Trends page's Candidates to track, never added automatically.
+Each tracked repo is covered by its stable releases of the last 24h (prereleases are only counted, unless the project has never shipped a stable release), hot issues (open, opened in the last 48h with 10+ comments and 👍, 3+ when labelled regression or security; at most 2; one an earlier day showed returns only once its engagement doubles or it gains such a label) and news (a community story or its own GitHub Trending entry naming it; a story naming three or more agents is a compatibility list and skipped). Projects with none of these are listed in one "Quiet today" line. Only the repos below are tracked: trending repos are suggested under the Trends page's Candidates to track, never added automatically.
 
 ### AI Agents
 

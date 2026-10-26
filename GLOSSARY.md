@@ -83,7 +83,7 @@ A nightly, alpha, beta, release candidate, preview or canary build, whatever its
 _Avoid_: Release, preview
 
 **Hot Issue**:
-An issue on a Tracked Project's repo with real engagement (comments plus 👍), or less engagement on a regression or security issue, however old.
+An open issue on a Tracked Project's repo with real engagement (comments plus 👍), or less engagement on a regression or security issue, however old.
 
 **News Item**:
 A community story (Hacker News, Lobste.rs, Dev.to) that names a Tracked Project, or a Tracked Project's own repo on GitHub Trending. Lab posts are not News Items.
