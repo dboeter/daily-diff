@@ -111,6 +111,8 @@ describe("selectVendorItems", () => {
     );
     expect(sel.items.map((i) => i.id)).toEqual(["dep", "high", "low", "bcr"]);
     expect(sel.items.map((i) => i.deprecation)).toEqual([true, false, false, true]);
+    // Significance under "Notable" (1) marks a non-deprecation minor: no Highlight. A deprecation never is.
+    expect(sel.items.map((i) => i.minor ?? false)).toEqual([false, false, true, false]);
     expect(sel.rankedBy).toBe("jev");
     expect(ask).toHaveBeenCalledTimes(4);
     expect(sel.nextVerdicts?.items["high"]).toMatchObject({

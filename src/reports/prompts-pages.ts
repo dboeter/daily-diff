@@ -13,6 +13,7 @@ import { DATA_REPORT, MODELS_PAGE, MSG, SECTIONS, SPOTTED, TRENDS_REPORT } from 
 import { TABLES_MARKER, rowList, summaryLine, summaryOutputRule, type Numbered } from "./summarized-table.ts";
 import {
   goingAwayRule,
+  HIGHLIGHTS_PICK_RULE,
   NO_TITLE_RULE,
   RELEASE_BODY_CHARS,
   releaseNotes,
@@ -71,13 +72,13 @@ ${pageMd || "(The page has no sections this week.)"}
 
 Write only these parts, in this order:
 
-1. \`## ${SECTIONS.highlights}\` — 3-5 bullets on the most noteworthy items of the week, across the page's sections.
+1. \`## ${SECTIONS.highlights}\` — 1-3 bullets on the most noteworthy items of the week for a data or AI engineer, most relevant first, across the page's sections.
 2. The line \`${TABLES_MARKER}\` exactly once, on its own line. The page is inserted there.
 3. \`## ${SECTIONS.signals}\` — 200-300 words: patterns across the week's tables, such as which kinds of agent or coding tool are getting attention, which model families lead usage, and which research directions recur. This is the one place for trend claims: each must rest on two or more rows whose summaries (not only titles) support it, and names them.
 
 Rules:
 - ${NO_TITLE_RULE}
-- In ${SECTIONS.highlights}: ${goingAwayRule("bullet")}
+- In ${SECTIONS.highlights}: ${goingAwayRule("bullet")} ${HIGHLIGHTS_PICK_RULE}
 - Do not reproduce or alter the tables, and write no other sections.
 - Base every claim on the page. It shows descriptions, summaries and counts only, so do not describe releases, adoption or community reactions it does not show.
 - Mention only items that appear on the page, and link every item you mention.
@@ -305,9 +306,14 @@ ${summaryOutputRule(count)}
  * change means for clients (the tables already say what changed); Across
  * platforms compares one capability across vendors, or is left out.
  */
-export function buildDataProsePrompt(sectionsMd: string, dateStr: string): string {
+export function buildDataProsePrompt(
+  sectionsMd: string,
+  dateStr: string,
+  /** Kept vendor rows under "Notable" significance (`minor`): in the tables, never a Highlight. */
+  minorTitles: string[] = [],
+): string {
   const parts = [
-    `\`## ${SECTIONS.highlights}\` — 3-5 bullets, the most consequential changes today, deprecations, retirements and breaking changes first. Each bullet says who is affected (which client setup: e.g. Azure Databricks workspaces with the compliance security profile, Snowflake Native App providers, BigQuery users of AI functions), what to do when the row says or its change requires it (enable, migrate, test, plan for) and by when, if the row gives a date.`,
+    `\`## ${SECTIONS.highlights}\` — 1-3 bullets, the most consequential changes today, deprecations, retirements and breaking changes first. Each bullet says who is affected (which client setup: e.g. Azure Databricks workspaces with the compliance security profile, Snowflake Native App providers, BigQuery users of AI functions), what to do when the row says or its change requires it (enable, migrate, test, plan for) and by when, if the row gives a date.`,
     `The line \`${TABLES_MARKER}\` exactly once, on its own line. The sections are inserted there.`,
     `\`## ${DATA_REPORT.acrossPlatforms}\` — 0-3 bullets, each one capability that moved on two or more platforms in the rows above (e.g. governance tagging on Snowflake and Databricks, AI functions in SQL on BigQuery and Snowflake), saying how they differ: GA or preview, which clouds, what each covers. Only rows in the sections count; say nothing about features they do not show. Leave this heading out when no capability moved on two platforms: no padding.`,
   ];
@@ -325,8 +331,8 @@ ${parts.map((p, i) => `${i + 1}. ${p}`).join("\n")}
 
 Rules:
 - ${NO_TITLE_RULE}
-- In ${SECTIONS.highlights}: ${goingAwayRule("bullet")}
-- Length: at most ~200 words for ${SECTIONS.highlights}, ~120 for ${DATA_REPORT.acrossPlatforms}.
+- In ${SECTIONS.highlights}: ${goingAwayRule("bullet")} ${HIGHLIGHTS_PICK_RULE}${minorTitles.length ? `\n- These rows are minor: no Highlight for them. ${minorTitles.map((t) => `"${t}"`).join(", ")}` : ""}
+- Length: at most ~150 words for ${SECTIONS.highlights}, ~120 for ${DATA_REPORT.acrossPlatforms}.
 - A major release in ${DATA_REPORT.releasesHeading} (a version x.0.0, or one whose summary names breaking changes) is a Highlights candidate: say who must test or migrate.
 - Never restate a row: the reader sees the tables right below. A bullet that only says what changed, without who is affected and what to do, is left out.
 - Write no links, URLs or other sections; name each item as the sections do. Dates only as the "by when" of a row that gives one.
@@ -406,6 +412,8 @@ Rules:
 - Use the exact report IDs from the [brackets] above as keys
 - Omit a report's key entirely when nothing in it qualifies, or when it contains only failure messages
 - At most ${maxPerReport} highlights per report, each at most ${HIGHLIGHT_MAX_CHARS} characters
+- A report's first highlight covers the first bullet of its \`## ${SECTIONS.highlights}\` (the page's lead), unless that bullet says there is no news
+- One subject per highlight, and keep its window ("this week") as the report gives it
 - Say only what the report excerpt says: the "why it matters" part comes from the excerpt, not from you
 ${sourceFidelityRules()}
 - ${goingAwayRule("highlight")}${forcedRule}`;

@@ -284,6 +284,14 @@ Rules:
 `;
 }
 
+/** How every page's Highlights bullets are cut: one subject each, with its window. */
+export const HIGHLIGHTS_PICK_RULE =
+  "One subject per bullet. Keep an item's window as the sections give it ('this week', 'in 7 days'): never present a weekly figure as today's.";
+
+/** The models page's Highlights note on a day without a lab post or new model: Spotted rows alone are not model news. */
+export const NO_MODEL_NEWS_NOTE =
+  "The page has no lab post and no new model today: open with the bullet '- No lab or model news today.' and add at most 2 bullets.";
+
 /** What the agents page's Highlights rank first: its focus line for buildPageHighlightsPrompt. */
 export const AGENTS_HIGHLIGHTS_FOCUS =
   "a release with breaking changes, a hot regression, a new capability, a notable spotted tool";
@@ -302,6 +310,8 @@ export function buildPageHighlightsPrompt(
   bodyMd: string,
   focus: string,
   dateStr: string,
+  /** An extra rule for today's page, e.g. the models page with no lab post or new model. */
+  note?: string,
 ): string {
   return `You are the editor of ${page}, a daily report. Below are today's report sections, ${dateStr}.
 
@@ -309,12 +319,13 @@ ${bodyMd}
 
 ---
 
-Write only \`## ${SECTIONS.highlights}\`: 3–5 bullets, most consequential first: ${focus}.
+Write only \`## ${SECTIONS.highlights}\`: 1–3 bullets, most consequential for a data or AI engineer first: ${focus}. Pick the few that matter; do not restate every row.
 
 Rules:
 - ${NO_TITLE_RULE}
 - ${goingAwayRule("bullet")}
-- About 150 words in total. Write no other sections.
+- ${HIGHLIGHTS_PICK_RULE}${note ? `\n- ${note}` : ""}
+- About 100 words in total. Write no other sections.
 - Name each item in at most one bullet. Write no links or URLs: the sections below link every item.
 - Base every claim on the sections. Do not invent versions, dates or features.
 ${sourceFidelityRules()}

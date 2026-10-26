@@ -3,6 +3,8 @@ import type { GitHubItem, GitHubRelease, RepoConfig } from "../../core/github.ts
 import { SECTIONS } from "../../core/strings.ts";
 import {
   AGENTS_HIGHLIGHTS_FOCUS,
+  HIGHLIGHTS_PICK_RULE,
+  NO_MODEL_NEWS_NOTE,
   type ProjectActivity,
   announcementLinks,
   buildPageHighlightsPrompt,
@@ -365,11 +367,13 @@ describe("buildPageHighlightsPrompt", () => {
     expect(prompt).toContain("2026-10-22");
   });
 
-  it("asks for Highlights only: 3–5 bullets, no links, each item once, ~150 words", () => {
-    expect(prompt).toContain(`Write only \`## ${SECTIONS.highlights}\`: 3–5 bullets`);
+  it("asks for Highlights only: 1–3 ranked bullets, no links, each item once, ~100 words", () => {
+    expect(prompt).toContain(`Write only \`## ${SECTIONS.highlights}\`: 1–3 bullets, most consequential`);
+    expect(prompt).toContain("do not restate every row");
     expect(prompt).toContain("Write no links");
     expect(prompt).toContain("at most one bullet");
-    expect(prompt).toContain("About 150 words");
+    expect(prompt).toContain(HIGHLIGHTS_PICK_RULE);
+    expect(prompt).toContain("About 100 words");
     expect(prompt).not.toContain(SECTIONS.signals);
     expect(prompt).not.toContain("Worth a Look");
     expect(prompt).not.toContain("Overview");
@@ -391,5 +395,13 @@ describe("buildSkillsPrompt", () => {
     const result = buildSkillsPrompt([], [], "2026-03-09");
     expect(result).toContain("Claude Code ecosystem");
     expect(result).toContain("None");
+  });
+});
+
+describe("buildPageHighlightsPrompt note", () => {
+  it("a models page without lab or model news says so instead of padding with Spotted rows", () => {
+    const p = buildPageHighlightsPrompt("AI Models", "## Spotted", "f", "2026-10-26", NO_MODEL_NEWS_NOTE);
+    expect(p).toContain("No lab or model news today.");
+    expect(p).toContain("at most 2 bullets");
   });
 });

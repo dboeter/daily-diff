@@ -428,3 +428,24 @@ describe("goingAwayRule", () => {
     },
   );
 });
+
+describe("Highlights pick, they don't restate", () => {
+  it("the data Highlights skip minor vendor rows and hold 1-3 bullets", () => {
+    const p = buildDataProsePrompt("## Snowflake", "2026-10-26", ["Oct 26, 2026: Custom error messages"]);
+    expect(p).toContain("1-3 bullets");
+    expect(p).toContain('These rows are minor: no Highlight for them. "Oct 26, 2026: Custom error messages"');
+    expect(buildDataProsePrompt("## Snowflake", "2026-10-26")).not.toContain("These rows are minor");
+  });
+
+  it("Trends Highlights hold 1-3 ranked bullets, one subject each, with their window", () => {
+    const p = buildTrendsProsePrompt("## Research", "2026-10-26");
+    expect(p).toContain("1-3 bullets on the most noteworthy items of the week for a data or AI engineer");
+    expect(p).toContain("One subject per bullet");
+  });
+
+  it("highlights.json leads each report with its page's first bullet", () => {
+    const p = buildHighlightsPrompt({ "ai-data": "## Highlights\n\n- lead" });
+    expect(p).toContain("A report's first highlight covers the first bullet of its `## Highlights`");
+    expect(p).toContain("One subject per highlight");
+  });
+});

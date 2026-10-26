@@ -178,6 +178,8 @@ const REAL_CHANGE_MIN = 0.5;
 const KEEP_MIN_RELEVANCE = 0.5;
 /** A deprecation at this noul or more, if a real change, is always kept: consultants warn clients early. */
 const DEPRECATION_MIN = 0.5;
+/** Significance level 1 ("Notable"): a kept item under it is `minor`. */
+const NOTABLE_LEVEL = 1;
 
 /** Weighted relevance in 0–1, the keep decision and the deprecation flag. Throws on an unexpected answer shape. */
 export function dataRelevance(a: DataAnswers): { relevance: number; keep: boolean; deprecation: boolean } {
@@ -257,6 +259,8 @@ export interface KeptVendorItem extends VendorItem {
   endDate?: string;
   /** The 🤖 marker: Jev's `ai_in_data`, else an AI keyword in title or description. */
   aiInData: boolean;
+  /** Significance under "Notable" and no deprecation: shown in its table, never a Highlight. */
+  minor?: boolean;
 }
 
 /**
@@ -343,7 +347,19 @@ export async function selectVendorItems(
     // Only a candidate counts: "none", or a date Jev made up, is no end date.
     const jevEnd = datesOf(i).some((c) => c.iso === picked) ? picked : undefined;
     const endDate = d.deprecation ? (i.endDate ?? jevEnd) : undefined;
-    return d.keep ? [{ ...i, deprecation: d.deprecation, aiInData, ...(endDate ? { endDate } : {}) }] : [];
+    const significance = verdicts.get(i.id)?.answers.significance?.score;
+    const minor = !d.deprecation && significance !== undefined && significance < NOTABLE_LEVEL;
+    return d.keep
+      ? [
+          {
+            ...i,
+            deprecation: d.deprecation,
+            aiInData,
+            ...(endDate ? { endDate } : {}),
+            ...(minor ? { minor } : {}),
+          },
+        ]
+      : [];
   });
   const selected = orderAndCap(kept, (i) => verdicts.get(i.id)?.relevance ?? -1);
   console.log(

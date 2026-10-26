@@ -40,6 +40,7 @@ import { saveStarHistory, summaryRows } from "../trending/rank.ts";
 import {
   AGENTS_HIGHLIGHTS_FOCUS,
   MODELS_HIGHLIGHTS_FOCUS,
+  NO_MODEL_NEWS_NOTE,
   buildPageHighlightsPrompt,
   buildProjectDigestPrompt,
   buildSkillsPrompt,
@@ -354,7 +355,13 @@ export async function buildModelsPage(
   const bodyMd = [...tracked, stealth, spottedMd].filter(Boolean).join("\n\n");
   const prose = await generateOr(
     "models-highlights",
-    buildPageHighlightsPrompt(REPORTS["ai-models"].name, bodyMd, MODELS_HIGHLIGHTS_FOCUS, dateStr),
+    buildPageHighlightsPrompt(
+      REPORTS["ai-models"].name,
+      bodyMd,
+      MODELS_HIGHLIGHTS_FOCUS,
+      dateStr,
+      shownPosts.length || models.length ? undefined : NO_MODEL_NEWS_NOTE,
+    ),
     null,
     LLM_TOKENS_LISTING,
   );
@@ -623,7 +630,11 @@ export async function buildDataReport(
   const sectionsMd = [...groupsMarkdown(groupsWith(proseTables)), spottedMd].filter(Boolean).join("\n\n");
   const prose = await generateOr(
     "data-highlights",
-    buildDataProsePrompt(sectionsMd, dateStr),
+    buildDataProsePrompt(
+      sectionsMd,
+      dateStr,
+      items.filter((i) => i.minor).map((i) => i.title),
+    ),
     null,
     LLM_TOKENS_LISTING,
   );
