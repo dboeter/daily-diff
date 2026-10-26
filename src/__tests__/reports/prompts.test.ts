@@ -393,8 +393,15 @@ describe("buildSkillsPrompt", () => {
 
   it("shows None when no data", () => {
     const result = buildSkillsPrompt([], [], "2026-03-09");
-    expect(result).toContain("Claude Code ecosystem");
     expect(result).toContain("None");
+  });
+
+  it("heads open PRs as unmerged and leaves off-audience items out", () => {
+    const result = buildSkillsPrompt([makeItem()], [], "2026-10-26");
+    expect(result).toContain("## Open PRs worth watching");
+    expect(result).toContain("an open PR is not a released Skill");
+    expect(result).toContain("not about coding agents or data/AI engineering");
+    expect(result).not.toContain("## Top Skills");
   });
 });
 

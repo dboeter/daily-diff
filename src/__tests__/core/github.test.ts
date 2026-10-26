@@ -283,7 +283,7 @@ describe("fetchSkillsData", () => {
     vi.spyOn(console, "error").mockImplementation(() => {});
     vi.spyOn(globalThis, "fetch").mockRejectedValue(new TypeError("fetch failed"));
     vi.useFakeTimers();
-    const pending = fetchSkillsData("anthropics/skills");
+    const pending = fetchSkillsData("anthropics/skills", new Date("2026-10-19T00:00:00Z"));
     await vi.runAllTimersAsync();
     expect(await pending).toEqual({ prs: [], issues: [], fetchSuccess: false });
   });

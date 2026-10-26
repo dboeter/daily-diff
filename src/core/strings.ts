@@ -127,7 +127,7 @@ export const TRENDS_REPORT = {
   sources:
     "GitHub Trending + GitHub Search API + OpenRouter + npm + Hugging Face + arXiv + Hacker News + Lobste.rs + Dev.to",
   agentsHeading: "Agents & coding tools",
-  skillsHeading: "Claude Code Skills",
+  skillsHeading: "Skills: open PRs worth watching",
   skillsSource: (repo: string) => `> Source: [${repo}](https://github.com/${repo})`,
   /** Code only: 🔥 GitHub repos in no config.yml section, with the lines to add. */
   candidatesHeading: "Candidates to track",

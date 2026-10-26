@@ -69,6 +69,7 @@ import { fetchTrendingData, type TrendingData } from "./trending/compose.ts";
 import { fetchModelCatalogDaily, type ModelCatalog } from "./sources/openrouter.ts";
 import { fetchHnData, pageDescription, type HnData, type HnStory } from "./sources/hn.ts";
 import { fetchArxivData, saveArxivState, type ArxivData } from "./sources/arxiv.ts";
+import { loadShownSkills, selectSkillsItems } from "./trending/skills.ts";
 import { loadResearchState, nextResearchState, saveResearchState, weekPapers } from "./trending/research.ts";
 import { fetchPolicyData, loadPolicyState, type PolicyData } from "./policy/items.ts";
 import { isDataLaw } from "./policy/relevance.ts";
@@ -260,7 +261,7 @@ async function fetchAllData(
       ),
     ),
     // No fetcher here throws: each returns its empty value (fetchSuccess false) on a failure.
-    weekly ? fetchSkillsData(CLAUDE_SKILLS_REPO) : Promise.resolve(noSkills),
+    weekly ? fetchSkillsData(CLAUDE_SKILLS_REPO, weekSince) : Promise.resolve(noSkills),
     Promise.all([
       fetchSiteContent("anthropic", labsState, toCstDateStr(now)),
       fetchSiteContent("openai", labsState, toCstDateStr(now)),
@@ -531,7 +532,10 @@ async function main(): Promise<void> {
           buildTrendsReport(
             {
               trending: trendingData,
-              skills: { ...skillsData, repo: CLAUDE_SKILLS_REPO },
+              skills: {
+                ...selectSkillsItems(skillsData, loadShownSkills(CLAUDE_SKILLS_REPO, dateStr), now),
+                repo: CLAUDE_SKILLS_REPO,
+              },
               hf: hfData,
               // Both read the days before today: today's papers and stories are saved after the gate.
               papers: weekPapers(researchState, dateStr),

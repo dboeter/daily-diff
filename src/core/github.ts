@@ -45,6 +45,7 @@ export interface GitHubItem {
   labels: GitHubLabel[];
   created_at: string;
   updated_at: string;
+  closed_at?: string | null;
   comments: number;
   reactions?: GitHubReactions;
   body?: string | null;
@@ -375,9 +376,9 @@ export interface SkillsData {
 }
 
 /** Never throws: a failed fetch is no PRs and no issues, with `fetchSuccess: false`. */
-export async function fetchSkillsData(repo: string): Promise<SkillsData> {
+export async function fetchSkillsData(repo: string, since: Date): Promise<SkillsData> {
   try {
-    const data = await fetchSkills(repo);
+    const data = await fetchSkills(repo, since);
     console.log(`  [claude-code-skills] prs: ${data.prs.length}, issues: ${data.issues.length}`);
     return { ...data, fetchSuccess: true };
   } catch (err) {
@@ -387,22 +388,23 @@ export async function fetchSkillsData(repo: string): Promise<SkillsData> {
 }
 
 /**
- * Fetch trending skills data from a skills repo (e.g. anthropics/skills).
- * PRs sorted by popularity (comment count); issues sorted by comments.
- * No `since` filter — we want all-time hot items, not just the last 24 h.
+ * The PRs and issues of a skills repo (e.g. anthropics/skills) updated most
+ * recently, any state, so a PR merged or closed this week is seen too. The
+ * pulls endpoint has no `since`: sorted by update, page 1 covers a week.
  */
-async function fetchSkills(repo: string): Promise<{ prs: GitHubItem[]; issues: GitHubItem[] }> {
+async function fetchSkills(repo: string, since: Date): Promise<{ prs: GitHubItem[]; issues: GitHubItem[] }> {
   const [prs, issuesRaw] = await Promise.all([
     githubGet<GitHubItem[]>(`https://api.github.com/repos/${repo}/pulls`, {
-      state: "open",
-      sort: "popularity",
+      state: "all",
+      sort: "updated",
       direction: "desc",
       per_page: "50",
     }),
     githubGet<GitHubItem[]>(`https://api.github.com/repos/${repo}/issues`, {
       state: "all",
-      sort: "comments",
+      sort: "updated",
       direction: "desc",
+      since: since.toISOString(),
       per_page: "50",
     }),
   ]);

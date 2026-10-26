@@ -124,7 +124,7 @@ export interface TrendsInput {
 
 /**
  * The weekly Trends page: Highlights, Agents & coding tools (the Radar and
- * category tables), Claude Code Skills, Candidates to track (code only),
+ * category tables), Skills: open PRs worth watching, Candidates to track (code only),
  * Models, Research, Most discussed, Signals. An empty section is left out; the
  * page is null when every section is. First round, in parallel: the trending
  * row summaries, the models call, Skills, and one call for the Research and
@@ -132,7 +132,8 @@ export interface TrendsInput {
  * from them writes Highlights and Signals, and spliceTables puts the page
  * between them. A failed summaries call shows the descriptions, a failed
  * models call leaves the notice under Models, a failed prose call the notice
- * under Highlights; a failed Skills fetch or call leaves MSG.skillsFailed.
+ * under Highlights; a failed Skills fetch or call leaves MSG.skillsFailed, and
+ * a fetched week with no Skills item leaves the section out.
  */
 export async function buildTrendsReport(
   input: TrendsInput,
@@ -164,14 +165,16 @@ export async function buildTrendsReport(
           LLM_TOKENS_LISTING,
         )
       : "",
-    // A failed fetch has nothing to summarize: the notice, without a call.
-    skills.fetchSuccess
+    // No item, no call: the notice only when the fetch failed, else no section.
+    hasSkills
       ? generateOr(
           "claude-code-skills",
           buildSkillsPrompt(skills.prs, skills.issues, dateStr),
           MSG.skillsFailed,
         )
-      : MSG.skillsFailed,
+      : skills.fetchSuccess
+        ? ""
+        : MSG.skillsFailed,
     papers.length + stories.length
       ? generateOr(
           "trends-summaries",
@@ -187,8 +190,9 @@ export async function buildTrendsReport(
   const page = [
     // The tables' own `##` headings go below the section's.
     tables && `## ${T.agentsHeading}\n\n${nestHeadings(tables, 3)}`,
-    // Code renders "## Claude Code Skills"; the body's own sections go below it.
-    `## ${T.skillsHeading}\n\n${T.skillsSource(skills.repo)}\n\n${nestHeadings(skillsSummary, 3)}`,
+    // Code renders the section heading; the body's own sections go below it.
+    skillsSummary &&
+      `## ${T.skillsHeading}\n\n${T.skillsSource(skills.repo)}\n\n${nestHeadings(skillsSummary, 3)}`,
     report ? renderCandidates(report.onFire, input.tracked) : "",
     models && `## ${T.modelsHeading}\n\n${nestHeadings(models, 3)}`,
     renderResearchTable(papers, rowMap),

@@ -363,32 +363,33 @@ export function buildSkillsPrompt(prs: GitHubItem[], issues: GitHubItem[], dateS
   const prsText = topPrs.map((p) => formatItem(p)).join("\n") || noneStr;
   const issuesText = topIssues.map((i) => formatItem(i)).join("\n") || noneStr;
 
-  return `You are a technical analyst focused on the Claude Code ecosystem. The following data is from github.com/anthropics/skills (official Claude Code Skills repository). Analyze the community's most-watched Skills activity (data as of ${dateStr}).
+  return `You are a technical analyst writing for engineers who use coding agents and build data/AI systems. The following data is from github.com/anthropics/skills, Anthropic's Claude Code Skills repository: its pull requests and issues updated in the last 7 days (data as of ${dateStr}).
 
 ## Repository Context
-anthropics/skills is the official Claude Code Skills collection. Each PR typically represents a new or improved Skill. The community proposes new Skills and reports issues via Issues; PRs represent actual Skill submissions.
+A PR proposes a new or changed Skill; most are third-party submissions, and an open PR is not a released Skill. Issues are bug reports and requests.
 
-## Popular Pull Requests (sorted by comments, ${prs.length} total, showing top ${topPrs.length})
+## Pull Requests updated this week (sorted by comments, ${prs.length} total, showing top ${topPrs.length})
 ${prsText}
 
-## Community Issues (sorted by comments, ${issues.length} total, showing top ${topIssues.length})
+## Issues updated this week (sorted by comments, ${issues.length} total, showing top ${topIssues.length})
 ${issuesText}
 
 ---
 
-Write the Skills section in English with these headings. ${NO_TITLE_RULE}
+Write the section in English with these headings. ${NO_TITLE_RULE}
+Leave out every item that is not about coding agents or data/AI engineering (e.g. games, blockchain, resumes, media production).
 
-## Top Skills
-The 3-5 most-discussed Skills (PRs) by comments/attention: each Skill's functionality, discussion highlights, and current status (open/merged/draft).
+## Open PRs worth watching
+Up to 5 open PRs: what each would add or fix, and that it is not merged yet. Describe what the PR does; do not call it critical or an overhaul unless its text says so.
 
-## Community Demand
-From Issues, the most-anticipated new Skill directions (e.g. workflow automation, code review, test generation, documentation).
+## Closed this week
+The PRs with state CLOSED, if any (a closed PR may or may not have been merged: do not say which).
 
-## Pending Skills
-Active-comment PRs not yet merged; these Skills may land soon.
+## Requests
+From the issues, what people ask the Skills to do or fix.
 
 ## Takeaway
-One sentence: what is the community's most concentrated demand at the Skills level?
+One sentence on what these items have in common.
 
 Style: concise and professional, include GitHub links for each item.
 ${REPO_LENGTH_RULE}

@@ -108,9 +108,20 @@ describe("buildTrendsReport", () => {
       classifiedBy: "jev",
     },
   };
+  const skillPr: GitHubItem = {
+    number: 7,
+    title: "Add a code review skill",
+    state: "open",
+    user: { login: "a" },
+    labels: [],
+    created_at: "2026-10-20T00:00:00Z",
+    updated_at: "2026-10-25T00:00:00Z",
+    comments: 3,
+    html_url: "https://github.com/anthropics/skills/pull/7",
+  };
   const input: TrendsInput = {
     trending: data,
-    skills: { prs: [], issues: [], fetchSuccess: true, repo: "anthropics/skills" },
+    skills: { prs: [skillPr], issues: [], fetchSuccess: true, repo: "anthropics/skills" },
     hf: { models: [], fetchSuccess: true },
     papers: [
       {
@@ -149,7 +160,7 @@ describe("buildTrendsReport", () => {
           ? "### OpenRouter usage\n\n- a/b leads.\n\n### Hugging Face trending\n\n| Model |\n| :--- |"
           : isProse(p)
             ? "## Highlights\n\n- H.\n\n<!-- tables -->\n\n## Signals\n\nS."
-            : "## Top Skills\n\nK.";
+            : "## Open PRs worth watching\n\nK.";
   const build = (over: Partial<TrendsInput> = {}) =>
     buildTrendsReport({ ...input, ...over }, "00:00", "2026-10-26");
 
@@ -169,7 +180,7 @@ describe("buildTrendsReport", () => {
     ]);
     expect(content).toContain(`### ${TRENDS_REPORT.radarHeading}`);
     expect(content).toContain(`### ${TRENDS_REPORT.categoryTitles.coding_agent}`);
-    expect(content).toContain("### Top Skills\n\nK.");
+    expect(content).toContain("### Open PRs worth watching\n\nK.");
     expect(content).toContain("### OpenRouter usage");
     expect(content).toContain("| Kilo is an agent. |");
     expect(content).toContain("| [Paper 1](https://arxiv.org/abs/p1) | The paper shows X. |");
@@ -215,10 +226,20 @@ describe("buildTrendsReport", () => {
       if (isTrendingSummaries(p) || isRowSummaries(p)) throw new Error("HTTP 504");
       return reply(p);
     });
-    const content = (await build({ skills: { ...input.skills, fetchSuccess: false } }))!.content;
+    const content = (await build({ skills: { ...input.skills, prs: [], fetchSuccess: false } }))!.content;
     expect(content).toContain("| Kilo description. |");
     expect(content).toContain("| Paper abstract. |");
     expect(content).toContain(MSG.skillsFailed);
+    expect(generateBody).toHaveBeenCalledTimes(4);
+  });
+
+  it("leaves the Skills section out, without a call, when no item moved this week", async () => {
+    generateBody.mockReset();
+    generateBody.mockImplementation(async (p: string) => reply(p));
+    const content = (await build({ skills: { ...input.skills, prs: [] } }))!.content;
+    expect(headings(content)).not.toContain(TRENDS_REPORT.skillsHeading);
+    expect(content).not.toContain(MSG.skillsFailed);
+    expect(content).not.toContain("Takeaway");
     expect(generateBody).toHaveBeenCalledTimes(4);
   });
 
@@ -227,6 +248,7 @@ describe("buildTrendsReport", () => {
     expect(
       await build({
         trending: EMPTY_TRENDING,
+        skills: { ...input.skills, prs: [] },
         hf: { models: [], fetchSuccess: false },
         papers: [],
         stories: [],
