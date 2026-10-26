@@ -27,6 +27,7 @@ import { summaryText, type Numbered } from "./summarized-table.ts";
 import {
   GOING_AWAY,
   LIVE_REPORT_IDS,
+  MSG,
   OVERVIEW,
   REPORTS,
   REPORT_META,
@@ -72,20 +73,74 @@ export interface ProjectReportInput {
   footer: string;
 }
 
+/** A `## <name>` section of a project summary, line-anchored, so "## Pi pod" is not Pi's. */
+const sectionHeading = (name: string) => new RegExp(`^##\\s+${escapeRegex(name)}\\s*$`, "m");
+
+/** The section's text under `## <name>`, up to the next `## `, or null when the summary has none. */
+function sectionOf(summary: string, name: string): string | null {
+  const m = sectionHeading(name).exec(summary);
+  if (!m) return null;
+  const rest = summary.slice(m.index + m[0].length);
+  const next = rest.search(/^##\s/m);
+  return next === -1 ? rest : rest.slice(0, next);
+}
+
+/** A project the model covered: its section carries at least one bullet, not only an absence note. */
+const covers = (summary: string, a: ProjectActivity) =>
+  /^\s*[-*]\s+\S/m.test(sectionOf(summary, a.config.name) ?? "");
+
+/** Dependency bumps and chores: never a release's top item. */
+const ROUTINE_ITEM = /\b(bump(s|ed)?|deps?|dependenc(y|ies)|dependabot|chore|renovate)\b/i;
+
 /**
- * The projects in a group that count as quiet. Quiet is decided by the
- * summary, not only the data: the model leaves out a project whose only news
- * mentions it in passing, and such a project is quiet too. A summary with no
- * project section at all is a failure notice, so then the data decides.
+ * The code-written section of a project with a stable release the model left without a bullet:
+ * the newest release, linked, and its first 3 non-routine note items. On 2026-10-26 Agent Deck
+ * v1.16.34 (about 20 user-facing items) rendered as a bare "(no reportable changes)".
  */
-function quietProjects(g: ProjectGroup): ProjectActivity[] {
-  const withData = g.activities.filter(hasActivity);
-  // Line-anchored, so "## Pi pod" in a summary does not count as a Pi section.
-  const covered = withData.filter((a) =>
-    new RegExp(`^##\\s+${escapeRegex(a.config.name)}\\s*$`, "m").test(g.summary),
-  );
-  const active = covered.length > 0 ? covered : withData;
-  return g.activities.filter((a) => !active.includes(a) && !a.fetchFailed);
+export function releaseFallbackSection(a: ProjectActivity): string {
+  const r = a.releases[0]!;
+  const items = (r.body ?? "")
+    .split("\n")
+    .map((l) => /^\s*[-*]\s+(.+)$/.exec(l)?.[1] ?? "")
+    .map((t) =>
+      t
+        .replace(/\s+by @\S+ in https:\/\/\S+$/, "")
+        .replace(/\[([^\]]*)\]\([^)]*\)/g, "$1")
+        .replace(/\s*\(#\d+\)$/, "")
+        .replace(/\*\*/g, "")
+        .trim(),
+    )
+    .filter((t) => t && !ROUTINE_ITEM.test(t))
+    .slice(0, 3)
+    .map((t) => (t.length > 120 ? `${t.slice(0, 119).trimEnd()}…` : t));
+  const title = r.name && r.name !== r.tag_name ? ` (${r.name})` : "";
+  const link = `[${r.tag_name}](https://github.com/${a.config.repo}/releases/tag/${r.tag_name})${title}`;
+  return `## ${a.config.name}\n- **Release:** ${link}${items.length ? `: ${items.join("; ")}` : ""}`;
+}
+
+/**
+ * A group's projects as rendered: the model's summary without text outside a `##` section and
+ * without a project section that has no bullet (both are absence notes the prompt forbids), plus a
+ * code section for each project with a stable release the model did not cover. `quiet` is every
+ * other checked project without a section; after a failed call (MSG.summaryFailed) the data decides.
+ */
+function groupProjects(g: ProjectGroup): { body: string; quiet: ProjectActivity[] } {
+  const failed = g.summary.trim() === MSG.summaryFailed;
+  const covered = g.activities.filter((a) => covers(g.summary, a));
+  const fallback = g.activities.filter((a) => a.releases.length > 0 && !covered.includes(a));
+  const kept = failed
+    ? [g.summary.trim()]
+    : g.summary
+        .split(/^(?=##\s)/m)
+        .filter((chunk) => /^##\s/.test(chunk))
+        .filter(
+          (chunk) =>
+            !g.activities.some((a) => sectionHeading(a.config.name).test(chunk) && !covers(chunk, a)),
+        )
+        .map((chunk) => chunk.trim());
+  const body = [...kept, ...fallback.map(releaseFallbackSection)].filter(Boolean).join("\n\n");
+  const active = failed ? g.activities.filter(hasActivity) : [...covered, ...fallback];
+  return { body, quiet: g.activities.filter((a) => !active.includes(a) && !a.fetchFailed) };
 }
 
 /**
@@ -96,7 +151,7 @@ function quietProjects(g: ProjectGroup): ProjectActivity[] {
 export function groupsMarkdown(groups: ProjectGroup[]): string[] {
   return groups
     .map((g) => {
-      const body = g.activities.some(hasActivity) ? nestHeadings(g.summary, 3) : "";
+      const body = g.activities.some(hasActivity) ? nestHeadings(groupProjects(g).body, 3) : "";
       return g.preamble || body ? `## ${g.title}\n\n${[g.preamble, body].filter(Boolean).join("\n\n")}` : "";
     })
     .filter(Boolean);
@@ -116,7 +171,7 @@ export function buildProjectReportContent(r: ProjectReportInput): string {
   const link = (a: ProjectActivity) => `[${a.config.name}](https://github.com/${a.config.repo})`;
   let inactiveCount = 0;
   const sections = r.groups.flatMap((g) => {
-    const quiet = quietProjects(g);
+    const { body, quiet } = groupProjects(g);
     // A project whose release fetch failed was not checked: "Quiet" would claim it shipped nothing.
     const unavailable = g.activities.filter((a) => a.fetchFailed);
     inactiveCount += quiet.length + unavailable.length;
@@ -125,7 +180,7 @@ export function buildProjectReportContent(r: ProjectReportInput): string {
     if (!g.activities.length && !g.preamble) return [];
     const projects = [
       // The data report passes an empty summary for a group with no active project.
-      nestHeadings(g.summary, 3),
+      nestHeadings(body, 3),
       quiet.length ? `**Quiet ${r.period}:** ${quiet.map(link).join(", ")}` : "",
       unavailable.length ? `**Unavailable ${r.period}:** ${unavailable.map(link).join(", ")}` : "",
     ]

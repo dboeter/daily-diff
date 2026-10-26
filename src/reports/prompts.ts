@@ -290,7 +290,8 @@ Write the report in English: one section per project above that has something le
 Rules:
 - Use only the data above. Omit a bullet type that has no data. Never state what did not happen ("no release today", "no breaking issues were reported").
 - A news item may mention a project only in passing: skip it unless the project is its actual subject.
-- If every item for a project is skipped, leave out its section entirely; the report lists it as quiet.
+- A project with a stable release always gets its section and a **Release** bullet naming its most user-visible changes, even when they are small.
+- If every item of a project without a stable release is skipped, leave out its section entirely; code lists it as quiet.
 - ${IDENTIFIER_RULE}
 - Style: concise and concrete, for developers who use these tools.
 `;

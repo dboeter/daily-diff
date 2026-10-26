@@ -1,6 +1,6 @@
 # 07: No Tracked project shows "no reportable changes"
 
-Status: ready-for-agent
+Status: done
 Blocked by: None (can start immediately)
 Findings: A1, S9 (agents) — see `../review.md`
 
@@ -8,8 +8,12 @@ Findings: A1, S9 (agents) — see `../review.md`
 
 A Tracked project with a release always shows that release, and the page header counts match the body. On 2026-10-26 Agent Deck v1.16.34, a release with about 20 user-facing items, rendered as a bare "(no reportable changes … only dependency updates)" with no heading, outside the Quiet line, while the header counted it as active.
 
-- [ ] A project with a release gets its `### <Project>` heading and a Release bullet
-- [ ] When the model returns nothing usable for a release, code falls back to the release title plus its top 2-3 items
-- [ ] When a project has nothing to show, code puts it in the Quiet line; the model never writes an absence
-- [ ] "Active today" and "Stable releases" in the header match the projects shown
-- [ ] A test covers a release whose model output is empty
+- [x] A project with a release gets its `### <Project>` heading and a Release bullet
+- [x] When the model returns nothing usable for a release, code falls back to the release title plus its top 2-3 items
+- [x] When a project has nothing to show, code puts it in the Quiet line; the model never writes an absence
+- [x] "Active today" and "Stable releases" in the header match the projects shown
+- [x] A test covers a release whose model output is empty
+
+## Comments
+
+Cause: the model wrote only "(no reportable changes for Agent Deck v1.16.34 — only dependency updates)" with no `## Agent Deck` section. `quietProjects` took a summary without any project section for a failure notice, so every project with data counted as active and the absence text rendered as written. Now `groupProjects` (markdown.ts) renders per project: the model's section when it carries a bullet, a code fallback (`releaseFallbackSection`) for a released project without one, text outside sections and bullet-less project sections dropped; only the exact `MSG.summaryFailed` lets the data decide. The header's Active count is the projects shown. The prompt now asks for a Release bullet on every released project. Tests: markdown.test "shows a release the model wrote off…" and "drops a project section without a bullet…".

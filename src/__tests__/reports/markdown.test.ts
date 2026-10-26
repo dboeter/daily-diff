@@ -178,16 +178,58 @@ describe("buildProjectReportContent", () => {
     expect(result).toContain("**Quiet today:** [ruvnet/ruflo](https://github.com/ruvnet/ruflo)");
   });
 
-  it("keeps projects with data active when the summary has no project section", () => {
+  it("keeps projects with data active when the summaries call failed", () => {
     const news = [{ source: "Hacker News", title: "BETA 2.0", url: "u", detail: "d" }];
     const result = buildProjectReportContent(
       withAgents({
-        summary: "Summary generation failed.",
+        summary: MSG.summaryFailed,
         activities: [agents.activities[0]!, makeActivity("beta", { news }), makeActivity("gamma")],
       }),
     );
     expect(result).toContain("Active today: 2 |");
     expect(result).toContain("**Quiet today:** [GAMMA](https://github.com/org/gamma)");
+  });
+
+  it("shows a release the model wrote off as 'no reportable changes', from its notes, and counts it", () => {
+    const deck = makeActivity("deck", {
+      config: { id: "deck", repo: "asheshgoplani/agent-deck", name: "Agent Deck" },
+      releases: [
+        {
+          ...stableRelease,
+          tag_name: "v1.16.34",
+          name: "v1.16.34",
+          body:
+            "## Changes\n- chore(deps): bump golang.org/x/net\n- **Session forks** keep their [worktree](https://x) (#812)\n" +
+            "- Fix status bar flicker by @a in https://github.com/o/r/pull/1\n- Add `--json` to list\n- Faster search",
+        },
+      ],
+    });
+    const result = buildProjectReportContent(
+      withAgents({
+        summary: "(no reportable changes for Agent Deck v1.16.34 — only dependency updates)",
+        activities: [deck, makeActivity("gamma")],
+      }),
+    );
+    expect(result).not.toContain("no reportable changes");
+    expect(result).toContain(
+      "### Agent Deck\n- **Release:** [v1.16.34](https://github.com/asheshgoplani/agent-deck/releases/tag/v1.16.34): " +
+        "Session forks keep their worktree; Fix status bar flicker; Add `--json` to list",
+    );
+    expect(result).toContain("Projects: 2 | Active today: 1 | Stable releases: 1 |");
+    expect(result).toContain("**Quiet today:** [GAMMA](https://github.com/org/gamma)");
+  });
+
+  it("drops a project section without a bullet; a project without a release then goes quiet", () => {
+    const news = [{ source: "Hacker News", title: "BETA", url: "u", detail: "d" }];
+    const result = buildProjectReportContent(
+      withAgents({
+        summary: "## ALPHA\n- release\n\n## BETA\nNothing to report today.",
+        activities: [agents.activities[0]!, makeActivity("beta", { news })],
+      }),
+    );
+    expect(result).not.toContain("Nothing to report");
+    expect(result).toContain("Active today: 1 |");
+    expect(result).toContain("**Quiet today:** [BETA](https://github.com/org/beta)");
   });
 
   it("omits the quiet line when every project was active", () => {
