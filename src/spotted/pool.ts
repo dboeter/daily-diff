@@ -487,8 +487,8 @@ const OFF_AUDIENCE_TOPIC = "other";
  * (`topicOf`: its saved Spotted verdict; unknown passes). A story a page showed on an earlier day (`shown`: a same-day
  * re-run shows today's rows again) or a daily page shows today (`showing`: the
  * run's project news and Spotted rows) is left out, by id or link; each link
- * once, in the first source whose rows take it. Unnumbered: the page numbers
- * them after its papers.
+ * once, in the first source whose rows take it. Unnumbered: main() numbers
+ * them after the Spotted rows, for the one story summaries call.
  */
 export function mostDiscussed(
   log: SpottedLog,

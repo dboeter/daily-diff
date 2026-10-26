@@ -57,7 +57,7 @@ import {
   isConnectionError,
 } from "./core/llm.ts";
 import { renderReportBar, withReportBar } from "./reports/markdown.ts";
-import { parseRowSummaries } from "./reports/summarized-table.ts";
+import { numberRows, parseRowSummaries } from "./reports/summarized-table.ts";
 import {
   buildModelsPage,
   buildTrendsReport,
@@ -476,17 +476,21 @@ async function main(): Promise<void> {
       )
     : [];
 
-  // 2. The agents report's two sections and every page's Spotted summaries (one call, before the
-  // page builders: their Highlights calls see their Spotted tables); every other
+  // 2. The agents report's two sections and the story summaries of every page's Spotted rows and
+  // Trends' Most discussed (one call, before the page builders: their Highlights calls see their
+  // story tables); every other
   // report makes its own calls in its builder.
   console.log("  Generating summaries...");
+  // Trends' Most discussed rows (weekly) join the same call, numbered after the Spotted rows.
+  const discussedRows = numberRows(discussed, spottedRows.length);
+  const storyRows = [...spottedRows, ...discussedRows];
   const [agentsSummary, infraSummary, spottedSummaries] = await Promise.all([
     summarizeProjects("agents", agentActivities, dateStr),
     summarizeProjects("infra", infraActivities, dateStr),
-    spottedRows.length
+    storyRows.length
       ? generateOr(
           "spotted-summaries",
-          buildSpottedSummariesPrompt(spottedRows, dateStr),
+          buildSpottedSummariesPrompt(storyRows, dateStr),
           "",
           LLM_TOKENS_LISTING,
         )
@@ -538,7 +542,7 @@ async function main(): Promise<void> {
               hf: hfData,
               // Both read the days before today: today's papers and stories are saved after the gate.
               papers: weekPapers(researchState, dateStr),
-              stories: discussed,
+              stories: { rows: discussedRows, summaries: spottedSummaryMap },
               tracked: [...AGENTS, ...INFRA_REPOS, ...DATA_SECTIONS.flatMap((s) => s.repos)],
             },
             utcStr,

@@ -1,6 +1,6 @@
 # 05: Spotted and Most discussed rows get real summaries
 
-Status: partial
+Status: done
 Blocked by: 01
 Findings: S1, A6, M1, T8, A10 — see `../review.md`
 
@@ -10,7 +10,7 @@ Spotted rows and the Trends Most discussed rows say what the story is about. On 
 
 - [x] The cause of the fallback on 2026-10-25/26 is recorded in this ticket's Comments
 - [x] Spotted rows carry a model-written summary with one concrete fact from the story
-- [ ] Most discussed rows go through the same summaries call (same rules, separate call: see Comments)
+- [x] Most discussed rows go through the same summaries call
 - [x] When the call fails, the fallback strips boilerplate ("Contribute to … on GitHub", "- owner/repo", trailing "...", subscribe lines) and shows "—" when nothing is left
 - [x] Link text matches the repo name when the story links a repo
 
@@ -22,3 +22,5 @@ Spotted rows and the Trends Most discussed rows say what the story is about. On 
 
 - Review fix: the subscribe pattern only strips a sentence that opens with "Subscribe for/to", so "A CLI to subscribe to RSS feeds and read offline." stays whole. Test: `cleanStoryDescription` cases (pool.test).
 **Review (2026-10-26):** Most discussed shares `STORY_RULES` with Spotted but runs in its own call (`trends-summaries` in `buildTrendsReport`, beside `spotted-summaries`), so the box as written is not met. Unticked.
+
+**Built (2026-10-26, follow-up):** `main()` numbers the Most discussed rows after the day's Spotted rows (`numberRows(discussed, spottedRows.length)`) and sends both in the one `spotted-summaries` call; `buildTrendsReport` gets them as `stories: { rows, summaries }` and renders them from that map. The `trends-summaries` call now holds the Research papers only, and is not made without a paper. Test: `buildTrendsReport` › "renders Most discussed from the Spotted call's summaries; its own call has the papers only" (pages.test).

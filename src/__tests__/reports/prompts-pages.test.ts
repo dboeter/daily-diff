@@ -122,16 +122,16 @@ describe("buildTrendsSummariesPrompt", () => {
     comments: 60,
   };
 
-  it("numbers the papers with their abstracts, then the stories on Spotted's rules", () => {
-    const result = buildTrendsSummariesPrompt([paper], [story], "2026-10-26");
+  it("numbers the papers with their abstracts; Most discussed stories go through the Spotted call", () => {
+    const result = buildTrendsSummariesPrompt([paper], "2026-10-26");
     expect(result).toContain("1. Agents that plan (arXiv paper) — abstract: We show planning helps.");
-    expect(result).toContain(
+    expect(result).toContain("Start with the paper's name");
+    expect(result).toContain("then its headline result, with the number when the abstract gives one");
+    expect(result).toContain("1 lines in total");
+    expect(result).not.toContain("community stories");
+    expect(buildSpottedSummariesPrompt([story], "2026-10-26")).toContain(
       "2. On AI writing (Lobste.rs, example.com, 40 points, 60 comments) — (no description)",
     );
-    expect(result).toContain("A paper: 1 sentence starting with its name");
-    expect(result).toContain("then its headline result, with the number when the abstract gives one");
-    expect(result).toContain("Describe no comment thread");
-    expect(result).toContain("2 lines in total");
   });
 });
 
@@ -482,12 +482,8 @@ describe("story summaries are written, not copied", () => {
       comments: 1,
       description: "D.",
     };
-    for (const p of [
-      buildSpottedSummariesPrompt([row], "2026-10-26"),
-      buildTrendsSummariesPrompt([], [row], "2026-10-26"),
-    ]) {
-      expect(p).toContain("in your own words, what it is about, with one concrete fact");
-      expect(p).toContain("Never copy the description");
-    }
+    const p = buildSpottedSummariesPrompt([row], "2026-10-26");
+    expect(p).toContain("in your own words, what it is about, with one concrete fact");
+    expect(p).toContain("Never copy the description");
   });
 });

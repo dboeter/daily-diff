@@ -134,28 +134,33 @@ describe("buildTrendsReport", () => {
         date: "2026-10-21",
       },
     ],
-    stories: [
-      {
-        id: "lobsters:x",
-        source: "lobsters",
-        title: "Essay",
-        url: "https://example.com/essay",
-        discussionUrl: "https://lobste.rs/s/x",
-        points: 40,
-        comments: 60,
-      },
-    ],
+    // Numbered after the day's Spotted rows: main() summarizes both in the Spotted call.
+    stories: {
+      rows: [
+        {
+          n: 9,
+          id: "lobsters:x",
+          source: "lobsters",
+          title: "Essay",
+          url: "https://example.com/essay",
+          discussionUrl: "https://lobste.rs/s/x",
+          points: 40,
+          comments: 60,
+        },
+      ],
+      summaries: new Map([[9, "An essay on Y."]]),
+    },
     tracked: [],
   };
   const isTrendingSummaries = (p: string) => p.includes("one fact from the description that sets it apart");
-  const isRowSummaries = (p: string) => p.includes("research papers and community stories");
+  const isRowSummaries = (p: string) => p.includes("You summarize research papers");
   const isModels = (p: string) => p.includes("model ecosystem analyst");
   const isProse = (p: string) => p.includes("<!-- tables -->");
   const reply = (p: string) =>
     isTrendingSummaries(p)
       ? "1: Kilo is an agent.\n2: Fast is a coding agent."
       : isRowSummaries(p)
-        ? "1: The paper shows X.\n2: An essay on Y."
+        ? "1: The paper shows X."
         : isModels(p)
           ? "### Hugging Face trending\n\n| Model |\n| :--- |"
           : isProse(p)
@@ -187,6 +192,21 @@ describe("buildTrendsReport", () => {
     expect(content).toContain("| An essay on Y. |");
     expect(content).toContain("    - id: fast\n      repo: o/fast\n      name: fast");
     expect(content).not.toContain("<!-- tables -->");
+  });
+
+  it("renders Most discussed from the Spotted call's summaries; its own call has the papers only", async () => {
+    generateBody.mockReset();
+    generateBody.mockImplementation(async (p: string) => reply(p));
+    const content = (await build())!.content;
+    expect(content).toContain("| An essay on Y. |");
+    const research = generateBody.mock.calls.map((c) => c[0]).find(isRowSummaries)!;
+    expect(research).toContain("Paper 1");
+    expect(research).not.toContain("Essay");
+    // No paper: no Research call, and Most discussed still gets its summary.
+    generateBody.mockClear();
+    const noPapers = (await build({ papers: [] }))!.content;
+    expect(generateBody.mock.calls.map((c) => c[0]).some(isRowSummaries)).toBe(false);
+    expect(noPapers).toContain("| An essay on Y. |");
   });
 
   it("makes four calls in the first round, then the prose call over the rendered page", async () => {
@@ -267,7 +287,7 @@ describe("buildTrendsReport", () => {
         skills: { ...input.skills, prs: [] },
         hf: { models: [], fetchSuccess: false },
         papers: [],
-        stories: [],
+        stories: { rows: [], summaries: new Map() },
       }),
     ).toBeNull();
     expect(generateBody).not.toHaveBeenCalled();
@@ -291,7 +311,7 @@ describe("buildTrendsReport", () => {
       trending: EMPTY_TRENDING,
       hf: { models: [], fetchSuccess: false },
       papers: [],
-      stories: [],
+      stories: { rows: [], summaries: new Map() },
       skills: { ...input.skills, prs: [pr] },
     });
     expect(report?.content).toContain(`## ${TRENDS_REPORT.skillsHeading}`);
@@ -346,14 +366,18 @@ describe("buildTrendsReport", () => {
         title: `A long paper title about agents, planning and tool use in large language models, part ${i}`,
         url: `https://arxiv.org/abs/2610.0000${i}`,
       })),
-      stories: Array.from({ length: 11 }, (_, i) => ({
-        ...input.stories[0]!,
-        id: `hn:${i}`,
-        source: "hn" as const,
-        title: `A fairly long Hacker News story title number ${i} about AI tooling`,
-        url: `https://example.com/a/long/path/to/the/article-${i}`,
-        discussionUrl: `https://news.ycombinator.com/item?id=4100000${i}`,
-      })),
+      stories: {
+        rows: Array.from({ length: 11 }, (_, i) => ({
+          ...input.stories.rows[0]!,
+          n: i + 1,
+          id: `hn:${i}`,
+          source: "hn" as const,
+          title: `A fairly long Hacker News story title number ${i} about AI tooling`,
+          url: `https://example.com/a/long/path/to/the/article-${i}`,
+          discussionUrl: `https://news.ycombinator.com/item?id=4100000${i}`,
+        })),
+        summaries: new Map(Array.from({ length: 11 }, (_, i) => [i + 1, summary])),
+      },
     };
     const lines = (count: number) =>
       Array.from({ length: count }, (_, i) => `${i + 1}: ${summary}`).join("\n");
@@ -362,7 +386,7 @@ describe("buildTrendsReport", () => {
       isTrendingSummaries(p)
         ? lines(52)
         : isRowSummaries(p)
-          ? lines(21)
+          ? lines(10)
           : isModels(p)
             ? `### OpenRouter usage\n\n${`- ${summary}\n`.repeat(5)}\n### Hugging Face trending\n\n| Model | Author | Likes | Downloads | Summary |\n| :--- | :--- | ---: | ---: | :--- |\n${hfRows.join("\n")}`
             : isProse(p)

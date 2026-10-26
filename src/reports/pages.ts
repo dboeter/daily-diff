@@ -117,8 +117,8 @@ export interface TrendsInput {
   hf: HfData;
   /** The week's papers (`weekPapers`). */
   papers: ResearchPaper[];
-  /** The week's most discussed stories (`mostDiscussed`). */
-  stories: Omit<StoryRow, "n">[];
+  /** The week's most discussed stories (`mostDiscussed`), summarized in main()'s Spotted call. */
+  stories: { rows: StoryRow[]; summaries: Map<number, string> };
   /** Every config.yml repo: Candidates to track leaves them out. */
   tracked: RepoConfig[];
 }
@@ -128,8 +128,8 @@ export interface TrendsInput {
  * category tables), Skills: PRs and requests this week, Candidates to track (code only),
  * Models, Research, Most discussed, Signals. An empty section is left out; the
  * page is null when every section is. First round, in parallel: the trending
- * row summaries, the models call, Skills, and one call for the Research and
- * Most discussed rows. Second round: the prose call over the page rendered
+ * row summaries, the models call, Skills, and the Research rows' call (the Most
+ * discussed rows come summarized from main()'s Spotted call). Second round: the prose call over the page rendered
  * from them writes Highlights and Signals, and spliceTables puts the page
  * between them. A failed summaries call shows the descriptions, a failed
  * models call leaves the notice under Models, a failed prose call the notice
@@ -147,7 +147,7 @@ export async function buildTrendsReport(
   const rows = report ? summaryRows(report) : [];
   const { hasHf, hasOpenRouter } = modelSources(hf, trending.openrouter);
   const papers = numberRows(input.papers);
-  const stories = numberRows(input.stories, papers.length);
+  const stories = input.stories.rows;
   const hasSkills = skills.prs.length + skills.issues.length > 0;
   if (!rows.length && !hasHf && !hasOpenRouter && !hasSkills && !papers.length && !stories.length) {
     console.log("  [trends] No trending rows, models, Skills activity, papers or stories, skipping report.");
@@ -176,13 +176,8 @@ export async function buildTrendsReport(
       : skills.fetchSuccess
         ? ""
         : MSG.skillsFailed,
-    papers.length + stories.length
-      ? generateOr(
-          "trends-summaries",
-          buildTrendsSummariesPrompt(papers, stories, dateStr),
-          "",
-          LLM_TOKENS_LISTING,
-        )
+    papers.length
+      ? generateOr("trends-summaries", buildTrendsSummariesPrompt(papers, dateStr), "", LLM_TOKENS_LISTING)
       : "",
   ]);
 
@@ -205,7 +200,7 @@ export async function buildTrendsReport(
         .map((part) => nestHeadings(part, 3))
         .join("\n\n")}`,
     renderResearchTable(papers, rowMap),
-    renderSpottedTable(stories, rowMap, T.mostDiscussedHeading),
+    renderSpottedTable(stories, input.stories.summaries, T.mostDiscussedHeading),
   ]
     .filter(Boolean)
     .join("\n\n---\n\n");

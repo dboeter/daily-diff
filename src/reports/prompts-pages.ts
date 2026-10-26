@@ -158,11 +158,11 @@ ${sourceFidelityRules()}
 }
 
 /** A story's line in a summaries prompt: title, source, site, counts and its description. */
-const storyLine = (r: Omit<StoryRow, "n">): string =>
+const storyLine = (r: StoryRow): string =>
   `${r.title} (${SPOTTED.sources[r.source]}, ${siteOf(r.url) || r.url}, ${SPOTTED.counts(r.source, r.points, r.comments)}) — ${r.description ? `description: ${r.description}` : "(no description)"}`;
 
 /**
- * The story summary rules, shared by Spotted and Trends' Most discussed. A story
+ * The story summary rules (Spotted and Trends' Most discussed rows, one call). A story
  * without a description gets `—`: a sentence on its title and site only restated
  * the row ("The story titled 'X' is from openai.com", 2026-10-23). Told to take 2 sentences from
  * the description, the model copied it whole (every Spotted row on 2026-10-25 and 10-26).
@@ -172,8 +172,9 @@ const STORY_RULES = `- A story with a description: in your own words, what it is
 - A first-person story ("I tested…", "We built…") is the author's: say who did it ("the author tested…").`;
 
 /**
- * Spotted, one call for every page's rows: one summary per numbered story.
- * The rows are numbered by selectSpotted; parseRowSummaries reads the reply.
+ * Spotted, one call for every page's rows and Trends' Most discussed rows: one
+ * summary per numbered story. selectSpotted numbers the Spotted rows, main() the
+ * Most discussed rows after them; parseRowSummaries reads the reply.
  * The model sees titles, sites, counts and descriptions, never the article or
  * the thread: on 2026-10-19 summaries of HN titles alone guessed what an article argues.
  */
@@ -192,31 +193,19 @@ ${summaryOutputRule(rows.length)}
 }
 
 /**
- * Weekly Trends, one call for the Research rows (numbered first) and the Most
- * discussed rows (numbered after them). parseRowSummaries reads the reply.
+ * Weekly Trends, one call for the Research rows. The Most discussed rows go
+ * through the Spotted call (buildSpottedSummariesPrompt). parseRowSummaries reads the reply.
  */
-export function buildTrendsSummariesPrompt(
-  papers: Numbered<ResearchPaper>[],
-  stories: StoryRow[],
-  dateStr: string,
-): string {
-  const list = [
-    rowList(papers, (p) => `${p.title} (arXiv paper) — abstract: ${p.abstract}`),
-    rowList(stories, storyLine),
-  ]
-    .filter(Boolean)
-    .join("\n");
-  const count = papers.length + stories.length;
-  return `You summarize research papers and community stories for AI practitioners.
+export function buildTrendsSummariesPrompt(papers: Numbered<ResearchPaper>[], dateStr: string): string {
+  return `You summarize research papers for AI practitioners.
 
-Below are ${count} numbered items of the week ending ${dateStr}: ${[papers.length && "arXiv papers, each with its abstract (cut)", stories.length && "the week's most discussed community stories (Hacker News, Lobste.rs, Dev.to), each with its source, the linked site, its counts and, where given, a description"].filter(Boolean).join(", then ")}. You have read neither the full papers, the articles nor the comment threads.
+Below are ${papers.length} numbered arXiv papers of the week ending ${dateStr}, each with its abstract (cut). You have not read the full papers.
 
-${list}
+${rowList(papers, (p) => `${p.title} (arXiv paper) — abstract: ${p.abstract}`)}
 
-${summaryLine("1-2 sentences")}.
-- A paper: 1 sentence starting with its name (the short name before the colon, else the title): what it does, then its headline result, with the number when the abstract gives one. No claim, number or result the abstract does not state.
-${STORY_RULES}
-${summaryOutputRule(count)}
+${summaryLine("1 sentence")}.
+- Start with the paper's name (the short name before the colon, else the title): what it does, then its headline result, with the number when the abstract gives one. No claim, number or result the abstract does not state.
+${summaryOutputRule(papers.length)}
 - English.
 `;
 }
