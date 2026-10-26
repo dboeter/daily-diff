@@ -142,9 +142,10 @@ export async function githubGet<T>(
 // ---------------------------------------------------------------------------
 
 /**
- * The search API allows 30 requests a minute, used by the trending topic queries. Spacing every search call SEARCH_INTERVAL_MS apart
- * keeps any 60 s window under 30, however many repos and topics there are, at
- * the cost of ~2 s of fetch-phase time per request.
+ * The search API allows 30 requests a minute, used by the trending topic
+ * queries. Spacing every search call SEARCH_INTERVAL_MS apart keeps any 60 s
+ * window under 30, however many repos and topics there are, at the cost of
+ * ~2 s of fetch-phase time per request.
  */
 const SEARCH_INTERVAL_MS = 2100;
 let nextSearchAt = 0;
@@ -210,12 +211,17 @@ export const HOT_ISSUE_MIN_ENGAGEMENT = 10;
 export const HOT_ISSUE_MIN_ENGAGEMENT_LABELLED = 3;
 /** Hot issues reported per repo, so one noisy tracker cannot flood the report. */
 export const HOT_ISSUES_PER_REPO = 2;
-/** Candidates per repo without a snapshot baseline whose gain is fetched (1–3 core REST calls each), highest total first. */
+/**
+ * Candidates per repo without a snapshot baseline whose gain may be fetched
+ * (1–3 core REST calls each), highest total first, while HOT_ISSUE_MAX_COUNT_CALLS
+ * lasts: the run counts every repo's first candidate before any repo's second.
+ */
 export const HOT_ISSUE_MAX_CHECKED = 10;
 /**
  * Per-issue count calls per run, shared by every repo: with the list pages and
  * the releases it keeps a daily run under the Actions GITHUB_TOKEN's 1,000 core
- * requests an hour (33 repos × 10 × 3 would be 990 alone).
+ * requests an hour (33 repos × 10 × 3 would be 990 alone). Spent round-robin
+ * (`countHotIssues`), so the repos that list longest still get their turns.
  */
 export const HOT_ISSUE_MAX_COUNT_CALLS = 250;
 /**
@@ -447,10 +453,12 @@ async function fetchIssueActivity(
   repo: string,
   i: GitHubItem,
   since: Date,
-): Promise<{ activity: IssueActivity; calls: number }> {
+  /** Calls made so far, kept up to date so a failed fetch still reports what it spent. */
+  made: { calls: number },
+): Promise<IssueActivity> {
   const base = `https://api.github.com/repos/${repo}/issues/${i.number}`;
   const perPage = String(ACTIVITY_PAGE);
-  let calls = i.comments > 0 ? 1 : 0;
+  if (i.comments > 0) made.calls++;
   const comments =
     i.comments > 0
       ? await githubGet<{ created_at: string }[]>(`${base}/comments`, {
@@ -460,7 +468,7 @@ async function fetchIssueActivity(
       : [];
   const totalThumbs = i.reactions?.["+1"] ?? 0;
   const thumbsPage = (page: number) => {
-    calls++;
+    made.calls++;
     return githubGet<{ created_at: string }[]>(`${base}/reactions`, {
       content: "+1",
       per_page: perPage,
@@ -475,7 +483,7 @@ async function fetchIssueActivity(
       thumbs = [...(await thumbsPage(last - 1)), ...thumbs];
     }
   }
-  return { activity: { comments, thumbs }, calls };
+  return { comments, thumbs };
 }
 
 /** A run's GitHub calls for hot issues, summed over every repo (`hotIssueCallsLine`). */
@@ -486,6 +494,34 @@ export interface HotIssueCalls {
   skipped: number;
 }
 
+/** One repo's candidates waiting for the run's count phase, and the activity fetched for them. */
+interface QueuedRepo {
+  repo: string;
+  since: Date;
+  toCheck: GitHubItem[];
+  activity: Map<number, IssueActivity>;
+}
+
+/**
+ * The repos that have listed their issues; the count phase starts once all
+ * `repos` have joined. `repos` must equal the number of fetchHotIssues calls of
+ * the run, or the run waits forever.
+ */
+export interface HotIssueQueue {
+  repos: number;
+  entries: QueuedRepo[];
+  full: Promise<void>;
+  release: () => void;
+  counted?: Promise<void>;
+}
+
+export function newHotIssueQueue(repos: number): HotIssueQueue {
+  let release = () => {};
+  const full = new Promise<void>((resolve) => (release = resolve));
+  if (repos <= 0) release();
+  return { repos, entries: [], full, release };
+}
+
 /** A run's hot-issue inputs, shared by every repo; `seen` collects each listed issue's total for the snapshot. */
 export interface HotIssueRun {
   snapshot: HotIssueSnapshot;
@@ -493,6 +529,7 @@ export interface HotIssueRun {
   isRepeat: (repo: string) => (i: GitHubItem) => boolean;
   seen: Record<string, number>;
   calls: HotIssueCalls;
+  queue: HotIssueQueue;
 }
 
 export function newHotIssueCalls(): HotIssueCalls {
@@ -539,41 +576,75 @@ async function listUpdatedIssues(repo: string, since: Date, calls: HotIssueCalls
 }
 
 /**
+ * The run's count phase, once every repo has listed: in round k each repo's
+ * k-th candidate is counted, all repos in parallel, so every repo gets a turn
+ * before any gets another while HOT_ISSUE_MAX_COUNT_CALLS lasts. Within a round
+ * the higher total reserves first. A candidate past the cap is skipped.
+ */
+async function countHotIssues(queue: HotIssueQueue, calls: HotIssueCalls): Promise<void> {
+  const rounds = Math.max(0, ...queue.entries.map((e) => e.toCheck.length));
+  for (let k = 0; k < rounds; k++) {
+    const turn = queue.entries
+      .flatMap((e) => {
+        const issue = e.toCheck[k];
+        return issue ? [{ e, issue }] : [];
+      })
+      .sort((a, b) => issueEngagement(b.issue) - issueEngagement(a.issue));
+    await Promise.all(
+      turn.map(async ({ e, issue }) => {
+        // Reserved before the first await: the round's fetches run in parallel and share the cap.
+        const cost = maxActivityCalls(issue);
+        if (calls.countCalls + cost > HOT_ISSUE_MAX_COUNT_CALLS) {
+          calls.skipped++;
+          return;
+        }
+        calls.countCalls += cost;
+        const made = { calls: 0 };
+        try {
+          e.activity.set(issue.number, await fetchIssueActivity(e.repo, issue, e.since, made));
+        } catch (err) {
+          console.error(`  [github] ${e.repo}#${issue.number} engagement fetch failed, skipped: ${err}`);
+        } finally {
+          calls.countCalls -= cost - made.calls;
+        }
+      }),
+    );
+  }
+}
+
+/**
  * Hot issues for a repo. Every open issue updated since `since` is listed
  * (`listUpdatedIssues`) and its total goes into `run.seen`. The gain comes
  * from the snapshot or the issue's age where it can (`knownGain`), else from
- * the API for up to HOT_ISSUE_MAX_CHECKED candidates (one issue at a time),
- * while the run's HOT_ISSUE_MAX_COUNT_CALLS last. A failed gain fetch skips
- * that issue; a failed list should be treated as "no hot issues", not a failed repo.
+ * the API for up to HOT_ISSUE_MAX_CHECKED candidates, counted in the run's
+ * shared count phase (`countHotIssues`) once every repo has listed. A failed
+ * gain fetch skips that issue; a failed list should be treated as "no hot
+ * issues", not a failed repo.
  */
 export async function fetchHotIssues(repo: string, since: Date, run: HotIssueRun): Promise<HotIssue[]> {
-  const issues = await listUpdatedIssues(repo, since, run.calls);
-  for (const i of issues) run.seen[snapshotKey(repo, i)] = issueEngagement(i);
-  const activity = new Map<number, IssueActivity>();
-  const ctx: HotIssueContext = {
-    repo,
-    snapshot: run.snapshot,
-    dateStr: run.dateStr,
-    since,
-    isRepeat: run.isRepeat(repo),
-    activity,
-  };
-  for (const issue of hotIssuesToCheck(issues, ctx)) {
-    // Reserved before the first await: repos run in parallel and share the cap.
-    const cost = maxActivityCalls(issue);
-    if (run.calls.countCalls + cost > HOT_ISSUE_MAX_COUNT_CALLS) {
-      run.calls.skipped++;
-      continue;
-    }
-    run.calls.countCalls += cost;
-    try {
-      const fetched = await fetchIssueActivity(repo, issue, since);
-      run.calls.countCalls -= cost - fetched.calls;
-      activity.set(issue.number, fetched.activity);
-    } catch (err) {
-      console.error(`  [github] ${repo}#${issue.number} engagement fetch failed, skipped: ${err}`);
-    }
+  const entry: QueuedRepo = { repo, since, toCheck: [], activity: new Map() };
+  const { queue } = run;
+  let issues: GitHubItem[];
+  let ctx: HotIssueContext;
+  try {
+    issues = await listUpdatedIssues(repo, since, run.calls);
+    for (const i of issues) run.seen[snapshotKey(repo, i)] = issueEngagement(i);
+    ctx = {
+      repo,
+      snapshot: run.snapshot,
+      dateStr: run.dateStr,
+      since,
+      isRepeat: run.isRepeat(repo),
+      activity: entry.activity,
+    };
+    entry.toCheck = hotIssuesToCheck(issues, ctx);
+  } finally {
+    // A failed list still joins, with nothing to count: the count phase waits for every repo.
+    queue.entries.push(entry);
+    if (queue.entries.length >= queue.repos) queue.release();
   }
+  queue.counted ??= queue.full.then(() => countHotIssues(queue, run.calls));
+  await queue.counted;
   return selectHotIssues(issues, ctx);
 }
 

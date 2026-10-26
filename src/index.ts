@@ -16,6 +16,7 @@ import {
   loadHotIssueSnapshot,
   nextHotIssueSnapshot,
   newHotIssueCalls,
+  newHotIssueQueue,
   hotIssueCallsLine,
   type RepoConfig,
   fetchRecentReleases,
@@ -362,6 +363,10 @@ async function main(): Promise<void> {
     isRepeat: (repo) => isRepeatHotIssue(hotIssuesState, dateStr, repo),
     seen: {},
     calls: newHotIssueCalls(),
+    // One fetchHotIssues call per tracked repo (fetchAllData's fetchProject calls).
+    queue: newHotIssueQueue(
+      AGENTS.length + INFRA_REPOS.length + DATA_SECTIONS.flatMap((s) => s.repos).length,
+    ),
   };
   const {
     agentFetches,

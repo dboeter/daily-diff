@@ -15,6 +15,7 @@ import {
   HOT_ISSUE_MAX_PAGES,
   hotIssueCallsLine,
   newHotIssueCalls,
+  newHotIssueQueue,
   hotIssueCandidates,
   hotIssuesToCheck,
   hotIssueStateItem,
@@ -391,6 +392,7 @@ describe("fetchHotIssues", () => {
       isRepeat: () => () => false,
       seen: {},
       calls,
+      queue: newHotIssueQueue(1),
     };
     const hot = await fetchHotIssues("org/repo", SINCE, hotRun);
     return { hot, urls: paths(spy), seen: hotRun.seen, calls };
@@ -528,6 +530,52 @@ describe("fetchHotIssues", () => {
       4: { comments: [], thumbs: dated(150, BEFORE_WINDOW) },
     });
     expect(calls.countCalls).toBe(2);
+  });
+
+  it("gives back a failed count fetch's unspent calls", async () => {
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    // 2 reserved (comments and 👍); the comments call fails, so the 👍 call is never made.
+    const { calls } = await run([issue({ number: 1, comments: 30, thumbs: 5 })], { 1: "fail" });
+    expect(calls.countCalls).toBe(1);
+  });
+
+  it("counts every repo's first candidate before any repo's second, whichever lists last", async () => {
+    // small/repo finishes listing last, after big/repo could have spent the 3 calls the cap leaves.
+    const items: Record<string, GitHubItem[]> = {
+      "big/repo": Array.from({ length: 10 }, (_, n) => issue({ number: n + 1, comments: 50 + n })),
+      "small/repo": [issue({ number: 1, comments: 20 })],
+    };
+    const counted: string[] = [];
+    vi.spyOn(globalThis, "fetch").mockImplementation(async (input) => {
+      const url = new URL(String(input));
+      const json = (body: unknown) => ({ ok: true, json: () => Promise.resolve(body) }) as Response;
+      const list = /^\/repos\/(\w+\/repo)\/issues$/.exec(url.pathname);
+      if (list) {
+        if (list[1] === "small/repo") for (let n = 0; n < 50; n++) await Promise.resolve();
+        return json(items[list[1]!]);
+      }
+      counted.push(url.pathname);
+      return json(dated(3, IN_WINDOW));
+    });
+    const calls = { ...newHotIssueCalls(), countCalls: HOT_ISSUE_MAX_COUNT_CALLS - 3 };
+    const hotRun: HotIssueRun = {
+      snapshot: EMPTY,
+      dateStr: TODAY,
+      isRepeat: () => () => false,
+      seen: {},
+      calls,
+      queue: newHotIssueQueue(2),
+    };
+    await Promise.all([
+      fetchHotIssues("big/repo", SINCE, hotRun),
+      fetchHotIssues("small/repo", SINCE, hotRun),
+    ]);
+    expect(counted).toEqual([
+      "/repos/big/repo/issues/10/comments",
+      "/repos/small/repo/issues/1/comments",
+      "/repos/big/repo/issues/9/comments",
+    ]);
+    expect(calls).toMatchObject({ countCalls: HOT_ISSUE_MAX_COUNT_CALLS, skipped: 8 });
   });
 
   it("skips an issue whose gain fetch fails, keeping the others", async () => {

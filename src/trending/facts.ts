@@ -7,6 +7,7 @@
  * with different units.
  */
 
+import { TRENDS_FACTS as F, TRENDS_REPORT } from "../core/strings.ts";
 import { formatTokens } from "../sources/openrouter.ts";
 
 export interface FactsGithubRow {
@@ -37,6 +38,8 @@ export interface TrendsFactsInput {
 export const PROVIDER_TOP_N = 10;
 
 const fmt = (n: number) => n.toLocaleString("en-US");
+/** A table heading as the facts name it: without its leading emoji. */
+const tableName = (heading: string) => heading.replace(/^\p{Extended_Pictographic}\uFE0F?\s*/u, "");
 const link = (name: string, url: string) => (url ? `[${name}](${url})` : name);
 const maxBy = <T>(rows: T[], value: (r: T) => number | null): T | undefined => {
   let best: T | undefined;
@@ -74,7 +77,7 @@ function radarFigures(signal: string) {
 
 function radarFacts(radar: FactsRadarRow[]): string[] {
   if (!radar.length) return [];
-  const T = "Agent & Coding Tool Radar";
+  const T = tableName(TRENDS_REPORT.radarHeading);
   // One entry per source part, with its position in the table; sources are not compared.
   const parts = radar.flatMap((r, i) =>
     r.signals.map((s, j) => ({
@@ -88,35 +91,27 @@ function radarFacts(radar: FactsRadarRow[]): string[] {
   const at = (p: (typeof parts)[number]) => `${link(p.row.name, p.row.url)} (row ${p.pos})`;
   const ofSource = (s: string) => parts.filter((p) => p.source === s);
   const topTokens = maxBy(ofSource("OpenRouter"), (p) => p.f.tokens);
-  if (topTokens)
-    out.push(
-      `${T}, OpenRouter rows: most tokens in the last 7 days: ${at(topTokens)}, ${topTokens.f.tokensText}.`,
-    );
+  if (topTokens) out.push(F.radarTop(T, "OpenRouter", "tokens", at(topTokens), topTokens.f.tokensText));
   const topDownloads = maxBy(ofSource("npm"), (p) => p.f.downloads);
   if (topDownloads)
-    out.push(
-      `${T}, npm rows: most downloads in the last 7 days: ${at(topDownloads)}, ${topDownloads.f.downloadsText}.`,
-    );
+    out.push(F.radarTop(T, "npm", "downloads", at(topDownloads), topDownloads.f.downloadsText));
   const topStars = maxBy(ofSource("GitHub"), (p) => p.f.stars);
-  if (topStars)
-    out.push(
-      `${T}, GitHub rows: most stars gained in the last 7 days: ${at(topStars)}, ${topStars.f.starsText}.`,
-    );
+  if (topStars) out.push(F.radarTop(T, "GitHub", "stars gained", at(topStars), topStars.f.starsText));
   const topChange = maxBy(parts, (p) => p.f.change);
+  // A fall is no rise: with every change negative, the "largest" one is the smallest fall.
   out.push(
-    topChange
-      ? `${T}: largest change against last week's page: ${at(topChange)} (${topChange.source}), ${topChange.f.changeText}.`
-      : `${T}: no row has a "vs previous week" figure, so no Radar row grew or fell against last week on this page.`,
+    !topChange
+      ? F.radarNoChange(T)
+      : topChange.f.change! > 0
+        ? F.radarRise(T, at(topChange), topChange.source, topChange.f.changeText)
+        : F.radarNoRise(T),
   );
-  out.push(
-    `${T}: tokens, downloads and stars are different units; no Radar row is larger than a row of another source.`,
-  );
+  out.push(F.radarUnits(T));
   return out;
 }
 
 function gainFacts(tables: TrendsFactsInput["tables"]): string[] {
   const out: string[] = [];
-  const window = "stars gained in the last 7 days";
   const pair = (where: string, rows: (FactsGithubRow & { at: string })[]) => {
     const abs = maxBy(rows, (r) => r.gain);
     const rel = maxBy(rows, (r) => r.relative);
@@ -125,58 +120,63 @@ function gainFacts(tables: TrendsFactsInput["tables"]): string[] {
       `${link(r.fullName, r.url)} (${r.at}), ${r.starsCell}`;
     out.push(
       abs === rel
-        ? `${where} (${window}): largest absolute and largest relative gain: ${quote(abs)}.`
-        : `${where} (${window}): largest absolute gain: ${quote(abs)}; largest relative gain: ${rel ? quote(rel) : "none (no row shows a %)"}.`,
+        ? F.gainBoth(where, F.gainWindow, quote(abs))
+        : F.gainSplit(where, F.gainWindow, quote(abs), rel ? quote(rel) : null),
     );
   };
-  const located = tables.map((t) => ({
-    title: t.title,
-    rows: t.rows.map((r, i) => ({ ...r, at: `${t.title}, row ${i + 1}` })),
-  }));
-  for (const t of located) if (t.rows.length) pair(t.title, t.rows);
+  const located = tables
+    .filter((t) => t.rows.length)
+    .map((t) => ({
+      title: t.title,
+      rows: t.rows.map((r, i) => ({ ...r, at: `${t.title}, row ${i + 1}` })),
+    }));
+  for (const t of located) pair(t.title, t.rows);
   const all = located.flatMap((t) => t.rows);
-  if (located.filter((t) => t.rows.length).length > 1) {
-    pair(`Across the ${located.length} GitHub category tables (${all.length} rows)`, all);
-  }
+  if (located.length > 1) pair(F.gainAcross(located.length, all.length), all);
   return out;
 }
 
 function openRouterFacts({ models, date }: TrendsFactsInput["openrouter"]): string[] {
   if (!models.length) return [];
-  const T = `OpenRouter usage (one day's snapshot, on ${date})`;
-  const out = [`${T}: the table has ${models.length} rows.`];
+  const T = F.openRouterTitle(tableName(TRENDS_REPORT.openRouterHeading), date);
+  const out = [F.openRouterRows(T, models.length)];
   const [first, second] = models;
+  const at = (slug: string) => link(slug, `https://openrouter.ai/${slug}`);
   out.push(
-    `${T}: #1 is ${link(first!.slug, `https://openrouter.ai/${first!.slug}`)} with ${formatTokens(first!.tokens)} tokens` +
+    F.openRouterFirst(T, at(first!.slug), formatTokens(first!.tokens)) +
       (second
-        ? `; #2 is ${link(second.slug, `https://openrouter.ai/${second.slug}`)} with ${formatTokens(second.tokens)} (#1 has ${(first!.tokens / second.tokens).toFixed(1)}× #2's tokens).`
+        ? F.openRouterSecond(at(second.slug), formatTokens(second.tokens)) +
+          (second.tokens > 0 ? F.openRouterRatio((first!.tokens / second.tokens).toFixed(1)) : "") +
+          "."
         : "."),
   );
   const top = models.slice(0, PROVIDER_TOP_N);
   const counts = new Map<string, number>();
   for (const m of top) {
-    const provider = m.slug.split("/")[0]!;
+    // "~anthropic/claude-x" is an alias slug of the same provider.
+    const slug = m.slug.replace(/^~/, "");
+    const provider = slug.includes("/") ? slug.split("/")[0]! : F.openRouterNoProvider;
     counts.set(provider, (counts.get(provider) ?? 0) + 1);
   }
   const listed = [...counts].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
-  out.push(
-    `${T}: models per provider within the top ${top.length} (by the slug's provider prefix): ` +
-      `${listed.map(([p, n]) => `${p} ${n}`).join(", ")}. Counts are for the top ${top.length} only, not the whole table.`,
-  );
+  out.push(F.openRouterProviders(T, top.length, listed.map(([p, n]) => `${p} ${n}`).join(", ")));
   return out;
 }
 
 function hfFacts(hf: TrendsFactsInput["hf"]): string[] {
   if (!hf.length) return [];
-  const T = "Hugging Face trending";
+  const T = tableName(TRENDS_REPORT.hfHeading);
   const likes = maxBy(hf, (r) => r.likes)!;
   const downloads = maxBy(hf, (r) => r.downloads)!;
   const pos = (r: (typeof hf)[number]) => `#${hf.indexOf(r) + 1}`;
   return [
-    `${T}: rows are in the Hub's order by likes gained in the last 7 days, a figure the page does not show. ` +
-      `Likes is each model's total and Downloads its last 30 days: neither is a gain, so no row "gained" likes or downloads.`,
-    `${T}: #1 in the Hub's order is ${link(hf[0]!.id, hf[0]!.url)}; most total likes: ${link(likes.id, likes.url)} (${pos(likes)}), ${fmt(likes.likes)}; ` +
-      `most downloads in 30 days: ${link(downloads.id, downloads.url)} (${pos(downloads)}), ${fmt(downloads.downloads)}.`,
+    F.hfOrder(T),
+    F.hfLeaders(
+      T,
+      link(hf[0]!.id, hf[0]!.url),
+      `${link(likes.id, likes.url)} (${pos(likes)}), ${fmt(likes.likes)}`,
+      `${link(downloads.id, downloads.url)} (${pos(downloads)}), ${fmt(downloads.downloads)}`,
+    ),
   ];
 }
 

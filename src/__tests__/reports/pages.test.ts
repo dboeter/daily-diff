@@ -1468,6 +1468,20 @@ describe("checkTrendsLinks", () => {
     log.mockRestore();
   });
 
+  it("treats each list item as a Signal and keeps a sub-heading", () => {
+    const log = vi.spyOn(console, "log").mockImplementation(() => {});
+    const p = prose([
+      "### Agents",
+      "- [a/b](https://x) gained most.\n- Stars rose overall.\n- [c/d](https://y) fell.",
+    ]);
+    expect(checkTrendsLinks(p)).toBe(
+      prose(["### Agents", "- [a/b](https://x) gained most.\n- [c/d](https://y) fell."]),
+    );
+    expect(log).toHaveBeenCalledTimes(1);
+    expect(log).toHaveBeenCalledWith("  [trends] Signal without a link: - Stars rose overall.");
+    log.mockRestore();
+  });
+
   it("logs a Highlight without a link and keeps it", () => {
     const log = vi.spyOn(console, "log").mockImplementation(() => {});
     const p = prose(["[a](https://x) one."], "- Plain bullet.\n- [B](https://b) linked.");

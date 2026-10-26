@@ -330,3 +330,41 @@ export const REPORT_LABELS: Record<string, string> = {
   "ai-weekly": "AI Tools Weekly Digest",
   "ai-monthly": "AI Tools Monthly Digest",
 };
+
+/**
+ * Trends' facts block (`trendsFacts`, src/trending/facts.ts): the sentences code fills with the
+ * figures it computed. `t` is the table's name, `at` a linked row with its position.
+ */
+export const TRENDS_FACTS = {
+  radarTop: (t: string, source: string, what: string, at: string, figure: string) =>
+    `${t}, ${source} rows: most ${what} in the last 7 days: ${at}, ${figure}.`,
+  radarRise: (t: string, at: string, source: string, figure: string) =>
+    `${t}: largest rise against last week's page: ${at} (${source}), ${figure}.`,
+  radarNoRise: (t: string) =>
+    `${t}: no row rose against last week's page: every "vs previous week" figure is a fall or zero.`,
+  radarNoChange: (t: string) =>
+    `${t}: no row has a "vs previous week" figure, so no Radar row grew or fell against last week on this page.`,
+  radarUnits: (t: string) =>
+    `${t}: tokens, downloads and stars are different units; no Radar row is larger than a row of another source.`,
+  gainWindow: "stars gained in the last 7 days",
+  gainBoth: (where: string, window: string, row: string) =>
+    `${where} (${window}): largest absolute and largest relative gain: ${row}.`,
+  gainSplit: (where: string, window: string, abs: string, rel: string | null) =>
+    `${where} (${window}): largest absolute gain: ${abs}; largest relative gain: ${rel ?? "none (no row shows a %)"}.`,
+  gainAcross: (tables: number, rows: number) => `Across the ${tables} GitHub category tables (${rows} rows)`,
+  openRouterTitle: (t: string, date: string) => `${t} (one day's snapshot, on ${date})`,
+  openRouterRows: (t: string, rows: number) => `${t}: the table has ${rows} rows.`,
+  openRouterFirst: (t: string, at: string, tokens: string) => `${t}: #1 is ${at} with ${tokens} tokens`,
+  openRouterSecond: (at: string, tokens: string) => `; #2 is ${at} with ${tokens}`,
+  openRouterRatio: (ratio: string) => ` (#1 has ${ratio}× #2's tokens)`,
+  openRouterProviders: (t: string, top: number, listed: string) =>
+    `${t}: models per provider within the top ${top} (by the slug's provider prefix): ${listed}. ` +
+    `Counts are for the top ${top} only, not the whole table.`,
+  /** A slug with no provider prefix (no "/"). */
+  openRouterNoProvider: "no provider prefix",
+  hfOrder: (t: string) =>
+    `${t}: rows are in the Hub's order by likes gained in the last 7 days, a figure the page does not show. ` +
+    `Likes is each model's total and Downloads its last 30 days: neither is a gain, so no row "gained" likes or downloads.`,
+  hfLeaders: (t: string, first: string, likes: string, downloads: string) =>
+    `${t}: #1 in the Hub's order is ${first}; most total likes: ${likes}; most downloads in 30 days: ${downloads}.`,
+};

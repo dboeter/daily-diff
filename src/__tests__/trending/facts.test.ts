@@ -134,8 +134,63 @@ describe("trendsFacts", () => {
       }),
     );
     expect(withChange).toContain(
-      "largest change against last week's page: [pi](u) (row 1) (OpenRouter), +12% vs previous week.",
+      "largest rise against last week's page: [pi](u) (row 1) (OpenRouter), +12% vs previous week.",
     );
+  });
+
+  it("names no largest rise when every vs previous week change is a fall", () => {
+    const facts = trendsFacts(
+      input({
+        radar: [
+          {
+            name: "pi",
+            url: "u",
+            sources: ["npm"],
+            signals: ["9,000 downloads/week (-20% vs previous week)"],
+          },
+          {
+            name: "qa",
+            url: "v",
+            sources: ["npm"],
+            signals: ["8,000 downloads/week (-35% vs previous week)"],
+          },
+        ],
+      }),
+    );
+    expect(facts).not.toContain("largest");
+    expect(facts).toContain("Agent & Coding Tool Radar: no row rose against last week's page");
+    expect(facts).not.toContain("🚀");
+  });
+
+  it("counts only non-empty tables across tables", () => {
+    const facts = trendsFacts(
+      input({
+        tables: [
+          { title: "A", rows: [repo("a/a", 10, 0.1, "x")] },
+          { title: "B", rows: [] },
+          { title: "C", rows: [repo("c/c", 20, 0.2, "y")] },
+        ],
+      }),
+    );
+    expect(facts).toContain("Across the 2 GitHub category tables (2 rows)");
+  });
+
+  it("gives no ratio against a #2 with 0 tokens and buckets slugs by their real provider", () => {
+    const facts = trendsFacts(
+      input({
+        openrouter: {
+          models: [
+            { slug: "~anthropic/claude-latest", tokens: 5e12 },
+            { slug: "anthropic/claude-x", tokens: 0 },
+            { slug: "openrouter-auto", tokens: 0 },
+          ],
+          date: "2026-10-25",
+        },
+      }),
+    );
+    expect(facts).not.toContain("Infinity");
+    expect(facts).not.toContain("×");
+    expect(facts).toContain("anthropic 2, no provider prefix 1.");
   });
 
   it("is empty without rows", () => {

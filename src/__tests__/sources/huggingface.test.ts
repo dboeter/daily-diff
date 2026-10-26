@@ -114,6 +114,25 @@ describe("hfReleaseRows", () => {
   it("keeps a copy of a different size apart from the release its name extends", () => {
     expect(isVariantOf("unsloth/Qwen3.6-35B-A3B-GGUF", "Qwen/Qwen3.6")).toBe(false);
     expect(isVariantOf("unsloth/Qwen3.6-GGUF", "Qwen/Qwen3.6")).toBe(true);
+  });
+
+  it.each([
+    "-i1-GGUF",
+    "-FP8-Dynamic",
+    "-bf16",
+    "-fp16",
+    "-4bit-DWQ",
+    "-8bit",
+    "-int4",
+    "-AWQ",
+    "-GPTQ-Int4",
+    "-MLX-4bit",
+    "-exl2",
+    "-Q4_K_M",
+    "-GGUF-IQ3_XXS",
+  ])("folds the quantised copy with suffix %s into its release", (suffix) => {
+    expect(isVariantOf(`o/Qwen3.6-27B${suffix}`, "Qwen/Qwen3.6-27B")).toBe(true);
+    expect(isVariantOf(`o/Qwen3.6-35B-A3B${suffix}`, "Qwen/Qwen3.6")).toBe(false);
     const m = (id: string) => ({ ...fixture.models[0]!, id });
     const rows = hfReleaseRows([m("Qwen/Qwen3.6"), m("unsloth/Qwen3.6-35B-A3B-GGUF")]);
     expect(rows.map((r) => [r.id, r.variants.length])).toEqual([
@@ -154,6 +173,8 @@ describe("formatParameters", () => {
 
   it("rounds down without a name size: 0.6B, 7.6B, 27.4B, 1.2T", () => {
     expect(formatParameters(0.6e9)).toBe("600M");
+    expect(formatParameters(135e3)).toBe("135K");
+    expect(formatParameters(400)).toBe("<1K");
     expect(formatParameters(7.69e9)).toBe("7.6B");
     expect(formatParameters(27.4e9)).toBe("27B");
     expect(formatParameters(27.78e9)).toBe("27B");

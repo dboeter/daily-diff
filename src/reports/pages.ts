@@ -145,16 +145,28 @@ export function checkTrendsLinks(prose: string): string {
   const heading = `## ${SECTIONS.signals}`;
   const h = tail.indexOf(heading);
   if (h === -1) return prose;
-  const paragraphs = tail
-    .slice(h + heading.length)
-    .split(/\n\s*\n/)
-    .map((p) => p.trim())
-    .filter(Boolean);
-  const unlinked = paragraphs.filter((p) => !hasLink(p));
-  for (const p of unlinked) console.log(`  [trends] Signal without a link: ${p.slice(0, 80)}`);
-  if (!unlinked.length || unlinked.length === paragraphs.length) return prose;
-  const kept = paragraphs.filter(hasLink);
-  return `${prose.slice(0, at + TABLES_MARKER.length)}${tail.slice(0, h)}${heading}\n\n${kept.join("\n\n")}\n`;
+  // A Signal is a list item (with its indented continuation lines) or a paragraph; a heading is
+  // never one, and is always kept.
+  const lines = tail.slice(h + heading.length).split("\n");
+  const signals: number[][] = [];
+  let open: number[] | null = null;
+  lines.forEach((line, n) => {
+    const text = line.trim();
+    if (!text || text.startsWith("#")) open = null;
+    else if (/^([-*]|\d+[.)])\s/.test(text) || !open) signals.push((open = [n]));
+    else open.push(n);
+  });
+  const textOf = (s: number[]) => s.map((n) => lines[n]!.trim()).join(" ");
+  const unlinked = signals.filter((s) => !hasLink(textOf(s)));
+  for (const s of unlinked) console.log(`  [trends] Signal without a link: ${textOf(s).slice(0, 80)}`);
+  if (!unlinked.length || unlinked.length === signals.length) return prose;
+  const dropped = new Set(unlinked.flat());
+  const body = lines
+    .filter((_, n) => !dropped.has(n))
+    .join("\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+  return `${prose.slice(0, at + TABLES_MARKER.length)}${tail.slice(0, h)}${heading}\n\n${body}\n`;
 }
 
 /**
@@ -166,7 +178,7 @@ export function checkTrendsLinks(prose: string): string {
  * call (the Most discussed rows come summarized from main()'s Spotted call).
  * Second round: the prose call over the page rendered from them and the
  * code-computed comparisons (`trendsFacts`) writes Highlights and Signals,
- * checkTrendsLinks drops a Signal without a link, and spliceTables puts the
+ * checkTrendsLinks drops a Signal (a list item or paragraph) without a link, and spliceTables puts the
  * page between them; a row
  * showing "—" is named to it as no Highlight. A failed summaries call shows the
  * descriptions (Hugging Face: task and size), a failed prose call the notice

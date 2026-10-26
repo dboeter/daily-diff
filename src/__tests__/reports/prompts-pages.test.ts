@@ -17,6 +17,7 @@ import {
   firstHighlight,
   forcedHighlightReports,
   withFallbackHighlights,
+  restatesLead,
 } from "../../reports/prompts-pages.ts";
 import { TABLES_MARKER, numberRows, parseRowSummaries } from "../../reports/summarized-table.ts";
 import {
@@ -356,6 +357,37 @@ describe("withFallbackHighlights", () => {
         [],
       ),
     ).toEqual({ "ai-agents": ["A ships"] });
+  });
+
+  it("signs only the highlight that restates a signed lead, and none when none does", () => {
+    const data = "## Highlights\n\n- − **Polars** py-2.1.0 disallows mixed arithmetic. More.";
+    const sign = (items: string[]) =>
+      withFallbackHighlights({ "ai-data": items }, { "ai-data": data }, [])["ai-data"];
+    expect(sign(["Snowflake ships dynamic tables", "Polars py-2.1.0 disallows mixed arithmetic"])).toEqual([
+      "Snowflake ships dynamic tables",
+      "− Polars py-2.1.0 disallows mixed arithmetic",
+    ]);
+    expect(sign(["Snowflake ships dynamic tables", "dbt Core 1.11 ships"])).toEqual([
+      "Snowflake ships dynamic tables",
+      "dbt Core 1.11 ships",
+    ]);
+    expect(sign(["− Polars drops mixed arithmetic", "Polars mixed arithmetic"])).toEqual([
+      "− Polars drops mixed arithmetic",
+      "Polars mixed arithmetic",
+    ]);
+    expect(restatesLead("Snowflake ships X", "− Polars py-2.1.0 disallows mixed arithmetic.")).toBe(false);
+  });
+
+  it("sends a report whose Highlights failed as its page, so a forced report can still get one", () => {
+    const page =
+      "## Highlights\n\n⚠️ Summary generation failed.\n\n## Databricks\n\n| Item | Summary |\n| --- | --- |\n| [Lakebase GA](https://x) | Lakebase is generally available. |";
+    const prompt = buildHighlightsPrompt({ "ai-data": page }, ["ai-data"]);
+    const section = prompt.slice(prompt.indexOf("## [ai-data]"));
+    expect(section).toContain("Lakebase is generally available.");
+    expect(section).not.toContain("Summary generation failed");
+    expect(
+      buildHighlightsPrompt({ "ai-data": "## Highlights\n\n- A ships.\n\n## Databricks\n\n| row |" }),
+    ).not.toContain("| row |");
   });
 
   it("forces ai-data only on a day with kept vendor items", () => {

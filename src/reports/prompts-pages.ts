@@ -370,9 +370,18 @@ export interface ReportHighlights {
 // section labels, keeps the worst case under that limit.
 const HIGHLIGHTS_MAX_PER_REPORT = 2;
 const HIGHLIGHT_MAX_CHARS = 140;
-// A report saved before its page had a Highlights section (the archive before October 2026) is sent
-// as its first 8000 chars, so scripts/regen-highlights.ts still covers an old date.
+// A report saved before its page had a Highlights section (the archive before October 2026), or
+// whose Highlights are a failure notice (a failed prose call), is sent as its first 8000 chars, so
+// scripts/regen-highlights.ts still covers an old date and a forced report still gets a highlight.
 const HIGHLIGHTS_EXCERPT_CHARS = 8000;
+
+/** What highlights.json's prompt sees of a report: its Highlights section, else its page without the failed section. */
+function highlightsInput(md: string): string {
+  const section = highlightsSection(md);
+  const body = section?.slice(`## ${SECTIONS.highlights}`.length).trim();
+  if (section && body && !FAILURE_NOTICES.has(body)) return section;
+  return (section ? md.replace(section, "") : md).trim().slice(0, HIGHLIGHTS_EXCERPT_CHARS);
+}
 
 /**
  * A report's `## Highlights` section (heading included), up to the next heading, `---` rule or
@@ -403,10 +412,7 @@ export function buildHighlightsPrompt(
     : "";
 
   const sections = Object.entries(reportContents)
-    .map(
-      ([id, content]) =>
-        `## [${id}]\n\n${highlightsSection(content) ?? content.slice(0, HIGHLIGHTS_EXCERPT_CHARS)}`,
-    )
+    .map(([id, content]) => `## [${id}]\n\n${highlightsInput(content)}`)
     .join("\n\n---\n\n");
 
   // The count is a maximum, not a quota, and the exclusion list is explicit: a
@@ -460,9 +466,26 @@ export function forcedHighlightReports(hasVendorItems: boolean): string[] {
   return hasVendorItems ? ["ai-policy", "ai-data"] : ["ai-policy"];
 }
 
+// A highlight restates the lead when at least this share of its words (3+ letters) are in the lead.
+const LEAD_MATCH_MIN = 0.5;
+const leadWords = (s: string) =>
+  new Set(
+    s
+      .toLowerCase()
+      .split(/[^\p{L}\p{N}]+/u)
+      .filter((w) => w.length >= 3),
+  );
+
+/** Whether `highlight` restates `lead`: most of its words are the lead's. */
+export function restatesLead(highlight: string, lead: string): boolean {
+  const words = [...leadWords(highlight)];
+  const inLead = leadWords(lead);
+  return words.length > 0 && words.filter((w) => inLead.has(w)).length / words.length >= LEAD_MATCH_MIN;
+}
+
 /**
- * The highlights as saved: each one's going-away sign normalized (`signHighlight`), a report's
- * first one signed when its page's lead bullet is, with a
+ * The highlights as saved: each one's going-away sign normalized (`signHighlight`), the one
+ * entry that restates a signed page lead signed too, with a
  * fallback for each `forced` report the model left out: the first sentence of that report's own
  * Highlights section.
  */
@@ -474,12 +497,14 @@ export function withFallbackHighlights(
   const out = Object.fromEntries(
     Object.entries(highlights).map(([id, items]) => [id, items.map(signHighlight)]),
   );
-  // The prompt has a report's first highlight cover its page's lead bullet, so a lead signed going
-  // away keeps its sign; the model dropped it on the Polars lead (regen of 2026-10-26).
+  // A lead signed going away keeps its sign on the highlight that restates it: the model dropped it
+  // on the Polars lead (regen of 2026-10-26). Only on a match: the first highlight may be another item.
   for (const [id, items] of Object.entries(out)) {
     const lead = reportContents[id] ? firstHighlight(reportContents[id]) : null;
-    if (items[0] && lead?.startsWith(`${GOING_AWAY} `) && !items[0].startsWith(`${GOING_AWAY} `))
-      items[0] = `${GOING_AWAY} ${items[0]}`;
+    if (!lead?.startsWith(`${GOING_AWAY} `)) continue;
+    if (items.some((h) => h.startsWith(`${GOING_AWAY} `) && restatesLead(h, lead))) continue;
+    const k = items.findIndex((h) => !h.startsWith(`${GOING_AWAY} `) && restatesLead(h, lead));
+    if (k >= 0) items[k] = `${GOING_AWAY} ${items[k]}`;
   }
   for (const id of forced) {
     const content = reportContents[id];

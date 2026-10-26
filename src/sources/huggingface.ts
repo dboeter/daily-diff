@@ -121,8 +121,12 @@ const UNCENSORED_RE = /uncensored|abliterated/i;
  * A name segment that marks a quantised or reformatted copy of a release. GSQ and RCO are
  * from `ISTA-DASLab/DeepSeek-V4.1-Flash-1017-GSQ-RCO-GGUF` (2026-10-26).
  */
-const VARIANT_TOKEN_RE =
-  /^(?:gguf|fp8|fp4|nvfp4|awq|gptq|gsq|rco|mlx|bnb|int4|int8|[2-8]bit|exl2|exl3|quantized|onnx)$/i;
+// i1 is mradermacher's imatrix set; Dynamic, DWQ and bf16/fp16 name a quantisation or a precision,
+// not another release. A GGUF quant type (Q4_K_M, IQ3_XXS, Q8_0) carries underscores, so the
+// suffix is matched whole rather than split on them.
+const VARIANT_TOKEN =
+  "(?:gguf|fp8|fp4|fp16|bf16|nvfp4|awq|gptq|gsq|rco|mlx|bnb|int4|int8|[2-8]bit|dwq|dynamic|i1|exl2|exl3|quantized|onnx|i?q[1-8](?:_(?:k|0|1|[sml]|xs|xxs|nl))*)";
+const VARIANT_SUFFIX_RE = new RegExp(`^${VARIANT_TOKEN}(?:[-_]${VARIANT_TOKEN})*$`, "i");
 
 /** One release: its original upload and the quantised copies of it in the same list. */
 export interface HfRow extends HfModel {
@@ -141,10 +145,7 @@ export function isVariantOf(variant: string, base: string): boolean {
   const v = baseName(variant);
   const b = baseName(base);
   if (!v.startsWith(`${b}-`)) return false;
-  return v
-    .slice(b.length + 1)
-    .split(/[-_]/)
-    .every((seg) => VARIANT_TOKEN_RE.test(seg));
+  return VARIANT_SUFFIX_RE.test(v.slice(b.length + 1));
 }
 
 /**
@@ -194,7 +195,8 @@ export function formatParameters(n: number, name = ""): string {
   const down = (x: number, digits: number) => Math.floor(x * 10 ** digits) / 10 ** digits;
   if (n >= 1e12) return `${down(n / 1e12, 1)}T`;
   if (n >= 1e9) return `${down(n / 1e9, n >= 1e10 ? 0 : 1)}B`;
-  return `${Math.floor(n / 1e6)}M`;
+  if (n >= 1e6) return `${Math.floor(n / 1e6)}M`;
+  return n >= 1e3 ? `${Math.floor(n / 1e3)}K` : "<1K";
 }
 
 /**
