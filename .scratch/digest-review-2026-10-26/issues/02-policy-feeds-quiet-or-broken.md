@@ -1,6 +1,6 @@
 # 02: Policy feeds: quiet or broken?
 
-Status: partial
+Status: done
 Blocked by: None (can start immediately)
 Findings: X1, X8 — see `../review.md`
 
@@ -9,7 +9,7 @@ Findings: X1, X8 — see `../review.md`
 On 2026-10-25 and 2026-10-26 AI Policy kept 0 of 99 judged items and the page was skipped. The judged items held nothing from any EU primary source, Tweede Kamer, Internetconsultatie, AP, Regulations.gov or Congress.gov; 94 of 99 were cached verdicts. Find out from the run logs whether those feeds were quiet or failing, and fix any that fail.
 
 - [x] The fetch outcome of every policy source on 10-25 and 10-26 is established from the workflow logs and written into this ticket's Comments
-- [ ] Every failing source is fixed, or recorded with its cause if it cannot be fixed now
+- [x] Every failing source is fixed, or recorded with its cause if it cannot be fixed now
 - [x] AGENTS.md's Open States sentence ("has never returned a live response") matches reality: the 10-26 trace holds two Open States items
 
 ## Comments
@@ -36,3 +36,5 @@ On 2026-10-25 and 2026-10-26 AI Policy kept 0 of 99 judged items and the page wa
 So the EU-primary gap is one cause: the Commission's digital-strategy site refuses GitHub's runner IPs. The other primary sources answered; the items they returned were judged and dropped (see ticket 13 for the DHS case).
 
 **Not fixed: the Commission 403.** The site's WAF blocks datacenter IPs; working around it (spoofed browser headers, proxies) would be bot-check circumvention, so it is out of scope. Options for the maintainer: let Commission mail items keep the email's own title and link when the redirect cannot be resolved (this reverses 866a2e6's no-fallback-id choice, so a later RSS copy could repeat it), or fetch the feed from a non-datacenter host. Recorded in AGENTS.md (AI Policy, Sources) and next to the feed in `config.yml`. Ticket 01's quiet-source warning now flags it after 7 days.
+
+**Maintainer decision (2026-10-27): option A.** A Commission mail item whose redirect cannot be resolved keeps the mail's title under the site's redirect for its newsroom item (`https://digital-strategy.ec.europa.eu/news-redirect/<item>`, where CI's requests stop on the 403), as id and link. The id is stable across nights; an item that resolves one night and not another is reported twice, accepted because on CI it never resolves. The RSS feed stays blocked on CI, recorded above.

@@ -95,7 +95,7 @@ describe("fetchCommissionMail", () => {
     expect((fetchSpy.mock.calls[0]![1]?.headers as Record<string, string>)["Authorization"]).toBe("Bearer k");
   });
 
-  it("skips an item whose id cannot be read this run, so a later run reports it under its own id", async () => {
+  it("keeps an item whose page cannot be read, under the site's redirect for its newsroom item", async () => {
     vi.stubEnv("AGENTMAIL_API_KEY", "k");
     const error = vi.spyOn(console, "error").mockImplementation(() => {});
     vi.spyOn(globalThis, "fetch").mockImplementation(async (input) => {
@@ -104,14 +104,25 @@ describe("fetchCommissionMail", () => {
       if (url.includes("/messages?"))
         return Response.json({ messages: [{ message_id: "m", timestamp: "2026-10-21T15:09:24.000Z" }] });
       if (url.includes("/messages/")) return Response.json({ html: HTML });
-      // 961653 fails, 961628 is a site page without its node (a block page); 961661 resolves.
+      // 961653 fails; 961628 stops on the site's 403 block page (as on CI, 2026-10-26); 961661 resolves.
       if (url.includes("/961653/")) throw new TypeError("fetch failed");
-      if (url.includes("/961628/")) return redirected("https://digital-strategy.ec.europa.eu/en/page");
+      if (url.includes("/961628/"))
+        return redirected("https://digital-strategy.ec.europa.eu/news-redirect/961628");
       return redirected("https://digital-strategy.ec.europa.eu/en/gpai", page(17594));
     });
-    expect((await fetchCommissionMail(ctx)).map((i) => i.id)).toEqual([
-      "17594 at https://digital-strategy.ec.europa.eu",
+    const items = await fetchCommissionMail(ctx);
+    expect(items.map((i) => [i.id, i.link])).toEqual([
+      [
+        "https://digital-strategy.ec.europa.eu/news-redirect/961653",
+        "https://digital-strategy.ec.europa.eu/news-redirect/961653",
+      ],
+      [
+        "https://digital-strategy.ec.europa.eu/news-redirect/961628",
+        "https://digital-strategy.ec.europa.eu/news-redirect/961628",
+      ],
+      ["17594 at https://digital-strategy.ec.europa.eu", "https://digital-strategy.ec.europa.eu/en/gpai"],
     ]);
+    expect(items[0]!.title).not.toBe("");
     expect(error).toHaveBeenCalledTimes(2);
   });
 
