@@ -1,0 +1,18 @@
+{
+  "ai-agents": [
+    "Hermes Agent loads ~/.hermes/.env with override=True, letting a malicious file silently relocate the agent's identity and policy on next start",
+    "Claude Code Opus usage limits drain ~5× faster on macOS, hitting 72% weekly quota in two days"
+  ],
+  "ai-models": [
+    "OpenAI launches GPT-6.1 Terra (mid-tier, 1.1M context) and Terra Pro (reasoning mode) on OpenRouter for agentic, coding, writing work",
+    "Security research finds data-leakage in popular open-weight Cohere model and cross-request KV cache exposure in GLM-5.3 on Cloudflare Workers AI"
+  ],
+  "ai-policy": [
+    "Dutch government letter on protecting authors in AI era signals emerging copyright obligations for generative AI deployments",
+    "CSET explainer on black-box distillation informs policy debates on adversarial distillation and model extraction risks for U.S. model deployers"
+  ],
+  "ai-data": [
+    "− Snowflake Connector for Python v4.8.1 drops Python 3.10 support (minimum now 3.11); users on 3.10 must upgrade runtime",
+    "Azure Databricks compliance-profile workspaces get Lakeflow Performance Observability by default Nov 25, adding job-level query metrics and Genie Code Optimize button"
+  ]
+}
