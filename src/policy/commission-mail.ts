@@ -62,15 +62,21 @@ const SITE = "https://digital-strategy.ec.europa.eu";
 /** The Drupal node of a digital-strategy page, from its settings JSON ("currentPath":"node\/17580"). */
 const NODE_RE = /"currentPath":"node\\\/(\d+)"/;
 
+/** The newsroom item number in a redirect (".../redirection/item/961419/en/2549"). */
+const NEWSROOM_ITEM_RE = /\/redirection\/item\/(\d+)/;
+
 /**
  * The redirect's target page and the item's id. The site's RSS feed keys its items on the Drupal
  * guid ("17580 at https://digital-strategy.ec.europa.eu"), so a page of the site gets that id: the
  * mail's copy of an RSS item is then the same item, in this run and in the reported state. Any
  * status will do: the Funding & Tenders portal answers 404 to this client after redirecting.
- * Null when the redirect fails or a site page shows no node: a fallback id would differ from the
- * next night's and report the item twice, so it waits for a later run within the news window.
+ * When the redirect fails or a site page shows no node (the site answers HTTP 403 to GitHub's
+ * runners), the item keeps the mail's title under the site's own redirect for its newsroom item,
+ * which a browser follows to the page. That id is stable across nights, but differs from the
+ * node id, so an item one night resolves and another does not is reported twice (accepted:
+ * on CI the site never resolves).
  */
-async function resolve(redirect: string): Promise<{ link: string; id: string } | null> {
+async function resolve(redirect: string): Promise<{ link: string; id: string }> {
   try {
     const res = await fetch(redirect, {
       headers: { "User-Agent": "daily-diff/1.0" },
@@ -83,8 +89,10 @@ async function resolve(redirect: string): Promise<{ link: string; id: string } |
     if (!node) throw new Error(`HTTP ${res.status}, no node id on ${link}`);
     return { link, id: `${node} at ${SITE}` };
   } catch (err) {
-    console.error(`  [policy] Commission mail: ${redirect} skipped this run: ${err}`);
-    return null;
+    const item = redirect.match(NEWSROOM_ITEM_RE)?.[1];
+    const link = item ? `${SITE}/news-redirect/${item}` : redirect;
+    console.error(`  [policy] Commission mail: ${redirect} unresolved, linked as ${link}: ${err}`);
+    return { link, id: link };
   }
 }
 
@@ -119,8 +127,8 @@ export async function fetchCommissionMail(ctx: PolicySourceContext): Promise<Pol
   const targets = await Promise.all(items.map((i) => resolve(i.redirect)));
   const byId = new Map<string, PolicyItem>();
   items.forEach((item, n) => {
-    const target = targets[n];
-    if (!target || byId.has(target.id)) return;
+    const target = targets[n]!;
+    if (byId.has(target.id)) return;
     byId.set(target.id, {
       id: target.id,
       title: item.title,

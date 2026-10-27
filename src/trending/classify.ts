@@ -11,8 +11,18 @@
 
 import { createHash } from "node:crypto";
 import path from "node:path";
-import { judgeItems, loadItemsFile, saveItemsFile, type AskJev, type VerdictCache } from "../core/jev.ts";
-import type { Category, GithubRow } from "./rank.ts";
+import {
+  droppedFor,
+  judgeItems,
+  loadItemsFile,
+  renderedAt,
+  saveItemsFile,
+  type AskJev,
+  type DroppedReason,
+  type SourceCounts,
+  type VerdictCache,
+} from "../core/jev.ts";
+import type { Category, GithubRow, TrendingReportData } from "./rank.ts";
 import type { SearchTopic } from "./compose.ts";
 import type { OpenRouterApp } from "../sources/openrouter.ts";
 import type { NpmPackage } from "./npm.ts";
@@ -367,10 +377,23 @@ export function buildTrendingTraceFile(
   classifiedBy: "jev" | "topics",
   matches: MatchTrace[],
   matchModels: string[] = [],
+  /** The selected report, why each other item got no row, and the per-source fetch counts. */
+  selection?: { report: TrendingReportData; dropped: Map<string, DroppedReason>; sources: SourceCounts },
 ): string {
   const round = (n: number): number => Math.round(n * 1000) / 1000;
   const roundAll = (p: Record<string, number> | undefined) =>
     p && Object.fromEntries(Object.entries(p).map(([k, v]) => [k, round(v)]));
+  const rowOf = new Map<string, number>();
+  if (selection) {
+    for (const r of selection.report.radar) for (const k of r.keys) rowOf.set(k, r.n);
+    for (const g of selection.report.categories) for (const r of g.rows) rowOf.set(r.key, r.n);
+  }
+  const outcome = (key: string) => {
+    if (!selection) return {};
+    const n = rowOf.get(key);
+    // No reason recorded: the item never became a Radar candidate (`buildRadarCandidates`' bars).
+    return n !== undefined ? renderedAt(n) : droppedFor(selection.dropped.get(key) ?? "threshold");
+  };
   const itemLines = items.map((item) => {
     const c = classifications.get(item.key);
     const [name] = itemText(item);
@@ -386,6 +409,7 @@ export function buildTrendingTraceFile(
       relative: row?.relative == null ? null : round(row.relative),
       // A saved verdict shows the probabilities it was saved with (none on a migrated or hand-added entry).
       ...(c?.decided ? { decided: c.decided } : {}),
+      ...outcome(item.key),
     });
   });
   const matchLines = matches.map((m) => JSON.stringify({ ...m, probabilities: roundAll(m.probabilities) }));
@@ -394,6 +418,7 @@ export function buildTrendingTraceFile(
   ];
   return (
     `{\n"models": ${JSON.stringify(models)},\n"classifiedBy": ${JSON.stringify(classifiedBy)},\n` +
+    (selection ? `"sources": ${JSON.stringify(selection.sources)},\n` : "") +
     `"items": [\n${itemLines.join(",\n")}\n],\n"matches": [\n${matchLines.join(",\n")}\n]\n}\n`
   );
 }

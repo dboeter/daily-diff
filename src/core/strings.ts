@@ -65,15 +65,31 @@ export const reportIssueTitle = (id: ReportId, dateStr: string) =>
  */
 export const PROJECT_SCOPE = { window: "last 24h", period: "today" } as const;
 
+/**
+ * A hot issue's engagement gained (`selectHotIssues`), next to its totals in the prompt:
+ * since `since` when its snapshot baseline is older than yesterday, else in the window.
+ */
+export const hotIssueGain = (gain: number, since?: string) =>
+  `Gained: +${gain} comments and 👍 ${since ? `since ${since}` : `in the ${PROJECT_SCOPE.window}`}`;
+
 const SOURCES = "Sources:";
+const generated = (utcStr: string) => `Generated: ${utcStr} UTC`;
 
 /** The meta line under every report's H1. */
 export const REPORT_META = {
   sources: (list: string) => `${SOURCES} ${list}`,
-  generated: (utcStr: string) => `Generated: ${utcStr} UTC`,
+  /** The meta line itself, one template on every page: the page's counts, then when it was generated. */
+  line: (parts: string[], utcStr: string) => `> ${[...parts, generated(utcStr)].filter(Boolean).join(" | ")}`,
   /** After a listing's item count when Jev ordered it (policy). */
   jevRanked: " ranked by [Jev](https://typesafe.ai) relevance",
 } as const;
+
+/** "1 comment", "2 comments". */
+export const plural = (n: number, noun: string) => `${n} ${noun}${n === 1 ? "" : "s"}`;
+
+/** One line naming a page's tracked sections with nothing to show (the models page, the data report). */
+export const nothingNew = (names: string[], period = "today") =>
+  `Nothing new from ${names.length > 1 ? `${names.slice(0, -1).join(", ")} or ${names.at(-1)}` : names[0]} ${period}.`;
 
 /** The report bar's first link: the day's overview of every report's highlights. */
 export const OVERVIEW = { emoji: "⬛", name: "Overview" } as const;
@@ -94,6 +110,9 @@ export const GOING_AWAY = "−";
  * one line. A header renamed in a table below must be renamed here too.
  */
 export const PROSE_COLUMNS = ["Summary", "What to do"];
+
+/** The Overview's line of stories routed to no page (`policy`, `other`): talked-about.json. */
+export const TALKED_ABOUT = { heading: "Also talked about" } as const;
 
 /** The dated items of the next 30 days from every page (coming-up.json), on the Overview and in Telegram. */
 export const COMING_UP = {
@@ -118,22 +137,43 @@ export const TRENDS_REPORT = {
   sources:
     "GitHub Trending + GitHub Search API + OpenRouter + npm + Hugging Face + arXiv + Hacker News + Lobste.rs + Dev.to",
   agentsHeading: "Agents & coding tools",
-  skillsHeading: "Claude Code Skills",
+  skillsHeading: "Skills: PRs and requests this week",
   skillsSource: (repo: string) => `> Source: [${repo}](https://github.com/${repo})`,
   /** Code only: 🔥 GitHub repos in no config.yml section, with the lines to add. */
   candidatesHeading: "Candidates to track",
   candidatesIntro:
-    "These repos trended two weeks in a row (🔥) and are not tracked. To track one, add its lines to `config.yml`.",
+    "These repos trended two weeks in a row (🔥) and are not tracked, by the config.yml section they fit.",
   candidatesSection: (key: string) => `\`${key}.repos\`:`,
+  candidatesNoSection: "No matching section:",
+  candidatesConfig: "config.yml lines to track one",
   modelsHeading: "Models",
   openRouterHeading: "OpenRouter usage",
+  /** Code only: the rankings snapshot is one day's tokens. */
+  openRouterIntro: (date: string, lastWeek = false) =>
+    `Top models by tokens (prompt + completion) on OpenRouter${date ? ` on ${date}` : ""}, one day's snapshot.` +
+    (lastWeek ? " Last week: the model's rank on last week's page, new when it was not ranked there." : ""),
+  openRouterHeader: "| # | Model | Tokens |\n| ---: | :--- | ---: |",
+  /** With a ranking saved by the run dated 7 days earlier: its rank, or "new" for a model not in it. */
+  openRouterHeaderLastWeek: "| # | Model | Tokens | Last week |\n| ---: | :--- | ---: | :---: |",
+  openRouterNewcomer: "new",
   hfHeading: "Hugging Face trending",
+  /** Code only (`renderHfTable`). */
+  hfIntro:
+    "*Ranked by likes gained in the last 7 days; 🔥 also on last week's Trends page; quantised copies of a release share its row.*",
+  hfHeader:
+    "| # | Model | Likes (total) | Downloads (30 days) | Summary |\n| ---: | :--- | ---: | ---: | :--- |",
   researchHeading: "Research",
   researchTableHeader: "| Paper | Summary |\n| :--- | :--- |",
   mostDiscussedHeading: "Most discussed",
   // Tables rendered in code (renderTrendingTables), one `##` per table, nested under agentsHeading.
   radarHeading: "🚀 Agent & Coding Tool Radar",
   radarHeader: "| Tool | Source | Signal | Summary |\n| :--- | :--- | :--- | :--- |",
+  radarLegend:
+    "*New tools (🆕: created or listed in the last 14 days) first, then each source's top movers; 🔥 also on last week's Trends page. " +
+    "OpenRouter: the app's rank this week / this month among OpenRouter apps, its tokens in the last 7 days. " +
+    "npm: downloads in the last 7 days. " +
+    "OpenRouter and npm \"vs previous week\": against the row's figure on last week's page, none when it was not there. " +
+    "GitHub: total stars (stars gained in the last 7 days, % on a week ago).*",
   categoryHeader:
     "| Project | Lang | Stars (total / this week, %) | Summary |\n| :--- | :--- | ---: | :--- |",
   categoryTitles: {
@@ -153,7 +193,7 @@ export const SPOTTED = {
   sources: { hn: "Hacker News", lobsters: "Lobste.rs", devto: "Dev.to" },
   /** The Discussion cell, e.g. "312 points, 95 comments"; a Dev.to story's points are reactions. */
   counts: (source: "hn" | "lobsters" | "devto", points: number, comments: number) =>
-    `${points} ${source === "devto" ? "reactions" : "points"}, ${comments} comments`,
+    `${plural(points, source === "devto" ? "reaction" : "point")}, ${plural(comments, "comment")}`,
 } as const;
 
 // Daily: AI legislation, regulation and official guidance. The table is rendered in code.
@@ -194,6 +234,8 @@ export const DATA_REPORT = {
   },
   vendorCount: (count: number) => `Vendor items: ${count}`,
   vendorTableHeader: "| Date | Source | Item | Summary |\n| :--- | :--- | :--- | :--- |",
+  /** A section whose rows all share one source: the Source column would repeat it in every row. */
+  vendorTableHeaderOneSource: "| Date | Item | Summary |\n| :--- | :--- | :--- |",
   /** Leads the line of links under a vendor table: today's kept items over the cap. */
   alsoNew: "Also new:",
   /** Marks a deprecation, retirement, breaking or behavior change in the Item cell. */
@@ -230,6 +272,12 @@ export const MODELS_PAGE = {
   modelsTableHeader: "| Model | Listed | Context | Summary |\n| :--- | :--- | :--- | :--- |",
   noModels: "No new models listed today.",
   catalogUnavailable: "⚠️ OpenRouter model catalog unavailable.",
+  /** One line in place of the tracked sections with nothing to show, named by `emptyNames`. */
+  emptyNames: {
+    labs: "Anthropic or OpenAI",
+    models: "OpenRouter's new listings",
+    stealth: "OpenRouter's stealth models",
+  },
   counts: (posts: number, models: number, spotted: number) =>
     `Lab posts: ${posts} | New models: ${models} | Spotted: ${spotted}`,
   noContent: "No lab posts, new models, new stealth models or Spotted stories, skipping report.",
@@ -237,7 +285,7 @@ export const MODELS_PAGE = {
 
 // Rendered daily on the models page (buildStealthSection).
 export const STEALTH_SECTION = {
-  title: "🕵️ Stealth Models on OpenRouter",
+  title: "Stealth Models on OpenRouter",
   none: "No stealth models listed on OpenRouter today.",
   unavailable: "⚠️ OpenRouter model catalog unavailable — stealth model status unknown.",
   header: "| Model | Listed | Expires | Status |\n| :--- | :--- | :--- | :--- |",
@@ -281,4 +329,42 @@ export const REPORT_LABELS: Record<string, string> = {
   "ai-ph": "Product Hunt AI Products Digest",
   "ai-weekly": "AI Tools Weekly Digest",
   "ai-monthly": "AI Tools Monthly Digest",
+};
+
+/**
+ * Trends' facts block (`trendsFacts`, src/trending/facts.ts): the sentences code fills with the
+ * figures it computed. `t` is the table's name, `at` a linked row with its position.
+ */
+export const TRENDS_FACTS = {
+  radarTop: (t: string, source: string, what: string, at: string, figure: string) =>
+    `${t}, ${source} rows: most ${what} in the last 7 days: ${at}, ${figure}.`,
+  radarRise: (t: string, at: string, source: string, figure: string) =>
+    `${t}: largest rise against last week's page: ${at} (${source}), ${figure}.`,
+  radarNoRise: (t: string) =>
+    `${t}: no row rose against last week's page: every "vs previous week" figure is a fall or zero.`,
+  radarNoChange: (t: string) =>
+    `${t}: no row has a "vs previous week" figure, so no Radar row grew or fell against last week on this page.`,
+  radarUnits: (t: string) =>
+    `${t}: tokens, downloads and stars are different units; no Radar row is larger than a row of another source.`,
+  gainWindow: "stars gained in the last 7 days",
+  gainBoth: (where: string, window: string, row: string) =>
+    `${where} (${window}): largest absolute and largest relative gain: ${row}.`,
+  gainSplit: (where: string, window: string, abs: string, rel: string | null) =>
+    `${where} (${window}): largest absolute gain: ${abs}; largest relative gain: ${rel ?? "none (no row shows a %)"}.`,
+  gainAcross: (tables: number, rows: number) => `Across the ${tables} GitHub category tables (${rows} rows)`,
+  openRouterTitle: (t: string, date: string) => `${t} (one day's snapshot, on ${date})`,
+  openRouterRows: (t: string, rows: number) => `${t}: the table has ${rows} rows.`,
+  openRouterFirst: (t: string, at: string, tokens: string) => `${t}: #1 is ${at} with ${tokens} tokens`,
+  openRouterSecond: (at: string, tokens: string) => `; #2 is ${at} with ${tokens}`,
+  openRouterRatio: (ratio: string) => ` (#1 has ${ratio}× #2's tokens)`,
+  openRouterProviders: (t: string, top: number, listed: string) =>
+    `${t}: models per provider within the top ${top} (by the slug's provider prefix): ${listed}. ` +
+    `Counts are for the top ${top} only, not the whole table.`,
+  /** A slug with no provider prefix (no "/"). */
+  openRouterNoProvider: "no provider prefix",
+  hfOrder: (t: string) =>
+    `${t}: rows are in the Hub's order by likes gained in the last 7 days, a figure the page does not show. ` +
+    `Likes is each model's total and Downloads its last 30 days: neither is a gain, so no row "gained" likes or downloads.`,
+  hfLeaders: (t: string, first: string, likes: string, downloads: string) =>
+    `${t}: #1 in the Hub's order is ${first}; most total likes: ${likes}; most downloads in 30 days: ${downloads}.`,
 };

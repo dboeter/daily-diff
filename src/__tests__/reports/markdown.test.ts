@@ -1,3 +1,4 @@
+import fs from "node:fs";
 import { describe, expect, it } from "vitest";
 import type { GitHubRelease } from "../../core/github.ts";
 import { MSG, TRENDS_REPORT } from "../../core/strings.ts";
@@ -7,18 +8,23 @@ import {
   highlightsOnly,
   nestHeadings,
   renderCandidates,
+  renderOpenRouterUsage,
   renderPolicyTable,
   renderReportBar,
   renderResearchTable,
   renderSpottedTable,
   renderTrendingTables,
+  renderVendorTables,
   signListItems,
   stripModelTitle,
   unwrapCodeLinks,
   withReportBar,
+  renderHfTable,
+  unsummarizedRows,
 } from "../../reports/markdown.ts";
 import { type ProjectActivity, goingAwayRule } from "../../reports/prompts.ts";
 import { numberRows } from "../../reports/summarized-table.ts";
+import type { KeptVendorItem } from "../../data/relevance.ts";
 import type { Story, StorySource } from "../../spotted/pool.ts";
 import type { TrendingReportData } from "../../trending/rank.ts";
 
@@ -59,7 +65,7 @@ function trendingReport(over: Partial<TrendingReportData> = {}): TrendingReportD
         url: "https://kilo.ai/",
         description: "",
         sources: ["OpenRouter", "npm"],
-        signals: ["🆕 week #3 / month —", "1,000/week, 4.3x"],
+        signals: ["🆕 week #3 / month —", "1,000 downloads/week, 4.3x"],
         isNew: true,
         links: [],
       },
@@ -70,7 +76,7 @@ function trendingReport(over: Partial<TrendingReportData> = {}): TrendingReportD
         url: "",
         description: "A | piped\ndescription",
         sources: ["npm"],
-        signals: ["10/week, 1.0x"],
+        signals: ["10 downloads/week, 1.0x"],
         isNew: false,
         links: [],
       },
@@ -178,16 +184,136 @@ describe("buildProjectReportContent", () => {
     expect(result).toContain("**Quiet today:** [ruvnet/ruflo](https://github.com/ruvnet/ruflo)");
   });
 
-  it("keeps projects with data active when the summary has no project section", () => {
+  it("keeps projects with data active when the summaries call failed", () => {
     const news = [{ source: "Hacker News", title: "BETA 2.0", url: "u", detail: "d" }];
     const result = buildProjectReportContent(
       withAgents({
-        summary: "Summary generation failed.",
+        summary: MSG.summaryFailed,
         activities: [agents.activities[0]!, makeActivity("beta", { news }), makeActivity("gamma")],
       }),
     );
     expect(result).toContain("Active today: 2 |");
     expect(result).toContain("**Quiet today:** [GAMMA](https://github.com/org/gamma)");
+  });
+
+  it("shows a release the model wrote off as 'no reportable changes', from its notes, and counts it", () => {
+    const deck = makeActivity("deck", {
+      config: { id: "deck", repo: "asheshgoplani/agent-deck", name: "Agent Deck" },
+      releases: [
+        {
+          ...stableRelease,
+          tag_name: "v1.16.34",
+          name: "v1.16.34",
+          body:
+            "## Changes\n- chore(deps): bump golang.org/x/net\n- **Session forks** keep their [worktree](https://x) (#812)\n" +
+            "- Fix status bar flicker by @a in https://github.com/o/r/pull/1\n- Add `--json` to list\n- Faster search",
+        },
+      ],
+    });
+    const result = buildProjectReportContent(
+      withAgents({
+        summary: "(no reportable changes for Agent Deck v1.16.34 — only dependency updates)",
+        activities: [deck, makeActivity("gamma")],
+      }),
+    );
+    expect(result).not.toContain("no reportable changes");
+    expect(result).toContain(
+      "### Agent Deck\n- **Release:** [v1.16.34](https://github.com/asheshgoplani/agent-deck/releases/tag/v1.16.34): " +
+        "Session forks keep their worktree; Fix status bar flicker; Add `--json` to list",
+    );
+    expect(result).toContain("Projects: 2 | Active today: 1 | Stable releases: 1 |");
+    expect(result).toContain("**Quiet today:** [GAMMA](https://github.com/org/gamma)");
+  });
+
+  describe("backticked tokens in a project section", () => {
+    // Hermes Agent on 2026-10-26 (review A11): the two hot issues' titles and the body excerpt the
+    // prompt saw (formatItem's first 300 characters), and the section the model wrote.
+    const issue = (number: number, title: string, body: string) => ({
+      number,
+      title,
+      body,
+      state: "open",
+      user: { login: "u" },
+      labels: [],
+      created_at: "2026-10-25T00:00:00Z",
+      updated_at: "2026-10-26T00:00:00Z",
+      comments: 12,
+      html_url: `https://github.com/NousResearch/hermes-agent/issues/${number}`,
+      gain: 12,
+    });
+    const hermes: ProjectActivity = {
+      ...makeActivity("hermes"),
+      config: { id: "hermes", repo: "NousResearch/hermes-agent", name: "Hermes Agent" },
+      hotIssues: [
+        issue(
+          143982,
+          "[Bug]: Secrets passed as command-line flags (--password=, --token=, docker login -p) and Azure AccountKey/SharedAccessKey pass the chat egress and approval-card redaction",
+          "### Bug Description\n\nTwo common credential shapes pass the chat egress scrub (`redact_for_egress`) and the approval-card scrub (`_redact_approval_command`) unmasked:\n\n1. **Secrets given as command-line flags:** `--password=…`, `--password …`, `--token=…`, `--api-key=…`, `docker login -p …`.",
+        ),
+        issue(
+          143938,
+          "gateway status prints MCP child-process command-line secrets verbatim (process-tree path has no redaction)",
+          "## Symptom\n\n`hermes gateway status` prints the gateway's full child-process tree, including each child's complete command line. When an MCP server is configured with a credential in its launch command (for example an `--api-key` argument), the live key value is printed in plaintext.",
+        ),
+      ],
+    };
+    const section = [
+      "## Hermes Agent",
+      "- **Hot issue**: Secrets passed as CLI flags (`--password=`, `--token=`, `docker login -p`) and Azure keys bypass chat egress and approval-card redaction [#143982](https://github.com/NousResearch/hermes-agent/issues/143982).",
+      "- **Hot issue**: `hermes gateway status` prints MCP child-process command lines verbatim, exposing API keys in plaintext [#143938](https://github.com/NousResearch/hermes-agent/issues/143938).",
+    ].join("\n");
+    const render = (summary: string) =>
+      buildProjectReportContent(withAgents({ summary, activities: [hermes] }));
+
+    it("keeps every token of the 2026-10-26 Hermes section, all in its source", () => {
+      const result = render(section);
+      for (const token of ["--password=", "--token=", "docker login -p", "hermes gateway status"]) {
+        expect(result).toContain(`\`${token}\``);
+      }
+    });
+
+    it("respells a token to its source's form and unwraps one the source lacks", () => {
+      const result = render(
+        `${section}\n- **Hot issue**: \`redactForEgress\` and \`mask_secrets()\` miss these flags [#143982](https://github.com/NousResearch/hermes-agent/issues/143982).`,
+      );
+      expect(result).toContain("`redact_for_egress` and mask_secrets() miss");
+    });
+
+    it("checks a section only against its own project's source", () => {
+      const other = makeActivity("alpha", { releases: [stableRelease] });
+      const result = buildProjectReportContent(
+        withAgents({
+          summary: `## ALPHA\n- **Release**: adds \`hermes gateway status\`.\n\n${section}`,
+          activities: [other, hermes],
+        }),
+      );
+      expect(result).toContain("adds hermes gateway status.");
+      expect(result).toContain("- **Hot issue:** `hermes gateway status` prints");
+    });
+  });
+
+  it("never labels a no-stable-yet project's prerelease as a Release or counts it as stable", () => {
+    // fetchProject sends such a project's prereleases as `previews`; `releases` stays stable-only.
+    const beta = makeActivity("beta", {
+      previews: [{ ...stableRelease, tag_name: "v0.3.0-beta.1", prerelease: true }],
+    });
+    const result = buildProjectReportContent(withAgents({ summary: "", activities: [beta] }));
+    expect(result).not.toContain("**Release:**");
+    expect(result).toContain("Stable releases: 0 |");
+    expect(result).toContain("**Quiet today:** [BETA](https://github.com/org/beta)");
+  });
+
+  it("drops a project section without a bullet; a project without a release then goes quiet", () => {
+    const news = [{ source: "Hacker News", title: "BETA", url: "u", detail: "d" }];
+    const result = buildProjectReportContent(
+      withAgents({
+        summary: "## ALPHA\n- release\n\n## BETA\nNothing to report today.",
+        activities: [agents.activities[0]!, makeActivity("beta", { news })],
+      }),
+    );
+    expect(result).not.toContain("Nothing to report");
+    expect(result).toContain("Active today: 1 |");
+    expect(result).toContain("**Quiet today:** [BETA](https://github.com/org/beta)");
   });
 
   it("omits the quiet line when every project was active", () => {
@@ -228,7 +354,9 @@ describe("buildProjectReportContent", () => {
 
   it("renders the preamble between the header and the groups", () => {
     const result = buildProjectReportContent({ ...input, preamble: "PREAMBLE\n\n---\n\n" });
-    expect(result).toMatch(/Prereleases \(not covered\): 7\n\n---\n\nPREAMBLE\n\n---\n\n## Coding Agents\n/);
+    expect(result).toMatch(
+      /Prereleases \(not covered\): 7 \| Generated: [^\n]+ UTC\n\n---\n\nPREAMBLE\n\n---\n\n## Coding Agents\n/,
+    );
   });
 
   it("renders each group under its own heading with its own quiet line; the header counts all", () => {
@@ -264,7 +392,7 @@ describe("buildStealthSection", () => {
 
   it("flags new and soon-expiring models", () => {
     const out = buildStealthSection([model("2026-10-03", "2026-10-05")], now);
-    expect(out).toContain("## 🕵️ Stealth Models on OpenRouter");
+    expect(out).toContain("## Stealth Models on OpenRouter");
     expect(out).toContain(
       "| [Space Bunny Alpha](https://openrouter.ai/stealth/space-bunny-alpha) `stealth/space-bunny-alpha` | 2026-10-03 | 2026-10-05 | 🆕 new, ⏳ expires in 1d |",
     );
@@ -280,15 +408,145 @@ describe("buildStealthSection", () => {
   });
 });
 
+describe("renderOpenRouterUsage", () => {
+  it("ranks and links every model in code, with the snapshot's day", () => {
+    const md = renderOpenRouterUsage(
+      [
+        { slug: "a/one", tokens: 33_560_000_000_000 },
+        { slug: "b/two", tokens: 18_000_000_000_000 },
+      ],
+      "2026-10-25",
+    );
+    expect(md).toContain(TRENDS_REPORT.openRouterIntro("2026-10-25"));
+    expect(md).toContain("| 1 | [a/one](https://openrouter.ai/a/one) | 33.56T |");
+    expect(md).toContain("| 2 | [b/two](https://openrouter.ai/b/two) | 18.00T |");
+    expect(md).not.toContain("[link]");
+    expect(renderOpenRouterUsage([], "")).toBe("");
+  });
+
+  it("adds last week's rank, and new for a model not ranked then, only with a saved ranking", () => {
+    const models = [
+      { slug: "a/one", tokens: 2e12 },
+      { slug: "c/three", tokens: 1e12 },
+    ];
+    const md = renderOpenRouterUsage(models, "2026-10-25", ["b/two", "a/one"]);
+    expect(md).toContain(TRENDS_REPORT.openRouterHeaderLastWeek);
+    expect(md).toContain(TRENDS_REPORT.openRouterIntro("2026-10-25", true));
+    expect(md).toContain("| 1 | [a/one](https://openrouter.ai/a/one) | 2.00T | 2 |");
+    expect(md).toContain(
+      `| 2 | [c/three](https://openrouter.ai/c/three) | 1.00T | ${TRENDS_REPORT.openRouterNewcomer} |`,
+    );
+    expect(renderOpenRouterUsage(models, "2026-10-25")).not.toContain("Last week");
+  });
+});
+
+describe("renderHfTable", () => {
+  const model = (id: string, o: object = {}) => ({
+    id,
+    author: id.split("/")[0]!,
+    likes: 18406,
+    downloads: 7762014,
+    tags: ["qwen3_5"],
+    pipelineTag: "image-text-to-text",
+    parameters: 27.4e9,
+    lastModified: "",
+    url: `https://huggingface.co/${id}`,
+    variants: [],
+    ...o,
+  });
+
+  it("ranks in code, marks 🔥 by last week's keys, links variants, and gives the windows", () => {
+    const rows = numberRows([
+      model("Qwen/Qwen3.8-27B"),
+      model("o/flint", { variants: [model("u/flint-GGUF")], pipelineTag: "", parameters: null }),
+    ]);
+    const md = renderHfTable(
+      rows,
+      new Map([[1, "A 27B vision-language model."]]),
+      new Set(["hf:u/flint-gguf"]),
+    );
+    expect(md).toContain(TRENDS_REPORT.hfHeader);
+    expect(md).toContain("Likes (total)");
+    expect(md).toContain("Downloads (30 days)");
+    expect(md).toContain(
+      "| 1 | [Qwen/Qwen3.8-27B](https://huggingface.co/Qwen/Qwen3.8-27B) | 18,406 | 7,762,014 | A 27B vision-language model. |",
+    );
+    expect(md).toContain(
+      "| 2 | 🔥 [o/flint](https://huggingface.co/o/flint) (+ [u/flint-GGUF](https://huggingface.co/u/flint-GGUF)) | 18,406 | 7,762,014 | — |",
+    );
+    expect(md).not.toContain("qwen3_5");
+    // A failed call: the task and size.
+    expect(renderHfTable(rows.slice(0, 1), new Map())).toContain("| Image text to text, 27B parameters |");
+    expect(renderHfTable([], new Map())).toBe("");
+  });
+
+  it("fills a row the model left — with its size and task; only a row with no data stays —", () => {
+    const rows = numberRows([
+      model("o/sized", { pipelineTag: "" }),
+      model("o/tasked"),
+      model("o/bare", { pipelineTag: "", parameters: null }),
+    ]);
+    const dashes = new Map([
+      [1, "—"],
+      [2, "—"],
+      [3, "—"],
+    ]);
+    const md = renderHfTable(rows, dashes);
+    expect(md).toContain("| 27B parameters |");
+    expect(md).toContain("| Image text to text, 27B parameters |");
+    expect(md).toMatch(/\[o\/bare\][^\n]*\| — \|$/m);
+    expect(unsummarizedRows(undefined, new Map(), rows, dashes)).toEqual(["o/bare"]);
+  });
+
+  it("names the rows that show — for the prose call: no summary, no description", () => {
+    const hf = numberRows([model("o/a"), model("o/b", { pipelineTag: "", parameters: null })]);
+    const report = {
+      radar: [
+        {
+          n: 1,
+          name: "Strix",
+          description: "",
+          keys: [],
+          url: "",
+          sources: [],
+          signals: [],
+          isNew: false,
+          links: [],
+        },
+        {
+          n: 2,
+          name: "Pi",
+          description: "A coding agent.",
+          keys: [],
+          url: "",
+          sources: [],
+          signals: [],
+          isNew: false,
+          links: [],
+        },
+      ],
+      categories: [],
+      onFire: [],
+      classifiedBy: "jev",
+    } as unknown as TrendingReportData;
+    expect(unsummarizedRows(report, new Map(), hf, new Map())).toEqual(["Strix", "o/b"]);
+    expect(
+      unsummarizedRows(report, new Map([[1, "Strix tests apps."]]), hf, new Map([[2, "A model."]])),
+    ).toEqual([]);
+  });
+});
+
 describe("renderTrendingTables", () => {
   it("renders both sections with summaries, falling back to descriptions", () => {
     const md = renderTrendingTables(trendingReport(), new Map([[1, "Kilo is | an agent."]]));
-    expect(md).toContain(`## ${TRENDS_REPORT.radarHeading}\n\n${TRENDS_REPORT.radarHeader}\n`);
     expect(md).toContain(
-      "| [Kilo](https://kilo.ai/) | OpenRouter; npm | 🆕 week #3 / month —; 1,000/week, 4.3x | Kilo is \\| an agent. |",
+      `## ${TRENDS_REPORT.radarHeading}\n\n${TRENDS_REPORT.radarLegend}\n\n${TRENDS_REPORT.radarHeader}\n`,
+    );
+    expect(md).toContain(
+      "| [Kilo](https://kilo.ai/) | OpenRouter; npm | 🆕 week #3 / month —; 1,000 downloads/week, 4.3x | Kilo is \\| an agent. |",
     );
     // No url → plain name; pipe and newline escaped in the description fallback.
-    expect(md).toContain("| bare | npm | 10/week, 1.0x | A \\| piped description |");
+    expect(md).toContain("| bare | npm | 10 downloads/week, 1.0x | A \\| piped description |");
     expect(md).toContain(
       `## ${TRENDS_REPORT.categoryTitles.coding_agent}\n\n${TRENDS_REPORT.categoryHeader}`,
     );
@@ -317,7 +575,7 @@ describe("renderTrendingTables", () => {
   it("shows — when there is neither summary nor description", () => {
     const md = renderTrendingTables(trendingReport(), new Map());
     expect(md).toContain(
-      "| [Kilo](https://kilo.ai/) | OpenRouter; npm | 🆕 week #3 / month —; 1,000/week, 4.3x | — |",
+      "| [Kilo](https://kilo.ai/) | OpenRouter; npm | 🆕 week #3 / month —; 1,000 downloads/week, 4.3x | — |",
     );
   });
 
@@ -334,7 +592,7 @@ describe("renderTrendingTables", () => {
 describe("renderCandidates", () => {
   const tracked = [{ id: "claude-code", repo: "anthropics/claude-code", name: "Claude Code" }];
 
-  it("lists the 🔥 repos in no config.yml section by the section they would join, with their config lines", () => {
+  it("links the 🔥 repos in no config.yml section by the section their category fits, config lines collapsed", () => {
     const md = renderCandidates(
       [
         { fullName: "Org/Fast-Agent", category: "coding_agent" },
@@ -347,17 +605,35 @@ describe("renderCandidates", () => {
     );
     expect(md).toBe(
       `## ${TRENDS_REPORT.candidatesHeading}\n\n${TRENDS_REPORT.candidatesIntro}\n\n` +
+        "- `agents.repos`: [Org/Fast-Agent](https://github.com/Org/Fast-Agent)\n" +
+        "- `infra.repos`: [o/tool](https://github.com/o/tool)\n" +
+        `- ${TRENDS_REPORT.candidatesNoSection} [o/mux](https://github.com/o/mux), [o/jobs](https://github.com/o/jobs)\n\n` +
+        `<details><summary>${TRENDS_REPORT.candidatesConfig}</summary>\n\n` +
         "`agents.repos`:\n\n```yaml\n    - id: fast-agent\n      repo: Org/Fast-Agent\n      name: Fast-Agent\n```\n\n" +
-        "`infra.repos`:\n\n```yaml\n    - id: mux\n      repo: o/mux\n      name: mux\n" +
-        "    - id: tool\n      repo: o/tool\n      name: tool\n```",
+        "`infra.repos`:\n\n```yaml\n    - id: tool\n      repo: o/tool\n      name: tool\n```\n\n</details>",
     );
   });
 
-  it("is empty when every 🔥 repo is tracked or an Other Agent, or there are none", () => {
+  it("files the 2026-10-26 harnesses and multi-agent systems under no section, not infra.repos", () => {
+    const candidates = JSON.parse(
+      fs.readFileSync(new URL("../fixtures/candidates-2026-10-26.json", import.meta.url), "utf-8"),
+    ) as Parameters<typeof renderCandidates>[0];
+    const lines = renderCandidates(candidates, tracked).split("\n");
+    const infra = lines.find((l) => l.startsWith("- `infra.repos`:")) ?? "";
+    const none = lines.find((l) => l.startsWith(`- ${TRENDS_REPORT.candidatesNoSection}`)) ?? "";
+    for (const r of ["ruvnet/ruflo", "paperclipai/paperclip", "alibaba/open-code-review", "DSH-APP/DSHA"]) {
+      expect(infra).not.toContain(r);
+      expect(none).toContain(r);
+    }
+  });
+
+  it("has no config lines when only unmatched repos remain, and is empty when every 🔥 repo is tracked", () => {
+    const md = renderCandidates([{ fullName: "o/jobs", category: "other_agent" }], tracked);
+    expect(md).toContain(`- ${TRENDS_REPORT.candidatesNoSection} [o/jobs]`);
+    expect(md).not.toContain("<details>");
     expect(
       renderCandidates([{ fullName: "anthropics/claude-code", category: "coding_agent" }], tracked),
     ).toBe("");
-    expect(renderCandidates([{ fullName: "o/jobs", category: "other_agent" }], tracked)).toBe("");
     expect(renderCandidates([], tracked)).toBe("");
   });
 });
@@ -651,5 +927,100 @@ describe("renderSpottedTable", () => {
 
   it("renders nothing without rows", () => {
     expect(renderSpottedTable([], new Map())).toBe("");
+  });
+});
+
+describe("renderSpottedTable links", () => {
+  it("labels a GitHub repo link with the repo name, keeping the title", () => {
+    const row = {
+      n: 1,
+      id: "hn:1",
+      source: "hn" as const,
+      title: "Show HN: Agentsh",
+      url: "https://github.com/microsoft/Agensh",
+      discussionUrl: "https://news.ycombinator.com/item?id=1",
+      points: 10,
+      comments: 2,
+    };
+    const md = renderSpottedTable([row], new Map());
+    expect(md).toContain("| Show HN: Agentsh ([microsoft/Agensh](https://github.com/microsoft/Agensh)) |");
+    expect(renderSpottedTable([{ ...row, url: "https://example.com/a" }], new Map())).toContain(
+      "| [Show HN: Agentsh](https://example.com/a) |",
+    );
+  });
+});
+
+// ---------------------------------------------------------------------------
+// One rendering convention across pages (ticket 17, 2026-10-26)
+// ---------------------------------------------------------------------------
+
+describe("rendering conventions", () => {
+  const vendorRow = (n: number, extra: Partial<KeptVendorItem>): KeptVendorItem & { n: number } => ({
+    n,
+    id: `v${n}`,
+    vendor: "snowflake",
+    source: "Snowflake",
+    title: `Item ${n}`,
+    link: `https://example.com/${n}`,
+    date: "2026-10-26",
+    description: "",
+    deprecation: false,
+    aiInData: false,
+    ...extra,
+  });
+
+  it("vendor tables: no date prefix, no Source column for one source, newest first (Snowflake 2026-10-26)", () => {
+    const rows = [
+      vendorRow(1, { title: "October 23, 2026: Coding agent MCP tool", date: "2026-10-23", aiInData: true }),
+      vendorRow(2, {
+        title: "Oct 26, 2026: Custom error messages for feature policy rules",
+        date: "2026-10-26",
+      }),
+    ];
+    const table = renderVendorTables(
+      rows,
+      new Map([
+        [1, "One."],
+        [2, "Two."],
+      ]),
+    ).snowflake!;
+    expect(table).toBe(
+      "| Date | Item | Summary |\n| :--- | :--- | :--- |\n" +
+        "| 2026-10-26 | [Custom error messages for feature policy rules](https://example.com/2) | Two. |\n" +
+        "| 2026-10-23 | 🤖 [Coding agent MCP tool](https://example.com/1) | One. |",
+    );
+  });
+
+  it("vendor tables keep the Source column when a section mixes sources, deprecations first", () => {
+    const rows = [
+      vendorRow(1, { vendor: "azure", source: "Microsoft Fabric", date: "2026-10-20" }),
+      vendorRow(2, { vendor: "gcp", source: "BigQuery", date: "2026-10-25" }),
+      vendorRow(3, { vendor: "azure", source: "Microsoft Fabric", date: "2026-10-01", deprecation: true }),
+    ];
+    const table = renderVendorTables(rows, new Map()).cloud!;
+    expect(table.split("\n")[0]).toBe("| Date | Source | Item | Summary |");
+    const at = (s: string) => table.indexOf(s);
+    expect(at("example.com/3")).toBeLessThan(at("example.com/2"));
+    expect(at("example.com/2")).toBeLessThan(at("example.com/1"));
+  });
+
+  it("writes every bullet label as **Label:**, the form releaseFallbackSection uses", () => {
+    const result = buildProjectReportContent({
+      heading: "# AI Agents 2026-10-26",
+      utcStr: "04:31",
+      period: "today",
+      footer: "",
+      groups: [
+        {
+          title: "Coding Agents",
+          summary: "## ALPHA\n- **Release**: [v1](https://x) does a thing.\n- **Hot issue:** already right.",
+          activities: [makeActivity("alpha")],
+        },
+      ],
+    });
+    expect(result).toContain("- **Release:** [v1](https://x) does a thing.");
+    expect(result).toContain("- **Hot issue:** already right.");
+    // The meta line ends with when it was generated, as on every page.
+    expect(result).toMatch(/\n> Projects: 1 \| .*Prereleases \(not covered\): 0 \| Generated: 04:31 UTC\n/);
   });
 });

@@ -3,12 +3,24 @@
  * tables, and the cleanup of what models write (titles, code links, headings).
  */
 
-import { hasActivity, RELEASE_BODY_CHARS, releaseNotes, type ProjectActivity } from "./prompts.ts";
+import {
+  formatProject,
+  hasActivity,
+  RELEASE_BODY_CHARS,
+  releaseNotes,
+  type ProjectActivity,
+} from "./prompts.ts";
 import type { ReleaseRow } from "./pages.ts";
 import { escapeRegex } from "./project-news.ts";
-import type { OpenRouterNewModel, OpenRouterStealthModel } from "../sources/openrouter.ts";
+import {
+  formatTokens,
+  type OpenRouterModel,
+  type OpenRouterNewModel,
+  type OpenRouterStealthModel,
+} from "../sources/openrouter.ts";
 import type { LabPost } from "../sources/labs.ts";
 import type { TrendingReportData } from "../trending/rank.ts";
+import { hfDescription, hfKeys, type HfRow } from "../sources/huggingface.ts";
 import type { PolicyItem } from "../policy/items.ts";
 import type { KeptVendorItem } from "../data/relevance.ts";
 import type { VendorAction } from "../data/vendors.ts";
@@ -23,10 +35,12 @@ import {
   type AgentSectionKey,
   type VendorSection,
 } from "../core/config.ts";
-import { summaryText, type Numbered } from "./summarized-table.ts";
+import { checkCodeTokens, summaryText, type Numbered } from "./summarized-table.ts";
 import {
   GOING_AWAY,
   LIVE_REPORT_IDS,
+  MSG,
+  nothingNew,
   OVERVIEW,
   REPORTS,
   REPORT_META,
@@ -52,6 +66,12 @@ export interface ProjectGroup {
   activities: ProjectActivity[];
   /** LLM output: one `## <Project>` section per active project. */
   summary: string;
+  /**
+   * A tracked source of the data report: with nothing to show (no preamble, no project section, no
+   * unavailable project) it is named, with its quiet projects, in the page's one "Nothing new from …"
+   * line instead of a heading. Without it an empty group shows its quiet line, or nothing.
+   */
+  namedWhenEmpty?: boolean;
   /** Markdown under the heading, before the projects (the data report's vendor table). Shown even when every project is quiet. */
   preamble?: string;
 }
@@ -72,20 +92,90 @@ export interface ProjectReportInput {
   footer: string;
 }
 
+/** A `## <name>` section of a project summary, line-anchored, so "## Pi pod" is not Pi's. */
+const sectionHeading = (name: string) => new RegExp(`^##\\s+${escapeRegex(name)}\\s*$`, "m");
+
+/** The section's text under `## <name>`, up to the next `## `, or null when the summary has none. */
+function sectionOf(summary: string, name: string): string | null {
+  const m = sectionHeading(name).exec(summary);
+  if (!m) return null;
+  const rest = summary.slice(m.index + m[0].length);
+  const next = rest.search(/^##\s/m);
+  return next === -1 ? rest : rest.slice(0, next);
+}
+
+/** A project the model covered: its section carries at least one bullet, not only an absence note. */
+const covers = (summary: string, a: ProjectActivity) =>
+  /^\s*[-*]\s+\S/m.test(sectionOf(summary, a.config.name) ?? "");
+
+/** Dependency bumps and chores: never a release's top item. */
+const ROUTINE_ITEM = /\b(bump(s|ed)?|deps?|dependenc(y|ies)|dependabot|chore|renovate)\b/i;
+
 /**
- * The projects in a group that count as quiet. Quiet is decided by the
- * summary, not only the data: the model leaves out a project whose only news
- * mentions it in passing, and such a project is quiet too. A summary with no
- * project section at all is a failure notice, so then the data decides.
+ * The code-written section of a project with a stable release the model left without a bullet:
+ * the newest release, linked, and its first 3 non-routine note items. On 2026-10-26 Agent Deck
+ * v1.16.34 (about 20 user-facing items) rendered as a bare "(no reportable changes)".
  */
-function quietProjects(g: ProjectGroup): ProjectActivity[] {
-  const withData = g.activities.filter(hasActivity);
-  // Line-anchored, so "## Pi pod" in a summary does not count as a Pi section.
-  const covered = withData.filter((a) =>
-    new RegExp(`^##\\s+${escapeRegex(a.config.name)}\\s*$`, "m").test(g.summary),
-  );
-  const active = covered.length > 0 ? covered : withData;
-  return g.activities.filter((a) => !active.includes(a) && !a.fetchFailed);
+export function releaseFallbackSection(a: ProjectActivity): string {
+  const r = a.releases[0]!;
+  const items = (r.body ?? "")
+    .split("\n")
+    .map((l) => /^\s*[-*]\s+(.+)$/.exec(l)?.[1] ?? "")
+    .map((t) =>
+      t
+        .replace(/\s+by @\S+ in https:\/\/\S+$/, "")
+        .replace(/\[([^\]]*)\]\([^)]*\)/g, "$1")
+        .replace(/\s*\(#\d+\)$/, "")
+        .replace(/\*\*/g, "")
+        .trim(),
+    )
+    .filter((t) => t && !ROUTINE_ITEM.test(t))
+    .slice(0, 3)
+    .map((t) => (t.length > 120 ? `${t.slice(0, 119).trimEnd()}…` : t));
+  const title = r.name && r.name !== r.tag_name ? ` (${r.name})` : "";
+  const link = `[${r.tag_name}](https://github.com/${a.config.repo}/releases/tag/${r.tag_name})${title}`;
+  return `## ${a.config.name}\n- **Release:** ${link}${items.length ? `: ${items.join("; ")}` : ""}`;
+}
+
+/**
+ * A bullet's bold label in one form, the colon inside (`**Release:**`), as releaseFallbackSection
+ * writes it: the prompt lists `**Release**:` and models copy either form (2026-10-25 vs 10-26).
+ */
+export const boldLabelColonInside = (md: string): string =>
+  md.replace(/^(\s*[-*]\s+)\*\*([^*\n]+?)\*\*:/gm, "$1**$2:**");
+
+/** A model-written project section with its backticked tokens checked against that project's prompt block. */
+function checkProjectTokens(section: string, g: ProjectGroup): string {
+  const a = g.activities.find((p) => sectionHeading(p.config.name).test(section));
+  if (!a) return section;
+  return checkCodeTokens(new Map([[0, section]]), new Map([[0, formatProject(a)]]), g.title).get(0)!;
+}
+
+/**
+ * A group's projects as rendered: the model's summary without text outside a `##` section and
+ * without a project section that has no bullet (both are absence notes the prompt forbids), plus a
+ * code section for each project with a stable release the model did not cover. Each project
+ * section's backticked tokens are checked against the project's block in the prompt
+ * (`checkCodeTokens`). `quiet` is every other checked project without a section; after a failed
+ * call (MSG.summaryFailed) the data decides.
+ */
+function groupProjects(g: ProjectGroup): { body: string; quiet: ProjectActivity[] } {
+  const failed = g.summary.trim() === MSG.summaryFailed;
+  const covered = g.activities.filter((a) => covers(g.summary, a));
+  const fallback = g.activities.filter((a) => a.releases.length > 0 && !covered.includes(a));
+  const kept = failed
+    ? [g.summary.trim()]
+    : g.summary
+        .split(/^(?=##\s)/m)
+        .filter((chunk) => /^##\s/.test(chunk))
+        .filter(
+          (chunk) =>
+            !g.activities.some((a) => sectionHeading(a.config.name).test(chunk) && !covers(chunk, a)),
+        )
+        .map((chunk) => boldLabelColonInside(checkProjectTokens(chunk.trim(), g)));
+  const body = [...kept, ...fallback.map(releaseFallbackSection)].filter(Boolean).join("\n\n");
+  const active = failed ? g.activities.filter(hasActivity) : [...covered, ...fallback];
+  return { body, quiet: g.activities.filter((a) => !active.includes(a) && !a.fetchFailed) };
 }
 
 /**
@@ -96,7 +186,7 @@ function quietProjects(g: ProjectGroup): ProjectActivity[] {
 export function groupsMarkdown(groups: ProjectGroup[]): string[] {
   return groups
     .map((g) => {
-      const body = g.activities.some(hasActivity) ? nestHeadings(g.summary, 3) : "";
+      const body = g.activities.some(hasActivity) ? nestHeadings(groupProjects(g).body, 3) : "";
       return g.preamble || body ? `## ${g.title}\n\n${[g.preamble, body].filter(Boolean).join("\n\n")}` : "";
     })
     .filter(Boolean);
@@ -115,17 +205,23 @@ export function buildProjectReportContent(r: ProjectReportInput): string {
   const prereleases = all.reduce((n, a) => n + a.prereleaseCount, 0);
   const link = (a: ProjectActivity) => `[${a.config.name}](https://github.com/${a.config.repo})`;
   let inactiveCount = 0;
+  const nothingNewFrom: string[] = [];
   const sections = r.groups.flatMap((g) => {
-    const quiet = quietProjects(g);
+    const { body, quiet } = groupProjects(g);
     // A project whose release fetch failed was not checked: "Quiet" would claim it shipped nothing.
     const unavailable = g.activities.filter((a) => a.fetchFailed);
     inactiveCount += quiet.length + unavailable.length;
+    if (g.namedWhenEmpty && !body && !g.preamble && !unavailable.length) {
+      // The quiet repos stay named: the line is the only sign they are tracked.
+      nothingNewFrom.push(quiet.length ? `${g.title} (${quiet.map(link).join(", ")})` : g.title);
+      return [];
+    }
     // A group with neither projects nor a preamble (the data report's Azure / Fabric & GCP on a day
     // without its vendor rows) has nothing to show. An all-quiet group shows its quiet line.
     if (!g.activities.length && !g.preamble) return [];
     const projects = [
       // The data report passes an empty summary for a group with no active project.
-      nestHeadings(g.summary, 3),
+      nestHeadings(body, 3),
       quiet.length ? `**Quiet ${r.period}:** ${quiet.map(link).join(", ")}` : "",
       unavailable.length ? `**Unavailable ${r.period}:** ${unavailable.map(link).join(", ")}` : "",
     ]
@@ -133,12 +229,21 @@ export function buildProjectReportContent(r: ProjectReportInput): string {
       .join("\n\n");
     return `## ${g.title}\n\n` + [g.preamble, projects].filter(Boolean).join("\n\n");
   });
+  if (nothingNewFrom.length) sections.push(nothingNew(nothingNewFrom, r.period));
 
   return (
     `${r.heading}\n\n` +
-    `> ${REPORT_META.generated(r.utcStr)} | ${r.leadingCounts ? `${r.leadingCounts} | ` : ""}Projects: ${all.length} | ` +
-    `Active ${r.period}: ${all.length - inactiveCount} | ` +
-    `Stable releases: ${releases} | Prereleases (not covered): ${prereleases}\n\n` +
+    REPORT_META.line(
+      [
+        r.leadingCounts ?? "",
+        `Projects: ${all.length}`,
+        `Active ${r.period}: ${all.length - inactiveCount}`,
+        `Stable releases: ${releases}`,
+        `Prereleases (not covered): ${prereleases}`,
+      ],
+      r.utcStr,
+    ) +
+    `\n\n` +
     `---\n\n` +
     (r.preamble ?? "") +
     sections.join("\n\n---\n\n") +
@@ -319,8 +424,8 @@ export function isNewStealthModel(m: OpenRouterStealthModel, now = Date.now()): 
 
 /**
  * Deterministic stealth-model section. Rendered from the catalog, not by the
- * LLM, so it can't be dropped or invented, and it always appears: "none
- * listed" and "catalog unavailable" are news too.
+ * LLM, so it can't be dropped or invented. "Catalog unavailable" is news too;
+ * the models page names a catalog without stealth models in its "Nothing new" line.
  */
 export function buildStealthSection(models: OpenRouterStealthModel[] | null, now = Date.now()): string {
   const S = STEALTH_SECTION;
@@ -341,7 +446,7 @@ export function buildStealthSection(models: OpenRouterStealthModel[] | null, now
     });
     body = `${S.header}\n${rows.join("\n")}`;
   }
-  return `## ${S.title}\n\n${body}\n\n---\n\n`;
+  return `## ${S.title}\n\n${body}`;
 }
 
 // ---------------------------------------------------------------------------
@@ -355,6 +460,26 @@ export const cell = (s: string) => s.replace(/\r?\n/g, " ").replace(/\|/g, "\\|"
 const POLICY_TITLE_MAX_CHARS = 200;
 export const policyTitleLabel = (title: string): string =>
   cell(title.length > POLICY_TITLE_MAX_CHARS ? `${title.slice(0, POLICY_TITLE_MAX_CHARS)}…` : title);
+
+/**
+ * The Radar, category and Hugging Face rows whose cell shows "—": no summary
+ * and no description to fall back on. The page says nothing about them, so
+ * the prose call is told they make no Highlight (Strix on 2026-10-26).
+ */
+export function unsummarizedRows(
+  report: TrendingReportData | undefined,
+  summaries: Map<number, string>,
+  hf: Numbered<HfRow>[] = [],
+  hfSummaries: Map<number, string> = new Map(),
+): string[] {
+  const radar = report?.radar ?? [];
+  const tables = report?.categories.flatMap((c) => c.rows) ?? [];
+  return [
+    ...radar.filter((r) => summaryText(summaries, r) === "—").map((r) => r.name),
+    ...tables.filter((r) => summaryText(summaries, r) === "—").map((r) => r.fullName),
+    ...hf.filter((r) => hfSummaryText(hfSummaries, r) === "—").map((r) => r.id),
+  ];
+}
 
 /** The Radar and category tables, a `##` heading each; "" when both are empty. */
 export function renderTrendingTables(report: TrendingReportData, summaries: Map<number, string>): string {
@@ -371,13 +496,13 @@ export function renderTrendingTables(report: TrendingReportData, summaries: Map<
         `| ${fire(r)}${link(r.name, r.url)} | ${cell(r.sources.join("; "))} | ${cell(r.signals.join("; "))} | ` +
         `${summary(r)} |`,
     );
-    blocks.push(`## ${T.radarHeading}`, `${T.radarHeader}\n${rows.join("\n")}`);
+    blocks.push(`## ${T.radarHeading}`, T.radarLegend, `${T.radarHeader}\n${rows.join("\n")}`);
   }
 
   for (const { category, rows } of report.categories) {
     const lines = rows.map(
       (r) =>
-        `| ${fire(r)}${link(r.fullName, r.url)} | ${cell(r.language)} | ${cell(r.starsCell)} | ${summary(r)} |`,
+        `| ${fire(r)}${link(r.fullName, r.url)} | ${cell(r.language || "—")} | ${cell(r.starsCell)} | ${summary(r)} |`,
     );
     blocks.push(`## ${T.categoryTitles[category]}`, `${T.categoryHeader}\n${lines.join("\n")}`);
   }
@@ -419,10 +544,13 @@ export function renderPolicyTable(
 }
 
 /**
- * The data report's vendor tables, one per vendor section with items. Each row
- * shows the summary for its own number (`n`, set by selectVendorItems).
- * Date, source, title and the ⚠️/🤖 markers come from the data, never the model.
+ * A vendor item's link text without the date its title opens with: Snowflake titles its notes
+ * "October 23, 2026: …" or "Oct 26, 2026: …", which the Date column already shows. The stored
+ * title keeps it: title + date is the item's state key.
  */
+export const vendorTitleLabel = (title: string): string =>
+  policyTitleLabel(title.replace(/^(?:[A-Z][a-z]+\.? \d{1,2}, \d{4}|\d{4}-\d{2}-\d{2}):\s*/, ""));
+
 /**
  * The data report's Releases this week table; each row's summary by its own
  * number (after the vendor rows), else its release notes, truncated. Empty
@@ -454,13 +582,18 @@ export function renderVendorActions(actions: Record<string, VendorAction>, dateS
     .sort((a, b) => a.date.localeCompare(b.date) || a.title.localeCompare(b.title))
     .map(
       (a) =>
-        `| ${a.date} | ${cell(a.source)} | [${policyTitleLabel(a.title)}](${cell(a.link)}) | ${cell(a.summary ?? "—")} |`,
+        `| ${a.date} | ${cell(a.source)} | [${vendorTitleLabel(a.title)}](${cell(a.link)}) | ${cell(a.summary ?? "—")} |`,
     );
   return rows.length
     ? `## ${DATA_REPORT.actionHeading}\n\n${DATA_REPORT.actionTableHeader}\n${rows.join("\n")}`
     : "";
 }
 
+/**
+ * The data report's vendor tables, one per vendor section with items. Each row
+ * shows the summary for its own number (`n`, set by selectVendorItems).
+ * Date, source, title and the ⚠️/🤖 markers come from the data, never the model.
+ */
 export function renderVendorTables(
   items: Numbered<KeptVendorItem>[],
   summaries: Map<number, string>,
@@ -471,21 +604,36 @@ export function renderVendorTables(
   for (const section of VENDOR_SECTIONS) {
     const links = alsoNew
       .filter((it) => vendorSection(it.vendor) === section)
-      .map((it) => `[${policyTitleLabel(it.title)}](${it.link})`);
+      .map((it) => `[${vendorTitleLabel(it.title)}](${it.link})`);
     const also = links.length ? `*${DATA_REPORT.alsoNew}* ${links.join(" · ")}` : "";
-    const rows = items
+    // Deprecations first, then newest first (undated last); a row keeps its number, so its summary follows it.
+    const sectionItems = items
       .filter((it) => vendorSection(it.vendor) === section)
-      .map(
-        (it) =>
-          `| ${it.date || "—"} | ${cell(it.source)} | ` +
-          `${it.deprecation ? `${DATA_REPORT.deprecationMarker} ` : ""}${it.aiInData ? `${DATA_REPORT.aiMarker} ` : ""}` +
-          `[${policyTitleLabel(it.title)}](${cell(it.link)}) | ` +
-          `${cell(summaryText(summaries, it))} |`,
+      .sort(
+        (a, b) => Number(b.deprecation) - Number(a.deprecation) || (b.date || "").localeCompare(a.date || ""),
       );
-    const table = rows.length ? `${DATA_REPORT.vendorTableHeader}\n${rows.join("\n")}` : "";
+    const oneSource = new Set(sectionItems.map((it) => it.source)).size === 1;
+    const rows = sectionItems.map(
+      (it) =>
+        `| ${it.date || "—"} | ${oneSource ? "" : `${cell(it.source)} | `}` +
+        `${it.deprecation ? `${DATA_REPORT.deprecationMarker} ` : ""}${it.aiInData ? `${DATA_REPORT.aiMarker} ` : ""}` +
+        `[${vendorTitleLabel(it.title)}](${cell(it.link)}) | ` +
+        `${cell(summaryText(summaries, it))} |`,
+    );
+    const header = oneSource ? DATA_REPORT.vendorTableHeaderOneSource : DATA_REPORT.vendorTableHeader;
+    const table = rows.length ? `${header}\n${rows.join("\n")}` : "";
     if (table || also) tables[section] = [table, also].filter(Boolean).join("\n\n");
   }
   return tables;
+}
+
+/**
+ * A story's link: its title, or for a story linking a GitHub repo the title with the repo as the
+ * link text, so the link reads what it opens ("Show HN: Agentsh" linked microsoft/Agensh, 2026-10-26).
+ */
+function storyLink(r: Pick<StoryRow, "title" | "url">): string {
+  const repo = /^https:\/\/github\.com\/([\w.-]+\/[\w.-]+?)(?:\.git)?\/?$/i.exec(r.url)?.[1];
+  return repo ? `${cell(r.title)} ([${cell(repo)}](${cell(r.url)}))` : `[${cell(r.title)}](${cell(r.url)})`;
 }
 
 /**
@@ -502,7 +650,7 @@ export function renderSpottedTable(
   if (!rows.length) return "";
   const lines = rows.map(
     (r) =>
-      `| [${cell(r.title)}](${cell(r.url)}) | ${SPOTTED.sources[r.source]} | ` +
+      `| ${storyLink(r)} | ${SPOTTED.sources[r.source]} | ` +
       `[${SPOTTED.counts(r.source, r.points, r.comments)}](${cell(r.discussionUrl)}) | ` +
       `${cell(summaryText(summaries, { n: r.n, description: r.description ?? "" }))} |`,
   );
@@ -524,21 +672,21 @@ export function renderResearchTable(
 }
 
 /**
- * The config.yml section a trending category would join, as promotion did
- * until October 2026: Other Agents (a job-search bot, a vulnerability scanner
- * on 2026-10-19) joins none.
+ * The config.yml section a trending category fits. `infra` is sandboxes,
+ * session multiplexers and context tools, so harnesses, frameworks and
+ * multi-agent systems (ruflo, paperclip on 2026-10-26) fit none, nor do Other
+ * Agents (a job-search bot, a vulnerability scanner on 2026-10-19).
  */
 const CANDIDATE_SECTION: Partial<Record<Category, AgentSectionKey>> = {
   coding_agent: "agents",
-  harness_framework: "infra",
-  multi_agent: "infra",
   agent_tooling: "infra",
 };
 
 /**
  * Trends' Candidates to track: the 🔥 GitHub repos in no config.yml section
- * (`tracked`, compared case-insensitively), grouped by the section they would
- * join, each with its entry in config.yml's format. Empty when there are none.
+ * (`tracked`, compared case-insensitively), linked and grouped by the section
+ * their category fits, then those that fit none. The config.yml lines are for
+ * the maintainer, so they sit collapsed below. Empty when there are none.
  */
 export function renderCandidates(
   candidates: { fullName: string; category: Category }[],
@@ -546,23 +694,93 @@ export function renderCandidates(
 ): string {
   const T = TRENDS_REPORT;
   const known = new Set(tracked.map((r) => r.repo.toLowerCase()));
-  const groups = AGENT_SECTION_KEYS.map((key) => {
-    const repos = [
-      ...new Set(
-        candidates
-          .filter((c) => CANDIDATE_SECTION[c.category] === key && !known.has(c.fullName.toLowerCase()))
-          .map((c) => c.fullName),
-      ),
-    ];
-    if (!repos.length) return "";
-    const entries = repos.map((repo) => {
+  const fresh = candidates.filter((c) => !known.has(c.fullName.toLowerCase()));
+  const reposOf = (key: AgentSectionKey | undefined) => [
+    ...new Set(fresh.filter((c) => CANDIDATE_SECTION[c.category] === key).map((c) => c.fullName)),
+  ];
+  const links = (repos: string[]) => repos.map((r) => `[${r}](https://github.com/${r})`).join(", ");
+  const groups = AGENT_SECTION_KEYS.map((key) => ({ key, repos: reposOf(key) })).filter(
+    (g) => g.repos.length,
+  );
+  const unmatched = reposOf(undefined);
+  if (!groups.length && !unmatched.length) return "";
+  const list = [
+    ...groups.map((g) => `- ${T.candidatesSection(g.key)} ${links(g.repos)}`),
+    ...(unmatched.length ? [`- ${T.candidatesNoSection} ${links(unmatched)}`] : []),
+  ].join("\n");
+  const yaml = groups.map((g) => {
+    const entries = g.repos.map((repo) => {
       const name = repo.split("/")[1] ?? repo;
       return `    - id: ${name.toLowerCase()}\n      repo: ${repo}\n      name: ${name}`;
     });
-    return `${T.candidatesSection(key)}\n\n\`\`\`yaml\n${entries.join("\n")}\n\`\`\``;
-  }).filter(Boolean);
-  if (!groups.length) return "";
-  return `## ${T.candidatesHeading}\n\n${T.candidatesIntro}\n\n${groups.join("\n\n")}`;
+    return `${T.candidatesSection(g.key)}\n\n\`\`\`yaml\n${entries.join("\n")}\n\`\`\``;
+  });
+  // The blank line after </summary> lets the Markdown inside <details> render.
+  const details = yaml.length
+    ? `\n\n<details><summary>${T.candidatesConfig}</summary>\n\n${yaml.join("\n\n")}\n\n</details>`
+    : "";
+  return `## ${T.candidatesHeading}\n\n${T.candidatesIntro}\n\n${list}${details}`;
+}
+
+/**
+ * Trends' OpenRouter usage, in code: on 2026-10-26 the model wrote "round out
+ * the top five" after six models and picked "newcomers" by no rule. Ranks are
+ * the rankings page's order; each model name links its OpenRouter page.
+ */
+export function renderOpenRouterUsage(
+  models: OpenRouterModel[],
+  date: string,
+  /** The slugs, in rank order, that the run dated 7 days earlier saved; no Last week column without them. */
+  lastWeek?: string[],
+): string {
+  if (!models.length) return "";
+  const T = TRENDS_REPORT;
+  const lastWeekCell = (slug: string) => {
+    if (!lastWeek) return "";
+    const rank = lastWeek.indexOf(slug);
+    return ` ${rank === -1 ? T.openRouterNewcomer : rank + 1} |`;
+  };
+  const rows = models.map(
+    (m, i) =>
+      `| ${i + 1} | [${cell(m.slug)}](https://openrouter.ai/${m.slug}) | ${formatTokens(m.tokens)} |${lastWeekCell(m.slug)}`,
+  );
+  const header = lastWeek ? T.openRouterHeaderLastWeek : T.openRouterHeader;
+  return `## ${T.openRouterHeading}\n\n${T.openRouterIntro(date, lastWeek !== undefined)}\n\n${header}\n${rows.join("\n")}`;
+}
+
+/**
+ * A Hugging Face row's summary cell: the model's line, else its task and size. A "—" line
+ * counts as none: the prompt allows it for an unknown task even when the size is known.
+ */
+export function hfSummaryText(summaries: Map<number, string>, r: Numbered<HfRow>): string {
+  const line = summaries.get(r.n);
+  return line && line !== "—" ? line : summaryText(new Map(), { n: r.n, description: hfDescription(r) });
+}
+
+/**
+ * Trends' Hugging Face table, in code like OpenRouter usage: the rank is the
+ * row's place in the Hub's order, 🔥 a row also on the page dated 7 days
+ * earlier (`lastWeek`: `lastWeekKeys`), quantised copies follow the original's
+ * link. The model writes only the summary, else the row shows its task and size.
+ */
+export function renderHfTable(
+  rows: Numbered<HfRow>[],
+  summaries: Map<number, string>,
+  lastWeek: Set<string> = new Set(),
+): string {
+  if (!rows.length) return "";
+  const T = TRENDS_REPORT;
+  const lines = rows.map((r, i) => {
+    const fire = hfKeys(r).some((k) => lastWeek.has(k)) ? "🔥 " : "";
+    const variants = r.variants.length
+      ? ` (+ ${r.variants.map((v) => `[${cell(v.id)}](${cell(v.url)})`).join(", ")})`
+      : "";
+    return (
+      `| ${i + 1} | ${fire}[${cell(r.id)}](${cell(r.url)})${variants} | ${r.likes.toLocaleString("en-US")} | ` +
+      `${r.downloads.toLocaleString("en-US")} | ${cell(hfSummaryText(summaries, r))} |`
+    );
+  });
+  return `## ${T.hfHeading}\n\n${T.hfIntro}\n\n${T.hfHeader}\n${lines.join("\n")}`;
 }
 
 /** The models page's Lab announcements rows, each summary by its own number (else the page text, truncated, or "—"). */

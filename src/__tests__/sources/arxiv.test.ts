@@ -1,3 +1,4 @@
+import fs from "node:fs";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   fetchArxivData,
@@ -13,6 +14,7 @@ import {
   submissionCutoff,
   nextArxivState,
   buildTraceFile,
+  DOMAIN_APPLICATION_PENALTY,
   type JevScore,
   type ArxivPaper,
 } from "../../sources/arxiv.ts";
@@ -212,8 +214,85 @@ describe("Jev relevance ranking", () => {
         works_without_training: 0.123,
         widely_used_models: 0,
         code_released: false,
+        rendered: true,
+        rank: 1,
       },
     ]);
+  });
+
+  it("traces domain_application and its penalty", () => {
+    const base = answers(2, 0.98, 1, 1);
+    const withDomain = { ...base, domain_application: { noul: 0.97 } };
+    expect(relevanceOf(withDomain, false)).toBeCloseTo(relevanceOf(base, false) * (1 - 0.2 * 0.97));
+    const file = JSON.parse(
+      buildTraceFile([{ paper: paper("a"), jev: { ...jev(0.9), answers: withDomain } }]),
+    );
+    expect(file.papers[0].domain_application).toBe(0.97);
+    expect(file.domain_application_penalty).toBe(DOMAIN_APPLICATION_PENALTY);
+  });
+
+  /**
+   * The 2026-10-26 Research pool (research-state entries of 10-19 to 10-25) with the answers the
+   * 10-23 and 10-24 arXiv traces saved. Those runs did not ask domain_application yet: the values
+   * below are supplied by hand, high for the four papers serving one outside field, low for the rest.
+   */
+  describe("replays the 2026-10-26 Research pool", () => {
+    type Row = {
+      id: string;
+      title: string;
+      relevance: number;
+      about_llms: number;
+      about_agents_or_code: number;
+      proposes_technique: number;
+      works_without_training: number;
+      widely_used_models: number;
+      code_released: boolean;
+    };
+    const pool = (
+      JSON.parse(
+        fs.readFileSync(new URL("../fixtures/arxiv-research-2026-10-26.json", import.meta.url), "utf-8"),
+      ) as { papers: Row[] }
+    ).papers;
+    const toAnswers = (r: Row, domain?: number) => ({
+      about_llms: { score: r.about_llms },
+      about_agents_or_code: { noul: r.about_agents_or_code },
+      ...(domain === undefined ? {} : { domain_application: { noul: domain } }),
+      proposes_technique: { noul: r.proposes_technique },
+      works_without_training: { noul: r.works_without_training },
+      widely_used_models: { noul: r.widely_used_models },
+    });
+    const top10 = (domainOf: (r: Row) => number | undefined): string[] =>
+      pool
+        .map((r) => ({ r, rel: relevanceOf(toAnswers(r, domainOf(r)), r.code_released) }))
+        .sort((a, b) => b.rel - a.rel)
+        .slice(0, 10)
+        .map(({ r }) => r.title.split(":")[0]!);
+    const OFF_AUDIENCE = [
+      "nnInteractive Agent",
+      "Governed Self-Evolution for Autonomous Investing",
+      "Harnessing Language Models as Optimization Modeling Agents",
+      "LLM2Cert",
+    ];
+    // Also for one field: biomedical claims, medical dialogue, Lean/Mathlib search.
+    const OTHER_DOMAIN = ["Real PMIDs, Wrong Papers", "SIM-UT", "Lean Finder V2"];
+
+    it("reproduces the saved relevance without a domain answer (no penalty)", () => {
+      for (const r of pool) expect(relevanceOf(toAnswers(r), r.code_released)).toBeCloseTo(r.relevance, 2);
+      expect(top10(() => undefined)).toEqual(expect.arrayContaining(OFF_AUDIENCE));
+    });
+
+    it("drops the four off-audience papers below the on-topic ones", () => {
+      const domain = (r: Row) =>
+        [...OFF_AUDIENCE, ...OTHER_DOMAIN].some((t) => r.title.startsWith(t)) ? 0.9 : 0.1;
+      const top = top10(domain);
+      for (const t of OFF_AUDIENCE) expect(top).not.toContain(t);
+      expect(top.slice(0, 2)).toEqual(["SWE-VERIFIER", "Environment Duels"]);
+      // At 0.5 the top paper (0.958) still falls below the on-topic ones at 0.87.
+      const half = top10((r) => (OFF_AUDIENCE.some((t) => r.title.startsWith(t)) ? 0.5 : 0));
+      expect(half.indexOf("nnInteractive Agent")).toBeGreaterThan(
+        half.indexOf("Beyond Watching and Searching"),
+      );
+    });
   });
 });
 

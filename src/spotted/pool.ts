@@ -7,7 +7,7 @@
 
 import path from "node:path";
 import { daysBefore } from "../core/date.ts";
-import { loadItemsFile, saveItemsFile, type ItemsFile } from "../core/jev.ts";
+import { loadItemsFile, saveItemsFile, type DroppedReason, type ItemsFile } from "../core/jev.ts";
 import { numberRows, type Numbered } from "../reports/summarized-table.ts";
 import type { HnData } from "../sources/hn.ts";
 import type { LobstersData } from "../sources/lobsters.ts";
@@ -60,6 +60,32 @@ export function linkKey(url: string): string {
   }
 }
 
+/** Boilerplate a linked page's meta description carries in place of content. */
+const DESCRIPTION_BOILERPLATE = [
+  /Contribute to [\w.-]+\/[\w.-]+ development by creating an account on GitHub\.?/gi,
+  /\s+-\s+[\w.-]+\/[\w.-]+\s*$/, // GitHub's trailing " - owner/repo"
+  // A sentence that opens with it: "A CLI to subscribe to RSS feeds" is content.
+  /(?:^|(?<=[.!?] ))Subscribe (now |today )?(for|to)\b[^.]*\.?/gi,
+  /(\.{3}|…)\s*$/,
+];
+
+/**
+ * A story's description without page boilerplate, whitespace collapsed; undefined when nothing is
+ * left. On 2026-10-26 a Spotted row read "Contribute to microsoft/Agensh development by creating an
+ * account on GitHub." and a Most discussed row "Subscribe for daily updates."
+ */
+export function cleanStoryDescription(description: string | undefined): string | undefined {
+  let d = (description ?? "").replace(/\s+/g, " ").trim();
+  for (const re of DESCRIPTION_BOILERPLATE) d = d.replace(re, "").trim();
+  return d || undefined;
+}
+
+/** `cleanStoryDescription` as an optional `description` field. */
+const describedBy = (description: string | undefined) => {
+  const d = cleanStoryDescription(description);
+  return d ? { description: d } : {};
+};
+
 /** Every fetched story, shown before or not: the log takes the latest counts of each. */
 export function storiesFrom(hn: HnData, lobsters: LobstersData, devto: DevtoData): Story[] {
   return [
@@ -71,7 +97,7 @@ export function storiesFrom(hn: HnData, lobsters: LobstersData, devto: DevtoData
       discussionUrl: s.hnUrl,
       points: s.points,
       comments: s.comments,
-      ...(s.description ? { description: s.description } : {}),
+      ...describedBy(s.description),
       published: s.createdAt,
     })),
     ...lobsters.stories.map((s): Story => ({
@@ -82,7 +108,7 @@ export function storiesFrom(hn: HnData, lobsters: LobstersData, devto: DevtoData
       discussionUrl: s.commentsUrl,
       points: s.score,
       comments: s.commentCount,
-      ...(s.description ? { description: s.description } : {}),
+      ...describedBy(s.description),
       published: s.publishedAt,
     })),
     ...devto.articles.map((a): Story => ({
@@ -93,7 +119,7 @@ export function storiesFrom(hn: HnData, lobsters: LobstersData, devto: DevtoData
       discussionUrl: a.url,
       points: a.positiveReactionsCount,
       comments: a.commentsCount,
-      ...(a.description ? { description: a.description } : {}),
+      ...describedBy(a.description),
       published: a.publishedAt,
     })),
   ];
@@ -114,6 +140,7 @@ export interface LoggedStory {
   firstSeen: string; // CST date
   lastSeen: string; // CST date
   shown?: string; // CST date a page first showed it
+  cut?: string; // CST date Spotted's per-source cap alone left it out: next day's pool takes it again
 }
 
 export type SpottedLog = ItemsFile<LoggedStory>;
@@ -184,8 +211,37 @@ export function splitPool(
 }
 
 /**
+ * The stories Spotted's cap cut yesterday (`cut`) that no page showed and today's fetch did not
+ * return, rebuilt from the log for one more chance in today's pool. On 2026-10-25 a Dev.to story
+ * about OpenShell (agents 0.99) was cut by the cap and Dev.to's 2-day window dropped it the next day.
+ * Its publish date is unknown: the log's first-seen date stands in.
+ */
+export function carriedStories(log: SpottedLog, fetched: Story[], dateStr: string): Story[] {
+  const yesterday = daysBefore(dateStr, 1);
+  const fetchedIds = new Set(fetched.map((s) => s.id));
+  const fetchedLinks = new Set(fetched.map((s) => linkKey(s.url)));
+  return Object.entries(log.items)
+    .filter(
+      ([id, e]) =>
+        e.cut === yesterday && !e.shown && !fetchedIds.has(id) && !fetchedLinks.has(linkKey(e.url)),
+    )
+    .map(([id, e]) => ({
+      id,
+      source: e.source,
+      title: e.title,
+      url: e.url,
+      discussionUrl: e.discussionUrl,
+      points: e.points,
+      comments: e.comments,
+      ...describedBy(e.description),
+      published: `${e.firstSeen}T00:00:00Z`,
+    }));
+}
+
+/**
  * Each fetched story with its latest counts and `lastSeen` (a story shown on
- * an earlier day too); `shown` set for each of `shownIds` that has none;
+ * an earlier day too); `shown` set for each of `shownIds` that has none; `cut`
+ * set to today for each of `cutIds` (Spotted's cap left it out) that no page showed;
  * entries unseen for more than LOG_UNSEEN_DAYS pruned.
  */
 export function nextLog(
@@ -193,6 +249,7 @@ export function nextLog(
   fetched: Story[],
   shownIds: Iterable<string>,
   dateStr: string,
+  cutIds: Iterable<string> = [],
 ): SpottedLog {
   const items = { ...log.items };
   for (const s of fetched) {
@@ -208,11 +265,16 @@ export function nextLog(
       firstSeen: prev?.firstSeen ?? dateStr,
       lastSeen: dateStr,
       ...(prev?.shown ? { shown: prev.shown } : {}),
+      ...(prev?.cut ? { cut: prev.cut } : {}),
     };
   }
   for (const id of shownIds) {
     const e = items[id];
     if (e && !e.shown) items[id] = { ...e, shown: dateStr };
+  }
+  for (const id of cutIds) {
+    const e = items[id];
+    if (e && !e.shown) items[id] = { ...e, cut: dateStr };
   }
   const oldest = daysBefore(dateStr, LOG_UNSEEN_DAYS);
   return { items: Object.fromEntries(Object.entries(items).filter(([, e]) => e.lastSeen >= oldest)) };
@@ -240,13 +302,34 @@ export interface SpottedSection {
   summaries: Map<number, string>;
 }
 
-/** Up to `cap` of `stories`, in order, skipping a link in `taken`; each one taken claims its link. */
-function claimRows<T extends Pick<Story, "url">>(stories: T[], cap: number, taken: Set<string>): T[] {
+/**
+ * Up to `cap` of `stories`, in order, skipping a link in `taken`; each one taken claims its link.
+ * `onDrop` hears every story left out and why.
+ */
+function claimRows<T extends Pick<Story, "url">>(
+  stories: T[],
+  cap: number,
+  taken: Set<string>,
+  onDrop?: (story: T, reason: DroppedReason) => void,
+  /** A floor on the next row, given the rows taken so far: a story under it is dropped as `threshold`. */
+  passes?: (story: T, taken: number) => boolean,
+): T[] {
   const rows: T[] = [];
   for (const s of stories) {
-    if (rows.length === cap) break;
+    if (passes && !passes(s, rows.length)) {
+      onDrop?.(s, "threshold");
+      continue;
+    }
     const key = linkKey(s.url);
-    if (taken.has(key)) continue;
+    if (taken.has(key)) {
+      onDrop?.(s, "repeat");
+      continue;
+    }
+    // Checked last: `cap` means the story would have been a row, which is what carries it to tomorrow.
+    if (rows.length === cap) {
+      onDrop?.(s, "cap");
+      continue;
+    }
     taken.add(key);
     rows.push(s);
   }
@@ -254,47 +337,164 @@ function claimRows<T extends Pick<Story, "url">>(stories: T[], cap: number, take
 }
 
 /**
- * Each page's rows: per source the top SPOTTED_PER_SOURCE by points, sources
- * in SPOTTED_PER_SOURCE order, numbered across pages in SPOTTED_PAGES order.
- * Each link once: a row claims its link in that order, so a copy below its
- * source's cut, or on no page, leaves the link to a copy that makes a row.
- * `pageOf` is null for a story no page takes.
+ * A routed story needs this probability for its topic to be Spotted. On 2026-10-26 DetectorScope
+ * (agents 0.43) and the AI graveyard (models 0.53) made rows on topics Jev was unsure of.
  */
-export function selectSpotted(stories: Story[], pageOf: (story: Story) => SpottedPage | null): SpottedRow[] {
+export const SPOTTED_MIN_TOPIC_PROBABILITY = 0.6;
+/** A story published longer ago is not news, however late a source surfaces it (a 25-day-old post, 2026-10-26). */
+export const SPOTTED_MAX_AGE_DAYS = 7;
+/** Once a page has this many rows, a further row needs SPOTTED_MIN_POINTS: no 8-point row beside 491. */
+export const SPOTTED_ROWS_BEFORE_FLOOR = 3;
+/** Each source's own scale (HN points, Lobste.rs score, Dev.to reactions); stories are fetched hours old. */
+export const SPOTTED_MIN_POINTS: Record<StorySource, number> = { hn: 5, lobsters: 3, devto: 10 };
+
+/** Dev.to challenge entries open with this line: three Hacktoberfest entries in two days on 2026-10-25/26. */
+export const isContestEntry = (s: Pick<Story, "title" | "description">): boolean =>
+  /\bthis is a submission for\b/i.test(`${s.title} ${s.description ?? ""}`);
+
+/** Topic probability in tenths: a sure story ranks above an unsure one, points decide within a band. */
+const confidenceBand = (p: number | undefined) => Math.round((p ?? 1) * 10);
+
+/**
+ * Each page's rows: per source up to SPOTTED_PER_SOURCE, sources in SPOTTED_PER_SOURCE order,
+ * ranked by topic probability band, then points; numbered across pages in SPOTTED_PAGES order.
+ * Left out before ranking (`threshold`): a topic probability under SPOTTED_MIN_TOPIC_PROBABILITY,
+ * a story over SPOTTED_MAX_AGE_DAYS old (when `dateStr` is given) and a contest entry; while
+ * ranking, a story under SPOTTED_MIN_POINTS once its page has SPOTTED_ROWS_BEFORE_FLOOR rows.
+ * Each link once: a row claims its link in that order, so a copy below its source's cut, or on no
+ * page, leaves the link to a copy that makes a row. `pageOf` is null for a story no page takes;
+ * `probabilityOf` is undefined without a Jev verdict (the keyword fallback), which passes.
+ * `dropped`, when given, gets every story without a row and why (for the trace).
+ */
+export function selectSpotted(
+  stories: Story[],
+  pageOf: (story: Story) => SpottedPage | null,
+  dropped?: Map<string, DroppedReason>,
+  opts: { dateStr?: string; probabilityOf?: (story: Story) => number | undefined } = {},
+): SpottedRow[] {
   const sources = Object.keys(SPOTTED_PER_SOURCE) as StorySource[];
+  const probability = (s: Story) => opts.probabilityOf?.(s);
+  const oldest = opts.dateStr ? daysBefore(opts.dateStr, SPOTTED_MAX_AGE_DAYS) : "";
+  const eligible = stories.filter((s) => {
+    if (pageOf(s) === null) {
+      dropped?.set(s.id, "routing");
+      return false;
+    }
+    const p = probability(s);
+    const tooOld = oldest !== "" && s.published.slice(0, 10) < oldest;
+    if ((p !== undefined && p < SPOTTED_MIN_TOPIC_PROBABILITY) || tooOld || isContestEntry(s)) {
+      dropped?.set(s.id, "threshold");
+      return false;
+    }
+    return true;
+  });
   const taken = new Set<string>();
   return numberRows(
-    SPOTTED_PAGES.flatMap((page) =>
-      sources.flatMap((source) =>
-        claimRows(
-          stories
-            .filter((s) => s.source === source && pageOf(s) === page)
-            .sort((a, b) => b.points - a.points),
+    SPOTTED_PAGES.flatMap((page) => {
+      const rows: Story[] = [];
+      for (const source of sources) {
+        const ranked = eligible
+          .filter((s) => s.source === source && pageOf(s) === page)
+          .sort(
+            (a, b) => confidenceBand(probability(b)) - confidenceBand(probability(a)) || b.points - a.points,
+          );
+        const claimed = claimRows(
+          ranked,
           SPOTTED_PER_SOURCE[source],
           taken,
-        ).map((s) => ({ ...s, page })),
-      ),
-    ),
+          (s, reason) => dropped?.set(s.id, reason),
+          (s, sourceRows) =>
+            rows.length + sourceRows < SPOTTED_ROWS_BEFORE_FLOOR || s.points >= SPOTTED_MIN_POINTS[source],
+        );
+        rows.push(...claimed);
+      }
+      return rows.map((s) => ({ ...s, page }));
+    }),
   );
 }
 
-/** Trends' Most discussed per source, sources in this order; every topic counts. */
+/** The Overview's "Also talked about" stories per source, sources in this order. */
+export const TALKED_ABOUT_PER_SOURCE: Record<StorySource, number> = { hn: 3, lobsters: 1, devto: 1 };
+/**
+ * Points a story routed to no page needs for the Overview, per source: 32 of 45 judged stories were
+ * `other` on 2026-10-26, so only the much-discussed ones (an AI-found PHP RCE at 452 points) make it.
+ */
+export const TALKED_ABOUT_MIN_POINTS: Record<StorySource, number> = { hn: 50, lobsters: 10, devto: 20 };
+
+/** An Overview "Also talked about" row: a story with the topic Jev routed it to. */
+export type TalkedAboutRow = Pick<
+  Story,
+  "id" | "source" | "title" | "url" | "discussionUrl" | "points" | "comments"
+> & {
+  topic: string;
+};
+
+/**
+ * The Overview's "Also talked about" line: the stories routed to a topic with no page (`policy`,
+ * `other`; the maintainer's choice of 2026-10-26), per source the top TALKED_ABOUT_PER_SOURCE by
+ * points with at least TALKED_ABOUT_MIN_POINTS, at most SPOTTED_MAX_AGE_DAYS old, no contest entry,
+ * each link once and none a Spotted row took (`taken`, `linkKey`s).
+ */
+export function selectTalkedAbout(
+  stories: Story[],
+  topicOf: (story: Story) => string | undefined,
+  pageOf: (story: Story) => SpottedPage | null,
+  dateStr: string,
+  taken: Set<string>,
+): TalkedAboutRow[] {
+  const oldest = daysBefore(dateStr, SPOTTED_MAX_AGE_DAYS);
+  const claimed = new Set(taken);
+  return (Object.keys(TALKED_ABOUT_PER_SOURCE) as StorySource[]).flatMap((source) =>
+    claimRows(
+      stories
+        .filter(
+          (s) =>
+            s.source === source &&
+            topicOf(s) !== undefined &&
+            pageOf(s) === null &&
+            s.points >= TALKED_ABOUT_MIN_POINTS[source] &&
+            s.published.slice(0, 10) >= oldest &&
+            !isContestEntry(s),
+        )
+        .sort((a, b) => b.points - a.points),
+      TALKED_ABOUT_PER_SOURCE[source],
+      claimed,
+    ).map((s) => ({
+      id: s.id,
+      source: s.source,
+      title: s.title,
+      url: s.url,
+      discussionUrl: s.discussionUrl,
+      points: s.points,
+      comments: s.comments,
+      topic: topicOf(s)!,
+    })),
+  );
+}
+
+/** Trends' Most discussed per source, sources in this order. */
 export const MOST_DISCUSSED_PER_SOURCE: Record<StorySource, number> = { hn: 5, lobsters: 3, devto: 3 };
+/** Comments a Most discussed row needs, per source: a 0-comment Lobste.rs row stood among 500-comment threads (2026-10-26). */
+export const MOST_DISCUSSED_MIN_COMMENTS: Record<StorySource, number> = { hn: 20, lobsters: 3, devto: 5 };
+/** The Spotted topic that is off the reader's subjects: never Most discussed. */
+const OFF_AUDIENCE_TOPIC = "other";
 
 /**
  * Trends' Most discussed: the logged stories first seen in the 7 days before
  * the run (the run's own stories enter the log after the page is built, so
  * each day counts in one week), per source the top MOST_DISCUSSED_PER_SOURCE
- * by comments. A story a page showed on an earlier day (`shown`: a same-day
+ * by comments, each with at least MOST_DISCUSSED_MIN_COMMENTS and not routed to the `other` topic
+ * (`topicOf`: its saved Spotted verdict; unknown passes). A story a page showed on an earlier day (`shown`: a same-day
  * re-run shows today's rows again) or a daily page shows today (`showing`: the
  * run's project news and Spotted rows) is left out, by id or link; each link
- * once, in the first source whose rows take it. Unnumbered: the page numbers
- * them after its papers.
+ * once, in the first source whose rows take it. Unnumbered: main() numbers
+ * them after the Spotted rows, for the one story summaries call.
  */
 export function mostDiscussed(
   log: SpottedLog,
   dateStr: string,
   showing: Pick<Story, "id" | "url">[],
+  topicOf: (id: string) => string | undefined = () => undefined,
 ): Omit<StoryRow, "n">[] {
   const from = daysBefore(dateStr, 7);
   const showingIds = new Set(showing.map((s) => s.id));
@@ -310,7 +510,9 @@ export function mostDiscussed(
         e.firstSeen >= from &&
         e.firstSeen < dateStr &&
         !shownEarlier(e.shown, dateStr) &&
-        !showingIds.has(id),
+        !showingIds.has(id) &&
+        e.comments >= MOST_DISCUSSED_MIN_COMMENTS[e.source] &&
+        topicOf(id) !== OFF_AUDIENCE_TOPIC,
     )
     .map(([id, e]) => ({ id, ...e }));
   return (Object.keys(MOST_DISCUSSED_PER_SOURCE) as StorySource[]).flatMap((source) =>
@@ -326,7 +528,8 @@ export function mostDiscussed(
       discussionUrl: e.discussionUrl,
       points: e.points,
       comments: e.comments,
-      ...(e.description ? { description: e.description } : {}),
+      // Logged before descriptions were cleaned at fetch.
+      ...describedBy(e.description),
     })),
   );
 }

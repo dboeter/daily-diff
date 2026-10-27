@@ -7,16 +7,20 @@
 
 import path from "node:path";
 import {
+  droppedFor,
   judgeItems,
   loadItemsFile,
+  renderedAt,
   saveItemsFile,
   type AskJev,
+  type DroppedReason,
+  type SourceCounts,
   type ChoiceAnswer,
   type Judgment,
   type VerdictCache,
 } from "../core/jev.ts";
 import { DATA_KEYWORD_PATTERNS } from "../sources/hn.ts";
-import { siteOf, type SpottedPage, type Story } from "./pool.ts";
+import { siteOf, type SpottedPage, type SpottedRow, type Story } from "./pool.ts";
 
 const TOPIC_QUESTIONS = {
   topic: {
@@ -87,8 +91,9 @@ export interface TopicAnswers {
 
 /**
  * The page each topic lands on. Research stays a topic of its own so later
- * work can tell it from model news. Policy stories are dropped: AI Policy
- * has its own sources (the HN-to-policy routing was reverted on 2026-10-20).
+ * work can tell it from model news. Policy and other have no page: AI Policy
+ * has its own sources (the HN-to-policy routing was reverted on 2026-10-20), so
+ * their best stories go on the Overview's "Also talked about" (`selectTalkedAbout`).
  */
 export const PAGE_OF_TOPIC: Record<Topic, SpottedPage | null> = {
   agents: "agents",
@@ -250,19 +255,40 @@ export async function routeStories(
 
 /**
  * `digests/YYYY-MM-DD/spotted-trace.json`: every routed story with its
- * topic, page, whether a page showed it, and its answers.
+ * topic, page, whether a page showed it (`rendered`, `rank`: its row number), why
+ * not (`selectSpotted`'s `dropped`, or its page went unpublished), and its answers.
+ * A story the Overview's "Also talked about" showed gets `talked_about: true` and no drop reason.
  */
-export function spottedTraceFile(stories: Story[], routing: Routing, shownIds: Set<string>): string {
+export function spottedTraceFile(
+  stories: Story[],
+  routing: Routing,
+  shownIds: Set<string>,
+  selection: {
+    rows: Pick<SpottedRow, "id" | "n">[];
+    dropped: Map<string, DroppedReason>;
+    /** The ids `selectTalkedAbout` took. */
+    talkedAbout?: Set<string>;
+    sources: SourceCounts;
+  },
+): string {
+  const rowOf = new Map(selection.rows.map((r) => [r.id, r.n]));
   const rows = stories.map((s) => {
     const topic = routing.topics.get(s.id) ?? null;
+    const n = rowOf.get(s.id);
     return {
       id: s.id,
       title: s.title,
+      source: s.source,
       topic,
       page: topic ? PAGE_OF_TOPIC[topic] : null,
       shown: shownIds.has(s.id),
+      ...(n !== undefined && shownIds.has(s.id)
+        ? renderedAt(n)
+        : selection.talkedAbout?.has(s.id)
+          ? { rendered: false, rank: null, talked_about: true }
+          : droppedFor(selection.dropped.get(s.id) ?? "unpublished")),
       ...routing.judgment.traceFields(s),
     };
   });
-  return routing.judgment.traceFile(rows, {});
+  return routing.judgment.traceFile(rows, { sources: selection.sources });
 }

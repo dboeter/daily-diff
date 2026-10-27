@@ -3,6 +3,7 @@ import {
   type DataAnswers,
   MAX_VENDOR_ITEMS,
   dataRelevance,
+  significanceLevel,
   dateCandidates,
   keywordVerdict,
   selectVendorItems,
@@ -39,6 +40,47 @@ describe("dataRelevance", () => {
     expect(dataRelevance(answers(1, 0, 0)).keep).toBe(false);
     expect(dataRelevance(answers(0.3, 0, 2)).keep).toBe(false);
     expect(dataRelevance(answers(0.3, 0.9, 2))).toMatchObject({ keep: false, deprecation: false });
+  });
+
+  it("counts a low-confidence significance as unknown (Notable), not low", () => {
+    const sure = { ...answers(0.95, 0.02, 0.53), significance: { score: 0.53, confidence: 0.8 } };
+    const unsure = { ...answers(0.95, 0.02, 0.53), significance: { score: 0.53, confidence: 0.3 } };
+    expect(significanceLevel(sure)).toBe(0.53);
+    expect(significanceLevel(unsure)).toBe(1);
+    expect(dataRelevance(unsure).relevance).toBeGreaterThan(dataRelevance(sure).relevance);
+  });
+
+  it("keeps a Tracked-project or Notable item on a weaker real change, not on a weak one", () => {
+    expect(dataRelevance(answers(0.46, 0.03, 0.5), true).keep).toBe(true);
+    expect(dataRelevance(answers(0.46, 0.03, 0.5)).keep).toBe(false);
+    expect(dataRelevance(answers(0.45, 0, 1.2)).keep).toBe(true);
+    expect(dataRelevance(answers(0.35, 0, 2), true).keep).toBe(false);
+  });
+
+  it("ticket 12 replay: the 2026-10-26 answers keep the Iceberg note and the Fabric FNTK item", () => {
+    // Saved answers from digests/2026-10-26/data-trace.json.
+    const recompact: DataAnswers = {
+      real_change: { noul: 0.46 },
+      deprecation: { noul: 0.03 },
+      ai_in_data: { noul: 0 },
+      significance: { score: 0.79, confidence: 0.53 },
+    };
+    const fntk: DataAnswers = {
+      real_change: { noul: 0.95 },
+      deprecation: { noul: 0.02 },
+      ai_in_data: { noul: 0.9 },
+      significance: { score: 0.53, confidence: 0.3 },
+    };
+    // "Recompact Iceberg table data" names Apache Iceberg (keyword "iceberg table"), a Tracked project.
+    expect(dataRelevance(recompact, true).keep).toBe(true);
+    expect(dataRelevance(fntk).keep).toBe(true);
+  });
+
+  it("does not exempt an untracked item whose significance is only unknown", () => {
+    // Real change 0.45 is under REAL_CHANGE_MIN; Notable at confidence 0.2 is not known to be Notable.
+    const unsure: DataAnswers = { ...answers(0.45, 0, 1.5), significance: { score: 1.5, confidence: 0.2 } };
+    expect(dataRelevance(unsure).keep).toBe(false);
+    expect(dataRelevance(unsure, true).keep).toBe(true);
   });
 
   it("always keeps a deprecation that is a real change, whatever its relevance", () => {
@@ -97,6 +139,23 @@ describe("selectVendorItems", () => {
     return { model: "jev-test", answers: byId[id]! };
   });
 
+  it("ticket 04 replay: the 2026-10-26 low-confidence Snowflake note is kept but minor (no Highlight)", async () => {
+    // Saved answers from digests/2026-10-26/data-trace.json (D5).
+    const d5: DataAnswers = {
+      real_change: { noul: 0.99 },
+      deprecation: { noul: 0.01 },
+      ai_in_data: { noul: 0.02 },
+      significance: { score: 0.52, confidence: 0.25 },
+    };
+    const sel = await selectVendorItems([item("d5", { vendor: "snowflake", source: "Snowflake" })], {
+      apiKey: "k",
+      cache: { items: {} },
+      dateStr: DATE,
+      ask: async () => ({ model: "jev-test", answers: d5 }),
+    });
+    expect(sel.items.map((i) => [i.id, i.minor])).toEqual([["d5", true]]);
+  });
+
   it("orders deprecations first, then by relevance; bundles skip Jev; saves the answers", async () => {
     ask.mockClear();
     const sel = await selectVendorItems(
@@ -111,6 +170,8 @@ describe("selectVendorItems", () => {
     );
     expect(sel.items.map((i) => i.id)).toEqual(["dep", "high", "low", "bcr"]);
     expect(sel.items.map((i) => i.deprecation)).toEqual([true, false, false, true]);
+    // Significance under "Notable" (1) marks a non-deprecation minor: no Highlight. A deprecation never is.
+    expect(sel.items.map((i) => i.minor ?? false)).toEqual([false, false, true, false]);
     expect(sel.rankedBy).toBe("jev");
     expect(ask).toHaveBeenCalledTimes(4);
     expect(sel.nextVerdicts?.items["high"]).toMatchObject({
@@ -185,6 +246,18 @@ describe("selectVendorItems", () => {
       "gcp4",
       ...Array.from({ length: 8 }, (_, i) => `dbx${i + 6}`),
     ]);
+  });
+
+  it("traces a kept item at its row number and an over-cap one as cut by the cap", async () => {
+    const many = Array.from({ length: MAX_VENDOR_ITEMS + 2 }, (_, i) =>
+      item(`dbx${i}`, { title: "Feature now available" }),
+    );
+    const sel = await selectVendorItems(many, { cache: { items: {} }, dateStr: DATE });
+    const trace = JSON.parse(sel.traceFile) as { items: Record<string, unknown>[] };
+    const row = (id: string) => trace.items.find((i) => i["id"] === id);
+    const kept = sel.items[3]!;
+    expect(row(kept.id)).toMatchObject({ rendered: true, rank: kept.n });
+    expect(row(`dbx${MAX_VENDOR_ITEMS + 1}`)).toMatchObject({ rendered: false, dropped_reason: "cap" });
   });
 
   it("gives slots the floors leave to Databricks first", async () => {
@@ -296,5 +369,38 @@ describe("selectVendorItems end dates", () => {
       ask: made,
     });
     expect(r.items[0]?.endDate).toBeUndefined();
+  });
+});
+
+describe("selectVendorItems near the cut", () => {
+  it("gives a section without a kept item its best item within 0.05 of the bar", async () => {
+    const byTitle: Record<string, DataAnswers> = {
+      // relevance 0.4*1 + 0.4*0.22/2 + 0 = 0.444 (no keep), 0.4*1 + 0.4*0.1/2 = 0.42 (no keep)
+      near: { ...answers(1, 0, 0.22) },
+      far: { ...answers(1, 0, 0.1) },
+    };
+    const ask = vi.fn(async (state: unknown) => ({
+      model: "jev-test",
+      answers: byTitle[(state as { title: string }).title.replace("Title ", "")]!,
+    }));
+    const sel = await selectVendorItems([item("near", { vendor: "gcp" }), item("far", { vendor: "gcp" })], {
+      apiKey: "k",
+      cache: { items: {} },
+      dateStr: DATE,
+      ask,
+    });
+    expect(sel.items.map((i) => i.id)).toEqual([]);
+    const near2: Record<string, DataAnswers> = { ...byTitle, near: answers(1, 0, 0.3) }; // 0.46: within 0.05 of 0.5
+    const ask2 = vi.fn(async (state: unknown) => ({
+      model: "jev-test",
+      answers: near2[(state as { title: string }).title.replace("Title ", "")]!,
+    }));
+    const sel2 = await selectVendorItems([item("near", { vendor: "gcp" }), item("far", { vendor: "gcp" })], {
+      apiKey: "k",
+      cache: { items: {} },
+      dateStr: DATE,
+      ask: ask2,
+    });
+    expect(sel2.items.map((i) => i.id)).toEqual(["near"]);
   });
 });

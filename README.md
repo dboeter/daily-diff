@@ -19,9 +19,9 @@ A personal daily digest of AI coding agents, AI models, AI policy and the data e
 | `ai-models.md` | AI Models & Labs | daily   | New Anthropic and OpenAI posts, models newly listed on OpenRouter, stealth models, Spotted                                                                             |
 | `ai-policy.md` | AI Policy        | daily   | New AI legislation, regulation and guidance for the EU, the Netherlands and the US, news & commentary, upcoming deadlines                                              |
 | `ai-data.md`   | Data Engineering | daily   | Action required (deprecations with an end date), vendor release notes and repo releases for Databricks, Snowflake, Azure / Fabric & GCP and the open-source data stack |
-| `ai-trends.md` | Trends           | Mondays | Trending agents & coding tools, Claude Code Skills, candidates to track, OpenRouter and Hugging Face models, the week's top papers and most discussed stories, Signals |
+| `ai-trends.md` | Trends           | Mondays | Trending agents & coding tools, the week's Claude Code Skills PRs and requests, candidates to track, OpenRouter and Hugging Face models, the week's top papers and most discussed stories, Signals |
 
-Every report opens with **Highlights**, then its tracked sections. AI Agents, AI Models & Labs and Data Engineering add **Spotted**: community stories on their topic that named no tracked project; Trends ends with **Signals**. A daily report with nothing new is skipped (AI Agents is always written). Each day also writes `highlights.json` (up to 2 highlights per report) and `coming-up.json` (dated items of the next 30 days from every page), which the Web UI's day overview and the notifications show.
+Every report opens with **Highlights**, then its tracked sections. AI Agents, AI Models & Labs and Data Engineering add **Spotted**: community stories on their topic that named no tracked project; Trends ends with **Signals**. A daily report with nothing new is skipped (AI Agents is always written). Each day also writes `highlights.json` (up to 2 highlights per report) and `coming-up.json` (dated items of the next 30 days from every page), which the Web UI's day overview and the notifications show, and `talked-about.json` (the day's best stories on topics without a page, the overview's "Also talked about" list).
 
 Code decides what is new and renders the tables; the LLM writes the prose: the per-project sections, row summaries, Highlights and Signals. Relevance, topic and category judgments come from [Jev](https://typesafe.ai) (TypeSafe), with keyword rules as the fallback without `TYPESAFE_API_KEY`. Each verdict is cached in a committed file under `digests/` and asked once.
 
@@ -70,7 +70,7 @@ With `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID` set, each run sends a Telegram 
 
 ## Tracked repos
 
-Each tracked repo is covered by its stable releases of the last 24h (prereleases are only counted, unless the project has never shipped a stable release), hot issues (opened in the last 48h with 10+ comments and 👍, 3+ when labelled regression or security; at most 2) and news (a community story or its own GitHub Trending entry naming it; a story naming three or more agents is a compatibility list and skipped). Projects with none of these are listed in one "Quiet today" line. Only the repos below are tracked: trending repos are suggested under the Trends page's Candidates to track, never added automatically.
+Each tracked repo is covered by its stable releases of the last 24h (prereleases are only counted, unless the project has never shipped a stable release), hot issues (open, however old, that gained 10+ comments and 👍 since the previous day, 3+ when labelled regression or security; at most 2; each is shown once) and news (a community story or its own GitHub Trending entry naming it; a story naming three or more agents is a compatibility list and skipped). Projects with none of these are listed in one "Quiet today" line. Only the repos below are tracked: trending repos are suggested under the Trends page's Candidates to track, never added automatically.
 
 ### AI Agents
 

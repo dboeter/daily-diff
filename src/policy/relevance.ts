@@ -6,8 +6,17 @@
  */
 
 import path from "node:path";
-import { judgeItems, loadItemsFile, type AskJev, type VerdictCache } from "../core/jev.ts";
-import type { Jurisdiction, PolicyConfig } from "../core/config.ts";
+import {
+  droppedFor,
+  judgeItems,
+  LOW_CONFIDENCE,
+  loadItemsFile,
+  renderedAt,
+  type AskJev,
+  type SourceCounts,
+  type VerdictCache,
+} from "../core/jev.ts";
+import { JURISDICTIONS, type Jurisdiction, type PolicyConfig } from "../core/config.ts";
 import type { PolicyItem } from "./items.ts";
 import type { Selection } from "../core/new-items.ts";
 
@@ -168,8 +177,8 @@ export interface PolicyAnswers {
   impact?: ScoreAnswer;
 }
 
-/** A Jev score answer; `probabilities` may be missing from a hand-edited verdict. */
-type ScoreAnswer = { score: number; probabilities?: Record<string, number> };
+/** A Jev score answer; `probabilities` and `confidence` may be missing from a hand-edited verdict. */
+type ScoreAnswer = { score: number; confidence?: number; probabilities?: Record<string, number> };
 
 /**
  * Weights for the order, summing to 1. Being about AI policy is the largest
@@ -200,6 +209,13 @@ const GATE_MIN_PROBABILITY = 0.5;
 const US_IMPACT_LEVEL = 1;
 /** Elsewhere: only major events (spec). */
 const OTHER_SIGNIFICANCE_LEVEL = 2;
+/**
+ * Under this confidence a US impact score is unknown, not low, and a notable
+ * item (significance level 1 or more) passes the impact gate. On 2026-10-26 the
+ * DHS order removing DeepSeek from federal systems, relevance 0.85, was dropped
+ * on impact 0.48 at confidence 0.28. LOW_CONFIDENCE is the data report's bar too.
+ */
+const NOTABLE_LEVEL = 1;
 
 const isUs = (j: Jurisdiction): boolean => j === "us_federal" || j === "us_states";
 
@@ -215,6 +231,11 @@ function reachesLevel(a: ScoreAnswer, level: number): boolean {
   if (!Number.isFinite(p)) throw new Error(`Unexpected Jev probabilities: ${JSON.stringify(a)}`);
   return p >= GATE_MIN_PROBABILITY;
 }
+
+const unknownImpact = (a: PolicyAnswers): boolean =>
+  a.impact!.confidence !== undefined &&
+  a.impact!.confidence < LOW_CONFIDENCE &&
+  reachesLevel(a.significance, NOTABLE_LEVEL);
 
 /** Weighted relevance in 0–1 and the keep decision. Throws on an unexpected answer shape. */
 export function policyRelevance(
@@ -237,7 +258,7 @@ export function policyRelevance(
   const keep =
     a.about_ai_policy.noul >= ABOUT_MIN &&
     relevance >= KEEP_MIN_RELEVANCE &&
-    (!isUs(jurisdiction) || reachesLevel(a.impact!, US_IMPACT_LEVEL)) &&
+    (!isUs(jurisdiction) || reachesLevel(a.impact!, US_IMPACT_LEVEL) || unknownImpact(a)) &&
     (jurisdiction !== "other" || reachesLevel(a.significance, OTHER_SIGNIFICANCE_LEVEL));
   return { relevance, keep };
 }
@@ -328,7 +349,10 @@ export function loadPolicyVerdicts(file = POLICY_VERDICTS_FILE): PolicyVerdicts 
 // Selection
 // ---------------------------------------------------------------------------
 
-/** Items most relevant first; items without a verdict after, in feed order. Trace: `policy-trace.json`. */
+/**
+ * Items in report order: by section (jurisdiction, then News & commentary), most relevant first
+ * within each; items without a verdict after, in feed order. Trace: `policy-trace.json`.
+ */
 export type PolicySelection = Selection<PolicyItem, PolicyVerdicts>;
 
 export async function selectPolicyItems(
@@ -337,13 +361,15 @@ export async function selectPolicyItems(
     readerProfile: string;
     /** A non-news item naming an entry of its own jurisdiction's list is always kept. */
     watchlist: PolicyConfig["watchlist"];
+    /** The trace's `sources` header (`sourceCounts`); absent when the caller has no fetch counts. */
+    sources?: SourceCounts;
     apiKey?: string;
     cache: PolicyVerdicts | null;
     dateStr: string;
     ask?: AskJev;
   },
 ): Promise<PolicySelection> {
-  const { readerProfile, watchlist, ...jev } = opts;
+  const { readerProfile, watchlist, sources, ...jev } = opts;
   const judgment = await judgeItems(items, {
     ...jev,
     tag: "policy",
@@ -363,7 +389,10 @@ export async function selectPolicyItems(
     return v ? v.keep : !i.jevOnly && fallbackKeywordHit(i);
   };
   const score = (i: PolicyItem): number => verdicts.get(i.id)?.relevance ?? -1;
-  const selected = items.filter(kept).sort((a, b) => score(b) - score(a));
+  // Report order: one section per jurisdiction in JURISDICTIONS order, then News & commentary,
+  // by relevance within each, so a trace row's rank is its row number on the page.
+  const section = (i: PolicyItem) => (i.news ? JURISDICTIONS.length : JURISDICTIONS.indexOf(i.jurisdiction));
+  const selected = items.filter(kept).sort((a, b) => section(a) - section(b) || score(b) - score(a));
   console.log(
     `  [policy] Kept ${selected.length}/${items.length} items${rankedBy === "keywords" ? " (no Jev: watchlist and keywords only)" : ""}`,
   );
@@ -374,11 +403,17 @@ export async function selectPolicyItems(
     source: i.source,
     jurisdiction: i.jurisdiction,
     kept: selected.includes(i),
+    // No cap, and the state filters repeats before selection: a dropped item fell below the bar.
+    ...(selected.includes(i) ? renderedAt(selected.indexOf(i) + 1) : droppedFor("threshold")),
     ...judgment.traceFields(i),
     watchlisted: onWatchlist(i),
     keyword: fallbackKeywordHit(i),
   }));
-  const traceFile = judgment.traceFile(rows, { weights: POLICY_WEIGHTS, newsWeights: NEWS_WEIGHTS });
+  const traceFile = judgment.traceFile(rows, {
+    ...(sources ? { sources } : {}),
+    weights: POLICY_WEIGHTS,
+    newsWeights: NEWS_WEIGHTS,
+  });
 
   return { items: selected, rankedBy, nextVerdicts: judgment.nextCache, traceFile };
 }

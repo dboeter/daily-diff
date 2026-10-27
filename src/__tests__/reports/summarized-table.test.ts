@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import {
+  checkCodeTokens,
   numberRows,
   parseRowSummaries,
   spliceTables,
@@ -159,7 +160,7 @@ describe("row numbers", () => {
     }
     expect(prompts[0]).toContain(summaryLine("2 sentences"));
     expect(prompts[1]).toContain(summaryLine("1-2 sentences"));
-    expect(prompts[2]).toContain(summaryLine("2 sentences"));
+    expect(prompts[2]).toContain(summaryLine("1-2 sentences"));
   });
 });
 
@@ -207,5 +208,22 @@ describe("spliceTables", () => {
   it("drops the marker when there are no tables", () => {
     const prose = `A.\n\n${TABLES_MARKER}\n\nB.`;
     expect(spliceTables(prose, "")).toBe("A.\n\nB.");
+  });
+});
+
+describe("checkCodeTokens", () => {
+  const sources = new Map([[1, "Adds the CODING_AGENT tool type with code_toolset_all."]]);
+
+  it("keeps a token the source has, respells one it spells differently, unwraps one it lacks", () => {
+    const out = checkCodeTokens(
+      new Map([[1, "Adds a `CODINGAGENT` tool type, the `code_toolset_all` sandbox and `thread_id`."]]),
+      sources,
+      "test",
+    );
+    expect(out.get(1)).toBe("Adds a `CODING_AGENT` tool type, the `code_toolset_all` sandbox and thread_id.");
+  });
+
+  it("leaves a row without a source alone", () => {
+    expect(checkCodeTokens(new Map([[2, "`x`"]]), sources, "test").get(2)).toBe("`x`");
   });
 });

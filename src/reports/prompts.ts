@@ -2,9 +2,9 @@
  * LLM prompt builders and item formatting.
  */
 
-import type { RepoConfig, GitHubItem, GitHubRelease } from "../core/github.ts";
+import type { RepoConfig, GitHubItem, GitHubRelease, HotIssue } from "../core/github.ts";
 import type { NewsItem } from "./project-news.ts";
-import { GOING_AWAY, SECTIONS } from "../core/strings.ts";
+import { GOING_AWAY, hotIssueGain, SECTIONS } from "../core/strings.ts";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -22,7 +22,7 @@ export interface ProjectActivity {
   previews: GitHubRelease[];
   /** Nightlies, alphas, RCs not in `previews` — counted in the report header, never sent to the model. */
   prereleaseCount: number;
-  hotIssues: GitHubItem[];
+  hotIssues: HotIssue[];
   news: NewsItem[];
   /** The release fetch failed: the project could not be checked, so it is neither active nor quiet. */
   fetchFailed?: boolean;
@@ -94,7 +94,37 @@ export const goingAwayRule = (item: "bullet" | "highlight") =>
     ? `Write every bullet as "- text". When its item is going away (a deprecation, retirement, removal, ` +
       `end of support or shutdown), put "${GOING_AWAY} " (the minus sign) after the marker: "- ${GOING_AWAY} text".`
     : `Start a highlight with "${GOING_AWAY} " (the minus sign) when its item is going away: a deprecation, ` +
-      `retirement, removal, end of support or shutdown.`) + ` Give every other ${item} no sign.`;
+      `retirement, removal, end of support or shutdown.`) +
+  ` Going away means a feature, model, API or product that is removed or gets an end date; a bug fix, ` +
+  `a breaking change or a call that now raises an error is not going away. Give every other ${item} no sign.`;
+
+/**
+ * What a Highlights, Signals or highlights.json claim may say beyond its source: nothing. On
+ * 2026-10-26 the models wrote "GA" for two Snowflake notes that said no such thing, added "audit
+ * your invocations immediately", stated a vendor's design target as achieved throughput, dropped
+ * the limits of a 200-case self-published study and built a trend from three paper titles.
+ */
+export const SOURCE_FIDELITY_RULES = [
+  "Release-stage words (GA, generally available, preview, beta, deprecated) only when the item's own row or text uses them.",
+  "No call to action, audience or conclusion the source does not state: never add advice such as 'audit now' or 'upgrade immediately'.",
+  "A vendor's or a self-published figure is that source's claim: attribute it ('X says', 'according to X'), and never state a target or estimate as achieved. An open issue is a report ('users report'), not an established fact.",
+  "A study result keeps its scope when the source gives it: sample size, a single run, not peer reviewed.",
+  "Several items on one theme in the same period are not a trend: a trend or causal claim needs rows that show it (a summary that states it, or figures such as gains or ranks), never titles, descriptions or co-occurrence alone.",
+];
+
+/** SOURCE_FIDELITY_RULES as prompt rule lines. */
+export const sourceFidelityRules = (): string => SOURCE_FIDELITY_RULES.map((r) => `- ${r}`).join("\n");
+
+/**
+ * How a release summary orders its changes. On 2026-10-26 the Polars row spent its words on 3 of
+ * 88 performance items and the Cline row led with minor items and called a fix an addition.
+ */
+export const RELEASE_ORDER =
+  "breaking changes first, then fixes that change behavior (call a fix a fix, never 'adds' or 'introduces'), then headline features, performance last";
+
+/** Identifiers and names exactly as the source writes them: a reader copies them. */
+export const IDENTIFIER_RULE =
+  "Copy identifiers (types, functions, settings, flags) verbatim from the text, in `code`; write a project or repo name exactly as given, even at the start of a sentence (pstack-claude, never Pstack-claude).";
 
 /** Sort by comment count desc, take top N. */
 export function topN(items: GitHubItem[], n: number): GitHubItem[] {
@@ -109,6 +139,9 @@ export function topN(items: GitHubItem[], n: number): GitHubItem[] {
 export function hasActivity(a: ProjectActivity): boolean {
   return a.releases.length > 0 || a.previews.length > 0 || a.hotIssues.length > 0 || a.news.length > 0;
 }
+
+/** A news story's description as the model sees it: enough to show the project is its subject. */
+const NEWS_DESCRIPTION_CHARS = 300;
 
 /** Newest stable releases shown per project; llama.cpp alone tags 35–70 a week. */
 const RELEASES_PER_PROJECT = 10;
@@ -201,7 +234,8 @@ function formatRelease(r: GitHubRelease, repo: string, notes: string): string {
   return `- ${r.tag_name}${r.name && r.name !== r.tag_name ? ` (${r.name})` : ""} — https://github.com/${repo}/releases/tag/${r.tag_name}${announcement}\n  ${notes || "(no release notes)"}`;
 }
 
-function formatProject(a: ProjectActivity): string {
+/** A project's block in the digest prompt; also the source its section's backticked tokens are checked against. */
+export function formatProject(a: ProjectActivity): string {
   const { config: cfg } = a;
   const shown = a.releases.slice(0, RELEASES_PER_PROJECT);
   const releaseNote =
@@ -217,8 +251,15 @@ function formatProject(a: ProjectActivity): string {
     ? `\n\n### Prereleases (no stable release yet)\n` +
       a.previews.map((r) => formatRelease(r, cfg.repo, releaseNotes(r.body, PREVIEW_BODY_CHARS))).join("\n")
     : "";
-  const issues = a.hotIssues.map((i) => formatItem(i)).join("\n") || "None";
-  const news = a.news.map((n) => `- [${n.source}] ${n.title} — ${n.url} (${n.detail})`).join("\n") || "None";
+  const issues =
+    a.hotIssues.map((i) => `${formatItem(i)}\n  ${hotIssueGain(i.gain, i.gainSince)}`).join("\n") || "None";
+  const news =
+    a.news
+      .map(
+        (n) =>
+          `- [${n.source}] ${n.title} — ${n.url} (${n.detail})${n.description ? `\n  Description: ${n.description.slice(0, NEWS_DESCRIPTION_CHARS)}` : ""}`,
+      )
+      .join("\n") || "None";
 
   return `## ${cfg.name} (github.com/${cfg.repo})
 
@@ -252,18 +293,28 @@ ${sections}
 ---
 
 Write the report in English: one section per project above that has something left to report, in the order given, headed \`## <Project name>\`, with at most 3 bullets, one or two sentences each. Write no other sections:
-- **Release**: what the stable release(s) change for users — features, breaking changes, fixes that matter. Several releases in a range: summarize the range, do not list each one. Link each release you name as a plain Markdown link, [tag](url), never inside backticks; a range as its oldest and newest, [v1.2.0](url)–[v1.2.5](url). A release with an Announcement: describe it from the announcement, not from its first changelog entries.
+- **Release**: what the stable release(s) change for users, in this order: ${RELEASE_ORDER}. Several releases in a range: summarize the range, do not list each one. Link each release you name as a plain Markdown link, [tag](url), never inside backticks; a range as its oldest and newest, [v1.2.0](url)–[v1.2.5](url). A release with an Announcement: describe it from the announcement, not from its first changelog entries.
 - **Prerelease**: only from a "Prereleases (no stable release yet)" list, and only when it adds notable features or breaking changes; skip routine alpha/rc bumps. Say it is a prerelease and link it.
 - **News**: what the news item says about the project and why it matters. Link it.
-- **Hot issue**: what users are hitting and how serious it is. Link the issue (https://github.com/<repo>/issues/<number>).
+- **Hot issue**: what users are hitting and how serious it is. For a security issue, say where the problem shows, who is affected and its fix status (open, or fixed in a named release), as far as the data says. Link the issue (https://github.com/<repo>/issues/<number>).
 
 Rules:
 - Use only the data above. Omit a bullet type that has no data. Never state what did not happen ("no release today", "no breaking issues were reported").
-- A news item may mention a project only in passing: skip it unless the project is its actual subject.
-- If every item for a project is skipped, leave out its section entirely; the report lists it as quiet.
+- A news item may mention a project only in passing: skip it unless the project is its actual subject, judged from its title and description.
+- A project with a stable release always gets its section and a **Release** bullet naming its most user-visible changes, even when they are small.
+- If every item of a project without a stable release is skipped, leave out its section entirely; code lists it as quiet.
+- ${IDENTIFIER_RULE}
 - Style: concise and concrete, for developers who use these tools.
 `;
 }
+
+/** How every page's Highlights bullets are cut: one subject each, with its window. */
+export const HIGHLIGHTS_PICK_RULE =
+  "One subject per bullet. Keep an item's window as the sections give it ('this week', 'in 7 days'): never present a weekly figure as today's.";
+
+/** The models page's Highlights note on a day without a lab post or new model: Spotted rows alone are not model news. */
+export const NO_MODEL_NEWS_NOTE =
+  "The page has no lab post and no new model today: open with the bullet '- No lab or model news today.' and add at most 2 bullets.";
 
 /** What the agents page's Highlights rank first: its focus line for buildPageHighlightsPrompt. */
 export const AGENTS_HIGHLIGHTS_FOCUS =
@@ -283,6 +334,8 @@ export function buildPageHighlightsPrompt(
   bodyMd: string,
   focus: string,
   dateStr: string,
+  /** An extra rule for today's page, e.g. the models page with no lab post or new model. */
+  note?: string,
 ): string {
   return `You are the editor of ${page}, a daily report. Below are today's report sections, ${dateStr}.
 
@@ -290,14 +343,16 @@ ${bodyMd}
 
 ---
 
-Write only \`## ${SECTIONS.highlights}\`: 3–5 bullets, most consequential first: ${focus}.
+Write only \`## ${SECTIONS.highlights}\`: 1–3 bullets, most consequential for a data or AI engineer first: ${focus}. Pick the few that matter; do not restate every row.
 
 Rules:
 - ${NO_TITLE_RULE}
 - ${goingAwayRule("bullet")}
-- About 150 words in total. Write no other sections.
+- ${HIGHLIGHTS_PICK_RULE}${note ? `\n- ${note}` : ""}
+- About 100 words in total. Write no other sections.
 - Name each item in at most one bullet. Write no links or URLs: the sections below link every item.
 - Base every claim on the sections. Do not invent versions, dates or features.
+${sourceFidelityRules()}
 - English, concise and concrete.
 `;
 }
@@ -310,32 +365,33 @@ export function buildSkillsPrompt(prs: GitHubItem[], issues: GitHubItem[], dateS
   const prsText = topPrs.map((p) => formatItem(p)).join("\n") || noneStr;
   const issuesText = topIssues.map((i) => formatItem(i)).join("\n") || noneStr;
 
-  return `You are a technical analyst focused on the Claude Code ecosystem. The following data is from github.com/anthropics/skills (official Claude Code Skills repository). Analyze the community's most-watched Skills activity (data as of ${dateStr}).
+  return `You are a technical analyst writing for engineers who use coding agents and build data/AI systems. The following data is from github.com/anthropics/skills, Anthropic's Claude Code Skills repository: its pull requests and issues updated in the last 7 days (data as of ${dateStr}).
 
 ## Repository Context
-anthropics/skills is the official Claude Code Skills collection. Each PR typically represents a new or improved Skill. The community proposes new Skills and reports issues via Issues; PRs represent actual Skill submissions.
+A PR proposes a new or changed Skill; most are third-party submissions, and an open PR is not a released Skill. Issues are bug reports and requests.
 
-## Popular Pull Requests (sorted by comments, ${prs.length} total, showing top ${topPrs.length})
+## Pull Requests updated this week (sorted by comments, ${prs.length} total, showing top ${topPrs.length})
 ${prsText}
 
-## Community Issues (sorted by comments, ${issues.length} total, showing top ${topIssues.length})
+## Issues updated this week (sorted by comments, ${issues.length} total, showing top ${topIssues.length})
 ${issuesText}
 
 ---
 
-Write the Skills section in English with these headings. ${NO_TITLE_RULE}
+Write the section in English with these headings. ${NO_TITLE_RULE}
+Leave out every item that is not about coding agents or data/AI engineering (e.g. games, blockchain, resumes, media production).
 
-## Top Skills
-The 3-5 most-discussed Skills (PRs) by comments/attention: each Skill's functionality, discussion highlights, and current status (open/merged/draft).
+## Open PRs worth watching
+Up to 5 open PRs: what each would add or fix, and that it is not merged yet. Describe what the PR does; do not call it critical or an overhaul unless its text says so.
 
-## Community Demand
-From Issues, the most-anticipated new Skill directions (e.g. workflow automation, code review, test generation, documentation).
+## Closed this week
+The PRs with state CLOSED, if any (a closed PR may or may not have been merged: do not say which).
 
-## Pending Skills
-Active-comment PRs not yet merged; these Skills may land soon.
+## Requests
+From the issues, what people ask the Skills to do or fix.
 
 ## Takeaway
-One sentence: what is the community's most concentrated demand at the Skills level?
+One sentence on what these items have in common.
 
 Style: concise and professional, include GitHub links for each item.
 ${REPO_LENGTH_RULE}

@@ -1,34 +1,38 @@
 import { describe, expect, it } from "vitest";
 import { SECTIONS, TRENDS_REPORT } from "../../core/strings.ts";
+import type { ReleaseRow } from "../../reports/pages.ts";
 import {
   buildDataProsePrompt,
+  buildDataSummariesPrompt,
   buildHighlightsPrompt,
+  highlightsSection,
   buildModelsSummariesPrompt,
   buildPolicyProsePrompt,
   buildPolicySummariesPrompt,
   buildSpottedSummariesPrompt,
   buildTrendingSummariesPrompt,
-  buildTrendsModelsPrompt,
+  buildHfSummariesPrompt,
   buildTrendsProsePrompt,
   buildTrendsSummariesPrompt,
   firstHighlight,
   forcedHighlightReports,
   withFallbackHighlights,
+  restatesLead,
 } from "../../reports/prompts-pages.ts";
 import { TABLES_MARKER, numberRows, parseRowSummaries } from "../../reports/summarized-table.ts";
+import {
+  AGENTS_HIGHLIGHTS_FOCUS,
+  buildPageHighlightsPrompt,
+  goingAwayRule,
+  IDENTIFIER_RULE,
+  RELEASE_ORDER,
+  SOURCE_FIDELITY_RULES,
+} from "../../reports/prompts.ts";
 import type { Story, StorySource } from "../../spotted/pool.ts";
-import { EMPTY_OPENROUTER, type TrendingData } from "../../trending/compose.ts";
 
 // ---------------------------------------------------------------------------
 // The Trends page's prompts
 // ---------------------------------------------------------------------------
-
-const withModels: TrendingData["openrouter"] = {
-  ...EMPTY_OPENROUTER,
-  topModels: [{ slug: "deepseek/deepseek-v4.1-flash", tokens: 25_630_000_000_000 }],
-  topModelsDate: "2026-10-04",
-  fetchSuccess: true,
-};
 
 const DATE = "2026-10-22";
 
@@ -67,9 +71,11 @@ describe("buildTrendingSummariesPrompt", () => {
     );
   });
 
-  it("asks for one `N: <2 sentences>` line per row and nothing else", () => {
+  it("asks for one `N: <1-2 sentences>` line per row and nothing else", () => {
     const result = buildTrendingSummariesPrompt(rows, "2026-10-05");
-    expect(result).toContain("`N: <2 sentences>`");
+    expect(result).toContain("`N: <1-2 sentences>`");
+    expect(result).toContain('No "It matters because"');
+    expect(result).toContain(IDENTIFIER_RULE);
     expect(result).toContain("2 lines in total");
     expect(result).toContain("No other text");
     expect(result).toContain("Do not invent");
@@ -118,35 +124,48 @@ describe("buildTrendsSummariesPrompt", () => {
     comments: 60,
   };
 
-  it("numbers the papers with their abstracts, then the stories on Spotted's rules", () => {
-    const result = buildTrendsSummariesPrompt([paper], [story], "2026-10-26");
+  it("numbers the papers with their abstracts; Most discussed stories go through the Spotted call", () => {
+    const result = buildTrendsSummariesPrompt([paper], "2026-10-26");
     expect(result).toContain("1. Agents that plan (arXiv paper) — abstract: We show planning helps.");
-    expect(result).toContain(
+    expect(result).toContain("Start with the paper's name");
+    expect(result).toContain("then its headline result, with the number when the abstract gives one");
+    expect(result).toContain("1 lines in total");
+    expect(result).not.toContain("community stories");
+    expect(buildSpottedSummariesPrompt([story], "2026-10-26")).toContain(
       "2. On AI writing (Lobste.rs, example.com, 40 points, 60 comments) — (no description)",
     );
-    expect(result).toContain("A paper: 2 sentences from its abstract: what it shows.");
-    expect(result).toContain("Describe no comment thread");
-    expect(result).toContain("2 lines in total");
   });
 });
 
-describe("buildTrendsModelsPrompt", () => {
-  it("asks for only the ### parts whose source has data, and no Highlights, Signals or Worth a Look", () => {
-    const both = buildTrendsModelsPrompt({ models: [], fetchSuccess: true }, withModels, "2026-10-26");
-    expect(both).toContain(`\`### ${TRENDS_REPORT.openRouterHeading}\``);
-    expect(both).toContain(`\`### ${TRENDS_REPORT.hfHeading}\``);
-    expect(both).toContain("deepseek/deepseek-v4.1-flash — 25.63T tokens");
-    expect(both).toContain("No Highlights, Signals or other sections");
-    expect(both).not.toContain("## Highlights");
-    expect(both).not.toContain("Worth a Look");
-    const hfOnly = buildTrendsModelsPrompt(
-      { models: [], fetchSuccess: true },
-      EMPTY_OPENROUTER,
-      "2026-10-26",
+describe("buildHfSummariesPrompt", () => {
+  it("asks for one summary per numbered release from task, size and license, never the model_type tag", () => {
+    const row = {
+      id: "Qwen/Qwen3.8-27B",
+      url: "https://huggingface.co/Qwen/Qwen3.8-27B",
+      author: "Qwen",
+      pipelineTag: "image-text-to-text",
+      parameters: 27.4e9,
+      likes: 18406,
+      downloads: 7762014,
+      tags: ["qwen3_5", "transformers", "license:apache-2.0"],
+      lastModified: "",
+      variants: [],
+      n: 1,
+    };
+    const p = buildHfSummariesPrompt([row], "2026-10-26");
+    expect(p).toContain(
+      "1. Qwen/Qwen3.8-27B | task: image-text-to-text | parameters: 27B | license: apache-2.0",
     );
-    expect(hfOnly).not.toContain(TRENDS_REPORT.openRouterHeading);
-    const orOnly = buildTrendsModelsPrompt({ models: [], fetchSuccess: false }, withModels, "2026-10-26");
-    expect(orOnly).not.toContain(TRENDS_REPORT.hfHeading);
+    expect(buildHfSummariesPrompt([{ ...row, parameters: 27.78e9 }], "2026-10-26")).toContain(
+      "parameters: 27B |",
+    );
+    expect(p).toContain("from its task, size, license and name only");
+    expect(p).toContain("You have no model card");
+    expect(p).toMatch(/no quality or speed word \("high-quality", "sophisticated", "efficient"/);
+    expect(p).not.toContain("qwen3_5");
+    expect(p).toContain("`N: <one sentence>`");
+    expect(p).toContain("1 lines in total");
+    expect(p).not.toContain(TRENDS_REPORT.hfHeading);
   });
 });
 
@@ -315,6 +334,62 @@ describe("withFallbackHighlights", () => {
     });
   });
 
+  it("keeps the going-away sign of a page's signed lead on the report's first highlight", () => {
+    const data = "## Highlights\n\n- − **Polars** py-2.1.0 disallows mixed arithmetic. More.\n- Other.";
+    const out = withFallbackHighlights(
+      {
+        "ai-data": ["Polars py-2.1.0 breaks mixed arithmetic", "Snowflake ships X"],
+        "ai-models": ["− Y ends", "Z"],
+      },
+      {
+        "ai-data": data,
+        "ai-models": "## Highlights\n\n- − Y ends.",
+        "ai-agents": "## Highlights\n\n- A ships.",
+      },
+      [],
+    );
+    expect(out["ai-data"]).toEqual(["− Polars py-2.1.0 breaks mixed arithmetic", "Snowflake ships X"]);
+    expect(out["ai-models"]).toEqual(["− Y ends", "Z"]);
+    expect(
+      withFallbackHighlights(
+        { "ai-agents": ["A ships"] },
+        { "ai-agents": "## Highlights\n\n- A ships." },
+        [],
+      ),
+    ).toEqual({ "ai-agents": ["A ships"] });
+  });
+
+  it("signs only the highlight that restates a signed lead, and none when none does", () => {
+    const data = "## Highlights\n\n- − **Polars** py-2.1.0 disallows mixed arithmetic. More.";
+    const sign = (items: string[]) =>
+      withFallbackHighlights({ "ai-data": items }, { "ai-data": data }, [])["ai-data"];
+    expect(sign(["Snowflake ships dynamic tables", "Polars py-2.1.0 disallows mixed arithmetic"])).toEqual([
+      "Snowflake ships dynamic tables",
+      "− Polars py-2.1.0 disallows mixed arithmetic",
+    ]);
+    expect(sign(["Snowflake ships dynamic tables", "dbt Core 1.11 ships"])).toEqual([
+      "Snowflake ships dynamic tables",
+      "dbt Core 1.11 ships",
+    ]);
+    expect(sign(["− Polars drops mixed arithmetic", "Polars mixed arithmetic"])).toEqual([
+      "− Polars drops mixed arithmetic",
+      "Polars mixed arithmetic",
+    ]);
+    expect(restatesLead("Snowflake ships X", "− Polars py-2.1.0 disallows mixed arithmetic.")).toBe(false);
+  });
+
+  it("sends a report whose Highlights failed as its page, so a forced report can still get one", () => {
+    const page =
+      "## Highlights\n\n⚠️ Summary generation failed.\n\n## Databricks\n\n| Item | Summary |\n| --- | --- |\n| [Lakebase GA](https://x) | Lakebase is generally available. |";
+    const prompt = buildHighlightsPrompt({ "ai-data": page }, ["ai-data"]);
+    const section = prompt.slice(prompt.indexOf("## [ai-data]"));
+    expect(section).toContain("Lakebase is generally available.");
+    expect(section).not.toContain("Summary generation failed");
+    expect(
+      buildHighlightsPrompt({ "ai-data": "## Highlights\n\n- A ships.\n\n## Databricks\n\n| row |" }),
+    ).not.toContain("| row |");
+  });
+
   it("forces ai-data only on a day with kept vendor items", () => {
     expect(forcedHighlightReports(false)).toEqual(["ai-policy"]);
     expect(forcedHighlightReports(true)).toEqual(["ai-policy", "ai-data"]);
@@ -374,5 +449,167 @@ describe("buildSpottedSummariesPrompt", () => {
     expect(prompt).toMatch(/Describe no comment thread/);
     expect(prompt).toContain("Without one: write `N: —`");
     expect(parseRowSummaries("1: One.\n2: —").get(2)).toBe("—");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Source fidelity: every Highlights, Signals and highlights.json prompt
+// ---------------------------------------------------------------------------
+
+describe("source fidelity rules", () => {
+  const prompts = {
+    page: buildPageHighlightsPrompt("AI Agents", "## Agents", AGENTS_HIGHLIGHTS_FOCUS, "2026-10-26"),
+    trends: buildTrendsProsePrompt("## Research", "2026-10-26"),
+    policy: buildPolicyProsePrompt("| Date |", "2026-10-26", "A reader."),
+    data: buildDataProsePrompt("## Snowflake", "2026-10-26"),
+    highlights: buildHighlightsPrompt({ "ai-data": "## Highlights" }),
+  };
+
+  it.each(Object.entries(prompts))("the %s prompt carries every rule", (_, prompt) => {
+    for (const rule of SOURCE_FIDELITY_RULES) expect(prompt).toContain(rule);
+  });
+
+  it("stage words, calls to action, attribution, study scope and trends are each covered", () => {
+    const rules = SOURCE_FIDELITY_RULES.join(" ");
+    expect(rules).toMatch(/GA, generally available, preview, beta/);
+    expect(rules).toMatch(/No call to action/);
+    expect(rules).toMatch(/X says/);
+    expect(rules).toMatch(/sample size, a single run, not peer reviewed/);
+    expect(rules).toMatch(/Several items on one theme in the same period are not a trend/);
+    expect(rules).toMatch(/never titles, descriptions or co-occurrence alone/);
+  });
+
+  it("the data Highlights ask for an action only when the row gives or requires one", () => {
+    expect(prompts.data).toContain("what to do when the row says or its change requires it");
+  });
+
+  // 2026-10-27 forced weekly run: "DeepSeek's model family dominates", "half the OpenRouter top 20"
+  // with MiniMax (a Hugging Face row only), and "harnesses are converging" from shared descriptions.
+  it("each Signal rests on a fact and its rows' figures, with no unsupported trend verb", () => {
+    expect(prompts.trends).toContain(
+      "links the rows that fact names; every other name and figure in it appears in those rows",
+    );
+    expect(prompts.trends).toContain("never on what their summaries, descriptions or titles have in common");
+    expect(prompts.trends).toContain(
+      "uses no trend verb the figures cannot show (dominates, is accelerating, is converging)",
+    );
+    expect(prompts.trends).toContain("The Research table has no figures, so it gives no Signal.");
+    expect(prompts.trends).not.toContain("which model families lead usage");
+  });
+
+  it("usage claims keep the table's window, in Highlights too", () => {
+    expect(prompts.trends).toContain(
+      'in Highlights too: OpenRouter usage is one day\'s snapshot, so say "on <its date>", never "this week"',
+    );
+  });
+});
+
+describe("goingAwayRule", () => {
+  it.each(["bullet", "highlight"] as const)(
+    "keeps bug fixes and breaking changes out of the %s sign",
+    (item) => {
+      expect(goingAwayRule(item)).toContain(
+        "a bug fix, a breaking change or a call that now raises an error is not going away",
+      );
+    },
+  );
+});
+
+describe("Highlights pick, they don't restate", () => {
+  it("the data Highlights skip minor vendor rows and hold 1-3 bullets", () => {
+    const p = buildDataProsePrompt("## Snowflake", "2026-10-26", ["Oct 26, 2026: Custom error messages"]);
+    expect(p).toContain("1-3 bullets");
+    expect(p).toContain('These rows are minor: no Highlight for them. "Oct 26, 2026: Custom error messages"');
+    expect(buildDataProsePrompt("## Snowflake", "2026-10-26")).not.toContain("These rows are minor");
+  });
+
+  it("Trends Highlights hold 1-3 ranked bullets, one subject each, with their window", () => {
+    const p = buildTrendsProsePrompt("## Research", "2026-10-26");
+    expect(p).toContain("1-3 bullets on the most noteworthy items of the week for a data or AI engineer");
+    expect(p).toContain("One subject per bullet");
+  });
+
+  it("highlights.json leads each report with its page's first bullet", () => {
+    const p = buildHighlightsPrompt({ "ai-data": "## Highlights\n\n- lead" });
+    expect(p).toContain("A report's first highlight covers the first bullet of its `## Highlights`");
+    expect(p).toContain("one subject per highlight");
+  });
+
+  it("highlights.json sees each page's Highlights only, never a table row below them", () => {
+    const data =
+      "# Data\n\n## Highlights\n\n- − **Polars** py-2.1.0 disallows mixed arithmetic.\n\n---\n\n## Snowflake\n\n| 1 | Coding agent MCP tool | minor note |";
+    const policy =
+      "## Highlights\n\nThe Commission published a standard.\n\n<!-- tables -->\n\n## EU\n\n| Draft guidance row |";
+    const p = buildHighlightsPrompt({ "ai-data": data, "ai-policy": policy });
+    expect(p).toContain("- − **Polars** py-2.1.0 disallows mixed arithmetic.");
+    expect(p).toContain("The Commission published a standard.");
+    expect(p).not.toContain("Coding agent MCP tool");
+    expect(p).not.toContain("Draft guidance row");
+    expect(highlightsSection(data)).toBe(
+      "## Highlights\n\n- − **Polars** py-2.1.0 disallows mixed arithmetic.",
+    );
+    expect(highlightsSection("## Agents\n\n- x")).toBeNull();
+  });
+
+  it("highlights.json asks for no consequence the Highlights do not state", () => {
+    const p = buildHighlightsPrompt({ "ai-agents": "## Highlights\n\n- A ships." });
+    expect(p).not.toMatch(/why it matters/i);
+    expect(p).toContain("add no consequence, audience or benefit it does not state");
+  });
+});
+
+describe("summaries lead with impact", () => {
+  it("the data summaries order release changes by impact and copy identifiers", () => {
+    const release = {
+      key: "release:pola-rs/polars@py-2.1.0",
+      project: { name: "Polars", repo: "pola-rs/polars" },
+      release: { tag_name: "py-2.1.0", name: "", body: "notes", published_at: "2026-10-25T00:00:00Z" },
+    } as unknown as ReleaseRow;
+    const p = buildDataSummariesPrompt([], "2026-10-26", numberRows([release]));
+    expect(p).toContain(RELEASE_ORDER);
+    expect(p).toContain(IDENTIFIER_RULE);
+  });
+});
+
+describe("story summaries are written, not copied", () => {
+  it("Spotted and Most discussed both ask for own words and one concrete fact", () => {
+    const row = {
+      n: 1,
+      id: "hn:1",
+      source: "hn" as const,
+      title: "T",
+      url: "https://x.com",
+      discussionUrl: "d",
+      points: 1,
+      comments: 1,
+      description: "D.",
+    };
+    const p = buildSpottedSummariesPrompt([row], "2026-10-26");
+    expect(p).toContain("in your own words, what it is about, with one concrete fact");
+    expect(p).toContain("Never copy the description");
+  });
+});
+
+describe("buildTrendsProsePrompt", () => {
+  it("names the rows without summary or description as no Highlight, like the data report's minor rows", () => {
+    expect(buildTrendsProsePrompt("page", "2026-10-26", ["Strix", "o/x"])).toContain(
+      '- These rows have no summary or description: no Highlight for them. "Strix", "o/x"',
+    );
+    expect(buildTrendsProsePrompt("page", "2026-10-26")).not.toContain("no Highlight for them");
+  });
+
+  it("carries the facts block and takes every comparison from it", () => {
+    const p = buildTrendsProsePrompt(
+      "page",
+      "2026-10-26",
+      [],
+      "- Agent Tooling: largest absolute gain: [a/b](u).",
+    );
+    expect(p).toContain("Facts computed in code from the tables above");
+    expect(p).toContain("- Agent Tooling: largest absolute gain: [a/b](u).");
+    expect(p).toContain('Comparisons ("largest", "most"');
+    expect(p).toContain("come only from the facts block, quoted as given");
+    expect(p).toContain("opens with one fact from the facts block");
+    expect(buildTrendsProsePrompt("page", "2026-10-26")).not.toContain("Facts computed in code");
   });
 });

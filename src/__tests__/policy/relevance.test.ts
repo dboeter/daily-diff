@@ -91,6 +91,24 @@ describe("policyRelevance", () => {
     expect(() => policyRelevance(withProbs({ 0: 0.2, 1: NaN }, 1), "us_federal")).toThrow("Unexpected");
   });
 
+  it("ticket 13 replay: a low-confidence impact counts as unknown for a notable US item", () => {
+    // Saved answers of us-fr:2026-21447 (DHS DeepSeek order) from digests/2026-10-26/policy-trace.json.
+    const dhs: PolicyAnswers = {
+      about_ai_policy: { noul: 0.95 },
+      binding: { noul: 0.93 },
+      new_stage: { noul: 0.96 },
+      significance: { score: 1.25, confidence: 0.33, probabilities: { 0: 0.1, 1: 0.55, 2: 0.35 } },
+      impact: { score: 0.48, confidence: 0.28, probabilities: { 0: 0.57, 1: 0.38, 2: 0.05 } },
+    };
+    expect(policyRelevance(dhs, "us_federal").keep).toBe(true);
+    // A confident "little effect" still drops it, and so does low confidence on a minor item.
+    expect(policyRelevance({ ...dhs, impact: { ...dhs.impact!, confidence: 0.6 } }, "us_federal").keep).toBe(
+      false,
+    );
+    const minor = { score: 0.3, probabilities: { 0: 0.7, 1: 0.3, 2: 0 } };
+    expect(policyRelevance({ ...dhs, significance: minor }, "us_federal").keep).toBe(false);
+  });
+
   it("throws on an unexpected answer shape, so the call counts as failed", () => {
     expect(() => policyRelevance({ about_ai_policy: {} } as PolicyAnswers, "eu")).toThrow("Unexpected");
     expect(() => policyRelevance(answers(1, 1, 1, 2), "us_federal")).toThrow("Unexpected");
@@ -118,6 +136,20 @@ describe("selectPolicyItems", () => {
     });
     expect(sel.rankedBy).toBe("jev");
     expect(sel.items.map((i) => i.id)).toEqual(["high", "low"]);
+  });
+
+  it("returns items in report order, so a trace row's rank is its row number", async () => {
+    const ask = stub({ nl: answers(1, 1, 1, 2), eu: answers(1, 0, 1, 1) });
+    const sel = await selectPolicyItems([item("nl", { jurisdiction: "nl" }), item("eu")], {
+      ...base,
+      apiKey: "k",
+      cache: { items: {} },
+      ask,
+    });
+    // EU's section comes before the Netherlands' though the Dutch item is more relevant.
+    expect(sel.items.map((i) => i.id)).toEqual(["eu", "nl"]);
+    const rows = (JSON.parse(sel.traceFile!) as { items: { id: string; rank?: number }[] }).items;
+    expect(Object.fromEntries(rows.map((r) => [r.id, r.rank]))).toEqual({ eu: 1, nl: 2 });
   });
 
   it("asks the impact question with the reader profile for US items only", async () => {
@@ -248,6 +280,23 @@ describe("selectPolicyItems", () => {
       ["b", false],
     ]);
     expect(sel.traceFile.split("\n").filter((l) => l.startsWith('{"id"'))).toHaveLength(2);
+  });
+
+  it("traces each item's outcome and the sources header passed in", async () => {
+    const sources = { Commission: { fetched: 2, judged: 2 }, Broken: { fetched: null, judged: 0 } };
+    const sel = await selectPolicyItems(
+      [item("ai", { title: "Rules on artificial intelligence" }), item("fish", { title: "Fishing quotas" })],
+      { ...base, sources, cache: { items: {} } },
+    );
+    expect(sel.rankedBy).toBe("keywords");
+    const trace = JSON.parse(sel.traceFile) as { sources: unknown; items: Record<string, unknown>[] };
+    expect(trace.sources).toEqual(sources);
+    expect(trace.items.find((i) => i["id"] === "ai")).toMatchObject({ rendered: true, rank: 1 });
+    expect(trace.items.find((i) => i["id"] === "fish")).toMatchObject({
+      rendered: false,
+      rank: null,
+      dropped_reason: "threshold",
+    });
   });
 });
 

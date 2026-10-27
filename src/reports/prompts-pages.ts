@@ -1,20 +1,29 @@
 /**
- * Page prompts: the row summaries of Trends, the models page, AI Policy, the
- * data report and Spotted; the prose of Trends, AI Policy and the data report;
- * Trends' Hugging Face table; and the highlights.json prompt. The agents and
+ * Page prompts: the row summaries of Trends (its Hugging Face table included),
+ * the models page, AI Policy, the data report and Spotted; the prose of Trends,
+ * AI Policy and the data report; and the highlights.json prompt. The agents and
  * models pages' Highlights, the repo sections and the shared prompt rules are in
  * prompts.ts.
  */
 
 import type { LabPost } from "../sources/labs.ts";
 import type { summaryRows } from "../trending/rank.ts";
-import { formatTokens, type OpenRouterData, type OpenRouterNewModel } from "../sources/openrouter.ts";
-import { DATA_REPORT, MODELS_PAGE, MSG, SECTIONS, SPOTTED, TRENDS_REPORT } from "../core/strings.ts";
+import type { OpenRouterData, OpenRouterNewModel } from "../sources/openrouter.ts";
+import { DATA_REPORT, GOING_AWAY, MODELS_PAGE, MSG, SECTIONS, SPOTTED } from "../core/strings.ts";
 import { TABLES_MARKER, rowList, summaryLine, summaryOutputRule, type Numbered } from "./summarized-table.ts";
-import { goingAwayRule, NO_TITLE_RULE, RELEASE_BODY_CHARS, releaseNotes } from "./prompts.ts";
+import {
+  goingAwayRule,
+  HIGHLIGHTS_PICK_RULE,
+  IDENTIFIER_RULE,
+  RELEASE_ORDER,
+  NO_TITLE_RULE,
+  RELEASE_BODY_CHARS,
+  releaseNotes,
+  sourceFidelityRules,
+} from "./prompts.ts";
 import type { ReleaseRow } from "./pages.ts";
 import type { Deadline } from "../core/report-state.ts";
-import type { HfData } from "../sources/huggingface.ts";
+import { formatParameters, type HfData, type HfRow } from "../sources/huggingface.ts";
 import type { ResearchPaper } from "../trending/research.ts";
 import type { PolicyItem } from "../policy/items.ts";
 import type { KeptVendorItem } from "../data/relevance.ts";
@@ -42,8 +51,10 @@ export function buildTrendingSummariesPrompt(rows: ReturnType<typeof summaryRows
 
 ${list}
 
-${summaryLine("2 sentences")} — what it is and why it matters to developers.
+${summaryLine("1-2 sentences")} — what it is, then one fact from the description that sets it apart from similar tools.
 - Ground every sentence only in the given description. Do not invent features, users, releases or numbers.
+- No "It matters because" or "why it matters" clause, and no sentence that restates the first in other words.
+- ${IDENTIFIER_RULE}
 - No star, gain, download, token or rank figures: the table shows them next to the summary.
 - If the description is empty, write \`N: —\`: the table shows the name and where it was found.
 ${summaryOutputRule(rows.length)}
@@ -54,27 +65,44 @@ ${summaryOutputRule(rows.length)}
 /**
  * Weekly Trends, the second round: Highlights and Signals around the page
  * rendered from the first round's calls. The model places TABLES_MARKER where
- * spliceTables inserts the page.
+ * spliceTables inserts the page. Signals rest on row figures: the row summaries are
+ * written from descriptions without figures, so "summaries support it" let the model
+ * build trends from shared wording (forced weekly run, 2026-10-27). Comparisons come
+ * from `facts` (`trendsFacts`): derived by the model, they misread the tables.
  */
-export function buildTrendsProsePrompt(pageMd: string, dateStr: string): string {
+export function buildTrendsProsePrompt(
+  pageMd: string,
+  dateStr: string,
+  /** Rows with neither a summary nor a description ("—"): the page says nothing about them, so no Highlight. */
+  noSummaryNames: string[] = [],
+  /** `trendsFacts`: the comparisons computed in code from the tables' rows. */
+  facts = "",
+): string {
   return `You are the editor of a weekly trends report for AI practitioners: agents and coding tools, models, research and the community's most discussed stories. Below is this week's page, week ending ${dateStr}. Its tables were selected and ranked in code from GitHub Trending (weekly), GitHub topic search, OpenRouter app and model rankings, npm downloads, Hugging Face, arXiv (ranked by relevance) and Hacker News, Lobste.rs and Dev.to. 🆕 in a Signal column means created or listed in the last 14 days; 🔥 before a name means the item was also in last week's report.
 
 ${pageMd || "(The page has no sections this week.)"}
-
+${facts ? `\nFacts computed in code from the tables above (each names its table, row and window):\n\n${facts}\n` : ""}
 ---
 
 Write only these parts, in this order:
 
-1. \`## ${SECTIONS.highlights}\` — 3-5 bullets on the most noteworthy items of the week, across the page's sections.
+1. \`## ${SECTIONS.highlights}\` — 1-3 bullets on the most noteworthy items of the week for a data or AI engineer, most relevant first, across the page's sections.
 2. The line \`${TABLES_MARKER}\` exactly once, on its own line. The page is inserted there.
-3. \`## ${SECTIONS.signals}\` — 200-300 words: patterns across the week's tables, such as which kinds of agent or coding tool are getting attention, which model families lead usage, and which research directions recur. This is the one place for trend claims: each must rest on two or more rows.
+3. \`## ${SECTIONS.signals}\` — 100-300 words, 2-4 short paragraphs: what the tables' figures show, such as the largest star gains, rank moves against last week's page and the usage leaders. This is the one place for trend claims, and each Signal:
+   - opens with one fact from the facts block, as given, and links the rows that fact names; every other name and figure in it appears in those rows, and it lists no rows beyond them;
+   - rests on those rows' figures (stars gained, %, rank, tokens, downloads, likes), never on what their summaries, descriptions or titles have in common: three tools that all support Codex are not a signal;
+   - uses no trend verb the figures cannot show (dominates, is accelerating, is converging): one snapshot shows no change over time.
+   The Research table has no figures, so it gives no Signal. Fewer Signals beat an unsupported one.
 
 Rules:
 - ${NO_TITLE_RULE}
-- In ${SECTIONS.highlights}: ${goingAwayRule("bullet")}
+- In ${SECTIONS.highlights}: ${goingAwayRule("bullet")} ${HIGHLIGHTS_PICK_RULE}${noSummaryNames.length ? `\n- These rows have no summary or description: no Highlight for them. ${noSummaryNames.map((t) => `"${t}"`).join(", ")}` : ""}
 - Do not reproduce or alter the tables, and write no other sections.
+- Each table gives its window in its intro line, and a claim keeps it, in Highlights too: OpenRouter usage is one day's snapshot, so say "on <its date>", never "this week".
 - Base every claim on the page. It shows descriptions, summaries and counts only, so do not describe releases, adoption or community reactions it does not show.
-- Mention only items that appear on the page, and link every item you mention.
+- Mention only items that appear on the page, and link every item you mention: each Signal and each Highlight carries the link of every row it names.
+- Comparisons ("largest", "most", "leads", "nearly double", counts and shares such as "3 of the top 10") come only from the facts block, quoted as given, with its table and window. Compute none yourself, and compare no rows the facts block does not compare.
+${sourceFidelityRules()}
 - English, professional and concise.
 `;
 }
@@ -140,25 +168,29 @@ Rules:
 - Do not reproduce or alter the table.
 - Base every claim on the table${nearDeadlines.length ? " or the open deadlines" : ""}. Do not invent obligations, dates, stages or legal status: a wrong legal status is worse than none.
 - Mention only items that appear in the table${nearDeadlines.length ? " or the open deadlines" : ""}, and link every item you mention.
+${sourceFidelityRules()}
 - English, professional and concise.
 `;
 }
 
 /** A story's line in a summaries prompt: title, source, site, counts and its description. */
-const storyLine = (r: Omit<StoryRow, "n">): string =>
+const storyLine = (r: StoryRow): string =>
   `${r.title} (${SPOTTED.sources[r.source]}, ${siteOf(r.url) || r.url}, ${SPOTTED.counts(r.source, r.points, r.comments)}) — ${r.description ? `description: ${r.description}` : "(no description)"}`;
 
 /**
- * The story summary rules, shared by Spotted and Trends' Most discussed. A story
+ * The story summary rules (Spotted and Trends' Most discussed rows, one call). A story
  * without a description gets `—`: a sentence on its title and site only restated
- * the row ("The story titled 'X' is from openai.com", 2026-10-23).
+ * the row ("The story titled 'X' is from openai.com", 2026-10-23). Told to take 2 sentences from
+ * the description, the model copied it whole (every Spotted row on 2026-10-25 and 10-26).
  */
-const STORY_RULES = `- A story with a description: 2 sentences taken from it. Without one: write \`N: —\`; the table shows its title and site.
-- Describe no comment thread or community reaction, and no claim, method or result a story's title and description do not state.`;
+const STORY_RULES = `- A story with a description: in your own words, what it is about, with one concrete fact from the description (a number, a named tool, a finding). Never copy the description: the reader can open the link. Without one: write \`N: —\`; the table shows its title and site.
+- Describe no comment thread or community reaction, and no claim, method or result a story's title and description do not state.
+- A first-person story ("I tested…", "We built…") is the author's: say who did it ("the author tested…").`;
 
 /**
- * Spotted, one call for every page's rows: one summary per numbered story.
- * The rows are numbered by selectSpotted; parseRowSummaries reads the reply.
+ * Spotted, one call for every page's rows and Trends' Most discussed rows: one
+ * summary per numbered story. selectSpotted numbers the Spotted rows, main() the
+ * Most discussed rows after them; parseRowSummaries reads the reply.
  * The model sees titles, sites, counts and descriptions, never the article or
  * the thread: on 2026-10-19 summaries of HN titles alone guessed what an article argues.
  */
@@ -177,31 +209,19 @@ ${summaryOutputRule(rows.length)}
 }
 
 /**
- * Weekly Trends, one call for the Research rows (numbered first) and the Most
- * discussed rows (numbered after them). parseRowSummaries reads the reply.
+ * Weekly Trends, one call for the Research rows. The Most discussed rows go
+ * through the Spotted call (buildSpottedSummariesPrompt). parseRowSummaries reads the reply.
  */
-export function buildTrendsSummariesPrompt(
-  papers: Numbered<ResearchPaper>[],
-  stories: StoryRow[],
-  dateStr: string,
-): string {
-  const list = [
-    rowList(papers, (p) => `${p.title} (arXiv paper) — abstract: ${p.abstract}`),
-    rowList(stories, storyLine),
-  ]
-    .filter(Boolean)
-    .join("\n");
-  const count = papers.length + stories.length;
-  return `You summarize research papers and community stories for AI practitioners.
+export function buildTrendsSummariesPrompt(papers: Numbered<ResearchPaper>[], dateStr: string): string {
+  return `You summarize research papers for AI practitioners.
 
-Below are ${count} numbered items of the week ending ${dateStr}: ${[papers.length && "arXiv papers, each with its abstract (cut)", stories.length && "the week's most discussed community stories (Hacker News, Lobste.rs, Dev.to), each with its source, the linked site, its counts and, where given, a description"].filter(Boolean).join(", then ")}. You have read neither the full papers, the articles nor the comment threads.
+Below are ${papers.length} numbered arXiv papers of the week ending ${dateStr}, each with its abstract (cut). You have not read the full papers.
 
-${list}
+${rowList(papers, (p) => `${p.title} (arXiv paper) — abstract: ${p.abstract}`)}
 
-${summaryLine("1-2 sentences")}.
-- A paper: 2 sentences from its abstract: what it shows. No claim, number or result the abstract does not state.
-${STORY_RULES}
-${summaryOutputRule(count)}
+${summaryLine("1 sentence")}.
+- Start with the paper's name (the short name before the colon, else the title): what it does, then its headline result, with the number when the abstract gives one. No claim, number or result the abstract does not state.
+${summaryOutputRule(papers.length)}
 - English.
 `;
 }
@@ -242,6 +262,7 @@ ${summaryLine("1-2 sentences")}.
 - A post without page text: write \`N: —\`, unless its title says more than its URL does.
 - A model: 1 sentence from its catalog description: what it is for, and what it takes in and gives back (text, images, audio) when the description says. Not its context length: the row shows it. Leave out its marketing claims (best, leading, state-of-the-art).
 - Ground every sentence only in the given text. Do not invent versions, prices, dates or benchmarks.
+- ${IDENTIFIER_RULE}
 ${summaryOutputRule(count)}
 - English.
 `;
@@ -284,7 +305,8 @@ ${list}
 ${summaryLine("1-2 sentences")} — what the change enables, breaks or requires for client data platforms: a setting to turn on, a migration, a cloud, region or edition limit (for a deprecation or breaking change: what stops working or must be migrated, and by when).
 - Do not repeat the title or its status words (generally available, preview, now available): the title is shown next to the summary.
 - Ground every sentence only in the given text. Do not invent dates, versions, regions or availability.
-- When the text adds nothing beyond the title (or is empty), write \`N: —\` for that item.${releases.length ? "\n- For a release: its most important change for users in 1 sentence; say so first when it is a major version (only a version x.0.0 is a major version) or its notes name breaking changes. Notes are cut at ${RELEASE_BODY_CHARS} characters: summarize what they show, and never say they are cut." : ""}
+- ${IDENTIFIER_RULE}
+- When the text adds nothing beyond the title (or is empty), write \`N: —\` for that item.${releases.length ? `\n- For a release: its most important changes for users in 1 sentence, in this order: ${RELEASE_ORDER}; say so first when it is a major version (only a version x.0.0 is a major version). Notes are cut at ${RELEASE_BODY_CHARS} characters: summarize what they show, and never say they are cut.` : ""}
 ${summaryOutputRule(count)}
 - English.
 `;
@@ -297,9 +319,14 @@ ${summaryOutputRule(count)}
  * change means for clients (the tables already say what changed); Across
  * platforms compares one capability across vendors, or is left out.
  */
-export function buildDataProsePrompt(sectionsMd: string, dateStr: string): string {
+export function buildDataProsePrompt(
+  sectionsMd: string,
+  dateStr: string,
+  /** Kept vendor rows under "Notable" significance or unsure of it (`minor`): in the tables, never a Highlight. */
+  minorTitles: string[] = [],
+): string {
   const parts = [
-    `\`## ${SECTIONS.highlights}\` — 3-5 bullets, the most consequential changes today, deprecations, retirements and breaking changes first. Each bullet says who is affected (which client setup: e.g. Azure Databricks workspaces with the compliance security profile, Snowflake Native App providers, BigQuery users of AI functions), what to do (enable, migrate, test, plan for) and by when, if the row gives a date.`,
+    `\`## ${SECTIONS.highlights}\` — 1-3 bullets, the most consequential changes today, deprecations, retirements and breaking changes first. Each bullet says who is affected (which client setup: e.g. Azure Databricks workspaces with the compliance security profile, Snowflake Native App providers, BigQuery users of AI functions), what to do when the row says or its change requires it (enable, migrate, test, plan for) and by when, if the row gives a date.`,
     `The line \`${TABLES_MARKER}\` exactly once, on its own line. The sections are inserted there.`,
     `\`## ${DATA_REPORT.acrossPlatforms}\` — 0-3 bullets, each one capability that moved on two or more platforms in the rows above (e.g. governance tagging on Snowflake and Databricks, AI functions in SQL on BigQuery and Snowflake), saying how they differ: GA or preview, which clouds, what each covers. Only rows in the sections count; say nothing about features they do not show. Leave this heading out when no capability moved on two platforms: no padding.`,
   ];
@@ -317,13 +344,14 @@ ${parts.map((p, i) => `${i + 1}. ${p}`).join("\n")}
 
 Rules:
 - ${NO_TITLE_RULE}
-- In ${SECTIONS.highlights}: ${goingAwayRule("bullet")}
-- Length: at most ~200 words for ${SECTIONS.highlights}, ~120 for ${DATA_REPORT.acrossPlatforms}.
+- In ${SECTIONS.highlights}: ${goingAwayRule("bullet")} ${HIGHLIGHTS_PICK_RULE}${minorTitles.length ? `\n- These rows are minor: no Highlight for them. ${minorTitles.map((t) => `"${t}"`).join(", ")}` : ""}
+- Length: at most ~150 words for ${SECTIONS.highlights}, ~120 for ${DATA_REPORT.acrossPlatforms}.
 - A major release in ${DATA_REPORT.releasesHeading} (a version x.0.0, or one whose summary names breaking changes) is a Highlights candidate: say who must test or migrate.
 - Never restate a row: the reader sees the tables right below. A bullet that only says what changed, without who is affected and what to do, is left out.
 - Write no links, URLs or other sections; name each item as the sections do. Dates only as the "by when" of a row that gives one.
 - Name each item in at most one bullet of ${SECTIONS.highlights}; ${DATA_REPORT.acrossPlatforms} compares rows, so it may name a row again. Two rows that describe the same change (a release note and its behavior change bundle, a "coming soon" note and its GA note) are one item: mention it once.
 - Base every claim on the sections. Do not invent versions, dates or availability.
+${sourceFidelityRules()}
 - English, professional and concise.
 `;
 }
@@ -342,10 +370,37 @@ export interface ReportHighlights {
 // section labels, keeps the worst case under that limit.
 const HIGHLIGHTS_MAX_PER_REPORT = 2;
 const HIGHLIGHT_MAX_CHARS = 140;
-// Repo reports open with a link list and an activity-count table; a 2000-char
-// window ended there, so the model only had counts to work with ("3
-// prereleases", "337 open issues"). 8000 reaches through the comparison prose.
+// A report saved before its page had a Highlights section (the archive before October 2026), or
+// whose Highlights are a failure notice (a failed prose call), is sent as its first 8000 chars, so
+// scripts/regen-highlights.ts still covers an old date and a forced report still gets a highlight.
 const HIGHLIGHTS_EXCERPT_CHARS = 8000;
+
+/** What highlights.json's prompt sees of a report: its Highlights section, else its page without the failed section. */
+function highlightsInput(md: string): string {
+  const section = highlightsSection(md);
+  const body = section?.slice(`## ${SECTIONS.highlights}`.length).trim();
+  if (section && body && !FAILURE_NOTICES.has(body)) return section;
+  return (section ? md.replace(section, "") : md).trim().slice(0, HIGHLIGHTS_EXCERPT_CHARS);
+}
+
+/**
+ * A report's `## Highlights` section (heading included), up to the next heading, `---` rule or
+ * TABLES_MARKER; null when the report has none. highlights.json sees only this, so it can restate
+ * only what the page picked: on 2026-10-26 it read the whole page and led with a Snowflake note
+ * the data page had left out as minor.
+ */
+export function highlightsSection(md: string): string | null {
+  const lines = md.split("\n");
+  const start = lines.findIndex((l) => l.trim() === `## ${SECTIONS.highlights}`);
+  if (start < 0) return null;
+  const end = lines.findIndex(
+    (l, i) => i > start && (l.startsWith("#") || l.trim() === "---" || l.trim() === TABLES_MARKER),
+  );
+  return lines
+    .slice(start, end === -1 ? undefined : end)
+    .join("\n")
+    .trim();
+}
 
 export function buildHighlightsPrompt(
   reportContents: Record<string, string>,
@@ -357,32 +412,24 @@ export function buildHighlightsPrompt(
     : "";
 
   const sections = Object.entries(reportContents)
-    .map(([id, content]) => `## [${id}]\n\n${content.slice(0, HIGHLIGHTS_EXCERPT_CHARS)}`)
+    .map(([id, content]) => `## [${id}]\n\n${highlightsInput(content)}`)
     .join("\n\n---\n\n");
 
   // The count is a maximum, not a quota, and the exclusion list is explicit: a
   // fixed 6-per-report quota padded every section with routine noise
-  // ("2 nightly builds", "200 commits", star counts).
-  return `You are a selective news editor. The following are today's AI ecosystem report excerpts, each labeled with a report ID. The reader is a developer who wants to know what actually changed in the AI tooling world today and why it matters to them, who follows AI policy for work (the ai-policy report), and who passes data-platform changes on to data-engineering colleagues working on Databricks, Snowflake and the open-source data stack (the ai-data report).
+  // ("2 nightly builds", "200 commits", star counts). No "why it matters" ask:
+  // on 2026-10-26 it made the model add consequences no page stated.
+  return `You are a selective news editor. The following are the Highlights of today's AI ecosystem reports, each labeled with a report ID. Each report's editor already picked them from the report's rows. The reader is a developer who wants to know what actually changed in the AI tooling world today, who follows AI policy for work (the ai-policy report), and who passes data-platform changes on to data-engineering colleagues working on Databricks, Snowflake and the open-source data stack (the ai-data report).
 
 ${sections}
 
 ---
 
-For each report, pick AT MOST ${maxPerReport} highlights that this reader would genuinely care about. Fewer is better than filler: return 1 or 0 when only 1 or 0 items qualify.
+For each report, pick AT MOST ${maxPerReport} of its Highlights that this reader would genuinely care about, and restate or shorten each as one sentence of at most ${HIGHLIGHT_MAX_CHARS} characters. Fewer is better than filler: return 1 or 0 when only 1 or 0 items qualify.
 
-Each highlight is one sentence of at most ${HIGHLIGHT_MAX_CHARS} characters that says what happened AND why it matters (the concrete change, capability or consequence).
-Good: "Claude Code adds background subagents, so long refactors keep running while you keep chatting"
+Say the concrete change, capability or consequence the Highlight states; add no consequence, audience or benefit it does not state.
+Good: "Claude Code adds background subagents that keep running while you chat"
 Bad: "Claude Code v2.1.288 released" (no content)  ·  "Copilot CLI ships three prereleases" (routine)
-
-Qualifies:
-- A user-visible feature, breaking change, or deprecation, named concretely
-- A security fix or vulnerability with real impact
-- Support for a specific new model or hardware platform
-- A concrete announcement, launch, paper result, or project with a clear new capability
-- A discussion with a specific, non-obvious takeaway
-- A law, regulation, official guidance or enforcement decision that was published, adopted or moved to a new stage, or a consultation opening, with what it means for organisations that deploy AI
-- For ai-data: a deprecation, retirement or breaking change in Databricks, Snowflake, Azure / Fabric, BigQuery or a tracked data project, or a major platform feature (generally available or in public preview), with what it means for client data platforms
 
 Never include:
 - Routine releases: nightlies, alphas, prereleases, build-number ranges, or a version number without saying what it changes
@@ -397,6 +444,9 @@ Rules:
 - Use the exact report IDs from the [brackets] above as keys
 - Omit a report's key entirely when nothing in it qualifies, or when it contains only failure messages
 - At most ${maxPerReport} highlights per report, each at most ${HIGHLIGHT_MAX_CHARS} characters
+- A report's first highlight covers the first bullet of its \`## ${SECTIONS.highlights}\` (the page's lead), unless that bullet says there is no news
+- Each highlight restates one item of its report's Highlights above, never another subject; one subject per highlight, and keep its window ("this week") as the report gives it
+${sourceFidelityRules()}
 - ${goingAwayRule("highlight")}${forcedRule}`;
 }
 
@@ -416,8 +466,26 @@ export function forcedHighlightReports(hasVendorItems: boolean): string[] {
   return hasVendorItems ? ["ai-policy", "ai-data"] : ["ai-policy"];
 }
 
+// A highlight restates the lead when at least this share of its words (3+ letters) are in the lead.
+const LEAD_MATCH_MIN = 0.5;
+const leadWords = (s: string) =>
+  new Set(
+    s
+      .toLowerCase()
+      .split(/[^\p{L}\p{N}]+/u)
+      .filter((w) => w.length >= 3),
+  );
+
+/** Whether `highlight` restates `lead`: most of its words are the lead's. */
+export function restatesLead(highlight: string, lead: string): boolean {
+  const words = [...leadWords(highlight)];
+  const inLead = leadWords(lead);
+  return words.length > 0 && words.filter((w) => inLead.has(w)).length / words.length >= LEAD_MATCH_MIN;
+}
+
 /**
- * The highlights as saved: each one's going-away sign normalized (`signHighlight`), with a
+ * The highlights as saved: each one's going-away sign normalized (`signHighlight`), the one
+ * entry that restates a signed page lead signed too, with a
  * fallback for each `forced` report the model left out: the first sentence of that report's own
  * Highlights section.
  */
@@ -429,6 +497,15 @@ export function withFallbackHighlights(
   const out = Object.fromEntries(
     Object.entries(highlights).map(([id, items]) => [id, items.map(signHighlight)]),
   );
+  // A lead signed going away keeps its sign on the highlight that restates it: the model dropped it
+  // on the Polars lead (regen of 2026-10-26). Only on a match: the first highlight may be another item.
+  for (const [id, items] of Object.entries(out)) {
+    const lead = reportContents[id] ? firstHighlight(reportContents[id]) : null;
+    if (!lead?.startsWith(`${GOING_AWAY} `)) continue;
+    if (items.some((h) => h.startsWith(`${GOING_AWAY} `) && restatesLead(h, lead))) continue;
+    const k = items.findIndex((h) => !h.startsWith(`${GOING_AWAY} `) && restatesLead(h, lead));
+    if (k >= 0) items[k] = `${GOING_AWAY} ${items[k]}`;
+  }
   for (const id of forced) {
     const content = reportContents[id];
     if (out[id]?.length || !content) continue;
@@ -515,64 +592,38 @@ export function firstHighlight(md: string): string | null {
 // ---------------------------------------------------------------------------
 
 /**
- * Weekly Trends' Models section: OpenRouter token usage and Hugging Face
- * trending models, only the `###` parts whose source has data. Either source
- * alone is enough for the call.
+ * Weekly Trends' Hugging Face table: one summary per numbered release row
+ * (`hfReleaseRows`); code renders the table (`renderHfTable`), its ranks,
+ * figures and 🔥. The input has no tags: on 2026-10-26 the summaries printed
+ * `model_type` tags ("Qwen 3.5" for Qwen3.8-27B, "Spark 2.5" for Spark-X2.6-4B).
  */
-export function buildTrendsModelsPrompt(data: HfData, openrouter: OpenRouterData, dateStr: string): string {
-  const T = TRENDS_REPORT;
-  const { hasHf, hasOpenRouter } = modelSources(data, openrouter);
-  const usage = openrouter.topModels
-    .map((m, i) => `${i + 1}. ${m.slug} — ${formatTokens(m.tokens)} tokens`)
-    .join("\n");
-  const modelsText = data.models
-    .map(
-      (m, i) =>
-        `${i + 1}. **${m.id}**\n` +
-        `   Link: ${m.url}\n` +
-        `   Author: ${m.author} | Pipeline: ${m.pipelineTag || "N/A"}\n` +
-        `   Likes: ${m.likes.toLocaleString()} | Downloads: ${m.downloads.toLocaleString()}\n` +
-        `   Tags: ${m.tags.slice(0, 5).join(", ")}`,
-    )
-    .join("\n\n");
+export function buildHfSummariesPrompt(rows: Numbered<HfRow>[], dateStr: string): string {
+  const list = rowList(rows, (m) =>
+    [
+      m.id,
+      `task: ${m.pipelineTag || "unknown"}`,
+      m.parameters !== null ? `parameters: ${formatParameters(m.parameters, m.id)}` : "",
+      license(m.tags),
+    ]
+      .filter(Boolean)
+      .join(" | "),
+  );
+  return `You are an AI model ecosystem analyst. Below are ${rows.length} numbered models trending on the Hugging Face Hub, week ending ${dateStr}, each with its task (pipeline tag), parameter count and license where known.
 
-  const inputs = [
-    hasOpenRouter ? `OpenRouter top models by tokens (${openrouter.topModelsDate}):\n\n${usage}` : "",
-    hasHf
-      ? `Hugging Face Hub trending models (${data.models.length}, sorted by weekly likes):\n\n${modelsText}`
-      : "",
-  ].filter(Boolean);
+${list}
 
-  const parts = [
-    hasOpenRouter &&
-      `\`### ${T.openRouterHeading}\` — 3-5 bullets: which models lead token usage and notable newcomers in the top list. Copy token figures verbatim; link each model as https://openrouter.ai/<slug>.`,
-    hasHf &&
-      `\`### ${T.hfHeading}\` — one **Markdown table** with exactly these columns:
-
-   | Model | Author | Likes | Downloads | Summary |
-   | :--- | :--- | ---: | ---: | :--- |
-
-   - **Model**: model name as a Markdown link to its HF URL
-   - **Likes / Downloads**: copy the numbers from the input verbatim (keep the thousands separators; do not recompute or round)
-   - **Summary**: 1-2 sentences — what it is, from its pipeline and tags`,
-  ].filter(Boolean);
-
-  return `You are an AI model ecosystem analyst. The following are this week's model signals as of ${dateStr}:
-
----
-
-${inputs.join("\n\n---\n\n")}
-
----
-
-Write only these parts, in this order:
-
-${parts.map((p, i) => `${i + 1}. ${p}`).join("\n")}
-
-Rules:
-- ${NO_TITLE_RULE}
-- No Highlights, Signals or other sections: they are written elsewhere on the page.
-- Base every claim on the data above. Do not invent releases, benchmarks or capabilities.
-- English, concise and professional, preserve all links.
+${summaryLine("one sentence")}: what the model is, from its task, size, license and name only (e.g. "27B image-text-to-text model, Apache-2.0 license."). You have no model card: say nothing else about it.
+- No use the task does not name (not "style transfer" for image-to-image) and no quality or speed word ("high-quality", "sophisticated", "efficient", "powerful").
+- Never name a base model, architecture, family or version the model's name does not state.
+- No likes, download or rank figures: the table shows them.
+- If the task is unknown and the name says nothing about what the model does, write \`N: —\`.
+${summaryOutputRule(rows.length)}
+- English.
 `;
+}
+
+/** "Apache-2.0 license" from a `license:` tag; "" without one. */
+function license(tags: string[]): string {
+  const tag = tags.find((t) => t.startsWith("license:"));
+  return tag ? `license: ${tag.slice("license:".length)}` : "";
 }

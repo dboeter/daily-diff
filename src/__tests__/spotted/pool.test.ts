@@ -1,4 +1,6 @@
+import fs from "node:fs";
 import { describe, expect, it } from "vitest";
+import type { DroppedReason } from "../../core/jev.ts";
 import {
   type SpottedLog,
   type SpottedPage,
@@ -6,9 +8,12 @@ import {
   type StorySource,
   freshStories,
   linkKey,
+  carriedStories,
+  cleanStoryDescription,
   mostDiscussed,
   nextLog,
   selectSpotted,
+  selectTalkedAbout,
   splitPool,
   storiesFrom,
 } from "../../spotted/pool.ts";
@@ -214,7 +219,7 @@ describe("mostDiscussed", () => {
     };
     for (let i = 1; i <= 7; i++) add(`h${i}`, "hn", i * 10, "2026-10-20");
     for (let i = 1; i <= 4; i++)
-      add(`l${i}`, "lobsters", i, "2026-10-15", i === 4 ? { shown: "2026-10-15" } : {});
+      add(`l${i}`, "lobsters", i * 10, "2026-10-15", i === 4 ? { shown: "2026-10-15" } : {});
     add("d1", "devto", 50, "2026-10-21", { description: "Desc." });
     add("old", "hn", 999, "2026-10-14");
     add("today", "hn", 999, DATE);
@@ -233,6 +238,20 @@ describe("mostDiscussed", () => {
     expect(rows.at(-1)).toMatchObject({ comments: 50, description: "Desc." });
   });
 
+  it("needs MOST_DISCUSSED_MIN_COMMENTS and leaves out the `other` topic", () => {
+    const items: SpottedLog["items"] = {};
+    for (const [id, source, comments] of [
+      ["quiet", "lobsters", 0],
+      ["busy", "lobsters", 12],
+      ["offtopic", "hn", 400],
+    ] as const) {
+      const s = story(id, source);
+      items[s.id] = logged(s, { comments });
+    }
+    const rows = mostDiscussed({ items }, DATE, [], (id) => (id === "hn:offtopic" ? "other" : "agents"));
+    expect(rows.map((r) => r.id)).toEqual(["lobsters:busy"]);
+  });
+
   it("takes the stories shown only today again, so a same-day re-run shows the same rows", () => {
     const items: SpottedLog["items"] = {};
     for (const [id, shown] of [
@@ -240,7 +259,7 @@ describe("mostDiscussed", () => {
       ["earlier", "2026-10-21"],
     ] as const) {
       const s = story(id);
-      items[s.id] = logged(s, { comments: 10, firstSeen: "2026-10-20", shown });
+      items[s.id] = logged(s, { comments: 30, firstSeen: "2026-10-20", shown });
     }
     expect(mostDiscussed({ items }, DATE, []).map((r) => r.id)).toEqual(["hn:first"]);
   });
@@ -305,9 +324,9 @@ describe("splitPool", () => {
 describe("selectSpotted", () => {
   it("caps each page at 6 HN, 2 Lobste.rs and 2 Dev.to by points, numbered agents, models, data", () => {
     const stories = [
-      ...Array.from({ length: 8 }, (_, i) => story(`h${i}`, "hn", i)),
-      ...Array.from({ length: 3 }, (_, i) => story(`l${i}`, "lobsters", i)),
-      ...Array.from({ length: 3 }, (_, i) => story(`d${i}`, "devto", i)),
+      ...Array.from({ length: 8 }, (_, i) => story(`h${i}`, "hn", 10 + i)),
+      ...Array.from({ length: 3 }, (_, i) => story(`l${i}`, "lobsters", 10 + i)),
+      ...Array.from({ length: 3 }, (_, i) => story(`d${i}`, "devto", 10 + i)),
       story("data1", "hn", 1),
       story("models1", "devto", 1),
       story("dropped", "hn", 1000),
@@ -339,12 +358,26 @@ describe("selectSpotted by link", () => {
     const copyA = story("x", "lobsters", 5, { url: "https://www.example.com/a/" });
     const top = Array.from({ length: 6 }, (_, i) => story(`t${i}`, "hn", 100 + i));
     const belowCut = story("low", "hn", 1, { url: "https://example.com/b" });
-    const copyB = story("d", "devto", 1, { url: "https://example.com/b" });
+    const copyB = story("d", "devto", 50, { url: "https://example.com/b" });
     const pageOf = (s: Story): SpottedPage | null => (s === routedNowhere ? null : "agents");
     const ids = selectSpotted([routedNowhere, copyA, ...top, belowCut, copyB], pageOf).map((r) => r.id);
     expect(ids).toContain(copyA.id);
     expect(ids).toContain(copyB.id);
     expect(ids).not.toContain(belowCut.id);
+  });
+
+  it("tells why each story got no row: routed nowhere, its link taken, or past its source's cap", () => {
+    const nowhere = story("n", "hn", 900);
+    const original = story("o", "lobsters", 50, { url: "https://example.com/same" });
+    const copy = story("c", "lobsters", 40, { url: "https://example.com/same" });
+    const lobsters = [story("l1", "lobsters", 30), story("l2", "lobsters", 20)];
+    const dropped = new Map<string, DroppedReason>();
+    selectSpotted([nowhere, original, copy, ...lobsters], (s) => (s === nowhere ? null : "agents"), dropped);
+    expect(Object.fromEntries(dropped)).toEqual({
+      [nowhere.id]: "routing",
+      [copy.id]: "repeat",
+      [lobsters[1]!.id]: "cap",
+    });
   });
 
   it("takes each link once across pages in numbering order, and a skipped copy takes no slot", () => {
@@ -359,5 +392,211 @@ describe("selectSpotted by link", () => {
       [2, "agents", l2.id],
       [3, "agents", l3.id],
     ]);
+  });
+});
+
+describe("selectSpotted floors", () => {
+  const DAY = "2026-10-26";
+  const agents = (): SpottedPage => "agents";
+
+  it("drops an unsure topic, an old story and a contest entry as threshold; no verdict passes", () => {
+    const unsure = story("unsure", "hn", 300);
+    const old = story("old", "hn", 300, { published: "2026-10-01T10:00:00Z" });
+    const contest = story("c", "devto", 90, {
+      description: "This is a submission for the Hacktoberfest challenge",
+    });
+    const keyword = story("kw", "hn", 300);
+    const dropped = new Map<string, DroppedReason>();
+    const rows = selectSpotted([unsure, old, contest, keyword], agents, dropped, {
+      dateStr: DAY,
+      probabilityOf: (s) => (s === unsure ? 0.43 : s === keyword ? undefined : 0.9),
+    });
+    expect(rows.map((r) => r.id)).toEqual([keyword.id]);
+    expect(Object.fromEntries(dropped)).toEqual({
+      [unsure.id]: "threshold",
+      [old.id]: "threshold",
+      [contest.id]: "threshold",
+    });
+  });
+
+  it("ranks by topic confidence band, then points", () => {
+    const sure = story("sure", "hn", 7);
+    const loud = story("loud", "hn", 400);
+    const rows = selectSpotted([loud, sure], agents, undefined, {
+      probabilityOf: (s) => (s === sure ? 1 : 0.7),
+    });
+    expect(rows.map((r) => r.id)).toEqual([sure.id, loud.id]);
+  });
+
+  it("needs SPOTTED_MIN_POINTS once a page has 3 rows", () => {
+    const hn = [story("a", "hn", 400), story("b", "hn", 300), story("c", "hn", 2), story("d", "hn", 200)];
+    const lob = story("l", "lobsters", 1);
+    const dropped = new Map<string, DroppedReason>();
+    const rows = selectSpotted([...hn, lob], agents, dropped);
+    // By points c comes fourth, past the first 3 rows, and has 2 points: dropped, as is the lobsters story.
+    expect(rows.map((r) => r.id)).toEqual(["hn:a", "hn:b", "hn:d"]);
+    expect(dropped.get("hn:c")).toBe("threshold");
+    expect(dropped.get(lob.id)).toBe("threshold");
+    // Under 3 rows no floor applies: a 1-point story still makes a row.
+    expect(selectSpotted([lob], agents).map((r) => r.id)).toEqual([lob.id]);
+  });
+
+  it("labels a story cap only when it would otherwise have made a row", () => {
+    const top = [story("l1", "lobsters", 30), story("l2", "lobsters", 20)];
+    const fill = [story("a", "hn", 400), story("b", "hn", 300)];
+    const underFloor = story("l3", "lobsters", 1);
+    const copy = story("l4", "lobsters", 10, { url: top[0]!.url });
+    const capped = story("l5", "lobsters", 5);
+    const dropped = new Map<string, DroppedReason>();
+    selectSpotted([...fill, ...top, underFloor, copy, capped], agents, dropped);
+    expect(Object.fromEntries(dropped)).toEqual({
+      [underFloor.id]: "threshold",
+      [copy.id]: "repeat",
+      [capped.id]: "cap",
+    });
+  });
+});
+
+describe("ticket 10 replay: the 2026-10-26 pool", () => {
+  // Frozen from that day's spotted-trace.json and spotted-log.json (published = first seen).
+  const day = JSON.parse(
+    fs.readFileSync(new URL("../fixtures/spotted-2026-10-26.json", import.meta.url), "utf-8"),
+  ) as {
+    pool: (Story & { topic: string | null; probabilities: Record<string, number> | null })[];
+    week: SpottedLog["items"];
+    topics: Record<string, string>;
+  };
+  const PAGE: Record<string, SpottedPage | null> = {
+    agents: "agents",
+    models: "models",
+    research: "models",
+    data: "data",
+  };
+  const titled = (part: string) => day.pool.find((s) => s.title.includes(part))!.id;
+
+  it("drops DetectorScope and the AI graveyard and keeps AgentTrust", () => {
+    const rows = selectSpotted(
+      day.pool,
+      (s) => PAGE[(s as (typeof day.pool)[number]).topic ?? ""] ?? null,
+      undefined,
+      {
+        dateStr: "2026-10-26",
+        probabilityOf: (s) => {
+          const st = s as (typeof day.pool)[number];
+          return st.topic && st.probabilities ? st.probabilities[st.topic] : undefined;
+        },
+      },
+    );
+    const ids = rows.map((r) => r.id);
+    expect(ids).not.toContain(titled("DetectorScope"));
+    expect(ids).not.toContain(titled("The AI graveyard"));
+    expect(ids).toContain(titled("AgentTrust"));
+  });
+
+  it("Most discussed drops the 0-point, 0-comment Lobste.rs row", () => {
+    const rows = mostDiscussed({ items: day.week }, "2026-10-26", [], (id) => day.topics[id]);
+    expect(rows.some((r) => r.source === "lobsters" && r.comments === 0)).toBe(false);
+    expect(rows.every((r) => day.topics[r.id] !== "other")).toBe(true);
+  });
+});
+
+describe("cap-cut stories stay eligible", () => {
+  it("nextLog marks a cap-cut story cut; carriedStories brings it back the next day only, unless refetched or shown", () => {
+    const cut = story("cut", "devto", 15);
+    const refetched = story("again", "devto", 20);
+    const log = nextLog({ items: {} }, [cut, refetched], [], "2026-10-25", [cut.id, refetched.id]);
+    expect(log.items[cut.id]!.cut).toBe("2026-10-25");
+
+    const carried = carriedStories(log, [refetched], "2026-10-26");
+    expect(carried.map((s) => s.id)).toEqual([cut.id]);
+    expect(carried[0]).toMatchObject({ title: cut.title, url: cut.url, published: "2026-10-25T00:00:00Z" });
+    expect(carriedStories(log, [], "2026-10-27")).toEqual([]);
+
+    const shown = nextLog(log, [], [cut.id], "2026-10-26");
+    expect(carriedStories(shown, [refetched], "2026-10-26")).toEqual([]);
+  });
+
+  it("a story a page showed is never marked cut", () => {
+    const s = story("s");
+    const log = nextLog({ items: {} }, [s], [s.id], "2026-10-25", [s.id]);
+    expect(log.items[s.id]!.cut).toBeUndefined();
+  });
+});
+
+describe("selectTalkedAbout", () => {
+  const PAGE: Record<string, SpottedPage | null> = {
+    agents: "agents",
+    models: "models",
+    research: "models",
+    data: "data",
+  };
+
+  it("takes stories routed to no page, by points over the floor, skipping a link Spotted took", () => {
+    const policy = story("p", "hn", 300);
+    const other = story("o", "hn", 80);
+    const quiet = story("q", "hn", 10);
+    const onPage = story("a", "hn", 900);
+    const taken = story("t", "hn", 500, { url: "https://example.com/taken" });
+    const topic: Record<string, string> = {
+      [policy.id]: "policy",
+      [other.id]: "other",
+      [quiet.id]: "other",
+      [onPage.id]: "agents",
+      [taken.id]: "other",
+    };
+    const rows = selectTalkedAbout(
+      [policy, other, quiet, onPage, taken],
+      (s) => topic[s.id],
+      (s) => PAGE[topic[s.id]!] ?? null,
+      DATE,
+      new Set([linkKey("https://example.com/taken")]),
+    );
+    expect(rows.map((r) => [r.id, r.topic])).toEqual([
+      [policy.id, "policy"],
+      [other.id, "other"],
+    ]);
+  });
+
+  it("ticket 14 replay: the 2026-10-26 pool puts the AI-found PHP RCE on the Overview", () => {
+    const day = JSON.parse(
+      fs.readFileSync(new URL("../fixtures/spotted-2026-10-26.json", import.meta.url), "utf-8"),
+    ) as {
+      pool: (Story & { topic: string | null })[];
+    };
+    const rows = selectTalkedAbout(
+      day.pool,
+      (s) => (s as (typeof day.pool)[number]).topic ?? undefined,
+      (s) => PAGE[(s as (typeof day.pool)[number]).topic ?? ""] ?? null,
+      "2026-10-26",
+      new Set(),
+    );
+    expect(rows.map((r) => r.title)).toContain("PHP2Shell: AI uncovers critical RCE in PHP");
+    expect(rows.length).toBeLessThanOrEqual(5);
+  });
+});
+
+describe("cleanStoryDescription", () => {
+  it.each([
+    [
+      "A Decentralized, Scalable Multiagent Harness. Contribute to microsoft/Agensh development by creating an account on GitHub.",
+      "A Decentralized, Scalable Multiagent Harness.",
+    ],
+    [
+      "Build AI text detectors that are human-auditable (EMNLP 2026) - google-deepmind/detectorscope",
+      "Build AI text detectors that are human-auditable (EMNLP 2026)",
+    ],
+    ["Subscribe for daily updates.", undefined],
+    [
+      "This is a submission for the Challenge Week 3: Slow and Steady          ...",
+      "This is a submission for the Challenge Week 3: Slow and Steady",
+    ],
+    ["Contribute to o/r development by creating an account on GitHub.", undefined],
+    [
+      "A CLI to subscribe to RSS feeds and read offline.",
+      "A CLI to subscribe to RSS feeds and read offline.",
+    ],
+    ["Agents that plan. Subscribe to our newsletter.", "Agents that plan."],
+  ])("cleans %j", (raw, clean) => {
+    expect(cleanStoryDescription(raw)).toBe(clean);
   });
 });

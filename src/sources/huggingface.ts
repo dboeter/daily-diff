@@ -1,8 +1,8 @@
 /**
- * Hugging Face trending models fetched via the HF Hub API.
- *
- * Strategy: fetch trending models sorted by weekly likes from the
- * HF Hub API, returning a mapped subset of fields.
+ * Hugging Face trending models fetched via the HF Hub API: the models with the
+ * most likes gained in the last 7 days (`likes7d`). The API's `likes` is the
+ * all-time total and `downloads` the last 30 days (`downloadsAllTime` is the
+ * total: openai-community/gpt2 had 21.8M against 951M on 2026-10-26).
  */
 
 // ---------------------------------------------------------------------------
@@ -16,6 +16,8 @@ export interface HfModel {
   downloads: number;
   tags: string[];
   pipelineTag: string;
+  /** Parameter count from the safetensors metadata; null without one. */
+  parameters: number | null;
   lastModified: string;
   url: string;
 }
@@ -46,6 +48,7 @@ export interface HfApiModel {
   tags?: string[];
   pipeline_tag?: string;
   lastModified?: string;
+  safetensors?: { total?: number };
 }
 
 export function toHfModel(m: HfApiModel): HfModel {
@@ -56,6 +59,7 @@ export function toHfModel(m: HfApiModel): HfModel {
     downloads: m.downloads,
     tags: m.tags ?? [],
     pipelineTag: m.pipeline_tag ?? "",
+    parameters: typeof m.safetensors?.total === "number" ? m.safetensors.total : null,
     lastModified: m.lastModified ?? "",
     url: `https://huggingface.co/${m.id}`,
   };
@@ -72,8 +76,19 @@ export async function fetchHfData(): Promise<HfData> {
       sort: "likes7d",
       direction: "-1",
       limit: String(HF_FETCH_LIMIT),
-      full: "false",
     });
+    // With `expand`, the API returns only the fields named.
+    for (const field of [
+      "author",
+      "likes",
+      "downloads",
+      "tags",
+      "pipeline_tag",
+      "lastModified",
+      "safetensors",
+    ]) {
+      params.append("expand[]", field);
+    }
 
     const resp = await fetch(`${API_URL}?${params}`, {
       headers: { "User-Agent": "daily-diff/1.0" },
@@ -94,3 +109,106 @@ export async function fetchHfData(): Promise<HfData> {
     return { models: [], fetchSuccess: false };
   }
 }
+
+// ---------------------------------------------------------------------------
+// Release rows (Trends' Hugging Face table)
+// ---------------------------------------------------------------------------
+
+/** Re-uploads that only strip safety tuning: not a release of their own. */
+const UNCENSORED_RE = /uncensored|abliterated/i;
+
+/**
+ * A name segment that marks a quantised or reformatted copy of a release. GSQ and RCO are
+ * from `ISTA-DASLab/DeepSeek-V4.1-Flash-1017-GSQ-RCO-GGUF` (2026-10-26).
+ */
+// i1 is mradermacher's imatrix set; Dynamic, DWQ and bf16/fp16 name a quantisation or a precision,
+// not another release. A GGUF quant type (Q4_K_M, IQ3_XXS, Q8_0) carries underscores, so the
+// suffix is matched whole rather than split on them.
+const VARIANT_TOKEN =
+  "(?:gguf|fp8|fp4|fp16|bf16|nvfp4|awq|gptq|gsq|rco|mlx|bnb|int4|int8|[2-8]bit|dwq|dynamic|i1|exl2|exl3|quantized|onnx|i?q[1-8](?:_(?:k|0|1|[sml]|xs|xxs|nl))*)";
+const VARIANT_SUFFIX_RE = new RegExp(`^${VARIANT_TOKEN}(?:[-_]${VARIANT_TOKEN})*$`, "i");
+
+/** One release: its original upload and the quantised copies of it in the same list. */
+export interface HfRow extends HfModel {
+  variants: HfModel[];
+}
+
+const baseName = (id: string) => (id.split("/").pop() ?? id).toLowerCase();
+
+/**
+ * Whether `variant` is a quantised or reformatted copy of `base`: its name is
+ * the base's name plus format tokens only (`ISTA-DASLab/DeepSeek-V4.1-Flash-1017-GSQ-RCO-GGUF`
+ * of `deepseek-ai/DeepSeek-V4.1-Flash-1017`, `unsloth/flint-GGUF` of `RecursiveSI/flint`).
+ * Any other segment is another release: `unsloth/Qwen3.6-35B-A3B-GGUF` is not `Qwen/Qwen3.6`.
+ */
+export function isVariantOf(variant: string, base: string): boolean {
+  const v = baseName(variant);
+  const b = baseName(base);
+  if (!v.startsWith(`${b}-`)) return false;
+  return VARIANT_SUFFIX_RE.test(v.slice(b.length + 1));
+}
+
+/**
+ * The Hub's trending models as Trends' rows, in its order: uncensored
+ * re-uploads left out, and one row per release, at its first position, led by
+ * the original upload with its quantised copies as `variants` (3 of 15 rows
+ * were one DeepSeek release on 2026-10-26).
+ */
+export function hfReleaseRows(models: HfModel[]): HfRow[] {
+  const kept = models.filter((m) => !UNCENSORED_RE.test(m.id));
+  const baseOf = (m: HfModel) => kept.find((b) => b !== m && isVariantOf(m.id, b.id));
+  const rows: HfRow[] = [];
+  const rowOf = new Map<HfModel, HfRow>();
+  for (const m of kept) {
+    if (baseOf(m)) continue;
+    const row = { ...m, variants: [] };
+    rowOf.set(m, row);
+    rows.push(row);
+  }
+  for (const m of kept) {
+    // Names only grow along the chain, so this ends at an original upload.
+    let base = baseOf(m);
+    while (base && baseOf(base)) base = baseOf(base);
+    if (base) rowOf.get(base)?.variants.push(m);
+  }
+  // A variant ranked above its original moves the row up to its place.
+  const position = (r: HfRow) =>
+    Math.min(...[r, ...r.variants].map((m) => kept.findIndex((k) => k.id === m.id)));
+  return rows.sort((a, b) => position(a) - position(b));
+}
+
+/** A size a model's name states: "27B" in "Qwen/Qwen3.8-27B"; never an active count such as "A3B". */
+const NAME_SIZE = /(?<![A-Za-z0-9.])(\d+(?:\.\d+)?)([MBT])(?![A-Za-z0-9])/i;
+const SCALE: Record<string, number> = { M: 1e6, B: 1e9, T: 1e12 };
+
+/**
+ * A parameter count as people write it. The size the model's name states when it is within 10% of
+ * the count (Qwen3.8-27B counts 27.78B, and "28B" contradicted its name); else rounded down, as
+ * names are: 1.2e12 → "1.2T", 27.4e9 → "27B", 7.6e9 → "7.6B", 6e8 → "600M".
+ */
+export function formatParameters(n: number, name = ""): string {
+  const m = NAME_SIZE.exec(name.split("/").pop() ?? "");
+  if (m) {
+    const stated = Number(m[1]) * SCALE[m[2]!.toUpperCase()]!;
+    if (Math.abs(stated - n) <= 0.1 * n) return `${m[1]}${m[2]!.toUpperCase()}`;
+  }
+  const down = (x: number, digits: number) => Math.floor(x * 10 ** digits) / 10 ** digits;
+  if (n >= 1e12) return `${down(n / 1e12, 1)}T`;
+  if (n >= 1e9) return `${down(n / 1e9, n >= 1e10 ? 0 : 1)}B`;
+  if (n >= 1e6) return `${Math.floor(n / 1e6)}M`;
+  return n >= 1e3 ? `${Math.floor(n / 1e3)}K` : "<1K";
+}
+
+/**
+ * What a row shows without a summary: its task and size ("Image text to text,
+ * 763B parameters"); "" with neither, and then the row is never a Highlight.
+ */
+export function hfDescription(m: Pick<HfModel, "id" | "pipelineTag" | "parameters">): string {
+  const task = m.pipelineTag.replace(/-/g, " ");
+  const size = m.parameters !== null ? `${formatParameters(m.parameters, m.id)} parameters` : "";
+  const text = [task, size].filter(Boolean).join(", ");
+  return text.charAt(0).toUpperCase() + text.slice(1);
+}
+
+/** The lowercased state keys of a row and its variants (`StarHistory.reported`), for 🔥. */
+export const hfKeys = (row: HfRow): string[] => [row, ...row.variants].map((m) => `hf:${m.id.toLowerCase()}`);

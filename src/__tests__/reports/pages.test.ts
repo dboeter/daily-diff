@@ -8,12 +8,13 @@ import {
   buildModelsPage,
   buildPolicyReport,
   buildTrendsReport,
+  checkTrendsLinks,
   hasDataNews,
   type TrendsInput,
   LAB_POSTS_MAX,
   type DataSection,
 } from "../../reports/pages.ts";
-import { EMPTY_TRENDING, type TrendingData } from "../../trending/compose.ts";
+import { EMPTY_OPENROUTER, EMPTY_TRENDING, type TrendingData } from "../../trending/compose.ts";
 import { MSG, TRENDS_REPORT } from "../../core/strings.ts";
 import type { ProjectActivity } from "../../reports/prompts.ts";
 import type { GitHubItem } from "../../core/github.ts";
@@ -23,7 +24,7 @@ import type { LabsFetchResult, LabPost } from "../../sources/labs.ts";
 import type { ModelCatalog } from "../../sources/openrouter.ts";
 import type { VendorData, VendorItem } from "../../data/vendors.ts";
 import { selectVendorItems } from "../../data/relevance.ts";
-import { fetchVendorData } from "../../data/vendors.ts";
+import { type DataState, fetchVendorData } from "../../data/vendors.ts";
 import { numberRows } from "../../reports/summarized-table.ts";
 import type { SpottedRow } from "../../spotted/pool.ts";
 
@@ -65,6 +66,12 @@ const vendorOf = (items: VendorData["items"]): VendorData => ({
   observedState: { reported: {} },
 });
 const saveFile = vi.fn((_content: string, dateStr: string, name: string) => `digests/${dateStr}/${name}`);
+// buildTrendsReport writes digests/trending-state.json: keep the tests off the real file.
+const saveStarHistory = vi.fn();
+vi.mock("../../trending/rank.ts", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("../../trending/rank.ts")>()),
+  saveStarHistory: (...args: unknown[]) => saveStarHistory(...args),
+}));
 
 describe("buildTrendsReport", () => {
   const githubRow = (n: number, fullName: string, onFire = false) => ({
@@ -108,10 +115,36 @@ describe("buildTrendsReport", () => {
       classifiedBy: "jev",
     },
   };
+  const skillPr: GitHubItem = {
+    number: 7,
+    title: "Add a code review skill",
+    state: "open",
+    user: { login: "a" },
+    labels: [],
+    created_at: "2026-10-20T00:00:00Z",
+    updated_at: "2026-10-25T00:00:00Z",
+    comments: 3,
+    html_url: "https://github.com/anthropics/skills/pull/7",
+  };
   const input: TrendsInput = {
     trending: data,
-    skills: { prs: [], issues: [], fetchSuccess: true, repo: "anthropics/skills" },
-    hf: { models: [], fetchSuccess: true },
+    skills: { prs: [skillPr], issues: [], fetchSuccess: true, repo: "anthropics/skills" },
+    hf: {
+      models: [
+        {
+          id: "o/Model-7B",
+          author: "o",
+          likes: 1200,
+          downloads: 3400,
+          tags: [],
+          pipelineTag: "text-generation",
+          parameters: 7e9,
+          lastModified: "",
+          url: "https://huggingface.co/o/Model-7B",
+        },
+      ],
+      fetchSuccess: true,
+    },
     papers: [
       {
         id: "p1",
@@ -123,33 +156,38 @@ describe("buildTrendsReport", () => {
         date: "2026-10-21",
       },
     ],
-    stories: [
-      {
-        id: "lobsters:x",
-        source: "lobsters",
-        title: "Essay",
-        url: "https://example.com/essay",
-        discussionUrl: "https://lobste.rs/s/x",
-        points: 40,
-        comments: 60,
-      },
-    ],
+    // Numbered after the day's Spotted rows: main() summarizes both in the Spotted call.
+    stories: {
+      rows: [
+        {
+          n: 9,
+          id: "lobsters:x",
+          source: "lobsters",
+          title: "Essay",
+          url: "https://example.com/essay",
+          discussionUrl: "https://lobste.rs/s/x",
+          points: 40,
+          comments: 60,
+        },
+      ],
+      summaries: new Map([[9, "An essay on Y."]]),
+    },
     tracked: [],
   };
-  const isTrendingSummaries = (p: string) => p.includes("`N: <2 sentences>`");
-  const isRowSummaries = (p: string) => p.includes("research papers and community stories");
+  const isTrendingSummaries = (p: string) => p.includes("one fact from the description that sets it apart");
+  const isRowSummaries = (p: string) => p.includes("You summarize research papers");
   const isModels = (p: string) => p.includes("model ecosystem analyst");
   const isProse = (p: string) => p.includes("<!-- tables -->");
   const reply = (p: string) =>
     isTrendingSummaries(p)
       ? "1: Kilo is an agent.\n2: Fast is a coding agent."
       : isRowSummaries(p)
-        ? "1: The paper shows X.\n2: An essay on Y."
+        ? "1: The paper shows X."
         : isModels(p)
-          ? "### OpenRouter usage\n\n- a/b leads.\n\n### Hugging Face trending\n\n| Model |\n| :--- |"
+          ? "1: A 7B text model."
           : isProse(p)
             ? "## Highlights\n\n- H.\n\n<!-- tables -->\n\n## Signals\n\nS."
-            : "## Top Skills\n\nK.";
+            : "## Open PRs worth watching\n\nK.";
   const build = (over: Partial<TrendsInput> = {}) =>
     buildTrendsReport({ ...input, ...over }, "00:00", "2026-10-26");
 
@@ -169,13 +207,28 @@ describe("buildTrendsReport", () => {
     ]);
     expect(content).toContain(`### ${TRENDS_REPORT.radarHeading}`);
     expect(content).toContain(`### ${TRENDS_REPORT.categoryTitles.coding_agent}`);
-    expect(content).toContain("### Top Skills\n\nK.");
+    expect(content).toContain("### Open PRs worth watching\n\nK.");
     expect(content).toContain("### OpenRouter usage");
     expect(content).toContain("| Kilo is an agent. |");
     expect(content).toContain("| [Paper 1](https://arxiv.org/abs/p1) | The paper shows X. |");
     expect(content).toContain("| An essay on Y. |");
     expect(content).toContain("    - id: fast\n      repo: o/fast\n      name: fast");
     expect(content).not.toContain("<!-- tables -->");
+  });
+
+  it("renders Most discussed from the Spotted call's summaries; its own call has the papers only", async () => {
+    generateBody.mockReset();
+    generateBody.mockImplementation(async (p: string) => reply(p));
+    const content = (await build())!.content;
+    expect(content).toContain("| An essay on Y. |");
+    const research = generateBody.mock.calls.map((c) => c[0]).find(isRowSummaries)!;
+    expect(research).toContain("Paper 1");
+    expect(research).not.toContain("Essay");
+    // No paper: no Research call, and Most discussed still gets its summary.
+    generateBody.mockClear();
+    const noPapers = (await build({ papers: [] }))!.content;
+    expect(generateBody.mock.calls.map((c) => c[0]).some(isRowSummaries)).toBe(false);
+    expect(noPapers).toContain("| An essay on Y. |");
   });
 
   it("makes four calls in the first round, then the prose call over the rendered page", async () => {
@@ -215,10 +268,73 @@ describe("buildTrendsReport", () => {
       if (isTrendingSummaries(p) || isRowSummaries(p)) throw new Error("HTTP 504");
       return reply(p);
     });
-    const content = (await build({ skills: { ...input.skills, fetchSuccess: false } }))!.content;
+    const content = (await build({ skills: { ...input.skills, prs: [], fetchSuccess: false } }))!.content;
     expect(content).toContain("| Kilo description. |");
     expect(content).toContain("| Paper abstract. |");
     expect(content).toContain(MSG.skillsFailed);
+    expect(generateBody).toHaveBeenCalledTimes(4);
+  });
+
+  it("renders OpenRouter usage in code next to the model's Hugging Face table, both at ###", async () => {
+    generateBody.mockReset();
+    generateBody.mockImplementation(async (p: string) => reply(p));
+    const openrouter = {
+      ...EMPTY_OPENROUTER,
+      topModels: [{ slug: "a/b", tokens: 1e12 }],
+      topModelsDate: "2026-10-25",
+      fetchSuccess: true,
+    };
+    const content = (await build({ trending: { ...input.trending, openrouter } }))!.content;
+    expect(content).toContain(`### ${TRENDS_REPORT.openRouterHeading}`);
+    expect(content).toContain("| 1 | [a/b](https://openrouter.ai/a/b) |");
+    expect(content).toContain(`### ${TRENDS_REPORT.hfHeading}`);
+    expect(content).toContain(
+      "| 1 | [o/Model-7B](https://huggingface.co/o/Model-7B) | 1,200 | 3,400 | A 7B text model. |",
+    );
+    expect(content).not.toContain("####");
+  });
+
+  it("reads last week's 🔥 keys and usage ranking from the weekly state, and saves the Hugging Face keys to it", async () => {
+    generateBody.mockReset();
+    generateBody.mockImplementation(async (p: string) => reply(p));
+    saveStarHistory.mockReset();
+    const openrouter = {
+      ...EMPTY_OPENROUTER,
+      topModels: [{ slug: "a/b", tokens: 1e12 }],
+      fetchSuccess: true,
+    };
+    const nextStarHistory = {
+      repos: {},
+      reported: { "2026-10-19": ["hf:o/model-7b"], "2026-10-26": ["github:o/fast"] },
+      modelRanking: { "2026-10-19": ["x/y", "a/b"] },
+    };
+    const content = (await build({
+      trending: { ...input.trending, openrouter, report: { ...input.trending.report!, nextStarHistory } },
+    }))!.content;
+    expect(content).toContain("| 1 | 🔥 [o/Model-7B](https://huggingface.co/o/Model-7B) |");
+    expect(content).toContain("| 1 | [a/b](https://openrouter.ai/a/b) | 1.00T | 2 |");
+    expect(saveStarHistory).toHaveBeenCalledWith({
+      ...nextStarHistory,
+      reported: { ...nextStarHistory.reported, "2026-10-26": ["github:o/fast", "hf:o/model-7b"] },
+    });
+  });
+
+  it("tells the prose call a row with neither summary nor description makes no Highlight", async () => {
+    generateBody.mockReset();
+    generateBody.mockImplementation(async (p: string) => (isModels(p) ? "" : reply(p)));
+    const bare = { ...input.hf.models[0]!, pipelineTag: "", parameters: null };
+    await build({ hf: { models: [bare], fetchSuccess: true } });
+    const prose = generateBody.mock.calls.map((c) => c[0]).find(isProse)!;
+    expect(prose).toContain('no Highlight for them. "o/Model-7B"');
+  });
+
+  it("leaves the Skills section out, without a call, when no item moved this week", async () => {
+    generateBody.mockReset();
+    generateBody.mockImplementation(async (p: string) => reply(p));
+    const content = (await build({ skills: { ...input.skills, prs: [] } }))!.content;
+    expect(headings(content)).not.toContain(TRENDS_REPORT.skillsHeading);
+    expect(content).not.toContain(MSG.skillsFailed);
+    expect(content).not.toContain("Takeaway");
     expect(generateBody).toHaveBeenCalledTimes(4);
   });
 
@@ -227,9 +343,10 @@ describe("buildTrendsReport", () => {
     expect(
       await build({
         trending: EMPTY_TRENDING,
+        skills: { ...input.skills, prs: [] },
         hf: { models: [], fetchSuccess: false },
         papers: [],
-        stories: [],
+        stories: { rows: [], summaries: new Map() },
       }),
     ).toBeNull();
     expect(generateBody).not.toHaveBeenCalled();
@@ -253,7 +370,7 @@ describe("buildTrendsReport", () => {
       trending: EMPTY_TRENDING,
       hf: { models: [], fetchSuccess: false },
       papers: [],
-      stories: [],
+      stories: { rows: [], summaries: new Map() },
       skills: { ...input.skills, prs: [pr] },
     });
     expect(report?.content).toContain(`## ${TRENDS_REPORT.skillsHeading}`);
@@ -279,18 +396,19 @@ describe("buildTrendsReport", () => {
       url: `https://radar-tool-${i}.example.com/`,
       description: "d".repeat(300),
       sources: ["OpenRouter", "npm", "GitHub"] as ("OpenRouter" | "npm" | "GitHub")[],
-      signals: ["🆕 week #3 / month #12", "12,345/week, 4.3x", "1,234 (+567, +85.0%)"],
+      signals: ["🆕 week #3 / month #12", "12,345 downloads/week, 4.3x", "1,234 (+567, +85.0%)"],
       isNew: true,
       onFire: true,
       links: [],
     }));
-    const hfRows = Array.from(
-      { length: 15 },
-      (_, i) =>
-        `| [some-org/A-Model-Name-${i}-Instruct-GGUF](https://huggingface.co/some-org/A-Model-Name-${i}-Instruct-GGUF) | some-org | 1,234 | 123,456 | ${summary} |`,
-    );
+    const hfModels = Array.from({ length: 15 }, (_, i) => ({
+      ...input.hf.models[0]!,
+      id: `some-org/A-Model-Name-${i}-Instruct`,
+      url: `https://huggingface.co/some-org/A-Model-Name-${i}-Instruct`,
+    }));
     const big: TrendsInput = {
       ...input,
+      hf: { models: hfModels, fetchSuccess: true },
       trending: {
         ...data,
         report: {
@@ -308,14 +426,18 @@ describe("buildTrendsReport", () => {
         title: `A long paper title about agents, planning and tool use in large language models, part ${i}`,
         url: `https://arxiv.org/abs/2610.0000${i}`,
       })),
-      stories: Array.from({ length: 11 }, (_, i) => ({
-        ...input.stories[0]!,
-        id: `hn:${i}`,
-        source: "hn" as const,
-        title: `A fairly long Hacker News story title number ${i} about AI tooling`,
-        url: `https://example.com/a/long/path/to/the/article-${i}`,
-        discussionUrl: `https://news.ycombinator.com/item?id=4100000${i}`,
-      })),
+      stories: {
+        rows: Array.from({ length: 11 }, (_, i) => ({
+          ...input.stories.rows[0]!,
+          n: i + 1,
+          id: `hn:${i}`,
+          source: "hn" as const,
+          title: `A fairly long Hacker News story title number ${i} about AI tooling`,
+          url: `https://example.com/a/long/path/to/the/article-${i}`,
+          discussionUrl: `https://news.ycombinator.com/item?id=4100000${i}`,
+        })),
+        summaries: new Map(Array.from({ length: 11 }, (_, i) => [i + 1, summary])),
+      },
     };
     const lines = (count: number) =>
       Array.from({ length: count }, (_, i) => `${i + 1}: ${summary}`).join("\n");
@@ -324,9 +446,9 @@ describe("buildTrendsReport", () => {
       isTrendingSummaries(p)
         ? lines(52)
         : isRowSummaries(p)
-          ? lines(21)
+          ? lines(10)
           : isModels(p)
-            ? `### OpenRouter usage\n\n${`- ${summary}\n`.repeat(5)}\n### Hugging Face trending\n\n| Model | Author | Likes | Downloads | Summary |\n| :--- | :--- | ---: | ---: | :--- |\n${hfRows.join("\n")}`
+            ? lines(15)
             : isProse(p)
               ? `## Highlights\n\n${"x".repeat(2000)}\n\n<!-- tables -->\n\n## Signals\n\n${"x".repeat(2000)}`
               : `## Top Skills\n\n${"k".repeat(3000)}`,
@@ -442,7 +564,7 @@ describe("buildModelsPage", () => {
     );
   };
 
-  it("reads Highlights, Lab announcements, New on OpenRouter, Stealth models, then Spotted", async () => {
+  it("reads Highlights, Lab announcements, New on OpenRouter, then Spotted", async () => {
     stub();
     const report = await build([site([post(1)])], catalog({ newModels: [model] }), {
       rows: [spottedRow(1, "models")],
@@ -456,9 +578,10 @@ describe("buildModelsPage", () => {
       "Highlights",
       "Lab announcements",
       "New on OpenRouter",
-      "🕵️ Stealth Models on OpenRouter",
       "Spotted",
     ]);
+    // No stealth model in the catalog: named in one line, no heading over a placeholder.
+    expect(report?.content).toContain("Nothing new from OpenRouter's stealth models today.");
     expect(report?.content).toContain(
       "| 2026-10-11 | Anthropic | [Post 1](https://www.anthropic.com/news/p1) | Summary one. |",
     );
@@ -532,13 +655,25 @@ describe("buildModelsPage", () => {
     expect(fs.existsSync(stateFile)).toBe(false);
   });
 
+  it("names its empty tracked sections in one line (2026-10-26: three placeholder sections)", async () => {
+    stub();
+    const spotted = { rows: [spottedRow(1, "models")], summaries: new Map<number, string>() };
+    const content = (await build([site([])], catalog(), spotted))!.content;
+    expect(headings(content)).toEqual(["Highlights", "Spotted"]);
+    expect(content).toContain(
+      "Nothing new from Anthropic or OpenAI, OpenRouter's new listings or OpenRouter's stealth models today.",
+    );
+  });
+
   it("is published for a 🆕 stealth model alone, or a Spotted row alone", async () => {
     stub();
     const fresh = { id: "stealth/b", name: "B", created: "2026-10-21", expires: null };
     expect(await build([site([])], catalog({ stealth: [fresh] }))).not.toBeNull();
     const spotted = { rows: [spottedRow(1, "models")], summaries: new Map<number, string>() };
     const report = await build([site([])], null, spotted);
-    expect(report?.content).toContain("No new posts today.");
+    // The lab section has nothing to show: one line names it. An unavailable catalog is news.
+    expect(report?.content).toContain("Nothing new from Anthropic or OpenAI today.");
+    expect(report?.content).not.toContain("## Lab announcements");
     expect(report?.content).toContain("⚠️ OpenRouter model catalog unavailable.");
   });
 
@@ -782,7 +917,7 @@ describe("buildDataReport", () => {
     };
   };
 
-  it("renders Highlights, the sections in order, and an all-quiet repo section with its quiet line", async () => {
+  it("renders Highlights, the sections in order, and names the empty sections with their quiet repos in one line", async () => {
     generateBody.mockReset();
     generateBody.mockImplementation(async (prompt: string) => reply(prompt));
     const report = await build(sections(false));
@@ -793,10 +928,15 @@ describe("buildDataReport", () => {
     expect(content.indexOf("## Databricks")).toBeLessThan(content.indexOf("## Open-source stack"));
     // The model wrote one; code drops it.
     expect(content).not.toContain("## Worth a Look");
-    // 2026-10-19..21: "Active today: 0" and no sign the stack was tracked at all.
-    expect(content).toContain("## Snowflake\n\n**Quiet today:** [Polaris](https://github.com/org/polaris)");
-    // No repos and no vendor rows: nothing to show.
+    // 2026-10-19..21: "Active today: 0" and no sign the stack was tracked at all. An empty section
+    // goes in one line, its quiet repos named in it.
+    expect(content).toContain(
+      "Nothing new from Snowflake ([Polaris](https://github.com/org/polaris)) or Azure / Fabric & GCP today.",
+    );
+    expect(content).not.toContain("## Snowflake");
     expect(content).not.toContain("## Azure / Fabric & GCP");
+    // After the sections, before Spotted and the footer.
+    expect(content.indexOf("## Open-source stack")).toBeLessThan(content.indexOf("Nothing new from"));
     expect(content).not.toContain("<!-- tables -->");
     expect(content).toContain("### Delta");
     expect(content).toContain("**Quiet today:** [MLflow](https://github.com/org/mlflow)");
@@ -857,7 +997,7 @@ describe("buildDataReport", () => {
     const at = (s: string) => content.indexOf(s);
     // Databricks: the retirement (row 1) before the feature (row 2), both before the repo body.
     expect(content).toContain(
-      "| 2026-10-19 | Azure Databricks | ⚠️ [Retirement: legacy runtime](https://example.com/dbx-old) | Retiring soon. |",
+      "| 2026-10-19 | ⚠️ [Retirement: legacy runtime](https://example.com/dbx-old) | Retiring soon. |",
     );
     expect(at("dbx-old)")).toBeLessThan(at("dbx-new)"));
     expect(at("dbx-new)")).toBeLessThan(at("### Delta"));
@@ -892,8 +1032,13 @@ describe("buildDataReport", () => {
     generateBody.mockReset();
     generateBody.mockImplementation(async (prompt: string) => reply(prompt));
     const content = (await build(sections(false, false), await vendorData()))!.content;
-    expect(content).toContain("## Databricks\n\n| Date | Source | Item | Summary |");
-    expect(content).toContain("## Open-source stack\n\n**Quiet today:** [DuckDB]");
+    // Every Databricks row is from one source: no Source column.
+    expect(content).toContain("## Databricks\n\n| Date | Item | Summary |");
+    // Databricks' table keeps its section (and its quiet repos' line); the empty ones share one line.
+    expect(content).toContain("**Quiet today:** [Delta](https://github.com/org/delta)");
+    expect(content).toContain(
+      "Nothing new from Open-source stack ([DuckDB](https://github.com/org/duckdb)) today.",
+    );
     // 2026-10-19: "Projects: 17 | Active today: 0" sat above 16 vendor rows.
     expect(content).toContain("Vendor items: 5 | Projects:");
     expect(generateBody).toHaveBeenCalledTimes(2);
@@ -1256,11 +1401,12 @@ describe("buildDataReport", () => {
         parser: "snowflake-bcr" as const,
       },
     ];
-    const fetchWith = async (resp: () => Response, state: Parameters<typeof fetchVendorData>[2]) => {
+    const fetchWith = async (resp: () => Response, state: DataState | null) => {
       vi.spyOn(console, "log").mockImplementation(() => {});
       const spy = vi.spyOn(globalThis, "fetch").mockImplementation(async () => resp());
-      const data = await fetchVendorData({ feeds }, new Date("2026-10-17T00:00:00Z"), state, {
-        cache: { items: {} },
+      const data = await fetchVendorData({ feeds }, new Date("2026-10-17T00:00:00Z"), {
+        state,
+        jev: { cache: { items: {} } },
       });
       spy.mockRestore();
       return data;
@@ -1297,5 +1443,51 @@ describe("buildDataReport", () => {
       expect(await build(sections(false, false), data)).toBeNull();
       expect(fs.existsSync(stateFile)).toBe(false);
     });
+  });
+});
+
+describe("checkTrendsLinks", () => {
+  const prose = (signals: string[], highlights = "- [A](https://a) rose.") =>
+    `## Highlights\n\n${highlights}\n\n<!-- tables -->\n\n## Signals\n\n${signals.join("\n\n")}\n`;
+
+  it("drops a Signal without a link while a linked one remains, and logs it", () => {
+    const log = vi.spyOn(console, "log").mockImplementation(() => {});
+    const out = checkTrendsLinks(prose(["[a/b](https://x) gained most.", "Stars rose overall."]));
+    expect(out).toContain("[a/b](https://x) gained most.");
+    expect(out).not.toContain("Stars rose overall.");
+    expect(out).toContain("## Highlights\n\n- [A](https://a) rose.");
+    expect(log).toHaveBeenCalledWith("  [trends] Signal without a link: Stars rose overall.");
+    log.mockRestore();
+  });
+
+  it("keeps every Signal when none has a link, so the section never goes empty", () => {
+    const log = vi.spyOn(console, "log").mockImplementation(() => {});
+    const p = prose(["One.", "Two."]);
+    expect(checkTrendsLinks(p)).toBe(p);
+    expect(log).toHaveBeenCalledTimes(2);
+    log.mockRestore();
+  });
+
+  it("treats each list item as a Signal and keeps a sub-heading", () => {
+    const log = vi.spyOn(console, "log").mockImplementation(() => {});
+    const p = prose([
+      "### Agents",
+      "- [a/b](https://x) gained most.\n- Stars rose overall.\n- [c/d](https://y) fell.",
+    ]);
+    expect(checkTrendsLinks(p)).toBe(
+      prose(["### Agents", "- [a/b](https://x) gained most.\n- [c/d](https://y) fell."]),
+    );
+    expect(log).toHaveBeenCalledTimes(1);
+    expect(log).toHaveBeenCalledWith("  [trends] Signal without a link: - Stars rose overall.");
+    log.mockRestore();
+  });
+
+  it("logs a Highlight without a link and keeps it", () => {
+    const log = vi.spyOn(console, "log").mockImplementation(() => {});
+    const p = prose(["[a](https://x) one."], "- Plain bullet.\n- [B](https://b) linked.");
+    expect(checkTrendsLinks(p)).toBe(p);
+    expect(log).toHaveBeenCalledWith("  [trends] Highlight without a link: - Plain bullet.");
+    expect(log).toHaveBeenCalledTimes(1);
+    log.mockRestore();
   });
 });

@@ -15,7 +15,9 @@ import {
   MIN_STARS,
   NEW_REPO_MIN_STARS,
   nextStarHistory,
+  lastWeekFigures,
   lastWeekKeys,
+  radarFigures,
   reportedKeys,
   npmKey,
   openrouterKey,
@@ -37,7 +39,7 @@ import {
   type ClassifyItem,
 } from "./classify.ts";
 import { loadMatchState, matchApps, type MatchState, type MatchTrace } from "./match.ts";
-import { askJev, type AskJev } from "../core/jev.ts";
+import { askJev, type AskJev, type DroppedReason } from "../core/jev.ts";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -69,7 +71,11 @@ export interface SearchRepo {
 export interface TrendingData {
   trendingRepos: TrendingRepo[];
   searchRepos: SearchRepo[];
+  /** False when every topic search failed; absent on daily runs (no search) and in old fixtures. */
+  searchFetchSuccess?: boolean;
   trendingFetchSuccess: boolean;
+  /** The trending page's window, which `periodStars` counts over; absent in old fixtures. */
+  period?: TrendingPeriod;
   /** Weekly run only; EMPTY_OPENROUTER on daily runs. */
   openrouter: OpenRouterData;
   /** Weekly run only; EMPTY_NPM on daily runs. */
@@ -264,7 +270,10 @@ interface SearchQuery {
  * needs the second query for new repos and the star gain to rank. Not daily:
  * search results stopped counting as agent news on 2026-10-19 (`matchProjectNews`).
  */
-export async function searchAiRepos(pushedSince: string, createdSince: string): Promise<SearchRepo[]> {
+export async function searchAiRepos(
+  pushedSince: string,
+  createdSince: string,
+): Promise<{ repos: SearchRepo[]; success: boolean }> {
   // Space-separated: githubGet URL-encodes `q`, and an encoded "+" is a literal plus.
   const queries: SearchQuery[] = SEARCH_TOPICS.flatMap((topic): SearchQuery[] => [
     {
@@ -283,7 +292,9 @@ export async function searchAiRepos(pushedSince: string, createdSince: string): 
     },
   ]);
 
-  // A short page is the last one. A failed page keeps the pages before it.
+  // A short page is the last one. A failed page keeps the pages before it. Any answered first page
+  // counts as success: an empty result is then "nothing found", not a failed search.
+  let success = false;
   const searchPages = async ({ q, name, perPage, maxPages }: SearchQuery): Promise<SearchApiItem[]> => {
     const items: SearchApiItem[] = [];
     for (let page = 1; page <= maxPages; page++) {
@@ -294,6 +305,7 @@ export async function searchAiRepos(pushedSince: string, createdSince: string): 
           searchSlot,
         );
         items.push(...pageItems);
+        success = true;
         if (pageItems.length < perPage) break;
       } catch (err) {
         console.error(`  [trending/search] "${name}" page ${page}: ${err}`);
@@ -329,7 +341,7 @@ export async function searchAiRepos(pushedSince: string, createdSince: string): 
     console.log(`  [trending/search] "${name}": ${added} new repos`);
   });
 
-  return all;
+  return { repos: all, success };
 }
 
 // ---------------------------------------------------------------------------
@@ -364,14 +376,22 @@ async function fetchTrending(period: TrendingPeriod, dateStr: string): Promise<T
   const daysAgo = (n: number) => new Date(Date.now() - n * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
   const weekly = period === "weekly";
 
-  const [{ repos: trendingRepos, success }, searchRepos, openrouter, npm] = await Promise.all([
+  const [{ repos: trendingRepos, success }, search, openrouter, npm] = await Promise.all([
     fetchGitHubTrending(period),
-    weekly ? searchAiRepos(daysAgo(SEARCH_PUSHED_DAYS), daysAgo(NEW_REPO_DAYS)) : [],
+    weekly ? searchAiRepos(daysAgo(SEARCH_PUSHED_DAYS), daysAgo(NEW_REPO_DAYS)) : undefined,
     weekly ? fetchOpenRouterData().catch((): OpenRouterData => EMPTY_OPENROUTER) : EMPTY_OPENROUTER,
     weekly ? fetchNpmData().catch((): NpmData => EMPTY_NPM) : EMPTY_NPM,
   ]);
 
-  const data: TrendingData = { trendingRepos, searchRepos, trendingFetchSuccess: success, openrouter, npm };
+  const data: TrendingData = {
+    trendingRepos,
+    searchRepos: search?.repos ?? [],
+    ...(search && { searchFetchSuccess: search.success }),
+    trendingFetchSuccess: success,
+    period,
+    openrouter,
+    npm,
+  };
   if (!weekly || !hasTrendingData(data)) return data;
 
   // Caught here, not by fetchTrendingData's catch-all, which would also wipe
@@ -490,7 +510,13 @@ export async function composeTrendingReport(
   // The trace reads the final rows' gains. Same keys as firstItems: the gains re-rank rows, they
   // neither add nor drop any, so the cache built from firstItems marks every item seen.
   const items = itemsFor(githubRows);
-  const candidates = buildRadarCandidates(data.openrouter.apps, data.npm, githubRows, dateStr);
+  const candidates = buildRadarCandidates(
+    data.openrouter.apps,
+    data.npm,
+    githubRows,
+    dateStr,
+    lastWeekFigures(history, dateStr),
+  );
 
   // Matching needs a readable state file; without one (null) it is skipped and nothing is saved.
   let links: [string, string][] = [];
@@ -506,6 +532,7 @@ export async function composeTrendingReport(
     console.log(`  [trending] Cross-source matches applied: ${links.length}`);
   }
 
+  const dropped = new Map<string, DroppedReason>();
   const report = selectTrendingReport(
     githubRows,
     candidates,
@@ -513,6 +540,7 @@ export async function composeTrendingReport(
     classifiedBy,
     links,
     lastWeekKeys(history, dateStr),
+    dropped,
   );
   console.log(
     `  [trending] Radar: ${report.radar.length} rows | ` +
@@ -520,13 +548,31 @@ export async function composeTrendingReport(
   );
   const traceFile =
     classifiedBy === "jev" || matchCalled
-      ? buildTrendingTraceFile(items, classifications, classifiedBy, matchTrace, matchModels)
+      ? buildTrendingTraceFile(items, classifications, classifiedBy, matchTrace, matchModels, {
+          report,
+          dropped,
+          sources: {
+            "GitHub Trending": { fetched: data.trendingFetchSuccess ? data.trendingRepos.length : null },
+            "topic search": { fetched: data.searchFetchSuccess === false ? null : data.searchRepos.length },
+            "OpenRouter apps": { fetched: data.openrouter.fetchSuccess ? data.openrouter.apps.length : null },
+            npm: { fetched: data.npm.fetchSuccess ? data.npm.rising.length + data.npm.top.length : null },
+          },
+        })
       : undefined;
+  const shown = reportedKeys(report);
   return {
     ...report,
     ...(traceFile !== undefined ? { traceFile } : {}),
     ...(nextMatches !== undefined ? { nextMatches } : {}),
     ...(nextCache ? { nextTrendingVerdicts: nextCache } : {}),
-    nextStarHistory: nextStarHistory(history, githubRows, dateStr, reportedKeys(report)),
+    nextStarHistory: nextStarHistory(history, githubRows, dateStr, shown, {
+      // The shown rows' figures only: a row new to the Radar next week shows no comparison.
+      figures: Object.fromEntries(
+        [...radarFigures(data.openrouter.apps, data.npm)].filter(([k]) => shown.includes(k)),
+      ),
+      ...(data.openrouter.topModels.length > 0 && {
+        modelRanking: data.openrouter.topModels.map((m) => m.slug),
+      }),
+    }),
   };
 }

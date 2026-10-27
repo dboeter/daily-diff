@@ -337,3 +337,16 @@ describe("data project news", () => {
     expect(matchProjectNews(dataRepos, sources).get("duckdb")).toEqual([]);
   });
 });
+
+describe("matchProjectNews reads the description", () => {
+  it("matches a story that names the project only in its description, and passes the description on", () => {
+    const openShell: RepoConfig = { id: "openshell", repo: "NVIDIA/OpenShell", name: "OpenShell" };
+    const s = {
+      ...story("Agents should never hold your API keys. NVIDIA just open-sourced the runtime"),
+      description: "NVIDIA open-sourced OpenShell: a runtime where agent fleets get kernel-level sandboxes.",
+    };
+    const news = matchProjectNews([openShell], { stories: [s] }).get("openshell")!;
+    expect(news.map((n) => n.id)).toEqual([s.id]);
+    expect(news[0]!.description).toContain("open-sourced OpenShell");
+  });
+});

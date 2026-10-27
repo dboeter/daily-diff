@@ -8,6 +8,7 @@
 import {
   DATA_REPORT,
   MSG,
+  nothingNew,
   POLICY_REPORT,
   PROJECT_SCOPE,
   REPORTS,
@@ -21,7 +22,7 @@ import {
 import {
   buildPolicySummariesPrompt,
   buildTrendingSummariesPrompt,
-  buildTrendsModelsPrompt,
+  buildHfSummariesPrompt,
   buildTrendsProsePrompt,
   buildTrendsSummariesPrompt,
   buildPolicyProsePrompt,
@@ -36,10 +37,12 @@ import { loadReportedState, newItems, nextReportedState, saveReportedState } fro
 import type { TrendingData } from "../trending/compose.ts";
 import { saveTrendingVerdicts } from "../trending/classify.ts";
 import { saveMatchState } from "../trending/match.ts";
-import { saveStarHistory, summaryRows } from "../trending/rank.ts";
+import { lastWeekKeys, saveStarHistory, summaryRows, weekAgo } from "../trending/rank.ts";
+import { trendsFacts } from "../trending/facts.ts";
 import {
   AGENTS_HIGHLIGHTS_FOCUS,
   MODELS_HIGHLIGHTS_FOCUS,
+  NO_MODEL_NEWS_NOTE,
   buildPageHighlightsPrompt,
   buildProjectDigestPrompt,
   buildSkillsPrompt,
@@ -48,6 +51,9 @@ import {
 } from "./prompts.ts";
 import type { GitHubRelease, RepoConfig, SkillsData } from "../core/github.ts";
 import {
+  renderHfTable,
+  renderOpenRouterUsage,
+  unsummarizedRows,
   buildProjectReportContent,
   buildStealthSection,
   groupsMarkdown,
@@ -70,12 +76,13 @@ import {
 } from "./markdown.ts";
 import {
   numberRows,
+  checkCodeTokens,
   parseRowSummaries,
   spliceTables,
   summaryText,
   TABLES_MARKER,
 } from "./summarized-table.ts";
-import type { HfData } from "../sources/huggingface.ts";
+import { hfKeys, hfReleaseRows, type HfData } from "../sources/huggingface.ts";
 import type { ResearchPaper } from "../trending/research.ts";
 import { POLICY_STATE_FILE, type PolicyData, type PolicyItem } from "../policy/items.ts";
 import { POLICY_VERDICTS_FILE } from "../policy/relevance.ts";
@@ -114,23 +121,69 @@ export interface TrendsInput {
   hf: HfData;
   /** The week's papers (`weekPapers`). */
   papers: ResearchPaper[];
-  /** The week's most discussed stories (`mostDiscussed`). */
-  stories: Omit<StoryRow, "n">[];
+  /** The week's most discussed stories (`mostDiscussed`), summarized in main()'s Spotted call. */
+  stories: { rows: StoryRow[]; summaries: Map<number, string> };
   /** Every config.yml repo: Candidates to track leaves them out. */
   tracked: RepoConfig[];
 }
 
 /**
+ * The Trends prose's link check: a Signals paragraph without a Markdown link is logged and
+ * dropped while a linked one remains, so the section never goes empty; a Highlights bullet
+ * without one is logged only. The prompt asks for links, and the free model left 2 of 3
+ * Highlights and all but one Signal without one (2026-10-27 check).
+ */
+export function checkTrendsLinks(prose: string): string {
+  const hasLink = (s: string) => /\]\([^)\s]+\)/.test(s);
+  const at = prose.indexOf(TABLES_MARKER);
+  const head = at === -1 ? prose : prose.slice(0, at);
+  for (const bullet of head.split("\n").filter((l) => /^\s*[-*] /.test(l))) {
+    if (!hasLink(bullet)) console.log(`  [trends] Highlight without a link: ${bullet.trim().slice(0, 80)}`);
+  }
+  if (at === -1) return prose;
+  const tail = prose.slice(at + TABLES_MARKER.length);
+  const heading = `## ${SECTIONS.signals}`;
+  const h = tail.indexOf(heading);
+  if (h === -1) return prose;
+  // A Signal is a list item (with its indented continuation lines) or a paragraph; a heading is
+  // never one, and is always kept.
+  const lines = tail.slice(h + heading.length).split("\n");
+  const signals: number[][] = [];
+  let open: number[] | null = null;
+  lines.forEach((line, n) => {
+    const text = line.trim();
+    if (!text || text.startsWith("#")) open = null;
+    else if (/^([-*]|\d+[.)])\s/.test(text) || !open) signals.push((open = [n]));
+    else open.push(n);
+  });
+  const textOf = (s: number[]) => s.map((n) => lines[n]!.trim()).join(" ");
+  const unlinked = signals.filter((s) => !hasLink(textOf(s)));
+  for (const s of unlinked) console.log(`  [trends] Signal without a link: ${textOf(s).slice(0, 80)}`);
+  if (!unlinked.length || unlinked.length === signals.length) return prose;
+  const dropped = new Set(unlinked.flat());
+  const body = lines
+    .filter((_, n) => !dropped.has(n))
+    .join("\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+  return `${prose.slice(0, at + TABLES_MARKER.length)}${tail.slice(0, h)}${heading}\n\n${body}\n`;
+}
+
+/**
  * The weekly Trends page: Highlights, Agents & coding tools (the Radar and
- * category tables), Claude Code Skills, Candidates to track (code only),
+ * category tables), Skills: PRs and requests this week, Candidates to track (code only),
  * Models, Research, Most discussed, Signals. An empty section is left out; the
  * page is null when every section is. First round, in parallel: the trending
- * row summaries, the models call, Skills, and one call for the Research and
- * Most discussed rows. Second round: the prose call over the page rendered
- * from them writes Highlights and Signals, and spliceTables puts the page
- * between them. A failed summaries call shows the descriptions, a failed
- * models call leaves the notice under Models, a failed prose call the notice
- * under Highlights; a failed Skills fetch or call leaves MSG.skillsFailed.
+ * row summaries, the Hugging Face row summaries, Skills, and the Research rows'
+ * call (the Most discussed rows come summarized from main()'s Spotted call).
+ * Second round: the prose call over the page rendered from them and the
+ * code-computed comparisons (`trendsFacts`) writes Highlights and Signals,
+ * checkTrendsLinks drops a Signal (a list item or paragraph) without a link, and spliceTables puts the
+ * page between them; a row
+ * showing "—" is named to it as no Highlight. A failed summaries call shows the
+ * descriptions (Hugging Face: task and size), a failed prose call the notice
+ * under Highlights; a failed Skills fetch or call leaves MSG.skillsFailed, and
+ * a fetched week with no Skills item leaves the section out.
  */
 export async function buildTrendsReport(
   input: TrendsInput,
@@ -142,8 +195,11 @@ export async function buildTrendsReport(
   const report = trending.report;
   const rows = report ? summaryRows(report) : [];
   const { hasHf, hasOpenRouter } = modelSources(hf, trending.openrouter);
+  const hfTableRows = hasHf ? numberRows(hfReleaseRows(hf.models)) : [];
+  // The weekly state carries last week's 🔥 keys and usage ranking; without a ranked report, neither.
+  const history = report?.nextStarHistory;
   const papers = numberRows(input.papers);
-  const stories = numberRows(input.stories, papers.length);
+  const stories = input.stories.rows;
   const hasSkills = skills.prs.length + skills.issues.length > 0;
   if (!rows.length && !hasHf && !hasOpenRouter && !hasSkills && !papers.length && !stories.length) {
     console.log("  [trends] No trending rows, models, Skills activity, papers or stories, skipping report.");
@@ -154,55 +210,88 @@ export async function buildTrendsReport(
     rows.length
       ? generateOr("trending-summaries", buildTrendingSummariesPrompt(rows, dateStr), "", LLM_TOKENS_LISTING)
       : "",
-    hasHf || hasOpenRouter
-      ? generateOr(
-          "trends-models",
-          buildTrendsModelsPrompt(hf, trending.openrouter, dateStr),
-          MSG.summaryFailed,
-          LLM_TOKENS_LISTING,
-        )
+    hfTableRows.length
+      ? generateOr("trends-hf-summaries", buildHfSummariesPrompt(hfTableRows, dateStr), "")
       : "",
-    // A failed fetch has nothing to summarize: the notice, without a call.
-    skills.fetchSuccess
+    // No item, no call: the notice only when the fetch failed, else no section.
+    hasSkills
       ? generateOr(
           "claude-code-skills",
           buildSkillsPrompt(skills.prs, skills.issues, dateStr),
           MSG.skillsFailed,
         )
-      : MSG.skillsFailed,
-    papers.length + stories.length
-      ? generateOr(
-          "trends-summaries",
-          buildTrendsSummariesPrompt(papers, stories, dateStr),
-          "",
-          LLM_TOKENS_LISTING,
-        )
+      : skills.fetchSuccess
+        ? ""
+        : MSG.skillsFailed,
+    papers.length
+      ? generateOr("trends-summaries", buildTrendsSummariesPrompt(papers, dateStr), "", LLM_TOKENS_LISTING)
       : "",
   ]);
 
   const rowMap = parseRowSummaries(rowSummaries);
-  const tables = report ? renderTrendingTables(report, parseRowSummaries(summaries)) : "";
+  const trendingSummaries = parseRowSummaries(summaries);
+  const hfSummaries = parseRowSummaries(models);
+  const tables = report ? renderTrendingTables(report, trendingSummaries) : "";
+  const hfTable = renderHfTable(
+    hfTableRows,
+    hfSummaries,
+    history ? lastWeekKeys(history, dateStr) : new Set(),
+  );
   const page = [
     // The tables' own `##` headings go below the section's.
     tables && `## ${T.agentsHeading}\n\n${nestHeadings(tables, 3)}`,
-    // Code renders "## Claude Code Skills"; the body's own sections go below it.
-    `## ${T.skillsHeading}\n\n${T.skillsSource(skills.repo)}\n\n${nestHeadings(skillsSummary, 3)}`,
+    // Code renders the section heading; the body's own sections go below it.
+    skillsSummary &&
+      `## ${T.skillsHeading}\n\n${T.skillsSource(skills.repo)}\n\n${nestHeadings(skillsSummary, 3)}`,
     report ? renderCandidates(report.onFire, input.tracked) : "",
-    models && `## ${T.modelsHeading}\n\n${nestHeadings(models, 3)}`,
+    (hasOpenRouter || hfTable) &&
+      `## ${T.modelsHeading}\n\n${nestHeadings(
+        [
+          renderOpenRouterUsage(
+            trending.openrouter.topModels,
+            trending.openrouter.topModelsDate,
+            weekAgo(history?.modelRanking, dateStr),
+          ),
+          hfTable,
+        ]
+          .filter(Boolean)
+          .join("\n\n"),
+        3,
+      )}`,
     renderResearchTable(papers, rowMap),
-    renderSpottedTable(stories, rowMap, T.mostDiscussedHeading),
+    renderSpottedTable(stories, input.stories.summaries, T.mostDiscussedHeading),
   ]
     .filter(Boolean)
     .join("\n\n---\n\n");
-  const prose = await generateOr("trends", buildTrendsProsePrompt(page, dateStr), null, LLM_TOKENS_LISTING);
+  const prose = await generateOr(
+    "trends",
+    buildTrendsProsePrompt(
+      page,
+      dateStr,
+      unsummarizedRows(report, trendingSummaries, hfTableRows, hfSummaries),
+      trendsFacts({
+        radar: report?.radar ?? [],
+        tables: (report?.categories ?? []).map((c) => ({
+          title: T.categoryTitles[c.category],
+          rows: c.rows,
+        })),
+        openrouter: { models: trending.openrouter.topModels, date: trending.openrouter.topModelsDate },
+        hf: hfTableRows,
+      }),
+    ),
+    null,
+    LLM_TOKENS_LISTING,
+  );
   const body = spliceTables(
-    prose === null ? `## ${SECTIONS.highlights}\n\n${MSG.summaryFailed}` : signListItems(prose),
+    prose === null
+      ? `## ${SECTIONS.highlights}\n\n${MSG.summaryFailed}`
+      : signListItems(checkTrendsLinks(prose)),
     `---\n\n${page}\n\n---`,
   );
   const content = assembleReport(
     "ai-trends",
     dateStr,
-    `> ${REPORT_META.sources(T.sources)} | ${REPORT_META.generated(utcStr)}`,
+    REPORT_META.line([REPORT_META.sources(T.sources)], utcStr),
     body,
   );
 
@@ -212,7 +301,11 @@ export async function buildTrendsReport(
   }
   if (report?.nextMatches) saveMatchState(report.nextMatches);
   if (report?.nextTrendingVerdicts) saveTrendingVerdicts(report.nextTrendingVerdicts);
-  if (report?.nextStarHistory) saveStarHistory(report.nextStarHistory);
+  if (history) {
+    // The Hugging Face rows join the week's keys, so next week's table can mark 🔥.
+    const shown = [...(history.reported?.[dateStr] ?? []), ...hfTableRows.flatMap(hfKeys)];
+    saveStarHistory({ ...history, reported: { ...history.reported, [dateStr]: shown } });
+  }
 
   return { id: "ai-trends", content };
 }
@@ -318,15 +411,22 @@ export async function buildModelsPage(
     return null;
   }
 
-  const summaries = parseRowSummaries(
-    shownPosts.length + models.length > 0
-      ? await generateOr(
-          "models-summaries",
-          buildModelsSummariesPrompt(shownPosts, models, dateStr),
-          "",
-          LLM_TOKENS_LISTING,
-        )
-      : "",
+  const summaries = checkCodeTokens(
+    parseRowSummaries(
+      shownPosts.length + models.length > 0
+        ? await generateOr(
+            "models-summaries",
+            buildModelsSummariesPrompt(shownPosts, models, dateStr),
+            "",
+            LLM_TOKENS_LISTING,
+          )
+        : "",
+    ),
+    new Map([
+      ...shownPosts.map((p): [number, string] => [p.n, `${p.title} ${p.url} ${p.content ?? ""}`]),
+      ...models.map((m): [number, string] => [m.n, `${m.name} ${m.id} ${m.description ?? ""}`]),
+    ]),
+    "models-summaries",
   );
   const failed = labs.filter((r) => !r.fetchSuccess).map((r) => P.siteFailed(P.labs[r.site]));
   const labBody = [
@@ -347,21 +447,48 @@ export async function buildModelsPage(
       : models.length
         ? renderNewModelsTable(models, summaries)
         : P.noModels;
-  const tracked = [`## ${P.labHeading}\n\n${labBody}`, `## ${P.modelsHeading}\n\n${modelsBody}`];
-  const stealth = buildStealthSection(catalog?.stealth ?? null, now);
+  // A section with nothing to show is named in one line instead of a heading over a placeholder.
+  const sections = [
+    {
+      name: P.emptyNames.labs,
+      md: `## ${P.labHeading}\n\n${labBody}`,
+      empty: !labBody || labBody === P.noPosts,
+    },
+    {
+      name: P.emptyNames.models,
+      md: `## ${P.modelsHeading}\n\n${modelsBody}`,
+      empty: modelsBody === P.noModels,
+    },
+    {
+      name: P.emptyNames.stealth,
+      md: buildStealthSection(catalog?.stealth ?? null, now),
+      empty: catalog?.stealth?.length === 0,
+    },
+  ];
+  const empty = sections.filter((s) => s.empty).map((s) => s.name);
+  const tracked = [
+    ...sections.filter((s) => !s.empty).map((s) => s.md),
+    ...(empty.length ? [nothingNew(empty)] : []),
+  ];
   const spottedMd = renderSpottedTable(spotted.rows, spotted.summaries);
   // The Highlights call reads everything below Highlights: a 🆕 stealth model is this page's news too.
-  const bodyMd = [...tracked, stealth, spottedMd].filter(Boolean).join("\n\n");
+  const bodyMd = [...tracked, spottedMd].filter(Boolean).join("\n\n");
   const prose = await generateOr(
     "models-highlights",
-    buildPageHighlightsPrompt(REPORTS["ai-models"].name, bodyMd, MODELS_HIGHLIGHTS_FOCUS, dateStr),
+    buildPageHighlightsPrompt(
+      REPORTS["ai-models"].name,
+      bodyMd,
+      MODELS_HIGHLIGHTS_FOCUS,
+      dateStr,
+      shownPosts.length || models.length ? undefined : NO_MODEL_NEWS_NOTE,
+    ),
     null,
     LLM_TOKENS_LISTING,
   );
   const highlights = highlightsOnly(prose ?? MSG.summaryFailed);
 
-  const meta = `> ${P.counts(posts.length, models.length, spotted.rows.length)} | ${REPORT_META.generated(utcStr)}`;
-  const body = `${[highlights, ...tracked].map((s) => `${s}\n\n---\n\n`).join("")}${stealth}${spottedMd}`;
+  const meta = REPORT_META.line([P.counts(posts.length, models.length, spotted.rows.length)], utcStr);
+  const body = `${[highlights, ...tracked].map((s) => `${s}\n\n---\n\n`).join("")}${spottedMd}`;
   saveReportedState(nextReportedState(state, fresh, dateStr), stateFile);
   return {
     id: "ai-models",
@@ -421,8 +548,20 @@ export async function buildPolicyReport(
 
   const sources = [...new Set(items.map((i) => i.source))].join(" + ");
   const ranked = policyData.rankedBy === "jev" ? REPORT_META.jevRanked : "";
-  const meta = `> ${REPORT_META.sources(sources)} | ${POLICY_REPORT.newItems(items.length)}${ranked} | ${REPORT_META.generated(utcStr)}`;
-  const body = spliceTables(highlightsOnly(prose), tables(parseRowSummaries(summaries)));
+  const meta = REPORT_META.line(
+    [REPORT_META.sources(sources), `${POLICY_REPORT.newItems(items.length)}${ranked}`],
+    utcStr,
+  );
+  const body = spliceTables(
+    highlightsOnly(prose),
+    tables(
+      checkCodeTokens(
+        parseRowSummaries(summaries),
+        new Map(items.map((i) => [i.n, `${i.title} ${i.description}`])),
+        "policy-summaries",
+      ),
+    ),
+  );
   // Only once the report exists.
   commitWrites(writes.onReported, files, dateStr);
   return { id: "ai-policy", content: assembleReport("ai-policy", dateStr, meta, body) };
@@ -528,7 +667,7 @@ export function hasDataNews(sections: DataSection[], vendor: VendorData, dateStr
  * the open-source stack, Releases this week (code-rendered: the data repos'
  * stable releases of the last 7 days not shown before, summarized by the vendor
  * summaries call), Across platforms, Spotted and EU data law. A section with neither vendor items
- * nor repo activity is left out. LLM calls: one per active repo section (as in
+ * nor repo activity is named in one "Nothing new from …" line instead (`nothingNew`). LLM calls: one per active repo section (as in
  * the agents report) and one for the vendor row summaries, in parallel; then
  * one for Highlights and Across platforms over all of it (Across platforms is
  * left out when the model writes none). A failed summaries call leaves the
@@ -586,7 +725,17 @@ export async function buildDataReport(
         )
       : "",
   ]);
-  const summaries = parseRowSummaries(rowSummaries);
+  const summaries = checkCodeTokens(
+    parseRowSummaries(rowSummaries),
+    new Map([
+      ...items.map((i): [number, string] => [i.n, `${i.title} ${i.description}`]),
+      ...releases.map((r): [number, string] => [
+        r.n,
+        `${r.project.name} ${r.release.tag_name} ${r.release.body ?? ""}`,
+      ]),
+    ]),
+    "data-vendor-summaries",
+  );
   // The prose call does not see the over-cap links: they have no summary to write from.
   const proseTables = renderVendorTables(items, summaries);
   const tables = renderVendorTables(items, summaries, vendor.alsoNew);
@@ -605,10 +754,10 @@ export async function buildDataReport(
   };
   // Report order; Azure and GCP have no repo section.
   const groupsWith = (tables: ReturnType<typeof renderVendorTables>): ProjectGroup[] => [
-    { title: H.databricks, ...repo("databricks"), preamble: tables.databricks },
-    { title: H.snowflake, ...repo("snowflake"), preamble: tables.snowflake },
-    { title: H.cloud, activities: [], summary: "", preamble: tables.cloud },
-    { title: H.data_stack, ...repo("data_stack") },
+    { title: H.databricks, ...repo("databricks"), preamble: tables.databricks, namedWhenEmpty: true },
+    { title: H.snowflake, ...repo("snowflake"), preamble: tables.snowflake, namedWhenEmpty: true },
+    { title: H.cloud, activities: [], summary: "", preamble: tables.cloud, namedWhenEmpty: true },
+    { title: H.data_stack, ...repo("data_stack"), namedWhenEmpty: true },
     {
       title: DATA_REPORT.releasesHeading,
       activities: [],
@@ -623,7 +772,11 @@ export async function buildDataReport(
   const sectionsMd = [...groupsMarkdown(groupsWith(proseTables)), spottedMd].filter(Boolean).join("\n\n");
   const prose = await generateOr(
     "data-highlights",
-    buildDataProsePrompt(sectionsMd, dateStr),
+    buildDataProsePrompt(
+      sectionsMd,
+      dateStr,
+      items.filter((i) => i.minor).map((i) => i.title),
+    ),
     null,
     LLM_TOKENS_LISTING,
   );

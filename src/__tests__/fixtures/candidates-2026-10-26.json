@@ -1,0 +1,12 @@
+[
+  { "fullName": "michael-denyer/pstack-claude", "category": "coding_agent" },
+  { "fullName": "GCWing/OpenBitFun", "category": "coding_agent" },
+  { "fullName": "ruvnet/ruflo", "category": "harness_framework" },
+  { "fullName": "DSH-APP/DSHA", "category": "harness_framework" },
+  { "fullName": "dataelement/dsh-desktop", "category": "harness_framework" },
+  { "fullName": "alibaba/open-code-review", "category": "harness_framework" },
+  { "fullName": "paperclipai/paperclip", "category": "multi_agent" },
+  { "fullName": "mvschwarz/openrig", "category": "multi_agent" },
+  { "fullName": "heygen-com/hyperframes", "category": "agent_tooling" },
+  { "fullName": "ccch1mneyyy/dsh-TUI", "category": "agent_tooling" }
+]

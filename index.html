@@ -442,6 +442,7 @@ let WEEKLY = [];
 let COLORS = {};
 let OVERVIEW_LABEL = 'Overview';
 let COMING_UP_HEADING = 'Coming up';
+let TALKED_ABOUT_HEADING = 'Also talked about';
 let HIGHLIGHTS_HEADING = 'Highlights';
 let PROSE_COLUMNS = ['Summary', 'What to do'];
 
@@ -589,7 +590,7 @@ function pageNav(date, report) {
   return `<nav class="page-nav">${left}${mid}${right}</nav>`;
 }
 
-/** The day's highlights (highlights.json, also sent to Telegram), each report's under a link to it, then Coming up (coming-up.json). */
+/** The day's highlights (highlights.json, also sent to Telegram), each report's under a link to it, then Also talked about (talked-about.json), then Coming up (coming-up.json). */
 async function renderOverview(date) {
   const entry = DATES.find((d) => d.date === date);
   if (!entry) throw new Error('unknown date');
@@ -607,6 +608,21 @@ async function renderOverview(date) {
     parts.push(items.length
       ? `<ul class="highlights">${items.map((h) => `<li>${escapeHtml(h)}</li>`).join('')}</ul>`
       : '<p class="dim">No highlights picked.</p>');
+  }
+  let talked = [];
+  try {
+    const res = await fetch(`./digests/${date}/talked-about.json`);
+    if (res.ok) talked = await res.json();
+  } catch {
+    /* days before talked-about.json have no Also talked about section */
+  }
+  if (Array.isArray(talked) && talked.length) {
+    parts.push(`<h2>${escapeHtml(TALKED_ABOUT_HEADING)}</h2>`);
+    // Story links reach this HTML without DOMPurify: only http(s) becomes a link.
+    const link = (url, text) => /^https?:\/\//i.test(url) ? `<a href="${escapeHtml(url)}">${escapeHtml(text)}</a>` : escapeHtml(text);
+    parts.push(`<ul>${talked.map((t) =>
+      `<li>${link(t.url, t.title)} <span class="dim">${link(t.discussionUrl, t.counts ?? `${t.points} points, ${t.comments} comments`)}</span></li>`,
+    ).join('')}</ul>`);
   }
   let comingUp = [];
   try {
@@ -952,7 +968,7 @@ window.addEventListener('hashchange', followHash);
   try {
     const res = await fetch('./manifest.json');
     if (!res.ok) throw new Error('manifest.json not found');
-    const { dates, labels, weekly, colors, overview, comingUp, highlights, proseColumns } = await res.json();
+    const { dates, labels, weekly, colors, overview, comingUp, talkedAbout, highlights, proseColumns } = await res.json();
     if (!dates?.length) throw new Error('manifest is empty');
     LABELS = labels ?? {};
     DATES = dates;
@@ -960,6 +976,7 @@ window.addEventListener('hashchange', followHash);
     COLORS = colors ?? {};
     OVERVIEW_LABEL = overview ?? 'Overview';
     COMING_UP_HEADING = comingUp ?? 'Coming up';
+    TALKED_ABOUT_HEADING = talkedAbout ?? 'Also talked about';
     HIGHLIGHTS_HEADING = highlights ?? 'Highlights';
     PROSE_COLUMNS = proseColumns ?? PROSE_COLUMNS;
 

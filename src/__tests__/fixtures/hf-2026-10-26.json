@@ -1,0 +1,170 @@
+{
+  "_source": "digests/2026-10-26/ai-trends.md, Hugging Face trending table (ids, likes, downloads in the Hub order)",
+  "models": [
+    {
+      "id": "deepseek-ai/DeepSeek-V4.1-Flash-1017",
+      "author": "deepseek-ai",
+      "likes": 3015,
+      "downloads": 85275,
+      "tags": [],
+      "pipelineTag": "",
+      "parameters": null,
+      "lastModified": "",
+      "url": "https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash-1017"
+    },
+    {
+      "id": "RecursiveSI/flint",
+      "author": "RecursiveSI",
+      "likes": 863,
+      "downloads": 6444,
+      "tags": [],
+      "pipelineTag": "",
+      "parameters": null,
+      "lastModified": "",
+      "url": "https://huggingface.co/RecursiveSI/flint"
+    },
+    {
+      "id": "black-forest-labs/flux-3-image-klein-comfy",
+      "author": "black-forest-labs",
+      "likes": 1613,
+      "downloads": 660874,
+      "tags": [],
+      "pipelineTag": "",
+      "parameters": null,
+      "lastModified": "",
+      "url": "https://huggingface.co/black-forest-labs/flux-3-image-klein-comfy"
+    },
+    {
+      "id": "XHToken/Spark-X2.6-4B",
+      "author": "XHToken",
+      "likes": 532,
+      "downloads": 3488,
+      "tags": [],
+      "pipelineTag": "",
+      "parameters": null,
+      "lastModified": "",
+      "url": "https://huggingface.co/XHToken/Spark-X2.6-4B"
+    },
+    {
+      "id": "Lightricks/LTX-2.5",
+      "author": "Lightricks",
+      "likes": 9350,
+      "downloads": 2107108,
+      "tags": [],
+      "pipelineTag": "",
+      "parameters": null,
+      "lastModified": "",
+      "url": "https://huggingface.co/Lightricks/LTX-2.5"
+    },
+    {
+      "id": "Nanbeige/Nanbeige4.3-33B",
+      "author": "Nanbeige",
+      "likes": 410,
+      "downloads": 0,
+      "tags": [],
+      "pipelineTag": "",
+      "parameters": null,
+      "lastModified": "",
+      "url": "https://huggingface.co/Nanbeige/Nanbeige4.3-33B"
+    },
+    {
+      "id": "MiniMaxAI/MiniMax-M3.1-Flash",
+      "author": "MiniMaxAI",
+      "likes": 354,
+      "downloads": 7355,
+      "tags": [],
+      "pipelineTag": "",
+      "parameters": null,
+      "lastModified": "",
+      "url": "https://huggingface.co/MiniMaxAI/MiniMax-M3.1-Flash"
+    },
+    {
+      "id": "OpenMOSS-Team/MOSS-Image-SFT",
+      "author": "OpenMOSS-Team",
+      "likes": 731,
+      "downloads": 10757,
+      "tags": [],
+      "pipelineTag": "",
+      "parameters": null,
+      "lastModified": "",
+      "url": "https://huggingface.co/OpenMOSS-Team/MOSS-Image-SFT"
+    },
+    {
+      "id": "abenzerps/Qwen-Image-2.1-Uncensored-Quantized",
+      "author": "abenzerps",
+      "likes": 5045,
+      "downloads": 2235846,
+      "tags": [],
+      "pipelineTag": "",
+      "parameters": null,
+      "lastModified": "",
+      "url": "https://huggingface.co/abenzerps/Qwen-Image-2.1-Uncensored-Quantized"
+    },
+    {
+      "id": "Qwen/Qwen3.8-27B",
+      "author": "Qwen",
+      "likes": 18406,
+      "downloads": 7762014,
+      "tags": [],
+      "pipelineTag": "",
+      "parameters": null,
+      "lastModified": "",
+      "url": "https://huggingface.co/Qwen/Qwen3.8-27B"
+    },
+    {
+      "id": "InternScience/Sage-A1.5",
+      "author": "InternScience",
+      "likes": 292,
+      "downloads": 3875,
+      "tags": [],
+      "pipelineTag": "",
+      "parameters": null,
+      "lastModified": "",
+      "url": "https://huggingface.co/InternScience/Sage-A1.5"
+    },
+    {
+      "id": "fishaudio/drama-3",
+      "author": "fishaudio",
+      "likes": 1016,
+      "downloads": 21375,
+      "tags": [],
+      "pipelineTag": "",
+      "parameters": null,
+      "lastModified": "",
+      "url": "https://huggingface.co/fishaudio/drama-3"
+    },
+    {
+      "id": "ISTA-DASLab/DeepSeek-V4.1-Flash-1017-GSQ-RCO-GGUF",
+      "author": "ISTA-DASLab",
+      "likes": 291,
+      "downloads": 412392,
+      "tags": [],
+      "pipelineTag": "",
+      "parameters": null,
+      "lastModified": "",
+      "url": "https://huggingface.co/ISTA-DASLab/DeepSeek-V4.1-Flash-1017-GSQ-RCO-GGUF"
+    },
+    {
+      "id": "unsloth/flint-GGUF",
+      "author": "unsloth",
+      "likes": 254,
+      "downloads": 103369,
+      "tags": [],
+      "pipelineTag": "",
+      "parameters": null,
+      "lastModified": "",
+      "url": "https://huggingface.co/unsloth/flint-GGUF"
+    },
+    {
+      "id": "dealignai/DeepSeek-V4.1-Flash-1017-UNCENSORED-FP8",
+      "author": "dealignai",
+      "likes": 371,
+      "downloads": 6792,
+      "tags": [],
+      "pipelineTag": "",
+      "parameters": null,
+      "lastModified": "",
+      "url": "https://huggingface.co/dealignai/DeepSeek-V4.1-Flash-1017-UNCENSORED-FP8"
+    }
+  ]
+}

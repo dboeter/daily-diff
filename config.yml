@@ -316,6 +316,7 @@ policy:
     - NIS 2
   feeds:
     # The AI Office's news, on the Commission's digital-strategy site; ~10 items.
+    # Answers HTTP 403 to GitHub's runners (every run 2026-10-22..10-26).
     - name: European Commission
       url: https://digital-strategy.ec.europa.eu/en/rss.xml
       jurisdiction: eu

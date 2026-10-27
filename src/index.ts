@@ -10,10 +10,21 @@
  */
 
 import {
-  type GitHubItem,
+  type HotIssue,
+  type HotIssueRun,
+  HOT_ISSUES_SNAPSHOT_FILE,
+  loadHotIssueSnapshot,
+  nextHotIssueSnapshot,
+  newHotIssueCalls,
+  newHotIssueQueue,
+  hotIssueCallsLine,
   type RepoConfig,
   fetchRecentReleases,
   fetchHotIssues,
+  HOT_ISSUES_STATE_FILE,
+  nextHotIssuesState,
+  hotIssueStateItem,
+  isRepeatHotIssue,
   isPrerelease,
   type GitHubRelease,
   fetchSkillsData,
@@ -38,6 +49,8 @@ import {
 import {
   callLlm,
   generateOr,
+  llmTraceFile,
+  markLlmFallback,
   parseLlmJson,
   saveFile,
   LLM_TOKENS_LISTING,
@@ -47,7 +60,7 @@ import {
   isConnectionError,
 } from "./core/llm.ts";
 import { renderReportBar, withReportBar } from "./reports/markdown.ts";
-import { parseRowSummaries } from "./reports/summarized-table.ts";
+import { numberRows, parseRowSummaries } from "./reports/summarized-table.ts";
 import {
   buildModelsPage,
   buildTrendsReport,
@@ -64,6 +77,7 @@ import { fetchTrendingData, type TrendingData } from "./trending/compose.ts";
 import { fetchModelCatalogDaily, type ModelCatalog } from "./sources/openrouter.ts";
 import { fetchHnData, pageDescription, type HnData, type HnStory } from "./sources/hn.ts";
 import { fetchArxivData, saveArxivState, type ArxivData } from "./sources/arxiv.ts";
+import { loadShownSkills, selectSkillsItems } from "./trending/skills.ts";
 import { loadResearchState, nextResearchState, saveResearchState, weekPapers } from "./trending/research.ts";
 import { fetchPolicyData, loadPolicyState, type PolicyData } from "./policy/items.ts";
 import { isDataLaw } from "./policy/relevance.ts";
@@ -73,6 +87,7 @@ import { fetchHfData, type HfData } from "./sources/huggingface.ts";
 import { fetchDevtoData, type DevtoData } from "./sources/devto.ts";
 import { fetchLobstersData, type LobstersData } from "./sources/lobsters.ts";
 import {
+  carriedStories,
   freshStories,
   isFresh,
   linkKey,
@@ -81,10 +96,14 @@ import {
   nextLog,
   saveSpottedLog,
   selectSpotted,
+  selectTalkedAbout,
   splitPool,
   storiesFrom,
   type SpottedPage,
+  type Story,
 } from "./spotted/pool.ts";
+import { saveItemsFile, sourceCounts, type DroppedReason } from "./core/jev.ts";
+import { loadReportedState, saveReportedState } from "./core/report-state.ts";
 import {
   loadSpottedVerdicts,
   routeStories,
@@ -95,7 +114,7 @@ import {
 import { DATA_SECTION_KEYS, loadConfig, type SectionKey } from "./core/config.ts";
 import { resolvePagesUrl } from "./cli/notify.ts";
 import { toCstDateStr, toUtcStr, isWeeklyRun, sleep } from "./core/date.ts";
-import { LIVE_REPORT_IDS, MSG, PROJECT_SCOPE, REPORTS, reportIssueTitle } from "./core/strings.ts";
+import { LIVE_REPORT_IDS, MSG, PROJECT_SCOPE, REPORTS, reportIssueTitle, SPOTTED } from "./core/strings.ts";
 
 // ---------------------------------------------------------------------------
 // Repo config — loaded from config.yml (throws when a section is missing)
@@ -151,17 +170,22 @@ async function withAnnouncement(r: GitHubRelease): Promise<GitHubRelease> {
 /**
  * Stable releases and hot issues for one project. A failed release fetch is `fetchFailed`, shown as unavailable.
  * `weekSince` (the data report): also the stable releases since then, as `weekReleases`, from the same request.
+ * `hot`: the run's hot-issue inputs (`HotIssueRun`): snapshot, repeats, and the totals it collects.
  */
-async function fetchProject(cfg: RepoConfig, since: Date, weekSince?: Date): Promise<ProjectFetch> {
+async function fetchProject(
+  cfg: RepoConfig,
+  since: Date,
+  hot: HotIssueRun,
+  weekSince?: Date,
+): Promise<ProjectFetch> {
   try {
     const [{ recent, noStableYet }, hotIssues] = await Promise.all([
       fetchRecentReleases(cfg.repo, weekSince ?? since).then(async (r) => ({
         ...r,
         recent: await Promise.all(r.recent.map(withAnnouncement)),
       })),
-      // Search API, rate-limited separately from releases: a failure here must
-      // not discard the releases.
-      fetchHotIssues(cfg.repo, since).catch((err): GitHubItem[] => {
+      // A failed hot-issue fetch must not discard the releases.
+      fetchHotIssues(cfg.repo, since, hot).catch((err): HotIssue[] => {
         console.error(`  [${cfg.id}] hot issues fetch failed: ${err}`);
         return [];
       }),
@@ -193,6 +217,7 @@ async function fetchAllData(
   weekly: boolean,
   /** A Hacker News story out of the Spotted pool: a page showed it or a copy of its link (`isFresh`). */
   hnShown: (story: HnStory) => boolean,
+  hot: HotIssueRun,
 ): Promise<{
   agentFetches: ProjectFetch[];
   infraFetches: ProjectFetch[];
@@ -236,13 +261,15 @@ async function fetchAllData(
     lobstersData,
     modelCatalog,
   ] = await Promise.all([
-    Promise.all(AGENTS.map((cfg) => fetchProject(cfg, daySince))),
-    Promise.all(INFRA_REPOS.map((cfg) => fetchProject(cfg, daySince))),
+    Promise.all(AGENTS.map((cfg) => fetchProject(cfg, daySince, hot))),
+    Promise.all(INFRA_REPOS.map((cfg) => fetchProject(cfg, daySince, hot))),
     Promise.all(
-      DATA_SECTIONS.map((s) => Promise.all(s.repos.map((cfg) => fetchProject(cfg, daySince, weekSince)))),
+      DATA_SECTIONS.map((s) =>
+        Promise.all(s.repos.map((cfg) => fetchProject(cfg, daySince, hot, weekSince))),
+      ),
     ),
     // No fetcher here throws: each returns its empty value (fetchSuccess false) on a failure.
-    weekly ? fetchSkillsData(CLAUDE_SKILLS_REPO) : Promise.resolve(noSkills),
+    weekly ? fetchSkillsData(CLAUDE_SKILLS_REPO, weekSince) : Promise.resolve(noSkills),
     Promise.all([
       fetchSiteContent("anthropic", labsState, toCstDateStr(now)),
       fetchSiteContent("openai", labsState, toCstDateStr(now)),
@@ -253,7 +280,7 @@ async function fetchAllData(
     fetchHnData(hnShown),
     fetchArxivData(toCstDateStr(now)),
     fetchPolicyData(CONFIG.policy, now, toCstDateStr(now)),
-    fetchVendorData(CONFIG.data, now),
+    fetchVendorData(CONFIG.data, now, { trackedProjects: DATA_SECTION_KEYS.flatMap((k) => CONFIG[k].repos) }),
     weekly ? fetchHfData() : Promise.resolve<HfData>({ models: [], fetchSuccess: false }),
     fetchDevtoData(),
     fetchLobstersData(),
@@ -329,6 +356,18 @@ async function main(): Promise<void> {
   // Before the fetch: HN's cut counts only the stories no page has shown.
   const spottedLog = loadSpottedLog();
   const inPool = isFresh(spottedLog, dateStr);
+  const hotIssuesState = loadReportedState(HOT_ISSUES_STATE_FILE);
+  const hotIssueRun: HotIssueRun = {
+    snapshot: loadHotIssueSnapshot(),
+    dateStr,
+    isRepeat: (repo) => isRepeatHotIssue(hotIssuesState, dateStr, repo),
+    seen: {},
+    calls: newHotIssueCalls(),
+    // One fetchHotIssues call per tracked repo (fetchAllData's fetchProject calls).
+    queue: newHotIssueQueue(
+      AGENTS.length + INFRA_REPOS.length + DATA_SECTIONS.flatMap((s) => s.repos).length,
+    ),
+  };
   const {
     agentFetches,
     infraFetches,
@@ -344,9 +383,20 @@ async function main(): Promise<void> {
     devtoData,
     lobstersData,
     modelCatalog,
-  } = await fetchAllData(now, labsState, weekly, (s) => !inPool({ id: `hn:${s.id}`, url: s.url }));
+  } = await fetchAllData(
+    now,
+    labsState,
+    weekly,
+    (s) => !inPool({ id: `hn:${s.id}`, url: s.url }),
+    hotIssueRun,
+  );
+  console.log(`  ${hotIssueCallsLine(hotIssueRun.calls)}`);
   const stories = storiesFrom(hnData, lobstersData, devtoData);
-  const fresh = freshStories(stories, spottedLog, dateStr);
+  const fresh = freshStories(
+    [...stories, ...carriedStories(spottedLog, stories, dateStr)],
+    spottedLog,
+    dateStr,
+  );
 
   // Agent news is matched against the other sources' data, so it waits for them.
   // Agents and tooling in one pass: an item naming 3+ of them is a compatibility list.
@@ -395,34 +445,59 @@ async function main(): Promise<void> {
     cache: spottedVerdicts,
     dateStr,
   });
-  const spottedRows = selectSpotted(unmatched, (s) => {
+  const spottedDropped = new Map<string, DroppedReason>();
+  const pageOf = (s: Story): SpottedPage | null => {
     const topic = routing.topics.get(s.id);
     return topic ? PAGE_OF_TOPIC[topic] : null;
+  };
+  const spottedRows = selectSpotted(unmatched, pageOf, spottedDropped, {
+    dateStr,
+    probabilityOf: (s) => {
+      const topic = routing.topics.get(s.id);
+      return topic ? routing.judgment.verdicts.get(s.id)?.answers.topic.probabilities?.[topic] : undefined;
+    },
   });
   const spottedOf = (page: SpottedPage) => spottedRows.filter((r) => r.page === page);
+  // The Overview's "Also talked about": stories routed to a topic with no page (policy, other).
+  const talkedAbout = selectTalkedAbout(
+    unmatched,
+    (s) => routing.topics.get(s.id),
+    pageOf,
+    dateStr,
+    new Set(spottedRows.map((r) => linkKey(r.url))),
+  );
   // Trends' Most discussed leaves out what today's pages show: a skipped data page shows no Spotted
   // rows (a data page with project news is never skipped, nor a models page with a lab post).
   const discussed = weekly
-    ? mostDiscussed(spottedLog, dateStr, [
-        ...fresh.filter((s) => matchedIds.has(s.id)),
-        ...pool.lab,
-        ...(hasDataNews(dataSections, vendorData, dateStr)
-          ? spottedRows
-          : spottedRows.filter((r) => r.page !== "data")),
-      ])
+    ? mostDiscussed(
+        spottedLog,
+        dateStr,
+        [
+          ...fresh.filter((s) => matchedIds.has(s.id)),
+          ...pool.lab,
+          ...talkedAbout,
+          ...(hasDataNews(dataSections, vendorData, dateStr)
+            ? spottedRows
+            : spottedRows.filter((r) => r.page !== "data")),
+        ],
+        (id) => spottedVerdicts?.items[id]?.answers.topic.choice,
+      )
     : [];
 
-  // 2. The agents report's two sections and every page's Spotted summaries (one call, before the
-  // page builders: their Highlights calls see their Spotted tables); every other
-  // report makes its own calls in its builder.
+  // 2. The agents report's two sections and the story summaries of every page's Spotted rows and
+  // Trends' Most discussed (one call, before the page builders: their Highlights calls see their
+  // story tables); every other report makes its own calls in its builder.
   console.log("  Generating summaries...");
+  // Trends' Most discussed rows (weekly) join the same call, numbered after the Spotted rows.
+  const discussedRows = numberRows(discussed, spottedRows.length);
+  const storyRows = [...spottedRows, ...discussedRows];
   const [agentsSummary, infraSummary, spottedSummaries] = await Promise.all([
     summarizeProjects("agents", agentActivities, dateStr),
     summarizeProjects("infra", infraActivities, dateStr),
-    spottedRows.length
+    storyRows.length
       ? generateOr(
           "spotted-summaries",
-          buildSpottedSummariesPrompt(spottedRows, dateStr),
+          buildSpottedSummariesPrompt(storyRows, dateStr),
           "",
           LLM_TOKENS_LISTING,
         )
@@ -467,11 +542,14 @@ async function main(): Promise<void> {
           buildTrendsReport(
             {
               trending: trendingData,
-              skills: { ...skillsData, repo: CLAUDE_SKILLS_REPO },
+              skills: {
+                ...selectSkillsItems(skillsData, loadShownSkills(CLAUDE_SKILLS_REPO, dateStr), now),
+                repo: CLAUDE_SKILLS_REPO,
+              },
               hf: hfData,
               // Both read the days before today: today's papers and stories are saved after the gate.
               papers: weekPapers(researchState, dateStr),
-              stories: discussed,
+              stories: { rows: discussedRows, summaries: spottedSummaryMap },
               tracked: [...AGENTS, ...INFRA_REPOS, ...DATA_SECTIONS.flatMap((s) => s.repos)],
             },
             utcStr,
@@ -502,16 +580,49 @@ async function main(): Promise<void> {
     ...(savedIds.has("ai-data") ? dataSections.flatMap((s) => s.activities) : []),
   ];
   const dailyShown = new Set([
+    ...talkedAbout.map((s) => s.id),
     ...spottedOf("agents").map((r) => r.id),
     ...(savedIds.has("ai-models") ? [...spottedOf("models"), ...pool.lab].map((s) => s.id) : []),
     ...(savedIds.has("ai-data") ? spottedOf("data").map((r) => r.id) : []),
     ...pageActivities.flatMap((a) => a.news.flatMap((n) => (n.id ? [n.id] : []))),
   ]);
   const shownIds = [...dailyShown, ...(savedIds.has("ai-trends") ? discussed.map((s) => s.id) : [])];
-  saveSpottedLog(nextLog(spottedLog, stories, shownIds, dateStr));
+  const cutIds = [...spottedDropped].flatMap(([id, reason]) => (reason === "cap" ? [id] : []));
+  saveSpottedLog(nextLog(spottedLog, stories, shownIds, dateStr, cutIds));
+  saveReportedState(
+    nextHotIssuesState(
+      hotIssuesState,
+      pageActivities.flatMap((a) => a.hotIssues.map((i) => hotIssueStateItem(a.config.repo, i))),
+      dateStr,
+    ),
+    HOT_ISSUES_STATE_FILE,
+  );
+  // Every repo's listed issues, published page or not, so each has a baseline tomorrow.
+  saveItemsFile(
+    nextHotIssueSnapshot(hotIssueRun.snapshot, hotIssueRun.seen, dateStr),
+    HOT_ISSUES_SNAPSHOT_FILE,
+  );
   if (routing.judgment.nextCache) saveSpottedVerdicts(routing.judgment.nextCache);
   console.log(
-    `  Saved ${saveFile(spottedTraceFile(unmatched, routing, dailyShown), dateStr, "spotted-trace.json")}`,
+    `  Saved ${saveFile(
+      spottedTraceFile(unmatched, routing, dailyShown, {
+        rows: spottedRows,
+        dropped: spottedDropped,
+        talkedAbout: new Set(talkedAbout.map((s) => s.id)),
+        sources: sourceCounts(
+          {
+            hn: hnData.fetchSuccess ? stories.filter((s) => s.source === "hn").length : null,
+            lobsters: lobstersData.fetchSuccess
+              ? stories.filter((s) => s.source === "lobsters").length
+              : null,
+            devto: devtoData.fetchSuccess ? stories.filter((s) => s.source === "devto").length : null,
+          },
+          unmatched.map((s) => s.source),
+        ),
+      }),
+      dateStr,
+      "spotted-trace.json",
+    )}`,
   );
   // Research: the day's top papers for the weekly Trends page; the arXiv cutoff moves on every run.
   if (arxivData.traceFile) {
@@ -530,6 +641,11 @@ async function main(): Promise<void> {
     dateStr,
   );
   console.log(`  Saved ${saveFile(JSON.stringify(comingUp, null, 2), dateStr, "coming-up.json")}`);
+  const talkedFile = talkedAbout.map((t) => ({
+    ...t,
+    counts: SPOTTED.counts(t.source, t.points, t.comments),
+  }));
+  console.log(`  Saved ${saveFile(JSON.stringify(talkedFile, null, 2), dateStr, "talked-about.json")}`);
 
   // The highlights pass reads the bodies, not the link bars.
   const reports: Record<string, string> = Object.fromEntries(saved.map((r) => [r.id, r.content]));
@@ -560,7 +676,7 @@ async function main(): Promise<void> {
   const attemptJson = async (prompt: string): Promise<ReportHighlights> => {
     for (let attempt = 1; attempt <= 2; attempt++) {
       try {
-        return parseLlmJson<ReportHighlights>(await callLlm(prompt));
+        return parseLlmJson<ReportHighlights>(await callLlm(prompt, undefined, "highlights"));
       } catch (err) {
         const tag = attempt < 2 ? "retrying" : "giving up";
         console.error(`  [highlights] attempt ${attempt} failed (${tag}): ${err}`);
@@ -572,6 +688,8 @@ async function main(): Promise<void> {
         }
       }
     }
+    // withFallbackHighlights then writes them from the reports' own Highlights.
+    markLlmFallback("highlights");
     return {};
   };
 
@@ -584,6 +702,7 @@ async function main(): Promise<void> {
 
   const highlightsPath = saveFile(JSON.stringify(highlights, null, 2), dateStr, "highlights.json");
   console.log(`  Saved ${highlightsPath}`);
+  console.log(`  Saved ${saveFile(llmTraceFile(), dateStr, "llm-trace.json")}`);
 
   // 5. Create the GitHub issues
   if (digestRepo) {
