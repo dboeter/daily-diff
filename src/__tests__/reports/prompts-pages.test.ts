@@ -637,6 +637,15 @@ describe("dropNoHighlightRows", () => {
     }
   });
 
+  it("matches GitHub and Hugging Face names as written", () => {
+    const rows = [
+      { name: "deepseek-ai/deepseek-harness", url: "" },
+      { name: "Qwen/Qwen3.6-35B-A3B", url: "" },
+    ];
+    const prose = `## Highlights\n\n${polars}\n- deepseek-ai/deepseek-harness gained 900 stars.\n- Qwen/Qwen3.6-35B-A3B tops likes.`;
+    expect(dropNoHighlightRows(prose, rows, "test")).toBe(`## Highlights\n\n${polars}`);
+  });
+
   it("keeps a bullet that only shares a word with a short name", () => {
     const prose = `## Highlights\n\n- Kilo ships a new CLI.\n- Strixhaven chips arrive.`;
     expect(dropNoHighlightRows(prose, [{ name: "Kilo Code", url: "" }, strix], "test")).toBe(prose);

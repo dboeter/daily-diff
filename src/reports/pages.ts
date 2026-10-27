@@ -287,7 +287,8 @@ export async function buildTrendsReport(
   const body = spliceTables(
     prose === null
       ? `## ${SECTIONS.highlights}\n\n${MSG.summaryFailed}`
-      : signListItems(checkTrendsLinks(dropNoHighlightRows(prose, noHighlight, "trends"))),
+      : // Signed first: a Highlight opened with the sign but no marker is a bullet only after it.
+        checkTrendsLinks(dropNoHighlightRows(signListItems(prose), noHighlight, "trends")),
     `---\n\n${page}\n\n---`,
   );
   const content = assembleReport(
