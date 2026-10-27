@@ -13,7 +13,88 @@
       <height>144</height>
     </image>
     <atom:link href="https://dboeter.github.io/daily-diff/feeds/ai-policy.xml" rel="self" type="application/rss+xml"/>
-    <lastBuildDate>Mon, 26 Oct 2026 04:36:17 +0000</lastBuildDate>
+    <lastBuildDate>Tue, 27 Oct 2026 04:54:10 +0000</lastBuildDate>
+    <item>
+      <title>AI Policy 2026-10-27</title>
+      <link>https://dboeter.github.io/daily-diff/#2026-10-27/ai-policy</link>
+      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-10-27/ai-policy</guid>
+      <pubDate>Tue, 27 Oct 2026 00:00:00 +0000</pubDate>
+      <description>AI Policy 2026-10-27 ⬛ Overview · 🟪 AI Agents · 🟦 AI Models &amp;amp; Labs · 🟧 AI Policy · 🟨 Data Engineering Sources: Tweede Kamer + Binnenlands Bestuur + CSET | 3 new items ranked by Jev relevance | Generated: 2026-10-27 04:50 UTC Highlights The Dutch government has issued a letter to the Tweede Kamer on Bescherming van (muziek)auteurs in het AI-tijdperk, signaling continued focus on copyright implications for generative AI deployments. A Binnenlands Bestuur report notes that the Dutch Algorit...</description>
+      <content:encoded><![CDATA[<h1>AI Policy 2026-10-27</h1>
+<p><a href="https://dboeter.github.io/daily-diff/#2026-10-27">⬛ Overview</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-27/ai-agents">🟪 AI Agents</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-27/ai-models">🟦 AI Models &amp; Labs</a> · <strong>🟧 AI Policy</strong> · <a href="https://dboeter.github.io/daily-diff/#2026-10-27/ai-data">🟨 Data Engineering</a></p>
+<blockquote>
+<p>Sources: Tweede Kamer + Binnenlands Bestuur + CSET | 3 new items ranked by <a href="https://typesafe.ai">Jev</a> relevance | Generated: 2026-10-27 04:50 UTC</p>
+</blockquote>
+<hr>
+<h2>Highlights</h2>
+<p>The Dutch government has issued a letter to the Tweede Kamer on <a href="https://www.tweedekamer.nl/kamerstukken/detail?id=2026Z23028&did=2026D53070">Bescherming van (muziek)auteurs in het AI-tijdperk</a>, signaling continued focus on copyright implications for generative AI deployments. A <a href="https://www.binnenlandsbestuur.nl/digitaal/meer-ondersteuning-nodig-bij-invulling-algoritmeregister">Binnenlands Bestuur</a> report notes that the Dutch Algorithm Register for government algorithms, now over three years old, still requires more support for proper implementation, reflecting ongoing transparency expectations that may extend to private sector practice. CSET has published an explainer on <a href="https://cset.georgetown.edu/article/how-black-box-distillation-works/">How Black-Box Distillation Works</a> to inform policy debates on adversarial distillation and model extraction risks.</p>
+<h2>Netherlands</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Source</th>
+<th align="left">Title</th>
+<th align="left">Stage</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-10-26</td>
+<td align="left">Tweede Kamer</td>
+<td align="left"><a href="https://www.tweedekamer.nl/kamerstukken/detail?id=2026Z23028&did=2026D53070">Bescherming van (muziek)auteurs in het AI-tijdperk</a></td>
+<td align="left"></td>
+<td align="left">The Dutch government submitted a letter to the Tweede Kamer on protecting authors and music authors in the AI era. Organisations deploying AI should monitor for emerging copyright obligations affecting model use and outputs.</td>
+</tr>
+</tbody></table>
+<h2>News &amp; commentary</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Source</th>
+<th align="left">Title</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-10-26</td>
+<td align="left">Binnenlands Bestuur</td>
+<td align="left"><a href="https://www.binnenlandsbestuur.nl/digitaal/meer-ondersteuning-nodig-bij-invulling-algoritmeregister">Meer ondersteuning nodig bij invulling Algoritmeregister</a></td>
+<td align="left">Binnenlands Bestuur reports that the Dutch Algorithm Register for government algorithms requires better implementation support and content evaluation after three years of operation. This signals growing emphasis on algorithmic transparency quality that may extend to private sector deployers.</td>
+</tr>
+<tr>
+<td align="left">2026-10-26</td>
+<td align="left">CSET</td>
+<td align="left"><a href="https://cset.georgetown.edu/article/how-black-box-distillation-works/">How Black-Box Distillation Works</a></td>
+<td align="left">CSET published an analysis of black-box distillation techniques to inform legislation and policy debates on adversarial distillation of proprietary U.S. models. Deployers of U.S. vendor models should note rising policy attention on distillation risks and intellectual property protection.</td>
+</tr>
+</tbody></table>
+<h2>Coming up</h2>
+<p>Deadlines and dates in the next 30 days.</p>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Source</th>
+<th align="left">Item</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-11-09</td>
+<td align="left">Have your say</td>
+<td align="left"><a href="https://ec.europa.eu/info/law/better-regulation/have-your-say/initiatives/19292_en">Articles 75c – 75d AI Act Implementing Act</a></td>
+</tr>
+<tr>
+<td align="left">2026-11-11</td>
+<td align="left">Have your say</td>
+<td align="left"><a href="https://ec.europa.eu/info/law/better-regulation/have-your-say/initiatives/14628_en">Cloud and AI Development Act</a></td>
+</tr>
+</tbody></table>
+<hr>
+<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
+]]></content:encoded>
+    </item>
     <item>
       <title>AI Policy 2026-10-24</title>
       <link>https://dboeter.github.io/daily-diff/#2026-10-24/ai-policy</link>

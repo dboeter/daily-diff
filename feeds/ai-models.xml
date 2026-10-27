@@ -13,7 +13,154 @@
       <height>144</height>
     </image>
     <atom:link href="https://dboeter.github.io/daily-diff/feeds/ai-models.xml" rel="self" type="application/rss+xml"/>
-    <lastBuildDate>Mon, 26 Oct 2026 04:36:17 +0000</lastBuildDate>
+    <lastBuildDate>Tue, 27 Oct 2026 04:54:10 +0000</lastBuildDate>
+    <item>
+      <title>AI Models &amp; Labs 2026-10-27</title>
+      <link>https://dboeter.github.io/daily-diff/#2026-10-27/ai-models</link>
+      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-10-27/ai-models</guid>
+      <pubDate>Tue, 27 Oct 2026 00:00:00 +0000</pubDate>
+      <description>AI Models &amp;amp; Labs 2026-10-27 ⬛ Overview · 🟪 AI Agents · 🟦 AI Models &amp;amp; Labs · 🟧 AI Policy · 🟨 Data Engineering Lab posts: 4 | New models: 4 | Spotted: 6 | Generated: 2026-10-27 04:50 UTC Highlights OpenAI launches GPT-6.1 Terra (mid-tier, 1.1M context) and GPT-6.1 Terra Pro (reasoning mode for complex tasks), both available on OpenRouter with strong screenshot understanding and agentic, coding, and writing capabilities Anthropic files S-1 for IPO, intending to list Class A shares on Na...</description>
+      <content:encoded><![CDATA[<h1>AI Models &amp; Labs 2026-10-27</h1>
+<p><a href="https://dboeter.github.io/daily-diff/#2026-10-27">⬛ Overview</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-27/ai-agents">🟪 AI Agents</a> · <strong>🟦 AI Models &amp; Labs</strong> · <a href="https://dboeter.github.io/daily-diff/#2026-10-27/ai-policy">🟧 AI Policy</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-27/ai-data">🟨 Data Engineering</a></p>
+<blockquote>
+<p>Lab posts: 4 | New models: 4 | Spotted: 6 | Generated: 2026-10-27 04:50 UTC</p>
+</blockquote>
+<hr>
+<h2>Highlights</h2>
+<ul>
+<li>OpenAI launches GPT-6.1 Terra (mid-tier, 1.1M context) and GPT-6.1 Terra Pro (reasoning mode for complex tasks), both available on OpenRouter with strong screenshot understanding and agentic, coding, and writing capabilities</li>
+<li>Anthropic files S-1 for IPO, intending to list Class A shares on Nasdaq under symbol &quot;ANT&quot;</li>
+<li>Security research reveals concerning data-leakage behavior in a popular open-weight model (Cohere) and cross-request KV cache exposure in GLM-5.3 on Cloudflare Workers AI</li>
+<li>OpenAI announces program building scientific understanding with academic communities</li>
+<li>OpenAI publishes preprint claiming the Exponential Time Hypothesis is false</li>
+</ul>
+<hr>
+<h2>Lab announcements</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Lab</th>
+<th align="left">Post</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-10-27</td>
+<td align="left">OpenAI</td>
+<td align="left"><a href="https://openai.com/index/chatgpt-expanding-world-of-work/">Chatgpt Expanding World Of Work</a></td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left">2026-10-27</td>
+<td align="left">OpenAI</td>
+<td align="left"><a href="https://openai.com/index/building-scientific-understanding-with-academic-communities/">Building Scientific Understanding With Academic Communities</a></td>
+<td align="left">OpenAI announces building scientific understanding with academic communities.</td>
+</tr>
+<tr>
+<td align="left">2026-10-26</td>
+<td align="left">Anthropic</td>
+<td align="left"><a href="https://www.anthropic.com/news/s1-sec">Anthropic files S-1 with the SEC for proposed initial public offering</a></td>
+<td align="left">Anthropic filed an S-1 with the SEC for a proposed initial public offering of its Class A common stock and intends to list on the Nasdaq Global Select Market under the symbol &quot;ANT&quot;.</td>
+</tr>
+<tr>
+<td align="left">—</td>
+<td align="left">OpenAI</td>
+<td align="left"><a href="https://openai.com/index/introducing-gpt-6-1-terra/">Introducing Gpt 6 1 Terra</a></td>
+<td align="left">OpenAI introduces GPT-6.1 Terra.</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>New on OpenRouter</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Model</th>
+<th align="left">Listed</th>
+<th align="left">Context</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a href="https://openrouter.ai/openai/gpt-6.1-terra-pro">OpenAI: GPT-6.1 Terra Pro</a> <code>openai/gpt-6.1-terra-pro</code></td>
+<td align="left">2026-10-26</td>
+<td align="left">1.1M</td>
+<td align="left">GPT-6.1 Terra Pro is the same underlying model as GPT-6.1 Terra served with reasoning mode set to pro for higher-quality responses on complex tasks.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://openrouter.ai/openai/gpt-6.1-terra-pro:batch">OpenAI: GPT-6.1 Terra Pro (batch)</a> <code>openai/gpt-6.1-terra-pro:batch</code></td>
+<td align="left">2026-10-26</td>
+<td align="left">1.1M</td>
+<td align="left">GPT-6.1 Terra Pro (batch) is the same underlying model as GPT-6.1 Terra served with reasoning mode set to pro for higher-quality responses on complex tasks.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://openrouter.ai/openai/gpt-6.1-terra">OpenAI: GPT-6.1 Terra</a> <code>openai/gpt-6.1-terra</code></td>
+<td align="left">2026-10-26</td>
+<td align="left">1.1M</td>
+<td align="left">GPT-6.1 Terra is the mid-tier model in OpenAI&#39;s GPT-6.1 series suited for everyday agentic, coding, and writing work and particularly strong at understanding screenshots.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://openrouter.ai/openai/gpt-6.1-terra:batch">OpenAI: GPT-6.1 Terra (batch)</a> <code>openai/gpt-6.1-terra:batch</code></td>
+<td align="left">2026-10-26</td>
+<td align="left">1.1M</td>
+<td align="left">GPT-6.1 Terra (batch) is the mid-tier model in OpenAI&#39;s GPT-6.1 series suited for everyday agentic, coding, and writing work and particularly strong at understanding screenshots.</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>🕵️ Stealth Models on OpenRouter</h2>
+<p>No stealth models listed on OpenRouter today.</p>
+<hr>
+<h2>Spotted</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Story</th>
+<th align="left">Source</th>
+<th align="left">Discussion</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a href="https://www.sec.gov/Archives/edgar/data/2130357/000162828026067168/anthropicpbc-sx1.htm">Anthropic S-1</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50242939">1532 points, 1489 comments</a></td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left"><a href="https://github.com/openai/math/blob/main/preprints/The-Exponential-Time-Hypothesis-is-False-October-25-2026/paper.pdf">The Exponential Time Hypothesis Is False [pdf]</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50251661">437 points, 167 comments</a></td>
+<td align="left">Contribute to openai/math development by creating an account on GitHub.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://cohere.com/blog/concerning-behaviour-popular-open-weight-ai-model">Concerning behavior from a popular open-weight AI model</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50246658">279 points, 113 comments</a></td>
+<td align="left">Discover how untrusted open-weight AI models can potentially leak data, even when self-hosted. Learn the security risks and how to protect your enterprise.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://blog.cloudflare.com/kv-cache-exposure-remediation/">Cross-request KV cache exposure in the GLM-5.3 Workers AI model (155 responses)</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50252159">101 points, 32 comments</a></td>
+<td align="left">A configuration mismatch in GLM 5.3 on Workers AI triggered an SGLang bug that exposed KV cache pages across requests. Here is how we addressed the issue.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://www.tomshardware.com/pc-components/gpus/nvidia-discusses-usd2-000-per-gpu-annual-software-fee-for-running-agents-on-ai-infrastructure-firm-already-charges-more-than-twice-that-amount-for-its-ai-enterprise-software-platform">Nvidia discusses $2k-per-GPU annual fee for software</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50247677">37 points, 20 comments</a></td>
+<td align="left">Nvidia&#39;s reported $2,000 annual fee per GPU could turn its software business into a multibillion-dollar revenue stream, but Huang has yet to reveal when the pricing could take effect.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://nypost.com/2026/10/23/business/wall-street-is-urging-anthropic-openai-to-do-their-ipos-in-a-hurry-heres-why/">Anthropic rushing IPO before AI bubble bursts</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50243343">15 points, 2 comments</a></td>
+<td align="left">—</td>
+</tr>
+</tbody></table>
+<hr>
+<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
+]]></content:encoded>
+    </item>
     <item>
       <title>AI Models &amp; Labs 2026-10-26</title>
       <link>https://dboeter.github.io/daily-diff/#2026-10-26/ai-models</link>

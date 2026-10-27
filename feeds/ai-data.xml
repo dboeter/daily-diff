@@ -13,7 +13,162 @@
       <height>144</height>
     </image>
     <atom:link href="https://dboeter.github.io/daily-diff/feeds/ai-data.xml" rel="self" type="application/rss+xml"/>
-    <lastBuildDate>Mon, 26 Oct 2026 04:36:17 +0000</lastBuildDate>
+    <lastBuildDate>Tue, 27 Oct 2026 04:54:10 +0000</lastBuildDate>
+    <item>
+      <title>Data Engineering 2026-10-27</title>
+      <link>https://dboeter.github.io/daily-diff/#2026-10-27/ai-data</link>
+      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-10-27/ai-data</guid>
+      <pubDate>Tue, 27 Oct 2026 00:00:00 +0000</pubDate>
+      <description>Data Engineering 2026-10-27 ⬛ Overview · 🟪 AI Agents · 🟦 AI Models &amp;amp; Labs · 🟧 AI Policy · 🟨 Data Engineering Generated: 2026-10-27 04:50 UTC | Vendor items: 12 | Projects: 17 | Active today: 3 | Stable releases: 2 | Prereleases (not covered): 0 Highlights − Snowflake Connector for Python v4.8.1 drops Python 3.10 support (minimum now 3.11); Snowflake Python users on 3.10 must upgrade runtime before adopting this version. Azure Databricks workspaces with the compliance security profile ena...</description>
+      <content:encoded><![CDATA[<h1>Data Engineering 2026-10-27</h1>
+<p><a href="https://dboeter.github.io/daily-diff/#2026-10-27">⬛ Overview</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-27/ai-agents">🟪 AI Agents</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-27/ai-models">🟦 AI Models &amp; Labs</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-27/ai-policy">🟧 AI Policy</a> · <strong>🟨 Data Engineering</strong></p>
+<blockquote>
+<p>Generated: 2026-10-27 04:50 UTC | Vendor items: 12 | Projects: 17 | Active today: 3 | Stable releases: 2 | Prereleases (not covered): 0</p>
+</blockquote>
+<hr>
+<h2>Highlights</h2>
+<ul>
+<li>− Snowflake Connector for Python v4.8.1 drops Python 3.10 support (minimum now 3.11); Snowflake Python users on 3.10 must upgrade runtime before adopting this version.</li>
+<li>Azure Databricks workspaces with the compliance security profile enabled will receive Lakeflow Performance Observability by default on 2026-11-25; no action required but expect job-level query metrics and Genie Code Optimize button to appear.</li>
+<li>Snowflake Task Graphs Preview adds atomic deployments, centralized configuration, and upstream-outcome-based run control; teams orchestrating tasks in Snowflake should evaluate for CI/CD workflows.</li>
+<li>Snowflake Pipeline Builder Preview provides a visual designer to orchestrate Notebooks, Python files, ML Jobs, and SQL as version-controlled task graphs; Snowflake-native pipeline authors should test the DCM-backed deployment model.</li>
+<li>BigQuery Conversational Analytics conversation logging reaches GA; organizations using BigQuery data agents can now persist agent conversations to a BigQuery table in the agent&#39;s project.</li>
+</ul>
+<hr>
+<h2>Databricks</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Source</th>
+<th align="left">Item</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-10-26</td>
+<td align="left">Azure Databricks</td>
+<td align="left">🤖 <a href="https://learn.microsoft.com/azure/databricks/release-notes/whats-coming#improved-lakeflow-performance-observability-will-soon-be-available-by-default-for-workspaces-with-the-compliance-security-profile-enabled">Improved Lakeflow Performance Observability will soon be available by default for workspaces with the compliance security profile enabled</a></td>
+<td align="left">Starting November 25, 2026, workspaces with the compliance security profile enabled get Lakeflow Performance Observability by default, providing job-level query metrics, data volume insights, and an Optimize button linking to Genie Code for serverless compute, SQL Warehouses, and Lakeflow Pipelines.</td>
+</tr>
+<tr>
+<td align="left">2026-10-26</td>
+<td align="left">Azure Databricks</td>
+<td align="left">🤖 <a href="https://learn.microsoft.com/azure/databricks/release-notes/product/2026/october#improved-lakeflow-performance-observability-is-now-generally-available">Improved Lakeflow Performance Observability is now generally available</a></td>
+<td align="left">Lakeflow Jobs now expose job-level query performance metrics and data volume insights with an Optimize button that opens Genie Code for query tuning on serverless compute.</td>
+</tr>
+<tr>
+<td align="left">2026-10-26</td>
+<td align="left">Azure Databricks</td>
+<td align="left"><a href="https://learn.microsoft.com/azure/databricks/release-notes/product/2026/october#quickbooks-connector-is-available-in-beta">QuickBooks connector is available in Beta</a></td>
+<td align="left">The managed QuickBooks connector in Lakeflow Connect (Beta) ingests accounting data from QuickBooks Online via OAuth user authorization with incremental ingestion and delete capture.</td>
+</tr>
+<tr>
+<td align="left">2026-10-24</td>
+<td align="left">Azure Databricks</td>
+<td align="left"><a href="https://learn.microsoft.com/azure/databricks/release-notes/product/2026/october#paypal-connector-is-available-in-beta">PayPal connector is available in Beta</a></td>
+<td align="left">The managed PayPal connector in Lakeflow Connect (Beta) ingests payments data from PayPal using OAuth client credentials with incremental ingestion.</td>
+</tr>
+</tbody></table>
+<p><strong>Quiet today:</strong> <a href="https://github.com/delta-io/delta">Delta Lake</a>, <a href="https://github.com/unitycatalog/unitycatalog">Unity Catalog</a>, <a href="https://github.com/mlflow/mlflow">MLflow</a>, <a href="https://github.com/databricks/cli">Databricks CLI</a>, <a href="https://github.com/databricks/dbt-databricks">dbt-databricks</a></p>
+<hr>
+<h2>Snowflake</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Source</th>
+<th align="left">Item</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-10-23</td>
+<td align="left">Snowflake</td>
+<td align="left"><a href="https://docs.snowflake.com/en/release-notes/2026/other/2026-10-23-task-graphs-preview">Oct 23, 2026: Atomic deployments, centralized configuration, and advanced branching for task graphs (Preview)</a></td>
+<td align="left">Preview adds centralized task graph configuration, atomic deployments without pipeline suspension, and upstream-outcome-based task run control.</td>
+</tr>
+<tr>
+<td align="left">2026-10-22</td>
+<td align="left">Snowflake</td>
+<td align="left"><a href="https://docs.snowflake.com/en/release-notes/2026/other/2026-10-22-pipeline-builder-preview">Oct 22, 2026: Pipeline Builder (Preview)</a></td>
+<td align="left">Pipeline Builder (Preview) provides a visual designer to orchestrate Notebooks, Python files, ML Jobs, and SQL as task graphs, with each pipeline as a DCM project enabling planned deployments and version control.</td>
+</tr>
+<tr>
+<td align="left">2026-10-22</td>
+<td align="left">Snowflake</td>
+<td align="left"><a href="https://docs.snowflake.com/en/release-notes/2026/other/2026-10-22-ingress-policies-preview">Oct 22, 2026: Ingress policies (Preview)</a></td>
+<td align="left">Ingress policies (Preview) allow admitting or blocking requests by combining multiple conditions into a single policy.</td>
+</tr>
+<tr>
+<td align="left">2026-10-23</td>
+<td align="left">Snowflake</td>
+<td align="left"><a href="https://docs.snowflake.com/en/release-notes/2026/other/2026-10-23-coco-desktop-v1-22-1">Oct 23, 2026: CoCo Desktop v1.22.1</a></td>
+<td align="left">CoCo Desktop v1.22.1 adds Defer to Production for Snowflake-managed dbt runs and improves session and app management.</td>
+</tr>
+</tbody></table>
+<h3>Snowflake Connector for Python</h3>
+<ul>
+<li><strong>Release</strong>: <a href="https://github.com/snowflakedb/snowflake-connector-python/releases/tag/v4.8.1">v4.8.1</a> fixes <code>write_pandas</code> identifier quoting (Parquet field paths quoted, Iceberg option values escaped, <code>quote_identifiers=False</code> validates unquoted identifiers), drops Python 3.10 support (minimum now 3.11), and upgrades vendored <code>urllib3</code> to 2.8.0.</li>
+</ul>
+<p><strong>Quiet today:</strong> <a href="https://github.com/snowflakedb/snowpark-python">Snowpark Python</a>, <a href="https://github.com/apache/polaris">Apache Polaris</a></p>
+<hr>
+<h2>Azure / Fabric &amp; GCP</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Source</th>
+<th align="left">Item</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-10-26</td>
+<td align="left">BigQuery</td>
+<td align="left">🤖 <a href="https://docs.cloud.google.com/bigquery/docs/release-notes#October_26_2026">Feature: Conversation logging for Conversational analytics in BigQuery is now generally available (GA).</a></td>
+<td align="left">Conversation logging for Conversational Analytics (GA) lets you log data agent conversations to a BigQuery table in the agent&#39;s project.</td>
+</tr>
+<tr>
+<td align="left">2026-10-26</td>
+<td align="left">BigQuery</td>
+<td align="left"><a href="https://docs.cloud.google.com/bigquery/docs/release-notes#October_26_2026">Feature: Python user-defined functions now support volume mounts, which let you access dependency files from Cloud Storage directly from your Python UDF code.</a></td>
+<td align="left">Python UDFs (Preview) now support volume mounts to access dependency files directly from Cloud Storage.</td>
+</tr>
+<tr>
+<td align="left">2026-10-26</td>
+<td align="left">BigQuery</td>
+<td align="left"><a href="https://docs.cloud.google.com/bigquery/docs/release-notes#October_26_2026">Feature: The REGEXP_EXTRACT_GROUPS function produces substrings that match multiple capturing groups in a regular expression.</a></td>
+<td align="left">The new REGEXP_EXTRACT_GROUPS function (Preview) extracts substrings matching multiple capturing groups in a regex.</td>
+</tr>
+<tr>
+<td align="left">2026-10-26</td>
+<td align="left">Microsoft Fabric</td>
+<td align="left"><a href="https://community.fabric.microsoft.com/t5/Fabric-Updates-Blog/Announcing-workspace-monitoring-integration-for-Fabric-Data/ba-p/5376599">Announcing workspace monitoring integration for Fabric Data Warehouse (Preview)</a></td>
+<td align="left">Workspace monitoring integration (Preview) aggregates completed warehouse query events into a WarehouseExecutions table in a monitoring Eventhouse/KQL database, covering warehouses, SQL analytics endpoints, and snapshots with metrics like duration, status, result codes, and CPU time for cross-workspace performance analysis.</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>Open-source stack</h2>
+<h3>Dagster</h3>
+<ul>
+<li><strong>Release</strong>: <a href="https://github.com/dagster-io/dagster/releases/tag/1.13.27">1.13.27</a> removes the default <code>[Dagster Plus] Credit Limit Exceeded</code> alert policy for new organizations, adds a mobile-friendly run details page, and scopes BigQuery Insights cost queries to the dbt invocation.</li>
+</ul>
+<h3>Polars</h3>
+<ul>
+<li><strong>Hot issue</strong>: <a href="https://github.com/pola-rs/polars/issues/30299">#30299</a> reports a regression in Polars 2.0 where streaming <code>select</code> reorders rows when using <code>when(window).then(literal).otherwise(literal)</code>, marked high priority and now closed.</li>
+</ul>
+<p><strong>Quiet today:</strong> <a href="https://github.com/dbt-labs/dbt">dbt Core</a>, <a href="https://github.com/SQLMesh/sqlmesh">SQLMesh</a>, <a href="https://github.com/apache/airflow">Apache Airflow</a>, <a href="https://github.com/dlt-hub/dlt">dlt</a>, <a href="https://github.com/apache/iceberg">Apache Iceberg</a>, <a href="https://github.com/duckdb/duckdb">DuckDB</a>, <a href="https://github.com/trinodb/trino">Trino</a></p>
+<hr>
+<h2>Across platforms</h2>
+<ul>
+<li>AI-assisted SQL optimization: Databricks (GA, Genie Code via Optimize button in Lakeflow Observability for serverless, SQL Warehouses, Lakeflow Pipelines) and BigQuery (GA, Conversational Analytics with conversation logging to BigQuery tables).</li>
+<li>Warehouse query observability: Databricks (GA, Lakeflow Performance Observability with job-level query metrics and data volume insights) and Microsoft Fabric (Preview, Workspace monitoring integration aggregating completed warehouse query events into a WarehouseExecutions KQL table).</li>
+</ul>
+<hr>
+<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
+]]></content:encoded>
+    </item>
     <item>
       <title>Data Engineering 2026-10-26</title>
       <link>https://dboeter.github.io/daily-diff/#2026-10-26/ai-data</link>
