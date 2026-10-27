@@ -30,6 +30,7 @@ import {
   buildDataProsePrompt,
   buildModelsSummariesPrompt,
   modelSources,
+  dropNoHighlightRows,
 } from "./prompts-pages.ts";
 import { generateOr, saveFile, autoGenFooter, LLM_TOKENS_LISTING } from "../core/llm.ts";
 import { saveLabsState, type LabsFetchResult, type LabPost, type LabsState } from "../sources/labs.ts";
@@ -263,12 +264,13 @@ export async function buildTrendsReport(
   ]
     .filter(Boolean)
     .join("\n\n---\n\n");
+  const noHighlight = unsummarizedRows(report, trendingSummaries, hfTableRows, hfSummaries);
   const prose = await generateOr(
     "trends",
     buildTrendsProsePrompt(
       page,
       dateStr,
-      unsummarizedRows(report, trendingSummaries, hfTableRows, hfSummaries),
+      noHighlight.map((r) => r.name),
       trendsFacts({
         radar: report?.radar ?? [],
         tables: (report?.categories ?? []).map((c) => ({
@@ -285,7 +287,8 @@ export async function buildTrendsReport(
   const body = spliceTables(
     prose === null
       ? `## ${SECTIONS.highlights}\n\n${MSG.summaryFailed}`
-      : signListItems(checkTrendsLinks(prose)),
+      : // Signed first: a Highlight opened with the sign but no marker is a bullet only after it.
+        checkTrendsLinks(dropNoHighlightRows(signListItems(prose), noHighlight, "trends")),
     `---\n\n${page}\n\n---`,
   );
   const content = assembleReport(
@@ -770,20 +773,23 @@ export async function buildDataReport(
   const spottedMd = renderSpottedTable(spotted.rows, spotted.summaries);
   // The prose call sees what the reader sees below Highlights, except the over-cap links.
   const sectionsMd = [...groupsMarkdown(groupsWith(proseTables)), spottedMd].filter(Boolean).join("\n\n");
+  const minor = items.filter((i) => i.minor).map((i) => ({ name: i.title, url: i.link }));
   const prose = await generateOr(
     "data-highlights",
     buildDataProsePrompt(
       sectionsMd,
       dateStr,
-      items.filter((i) => i.minor).map((i) => i.title),
+      minor.map((r) => r.name),
     ),
     null,
     LLM_TOKENS_LISTING,
   );
-  const { highlights, acrossPlatforms } =
+  const split =
     prose === null
       ? { highlights: `## ${SECTIONS.highlights}\n\n${MSG.summaryFailed}`, acrossPlatforms: "" }
       : splitProse(prose);
+  const { acrossPlatforms } = split;
+  const highlights = dropNoHighlightRows(split.highlights, minor, "data");
   const lawLinks = dataLaw
     .map(
       (i) =>

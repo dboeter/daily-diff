@@ -225,6 +225,29 @@ describe("buildProjectReportContent", () => {
     expect(result).toContain("**Quiet today:** [GAMMA](https://github.com/org/gamma)");
   });
 
+  it("appends the Release bullet to a released project's section that only has other bullets", () => {
+    const alpha = makeActivity("alpha", { releases: [{ ...stableRelease, body: "- Add `--json` to list" }] });
+    const result = buildProjectReportContent(
+      withAgents({ summary: "## ALPHA\n- **News:** [A story](https://n) about it.", activities: [alpha] }),
+    );
+    expect(result).toContain(
+      "- **News:** [A story](https://n) about it.\n" +
+        "- **Release:** [v1](https://github.com/org/alpha/releases/tag/v1): Add `--json` to list",
+    );
+    expect(result).toContain("Active today: 1 | Stable releases: 1 |");
+  });
+
+  it("adds no Release bullet to a section that shows the release, labelled or by its tag", () => {
+    const alpha = makeActivity("alpha", { releases: [{ ...stableRelease, body: "- Add `--json` to list" }] });
+    for (const summary of [
+      "## ALPHA\n- **Release**: [v1](https://x) adds `--json`.",
+      "## ALPHA\n- [v1](https://x) adds `--json` to list.",
+    ]) {
+      const result = buildProjectReportContent(withAgents({ summary, activities: [alpha] }));
+      expect(result.match(/releases\/tag\/v1|\]\(https:\/\/x\)/g)).toHaveLength(1);
+    }
+  });
+
   describe("backticked tokens in a project section", () => {
     // Hermes Agent on 2026-10-26 (review A11): the two hot issues' titles and the body excerpt the
     // prompt saw (formatItem's first 300 characters), and the section the model wrote.
@@ -495,7 +518,7 @@ describe("renderHfTable", () => {
     expect(md).toContain("| 27B parameters |");
     expect(md).toContain("| Image text to text, 27B parameters |");
     expect(md).toMatch(/\[o\/bare\][^\n]*\| — \|$/m);
-    expect(unsummarizedRows(undefined, new Map(), rows, dashes)).toEqual(["o/bare"]);
+    expect(unsummarizedRows(undefined, new Map(), rows, dashes).map((r) => r.name)).toEqual(["o/bare"]);
   });
 
   it("names the rows that show — for the prose call: no summary, no description", () => {
@@ -529,7 +552,7 @@ describe("renderHfTable", () => {
       onFire: [],
       classifiedBy: "jev",
     } as unknown as TrendingReportData;
-    expect(unsummarizedRows(report, new Map(), hf, new Map())).toEqual(["Strix", "o/b"]);
+    expect(unsummarizedRows(report, new Map(), hf, new Map()).map((r) => r.name)).toEqual(["Strix", "o/b"]);
     expect(
       unsummarizedRows(report, new Map([[1, "Strix tests apps."]]), hf, new Map([[2, "A model."]])),
     ).toEqual([]);

@@ -321,6 +321,7 @@ describe("composeTrendingReport", () => {
   const noCache = (): TrendingVerdicts => ({ items: {} });
   /** Stands in for the history API, which would be asked about a/agent. */
   const zeroGain = async () => 0;
+  const noDescription = async () => "";
 
   it("lets Jev decide scope and Radar, and merges a saved match into one Radar row", async () => {
     const report = await composeTrendingReport(data, DATE, {
@@ -330,6 +331,7 @@ describe("composeTrendingReport", () => {
       history: { repos: {} },
       trendingVerdicts: noCache(),
       fetchGain: zeroGain,
+      fetchDescription: noDescription,
     });
     expect(report.classifiedBy).toBe("jev");
     expect(report.radar.map((r) => r.keys)).toEqual([["openrouter:1", "npm:@kilocode/cli"]]);
@@ -348,6 +350,21 @@ describe("composeTrendingReport", () => {
     ]);
   });
 
+  it("gives a shown Radar row without a description its site's meta description", async () => {
+    const fetchDescription = vi.fn(async () => "Open-source AI coding agent.");
+    const report = await composeTrendingReport(data, DATE, {
+      apiKey: "key",
+      matchState: saved(),
+      ask,
+      history: { repos: {} },
+      trendingVerdicts: noCache(),
+      fetchGain: zeroGain,
+      fetchDescription,
+    });
+    expect(fetchDescription.mock.calls).toEqual([["https://kilocode.ai/docs"]]);
+    expect(report.radar[0]!.description).toBe("Open-source AI coding agent.");
+  });
+
   it("skips matching and saves no state when the match file is unreadable", async () => {
     const report = await composeTrendingReport(data, DATE, {
       apiKey: "key",
@@ -356,6 +373,7 @@ describe("composeTrendingReport", () => {
       history: { repos: {} },
       trendingVerdicts: noCache(),
       fetchGain: zeroGain,
+      fetchDescription: noDescription,
     });
     expect(report.radar.map((r) => r.keys)).toEqual([["openrouter:1"], ["npm:@kilocode/cli"]]);
     expect(report.nextMatches).toBeUndefined();
@@ -369,6 +387,7 @@ describe("composeTrendingReport", () => {
       history: { repos: {} },
       trendingVerdicts: noCache(),
       fetchGain: zeroGain,
+      fetchDescription: noDescription,
     });
     expect(report.classifiedBy).toBe("topics");
     expect(report.traceFile).toBeUndefined();
@@ -384,6 +403,7 @@ describe("composeTrendingReport", () => {
       history: { repos: {} },
       trendingVerdicts: noCache(),
       fetchGain: zeroGain,
+      fetchDescription: noDescription,
     });
     expect(Object.keys(first.nextTrendingVerdicts!.items)).toHaveLength(5);
 
@@ -395,6 +415,7 @@ describe("composeTrendingReport", () => {
       history: { repos: {} },
       trendingVerdicts: first.nextTrendingVerdicts!,
       fetchGain: zeroGain,
+      fetchDescription: noDescription,
     });
     expect(counted).not.toHaveBeenCalled();
     expect(second.classifiedBy).toBe("jev");
@@ -410,6 +431,7 @@ describe("composeTrendingReport", () => {
       history: { repos: {} },
       trendingVerdicts: first.nextTrendingVerdicts!,
       fetchGain: zeroGain,
+      fetchDescription: noDescription,
     });
     expect(keyless.categories).toEqual(first.categories);
   });
@@ -423,6 +445,7 @@ describe("composeTrendingReport", () => {
       history: { repos: {} },
       trendingVerdicts: null,
       fetchGain: zeroGain,
+      fetchDescription: noDescription,
     });
     expect(counted).toHaveBeenCalledTimes(5);
     expect(report.nextTrendingVerdicts).toBeUndefined();

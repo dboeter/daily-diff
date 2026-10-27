@@ -20,6 +20,7 @@ import {
 } from "../sources/openrouter.ts";
 import type { LabPost } from "../sources/labs.ts";
 import type { TrendingReportData } from "../trending/rank.ts";
+import type { NoHighlightRow } from "./prompts-pages.ts";
 import { hfDescription, hfKeys, type HfRow } from "../sources/huggingface.ts";
 import type { PolicyItem } from "../policy/items.ts";
 import type { KeptVendorItem } from "../data/relevance.ts";
@@ -112,11 +113,11 @@ const covers = (summary: string, a: ProjectActivity) =>
 const ROUTINE_ITEM = /\b(bump(s|ed)?|deps?|dependenc(y|ies)|dependabot|chore|renovate)\b/i;
 
 /**
- * The code-written section of a project with a stable release the model left without a bullet:
+ * The code-written Release bullet of a project with a stable release the model left without one:
  * the newest release, linked, and its first 3 non-routine note items. On 2026-10-26 Agent Deck
  * v1.16.34 (about 20 user-facing items) rendered as a bare "(no reportable changes)".
  */
-export function releaseFallbackSection(a: ProjectActivity): string {
+function releaseBullet(a: ProjectActivity): string {
   const r = a.releases[0]!;
   const items = (r.body ?? "")
     .split("\n")
@@ -134,7 +135,27 @@ export function releaseFallbackSection(a: ProjectActivity): string {
     .map((t) => (t.length > 120 ? `${t.slice(0, 119).trimEnd()}…` : t));
   const title = r.name && r.name !== r.tag_name ? ` (${r.name})` : "";
   const link = `[${r.tag_name}](https://github.com/${a.config.repo}/releases/tag/${r.tag_name})${title}`;
-  return `## ${a.config.name}\n- **Release:** ${link}${items.length ? `: ${items.join("; ")}` : ""}`;
+  return `- **Release:** ${link}${items.length ? `: ${items.join("; ")}` : ""}`;
+}
+
+/** The code-written section of a project with a stable release the model left without a bullet. */
+export const releaseFallbackSection = (a: ProjectActivity): string =>
+  `## ${a.config.name}\n${releaseBullet(a)}`;
+
+/**
+ * Whether a normalized section (`boldLabelColonInside`) shows the project's release: a
+ * `**Release:**` bullet, or a bullet naming one of its release tags without the label.
+ */
+const showsRelease = (section: string, a: ProjectActivity): boolean =>
+  /^\s*[-*]\s+\*\*Release:\*\*/m.test(section) ||
+  section.split("\n").some((l) => /^\s*[-*]\s/.test(l) && a.releases.some((r) => l.includes(r.tag_name)));
+
+/** A covered section of a project with a stable release, with the Release bullet the model left out appended. */
+function withReleaseBullet(section: string, g: ProjectGroup): string {
+  const a = g.activities.find((p) => sectionHeading(p.config.name).test(section));
+  return a && a.releases.length > 0 && !showsRelease(section, a)
+    ? `${section}\n${releaseBullet(a)}`
+    : section;
 }
 
 /**
@@ -154,7 +175,8 @@ function checkProjectTokens(section: string, g: ProjectGroup): string {
 /**
  * A group's projects as rendered: the model's summary without text outside a `##` section and
  * without a project section that has no bullet (both are absence notes the prompt forbids), plus a
- * code section for each project with a stable release the model did not cover. Each project
+ * code section for each project with a stable release the model did not cover, and a code Release
+ * bullet appended to a covered section that does not show its release. Each project
  * section's backticked tokens are checked against the project's block in the prompt
  * (`checkCodeTokens`). `quiet` is every other checked project without a section; after a failed
  * call (MSG.summaryFailed) the data decides.
@@ -172,7 +194,7 @@ function groupProjects(g: ProjectGroup): { body: string; quiet: ProjectActivity[
           (chunk) =>
             !g.activities.some((a) => sectionHeading(a.config.name).test(chunk) && !covers(chunk, a)),
         )
-        .map((chunk) => boldLabelColonInside(checkProjectTokens(chunk.trim(), g)));
+        .map((chunk) => withReleaseBullet(boldLabelColonInside(checkProjectTokens(chunk.trim(), g)), g));
   const body = [...kept, ...fallback.map(releaseFallbackSection)].filter(Boolean).join("\n\n");
   const active = failed ? g.activities.filter(hasActivity) : [...covered, ...fallback];
   return { body, quiet: g.activities.filter((a) => !active.includes(a) && !a.fetchFailed) };
@@ -464,20 +486,21 @@ export const policyTitleLabel = (title: string): string =>
 /**
  * The Radar, category and Hugging Face rows whose cell shows "—": no summary
  * and no description to fall back on. The page says nothing about them, so
- * the prose call is told they make no Highlight (Strix on 2026-10-26).
+ * they make no Highlight: the prose call is told, and `dropNoHighlightRows`
+ * drops one it writes anyway (Strix on 2026-10-26).
  */
 export function unsummarizedRows(
   report: TrendingReportData | undefined,
   summaries: Map<number, string>,
   hf: Numbered<HfRow>[] = [],
   hfSummaries: Map<number, string> = new Map(),
-): string[] {
+): NoHighlightRow[] {
   const radar = report?.radar ?? [];
   const tables = report?.categories.flatMap((c) => c.rows) ?? [];
   return [
-    ...radar.filter((r) => summaryText(summaries, r) === "—").map((r) => r.name),
-    ...tables.filter((r) => summaryText(summaries, r) === "—").map((r) => r.fullName),
-    ...hf.filter((r) => hfSummaryText(hfSummaries, r) === "—").map((r) => r.id),
+    ...radar.filter((r) => summaryText(summaries, r) === "—").map((r) => ({ name: r.name, url: r.url })),
+    ...tables.filter((r) => summaryText(summaries, r) === "—").map((r) => ({ name: r.fullName, url: r.url })),
+    ...hf.filter((r) => hfSummaryText(hfSummaries, r) === "—").map((r) => ({ name: r.id, url: r.url })),
   ];
 }
 

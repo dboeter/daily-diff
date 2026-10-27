@@ -231,6 +231,21 @@ describe("buildTrendsReport", () => {
     expect(noPapers).toContain("| An essay on Y. |");
   });
 
+  it('drops a Highlight about a row showing "—", a signed one without a list marker too', async () => {
+    generateBody.mockReset();
+    generateBody.mockImplementation(async (p: string) =>
+      isTrendingSummaries(p)
+        ? "2: Fast is a coding agent."
+        : isProse(p)
+          ? "## Highlights\n\n− Kilo lost half its users.\n− o/fast loses its free tier.\n\n<!-- tables -->\n\n## Signals\n\nS."
+          : reply(p),
+    );
+    const radar = [{ ...data.report!.radar[0]!, description: "" }];
+    const content = (await build({ trending: { ...data, report: { ...data.report!, radar } } }))!.content;
+    expect(content).not.toContain("Kilo lost");
+    expect(content).toContain("o/fast loses its free tier.");
+  });
+
   it("makes four calls in the first round, then the prose call over the rendered page", async () => {
     generateBody.mockReset();
     generateBody.mockImplementation(async (p: string) => reply(p));

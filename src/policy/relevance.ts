@@ -209,12 +209,7 @@ const GATE_MIN_PROBABILITY = 0.5;
 const US_IMPACT_LEVEL = 1;
 /** Elsewhere: only major events (spec). */
 const OTHER_SIGNIFICANCE_LEVEL = 2;
-/**
- * Under this confidence a US impact score is unknown, not low, and a notable
- * item (significance level 1 or more) passes the impact gate. On 2026-10-26 the
- * DHS order removing DeepSeek from federal systems, relevance 0.85, was dropped
- * on impact 0.48 at confidence 0.28. LOW_CONFIDENCE is the data report's bar too.
- */
+/** Significance level 1 ("Notable"): a US item at it keeps an impact Jev is unsure of (`unknownImpact`). */
 const NOTABLE_LEVEL = 1;
 
 const isUs = (j: Jurisdiction): boolean => j === "us_federal" || j === "us_states";
@@ -232,6 +227,11 @@ function reachesLevel(a: ScoreAnswer, level: number): boolean {
   return p >= GATE_MIN_PROBABILITY;
 }
 
+/**
+ * Under LOW_CONFIDENCE (the data report's bar too) a US impact score is unknown, not low, and a
+ * notable item (significance level 1 or more) passes the impact gate. On 2026-10-26 the DHS order
+ * removing DeepSeek from federal systems, relevance 0.85, was dropped on impact 0.48 at confidence 0.28.
+ */
 const unknownImpact = (a: PolicyAnswers): boolean =>
   a.impact!.confidence !== undefined &&
   a.impact!.confidence < LOW_CONFIDENCE &&

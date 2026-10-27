@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { SECTIONS, TRENDS_REPORT } from "../../core/strings.ts";
+import { NO_HIGHLIGHT_NOTE, SECTIONS, TRENDS_REPORT } from "../../core/strings.ts";
 import type { ReleaseRow } from "../../reports/pages.ts";
 import {
   buildDataProsePrompt,
@@ -18,6 +18,7 @@ import {
   forcedHighlightReports,
   withFallbackHighlights,
   restatesLead,
+  dropNoHighlightRows,
 } from "../../reports/prompts-pages.ts";
 import { TABLES_MARKER, numberRows, parseRowSummaries } from "../../reports/summarized-table.ts";
 import {
@@ -611,5 +612,48 @@ describe("buildTrendsProsePrompt", () => {
     expect(p).toContain("come only from the facts block, quoted as given");
     expect(p).toContain("opens with one fact from the facts block");
     expect(buildTrendsProsePrompt("page", "2026-10-26")).not.toContain("Facts computed in code");
+  });
+});
+
+describe("dropNoHighlightRows", () => {
+  // The 2026-10-26 data page's minor row (D5) and Strix, the Trends Radar row showing "—".
+  const minor = {
+    name: "Custom error messages for feature policy rules",
+    url: "https://docs.snowflake.com/d5",
+  };
+  const strix = { name: "Strix", url: "https://strix.ai" };
+  const polars = "- Polars py-2.1.0 disallows mixed arithmetic.";
+
+  it("drops a bullet linking, naming or restating a no-Highlight row, and keeps the rest", () => {
+    for (const bullet of [
+      "- Snowflake [adds a setting](https://docs.snowflake.com/d5) for policies.",
+      "- strix tests web apps for vulnerabilities.",
+      "- Snowflake policy rules now take custom error messages.",
+    ]) {
+      const prose = `## Highlights\n\n${polars}\n${bullet}\n  continued.\n${TABLES_MARKER}\n- Strix in a Signal.`;
+      expect(dropNoHighlightRows(prose, [minor, strix], "test")).toBe(
+        `## Highlights\n\n${polars}\n${TABLES_MARKER}\n- Strix in a Signal.`,
+      );
+    }
+  });
+
+  it("matches GitHub and Hugging Face names as written", () => {
+    const rows = [
+      { name: "deepseek-ai/deepseek-harness", url: "" },
+      { name: "Qwen/Qwen3.6-35B-A3B", url: "" },
+    ];
+    const prose = `## Highlights\n\n${polars}\n- deepseek-ai/deepseek-harness gained 900 stars.\n- Qwen/Qwen3.6-35B-A3B tops likes.`;
+    expect(dropNoHighlightRows(prose, rows, "test")).toBe(`## Highlights\n\n${polars}`);
+  });
+
+  it("keeps a bullet that only shares a word with a short name", () => {
+    const prose = `## Highlights\n\n- Kilo ships a new CLI.\n- Strixhaven chips arrive.`;
+    expect(dropNoHighlightRows(prose, [{ name: "Kilo Code", url: "" }, strix], "test")).toBe(prose);
+  });
+
+  it("leaves NO_HIGHLIGHT_NOTE when every bullet goes, which highlights.json does not restate", () => {
+    const page = dropNoHighlightRows("## Highlights\n\n- Strix is up 40%.", [strix], "test");
+    expect(page).toBe(`## Highlights\n\n- ${NO_HIGHLIGHT_NOTE}`);
+    expect(withFallbackHighlights({}, { "ai-data": page }, ["ai-data"])).toEqual({});
   });
 });
