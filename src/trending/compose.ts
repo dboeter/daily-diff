@@ -6,6 +6,7 @@
  */
 
 import { fetchOpenRouterData, type OpenRouterData } from "../sources/openrouter.ts";
+import { pageDescription } from "../sources/hn.ts";
 import { fetchNpmData, type NpmData } from "./npm.ts";
 import { fetchWeeklyStarGain, GitHubApiError, githubGet, searchSlot } from "../core/github.ts";
 import {
@@ -456,6 +457,28 @@ export interface ComposeDeps {
   /** Null (unreadable file): every item is asked and the file is left as it is. */
   trendingVerdicts: TrendingVerdicts | null;
   fetchGain: (repo: string) => Promise<number>;
+  /** A page's meta description, "" on failure: a shown Radar row without a description borrows its site's. */
+  fetchDescription: (url: string) => Promise<string>;
+}
+
+/** Hosts whose rows already carry their registry's description: their page's meta adds nothing. */
+const REGISTRY_HOSTS = new Set(["github.com", "www.npmjs.com", "npmjs.com"]);
+
+/**
+ * The shown Radar rows, a row without a description given its site's meta description, so it gets a
+ * summary instead of "—" (Strix, an OpenRouter app, on 2026-10-26). Only the shown rows are fetched.
+ */
+async function withSiteDescriptions(
+  radar: TrendingReportData["radar"],
+  fetchDescription: ComposeDeps["fetchDescription"],
+): Promise<TrendingReportData["radar"]> {
+  return Promise.all(
+    radar.map(async (r) => {
+      if (r.description || !URL.canParse(r.url) || REGISTRY_HOSTS.has(new URL(r.url).hostname)) return r;
+      const description = await fetchDescription(r.url);
+      return description ? { ...r, description } : r;
+    }),
+  );
 }
 
 /**
@@ -474,6 +497,7 @@ export async function composeTrendingReport(
     history = loadStarHistory(),
     trendingVerdicts = loadTrendingVerdicts(),
     fetchGain = fetchWeeklyStarGain,
+    fetchDescription = pageDescription,
   } = deps;
   // Every GitHub row is classified: the new ones are Radar candidates, the rest
   // category rows. Classified before the gains are complete, so the history API
@@ -533,7 +557,7 @@ export async function composeTrendingReport(
   }
 
   const dropped = new Map<string, DroppedReason>();
-  const report = selectTrendingReport(
+  const selected = selectTrendingReport(
     githubRows,
     candidates,
     classifications,
@@ -542,6 +566,7 @@ export async function composeTrendingReport(
     lastWeekKeys(history, dateStr),
     dropped,
   );
+  const report = { ...selected, radar: await withSiteDescriptions(selected.radar, fetchDescription) };
   console.log(
     `  [trending] Radar: ${report.radar.length} rows | ` +
       (report.categories.map((c) => `${c.category}: ${c.rows.length}`).join(", ") || "no category rows"),

@@ -9,7 +9,15 @@
 import type { LabPost } from "../sources/labs.ts";
 import type { summaryRows } from "../trending/rank.ts";
 import type { OpenRouterData, OpenRouterNewModel } from "../sources/openrouter.ts";
-import { DATA_REPORT, GOING_AWAY, MODELS_PAGE, MSG, SECTIONS, SPOTTED } from "../core/strings.ts";
+import {
+  DATA_REPORT,
+  GOING_AWAY,
+  MODELS_PAGE,
+  MSG,
+  NO_HIGHLIGHT_NOTE,
+  SECTIONS,
+  SPOTTED,
+} from "../core/strings.ts";
 import { TABLES_MARKER, rowList, summaryLine, summaryOutputRule, type Numbered } from "./summarized-table.ts";
 import {
   goingAwayRule,
@@ -28,6 +36,7 @@ import type { ResearchPaper } from "../trending/research.ts";
 import type { PolicyItem } from "../policy/items.ts";
 import type { KeptVendorItem } from "../data/relevance.ts";
 import { signHighlight } from "./markdown.ts";
+import { escapeRegex } from "./project-news.ts";
 import { siteOf, type StoryRow } from "../spotted/pool.ts";
 
 /** Which sources Trends' Models section covers: no call when neither has data. */
@@ -483,6 +492,60 @@ export function restatesLead(highlight: string, lead: string): boolean {
   return words.length > 0 && words.filter((w) => inLead.has(w)).length / words.length >= LEAD_MATCH_MIN;
 }
 
+/** A table row the page shows but that makes no Highlight: a `minor` vendor row, a Trends row showing "—". */
+export interface NoHighlightRow {
+  name: string;
+  /** "" when the row has no link. */
+  url: string;
+}
+
+// A title of at least this many words (3+ letters) also matches a bullet restating most of them.
+const RESTATED_NAME_MIN_WORDS = 4;
+
+/**
+ * The Highlights before TABLES_MARKER (the whole text without one) without a bullet about a
+ * `rows` entry: one linking its URL, naming it (word-bounded), or restating most of a longer
+ * name's words (`restatesLead`). The prompt names these rows as no Highlight; this is the net for
+ * a model that writes one anyway. Each drop is logged; when every bullet goes, NO_HIGHLIGHT_NOTE
+ * stands in, as an empty section would send highlights.json to the page body.
+ */
+export function dropNoHighlightRows(prose: string, rows: readonly NoHighlightRow[], tag: string): string {
+  if (!rows.length) return prose;
+  const at = prose.indexOf(TABLES_MARKER);
+  const head = at === -1 ? prose : prose.slice(0, at);
+  const about = (bullet: string) =>
+    rows.some(
+      (r) =>
+        (r.url !== "" && bullet.includes(`](${r.url})`)) ||
+        new RegExp(`(^|[^\\p{L}\\p{N}])${escapeRegex(r.name)}($|[^\\p{L}\\p{N}])`, "iu").test(bullet) ||
+        (leadWords(r.name).size >= RESTATED_NAME_MIN_WORDS && restatesLead(r.name, bullet)),
+    );
+  // A bullet is its marker line and the indented lines continuing it.
+  const lines = head.split("\n");
+  const bullets: number[][] = [];
+  let open: number[] | null = null;
+  lines.forEach((line, n) => {
+    if (/^\s*(?:[-*]|\d+\.)\s/.test(line)) bullets.push((open = [n]));
+    else if (open && /^\s+\S/.test(line)) open.push(n);
+    else open = null;
+  });
+  const textOf = (b: number[]) => b.map((n) => lines[n]!.trim()).join(" ");
+  const dropped = bullets.filter((b) => about(textOf(b)));
+  if (!dropped.length) return prose;
+  for (const b of dropped)
+    console.log(`  [${tag}] Highlight about a no-Highlight row dropped: ${textOf(b).slice(0, 80)}`);
+  const gone = new Set(dropped.flat());
+  // The note takes the first dropped bullet's place when none is left.
+  const kept = lines.flatMap((l, n) =>
+    !gone.has(n)
+      ? [l]
+      : dropped.length === bullets.length && n === dropped[0]![0]
+        ? [`- ${NO_HIGHLIGHT_NOTE}`]
+        : [],
+  );
+  return `${kept.join("\n")}${at === -1 ? "" : prose.slice(at)}`;
+}
+
 /**
  * The highlights as saved: each one's going-away sign normalized (`signHighlight`), the one
  * entry that restates a signed page lead signed too, with a
@@ -510,7 +573,8 @@ export function withFallbackHighlights(
     const content = reportContents[id];
     if (out[id]?.length || !content) continue;
     const line = firstHighlight(content);
-    if (line) out[id] = [line];
+    // A page whose every Highlight code dropped has nothing to restate.
+    if (line && line !== NO_HIGHLIGHT_NOTE) out[id] = [line];
   }
   return out;
 }

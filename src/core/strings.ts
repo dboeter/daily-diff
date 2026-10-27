@@ -14,6 +14,12 @@ export const MSG = {
   skillsFailed: "⚠️ Skills summary generation failed.",
 } as const;
 
+/**
+ * A page's only Highlight when code dropped every bullet the model wrote (`dropNoHighlightRows`).
+ * Not in MSG: highlights.json reads a MSG notice as a failed call and falls back to the page body.
+ */
+export const NO_HIGHLIGHT_NOTE = "No item stands out today.";
+
 // ---------------------------------------------------------------------------
 // Report headers & labels (used in markdown.ts, index.ts)
 // ---------------------------------------------------------------------------

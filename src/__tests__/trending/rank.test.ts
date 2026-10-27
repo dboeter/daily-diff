@@ -1206,6 +1206,7 @@ describe("composeTrendingReport with star history", () => {
         history: h,
         trendingVerdicts: { items: {} },
         fetchGain: noFetch,
+        fetchDescription: async () => "",
       },
     );
     expect(cells(report)).toEqual([
@@ -1245,6 +1246,7 @@ describe("composeTrendingReport with star history", () => {
         history: h,
         trendingVerdicts: { items: {} },
         fetchGain: noFetch,
+        fetchDescription: async () => "",
       },
     );
     expect(report.radar.map((r) => r.signals[0])).toEqual([
@@ -1273,6 +1275,7 @@ describe("composeTrendingReport with star history", () => {
         history: h,
         trendingVerdicts: { items: {} },
         fetchGain: noFetch,
+        fetchDescription: async () => "",
       },
     );
     const rows = report.categories.flatMap((c) => c.rows);
@@ -1313,6 +1316,7 @@ describe("composeTrendingReport with star history", () => {
         history: hist({ "snap/agent": [["2026-09-28", 8_000]] }),
         trendingVerdicts: { items: {} },
         fetchGain,
+        fetchDescription: async () => "",
       },
     );
     expect(asked).toEqual(["new/agent", "big/agent", "small/agent"]);
@@ -1344,6 +1348,7 @@ describe("composeTrendingReport with star history", () => {
       history: hist({}),
       trendingVerdicts: { items: {} },
       fetchGain,
+      fetchDescription: async () => "",
     });
     expect(fetchGain.mock.calls.map(([repo]) => repo)).toEqual(["a/agent", "b/agent"]);
     expect(logs).toHaveBeenCalledWith(
