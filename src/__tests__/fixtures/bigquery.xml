@@ -7,7 +7,28 @@
   <author>
     <name>Google Cloud Platform</name>
   </author>
-  <updated>2026-10-16T00:00:00-07:00</updated>
+  <updated>2026-10-27T00:00:00-07:00</updated>
+
+  <entry>
+    <title>October 27, 2026</title>
+    <id>tag:google.com,2016:bigquery-release-notes#October_27_2026</id>
+    <updated>2026-10-27T00:00:00-07:00</updated>
+    <link rel="alternate" href="https://docs.cloud.google.com/bigquery/docs/release-notes#October_27_2026"/>
+    <content type="html"><![CDATA[<h3>Feature</h3>
+<p>The <a href="https://docs.cloud.google.com/bigquery/docs/data-engineering-agent-pipelines">Data Engineering Agent</a>
+now integrates with Google Drive, letting you provide Google Sheets, CSV, or
+JSONL files from Google Drive as inputs for your pipelines. This feature is
+<a href="https://cloud.google.com/products#product-launch-stages">generally available</a> (GA).</p>
+<h3>Feature</h3>
+<p>Python user-defined functions now support volume mounts, which let you access
+dependency files from Cloud Storage directly from your Python UDF code. This
+feature is in <a href="https://cloud.google.com/products#product-launch-stages">Preview</a>.</p>
+<h3>Feature</h3>
+<p>Conversation logging for Conversational analytics in BigQuery is now
+<a href="https://cloud.google.com/products#product-launch-stages">generally available</a> (GA).</p>
+]]>
+    </content>
+  </entry>
 
   <entry>
     <title>October 16, 2026</title>

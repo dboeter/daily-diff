@@ -1,6 +1,6 @@
 # 10: BigQuery rows show their release stage
 
-Status: ready-for-agent
+Status: done
 Blocked by: None (can start immediately)
 Findings: D2 [medium]; low D3 — see `../review.md`, `../ai-data.md`
 
@@ -8,11 +8,20 @@ Findings: D2 [medium]; low D3 — see `../review.md`, `../ai-data.md`
 
 Every vendor row shows its release stage, from the source. Databricks, Snowflake and Fabric titles carry "(GA)" or "(Preview)"; BigQuery's do not. On 2026-10-28 the BigQuery note said "This feature is generally available (GA)" in its second sentence, but the Item cell holds only the first sentence and the summaries prompt forbids status words, so the row never showed GA; Highlight 3 said "released" and Across platforms said "GA" without either word in its input. On 10-27 the same source rendered "(GA)". The Item cell is also a whole "Feature: …" sentence that the Summary repeats (D3).
 
-- [ ] Code reads the stage from a BigQuery note's body (GA, Preview) and shows it in the Item cell as the other vendors' titles do
-- [ ] The Item cell is a short label without the "Feature:" prefix; the Summary adds what the label does not say
-- [ ] The prose call sees the stage it may restate
-- [ ] A test on the 2026-10-27 Drive note: the row shows GA
+- [x] Code reads the stage from a BigQuery note's body (GA, Preview) and shows it in the Item cell as the other vendors' titles do
+- [x] The Item cell is a short label without the "Feature:" prefix; the Summary adds what the label does not say
+- [x] The prose call sees the stage it may restate
+- [x] A test on the 2026-10-27 Drive note: the row shows GA
 
 ## Comments
 
 From the review: `src/data/bigquery.ts:33` (title = `<type>: <first sentence>`); `src/reports/prompts-pages.ts:315` (no status words, on the assumption the title carries them); the prose call gets the rendered rows (`src/reports/pages.ts:774-783`); `vendorTitleLabel` (`src/reports/markdown.ts:574`) strips only dates.
+
+**Decide before merge: already-reported BigQuery notes come back once.** The verdict cache is keyed by `id`, which stays as before (`<anchor>#<type>: <first sentence>`, tested). But the data state is not: `stateId` (`src/data/vendors.ts`) keys a note without a stage or `stable_id` on `dedupeKey`, the lowercased title + date (`digests/data-state.json` holds e.g. `"feature: you can copy tables across regions.|2026-10-15"`). The new title is a new key, so on the first run after merge every BigQuery note dated in the last 7 days (the age limit) that an earlier report showed is new again and shown a second time. Nothing in `bigquery.ts` can prevent that: `VendorNote` has no alias field and `stableId` comes from the feed config. Options: (a) accept one repeat of up to 7 days of BigQuery rows; (b) set `stable_id: true` on the BigQuery feed in `config.yml`, so the state keys on the unchanged `id` and `asStateItem` adds `dedupeKey` as an alias; but the alias is built from the new title, so the old keys still don't match and the repeat happens anyway, unless (c) `VendorNote` gains an optional `aliases` that `asStateItem` passes through, which `bigquery.ts` fills with the old `"<type>: <first sentence>"` title + date. (c) is the fix with no repeat; it touches `vendors.ts`, outside this node's files.
+
+- Cause: `parseBigQueryNotes` titled a note `"<type>: <first sentence>"`. BigQuery states the stage in a later sentence ("This feature is generally available (GA)."), so the title never carried it, and the summaries prompt forbids status words in the Summary, so no cell did.
+- Changed: `src/data/bigquery.ts`. `parseBigQueryNotes` titles a note with `noteLabel`: the first sentence without the type prefix, without a trailing stage phrase (`STAGE_PHRASE_RE`: "is now generally available (GA)", so "(GA)" is not doubled), cut before a trailing clause (`TRAILING_CLAUSE_RE`: ", letting/which/allowing/enabling/so that …", which the Summary carries) and its final period or colon, then " (GA)" or " (Preview)" from `stageOf` over the whole note's text (GA wins). The id is still built from the old title form, so verdicts stay cached. Drive note: "The Data Engineering Agent now integrates with Google Drive (GA)". `vendors.ts`'s `STATUS_RE` is module-private, hence the local regex.
+- Prose call and `vendorTitleLabel`: no change needed. The Item cell renders the title through `vendorTitleLabel`, and the prose call gets the rendered rows, so both now see "(GA)". The summaries prompt's "Do not repeat the title or its status words" (`prompts-pages.ts:315`) is now right for BigQuery too. Caveat: `policyTitleLabel` cuts a title at 200 chars, so a first sentence over ~195 chars with no clause to cut (AI.CHUNK_DOCUMENT on 10-21 is ~190) can lose its "(GA)"; not seen yet.
+- Tests (`src/__tests__/data/bigquery.test.ts`, fixture `bigquery.xml` gains an `October_27_2026` entry modelled on the Drive note plus a Preview note and a note whose first sentence carries "(GA)"): the existing Oct 15 id is unchanged and its title is "You can copy tables across regions (GA)"; the Drive note's title ends "(GA)" without "Feature:" and its id is the old form; a Preview note gets "(Preview)"; a stage phrase is replaced, not doubled; a note with no stage gets no suffix. The box 4 test checks the parsed title, which `vendorTitleLabel` renders as is.
+- Pre-existing, left alone: `stateId`'s comment in `vendors.ts` says "a BigQuery note's id moves when a note is added before it"; the id has been anchor + title, not the index, for a while.
+- Docs: AGENTS.md, Data engineering → Vendor feeds → **Tables**: "The Item cell shows the title without the date Snowflake opens it with (`vendorTitleLabel`), …" → "The Item cell shows the title without the date Snowflake opens it with (`vendorTitleLabel`); a BigQuery title is its note's first sentence without the type prefix, plus the stage its text states, "(GA)" or "(Preview)" (`noteLabel`, `src/data/bigquery.ts`), …". **State key**: "title + date (Databricks lists a note under two guids), or the guid on a `stable_id: true` feed." stays true; add "A BigQuery note's verdict id stays `<anchor>#<type>: <first sentence>`, its title before 2026-10-28." (and the outcome of the decision above).
