@@ -144,9 +144,8 @@ async function main(): Promise<void> {
   const state = loadResearchState();
   const ids = entriesBefore(state, cutoff).map(([id]) => id);
   const abstracts = await fetchAbstracts(ids);
-  console.log(
-    `Re-judging ${ids.length} entries saved before ${cutoff} (${abstracts.size} full abstracts)...`,
-  );
+  const full = ids.filter((id) => abstracts.has(id)).length;
+  console.log(`Re-judging ${ids.length} entries saved before ${cutoff} (${full} full abstracts)...`);
   const result = await rejudgeResearch(state, cutoff, (paper) => scorePaper(paper, apiKey), abstracts);
   if (!result) {
     console.error("Too many Jev failures (first error above): nothing was changed.");
