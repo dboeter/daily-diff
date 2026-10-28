@@ -30,3 +30,10 @@ Done (2026-10-28):
 - **Side effect**: when the summaries call fails, the table shows the descriptions, so a cell of a post with headings now opens with `Sections: …`.
 - **Tests**: `describe("vendorText")` in `src/__tests__/core/rss.test.ts` with fixture `src/__tests__/fixtures/fabric-gateway.xml`. A guard checks that plain 1,000-character truncation misses "Admin APIs". Other tests check that every heading, Admin APIs included, opens the description within the cut, that each heading appears once, and that a note without headings is unchanged.
 - **Docs**: no AGENTS.md statement is now wrong (it does not mention the description cut). Suggested addition under Data engineering › Vendor feeds: "A vendor item's description is its plain text cut at 1,000 characters (`vendorText`), opened by the post's `<h2>`–`<h4>` headings (`Sections: …`), so Jev and the summaries see every feature of a multi-feature post."
+
+Fix round (code review, 2026-10-28):
+
+- `vendorText` (`src/core/rss.ts`) truncates once: `plainText` is now an untruncated core (`untruncatedText`) plus `truncate`, and `vendorText` uses the core for headings and body, then `truncate`, instead of `plainText(…, Number.MAX_SAFE_INTEGER)` and its own cut. Output unchanged.
+- The `"Sections: "` label is one exported constant, `SECTIONS_LABEL` (`rss.ts`), written by `vendorText` and removed by `isBundlePointer` (`src/data/snowflake.ts`) in place of its `/sections:/` regex alternative.
+- **Tests:** the existing `vendorText` and Snowflake tests pass unchanged (`pnpm test`: 1100 passed); `pnpm typecheck` and `pnpm lint` clean.
+- **Docs:** no AGENTS.md statement is now wrong.

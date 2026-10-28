@@ -10,6 +10,7 @@ import {
   fetchVendorFeeds,
   recentVendorItems,
 } from "../../data/vendors.ts";
+import { parseBigQueryNotes } from "../../data/bigquery.ts";
 
 const fixture = (name: string) => fs.readFileSync(new URL(`../fixtures/${name}`, import.meta.url), "utf-8");
 
@@ -308,6 +309,19 @@ describe("vendor state", () => {
   it("does not report a note again under its other guid", () => {
     const state = nextDataState(null, [item("topic-page-guid", { title: "Same note" })], "2026-10-16");
     expect(newVendorItems([item("monthly-page-guid", { title: "Same note" })], state, DATE)).toEqual([]);
+  });
+
+  it("does not report a BigQuery note again under the title + date key saved before its label", () => {
+    const notes = parseBigQueryNotes(fixture("bigquery.xml"))
+      .filter((n) => n.date === "2026-10-15")
+      .map((n): VendorItem => ({ ...n, vendor: "gcp", source: "BigQuery" }));
+    const state = {
+      reported: { "feature: you can copy tables across regions.|2026-10-15": "2026-10-15" },
+      stages: {},
+    };
+    expect(notes[0]!.title).toBe("You can copy tables across regions (GA)");
+    expect(newVendorItems(notes, state, DATE).map((i) => i.title)).not.toContain(notes[0]!.title);
+    expect(newVendorItems(notes, state, DATE)).toHaveLength(notes.length - 1);
   });
 
   it("reports a bundle again when its stage moves, not before", () => {

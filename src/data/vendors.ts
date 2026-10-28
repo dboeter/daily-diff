@@ -7,7 +7,7 @@
 import type { DataConfig, DataFeed, Vendor } from "../core/config.ts";
 import { fetchRssFeed, vendorText } from "../core/rss.ts";
 import { fetchBehaviorChangeBundles, fetchSnowflakeReleases } from "./snowflake.ts";
-import { fetchBigQueryNotes } from "./bigquery.ts";
+import { fetchBigQueryNotes, STAGE_MARKER } from "./bigquery.ts";
 import path from "node:path";
 import {
   loadReportedState,
@@ -49,6 +49,8 @@ export interface VendorItem {
   endDate?: string;
   /** From a feed with `stable_id`: the state keys it on `id`. */
   stableId?: true;
+  /** Earlier titles the state may key the note under (title + date): a BigQuery note's before 2026-10-28. */
+  formerTitles?: string[];
 }
 
 /** An item as a parser returns it, before the feed's vendor and name are added. */
@@ -152,24 +154,27 @@ export const loadDataState = (file = DATA_STATE_FILE): DataState | null => loadR
 /**
  * The state's StateItem: it dates an item by `published`. A note is keyed
  * on dedupeKey, not its id: Databricks lists a note under two guids and the run
- * keeps whichever comes first, and a BigQuery note's id moves when a note is
- * added before it. A `stable_id` feed's note (Fabric, Azure updates) and a
- * bundle keep their id: an edited date or title, or a bundle's stage, is what
- * moves. Such a note's title + date key, saved before 2026-10-22, is its alias.
+ * keeps whichever comes first. A `stable_id` feed's note (Fabric, Azure
+ * updates) and a bundle keep their id: an edited date or title, or a bundle's
+ * stage, is what moves. Such a note's title + date key, saved before
+ * 2026-10-22, is its alias, as is the title + date key of each `formerTitles`.
  */
 const stateId = (i: VendorItem): string => (i.stage === undefined && !i.stableId ? dedupeKey(i) : i.id);
-export const asStateItem = (i: VendorItem): StateItem => ({
-  id: stateId(i),
-  published: i.date,
-  stage: i.stage,
-  ...(i.stableId && i.stage === undefined ? { aliases: [dedupeKey(i)] } : {}),
-});
+export const asStateItem = (i: VendorItem): StateItem => {
+  const aliases = [
+    ...(i.stableId && i.stage === undefined ? [dedupeKey(i)] : []),
+    ...(i.formerTitles ?? []).map((title) => dedupeKey({ ...i, title })),
+  ];
+  return { id: stateId(i), published: i.date, stage: i.stage, ...(aliases.length ? { aliases } : {}) };
+};
 
 /** A note announcing a change ahead: Databricks' "What's coming" page. */
 const COMING_SOON_RE = /\b(?:will soon be|coming soon)\b/i;
 /** A title's status phrase and what follows it, so a coming-soon note and its GA note share a stem. */
-const STATUS_RE =
-  /\s+(?:will soon be|will be|is now|are now|is generally|are generally|is available|are available|now available|(?:is|are) in (?:public )?preview)\b.*$|\s*\((?:general availability|ga|public preview|preview)\)\s*$/i;
+const STATUS_RE = new RegExp(
+  String.raw`\s+(?:will soon be|will be|is now|are now|is generally|are generally|is available|are available|now available|(?:is|are) in (?:public )?preview)\b.*$|\s*${STAGE_MARKER}\s*$`,
+  "i",
+);
 const titleStem = (title: string): string =>
   title.toLowerCase().replace(/\s+/g, " ").replace(STATUS_RE, "").trim();
 
