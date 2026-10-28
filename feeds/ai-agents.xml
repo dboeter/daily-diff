@@ -13,7 +13,130 @@
       <height>144</height>
     </image>
     <atom:link href="https://dboeter.github.io/daily-diff/feeds/ai-agents.xml" rel="self" type="application/rss+xml"/>
-    <lastBuildDate>Tue, 27 Oct 2026 04:54:10 +0000</lastBuildDate>
+    <lastBuildDate>Wed, 28 Oct 2026 05:29:16 +0000</lastBuildDate>
+    <item>
+      <title>AI Agents 2026-10-28</title>
+      <link>https://dboeter.github.io/daily-diff/#2026-10-28/ai-agents</link>
+      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-10-28/ai-agents</guid>
+      <pubDate>Wed, 28 Oct 2026 00:00:00 +0000</pubDate>
+      <description>AI Agents 2026-10-28 ⬛ Overview · 🟪 AI Agents · 🟦 AI Models &amp;amp; Labs · 🟧 AI Policy · 🟨 Data Engineering Projects: 16 | Active today: 7 | Stable releases: 5 | Prereleases (not covered): 8 | Generated: 2026-10-28 05:25 UTC Highlights OpenShell v0.1.6 now refuses to start gateways unless OIDC, mTLS, or JWT authentication is configured; local development requires explicitly setting allow_unauthenticated_users = true. Claude Code headless claude -p consumes roughly 1.8× more of the 5-hour token...</description>
+      <content:encoded><![CDATA[<h1>AI Agents 2026-10-28</h1>
+<p><a href="https://dboeter.github.io/daily-diff/#2026-10-28">⬛ Overview</a> · <strong>🟪 AI Agents</strong> · <a href="https://dboeter.github.io/daily-diff/#2026-10-28/ai-models">🟦 AI Models &amp; Labs</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-28/ai-policy">🟧 AI Policy</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-28/ai-data">🟨 Data Engineering</a></p>
+<blockquote>
+<p>Projects: 16 | Active today: 7 | Stable releases: 5 | Prereleases (not covered): 8 | Generated: 2026-10-28 05:25 UTC</p>
+</blockquote>
+<hr>
+<h2>Highlights</h2>
+<ul>
+<li>OpenShell v0.1.6 now refuses to start gateways unless OIDC, mTLS, or JWT authentication is configured; local development requires explicitly setting <code>allow_unauthenticated_users = true</code>.</li>
+<li>Claude Code headless <code>claude -p</code> consumes roughly 1.8× more of the 5-hour token window than the interactive CLI for the same workload, per user reports with 92 upvotes.</li>
+<li>Hermes Agent leaks a valid <code>OPENAI_API_KEY</code> to third-party <code>base_url</code> endpoints during model-catalog probes against OpenAI-compatible providers, labeled a security issue.</li>
+</ul>
+<hr>
+<h2>Coding Agents &amp; Assistants</h2>
+<h3>Claude Code</h3>
+<ul>
+<li><strong>Release:</strong> <a href="https://github.com/anthropics/claude-code/releases/tag/v2.1.312">v2.1.312</a> adds <code>oidc.user_id_claim</code> for identifying users via non-<code>sub</code> claims (e.g., Microsoft Entra ID&#39;s <code>oid</code>), enables click-to-send for queued messages in fullscreen, and fixes managed settings and organization policy not being fetched after session start.</li>
+<li><strong>Hot issue:</strong> <a href="https://github.com/anthropics/claude-code/issues/97074">#97074</a> — headless <code>claude -p</code> consumes ~1.8× more of the 5-hour token window than interactive CLI for the same workload; 92 👍, 54 comments.</li>
+<li><strong>Hot issue:</strong> <a href="https://github.com/anthropics/claude-code/issues/105408">#105408</a> — <code>apiKeyHelper</code> not re-run on 401 when using Vertex with <code>CLAUDE_CODE_SKIP_VERTEX_AUTH=1</code>; 22 👍, filed yesterday.</li>
+<li><strong>News:</strong> <a href="https://dev.to/wst2002rk/your-ai-said-fixed-but-never-ran-the-tests-i-made-a-plugin-that-wont-let-it-say-done-until-5531">Dev.to plugin</a> prevents Claude Code, Codex, and Cursor from claiming &quot;done&quot; until tests actually pass; 29 reactions.</li>
+</ul>
+<h3>Gemini CLI</h3>
+<ul>
+<li><strong>Release:</strong> <a href="https://github.com/google-gemini/gemini-cli/releases/tag/v0.66.0">v0.66.0</a> fixes synchronized output and spinner rendering, debug console height calculation, terminal buffer flickering, and right-hand border issues across 26 merged PRs.</li>
+<li><strong>Hot issue:</strong> <a href="https://github.com/google-gemini/gemini-cli/issues/15404">#15404</a> — temp files flagged as <code>Generic.PyStealer.AD.3D27F607</code> by antivirus; 16 comments, triaged as security priority P2.</li>
+</ul>
+<h3>OpenCode</h3>
+<ul>
+<li><strong>Release:</strong> <a href="https://github.com/anomalyco/opencode/releases/tag/v2.2.0">v2.2.0</a> introduces experimental desktop plugins (create, install, share) and a refreshed desktop app experience.</li>
+<li><strong>Hot issue:</strong> <a href="https://github.com/anomalyco/opencode/issues/59387">#59387</a> — free tier users hit &quot;usage exceeded&quot; and reset failures; 42 comments, 7 👍, updated today.</li>
+</ul>
+<h3>Oh My Pi</h3>
+<ul>
+<li><strong>Release:</strong> <a href="https://github.com/can1357/oh-my-pi/releases/tag/v18.13.2">v18.13.2</a> adds optional <code>handlesToolInterrupt</code> flag to <code>AgentTool</code>, allowing interruptible tools like <code>wait</code> to drain queued wake events instead of being skipped.</li>
+</ul>
+<h3>DeepSeek Harness</h3>
+<ul>
+<li><strong>Prerelease:</strong> <a href="https://github.com/deepseek-ai/deepseek-harness/releases/tag/dsh-v0.2.2-alpha.2">dsh-v0.2.2-alpha.2</a> adds plugin management with rich details and hot-update rollback, chat-text references, full-session Markdown copy, multi-language UI (ja/es/fr/de/ru/pt-BR), experimental <code>subagent_oar</code> tool to delegate tasks to local Codex or Claude CLI, personalized recommendations, developer statistics plugin, and Git worktree-based change requests.</li>
+</ul>
+<h3>Hermes Agent</h3>
+<ul>
+<li><strong>Hot issue:</strong> <a href="https://github.com/NousResearch/hermes-agent/issues/145452">#145452</a> — model-catalog probes against a config-declared OpenAI-compatible provider send the wrong credential (or none), leaking a valid <code>OPENAI_API_KEY</code> to a third-party <code>base_url</code>; 5 comments, security label.</li>
+<li><strong>Hot issue:</strong> <a href="https://github.com/NousResearch/hermes-agent/issues/143379">#143379</a> — RFC proposing a durable &quot;doc-chain substrate&quot; for read/restore/governance across session compression; 29 comments.</li>
+</ul>
+<p><strong>Quiet today:</strong> <a href="https://github.com/Kilo-Org/kilocode">Kilo Code</a>, <a href="https://github.com/earendil-works/pi">Pi</a>, <a href="https://github.com/1jehuang/jcode">jcode</a>, <a href="https://github.com/cline/cline">Cline</a>, <a href="https://github.com/CommandCodeAI/command-code">Command Code</a></p>
+<p><strong>Unavailable today:</strong> <a href="https://github.com/openai/codex">OpenAI Codex</a></p>
+<hr>
+<h2>Agent Tooling</h2>
+<h3>OpenShell</h3>
+<ul>
+<li><strong>Release:</strong> <a href="https://github.com/NVIDIA/OpenShell/releases/tag/v0.1.6">v0.1.6</a> — Gateways now refuse to start unless OIDC, mTLS user or operator authentication, or gateway JWTs are configured; for trusted local development only, set <code>allow_unauthenticated_users = true</code> under <code>[openshell.gateway.auth]</code>. New sandboxes on Kubernetes, Docker, Podman, and VM now open terminals with improved isolation.</li>
+</ul>
+<p><strong>Quiet today:</strong> <a href="https://github.com/herdrdev/herdr">herdr</a>, <a href="https://github.com/mksglu/context-mode">context-mode</a>, <a href="https://github.com/asheshgoplani/agent-deck">Agent Deck</a></p>
+<hr>
+<h2>Spotted</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Story</th>
+<th align="left">Source</th>
+<th align="left">Discussion</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a href="https://www.formal.ai/blog/cloud-agents-oidc-infrastructure/">We let our cloud agents query prod (with OIDC, not secrets)</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50261584">17 points, 12 comments</a></td>
+<td align="left">Formal uses OIDC to grant cloud coding agents auditable, policy-controlled, short-lived access to production data and infrastructure without long-lived secrets.</td>
+</tr>
+<tr>
+<td align="left">Show HN: Agent-relay for multi-vendor coding sessions (<a href="https://github.com/saranyan/agent-relay">saranyan/agent-relay</a>)</td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50262407">6 points, 0 comments</a></td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left"><a href="https://blog.adrq.dev/here-be-monsters-what-do-you-still-need-to-know-when-agents-do-the-work">Here be monsters: What do you still need to know when agents do the work?</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50258868">165 points, 88 comments</a></td>
+<td align="left">The article argues that as AI agents write code faster than humans can read it, engineers still need fundamentals, breadth, and willingness to debug when things break.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://www.brangus.io/survival-llm">Survival LLM: AI assistant and emergency library that runs on your own computer</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50264853">261 points, 120 comments</a></td>
+<td align="left">Survival LLM is a free, offline AI assistant with a survival library of 1.5 million articles that runs locally on Mac and Windows, showing sources for every answer.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://buildtounderstand.substack.com/p/can-you-make-a-3d-game-if-you-dont">Can You Make a 3D Game with AI, If You Don&#39;t Know How to Do Anything?</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50261110">6 points, 1 comment</a></td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left">Kauldron: Modular, scalable library to train ML models (<a href="https://github.com/google-research/kauldron">google-research/kauldron</a>)</td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50235449">25 points, 2 comments</a></td>
+<td align="left">Kauldron is a modular, scalable library for training machine learning models.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://dev.to/devstackhub/i-compared-11-best-ai-design-to-code-tools-for-my-client-projects-4alo">I Compared 11 Best AI Design-to-Code Tools for My Client Projects</a></td>
+<td align="left">Dev.to</td>
+<td align="left"><a href="https://dev.to/devstackhub/i-compared-11-best-ai-design-to-code-tools-for-my-client-projects-4alo">38 reactions, 15 comments</a></td>
+<td align="left">The author compared 11 AI design-to-code tools, covering Figma integrations and AI coding agents, to help choose the right tool for converting designs into code.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://dev.to/aws-builders/mcp-token-cost-i-cut-my-mcp-server-from-15-tools-to-4-cek">MCP Token Cost: I Cut My MCP Server From 15 Tools to 4</a></td>
+<td align="left">Dev.to</td>
+<td align="left"><a href="https://dev.to/aws-builders/mcp-token-cost-i-cut-my-mcp-server-from-15-tools-to-4-cek">34 reactions, 41 comments</a></td>
+<td align="left">The author rebuilt an AWS cost-triage MCP server, reducing tools from 15 to 4, cutting tool calls from 7 to 2, and shrinking schemas by 88%.</td>
+</tr>
+</tbody></table>
+<hr>
+<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
+]]></content:encoded>
+    </item>
     <item>
       <title>AI Agents 2026-10-27</title>
       <link>https://dboeter.github.io/daily-diff/#2026-10-27/ai-agents</link>
