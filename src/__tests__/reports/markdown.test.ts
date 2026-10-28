@@ -456,6 +456,30 @@ describe("buildProjectReportContent", () => {
       const result = render("## ALPHA\n- **Hot issue:** #99 (12 comments) users report a crash", [hot(1)]);
       expect(result).toContain("- **Hot issue:** #99 (12 comments) users report a crash");
     });
+
+    it("writes the bullet of a hot issue the model left out, its title as the description", () => {
+      const result = render("## ALPHA\n- **Hot issue:** #1: users report a crash", [
+        hot(1),
+        hot(2, { title: "Login loops after update", comments: 1, reactions: { "+1": 9 }, gain: 10 }),
+      ]);
+      expect(result).toContain(
+        "- **Hot issue:** [#1](https://github.com/org/alpha/issues/1): users report a crash (16 comments, 2 👍; +3 in the last 24h)\n" +
+          "- **Hot issue:** [#2](https://github.com/org/alpha/issues/2): Login loops after update (1 comment, 9 👍; +10 in the last 24h)",
+      );
+    });
+
+    it("writes the section of a project the model left out that has only a hot issue", () => {
+      const result = buildProjectReportContent(
+        withAgents({
+          summary: "## BETA\n- **News:** [a story](https://x) about beta",
+          activities: [makeActivity("alpha", { hotIssues: [hot(1)] }), makeActivity("beta")],
+        }),
+      );
+      expect(result).toContain(
+        "### ALPHA\n- **Hot issue:** [#1](https://github.com/org/alpha/issues/1): Issue 1 (16 comments, 2 👍; +3 in the last 24h)",
+      );
+      expect(result).not.toContain("[ALPHA](https://github.com/org/alpha)");
+    });
   });
 });
 
@@ -1086,7 +1110,7 @@ describe("rendering conventions", () => {
     expect(at("example.com/2")).toBeLessThan(at("example.com/1"));
   });
 
-  it("writes every bullet label as **Label:**, the form releaseFallbackSection uses", () => {
+  it("writes every bullet label as **Label:**, the form projectFallbackSection uses", () => {
     const result = buildProjectReportContent({
       heading: "# AI Agents 2026-10-26",
       utcStr: "04:31",

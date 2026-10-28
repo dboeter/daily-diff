@@ -110,11 +110,9 @@ const GET_RETRY_MS = 2000;
 const RETRY_STATUSES = new Set([502, 503, 504]);
 
 /**
- * A failure worth another try. On 2026-10-06 the connection dropped mid-body
- * (`TypeError: terminated`, thrown by `resp.json()`) and the run lost a Codex
- * stable release; undici throws TypeError for that and a failed connect. A
- * gateway timeout can also arrive as a 200 with truncated JSON (SyntaxError),
- * and our own timeout aborts with a `TimeoutError`. Other statuses fail again on retry.
+ * A failure worth another try: a dropped connection or failed connect (undici's TypeError; on
+ * 2026-10-06 one mid-body lost a Codex stable release), a gateway timeout sent as a 200 with
+ * truncated JSON (SyntaxError), or our own timeout (TimeoutError); other statuses fail again.
  */
 function isRetryableGet(err: unknown): boolean {
   if (err instanceof GitHubApiError) return RETRY_STATUSES.has(err.status);
@@ -271,8 +269,9 @@ export const HOT_ISSUE_MAX_CHECKED = 10;
 /**
  * Candidates per repo whose known gain (snapshot delta, or a new issue's total) clears the bar and
  * is recounted by the API without bots and slash commands, highest gain first: twice the issues
- * shown, so a drop still leaves recounted ones. On 2026-10-28 Gemini #15404 qualified on two
- * gemini-cli[bot] comments and "/assign". Their calls come out of HOT_ISSUE_MAX_COUNT_CALLS.
+ * shown, so a drop still leaves recounted ones. Only a recounted one can be shown: on 2026-10-28
+ * Gemini #15404 qualified on two gemini-cli[bot] comments and "/assign". Their calls come out of
+ * HOT_ISSUE_MAX_COUNT_CALLS.
  */
 export const HOT_ISSUE_MAX_VERIFIED = 2 * HOT_ISSUES_PER_REPO;
 /**
@@ -289,13 +288,15 @@ export const HOT_ISSUE_MAX_COUNT_CALLS = 250;
  * plus the pull requests, so 8 pages covers it. Hitting the cap is logged.
  */
 export const HOT_ISSUE_MAX_PAGES = 8;
+/** The repos of config.yml's agents, infra and data sections on 2026-10-28, for the call budgets. */
+const TRACKED_REPOS = 33;
 /**
- * Fix-status lookups per run (`fetchFixStatus`, one core call each), shared by every repo: one per
- * hot issue sent to the prompt, so 33 repos × HOT_ISSUES_PER_REPO. With the list pages, count calls
+ * Timeline pages read per run for fix status (`fetchFixStatus`), shared by every repo: one per hot
+ * issue sent to the prompt, though a busy issue can spend several. With the list pages, count calls
  * and release pages (33 × RELEASES_MAX_PAGES) the daily worst case is 264 + 250 + 66 + 165 = 745 core
  * calls, under the Actions token's 1,000 an hour.
  */
-export const HOT_ISSUE_MAX_STATUS_CALLS = 66;
+export const HOT_ISSUE_MAX_STATUS_CALLS = TRACKED_REPOS * HOT_ISSUES_PER_REPO;
 /** Matched against each label name, so "area:security" and "type: regression" count. */
 const HOT_LABEL = /regression|security/i;
 export function issueEngagement(i: GitHubItem): number {
@@ -537,20 +538,20 @@ export function hotIssuesToCheck(items: GitHubItem[], ctx: HotIssueContext): Git
 }
 
 /**
- * Pick the hot issues: gained engagement over the bar, whenever opened.
- * Highest gain first, capped at HOT_ISSUES_PER_REPO. A candidate with neither
- * a known gain nor fetched activity is skipped. A known gain with fetched activity
- * is the people's part of it (the count, never above the known gain); one the run
- * could not recount (past HOT_ISSUE_MAX_VERIFIED, the cap, a failed fetch) keeps its known gain.
+ * Pick the hot issues: gained engagement over the bar, whenever opened, counted without
+ * bots and slash commands. Highest gain first, capped at HOT_ISSUES_PER_REPO. A candidate
+ * without fetched activity (past HOT_ISSUE_MAX_VERIFIED or HOT_ISSUE_MAX_CHECKED, past the
+ * run's cap, a failed fetch) is skipped, a known gain included: it counts bots. A known gain
+ * with fetched activity is the people's part of it (the count, never above the known gain).
  */
 export function selectHotIssues(items: GitHubItem[], ctx: HotIssueContext): HotIssue[] {
   return hotIssueCandidates(items, ctx.isRepeat)
     .flatMap((i): HotIssue[] => {
-      const known = knownGain(i, ctx);
       const activity = ctx.activity?.get(i.number);
-      const counted = activity && engagementGained(activity, gainWindowStart(i, ctx));
-      if (known) return [{ ...i, ...known, gain: Math.min(known.gain, counted ?? known.gain) }];
-      return counted !== undefined ? [{ ...i, gain: counted }] : [];
+      if (!activity) return [];
+      const counted = engagementGained(activity, gainWindowStart(i, ctx));
+      const known = knownGain(i, ctx);
+      return [known ? { ...i, ...known, gain: Math.min(known.gain, counted) } : { ...i, gain: counted }];
     })
     .filter((i) => i.gain >= hotIssueBar(i))
     .sort((a, b) => b.gain - a.gain)
@@ -559,6 +560,7 @@ export function selectHotIssues(items: GitHubItem[], ctx: HotIssueContext): HotI
 
 const ACTIVITY_PAGE = 100;
 const LIST_PAGE = 100;
+const TIMELINE_PAGE = 100;
 
 /**
  * An issue's comments and 👍 that may be new since `since`, in 0–3 core calls.
@@ -613,7 +615,7 @@ export interface HotIssueCalls {
   countCalls: number;
   /** Candidates not counted: the run had used HOT_ISSUE_MAX_COUNT_CALLS. */
   skipped: number;
-  /** Fix-status lookups made (`fetchFixStatus`), at most HOT_ISSUE_MAX_STATUS_CALLS. */
+  /** Fix-status timeline pages read (`fetchFixStatus`), at most HOT_ISSUE_MAX_STATUS_CALLS. */
   statusCalls: number;
 }
 
@@ -621,7 +623,7 @@ export interface HotIssueCalls {
 interface QueuedRepo {
   repo: string;
   /** Where a candidate's count starts (`gainWindowStart`). */
-  since: (i: GitHubItem) => Date;
+  countFrom: (i: GitHubItem) => Date;
   toCheck: GitHubItem[];
   activity: Map<number, IssueActivity>;
 }
@@ -687,14 +689,28 @@ interface TimelineEvent {
 /**
  * The issue's fix: a pull request of the same repo that cross-references it with a GitHub
  * closing keyword ("fixes #N", "closes owner/repo#N", the issue URL), merged first, else an
- * open one; a PR that only mentions the issue is not its fix. One call: the timeline's first
- * page of 100 events, oldest first, so an issue with more events may have its fix PR unseen.
+ * open one; a PR that only mentions the issue is not its fix. The timeline is oldest first with
+ * no sort, and holds at least every comment, so reading starts at the page the comment count
+ * implies and goes forward to a short page: the newest events, one call per page while
+ * HOT_ISSUE_MAX_STATUS_CALLS lasts. A fix PR referenced before the comments on earlier pages is unseen.
  */
-export async function fetchFixStatus(repo: string, i: GitHubItem): Promise<FixStatus | undefined> {
-  const events = await githubGet<TimelineEvent[]>(
-    `https://api.github.com/repos/${repo}/issues/${i.number}/timeline`,
-    { per_page: "100" },
-  );
+export async function fetchFixStatus(
+  repo: string,
+  i: GitHubItem,
+  calls: HotIssueCalls,
+): Promise<FixStatus | undefined> {
+  const events: TimelineEvent[] = [];
+  for (let page = Math.max(1, Math.ceil(i.comments / TIMELINE_PAGE)); ; page++) {
+    // Reserved before the await: the repos look up in parallel and share the cap.
+    if (calls.statusCalls >= HOT_ISSUE_MAX_STATUS_CALLS) break;
+    calls.statusCalls++;
+    const batch = await githubGet<TimelineEvent[]>(
+      `https://api.github.com/repos/${repo}/issues/${i.number}/timeline`,
+      { per_page: String(TIMELINE_PAGE), page: String(page) },
+    );
+    events.push(...batch);
+    if (batch.length < TIMELINE_PAGE) break;
+  }
   const ref = `(?:#|${escapeRegex(repo)}#|https://github\\.com/${escapeRegex(repo)}/issues/)${i.number}(?!\\d)`;
   const closes = new RegExp(`\\b(?:close[sd]?|fix(?:e[sd])?|resolve[sd]?)\\b:?\\s+${ref}`, "i");
   const fixes = events.flatMap((e) => {
@@ -769,7 +785,7 @@ async function countHotIssues(queue: HotIssueQueue, calls: HotIssueCalls): Promi
         calls.countCalls += cost;
         const made = { calls: 0 };
         try {
-          e.activity.set(issue.number, await fetchIssueActivity(e.repo, issue, e.since(issue), made));
+          e.activity.set(issue.number, await fetchIssueActivity(e.repo, issue, e.countFrom(issue), made));
         } catch (err) {
           console.error(`  [github] ${e.repo}#${issue.number} engagement fetch failed, skipped: ${err}`);
         } finally {
@@ -786,29 +802,27 @@ async function countHotIssues(queue: HotIssueQueue, calls: HotIssueCalls): Promi
  * from the snapshot or the issue's age where it can (`knownGain`), else from
  * the API for up to HOT_ISSUE_MAX_CHECKED candidates, counted in the run's
  * shared count phase (`countHotIssues`) once every repo has listed; that phase
- * also recounts up to HOT_ISSUE_MAX_VERIFIED known gains without bots. Each
- * selected issue then gets one fix-status lookup (`withFixStatus`). A failed
- * gain fetch skips that issue; a failed list should be treated as "no hot
- * issues", not a failed repo.
+ * also recounts up to HOT_ISSUE_MAX_VERIFIED known gains without bots. Only a
+ * counted issue is shown. Each selected issue then gets a fix-status lookup
+ * (`withFixStatus`). A failed gain fetch skips that issue; a failed list should
+ * be treated as "no hot issues", not a failed repo.
  */
 export async function fetchHotIssues(repo: string, since: Date, run: HotIssueRun): Promise<HotIssue[]> {
-  const entry: QueuedRepo = { repo, since: () => since, toCheck: [], activity: new Map() };
+  const activity = new Map<number, IssueActivity>();
+  const ctx: HotIssueContext = {
+    repo,
+    snapshot: run.snapshot,
+    dateStr: run.dateStr,
+    since,
+    isRepeat: run.isRepeat(repo),
+    activity,
+  };
+  const entry: QueuedRepo = { repo, countFrom: (i) => gainWindowStart(i, ctx), toCheck: [], activity };
   const { queue } = run;
   let issues: GitHubItem[];
-  let ctx: HotIssueContext;
   try {
     issues = await listUpdatedIssues(repo, since, run.calls);
     for (const i of issues) run.seen[snapshotKey(repo, i)] = issueEngagement(i);
-    ctx = {
-      repo,
-      snapshot: run.snapshot,
-      dateStr: run.dateStr,
-      since,
-      isRepeat: run.isRepeat(repo),
-      activity: entry.activity,
-    };
-    const c = ctx;
-    entry.since = (i) => gainWindowStart(i, c);
     entry.toCheck = hotIssuesToCheck(issues, ctx);
   } finally {
     // A failed list still joins, with nothing to count: the count phase waits for every repo.
@@ -822,11 +836,8 @@ export async function fetchHotIssues(repo: string, since: Date, run: HotIssueRun
 
 /** The issue with its fix status while HOT_ISSUE_MAX_STATUS_CALLS lasts; a failed lookup shows none and keeps the issue. */
 async function withFixStatus(repo: string, i: HotIssue, calls: HotIssueCalls): Promise<HotIssue> {
-  // Reserved before the await: the repos look up in parallel and share the cap.
-  if (calls.statusCalls >= HOT_ISSUE_MAX_STATUS_CALLS) return i;
-  calls.statusCalls++;
   try {
-    const fix = await fetchFixStatus(repo, i);
+    const fix = await fetchFixStatus(repo, i, calls);
     return fix ? { ...i, fix } : i;
   } catch (err) {
     console.error(`  [github] ${repo}#${i.number} fix-status lookup failed: ${err}`);
@@ -889,6 +900,7 @@ export async function ensureLabel(name: string, color: string): Promise<void> {
     method: "POST",
     headers: { ...headers(), "Content-Type": "application/json" },
     body: JSON.stringify({ name, color }),
+    signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
   });
   if (!resp.ok && resp.status !== 422) {
     throw new Error(`Failed to create label "${name}": ${await resp.text()}`);
@@ -1100,6 +1112,7 @@ export async function closeSupersededIssues(): Promise<number> {
           method: "PATCH",
           headers: { ...headers(), "Content-Type": "application/json" },
           body: JSON.stringify({ state: "closed" }),
+          signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
         });
         if (resp.ok) closed++;
         else console.error(`[github] Failed to close #${issue.number}: ${resp.status}`);
@@ -1120,6 +1133,7 @@ export async function createGitHubIssue(title: string, body: string, label: stri
     method: "POST",
     headers: { ...headers(), "Content-Type": "application/json" },
     body: JSON.stringify({ title, body, labels: [label] }),
+    signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
   });
   if (!resp.ok) throw new Error(`Failed to create issue: ${await resp.text()}`);
   const data = (await resp.json()) as { html_url: string };
