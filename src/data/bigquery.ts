@@ -15,10 +15,35 @@ function firstSentence(html: string): string {
   return text.match(/^.*?[.!?](?=\s|$)/)?.[0] ?? text;
 }
 
+/** A trailing stage phrase ("… is now generally available (GA)."), which the stage suffix replaces. */
+const STAGE_PHRASE_RE =
+  /\s+(?:is|are) (?:now )?(?:generally available|in (?:public |private )?preview)(?: \((?:GA|preview)\))?\.?$|\s*\((?:GA|preview)\)\.?$/i;
+/** A clause the summary carries ("…, letting you provide …"): the label stops before it. */
+const TRAILING_CLAUSE_RE = /,\s+(?:which|letting|allowing|enabling|so that)\b.*$/;
+
+/** The release stage the note's text states; GA wins over a Preview it was in before. */
+function stageOf(text: string): string | undefined {
+  if (/\bgenerally available\b|\(GA\)/i.test(text)) return "GA";
+  if (/\bin (?:public |private )?preview\b|\(preview\)/i.test(text)) return "Preview";
+  return undefined;
+}
+
 /**
- * One note per `<h3>`: title = "<type>: <first sentence>", id = the entry's
- * anchor + "#" + title (not the note's index: a note added before it would
- * move it, and the verdict cache is keyed by id), categories = [type].
+ * The Item cell's label: the first sentence without its stage phrase, trailing
+ * clause and period, then the stage from the whole note, as the other vendors'
+ * titles carry it ("(GA)", "(Preview)"). BigQuery states it in a later sentence.
+ */
+function noteLabel(sentence: string, text: string): string {
+  const label = sentence.replace(STAGE_PHRASE_RE, "").replace(TRAILING_CLAUSE_RE, "").replace(/[.:]$/, "");
+  const stage = stageOf(text);
+  return stage ? `${label} (${stage})` : label;
+}
+
+/**
+ * One note per `<h3>`: title = its label (`noteLabel`), id = the entry's anchor
+ * + "#" + "<type>: <first sentence>", the title before 2026-10-28 (not the
+ * note's index: a note added before it would move it, and the verdict cache is
+ * keyed by id), categories = [type].
  */
 export function parseBigQueryNotes(xml: string): VendorNote[] {
   const entries = [...xml.matchAll(/<entry>([\s\S]*?)<\/entry>/g)].map(([, e]) => e!);
@@ -35,10 +60,11 @@ export function parseBigQueryNotes(xml: string): VendorNote[] {
       .map((part) => {
         const [type, body = ""] = part.split("</h3>");
         const kind = vendorText(type!);
-        const title = `${kind}: ${firstSentence(body)}`;
+        const sentence = firstSentence(body);
+        const text = vendorText(body, Number.MAX_SAFE_INTEGER);
         return {
-          id: `${anchor}#${title}`,
-          title,
+          id: `${anchor}#${kind}: ${sentence}`,
+          title: noteLabel(sentence, text),
           link,
           date,
           description: vendorText(body),
