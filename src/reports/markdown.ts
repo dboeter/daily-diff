@@ -28,7 +28,8 @@ import type { VendorAction } from "../data/vendors.ts";
 import type { StoryRow } from "../spotted/pool.ts";
 import type { ResearchPaper } from "../trending/research.ts";
 import type { Category } from "../trending/rank.ts";
-import { hotIssueLabel, type HotIssue, type RepoConfig } from "../core/github.ts";
+import type { RepoConfig } from "../core/github.ts";
+import { hotIssueLabel, type HotIssue } from "../core/hot-issues.ts";
 import {
   AGENT_SECTION_KEYS,
   VENDOR_SECTIONS,

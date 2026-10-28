@@ -2,7 +2,8 @@
  * LLM prompt builders and item formatting.
  */
 
-import type { RepoConfig, GitHubItem, GitHubRelease, HotIssue } from "../core/github.ts";
+import type { RepoConfig, GitHubItem, GitHubRelease } from "../core/github.ts";
+import type { HotIssue } from "../core/hot-issues.ts";
 import type { NewsItem } from "./project-news.ts";
 import { GOING_AWAY, HOT_ISSUE, hotIssueGain, SECTIONS } from "../core/strings.ts";
 

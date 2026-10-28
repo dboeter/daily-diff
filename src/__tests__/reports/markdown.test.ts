@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import { describe, expect, it } from "vitest";
-import type { GitHubRelease, HotIssue } from "../../core/github.ts";
+import type { GitHubRelease } from "../../core/github.ts";
+import type { HotIssue } from "../../core/hot-issues.ts";
 import { MSG, TRENDS_REPORT } from "../../core/strings.ts";
 import {
   buildProjectReportContent,

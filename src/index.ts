@@ -10,6 +10,15 @@
  */
 
 import {
+  type RepoConfig,
+  fetchRecentReleases,
+  isPrerelease,
+  type GitHubRelease,
+  fetchSkillsData,
+  type SkillsData,
+  createGitHubIssue,
+} from "./core/github.ts";
+import {
   type HotIssue,
   type HotIssueRun,
   HOT_ISSUES_SNAPSHOT_FILE,
@@ -18,19 +27,12 @@ import {
   newHotIssueCalls,
   newHotIssueQueue,
   hotIssueCallsLine,
-  type RepoConfig,
-  fetchRecentReleases,
   fetchHotIssues,
   HOT_ISSUES_STATE_FILE,
   nextHotIssuesState,
   hotIssueStateItem,
   isRepeatHotIssue,
-  isPrerelease,
-  type GitHubRelease,
-  fetchSkillsData,
-  type SkillsData,
-  createGitHubIssue,
-} from "./core/github.ts";
+} from "./core/hot-issues.ts";
 import {
   type ProjectActivity,
   announcementLinks,
