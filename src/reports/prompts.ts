@@ -44,11 +44,35 @@ export interface DigestScope {
 // Formatting
 // ---------------------------------------------------------------------------
 
-export function formatItem(item: GitHubItem): string {
+/**
+ * A hot issue's body as the model sees it. On 2026-10-28 OpenCode #59387, the maintainers' "Free
+ * tier issues: read this first" thread, read as a live bug from its first 300 characters.
+ */
+export const HOT_ISSUE_BODY_CHARS = 1000;
+
+/** Issue-form and template lines that say nothing about the issue: an unanswered field, a checklist item. */
+const ISSUE_TEMPLATE_LINE_RE = /^[ \t]*(?:_No response_|[-*][ \t]+\[[ xX]\][ \t].*)[ \t]*$/gm;
+
+/**
+ * An issue or PR body on one line, without template comments and lines, code blocks (logs, stack
+ * traces), HTML tags and link noise (`stripLinkNoise`), cut at `maxChars`.
+ */
+function issueBody(body: string | null | undefined, maxChars: number): string {
+  const text = stripLinkNoise(
+    (body ?? "")
+      .replace(/<!--[\s\S]*?(?:-->|$)/g, " ")
+      .replace(/(```|~~~)[\s\S]*?(\1|$)/g, " ")
+      .replace(/<[^>]*>/g, " ")
+      .replace(ISSUE_TEMPLATE_LINE_RE, ""),
+  )
+    .replace(/\s+/g, " ")
+    .trim();
+  return text.length > maxChars ? `${text.slice(0, maxChars)}...` : text;
+}
+
+export function formatItem(item: GitHubItem, bodyChars = 300): string {
   const labels = item.labels.map((l) => l.name).join(", ");
   const labelStr = labels ? ` [${labels}]` : "";
-  const body = (item.body ?? "").replace(/\n/g, " ").trim().slice(0, 300);
-  const ellipsis = (item.body ?? "").length > 300 ? "..." : "";
   const t = {
     author: "Author",
     created: "Created",
@@ -65,7 +89,7 @@ export function formatItem(item: GitHubItem): string {
     `#${item.number} [${item.state.toUpperCase()}]${labelStr} ${item.title}`,
     `  ${t.author}: ${item.user.login} | ${t.created}: ${item.created_at.slice(0, 10)} | ${t.updated}: ${item.updated_at.slice(0, 10)} | ${t.comments}: ${item.comments} | 👍: ${item.reactions?.["+1"] ?? 0}`,
     `  ${t.url}: ${refStr}`,
-    `  ${t.summary}: ${body}${ellipsis}`,
+    `  ${t.summary}: ${issueBody(item.body, bodyChars)}`,
   ].join("\n");
 }
 
@@ -336,7 +360,13 @@ export function formatProject(a: ProjectActivity): string {
       a.previews.map((r) => formatRelease(r, cfg.repo, releaseNotes(r.body, PREVIEW_BODY_CHARS))).join("\n")
     : "";
   const issues =
-    a.hotIssues.map((i) => `${formatItem(i)}\n  ${hotIssueGain(i.gain, i.gainSince)}`).join("\n") || "None";
+    a.hotIssues
+      .map(
+        (i) =>
+          `${formatItem(i, HOT_ISSUE_BODY_CHARS)}\n  ${hotIssueGain(i.gain, i.gainSince)}` +
+          (i.fix ? `\n  Fix: PR #${i.fix.number} ${i.fix.state}` : ""),
+      )
+      .join("\n") || "None";
   const news =
     a.news
       .map(
@@ -380,7 +410,7 @@ Write the report in English: one section per project above that has something le
 - **Release**: what the stable release(s) change for users, in this order: ${RELEASE_ORDER}. Several releases in a range: summarize the range, do not list each one. Link each release you name as a plain Markdown link, [tag](url), never inside backticks; a range as its oldest and newest, [v1.2.0](url)–[v1.2.5](url). A release with an Announcement: describe it from the announcement, not from its first changelog entries.
 - **Prerelease**: only from a "Prereleases (no stable release yet)" list, and only when it adds notable features or breaking changes; skip routine alpha/rc bumps. Say it is a prerelease and link it.
 - **News**: what the news item says about the project and why it matters. Link it.
-- **Hot issue**: what users are hitting and how serious it is. For a security issue, say where the problem shows, who is affected and its fix status (open, or fixed in a named release), as far as the data says. Link the issue (https://github.com/<repo>/issues/<number>).
+- **Hot issue**: one bullet per issue, written "- **Hot issue:** #<number>: <description>". The description says what the issue reports and how serious it is, worded as a report ("users report", "an issue says"), never as an established fact. When the body shows a tracking, announcement or FAQ thread rather than a bug report, say so. For a security issue, say where the problem shows and who is affected. Write no link, label, comment or 👍 count, gain or fix status: code adds them to the bullet.
 
 Rules:
 - Use only the data above. Omit a bullet type that has no data. Never state what did not happen ("no release today", "no breaking issues were reported").

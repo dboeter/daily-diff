@@ -13,6 +13,7 @@ import {
   HOT_ISSUE_MAX_CHECKED,
   HOT_ISSUE_MAX_COUNT_CALLS,
   HOT_ISSUE_MAX_PAGES,
+  HOT_ISSUE_MAX_STATUS_CALLS,
   hotIssueCallsLine,
   newHotIssueCalls,
   newHotIssueQueue,
@@ -166,6 +167,36 @@ describe("selectHotIssues, gain counted by the API", () => {
       [2, 25],
       [3, 14],
     ]);
+  });
+
+  it("does not count bot comments, bot 👍 or a bare slash command (Gemini #15404, 2026-10-28)", () => {
+    // Labelled area/security (bar 3): two gemini-cli[bot] comments and "/assign" made +3.
+    const gemini = issue({ number: 15404, comments: 16, labels: ["area/security", "priority/p2"] });
+    const by = (login: string, body: string, type = "User") => ({
+      created_at: IN_WINDOW,
+      user: { login, type },
+      body,
+    });
+    const activity: IssueActivity = {
+      comments: [
+        by("gemini-cli[bot]", "Thanks for the report", "Bot"),
+        by("Neal006", " /assign\n"),
+        by("gemini-cli[bot]", "Assigned to Neal006"),
+        by("ci-app", "/label bug", "Bot"),
+      ],
+      thumbs: [{ created_at: IN_WINDOW, user: { login: "renovate[bot]", type: "Bot" } }],
+    };
+    expect(selectByApi([[gemini, activity]])).toEqual([]);
+    const withPeople: IssueActivity = {
+      ...activity,
+      comments: [...activity.comments, by("alice", "/assign is not enough, this also breaks on Linux")],
+      thumbs: [
+        ...activity.thumbs,
+        { created_at: IN_WINDOW, user: { login: "bob", type: "User" } },
+        { created_at: IN_WINDOW },
+      ],
+    };
+    expect(selectByApi([[gemini, withPeople]]).map((i) => i.gain)).toEqual([3]);
   });
 
   it("skips an old issue without a baseline whose activity was not fetched", () => {
@@ -341,7 +372,12 @@ describe("fetchHotIssues", () => {
    * The issues list returns `items`, 100 a page; each issue's comments and 👍
    * come from `activity` by number (all new by default).
    */
-  function mockGitHub(items: GitHubItem[], activity: Record<number, IssueActivity | "fail"> = {}) {
+  function mockGitHub(
+    items: GitHubItem[],
+    activity: Record<number, IssueActivity | "fail"> = {},
+    /** Each issue's timeline events (none by default). */
+    timeline: Record<number, unknown[] | "fail"> = {},
+  ) {
     return vi.spyOn(globalThis, "fetch").mockImplementation((input) => {
       const url = new URL(String(input));
       const json = (body: unknown) =>
@@ -350,9 +386,10 @@ describe("fetchHotIssues", () => {
         const page = Number(url.searchParams.get("page"));
         return json(items.slice((page - 1) * 100, page * 100));
       }
-      const m = /\/issues\/(\d+)\/(comments|reactions)$/.exec(url.pathname)!;
+      const m = /\/issues\/(\d+)\/(comments|reactions|timeline)$/.exec(url.pathname)!;
       const n = Number(m[1]);
-      const a = activity[n];
+      const a = m[2] === "timeline" ? timeline[n] : activity[n];
+      if (m[2] === "timeline" && a !== "fail") return json(a ?? []);
       if (a === "fail") {
         return Promise.resolve({
           ok: false,
@@ -361,7 +398,7 @@ describe("fetchHotIssues", () => {
         } as Response);
       }
       const i = items.find((x) => x.number === n)!;
-      const all = a ?? {
+      const all = (a as IssueActivity | undefined) ?? {
         comments: dated(i.comments, IN_WINDOW),
         thumbs: dated(i.reactions?.["+1"] ?? 0, IN_WINDOW),
       };
@@ -384,8 +421,9 @@ describe("fetchHotIssues", () => {
     activity?: Record<number, IssueActivity | "fail">,
     snapshot: HotIssueSnapshot = EMPTY,
     calls = newHotIssueCalls(),
+    timeline?: Record<number, unknown[] | "fail">,
   ) {
-    const spy = mockGitHub(items, activity);
+    const spy = mockGitHub(items, activity, timeline);
     const hotRun: HotIssueRun = {
       snapshot,
       dateStr: TODAY,
@@ -395,7 +433,16 @@ describe("fetchHotIssues", () => {
       queue: newHotIssueQueue(1),
     };
     const hot = await fetchHotIssues("org/repo", SINCE, hotRun);
-    return { hot, urls: paths(spy), seen: hotRun.seen, calls };
+    // The list and count calls; each hot issue's fix-status lookup is in `timelines`.
+    const all = paths(spy);
+    const isTimeline = (u: URL) => u.pathname.endsWith("/timeline");
+    return {
+      hot,
+      urls: all.filter((u) => !isTimeline(u)),
+      timelines: all.filter(isTimeline).map((u) => u.pathname),
+      seen: hotRun.seen,
+      calls,
+    };
   }
   const LIST = "/repos/org/repo/issues";
 
@@ -480,7 +527,7 @@ describe("fetchHotIssues", () => {
     expect(Object.keys(seen)).toHaveLength(117);
     expect(seen["org/repo#1"]).toBeUndefined();
     expect(hot.map((i) => [i.number, i.gain])).toEqual([[110, 12]]);
-    expect(calls).toEqual({ listPages: 2, countCalls: 1, skipped: 0 });
+    expect(calls).toEqual({ listPages: 2, countCalls: 1, skipped: 0, statusCalls: 1 });
   });
 
   it(`stops after ${HOT_ISSUE_MAX_PAGES} list pages and logs it`, async () => {
@@ -518,9 +565,14 @@ describe("fetchHotIssues", () => {
       "/repos/org/repo/issues/2/comments",
     ]);
     expect(hot.map((i) => i.number)).toEqual([2]);
-    expect(calls).toEqual({ listPages: 1, countCalls: HOT_ISSUE_MAX_COUNT_CALLS, skipped: 1 });
+    expect(calls).toEqual({
+      listPages: 1,
+      countCalls: HOT_ISSUE_MAX_COUNT_CALLS,
+      skipped: 1,
+      statusCalls: 1,
+    });
     expect(hotIssueCallsLine(calls)).toBe(
-      `[github] hot issues: 1 list pages, ${HOT_ISSUE_MAX_COUNT_CALLS} count calls, 1 candidates skipped past the run cap of ${HOT_ISSUE_MAX_COUNT_CALLS}`,
+      `[github] hot issues: 1 list pages, ${HOT_ISSUE_MAX_COUNT_CALLS} count calls, 1 fix-status calls, 1 candidates skipped past the run cap of ${HOT_ISSUE_MAX_COUNT_CALLS}`,
     );
   });
 
@@ -576,6 +628,62 @@ describe("fetchHotIssues", () => {
       "/repos/big/repo/issues/9/comments",
     ]);
     expect(calls).toMatchObject({ countCalls: HOT_ISSUE_MAX_COUNT_CALLS, skipped: 8 });
+  });
+
+  describe("fix status", () => {
+    /** A cross-referenced pull request of `repo`, its title or body naming the issue. */
+    const xref = (o: { number: number; text: string; state?: string; merged?: boolean; repo?: string }) => ({
+      event: "cross-referenced",
+      source: {
+        issue: {
+          number: o.number,
+          state: o.state ?? "open",
+          html_url: `https://github.com/${o.repo ?? "org/repo"}/pull/${o.number}`,
+          title: "A change",
+          body: o.text,
+          pull_request: { merged_at: o.merged ? "2026-10-04T01:00:00Z" : null },
+          repository: { full_name: o.repo ?? "Org/Repo" },
+        },
+      },
+    });
+    const hotOne = [issue({ number: 7, comments: 12, created_at: IN_WINDOW })];
+
+    it("looks up each hot issue once and keeps an open fix PR", async () => {
+      // Hermes #145452 (2026-10-28): its fix PR #145478 was open and the page did not say so.
+      const { hot, timelines, calls } = await run(hotOne, {}, EMPTY, newHotIssueCalls(), {
+        7: [xref({ number: 20, text: "Mentions #7 in passing" }), xref({ number: 21, text: "Fixes #7" })],
+      });
+      expect(timelines).toEqual(["/repos/org/repo/issues/7/timeline"]);
+      expect(hot.map((i) => i.fix)).toEqual([
+        { state: "open", number: 21, url: "https://github.com/org/repo/pull/21" },
+      ]);
+      expect(calls.statusCalls).toBe(1);
+    });
+
+    it("prefers a merged fix and ignores another repo's PR and a closed unmerged one", async () => {
+      const { hot } = await run(hotOne, {}, EMPTY, newHotIssueCalls(), {
+        7: [
+          xref({ number: 30, text: "closes org/repo#7", repo: "fork/repo" }),
+          xref({ number: 31, text: "Resolves: #7", state: "closed" }),
+          xref({ number: 32, text: "fix https://github.com/org/repo/issues/7 by retrying", state: "open" }),
+          xref({ number: 33, text: "Closes #7", state: "closed", merged: true }),
+        ],
+      });
+      expect(hot.map((i) => i.fix)).toEqual([
+        { state: "merged", number: 33, url: "https://github.com/org/repo/pull/33" },
+      ]);
+    });
+
+    it("keeps the issue without a status when the lookup fails or the run cap is spent", async () => {
+      vi.spyOn(console, "error").mockImplementation(() => {});
+      const failed = await run(hotOne, {}, EMPTY, newHotIssueCalls(), { 7: "fail" });
+      expect(failed.hot.map((i) => [i.number, i.fix])).toEqual([[7, undefined]]);
+      vi.restoreAllMocks();
+      const spent = { ...newHotIssueCalls(), statusCalls: HOT_ISSUE_MAX_STATUS_CALLS };
+      const capped = await run(hotOne, {}, EMPTY, spent);
+      expect(capped.timelines).toEqual([]);
+      expect(capped.hot.map((i) => [i.number, i.fix])).toEqual([[7, undefined]]);
+    });
   });
 
   it("skips an issue whose gain fetch fails, keeping the others", async () => {

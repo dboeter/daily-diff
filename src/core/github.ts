@@ -281,32 +281,56 @@ export const HOT_ISSUE_MAX_COUNT_CALLS = 250;
  * plus the pull requests, so 8 pages covers it. Hitting the cap is logged.
  */
 export const HOT_ISSUE_MAX_PAGES = 8;
+/**
+ * Fix-status lookups per run (`fetchFixStatus`, one core call each), shared by every repo: one per
+ * hot issue sent to the prompt, so 33 repos × HOT_ISSUES_PER_REPO. With the list pages, count calls
+ * and releases the daily worst case is 547 + 66 = 613 core calls, under the Actions token's 1,000 an hour.
+ */
+export const HOT_ISSUE_MAX_STATUS_CALLS = 66;
 /** Matched against each label name, so "area:security" and "type: regression" count. */
 const HOT_LABEL = /regression|security/i;
 export function issueEngagement(i: GitHubItem): number {
   return i.comments + (i.reactions?.["+1"] ?? 0);
 }
 
+/** The regression or security label that lowers the issue's bar, as the tracker names it. */
+export function hotIssueLabel(i: GitHubItem): string | undefined {
+  return i.labels.find((l) => HOT_LABEL.test(l.name))?.name;
+}
+
 /** The engagement an issue needs to be hot: lower with a regression or security label. */
 function hotIssueBar(i: GitHubItem): number {
-  return i.labels.some((l) => HOT_LABEL.test(l.name))
-    ? HOT_ISSUE_MIN_ENGAGEMENT_LABELLED
-    : HOT_ISSUE_MIN_ENGAGEMENT;
+  return hotIssueLabel(i) ? HOT_ISSUE_MIN_ENGAGEMENT_LABELLED : HOT_ISSUE_MIN_ENGAGEMENT;
+}
+
+/** A pull request linked to a hot issue as its fix (`fetchFixStatus`): merged, or still open. */
+export interface FixStatus {
+  state: "open" | "merged";
+  number: number;
+  url: string;
 }
 
 /**
  * A hot issue with `gain`: its comments + 👍 gained since `gainSince` (a CST
  * date, from a snapshot baseline older than yesterday), else in the report window.
+ * `fix`: its linked fix PR, when the lookup found one.
  */
 export interface HotIssue extends GitHubItem {
   gain: number;
   gainSince?: string;
+  fix?: FixStatus;
 }
 
-/** An issue's comments and 👍 reactions, as far as fetched; only `created_at` is read. */
+/** Who wrote a comment or reaction; `type` is "Bot" for an app. */
+export interface ActivityUser {
+  login: string;
+  type?: string;
+}
+
+/** An issue's comments and 👍 reactions, as far as fetched. */
 export interface IssueActivity {
-  comments: { created_at: string }[];
-  thumbs: { created_at: string }[];
+  comments: { created_at: string; user?: ActivityUser | null; body?: string | null }[];
+  thumbs: { created_at: string; user?: ActivityUser | null }[];
 }
 
 /** `digests/hot-issues-state.json`: the hot issues a page showed, a `ReportedState` of `hotIssueStateItem`s. */
@@ -426,10 +450,23 @@ export function hotIssueCandidates(
     .sort((a, b) => issueEngagement(b) - issueEngagement(a));
 }
 
-/** Comments and 👍 created at or after `since`; an edited older comment does not count. */
+const isBot = (u: ActivityUser | null | undefined) => u?.type === "Bot" || /\[bot\]$/i.test(u?.login ?? "");
+/**
+ * A comment that is only a slash command and its argument ("/assign", "/label bug"): on
+ * 2026-10-28 Gemini #15404 qualified on two gemini-cli[bot] comments and one "/assign".
+ */
+const BARE_COMMAND = /^\/[\w-]+(?:[ \t]+\S+)?$/;
+
+/**
+ * Comments and 👍 created at or after `since`, by people: an edited older comment, a bot's
+ * comment or 👍 and a bare slash command do not count.
+ */
 export function engagementGained(activity: IssueActivity, since: Date): number {
   const isNew = (x: { created_at: string }) => new Date(x.created_at) >= since;
-  return activity.comments.filter(isNew).length + activity.thumbs.filter(isNew).length;
+  const comments = activity.comments.filter(
+    (c) => isNew(c) && !isBot(c.user) && !BARE_COMMAND.test((c.body ?? "").trim()),
+  );
+  return comments.length + activity.thumbs.filter((t) => isNew(t) && !isBot(t.user)).length;
 }
 
 /** What `selectHotIssues` reads besides the listed issues. */
@@ -511,7 +548,7 @@ async function fetchIssueActivity(
   if (i.comments > 0) made.calls++;
   const comments =
     i.comments > 0
-      ? await githubGet<{ created_at: string }[]>(`${base}/comments`, {
+      ? await githubGet<IssueActivity["comments"]>(`${base}/comments`, {
           since: since.toISOString(),
           per_page: perPage,
         })
@@ -519,13 +556,13 @@ async function fetchIssueActivity(
   const totalThumbs = i.reactions?.["+1"] ?? 0;
   const thumbsPage = (page: number) => {
     made.calls++;
-    return githubGet<{ created_at: string }[]>(`${base}/reactions`, {
+    return githubGet<IssueActivity["thumbs"]>(`${base}/reactions`, {
       content: "+1",
       per_page: perPage,
       page: String(page),
     });
   };
-  let thumbs: { created_at: string }[] = [];
+  let thumbs: IssueActivity["thumbs"] = [];
   if (totalThumbs > 0) {
     const last = Math.ceil(totalThumbs / ACTIVITY_PAGE);
     thumbs = await thumbsPage(last);
@@ -542,6 +579,8 @@ export interface HotIssueCalls {
   countCalls: number;
   /** Candidates not counted: the run had used HOT_ISSUE_MAX_COUNT_CALLS. */
   skipped: number;
+  /** Fix-status lookups made (`fetchFixStatus`), at most HOT_ISSUE_MAX_STATUS_CALLS. */
+  statusCalls: number;
 }
 
 /** One repo's candidates waiting for the run's count phase, and the activity fetched for them. */
@@ -583,16 +622,62 @@ export interface HotIssueRun {
 }
 
 export function newHotIssueCalls(): HotIssueCalls {
-  return { listPages: 0, countCalls: 0, skipped: 0 };
+  return { listPages: 0, countCalls: 0, skipped: 0, statusCalls: 0 };
 }
 
 /** The run's one hot-issue log line. */
 export function hotIssueCallsLine(c: HotIssueCalls): string {
   return (
-    `[github] hot issues: ${c.listPages} list pages, ${c.countCalls} count calls` +
+    `[github] hot issues: ${c.listPages} list pages, ${c.countCalls} count calls, ${c.statusCalls} fix-status calls` +
     (c.skipped ? `, ${c.skipped} candidates skipped past the run cap of ${HOT_ISSUE_MAX_COUNT_CALLS}` : "")
   );
 }
+
+/** A timeline event, as far as `fetchFixStatus` reads it: a cross-reference's source issue or PR. */
+interface TimelineEvent {
+  event: string;
+  source?: {
+    issue?: {
+      number: number;
+      state: string;
+      html_url: string;
+      title?: string;
+      body?: string | null;
+      pull_request?: { merged_at?: string | null } | null;
+      repository?: { full_name: string };
+    };
+  };
+}
+
+/**
+ * The issue's fix: a pull request of the same repo that cross-references it with a GitHub
+ * closing keyword ("fixes #N", "closes owner/repo#N", the issue URL), merged first, else an
+ * open one; a PR that only mentions the issue is not its fix. One call: the timeline's first
+ * page of 100 events, oldest first, so an issue with more events may have its fix PR unseen.
+ */
+export async function fetchFixStatus(repo: string, i: GitHubItem): Promise<FixStatus | undefined> {
+  const events = await githubGet<TimelineEvent[]>(
+    `https://api.github.com/repos/${repo}/issues/${i.number}/timeline`,
+    { per_page: "100" },
+  );
+  const ref = `(?:#|${escapeRe(repo)}#|https://github\\.com/${escapeRe(repo)}/issues/)${i.number}(?!\\d)`;
+  const closes = new RegExp(`\\b(?:close[sd]?|fix(?:e[sd])?|resolve[sd]?)\\b:?\\s+${ref}`, "i");
+  const fixes = events.flatMap((e) => {
+    const pr = e.source?.issue;
+    return e.event === "cross-referenced" &&
+      pr?.pull_request &&
+      pr.repository?.full_name.toLowerCase() === repo.toLowerCase() &&
+      closes.test(`${pr.title ?? ""}\n${pr.body ?? ""}`)
+      ? [pr]
+      : [];
+  });
+  const merged = fixes.find((pr) => pr.pull_request?.merged_at);
+  const open = fixes.find((pr) => pr.state === "open");
+  const fix = merged ?? open;
+  return fix && { state: merged ? "merged" : "open", number: fix.number, url: fix.html_url };
+}
+
+const escapeRe = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
 /** The most core calls `fetchIssueActivity` makes for an issue. */
 function maxActivityCalls(i: GitHubItem): number {
@@ -667,7 +752,8 @@ async function countHotIssues(queue: HotIssueQueue, calls: HotIssueCalls): Promi
  * (`listUpdatedIssues`) and its total goes into `run.seen`. The gain comes
  * from the snapshot or the issue's age where it can (`knownGain`), else from
  * the API for up to HOT_ISSUE_MAX_CHECKED candidates, counted in the run's
- * shared count phase (`countHotIssues`) once every repo has listed. A failed
+ * shared count phase (`countHotIssues`) once every repo has listed. Each
+ * selected issue then gets one fix-status lookup (`withFixStatus`). A failed
  * gain fetch skips that issue; a failed list should be treated as "no hot
  * issues", not a failed repo.
  */
@@ -695,7 +781,21 @@ export async function fetchHotIssues(repo: string, since: Date, run: HotIssueRun
   }
   queue.counted ??= queue.full.then(() => countHotIssues(queue, run.calls));
   await queue.counted;
-  return selectHotIssues(issues, ctx);
+  return Promise.all(selectHotIssues(issues, ctx).map((i) => withFixStatus(repo, i, run.calls)));
+}
+
+/** The issue with its fix status while HOT_ISSUE_MAX_STATUS_CALLS lasts; a failed lookup shows none and keeps the issue. */
+async function withFixStatus(repo: string, i: HotIssue, calls: HotIssueCalls): Promise<HotIssue> {
+  // Reserved before the await: the repos look up in parallel and share the cap.
+  if (calls.statusCalls >= HOT_ISSUE_MAX_STATUS_CALLS) return i;
+  calls.statusCalls++;
+  try {
+    const fix = await fetchFixStatus(repo, i);
+    return fix ? { ...i, fix } : i;
+  } catch (err) {
+    console.error(`  [github] ${repo}#${i.number} fix-status lookup failed: ${err}`);
+    return i;
+  }
 }
 
 /** One `stargazers/history` bucket: a calendar week from Sunday, newest bucket first. */
