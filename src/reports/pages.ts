@@ -29,6 +29,7 @@ import {
   buildDataSummariesPrompt,
   buildDataProsePrompt,
   buildModelsSummariesPrompt,
+  labPostsNoHighlightNote,
   modelSources,
   dropNoHighlightRows,
 } from "./prompts-pages.ts";
@@ -379,7 +380,8 @@ export function labPosts(labs: LabsFetchResult[]): LabPost[] {
  * that no earlier page listed), the stealth table (always shown) and Spotted.
  * Two LLM calls: the posts' and models' row summaries, then Highlights over the
  * rendered sections. A failed summaries call shows the descriptions, a failed
- * Highlights call the failure notice. Null when there is no new post, new
+ * Highlights call the failure notice. A post without page text shows "—" and
+ * makes no Highlight (`dropNoHighlightRows`). Null when there is no new post, new
  * model, 🆕 stealth model or Spotted row. The labs state is saved either way, the
  * models state only once the page is built.
  */
@@ -431,6 +433,10 @@ export async function buildModelsPage(
     ]),
     "models-summaries",
   );
+  // A post without page text (OpenAI's pages answer 403) has only its URL slug: its row shows
+  // "—" whatever the model wrote, and it makes no Highlight (Oracle Apps In Chatgpt, 2026-10-28).
+  const noText = shownPosts.filter((p) => !p.content.trim());
+  for (const p of noText) summaries.delete(p.n);
   const failed = labs.filter((r) => !r.fetchSuccess).map((r) => P.siteFailed(P.labs[r.site]));
   const labBody = [
     shownPosts.length
@@ -483,12 +489,18 @@ export async function buildModelsPage(
       bodyMd,
       MODELS_HIGHLIGHTS_FOCUS,
       dateStr,
-      shownPosts.length || models.length ? undefined : NO_MODEL_NEWS_NOTE,
+      shownPosts.length || models.length
+        ? labPostsNoHighlightNote(noText.map((p) => p.title))
+        : NO_MODEL_NEWS_NOTE,
     ),
     null,
     LLM_TOKENS_LISTING,
   );
-  const highlights = highlightsOnly(prose ?? MSG.summaryFailed);
+  const highlights = dropNoHighlightRows(
+    highlightsOnly(prose ?? MSG.summaryFailed),
+    noText.map((p) => ({ name: p.title, url: p.url })),
+    "models",
+  );
 
   const meta = REPORT_META.line([P.counts(posts.length, models.length, spotted.rows.length)], utcStr);
   const body = `${[highlights, ...tracked].map((s) => `${s}\n\n---\n\n`).join("")}${spottedMd}`;

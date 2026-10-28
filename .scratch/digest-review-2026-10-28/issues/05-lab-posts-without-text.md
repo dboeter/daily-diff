@@ -1,6 +1,6 @@
 # 05: A lab post without page text is never summarized or highlighted
 
-Status: ready-for-agent
+Status: done
 Blocked by: None (can start immediately)
 Findings: M1 [medium] (regression of ticket 03 of the 2026-10-26 round), M2 [medium]; lows L7, L8 — see `../review.md`, `../ai-models-policy.md`
 
@@ -8,12 +8,19 @@ Findings: M1 [medium] (regression of ticket 03 of the 2026-10-26 round), M2 [med
 
 No summary or Highlight on the models page rests on a URL slug. On 2026-10-28 the OpenAI row "Oracle Apps In Chatgpt" got the prompt line "(no page text)", and the model wrote "enabling users to access Oracle Apps directly within the chat interface" anyway; Highlight 3 and `highlights.json` restated it, and `highlights.json` dropped Anthropic's sourced vulnerability-research post to make room. The same happened on 10-27 (GPT-6.1 Terra). The guess was close this time; nothing makes the next one close.
 
-- [ ] Code writes `—` for a lab post with empty content, whatever the model returns
-- [ ] Such a row is named to the Highlights prose call as no Highlight, and a Highlight about it is dropped in code (`dropNoHighlightRows`, as Trends and the data report do)
-- [ ] `highlights.json` cannot pick a highlight about such a row
-- [ ] Optional, after checking from a GitHub runner: OpenAI's `https://openai.com/news/rss.xml` supplies each post's title, description and publish date (it answered from a local machine on 2026-10-27; CI reachability is unverified). That would also fix L7 (OpenAI row dates are sitemap generation time) and L8 (the `security` and `global-affairs` sub-sitemaps are not crawled)
-- [ ] A test: an OpenAI post with empty content renders `—` and yields no Highlight
+- [x] Code writes `—` for a lab post with empty content, whatever the model returns
+- [x] Such a row is named to the Highlights prose call as no Highlight, and a Highlight about it is dropped in code (`dropNoHighlightRows`, as Trends and the data report do)
+- [x] `highlights.json` cannot pick a highlight about such a row
+- [ ] Optional, after checking from a GitHub runner: OpenAI's `https://openai.com/news/rss.xml` supplies each post's title, description and publish date (it answered from a local machine on 2026-10-27; CI reachability is unverified). That would also fix L7 (OpenAI row dates are sitemap generation time) and L8 (the `security` and `global-affairs` sub-sitemaps are not crawled). Not done: it needs a check from a GitHub runner first, and `src/sources/labs.ts` was out of scope for this change
+- [x] A test: an OpenAI post with empty content renders `—` and yields no Highlight
 
 ## Comments
 
 From the review: `src/sources/labs.ts:357` builds the OpenAI item with `content: ""` and `titleFromUrl`; `src/reports/prompts-pages.ts:252` prints "(no page text)" and `:271` holds the `N: —` rule; `buildModelsPage` is `src/reports/pages.ts:417-435`.
+
+Done (2026-10-28):
+
+- Cause: `buildModelsPage` rendered the model's summary line for every lab post, and the summaries prompt even allowed a slug-based summary for a post without page text ("unless its title says more than its URL does"). The models Highlights call was not told which rows lack text, and nothing dropped a Highlight about one, so `highlights.json` (which restates the page's own Highlights) could pick it.
+- Changed: `src/reports/pages.ts` `buildModelsPage`: the shown posts with empty `content` (`noText`) lose their summary, so their row shows `—` via `summaryText`'s fallback; their titles go to `buildPageHighlightsPrompt`'s `note` (the no-lab-post case keeps `NO_MODEL_NEWS_NOTE`: the two never apply together); the Highlights pass through `dropNoHighlightRows(…, "models")` by title and URL. Limit of that net: it drops a bullet that names the slug title verbatim, or restates most of a title with 4+ words of 3+ letters (`RESTATED_NAME_MIN_WORDS`), and the prose prompt forbids links, so the URL never matches. A paraphrase of a short slug title gets through, and the prompt note is then the only guard. On 10-27, "Building Scientific Understanding With Academic Communities" (6 words) would have been dropped; "Introducing Gpt 6 1 Terra" (3 words: introducing, gpt, terra) would not ("OpenAI launches GPT-6.1 Terra …", though that model was also a New on OpenRouter row). The 10-28 "Oracle Apps In Chatgpt" (3 words) would not be dropped either, given its paraphrase. Checked by reading the code, not by running it. Widening the shared threshold would also change what Trends and the data report drop, so it is left as it is. `src/reports/prompts-pages.ts`: new `labPostsNoHighlightNote` (the note's wording); `buildModelsSummariesPrompt`'s rule is now plainly "A post without page text: write `N: —`."; `NoHighlightRow`'s doc names lab posts.
+- Tests: `buildModelsPage` › "shows — for a post without page text and drops a Highlight about it" (`src/__tests__/reports/pages.test.ts`): an OpenAI post with empty content and a model summary renders `—`, is named in the Highlights prompt, and its Highlight is dropped while the Anthropic one stays. `labPostsNoHighlightNote` describe and the updated rule assertion in `buildModelsSummariesPrompt` (`src/__tests__/reports/prompts-pages.test.ts`). `pnpm typecheck`, `pnpm lint`, `pnpm test` (1044 passed) clean.
+- Docs: AGENTS.md, AI Models & Labs, Lab posts bullet: "OpenAI's pages answer 403 to datacenter IPs, so its titles come from the URL slug." → "OpenAI's pages answer 403 to datacenter IPs, so its titles come from the URL slug, and a post without page text shows `—` and makes no Highlight: it is named to the Highlights call as no Highlight, and a Highlight about it is dropped in code (`dropNoHighlightRows`)." Also in the Trends bullet "and a Highlight about it is dropped in code (`dropNoHighlightRows`), as the data report does with `minor` rows" → "…, as the data report does with `minor` rows and the models page with lab posts without page text". Not AGENTS.md but out of this change's file scope: the `note` doc comment of `buildPageHighlightsPrompt` (`src/reports/prompts.ts`), "e.g. the models page with no lab post or new model", now also carries the lab-posts-without-text rule.

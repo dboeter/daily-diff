@@ -7,6 +7,7 @@ import {
   buildHighlightsPrompt,
   highlightsSection,
   buildModelsSummariesPrompt,
+  labPostsNoHighlightNote,
   buildPolicyProsePrompt,
   buildPolicySummariesPrompt,
   buildSpottedSummariesPrompt,
@@ -251,9 +252,18 @@ describe("buildModelsSummariesPrompt", () => {
     expect(prompt).toContain("2. P (OpenAI post, https://openai.com/news/p) — (no page text)");
     expect(prompt).toContain("3. M (OpenRouter model `x/m`) — catalog description: A coding model.");
     expect(prompt).not.toContain("262144");
-    expect(prompt).toContain("`N: —`, unless its title says more than its URL");
+    expect(prompt).toContain("A post without page text: write `N: —`.");
     expect(prompt).toContain("its marketing claims");
     expect(prompt).toContain("3 lines in total");
+  });
+});
+
+describe("labPostsNoHighlightNote", () => {
+  it("names each post without page text as no Highlight, and is undefined without one", () => {
+    expect(labPostsNoHighlightNote(["Oracle Apps In Chatgpt", "Gpt 6 1 Terra"])).toBe(
+      'These lab posts have no page text, only a title: no Highlight for them. "Oracle Apps In Chatgpt", "Gpt 6 1 Terra"',
+    );
+    expect(labPostsNoHighlightNote([])).toBeUndefined();
   });
 });
 
