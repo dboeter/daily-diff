@@ -14,6 +14,8 @@ import {
   HOT_ISSUE_MAX_COUNT_CALLS,
   HOT_ISSUE_MAX_PAGES,
   HOT_ISSUE_MAX_STATUS_CALLS,
+  HOT_ISSUE_MAX_VERIFIED,
+  gainWindowStart,
   hotIssueCallsLine,
   newHotIssueCalls,
   newHotIssueQueue,
@@ -207,11 +209,52 @@ describe("selectHotIssues, gain counted by the API", () => {
 describe("selectHotIssues, gain from the snapshot", () => {
   const YESTERDAY = "2026-10-03";
 
-  it("takes the gain from yesterday's total and needs no fetch", () => {
+  it("takes the gain from yesterday's total, which a recount can only lower", () => {
     const i = issue({ number: 1, comments: 30 });
     const c = ctx({ snapshot: snap({ "org/repo#1": { date: YESTERDAY, total: 18 } }) });
-    expect(hotIssuesToCheck([i], c)).toEqual([]);
+    expect(hotIssuesToCheck([i], c).map((x) => x.number)).toEqual([1]);
     expect(selectHotIssues([i], c).map((x) => [x.gain, x.gainSince])).toEqual([[12, undefined]]);
+    // An API count past the known gain (edits, a long window) does not raise it.
+    const recounted = selectHotIssues([i], { ...c, activity: new Map([[1, act({ newComments: 20 })]]) });
+    expect(recounted.map((x) => x.gain)).toEqual([12]);
+  });
+
+  it("recounts a baseline gain without bots and /assign, and drops the issue when people added too little", () => {
+    // Gemini #15404 (2026-10-28) on the baseline path: +3 since yesterday, labelled area/security (bar 3).
+    const gemini = issue({ number: 15404, comments: 16, labels: ["area/security"] });
+    const c = ctx({ snapshot: snap({ "org/repo#15404": { date: YESTERDAY, total: 13 } }) });
+    expect(selectHotIssues([gemini], c).map((x) => x.gain)).toEqual([3]);
+    const by = (login: string, body: string, type = "User") => ({
+      created_at: IN_WINDOW,
+      user: { login, type },
+      body,
+    });
+    const activity: IssueActivity = {
+      comments: [
+        by("gemini-cli[bot]", "Triage", "Bot"),
+        by("Neal006", "/assign"),
+        by("gemini-cli[bot]", "Assigned"),
+      ],
+      thumbs: [],
+    };
+    expect(hotIssuesToCheck([gemini], c).map((x) => x.number)).toEqual([15404]);
+    expect(selectHotIssues([gemini], { ...c, activity: new Map([[15404, activity]]) })).toEqual([]);
+  });
+
+  it("counts a two-day-old baseline's recount from the day after it", () => {
+    const i = issue({ number: 1, comments: 30 });
+    const c = ctx({ snapshot: snap({ "org/repo#1": { date: "2026-10-02", total: 10 } }) });
+    expect(gainWindowStart(i, c)).toEqual(new Date(SINCE.getTime() - 24 * 60 * 60 * 1000));
+    expect(gainWindowStart(i, ctx())).toEqual(SINCE);
+  });
+
+  it(`recounts at most ${HOT_ISSUE_MAX_VERIFIED} known gains per repo, highest first, before the unknown ones`, () => {
+    const known = Array.from({ length: 6 }, (_, n) =>
+      issue({ number: n + 1, comments: 20 + n, created_at: IN_WINDOW }),
+    );
+    const old = issue({ number: 99, comments: 500 });
+    const toCheck = hotIssuesToCheck([...known, old], ctx()).map((x) => x.number);
+    expect(toCheck).toEqual([6, 5, 4, 3, 99]);
   });
 
   it("is not hot when the total barely moved since yesterday", () => {
@@ -246,13 +289,23 @@ describe("selectHotIssues, gain from the snapshot", () => {
     expect(selectHotIssues([i], ctx({ snapshot: afterFirstRun })).map((x) => x.gain)).toEqual([12]);
   });
 
-  it("counts the whole total of an issue opened in the window, with no fetch", () => {
+  it("counts the whole total of an issue opened in the window, less its bot comments once recounted", () => {
     const i = issue({ number: 1, comments: 12, created_at: IN_WINDOW });
-    expect(hotIssuesToCheck([i], ctx())).toEqual([]);
+    expect(hotIssuesToCheck([i], ctx()).map((x) => x.number)).toEqual([1]);
     expect(selectHotIssues([i], ctx()).map((x) => x.gain)).toEqual([12]);
+    const botFirst: IssueActivity = {
+      comments: [
+        { created_at: IN_WINDOW, user: { login: "triage-bot", type: "Bot" }, body: "Thanks" },
+        ...dated(11, IN_WINDOW),
+      ],
+      thumbs: [],
+    };
+    expect(selectHotIssues([i], ctx({ activity: new Map([[1, botFirst]]) })).map((x) => x.gain)).toEqual([
+      11,
+    ]);
   });
 
-  it("keeps Codex #56691 (53 now, 40 yesterday) hot without a fetch", () => {
+  it("keeps Codex #56691 (53 now, 40 yesterday) hot from its baseline", () => {
     // 2026-10-26: 53 comments + 👍, 13 of them in the last 24h, behind older threads in a top-10-by-total cut.
     const codex = issue({ number: 56691, comments: 45, thumbs: 8 });
     const c = ctx({
@@ -261,7 +314,6 @@ describe("selectHotIssues, gain from the snapshot", () => {
       since: new Date("2026-10-25T20:00:00Z"),
       snapshot: snap({ "openai/codex#56691": { date: "2026-10-25", total: 40 } }),
     });
-    expect(hotIssuesToCheck([codex], c)).toEqual([]);
     expect(selectHotIssues([codex], c).map((x) => [x.number, x.gain])).toEqual([[56691, 13]]);
   });
 });
@@ -466,14 +518,18 @@ describe("fetchHotIssues", () => {
       per_page: "100",
       page: "1",
     });
+    // #7, opened in the window, is recounted without bots first; #9 has no known gain.
     const comments = urls.filter((u) => u.pathname.endsWith("/comments"));
-    expect(comments.map((u) => u.pathname)).toEqual(["/repos/org/repo/issues/9/comments"]);
-    expect(comments[0]!.searchParams.get("since")).toBe(SINCE.toISOString());
+    expect(comments.map((u) => u.pathname)).toEqual([
+      "/repos/org/repo/issues/7/comments",
+      "/repos/org/repo/issues/9/comments",
+    ]);
+    expect(comments[1]!.searchParams.get("since")).toBe(SINCE.toISOString());
     expect(hot.map((i) => [i.number, i.gain])).toEqual([[7, 12]]);
     expect(seen).toEqual({ "org/repo#7": 12, "org/repo#9": 60, "org/repo#11": 2 });
   });
 
-  it("makes no gain call for an issue with a baseline from yesterday", async () => {
+  it("recounts a gain from yesterday's baseline in one comments call", async () => {
     const { hot, urls } = await run(
       [issue({ number: 9, comments: 60 })],
       {},
@@ -481,8 +537,33 @@ describe("fetchHotIssues", () => {
         "org/repo#9": { date: "2026-10-03", total: 45 },
       }),
     );
-    expect(urls.map((u) => u.pathname)).toEqual([LIST]);
+    expect(urls.map((u) => u.pathname)).toEqual([LIST, "/repos/org/repo/issues/9/comments"]);
     expect(hot.map((i) => [i.number, i.gain])).toEqual([[9, 15]]);
+  });
+
+  it("does not show a baseline-path issue whose gain is bot comments and /assign (Gemini #15404)", async () => {
+    const gemini = issue({ number: 15404, comments: 16, labels: ["area/security"] });
+    const by = (login: string, body: string, type = "User") => ({
+      created_at: IN_WINDOW,
+      user: { login, type },
+      body,
+    });
+    const { hot, timelines } = await run(
+      [gemini],
+      {
+        15404: {
+          comments: [
+            by("gemini-cli[bot]", "Triage", "Bot"),
+            by("Neal006", "/assign"),
+            by("gemini-cli[bot]", "Assigned"),
+          ],
+          thumbs: [],
+        },
+      },
+      snap({ "org/repo#15404": { date: "2026-10-03", total: 13 } }),
+    );
+    expect(hot).toEqual([]);
+    expect(timelines).toEqual([]);
   });
 
   it("fetches nothing for an issue whose total is under the bar", async () => {
@@ -539,7 +620,7 @@ describe("fetchHotIssues", () => {
     expect(log).toHaveBeenCalledWith(expect.stringContaining(`stopped at ${HOT_ISSUE_MAX_PAGES} pages`));
   });
 
-  it("finds a small-total old issue that surged, from its snapshot baseline, with no count call", async () => {
+  it("finds a small-total old issue that surged, from its snapshot baseline, recounting only it", async () => {
     const { hot, urls } = await run(
       [issue({ number: 5, comments: 300 }), issue({ number: 8, comments: 16, thumbs: 2 })],
       {},
@@ -548,7 +629,12 @@ describe("fetchHotIssues", () => {
         "org/repo#8": { date: "2026-10-03", total: 6 },
       }),
     );
-    expect(urls.map((u) => u.pathname)).toEqual([LIST]);
+    // #5's gain (+1) is under the bar, so only #8 is recounted.
+    expect(urls.map((u) => u.pathname)).toEqual([
+      LIST,
+      "/repos/org/repo/issues/8/comments",
+      "/repos/org/repo/issues/8/reactions",
+    ]);
     expect(hot.map((i) => [i.number, i.gain])).toEqual([[8, 12]]);
   });
 

@@ -268,6 +268,13 @@ export const HOT_ISSUES_PER_REPO = 2;
  */
 export const HOT_ISSUE_MAX_CHECKED = 10;
 /**
+ * Candidates per repo whose known gain (snapshot delta, or a new issue's total) clears the bar and
+ * is recounted by the API without bots and slash commands, highest gain first: twice the issues
+ * shown, so a drop still leaves recounted ones. On 2026-10-28 Gemini #15404 qualified on two
+ * gemini-cli[bot] comments and "/assign". Their calls come out of HOT_ISSUE_MAX_COUNT_CALLS.
+ */
+export const HOT_ISSUE_MAX_VERIFIED = 2 * HOT_ISSUES_PER_REPO;
+/**
  * Per-issue count calls per run, shared by every repo: with the list pages and
  * the releases it keeps a daily run under the Actions GITHUB_TOKEN's 1,000 core
  * requests an hour (33 repos × 10 × 3 would be 990 alone). Spent round-robin
@@ -498,25 +505,50 @@ function knownGain(i: GitHubItem, ctx: HotIssueContext): { gain: number; gainSin
   return undefined;
 }
 
-/** The candidates without a known gain whose activity to fetch: at most HOT_ISSUE_MAX_CHECKED, highest total first. */
+/**
+ * Where a candidate's counted gain starts: the window's start, or for a baseline older than
+ * yesterday the same time of day on the day after the baseline (the snapshot keeps dates only).
+ */
+export function gainWindowStart(i: GitHubItem, ctx: HotIssueContext): Date {
+  const base = snapshotBaseline(ctx.snapshot.items[snapshotKey(ctx.repo, i)], ctx.dateStr);
+  const dayMs = DAY_S * 1000;
+  const extraDays = base ? (Date.parse(ctx.dateStr) - Date.parse(base.date)) / dayMs - 1 : 0;
+  return new Date(ctx.since.getTime() - Math.max(0, extraDays) * dayMs);
+}
+
+/**
+ * The candidates whose activity to fetch, highest first: up to HOT_ISSUE_MAX_VERIFIED whose known
+ * gain clears the bar, recounted without bots and commands (a known gain counts them), then up to
+ * HOT_ISSUE_MAX_CHECKED without a known gain, by total.
+ */
 export function hotIssuesToCheck(items: GitHubItem[], ctx: HotIssueContext): GitHubItem[] {
-  return hotIssueCandidates(items, ctx.isRepeat)
-    .filter((i) => !knownGain(i, ctx))
-    .slice(0, HOT_ISSUE_MAX_CHECKED);
+  const candidates = hotIssueCandidates(items, ctx.isRepeat);
+  const toVerify = candidates
+    .flatMap((i) => {
+      const known = knownGain(i, ctx);
+      return known && known.gain >= hotIssueBar(i) ? [{ i, gain: known.gain }] : [];
+    })
+    .sort((a, b) => b.gain - a.gain)
+    .slice(0, HOT_ISSUE_MAX_VERIFIED)
+    .map(({ i }) => i);
+  return [...toVerify, ...candidates.filter((i) => !knownGain(i, ctx)).slice(0, HOT_ISSUE_MAX_CHECKED)];
 }
 
 /**
  * Pick the hot issues: gained engagement over the bar, whenever opened.
  * Highest gain first, capped at HOT_ISSUES_PER_REPO. A candidate with neither
- * a known gain nor fetched activity is skipped.
+ * a known gain nor fetched activity is skipped. A known gain with fetched activity
+ * is the people's part of it (the count, never above the known gain); one the run
+ * could not recount (past HOT_ISSUE_MAX_VERIFIED, the cap, a failed fetch) keeps its known gain.
  */
 export function selectHotIssues(items: GitHubItem[], ctx: HotIssueContext): HotIssue[] {
   return hotIssueCandidates(items, ctx.isRepeat)
     .flatMap((i): HotIssue[] => {
       const known = knownGain(i, ctx);
-      if (known) return [{ ...i, ...known }];
       const activity = ctx.activity?.get(i.number);
-      return activity ? [{ ...i, gain: engagementGained(activity, ctx.since) }] : [];
+      const counted = activity && engagementGained(activity, gainWindowStart(i, ctx));
+      if (known) return [{ ...i, ...known, gain: Math.min(known.gain, counted ?? known.gain) }];
+      return counted !== undefined ? [{ ...i, gain: counted }] : [];
     })
     .filter((i) => i.gain >= hotIssueBar(i))
     .sort((a, b) => b.gain - a.gain)
@@ -586,7 +618,8 @@ export interface HotIssueCalls {
 /** One repo's candidates waiting for the run's count phase, and the activity fetched for them. */
 interface QueuedRepo {
   repo: string;
-  since: Date;
+  /** Where a candidate's count starts (`gainWindowStart`). */
+  since: (i: GitHubItem) => Date;
   toCheck: GitHubItem[];
   activity: Map<number, IssueActivity>;
 }
@@ -736,7 +769,7 @@ async function countHotIssues(queue: HotIssueQueue, calls: HotIssueCalls): Promi
         calls.countCalls += cost;
         const made = { calls: 0 };
         try {
-          e.activity.set(issue.number, await fetchIssueActivity(e.repo, issue, e.since, made));
+          e.activity.set(issue.number, await fetchIssueActivity(e.repo, issue, e.since(issue), made));
         } catch (err) {
           console.error(`  [github] ${e.repo}#${issue.number} engagement fetch failed, skipped: ${err}`);
         } finally {
@@ -752,13 +785,14 @@ async function countHotIssues(queue: HotIssueQueue, calls: HotIssueCalls): Promi
  * (`listUpdatedIssues`) and its total goes into `run.seen`. The gain comes
  * from the snapshot or the issue's age where it can (`knownGain`), else from
  * the API for up to HOT_ISSUE_MAX_CHECKED candidates, counted in the run's
- * shared count phase (`countHotIssues`) once every repo has listed. Each
+ * shared count phase (`countHotIssues`) once every repo has listed; that phase
+ * also recounts up to HOT_ISSUE_MAX_VERIFIED known gains without bots. Each
  * selected issue then gets one fix-status lookup (`withFixStatus`). A failed
  * gain fetch skips that issue; a failed list should be treated as "no hot
  * issues", not a failed repo.
  */
 export async function fetchHotIssues(repo: string, since: Date, run: HotIssueRun): Promise<HotIssue[]> {
-  const entry: QueuedRepo = { repo, since, toCheck: [], activity: new Map() };
+  const entry: QueuedRepo = { repo, since: () => since, toCheck: [], activity: new Map() };
   const { queue } = run;
   let issues: GitHubItem[];
   let ctx: HotIssueContext;
@@ -773,6 +807,8 @@ export async function fetchHotIssues(repo: string, since: Date, run: HotIssueRun
       isRepeat: run.isRepeat(repo),
       activity: entry.activity,
     };
+    const c = ctx;
+    entry.since = (i) => gainWindowStart(i, c);
     entry.toCheck = hotIssuesToCheck(issues, ctx);
   } finally {
     // A failed list still joins, with nothing to count: the count phase waits for every repo.
