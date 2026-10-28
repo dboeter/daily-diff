@@ -39,13 +39,7 @@ import { loadReportedState, newItems, nextReportedState, saveReportedState } fro
 import type { TrendingData } from "../trending/compose.ts";
 import { saveTrendingVerdicts } from "../trending/classify.ts";
 import { saveMatchState } from "../trending/match.ts";
-import {
-  lastWeekKeys,
-  saveStarHistory,
-  summaryRows,
-  tidyTrendsSummaries,
-  weekAgo,
-} from "../trending/rank.ts";
+import { lastWeekKeys, saveStarHistory, summaryRows, weekAgo } from "../trending/rank.ts";
 import { trendsFacts } from "../trending/facts.ts";
 import {
   AGENTS_HIGHLIGHTS_FOCUS,
@@ -90,6 +84,7 @@ import {
   spliceTables,
   summaryText,
   TABLES_MARKER,
+  tidyTrendsSummaries,
 } from "./summarized-table.ts";
 import { hfKeys, hfReleaseRows, type HfData } from "../sources/huggingface.ts";
 import type { ResearchPaper } from "../trending/research.ts";

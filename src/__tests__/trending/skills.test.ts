@@ -130,6 +130,18 @@ describe("selectSkillsItems", () => {
       });
       expect(selectSkillsItems(data([], [issue]), new Set(), NOW).issues.map((i) => i.number)).toEqual([556]);
     });
+
+    it("goes by the list an item is in, not its URL", () => {
+      const closed = { state: "closed", closed_at: "2026-10-24T00:00:00Z" };
+      const asIssue = item(557, "2026-10-25T00:00:00Z", closed);
+      const asPr = item(558, "2026-10-25T00:00:00Z", {
+        ...closed,
+        html_url: `https://github.com/${REPO}/issues/558`,
+      });
+      const out = selectSkillsItems(data([asPr], [asIssue]), new Set(), NOW);
+      expect(out.issues.map((i) => i.number)).toEqual([557]);
+      expect(out.prs).toEqual([]);
+    });
   });
 
   it("leaves nothing when nothing moved, so the section is left out", () => {

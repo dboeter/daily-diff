@@ -426,7 +426,7 @@ export const TALKED_ABOUT_MIN_POINTS: Record<StorySource, number> = { hn: 50, lo
  */
 export const POLICY_TALK_PER_SOURCE: Record<StorySource, number> = { hn: 2, lobsters: 1, devto: 1 };
 /** Points a policy story needs for the Overview, per source: the same bar as `other`. */
-export const POLICY_TALK_MIN_POINTS: Record<StorySource, number> = { hn: 50, lobsters: 10, devto: 20 };
+export const POLICY_TALK_MIN_POINTS = TALKED_ABOUT_MIN_POINTS;
 const POLICY_TOPIC = "policy";
 
 /** An Overview "Also talked about" row: a story with the topic Jev routed it to. */

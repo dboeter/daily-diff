@@ -5,6 +5,7 @@
  */
 
 import type { RepoConfig } from "../core/github.ts";
+import { escapeRegex } from "../core/regex.ts";
 import { SPOTTED } from "../core/strings.ts";
 import { linkKey, type Story } from "../spotted/pool.ts";
 import type { TrendingData } from "../trending/compose.ts";
@@ -29,10 +30,6 @@ export interface NewsSources {
 
 /** News items per agent, so one viral thread cannot crowd out the rest. */
 export const NEWS_PER_AGENT = 5;
-
-export function escapeRegex(s: string): string {
-  return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-}
 
 /**
  * The terms an agent is matched by: the full "owner/repo", plus explicit
