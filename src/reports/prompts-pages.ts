@@ -117,7 +117,7 @@ ${sourceFidelityRules()}
 }
 
 /**
- * Policy report, call 1 of 2: one 2-sentence summary per numbered table row.
+ * Policy report, call 1 of 2: one 1-2 sentence summary per numbered table row.
  * The rows are the kept items, numbered by fetchPolicyData; parseRowSummaries reads the reply.
  */
 export function buildPolicySummariesPrompt(
@@ -136,7 +136,8 @@ Below are ${items.length} numbered items from official sources and news & commen
 
 ${list}
 
-${summaryLine("2 sentences")} — what was published or decided, and what it means for organisations that deploy AI.
+${summaryLine("1-2 sentences")} — what was published or decided. Add a second sentence only when the text states what the item means for organisations that deploy AI; otherwise write one sentence.
+- Never write about the text itself ("the provided text", "the text does not specify"): leave out what it does not say.
 - Ground every sentence only in the given text. Do not invent obligations, dates, stages or legal status.
 - If the text is empty, say only what the title shows.
 ${summaryOutputRule(items.length)}

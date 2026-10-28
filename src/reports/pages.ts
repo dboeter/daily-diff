@@ -79,6 +79,7 @@ import {
 import {
   numberRows,
   checkCodeTokens,
+  dropInputTalk,
   parseRowSummaries,
   spliceTables,
   summaryText,
@@ -571,7 +572,7 @@ export async function buildPolicyReport(
     highlightsOnly(prose),
     tables(
       checkCodeTokens(
-        parseRowSummaries(summaries),
+        dropInputTalk(parseRowSummaries(summaries), "policy-summaries"),
         new Map(items.map((i) => [i.n, `${i.title} ${i.description}`])),
         "policy-summaries",
       ),

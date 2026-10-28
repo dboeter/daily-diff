@@ -212,7 +212,7 @@ export const POLICY_REPORT = {
     us_states: "US states",
     other: "Elsewhere",
   } satisfies Record<Jurisdiction, string>,
-  // Stage is empty for items from the regular news feeds.
+  // Stage is "—" for items without one (most feed items).
   tableHeader: "| Date | Source | Title | Stage | Summary |\n| :--- | :--- | :--- | :--- | :--- |",
   /** The last section: open deadlines and calendar dates of the next 30 days (src/policy/deadlines.ts). */
   deadlinesHeading: "Coming up",
@@ -224,7 +224,7 @@ export const POLICY_REPORT = {
   newsHeading: "News & commentary",
   newsTableHeader: "| Date | Source | Title | Summary |\n| :--- | :--- | :--- | :--- |",
   /** The meta line's count, and the log's. */
-  newItems: (n: number) => `${n} new items`,
+  newItems: (n: number) => plural(n, "new item"),
   noNewItems: "No new items, skipping report.",
   noData: "No data available, skipping report.",
 } as const;

@@ -602,7 +602,7 @@ export function renderPolicyTable(
   const sections = Object.entries(POLICY_REPORT.headings).map(([jurisdiction, heading]) => {
     const rows = items
       .filter((it) => !it.news && it.jurisdiction === jurisdiction)
-      .map((it) => `${lead(it)}${cell(it.stage ?? "")} | ${cell(summaryText(summaries, it))} |`);
+      .map((it) => `${lead(it)}${cell(it.stage || "—")} | ${cell(summaryText(summaries, it))} |`);
     return rows.length ? `## ${heading}\n\n${POLICY_REPORT.tableHeader}\n${rows.join("\n")}` : "";
   });
   const newsRows = items

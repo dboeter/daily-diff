@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import {
   checkCodeTokens,
+  dropInputTalk,
   numberRows,
   parseRowSummaries,
   spliceTables,
@@ -56,8 +57,8 @@ describe("row numbers", () => {
   it("puts a policy summary on the row with its number, under its jurisdiction, whatever the input order", () => {
     const md = renderPolicyTable(shuffle(policy), reply);
     const nl = md.slice(md.indexOf("## Netherlands"), md.indexOf("## US federal"));
-    expect(nl).toContain("[Title nl-1](https://example.eu/nl-1) |  | S3. |");
-    expect(md).toContain("[Title us-1](https://example.eu/us-1) |  | S4. |");
+    expect(nl).toContain("[Title nl-1](https://example.eu/nl-1) | — | S3. |");
+    expect(md).toContain("[Title us-1](https://example.eu/us-1) | — | S4. |");
     expect(md.slice(md.indexOf("## News & commentary"))).toContain(
       "[Title news-1](https://example.eu/news-1) | S5. |",
     );
@@ -158,7 +159,7 @@ describe("row numbers", () => {
     for (const p of prompts) {
       expect(p).toContain(summaryOutputRule(2));
     }
-    expect(prompts[0]).toContain(summaryLine("2 sentences"));
+    expect(prompts[0]).toContain(summaryLine("1-2 sentences"));
     expect(prompts[1]).toContain(summaryLine("1-2 sentences"));
     expect(prompts[2]).toContain(summaryLine("1-2 sentences"));
   });
@@ -225,5 +226,31 @@ describe("checkCodeTokens", () => {
 
   it("leaves a row without a source alone", () => {
     expect(checkCodeTokens(new Map([[2, "`x`"]]), sources, "test").get(2)).toBe("`x`");
+  });
+});
+
+describe("dropInputTalk", () => {
+  it("drops a sentence about the input and keeps the rest", () => {
+    const out = dropInputTalk(
+      new Map([
+        [
+          1,
+          "The Commission opened a consultation on the AI Act. The provided text does not specify any direct implications for organisations that deploy AI.",
+        ],
+        [2, "The text does not say when. The guidelines apply from August."],
+      ]),
+      "test",
+    );
+    expect(out.get(1)).toBe("The Commission opened a consultation on the AI Act.");
+    expect(out.get(2)).toBe("The guidelines apply from August.");
+  });
+
+  it("leaves a summary without such a sentence untouched", () => {
+    const text = "The U.S.  Senate passed the bill. It requires text labels on AI content.";
+    expect(dropInputTalk(new Map([[1, text]]), "test").get(1)).toBe(text);
+  });
+
+  it("drops a summary with nothing left, so its row shows the description", () => {
+    expect(dropInputTalk(new Map([[1, "The given description is empty."]]), "test").has(1)).toBe(false);
   });
 });
