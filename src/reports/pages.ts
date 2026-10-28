@@ -38,7 +38,13 @@ import { loadReportedState, newItems, nextReportedState, saveReportedState } fro
 import type { TrendingData } from "../trending/compose.ts";
 import { saveTrendingVerdicts } from "../trending/classify.ts";
 import { saveMatchState } from "../trending/match.ts";
-import { lastWeekKeys, saveStarHistory, summaryRows, weekAgo } from "../trending/rank.ts";
+import {
+  lastWeekKeys,
+  saveStarHistory,
+  summaryRows,
+  tidyTrendsSummaries,
+  weekAgo,
+} from "../trending/rank.ts";
 import { trendsFacts } from "../trending/facts.ts";
 import {
   AGENTS_HIGHLIGHTS_FOCUS,
@@ -230,8 +236,8 @@ export async function buildTrendsReport(
   ]);
 
   const rowMap = parseRowSummaries(rowSummaries);
-  const trendingSummaries = parseRowSummaries(summaries);
-  const hfSummaries = parseRowSummaries(models);
+  const trendingSummaries = tidyTrendsSummaries(parseRowSummaries(summaries), report);
+  const hfSummaries = tidyTrendsSummaries(parseRowSummaries(models));
   const tables = report ? renderTrendingTables(report, trendingSummaries) : "";
   const hfTable = renderHfTable(
     hfTableRows,
