@@ -46,6 +46,8 @@ interface Manifest {
   comingUp: string;
   /** The heading of the overview's Also talked about list (talked-about.json). */
   talkedAbout: string;
+  /** The heading of the overview's list of policy stories (talked-about.json rows with `topic: "policy"`). */
+  policyTalk: string;
   /** The Highlights heading (SECTIONS), whose list the web UI renders as a diff hunk. */
   highlights: string;
   /** The table headers of prose columns (PROSE_COLUMNS), stacked full width on a phone. */
@@ -196,6 +198,7 @@ async function main(): Promise<void> {
     overview: OVERVIEW.name,
     comingUp: COMING_UP.heading,
     talkedAbout: TALKED_ABOUT.heading,
+    policyTalk: TALKED_ABOUT.policyHeading,
     highlights: SECTIONS.highlights,
     proseColumns: PROSE_COLUMNS,
     dates: entries,

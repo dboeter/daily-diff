@@ -420,6 +420,14 @@ export const TALKED_ABOUT_PER_SOURCE: Record<StorySource, number> = { hn: 3, lob
  * `other` on 2026-10-26, so only the much-discussed ones (an AI-found PHP RCE at 452 points) make it.
  */
 export const TALKED_ABOUT_MIN_POINTS: Record<StorySource, number> = { hn: 50, lobsters: 10, devto: 20 };
+/**
+ * The Overview's policy list per source, apart from `other`: on 2026-10-28 three `other` essays
+ * (605, 542, 402 points) took HN's slots from Claude's illegally obtained books (323) and police AI (279).
+ */
+export const POLICY_TALK_PER_SOURCE: Record<StorySource, number> = { hn: 2, lobsters: 1, devto: 1 };
+/** Points a policy story needs for the Overview, per source: the same bar as `other`. */
+export const POLICY_TALK_MIN_POINTS: Record<StorySource, number> = { hn: 50, lobsters: 10, devto: 20 };
+const POLICY_TOPIC = "policy";
 
 /** An Overview "Also talked about" row: a story with the topic Jev routed it to. */
 export type TalkedAboutRow = Pick<
@@ -430,10 +438,12 @@ export type TalkedAboutRow = Pick<
 };
 
 /**
- * The Overview's "Also talked about" line: the stories routed to a topic with no page (`policy`,
- * `other`; the maintainer's choice of 2026-10-26), per source the top TALKED_ABOUT_PER_SOURCE by
- * points with at least TALKED_ABOUT_MIN_POINTS, at most SPOTTED_MAX_AGE_DAYS old, no contest entry,
- * each link once and none a Spotted row took (`taken`, `linkKey`s).
+ * The Overview's lists of stories routed to a topic with no page (the maintainer's choices of
+ * 2026-10-26 and 10-28): `policy` first, per source the top POLICY_TALK_PER_SOURCE by points with
+ * at least POLICY_TALK_MIN_POINTS, then the rest (`other`, "Also talked about"), per source the top
+ * TALKED_ABOUT_PER_SOURCE with at least TALKED_ABOUT_MIN_POINTS; at most SPOTTED_MAX_AGE_DAYS old,
+ * no contest entry, each link once and none a Spotted row took (`taken`, `linkKey`s). No topic
+ * probability floor: a story split between policy and other goes by its leading topic.
  */
 export function selectTalkedAbout(
   stories: Story[],
@@ -444,22 +454,32 @@ export function selectTalkedAbout(
 ): TalkedAboutRow[] {
   const oldest = daysBefore(dateStr, SPOTTED_MAX_AGE_DAYS);
   const claimed = new Set(taken);
-  return (Object.keys(TALKED_ABOUT_PER_SOURCE) as StorySource[]).flatMap((source) =>
-    claimRows(
-      stories
-        .filter(
-          (s) =>
-            s.source === source &&
-            topicOf(s) !== undefined &&
-            pageOf(s) === null &&
-            s.points >= TALKED_ABOUT_MIN_POINTS[source] &&
-            s.published.slice(0, 10) >= oldest &&
-            !isContestEntry(s),
-        )
-        .sort((a, b) => b.points - a.points),
-      TALKED_ABOUT_PER_SOURCE[source],
-      claimed,
-    ).map((s) => ({
+  const lanes = [
+    { isPolicy: true, perSource: POLICY_TALK_PER_SOURCE, minPoints: POLICY_TALK_MIN_POINTS },
+    { isPolicy: false, perSource: TALKED_ABOUT_PER_SOURCE, minPoints: TALKED_ABOUT_MIN_POINTS },
+  ];
+  return lanes
+    .flatMap(({ isPolicy, perSource, minPoints }) =>
+      (Object.keys(perSource) as StorySource[]).flatMap((source) =>
+        claimRows(
+          stories
+            .filter(
+              (s) =>
+                s.source === source &&
+                topicOf(s) !== undefined &&
+                (topicOf(s) === POLICY_TOPIC) === isPolicy &&
+                pageOf(s) === null &&
+                s.points >= minPoints[source] &&
+                s.published.slice(0, 10) >= oldest &&
+                !isContestEntry(s),
+            )
+            .sort((a, b) => b.points - a.points),
+          perSource[source],
+          claimed,
+        ),
+      ),
+    )
+    .map((s) => ({
       id: s.id,
       source: s.source,
       title: s.title,
@@ -468,8 +488,7 @@ export function selectTalkedAbout(
       points: s.points,
       comments: s.comments,
       topic: topicOf(s)!,
-    })),
-  );
+    }));
 }
 
 /** Trends' Most discussed per source, sources in this order. */
