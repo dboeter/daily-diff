@@ -1,5 +1,14 @@
+import fs from "node:fs";
 import { describe, it, expect } from "vitest";
-import { parseRssItems, recentNewsItems, type FeedItem } from "../../core/rss.ts";
+import {
+  parseRssItems,
+  plainText,
+  recentNewsItems,
+  tagText,
+  vendorText,
+  VENDOR_DESCRIPTION_MAX_CHARS,
+  type FeedItem,
+} from "../../core/rss.ts";
 
 // Shaped like the Commission digital-strategy feed: guid with an attribute,
 // entity-encoded Drupal HTML in the description that repeats the title.
@@ -72,6 +81,30 @@ describe("parseRssItems", () => {
 
   it("returns nothing for a document that is not a feed", () => {
     expect(parseRssItems("<html><body>Maintenance</body></html>")).toEqual([]);
+  });
+});
+
+describe("vendorText", () => {
+  const xml = fs.readFileSync(new URL("../fixtures/fabric-gateway.xml", import.meta.url), "utf-8");
+  const [gateway] = parseRssItems(xml, vendorText);
+
+  it("the fixture places the Admin APIs heading past the 1,000-character cut", () => {
+    expect(plainText(tagText(xml, "description"), VENDOR_DESCRIPTION_MAX_CHARS)).not.toContain("Admin APIs");
+  });
+
+  it("opens a multi-feature post with every section heading, within the cut", () => {
+    expect(gateway!.description).toMatch(
+      /^Sections: Installer accessibility improvements; Power Query settings; Service start diagnostics; Power BI Desktop compatibility; Admin APIs for connections and gateways \(Preview\); Next steps\. Here is the October 2026 update/,
+    );
+    expect(gateway!.description.length).toBeLessThanOrEqual(VENDOR_DESCRIPTION_MAX_CHARS + 1);
+  });
+
+  it("states each heading once: the body loses the heading elements", () => {
+    expect(gateway!.description.match(/Power Query settings/g)).toHaveLength(1);
+  });
+
+  it("leaves a note without headings as plainText left it, minus the space before punctuation", () => {
+    expect(vendorText("<p>Now in <a>two regions</a>.</p>")).toBe("Now in two regions.");
   });
 });
 

@@ -64,7 +64,8 @@ function isBundlePointer(title: string, description: string): boolean {
   return (
     title.includes("(with behavior changes)") &&
     description
-      .replace(/behavior change bundles?|this release contains the following|read more/gi, "")
+      // "Sections:" is vendorText's label for the post's headings.
+      .replace(/sections:|behavior change bundles?|this release contains the following|read more/gi, "")
       .replace(/[\s:.…]/g, "") === ""
   );
 }

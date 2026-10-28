@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Modelled on the Fabric blog feed's "On-premises data gateway October 2026 release"
+  post (https://blog.fabric.microsoft.com/en-us/blog/feed/, 2026-10-28): a whole post
+  in the description, one <h2> per feature, the new capability's heading ~1,600
+  characters in. Text written for the test; the live post's heading tags are assumed.
+-->
+<rss version="2.0" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Microsoft Fabric Blog</title>
+    <item>
+      <title>On-premises data gateway October 2026 release</title>
+      <link>https://community.fabric.microsoft.com/t5/Fabric-Updates-Blog/On-premises-data-gateway-October-2026-release/ba-p/4800001</link>
+      <pubDate>Mon, 26 Oct 2026 16:00:00 +0000</pubDate>
+      <guid isPermaLink="false">https://blog.fabric.microsoft.com/?p=48001</guid>
+      <category>Data Factory</category>
+      <description><![CDATA[<p>Here is the October 2026 update of the on-premises data gateway (version 3000.338). This release ships the Power Query Engine 2.159.229 and a set of reliability, accessibility and compatibility improvements, along with a new way for administrators to govern connections and gateways across the tenant. Read on for the details of each change, and download the new gateway from the <a href="https://aka.ms/gateway">download page</a>.</p>
+<h2 class="wp-block-heading">Installer accessibility improvements</h2>
+<p>The gateway installer now works fully with screen readers and high-contrast themes. Every step of the setup wizard can be reached by keyboard, focus order follows the visual layout, and each control announces its name and state. Error messages during setup are read aloud and stay on screen until dismissed, so an administrator using assistive technology can complete the installation and the sign-in without a mouse.</p>
+<h2 class="wp-block-heading">Power Query settings</h2>
+<p>The gateway app has a new Power Query settings page. Administrators can set the mashup container memory limit, the number of concurrent evaluations and the spooling folder from the app instead of editing the configuration file by hand. Changes take effect after the gateway service restarts, and the page shows the values currently in use.</p>
+<h2 class="wp-block-heading">Service start diagnostics</h2>
+<p>When the gateway service fails to start, the gateway app now shows the reason: a missing service account permission, a port blocked by the firewall, or a recovery key mismatch. Each reason links to the matching troubleshooting article, and the diagnostics are included in the exported logs for support cases.</p>
+<h2 class="wp-block-heading">Power BI Desktop compatibility</h2>
+<p>This gateway release supports reports built with the October 2026 version of Power BI Desktop. As always, we recommend keeping the gateway and Power BI Desktop on matching monthly versions so that custom connectors and query features behave the same on both.</p>
+<h2 class="wp-block-heading">Admin APIs for connections and gateways (Preview)</h2>
+<p>Fabric administrators and service principals can now list, inspect and manage every connection and gateway in the tenant through REST APIs. The APIs return each connection's owner, data source, gateway cluster and users, let admins add or remove users and rotate credentials, and record every call in the audit log, so tenant-wide governance of connections no longer depends on each connection's owner.</p>
+<h2 class="wp-block-heading">Next steps</h2>
+<p>Download the October 2026 gateway and let us know what you think in the Fabric community forum.</p>]]></description>
+    </item>
+  </channel>
+</rss>

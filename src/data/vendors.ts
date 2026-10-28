@@ -5,7 +5,7 @@
  */
 
 import type { DataConfig, DataFeed, Vendor } from "../core/config.ts";
-import { fetchRssFeed, VENDOR_DESCRIPTION_MAX_CHARS } from "../core/rss.ts";
+import { fetchRssFeed, vendorText } from "../core/rss.ts";
 import { fetchBehaviorChangeBundles, fetchSnowflakeReleases } from "./snowflake.ts";
 import { fetchBigQueryNotes } from "./bigquery.ts";
 import path from "node:path";
@@ -38,7 +38,7 @@ export interface VendorItem {
    * release). "" for a behavior-change bundle whose status gives no full date.
    */
   date: string;
-  /** Plain text, truncated to VENDOR_DESCRIPTION_MAX_CHARS. */
+  /** Plain text (vendorText): its section headings first, truncated to VENDOR_DESCRIPTION_MAX_CHARS. */
   description: string;
   /** A behavior-change bundle's status. */
   stage?: string;
@@ -55,7 +55,7 @@ export interface VendorItem {
 export type VendorNote = Omit<VendorItem, "vendor" | "source" | "stableId">;
 
 async function fetchRssNotes(feed: DataFeed): Promise<VendorNote[]> {
-  const items = await fetchRssFeed(feed.url, VENDOR_DESCRIPTION_MAX_CHARS);
+  const items = await fetchRssFeed(feed.url, vendorText);
   const wanted = feed.categories;
   return items
     .filter((i) => !wanted || i.categories?.some((c) => wanted.includes(c)))
