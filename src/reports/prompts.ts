@@ -59,18 +59,25 @@ const ISSUE_TEMPLATE_LINE_RE = /^[ \t]*(?:_No response_|[-*][ \t]+\[[ xX]\][ \t]
  */
 function issueBody(body: string | null | undefined, maxChars: number): string {
   const text = stripLinkNoise(
-    (body ?? "")
-      .replace(/<!--[\s\S]*?(?:-->|$)/g, " ")
-      .replace(/(```|~~~)[\s\S]*?(\1|$)/g, " ")
-      .replace(/<[^>]*>/g, " ")
-      .replace(ISSUE_TEMPLATE_LINE_RE, ""),
+    withoutCodeAndTags((body ?? "").replace(/<!--[\s\S]*?(?:-->|$)/g, " "), " ").replace(
+      ISSUE_TEMPLATE_LINE_RE,
+      "",
+    ),
   )
     .replace(/\s+/g, " ")
     .trim();
   return text.length > maxChars ? `${text.slice(0, maxChars)}...` : text;
 }
 
-export function formatItem(item: GitHubItem, bodyChars = 300): string {
+/** Text without fenced code blocks (each replaced by `blockGap`; an unclosed one runs to the end) and HTML tags. */
+function withoutCodeAndTags(text: string, blockGap: string): string {
+  return text.replace(/(```|~~~)[\s\S]*?(\1|$)/g, blockGap).replace(/<[^>]*>/g, " ");
+}
+
+/** An issue's or PR's body as the model sees it, outside the hot issues: enough to tell its subject. */
+const ITEM_BODY_CHARS = 300;
+
+export function formatItem(item: GitHubItem, bodyChars = ITEM_BODY_CHARS): string {
   const labels = item.labels.map((l) => l.name).join(", ");
   const labelStr = labels ? ` [${labels}]` : "";
   const t = {
@@ -170,12 +177,10 @@ const NEWS_DESCRIPTION_CHARS = 300;
 /** Newest stable releases shown per project; llama.cpp alone tags 35–70 a week. */
 const RELEASES_PER_PROJECT = 10;
 /**
- * A stable release's notes as the model sees them (the agents and data reports), counted after
- * `releaseNotes` strips the links: OpenCode v2.2.0's 35 KB notes strip to 17 KB, its Breaking
- * changes and Highlights to the first 1.8 KB. Prompt input, which `callLlm`'s token budgets (output
- * caps) do not count: 16 agents or 17 data repos × RELEASES_PER_PROJECT × 2000 chars is at worst
- * ~85K tokens, inside gpt-4o's 128K context and the daily fallbacks' 1M; a normal day sends a few releases.
- * The data page's Releases this week rows have no code cap: only releases no earlier report showed.
+ * A stable release's notes as the model sees them (agents and data reports), counted after
+ * `releaseNotes` strips the links: OpenCode v2.2.0's Breaking changes and Highlights fit in 1.8 KB.
+ * Prompt input, outside `callLlm`'s output budgets: at worst 17 repos × RELEASES_PER_PROJECT × 2000
+ * chars ≈ 85K tokens, inside gpt-4o's 128K context (the data page's Releases this week rows are uncapped).
  */
 export const RELEASE_BODY_CHARS = 2000;
 // A prerelease is reported only if its notes show notable features, so the
@@ -193,10 +198,7 @@ const PREVIEW_BODY_CHARS = 1500;
  * change and the report listed install commands.
  */
 export function releaseNotes(body: string | null | undefined, maxChars: number): string {
-  const text = compactChangelog(body ?? "")
-    .replace(/(```|~~~)[\s\S]*?(\1|$)/g, "\n")
-    .replace(/<[^>]*>/g, " ")
-    .replace(/\[[^\]]*\]\(#[^)]*\)/g, " ");
+  const text = withoutCodeAndTags(compactChangelog(body ?? ""), "\n").replace(/\[[^\]]*\]\(#[^)]*\)/g, " ");
   return wholeItems(stripLinkNoise(priorityFirst(text)), maxChars);
 }
 
@@ -235,15 +237,24 @@ const CONTRIBUTOR_LINE_RE =
 const PRIORITY_HEADING_RE =
   /\b(?:breaking|removed|removals?|deprecat\w*|upgrade notes?|upgrade guide|upgrading|migrat\w*|security)\b/i;
 
-/** The sections under a PRIORITY_HEADING_RE heading (each through its sub-headings) moved to the front, in order. */
+// A bold label alone on its line, "**Breaking changes**" or "**Security:**": a heading by another name.
+const BOLD_LABEL_RE = /^[ \t]*\*\*([^*]+)\*\*:?[ \t]*$/;
+
+/**
+ * The sections under a PRIORITY_HEADING_RE heading (each through its sub-headings) or bold label
+ * (up to the next heading or bold label) moved to the front, in order.
+ */
 function priorityFirst(text: string): string {
   const front: string[] = [];
   const rest: string[] = [];
   let level = 0; // the heading level of the priority section we are in, 0 outside one
   for (const line of text.split("\n")) {
     const heading = /^[ \t]*(#{1,6})[ \t]+(.*)$/.exec(line);
-    if (heading && level && heading[1]!.length <= level) level = 0;
-    if (heading && !level && PRIORITY_HEADING_RE.test(heading[2]!)) level = heading[1]!.length;
+    const label = heading ? undefined : BOLD_LABEL_RE.exec(line)?.[1];
+    // A bold label ranks below every heading: level 7.
+    const lineLevel = heading ? heading[1]!.length : label === undefined ? 0 : 7;
+    if (lineLevel && level && lineLevel <= level) level = 0;
+    if (lineLevel && !level && PRIORITY_HEADING_RE.test(heading?.[2] ?? label!)) level = lineLevel;
     (level ? front : rest).push(line);
   }
   return [...front, ...rest].join("\n");
@@ -319,13 +330,15 @@ const ANNOUNCEMENT_PATH = /blog|announc|news|release|post/i;
  * with a post-like path.
  */
 export function announcementLinks(body: string | null | undefined): string[] {
-  const text = (body ?? "")
-    .replace(/(```|~~~)[\s\S]*?(\1|$)/g, " ")
-    .replace(/!\[[^\]]*\]\([^)]*\)/g, " ")
-    // An autolink (`<https://…>`) and an HTML link's href are links, not tags to drop.
-    .replace(/<(https:\/\/[^\s>]+)>/g, " $1 ")
-    .replace(/<a\s[^>]*href=["'](https:\/\/[^"']+)["'][^>]*>/gi, " $1 ")
-    .replace(/<[^>]*>/g, " ");
+  const text = withoutCodeAndTags(
+    (body ?? "")
+      .replace(/!\[[^\]]*\]\([^)]*\)/g, " ")
+      // An autolink (`<https://…>`) and an HTML link's href are links, not tags to drop; one inside a
+      // code block goes with the block.
+      .replace(/<(https:\/\/[^\s>]+)>/g, " $1 ")
+      .replace(/<a\s[^>]*href=["'](https:\/\/[^"']+)["'][^>]*>/gi, " $1 "),
+    " ",
+  );
   const links = [...text.matchAll(/https:\/\/[^\s)\]>"'`]+/g)].map(([u]) => u.replace(/[.,;:*!?]+$/, ""));
   return [...new Set(links)].filter((u) => {
     try {

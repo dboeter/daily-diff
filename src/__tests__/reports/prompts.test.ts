@@ -437,6 +437,29 @@ describe("releaseNotes", () => {
     expect(releaseNotes(opencode, RELEASE_BODY_CHARS)).toContain("call `refreshHooks()` after adding a hook");
   });
 
+  it("puts a section under a bold label first, up to the next heading or bold label", () => {
+    const body = [
+      "**Features**",
+      "- New plugin manager",
+      "**Breaking changes:**",
+      "- `--legacy` is removed",
+      "**Fixes**",
+      "- Faster startup",
+      "**Security**",
+      "- Patched a path traversal",
+      "## Docs",
+      "- New guide",
+    ].join("\n");
+    expect(releaseNotes(body, 400)).toBe(
+      "**Breaking changes:** - `--legacy` is removed **Security** - Patched a path traversal " +
+        "**Features** - New plugin manager **Fixes** - Faster startup ## Docs - New guide",
+    );
+    // A bold label inside a line is no section.
+    expect(releaseNotes("- Fixed **security** prompt\n**Breaking**\n- Old API gone", 400)).toBe(
+      "**Breaking** - Old API gone - Fixed **security** prompt",
+    );
+  });
+
   it("ends on a whole line or sentence, never mid-word", () => {
     const lines = [
       "### Fixes",
