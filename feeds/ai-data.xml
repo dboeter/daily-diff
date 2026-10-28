@@ -13,7 +13,139 @@
       <height>144</height>
     </image>
     <atom:link href="https://dboeter.github.io/daily-diff/feeds/ai-data.xml" rel="self" type="application/rss+xml"/>
-    <lastBuildDate>Tue, 27 Oct 2026 04:54:10 +0000</lastBuildDate>
+    <lastBuildDate>Wed, 28 Oct 2026 05:29:17 +0000</lastBuildDate>
+    <item>
+      <title>Data Engineering 2026-10-28</title>
+      <link>https://dboeter.github.io/daily-diff/#2026-10-28/ai-data</link>
+      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-10-28/ai-data</guid>
+      <pubDate>Wed, 28 Oct 2026 00:00:00 +0000</pubDate>
+      <description>Data Engineering 2026-10-28 ⬛ Overview · 🟪 AI Agents · 🟦 AI Models &amp;amp; Labs · 🟧 AI Policy · 🟨 Data Engineering Vendor items: 12 | Projects: 17 | Active today: 0 | Stable releases: 0 | Prereleases (not covered): 0 | Generated: 2026-10-28 05:25 UTC Highlights Azure Databricks account admins: account-level security features (network connectivity, network security, encryption, enhanced compliance) are now GA by default; configure them before they take effect. Snowflake users building ingestion...</description>
+      <content:encoded><![CDATA[<h1>Data Engineering 2026-10-28</h1>
+<p><a href="https://dboeter.github.io/daily-diff/#2026-10-28">⬛ Overview</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-28/ai-agents">🟪 AI Agents</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-28/ai-models">🟦 AI Models &amp; Labs</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-28/ai-policy">🟧 AI Policy</a> · <strong>🟨 Data Engineering</strong></p>
+<blockquote>
+<p>Vendor items: 12 | Projects: 17 | Active today: 0 | Stable releases: 0 | Prereleases (not covered): 0 | Generated: 2026-10-28 05:25 UTC</p>
+</blockquote>
+<hr>
+<h2>Highlights</h2>
+<ul>
+<li>Azure Databricks account admins: account-level security features (network connectivity, network security, encryption, enhanced compliance) are now GA by default; configure them before they take effect.</li>
+<li>Snowflake users building ingestion pipelines: CoCo is GA for continuous Snowpipe loads on new files and one-time COPY INTO on existing files, targeting standard or Snowflake-managed tables.</li>
+<li>Databricks metastore admins: AI Functions Unity Catalog permissions on <code>system.ai</code> schema are GA; enablement requires contacting your Databricks account team.</li>
+</ul>
+<hr>
+<h2>Databricks</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Item</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-10-27</td>
+<td align="left">🤖 <a href="https://learn.microsoft.com/azure/databricks/release-notes/product/2026/october#default-oauth-apps-for-external-ai-agents-are-now-generally-available">Default OAuth apps for external AI agents are now generally available</a></td>
+<td align="left">ChatGPT, Codex, Claude, Claude Code, and Cursor can connect to Azure Databricks <code>MCP servers</code> including the <code>Genie One MCP server</code> using default <code>OAuth client IDs</code>, removing the need for account admins to create an OAuth app.</td>
+</tr>
+<tr>
+<td align="left">2026-10-27</td>
+<td align="left"><a href="https://learn.microsoft.com/azure/databricks/release-notes/product/2026/october#editing-files-in-unity-catalog-volumes-is-now-generally-available">Editing files in Unity Catalog volumes is now generally available</a></td>
+<td align="left">Files in <code>Unity Catalog</code> volumes can be edited directly in the workspace file editor without download or re-upload, accessible from <code>Catalog Explorer</code> or the schema browser in a notebook or SQL editor.</td>
+</tr>
+<tr>
+<td align="left">2026-10-27</td>
+<td align="left">🤖 <a href="https://learn.microsoft.com/azure/databricks/release-notes/product/2026/october#ai-functions-unity-catalog-permissions-is-now-generally-available">AI Functions Unity Catalog permissions is now generally available</a></td>
+<td align="left"><code>Metastore admins</code> can control which task-specific AI Functions users can run via <code>Unity Catalog</code> permissions on the <code>system.ai</code> schema, though enabling the feature requires contacting your Databricks account team.</td>
+</tr>
+<tr>
+<td align="left">2026-10-26</td>
+<td align="left"><a href="https://learn.microsoft.com/azure/databricks/release-notes/product/2026/october#account-level-security-features-are-now-available-by-default-at-ga">Account-level security features are now available by default at GA</a></td>
+<td align="left">Account-level security features for network connectivity, network security, encryption, and enhanced security and compliance are available by default at GA without manual enablement on the <code>Previews page</code>, but <code>account admins</code> must configure them before they take effect and retain full control over adoption.</td>
+</tr>
+</tbody></table>
+<p><strong>Quiet today:</strong> <a href="https://github.com/delta-io/delta">Delta Lake</a>, <a href="https://github.com/unitycatalog/unitycatalog">Unity Catalog</a>, <a href="https://github.com/mlflow/mlflow">MLflow</a>, <a href="https://github.com/databricks/cli">Databricks CLI</a>, <a href="https://github.com/databricks/dbt-databricks">dbt-databricks</a></p>
+<hr>
+<h2>Snowflake</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Item</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-10-27</td>
+<td align="left"><a href="https://docs.snowflake.com/en/release-notes/2026/other/2026-10-27-file-loading-coco-ga">Continuous and bulk file loading with CoCo (General availability)</a></td>
+<td align="left"><code>CoCo</code> builds continuous <code>Snowpipe</code> pipelines for new files in cloud storage or one-time <code>COPY INTO</code> loads for existing files, both loading into standard Snowflake tables or Snowflake-managed tables.</td>
+</tr>
+<tr>
+<td align="left">2026-10-27</td>
+<td align="left">🤖 <a href="https://docs.snowflake.com/en/release-notes/2026/other/2026-10-27-interactive-cortex-code-skills">Cortex Code skills for interactive analytics</a></td>
+<td align="left">Two <code>Cortex Code skills</code> now help work with interactive analytics in Snowflake.</td>
+</tr>
+<tr>
+<td align="left">2026-10-26</td>
+<td align="left"><a href="https://docs.snowflake.com/en/release-notes/2026/other/2026-10-26-secondary-indexes-ga">Secondary indexes (General availability)</a></td>
+<td align="left">—</td>
+</tr>
+</tbody></table>
+<p><strong>Quiet today:</strong> <a href="https://github.com/snowflakedb/snowpark-python">Snowpark Python</a>, <a href="https://github.com/snowflakedb/snowflake-connector-python">Snowflake Connector for Python</a>, <a href="https://github.com/apache/polaris">Apache Polaris</a></p>
+<hr>
+<h2>Azure / Fabric &amp; GCP</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Source</th>
+<th align="left">Item</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-10-27</td>
+<td align="left">BigQuery</td>
+<td align="left"><a href="https://docs.cloud.google.com/bigquery/docs/release-notes#October_27_2026">Feature: You can manage and version control SQL scripts and notebooks with BigQuery Studio Git repositories, which provide a streamlined, folder-based integration with remote Git repositories.</a></td>
+<td align="left">SQL scripts and notebooks can be version controlled with <code>BigQuery Studio Git repositories</code>, providing a streamlined folder-based integration with remote Git repositories.</td>
+</tr>
+<tr>
+<td align="left">2026-10-27</td>
+<td align="left">BigQuery</td>
+<td align="left">🤖 <a href="https://docs.cloud.google.com/bigquery/docs/release-notes#October_27_2026">Feature: The Data Engineering Agent now integrates with Google Drive, letting you provide Google Sheets files, CSV, or JSONL files as input for your data engineering pipelines.</a></td>
+<td align="left">The <code>Data Engineering Agent</code> integrates with Google Drive, accepting Google Sheets files, CSV, or JSONL files as input for data engineering pipelines.</td>
+</tr>
+<tr>
+<td align="left">2026-10-27</td>
+<td align="left">BigQuery</td>
+<td align="left">🤖 <a href="https://docs.cloud.google.com/bigquery/docs/release-notes#October_27_2026">Feature: You can now use conversational analytics in Connected Sheets to ask questions and analyze your BigQuery data using natural language.</a></td>
+<td align="left">Conversational analytics in <code>Connected Sheets</code> enables natural language questions on BigQuery data, with the <code>Gemini side panel</code> translating to optimized SQL, executing queries, summarizing trends, and inserting live refreshable database objects into workbooks.</td>
+</tr>
+<tr>
+<td align="left">2026-10-27</td>
+<td align="left">Azure updates</td>
+<td align="left"><a href="https://azure.microsoft.com/updates?id=578358">[Launched] Generally Available: Higher limit of Azure Blob Storage accounts per region per subscription</a></td>
+<td align="left">Azure Blob Storage accounts per region per subscription now support up to 1,000 storage accounts with <code>standard endpoints</code>, up from the default 250, enabling more accounts per subscription.</td>
+</tr>
+<tr>
+<td align="left">2026-10-21</td>
+<td align="left">Microsoft Fabric</td>
+<td align="left"><a href="https://community.fabric.microsoft.com/t5/Fabric-Updates-Blog/Simplify-Teradata-migrations-with-Fabric-Migration-Assistant/ba-p/5376058">Simplify Teradata migrations with Fabric Migration Assistant (Preview)</a></td>
+<td align="left"><code>Fabric Migration Assistant for Data Warehouse</code> supports Teradata sources in preview, converting eligible metadata and code to <code>Fabric-compatible T-SQL</code>, deploying destination definitions, and flagging scripts for review, though data migration requires a separate loading step.</td>
+</tr>
+</tbody></table>
+<p><em>Also new:</em> <a href="https://docs.cloud.google.com/bigquery/docs/release-notes#October_27_2026">Feature: The AI.COUNT_TOKENS function, which estimates the token count of a text string, is generally available (GA).</a> · <a href="https://community.fabric.microsoft.com/t5/Fabric-Updates-Blog/Connect-coding-agents-to-Fabric-notebooks-with-FNTK-Preview/ba-p/5375986">Connect coding agents to Fabric notebooks with FNTK (Preview)</a></p>
+<hr>
+<p>Nothing new from Open-source stack (<a href="https://github.com/dbt-labs/dbt">dbt Core</a>, <a href="https://github.com/SQLMesh/sqlmesh">SQLMesh</a>, <a href="https://github.com/apache/airflow">Apache Airflow</a>, <a href="https://github.com/dagster-io/dagster">Dagster</a>, <a href="https://github.com/dlt-hub/dlt">dlt</a>, <a href="https://github.com/apache/iceberg">Apache Iceberg</a>, <a href="https://github.com/duckdb/duckdb">DuckDB</a>, <a href="https://github.com/pola-rs/polars">Polars</a>, <a href="https://github.com/trinodb/trino">Trino</a>) today.</p>
+<hr>
+<h2>Across platforms</h2>
+<ul>
+<li>AI-assisted development and analytics moved on all three platforms: Databricks added default OAuth apps so ChatGPT, Codex, Claude, and Cursor connect to MCP servers (GA); Snowflake released Cortex Code skills for interactive analytics; BigQuery launched conversational analytics in Connected Sheets (natural language to optimized SQL via Gemini) and a Data Engineering Agent that accepts Google Drive files as pipeline input.</li>
+<li>Git-backed authoring for SQL and notebooks appeared on BigQuery (BigQuery Studio Git repositories, folder-based remote repo integration); no equivalent GA item in this set for Databricks or Snowflake.</li>
+</ul>
+<hr>
+<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
+]]></content:encoded>
+    </item>
     <item>
       <title>Data Engineering 2026-10-27</title>
       <link>https://dboeter.github.io/daily-diff/#2026-10-27/ai-data</link>

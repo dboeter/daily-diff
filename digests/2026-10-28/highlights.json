@@ -1,0 +1,17 @@
+{
+  "ai-agents": [
+    "OpenShell v0.1.6 requires OIDC, mTLS, or JWT auth to start gateways; local dev needs explicit `allow_unauthenticated_users = true`",
+    "Hermes Agent leaks `OPENAI_API_KEY` to third-party `base_url` endpoints during model-catalog probes, labeled a security issue"
+  ],
+  "ai-models": [
+    "Liquid AI released LFM3, open-weight model family spanning 2B-class text, vision, audio, omni, and decision models for fast fine-tuning and on-device inference",
+    "OpenAI made Oracle applications available within ChatGPT"
+  ],
+  "ai-policy": [
+    "EU AI Office published workshop report on evaluator qualifications and independence for general-purpose AI models under AI Act governance"
+  ],
+  "ai-data": [
+    "Azure Databricks account-level security features (network connectivity, security, encryption, enhanced compliance) now GA by default",
+    "Snowflake CoCo GA for continuous Snowpipe loads on new files and one-time COPY INTO on existing files for standard or managed tables"
+  ]
+}

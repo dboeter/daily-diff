@@ -13,7 +13,121 @@
       <height>144</height>
     </image>
     <atom:link href="https://dboeter.github.io/daily-diff/feeds/ai-models.xml" rel="self" type="application/rss+xml"/>
-    <lastBuildDate>Tue, 27 Oct 2026 04:54:10 +0000</lastBuildDate>
+    <lastBuildDate>Wed, 28 Oct 2026 05:29:17 +0000</lastBuildDate>
+    <item>
+      <title>AI Models &amp; Labs 2026-10-28</title>
+      <link>https://dboeter.github.io/daily-diff/#2026-10-28/ai-models</link>
+      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-10-28/ai-models</guid>
+      <pubDate>Wed, 28 Oct 2026 00:00:00 +0000</pubDate>
+      <description>AI Models &amp;amp; Labs 2026-10-28 ⬛ Overview · 🟪 AI Agents · 🟦 AI Models &amp;amp; Labs · 🟧 AI Policy · 🟨 Data Engineering Lab posts: 5 | New models: 0 | Spotted: 6 | Generated: 2026-10-28 05:25 UTC Highlights Liquid AI released LFM3, an open-weight model family spanning 2B-class text, vision, audio, omni, and decision models optimized for fast fine-tuning and on-device inference. Anthropic used an unreleased internal research model to discover and exploit five critical vulnerability chains—in Chr...</description>
+      <content:encoded><![CDATA[<h1>AI Models &amp; Labs 2026-10-28</h1>
+<p><a href="https://dboeter.github.io/daily-diff/#2026-10-28">⬛ Overview</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-28/ai-agents">🟪 AI Agents</a> · <strong>🟦 AI Models &amp; Labs</strong> · <a href="https://dboeter.github.io/daily-diff/#2026-10-28/ai-policy">🟧 AI Policy</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-28/ai-data">🟨 Data Engineering</a></p>
+<blockquote>
+<p>Lab posts: 5 | New models: 0 | Spotted: 6 | Generated: 2026-10-28 05:25 UTC</p>
+</blockquote>
+<hr>
+<h2>Highlights</h2>
+<ul>
+<li>Liquid AI released LFM3, an open-weight model family spanning 2B-class text, vision, audio, omni, and decision models optimized for fast fine-tuning and on-device inference.</li>
+<li>Anthropic used an unreleased internal research model to discover and exploit five critical vulnerability chains—in Chrome, Safari, Android, Windows, and Linux—achieving remote code execution, then reported them under coordinated disclosure.</li>
+<li>OpenAI made Oracle applications available within ChatGPT.</li>
+</ul>
+<hr>
+<h2>Lab announcements</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Lab</th>
+<th align="left">Post</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-10-28</td>
+<td align="left">OpenAI</td>
+<td align="left"><a href="https://openai.com/index/oracle-apps-in-chatgpt/">Oracle Apps In Chatgpt</a></td>
+<td align="left">OpenAI announced Oracle applications are now available within ChatGPT.</td>
+</tr>
+<tr>
+<td align="left">2026-10-27</td>
+<td align="left">Anthropic</td>
+<td align="left"><a href="https://www.anthropic.com/news/expanding-partnership-gsa">Expanding our partnership with GSA to bring Claude to all levels of government</a></td>
+<td align="left">Anthropic expanded its GSA partnership to offer a 40% discount on Claude Enterprise, Claude for Government, and the Claude API across all U.S. federal, state, local, tribal, and territorial government agencies, alongside a new implementation program.</td>
+</tr>
+<tr>
+<td align="left">2026-10-27</td>
+<td align="left">Anthropic</td>
+<td align="left"><a href="https://www.anthropic.com/research/early-progress-drug-development">Early progress on accelerating drug development with Claude</a></td>
+<td align="left">Anthropic&#39;s life sciences team partnered with six organizations—BigHat Biosciences, Bristol Myers Squibb, Divergence Labs, Enveda, Generate Biomedicines, and The Column Group—and began internal drug discovery efforts to accelerate drug development with Claude.</td>
+</tr>
+<tr>
+<td align="left">2026-10-27</td>
+<td align="left">Anthropic</td>
+<td align="left"><a href="https://www.anthropic.com/research/agents-judgment-calls">How AI agents shape experts’ judgment calls</a></td>
+<td align="left">Anthropic studied 50 professional analysts using Claude Code for causal inference analysis to test whether experts retain judgment calls or defer to AI agents when making ambiguous decisions.</td>
+</tr>
+<tr>
+<td align="left">2026-10-27</td>
+<td align="left">Anthropic</td>
+<td align="left"><a href="https://www.anthropic.com/research/discovering-vulnerabilities-with-claude">Discovering and exploiting vulnerabilities in critical, real-world software with Claude</a></td>
+<td align="left">Anthropic used an unreleased internal research model to discover and exploit five critical vulnerability chains—in Chrome, Safari, Android, Windows, and Linux—achieving remote code execution and other severe impacts, then reported them under coordinated vulnerability disclosure.</td>
+</tr>
+</tbody></table>
+<hr>
+<p>Nothing new from OpenRouter&#39;s new listings or OpenRouter&#39;s stealth models today.</p>
+<hr>
+<h2>Spotted</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Story</th>
+<th align="left">Source</th>
+<th align="left">Discussion</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a href="https://futurism.com/artificial-intelligence/amazon-ai-division-failure-nova">Amazon Is Gutting Its AI Division After Sustained Failure</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50261589">296 points, 226 comments</a></td>
+<td align="left">Amazon is shutting down its AI labs and redirecting resources to a new project led by a noted AI robotics expert.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://www.liquid.ai/blog/lfm3">Introducing LFM3: Every Modality for Specialized Intelligence</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50262229">133 points, 51 comments</a></td>
+<td align="left">Liquid AI released LFM3, an open-weight model family including 2B-class text, vision, audio, omni, and decision models designed for fast fine-tuning and on-device inference.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://codingplans.dev/briefs/us-model-labs-part-1/">The US AI Labs, Mapped: Founders, Revenue and the Money Behind Them</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50251518">5 points, 2 comments</a></td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left"><a href="https://www.newconstructs.com/wp-content/uploads/2026/10/Anthropic-Is-The-Most-Ridiculous-IPO-of-2026.pdf">Anthropic Is the Most Ridiculous IPO of 2026 [pdf]</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50251762">14 points, 5 comments</a></td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left"><a href="https://theainewsreport.com/2026-10-27-gpt-6-1-terra-pricing-agent-cost-explained.html">GPT-6.1 Terra&#39;s price cut, recomputed for a cache-heavy agent session</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50261070">5 points, 0 comments</a></td>
+<td align="left">The article computes the cost of a realistic agent coding session using OpenAI&#39;s GPT-6.1 Terra pricing of $1 per million input tokens and $5 per million output tokens, comparing with Anthropic&#39;s rates.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://hexagonmath.org/2610.00577v1">Anthropic&#39;s Disproof of the ETH</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50255159">25 points, 6 comments</a></td>
+<td align="left">The paper claims to disprove the Exponential Time Hypothesis by presenting a deterministic algorithm solving 3-SAT in 2^{o(n)} time, which also solves #3-SAT to count satisfying assignments.</td>
+</tr>
+</tbody></table>
+<hr>
+<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
+]]></content:encoded>
+    </item>
     <item>
       <title>AI Models &amp; Labs 2026-10-27</title>
       <link>https://dboeter.github.io/daily-diff/#2026-10-27/ai-models</link>
