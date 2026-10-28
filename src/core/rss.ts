@@ -56,19 +56,28 @@ export function tagText(xml: string, tag: string): string {
  */
 const DRUPAL_BYLINE_RE = /^.*?Anonymous \(not verified\) \w{3}, \d{2}\/\d{2}\/\d{4} - \d{2}:\d{2}\s*/;
 
-/** HTML to plain text: tags stripped, entities decoded, whitespace collapsed, truncated. */
-export function plainText(html: string, maxChars = DESCRIPTION_MAX_CHARS): string {
-  const text = decodeEntities(html.replace(/<[^>]*>/g, " "))
+/** HTML to plain text: tags stripped, entities decoded, whitespace collapsed. */
+const untruncatedText = (html: string): string =>
+  decodeEntities(html.replace(/<[^>]*>/g, " "))
     .replace(/\s+/g, " ")
     .trim()
     .replace(DRUPAL_BYLINE_RE, "");
-  return text.length > maxChars ? `${text.slice(0, maxChars)}…` : text;
+
+const truncate = (text: string, maxChars: number): string =>
+  text.length > maxChars ? `${text.slice(0, maxChars)}…` : text;
+
+/** HTML to plain text: tags stripped, entities decoded, whitespace collapsed, truncated. */
+export function plainText(html: string, maxChars = DESCRIPTION_MAX_CHARS): string {
+  return truncate(untruncatedText(html), maxChars);
 }
 
 /** The data report's vendor notes; Fabric's descriptions are whole posts (up to ~12 KB). */
 export const VENDOR_DESCRIPTION_MAX_CHARS = 1000;
 
 const HEADING_RE = /<h([2-4])\b[^>]*>([\s\S]*?)<\/h\1>/gi;
+
+/** What opens a vendor description that lists its post's headings (vendorText). */
+export const SECTIONS_LABEL = "Sections: ";
 
 /**
  * plainText for the vendor parsers, without the space it leaves before
@@ -78,13 +87,10 @@ const HEADING_RE = /<h([2-4])\b[^>]*>([\s\S]*?)<\/h\1>/gi;
  * post's one new capability was a heading ~1,600 chars in (2026-10-28).
  */
 export function vendorText(html: string, maxChars = VENDOR_DESCRIPTION_MAX_CHARS): string {
-  const headings = [...html.matchAll(HEADING_RE)]
-    .map(([, , h]) => plainText(h!, Number.MAX_SAFE_INTEGER))
-    .filter(Boolean);
-  const body = plainText(html.replace(HEADING_RE, " "), Number.MAX_SAFE_INTEGER);
-  const text = headings.length ? `Sections: ${headings.join("; ")}. ${body}` : body;
-  const cut = text.length > maxChars ? `${text.slice(0, maxChars)}…` : text;
-  return cut.replace(/ ([,;:.])/g, "$1");
+  const headings = [...html.matchAll(HEADING_RE)].map(([, , h]) => untruncatedText(h!)).filter(Boolean);
+  const body = untruncatedText(html.replace(HEADING_RE, " "));
+  const text = headings.length ? `${SECTIONS_LABEL}${headings.join("; ")}. ${body}` : body;
+  return truncate(text, maxChars).replace(/ ([,;:.])/g, "$1");
 }
 
 /** `toText` turns an item's description HTML into its `description` (vendor feeds: vendorText). */

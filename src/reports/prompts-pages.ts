@@ -18,7 +18,14 @@ import {
   SECTIONS,
   SPOTTED,
 } from "../core/strings.ts";
-import { TABLES_MARKER, rowList, summaryLine, summaryOutputRule, type Numbered } from "./summarized-table.ts";
+import {
+  TABLES_MARKER,
+  contentWords,
+  rowList,
+  summaryLine,
+  summaryOutputRule,
+  type Numbered,
+} from "./summarized-table.ts";
 import {
   goingAwayRule,
   HIGHLIGHTS_PICK_RULE,
@@ -36,7 +43,7 @@ import type { ResearchPaper } from "../trending/research.ts";
 import type { PolicyItem } from "../policy/items.ts";
 import type { KeptVendorItem } from "../data/relevance.ts";
 import { signHighlight } from "./markdown.ts";
-import { escapeRegex } from "./project-news.ts";
+import { escapeRegex } from "../core/regex.ts";
 import { siteOf, type StoryRow } from "../spotted/pool.ts";
 
 /** Which sources Trends' Models section covers: no call when neither has data. */
@@ -427,15 +434,15 @@ export function buildHighlightsPrompt(
   forced: readonly string[] = [],
   maxPerReport: number = HIGHLIGHTS_MAX_PER_REPORT,
 ): string {
-  const forcedRule = forced.length
-    ? `\n- ${forced.map((id) => FORCED_REASON[id] ?? id).join(" and ")} ${forced.length === 1 ? "was" : "were"} already judged relevant to this reader: give ${forced.length === 1 ? "that report" : "each of those reports"} at least 1 highlight`
+  // Only the published ones: on a daily run the prompt asked for a highlight of the absent Trends page.
+  const published = forced.filter((id) => id in reportContents);
+  const forcedRule = published.length
+    ? `\n- ${published.map((id) => HIGHLIGHT_RULES[id]?.forced ?? id).join(" and ")} ${published.length === 1 ? "was" : "were"} already judged relevant to this reader: give ${published.length === 1 ? "that report" : "each of those reports"} at least 1 highlight`
     : "";
-  // Trends' Highlights lead with figures its code computed (tokens, stars gained): banning
-  // them left the page out of highlights.json on 2026-10-28.
-  const trendsFigures =
-    "ai-trends" in reportContents
-      ? ` (except in ai-trends: restate a figure its Highlights state with its window, e.g. "35.37T tokens on 2026-10-27", "+16,593 stars in 7 days")`
-      : "";
+  const figures = Object.entries(HIGHLIGHT_RULES)
+    .filter(([id, rule]) => rule.figures && id in reportContents)
+    .map(([id, rule]) => ` (except in ${id}: ${rule.figures})`)
+    .join("");
 
   const sections = Object.entries(reportContents)
     .map(([id, content]) => `## [${id}]\n\n${highlightsInput(content)}`)
@@ -459,7 +466,7 @@ Bad: "Claude Code v2.1.288 released" (no content)  ·  "Copilot CLI ships three 
 
 Never include:
 - Routine releases: nightlies, alphas, prereleases, build-number ranges, or a version number without saying what it changes
-- Raw counts: commits, issues, PRs, open items, stars, comments, points${trendsFigures}
+- Raw counts: commits, issues, PRs, open items, stars, comments, points${figures}
 - CI status, flaky tests, pending upgrades, "in progress" or "targets" items with no shipped result
 - Generic trend statements ("X dominates", "Y remains active", "Z gains attention")
 
@@ -476,10 +483,25 @@ ${sourceFidelityRules()}
 - ${goingAwayRule("highlight")}${forcedRule}`;
 }
 
-const FORCED_REASON: Record<string, string> = {
-  "ai-policy": "Every item in ai-policy",
-  "ai-data": "every vendor release-note row in ai-data",
-  "ai-trends": "the weekly ai-trends page",
+/**
+ * The reports highlights.json treats apart from the rest. `forced`: how the prompt names a report
+ * that always gets a highlight when published, `onlyWithVendorItems` when that holds only on a day
+ * Jev kept a vendor item. `figures`: the exception to the raw-counts ban, and `leadFirst`: its first
+ * highlight is always its page's lead (`withFallbackHighlights`).
+ */
+const HIGHLIGHT_RULES: Record<
+  string,
+  { forced: string; onlyWithVendorItems?: true; figures?: string; leadFirst?: true }
+> = {
+  "ai-policy": { forced: "Every item in ai-policy" },
+  "ai-data": { forced: "every vendor release-note row in ai-data", onlyWithVendorItems: true },
+  // Trends' Highlights lead with figures its code computed (tokens, stars gained): banning
+  // them left the page out of highlights.json on 2026-10-28.
+  "ai-trends": {
+    forced: "the weekly ai-trends page",
+    figures: `restate a figure its Highlights state with its window, e.g. "35.37T tokens on 2026-10-27", "+16,593 stars in 7 days"`,
+    leadFirst: true,
+  },
 };
 
 /**
@@ -488,20 +510,17 @@ const FORCED_REASON: Record<string, string> = {
  * item (a day of repo activity alone holds routine releases and hot issues,
  * which the model may rightly skip). On 2026-10-20 the model left AI Policy
  * out though it carried the AI Act's first harmonised standard in the OJ, and on 2026-10-28 Trends.
+ * The prompt and the fallback skip one not published in the run (Trends on a daily run).
  */
 export function forcedHighlightReports(hasVendorItems: boolean): string[] {
-  return hasVendorItems ? ["ai-policy", "ai-data", "ai-trends"] : ["ai-policy", "ai-trends"];
+  return Object.keys(HIGHLIGHT_RULES).filter(
+    (id) => hasVendorItems || !HIGHLIGHT_RULES[id]!.onlyWithVendorItems,
+  );
 }
 
-// A highlight restates the lead when at least this share of its words (3+ letters) are in the lead.
+// A highlight restates the lead when at least this share of its content words are in the lead.
 const LEAD_MATCH_MIN = 0.5;
-const leadWords = (s: string) =>
-  new Set(
-    s
-      .toLowerCase()
-      .split(/[^\p{L}\p{N}]+/u)
-      .filter((w) => w.length >= 3),
-  );
+const leadWords = (s: string) => new Set(contentWords(s));
 
 /** Whether `highlight` restates `lead`: most of its words are the lead's. */
 export function restatesLead(highlight: string, lead: string): boolean {
@@ -520,7 +539,7 @@ export interface NoHighlightRow {
   url: string;
 }
 
-// A title of at least this many words (3+ letters) also matches a bullet restating most of them.
+// A title of at least this many content words also matches a bullet restating most of them.
 const RESTATED_NAME_MIN_WORDS = 4;
 
 /**
@@ -590,14 +609,15 @@ export function withFallbackHighlights(
     const k = items.findIndex((h) => !h.startsWith(`${GOING_AWAY} `) && restatesLead(h, lead));
     if (k >= 0) items[k] = `${GOING_AWAY} ${items[k]}`;
   }
-  // Trends leads with its page's lead, whatever the model returned: the highlight restating it
-  // moves first, else the lead's first sentence goes in front.
-  const trendsLead = reportContents["ai-trends"] ? firstHighlight(reportContents["ai-trends"]) : null;
-  if (trendsLead && trendsLead !== NO_HIGHLIGHT_NOTE) {
-    const items = out["ai-trends"] ?? [];
-    const k = items.findIndex((h) => restatesLead(h, trendsLead));
+  // A `leadFirst` report (Trends) leads with its page's lead, whatever the model returned: the
+  // highlight restating it moves first, else the lead's first sentence goes in front.
+  for (const [id, rule] of Object.entries(HIGHLIGHT_RULES)) {
+    const lead = rule.leadFirst && reportContents[id] ? firstHighlight(reportContents[id]) : null;
+    if (!lead || lead === NO_HIGHLIGHT_NOTE) continue;
+    const items = out[id] ?? [];
+    const k = items.findIndex((h) => restatesLead(h, lead));
     if (k !== 0)
-      out["ai-trends"] = [k > 0 ? items[k]! : trendsLead, ...items.filter((_, i) => i !== k)].slice(
+      out[id] = [k > 0 ? items[k]! : lead, ...items.filter((_, i) => i !== k)].slice(
         0,
         HIGHLIGHTS_MAX_PER_REPORT,
       );

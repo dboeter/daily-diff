@@ -87,7 +87,7 @@ OpenRouter and npm figures against live sources (snapshot not reloadable); 15 of
 Behavior between the merged changes:
 
 - **01 × 06, GitHub core-call budget**: each ticket stated its worst case without the other's calls (01: 679 with 5 release pages a repo; 06: 613 with 66 fix-status calls). Together: 33 × 8 list pages + 250 count calls + 66 fix-status calls + 33 × 5 release pages = 745 core calls a daily run, plus up to 2 retries per request; still under the Actions token's 1,000 an hour, but the weekly run's star-history calls come on top. AGENTS.md and the `HOT_ISSUE_MAX_STATUS_CALLS` comment now give 745.
-- **10, BigQuery state keys**: the ticket's "decide before merge" is still open. No option was taken (`config.yml` has no `stable_id` on the BigQuery feed, `VendorNote` has no `aliases`), so it is option (a) by default: on the first run after merge, the BigQuery notes of the last 7 days that an earlier report showed come back once under their new titles.
+- **10, BigQuery state keys**: decided in the fix round, option (c): `formerTitles` keeps the `<type>: <first sentence>|date` key as the state item's alias, so no BigQuery note an earlier report showed comes back.
 - No other two changes conflict. 02 and 06 share `stripLinkNoise`; 05 and 04 both lean on `dropNoHighlightRows`/`restatesLead` without overlap; 09's `Sections:` prefix does not reach BigQuery (split on `<h3>`, as 10 relies on).
 
 Fixed in integration: 06 and 11 each added an inline regex escape (`escapeRe` in `src/core/github.ts`, one in `tidyTrendsSummaries`); both now use `escapeRegex` (`src/reports/project-news.ts`). 01's private `isRetryable` in `src/core/github.ts` shared its name with `src/core/llm.ts`'s exported one, a different rule: it is now `isRetryableGet`. No test was added by two tickets (checked by `describe`/`it` name across `src/__tests__`). The `src/spotted/topics.ts` comments name Policy talk (07), and `buildPageHighlightsPrompt`'s `note` doc names the lab posts without page text (05).
@@ -101,6 +101,58 @@ Fixed in integration: 06 and 11 each added an inline regex escape (`escapeRe` in
 - 07: done. All boxes ticked (the docs box in this integration step).
 - 08: done. All boxes ticked.
 - 09: done. Unticked: re-judging the gateway item: needs a live Jev call, and `digests/data-verdicts.json` has no entry for it to delete.
-- 10: done. All boxes ticked; the state-key decision above is open.
+- 10: done. All boxes ticked.
 - 11: done. All boxes ticked.
 - 12: done. Unticked: the 2026-11-02 pool has no unpenalized pre-10-28 entry: waits for the maintainer to run `scripts/rejudge-research.ts` with `TYPESAFE_API_KEY` and for that page.
+
+### Fix round
+
+One line per finding of `code-review.md`. After the merge: `pnpm typecheck`, `pnpm lint`, `pnpm format:check` clean, `pnpm test` 1112 passed.
+
+Standards, hard:
+
+- 1, inline hot-issue strings and "1 comments": fixed (06). `HOT_ISSUE.totals` (`plural`), `.gain`, `.fix` and `.label` in `strings.ts`; `hotIssueGain` and `HOT_ISSUE.gain` share `gainPeriod`.
+- 2, `tidyTrendsSummaries` in `rank.ts`: fixed (11). Moved to `summarized-table.ts` with `RESTATED_SENTENCE_SHARE` and `contentWords`.
+- 3, AGENTS.md history line and undocumented scripts: fixed in this integration. The BigQuery sentence states the current rule; the scripts list has one line per file in `scripts/`.
+
+Standards, judgement calls:
+
+- `STAGE_PHRASE_RE`/`stageOf` vs `STATUS_RE`: partly fixed (10). The marker list is one `STAGE_MARKER`; the verb phrases stay apart on purpose (`STATUS_RE` also cuts the future tense for coming-soon stems).
+- Code-fence and HTML-tag regex pair in three functions: fixed (02, `withoutCodeAndTags`).
+- `vendorText` truncating twice: fixed (09, `untruncatedText` + one `truncate`).
+- Two word-overlap tokenizers: fixed (11 and 04). `contentWords` serves `tidyTrendsSummaries` and `restatesLead`.
+- Third copy of the `sectionHeading(...).test` lookup: fixed (06, `projectOf`).
+- `POLICY_TALK_MIN_POINTS` copying `TALKED_ABOUT_MIN_POINTS`: fixed (07). It is the same constant.
+- `"Sections: "` literal in `rss.ts` and `snowflake.ts`: fixed (09, `SECTIONS_LABEL`).
+- `**Hot issue:**` in the prompt and a regex: fixed (06, `HOT_ISSUE.label`).
+- `escapeRegex` imported from `reports/project-news.ts`: fixed (11). It now lives in `src/core/regex.ts`.
+- `"ai-trends"` special-cased four times in `prompts-pages.ts`: fixed (04, `HIGHLIGHT_RULES`).
+- `forced` not filtered to published reports: fixed (04). The prompt names only the forced reports in its input.
+- `github.ts` at 1,127 lines: fixed (split). The hot-issue code is now `src/core/hot-issues.ts` (611 lines), and `github.ts` is 537.
+- `QueuedRepo.since` holding a function: fixed (06, `countFrom`).
+- `const c = ctx` alias: fixed (06).
+- `HOT_ISSUE_MAX_STATUS_CALLS = 66` hard-coded: fixed (06). It is `TRACKED_REPOS × HOT_ISSUES_PER_REPO`, and `TRACKED_REPOS = 33` remains a commented literal.
+- `per_page: "100"` in `fetchFixStatus`: fixed (06, `TIMELINE_PAGE`).
+- `formatItem(item, bodyChars = 300)`: fixed (02, `ITEM_BODY_CHARS`).
+- `skills.ts` testing `html_url.includes("/pull/")`: fixed (03). Items are told apart by the list they came in. Left: `prompts.ts` `formatItem` still tests `/pull/` for the item kind, outside this round's files and correct for both lists.
+- Comments over 3 sentences, `RELEASE_BODY_CHARS`: fixed (02, two sentences).
+- Comments over 3 sentences, `isRetryableGet`: fixed (01 and 06, one sentence).
+
+Spec, blocking:
+
+- 10, BigQuery notes repeating once after the merge: fixed. Option (c): `formerTitles` puts the old `<type>: <first sentence>|date` key in the state item's `aliases`.- 06, bots and slash commands counted outside the API count: fixed. Only a gain counted through the API is shown; a known gain is an upper bound.
+
+Spec, wrong or partial:
+
+- 06, `fetchFixStatus` reading the first 100 timeline events: fixed. It reads from the page the comment count implies to the end, one capped call per page. A fix referenced before those comments is still missed (documented).
+- 06, no fallback for a hot issue the model left out: fixed (`hotIssueBullet`, `projectFallbackSection`).
+- 04, `ai-trends` forced on daily runs: fixed (as above).
+- 10, `stageOf` reading the whole note: fixed. It reads the present tense in the first sentence or a "This feature …" sentence, and gives no stage when the note states both.
+- 12, a failed Jev call silently keeping the old relevance: fixed. The script lists the failed entries and exits 1.
+- 01, write requests without a timeout: fixed. `ensureLabel`, `createGitHubIssue` and the closing PATCH pass `AbortSignal.timeout(FETCH_TIMEOUT_MS)`.
+- 02, `priorityFirst` missing bold-label sections: fixed (`BOLD_LABEL_RE`).
+- 02, the 35 KB claim resting on a 4 KB fixture: left. No full-size fixture was added; the 35 KB/17 KB measurement in the ticket stays the only evidence.
+
+Holds (03, 07, 08, 11; 01 paging, retries and `noStableYet`; the 745-call budget): still hold. 06 changed the status cap's unit to timeline pages but left the cap at 66, so the total stays at 745.
+
+Small mismatches fixed in this integration: `scripts/regen-highlights.ts`'s Usage line now shows the `[YYYY-MM-DD]` argument the script reads. Checked and left: `bigquery.ts` builds `stageOf`'s text with `vendorText(body, Number.MAX_SAFE_INTEGER)`, which would put a `Sections:` line first only if a note body had `<h2>`–`<h4>` headings; the feed splits on `<h3>`, and the fixture has no `<h4>`.

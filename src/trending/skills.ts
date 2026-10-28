@@ -60,12 +60,14 @@ export function selectSkillsItems(data: SkillsData, shown: Set<number>, now: Dat
   const since = now.getTime() - SKILLS_WINDOW_DAYS * DAY_MS;
   const inWindow = (iso: string | null | undefined) => !!iso && Date.parse(iso) >= since;
   // Issues have no `merged_at`; GitHub sets a merged PR's `closed_at` too, so `merged_at` alone decides a PR.
-  const closedThisWeek = (i: GitHubItem) =>
-    inWindow(i.html_url.includes("/pull/") ? i.merged_at : i.closed_at);
-  const keep = (i: GitHubItem) =>
-    inWindow(i.updated_at) &&
-    isAudienceSkillsItem(i) &&
-    (i.state !== "closed" || closedThisWeek(i)) &&
-    (!shown.has(i.number) || closedThisWeek(i));
-  return { ...data, prs: data.prs.filter(keep), issues: data.issues.filter(keep) };
+  const keep = (isPr: boolean) => (i: GitHubItem) => {
+    const closedThisWeek = inWindow(isPr ? i.merged_at : i.closed_at);
+    return (
+      inWindow(i.updated_at) &&
+      isAudienceSkillsItem(i) &&
+      (i.state !== "closed" || closedThisWeek) &&
+      (!shown.has(i.number) || closedThisWeek)
+    );
+  };
+  return { ...data, prs: data.prs.filter(keep(true)), issues: data.issues.filter(keep(false)) };
 }

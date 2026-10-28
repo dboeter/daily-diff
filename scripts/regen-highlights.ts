@@ -3,7 +3,7 @@
  * and optionally resend Telegram notification.
  *
  * Usage:
- *   npx tsx scripts/regen-highlights.ts [--notify]
+ *   npx tsx scripts/regen-highlights.ts [YYYY-MM-DD] [--notify]
  *
  * Env vars:
  *   ANTHROPIC_API_KEY (or LLM_PROVIDER + matching key)

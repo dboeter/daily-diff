@@ -17,6 +17,9 @@
  * YYYY-MM-DD: re-judge entries saved before this date (default 2026-10-28).
  * --dry-run: print the changes, write nothing.
  *
+ * Exits 1 when an entry's Jev call failed, listing those entries last (the
+ * rest are still saved): run it again until it exits 0.
+ *
  * Env vars:
  *   TYPESAFE_API_KEY
  */
@@ -84,6 +87,25 @@ export async function rejudgeResearch(
   return { state: { items }, changes };
 }
 
+/**
+ * Prints every change, then the entries whose call failed: they keep their old, unpenalized
+ * relevance. Returns the exit code, 1 when there is such an entry, so the maintainer reruns the
+ * script (a rerun scores from fresh answers, so the entries already re-judged stay as they are).
+ */
+export function printChanges(changes: RelevanceChange[]): number {
+  for (const c of changes) {
+    const now = c.new === null ? "failed, kept" : c.new.toFixed(3);
+    console.log(`  ${c.old.toFixed(3)} → ${now}  ${c.title}`);
+  }
+  const failed = changes.filter((c) => c.new === null);
+  if (!failed.length) return 0;
+  console.error(
+    `${failed.length} entries could not be re-judged and keep their old relevance; run the script again:`,
+  );
+  for (const c of failed) console.error(`  ${c.id}  ${c.title}`);
+  return 1;
+}
+
 async function main(): Promise<void> {
   const args = process.argv.slice(2);
   const cutoff = args.find((a) => !a.startsWith("-")) ?? DEFAULT_CUTOFF;
@@ -103,10 +125,7 @@ async function main(): Promise<void> {
     process.exit(1);
   }
 
-  for (const c of result.changes) {
-    const now = c.new === null ? "failed, kept" : c.new.toFixed(3);
-    console.log(`  ${c.old.toFixed(3)} → ${now}  ${c.title}`);
-  }
+  process.exitCode = printChanges(result.changes);
   if (dryRun) {
     console.log("Dry run: nothing written.");
     return;
