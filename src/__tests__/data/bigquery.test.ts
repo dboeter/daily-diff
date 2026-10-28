@@ -43,6 +43,32 @@ describe("parseBigQueryNotes", () => {
     );
   });
 
+  // One entry with one note per body, as the feed wraps them.
+  const titleOf = (body: string) =>
+    parseBigQueryNotes(
+      `<entry><id>x#October_28_2026</id><updated>2026-10-28T00:00:00-07:00</updated><content type="html"><![CDATA[<h3>Feature</h3><p>${body}</p>]]></content></entry>`,
+    )[0]!.title;
+
+  it("takes no stage from a future-tense sentence", () => {
+    expect(
+      titleOf("You can use vector indexes. This feature will be generally available (GA) in November."),
+    ).toBe("You can use vector indexes");
+    expect(
+      titleOf(
+        "You can use vector indexes. This feature is in Preview and will be generally available next month.",
+      ),
+    ).toBe("You can use vector indexes");
+  });
+
+  it("takes no stage from a note naming a GA and a Preview feature", () => {
+    expect(titleOf("Search indexes are now generally available, and vector indexes are in Preview.")).toBe(
+      "Search indexes are now generally available, and vector indexes are in Preview",
+    );
+    expect(
+      titleOf("You can use search and vector indexes. Search indexes are generally available (GA)."),
+    ).toBe("You can use search and vector indexes");
+  });
+
   it("throws when no entry parses", () => {
     expect(() => parseBigQueryNotes("<html></html>")).toThrow("no BigQuery entries");
   });
