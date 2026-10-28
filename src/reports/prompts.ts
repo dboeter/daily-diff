@@ -441,12 +441,17 @@ ${sourceFidelityRules()}
 `;
 }
 
+/**
+ * The Skills section. `prs` are open or merged (selectSkillsItems drops a PR closed without
+ * merging), so code, not the model, decides what shipped: a merged PR is listed as MERGED.
+ */
 export function buildSkillsPrompt(prs: GitHubItem[], issues: GitHubItem[], dateStr: string): string {
   const topPrs = topN(prs, 20);
   const topIssues = topN(issues, 15);
 
   const noneStr = "None";
-  const prsText = topPrs.map((p) => formatItem(p)).join("\n") || noneStr;
+  const prsText =
+    topPrs.map((p) => formatItem(p.merged_at ? { ...p, state: "merged" } : p)).join("\n") || noneStr;
   const issuesText = topIssues.map((i) => formatItem(i)).join("\n") || noneStr;
 
   return `You are a technical analyst writing for engineers who use coding agents and build data/AI systems. The following data is from github.com/anthropics/skills, Anthropic's Claude Code Skills repository: its pull requests and issues updated in the last 7 days (data as of ${dateStr}).
@@ -468,14 +473,14 @@ Leave out every item that is not about coding agents or data/AI engineering (e.g
 ## Open PRs worth watching
 Up to 5 open PRs: what each would add or fix, and that it is not merged yet. Describe what the PR does; do not call it critical or an overhaul unless its text says so.
 
-## Closed this week
-The PRs with state CLOSED, if any (a closed PR may or may not have been merged: do not say which).
+## Merged this week
+The PRs with state MERGED, if any: what each ships.
 
 ## Requests
 From the issues, what people ask the Skills to do or fix.
 
 ## Takeaway
-One sentence on what these items have in common.
+One sentence on what the open PRs, merged PRs and issues you wrote about have in common.
 
 Style: concise and professional, include GitHub links for each item.
 ${REPO_LENGTH_RULE}
