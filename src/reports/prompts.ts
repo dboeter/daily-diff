@@ -145,8 +145,15 @@ const NEWS_DESCRIPTION_CHARS = 300;
 
 /** Newest stable releases shown per project; llama.cpp alone tags 35–70 a week. */
 const RELEASES_PER_PROJECT = 10;
-/** A stable release's notes as the model sees them (the agents and data reports). */
-export const RELEASE_BODY_CHARS = 400;
+/**
+ * A stable release's notes as the model sees them (the agents and data reports), counted after
+ * `releaseNotes` strips the links: OpenCode v2.2.0's 35 KB notes strip to 17 KB, its Breaking
+ * changes and Highlights to the first 1.8 KB. Prompt input, which `callLlm`'s token budgets (output
+ * caps) do not count: 16 agents or 17 data repos × RELEASES_PER_PROJECT × 2000 chars is at worst
+ * ~85K tokens, inside gpt-4o's 128K context and the daily fallbacks' 1M; a normal day sends a few releases.
+ * The data page's Releases this week rows have no code cap: only releases no earlier report showed.
+ */
+export const RELEASE_BODY_CHARS = 2000;
 // A prerelease is reported only if its notes show notable features, so the
 // model needs more of them. DeepSeek Harness notes run 4–19 KB, Chinese first
 // behind "[English](#en-…)" anchor links and <h3> tags: at 400 characters the
@@ -154,24 +161,105 @@ export const RELEASE_BODY_CHARS = 400;
 const PREVIEW_BODY_CHARS = 1500;
 
 /**
- * Release notes on one line, without fenced code blocks, HTML tags and in-page
- * anchor links, cut at `maxChars`. Agent Deck's notes open with three install
- * blocks (Homebrew, curl, `go install`), so on 2026-10-19 the first 400
- * characters held no change and the report listed install commands.
+ * Release notes on one line, without fenced code blocks, HTML tags, in-page
+ * anchor links and link noise (`stripLinkNoise`), the going-away and upgrade
+ * sections first (`priorityFirst`), cut after the last whole item that fits
+ * `maxChars`. Agent Deck's notes open with three install blocks (Homebrew,
+ * curl, `go install`), so on 2026-10-19 the first 400 characters held no
+ * change and the report listed install commands.
  */
 export function releaseNotes(body: string | null | undefined, maxChars: number): string {
-  return compactChangelog(body ?? "")
-    .replace(/(```|~~~)[\s\S]*?(\1|$)/g, " ")
+  const text = compactChangelog(body ?? "")
+    .replace(/(```|~~~)[\s\S]*?(\1|$)/g, "\n")
     .replace(/<[^>]*>/g, " ")
-    .replace(/\[[^\]]*\]\(#[^)]*\)/g, " ")
-    .replace(/\s+/g, " ")
-    .trim()
-    .slice(0, maxChars);
+    .replace(/\[[^\]]*\]\(#[^)]*\)/g, " ");
+  return wholeItems(stripLinkNoise(priorityFirst(text)), maxChars);
+}
+
+/**
+ * Text without what costs characters and tells the model nothing: link URLs (a
+ * link keeps its text, an image goes), PR and issue references, thank-you and
+ * first-contribution lines, the Full Changelog link. Line breaks are kept. On
+ * 2026-10-28 most of OpenShell v0.1.6's first 400 characters were PR link URLs.
+ */
+export function stripLinkNoise(text: string): string {
+  return (
+    text
+      .replace(/^#+[ \t]*New Contributors[ \t]*$/gim, "")
+      .replace(CONTRIBUTOR_LINE_RE, "")
+      .replace(/\*\*Full Changelog\*\*:?\s*\S+/g, "")
+      .replace(/!\[[^\]]*\]\([^)]*\)/g, " ")
+      .replace(/(?:,\s*)?\[#\d+\]\([^)]*\)/g, " ")
+      .replace(/\[([^\]]*)\]\([^)]*\)/g, "$1")
+      .replace(/<?https?:\/\/[^\s)>]+>?/g, " ")
+      // The reference lists the steps above emptied, "([#1](…), [#2](…))" → "( , )", and "(#1, #2)";
+      // the opening lookahead keeps a call's "()" in code.
+      .replace(/\((?=[\s,#])(?:[\s,]|#\d+)+\)/g, " ")
+      .replace(/ by @[\w-]+(?:\[bot\])?(?![\w/-])(?: in #\d+)?/g, "")
+  );
+}
+
+// "- @user made their first contribution in …", "Thanks to @a and @b", "Contributors: @a, @b".
+const CONTRIBUTOR_LINE_RE =
+  /^[ \t]*(?:[*-][ \t]+)?(?:.*\bmade their first contribution\b.*|(?:thanks|thank you|kudos|contributors|credits)\b.*@[\w-]+.*)$/gim;
+
+/**
+ * A heading of what a user must act on: what breaks, goes away or needs an
+ * upgrade step. On 2026-10-28 OpenCode v2.2.0's three breaking changes and
+ * OpenShell v0.1.6's upgrade notes came after the cut.
+ */
+const PRIORITY_HEADING_RE =
+  /\b(?:breaking|removed|removals?|deprecat\w*|upgrade notes?|upgrade guide|upgrading|migrat\w*|security)\b/i;
+
+/** The sections under a PRIORITY_HEADING_RE heading (each through its sub-headings) moved to the front, in order. */
+function priorityFirst(text: string): string {
+  const front: string[] = [];
+  const rest: string[] = [];
+  let level = 0; // the heading level of the priority section we are in, 0 outside one
+  for (const line of text.split("\n")) {
+    const heading = /^[ \t]*(#{1,6})[ \t]+(.*)$/.exec(line);
+    if (heading && level && heading[1]!.length <= level) level = 0;
+    if (heading && !level && PRIORITY_HEADING_RE.test(heading[2]!)) level = heading[1]!.length;
+    (level ? front : rest).push(line);
+  }
+  return [...front, ...rest].join("\n");
+}
+
+/**
+ * The lines on one line, up to the last whole line that fits `maxChars`; a line
+ * that does not fit gives its leading whole sentences, and a first line without
+ * one is cut at a word. A heading with nothing under it (OpenShell's title over
+ * its install block) or left last by the cut is dropped: it introduces nothing.
+ */
+function wholeItems(text: string, maxChars: number): string {
+  const lines = text
+    .split("\n")
+    .map((line) => line.replace(/\s+/g, " ").trim())
+    .filter(Boolean);
+  const level = (line: string) => /^#+(?= )/.exec(line)?.[0].length ?? 0;
+  const items: string[] = [];
+  let length = -1; // the joining space before the first item is not there
+  for (const [i, item] of lines.entries()) {
+    const next = lines[i + 1];
+    if (level(item) && (next === undefined || (level(next) && level(next) <= level(item)))) continue;
+    const room = maxChars - length - 1;
+    if (item.length <= room) {
+      items.push(item);
+      length += item.length + 1;
+      continue;
+    }
+    const head = item.slice(0, room + 1);
+    const sentenceEnd = Math.max(...[...head.matchAll(/[.!?;](?=\s)/g)].map((m) => m.index), -1);
+    if (sentenceEnd >= 0) items.push(item.slice(0, sentenceEnd + 1));
+    else if (!items.length) items.push(head.slice(0, Math.max(head.lastIndexOf(" "), 0)).trim());
+    break;
+  }
+  while (items.length && level(items.at(-1)!)) items.pop();
+  return items.join(" ");
 }
 
 // GitHub's generated notes: "* <PR title> by @user in https://github.com/…/pull/N".
 const CHANGELOG_ENTRY_RE = /^[ \t]*[*-][ \t]+(.+?) by @\S+ in https:\/\/github\.com\/\S+\/pull\/\d+[ \t]*$/gm;
-const NEW_CONTRIBUTOR_RE = /^[ \t]*[*-][ \t]+@\S+ made their first contribution in \S+[ \t]*$/gm;
 
 /**
  * A generated changelog as PR titles only, with its count. At 400 characters
@@ -187,11 +275,7 @@ function compactChangelog(body: string): string {
   const withCount = header.test(body)
     ? body.replace(header, counted)
     : `${body.slice(0, first)}${counted}\n${body.slice(first)}`;
-  return withCount
-    .replace(CHANGELOG_ENTRY_RE, "$1;")
-    .replace(NEW_CONTRIBUTOR_RE, "")
-    .replace(/^#+[ \t]*New Contributors[ \t]*$/im, "")
-    .replace(/\*\*Full Changelog\*\*:?\s*\S+/g, "");
+  return withCount.replace(CHANGELOG_ENTRY_RE, "$1;");
 }
 
 /** Only a version x.0.0 is a major version (the data prompts' rule). */

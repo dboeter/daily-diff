@@ -1,3 +1,4 @@
+import fs from "node:fs";
 import { describe, expect, it } from "vitest";
 import type { GitHubItem, GitHubRelease, RepoConfig } from "../../core/github.ts";
 import { SECTIONS } from "../../core/strings.ts";
@@ -6,6 +7,7 @@ import {
   HIGHLIGHTS_PICK_RULE,
   NO_MODEL_NEWS_NOTE,
   type ProjectActivity,
+  RELEASE_BODY_CHARS,
   announcementLinks,
   buildPageHighlightsPrompt,
   buildProjectDigestPrompt,
@@ -14,6 +16,7 @@ import {
   hasActivity,
   isMajorRelease,
   releaseNotes,
+  stripLinkNoise,
   topN,
 } from "../../reports/prompts.ts";
 
@@ -350,6 +353,97 @@ describe("buildProjectDigestPrompt", () => {
     const prompt = buildProjectDigestPrompt([makeActivity({ releases: [release] })], scope, "d");
     expect(prompt).toContain("that has something left to report");
     expect(prompt).toContain("leave out its section entirely");
+  });
+});
+
+describe("releaseNotes", () => {
+  // Trimmed from the notes of 2026-10-28; the full OpenCode v2.2.0 body is 35 KB.
+  const fixture = (name: string) => fs.readFileSync(new URL(`../fixtures/${name}`, import.meta.url), "utf-8");
+  const openshell = fixture("release-openshell-v0.1.6.md");
+  const opencode = fixture("release-opencode-v2.2.0.md");
+
+  it("puts the upgrade notes first and keeps the control-connection item whole", () => {
+    const notes = releaseNotes(openshell, RELEASE_BODY_CHARS);
+    expect(notes).toMatch(/^### Upgrade notes - Gateways now refuse to start/);
+    expect(notes).toContain(
+      "New sandboxes on Kubernetes, Docker, Podman, and VM now open the control connection from the sandbox to its supervisor",
+    );
+    expect(notes).toContain("Upgrade the supervisor and sandbox runtime binaries together");
+    expect(notes).not.toContain("curl");
+    // Quick install lost its text with the install block.
+    expect(notes).toContain("`restart_if_restore_fails`. ## OpenShell v0.1.6 ### Bug fixes - The Python SDK");
+    expect(notes).not.toContain("Quick install");
+    // The CVE fixes are within the budget.
+    expect(notes).toContain("RUSTSEC-2026-0385");
+  });
+
+  it("puts all three breaking changes ahead of the Highlights", () => {
+    const notes = releaseNotes(opencode, RELEASE_BODY_CHARS);
+    expect(notes).toMatch(/^### Breaking changes #### `@opencode\/ai` root is now the Promise API/);
+    expect(notes).toContain("`@opencode/ai/promise` is removed");
+    expect(notes).toContain(
+      "The OpenCode GitHub Action is no longer published. Remove it from your workflows.",
+    );
+    expect(notes).toContain("Plugins that depend on OpenTUI 0.6 fail to install until they upgrade.");
+    expect(notes.indexOf("Remove it from your workflows")).toBeLessThan(notes.indexOf("### Highlights"));
+    expect(notes).toContain("### Highlights - Create, install and share Desktop plugins (experimental)");
+  });
+
+  it("strips link URLs and PR references before counting", () => {
+    for (const body of [openshell, opencode]) {
+      const notes = releaseNotes(body, RELEASE_BODY_CHARS);
+      expect(notes).not.toMatch(/https?:|\]\(|#\d{4}|\( *,| ,/);
+      expect(notes.length).toBeLessThanOrEqual(RELEASE_BODY_CHARS);
+    }
+    expect(releaseNotes(openshell, RELEASE_BODY_CHARS)).toContain(
+      "`ResumeBoundaryRequest` field 3 is renamed from `allow_cold_start_fallback` to `restart_if_restore_fails`.",
+    );
+    expect(releaseNotes(opencode, RELEASE_BODY_CHARS)).toContain("call `refreshHooks()` after adding a hook");
+  });
+
+  it("ends on a whole line or sentence, never mid-word", () => {
+    const lines = [
+      "### Fixes",
+      "- First fix is short.",
+      "- Second fix is longer. It has two sentences.",
+      "- Third fix",
+    ].join("\n");
+    expect(releaseNotes(lines, 60)).toBe("### Fixes - First fix is short. - Second fix is longer.");
+    expect(releaseNotes(lines, 40)).toBe("### Fixes - First fix is short.");
+    expect(releaseNotes("A very long first line without any sentence end", 20)).toBe("A very long first");
+    // A heading the cut leaves last introduces nothing.
+    expect(releaseNotes("- One fix.\n### Features\n- A feature that does not fit", 30)).toBe("- One fix.");
+    const cut = releaseNotes(opencode, 1000);
+    expect(opencode.replace(/\s+/g, " ")).toContain(cut.slice(-40));
+    expect(cut).toMatch(/[.)]$/);
+  });
+
+  it("drops contributor lines and the Full Changelog link", () => {
+    const body =
+      "- Faster startup by @alice in #12\n" +
+      "Thanks to @bob and @carol for their help!\n" +
+      "## New Contributors\n- @dave made their first contribution in #13\n" +
+      "**Full Changelog**: https://github.com/o/r/compare/v1...v2";
+    expect(releaseNotes(body, 400)).toBe("- Faster startup");
+  });
+});
+
+describe("stripLinkNoise", () => {
+  it("keeps a link's text and code, drops URLs and reference lists", () => {
+    expect(
+      stripLinkNoise(
+        "- Read [the guide](https://x.dev/g) and call `f()` ([#1](https://x/1), [#2](https://x/2))",
+      ),
+    ).toMatch(/^- Read the guide and call `f\(\)` +$/);
+    expect(stripLinkNoise("See https://x.dev/post or <https://x.dev/a>. (#3, #4)").trim()).toBe(
+      "See   or  .",
+    );
+    expect(stripLinkNoise("![logo](https://x/l.png)Text").trim()).toBe("Text");
+    expect(stripLinkNoise("Use `@opencode/ai` by @opencode/ai")).toBe("Use `@opencode/ai` by @opencode/ai");
+  });
+
+  it("keeps line breaks", () => {
+    expect(stripLinkNoise("a\nb [#5](https://x/5)\nc")).toBe("a\nb  \nc");
   });
 });
 
