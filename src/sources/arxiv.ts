@@ -70,7 +70,7 @@ const ARXIV_PAGE_SIZE = 300;
 const ARXIV_MAX_PAGES = 4;
 /** Papers kept from the ranked pool; the research state takes its top 15. */
 export const ARXIV_KEPT_PAPERS = 40;
-const API_URL = "https://export.arxiv.org/api/query";
+export const API_URL = "https://export.arxiv.org/api/query";
 
 /** ArXiv categories to search. */
 const CATEGORIES = ["cs.AI", "cs.CL", "cs.LG"];

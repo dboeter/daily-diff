@@ -73,6 +73,17 @@ describe("rejudgeResearch", () => {
     expect(result!.changes.find((c) => c.id === "b")!.new).toBeNull();
   });
 
+  it("judges an entry on its full abstract when there is one, else on the stored text", async () => {
+    const seen = new Map<string, string>();
+    const score = (paper: ArxivPaper) => {
+      seen.set(paper.id, paper.summary);
+      return stubScore(paper);
+    };
+    await rejudgeResearch(state(), "2026-10-28", score, new Map([["a", "The full abstract."]]));
+    expect(seen.get("a")).toBe("The full abstract.");
+    expect(seen.get("b")).toBe(state().items["b"]!.abstract);
+  });
+
   it("returns null when too many calls failed", async () => {
     const result = await rejudgeResearch(state(), "2026-10-28", () => Promise.reject(new Error("HTTP 400")));
     expect(result).toBeNull();

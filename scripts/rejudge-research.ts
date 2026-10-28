@@ -8,8 +8,9 @@
  * The value comes from fresh answers, never from the stored one, so a second run
  * does not penalize twice.
  *
- * The stored abstract is cut at 600 characters, so a code link past that point
- * no longer counts as `code_released`.
+ * The state keeps 600 characters of each abstract, and a cut abstract scores
+ * lower on every question, so the full abstracts are fetched from the arXiv API
+ * first; an entry the API does not return is judged on its stored text.
  *
  * Usage:
  *   npx tsx scripts/rejudge-research.ts [YYYY-MM-DD] [--dry-run]
@@ -26,7 +27,14 @@
 
 import { pathToFileURL } from "node:url";
 import { jevFailedTooOften, mapJev } from "../src/core/jev.ts";
-import { scorePaper, type ArxivPaper, type JevScore } from "../src/sources/arxiv.ts";
+import { fetchOk } from "../src/core/http.ts";
+import {
+  API_URL,
+  parseArxivEntries,
+  scorePaper,
+  type ArxivPaper,
+  type JevScore,
+} from "../src/sources/arxiv.ts";
 import {
   loadResearchState,
   saveResearchState,
@@ -50,12 +58,22 @@ export function entriesBefore(state: ResearchState, cutoff: string): [string, Re
   return Object.entries(state.items).filter(([, e]) => e.date < cutoff);
 }
 
+/** The full abstracts of the papers `ids` names (state ids are their abs URLs), in one arXiv API request. */
+export async function fetchAbstracts(ids: string[]): Promise<Map<string, string>> {
+  const params = new URLSearchParams({
+    id_list: ids.map((id) => id.replace(/^https?:\/\/arxiv\.org\/abs\//, "")).join(","),
+    max_results: String(ids.length),
+  });
+  const res = await fetchOk(`${API_URL}?${params}`);
+  return new Map(parseArxivEntries(await res.text()).map((p) => [p.id, p.summary]));
+}
+
 /** The entry as the paper `scorePaper` reads: only `title` and `summary` reach Jev and the code-link check. */
-function asPaper(id: string, e: ResearchEntry): ArxivPaper {
+function asPaper(id: string, e: ResearchEntry, abstract: string): ArxivPaper {
   return {
     id,
     title: e.title,
-    summary: e.abstract,
+    summary: abstract,
     authors: [],
     published: e.published,
     updated: e.published,
@@ -66,17 +84,23 @@ function asPaper(id: string, e: ResearchEntry): ArxivPaper {
 }
 
 /**
- * The state with every entry saved before `cutoff` re-scored, and one change per
- * such entry. Returns null when too many calls failed for the scores to be
- * trusted, like the daily ranking's recency fallback.
+ * The state with every entry saved before `cutoff` re-scored, from its full
+ * abstract in `abstracts` when there is one, and one change per such entry.
+ * Returns null when too many calls failed for the scores to be trusted, like the
+ * daily ranking's recency fallback.
  */
 export async function rejudgeResearch(
   state: ResearchState,
   cutoff: string,
   score: (paper: ArxivPaper) => Promise<JevScore>,
+  abstracts: Map<string, string> = new Map(),
 ): Promise<{ state: ResearchState; changes: RelevanceChange[] } | null> {
   const stale = entriesBefore(state, cutoff);
-  const { results, failed } = await mapJev(stale, ([id, e]) => score(asPaper(id, e)), "rejudge");
+  const { results, failed } = await mapJev(
+    stale,
+    ([id, e]) => score(asPaper(id, e, abstracts.get(id) ?? e.abstract)),
+    "rejudge",
+  );
   if (jevFailedTooOften(failed, stale.length)) return null;
   const items = { ...state.items };
   const changes = stale.map(([id, e], i): RelevanceChange => {
@@ -118,8 +142,12 @@ async function main(): Promise<void> {
   }
 
   const state = loadResearchState();
-  console.log(`Re-judging ${entriesBefore(state, cutoff).length} entries saved before ${cutoff}...`);
-  const result = await rejudgeResearch(state, cutoff, (paper) => scorePaper(paper, apiKey));
+  const ids = entriesBefore(state, cutoff).map(([id]) => id);
+  const abstracts = await fetchAbstracts(ids);
+  console.log(
+    `Re-judging ${ids.length} entries saved before ${cutoff} (${abstracts.size} full abstracts)...`,
+  );
+  const result = await rejudgeResearch(state, cutoff, (paper) => scorePaper(paper, apiKey), abstracts);
   if (!result) {
     console.error("Too many Jev failures (first error above): nothing was changed.");
     process.exit(1);
