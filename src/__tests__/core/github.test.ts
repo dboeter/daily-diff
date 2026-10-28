@@ -356,8 +356,8 @@ describe("fetchHotIssues", () => {
       if (a === "fail") {
         return Promise.resolve({
           ok: false,
-          status: 502,
-          text: () => Promise.resolve("bad gateway"),
+          status: 404,
+          text: () => Promise.resolve("Not Found"),
         } as Response);
       }
       const i = items.find((x) => x.number === n)!;
@@ -606,20 +606,83 @@ describe("fetchRecentReleases", () => {
     vi.useRealTimers();
   });
 
-  function respond(releases: GitHubRelease[]) {
-    vi.spyOn(globalThis, "fetch").mockResolvedValue({
+  it("retries a gateway timeout", async () => {
+    vi.useFakeTimers();
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    const fetchSpy = vi
+      .spyOn(globalThis, "fetch")
+      .mockResolvedValueOnce({ ok: false, status: 504, text: () => Promise.resolve("") } as Response)
+      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve([release("v2")]) } as Response);
+
+    const pending = fetchRecentReleases("org/repo", SINCE);
+    await vi.runAllTimersAsync();
+    expect((await pending).recent.map((r) => r.tag_name)).toEqual(["v2"]);
+    expect(fetchSpy).toHaveBeenCalledTimes(2);
+    vi.useRealTimers();
+  });
+
+  it("retries a truncated body instead of parsing it", async () => {
+    vi.useFakeTimers();
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    const truncated = new Response('[{"tag_name":"v2","name":"v2","published_at":"2026-10');
+    const fetchSpy = vi
+      .spyOn(globalThis, "fetch")
+      .mockResolvedValueOnce(truncated)
+      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve([release("v2")]) } as Response);
+
+    const pending = fetchRecentReleases("org/repo", SINCE);
+    await vi.runAllTimersAsync();
+    expect((await pending).recent.map((r) => r.tag_name)).toEqual(["v2"]);
+    expect(fetchSpy).toHaveBeenCalledTimes(2);
+    vi.useRealTimers();
+  });
+
+  it("gives every request a timeout", async () => {
+    const fetchSpy = vi.spyOn(globalThis, "fetch").mockResolvedValue({
       ok: true,
-      json: () => Promise.resolve(releases),
-    } as Response);
+      json: () => Promise.resolve([]),
+    } as unknown as Response);
+    await fetchRecentReleases("org/repo", SINCE);
+    expect(fetchSpy.mock.calls[0]![1]?.signal).toBeInstanceOf(AbortSignal);
+  });
+
+  /** Serves `history` (newest first) page by page, as the releases list does. */
+  function respond(history: GitHubRelease[]) {
+    return vi.spyOn(globalThis, "fetch").mockImplementation((input) => {
+      const url = new URL(String(input));
+      const perPage = Number(url.searchParams.get("per_page"));
+      const page = Number(url.searchParams.get("page"));
+      const body = history.slice((page - 1) * perPage, page * perPage);
+      return Promise.resolve({ ok: true, json: () => Promise.resolve(body) } as Response);
+    });
   }
+  const old = (r: GitHubRelease): GitHubRelease => ({ ...r, published_at: "2026-09-01T00:00:00Z" });
 
   it("keeps only the releases published in the window", async () => {
     respond([release("v2"), { ...release("v1"), published_at: "2026-10-01T00:00:00Z" }]);
     expect((await fetchRecentReleases("org/repo", SINCE)).recent.map((r) => r.tag_name)).toEqual(["v2"]);
   });
 
+  it("pages in small pages and stops at the first page that ends before the window", async () => {
+    const history = [
+      ...Array.from({ length: 12 }, (_, i) => release(`v1.${12 - i}.0`)),
+      ...Array.from({ length: 30 }, (_, i) => old(release(`v0.${30 - i}.0`))),
+    ];
+    const fetchSpy = respond(history);
+    const { recent, noStableYet } = await fetchRecentReleases("org/repo", SINCE);
+    expect(recent).toHaveLength(12);
+    expect(noStableYet).toBe(false);
+    expect(fetchSpy).toHaveBeenCalledTimes(2);
+    expect(new URL(String(fetchSpy.mock.calls[0]![0])).searchParams.get("per_page")).toBe("10");
+  });
+
   it("flags a repo whose whole history is prereleases", async () => {
     respond([release("dsh-v0.2.1-alpha.2"), release("dsh-v0.2.0-rc.1", true)]);
+    expect((await fetchRecentReleases("org/repo", SINCE)).noStableYet).toBe(true);
+  });
+
+  it("flags a short prerelease-only history read over several pages", async () => {
+    respond(Array.from({ length: 23 }, (_, i) => old(release(`v0.${i}.0-beta.1`))));
     expect((await fetchRecentReleases("org/repo", SINCE)).noStableYet).toBe(true);
   });
 
@@ -628,9 +691,21 @@ describe("fetchRecentReleases", () => {
     expect((await fetchRecentReleases("org/repo", SINCE)).noStableYet).toBe(false);
   });
 
-  it("does not flag a full page of prereleases: the stable one may be on the next page", async () => {
-    respond(Array.from({ length: 100 }, (_, i) => release(`rust-v0.${i}.0-alpha.1`)));
+  it("pages past the window to Codex's stable release behind a run of alphas", async () => {
+    const alphas = Array.from({ length: 25 }, (_, i) => old(release(`rust-v0.166.0-alpha.${25 - i}`)));
+    const fetchSpy = respond([release("rust-v0.166.0-alpha.26"), ...alphas, old(release("rust-v0.165.0"))]);
+    const { recent, noStableYet } = await fetchRecentReleases("org/repo", SINCE);
+    expect(recent.map((r) => r.tag_name)).toEqual(["rust-v0.166.0-alpha.26"]);
+    expect(noStableYet).toBe(false);
+    expect(fetchSpy).toHaveBeenCalledTimes(3);
+  });
+
+  it("does not flag a long prerelease-only history: it stops at the page cap without reading it all", async () => {
+    const log = vi.spyOn(console, "error").mockImplementation(() => {});
+    const fetchSpy = respond(Array.from({ length: 100 }, (_, i) => release(`rust-v0.${i}.0-alpha.1`)));
     expect((await fetchRecentReleases("org/repo", SINCE)).noStableYet).toBe(false);
+    expect(fetchSpy).toHaveBeenCalledTimes(5);
+    expect(log).toHaveBeenCalledWith(expect.stringContaining("stopped at 5 pages"));
   });
 
   it("does not retry an HTTP error", async () => {

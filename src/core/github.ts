@@ -5,6 +5,7 @@
 
 import { LIVE_REPORT_IDS, REPORTS, WEEKLY_REPORT_IDS } from "./strings.ts";
 import { daysBefore, toCstDateStr, sleep } from "./date.ts";
+import { FETCH_TIMEOUT_MS } from "./http.ts";
 import { loadItemsFile, type ItemsFile } from "./jev.ts";
 import { newItems, nextReportedState, type ReportedState, type StateItem } from "./report-state.ts";
 
@@ -98,15 +99,32 @@ function rateLimitNote(resp: Response): string {
   return ` [rate limit: resource ${h("x-ratelimit-resource")}, remaining ${h("x-ratelimit-remaining")}, reset ${resetStr}, retry-after ${h("retry-after")}]`;
 }
 
-/** Retries after a dropped connection; waits GET_RETRY_MS, then twice that. */
+/** Retries after a dropped connection or a gateway error; waits GET_RETRY_MS, then twice that. */
 const GET_RETRIES = 2;
 const GET_RETRY_MS = 2000;
 
+/** Gateway errors: GitHub answers 504 when a response takes over ~10 s to build, and 502/503 in passing. */
+const RETRY_STATUSES = new Set([502, 503, 504]);
+
 /**
- * GET with retries on network failures only. On 2026-10-06 the connection
- * dropped mid-body (`TypeError: terminated`, thrown by `resp.json()`) and the
- * run lost a Codex stable release. undici throws TypeError for both that and a
- * failed connect; an HTTP error status or bad JSON fails again on retry.
+ * A failure worth another try. On 2026-10-06 the connection dropped mid-body
+ * (`TypeError: terminated`, thrown by `resp.json()`) and the run lost a Codex
+ * stable release; undici throws TypeError for that and a failed connect. A
+ * gateway timeout can also arrive as a 200 with truncated JSON (SyntaxError),
+ * and our own timeout aborts with a `TimeoutError`. Other statuses fail again on retry.
+ */
+function isRetryable(err: unknown): boolean {
+  if (err instanceof GitHubApiError) return RETRY_STATUSES.has(err.status);
+  return (
+    err instanceof TypeError ||
+    err instanceof SyntaxError ||
+    (err instanceof Error && err.name === "TimeoutError")
+  );
+}
+
+/**
+ * GET with retries on network failures, gateway errors and truncated bodies
+ * (`isRetryable`), each attempt aborted after FETCH_TIMEOUT_MS.
  *
  * `slot` runs before every attempt: search calls pass searchSlot, so a retry
  * keeps to the search rate limit too.
@@ -121,7 +139,11 @@ export async function githubGet<T>(
   for (let attempt = 0; ; attempt++) {
     await slot?.();
     try {
-      const resp = await fetch(u.toString(), { headers: headers() });
+      // The signal also covers reading the body in resp.json().
+      const resp = await fetch(u.toString(), {
+        headers: headers(),
+        signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
+      });
       if (!resp.ok) {
         throw new GitHubApiError(
           resp.status,
@@ -130,7 +152,7 @@ export async function githubGet<T>(
       }
       return (await resp.json()) as T;
     } catch (err) {
-      if (!(err instanceof TypeError) || attempt >= GET_RETRIES) throw err;
+      if (!isRetryable(err) || attempt >= GET_RETRIES) throw err;
       console.error(`  [github] ${err} — retry ${attempt + 1}/${GET_RETRIES} (${url})`);
       await sleep(GET_RETRY_MS * 2 ** attempt);
     }
@@ -158,27 +180,53 @@ export async function searchSlot(): Promise<void> {
   if (at > now) await sleep(at - now);
 }
 
-/** The API maximum: a weekly window on llama.cpp, which tags several builds a day, already runs to 35–70 releases. */
-const RELEASES_PAGE = 100;
+/**
+ * GitHub builds a release page with every asset, ~130 per Codex release: on
+ * 2026-10-28 a page of 100 failed at ~11 s (504, or a 200 with truncated JSON)
+ * and a page of 10 answered in 4.9 s, so a page of 20 or 30 would near the limit again.
+ */
+const RELEASES_PAGE = 10;
+/** 50 releases: past the window, paging goes on only to find a stable release (`noStableYet`). */
+const RELEASES_MAX_PAGES = 5;
 
 export interface RecentReleases {
   /** Published since `since`, newest first. */
   recent: GitHubRelease[];
   /**
-   * The repo has never published a stable release: its whole history fit in
-   * one page and none of it was stable. A full page of prereleases cannot tell
-   * (Codex runs ~86 alphas per 100 releases), so it reads as false.
+   * The repo has never published a stable release: its whole history was read
+   * and none of it was stable. A prerelease-only read that stopped at
+   * RELEASES_MAX_PAGES cannot tell, so it reads as false.
    */
   noStableYet: boolean;
 }
 
+/**
+ * Pages until a page ends before `since` and a stable release has been seen,
+ * or the history ends. The list is newest first by creation date, which tracks
+ * `published_at` closely enough for the stop.
+ */
 export async function fetchRecentReleases(repo: string, since: Date): Promise<RecentReleases> {
-  const releases = await githubGet<GitHubRelease[]>(`https://api.github.com/repos/${repo}/releases`, {
-    per_page: String(RELEASES_PAGE),
-  });
+  const releases: GitHubRelease[] = [];
+  let historyRead = false;
+  for (let page = 1; page <= RELEASES_MAX_PAGES; page++) {
+    const batch = await githubGet<GitHubRelease[]>(`https://api.github.com/repos/${repo}/releases`, {
+      per_page: String(RELEASES_PAGE),
+      page: String(page),
+    });
+    releases.push(...batch);
+    if (batch.length < RELEASES_PAGE) {
+      historyRead = true;
+      break;
+    }
+    const pastWindow = new Date(batch[batch.length - 1]!.published_at) < since;
+    if (pastWindow && !releases.every(isPrerelease)) break;
+    if (page === RELEASES_MAX_PAGES) {
+      console.error(`  [github] ${repo} releases: stopped at ${RELEASES_MAX_PAGES} pages`);
+    }
+  }
   return {
     recent: releases.filter((r) => new Date(r.published_at) >= since),
-    noStableYet: releases.length < RELEASES_PAGE && releases.every(isPrerelease),
+    noStableYet: historyRead && releases.every(isPrerelease),
   };
 }
 
