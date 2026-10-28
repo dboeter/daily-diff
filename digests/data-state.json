@@ -2,6 +2,7 @@
   "reported": {
     "576716": "2026-10-22",
     "577618": "2026-10-23",
+    "578358": "2026-10-28",
     "databricks ai runtime sdk replaces serverless_gpu|2026-10-13": "2026-10-19",
     "knowledge assistant and supervisor agent are now legacy|2026-10-12": "2026-10-19",
     "feature views are now generally available|2026-10-12": "2026-10-19",
@@ -121,7 +122,20 @@
     "feature: the regexp_extract_groups function produces substrings that match multiple capturing groups in a regular expression.|2026-10-26": "2026-10-27",
     "https://community.fabric.microsoft.com/t5/Fabric-Updates-Blog/Announcing-workspace-monitoring-integration-for-Fabric-Data/ba-p/5376599": "2026-10-27",
     "release:snowflakedb/snowflake-connector-python@v4.8.1": "2026-10-27",
-    "release:dagster-io/dagster@1.13.27": "2026-10-27"
+    "release:dagster-io/dagster@1.13.27": "2026-10-27",
+    "account-level security features are now available by default at ga|2026-10-26": "2026-10-28",
+    "default oauth apps for external ai agents are now generally available|2026-10-27": "2026-10-28",
+    "editing files in unity catalog volumes is now generally available|2026-10-27": "2026-10-28",
+    "ai functions unity catalog permissions is now generally available|2026-10-27": "2026-10-28",
+    "oct 26, 2026: secondary indexes (general availability)|2026-10-26": "2026-10-28",
+    "oct 27, 2026: continuous and bulk file loading with coco (general availability)|2026-10-27": "2026-10-28",
+    "october 27, 2026: cortex code skills for interactive analytics|2026-10-27": "2026-10-28",
+    "feature: you can manage and version control sql scripts and notebooks with bigquery studio git repositories, which provide a streamlined, folder-based integration with remote git repositories.|2026-10-27": "2026-10-28",
+    "feature: the data engineering agent now integrates with google drive, letting you provide google sheets files, csv, or jsonl files as input for your data engineering pipelines.|2026-10-27": "2026-10-28",
+    "feature: you can now use conversational analytics in connected sheets to ask questions and analyze your bigquery data using natural language.|2026-10-27": "2026-10-28",
+    "https://community.fabric.microsoft.com/t5/Fabric-Updates-Blog/Simplify-Teradata-migrations-with-Fabric-Migration-Assistant/ba-p/5376058": "2026-10-28",
+    "feature: the ai.count_tokens function, which estimates the token count of a text string, is generally available (ga).|2026-10-27": "2026-10-28",
+    "https://community.fabric.microsoft.com/t5/Fabric-Updates-Blog/Connect-coding-agents-to-Fabric-notebooks-with-FNTK-Preview/ba-p/5375986": "2026-10-28"
   },
   "stages": {
     "snowflake-bcr:2026_08": "2026-10-16 Introduced in the 10.37 release (October 8-16, 2026) as Disabled by Default; account admins can enable for testing."

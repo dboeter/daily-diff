@@ -1,0 +1,11 @@
+{
+  "reported": {
+    "issue:anthropics/claude-code#97074": "2026-10-28",
+    "issue:anthropics/claude-code#105408": "2026-10-28",
+    "issue:google-gemini/gemini-cli#15404": "2026-10-28",
+    "issue:anomalyco/opencode#59387": "2026-10-28",
+    "issue:nousresearch/hermes-agent#145452": "2026-10-28",
+    "issue:nousresearch/hermes-agent#143379": "2026-10-28"
+  },
+  "stages": {}
+}

@@ -1,0 +1,17 @@
+{
+"attempted": 11,
+"failed": 0,
+"calls": [
+{"label":"infra","outcome":"ok","chars":414},
+{"label":"agents","outcome":"ok","chars":3106},
+{"label":"spotted-summaries","outcome":"ok","chars":1610},
+{"label":"policy","outcome":"ok","chars":497},
+{"label":"models-summaries","outcome":"ok","chars":1069},
+{"label":"models-highlights","outcome":"ok","chars":492},
+{"label":"policy-summaries","outcome":"ok","chars":249},
+{"label":"agents-highlights","outcome":"ok","chars":546},
+{"label":"data-vendor-summaries","outcome":"ok","chars":2350},
+{"label":"data-highlights","outcome":"ok","chars":1239},
+{"label":"highlights","outcome":"ok","chars":947}
+]
+}

@@ -30,7 +30,8 @@
     "000001a1-6a7c-d679-a5a5-6affc6490000": "2026-10-24",
     "tk:2026Z23028": "2026-10-27",
     "https://www.binnenlandsbestuur.nl/digitaal/meer-ondersteuning-nodig-bij-invulling-algoritmeregister": "2026-10-27",
-    "https://cset.georgetown.edu/?p=25690": "2026-10-27"
+    "https://cset.georgetown.edu/?p=25690": "2026-10-27",
+    "https://digital-strategy.ec.europa.eu/news-redirect/961661": "2026-10-28"
   },
   "stages": {
     "celex:32026D2274": "2026-10-12 Decision adopted",
@@ -53,5 +54,16 @@
       "link": "https://ec.europa.eu/info/law/better-regulation/have-your-say/initiatives/19292_en",
       "source": "Have your say"
     }
+  },
+  "zeroSince": {
+    "EUR-Lex": "2026-10-28",
+    "European Parliament": "2026-10-28",
+    "Tweede Kamer": "2026-10-28",
+    "Have your say": "2026-10-28",
+    "Congress.gov": "2026-10-28",
+    "Internetconsultatie": "2026-10-28",
+    "European Commission": "2026-10-28",
+    "EDPB": "2026-10-28",
+    "Autoriteit Persoonsgegevens": "2026-10-28"
   }
 }
