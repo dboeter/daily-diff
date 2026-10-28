@@ -1,5 +1,10 @@
 import { describe, expect, it, vi } from "vitest";
-import { entriesBefore, printChanges, rejudgeResearch } from "../../../scripts/rejudge-research.ts";
+import {
+  entriesBefore,
+  fetchAbstracts,
+  printChanges,
+  rejudgeResearch,
+} from "../../../scripts/rejudge-research.ts";
 import { relevanceOf, type ArxivPaper, type JevAnswers, type JevScore } from "../../sources/arxiv.ts";
 import type { ResearchEntry, ResearchState } from "../../trending/research.ts";
 
@@ -39,6 +44,15 @@ describe("entriesBefore", () => {
   it("takes the entries saved before the cutoff only", () => {
     expect(entriesBefore(state(), "2026-10-28").map(([id]) => id)).toEqual(["a", "b"]);
     expect(entriesBefore(state(), "2026-10-24").map(([id]) => id)).toEqual(["a"]);
+  });
+});
+
+describe("fetchAbstracts", () => {
+  it("makes no request for no ids: arXiv answers an empty id_list with HTTP 400", async () => {
+    const fetch = vi.spyOn(globalThis, "fetch");
+    expect(await fetchAbstracts([])).toEqual(new Map());
+    expect(fetch).not.toHaveBeenCalled();
+    fetch.mockRestore();
   });
 });
 

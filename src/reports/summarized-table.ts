@@ -123,11 +123,17 @@ const STOPWORDS = new Set(
 );
 
 /**
- * Lowercased words minus stopwords, a plural "s" cut so "agents" matches "agent": the words two
- * texts are compared by, here and for a highlight restating its page's lead (`restatesLead`).
+ * Lowercased words minus stopwords, a plural "s" cut so "agents" matches "agent", a possessive
+ * dropped and hyphenated words split, so "OpenAI's open-source" matches "OpenAI open source": the
+ * words two texts are compared by, here and for a highlight restating its page's lead (`restatesLead`).
  */
 export function contentWords(text: string): string[] {
-  return (text.toLowerCase().match(/[\p{L}\p{N}][\p{L}\p{N}+#'-]*/gu) ?? [])
+  return (
+    text
+      .toLowerCase()
+      .replace(/['’]s\b/g, "")
+      .match(/[\p{L}\p{N}][\p{L}\p{N}+#]*/gu) ?? []
+  )
     .filter((w) => !STOPWORDS.has(w))
     .map((w) => (w.length > 3 && w.endsWith("s") ? w.slice(0, -1) : w));
 }

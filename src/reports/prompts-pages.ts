@@ -539,8 +539,9 @@ export interface NoHighlightRow {
   url: string;
 }
 
-// A title of at least this many content words also matches a bullet restating most of them.
-const RESTATED_NAME_MIN_WORDS = 4;
+// A title of at least this many content words also matches a bullet restating most of them
+// (4 words of 3+ letters before stopwords were dropped).
+const RESTATED_NAME_MIN_WORDS = 3;
 
 /**
  * The Highlights before TABLES_MARKER (the whole text without one) without a bullet about a

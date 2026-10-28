@@ -391,6 +391,12 @@ describe("withFallbackHighlights", () => {
     expect(restatesLead("Snowflake ships X", "− Polars py-2.1.0 disallows mixed arithmetic.")).toBe(false);
   });
 
+  it("matches a lead's possessive and hyphenated words to their bare forms", () => {
+    expect(
+      restatesLead("OpenAI open source Codex agent", "OpenAI's open-source Codex agent ships today"),
+    ).toBe(true);
+  });
+
   it("sends a report whose Highlights failed as its page, so a forced report can still get one", () => {
     const page =
       "## Highlights\n\n⚠️ Summary generation failed.\n\n## Databricks\n\n| Item | Summary |\n| --- | --- |\n| [Lakebase GA](https://x) | Lakebase is generally available. |";
@@ -713,6 +719,13 @@ describe("dropNoHighlightRows", () => {
     ];
     const prose = `## Highlights\n\n${polars}\n- deepseek-ai/deepseek-harness gained 900 stars.\n- Qwen/Qwen3.6-35B-A3B tops likes.`;
     expect(dropNoHighlightRows(prose, rows, "test")).toBe(`## Highlights\n\n${polars}`);
+  });
+
+  it("drops a bullet restating a name of three content words", () => {
+    const prose = `## Highlights\n\n${polars}\n- Snowflake adds new API support.`;
+    expect(dropNoHighlightRows(prose, [{ name: "Support for the new API", url: "" }], "test")).toBe(
+      `## Highlights\n\n${polars}`,
+    );
   });
 
   it("keeps a bullet that only shares a word with a short name", () => {

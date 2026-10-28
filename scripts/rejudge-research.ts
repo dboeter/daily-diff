@@ -10,7 +10,8 @@
  *
  * The state keeps 600 characters of each abstract, and a cut abstract scores
  * lower on every question, so the full abstracts are fetched from the arXiv API
- * first; an entry the API does not return is judged on its stored text.
+ * first; an entry the API does not return is judged on its stored text, and a
+ * failed request changes nothing.
  *
  * Usage:
  *   npx tsx scripts/rejudge-research.ts [YYYY-MM-DD] [--dry-run]
@@ -60,6 +61,8 @@ export function entriesBefore(state: ResearchState, cutoff: string): [string, Re
 
 /** The full abstracts of the papers `ids` names (state ids are their abs URLs), in one arXiv API request. */
 export async function fetchAbstracts(ids: string[]): Promise<Map<string, string>> {
+  // arXiv answers an empty id_list with HTTP 400.
+  if (!ids.length) return new Map();
   const params = new URLSearchParams({
     id_list: ids.map((id) => id.replace(/^https?:\/\/arxiv\.org\/abs\//, "")).join(","),
     max_results: String(ids.length),

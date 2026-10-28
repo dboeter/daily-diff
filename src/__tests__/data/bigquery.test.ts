@@ -49,7 +49,7 @@ describe("parseBigQueryNotes", () => {
       `<entry><id>x#October_28_2026</id><updated>2026-10-28T00:00:00-07:00</updated><content type="html"><![CDATA[<h3>Feature</h3><p>${body}</p>]]></content></entry>`,
     )[0]!.title;
 
-  it("takes no stage from a future-tense sentence", () => {
+  it("takes the present stage, never a future one", () => {
     expect(
       titleOf("You can use vector indexes. This feature will be generally available (GA) in November."),
     ).toBe("You can use vector indexes");
@@ -57,7 +57,7 @@ describe("parseBigQueryNotes", () => {
       titleOf(
         "You can use vector indexes. This feature is in Preview and will be generally available next month.",
       ),
-    ).toBe("You can use vector indexes");
+    ).toBe("You can use vector indexes (Preview)");
   });
 
   it("takes no stage from a note naming a GA and a Preview feature", () => {

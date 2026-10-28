@@ -156,3 +156,14 @@ Spec, wrong or partial:
 Holds (03, 07, 08, 11; 01 paging, retries and `noStableYet`; the 745-call budget): still hold. 06 changed the status cap's unit to timeline pages but left the cap at 66, so the total stays at 745.
 
 Small mismatches fixed in this integration: `scripts/regen-highlights.ts`'s Usage line now shows the `[YYYY-MM-DD]` argument the script reads. Checked and left: `bigquery.ts` builds `stageOf`'s text with `vendorText(body, Number.MAX_SAFE_INTEGER)`, which would put a `Sections:` line first only if a note body had `<h2>`–`<h4>` headings; the feed splits on `<h3>`, and the fixture has no `<h4>`.
+
+### PR review (2026-10-28)
+
+A fresh-context review of the fix round and the re-judge fix (`37bff2f..HEAD`) found six issues; all six are fixed, each with a test or a doc fix:
+
+1. `contentWords` kept `'` and `-` inside words, so "OpenAI's open-source" no longer matched "OpenAI open source" in `restatesLead`, the sign carry-over and `dropNoHighlightRows`. It now drops a possessive and splits hyphenated words. `RESTATED_NAME_MIN_WORDS` went from 4 to 3, because stopwords no longer count.
+2. `HOT_ISSUE_BULLET` was case-sensitive. A model's `**Hot Issue:**` bullet got no facts and a duplicate code bullet; the label now matches in any case.
+3. `fetchAbstracts` sent an empty `id_list`, which arXiv answers with HTTP 400. It now returns early. The header now says a failed request changes nothing.
+4. AGENTS.md: a rerun of `rejudge-research.ts` asks Jev again for every entry before the date.
+5. `stageOf` skipped every sentence containing "will". "This feature is in Preview and will be GA" now shows "(Preview)"; the present-tense regexes already exclude "will be".
+6. The `scripts/regen-highlights.ts` comment now says Trends is forced too.

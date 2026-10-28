@@ -47,7 +47,7 @@ function stageOf(text: string): string | undefined {
   const stages = new Set(
     text
       .split(/(?<=[.!?])\s+/)
-      .filter((s, i) => (i === 0 || SUBJECT_SENTENCE_RE.test(s)) && !/\bwill\b/i.test(s))
+      .filter((s, i) => i === 0 || SUBJECT_SENTENCE_RE.test(s))
       .flatMap((s) => [
         ...(PRESENT_GA_RE.test(s) ? ["GA"] : []),
         ...(PRESENT_PREVIEW_RE.test(s) ? ["Preview"] : []),

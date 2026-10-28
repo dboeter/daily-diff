@@ -430,6 +430,16 @@ describe("buildProjectReportContent", () => {
       );
     });
 
+    it("takes a Hot Issue label in any case, so the issue gets no second bullet", () => {
+      const result = render("## ALPHA\n- **Hot Issue:** #15404: temp files flagged by antivirus", [
+        hot(15404),
+      ]);
+      expect(result).toContain(
+        "- **Hot Issue:** [#15404](https://github.com/org/alpha/issues/15404): temp files",
+      );
+      expect(result.match(/#15404\]/g)).toHaveLength(1);
+    });
+
     it("keeps the model's link, names the gain's date and shows the fix PR, per issue when a bullet names two", () => {
       const result = render(
         "## ALPHA\n- **Hot issue:** [#1](https://github.com/org/alpha/issues/1) and #2: an issue says logins fail",

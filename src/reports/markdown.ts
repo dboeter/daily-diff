@@ -199,8 +199,8 @@ function hotIssueFacts(i: HotIssue): string {
 const hotIssueBullet = (i: HotIssue): string =>
   `- **${HOT_ISSUE.label}:** [#${i.number}](${i.html_url}): ${i.title} (${hotIssueFacts(i)})`;
 
-/** A Hot issue bullet, its label normalized by `boldLabelColonInside`. */
-const HOT_ISSUE_BULLET = new RegExp(`^\\s*[-*]\\s+\\*\\*${escapeRegex(HOT_ISSUE.label)}:\\*\\*`);
+/** A Hot issue bullet, its label normalized by `boldLabelColonInside`, in any case ("Hot Issue"). */
+const HOT_ISSUE_BULLET = new RegExp(`^\\s*[-*]\\s+\\*\\*${escapeRegex(HOT_ISSUE.label)}:\\*\\*`, "i");
 
 /** A parenthetical the model wrote with counts or a gain: "(16 comments, +3 in 24h)". */
 const MODEL_COUNTS = /\s*\((?=[^()\n]*(?:\bcomments?\b|👍|\breactions?\b|\+\d+\s+(?:in|since)\b))[^()\n]*\)/g;
