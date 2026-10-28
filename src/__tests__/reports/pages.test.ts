@@ -27,6 +27,7 @@ import { selectVendorItems } from "../../data/relevance.ts";
 import { type DataState, fetchVendorData } from "../../data/vendors.ts";
 import { numberRows } from "../../reports/summarized-table.ts";
 import type { SpottedRow } from "../../spotted/pool.ts";
+import { selectSkillsItems } from "../../trending/skills.ts";
 
 const NO_SPOTTED = { rows: [], summaries: new Map<number, string>() };
 /** A page's `##` headings, in order. */
@@ -389,6 +390,38 @@ describe("buildTrendsReport", () => {
       skills: { ...input.skills, prs: [pr] },
     });
     expect(report?.content).toContain(`## ${TRENDS_REPORT.skillsHeading}`);
+  });
+
+  it("shows a PR merged this week under Merged this week and leaves out one closed without merging", async () => {
+    const closed = (number: number, merged: boolean): GitHubItem => ({
+      ...skillPr,
+      number,
+      title: `skill-creator: change ${number}`,
+      state: "closed",
+      closed_at: "2026-10-24T00:00:00Z",
+      merged_at: merged ? "2026-10-24T00:00:00Z" : null,
+      html_url: `https://github.com/anthropics/skills/pull/${number}`,
+    });
+    const selected = selectSkillsItems(
+      { prs: [closed(1990, true), closed(1961, false)], issues: [], fetchSuccess: true },
+      new Set(),
+      new Date("2026-10-26T03:00:00Z"),
+    );
+    // The Skills call writes a bullet for every PR it is given, so a PR the selection kept shows.
+    const isSkills = (p: string) => p.includes("## Merged this week");
+    generateBody.mockReset();
+    generateBody.mockImplementation(async (p: string) =>
+      isSkills(p)
+        ? `## Merged this week\n\n${[...p.matchAll(/^#(\d+) \[\w+\]/gm)]
+            .map((m) => `- [#${m[1]}](https://github.com/anthropics/skills/pull/${m[1]}) ships it.`)
+            .join("\n")}`
+        : reply(p),
+    );
+    const content = (await build({ skills: { ...input.skills, ...selected } }))!.content;
+    const section = content.slice(content.indexOf(`## ${TRENDS_REPORT.skillsHeading}`));
+    expect(section).toContain("### Merged this week");
+    expect(section).toContain("https://github.com/anthropics/skills/pull/1990");
+    expect(content).not.toContain("1961");
   });
 
   it("stays under 60 KB with the largest plausible inputs", async () => {

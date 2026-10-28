@@ -498,6 +498,22 @@ describe("buildSkillsPrompt", () => {
     expect(result).toContain("not about coding agents or data/AI engineering");
     expect(result).not.toContain("## Top Skills");
   });
+
+  it("lists a merged PR as MERGED, under Merged this week, with no 'do not say which'", () => {
+    const merged = makeItem({
+      number: 1990,
+      state: "closed",
+      closed_at: "2026-10-24T00:00:00Z",
+      merged_at: "2026-10-24T00:00:00Z",
+    });
+    const result = buildSkillsPrompt([makeItem({ number: 1742 }), merged], [], "2026-10-26");
+    expect(result).toContain("#1990 [MERGED]");
+    expect(result).toContain("#1742 [OPEN]");
+    expect(result).toContain("## Merged this week");
+    expect(result).not.toContain("Closed this week");
+    expect(result).not.toContain("do not say which");
+    expect(result).toContain("open PRs, merged PRs and issues");
+  });
 });
 
 describe("buildPageHighlightsPrompt note", () => {

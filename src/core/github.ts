@@ -48,6 +48,8 @@ export interface GitHubItem {
   created_at: string;
   updated_at: string;
   closed_at?: string | null;
+  /** Set by the pulls endpoint: null on a PR closed without merging (and an open one). */
+  merged_at?: string | null;
   comments: number;
   reactions?: GitHubReactions;
   body?: string | null;
