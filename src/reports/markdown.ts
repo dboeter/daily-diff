@@ -28,7 +28,7 @@ import type { VendorAction } from "../data/vendors.ts";
 import type { StoryRow } from "../spotted/pool.ts";
 import type { ResearchPaper } from "../trending/research.ts";
 import type { Category } from "../trending/rank.ts";
-import type { RepoConfig } from "../core/github.ts";
+import { hotIssueLabel, type HotIssue, type RepoConfig } from "../core/github.ts";
 import {
   AGENT_SECTION_KEYS,
   VENDOR_SECTIONS,
@@ -43,6 +43,7 @@ import {
   MSG,
   nothingNew,
   OVERVIEW,
+  PROJECT_SCOPE,
   REPORTS,
   REPORT_META,
   SECTIONS,
@@ -165,6 +166,50 @@ function withReleaseBullet(section: string, g: ProjectGroup): string {
 export const boldLabelColonInside = (md: string): string =>
   md.replace(/^(\s*[-*]\s+)\*\*([^*\n]+?)\*\*:/gm, "$1**$2:**");
 
+/**
+ * A hot issue's facts in one form, written by code: the regression or security label it qualified
+ * on, its totals, its gain and its fix PR. On 2026-10-28 the model wrote a different count
+ * parenthetical on every row and left out Gemini #15404's `area/security`.
+ */
+function hotIssueFacts(i: HotIssue): string {
+  const label = hotIssueLabel(i);
+  const gain = `+${i.gain} ${i.gainSince ? `since ${i.gainSince}` : `in the ${PROJECT_SCOPE.window}`}`;
+  const fix =
+    i.fix && `fix ${i.fix.state === "merged" ? "" : "PR "}[#${i.fix.number}](${i.fix.url}) ${i.fix.state}`;
+  return [label, `${i.comments} comments, ${i.reactions?.["+1"] ?? 0} 👍`, gain, fix]
+    .filter(Boolean)
+    .join("; ");
+}
+
+/** A parenthetical the model wrote with counts or a gain: "(16 comments, +3 in 24h)". */
+const MODEL_COUNTS = /\s*\((?=[^()\n]*(?:\bcomments?\b|👍|\breactions?\b|\+\d+\s+(?:in|since)\b))[^()\n]*\)/g;
+
+/**
+ * A section's Hot issue bullets with code's facts: each bullet naming one of the project's hot
+ * issues (`#N` or its URL) gets the issue linked where the model left it bare, any counts the model
+ * wrote dropped, and `hotIssueFacts` appended, prefixed by the number when the bullet names several.
+ */
+function withHotIssueFacts(section: string, g: ProjectGroup): string {
+  const a = g.activities.find((p) => sectionHeading(p.config.name).test(section));
+  if (!a?.hotIssues.length) return section;
+  return section
+    .split("\n")
+    .map((line) => {
+      if (!/^\s*[-*]\s+\*\*Hot issue:\*\*/.test(line)) return line;
+      const named = a.hotIssues.filter((i) => new RegExp(`(?:#|/issues/)${i.number}(?!\\d)`).test(line));
+      if (!named.length) return line;
+      let text = line.replace(MODEL_COUNTS, "").trimEnd();
+      for (const i of named) {
+        if (!text.includes(`/issues/${i.number}`)) {
+          text = text.replace(new RegExp(`#${i.number}(?!\\d)`), `[#${i.number}](${i.html_url})`);
+        }
+      }
+      const facts = named.map((i) => `(${named.length > 1 ? `#${i.number}: ` : ""}${hotIssueFacts(i)})`);
+      return `${text} ${facts.join(" ")}`;
+    })
+    .join("\n");
+}
+
 /** A model-written project section with its backticked tokens checked against that project's prompt block. */
 function checkProjectTokens(section: string, g: ProjectGroup): string {
   const a = g.activities.find((p) => sectionHeading(p.config.name).test(section));
@@ -176,7 +221,8 @@ function checkProjectTokens(section: string, g: ProjectGroup): string {
  * A group's projects as rendered: the model's summary without text outside a `##` section and
  * without a project section that has no bullet (both are absence notes the prompt forbids), plus a
  * code section for each project with a stable release the model did not cover, and a code Release
- * bullet appended to a covered section that does not show its release. Each project
+ * bullet appended to a covered section that does not show its release, and each Hot issue bullet
+ * with its facts in code (`withHotIssueFacts`). Each project
  * section's backticked tokens are checked against the project's block in the prompt
  * (`checkCodeTokens`). `quiet` is every other checked project without a section; after a failed
  * call (MSG.summaryFailed) the data decides.
@@ -194,7 +240,12 @@ function groupProjects(g: ProjectGroup): { body: string; quiet: ProjectActivity[
           (chunk) =>
             !g.activities.some((a) => sectionHeading(a.config.name).test(chunk) && !covers(chunk, a)),
         )
-        .map((chunk) => withReleaseBullet(boldLabelColonInside(checkProjectTokens(chunk.trim(), g)), g));
+        .map((chunk) =>
+          withHotIssueFacts(
+            withReleaseBullet(boldLabelColonInside(checkProjectTokens(chunk.trim(), g)), g),
+            g,
+          ),
+        );
   const body = [...kept, ...fallback.map(releaseFallbackSection)].filter(Boolean).join("\n\n");
   const active = failed ? g.activities.filter(hasActivity) : [...covered, ...fallback];
   return { body, quiet: g.activities.filter((a) => !active.includes(a) && !a.fetchFailed) };

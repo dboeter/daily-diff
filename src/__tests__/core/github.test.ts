@@ -13,6 +13,9 @@ import {
   HOT_ISSUE_MAX_CHECKED,
   HOT_ISSUE_MAX_COUNT_CALLS,
   HOT_ISSUE_MAX_PAGES,
+  HOT_ISSUE_MAX_STATUS_CALLS,
+  HOT_ISSUE_MAX_VERIFIED,
+  gainWindowStart,
   hotIssueCallsLine,
   newHotIssueCalls,
   newHotIssueQueue,
@@ -168,6 +171,36 @@ describe("selectHotIssues, gain counted by the API", () => {
     ]);
   });
 
+  it("does not count bot comments, bot 👍 or a bare slash command (Gemini #15404, 2026-10-28)", () => {
+    // Labelled area/security (bar 3): two gemini-cli[bot] comments and "/assign" made +3.
+    const gemini = issue({ number: 15404, comments: 16, labels: ["area/security", "priority/p2"] });
+    const by = (login: string, body: string, type = "User") => ({
+      created_at: IN_WINDOW,
+      user: { login, type },
+      body,
+    });
+    const activity: IssueActivity = {
+      comments: [
+        by("gemini-cli[bot]", "Thanks for the report", "Bot"),
+        by("Neal006", " /assign\n"),
+        by("gemini-cli[bot]", "Assigned to Neal006"),
+        by("ci-app", "/label bug", "Bot"),
+      ],
+      thumbs: [{ created_at: IN_WINDOW, user: { login: "renovate[bot]", type: "Bot" } }],
+    };
+    expect(selectByApi([[gemini, activity]])).toEqual([]);
+    const withPeople: IssueActivity = {
+      ...activity,
+      comments: [...activity.comments, by("alice", "/assign is not enough, this also breaks on Linux")],
+      thumbs: [
+        ...activity.thumbs,
+        { created_at: IN_WINDOW, user: { login: "bob", type: "User" } },
+        { created_at: IN_WINDOW },
+      ],
+    };
+    expect(selectByApi([[gemini, withPeople]]).map((i) => i.gain)).toEqual([3]);
+  });
+
   it("skips an old issue without a baseline whose activity was not fetched", () => {
     expect(selectHotIssues([issue({ number: 1, comments: 40 })], ctx())).toEqual([]);
   });
@@ -176,11 +209,52 @@ describe("selectHotIssues, gain counted by the API", () => {
 describe("selectHotIssues, gain from the snapshot", () => {
   const YESTERDAY = "2026-10-03";
 
-  it("takes the gain from yesterday's total and needs no fetch", () => {
+  it("takes the gain from yesterday's total, which a recount can only lower", () => {
     const i = issue({ number: 1, comments: 30 });
     const c = ctx({ snapshot: snap({ "org/repo#1": { date: YESTERDAY, total: 18 } }) });
-    expect(hotIssuesToCheck([i], c)).toEqual([]);
+    expect(hotIssuesToCheck([i], c).map((x) => x.number)).toEqual([1]);
     expect(selectHotIssues([i], c).map((x) => [x.gain, x.gainSince])).toEqual([[12, undefined]]);
+    // An API count past the known gain (edits, a long window) does not raise it.
+    const recounted = selectHotIssues([i], { ...c, activity: new Map([[1, act({ newComments: 20 })]]) });
+    expect(recounted.map((x) => x.gain)).toEqual([12]);
+  });
+
+  it("recounts a baseline gain without bots and /assign, and drops the issue when people added too little", () => {
+    // Gemini #15404 (2026-10-28) on the baseline path: +3 since yesterday, labelled area/security (bar 3).
+    const gemini = issue({ number: 15404, comments: 16, labels: ["area/security"] });
+    const c = ctx({ snapshot: snap({ "org/repo#15404": { date: YESTERDAY, total: 13 } }) });
+    expect(selectHotIssues([gemini], c).map((x) => x.gain)).toEqual([3]);
+    const by = (login: string, body: string, type = "User") => ({
+      created_at: IN_WINDOW,
+      user: { login, type },
+      body,
+    });
+    const activity: IssueActivity = {
+      comments: [
+        by("gemini-cli[bot]", "Triage", "Bot"),
+        by("Neal006", "/assign"),
+        by("gemini-cli[bot]", "Assigned"),
+      ],
+      thumbs: [],
+    };
+    expect(hotIssuesToCheck([gemini], c).map((x) => x.number)).toEqual([15404]);
+    expect(selectHotIssues([gemini], { ...c, activity: new Map([[15404, activity]]) })).toEqual([]);
+  });
+
+  it("counts a two-day-old baseline's recount from the day after it", () => {
+    const i = issue({ number: 1, comments: 30 });
+    const c = ctx({ snapshot: snap({ "org/repo#1": { date: "2026-10-02", total: 10 } }) });
+    expect(gainWindowStart(i, c)).toEqual(new Date(SINCE.getTime() - 24 * 60 * 60 * 1000));
+    expect(gainWindowStart(i, ctx())).toEqual(SINCE);
+  });
+
+  it(`recounts at most ${HOT_ISSUE_MAX_VERIFIED} known gains per repo, highest first, before the unknown ones`, () => {
+    const known = Array.from({ length: 6 }, (_, n) =>
+      issue({ number: n + 1, comments: 20 + n, created_at: IN_WINDOW }),
+    );
+    const old = issue({ number: 99, comments: 500 });
+    const toCheck = hotIssuesToCheck([...known, old], ctx()).map((x) => x.number);
+    expect(toCheck).toEqual([6, 5, 4, 3, 99]);
   });
 
   it("is not hot when the total barely moved since yesterday", () => {
@@ -215,13 +289,23 @@ describe("selectHotIssues, gain from the snapshot", () => {
     expect(selectHotIssues([i], ctx({ snapshot: afterFirstRun })).map((x) => x.gain)).toEqual([12]);
   });
 
-  it("counts the whole total of an issue opened in the window, with no fetch", () => {
+  it("counts the whole total of an issue opened in the window, less its bot comments once recounted", () => {
     const i = issue({ number: 1, comments: 12, created_at: IN_WINDOW });
-    expect(hotIssuesToCheck([i], ctx())).toEqual([]);
+    expect(hotIssuesToCheck([i], ctx()).map((x) => x.number)).toEqual([1]);
     expect(selectHotIssues([i], ctx()).map((x) => x.gain)).toEqual([12]);
+    const botFirst: IssueActivity = {
+      comments: [
+        { created_at: IN_WINDOW, user: { login: "triage-bot", type: "Bot" }, body: "Thanks" },
+        ...dated(11, IN_WINDOW),
+      ],
+      thumbs: [],
+    };
+    expect(selectHotIssues([i], ctx({ activity: new Map([[1, botFirst]]) })).map((x) => x.gain)).toEqual([
+      11,
+    ]);
   });
 
-  it("keeps Codex #56691 (53 now, 40 yesterday) hot without a fetch", () => {
+  it("keeps Codex #56691 (53 now, 40 yesterday) hot from its baseline", () => {
     // 2026-10-26: 53 comments + 👍, 13 of them in the last 24h, behind older threads in a top-10-by-total cut.
     const codex = issue({ number: 56691, comments: 45, thumbs: 8 });
     const c = ctx({
@@ -230,7 +314,6 @@ describe("selectHotIssues, gain from the snapshot", () => {
       since: new Date("2026-10-25T20:00:00Z"),
       snapshot: snap({ "openai/codex#56691": { date: "2026-10-25", total: 40 } }),
     });
-    expect(hotIssuesToCheck([codex], c)).toEqual([]);
     expect(selectHotIssues([codex], c).map((x) => [x.number, x.gain])).toEqual([[56691, 13]]);
   });
 });
@@ -341,7 +424,12 @@ describe("fetchHotIssues", () => {
    * The issues list returns `items`, 100 a page; each issue's comments and 👍
    * come from `activity` by number (all new by default).
    */
-  function mockGitHub(items: GitHubItem[], activity: Record<number, IssueActivity | "fail"> = {}) {
+  function mockGitHub(
+    items: GitHubItem[],
+    activity: Record<number, IssueActivity | "fail"> = {},
+    /** Each issue's timeline events (none by default). */
+    timeline: Record<number, unknown[] | "fail"> = {},
+  ) {
     return vi.spyOn(globalThis, "fetch").mockImplementation((input) => {
       const url = new URL(String(input));
       const json = (body: unknown) =>
@@ -350,9 +438,10 @@ describe("fetchHotIssues", () => {
         const page = Number(url.searchParams.get("page"));
         return json(items.slice((page - 1) * 100, page * 100));
       }
-      const m = /\/issues\/(\d+)\/(comments|reactions)$/.exec(url.pathname)!;
+      const m = /\/issues\/(\d+)\/(comments|reactions|timeline)$/.exec(url.pathname)!;
       const n = Number(m[1]);
-      const a = activity[n];
+      const a = m[2] === "timeline" ? timeline[n] : activity[n];
+      if (m[2] === "timeline" && a !== "fail") return json(a ?? []);
       if (a === "fail") {
         return Promise.resolve({
           ok: false,
@@ -361,7 +450,7 @@ describe("fetchHotIssues", () => {
         } as Response);
       }
       const i = items.find((x) => x.number === n)!;
-      const all = a ?? {
+      const all = (a as IssueActivity | undefined) ?? {
         comments: dated(i.comments, IN_WINDOW),
         thumbs: dated(i.reactions?.["+1"] ?? 0, IN_WINDOW),
       };
@@ -384,8 +473,9 @@ describe("fetchHotIssues", () => {
     activity?: Record<number, IssueActivity | "fail">,
     snapshot: HotIssueSnapshot = EMPTY,
     calls = newHotIssueCalls(),
+    timeline?: Record<number, unknown[] | "fail">,
   ) {
-    const spy = mockGitHub(items, activity);
+    const spy = mockGitHub(items, activity, timeline);
     const hotRun: HotIssueRun = {
       snapshot,
       dateStr: TODAY,
@@ -395,7 +485,16 @@ describe("fetchHotIssues", () => {
       queue: newHotIssueQueue(1),
     };
     const hot = await fetchHotIssues("org/repo", SINCE, hotRun);
-    return { hot, urls: paths(spy), seen: hotRun.seen, calls };
+    // The list and count calls; each hot issue's fix-status lookup is in `timelines`.
+    const all = paths(spy);
+    const isTimeline = (u: URL) => u.pathname.endsWith("/timeline");
+    return {
+      hot,
+      urls: all.filter((u) => !isTimeline(u)),
+      timelines: all.filter(isTimeline).map((u) => u.pathname),
+      seen: hotRun.seen,
+      calls,
+    };
   }
   const LIST = "/repos/org/repo/issues";
 
@@ -419,14 +518,18 @@ describe("fetchHotIssues", () => {
       per_page: "100",
       page: "1",
     });
+    // #7, opened in the window, is recounted without bots first; #9 has no known gain.
     const comments = urls.filter((u) => u.pathname.endsWith("/comments"));
-    expect(comments.map((u) => u.pathname)).toEqual(["/repos/org/repo/issues/9/comments"]);
-    expect(comments[0]!.searchParams.get("since")).toBe(SINCE.toISOString());
+    expect(comments.map((u) => u.pathname)).toEqual([
+      "/repos/org/repo/issues/7/comments",
+      "/repos/org/repo/issues/9/comments",
+    ]);
+    expect(comments[1]!.searchParams.get("since")).toBe(SINCE.toISOString());
     expect(hot.map((i) => [i.number, i.gain])).toEqual([[7, 12]]);
     expect(seen).toEqual({ "org/repo#7": 12, "org/repo#9": 60, "org/repo#11": 2 });
   });
 
-  it("makes no gain call for an issue with a baseline from yesterday", async () => {
+  it("recounts a gain from yesterday's baseline in one comments call", async () => {
     const { hot, urls } = await run(
       [issue({ number: 9, comments: 60 })],
       {},
@@ -434,8 +537,33 @@ describe("fetchHotIssues", () => {
         "org/repo#9": { date: "2026-10-03", total: 45 },
       }),
     );
-    expect(urls.map((u) => u.pathname)).toEqual([LIST]);
+    expect(urls.map((u) => u.pathname)).toEqual([LIST, "/repos/org/repo/issues/9/comments"]);
     expect(hot.map((i) => [i.number, i.gain])).toEqual([[9, 15]]);
+  });
+
+  it("does not show a baseline-path issue whose gain is bot comments and /assign (Gemini #15404)", async () => {
+    const gemini = issue({ number: 15404, comments: 16, labels: ["area/security"] });
+    const by = (login: string, body: string, type = "User") => ({
+      created_at: IN_WINDOW,
+      user: { login, type },
+      body,
+    });
+    const { hot, timelines } = await run(
+      [gemini],
+      {
+        15404: {
+          comments: [
+            by("gemini-cli[bot]", "Triage", "Bot"),
+            by("Neal006", "/assign"),
+            by("gemini-cli[bot]", "Assigned"),
+          ],
+          thumbs: [],
+        },
+      },
+      snap({ "org/repo#15404": { date: "2026-10-03", total: 13 } }),
+    );
+    expect(hot).toEqual([]);
+    expect(timelines).toEqual([]);
   });
 
   it("fetches nothing for an issue whose total is under the bar", async () => {
@@ -480,7 +608,7 @@ describe("fetchHotIssues", () => {
     expect(Object.keys(seen)).toHaveLength(117);
     expect(seen["org/repo#1"]).toBeUndefined();
     expect(hot.map((i) => [i.number, i.gain])).toEqual([[110, 12]]);
-    expect(calls).toEqual({ listPages: 2, countCalls: 1, skipped: 0 });
+    expect(calls).toEqual({ listPages: 2, countCalls: 1, skipped: 0, statusCalls: 1 });
   });
 
   it(`stops after ${HOT_ISSUE_MAX_PAGES} list pages and logs it`, async () => {
@@ -492,7 +620,7 @@ describe("fetchHotIssues", () => {
     expect(log).toHaveBeenCalledWith(expect.stringContaining(`stopped at ${HOT_ISSUE_MAX_PAGES} pages`));
   });
 
-  it("finds a small-total old issue that surged, from its snapshot baseline, with no count call", async () => {
+  it("finds a small-total old issue that surged, from its snapshot baseline, recounting only it", async () => {
     const { hot, urls } = await run(
       [issue({ number: 5, comments: 300 }), issue({ number: 8, comments: 16, thumbs: 2 })],
       {},
@@ -501,7 +629,12 @@ describe("fetchHotIssues", () => {
         "org/repo#8": { date: "2026-10-03", total: 6 },
       }),
     );
-    expect(urls.map((u) => u.pathname)).toEqual([LIST]);
+    // #5's gain (+1) is under the bar, so only #8 is recounted.
+    expect(urls.map((u) => u.pathname)).toEqual([
+      LIST,
+      "/repos/org/repo/issues/8/comments",
+      "/repos/org/repo/issues/8/reactions",
+    ]);
     expect(hot.map((i) => [i.number, i.gain])).toEqual([[8, 12]]);
   });
 
@@ -518,9 +651,14 @@ describe("fetchHotIssues", () => {
       "/repos/org/repo/issues/2/comments",
     ]);
     expect(hot.map((i) => i.number)).toEqual([2]);
-    expect(calls).toEqual({ listPages: 1, countCalls: HOT_ISSUE_MAX_COUNT_CALLS, skipped: 1 });
+    expect(calls).toEqual({
+      listPages: 1,
+      countCalls: HOT_ISSUE_MAX_COUNT_CALLS,
+      skipped: 1,
+      statusCalls: 1,
+    });
     expect(hotIssueCallsLine(calls)).toBe(
-      `[github] hot issues: 1 list pages, ${HOT_ISSUE_MAX_COUNT_CALLS} count calls, 1 candidates skipped past the run cap of ${HOT_ISSUE_MAX_COUNT_CALLS}`,
+      `[github] hot issues: 1 list pages, ${HOT_ISSUE_MAX_COUNT_CALLS} count calls, 1 fix-status calls, 1 candidates skipped past the run cap of ${HOT_ISSUE_MAX_COUNT_CALLS}`,
     );
   });
 
@@ -576,6 +714,62 @@ describe("fetchHotIssues", () => {
       "/repos/big/repo/issues/9/comments",
     ]);
     expect(calls).toMatchObject({ countCalls: HOT_ISSUE_MAX_COUNT_CALLS, skipped: 8 });
+  });
+
+  describe("fix status", () => {
+    /** A cross-referenced pull request of `repo`, its title or body naming the issue. */
+    const xref = (o: { number: number; text: string; state?: string; merged?: boolean; repo?: string }) => ({
+      event: "cross-referenced",
+      source: {
+        issue: {
+          number: o.number,
+          state: o.state ?? "open",
+          html_url: `https://github.com/${o.repo ?? "org/repo"}/pull/${o.number}`,
+          title: "A change",
+          body: o.text,
+          pull_request: { merged_at: o.merged ? "2026-10-04T01:00:00Z" : null },
+          repository: { full_name: o.repo ?? "Org/Repo" },
+        },
+      },
+    });
+    const hotOne = [issue({ number: 7, comments: 12, created_at: IN_WINDOW })];
+
+    it("looks up each hot issue once and keeps an open fix PR", async () => {
+      // Hermes #145452 (2026-10-28): its fix PR #145478 was open and the page did not say so.
+      const { hot, timelines, calls } = await run(hotOne, {}, EMPTY, newHotIssueCalls(), {
+        7: [xref({ number: 20, text: "Mentions #7 in passing" }), xref({ number: 21, text: "Fixes #7" })],
+      });
+      expect(timelines).toEqual(["/repos/org/repo/issues/7/timeline"]);
+      expect(hot.map((i) => i.fix)).toEqual([
+        { state: "open", number: 21, url: "https://github.com/org/repo/pull/21" },
+      ]);
+      expect(calls.statusCalls).toBe(1);
+    });
+
+    it("prefers a merged fix and ignores another repo's PR and a closed unmerged one", async () => {
+      const { hot } = await run(hotOne, {}, EMPTY, newHotIssueCalls(), {
+        7: [
+          xref({ number: 30, text: "closes org/repo#7", repo: "fork/repo" }),
+          xref({ number: 31, text: "Resolves: #7", state: "closed" }),
+          xref({ number: 32, text: "fix https://github.com/org/repo/issues/7 by retrying", state: "open" }),
+          xref({ number: 33, text: "Closes #7", state: "closed", merged: true }),
+        ],
+      });
+      expect(hot.map((i) => i.fix)).toEqual([
+        { state: "merged", number: 33, url: "https://github.com/org/repo/pull/33" },
+      ]);
+    });
+
+    it("keeps the issue without a status when the lookup fails or the run cap is spent", async () => {
+      vi.spyOn(console, "error").mockImplementation(() => {});
+      const failed = await run(hotOne, {}, EMPTY, newHotIssueCalls(), { 7: "fail" });
+      expect(failed.hot.map((i) => [i.number, i.fix])).toEqual([[7, undefined]]);
+      vi.restoreAllMocks();
+      const spent = { ...newHotIssueCalls(), statusCalls: HOT_ISSUE_MAX_STATUS_CALLS };
+      const capped = await run(hotOne, {}, EMPTY, spent);
+      expect(capped.timelines).toEqual([]);
+      expect(capped.hot.map((i) => [i.number, i.fix])).toEqual([[7, undefined]]);
+    });
   });
 
   it("skips an issue whose gain fetch fails, keeping the others", async () => {

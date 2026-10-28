@@ -13,6 +13,7 @@ import {
   buildProjectDigestPrompt,
   buildSkillsPrompt,
   formatItem,
+  HOT_ISSUE_BODY_CHARS,
   hasActivity,
   isMajorRelease,
   releaseNotes,
@@ -132,6 +133,25 @@ describe("formatItem", () => {
     const result = formatItem(makeItem({ state: "closed" }));
     expect(result).toContain("[CLOSED]");
   });
+
+  it("strips template comments, unanswered fields, checklists, code blocks and link URLs from the body", () => {
+    const body =
+      "<!-- Please search existing issues first -->\n### Description\n" +
+      "Read this first: free tier errors are fixed in [v2](https://github.com/org/repo/releases/tag/v2).\n" +
+      "- [x] I searched existing issues\n```\nError: stack trace\n```\n### Version\n_No response_";
+    const result = formatItem(makeItem({ body }), HOT_ISSUE_BODY_CHARS);
+    expect(result).toContain(
+      "Summary: ### Description Read this first: free tier errors are fixed in v2. ### Version",
+    );
+    expect(result).not.toMatch(/https:|Please search|I searched|stack trace|No response/);
+  });
+
+  it("sends a hot issue up to HOT_ISSUE_BODY_CHARS of its body", () => {
+    const body = "word ".repeat(400);
+    expect(formatItem(makeItem({ body }), HOT_ISSUE_BODY_CHARS)).toContain(
+      `${body.slice(0, HOT_ISSUE_BODY_CHARS)}...`,
+    );
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -206,6 +226,22 @@ describe("buildProjectDigestPrompt", () => {
     expect(prompt).toContain("[Hacker News] TestTool 1.0 — https://hn/1 (9 points)");
     expect(prompt).toContain("2026-10-04 (last 24h)");
     expect(prompt).toContain("AI coding agents");
+  });
+
+  it("gives a hot issue's fix PR and asks for the description only, worded as a report", () => {
+    const prompt = buildProjectDigestPrompt(
+      [
+        makeActivity({
+          hotIssues: [{ ...makeItem(), gain: 5, fix: { state: "open", number: 9, url: "https://x/9" } }],
+        }),
+      ],
+      scope,
+      "d",
+    );
+    expect(prompt).toContain("Fix: PR #9 open");
+    expect(prompt).toContain('"- **Hot issue:** #<number>: <description>"');
+    expect(prompt).toContain("Write no link, label, comment or 👍 count, gain or fix status");
+    expect(prompt).toContain('worded as a report ("users report", "an issue says")');
   });
 
   it("sends no prerelease list for a project that has a stable release", () => {
