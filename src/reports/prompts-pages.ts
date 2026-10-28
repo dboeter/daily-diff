@@ -268,13 +268,23 @@ ${list}
 
 ${summaryLine("1-2 sentences")}.
 - A post with page text: 1-2 sentences taken from it, on what was announced and for whom.
-- A post without page text: write \`N: —\`, unless its title says more than its URL does.
+- A post without page text: write \`N: —\`.
 - A model: 1 sentence from its catalog description: what it is for, and what it takes in and gives back (text, images, audio) when the description says. Not its context length: the row shows it. Leave out its marketing claims (best, leading, state-of-the-art).
 - Ground every sentence only in the given text. Do not invent versions, prices, dates or benchmarks.
 - ${IDENTIFIER_RULE}
 ${summaryOutputRule(count)}
 - English.
 `;
+}
+
+/**
+ * The models Highlights call's rule for the lab posts without page text (`note` of
+ * buildPageHighlightsPrompt); undefined when every shown post has text.
+ */
+export function labPostsNoHighlightNote(titles: string[]): string | undefined {
+  return titles.length
+    ? `These lab posts have no page text, only a title: no Highlight for them. ${titles.map((t) => `"${t}"`).join(", ")}`
+    : undefined;
 }
 
 /** The data report's reader, shared by its two vendor calls. */
@@ -499,7 +509,10 @@ export function restatesLead(highlight: string, lead: string): boolean {
   return words.length > 0 && words.filter((w) => inLead.has(w)).length / words.length >= LEAD_MATCH_MIN;
 }
 
-/** A table row the page shows but that makes no Highlight: a `minor` vendor row, a Trends row showing "—". */
+/**
+ * A table row the page shows but that makes no Highlight: a `minor` vendor row, a Trends row
+ * showing "—", a lab post without page text.
+ */
 export interface NoHighlightRow {
   name: string;
   /** "" when the row has no link. */

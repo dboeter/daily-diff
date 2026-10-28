@@ -645,6 +645,24 @@ describe("buildModelsPage", () => {
     expect(highlightsPrompt).toContain("| [Story 1](https://example.com/1) |");
   });
 
+  it("shows — for a post without page text and drops a Highlight about it (Oracle Apps, 2026-10-28)", async () => {
+    generateBody.mockReset();
+    generateBody.mockImplementation(async (prompt: string) =>
+      prompt.includes("You are the editor")
+        ? "## Highlights\n\n- Post 1 ships a guess.\n- Post 2 ships something."
+        : // Newest first: Post 2 is row 1.
+          "1: Summary two.\n2: A guess from the slug.",
+    );
+    const report = await build([site([post(1, "openai"), post(2)])], catalog());
+    const content = report!.content;
+    expect(content).toContain("| OpenAI | [Post 1](https://www.openai.com/news/p1) | — |");
+    expect(content).toContain("| Anthropic | [Post 2](https://www.anthropic.com/news/p2) | Summary two. |");
+    const highlightsPrompt = generateBody.mock.calls[1]![0] as string;
+    expect(highlightsPrompt).toContain('only a title: no Highlight for them. "Post 1"');
+    expect(content).not.toContain("Post 1 ships a guess.");
+    expect(content).toContain("- Post 2 ships something.");
+  });
+
   it("shows at most LAB_POSTS_MAX posts, newest first, then how many more came in", async () => {
     stub();
     const posts = Array.from({ length: LAB_POSTS_MAX + 2 }, (_, i) =>
