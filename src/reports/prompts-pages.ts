@@ -419,6 +419,12 @@ export function buildHighlightsPrompt(
   const forcedRule = forced.length
     ? `\n- ${forced.map((id) => FORCED_REASON[id] ?? id).join(" and ")} ${forced.length === 1 ? "was" : "were"} already judged relevant to this reader: give ${forced.length === 1 ? "that report" : "each of those reports"} at least 1 highlight`
     : "";
+  // Trends' Highlights lead with figures its code computed (tokens, stars gained): banning
+  // them left the page out of highlights.json on 2026-10-28.
+  const trendsFigures =
+    "ai-trends" in reportContents
+      ? ` (except in ai-trends: restate a figure its Highlights state with its window, e.g. "35.37T tokens on 2026-10-27", "+16,593 stars in 7 days")`
+      : "";
 
   const sections = Object.entries(reportContents)
     .map(([id, content]) => `## [${id}]\n\n${highlightsInput(content)}`)
@@ -442,7 +448,7 @@ Bad: "Claude Code v2.1.288 released" (no content)  ·  "Copilot CLI ships three 
 
 Never include:
 - Routine releases: nightlies, alphas, prereleases, build-number ranges, or a version number without saying what it changes
-- Raw counts: commits, issues, PRs, open items, stars, comments, points
+- Raw counts: commits, issues, PRs, open items, stars, comments, points${trendsFigures}
 - CI status, flaky tests, pending upgrades, "in progress" or "targets" items with no shipped result
 - Generic trend statements ("X dominates", "Y remains active", "Z gains attention")
 
@@ -462,17 +468,18 @@ ${sourceFidelityRules()}
 const FORCED_REASON: Record<string, string> = {
   "ai-policy": "Every item in ai-policy",
   "ai-data": "every vendor release-note row in ai-data",
+  "ai-trends": "the weekly ai-trends page",
 };
 
 /**
  * The reports that always get a highlight when published: AI Policy, whose
- * every item Jev kept, and the data report only on a day Jev kept a vendor
+ * every item Jev kept, the weekly Trends page, and the data report only on a day Jev kept a vendor
  * item (a day of repo activity alone holds routine releases and hot issues,
  * which the model may rightly skip). On 2026-10-20 the model left AI Policy
- * out though it carried the AI Act's first harmonised standard in the OJ.
+ * out though it carried the AI Act's first harmonised standard in the OJ, and on 2026-10-28 Trends.
  */
 export function forcedHighlightReports(hasVendorItems: boolean): string[] {
-  return hasVendorItems ? ["ai-policy", "ai-data"] : ["ai-policy"];
+  return hasVendorItems ? ["ai-policy", "ai-data", "ai-trends"] : ["ai-policy", "ai-trends"];
 }
 
 // A highlight restates the lead when at least this share of its words (3+ letters) are in the lead.
@@ -568,6 +575,18 @@ export function withFallbackHighlights(
     if (items.some((h) => h.startsWith(`${GOING_AWAY} `) && restatesLead(h, lead))) continue;
     const k = items.findIndex((h) => !h.startsWith(`${GOING_AWAY} `) && restatesLead(h, lead));
     if (k >= 0) items[k] = `${GOING_AWAY} ${items[k]}`;
+  }
+  // Trends leads with its page's lead, whatever the model returned: the highlight restating it
+  // moves first, else the lead's first sentence goes in front.
+  const trendsLead = reportContents["ai-trends"] ? firstHighlight(reportContents["ai-trends"]) : null;
+  if (trendsLead && trendsLead !== NO_HIGHLIGHT_NOTE) {
+    const items = out["ai-trends"] ?? [];
+    const k = items.findIndex((h) => restatesLead(h, trendsLead));
+    if (k !== 0)
+      out["ai-trends"] = [k > 0 ? items[k]! : trendsLead, ...items.filter((_, i) => i !== k)].slice(
+        0,
+        HIGHLIGHTS_MAX_PER_REPORT,
+      );
   }
   for (const id of forced) {
     const content = reportContents[id];

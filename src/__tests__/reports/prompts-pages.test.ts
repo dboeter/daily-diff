@@ -392,8 +392,8 @@ describe("withFallbackHighlights", () => {
   });
 
   it("forces ai-data only on a day with kept vendor items", () => {
-    expect(forcedHighlightReports(false)).toEqual(["ai-policy"]);
-    expect(forcedHighlightReports(true)).toEqual(["ai-policy", "ai-data"]);
+    expect(forcedHighlightReports(false)).toEqual(["ai-policy", "ai-trends"]);
+    expect(forcedHighlightReports(true)).toEqual(["ai-policy", "ai-data", "ai-trends"]);
     const reports = { "ai-data": "## Highlights\n- dbt Core 1.11 ships." };
     expect(withFallbackHighlights({}, reports, forcedHighlightReports(false))).toEqual({});
     expect(withFallbackHighlights({}, reports, forcedHighlightReports(true))).toEqual({
@@ -431,6 +431,48 @@ describe("withFallbackHighlights", () => {
     expect(firstHighlight("## Highlights\n- *Delta Lake* 4.0 adds `variant` type.")).toBe(
       "Delta Lake 4.0 adds variant type.",
     );
+  });
+});
+
+describe("highlights.json for Trends", () => {
+  const TRENDS =
+    "## Highlights\n\n- **DeepSeek V4.1 Flash** leads OpenRouter with **35.37T tokens** on 2026-10-27. More.\n- **owner/repo** gains **+16,593 stars** in 7 days.\n\n## Models";
+  const LEAD = "DeepSeek V4.1 Flash leads OpenRouter with 35.37T tokens on 2026-10-27.";
+  const forced = forcedHighlightReports(false);
+
+  it("gives a figure-led Trends page an entry restating its first bullet when the model left it out", () => {
+    expect(
+      withFallbackHighlights({ "ai-agents": ["A."] }, { "ai-agents": "x", "ai-trends": TRENDS }, forced),
+    ).toEqual({ "ai-agents": ["A."], "ai-trends": [LEAD] });
+  });
+
+  it("puts the lead first: moves the model's restatement, else adds the lead in front", () => {
+    const run = (items: string[]) =>
+      withFallbackHighlights({ "ai-trends": items }, { "ai-trends": TRENDS }, forced)["ai-trends"];
+    expect(
+      run(["owner/repo gains 16,593 stars", "DeepSeek V4.1 Flash leads OpenRouter at 35.37T tokens"]),
+    ).toEqual(["DeepSeek V4.1 Flash leads OpenRouter at 35.37T tokens", "owner/repo gains 16,593 stars"]);
+    expect(run(["owner/repo gains 16,593 stars", "Other thing"])).toEqual([
+      LEAD,
+      "owner/repo gains 16,593 stars",
+    ]);
+    expect(run(["DeepSeek V4.1 Flash leads OpenRouter"])).toEqual(["DeepSeek V4.1 Flash leads OpenRouter"]);
+  });
+
+  it("adds nothing for an unpublished Trends page or one whose Highlights code dropped", () => {
+    expect(withFallbackHighlights({}, {}, forced)).toEqual({});
+    expect(
+      withFallbackHighlights({}, { "ai-trends": `## Highlights\n\n- ${NO_HIGHLIGHT_NOTE}` }, forced),
+    ).toEqual({});
+  });
+
+  it("lets the prompt restate Trends figures with their window, and keeps raw counts banned elsewhere", () => {
+    const withTrends = buildHighlightsPrompt({ "ai-trends": TRENDS }, forced);
+    expect(withTrends).toContain("except in ai-trends: restate a figure");
+    expect(withTrends).toContain("the weekly ai-trends page");
+    const daily = buildHighlightsPrompt({ "ai-agents": "## Highlights\n\n- A ships." }, forced);
+    expect(daily).toContain("Raw counts: commits, issues, PRs, open items, stars, comments, points\n");
+    expect(daily).not.toContain("except in ai-trends");
   });
 });
 
