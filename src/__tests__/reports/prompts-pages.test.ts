@@ -413,12 +413,27 @@ describe("withFallbackHighlights", () => {
     });
   });
 
-  it("asks the model for a forced report's highlight only when forced", () => {
-    expect(buildHighlightsPrompt({}, ["ai-policy"])).toContain("give that report at least 1 highlight");
-    expect(buildHighlightsPrompt({}, forcedHighlightReports(true))).toContain(
-      "vendor release-note row in ai-data",
-    );
-    expect(buildHighlightsPrompt({})).not.toContain("at least 1 highlight");
+  it("asks the model for a forced report's highlight only when forced and published", () => {
+    const policy = { "ai-policy": "## Highlights\n- The AI Act's standard is in the OJ." };
+    expect(buildHighlightsPrompt(policy, ["ai-policy"])).toContain("give that report at least 1 highlight");
+    expect(
+      buildHighlightsPrompt(
+        { ...policy, "ai-data": "## Highlights\n- A ships." },
+        forcedHighlightReports(true),
+      ),
+    ).toContain("vendor release-note row in ai-data");
+    expect(buildHighlightsPrompt(policy)).not.toContain("at least 1 highlight");
+    expect(buildHighlightsPrompt({}, ["ai-policy"])).not.toContain("at least 1 highlight");
+  });
+
+  it("does not mention ai-trends on a daily run", () => {
+    const daily = {
+      "ai-agents": "## Highlights\n- Codex ships hooks.",
+      "ai-policy": "## Highlights\n- The AI Act's standard is in the OJ.",
+    };
+    const prompt = buildHighlightsPrompt(daily, forcedHighlightReports(false));
+    expect(prompt).toContain("Every item in ai-policy was already judged relevant");
+    expect(prompt).not.toContain("ai-trends");
   });
 
   it("does not end the sentence at an abbreviation", () => {

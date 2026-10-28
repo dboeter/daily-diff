@@ -11,7 +11,7 @@ import {
   type ProjectActivity,
 } from "./prompts.ts";
 import type { ReleaseRow } from "./pages.ts";
-import { escapeRegex } from "./project-news.ts";
+import { escapeRegex } from "../core/regex.ts";
 import {
   formatTokens,
   type OpenRouterModel,

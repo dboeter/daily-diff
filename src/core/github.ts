@@ -8,7 +8,7 @@ import { daysBefore, toCstDateStr, sleep } from "./date.ts";
 import { FETCH_TIMEOUT_MS } from "./http.ts";
 import { loadItemsFile, type ItemsFile } from "./jev.ts";
 import { newItems, nextReportedState, type ReportedState, type StateItem } from "./report-state.ts";
-import { escapeRegex } from "../reports/project-news.ts";
+import { escapeRegex } from "./regex.ts";
 
 // ---------------------------------------------------------------------------
 // Types
