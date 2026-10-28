@@ -117,8 +117,8 @@ export const GOING_AWAY = "−";
  */
 export const PROSE_COLUMNS = ["Summary", "What to do"];
 
-/** The Overview's line of stories routed to no page (`policy`, `other`): talked-about.json. */
-export const TALKED_ABOUT = { heading: "Also talked about" } as const;
+/** The Overview's lists of stories routed to no page (talked-about.json): `policy`, then the rest. */
+export const TALKED_ABOUT = { heading: "Also talked about", policyHeading: "Policy talk" } as const;
 
 /** The dated items of the next 30 days from every page (coming-up.json), on the Overview and in Telegram. */
 export const COMING_UP = {

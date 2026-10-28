@@ -458,7 +458,7 @@ async function main(): Promise<void> {
     },
   });
   const spottedOf = (page: SpottedPage) => spottedRows.filter((r) => r.page === page);
-  // The Overview's "Also talked about": stories routed to a topic with no page (policy, other).
+  // The Overview's policy list and "Also talked about": stories routed to a topic with no page.
   const talkedAbout = selectTalkedAbout(
     unmatched,
     (s) => routing.topics.get(s.id),

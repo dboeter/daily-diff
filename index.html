@@ -443,6 +443,7 @@ let COLORS = {};
 let OVERVIEW_LABEL = 'Overview';
 let COMING_UP_HEADING = 'Coming up';
 let TALKED_ABOUT_HEADING = 'Also talked about';
+let POLICY_TALK_HEADING = 'Policy talk';
 let HIGHLIGHTS_HEADING = 'Highlights';
 let PROSE_COLUMNS = ['Summary', 'What to do'];
 
@@ -590,7 +591,7 @@ function pageNav(date, report) {
   return `<nav class="page-nav">${left}${mid}${right}</nav>`;
 }
 
-/** The day's highlights (highlights.json, also sent to Telegram), each report's under a link to it, then Also talked about (talked-about.json), then Coming up (coming-up.json). */
+/** The day's highlights (highlights.json, also sent to Telegram), each report's under a link to it, then Policy talk and Also talked about (talked-about.json, split by `topic`), then Coming up (coming-up.json). */
 async function renderOverview(date) {
   const entry = DATES.find((d) => d.date === date);
   if (!entry) throw new Error('unknown date');
@@ -616,11 +617,17 @@ async function renderOverview(date) {
   } catch {
     /* days before talked-about.json have no Also talked about section */
   }
-  if (Array.isArray(talked) && talked.length) {
-    parts.push(`<h2>${escapeHtml(TALKED_ABOUT_HEADING)}</h2>`);
-    // Story links reach this HTML without DOMPurify: only http(s) becomes a link.
-    const link = (url, text) => /^https?:\/\//i.test(url) ? `<a href="${escapeHtml(url)}">${escapeHtml(text)}</a>` : escapeHtml(text);
-    parts.push(`<ul>${talked.map((t) =>
+  if (!Array.isArray(talked)) talked = [];
+  // Story links reach this HTML without DOMPurify: only http(s) becomes a link.
+  const link = (url, text) => /^https?:\/\//i.test(url) ? `<a href="${escapeHtml(url)}">${escapeHtml(text)}</a>` : escapeHtml(text);
+  // Policy stories have their own list; every row carries `topic`, so older days split the same way.
+  for (const [heading, rows] of [
+    [POLICY_TALK_HEADING, talked.filter((t) => t.topic === 'policy')],
+    [TALKED_ABOUT_HEADING, talked.filter((t) => t.topic !== 'policy')],
+  ]) {
+    if (!rows.length) continue;
+    parts.push(`<h2>${escapeHtml(heading)}</h2>`);
+    parts.push(`<ul>${rows.map((t) =>
       `<li>${link(t.url, t.title)} <span class="dim">${link(t.discussionUrl, t.counts ?? `${t.points} points, ${t.comments} comments`)}</span></li>`,
     ).join('')}</ul>`);
   }
@@ -968,7 +975,7 @@ window.addEventListener('hashchange', followHash);
   try {
     const res = await fetch('./manifest.json');
     if (!res.ok) throw new Error('manifest.json not found');
-    const { dates, labels, weekly, colors, overview, comingUp, talkedAbout, highlights, proseColumns } = await res.json();
+    const { dates, labels, weekly, colors, overview, comingUp, talkedAbout, policyTalk, highlights, proseColumns } = await res.json();
     if (!dates?.length) throw new Error('manifest is empty');
     LABELS = labels ?? {};
     DATES = dates;
@@ -977,6 +984,7 @@ window.addEventListener('hashchange', followHash);
     OVERVIEW_LABEL = overview ?? 'Overview';
     COMING_UP_HEADING = comingUp ?? 'Coming up';
     TALKED_ABOUT_HEADING = talkedAbout ?? 'Also talked about';
+    POLICY_TALK_HEADING = policyTalk ?? 'Policy talk';
     HIGHLIGHTS_HEADING = highlights ?? 'Highlights';
     PROSE_COLUMNS = proseColumns ?? PROSE_COLUMNS;
 

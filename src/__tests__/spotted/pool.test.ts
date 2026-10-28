@@ -571,7 +571,50 @@ describe("selectTalkedAbout", () => {
       new Set(),
     );
     expect(rows.map((r) => r.title)).toContain("PHP2Shell: AI uncovers critical RCE in PHP");
-    expect(rows.length).toBeLessThanOrEqual(5);
+    expect(rows.length).toBeLessThanOrEqual(9); // 4 policy slots and 5 other
+  });
+
+  describe("policy stories", () => {
+    const pick = (stories: Story[], topic: Record<string, string>) =>
+      selectTalkedAbout(
+        stories,
+        (s) => topic[s.id],
+        (s) => PAGE[topic[s.id]!] ?? null,
+        "2026-10-28",
+        new Set(),
+      );
+
+    it("ticket 07 replay: 2026-10-28's Stanford-books story gets a policy slot beside three bigger other essays", () => {
+      const essays = [605, 542, 402].map((p) => story(`o${p}`, "hn", p));
+      const books = story("books", "hn", 323, {
+        title: "Anthropic trained Claude on illegally obtained Stanford professors' books",
+      });
+      const police = story("police", "hn", 279);
+      const topic: Record<string, string> = {
+        ...Object.fromEntries(essays.map((s) => [s.id, "other"])),
+        [books.id]: "policy",
+        [police.id]: "policy",
+      };
+      const rows = pick([...essays, books, police], topic);
+      expect(rows.map((r) => [r.id, r.topic])).toEqual([
+        [books.id, "policy"],
+        [police.id, "policy"],
+        ...essays.map((s) => [s.id, "other"]),
+      ]);
+    });
+
+    it("keeps policy under its own cap and points floor", () => {
+      const policy = [400, 300, 200].map((p) => story(`p${p}`, "hn", p));
+      const quiet = story("pq", "lobsters", 9);
+      const topic = Object.fromEntries([...policy, quiet].map((s) => [s.id, "policy"]));
+      expect(pick([...policy, quiet], topic).map((r) => r.id)).toEqual([policy[0]!.id, policy[1]!.id]);
+    });
+
+    it("gives a link both lanes have to the policy list", () => {
+      const p = story("p", "hn", 100, { url: "https://example.com/same" });
+      const o = story("o", "hn", 900, { url: "https://example.com/same" });
+      expect(pick([p, o], { [p.id]: "policy", [o.id]: "other" }).map((r) => r.id)).toEqual([p.id]);
+    });
   });
 });
 
