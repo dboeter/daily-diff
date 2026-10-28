@@ -13,7 +13,7 @@ Decision needed from the maintainer: how policy competes with `other`. Options: 
 - [x] The maintainer's choice is recorded in this ticket's Comments
 - [x] With 10-28's data, the Stanford-books story appears on the Overview
 - [x] A story whose topic probabilities split under the Spotted floor but whose two leading topics are both page-less or both kept is not lost (decide with L2 in view, or record it as accepted)
-- [ ] AGENTS.md "Community and Spotted" and GLOSSARY.md describe the rule (left for the integration step: see the `Docs:` line below)
+- [x] AGENTS.md "Community and Spotted" and GLOSSARY.md describe the rule (done in the integration step, per the `Docs:` line below)
 
 ## Comments
 

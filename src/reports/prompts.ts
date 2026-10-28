@@ -448,7 +448,7 @@ export function buildPageHighlightsPrompt(
   bodyMd: string,
   focus: string,
   dateStr: string,
-  /** An extra rule for today's page, e.g. the models page with no lab post or new model. */
+  /** An extra rule for today's page, e.g. the models page with no lab post or new model, or its lab posts without page text. */
   note?: string,
 ): string {
   return `You are the editor of ${page}, a daily report. Below are today's report sections, ${dateStr}.

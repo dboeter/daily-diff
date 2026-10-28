@@ -8,6 +8,7 @@ import { daysBefore, toCstDateStr, sleep } from "./date.ts";
 import { FETCH_TIMEOUT_MS } from "./http.ts";
 import { loadItemsFile, type ItemsFile } from "./jev.ts";
 import { newItems, nextReportedState, type ReportedState, type StateItem } from "./report-state.ts";
+import { escapeRegex } from "../reports/project-news.ts";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -115,7 +116,7 @@ const RETRY_STATUSES = new Set([502, 503, 504]);
  * gateway timeout can also arrive as a 200 with truncated JSON (SyntaxError),
  * and our own timeout aborts with a `TimeoutError`. Other statuses fail again on retry.
  */
-function isRetryable(err: unknown): boolean {
+function isRetryableGet(err: unknown): boolean {
   if (err instanceof GitHubApiError) return RETRY_STATUSES.has(err.status);
   return (
     err instanceof TypeError ||
@@ -126,7 +127,7 @@ function isRetryable(err: unknown): boolean {
 
 /**
  * GET with retries on network failures, gateway errors and truncated bodies
- * (`isRetryable`), each attempt aborted after FETCH_TIMEOUT_MS.
+ * (`isRetryableGet`), each attempt aborted after FETCH_TIMEOUT_MS.
  *
  * `slot` runs before every attempt: search calls pass searchSlot, so a retry
  * keeps to the search rate limit too.
@@ -154,7 +155,7 @@ export async function githubGet<T>(
       }
       return (await resp.json()) as T;
     } catch (err) {
-      if (!isRetryable(err) || attempt >= GET_RETRIES) throw err;
+      if (!isRetryableGet(err) || attempt >= GET_RETRIES) throw err;
       console.error(`  [github] ${err} — retry ${attempt + 1}/${GET_RETRIES} (${url})`);
       await sleep(GET_RETRY_MS * 2 ** attempt);
     }
@@ -291,7 +292,8 @@ export const HOT_ISSUE_MAX_PAGES = 8;
 /**
  * Fix-status lookups per run (`fetchFixStatus`, one core call each), shared by every repo: one per
  * hot issue sent to the prompt, so 33 repos × HOT_ISSUES_PER_REPO. With the list pages, count calls
- * and releases the daily worst case is 547 + 66 = 613 core calls, under the Actions token's 1,000 an hour.
+ * and release pages (33 × RELEASES_MAX_PAGES) the daily worst case is 264 + 250 + 66 + 165 = 745 core
+ * calls, under the Actions token's 1,000 an hour.
  */
 export const HOT_ISSUE_MAX_STATUS_CALLS = 66;
 /** Matched against each label name, so "area:security" and "type: regression" count. */
@@ -693,7 +695,7 @@ export async function fetchFixStatus(repo: string, i: GitHubItem): Promise<FixSt
     `https://api.github.com/repos/${repo}/issues/${i.number}/timeline`,
     { per_page: "100" },
   );
-  const ref = `(?:#|${escapeRe(repo)}#|https://github\\.com/${escapeRe(repo)}/issues/)${i.number}(?!\\d)`;
+  const ref = `(?:#|${escapeRegex(repo)}#|https://github\\.com/${escapeRegex(repo)}/issues/)${i.number}(?!\\d)`;
   const closes = new RegExp(`\\b(?:close[sd]?|fix(?:e[sd])?|resolve[sd]?)\\b:?\\s+${ref}`, "i");
   const fixes = events.flatMap((e) => {
     const pr = e.source?.issue;
@@ -709,8 +711,6 @@ export async function fetchFixStatus(repo: string, i: GitHubItem): Promise<FixSt
   const fix = merged ?? open;
   return fix && { state: merged ? "merged" : "open", number: fix.number, url: fix.html_url };
 }
-
-const escapeRe = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
 /** The most core calls `fetchIssueActivity` makes for an issue. */
 function maxActivityCalls(i: GitHubItem): number {

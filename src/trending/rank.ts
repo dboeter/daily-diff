@@ -13,6 +13,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import type { Numbered } from "../reports/summarized-table.ts";
+import { escapeRegex } from "../reports/project-news.ts";
 import type { SearchRepo, TrendingRepo } from "./compose.ts";
 import { formatTokens, type OpenRouterApp } from "../sources/openrouter.ts";
 import type { NpmData, NpmPackage } from "./npm.ts";
@@ -888,9 +889,8 @@ export function tidyTrendsSummaries(
       let text = [first, ...kept].join(" ");
       const language = languages.get(n);
       if (language) {
-        const escaped = language.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
         // Not after "is" or "written": "Foo is written in Rust." would become "Foo is.".
-        const suffix = `(?<!\\b(?:is|are|was|written)),?\\s+(?:written\\s+)?in\\s+${escaped}(?=[.!]?$)`;
+        const suffix = `(?<!\\b(?:is|are|was|written)),?\\s+(?:written\\s+)?in\\s+${escapeRegex(language)}(?=[.!]?$)`;
         text = text.replace(new RegExp(suffix, "i"), "");
       }
       return [n, text];

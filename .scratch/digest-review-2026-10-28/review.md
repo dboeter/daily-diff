@@ -81,3 +81,26 @@ All header and meta-line counts; hot-issue bars and gains (#97074 +29, #59387 +3
 ## Not checked
 
 OpenRouter and npm figures against live sources (snapshot not reloadable); 15 of 32 category rows; the Axios story, IPO PDF and OpenAI post (HTTP 403); Fabric community pages (JS challenge; RSS bodies used); the raw `highlights` reply (not saved); whether CI can reach `openai.com/news/rss.xml`; data-repo hot issues.
+
+## Integration notes
+
+Behavior between the merged changes:
+
+- **01 × 06, GitHub core-call budget**: each ticket stated its worst case without the other's calls (01: 679 with 5 release pages a repo; 06: 613 with 66 fix-status calls). Together: 33 × 8 list pages + 250 count calls + 66 fix-status calls + 33 × 5 release pages = 745 core calls a daily run, plus up to 2 retries per request; still under the Actions token's 1,000 an hour, but the weekly run's star-history calls come on top. AGENTS.md and the `HOT_ISSUE_MAX_STATUS_CALLS` comment now give 745.
+- **10, BigQuery state keys**: the ticket's "decide before merge" is still open. No option was taken (`config.yml` has no `stable_id` on the BigQuery feed, `VendorNote` has no `aliases`), so it is option (a) by default: on the first run after merge, the BigQuery notes of the last 7 days that an earlier report showed come back once under their new titles.
+- No other two changes conflict. 02 and 06 share `stripLinkNoise`; 05 and 04 both lean on `dropNoHighlightRows`/`restatesLead` without overlap; 09's `Sections:` prefix does not reach BigQuery (split on `<h3>`, as 10 relies on).
+
+Fixed in integration: 06 and 11 each added an inline regex escape (`escapeRe` in `src/core/github.ts`, one in `tidyTrendsSummaries`); both now use `escapeRegex` (`src/reports/project-news.ts`). 01's private `isRetryable` in `src/core/github.ts` shared its name with `src/core/llm.ts`'s exported one, a different rule: it is now `isRetryableGet`. No test was added by two tickets (checked by `describe`/`it` name across `src/__tests__`). The `src/spotted/topics.ts` comments name Policy talk (07), and `buildPageHighlightsPrompt`'s `note` doc names the lab posts without page text (05).
+
+- 01: done. Unticked: a live run shows Codex as active or quiet, not Unavailable: needs a CI run with network. The box names a `[codex] releases:` log line; the only release log line in `src/` is `[github] <repo> releases: stopped at 5 pages`, written at the page cap, so check the agents page's Unavailable today line instead.
+- 02: done. All boxes ticked.
+- 03: done. All boxes ticked.
+- 04: done. All boxes ticked.
+- 05: done. Unticked: the optional OpenAI `news/rss.xml` source: needs a reachability check from a GitHub runner first.
+- 06: done. All boxes ticked.
+- 07: done. All boxes ticked (the docs box in this integration step).
+- 08: done. All boxes ticked.
+- 09: done. Unticked: re-judging the gateway item: needs a live Jev call, and `digests/data-verdicts.json` has no entry for it to delete.
+- 10: done. All boxes ticked; the state-key decision above is open.
+- 11: done. All boxes ticked.
+- 12: done. Unticked: the 2026-11-02 pool has no unpenalized pre-10-28 entry: waits for the maintainer to run `scripts/rejudge-research.ts` with `TYPESAFE_API_KEY` and for that page.

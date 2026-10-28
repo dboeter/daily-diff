@@ -93,7 +93,7 @@ export interface TopicAnswers {
  * The page each topic lands on. Research stays a topic of its own so later
  * work can tell it from model news. Policy and other have no page: AI Policy
  * has its own sources (the HN-to-policy routing was reverted on 2026-10-20), so
- * their best stories go on the Overview's "Also talked about" (`selectTalkedAbout`).
+ * their best stories go on the Overview's "Policy talk" and "Also talked about" lists (`selectTalkedAbout`).
  */
 export const PAGE_OF_TOPIC: Record<Topic, SpottedPage | null> = {
   agents: "agents",
@@ -257,7 +257,7 @@ export async function routeStories(
  * `digests/YYYY-MM-DD/spotted-trace.json`: every routed story with its
  * topic, page, whether a page showed it (`rendered`, `rank`: its row number), why
  * not (`selectSpotted`'s `dropped`, or its page went unpublished), and its answers.
- * A story the Overview's "Also talked about" showed gets `talked_about: true` and no drop reason.
+ * A story the Overview's "Policy talk" or "Also talked about" showed gets `talked_about: true` and no drop reason.
  */
 export function spottedTraceFile(
   stories: Story[],
