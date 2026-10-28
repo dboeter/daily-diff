@@ -8,7 +8,9 @@ import {
   summaryLine,
   summaryOutputRule,
   TABLES_MARKER,
+  tidyTrendsSummaries,
 } from "../../reports/summarized-table.ts";
+import type { TrendingReportData } from "../../trending/rank.ts";
 import { renderPolicyTable, renderVendorTables } from "../../reports/markdown.ts";
 import {
   buildDataSummariesPrompt,
@@ -252,5 +254,45 @@ describe("dropInputTalk", () => {
 
   it("drops a summary with nothing left, so its row shows the description", () => {
     expect(dropInputTalk(new Map([[1, "The given description is empty."]]), "test").has(1)).toBe(false);
+  });
+});
+
+describe("tidyTrendsSummaries", () => {
+  // The three restating summaries of 2026-10-28's Trends page; opencode's row has Lang TypeScript.
+  const report = {
+    categories: [{ category: "coding_agent", rows: [{ n: 3, language: "TypeScript" }] }],
+  } as unknown as TrendingReportData;
+  const tidy = (line: string, n = 1) => tidyTrendsSummaries(new Map([[n, line]]), report).get(n);
+
+  it("drops a second sentence made of the first's words", () => {
+    expect(
+      tidy(
+        "pi is a coding agent positioned as personally yours. It is positioned as personally yours among many coding agents.",
+      ),
+    ).toBe("pi is a coding agent positioned as personally yours.");
+    expect(
+      tidy(
+        "Proto Agent is the personal agent for your business. It is the personal agent for your business.",
+      ),
+    ).toBe("Proto Agent is the personal agent for your business.");
+  });
+
+  it("drops a trailing language that repeats the row's Lang column", () => {
+    expect(
+      tidy(
+        "anomalyco/opencode is the open source coding agent written in TypeScript. It is the open source coding agent in TypeScript.",
+        3,
+      ),
+    ).toBe("anomalyco/opencode is the open source coding agent.");
+  });
+
+  it("keeps a second sentence that adds a fact, and a language the row does not show", () => {
+    const line = "t/x is a coding agent. It runs every tool call in a Docker sandbox.";
+    expect(tidy(line)).toBe(line);
+    expect(tidy("t/x is a coding agent written in Rust.", 3)).toBe("t/x is a coding agent written in Rust.");
+    expect(tidy("t/x is written in TypeScript.", 3)).toBe("t/x is written in TypeScript.");
+    expect(tidyTrendsSummaries(new Map([[3, "t/x is a CLI in TypeScript."]])).get(3)).toBe(
+      "t/x is a CLI in TypeScript.",
+    );
   });
 });

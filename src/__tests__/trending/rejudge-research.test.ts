@@ -1,5 +1,5 @@
-import { describe, expect, it } from "vitest";
-import { entriesBefore, rejudgeResearch } from "../../../scripts/rejudge-research.ts";
+import { describe, expect, it, vi } from "vitest";
+import { entriesBefore, printChanges, rejudgeResearch } from "../../../scripts/rejudge-research.ts";
 import { relevanceOf, type ArxivPaper, type JevAnswers, type JevScore } from "../../sources/arxiv.ts";
 import type { ResearchEntry, ResearchState } from "../../trending/research.ts";
 
@@ -76,5 +76,29 @@ describe("rejudgeResearch", () => {
   it("returns null when too many calls failed", async () => {
     const result = await rejudgeResearch(state(), "2026-10-28", () => Promise.reject(new Error("HTTP 400")));
     expect(result).toBeNull();
+  });
+});
+
+describe("printChanges", () => {
+  it("lists the entries it could not re-judge and exits non-zero", async () => {
+    const score = (paper: ArxivPaper) =>
+      paper.title === "A coding agent" ? Promise.reject(new Error("HTTP 500")) : stubScore(paper);
+    const result = await rejudgeResearch(state(), "2026-10-28", score);
+    vi.spyOn(console, "log").mockImplementation(() => {});
+    const error = vi.spyOn(console, "error").mockImplementation(() => {});
+    expect(printChanges(result!.changes)).toBe(1);
+    const listed = error.mock.calls.map((c) => String(c[0]));
+    expect(listed.some((l) => l.includes("b  A coding agent"))).toBe(true);
+    expect(listed.some((l) => l.includes("nnInteractive"))).toBe(false);
+    vi.restoreAllMocks();
+  });
+
+  it("exits zero when every entry was re-judged", async () => {
+    const result = await rejudgeResearch(state(), "2026-10-28", stubScore);
+    vi.spyOn(console, "log").mockImplementation(() => {});
+    const error = vi.spyOn(console, "error").mockImplementation(() => {});
+    expect(printChanges(result!.changes)).toBe(0);
+    expect(error).not.toHaveBeenCalled();
+    vi.restoreAllMocks();
   });
 });
