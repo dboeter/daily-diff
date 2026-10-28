@@ -190,7 +190,9 @@ describe("buildPolicySummariesPrompt", () => {
     expect(result).toContain(
       "1. AI Act guidelines (European Commission, 2026-10-09) — The AI Office publishes guidelines.",
     );
-    expect(result).toContain("`N: <2 sentences>`");
+    expect(result).toContain("`N: <1-2 sentences>`");
+    expect(result).toContain("Add a second sentence only when the text states what the item means");
+    expect(result).toContain("Never write about the text itself");
     expect(result).toContain("1 lines in total");
     expect(result).toContain("Do not invent");
     expect(result).toContain("The reader: A Dutch AI practitioner.");

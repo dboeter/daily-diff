@@ -715,7 +715,7 @@ describe("renderPolicyTable", () => {
     stage: "Stemmen - aangenomen",
   };
 
-  it("renders one section per jurisdiction, date, source, title and stage from the data, the summary from the model", () => {
+  it("renders one section per jurisdiction, date, source, title and stage (— without one) from the data, the summary from the model", () => {
     const summaries = new Map([
       [1, "Guidelines for providers."],
       [3, "A motion passed."],
@@ -723,8 +723,8 @@ describe("renderPolicyTable", () => {
     expect(renderPolicyTable(numberRows([...items, motion]), summaries)).toBe(
       "## EU\n\n" +
         "| Date | Source | Title | Stage | Summary |\n| :--- | :--- | :--- | :--- | :--- |\n" +
-        "| 2026-10-09 | European Commission | [AI Act \\| guidelines](https://example.eu/a) |  | Guidelines for providers. |\n" +
-        "| 2026-10-08 | European Commission | [Scientific panel](https://example.eu/b) |  | — |\n\n" +
+        "| 2026-10-09 | European Commission | [AI Act \\| guidelines](https://example.eu/a) | — | Guidelines for providers. |\n" +
+        "| 2026-10-08 | European Commission | [Scientific panel](https://example.eu/b) | — | — |\n\n" +
         "## Netherlands\n\n" +
         "| Date | Source | Title | Stage | Summary |\n| :--- | :--- | :--- | :--- | :--- |\n" +
         "| 2026-10-08 | Tweede Kamer | [Motie AI](https://example.nl/m) | Stemmen - aangenomen | A motion passed. |",

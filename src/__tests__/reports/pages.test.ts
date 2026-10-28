@@ -797,7 +797,7 @@ describe("buildPolicyReport", () => {
 
   it("splices the code-rendered table into the prose and saves the state", async () => {
     generateBody.mockImplementation(async (prompt: string) =>
-      prompt.includes("`N: <2 sentences>`")
+      prompt.includes("`N: <1-2 sentences>`")
         ? "1: The AI Office published guidelines."
         : "## Highlights\n\nH.",
     );
@@ -807,14 +807,14 @@ describe("buildPolicyReport", () => {
     expect(report?.content).toContain("# AI Policy 2026-10-14");
     expect(report?.content).toContain(
       "H.\n\n## EU\n\n| Date | Source | Title | Stage | Summary |\n| :--- | :--- | :--- | :--- | :--- |\n" +
-        "| 2026-10-09 | European Commission | [AI Act guidelines](https://example.eu/a) |  | The AI Office published guidelines. |",
+        "| 2026-10-09 | European Commission | [AI Act guidelines](https://example.eu/a) | — | The AI Office published guidelines. |",
     );
     expect(JSON.parse(fs.readFileSync(file, "utf-8"))).toEqual({ reported: { g1: "2026-10-14" } });
   });
 
   it("reads Highlights, the jurisdictions, News & commentary, then Coming up with its window line", async () => {
     generateBody.mockImplementation(async (prompt: string) =>
-      prompt.includes("`N: <2 sentences>`") ? "1: S.\n2: N." : "## Highlights\n\nH.",
+      prompt.includes("`N: <1-2 sentences>`") ? "1: S.\n2: N." : "## Highlights\n\nH.",
     );
     const nl = { ...item, id: "nl1", jurisdiction: "nl" as const };
     const news = { ...item, id: "n1", title: "Op-ed", news: true };
@@ -851,7 +851,7 @@ describe("buildPolicyReport", () => {
 
   it("is skipped when the prose call fails, saving only the observed state", async () => {
     generateBody.mockImplementation(async (prompt: string) => {
-      if (prompt.includes("`N: <2 sentences>`")) return "1: S.";
+      if (prompt.includes("`N: <1-2 sentences>`")) return "1: S.";
       throw new Error("down");
     });
     const file = path.join(dir, "failed.json");
@@ -862,7 +862,7 @@ describe("buildPolicyReport", () => {
 
   it("is written on a day with only news, which gets its own section after the jurisdiction tables", async () => {
     generateBody.mockImplementation(async (prompt: string) =>
-      prompt.includes("`N: <2 sentences>`") ? "1: Politico reports." : "## Highlights\n\nH.",
+      prompt.includes("`N: <1-2 sentences>`") ? "1: Politico reports." : "## Highlights\n\nH.",
     );
     const news = { ...item, id: "n1", source: "Politico Europe", news: true };
     const report = await buildPolicyReport(data([news]), "00:00", "2026-10-14", path.join(dir, "news.json"));

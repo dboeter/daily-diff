@@ -89,6 +89,30 @@ export function checkCodeTokens(
   return checked;
 }
 
+/** A sentence about the model's input rather than the item: "The provided text does not specify …". */
+const INPUT_TALK_RE =
+  /\b(?:provided|given) (?:text|description)\b|\bthe (?:text|description) (?:does not|doesn't|did not|is empty)\b/i;
+
+/**
+ * The summaries without their sentences about the model's input, each one logged. On 2026-10-28
+ * the only AI Policy row ended "The provided text does not specify any direct implications for
+ * organisations that deploy AI." A summary left with no sentence is dropped, so its row shows
+ * the description.
+ */
+export function dropInputTalk(summaries: Map<number, string>, tag: string): Map<number, string> {
+  const kept = new Map<number, string>();
+  for (const [n, text] of summaries) {
+    const sentences = text.split(/(?<=[.!?])\s+/);
+    const rest = sentences.filter((s) => {
+      if (!INPUT_TALK_RE.test(s)) return true;
+      console.warn(`  [${tag}] row ${n}: dropped a sentence about its input: "${s}"`);
+      return false;
+    });
+    if (rest.length) kept.set(n, rest.length === sentences.length ? text : rest.join(" "));
+  }
+  return kept;
+}
+
 // ---------------------------------------------------------------------------
 // Rendering
 // ---------------------------------------------------------------------------
