@@ -1,0 +1,57 @@
+[
+  {
+    "id": "hn:50257326",
+    "source": "hn",
+    "title": "Wikipedia's Cleanup of AI-Generated Content",
+    "url": "https://spectrum.ieee.org/wikipedia-wikiproject-ai-writing-cleanup",
+    "discussionUrl": "https://news.ycombinator.com/item?id=50257326",
+    "points": 499,
+    "comments": 237,
+    "topic": "other",
+    "counts": "499 points, 237 comments"
+  },
+  {
+    "id": "hn:50255298",
+    "source": "hn",
+    "title": "The Mythical Man-Month in the Age of AI",
+    "url": "https://j11g.com/the-mythical-man-month-in-the-age-of-ai",
+    "discussionUrl": "https://news.ycombinator.com/item?id=50255298",
+    "points": 477,
+    "comments": 353,
+    "topic": "other",
+    "counts": "477 points, 353 comments"
+  },
+  {
+    "id": "hn:50273396",
+    "source": "hn",
+    "title": "Kentucky man becomes the first humanist granted religious exemption from AI",
+    "url": "https://religionnews.com/2026/10/26/in-a-first-a-humanist-granted-a-religious-exemption-from-using-ai/",
+    "discussionUrl": "https://news.ycombinator.com/item?id=50273396",
+    "points": 448,
+    "comments": 496,
+    "topic": "policy",
+    "counts": "448 points, 496 comments"
+  },
+  {
+    "id": "lobsters:gvy5gz",
+    "source": "lobsters",
+    "title": "Why Is This Fingerprinting Script Creating Bioweapons?",
+    "url": "https://nullpt.rs/fingerprinting-bioweapons",
+    "discussionUrl": "https://lobste.rs/s/gvy5gz/why_is_this_fingerprinting_script",
+    "points": 35,
+    "comments": 1,
+    "topic": "other",
+    "counts": "35 points, 1 comment"
+  },
+  {
+    "id": "devto:4925970",
+    "source": "devto",
+    "title": "The Most Embarrassing Private Key in Web PKI History",
+    "url": "https://dev.to/varshithvhegde/the-most-embarrassing-private-key-in-web-pki-history-f9b",
+    "discussionUrl": "https://dev.to/varshithvhegde/the-most-embarrassing-private-key-in-web-pki-history-f9b",
+    "points": 35,
+    "comments": 19,
+    "topic": "other",
+    "counts": "35 reactions, 19 comments"
+  }
+]

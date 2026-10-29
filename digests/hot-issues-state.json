@@ -5,7 +5,10 @@
     "issue:google-gemini/gemini-cli#15404": "2026-10-28",
     "issue:anomalyco/opencode#59387": "2026-10-28",
     "issue:nousresearch/hermes-agent#145452": "2026-10-28",
-    "issue:nousresearch/hermes-agent#143379": "2026-10-28"
+    "issue:nousresearch/hermes-agent#143379": "2026-10-28",
+    "issue:anthropics/claude-code#65833": "2026-10-29",
+    "issue:google-gemini/gemini-cli#30004": "2026-10-29",
+    "issue:nousresearch/hermes-agent#143364": "2026-10-29"
   },
   "stages": {}
 }

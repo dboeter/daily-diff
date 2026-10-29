@@ -5,7 +5,8 @@
     "openai/gpt-6.1-terra-pro": "2026-10-27",
     "openai/gpt-6.1-terra-pro:batch": "2026-10-27",
     "openai/gpt-6.1-terra": "2026-10-27",
-    "openai/gpt-6.1-terra:batch": "2026-10-27"
+    "openai/gpt-6.1-terra:batch": "2026-10-27",
+    "particle-ai/particle-1": "2026-10-29"
   },
   "stages": {}
 }

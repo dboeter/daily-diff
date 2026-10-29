@@ -1,0 +1,14 @@
+{
+  "ai-agents": [
+    "Anthropic adds `CLAUDE_CODE_EVEN_MORE_DANGEROUSLY_SKIP_PERMISSIONS` flag to bypass all permission prompts in Claude Code",
+    "Gemini CLI `--yolo` mode halts with CRITICAL SECURITY WARNING on temp dirs, workspace scripts, and home paths; no toggle to suppress"
+  ],
+  "ai-models": [
+    "Particle-1 listed on OpenRouter with 1M-context window, token-efficient agentic coding model post-trained on DeepSeek V4.1 Flash",
+    "Google announces Gemini 4 Carbon as strongest model with state-of-the-art cybersecurity and long-horizon capabilities"
+  ],
+  "ai-policy": [
+    "New York enacts Senate Bill 9051 prohibiting AI companions from using features deemed unsafe for minors",
+    "Netherlands publishes handreiking to help municipalities jointly scale AI applications, pushing standardized public-sector deployment"
+  ]
+}

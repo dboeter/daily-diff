@@ -1,0 +1,16 @@
+{
+"attempted": 10,
+"failed": 0,
+"calls": [
+{"label":"agents","outcome":"ok","chars":1940},
+{"label":"spotted-summaries","outcome":"ok","chars":1733},
+{"label":"agents-highlights","outcome":"ok","chars":533},
+{"label":"policy","outcome":"ok","chars":456},
+{"label":"models-summaries","outcome":"ok","chars":419},
+{"label":"policy-summaries","outcome":"ok","chars":438},
+{"label":"models-highlights","outcome":"ok","chars":491},
+{"label":"data-vendor-summaries","outcome":"ok","chars":2064},
+{"label":"data-highlights","outcome":"ok","chars":829},
+{"label":"highlights","outcome":"ok","chars":794}
+]
+}

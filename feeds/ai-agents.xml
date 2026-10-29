@@ -13,7 +13,105 @@
       <height>144</height>
     </image>
     <atom:link href="https://dboeter.github.io/daily-diff/feeds/ai-agents.xml" rel="self" type="application/rss+xml"/>
-    <lastBuildDate>Wed, 28 Oct 2026 05:29:16 +0000</lastBuildDate>
+    <lastBuildDate>Thu, 29 Oct 2026 05:38:26 +0000</lastBuildDate>
+    <item>
+      <title>AI Agents 2026-10-29</title>
+      <link>https://dboeter.github.io/daily-diff/#2026-10-29/ai-agents</link>
+      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-10-29/ai-agents</guid>
+      <pubDate>Thu, 29 Oct 2026 00:00:00 +0000</pubDate>
+      <description>AI Agents 2026-10-29 ⬛ Overview · 🟪 AI Agents · 🟦 AI Models &amp;amp; Labs · 🟧 AI Policy · 🟨 Data Engineering Projects: 16 | Active today: 5 | Stable releases: 4 | Prereleases (not covered): 9 | Generated: 2026-10-29 05:34 UTC Highlights Anthropic introduces CLAUDE_CODE_EVEN_MORE_DANGEROUSLY_SKIP_PERMISSIONS flag letting Claude Code users bypass all permission prompts entirely Gemini CLI --yolo mode repeatedly halts with “CRITICAL SECURITY WARNING” on project temp dirs, workspace scripts, and ho...</description>
+      <content:encoded><![CDATA[<h1>AI Agents 2026-10-29</h1>
+<p><a href="https://dboeter.github.io/daily-diff/#2026-10-29">⬛ Overview</a> · <strong>🟪 AI Agents</strong> · <a href="https://dboeter.github.io/daily-diff/#2026-10-29/ai-models">🟦 AI Models &amp; Labs</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-29/ai-policy">🟧 AI Policy</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-29/ai-data">🟨 Data Engineering</a></p>
+<blockquote>
+<p>Projects: 16 | Active today: 5 | Stable releases: 4 | Prereleases (not covered): 9 | Generated: 2026-10-29 05:34 UTC</p>
+</blockquote>
+<hr>
+<h2>Highlights</h2>
+<ul>
+<li>Anthropic introduces <code>CLAUDE_CODE_EVEN_MORE_DANGEROUSLY_SKIP_PERMISSIONS</code> flag letting Claude Code users bypass all permission prompts entirely</li>
+<li>Gemini CLI <code>--yolo</code> mode repeatedly halts with “CRITICAL SECURITY WARNING” on project temp dirs, workspace scripts, and home paths; <code>findUntrustedFlags</code> lacks a settings toggle to suppress it</li>
+<li>OpenCode v2.2.1 adds <code>/goal</code> command to keep sessions working toward an objective until reviewer confirmation and experimental image generation via <code>experimental.image_generate</code></li>
+</ul>
+<hr>
+<h2>Coding Agents &amp; Assistants</h2>
+<h3>Claude Code</h3>
+<ul>
+<li><strong>Hot issue:</strong> In v2.1.150 on WSL, the mouse scroll wheel sends arrow keys instead of scrolling conversation output, cycling through input history; regression since previous version. <a href="https://github.com/anthropics/claude-code/issues/65833">#65833</a></li>
+<li><strong>News:</strong> A Bun preload script disables <code>agent_summary</code> and cuts ~15–20% token overhead from the status line, showing the feature burns significant context. <a href="https://news.ycombinator.com/item?id=50284255">Hacker News</a></li>
+</ul>
+<h3>Gemini CLI</h3>
+<ul>
+<li><strong>Hot issue:</strong> <code>--yolo</code> mode repeatedly halts with “CRITICAL SECURITY WARNING: Untrusted Command Flags Detected” on project temp dirs, workspace <code>.sh</code> scripts, and <code>~/</code> paths; <code>findUntrustedFlags</code> lacks a settings toggle to suppress it. <a href="https://github.com/google-gemini/gemini-cli/issues/30004">#30004</a></li>
+</ul>
+<h3>OpenCode</h3>
+<ul>
+<li><strong>Release:</strong> <a href="https://github.com/anomalyco/opencode/releases/tag/v2.2.1">v2.2.1</a> adds <code>/goal</code> command to keep sessions working toward an objective until reviewer confirmation, and experimental image generation via <code>experimental.image_generate</code>; <a href="https://github.com/anomalyco/opencode/releases/tag/v1.19.5">v1.19.5</a> fixes failed TUI worker requests returning errors instead of hanging; <a href="https://github.com/anomalyco/opencode/releases/tag/process-daemon-v0.3.2">process-daemon-v0.3.2</a> updates the PTY protocol to v7.</li>
+</ul>
+<h3>Oh My Pi</h3>
+<ul>
+<li><strong>Release:</strong> <a href="https://github.com/can1357/oh-my-pi/releases/tag/v18.13.3">v18.13.3</a> raises Bun engine requirement to ≥1.4.4 and fixes chat-completion context estimates that incorrectly counted dropped thinking tokens, preventing premature compaction.</li>
+</ul>
+<h3>Hermes Agent</h3>
+<ul>
+<li><strong>Hot issue:</strong> In multiplexed gateway mode, mid-turn progress and background-review notices from secondary profiles (e.g., <code>yori</code>) are delivered to the primary profile’s Telegram bot instead of their own, cross-contaminating streams across four bots. <a href="https://github.com/NousResearch/hermes-agent/issues/143364">#143364</a></li>
+</ul>
+<p><strong>Quiet today:</strong> <a href="https://github.com/Kilo-Org/kilocode">Kilo Code</a>, <a href="https://github.com/earendil-works/pi">Pi</a>, <a href="https://github.com/1jehuang/jcode">jcode</a>, <a href="https://github.com/cline/cline">Cline</a>, <a href="https://github.com/CommandCodeAI/command-code">Command Code</a>, <a href="https://github.com/deepseek-ai/deepseek-harness">DeepSeek Harness</a></p>
+<p><strong>Unavailable today:</strong> <a href="https://github.com/openai/codex">OpenAI Codex</a></p>
+<hr>
+<h2>Agent Tooling</h2>
+<p><strong>Quiet today:</strong> <a href="https://github.com/NVIDIA/OpenShell">OpenShell</a>, <a href="https://github.com/herdrdev/herdr">herdr</a>, <a href="https://github.com/mksglu/context-mode">context-mode</a>, <a href="https://github.com/asheshgoplani/agent-deck">Agent Deck</a></p>
+<hr>
+<h2>Spotted</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Story</th>
+<th align="left">Source</th>
+<th align="left">Discussion</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a href="https://cursor.com/blog/agent-sdk">The Agent SDK</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50273731">110 points, 116 comments</a></td>
+<td align="left">Cursor&#39;s Agent SDK framework lets developers define managed agents like Bugbot, Security Reviewer, and Rollouts in code and deploy them with a single command.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://www.theregister.com/ai-and-ml/2026/10/27/anthropic-now-lets-claude-users-jump-out-of-plane-without-parachute/5305807">Anthropic now lets Claude users jump out of plane without parachute</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50274666">8 points, 2 comments</a></td>
+<td align="left">Anthropic introduces a CLAUDE_CODE_EVEN_MORE_DANGEROUSLY_SKIP_PERMISSIONS flag that lets Claude Code users bypass permission prompts entirely.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://www.cirkit.us/demo/">Show HN: Cirkit – Annotate, Trace, and Ask AI About Schematic PDFs</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50268880">4 points, 2 comments</a></td>
+<td align="left">Cirkit converts schematic PDFs into collaborative hardware workspaces with BOM-aware parts, searchable notes, live equations, and an AI that reads the page.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://surgehq.ai/blog/dayjob-tax">Dayjob: Tax – evaluating AI agents on 50 professional tax assignments</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50275626">219 points, 141 comments</a></td>
+<td align="left">SurgeHQ&#39;s DAYJOB: Tax benchmark evaluates AI agents across 50 realistic tax assignments testing professional judgment and messy record navigation.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://dev.to/anis_meziani_52aab42304a8/how-to-cut-your-ai-agents-input-tokens-what-worked-what-failed-and-a-bench-to-measure-yours-f90">How to cut your AI agent&#39;s input tokens: what worked, what failed, and a bench to measure yours</a></td>
+<td align="left">Dev.to</td>
+<td align="left"><a href="https://dev.to/anis_meziani_52aab42304a8/how-to-cut-your-ai-agents-input-tokens-what-worked-what-failed-and-a-bench-to-measure-yours-f90">16 reactions, 11 comments</a></td>
+<td align="left">The author reports their AI agent consumed 17,000 tokens before reading any input, sharing a 7-point checklist and open-source benchmark for reducing token usage.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://dev.to/kenwalger/four-ways-a-test-can-lie-to-you-2ibf">Four Ways a Test Can Lie to You</a></td>
+<td align="left">Dev.to</td>
+<td align="left"><a href="https://dev.to/kenwalger/four-ways-a-test-can-lie-to-you-2ibf">15 reactions, 10 comments</a></td>
+<td align="left">The author describes four ways tests can be misleading after verifying a small application where an AI agent wrote most of the code.</td>
+</tr>
+</tbody></table>
+<hr>
+<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
+]]></content:encoded>
+    </item>
     <item>
       <title>AI Agents 2026-10-28</title>
       <link>https://dboeter.github.io/daily-diff/#2026-10-28/ai-agents</link>
