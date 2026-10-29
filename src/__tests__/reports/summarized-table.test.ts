@@ -1,13 +1,16 @@
 import { describe, it, expect } from "vitest";
 import {
   checkCodeTokens,
+  dropInputTalk,
   numberRows,
   parseRowSummaries,
   spliceTables,
   summaryLine,
   summaryOutputRule,
   TABLES_MARKER,
+  tidyTrendsSummaries,
 } from "../../reports/summarized-table.ts";
+import type { TrendingReportData } from "../../trending/rank.ts";
 import { renderPolicyTable, renderVendorTables } from "../../reports/markdown.ts";
 import {
   buildDataSummariesPrompt,
@@ -56,8 +59,8 @@ describe("row numbers", () => {
   it("puts a policy summary on the row with its number, under its jurisdiction, whatever the input order", () => {
     const md = renderPolicyTable(shuffle(policy), reply);
     const nl = md.slice(md.indexOf("## Netherlands"), md.indexOf("## US federal"));
-    expect(nl).toContain("[Title nl-1](https://example.eu/nl-1) |  | S3. |");
-    expect(md).toContain("[Title us-1](https://example.eu/us-1) |  | S4. |");
+    expect(nl).toContain("[Title nl-1](https://example.eu/nl-1) | — | S3. |");
+    expect(md).toContain("[Title us-1](https://example.eu/us-1) | — | S4. |");
     expect(md.slice(md.indexOf("## News & commentary"))).toContain(
       "[Title news-1](https://example.eu/news-1) | S5. |",
     );
@@ -158,7 +161,7 @@ describe("row numbers", () => {
     for (const p of prompts) {
       expect(p).toContain(summaryOutputRule(2));
     }
-    expect(prompts[0]).toContain(summaryLine("2 sentences"));
+    expect(prompts[0]).toContain(summaryLine("1-2 sentences"));
     expect(prompts[1]).toContain(summaryLine("1-2 sentences"));
     expect(prompts[2]).toContain(summaryLine("1-2 sentences"));
   });
@@ -225,5 +228,71 @@ describe("checkCodeTokens", () => {
 
   it("leaves a row without a source alone", () => {
     expect(checkCodeTokens(new Map([[2, "`x`"]]), sources, "test").get(2)).toBe("`x`");
+  });
+});
+
+describe("dropInputTalk", () => {
+  it("drops a sentence about the input and keeps the rest", () => {
+    const out = dropInputTalk(
+      new Map([
+        [
+          1,
+          "The Commission opened a consultation on the AI Act. The provided text does not specify any direct implications for organisations that deploy AI.",
+        ],
+        [2, "The text does not say when. The guidelines apply from August."],
+      ]),
+      "test",
+    );
+    expect(out.get(1)).toBe("The Commission opened a consultation on the AI Act.");
+    expect(out.get(2)).toBe("The guidelines apply from August.");
+  });
+
+  it("leaves a summary without such a sentence untouched", () => {
+    const text = "The U.S.  Senate passed the bill. It requires text labels on AI content.";
+    expect(dropInputTalk(new Map([[1, text]]), "test").get(1)).toBe(text);
+  });
+
+  it("drops a summary with nothing left, so its row shows the description", () => {
+    expect(dropInputTalk(new Map([[1, "The given description is empty."]]), "test").has(1)).toBe(false);
+  });
+});
+
+describe("tidyTrendsSummaries", () => {
+  // The three restating summaries of 2026-10-28's Trends page; opencode's row has Lang TypeScript.
+  const report = {
+    categories: [{ category: "coding_agent", rows: [{ n: 3, language: "TypeScript" }] }],
+  } as unknown as TrendingReportData;
+  const tidy = (line: string, n = 1) => tidyTrendsSummaries(new Map([[n, line]]), report).get(n);
+
+  it("drops a second sentence made of the first's words", () => {
+    expect(
+      tidy(
+        "pi is a coding agent positioned as personally yours. It is positioned as personally yours among many coding agents.",
+      ),
+    ).toBe("pi is a coding agent positioned as personally yours.");
+    expect(
+      tidy(
+        "Proto Agent is the personal agent for your business. It is the personal agent for your business.",
+      ),
+    ).toBe("Proto Agent is the personal agent for your business.");
+  });
+
+  it("drops a trailing language that repeats the row's Lang column", () => {
+    expect(
+      tidy(
+        "anomalyco/opencode is the open source coding agent written in TypeScript. It is the open source coding agent in TypeScript.",
+        3,
+      ),
+    ).toBe("anomalyco/opencode is the open source coding agent.");
+  });
+
+  it("keeps a second sentence that adds a fact, and a language the row does not show", () => {
+    const line = "t/x is a coding agent. It runs every tool call in a Docker sandbox.";
+    expect(tidy(line)).toBe(line);
+    expect(tidy("t/x is a coding agent written in Rust.", 3)).toBe("t/x is a coding agent written in Rust.");
+    expect(tidy("t/x is written in TypeScript.", 3)).toBe("t/x is written in TypeScript.");
+    expect(tidyTrendsSummaries(new Map([[3, "t/x is a CLI in TypeScript."]])).get(3)).toBe(
+      "t/x is a CLI in TypeScript.",
+    );
   });
 });

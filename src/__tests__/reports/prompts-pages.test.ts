@@ -7,6 +7,7 @@ import {
   buildHighlightsPrompt,
   highlightsSection,
   buildModelsSummariesPrompt,
+  labPostsNoHighlightNote,
   buildPolicyProsePrompt,
   buildPolicySummariesPrompt,
   buildSpottedSummariesPrompt,
@@ -189,7 +190,9 @@ describe("buildPolicySummariesPrompt", () => {
     expect(result).toContain(
       "1. AI Act guidelines (European Commission, 2026-10-09) — The AI Office publishes guidelines.",
     );
-    expect(result).toContain("`N: <2 sentences>`");
+    expect(result).toContain("`N: <1-2 sentences>`");
+    expect(result).toContain("Add a second sentence only when the text states what the item means");
+    expect(result).toContain("Never write about the text itself");
     expect(result).toContain("1 lines in total");
     expect(result).toContain("Do not invent");
     expect(result).toContain("The reader: A Dutch AI practitioner.");
@@ -251,9 +254,18 @@ describe("buildModelsSummariesPrompt", () => {
     expect(prompt).toContain("2. P (OpenAI post, https://openai.com/news/p) — (no page text)");
     expect(prompt).toContain("3. M (OpenRouter model `x/m`) — catalog description: A coding model.");
     expect(prompt).not.toContain("262144");
-    expect(prompt).toContain("`N: —`, unless its title says more than its URL");
+    expect(prompt).toContain("A post without page text: write `N: —`.");
     expect(prompt).toContain("its marketing claims");
     expect(prompt).toContain("3 lines in total");
+  });
+});
+
+describe("labPostsNoHighlightNote", () => {
+  it("names each post without page text as no Highlight, and is undefined without one", () => {
+    expect(labPostsNoHighlightNote(["Oracle Apps In Chatgpt", "Gpt 6 1 Terra"])).toBe(
+      'These lab posts have no page text, only a title: no Highlight for them. "Oracle Apps In Chatgpt", "Gpt 6 1 Terra"',
+    );
+    expect(labPostsNoHighlightNote([])).toBeUndefined();
   });
 });
 
@@ -379,6 +391,12 @@ describe("withFallbackHighlights", () => {
     expect(restatesLead("Snowflake ships X", "− Polars py-2.1.0 disallows mixed arithmetic.")).toBe(false);
   });
 
+  it("matches a lead's possessive and hyphenated words to their bare forms", () => {
+    expect(
+      restatesLead("OpenAI open source Codex agent", "OpenAI's open-source Codex agent ships today"),
+    ).toBe(true);
+  });
+
   it("sends a report whose Highlights failed as its page, so a forced report can still get one", () => {
     const page =
       "## Highlights\n\n⚠️ Summary generation failed.\n\n## Databricks\n\n| Item | Summary |\n| --- | --- |\n| [Lakebase GA](https://x) | Lakebase is generally available. |";
@@ -392,8 +410,8 @@ describe("withFallbackHighlights", () => {
   });
 
   it("forces ai-data only on a day with kept vendor items", () => {
-    expect(forcedHighlightReports(false)).toEqual(["ai-policy"]);
-    expect(forcedHighlightReports(true)).toEqual(["ai-policy", "ai-data"]);
+    expect(forcedHighlightReports(false)).toEqual(["ai-policy", "ai-trends"]);
+    expect(forcedHighlightReports(true)).toEqual(["ai-policy", "ai-data", "ai-trends"]);
     const reports = { "ai-data": "## Highlights\n- dbt Core 1.11 ships." };
     expect(withFallbackHighlights({}, reports, forcedHighlightReports(false))).toEqual({});
     expect(withFallbackHighlights({}, reports, forcedHighlightReports(true))).toEqual({
@@ -401,12 +419,27 @@ describe("withFallbackHighlights", () => {
     });
   });
 
-  it("asks the model for a forced report's highlight only when forced", () => {
-    expect(buildHighlightsPrompt({}, ["ai-policy"])).toContain("give that report at least 1 highlight");
-    expect(buildHighlightsPrompt({}, forcedHighlightReports(true))).toContain(
-      "vendor release-note row in ai-data",
-    );
-    expect(buildHighlightsPrompt({})).not.toContain("at least 1 highlight");
+  it("asks the model for a forced report's highlight only when forced and published", () => {
+    const policy = { "ai-policy": "## Highlights\n- The AI Act's standard is in the OJ." };
+    expect(buildHighlightsPrompt(policy, ["ai-policy"])).toContain("give that report at least 1 highlight");
+    expect(
+      buildHighlightsPrompt(
+        { ...policy, "ai-data": "## Highlights\n- A ships." },
+        forcedHighlightReports(true),
+      ),
+    ).toContain("vendor release-note row in ai-data");
+    expect(buildHighlightsPrompt(policy)).not.toContain("at least 1 highlight");
+    expect(buildHighlightsPrompt({}, ["ai-policy"])).not.toContain("at least 1 highlight");
+  });
+
+  it("does not mention ai-trends on a daily run", () => {
+    const daily = {
+      "ai-agents": "## Highlights\n- Codex ships hooks.",
+      "ai-policy": "## Highlights\n- The AI Act's standard is in the OJ.",
+    };
+    const prompt = buildHighlightsPrompt(daily, forcedHighlightReports(false));
+    expect(prompt).toContain("Every item in ai-policy was already judged relevant");
+    expect(prompt).not.toContain("ai-trends");
   });
 
   it("does not end the sentence at an abbreviation", () => {
@@ -431,6 +464,48 @@ describe("withFallbackHighlights", () => {
     expect(firstHighlight("## Highlights\n- *Delta Lake* 4.0 adds `variant` type.")).toBe(
       "Delta Lake 4.0 adds variant type.",
     );
+  });
+});
+
+describe("highlights.json for Trends", () => {
+  const TRENDS =
+    "## Highlights\n\n- **DeepSeek V4.1 Flash** leads OpenRouter with **35.37T tokens** on 2026-10-27. More.\n- **owner/repo** gains **+16,593 stars** in 7 days.\n\n## Models";
+  const LEAD = "DeepSeek V4.1 Flash leads OpenRouter with 35.37T tokens on 2026-10-27.";
+  const forced = forcedHighlightReports(false);
+
+  it("gives a figure-led Trends page an entry restating its first bullet when the model left it out", () => {
+    expect(
+      withFallbackHighlights({ "ai-agents": ["A."] }, { "ai-agents": "x", "ai-trends": TRENDS }, forced),
+    ).toEqual({ "ai-agents": ["A."], "ai-trends": [LEAD] });
+  });
+
+  it("puts the lead first: moves the model's restatement, else adds the lead in front", () => {
+    const run = (items: string[]) =>
+      withFallbackHighlights({ "ai-trends": items }, { "ai-trends": TRENDS }, forced)["ai-trends"];
+    expect(
+      run(["owner/repo gains 16,593 stars", "DeepSeek V4.1 Flash leads OpenRouter at 35.37T tokens"]),
+    ).toEqual(["DeepSeek V4.1 Flash leads OpenRouter at 35.37T tokens", "owner/repo gains 16,593 stars"]);
+    expect(run(["owner/repo gains 16,593 stars", "Other thing"])).toEqual([
+      LEAD,
+      "owner/repo gains 16,593 stars",
+    ]);
+    expect(run(["DeepSeek V4.1 Flash leads OpenRouter"])).toEqual(["DeepSeek V4.1 Flash leads OpenRouter"]);
+  });
+
+  it("adds nothing for an unpublished Trends page or one whose Highlights code dropped", () => {
+    expect(withFallbackHighlights({}, {}, forced)).toEqual({});
+    expect(
+      withFallbackHighlights({}, { "ai-trends": `## Highlights\n\n- ${NO_HIGHLIGHT_NOTE}` }, forced),
+    ).toEqual({});
+  });
+
+  it("lets the prompt restate Trends figures with their window, and keeps raw counts banned elsewhere", () => {
+    const withTrends = buildHighlightsPrompt({ "ai-trends": TRENDS }, forced);
+    expect(withTrends).toContain("except in ai-trends: restate a figure");
+    expect(withTrends).toContain("the weekly ai-trends page");
+    const daily = buildHighlightsPrompt({ "ai-agents": "## Highlights\n\n- A ships." }, forced);
+    expect(daily).toContain("Raw counts: commits, issues, PRs, open items, stars, comments, points\n");
+    expect(daily).not.toContain("except in ai-trends");
   });
 });
 
@@ -644,6 +719,13 @@ describe("dropNoHighlightRows", () => {
     ];
     const prose = `## Highlights\n\n${polars}\n- deepseek-ai/deepseek-harness gained 900 stars.\n- Qwen/Qwen3.6-35B-A3B tops likes.`;
     expect(dropNoHighlightRows(prose, rows, "test")).toBe(`## Highlights\n\n${polars}`);
+  });
+
+  it("drops a bullet restating a name of three content words", () => {
+    const prose = `## Highlights\n\n${polars}\n- Snowflake adds new API support.`;
+    expect(dropNoHighlightRows(prose, [{ name: "Support for the new API", url: "" }], "test")).toBe(
+      `## Highlights\n\n${polars}`,
+    );
   });
 
   it("keeps a bullet that only shares a word with a short name", () => {

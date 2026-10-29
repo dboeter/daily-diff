@@ -2,9 +2,10 @@
  * LLM prompt builders and item formatting.
  */
 
-import type { RepoConfig, GitHubItem, GitHubRelease, HotIssue } from "../core/github.ts";
+import type { RepoConfig, GitHubItem, GitHubRelease } from "../core/github.ts";
+import type { HotIssue } from "../core/hot-issues.ts";
 import type { NewsItem } from "./project-news.ts";
-import { GOING_AWAY, hotIssueGain, SECTIONS } from "../core/strings.ts";
+import { GOING_AWAY, HOT_ISSUE, hotIssueGain, SECTIONS } from "../core/strings.ts";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -44,11 +45,42 @@ export interface DigestScope {
 // Formatting
 // ---------------------------------------------------------------------------
 
-export function formatItem(item: GitHubItem): string {
+/**
+ * A hot issue's body as the model sees it. On 2026-10-28 OpenCode #59387, the maintainers' "Free
+ * tier issues: read this first" thread, read as a live bug from its first 300 characters.
+ */
+export const HOT_ISSUE_BODY_CHARS = 1000;
+
+/** Issue-form and template lines that say nothing about the issue: an unanswered field, a checklist item. */
+const ISSUE_TEMPLATE_LINE_RE = /^[ \t]*(?:_No response_|[-*][ \t]+\[[ xX]\][ \t].*)[ \t]*$/gm;
+
+/**
+ * An issue or PR body on one line, without template comments and lines, code blocks (logs, stack
+ * traces), HTML tags and link noise (`stripLinkNoise`), cut at `maxChars`.
+ */
+function issueBody(body: string | null | undefined, maxChars: number): string {
+  const text = stripLinkNoise(
+    withoutCodeAndTags((body ?? "").replace(/<!--[\s\S]*?(?:-->|$)/g, " "), " ").replace(
+      ISSUE_TEMPLATE_LINE_RE,
+      "",
+    ),
+  )
+    .replace(/\s+/g, " ")
+    .trim();
+  return text.length > maxChars ? `${text.slice(0, maxChars)}...` : text;
+}
+
+/** Text without fenced code blocks (each replaced by `blockGap`; an unclosed one runs to the end) and HTML tags. */
+function withoutCodeAndTags(text: string, blockGap: string): string {
+  return text.replace(/(```|~~~)[\s\S]*?(\1|$)/g, blockGap).replace(/<[^>]*>/g, " ");
+}
+
+/** An issue's or PR's body as the model sees it, outside the hot issues: enough to tell its subject. */
+const ITEM_BODY_CHARS = 300;
+
+export function formatItem(item: GitHubItem, bodyChars = ITEM_BODY_CHARS): string {
   const labels = item.labels.map((l) => l.name).join(", ");
   const labelStr = labels ? ` [${labels}]` : "";
-  const body = (item.body ?? "").replace(/\n/g, " ").trim().slice(0, 300);
-  const ellipsis = (item.body ?? "").length > 300 ? "..." : "";
   const t = {
     author: "Author",
     created: "Created",
@@ -65,7 +97,7 @@ export function formatItem(item: GitHubItem): string {
     `#${item.number} [${item.state.toUpperCase()}]${labelStr} ${item.title}`,
     `  ${t.author}: ${item.user.login} | ${t.created}: ${item.created_at.slice(0, 10)} | ${t.updated}: ${item.updated_at.slice(0, 10)} | ${t.comments}: ${item.comments} | 👍: ${item.reactions?.["+1"] ?? 0}`,
     `  ${t.url}: ${refStr}`,
-    `  ${t.summary}: ${body}${ellipsis}`,
+    `  ${t.summary}: ${issueBody(item.body, bodyChars)}`,
   ].join("\n");
 }
 
@@ -145,8 +177,13 @@ const NEWS_DESCRIPTION_CHARS = 300;
 
 /** Newest stable releases shown per project; llama.cpp alone tags 35–70 a week. */
 const RELEASES_PER_PROJECT = 10;
-/** A stable release's notes as the model sees them (the agents and data reports). */
-export const RELEASE_BODY_CHARS = 400;
+/**
+ * A stable release's notes as the model sees them (agents and data reports), counted after
+ * `releaseNotes` strips the links: OpenCode v2.2.0's Breaking changes and Highlights fit in 1.8 KB.
+ * Prompt input, outside `callLlm`'s output budgets: at worst 17 repos × RELEASES_PER_PROJECT × 2000
+ * chars ≈ 85K tokens, inside gpt-4o's 128K context (the data page's Releases this week rows are uncapped).
+ */
+export const RELEASE_BODY_CHARS = 2000;
 // A prerelease is reported only if its notes show notable features, so the
 // model needs more of them. DeepSeek Harness notes run 4–19 KB, Chinese first
 // behind "[English](#en-…)" anchor links and <h3> tags: at 400 characters the
@@ -154,24 +191,111 @@ export const RELEASE_BODY_CHARS = 400;
 const PREVIEW_BODY_CHARS = 1500;
 
 /**
- * Release notes on one line, without fenced code blocks, HTML tags and in-page
- * anchor links, cut at `maxChars`. Agent Deck's notes open with three install
- * blocks (Homebrew, curl, `go install`), so on 2026-10-19 the first 400
- * characters held no change and the report listed install commands.
+ * Release notes on one line, without fenced code blocks, HTML tags, in-page
+ * anchor links and link noise (`stripLinkNoise`), the going-away and upgrade
+ * sections first (`priorityFirst`), cut after the last whole item that fits
+ * `maxChars`. Agent Deck's notes open with three install blocks (Homebrew,
+ * curl, `go install`), so on 2026-10-19 the first 400 characters held no
+ * change and the report listed install commands.
  */
 export function releaseNotes(body: string | null | undefined, maxChars: number): string {
-  return compactChangelog(body ?? "")
-    .replace(/(```|~~~)[\s\S]*?(\1|$)/g, " ")
-    .replace(/<[^>]*>/g, " ")
-    .replace(/\[[^\]]*\]\(#[^)]*\)/g, " ")
-    .replace(/\s+/g, " ")
-    .trim()
-    .slice(0, maxChars);
+  const text = withoutCodeAndTags(compactChangelog(body ?? ""), "\n").replace(/\[[^\]]*\]\(#[^)]*\)/g, " ");
+  return wholeItems(stripLinkNoise(priorityFirst(text)), maxChars);
+}
+
+/**
+ * Text without what costs characters and tells the model nothing: link URLs (a
+ * link keeps its text, an image goes), PR and issue references, thank-you and
+ * first-contribution lines, the Full Changelog link. Line breaks are kept. On
+ * 2026-10-28 most of OpenShell v0.1.6's first 400 characters were PR link URLs.
+ */
+export function stripLinkNoise(text: string): string {
+  return (
+    text
+      .replace(/^#+[ \t]*New Contributors[ \t]*$/gim, "")
+      .replace(CONTRIBUTOR_LINE_RE, "")
+      .replace(/\*\*Full Changelog\*\*:?\s*\S+/g, "")
+      .replace(/!\[[^\]]*\]\([^)]*\)/g, " ")
+      .replace(/(?:,\s*)?\[#\d+\]\([^)]*\)/g, " ")
+      .replace(/\[([^\]]*)\]\([^)]*\)/g, "$1")
+      .replace(/<?https?:\/\/[^\s)>]+>?/g, " ")
+      // The reference lists the steps above emptied, "([#1](…), [#2](…))" → "( , )", and "(#1, #2)";
+      // the opening lookahead keeps a call's "()" in code.
+      .replace(/\((?=[\s,#])(?:[\s,]|#\d+)+\)/g, " ")
+      .replace(/ by @[\w-]+(?:\[bot\])?(?![\w/-])(?: in #\d+)?/g, "")
+  );
+}
+
+// "- @user made their first contribution in …", "Thanks to @a and @b", "Contributors: @a, @b".
+const CONTRIBUTOR_LINE_RE =
+  /^[ \t]*(?:[*-][ \t]+)?(?:.*\bmade their first contribution\b.*|(?:thanks|thank you|kudos|contributors|credits)\b.*@[\w-]+.*)$/gim;
+
+/**
+ * A heading of what a user must act on: what breaks, goes away or needs an
+ * upgrade step. On 2026-10-28 OpenCode v2.2.0's three breaking changes and
+ * OpenShell v0.1.6's upgrade notes came after the cut.
+ */
+const PRIORITY_HEADING_RE =
+  /\b(?:breaking|removed|removals?|deprecat\w*|upgrade notes?|upgrade guide|upgrading|migrat\w*|security)\b/i;
+
+// A bold label alone on its line, "**Breaking changes**" or "**Security:**": a heading by another name.
+const BOLD_LABEL_RE = /^[ \t]*\*\*([^*]+)\*\*:?[ \t]*$/;
+
+/**
+ * The sections under a PRIORITY_HEADING_RE heading (each through its sub-headings) or bold label
+ * (up to the next heading or bold label) moved to the front, in order.
+ */
+function priorityFirst(text: string): string {
+  const front: string[] = [];
+  const rest: string[] = [];
+  let level = 0; // the heading level of the priority section we are in, 0 outside one
+  for (const line of text.split("\n")) {
+    const heading = /^[ \t]*(#{1,6})[ \t]+(.*)$/.exec(line);
+    const label = heading ? undefined : BOLD_LABEL_RE.exec(line)?.[1];
+    // A bold label ranks below every heading: level 7.
+    const lineLevel = heading ? heading[1]!.length : label === undefined ? 0 : 7;
+    if (lineLevel && level && lineLevel <= level) level = 0;
+    if (lineLevel && !level && PRIORITY_HEADING_RE.test(heading?.[2] ?? label!)) level = lineLevel;
+    (level ? front : rest).push(line);
+  }
+  return [...front, ...rest].join("\n");
+}
+
+/**
+ * The lines on one line, up to the last whole line that fits `maxChars`; a line
+ * that does not fit gives its leading whole sentences, and a first line without
+ * one is cut at a word. A heading with nothing under it (OpenShell's title over
+ * its install block) or left last by the cut is dropped: it introduces nothing.
+ */
+function wholeItems(text: string, maxChars: number): string {
+  const lines = text
+    .split("\n")
+    .map((line) => line.replace(/\s+/g, " ").trim())
+    .filter(Boolean);
+  const level = (line: string) => /^#+(?= )/.exec(line)?.[0].length ?? 0;
+  const items: string[] = [];
+  let length = -1; // the joining space before the first item is not there
+  for (const [i, item] of lines.entries()) {
+    const next = lines[i + 1];
+    if (level(item) && (next === undefined || (level(next) && level(next) <= level(item)))) continue;
+    const room = maxChars - length - 1;
+    if (item.length <= room) {
+      items.push(item);
+      length += item.length + 1;
+      continue;
+    }
+    const head = item.slice(0, room + 1);
+    const sentenceEnd = Math.max(...[...head.matchAll(/[.!?;](?=\s)/g)].map((m) => m.index), -1);
+    if (sentenceEnd >= 0) items.push(item.slice(0, sentenceEnd + 1));
+    else if (!items.length) items.push(head.slice(0, Math.max(head.lastIndexOf(" "), 0)).trim());
+    break;
+  }
+  while (items.length && level(items.at(-1)!)) items.pop();
+  return items.join(" ");
 }
 
 // GitHub's generated notes: "* <PR title> by @user in https://github.com/…/pull/N".
 const CHANGELOG_ENTRY_RE = /^[ \t]*[*-][ \t]+(.+?) by @\S+ in https:\/\/github\.com\/\S+\/pull\/\d+[ \t]*$/gm;
-const NEW_CONTRIBUTOR_RE = /^[ \t]*[*-][ \t]+@\S+ made their first contribution in \S+[ \t]*$/gm;
 
 /**
  * A generated changelog as PR titles only, with its count. At 400 characters
@@ -187,11 +311,7 @@ function compactChangelog(body: string): string {
   const withCount = header.test(body)
     ? body.replace(header, counted)
     : `${body.slice(0, first)}${counted}\n${body.slice(first)}`;
-  return withCount
-    .replace(CHANGELOG_ENTRY_RE, "$1;")
-    .replace(NEW_CONTRIBUTOR_RE, "")
-    .replace(/^#+[ \t]*New Contributors[ \t]*$/im, "")
-    .replace(/\*\*Full Changelog\*\*:?\s*\S+/g, "");
+  return withCount.replace(CHANGELOG_ENTRY_RE, "$1;");
 }
 
 /** Only a version x.0.0 is a major version (the data prompts' rule). */
@@ -211,13 +331,15 @@ const ANNOUNCEMENT_PATH = /blog|announc|news|release|post/i;
  * with a post-like path.
  */
 export function announcementLinks(body: string | null | undefined): string[] {
-  const text = (body ?? "")
-    .replace(/(```|~~~)[\s\S]*?(\1|$)/g, " ")
-    .replace(/!\[[^\]]*\]\([^)]*\)/g, " ")
-    // An autolink (`<https://…>`) and an HTML link's href are links, not tags to drop.
-    .replace(/<(https:\/\/[^\s>]+)>/g, " $1 ")
-    .replace(/<a\s[^>]*href=["'](https:\/\/[^"']+)["'][^>]*>/gi, " $1 ")
-    .replace(/<[^>]*>/g, " ");
+  const text = withoutCodeAndTags(
+    (body ?? "")
+      .replace(/!\[[^\]]*\]\([^)]*\)/g, " ")
+      // An autolink (`<https://…>`) and an HTML link's href are links, not tags to drop; one inside a
+      // code block goes with the block.
+      .replace(/<(https:\/\/[^\s>]+)>/g, " $1 ")
+      .replace(/<a\s[^>]*href=["'](https:\/\/[^"']+)["'][^>]*>/gi, " $1 "),
+    " ",
+  );
   const links = [...text.matchAll(/https:\/\/[^\s)\]>"'`]+/g)].map(([u]) => u.replace(/[.,;:*!?]+$/, ""));
   return [...new Set(links)].filter((u) => {
     try {
@@ -252,7 +374,13 @@ export function formatProject(a: ProjectActivity): string {
       a.previews.map((r) => formatRelease(r, cfg.repo, releaseNotes(r.body, PREVIEW_BODY_CHARS))).join("\n")
     : "";
   const issues =
-    a.hotIssues.map((i) => `${formatItem(i)}\n  ${hotIssueGain(i.gain, i.gainSince)}`).join("\n") || "None";
+    a.hotIssues
+      .map(
+        (i) =>
+          `${formatItem(i, HOT_ISSUE_BODY_CHARS)}\n  ${hotIssueGain(i.gain, i.gainSince)}` +
+          (i.fix ? `\n  Fix: PR #${i.fix.number} ${i.fix.state}` : ""),
+      )
+      .join("\n") || "None";
   const news =
     a.news
       .map(
@@ -296,7 +424,7 @@ Write the report in English: one section per project above that has something le
 - **Release**: what the stable release(s) change for users, in this order: ${RELEASE_ORDER}. Several releases in a range: summarize the range, do not list each one. Link each release you name as a plain Markdown link, [tag](url), never inside backticks; a range as its oldest and newest, [v1.2.0](url)–[v1.2.5](url). A release with an Announcement: describe it from the announcement, not from its first changelog entries.
 - **Prerelease**: only from a "Prereleases (no stable release yet)" list, and only when it adds notable features or breaking changes; skip routine alpha/rc bumps. Say it is a prerelease and link it.
 - **News**: what the news item says about the project and why it matters. Link it.
-- **Hot issue**: what users are hitting and how serious it is. For a security issue, say where the problem shows, who is affected and its fix status (open, or fixed in a named release), as far as the data says. Link the issue (https://github.com/<repo>/issues/<number>).
+- **${HOT_ISSUE.label}**: one bullet per issue, written "- **${HOT_ISSUE.label}:** #<number>: <description>". The description says what the issue reports and how serious it is, worded as a report ("users report", "an issue says"), never as an established fact. When the body shows a tracking, announcement or FAQ thread rather than a bug report, say so. For a security issue, say where the problem shows and who is affected. Write no link, label, comment or 👍 count, gain or fix status: code adds them to the bullet.
 
 Rules:
 - Use only the data above. Omit a bullet type that has no data. Never state what did not happen ("no release today", "no breaking issues were reported").
@@ -334,7 +462,7 @@ export function buildPageHighlightsPrompt(
   bodyMd: string,
   focus: string,
   dateStr: string,
-  /** An extra rule for today's page, e.g. the models page with no lab post or new model. */
+  /** An extra rule for today's page, e.g. the models page with no lab post or new model, or its lab posts without page text. */
   note?: string,
 ): string {
   return `You are the editor of ${page}, a daily report. Below are today's report sections, ${dateStr}.
@@ -357,12 +485,17 @@ ${sourceFidelityRules()}
 `;
 }
 
+/**
+ * The Skills section. `prs` are open or merged (selectSkillsItems drops a PR closed without
+ * merging), so code, not the model, decides what shipped: a merged PR is listed as MERGED.
+ */
 export function buildSkillsPrompt(prs: GitHubItem[], issues: GitHubItem[], dateStr: string): string {
   const topPrs = topN(prs, 20);
   const topIssues = topN(issues, 15);
 
   const noneStr = "None";
-  const prsText = topPrs.map((p) => formatItem(p)).join("\n") || noneStr;
+  const prsText =
+    topPrs.map((p) => formatItem(p.merged_at ? { ...p, state: "merged" } : p)).join("\n") || noneStr;
   const issuesText = topIssues.map((i) => formatItem(i)).join("\n") || noneStr;
 
   return `You are a technical analyst writing for engineers who use coding agents and build data/AI systems. The following data is from github.com/anthropics/skills, Anthropic's Claude Code Skills repository: its pull requests and issues updated in the last 7 days (data as of ${dateStr}).
@@ -384,14 +517,14 @@ Leave out every item that is not about coding agents or data/AI engineering (e.g
 ## Open PRs worth watching
 Up to 5 open PRs: what each would add or fix, and that it is not merged yet. Describe what the PR does; do not call it critical or an overhaul unless its text says so.
 
-## Closed this week
-The PRs with state CLOSED, if any (a closed PR may or may not have been merged: do not say which).
+## Merged this week
+The PRs with state MERGED, if any: what each ships.
 
 ## Requests
 From the issues, what people ask the Skills to do or fix.
 
 ## Takeaway
-One sentence on what these items have in common.
+One sentence on what the open PRs, merged PRs and issues you wrote about have in common.
 
 Style: concise and professional, include GitHub links for each item.
 ${REPO_LENGTH_RULE}

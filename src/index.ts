@@ -10,6 +10,15 @@
  */
 
 import {
+  type RepoConfig,
+  fetchRecentReleases,
+  isPrerelease,
+  type GitHubRelease,
+  fetchSkillsData,
+  type SkillsData,
+  createGitHubIssue,
+} from "./core/github.ts";
+import {
   type HotIssue,
   type HotIssueRun,
   HOT_ISSUES_SNAPSHOT_FILE,
@@ -18,19 +27,12 @@ import {
   newHotIssueCalls,
   newHotIssueQueue,
   hotIssueCallsLine,
-  type RepoConfig,
-  fetchRecentReleases,
   fetchHotIssues,
   HOT_ISSUES_STATE_FILE,
   nextHotIssuesState,
   hotIssueStateItem,
   isRepeatHotIssue,
-  isPrerelease,
-  type GitHubRelease,
-  fetchSkillsData,
-  type SkillsData,
-  createGitHubIssue,
-} from "./core/github.ts";
+} from "./core/hot-issues.ts";
 import {
   type ProjectActivity,
   announcementLinks,
@@ -458,7 +460,7 @@ async function main(): Promise<void> {
     },
   });
   const spottedOf = (page: SpottedPage) => spottedRows.filter((r) => r.page === page);
-  // The Overview's "Also talked about": stories routed to a topic with no page (policy, other).
+  // The Overview's policy list and "Also talked about": stories routed to a topic with no page.
   const talkedAbout = selectTalkedAbout(
     unmatched,
     (s) => routing.topics.get(s.id),
@@ -676,7 +678,14 @@ async function main(): Promise<void> {
   const attemptJson = async (prompt: string): Promise<ReportHighlights> => {
     for (let attempt = 1; attempt <= 2; attempt++) {
       try {
-        return parseLlmJson<ReportHighlights>(await callLlm(prompt, undefined, "highlights"));
+        const raw = await callLlm(prompt, undefined, "highlights");
+        const parsed = parseLlmJson<ReportHighlights>(raw);
+        // A published report without a key may be a rightful skip or a misread rule (Trends on
+        // 2026-10-28): the reply in the log tells which.
+        const missing = Object.keys(reports).filter((id) => !parsed[id]?.length);
+        if (missing.length)
+          console.log(`  [highlights] no highlight for ${missing.join(", ")}; reply: ${raw}`);
+        return parsed;
       } catch (err) {
         const tag = attempt < 2 ? "retrying" : "giving up";
         console.error(`  [highlights] attempt ${attempt} failed (${tag}): ${err}`);

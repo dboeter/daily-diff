@@ -71,12 +71,24 @@ export const reportIssueTitle = (id: ReportId, dateStr: string) =>
  */
 export const PROJECT_SCOPE = { window: "last 24h", period: "today" } as const;
 
-/**
- * A hot issue's engagement gained (`selectHotIssues`), next to its totals in the prompt:
- * since `since` when its snapshot baseline is older than yesterday, else in the window.
- */
+/** A hot issue's gain period: since `since` when its snapshot baseline is older than yesterday, else the window. */
+const gainPeriod = (since?: string) => (since ? `since ${since}` : `in the ${PROJECT_SCOPE.window}`);
+
+/** A hot issue's engagement gained (`selectHotIssues`), next to its totals in the prompt. */
 export const hotIssueGain = (gain: number, since?: string) =>
-  `Gained: +${gain} comments and 👍 ${since ? `since ${since}` : `in the ${PROJECT_SCOPE.window}`}`;
+  `Gained: +${gain} comments and 👍 ${gainPeriod(since)}`;
+
+/**
+ * A hot issue's row, written by code (`withHotIssueFacts`): `label` is the bullet's bold label, in
+ * the prompt's bullet form and matched in the rendered section; the rest are the facts' parts.
+ */
+export const HOT_ISSUE = {
+  label: "Hot issue",
+  totals: (comments: number, thumbs: number) => `${plural(comments, "comment")}, ${thumbs} 👍`,
+  gain: (gain: number, since?: string) => `+${gain} ${gainPeriod(since)}`,
+  fix: (state: "open" | "merged", link: string) =>
+    state === "merged" ? `fix ${link} merged` : `fix PR ${link} open`,
+} as const;
 
 const SOURCES = "Sources:";
 const generated = (utcStr: string) => `Generated: ${utcStr} UTC`;
@@ -117,8 +129,8 @@ export const GOING_AWAY = "−";
  */
 export const PROSE_COLUMNS = ["Summary", "What to do"];
 
-/** The Overview's line of stories routed to no page (`policy`, `other`): talked-about.json. */
-export const TALKED_ABOUT = { heading: "Also talked about" } as const;
+/** The Overview's lists of stories routed to no page (talked-about.json): `policy`, then the rest. */
+export const TALKED_ABOUT = { heading: "Also talked about", policyHeading: "Policy talk" } as const;
 
 /** The dated items of the next 30 days from every page (coming-up.json), on the Overview and in Telegram. */
 export const COMING_UP = {
@@ -212,7 +224,7 @@ export const POLICY_REPORT = {
     us_states: "US states",
     other: "Elsewhere",
   } satisfies Record<Jurisdiction, string>,
-  // Stage is empty for items from the regular news feeds.
+  // Stage is "—" for items without one (most feed items).
   tableHeader: "| Date | Source | Title | Stage | Summary |\n| :--- | :--- | :--- | :--- | :--- |",
   /** The last section: open deadlines and calendar dates of the next 30 days (src/policy/deadlines.ts). */
   deadlinesHeading: "Coming up",
@@ -224,7 +236,7 @@ export const POLICY_REPORT = {
   newsHeading: "News & commentary",
   newsTableHeader: "| Date | Source | Title | Summary |\n| :--- | :--- | :--- | :--- |",
   /** The meta line's count, and the log's. */
-  newItems: (n: number) => `${n} new items`,
+  newItems: (n: number) => plural(n, "new item"),
   noNewItems: "No new items, skipping report.",
   noData: "No data available, skipping report.",
 } as const;

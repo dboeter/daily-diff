@@ -18,7 +18,14 @@ import {
   SECTIONS,
   SPOTTED,
 } from "../core/strings.ts";
-import { TABLES_MARKER, rowList, summaryLine, summaryOutputRule, type Numbered } from "./summarized-table.ts";
+import {
+  TABLES_MARKER,
+  contentWords,
+  rowList,
+  summaryLine,
+  summaryOutputRule,
+  type Numbered,
+} from "./summarized-table.ts";
 import {
   goingAwayRule,
   HIGHLIGHTS_PICK_RULE,
@@ -36,7 +43,7 @@ import type { ResearchPaper } from "../trending/research.ts";
 import type { PolicyItem } from "../policy/items.ts";
 import type { KeptVendorItem } from "../data/relevance.ts";
 import { signHighlight } from "./markdown.ts";
-import { escapeRegex } from "./project-news.ts";
+import { escapeRegex } from "../core/regex.ts";
 import { siteOf, type StoryRow } from "../spotted/pool.ts";
 
 /** Which sources Trends' Models section covers: no call when neither has data. */
@@ -117,7 +124,7 @@ ${sourceFidelityRules()}
 }
 
 /**
- * Policy report, call 1 of 2: one 2-sentence summary per numbered table row.
+ * Policy report, call 1 of 2: one 1-2 sentence summary per numbered table row.
  * The rows are the kept items, numbered by fetchPolicyData; parseRowSummaries reads the reply.
  */
 export function buildPolicySummariesPrompt(
@@ -136,7 +143,8 @@ Below are ${items.length} numbered items from official sources and news & commen
 
 ${list}
 
-${summaryLine("2 sentences")} — what was published or decided, and what it means for organisations that deploy AI.
+${summaryLine("1-2 sentences")} — what was published or decided. Add a second sentence only when the text states what the item means for organisations that deploy AI; otherwise write one sentence.
+- Never write about the text itself ("the provided text", "the text does not specify"): leave out what it does not say.
 - Ground every sentence only in the given text. Do not invent obligations, dates, stages or legal status.
 - If the text is empty, say only what the title shows.
 ${summaryOutputRule(items.length)}
@@ -268,13 +276,23 @@ ${list}
 
 ${summaryLine("1-2 sentences")}.
 - A post with page text: 1-2 sentences taken from it, on what was announced and for whom.
-- A post without page text: write \`N: —\`, unless its title says more than its URL does.
+- A post without page text: write \`N: —\`.
 - A model: 1 sentence from its catalog description: what it is for, and what it takes in and gives back (text, images, audio) when the description says. Not its context length: the row shows it. Leave out its marketing claims (best, leading, state-of-the-art).
 - Ground every sentence only in the given text. Do not invent versions, prices, dates or benchmarks.
 - ${IDENTIFIER_RULE}
 ${summaryOutputRule(count)}
 - English.
 `;
+}
+
+/**
+ * The models Highlights call's rule for the lab posts without page text (`note` of
+ * buildPageHighlightsPrompt); undefined when every shown post has text.
+ */
+export function labPostsNoHighlightNote(titles: string[]): string | undefined {
+  return titles.length
+    ? `These lab posts have no page text, only a title: no Highlight for them. ${titles.map((t) => `"${t}"`).join(", ")}`
+    : undefined;
 }
 
 /** The data report's reader, shared by its two vendor calls. */
@@ -416,9 +434,15 @@ export function buildHighlightsPrompt(
   forced: readonly string[] = [],
   maxPerReport: number = HIGHLIGHTS_MAX_PER_REPORT,
 ): string {
-  const forcedRule = forced.length
-    ? `\n- ${forced.map((id) => FORCED_REASON[id] ?? id).join(" and ")} ${forced.length === 1 ? "was" : "were"} already judged relevant to this reader: give ${forced.length === 1 ? "that report" : "each of those reports"} at least 1 highlight`
+  // Only the published ones: on a daily run the prompt asked for a highlight of the absent Trends page.
+  const published = forced.filter((id) => id in reportContents);
+  const forcedRule = published.length
+    ? `\n- ${published.map((id) => HIGHLIGHT_RULES[id]?.forced ?? id).join(" and ")} ${published.length === 1 ? "was" : "were"} already judged relevant to this reader: give ${published.length === 1 ? "that report" : "each of those reports"} at least 1 highlight`
     : "";
+  const figures = Object.entries(HIGHLIGHT_RULES)
+    .filter(([id, rule]) => rule.figures && id in reportContents)
+    .map(([id, rule]) => ` (except in ${id}: ${rule.figures})`)
+    .join("");
 
   const sections = Object.entries(reportContents)
     .map(([id, content]) => `## [${id}]\n\n${highlightsInput(content)}`)
@@ -442,7 +466,7 @@ Bad: "Claude Code v2.1.288 released" (no content)  ·  "Copilot CLI ships three 
 
 Never include:
 - Routine releases: nightlies, alphas, prereleases, build-number ranges, or a version number without saying what it changes
-- Raw counts: commits, issues, PRs, open items, stars, comments, points
+- Raw counts: commits, issues, PRs, open items, stars, comments, points${figures}
 - CI status, flaky tests, pending upgrades, "in progress" or "targets" items with no shipped result
 - Generic trend statements ("X dominates", "Y remains active", "Z gains attention")
 
@@ -459,31 +483,44 @@ ${sourceFidelityRules()}
 - ${goingAwayRule("highlight")}${forcedRule}`;
 }
 
-const FORCED_REASON: Record<string, string> = {
-  "ai-policy": "Every item in ai-policy",
-  "ai-data": "every vendor release-note row in ai-data",
+/**
+ * The reports highlights.json treats apart from the rest. `forced`: how the prompt names a report
+ * that always gets a highlight when published, `onlyWithVendorItems` when that holds only on a day
+ * Jev kept a vendor item. `figures`: the exception to the raw-counts ban, and `leadFirst`: its first
+ * highlight is always its page's lead (`withFallbackHighlights`).
+ */
+const HIGHLIGHT_RULES: Record<
+  string,
+  { forced: string; onlyWithVendorItems?: true; figures?: string; leadFirst?: true }
+> = {
+  "ai-policy": { forced: "Every item in ai-policy" },
+  "ai-data": { forced: "every vendor release-note row in ai-data", onlyWithVendorItems: true },
+  // Trends' Highlights lead with figures its code computed (tokens, stars gained): banning
+  // them left the page out of highlights.json on 2026-10-28.
+  "ai-trends": {
+    forced: "the weekly ai-trends page",
+    figures: `restate a figure its Highlights state with its window, e.g. "35.37T tokens on 2026-10-27", "+16,593 stars in 7 days"`,
+    leadFirst: true,
+  },
 };
 
 /**
  * The reports that always get a highlight when published: AI Policy, whose
- * every item Jev kept, and the data report only on a day Jev kept a vendor
+ * every item Jev kept, the weekly Trends page, and the data report only on a day Jev kept a vendor
  * item (a day of repo activity alone holds routine releases and hot issues,
  * which the model may rightly skip). On 2026-10-20 the model left AI Policy
- * out though it carried the AI Act's first harmonised standard in the OJ.
+ * out though it carried the AI Act's first harmonised standard in the OJ, and on 2026-10-28 Trends.
+ * The prompt and the fallback skip one not published in the run (Trends on a daily run).
  */
 export function forcedHighlightReports(hasVendorItems: boolean): string[] {
-  return hasVendorItems ? ["ai-policy", "ai-data"] : ["ai-policy"];
+  return Object.keys(HIGHLIGHT_RULES).filter(
+    (id) => hasVendorItems || !HIGHLIGHT_RULES[id]!.onlyWithVendorItems,
+  );
 }
 
-// A highlight restates the lead when at least this share of its words (3+ letters) are in the lead.
+// A highlight restates the lead when at least this share of its content words are in the lead.
 const LEAD_MATCH_MIN = 0.5;
-const leadWords = (s: string) =>
-  new Set(
-    s
-      .toLowerCase()
-      .split(/[^\p{L}\p{N}]+/u)
-      .filter((w) => w.length >= 3),
-  );
+const leadWords = (s: string) => new Set(contentWords(s));
 
 /** Whether `highlight` restates `lead`: most of its words are the lead's. */
 export function restatesLead(highlight: string, lead: string): boolean {
@@ -492,15 +529,19 @@ export function restatesLead(highlight: string, lead: string): boolean {
   return words.length > 0 && words.filter((w) => inLead.has(w)).length / words.length >= LEAD_MATCH_MIN;
 }
 
-/** A table row the page shows but that makes no Highlight: a `minor` vendor row, a Trends row showing "—". */
+/**
+ * A table row the page shows but that makes no Highlight: a `minor` vendor row, a Trends row
+ * showing "—", a lab post without page text.
+ */
 export interface NoHighlightRow {
   name: string;
   /** "" when the row has no link. */
   url: string;
 }
 
-// A title of at least this many words (3+ letters) also matches a bullet restating most of them.
-const RESTATED_NAME_MIN_WORDS = 4;
+// A title of at least this many content words also matches a bullet restating most of them
+// (4 words of 3+ letters before stopwords were dropped).
+const RESTATED_NAME_MIN_WORDS = 3;
 
 /**
  * The Highlights before TABLES_MARKER (the whole text without one) without a bullet about a
@@ -568,6 +609,19 @@ export function withFallbackHighlights(
     if (items.some((h) => h.startsWith(`${GOING_AWAY} `) && restatesLead(h, lead))) continue;
     const k = items.findIndex((h) => !h.startsWith(`${GOING_AWAY} `) && restatesLead(h, lead));
     if (k >= 0) items[k] = `${GOING_AWAY} ${items[k]}`;
+  }
+  // A `leadFirst` report (Trends) leads with its page's lead, whatever the model returned: the
+  // highlight restating it moves first, else the lead's first sentence goes in front.
+  for (const [id, rule] of Object.entries(HIGHLIGHT_RULES)) {
+    const lead = rule.leadFirst && reportContents[id] ? firstHighlight(reportContents[id]) : null;
+    if (!lead || lead === NO_HIGHLIGHT_NOTE) continue;
+    const items = out[id] ?? [];
+    const k = items.findIndex((h) => restatesLead(h, lead));
+    if (k !== 0)
+      out[id] = [k > 0 ? items[k]! : lead, ...items.filter((_, i) => i !== k)].slice(
+        0,
+        HIGHLIGHTS_MAX_PER_REPORT,
+      );
   }
   for (const id of forced) {
     const content = reportContents[id];

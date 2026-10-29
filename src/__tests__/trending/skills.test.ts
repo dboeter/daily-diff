@@ -66,11 +66,13 @@ describe("selectSkillsItems", () => {
     expect(out.prs.map((p) => p.number)).toEqual([1980]);
   });
 
+  const merged = (at: string) => ({ state: "closed", closed_at: at, merged_at: at });
+
   it("drops a closed item that closed before the window, however recently it was updated", () => {
     const out = selectSkillsItems(
       data([
-        item(900, "2026-10-25T00:00:00Z", { state: "closed", closed_at: "2026-06-01T00:00:00Z" }),
-        item(901, "2026-10-25T00:00:00Z", { state: "closed", closed_at: "2026-10-24T00:00:00Z" }),
+        item(900, "2026-10-25T00:00:00Z", merged("2026-06-01T00:00:00Z")),
+        item(901, "2026-10-25T00:00:00Z", merged("2026-10-24T00:00:00Z")),
         item(902, "2026-10-25T00:00:00Z"),
       ]),
       new Set(),
@@ -84,7 +86,7 @@ describe("selectSkillsItems", () => {
       data(
         [
           item(1742, "2026-10-24T00:00:00Z"),
-          item(1298, "2026-10-24T00:00:00Z", { state: "closed", closed_at: "2026-10-23T00:00:00Z" }),
+          item(1298, "2026-10-24T00:00:00Z", merged("2026-10-23T00:00:00Z")),
         ],
         [item(492, "2026-10-25T00:00:00Z")],
       ),
@@ -93,6 +95,53 @@ describe("selectSkillsItems", () => {
     );
     expect(out.prs.map((p) => p.number)).toEqual([1298]);
     expect(out.issues).toEqual([]);
+  });
+
+  describe("a PR closed without merging", () => {
+    // 2026-10-28: #1961 and the other 6 "Closed this week" PRs were all closed unmerged, yet read as shipped.
+    const unmerged = { state: "closed", closed_at: "2026-10-24T00:00:00Z", merged_at: null };
+
+    it("is left out, while a PR merged this week is kept", () => {
+      const out = selectSkillsItems(
+        data([
+          item(1961, "2026-10-25T00:00:00Z", unmerged),
+          item(1990, "2026-10-25T00:00:00Z", merged("2026-10-24T00:00:00Z")),
+        ]),
+        new Set(),
+        NOW,
+      );
+      expect(out.prs.map((p) => p.number)).toEqual([1990]);
+    });
+
+    it("is left out when last week's page showed it open", () => {
+      const out = selectSkillsItems(
+        data([item(1961, "2026-10-25T00:00:00Z", unmerged)]),
+        new Set([1961]),
+        NOW,
+      );
+      expect(out.prs).toEqual([]);
+    });
+
+    it("leaves a closed issue, which has no merged_at, to its closed_at", () => {
+      const issue = item(556, "2026-10-25T00:00:00Z", {
+        state: "closed",
+        closed_at: "2026-10-24T00:00:00Z",
+        html_url: `https://github.com/${REPO}/issues/556`,
+      });
+      expect(selectSkillsItems(data([], [issue]), new Set(), NOW).issues.map((i) => i.number)).toEqual([556]);
+    });
+
+    it("goes by the list an item is in, not its URL", () => {
+      const closed = { state: "closed", closed_at: "2026-10-24T00:00:00Z" };
+      const asIssue = item(557, "2026-10-25T00:00:00Z", closed);
+      const asPr = item(558, "2026-10-25T00:00:00Z", {
+        ...closed,
+        html_url: `https://github.com/${REPO}/issues/558`,
+      });
+      const out = selectSkillsItems(data([asPr], [asIssue]), new Set(), NOW);
+      expect(out.issues.map((i) => i.number)).toEqual([557]);
+      expect(out.prs).toEqual([]);
+    });
   });
 
   it("leaves nothing when nothing moved, so the section is left out", () => {

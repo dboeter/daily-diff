@@ -1,0 +1,114 @@
+name: digest-review-2026-10-28-fixes
+max_parallel: 4
+test: pnpm install --frozen-lockfile --offline --silent && pnpm test && pnpm typecheck && pnpm lint && pnpm format:check
+allow:
+  - "Bash(pnpm install*)"
+  - "Bash(pnpm test*)"
+  - "Bash(pnpm vitest*)"
+  - "Bash(pnpm exec vitest*)"
+  - "Bash(pnpm typecheck)"
+  - "Bash(pnpm lint)"
+  - "Bash(pnpm lint:fix)"
+  - "Bash(pnpm format)"
+  - "Bash(pnpm format:check)"
+  - "Bash(pnpm readme*)"
+nodes:
+  - id: f-prompts
+    agent: claude
+    timeout: 2700
+    prompt: |
+      Fix code-review findings in `src/reports/prompts.ts` of this repo (Daily Diff: TypeScript, pnpm, vitest; AGENTS.md describes conventions). Background: `.scratch/digest-review-2026-10-28/code-review.md` and ticket `.scratch/digest-review-2026-10-28/issues/02-release-notes-keep-what-matters.md`.
+
+      1. `priorityFirst` (the release-notes excerpt) recognises only `#` headings. Make it also move a section opened by a bold-label line (`**Breaking changes**`, `**Breaking changes:**`, `**Security**` alone on its line) with the same `PRIORITY_HEADING_RE`, up to the next heading or bold-label line. Test it next to the existing `releaseNotes` tests.
+      2. The code-fence and HTML-tag regex pair (``/(```|~~~)[\s\S]*?(\1|$)/g`` then `/<[^>]*>/g`) is repeated in `issueBody`, `releaseNotes` and `announcementLinks`: one small helper, used by all three.
+      3. `formatItem(item, bodyChars = 300)` sits beside the named `HOT_ISSUE_BODY_CHARS`: give the default a name too (or drop the default if every caller passes one).
+      4. The `RELEASE_BODY_CHARS` comment is four sentences; the house rule is under three. Keep the token argument, shorter.
+
+      Edit only `src/reports/prompts.ts`, `src/__tests__/reports/prompts.test.ts`, and ticket 02 (append a short "Fix round (code review)" note to its Comments: what changed, tests). Do not edit AGENTS.md or anything under `digests/`. Do exactly this, existing helper first, no unrequested deps, no speculative abstraction; match the surrounding code. Run `pnpm format` before finishing. Batch independent Read/Bash calls. Budget: about 40 tool calls.
+
+  - id: f-data
+    agent: claude
+    timeout: 3600
+    prompt: |
+      Fix code-review findings on the data report's vendor feeds in this repo (Daily Diff: TypeScript, pnpm, vitest; AGENTS.md "Data engineering" describes vendor feeds, state keys and tables). Background: `.scratch/digest-review-2026-10-28/code-review.md`, tickets `.scratch/digest-review-2026-10-28/issues/09-vendor-text-keeps-features.md` and `10-bigquery-rows-show-stage.md` (read their Comments).
+
+      1. Blocking: a BigQuery note's title changed from `"<type>: <first sentence>"` to a short label with its stage, but the data state keys a note without a stage on its lowercased title + date (`stateId`, `dedupeKey` in `src/data/vendors.ts`; `digests/data-state.json` holds keys like `"feature: you can copy tables across regions.|2026-10-15"`). On the first run after merge every already-reported BigQuery note of the last 7 days would show again. Give a vendor note an optional list of state-key aliases that `asStateItem` passes through (the alias mechanism already exists for `stable_id` feeds), and have `src/data/bigquery.ts` fill it with the old `"<type>: <first sentence>"` key. Test: a state holding the old key makes the note not new.
+      2. `stageOf` in `src/data/bigquery.ts` scans the whole note, so "will be generally available …" or a note naming both a GA and a Preview feature shows "(GA)". Take the stage only from a sentence stating present availability of the note's subject (not future tense); a note with no such sentence gets no suffix. Tests for the future-tense and mixed cases.
+      3. `STAGE_PHRASE_RE`/`stageOf` in `bigquery.ts` overlap `STATUS_RE` in `vendors.ts`: share one definition where it fits without changing `vendors.ts` behavior.
+      4. `vendorText` in `src/core/rss.ts` calls `plainText(…, Number.MAX_SAFE_INTEGER)` and then truncates again: truncate once.
+      5. The `"Sections: "` prefix is written in `src/core/rss.ts` and matched by `/sections:/` in `src/data/snowflake.ts`: one exported constant for both.
+
+      Edit only `src/data/vendors.ts`, `src/data/bigquery.ts`, `src/data/snowflake.ts`, `src/core/rss.ts`, their tests in `src/__tests__/`, fixtures, and tickets 09 and 10 (append a short "Fix round (code review)" note to each one's Comments: what changed, tests, and a `Docs:` line for any AGENTS.md statement now wrong). Do not edit AGENTS.md or anything under `digests/`. Do exactly this, existing helper first, no unrequested deps, no speculative abstraction; match the surrounding code. Run `pnpm format` before finishing. Batch independent Read/Bash calls. Budget: about 50 tool calls.
+
+  - id: f-highlights-trends
+    agent: claude
+    timeout: 3600
+    prompt: |
+      Fix code-review findings in this repo (Daily Diff: TypeScript, pnpm, vitest; AGENTS.md describes conventions and the Source files table). Background: `.scratch/digest-review-2026-10-28/code-review.md` and tickets 03, 04, 07, 11, 12 in `.scratch/digest-review-2026-10-28/issues/` (read their Comments).
+
+      1. `forcedHighlightReports` (`src/reports/prompts-pages.ts`) now always includes `ai-trends`, so on six daily runs a week the highlights prompt asks for a highlight of a page that is not in its input. Force a report only when it is published in that run. `"ai-trends"` is also special-cased in four places (`trendsFigures`, `FORCED_REASON`, `forcedHighlightReports`, a block in `withFallbackHighlights`): gather the per-report rules into one place. Test: a daily run's prompt does not mention ai-trends.
+      2. `tidyTrendsSummaries` lives in `src/trending/rank.ts` ("Selection, ranking and numbering"), while the other cleanup of model row summaries, `dropInputTalk`, is in `src/reports/summarized-table.ts`, which AGENTS.md names as the home of LLM row summaries: move it there (with its tests). It has a word-overlap tokenizer (`contentWords`, `RESTATED_SENTENCE_SHARE`) like `leadWords`/`LEAD_MATCH_MIN` in `prompts-pages.ts`: one tokenizer for both.
+      3. `escapeRegex` lives in `src/reports/project-news.ts` and is imported by `src/core/github.ts`, `src/trending/rank.ts`, `src/reports/prompts-pages.ts` and `src/reports/markdown.ts`, so core depends on reports. Move it to a module under `src/core/` (an existing one if one fits) and update every importer, changing only the import lines in `github.ts` and `markdown.ts`.
+      4. `POLICY_TALK_MIN_POINTS` in `src/spotted/pool.ts` copies `TALKED_ABOUT_MIN_POINTS` value for value ("the same bar"): make it the same constant, or say in a comment why it must be able to differ.
+      5. `src/trending/skills.ts` tests `html_url.includes("/pull/")` to tell a PR, though `selectSkillsItems` already receives PRs and issues as separate lists: use the lists.
+      6. `scripts/rejudge-research.ts`: a failed Jev call keeps the old, unpenalized relevance silently ("failed, kept"). Make the script end with a non-zero exit and list the entries it could not re-judge, so the maintainer reruns it. Test it.
+
+      Edit only the files named above, their tests in `src/__tests__/`, and tickets 03, 04, 07, 11, 12 (append a short "Fix round (code review)" note to each one you change: what changed, tests, and a `Docs:` line for any AGENTS.md statement now wrong). Do not edit AGENTS.md or anything under `digests/`. Do exactly this, existing helper first, no unrequested deps, no speculative abstraction; match the surrounding code. Run `pnpm format` before finishing. Batch independent Read/Bash calls. Budget: about 60 tool calls.
+
+  - id: f-hot
+    agent: claude
+    timeout: 3600
+    depends_on: [f-prompts, f-highlights-trends]
+    prompt: |
+      Fix code-review findings on hot issues and GitHub requests in this repo (Daily Diff: TypeScript, pnpm, vitest; AGENTS.md "AI Agents" describes hot issues and their call budget). Background: `.scratch/digest-review-2026-10-28/code-review.md`, tickets `.scratch/digest-review-2026-10-28/issues/06-hot-issues-real-engagement-and-status.md` and `01-codex-releases-fetch.md` (read their Comments).
+
+      1. Blocking: bot comments and bare slash commands are excluded only when a gain is counted through the API. A gain known from the snapshot, or a new issue's whole total, keeps them for any issue past the top `HOT_ISSUE_MAX_VERIFIED` per repo or past the call cap, and `selectHotIssues` can still show such an issue. Make the rule: an issue is shown only when its gain was counted without bots and commands; an issue whose count was skipped is not shown (log the skips as the code already does for the cap). Test it.
+      2. `fetchFixStatus` reads the first 100 timeline events, oldest first; on a busy issue the fix-PR reference is past that page. Read the newest events (for example start at the page the issue's comment count implies, since the timeline holds at least every comment, and read forward to a short page), every call counted against the fix-status cap. Test with a timeline longer than one page.
+      3. `withHotIssueFacts` (`src/reports/markdown.ts`) only decorates bullets the model wrote: a hot issue the model left out gets a code-written bullet (title as the description, with the facts), as releases do with `releaseFallbackSection`. Test it.
+      4. `hotIssueFacts` writes report strings inline and prints "1 comments": move the strings to `src/core/strings.ts`, use its `plural`, and reuse `hotIssueGain`'s since/window wording instead of a copy. The `**Hot issue:**` label is written in the prompt (`src/reports/prompts.ts`) and matched by a regex in `markdown.ts`: one constant for both. `withHotIssueFacts` adds a third copy of the `g.activities.find((p) => sectionHeading(p.config.name).test(section))` lookup: one helper for all three.
+      5. Ticket 01 asked that every GitHub request have a timeout: `ensureLabel`, `createGitHubIssue` and the issue-closing loop in `src/core/github.ts` still call `fetch` without one. Give them the same `AbortSignal.timeout(FETCH_TIMEOUT_MS)`.
+      6. Names and literals in `src/core/github.ts`: `QueuedRepo.since` is now a function but keeps a date's name (rename it); remove the unexplained `const c = ctx` alias; `HOT_ISSUE_MAX_STATUS_CALLS = 66` is a literal derived from "33 repos" in prose (derive it from named values, as `HOT_ISSUE_MAX_VERIFIED` is); `per_page: "100"` in `fetchFixStatus` gets a name; the `isRetryableGet` comment is four sentences (house rule: under three).
+
+      Edit only `src/core/github.ts`, `src/reports/markdown.ts` (hot-issue rendering only), `src/core/strings.ts` (hot-issue strings only), `src/reports/prompts.ts` (the hot-issue label only), their tests in `src/__tests__/`, and tickets 01 and 06 (append a short "Fix round (code review)" note to each: what changed, tests, and a `Docs:` line for any AGENTS.md statement now wrong, including the worst-case core-call count if it moves). Do not edit AGENTS.md or anything under `digests/`. Do not move code between modules: a later step does that. Do exactly this, existing helper first, no unrequested deps, no speculative abstraction; match the surrounding code. Run `pnpm format` before finishing. Batch independent Read/Bash calls. Budget: about 70 tool calls.
+
+  - id: f-hot-review
+    agent: claude
+    reviews: f-hot
+    prompt: |
+      Check against `.scratch/digest-review-2026-10-28/code-review.md` (Spec, ticket 06 items) and AGENTS.md's hot-issues paragraph:
+      - no path can show a hot issue whose gain includes bot comments or slash commands;
+      - the fix-status lookup reads the newest timeline events, stays within its cap, and a failed or capped lookup never drops the issue or the repo's releases;
+      - a hot issue the model left out gets the code bullet, and one the model wrote is not duplicated;
+      - "1 comment" singular, and every hot-issue row has the same form;
+      - the three non-`githubGet` fetches now have a timeout;
+      - tests pin each of these.
+
+  - id: f-split
+    agent: claude
+    timeout: 2700
+    depends_on: [f-hot]
+    prompt: |
+      Move-only refactor in this repo (Daily Diff: TypeScript, pnpm, vitest; AGENTS.md "Source files" lists the modules). `src/core/github.ts` has grown past 1,100 lines; its hot-issue cluster (the hot-issue fetch, gain computation, `countHotIssues`, `selectHotIssues`, the snapshot and fix-status code, their constants and types) changes for different reasons than the releases, Skills, star-history and issue-creation code.
+
+      Move the hot-issue cluster to a new `src/core/hot-issues.ts`, and its tests from `src/__tests__/core/github.test.ts` to a new `src/__tests__/core/hot-issues.test.ts`. Change no behavior and no names; keep the shared request helpers (`githubGet`, headers, errors) in `github.ts` and import them. Update every importer (`grep -rn` for each moved export) and the AGENTS.md "Source files" table row for `src/core/github.ts` plus one new row for `src/core/hot-issues.ts`, in the table's style. The test count before and after must be equal: run `pnpm test` before you start and when you finish and compare.
+
+      Edit only `src/core/github.ts`, the new `src/core/hot-issues.ts`, importers' import lines, the two test files, and that AGENTS.md table. Run `pnpm format` before finishing. Batch independent Read/Bash calls. Budget: about 40 tool calls.
+
+  - id: integrate
+    agent: claude
+    timeout: 3000
+    depends_on: [f-prompts, f-data, f-highlights-trends, f-split]
+    test: pnpm install --frozen-lockfile --offline --silent && pnpm test && pnpm typecheck && pnpm lint && pnpm format:check && pnpm readme --check
+    prompt: |
+      This repo (Daily Diff: TypeScript, pnpm, vitest) now holds a fix round for the code review in `.scratch/digest-review-2026-10-28/code-review.md`. The fix notes are at the end of the Comments of tickets 01, 02, 03, 04, 06, 07, 09, 10, 11 and 12 in `.scratch/digest-review-2026-10-28/issues/`, each with a `Docs:` line.
+
+      1. Update AGENTS.md (and README.md or GLOSSARY.md where a statement is now wrong) to describe the current behavior, per those `Docs:` lines and by checking the code: current state only, in the file's style. In particular: replace "A BigQuery verdict id stays `<anchor>#<type>: <first sentence>`, its title before 2026-10-28" with a statement of the current rule (the verdict id and the state-key alias keep the note's `<type>: <first sentence>` form), and make the list of one-off scripts after "Report outputs" cover every file in `scripts/` in one line each (read each script's header).
+      2. Fix small mismatches between the merged changes; do not redesign any of them.
+      3. Under `## Integration notes` in `.scratch/digest-review-2026-10-28/review.md`, add a `### Fix round` list: one line per code-review finding (`code-review.md`), fixed or left with its reason.
+
+      Do not edit anything under `digests/`. Run `pnpm format` before finishing. Batch independent Read/Bash calls. Budget: about 50 tool calls.
+
+  - id: check
+    agent: shell
+    depends_on: [integrate]
+    prompt: pnpm install --frozen-lockfile --offline --silent && pnpm test && pnpm typecheck && pnpm lint && pnpm format:check && pnpm readme --check

@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import { describe, expect, it } from "vitest";
 import type { GitHubRelease } from "../../core/github.ts";
+import type { HotIssue } from "../../core/hot-issues.ts";
 import { MSG, TRENDS_REPORT } from "../../core/strings.ts";
 import {
   buildProjectReportContent,
@@ -398,6 +399,99 @@ describe("buildProjectReportContent", () => {
     expect(result.slice(toolingAt)).toContain("### DELTA\n- release");
     expect(result.slice(toolingAt)).toContain("**Quiet today:** [EPS](https://github.com/org/eps)");
   });
+
+  describe("hot issue bullets", () => {
+    const hot = (number: number, o: Partial<HotIssue> = {}): HotIssue => ({
+      number,
+      title: `Issue ${number}`,
+      state: "open",
+      user: { login: "alice" },
+      labels: [],
+      created_at: "2026-01-01T00:00:00Z",
+      updated_at: "2026-10-04T00:00:00Z",
+      comments: 16,
+      reactions: { "+1": 2 },
+      html_url: `https://github.com/org/alpha/issues/${number}`,
+      gain: 3,
+      ...o,
+    });
+    const render = (summary: string, hotIssues: HotIssue[]) =>
+      buildProjectReportContent(withAgents({ summary, activities: [makeActivity("alpha", { hotIssues })] }));
+
+    it("links the issue and appends its label, counts and gain in code (Gemini #15404, 2026-10-28)", () => {
+      const gemini = hot(15404, { labels: [{ name: "priority/p2" }, { name: "area/security" }] });
+      const result = render(
+        "## ALPHA\n- **Hot issue**: #15404: users report temp files flagged by antivirus (16 comments, +3 in 24h)",
+        [gemini],
+      );
+      expect(result).toContain(
+        "- **Hot issue:** [#15404](https://github.com/org/alpha/issues/15404): users report temp files flagged by antivirus" +
+          " (area/security; 16 comments, 2 👍; +3 in the last 24h)",
+      );
+    });
+
+    it("takes a Hot Issue label in any case, so the issue gets no second bullet", () => {
+      const result = render("## ALPHA\n- **Hot Issue:** #15404: temp files flagged by antivirus", [
+        hot(15404),
+      ]);
+      expect(result).toContain(
+        "- **Hot Issue:** [#15404](https://github.com/org/alpha/issues/15404): temp files",
+      );
+      expect(result.match(/#15404\]/g)).toHaveLength(1);
+    });
+
+    it("keeps the model's link, names the gain's date and shows the fix PR, per issue when a bullet names two", () => {
+      const result = render(
+        "## ALPHA\n- **Hot issue:** [#1](https://github.com/org/alpha/issues/1) and #2: an issue says logins fail",
+        [
+          hot(1, {
+            gainSince: "2026-10-02",
+            fix: { state: "open", number: 5, url: "https://github.com/org/alpha/pull/5" },
+          }),
+          hot(2, {
+            comments: 9,
+            reactions: { "+1": 1 },
+            gain: 10,
+            fix: { state: "merged", number: 6, url: "u6" },
+          }),
+        ],
+      );
+      expect(result).toContain(
+        "- **Hot issue:** [#1](https://github.com/org/alpha/issues/1) and [#2](https://github.com/org/alpha/issues/2): an issue says logins fail" +
+          " (#1: 16 comments, 2 👍; +3 since 2026-10-02; fix PR [#5](https://github.com/org/alpha/pull/5) open)" +
+          " (#2: 9 comments, 1 👍; +10 in the last 24h; fix [#6](u6) merged)",
+      );
+    });
+
+    it("leaves a bullet that names no hot issue as written", () => {
+      const result = render("## ALPHA\n- **Hot issue:** #99 (12 comments) users report a crash", [hot(1)]);
+      expect(result).toContain("- **Hot issue:** #99 (12 comments) users report a crash");
+    });
+
+    it("writes the bullet of a hot issue the model left out, its title as the description", () => {
+      const result = render("## ALPHA\n- **Hot issue:** #1: users report a crash", [
+        hot(1),
+        hot(2, { title: "Login loops after update", comments: 1, reactions: { "+1": 9 }, gain: 10 }),
+      ]);
+      expect(result).toContain(
+        "- **Hot issue:** [#1](https://github.com/org/alpha/issues/1): users report a crash (16 comments, 2 👍; +3 in the last 24h)\n" +
+          "- **Hot issue:** [#2](https://github.com/org/alpha/issues/2): Login loops after update (1 comment, 9 👍; +10 in the last 24h)",
+      );
+    });
+
+    it("writes the section of a project the model left out that has only a hot issue", () => {
+      const result = buildProjectReportContent(
+        withAgents({
+          summary: "## BETA\n- **News:** [a story](https://x) about beta",
+          activities: [makeActivity("alpha", { hotIssues: [hot(1)] }), makeActivity("beta")],
+        }),
+      );
+      expect(result).toContain(
+        "### ALPHA\n- **Hot issue:** [#1](https://github.com/org/alpha/issues/1): Issue 1 (16 comments, 2 👍; +3 in the last 24h)",
+      );
+      expect(result).not.toContain("[ALPHA](https://github.com/org/alpha)");
+    });
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -715,7 +809,7 @@ describe("renderPolicyTable", () => {
     stage: "Stemmen - aangenomen",
   };
 
-  it("renders one section per jurisdiction, date, source, title and stage from the data, the summary from the model", () => {
+  it("renders one section per jurisdiction, date, source, title and stage (— without one) from the data, the summary from the model", () => {
     const summaries = new Map([
       [1, "Guidelines for providers."],
       [3, "A motion passed."],
@@ -723,8 +817,8 @@ describe("renderPolicyTable", () => {
     expect(renderPolicyTable(numberRows([...items, motion]), summaries)).toBe(
       "## EU\n\n" +
         "| Date | Source | Title | Stage | Summary |\n| :--- | :--- | :--- | :--- | :--- |\n" +
-        "| 2026-10-09 | European Commission | [AI Act \\| guidelines](https://example.eu/a) |  | Guidelines for providers. |\n" +
-        "| 2026-10-08 | European Commission | [Scientific panel](https://example.eu/b) |  | — |\n\n" +
+        "| 2026-10-09 | European Commission | [AI Act \\| guidelines](https://example.eu/a) | — | Guidelines for providers. |\n" +
+        "| 2026-10-08 | European Commission | [Scientific panel](https://example.eu/b) | — | — |\n\n" +
         "## Netherlands\n\n" +
         "| Date | Source | Title | Stage | Summary |\n| :--- | :--- | :--- | :--- | :--- |\n" +
         "| 2026-10-08 | Tweede Kamer | [Motie AI](https://example.nl/m) | Stemmen - aangenomen | A motion passed. |",
@@ -1027,7 +1121,7 @@ describe("rendering conventions", () => {
     expect(at("example.com/2")).toBeLessThan(at("example.com/1"));
   });
 
-  it("writes every bullet label as **Label:**, the form releaseFallbackSection uses", () => {
+  it("writes every bullet label as **Label:**, the form projectFallbackSection uses", () => {
     const result = buildProjectReportContent({
       heading: "# AI Agents 2026-10-26",
       utcStr: "04:31",

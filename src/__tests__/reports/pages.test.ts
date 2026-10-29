@@ -27,6 +27,7 @@ import { selectVendorItems } from "../../data/relevance.ts";
 import { type DataState, fetchVendorData } from "../../data/vendors.ts";
 import { numberRows } from "../../reports/summarized-table.ts";
 import type { SpottedRow } from "../../spotted/pool.ts";
+import { selectSkillsItems } from "../../trending/skills.ts";
 
 const NO_SPOTTED = { rows: [], summaries: new Map<number, string>() };
 /** A page's `##` headings, in order. */
@@ -391,6 +392,38 @@ describe("buildTrendsReport", () => {
     expect(report?.content).toContain(`## ${TRENDS_REPORT.skillsHeading}`);
   });
 
+  it("shows a PR merged this week under Merged this week and leaves out one closed without merging", async () => {
+    const closed = (number: number, merged: boolean): GitHubItem => ({
+      ...skillPr,
+      number,
+      title: `skill-creator: change ${number}`,
+      state: "closed",
+      closed_at: "2026-10-24T00:00:00Z",
+      merged_at: merged ? "2026-10-24T00:00:00Z" : null,
+      html_url: `https://github.com/anthropics/skills/pull/${number}`,
+    });
+    const selected = selectSkillsItems(
+      { prs: [closed(1990, true), closed(1961, false)], issues: [], fetchSuccess: true },
+      new Set(),
+      new Date("2026-10-26T03:00:00Z"),
+    );
+    // The Skills call writes a bullet for every PR it is given, so a PR the selection kept shows.
+    const isSkills = (p: string) => p.includes("## Merged this week");
+    generateBody.mockReset();
+    generateBody.mockImplementation(async (p: string) =>
+      isSkills(p)
+        ? `## Merged this week\n\n${[...p.matchAll(/^#(\d+) \[\w+\]/gm)]
+            .map((m) => `- [#${m[1]}](https://github.com/anthropics/skills/pull/${m[1]}) ships it.`)
+            .join("\n")}`
+        : reply(p),
+    );
+    const content = (await build({ skills: { ...input.skills, ...selected } }))!.content;
+    const section = content.slice(content.indexOf(`## ${TRENDS_REPORT.skillsHeading}`));
+    expect(section).toContain("### Merged this week");
+    expect(section).toContain("https://github.com/anthropics/skills/pull/1990");
+    expect(content).not.toContain("1961");
+  });
+
   it("stays under 60 KB with the largest plausible inputs", async () => {
     const sentence =
       "This summary says what the row is and why it matters to developers in two sentences of plain text.";
@@ -612,6 +645,24 @@ describe("buildModelsPage", () => {
     expect(highlightsPrompt).toContain("| [Story 1](https://example.com/1) |");
   });
 
+  it("shows — for a post without page text and drops a Highlight about it (Oracle Apps, 2026-10-28)", async () => {
+    generateBody.mockReset();
+    generateBody.mockImplementation(async (prompt: string) =>
+      prompt.includes("You are the editor")
+        ? "## Highlights\n\n- Post 1 ships a guess.\n- Post 2 ships something."
+        : // Newest first: Post 2 is row 1.
+          "1: Summary two.\n2: A guess from the slug.",
+    );
+    const report = await build([site([post(1, "openai"), post(2)])], catalog());
+    const content = report!.content;
+    expect(content).toContain("| OpenAI | [Post 1](https://www.openai.com/news/p1) | — |");
+    expect(content).toContain("| Anthropic | [Post 2](https://www.anthropic.com/news/p2) | Summary two. |");
+    const highlightsPrompt = generateBody.mock.calls[1]![0] as string;
+    expect(highlightsPrompt).toContain('only a title: no Highlight for them. "Post 1"');
+    expect(content).not.toContain("Post 1 ships a guess.");
+    expect(content).toContain("- Post 2 ships something.");
+  });
+
   it("shows at most LAB_POSTS_MAX posts, newest first, then how many more came in", async () => {
     stub();
     const posts = Array.from({ length: LAB_POSTS_MAX + 2 }, (_, i) =>
@@ -779,7 +830,7 @@ describe("buildPolicyReport", () => {
 
   it("splices the code-rendered table into the prose and saves the state", async () => {
     generateBody.mockImplementation(async (prompt: string) =>
-      prompt.includes("`N: <2 sentences>`")
+      prompt.includes("`N: <1-2 sentences>`")
         ? "1: The AI Office published guidelines."
         : "## Highlights\n\nH.",
     );
@@ -789,14 +840,14 @@ describe("buildPolicyReport", () => {
     expect(report?.content).toContain("# AI Policy 2026-10-14");
     expect(report?.content).toContain(
       "H.\n\n## EU\n\n| Date | Source | Title | Stage | Summary |\n| :--- | :--- | :--- | :--- | :--- |\n" +
-        "| 2026-10-09 | European Commission | [AI Act guidelines](https://example.eu/a) |  | The AI Office published guidelines. |",
+        "| 2026-10-09 | European Commission | [AI Act guidelines](https://example.eu/a) | — | The AI Office published guidelines. |",
     );
     expect(JSON.parse(fs.readFileSync(file, "utf-8"))).toEqual({ reported: { g1: "2026-10-14" } });
   });
 
   it("reads Highlights, the jurisdictions, News & commentary, then Coming up with its window line", async () => {
     generateBody.mockImplementation(async (prompt: string) =>
-      prompt.includes("`N: <2 sentences>`") ? "1: S.\n2: N." : "## Highlights\n\nH.",
+      prompt.includes("`N: <1-2 sentences>`") ? "1: S.\n2: N." : "## Highlights\n\nH.",
     );
     const nl = { ...item, id: "nl1", jurisdiction: "nl" as const };
     const news = { ...item, id: "n1", title: "Op-ed", news: true };
@@ -833,7 +884,7 @@ describe("buildPolicyReport", () => {
 
   it("is skipped when the prose call fails, saving only the observed state", async () => {
     generateBody.mockImplementation(async (prompt: string) => {
-      if (prompt.includes("`N: <2 sentences>`")) return "1: S.";
+      if (prompt.includes("`N: <1-2 sentences>`")) return "1: S.";
       throw new Error("down");
     });
     const file = path.join(dir, "failed.json");
@@ -844,7 +895,7 @@ describe("buildPolicyReport", () => {
 
   it("is written on a day with only news, which gets its own section after the jurisdiction tables", async () => {
     generateBody.mockImplementation(async (prompt: string) =>
-      prompt.includes("`N: <2 sentences>`") ? "1: Politico reports." : "## Highlights\n\nH.",
+      prompt.includes("`N: <1-2 sentences>`") ? "1: Politico reports." : "## Highlights\n\nH.",
     );
     const news = { ...item, id: "n1", source: "Politico Europe", news: true };
     const report = await buildPolicyReport(data([news]), "00:00", "2026-10-14", path.join(dir, "news.json"));

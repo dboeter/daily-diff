@@ -6,7 +6,7 @@
  */
 
 import { fetchOk } from "../core/http.ts";
-import { vendorText } from "../core/rss.ts";
+import { SECTIONS_LABEL, vendorText } from "../core/rss.ts";
 import type { VendorNote } from "./vendors.ts";
 
 const SITE = "https://docs.snowflake.com/en";
@@ -64,6 +64,8 @@ function isBundlePointer(title: string, description: string): boolean {
   return (
     title.includes("(with behavior changes)") &&
     description
+      // vendorText's label for the post's headings.
+      .replace(SECTIONS_LABEL, "")
       .replace(/behavior change bundles?|this release contains the following|read more/gi, "")
       .replace(/[\s:.…]/g, "") === ""
   );

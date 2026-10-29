@@ -59,7 +59,10 @@ The part of a daily page holding the best community stories (Hacker News, Lobste
 _Avoid_: Discussions, Worth a Look
 
 **Also talked about**:
-The Overview's list of the day's most-discussed community stories whose topic has no page (policy, other): AI and work, security incidents, AI law in the news. Agents, models, research and data stories go to a page's Spotted instead.
+The Overview's list of the day's most-discussed community stories whose topic (`other`) has no page: AI and work, security incidents. Policy stories, AI law in the news, have their own list beside it, **Policy talk**, with its own slots. Agents, models, research and data stories go to a page's Spotted instead.
+
+**Policy talk**:
+The Overview's list of the day's most-discussed policy-topic community stories, beside Also talked about and not competing with it for slots.
 
 **Coming up**:
 The dated items of the next 30 days: AI Policy's deadlines and calendar dates, the data page's Action required dates, Stealth Model expiries. All pages' items are listed on the Overview and in the Telegram message; AI Policy also ends with its own.
@@ -83,7 +86,7 @@ A nightly, alpha, beta, release candidate, preview or canary build, whatever its
 _Avoid_: Release, preview
 
 **Hot Issue**:
-An open issue on a Tracked Project's repo that gained real engagement (comments plus 👍), or less on a regression or security issue, however old. The gain is measured against an earlier day's snapshot total, else, for an issue created in the report window, its whole total, else by counting the issue's comments and 👍 created in the window. A page shows it once.
+An open issue on a Tracked Project's repo that gained real engagement (comments plus 👍), or less on a regression or security issue, however old. The gain is the issue's comments and 👍 created in the window, counted without bots and bare slash commands; the rise since an earlier day's snapshot total, or a new issue's whole total, only caps it. A page shows it once.
 
 **News Item**:
 A community story (Hacker News, Lobste.rs, Dev.to) that names a Tracked Project, or a Tracked Project's own repo on GitHub Trending. Lab posts are not News Items.

@@ -3,7 +3,7 @@
  * and optionally resend Telegram notification.
  *
  * Usage:
- *   npx tsx scripts/regen-highlights.ts [--notify]
+ *   npx tsx scripts/regen-highlights.ts [YYYY-MM-DD] [--notify]
  *
  * Env vars:
  *   ANTHROPIC_API_KEY (or LLM_PROVIDER + matching key)
@@ -57,7 +57,7 @@ async function main() {
   console.log(`  Reports: ${Object.keys(reports).length}`);
 
   // Generate highlights. The saved data report does not say whether Jev kept a
-  // vendor item that day, so only AI Policy is forced here.
+  // vendor item that day, so only AI Policy and Trends are forced here.
   const forced = forcedHighlightReports(false);
   let highlights: ReportHighlights = {};
   try {

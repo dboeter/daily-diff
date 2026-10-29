@@ -9,6 +9,9 @@
  * the prose prompt (no summaries) and once for the report.
  */
 
+import { escapeRegex } from "../core/regex.ts";
+import type { TrendingReportData } from "../trending/rank.ts";
+
 /** A table row with its number in the report: the summaries call's `N:`. */
 export type Numbered<T> = T & { n: number };
 
@@ -87,6 +90,95 @@ export function checkCodeTokens(
     );
   }
   return checked;
+}
+
+/** A sentence about the model's input rather than the item: "The provided text does not specify …". */
+const INPUT_TALK_RE =
+  /\b(?:provided|given) (?:text|description)\b|\bthe (?:text|description) (?:does not|doesn't|did not|is empty)\b/i;
+
+/**
+ * The summaries without their sentences about the model's input, each one logged. On 2026-10-28
+ * the only AI Policy row ended "The provided text does not specify any direct implications for
+ * organisations that deploy AI." A summary left with no sentence is dropped, so its row shows
+ * the description.
+ */
+export function dropInputTalk(summaries: Map<number, string>, tag: string): Map<number, string> {
+  const kept = new Map<number, string>();
+  for (const [n, text] of summaries) {
+    const sentences = text.split(/(?<=[.!?])\s+/);
+    const rest = sentences.filter((s) => {
+      if (!INPUT_TALK_RE.test(s)) return true;
+      console.warn(`  [${tag}] row ${n}: dropped a sentence about its input: "${s}"`);
+      return false;
+    });
+    if (rest.length) kept.set(n, rest.length === sentences.length ? text : rest.join(" "));
+  }
+  return kept;
+}
+
+const STOPWORDS = new Set(
+  "a an and are as at be by for from has have in is it its of on or that the their this to was with you your yours".split(
+    " ",
+  ),
+);
+
+/**
+ * Lowercased words minus stopwords, a plural "s" cut so "agents" matches "agent", a possessive
+ * dropped and hyphenated words split, so "OpenAI's open-source" matches "OpenAI open source": the
+ * words two texts are compared by, here and for a highlight restating its page's lead (`restatesLead`).
+ */
+export function contentWords(text: string): string[] {
+  return (
+    text
+      .toLowerCase()
+      .replace(/['’]s\b/g, "")
+      .match(/[\p{L}\p{N}][\p{L}\p{N}+#]*/gu) ?? []
+  )
+    .filter((w) => !STOPWORDS.has(w))
+    .map((w) => (w.length > 3 && w.endsWith("s") ? w.slice(0, -1) : w));
+}
+
+/**
+ * The share of a later sentence's content words already in the first at which
+ * it is dropped as a restatement. On 2026-10-28 the restating second sentences
+ * scored 0.67 (pi: "among", "many" new), 1 (Proto Agent) and 1
+ * (anomalyco/opencode); 0.6 still keeps a sentence whose words are over 40% new.
+ */
+export const RESTATED_SENTENCE_SHARE = 0.6;
+
+/**
+ * Trends' row summaries with what the model repeats cut (2026-10-28: 42 of 53
+ * had a second "It …" sentence restating the first, 30 ended "in TypeScript."
+ * next to the Lang column; the prompt forbids the first and the free model
+ * ignores it): a later sentence mostly made of the first's words, then a trailing
+ * "(written) in <language>" matching a category row's Lang column. Pass the report
+ * for the Radar and category summaries, none for Hugging Face's.
+ */
+export function tidyTrendsSummaries(
+  summaries: Map<number, string>,
+  report?: Pick<TrendingReportData, "categories">,
+): Map<number, string> {
+  const languages = new Map(
+    (report?.categories ?? []).flatMap((g) => g.rows.flatMap((r) => (r.language ? [[r.n, r.language]] : []))),
+  );
+  return new Map(
+    [...summaries].map(([n, line]) => {
+      const [first = "", ...rest] = line.split(/(?<=[.!?])\s+(?=\p{Lu})/u);
+      const firstWords = new Set(contentWords(first));
+      const kept = rest.filter((s) => {
+        const words = contentWords(s);
+        return words.filter((w) => firstWords.has(w)).length < RESTATED_SENTENCE_SHARE * words.length;
+      });
+      let text = [first, ...kept].join(" ");
+      const language = languages.get(n);
+      if (language) {
+        // Not after "is" or "written": "Foo is written in Rust." would become "Foo is.".
+        const suffix = `(?<!\\b(?:is|are|was|written)),?\\s+(?:written\\s+)?in\\s+${escapeRegex(language)}(?=[.!]?$)`;
+        text = text.replace(new RegExp(suffix, "i"), "");
+      }
+      return [n, text];
+    }),
+  );
 }
 
 // ---------------------------------------------------------------------------

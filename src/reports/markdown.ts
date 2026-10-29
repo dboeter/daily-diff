@@ -11,7 +11,7 @@ import {
   type ProjectActivity,
 } from "./prompts.ts";
 import type { ReleaseRow } from "./pages.ts";
-import { escapeRegex } from "./project-news.ts";
+import { escapeRegex } from "../core/regex.ts";
 import {
   formatTokens,
   type OpenRouterModel,
@@ -29,6 +29,7 @@ import type { StoryRow } from "../spotted/pool.ts";
 import type { ResearchPaper } from "../trending/research.ts";
 import type { Category } from "../trending/rank.ts";
 import type { RepoConfig } from "../core/github.ts";
+import { hotIssueLabel, type HotIssue } from "../core/hot-issues.ts";
 import {
   AGENT_SECTION_KEYS,
   VENDOR_SECTIONS,
@@ -39,6 +40,7 @@ import {
 import { checkCodeTokens, summaryText, type Numbered } from "./summarized-table.ts";
 import {
   GOING_AWAY,
+  HOT_ISSUE,
   LIVE_REPORT_IDS,
   MSG,
   nothingNew,
@@ -138,9 +140,20 @@ function releaseBullet(a: ProjectActivity): string {
   return `- **Release:** ${link}${items.length ? `: ${items.join("; ")}` : ""}`;
 }
 
-/** The code-written section of a project with a stable release the model left without a bullet. */
-export const releaseFallbackSection = (a: ProjectActivity): string =>
-  `## ${a.config.name}\n${releaseBullet(a)}`;
+/**
+ * The code-written section of a project with a stable release or a hot issue the model left
+ * without a bullet: its Release bullet and its Hot issue bullets.
+ */
+const projectFallbackSection = (a: ProjectActivity): string =>
+  [
+    `## ${a.config.name}`,
+    ...(a.releases.length ? [releaseBullet(a)] : []),
+    ...a.hotIssues.map(hotIssueBullet),
+  ].join("\n");
+
+/** The project whose `## <name>` heads the section. */
+const projectOf = (section: string, g: ProjectGroup): ProjectActivity | undefined =>
+  g.activities.find((p) => sectionHeading(p.config.name).test(section));
 
 /**
  * Whether a normalized section (`boldLabelColonInside`) shows the project's release: a
@@ -152,22 +165,77 @@ const showsRelease = (section: string, a: ProjectActivity): boolean =>
 
 /** A covered section of a project with a stable release, with the Release bullet the model left out appended. */
 function withReleaseBullet(section: string, g: ProjectGroup): string {
-  const a = g.activities.find((p) => sectionHeading(p.config.name).test(section));
+  const a = projectOf(section, g);
   return a && a.releases.length > 0 && !showsRelease(section, a)
     ? `${section}\n${releaseBullet(a)}`
     : section;
 }
 
 /**
- * A bullet's bold label in one form, the colon inside (`**Release:**`), as releaseFallbackSection
+ * A bullet's bold label in one form, the colon inside (`**Release:**`), as projectFallbackSection
  * writes it: the prompt lists `**Release**:` and models copy either form (2026-10-25 vs 10-26).
  */
 export const boldLabelColonInside = (md: string): string =>
   md.replace(/^(\s*[-*]\s+)\*\*([^*\n]+?)\*\*:/gm, "$1**$2:**");
 
+/**
+ * A hot issue's facts in one form, written by code: the regression or security label it qualified
+ * on, its totals, its gain and its fix PR. On 2026-10-28 the model wrote a different count
+ * parenthetical on every row and left out Gemini #15404's `area/security`.
+ */
+function hotIssueFacts(i: HotIssue): string {
+  const fix = i.fix && HOT_ISSUE.fix(i.fix.state, `[#${i.fix.number}](${i.fix.url})`);
+  return [
+    hotIssueLabel(i),
+    HOT_ISSUE.totals(i.comments, i.reactions?.["+1"] ?? 0),
+    HOT_ISSUE.gain(i.gain, i.gainSince),
+    fix,
+  ]
+    .filter(Boolean)
+    .join("; ");
+}
+
+/** The code-written Hot issue bullet of a hot issue the model left out: its title as the description. */
+const hotIssueBullet = (i: HotIssue): string =>
+  `- **${HOT_ISSUE.label}:** [#${i.number}](${i.html_url}): ${i.title} (${hotIssueFacts(i)})`;
+
+/** A Hot issue bullet, its label normalized by `boldLabelColonInside`, in any case ("Hot Issue"). */
+const HOT_ISSUE_BULLET = new RegExp(`^\\s*[-*]\\s+\\*\\*${escapeRegex(HOT_ISSUE.label)}:\\*\\*`, "i");
+
+/** A parenthetical the model wrote with counts or a gain: "(16 comments, +3 in 24h)". */
+const MODEL_COUNTS = /\s*\((?=[^()\n]*(?:\bcomments?\b|👍|\breactions?\b|\+\d+\s+(?:in|since)\b))[^()\n]*\)/g;
+
+/**
+ * A section's Hot issue bullets with code's facts: each bullet naming one of the project's hot
+ * issues (`#N` or its URL) gets the issue linked where the model left it bare, any counts the model
+ * wrote dropped, and `hotIssueFacts` appended, prefixed by the number when the bullet names several.
+ * A hot issue no bullet names gets a code-written one (`hotIssueBullet`).
+ */
+function withHotIssueFacts(section: string, g: ProjectGroup): string {
+  const a = projectOf(section, g);
+  if (!a?.hotIssues.length) return section;
+  const shown = new Set<HotIssue>();
+  const lines = section.split("\n").map((line) => {
+    if (!HOT_ISSUE_BULLET.test(line)) return line;
+    const named = a.hotIssues.filter((i) => new RegExp(`(?:#|/issues/)${i.number}(?!\\d)`).test(line));
+    if (!named.length) return line;
+    for (const i of named) shown.add(i);
+    let text = line.replace(MODEL_COUNTS, "").trimEnd();
+    for (const i of named) {
+      if (!text.includes(`/issues/${i.number}`)) {
+        text = text.replace(new RegExp(`#${i.number}(?!\\d)`), `[#${i.number}](${i.html_url})`);
+      }
+    }
+    const facts = named.map((i) => `(${named.length > 1 ? `#${i.number}: ` : ""}${hotIssueFacts(i)})`);
+    return `${text} ${facts.join(" ")}`;
+  });
+  const missing = a.hotIssues.filter((i) => !shown.has(i)).map(hotIssueBullet);
+  return [...lines, ...missing].join("\n");
+}
+
 /** A model-written project section with its backticked tokens checked against that project's prompt block. */
 function checkProjectTokens(section: string, g: ProjectGroup): string {
-  const a = g.activities.find((p) => sectionHeading(p.config.name).test(section));
+  const a = projectOf(section, g);
   if (!a) return section;
   return checkCodeTokens(new Map([[0, section]]), new Map([[0, formatProject(a)]]), g.title).get(0)!;
 }
@@ -175,8 +243,9 @@ function checkProjectTokens(section: string, g: ProjectGroup): string {
 /**
  * A group's projects as rendered: the model's summary without text outside a `##` section and
  * without a project section that has no bullet (both are absence notes the prompt forbids), plus a
- * code section for each project with a stable release the model did not cover, and a code Release
- * bullet appended to a covered section that does not show its release. Each project
+ * code section for each project with a stable release or a hot issue the model did not cover, and a
+ * code Release bullet appended to a covered section that does not show its release, and each Hot
+ * issue bullet with its facts in code, a missing one code-written (`withHotIssueFacts`). Each project
  * section's backticked tokens are checked against the project's block in the prompt
  * (`checkCodeTokens`). `quiet` is every other checked project without a section; after a failed
  * call (MSG.summaryFailed) the data decides.
@@ -184,7 +253,9 @@ function checkProjectTokens(section: string, g: ProjectGroup): string {
 function groupProjects(g: ProjectGroup): { body: string; quiet: ProjectActivity[] } {
   const failed = g.summary.trim() === MSG.summaryFailed;
   const covered = g.activities.filter((a) => covers(g.summary, a));
-  const fallback = g.activities.filter((a) => a.releases.length > 0 && !covered.includes(a));
+  const fallback = g.activities.filter(
+    (a) => (a.releases.length > 0 || a.hotIssues.length > 0) && !covered.includes(a),
+  );
   const kept = failed
     ? [g.summary.trim()]
     : g.summary
@@ -194,8 +265,13 @@ function groupProjects(g: ProjectGroup): { body: string; quiet: ProjectActivity[
           (chunk) =>
             !g.activities.some((a) => sectionHeading(a.config.name).test(chunk) && !covers(chunk, a)),
         )
-        .map((chunk) => withReleaseBullet(boldLabelColonInside(checkProjectTokens(chunk.trim(), g)), g));
-  const body = [...kept, ...fallback.map(releaseFallbackSection)].filter(Boolean).join("\n\n");
+        .map((chunk) =>
+          withHotIssueFacts(
+            withReleaseBullet(boldLabelColonInside(checkProjectTokens(chunk.trim(), g)), g),
+            g,
+          ),
+        );
+  const body = [...kept, ...fallback.map(projectFallbackSection)].filter(Boolean).join("\n\n");
   const active = failed ? g.activities.filter(hasActivity) : [...covered, ...fallback];
   return { body, quiet: g.activities.filter((a) => !active.includes(a) && !a.fetchFailed) };
 }
@@ -551,7 +627,7 @@ export function renderPolicyTable(
   const sections = Object.entries(POLICY_REPORT.headings).map(([jurisdiction, heading]) => {
     const rows = items
       .filter((it) => !it.news && it.jurisdiction === jurisdiction)
-      .map((it) => `${lead(it)}${cell(it.stage ?? "")} | ${cell(summaryText(summaries, it))} |`);
+      .map((it) => `${lead(it)}${cell(it.stage || "—")} | ${cell(summaryText(summaries, it))} |`);
     return rows.length ? `## ${heading}\n\n${POLICY_REPORT.tableHeader}\n${rows.join("\n")}` : "";
   });
   const newsRows = items

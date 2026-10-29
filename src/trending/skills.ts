@@ -50,19 +50,24 @@ export function isAudienceSkillsItem(item: GitHubItem): boolean {
 }
 
 /**
- * The items updated in the last SKILLS_WINDOW_DAYS whose title is in the audience's reach. A closed item is kept only when it closed (or
- * merged: GitHub sets `closed_at` then too) in the window, so a comment on a PR closed months ago
- * does not put it under "Closed this week". One last week's page showed is kept only when it closed
- * in the window: its state changed.
+ * The items updated in the last SKILLS_WINDOW_DAYS whose title is in the audience's reach. A closed issue is kept only when it
+ * closed in the window, a closed PR only when it merged in it, so a comment on a PR closed months ago
+ * does not put it under "Merged this week". A PR closed without merging is left out: the model read
+ * rejected PRs as shipped (2026-10-28: all 7 "closed" PRs were unmerged). One last week's page showed
+ * is kept only when it closed in the window: its state changed.
  */
 export function selectSkillsItems(data: SkillsData, shown: Set<number>, now: Date): SkillsData {
   const since = now.getTime() - SKILLS_WINDOW_DAYS * DAY_MS;
   const inWindow = (iso: string | null | undefined) => !!iso && Date.parse(iso) >= since;
-  const closedThisWeek = (i: GitHubItem) => inWindow(i.closed_at);
-  const keep = (i: GitHubItem) =>
-    inWindow(i.updated_at) &&
-    isAudienceSkillsItem(i) &&
-    (i.state !== "closed" || closedThisWeek(i)) &&
-    (!shown.has(i.number) || closedThisWeek(i));
-  return { ...data, prs: data.prs.filter(keep), issues: data.issues.filter(keep) };
+  // Issues have no `merged_at`; GitHub sets a merged PR's `closed_at` too, so `merged_at` alone decides a PR.
+  const keep = (isPr: boolean) => (i: GitHubItem) => {
+    const closedThisWeek = inWindow(isPr ? i.merged_at : i.closed_at);
+    return (
+      inWindow(i.updated_at) &&
+      isAudienceSkillsItem(i) &&
+      (i.state !== "closed" || closedThisWeek) &&
+      (!shown.has(i.number) || closedThisWeek)
+    );
+  };
+  return { ...data, prs: data.prs.filter(keep(true)), issues: data.issues.filter(keep(false)) };
 }

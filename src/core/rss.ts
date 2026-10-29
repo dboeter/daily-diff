@@ -56,26 +56,45 @@ export function tagText(xml: string, tag: string): string {
  */
 const DRUPAL_BYLINE_RE = /^.*?Anonymous \(not verified\) \w{3}, \d{2}\/\d{2}\/\d{4} - \d{2}:\d{2}\s*/;
 
-/** HTML to plain text: tags stripped, entities decoded, whitespace collapsed, truncated. */
-export function plainText(html: string, maxChars = DESCRIPTION_MAX_CHARS): string {
-  const text = decodeEntities(html.replace(/<[^>]*>/g, " "))
+/** HTML to plain text: tags stripped, entities decoded, whitespace collapsed. */
+const untruncatedText = (html: string): string =>
+  decodeEntities(html.replace(/<[^>]*>/g, " "))
     .replace(/\s+/g, " ")
     .trim()
     .replace(DRUPAL_BYLINE_RE, "");
-  return text.length > maxChars ? `${text.slice(0, maxChars)}…` : text;
+
+const truncate = (text: string, maxChars: number): string =>
+  text.length > maxChars ? `${text.slice(0, maxChars)}…` : text;
+
+/** HTML to plain text: tags stripped, entities decoded, whitespace collapsed, truncated. */
+export function plainText(html: string, maxChars = DESCRIPTION_MAX_CHARS): string {
+  return truncate(untruncatedText(html), maxChars);
 }
 
 /** The data report's vendor notes; Fabric's descriptions are whole posts (up to ~12 KB). */
 export const VENDOR_DESCRIPTION_MAX_CHARS = 1000;
 
+const HEADING_RE = /<h([2-4])\b[^>]*>([\s\S]*?)<\/h\1>/gi;
+
+/** What opens a vendor description that lists its post's headings (vendorText). */
+export const SECTIONS_LABEL = "Sections: ";
+
 /**
  * plainText for the vendor parsers, without the space it leaves before
- * punctuation where a tag closed ("<a>regions</a>." → "regions .").
+ * punctuation where a tag closed ("<a>regions</a>." → "regions ."). A post
+ * with `<h2>`–`<h4>` headings opens with them ("Sections: A; B. …"), so
+ * every feature of a multi-feature post survives the cut: the Fabric gateway
+ * post's one new capability was a heading ~1,600 chars in (2026-10-28).
  */
-export const vendorText = (html: string, maxChars = VENDOR_DESCRIPTION_MAX_CHARS): string =>
-  plainText(html, maxChars).replace(/ ([,;:.])/g, "$1");
+export function vendorText(html: string, maxChars = VENDOR_DESCRIPTION_MAX_CHARS): string {
+  const headings = [...html.matchAll(HEADING_RE)].map(([, , h]) => untruncatedText(h!)).filter(Boolean);
+  const body = untruncatedText(html.replace(HEADING_RE, " "));
+  const text = headings.length ? `${SECTIONS_LABEL}${headings.join("; ")}. ${body}` : body;
+  return truncate(text, maxChars).replace(/ ([,;:.])/g, "$1");
+}
 
-export function parseRssItems(xml: string, maxChars = DESCRIPTION_MAX_CHARS): FeedItem[] {
+/** `toText` turns an item's description HTML into its `description` (vendor feeds: vendorText). */
+export function parseRssItems(xml: string, toText: (html: string) => string = plainText): FeedItem[] {
   return [...xml.matchAll(/<item(?:\s[^>]*)?>([\s\S]*?)<\/item>/g)].map(([, body]) => {
     const link = tagText(body!, "link");
     const date = Date.parse(tagText(body!, "pubDate"));
@@ -88,7 +107,7 @@ export function parseRssItems(xml: string, maxChars = DESCRIPTION_MAX_CHARS): Fe
       link,
       published: Number.isFinite(date) ? new Date(date).toISOString() : "",
       // Description HTML arrives entity-encoded: tagText decodes it to HTML, plainText strips it.
-      description: plainText(tagText(body!, "description"), maxChars),
+      description: toText(tagText(body!, "description")),
       ...(categories.length ? { categories } : {}),
     };
   });
@@ -101,6 +120,9 @@ export function recentNewsItems(items: FeedItem[], now: Date): FeedItem[] {
 }
 
 /** Fetch and parse a feed. Throws on HTTP errors and after http.ts's FETCH_TIMEOUT_MS. */
-export async function fetchRssFeed(url: string, maxChars = DESCRIPTION_MAX_CHARS): Promise<FeedItem[]> {
-  return parseRssItems(await (await fetchOk(url)).text(), maxChars);
+export async function fetchRssFeed(
+  url: string,
+  toText: (html: string) => string = plainText,
+): Promise<FeedItem[]> {
+  return parseRssItems(await (await fetchOk(url)).text(), toText);
 }
