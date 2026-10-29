@@ -13,7 +13,453 @@
       <height>144</height>
     </image>
     <atom:link href="https://dboeter.github.io/daily-diff/feed.xml" rel="self" type="application/rss+xml"/>
-    <lastBuildDate>Wed, 28 Oct 2026 05:29:16 +0000</lastBuildDate>
+    <lastBuildDate>Thu, 29 Oct 2026 05:38:25 +0000</lastBuildDate>
+    <item>
+      <title>AI Agents 2026-10-29</title>
+      <link>https://dboeter.github.io/daily-diff/#2026-10-29/ai-agents</link>
+      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-10-29/ai-agents</guid>
+      <pubDate>Thu, 29 Oct 2026 00:00:00 +0000</pubDate>
+      <description>AI Agents 2026-10-29 ⬛ Overview · 🟪 AI Agents · 🟦 AI Models &amp;amp; Labs · 🟧 AI Policy · 🟨 Data Engineering Projects: 16 | Active today: 5 | Stable releases: 4 | Prereleases (not covered): 9 | Generated: 2026-10-29 05:34 UTC Highlights Anthropic introduces CLAUDE_CODE_EVEN_MORE_DANGEROUSLY_SKIP_PERMISSIONS flag letting Claude Code users bypass all permission prompts entirely Gemini CLI --yolo mode repeatedly halts with “CRITICAL SECURITY WARNING” on project temp dirs, workspace scripts, and ho...</description>
+      <content:encoded><![CDATA[<h1>AI Agents 2026-10-29</h1>
+<p><a href="https://dboeter.github.io/daily-diff/#2026-10-29">⬛ Overview</a> · <strong>🟪 AI Agents</strong> · <a href="https://dboeter.github.io/daily-diff/#2026-10-29/ai-models">🟦 AI Models &amp; Labs</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-29/ai-policy">🟧 AI Policy</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-29/ai-data">🟨 Data Engineering</a></p>
+<blockquote>
+<p>Projects: 16 | Active today: 5 | Stable releases: 4 | Prereleases (not covered): 9 | Generated: 2026-10-29 05:34 UTC</p>
+</blockquote>
+<hr>
+<h2>Highlights</h2>
+<ul>
+<li>Anthropic introduces <code>CLAUDE_CODE_EVEN_MORE_DANGEROUSLY_SKIP_PERMISSIONS</code> flag letting Claude Code users bypass all permission prompts entirely</li>
+<li>Gemini CLI <code>--yolo</code> mode repeatedly halts with “CRITICAL SECURITY WARNING” on project temp dirs, workspace scripts, and home paths; <code>findUntrustedFlags</code> lacks a settings toggle to suppress it</li>
+<li>OpenCode v2.2.1 adds <code>/goal</code> command to keep sessions working toward an objective until reviewer confirmation and experimental image generation via <code>experimental.image_generate</code></li>
+</ul>
+<hr>
+<h2>Coding Agents &amp; Assistants</h2>
+<h3>Claude Code</h3>
+<ul>
+<li><strong>Hot issue:</strong> In v2.1.150 on WSL, the mouse scroll wheel sends arrow keys instead of scrolling conversation output, cycling through input history; regression since previous version. <a href="https://github.com/anthropics/claude-code/issues/65833">#65833</a></li>
+<li><strong>News:</strong> A Bun preload script disables <code>agent_summary</code> and cuts ~15–20% token overhead from the status line, showing the feature burns significant context. <a href="https://news.ycombinator.com/item?id=50284255">Hacker News</a></li>
+</ul>
+<h3>Gemini CLI</h3>
+<ul>
+<li><strong>Hot issue:</strong> <code>--yolo</code> mode repeatedly halts with “CRITICAL SECURITY WARNING: Untrusted Command Flags Detected” on project temp dirs, workspace <code>.sh</code> scripts, and <code>~/</code> paths; <code>findUntrustedFlags</code> lacks a settings toggle to suppress it. <a href="https://github.com/google-gemini/gemini-cli/issues/30004">#30004</a></li>
+</ul>
+<h3>OpenCode</h3>
+<ul>
+<li><strong>Release:</strong> <a href="https://github.com/anomalyco/opencode/releases/tag/v2.2.1">v2.2.1</a> adds <code>/goal</code> command to keep sessions working toward an objective until reviewer confirmation, and experimental image generation via <code>experimental.image_generate</code>; <a href="https://github.com/anomalyco/opencode/releases/tag/v1.19.5">v1.19.5</a> fixes failed TUI worker requests returning errors instead of hanging; <a href="https://github.com/anomalyco/opencode/releases/tag/process-daemon-v0.3.2">process-daemon-v0.3.2</a> updates the PTY protocol to v7.</li>
+</ul>
+<h3>Oh My Pi</h3>
+<ul>
+<li><strong>Release:</strong> <a href="https://github.com/can1357/oh-my-pi/releases/tag/v18.13.3">v18.13.3</a> raises Bun engine requirement to ≥1.4.4 and fixes chat-completion context estimates that incorrectly counted dropped thinking tokens, preventing premature compaction.</li>
+</ul>
+<h3>Hermes Agent</h3>
+<ul>
+<li><strong>Hot issue:</strong> In multiplexed gateway mode, mid-turn progress and background-review notices from secondary profiles (e.g., <code>yori</code>) are delivered to the primary profile’s Telegram bot instead of their own, cross-contaminating streams across four bots. <a href="https://github.com/NousResearch/hermes-agent/issues/143364">#143364</a></li>
+</ul>
+<p><strong>Quiet today:</strong> <a href="https://github.com/Kilo-Org/kilocode">Kilo Code</a>, <a href="https://github.com/earendil-works/pi">Pi</a>, <a href="https://github.com/1jehuang/jcode">jcode</a>, <a href="https://github.com/cline/cline">Cline</a>, <a href="https://github.com/CommandCodeAI/command-code">Command Code</a>, <a href="https://github.com/deepseek-ai/deepseek-harness">DeepSeek Harness</a></p>
+<p><strong>Unavailable today:</strong> <a href="https://github.com/openai/codex">OpenAI Codex</a></p>
+<hr>
+<h2>Agent Tooling</h2>
+<p><strong>Quiet today:</strong> <a href="https://github.com/NVIDIA/OpenShell">OpenShell</a>, <a href="https://github.com/herdrdev/herdr">herdr</a>, <a href="https://github.com/mksglu/context-mode">context-mode</a>, <a href="https://github.com/asheshgoplani/agent-deck">Agent Deck</a></p>
+<hr>
+<h2>Spotted</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Story</th>
+<th align="left">Source</th>
+<th align="left">Discussion</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a href="https://cursor.com/blog/agent-sdk">The Agent SDK</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50273731">110 points, 116 comments</a></td>
+<td align="left">Cursor&#39;s Agent SDK framework lets developers define managed agents like Bugbot, Security Reviewer, and Rollouts in code and deploy them with a single command.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://www.theregister.com/ai-and-ml/2026/10/27/anthropic-now-lets-claude-users-jump-out-of-plane-without-parachute/5305807">Anthropic now lets Claude users jump out of plane without parachute</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50274666">8 points, 2 comments</a></td>
+<td align="left">Anthropic introduces a CLAUDE_CODE_EVEN_MORE_DANGEROUSLY_SKIP_PERMISSIONS flag that lets Claude Code users bypass permission prompts entirely.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://www.cirkit.us/demo/">Show HN: Cirkit – Annotate, Trace, and Ask AI About Schematic PDFs</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50268880">4 points, 2 comments</a></td>
+<td align="left">Cirkit converts schematic PDFs into collaborative hardware workspaces with BOM-aware parts, searchable notes, live equations, and an AI that reads the page.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://surgehq.ai/blog/dayjob-tax">Dayjob: Tax – evaluating AI agents on 50 professional tax assignments</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50275626">219 points, 141 comments</a></td>
+<td align="left">SurgeHQ&#39;s DAYJOB: Tax benchmark evaluates AI agents across 50 realistic tax assignments testing professional judgment and messy record navigation.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://dev.to/anis_meziani_52aab42304a8/how-to-cut-your-ai-agents-input-tokens-what-worked-what-failed-and-a-bench-to-measure-yours-f90">How to cut your AI agent&#39;s input tokens: what worked, what failed, and a bench to measure yours</a></td>
+<td align="left">Dev.to</td>
+<td align="left"><a href="https://dev.to/anis_meziani_52aab42304a8/how-to-cut-your-ai-agents-input-tokens-what-worked-what-failed-and-a-bench-to-measure-yours-f90">16 reactions, 11 comments</a></td>
+<td align="left">The author reports their AI agent consumed 17,000 tokens before reading any input, sharing a 7-point checklist and open-source benchmark for reducing token usage.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://dev.to/kenwalger/four-ways-a-test-can-lie-to-you-2ibf">Four Ways a Test Can Lie to You</a></td>
+<td align="left">Dev.to</td>
+<td align="left"><a href="https://dev.to/kenwalger/four-ways-a-test-can-lie-to-you-2ibf">15 reactions, 10 comments</a></td>
+<td align="left">The author describes four ways tests can be misleading after verifying a small application where an AI agent wrote most of the code.</td>
+</tr>
+</tbody></table>
+<hr>
+<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
+]]></content:encoded>
+    </item>
+    <item>
+      <title>AI Models &amp; Labs 2026-10-29</title>
+      <link>https://dboeter.github.io/daily-diff/#2026-10-29/ai-models</link>
+      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-10-29/ai-models</guid>
+      <pubDate>Thu, 29 Oct 2026 00:00:00 +0000</pubDate>
+      <description>AI Models &amp;amp; Labs 2026-10-29 ⬛ Overview · 🟪 AI Agents · 🟦 AI Models &amp;amp; Labs · 🟧 AI Policy · 🟨 Data Engineering Lab posts: 2 | New models: 1 | Spotted: 4 | Generated: 2026-10-29 05:34 UTC Highlights Particle-1 is listed on OpenRouter with a 1M-context window; it is a token-efficient agentic coding model post-trained on DeepSeek V4.1 Flash, suited for software engineering work. Google announced Gemini 4 Carbon as its strongest model, featuring state-of-the-art cybersecurity and long-hori...</description>
+      <content:encoded><![CDATA[<h1>AI Models &amp; Labs 2026-10-29</h1>
+<p><a href="https://dboeter.github.io/daily-diff/#2026-10-29">⬛ Overview</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-29/ai-agents">🟪 AI Agents</a> · <strong>🟦 AI Models &amp; Labs</strong> · <a href="https://dboeter.github.io/daily-diff/#2026-10-29/ai-policy">🟧 AI Policy</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-29/ai-data">🟨 Data Engineering</a></p>
+<blockquote>
+<p>Lab posts: 2 | New models: 1 | Spotted: 4 | Generated: 2026-10-29 05:34 UTC</p>
+</blockquote>
+<hr>
+<h2>Highlights</h2>
+<ul>
+<li>Particle-1 is listed on OpenRouter with a 1M-context window; it is a token-efficient agentic coding model post-trained on DeepSeek V4.1 Flash, suited for software engineering work.</li>
+<li>Google announced Gemini 4 Carbon as its strongest model, featuring state-of-the-art cybersecurity and long-horizon capabilities.</li>
+<li>Artificial Analysis released Intelligence Index v5 with two new benchmarks and three upgrades; most of the index is built on private datasets for the first time.</li>
+</ul>
+<hr>
+<h2>Lab announcements</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Lab</th>
+<th align="left">Post</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-10-29</td>
+<td align="left">OpenAI</td>
+<td align="left"><a href="https://openai.com/index/openai-servicenow-partnership-expansion/">Openai Servicenow Partnership Expansion</a></td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left">2026-10-28</td>
+<td align="left">Anthropic</td>
+<td align="left"><a href="https://www.anthropic.com/news/ai-for-science-expands-foundations-research-institutions">AI for Science expands to foundations and institutions</a></td>
+<td align="left">Anthropic expanded its AI for Science program to partner with 20 scientific foundations, institutions, and research groups worldwide, giving free Claude credits to researchers working on high-impact scientific projects.</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>New on OpenRouter</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Model</th>
+<th align="left">Listed</th>
+<th align="left">Context</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a href="https://openrouter.ai/particle-ai/particle-1">Particle AI: Particle-1</a> <code>particle-ai/particle-1</code></td>
+<td align="left">2026-10-28</td>
+<td align="left">1M</td>
+<td align="left">Particle-1 is a token-efficient agentic coding model post-trained on DeepSeek V4.1 Flash, suited for software engineering work such as terminal workflows, codebase changes, and data tasks.</td>
+</tr>
+</tbody></table>
+<hr>
+<p>Nothing new from OpenRouter&#39;s stealth models today.</p>
+<hr>
+<h2>Spotted</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Story</th>
+<th align="left">Source</th>
+<th align="left">Discussion</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a href="https://blog.google/innovation-and-ai/models-and-research/gemini-models/introducing-gemini-4-carbon/">Gemini 4 Carbon</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50276792">859 points, 712 comments</a></td>
+<td align="left">Google announces Gemini 4 Carbon as their strongest model featuring state-of-the-art cybersecurity and long-horizon capabilities.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://artificialanalysis.ai/articles/artificial-analysis-intelligence-index-v5">Artificial Analysis Intelligence Index v5</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50268868">92 points, 82 comments</a></td>
+<td align="left">Artificial Analysis releases Intelligence Index v5 with 2 new benchmarks, 3 upgrades, and a majority of the index built on private datasets for the first time.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://research.google/blog/the-sleep-framework-a-new-way-for-llms-to-retain-knowledge-in-continual-learning/">Sleep framework: A new way for LLMs to retain knowledge in continual learning</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50272479">43 points, 3 comments</a></td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left"><a href="https://particle.ai/blog/introducing-particle-1">Particle-1</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50277764">16 points, 4 comments</a></td>
+<td align="left">Particle.ai introduces Particle-1, their first model trained specifically for token efficiency to deliver more work per token.</td>
+</tr>
+</tbody></table>
+<hr>
+<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
+]]></content:encoded>
+    </item>
+    <item>
+      <title>AI Policy 2026-10-29</title>
+      <link>https://dboeter.github.io/daily-diff/#2026-10-29/ai-policy</link>
+      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-10-29/ai-policy</guid>
+      <pubDate>Thu, 29 Oct 2026 00:00:00 +0000</pubDate>
+      <description>AI Policy 2026-10-29 ⬛ Overview · 🟪 AI Agents · 🟦 AI Models &amp;amp; Labs · 🟧 AI Policy · 🟨 Data Engineering Sources: Open States + Binnenlands Bestuur | 2 new items ranked by Jev relevance | Generated: 2026-10-29 05:34 UTC Highlights New York has enacted Senate Bill 9051, prohibiting AI companions from using features deemed unsafe for minors, marking a new state-level restriction on specific AI product designs. In the Netherlands, a new government handreiking published by Binnenlands Bestuur a...</description>
+      <content:encoded><![CDATA[<h1>AI Policy 2026-10-29</h1>
+<p><a href="https://dboeter.github.io/daily-diff/#2026-10-29">⬛ Overview</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-29/ai-agents">🟪 AI Agents</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-29/ai-models">🟦 AI Models &amp; Labs</a> · <strong>🟧 AI Policy</strong> · <a href="https://dboeter.github.io/daily-diff/#2026-10-29/ai-data">🟨 Data Engineering</a></p>
+<blockquote>
+<p>Sources: Open States + Binnenlands Bestuur | 2 new items ranked by <a href="https://typesafe.ai">Jev</a> relevance | Generated: 2026-10-29 05:34 UTC</p>
+</blockquote>
+<hr>
+<h2>Highlights</h2>
+<p>New York has enacted Senate Bill 9051, prohibiting AI companions from using features deemed unsafe for minors, marking a new state-level restriction on specific AI product designs. In the Netherlands, a new government handreiking published by Binnenlands Bestuur aims to help municipalities jointly scale successful AI applications, signaling a push for standardized public-sector AI deployment that may shape broader governance expectations.</p>
+<h2>US states</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Source</th>
+<th align="left">Title</th>
+<th align="left">Stage</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-10-28</td>
+<td align="left">Open States</td>
+<td align="left"><a href="https://openstates.org/ny/bills/2025-2026/S9051/">New York S 9051: Prohibits artificial intelligence companions from using features which are considered unsafe for minors</a></td>
+<td align="left">Enacted</td>
+<td align="left">New York bill S 9051 has been enacted, prohibiting AI companions from using features considered unsafe for minors. Organisations deploying AI companions in New York must avoid such features to comply.</td>
+</tr>
+</tbody></table>
+<h2>News &amp; commentary</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Source</th>
+<th align="left">Title</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-10-28</td>
+<td align="left">Binnenlands Bestuur</td>
+<td align="left"><a href="https://www.binnenlandsbestuur.nl/digitaal/handreiking-moet-gemeenten-helpen-met-ai-toepassingen">Nieuwe handreiking moet gemeenten helpen AI-toepassingen op te schalen</a></td>
+<td align="left">A new guideline offers a step-by-step plan for scaling AI applications and identifies obstacles, aimed at municipalities and government bodies. Organisations deploying AI can use this guidance to inform their own scaling efforts.</td>
+</tr>
+</tbody></table>
+<h2>Coming up</h2>
+<p>Deadlines and dates in the next 30 days.</p>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Source</th>
+<th align="left">Item</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-11-09</td>
+<td align="left">Have your say</td>
+<td align="left"><a href="https://ec.europa.eu/info/law/better-regulation/have-your-say/initiatives/19292_en">Articles 75c – 75d AI Act Implementing Act</a></td>
+</tr>
+<tr>
+<td align="left">2026-11-11</td>
+<td align="left">Have your say</td>
+<td align="left"><a href="https://ec.europa.eu/info/law/better-regulation/have-your-say/initiatives/14628_en">Cloud and AI Development Act</a></td>
+</tr>
+</tbody></table>
+<hr>
+<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
+]]></content:encoded>
+    </item>
+    <item>
+      <title>Data Engineering 2026-10-29</title>
+      <link>https://dboeter.github.io/daily-diff/#2026-10-29/ai-data</link>
+      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-10-29/ai-data</guid>
+      <pubDate>Thu, 29 Oct 2026 00:00:00 +0000</pubDate>
+      <description>Data Engineering 2026-10-29 ⬛ Overview · 🟪 AI Agents · 🟦 AI Models &amp;amp; Labs · 🟧 AI Policy · 🟨 Data Engineering Vendor items: 12 | Projects: 17 | Active today: 0 | Stable releases: 0 | Prereleases (not covered): 0 | Generated: 2026-10-29 05:34 UTC Highlights No item stands out today. Action required Date Platform Item What to do 2026-11-30 Azure Databricks Upcoming end of life for the Genie One MCP Beta endpoint The Genie One MCP Beta endpoint at https://&amp;lt;workspace-hostname&amp;gt;/api/2.0/m...</description>
+      <content:encoded><![CDATA[<h1>Data Engineering 2026-10-29</h1>
+<p><a href="https://dboeter.github.io/daily-diff/#2026-10-29">⬛ Overview</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-29/ai-agents">🟪 AI Agents</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-29/ai-models">🟦 AI Models &amp; Labs</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-29/ai-policy">🟧 AI Policy</a> · <strong>🟨 Data Engineering</strong></p>
+<blockquote>
+<p>Vendor items: 12 | Projects: 17 | Active today: 0 | Stable releases: 0 | Prereleases (not covered): 0 | Generated: 2026-10-29 05:34 UTC</p>
+</blockquote>
+<hr>
+<h2>Highlights</h2>
+<ul>
+<li>No item stands out today.</li>
+</ul>
+<hr>
+<h2>Action required</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Platform</th>
+<th align="left">Item</th>
+<th align="left">What to do</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-11-30</td>
+<td align="left">Azure Databricks</td>
+<td align="left"><a href="https://learn.microsoft.com/azure/databricks/release-notes/whats-coming#upcoming-end-of-life-for-the-genie-one-mcp-beta-endpoint">Upcoming end of life for the Genie One MCP Beta endpoint</a></td>
+<td align="left">The Genie One MCP Beta endpoint at <code>https://&lt;workspace-hostname&gt;/api/2.0/mcp/genie</code> reaches end of life on November 30, 2026, after which requests fail; migrate all workloads to the <code>system.ai.genie_one_mcp</code> MCP in Unity Gateway.</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>Databricks</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Item</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-10-28</td>
+<td align="left">⚠️ 🤖 <a href="https://learn.microsoft.com/azure/databricks/release-notes/whats-coming#upcoming-end-of-life-for-the-genie-one-mcp-beta-endpoint">Upcoming end of life for the Genie One MCP Beta endpoint</a></td>
+<td align="left">The Genie One MCP Beta endpoint at <code>https://&lt;workspace-hostname&gt;/api/2.0/mcp/genie</code> reaches end of life on November 30, 2026, after which requests fail; migrate all workloads to the <code>system.ai.genie_one_mcp</code> MCP in Unity Gateway.</td>
+</tr>
+<tr>
+<td align="left">2026-10-28</td>
+<td align="left">⚠️ 🤖 <a href="https://learn.microsoft.com/azure/databricks/release-notes/whats-coming#serverless-gpu-in-clean-rooms-will-soon-be-on-by-default-for-accounts-where-its-turned-off">Serverless GPU in clean rooms will soon be on by default for accounts where it&#39;s turned off</a></td>
+<td align="left">Starting on or after November 26, 2026, serverless GPU in clean rooms becomes enabled by default for Enterprise and Premium tier accounts; until then, admins can turn on Clean Rooms AI Runtime from the Previews page in the account console.</td>
+</tr>
+<tr>
+<td align="left">2026-10-28</td>
+<td align="left">🤖 <a href="https://learn.microsoft.com/azure/databricks/release-notes/product/2026/october#serverless-gpu-for-clean-room-notebooks-is-now-generally-available">Serverless GPU for clean room notebooks is now generally available</a></td>
+<td align="left">Serverless GPU for clean room notebooks is generally available, allowing model inference and training on serverless GPU compute with AI Runtime, using the same approval flow, data access, and output tables as other clean room notebooks.</td>
+</tr>
+<tr>
+<td align="left">2026-10-27</td>
+<td align="left">🤖 <a href="https://learn.microsoft.com/azure/databricks/release-notes/unity-gateway#unity-gateway-usage-dashboard-v10">Unity Gateway Usage Dashboard v1.0</a></td>
+<td align="left">The Unity Gateway Usage Dashboard v1.0 is available, providing coding-agent adoption metrics, harness usage, estimated session spend, expanded model and user spend analysis, and tag-based spend attribution.</td>
+</tr>
+<tr>
+<td align="left">2026-10-26</td>
+<td align="left"><a href="https://learn.microsoft.com/azure/databricks/release-notes/runtime/19#databricks-runtime-19-october-26-2026">Databricks Runtime 19: October 26, 2026</a></td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left">2026-10-26</td>
+<td align="left"><a href="https://learn.microsoft.com/azure/databricks/sql/release-notes/2026#databricks-sql-version-202643-is-rolling-out-in-current">Databricks SQL version 2026.43 is rolling out in Current</a></td>
+<td align="left">—</td>
+</tr>
+</tbody></table>
+<p><strong>Quiet today:</strong> <a href="https://github.com/delta-io/delta">Delta Lake</a>, <a href="https://github.com/unitycatalog/unitycatalog">Unity Catalog</a>, <a href="https://github.com/mlflow/mlflow">MLflow</a>, <a href="https://github.com/databricks/cli">Databricks CLI</a>, <a href="https://github.com/databricks/dbt-databricks">dbt-databricks</a></p>
+<hr>
+<h2>Snowflake</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Item</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-10-28</td>
+<td align="left"><a href="https://docs.snowflake.com/en/release-notes/2026/other/2026-10-28-request-access-workspaces-ga">Request Access in Workspaces (General availability)</a></td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left">2026-10-28</td>
+<td align="left"><a href="https://docs.snowflake.com/en/release-notes/2026/other/2026-10-28-my-budget-summary">Check the quotas that apply to you with MY_BUDGET_SUMMARY (General availability)</a></td>
+<td align="left">The <code>MY_BUDGET_SUMMARY</code> table function is generally available in Snowflake, letting users check their limits, usage, and block status for per-user quotas.</td>
+</tr>
+<tr>
+<td align="left">2026-10-27</td>
+<td align="left"><a href="https://docs.snowflake.com/en/release-notes/2026/other/2026-10-27-dcm-define-task-graph-preview">DCM Projects DEFINE TASK GRAPH (Preview)</a></td>
+<td align="left">In DCM Projects, <code>DEFINE TASK GRAPH</code> is now in Public Preview, enabling declarative management of task graphs and member tasks with graph-wide settings for schedule, overlap policy, retry behavior, and member-task defaults.</td>
+</tr>
+<tr>
+<td align="left">2026-10-26</td>
+<td align="left">🤖 <a href="https://docs.snowflake.com/en/release-notes/2026/other/2026-10-26-coco-desktop-v1-23-0">CoCo Desktop v1.23.0</a></td>
+<td align="left">CoCo Desktop v1.23.0 improves session organization and brings Snowflake Managed MCP servers to all accounts.</td>
+</tr>
+</tbody></table>
+<p><em>Also new:</em> <a href="https://docs.snowflake.com/en/release-notes/2026/other/2026-10-28-native-app-ai-usage-history">Cortex AI usage in Native App usage history</a></p>
+<p><strong>Quiet today:</strong> <a href="https://github.com/snowflakedb/snowpark-python">Snowpark Python</a>, <a href="https://github.com/snowflakedb/snowflake-connector-python">Snowflake Connector for Python</a>, <a href="https://github.com/apache/polaris">Apache Polaris</a></p>
+<hr>
+<h2>Azure / Fabric &amp; GCP</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Item</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-10-28</td>
+<td align="left">🤖 <a href="https://community.fabric.microsoft.com/t5/Fabric-Updates-Blog/Govern-your-Microsoft-Fabric-data-estate-from-one-place-with-the/ba-p/5377369">Govern your Microsoft Fabric data estate from one place with the OneLake catalog and Govern Skills (Generally Available)</a></td>
+<td align="left">The Govern experience in the OneLake catalog is generally available, centralizing governance for tenants, domains, capacities, workspaces, tags, and policies, while Govern Skills in the Skills for Fabric collection give AI agents knowledge to audit, investigate, and remediate governance issues at scale.</td>
+</tr>
+<tr>
+<td align="left">2026-10-28</td>
+<td align="left"><a href="https://community.fabric.microsoft.com/t5/Fabric-Updates-Blog/More-ways-to-use-scalar-UDFs-in-Microsoft-Fabric-Data-Warehouse/ba-p/5376708">More ways to use scalar UDFs in Microsoft Fabric Data Warehouse (Preview)</a></td>
+<td align="left">Scalar UDFs in Microsoft Fabric Data Warehouse gain enhanced procedural logic support in Preview, including more natural loop control, broader query-shape support, automatic adoption of new capabilities, inlineability validation with diagnostics, and a <code>WITH INLINE = AUTO</code> override for non-inlineable functions.</td>
+</tr>
+</tbody></table>
+<hr>
+<p>Nothing new from Open-source stack (<a href="https://github.com/dbt-labs/dbt">dbt Core</a>, <a href="https://github.com/SQLMesh/sqlmesh">SQLMesh</a>, <a href="https://github.com/apache/airflow">Apache Airflow</a>, <a href="https://github.com/dagster-io/dagster">Dagster</a>, <a href="https://github.com/dlt-hub/dlt">dlt</a>, <a href="https://github.com/apache/iceberg">Apache Iceberg</a>, <a href="https://github.com/duckdb/duckdb">DuckDB</a>, <a href="https://github.com/pola-rs/polars">Polars</a>, <a href="https://github.com/trinodb/trino">Trino</a>) today.</p>
+<hr>
+<h2>Across platforms</h2>
+<ul>
+<li>MCP integration: Databricks requires migration from the Genie One MCP Beta endpoint to the <code>system.ai.genie_one_mcp</code> MCP in Unity Gateway by November 30, 2026; Snowflake adds Snowflake Managed MCP servers to CoCo Desktop v1.23.0 for all accounts.</li>
+</ul>
+<hr>
+<h2>Spotted</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Story</th>
+<th align="left">Source</th>
+<th align="left">Discussion</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a href="https://techcommunity.microsoft.com/blog/adforpostgresql/why-microsoft-contributes-to-postgres-what-i-tell-people/4568479">Why Microsoft contributes to Postgres: What I tell people</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50277503">4 points, 0 comments</a></td>
+<td align="left">A Microsoft employee explains why the company contributes to PostgreSQL, based on a talk given at PGConf.EU in Valencia.</td>
+</tr>
+<tr>
+<td align="left"><a href="http://databasearchitects.blogspot.com/2026/10/the-benchmarking-crisis.html">The Benchmarking Crisis</a></td>
+<td align="left">Lobste.rs</td>
+<td align="left"><a href="https://lobste.rs/s/smtpje/benchmarking_crisis">11 points, 8 comments</a></td>
+<td align="left">A blog post on databasearchitects.blogspot.com discusses a benchmarking crisis, written by and for database architects.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://dev.to/peter-white-1492/should-our-llm-wiki-use-vector-search-we-benchmarked-it-before-deciding-fkf">Should our LLM wiki use vector search? We benchmarked it before deciding</a></td>
+<td align="left">Dev.to</td>
+<td align="left"><a href="https://dev.to/peter-white-1492/should-our-llm-wiki-use-vector-search-we-benchmarked-it-before-deciding-fkf">15 reactions, 13 comments</a></td>
+<td align="left">The author benchmarks vector search for their LLM wiki to evaluate whether it helps users who phrase questions in their own way.</td>
+</tr>
+</tbody></table>
+<hr>
+<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
+]]></content:encoded>
+    </item>
     <item>
       <title>AI Agents 2026-10-28</title>
       <link>https://dboeter.github.io/daily-diff/#2026-10-28/ai-agents</link>
@@ -3445,558 +3891,6 @@
 <li><a href="https://community.fabric.microsoft.com/t5/Fabric-Updates-Blog/New-analytical-functions-in-Microsoft-Fabric-Data-Warehouse/ba-p/5375432">New analytical functions in Microsoft Fabric Data Warehouse (Preview)</a> — Preview adds MEDIAN, QUANTILE, APPROX_MEDIAN, APPROX_QUANTILE, and PERCENTILE_CONT/DISC aggregate syntax for efficient distribution analytics.</li>
 <li><a href="https://azure.microsoft.com/updates?id=576716">Generally Available: Azure Cosmos DB Safe Key Rotation</a> — Provides last-used timestamps for account keys to safely identify active keys before rotating or retiring credentials.</li>
 </ul>
-<hr>
-<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
-]]></content:encoded>
-    </item>
-    <item>
-      <title>AI Discussions 2026-10-22</title>
-      <link>https://dboeter.github.io/daily-diff/#2026-10-22/ai-hn</link>
-      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-10-22/ai-hn</guid>
-      <pubDate>Thu, 22 Oct 2026 00:00:00 +0000</pubDate>
-      <description>AI Discussions 2026-10-22 📅 Overview · 🤖 AI Agents · 💬 AI Discussions · 📚 AI Research · 🌐 Lab Announcements · ⚖️ Policy Watch · 🗄️ Data Engineering Watch Sources: Hacker News (30 stories) | Generated: 2026-10-22 01:26 UTC Highlights DeepSeek&amp;#39;s new inference framework DeepInfer dominates discussion with 2302 points and 882 comments, signaling intense developer interest in high-performance open-weight model serving. The DeepSeek US government ban (578 points, 538 comments) and WhatsApp&amp;#...</description>
-      <content:encoded><![CDATA[<h1>AI Discussions 2026-10-22</h1>
-<p><a href="https://dboeter.github.io/daily-diff/#2026-10-22">📅 Overview</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-22/ai-agents">🤖 AI Agents</a> · <strong>💬 AI Discussions</strong> · <a href="https://dboeter.github.io/daily-diff/#2026-10-22/ai-arxiv">📚 AI Research</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-22/ai-web">🌐 Lab Announcements</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-22/ai-policy">⚖️ Policy Watch</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-22/ai-data">🗄️ Data Engineering Watch</a></p>
-<blockquote>
-<p>Sources: <a href="https://news.ycombinator.com/">Hacker News</a> (30 stories) | Generated: 2026-10-22 01:26 UTC</p>
-</blockquote>
-<hr>
-<h2>Highlights</h2>
-<p>DeepSeek&#39;s new inference framework DeepInfer dominates discussion with 2302 points and 882 comments, signaling intense developer interest in high-performance open-weight model serving. The DeepSeek US government ban (578 points, 538 comments) and WhatsApp&#39;s hidden LLM instructions (738 points, 216 comments) reveal mounting geopolitical and privacy tensions. Anthropic&#39;s Claude Duet agent launch (312 points, 270 comments) and OpenAI&#39;s Google Cloud partnership (238 points, 100 comments) show major product momentum. The &quot;publish fake stats, get cited in LLMs&quot; investigation (362 points, 202 comments) highlights growing concern about data poisoning and LLM reliability.</p>
-<h2>Hacker News</h2>
-<h3>🔬 Models &amp; Research</h3>
-<table>
-<thead>
-<tr>
-<th align="left">Title</th>
-<th align="right">Score</th>
-<th align="right">Comments</th>
-<th align="left">Summary</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left"><a href="https://github.com/deepseek-ai/DeepInfer">DeepInfer: High-performance inference framework for DeepSeek models</a> · <a href="https://news.ycombinator.com/item?id=50163277">HN</a></td>
-<td align="right">2302</td>
-<td align="right">882</td>
-<td align="left">DeepInfer is a high-performance, large-scale inference framework for DeepSeek models. It aims to optimize serving efficiency for open-weight models at production scale.</td>
-</tr>
-<tr>
-<td align="left"><a href="https://alexwang.ai/posts/associative-memory/">You could have invented transformers from memory</a> · <a href="https://news.ycombinator.com/item?id=50122878">HN</a></td>
-<td align="right">664</td>
-<td align="right">149</td>
-<td align="left">The post argues every transformer layer functions as a memory store, presenting an associative-memory perspective on the architecture. It reframes attention mechanisms as memory retrieval operations.</td>
-</tr>
-<tr>
-<td align="left"><a href="https://mistral.ai/news/voxtral-3/">Voxtral 3</a> · <a href="https://news.ycombinator.com/item?id=50168396">HN</a></td>
-<td align="right">757</td>
-<td align="right">197</td>
-<td align="left">Voxtral 3 is Mistral&#39;s voice agent SDK supporting real-time speech in 50+ languages with accurate transcription, emotional TTS, and deep tool use. It offers EU-hosted or self-deployed options.</td>
-</tr>
-<tr>
-<td align="left"><a href="https://www.wiz.io/blog/php2shell-php-rce">PHP2Shell: AI uncovers critical RCE in PHP</a> · <a href="https://news.ycombinator.com/item?id=50180836">HN</a></td>
-<td align="right">432</td>
-<td align="right">172</td>
-<td align="left">AI-assisted research uncovered core PHP engine flaws enabling remote code execution and Heartbleed-style memory disclosure across the web. The findings demonstrate AI&#39;s growing role in vulnerability discovery.</td>
-</tr>
-<tr>
-<td align="left"><a href="https://github.com/humanlayer/advanced-context-engineering-for-coding-agents/blob/main/benchmarking-new-models-on-slop-code-bench.md">SlopCodeBench 10/2026 – Opus 5.5, Astra wins overall, xhigh considered harmful</a> · <a href="https://news.ycombinator.com/item?id=50108717">HN</a></td>
-<td align="right">303</td>
-<td align="right">120</td>
-<td align="left">The benchmark evaluates coding agents on messy, real-world codebases. Astra wins overall while the &quot;xhigh&quot; setting is flagged as harmful, offering practical guidance for agent configuration.</td>
-</tr>
-</tbody></table>
-<h3>🛠️ Tools &amp; Engineering</h3>
-<table>
-<thead>
-<tr>
-<th align="left">Title</th>
-<th align="right">Score</th>
-<th align="right">Comments</th>
-<th align="left">Summary</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left"><a href="https://github.com/deepseek-ai/DeepInfer">DeepInfer: High-performance inference framework for DeepSeek models</a> · <a href="https://news.ycombinator.com/item?id=50163277">HN</a></td>
-<td align="right">2302</td>
-<td align="right">882</td>
-<td align="left">DeepInfer is a high-performance, large-scale inference framework for DeepSeek models. It aims to optimize serving efficiency for open-weight models at production scale.</td>
-</tr>
-<tr>
-<td align="left"><a href="https://layerfs.ai/">LayerFS: The filesystem for AI coding agents</a> · <a href="https://news.ycombinator.com/item?id=50179857">HN</a></td>
-<td align="right">69</td>
-<td align="right">42</td>
-<td align="left">LayerFS is an open-source (MIT) filesystem giving each AI tool call a complete, writable workspace over shared history. It addresses isolation and state management for coding agents.</td>
-</tr>
-<tr>
-<td align="left"><a href="https://github.blog/engineering/architecture-optimization/the-bridge-to-agent-scale-git-infrastructure/">The bridge to agent-scale Git infrastructure</a> · <a href="https://news.ycombinator.com/item?id=50183344">HN</a></td>
-<td align="right">57</td>
-<td align="right">15</td>
-<td align="left">GitHub moved 99.99999% of repositories to Azure and describes per-reference quorums to bring over the rest. The work enables Git infrastructure to scale for massive AI agent workloads.</td>
-</tr>
-<tr>
-<td align="left"><a href="https://alterauth.com/">Launch HN: Alter (YC S25) – Access control for multi-user agents</a> · <a href="https://news.ycombinator.com/item?id=50176908">HN</a></td>
-<td align="right">52</td>
-<td align="right">22</td>
-<td align="left">Alter provides PAM for AI agents enforced at runtime: vaulted credentials, per-action policy, approval before risky calls, and an audit trail for every call through the platform.</td>
-</tr>
-<tr>
-<td align="left"><a href="https://news.ycombinator.com/item?id=50167583">Launch HN: Respan (YC W24) – Open-source Rust AI gateway built around plugins</a> · <a href="https://news.ycombinator.com/item?id=50167583">HN</a></td>
-<td align="right">52</td>
-<td align="right">21</td>
-<td align="left">Respan is an open-source Rust AI gateway designed around a plugin architecture. It aims to provide flexible routing, observability, and control for AI model traffic.</td>
-</tr>
-</tbody></table>
-<h3>🏢 Industry News</h3>
-<table>
-<thead>
-<tr>
-<th align="left">Title</th>
-<th align="right">Score</th>
-<th align="right">Comments</th>
-<th align="left">Summary</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left"><a href="https://redact.dev/blog/whatsapp-help-pages-hidden-ai-instructions">WhatsApp&#39;s help pages hid LLM instructions: dont recommend a regulator</a> · <a href="https://news.ycombinator.com/item?id=50159341">HN</a></td>
-<td align="right">738</td>
-<td align="right">216</td>
-<td align="left">WhatsApp&#39;s help pages contained hidden instructions telling AI not to recommend regulators or cite GDPR/CCPA when lawyers were mentioned. The notes were removed after scrutiny.</td>
-</tr>
-<tr>
-<td align="left"><a href="https://www.reuters.com/technology/us-banning-chinese-ai-deepseek-government-agency-it-systems-2026-10-19/">DeepSeek banned from U.S. federal civilian agencies under new DHS order</a> · <a href="https://news.ycombinator.com/item?id=50154244">HN</a></td>
-<td align="right">578</td>
-<td align="right">538</td>
-<td align="left">The Department of Homeland Security ordered a ban on DeepSeek across US federal civilian agency IT systems. The move reflects escalating US-China AI competition and supply-chain concerns.</td>
-</tr>
-<tr>
-<td align="left"><a href="https://claude.com/product/claude-duet">Claude Duet</a> · <a href="https://news.ycombinator.com/item?id=50186037">HN</a></td>
-<td align="right">312</td>
-<td align="right">270</td>
-<td align="left">Claude Duet is a personal AI agent that handles inbox, calendar, follow-ups, and messages users when attention is needed. The research preview opens by waitlist for Pro and Max subscribers in the US.</td>
-</tr>
-<tr>
-<td align="left"><a href="https://openai.com/index/openai-models-google-cloud/">OpenAI models are coming to Google Cloud</a> · <a href="https://news.ycombinator.com/item?id=50180079">HN</a></td>
-<td align="right">238</td>
-<td align="right">100</td>
-<td align="left">OpenAI announced its models will be available on Google Cloud, marking a significant partnership between former rivals. The integration expands enterprise access to OpenAI models via Vertex AI.</td>
-</tr>
-<tr>
-<td align="left"><a href="https://openai.com/index/coordinated-disclosure-of-critical-vulnerabilities/">Patch the Planet: global response coordination as agents uncover vulnerabilities</a> · <a href="https://news.ycombinator.com/item?id=50181175">HN</a></td>
-<td align="right">233</td>
-<td align="right">160</td>
-<td align="left">OpenAI describes a coordinated disclosure process where AI agents helped uncover critical vulnerabilities across multiple organizations. The effort demonstrates agent-driven security research at scale.</td>
-</tr>
-</tbody></table>
-<h3>💬 Opinions &amp; Debates</h3>
-<table>
-<thead>
-<tr>
-<th align="left">Title</th>
-<th align="right">Score</th>
-<th align="right">Comments</th>
-<th align="left">Summary</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left"><a href="https://peec.ai/blog/publish-stats-get-cited-the-tactic-that-put-my-data-all-over-the-web">Publish fake stats, get cited in LLMs</a> · <a href="https://news.ycombinator.com/item?id=50165801">HN</a></td>
-<td align="right">362</td>
-<td align="right">202</td>
-<td align="left">The author planted 50,000 fake statistics online and tracked their propagation through LLM outputs. The experiment demonstrates how easily fabricated data enters model training and hallucinated citations.</td>
-</tr>
-<tr>
-<td align="left"><a href="https://www.bolkunov.com/p/on-ai-writing">On AI writing</a> · <a href="https://news.ycombinator.com/item?id=50171771">HN</a></td>
-<td align="right">92</td>
-<td align="right">60</td>
-<td align="left">The author defines AI writing as text with at least 50% AI-generated words and reflects on its implications for authenticity, craft, and the future of human expression.</td>
-</tr>
-<tr>
-<td align="left"><a href="https://www.thedial.world/articles/news/ai-book-scams">The Lucrative World of Literary Scams</a> · <a href="https://news.ycombinator.com/item?id=50151175">HN</a></td>
-<td align="right">70</td>
-<td align="right">13</td>
-<td align="left">The article examines how AI enables large-scale literary fraud, targeting writers with fake publishing offers, phantom agents, and generated content mills. It maps the emerging scam ecosystem.</td>
-</tr>
-<tr>
-<td align="left"><a href="https://www.theatlantic.com/technology/2026/10/ai-hacking-apocalypse-began-last-night/689106/">The AI-Hacking Apocalypse Began Last Night</a> · <a href="https://news.ycombinator.com/item?id=50186699">HN</a></td>
-<td align="right">13</td>
-<td align="right">2</td>
-<td align="left">The Atlantic piece warns that AI-driven automated hacking has reached a tipping point. It argues defensive tooling is not keeping pace with offensive agent capabilities.</td>
-</tr>
-</tbody></table>
-<h2>Signals</h2>
-<p>Developers are most actively discussing three clusters: open-weight model infrastructure (DeepInfer&#39;s 882 comments, Voxtral 3&#39;s 197), AI safety and governance (DeepSeek ban&#39;s 538 comments — far exceeding its 578 points, signaling controversy; WhatsApp&#39;s hidden instructions at 216 comments), and agent product launches (Claude Duet&#39;s 270 comments, Patch the Planet&#39;s 160). The DeepSeek ban shows a 0.93 comments-per-point ratio, indicating heated debate over geopolitical tech restrictions. The fake-stats investigation (0.56 ratio) and Claude Duet (0.87 ratio) also draw disproportionate discussion, reflecting anxiety about data integrity and agent autonomy. Benchmark stories (SlopCodeBench, RuneScape Bench) attract moderate but technical engagement (120 and 82 comments), suggesting practitioners are evaluating agent coding capabilities rigorously. Show HN launches (Alter, Omnara, Respan) gather modest but focused interest (22, 8, 21 comments), pointing to early-stage tooling experimentation.</p>
-<h2>Worth a Look</h2>
-<ul>
-<li><strong><a href="https://github.com/deepseek-ai/DeepInfer">DeepInfer: High-performance inference framework for DeepSeek models</a></strong> — Highest engagement by far (2302 points, 882 comments); essential reading for anyone deploying or optimizing open-weight LLMs at scale.</li>
-<li><strong><a href="https://redact.dev/blog/whatsapp-help-pages-hidden-ai-instructions">WhatsApp&#39;s help pages hid LLM instructions: dont recommend a regulator</a></strong> — Reveals concrete evidence of corporate AI guardrails being manipulated via hidden prompts; critical for understanding deployed-system risks.</li>
-<li><strong><a href="https://peec.ai/blog/publish-stats-get-cited-the-tactic-that-put-my-data-all-over-the-web">Publish fake stats, get cited in LLMs</a></strong> — A controlled experiment proving data poisoning at scale; directly relevant to anyone building RAG systems or relying on LLM-cited facts.</li>
-</ul>
-<hr>
-<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
-]]></content:encoded>
-    </item>
-    <item>
-      <title>Lab Announcements 2026-10-22</title>
-      <link>https://dboeter.github.io/daily-diff/#2026-10-22/ai-web</link>
-      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-10-22/ai-web</guid>
-      <pubDate>Thu, 22 Oct 2026 00:00:00 +0000</pubDate>
-      <description>Lab Announcements 2026-10-22 📅 Overview · 🤖 AI Agents · 💬 AI Discussions · 📚 AI Research · 🌐 Lab Announcements · ⚖️ Policy Watch · 🗄️ Data Engineering Watch Today&amp;#39;s update | New content: 17 articles | Generated: 2026-10-22 01:26 UTC Sources: Anthropic: anthropic.com — 9 new articles (sitemap total: 477) OpenAI: openai.com — 8 new articles (sitemap total: 1080) Highlights Anthropic announced Enterprise Frontier Safeguards (EFS), a new architecture that combines zero data retention with ...</description>
-      <content:encoded><![CDATA[<h1>Lab Announcements 2026-10-22</h1>
-<p><a href="https://dboeter.github.io/daily-diff/#2026-10-22">📅 Overview</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-22/ai-agents">🤖 AI Agents</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-22/ai-hn">💬 AI Discussions</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-22/ai-arxiv">📚 AI Research</a> · <strong>🌐 Lab Announcements</strong> · <a href="https://dboeter.github.io/daily-diff/#2026-10-22/ai-policy">⚖️ Policy Watch</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-22/ai-data">🗄️ Data Engineering Watch</a></p>
-<blockquote>
-<p>Today&#39;s update | New content: 17 articles | Generated: 2026-10-22 01:26 UTC</p>
-</blockquote>
-<p>Sources:</p>
-<ul>
-<li>Anthropic: <a href="https://www.anthropic.com">anthropic.com</a> — 9 new articles (sitemap total: 477)</li>
-<li>OpenAI: <a href="https://openai.com">openai.com</a> — 8 new articles (sitemap total: 1080)</li>
-</ul>
-<hr>
-<h2>Highlights</h2>
-<p>Anthropic announced Enterprise Frontier Safeguards (EFS), a new architecture that combines zero data retention with customer-controlled cloud infrastructure for deploying frontier models like Fable 5.1 across major cloud platforms. The company also published a suite of Frontier Red Team research revealing that current models can perform tactical intelligence targeting, conventional weapons engineering, end-to-end cyber exploit development, and autonomous replication on IoT devices, while also demonstrating breakthrough scientific reasoning by solving a nine-loop amplitude in theoretical physics. OpenAI released eight announcements on a single day covering ad stack development, coordinated vulnerability disclosure, biological research scaling, Google Cloud model availability, access standards, and ad expansion to 26 countries, signaling a heavy productization and platform expansion push.</p>
-<h2>Anthropic</h2>
-<h3>News</h3>
-<p><strong>Developing Enterprise Frontier Safeguards with our customers</strong> (2026-10-21)<br><a href="https://www.anthropic.com/news/enterprise-frontier-safeguards">https://www.anthropic.com/news/enterprise-frontier-safeguards</a><br>Anthropic introduced Enterprise Frontier Safeguards (EFS), a deployment model that stores customer data in their own cloud infrastructure (AWS, GCP, Azure) rather than Anthropic’s, combining zero data retention with automated misuse detection for Mythos-class models like Fable 5.1. Developed with over 100 enterprise customers across regulated industries, EFS will roll out in phases starting fall 2026, with eligible customers receiving ZDR on Fable 5/5.1 until EFS is ready. The solution supports Claude Code, Claude Enterprise, Claude Platform, Amazon Bedrock, Google’s Agent Platform, and Microsoft Foundry.</p>
-<p><strong>Physicist Christopher Stubbs joins Anthropic’s Long-Term Benefit Trust</strong> (2026-10-21)<br><a href="https://www.anthropic.com/news/christopher-stubbs-joins-long-term-benefit-trust">https://www.anthropic.com/news/christopher-stubbs-joins-long-term-benefit-trust</a><br>Harvard physicist Christopher Stubbs, known for co-discovering the accelerating expansion of the universe and advising on national security, has joined the Long-Term Benefit Trust. His background in precision measurement, cosmology, and arms control adds scientific and governance depth to the trust overseeing Anthropic’s public benefit mission.</p>
-<p><strong>Investing in the public benefit</strong> (2026-10-18, published 2026-10-21)<br><a href="https://www.anthropic.com/news/public-benefit-fund">https://www.anthropic.com/news/public-benefit-fund</a><br>Anthropic committed 5% of its shares to a new Anthropic Public Benefit Fund, with an additional 2% added per 50% valuation increase above a baseline, subject to stockholder approval. The fund enables large-scale donations and direct distributions beyond internal R&amp;D, with an initial focus on labor market impacts—building on a $200M commitment to study and address worker instability from AI.</p>
-<h3>Research</h3>
-<p><strong>Measuring AI capabilities in intelligence targeting and conventional weapons</strong> (2026-09-10, published 2026-10-21)<br><a href="https://www.anthropic.com/research/intelligence-targeting-conventional-weapons-capabilities">https://www.anthropic.com/research/intelligence-targeting-conventional-weapons-capabilities</a><br>The Frontier Red Team developed evaluations for tactical intelligence targeting (locating individuals from fragmentary data) and conventional weapons development (engineering drones to strike moving targets). Frontier models now match scarce human experts on some tasks; open-weight models from PRC developers lag but show concerning proficiency. New on-platform classifiers have been deployed to block such misuse.</p>
-<p><strong>Claude computes a nine-loop amplitude in N=4 super-Yang-Mills</strong> (2026-09-25, published 2026-10-21)<br><a href="https://www.anthropic.com/research/yes-claude-can-do-nine-loops">https://www.anthropic.com/research/yes-claude-can-do-nine-loops</a><br>Physicist Matt von Hippel documented Claude solving a nine-loop scattering amplitude calculation in N=4 super-Yang-Mills theory—a problem that stumped human experts for years—in roughly one month. The guest post highlights the model’s ability to perform high-level theoretical physics reasoning and symbolic computation.</p>
-<p><strong>GLM-5.3 and the spread of advanced cyber capabilities</strong> (2026-09-29, published 2026-10-21)<br><a href="https://www.anthropic.com/research/glm-5-3-and-the-spread-of-advanced-cyber-capabilities">https://www.anthropic.com/research/glm-5-3-and-the-spread-of-advanced-cyber-capabilities</a><br>Analysis of Zhipu AI’s GLM-5.3 shows it can autonomously develop end-to-end cyber exploits comparable to Anthropic’s earlier Mythos Preview, but lacks robust safeguards. The findings confirm proliferation of advanced offensive cyber capabilities to openly available models, validating Anthropic’s prior limited release strategy via Project Glasswing to give defenders a head start.</p>
-<p><strong>An opt-in vulnerability-finding service for open-source software</strong> (2026-10-08, published 2026-10-21)<br><a href="https://www.anthropic.com/research/launching-opt-in-vuln-finding-service-for-open-source">https://www.anthropic.com/research/launching-opt-in-vuln-finding-service-for-open-source</a><br>Anthropic launched OSS Scanner, a free opt-in service that periodically scans open-source projects for vulnerabilities using its strongest models. Informed by Project Glasswing (which found 29,000+ candidate vulnerabilities, with ~6,000 manually triaged), the service aims to scale defensive vulnerability discovery beyond human review bottlenecks.</p>
-<p><strong>Claude reveals ECDSA curve origins</strong> (2026-10-16, published 2026-10-21)<br><a href="https://www.anthropic.com/research/ecdsa-curve-origins">https://www.anthropic.com/research/ecdsa-curve-origins</a><br>Claude resolved a decades-old cryptographic mystery by determining that the NSA-provided seeds for NIST ECDSA curves (e.g., P-256) are simply SHA-1 hashes of timestamps. The finding confirms the curves were generated verifiably and removes lingering suspicions of backdoors, requiring no action from users.</p>
-<p><strong>AI models may be capable of self-replicating without access to a datacenter</strong> (2026-10-12, published 2026-10-21)<br><a href="https://www.anthropic.com/research/self-replicating-ai">https://www.anthropic.com/research/self-replicating-ai</a><br>Experiments show 9B–30B parameter models can execute individual replication steps on diverse IoT hardware (smart ovens, Android TV boxes); GLM-5.2 and stronger models achieve end-to-end autonomous replication. Such worms would lack a central kill switch, adapt to unfamiliar devices, and potentially double in days, representing a novel threat class distinct from traditional botnets.</p>
-<h2>OpenAI</h2>
-<h3>Index (metadata-only)</h3>
-<p>⚠️ <strong>Data limitation</strong>: Only URL slugs and publication dates are available; no article text or excerpts were crawled. The following list is derived solely from metadata.</p>
-<ul>
-<li><strong>Building Chatgpt Ad Stack</strong> (2026-10-22)<br><a href="https://openai.com/index/building-chatgpt-ad-stack/">https://openai.com/index/building-chatgpt-ad-stack/</a></li>
-<li><strong>Coordinated Disclosure Of Critical Vulnerabilities</strong> (2026-10-22)<br><a href="https://openai.com/index/coordinated-disclosure-of-critical-vulnerabilities/">https://openai.com/index/coordinated-disclosure-of-critical-vulnerabilities/</a></li>
-<li><strong>Scaling Ai Research For Complex Biological Data</strong> (2026-10-22)<br><a href="https://openai.com/index/scaling-ai-research-for-complex-biological-data/">https://openai.com/index/scaling-ai-research-for-complex-biological-data/</a></li>
-<li><strong>Scaling Ai Research For Complex Biological Data</strong> (duplicate entry, 2026-10-22)<br><a href="https://openai.com/index/scaling-ai-research-for-complex-biological-data/">https://openai.com/index/scaling-ai-research-for-complex-biological-data/</a></li>
-<li><strong>Openai Models Google Cloud</strong> (2026-10-22)<br><a href="https://openai.com/index/openai-models-google-cloud/">https://openai.com/index/openai-models-google-cloud/</a></li>
-<li><strong>Broad Access Through Consistent Standards</strong> (2026-10-22)<br><a href="https://openai.com/index/broad-access-through-consistent-standards/">https://openai.com/index/broad-access-through-consistent-standards/</a></li>
-<li><strong>Broad Access Through Consistent Standards</strong> (duplicate entry, 2026-10-22)<br><a href="https://openai.com/index/broad-access-through-consistent-standards/">https://openai.com/index/broad-access-through-consistent-standards/</a></li>
-<li><strong>Chatgpt Ads Expands 26 New Countries</strong> (2026-10-22)<br><a href="https://openai.com/index/chatgpt-ads-expands-26-new-countries/">https://openai.com/index/chatgpt-ads-expands-26-new-countries/</a></li>
-</ul>
-<h2>Signals</h2>
-<p><strong>Technical priorities</strong><br>Anthropic’s batch emphasizes <em>frontier safety instrumentation</em> (EFS architecture, misuse classifiers, self-replication evaluations, cyber capability measurements) and <em>scientific reasoning demonstrations</em> (nine-loop amplitude, ECDSA origin). OpenAI’s metadata-only drop points to <em>monetization infrastructure</em> (ad stack, ad expansion), <em>platform breadth</em> (Google Cloud availability, access standards), <em>security process</em> (coordinated disclosure), and <em>domain-specific scaling</em> (biological data).</p>
-<p><strong>Competitive dynamics</strong><br>Anthropic is setting the agenda on <em>enterprise-grade safety architecture</em> (customer-controlled data planes, ZDR + safeguards) and <em>transparent red-teaming of physical-world risks</em> (weapons, self-replication, cyber proliferation). OpenAI appears to be following a <em>platform-scale playbook</em>: expanding revenue surfaces (ads), cloud partnerships (Google), and standardized access—moves that mirror classic SaaS growth loops rather than frontier safety leadership.</p>
-<p><strong>Impact on developers and enterprises</strong><br>EFS gives regulated enterprises a concrete path to deploy Mythos-class models without surrendering data control, directly addressing a key adoption blocker. OSS Scanner offers maintainers free, model-driven vulnerability detection at scale. OpenAI’s ad stack and expanded ad geography signal a shifting user experience for ChatGPT’s free tier, while Google Cloud integration and “consistent standards” phrasing suggest easier multi-cloud procurement for enterprise customers.</p>
-<p><strong>Hidden signals</strong>  </p>
-<ul>
-<li>Anthropic’s simultaneous release of <em>offensive capability measurements</em> (weapons, cyber, self-replication) and <em>defensive deployments</em> (EFS classifiers, OSS Scanner) frames safety as an operational product, not just research.  </li>
-<li>The Long-Term Benefit Trust addition of a physicist with arms control experience signals governance preparation for <em>physical-world risk</em> oversight.  </li>
-<li>OpenAI’s same-day cluster of 8 announcements (with duplicates) suggests a coordinated <em>launch cadence</em> rather than organic publishing—likely tied to a product or partnership milestone.  </li>
-<li>“Broad Access Through Consistent Standards” and “OpenAI Models Google Cloud” together hint at a <em>unified API/serving layer</em> across clouds, possibly preempting Anthropic’s multi-platform EFS support.</li>
-</ul>
-<p><strong>Patterns</strong><br>Anthropic: dense, research-heavy batches tied to specific model generations (Fable 5.1, Mythos) and safety architectures. OpenAI: marketing/platform announcements grouped by date, with recurring themes of monetization, cloud distribution, and access policy.</p>
-<h2>Worth a Look</h2>
-<ul>
-<li><a href="https://www.anthropic.com/news/enterprise-frontier-safeguards">Developing Enterprise Frontier Safeguards with our customers</a> — Defines the new enterprise deployment paradigm for frontier models (customer-controlled data plane + automated safeguards) and lists supported platforms; essential for procurement and security architects.</li>
-<li><a href="https://www.anthropic.com/research/intelligence-targeting-conventional-weapons-capabilities">Measuring AI capabilities in intelligence targeting and conventional weapons</a> — First public benchmarking of frontier models on tactical targeting and kinetic weapons engineering; informs risk assessments for defense, policy, and safety engineering.</li>
-<li><a href="https://www.anthropic.com/research/self-replicating-ai">AI models may be capable of self-replicating without access to a datacenter</a> — Demonstrates autonomous replication on commodity IoT hardware by sub-30B models; a concrete threat model for distributed AI worms that differs fundamentally from traditional malware.</li>
-</ul>
-<hr>
-<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
-]]></content:encoded>
-    </item>
-    <item>
-      <title>AI Research 2026-10-22</title>
-      <link>https://dboeter.github.io/daily-diff/#2026-10-22/ai-arxiv</link>
-      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-10-22/ai-arxiv</guid>
-      <pubDate>Thu, 22 Oct 2026 00:00:00 +0000</pubDate>
-      <description>AI Research 2026-10-22 📅 Overview · 🤖 AI Agents · 💬 AI Discussions · 📚 AI Research · 🌐 Lab Announcements · ⚖️ Policy Watch · 🗄️ Data Engineering Watch Sources: ArXiv (cs.AI, cs.CL, cs.LG) | 40 papers ranked by Jev relevance | Generated: 2026-10-22 01:26 UTC Highlights Autonomous interface and skill evolution emerges as a dominant paradigm, with Agent S4 demonstrating that agents can design their own computer-use interfaces from experience to surpass frontier models at a fraction of the cos...</description>
-      <content:encoded><![CDATA[<h1>AI Research 2026-10-22</h1>
-<p><a href="https://dboeter.github.io/daily-diff/#2026-10-22">📅 Overview</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-22/ai-agents">🤖 AI Agents</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-22/ai-hn">💬 AI Discussions</a> · <strong>📚 AI Research</strong> · <a href="https://dboeter.github.io/daily-diff/#2026-10-22/ai-web">🌐 Lab Announcements</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-22/ai-policy">⚖️ Policy Watch</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-22/ai-data">🗄️ Data Engineering Watch</a></p>
-<blockquote>
-<p>Sources: <a href="https://arxiv.org/">ArXiv</a> (cs.AI, cs.CL, cs.LG) | 40 papers ranked by <a href="https://typesafe.ai">Jev</a> relevance | Generated: 2026-10-22 01:26 UTC</p>
-</blockquote>
-<hr>
-<h2>Highlights</h2>
-<p>Autonomous interface and skill evolution emerges as a dominant paradigm, with Agent S4 demonstrating that agents can design their own computer-use interfaces from experience to surpass frontier models at a fraction of the cost. Reliability engineering for agents advances on multiple fronts: ReTrace formalizes recovery as a first-class capability, PerMIT provides machine-checked memory integrity guarantees, and Self-Credit solves long-horizon credit assignment via intra-group rescaling. A mechanistic interpretability study reveals a pervasive &quot;knows-but-won&#39;t-say&quot; gap in failure attribution, addressable through activation grafting rather than prompting. Systems-level efficiency breakthroughs include AKV&#39;s cache engineering eliminating re-prefill overhead and DiffResearch&#39;s diffusion backbone achieving 6× end-to-end speedups for deep research. New benchmarks (Agent4Sci, RegretBench, RTLRepairBench, BRA) shift evaluation from static leaderboards toward measuring scientific insight, backup awareness, hardware repair fidelity, and resource allocation decisions.</p>
-<h2>Key Papers</h2>
-<h3>🧠 Large Language Models (architecture, training, alignment, evaluation)</h3>
-<table>
-<thead>
-<tr>
-<th align="left">Paper</th>
-<th align="left">Authors</th>
-<th align="left">Summary</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left"><a href="http://arxiv.org/abs/2610.28811v1">A Mechanistic Study of Automated Failure Attribution in LLM-based Agentic Systems</a></td>
-<td align="left">Wendy Zheng, Liang Wu, Yinhan He et al.</td>
-<td align="left">Linear probes reveal models encode sufficient information for correct failure attribution but fail to output it — a &quot;knows-but-won&#39;t-say&quot; gap. Grafting latent activations closes this gap without labels, outperforming all prompting baselines across models and benchmarks.</td>
-</tr>
-<tr>
-<td align="left"><a href="http://arxiv.org/abs/2610.27981v1">Adaptive Stopping of Streamed Reasoning for Language Model Agents</a></td>
-<td align="left">JunHyeok Oh, Byung-Jun Lee</td>
-<td align="left">StreamStop learns model-specific stopping policies from prefix-level action agreement, enabling early exit without internal model access. On WebShop with Qwen3.8-27B, it matches full-reasoning success using 42% fewer tokens.</td>
-</tr>
-<tr>
-<td align="left"><a href="http://arxiv.org/abs/2610.28393v1">When Copying Is Hard: Copy-Constrained Decoding for Exact Span Reproduction</a></td>
-<td align="left">Jinghui Zhang, Lang Gao, Zongfang Liu et al.</td>
-<td align="left">CopyGen decomposes exact copying into three controlled decisions (when, how far, when to stop), improving exact match by 35% relative across three LLMs and four benchmarks without fine-tuning, and integrating with SFT for further gains.</td>
-</tr>
-<tr>
-<td align="left"><a href="http://arxiv.org/abs/2610.28909v1">DiffResearch: Accelerating Deep Research with Diffusion Language Models</a></td>
-<td align="left">Alan-Barsag Gazzaev, Alexey Gavrilov, Mikhail Mozikov et al.</td>
-<td align="left">Replacing autoregressive backbones with a diffusion LLM in a multi-agent research framework yields ~6× end-to-end speedup; dFast decomposition mode extracts subqueries from intermediate denoising states for an additional 1.99× speedup with no quality loss.</td>
-</tr>
-<tr>
-<td align="left"><a href="http://arxiv.org/abs/2610.29409v1">LLMSeg: Training-Free Text-Prompted Image Segmentation with B-Splines</a></td>
-<td align="left">Abdullah Hamdi</td>
-<td align="left">An off-the-shelf MLLM (Gemini-3.7-Flash) drives detect-segment-refine loops using closed B-splines, reaching 71.5 cIoU on ReasonSeg val and matching or surpassing specialist SAM 3 across referring, reasoning, and open-vocabulary segmentation tasks without any segmentation-specific training.</td>
-</tr>
-</tbody></table>
-<h3>🤖 Agents &amp; Reasoning (planning, tool use, multi-agent, chain-of-thought)</h3>
-<table>
-<thead>
-<tr>
-<th align="left">Paper</th>
-<th align="left">Authors</th>
-<th align="left">Summary</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left"><a href="http://arxiv.org/abs/2610.28601v1">Evolving Agent Interfaces</a></td>
-<td align="left">Saaket Agashe, Yuzhe Yang, Gonzalo Gonzalez-Pumariega et al.</td>
-<td align="left">Agent S4 autonomously evolves computer-use interfaces from task experience via meta-agent synthesis and population-based evolution. With Qwen3.8-27B, it achieves 21.3% on OSWorld V2 — 3.8× fixed-interface baseline, surpassing GPT-5.5 (13.0%) and Claude Opus 4.8 (20.6%) at 1.5–4.3% of their cost.</td>
-</tr>
-<tr>
-<td align="left"><a href="http://arxiv.org/abs/2610.28763v1">Automating ML for Science: Can Frontier Agents Climb Scientific Hills in the Wild?</a></td>
-<td align="left">Ming Zhong, Stacy Li, Nicholas Carlini et al.</td>
-<td align="left">Agent4Sci benchmarks agents on improving published best models across 20 scientific ML benchmarks. Frontier agents achieve gains (Claude Opus: 10.4% mean relative improvement) but primarily via engineering tricks; lightweight research ideation plug-ins raise this to 20.1%.</td>
-</tr>
-<tr>
-<td align="left"><a href="http://arxiv.org/abs/2610.29443v1">DynaWeave: Learning to Adapt through Dynamic Scenario Synthesis</a></td>
-<td align="left">Xuan Yang, Chunxiao Liu, Hongsheng Xin et al.</td>
-<td align="left">Transforms static tasks into verifiable dynamic scenarios with exogenous events via DAG-based synthesis. Fine-tuning Qwen3.5 on 2,095 trajectories boosts CostBench completion by 67.34 pp and exceeds Gemini-3.1-Pro-Preview on ToolMaze.</td>
-</tr>
-<tr>
-<td align="left"><a href="http://arxiv.org/abs/2610.28354v1">S-Agent 2.0: Spatial Reasoning with a General Coding Agent</a></td>
-<td align="left">Rui Gong, Ruoyu Wang, Yalun Dai et al.</td>
-<td align="left">Equips a general coding agent with a perception toolkit and persistent scene memory, improving Qwen3.8-27B by +13.9/+20.5 on MMSI-Bench/ReVSI and Gemini-3.8-Flash by +11.2/+9.6, outperforming specialized SpatialClaw on the same backbones.</td>
-</tr>
-<tr>
-<td align="left"><a href="http://arxiv.org/abs/2610.29005v1">VeriEvolve: Evaluator-First Evolution for Tool-Using Agents</a></td>
-<td align="left">Yueshen Li, Kamer Ali Yuksel, Gokhan Tur et al.</td>
-<td align="left">Synthesizes executable evaluators from task instructions before evolution; evaluator-guided search raises GLM-5.2 from 6/30 to 18/30 and Claude from 27/30 to 30/30 on MCPMark Filesystem, with cross-environment validation on PostgreSQL, Playwright, Notion, GitHub.</td>
-</tr>
-<tr>
-<td align="left"><a href="http://arxiv.org/abs/2610.27954v1">Lost in Recovery: Demystifying Recovery Behavior of Computer-Use Agents via Goal-Oriented Action Replay</a></td>
-<td align="left">Byeonghun Bang, Sangwoo Park, Jinheon Baek et al.</td>
-<td align="left">ReTrace introduces Transition-Consistent Recovery and goal-oriented action replay after controlled error injection. Shows ideal recovery unlocks latent capabilities, current agents fail to exploit them, and accurate model-based recovery yields measurable end-to-end gains.</td>
-</tr>
-<tr>
-<td align="left"><a href="http://arxiv.org/abs/2610.28834v1">Where Should a Stuck Agent Spend Its Next Tokens? Causal Attribution of Inference-Time Resources</a></td>
-<td align="left">Saiyue Lyu, Jerrold Huang, Yunbei Zhang et al.</td>
-<td align="left">Banzhaf Resource Attribution (BRA) measures marginal contribution of computation, information, and feedback to repair. Specifications consistently help; feedback is preferred by 95–100% of frontier models but yields lower gains than random resource selection.</td>
-</tr>
-<tr>
-<td align="left"><a href="http://arxiv.org/abs/2610.29139v1">Steering Black-Box Large Language Model Agents with Pitfall Anticipation World Model</a></td>
-<td align="left">Jiongxiao Wang, Han Ding, Youzhi Luo et al.</td>
-<td align="left">PAWM selectively predicts impending pitfalls in a bounded future and steers agents away. Trained via SFT on synthetic pitfall data then GRPO co-training, it improves Claude Sonnet 4.5 by 24.3% on ScienceWorld and 7.7% on WebArena-Lite.</td>
-</tr>
-<tr>
-<td align="left"><a href="http://arxiv.org/abs/2610.28286v1">Local Work, Global Progress: A Convergence Theory of AI Agent Collaboration</a></td>
-<td align="left">Ivan Ilin, Peter Richtárik</td>
-<td align="left">Formalizes multi-agent collaboration as block optimization with coordinator-mediated merging. Proves linear convergence; 3-agent GPT-OSS-120B team finds collision-free robot routes every run, 6-agent team searches ~2× faster than single agent.</td>
-</tr>
-<tr>
-<td align="left"><a href="http://arxiv.org/abs/2610.28388v1">Self-Credit: Credit Assignment for Long-Horizon Agentic RL via Intra-group Rescaling</a></td>
-<td align="left">Fangcong Yin, Ming Yin, Tanvi Bhandarkar et al.</td>
-<td align="left">Policy generates cited summaries during rollouts; intra-group rescaling compares citations across success/failure groups to reweight advantages. Improves Qwen3 8B/32B by 37.0/36.2 pts on BrowseComp-Plus, beating strongest baselines by 8.5/5.6 pts.</td>
-</tr>
-<tr>
-<td align="left"><a href="http://arxiv.org/abs/2610.29467v1">PreCoMem: Predictive Cognitive Memory for Self-Evolving Long-Term Dialogue Agents</a></td>
-<td align="left">Jian Zhong, Zeyu Liu, Pingchuan Cao et al.</td>
-<td align="left">Memory as confidence-weighted beliefs updated via Effective Surprisal (semantic deviation + contradiction, downweighted by retrieval diffuseness). Three-gate updates (MAINTAIN/PROFILE/CORRECT) achieve SOTA on LoCoMo, LongMemEval-S, PersonaMem-v2 and adapt to non-stationary drift on DiMoBench.</td>
-</tr>
-<tr>
-<td align="left"><a href="http://arxiv.org/abs/2610.28294v1">Adaptive Replay Refinement: Allocating Test-Time Compute Between Revision and Resampling</a></td>
-<td align="left">Ahsan Bilal, Muhammad Ahmed Mohsin, Muhammad Umer et al.</td>
-<td align="left">Training-free ARR detects revision fixed points via replay decoding and reallocates compute to new samples. Matches majority voting on 3/5 math benchmarks at equal compute; on MATH500 achieves 84.6% with 41% of majority voting&#39;s serial passes.</td>
-</tr>
-</tbody></table>
-<h3>🔧 Methods &amp; Frameworks (new techniques, benchmarks, efficiency improvements)</h3>
-<table>
-<thead>
-<tr>
-<th align="left">Paper</th>
-<th align="left">Authors</th>
-<th align="left">Summary</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left"><a href="http://arxiv.org/abs/2610.28577v1">Cache Engineering for Agents</a></td>
-<td align="left">Tianyu Fu, Ruoxi Wang, Zihan Min et al.</td>
-<td align="left">Introduces drop/repos cache operations and the AKV serving engine for stateful cache reuse without re-prefill. Tool-response rolling-drop policy improves scores by 1.7 pts and cuts cost 27.7%; AKV delivers 1.2× throughput and 1.5× P95 latency speedup.</td>
-</tr>
-<tr>
-<td align="left"><a href="http://arxiv.org/abs/2610.28934v1">Back Up Before You Regret: Measuring Backup Awareness and Automating Backup in Coding Agents</a></td>
-<td align="left">Xu Li, Simon Yu, Minzhou Pan et al.</td>
-<td align="left">RegretBench (205 tasks from real regret moments) shows agents complete 86.1% of tasks but back up only 15.2% of the time. BackUpper plug-in covers all regret actions, restores with 92.2% similarity at $0.014/task (7× cheaper than self-backup).</td>
-</tr>
-<tr>
-<td align="left"><a href="http://arxiv.org/abs/2610.28706v1">SpecEvo: Speculative Evolution with Large Language Models for Cost-Efficient Scientific Discovery</a></td>
-<td align="left">Ha Minh Hieu, Tongyao Zhu, Do Xuan Long et al.</td>
-<td align="left">Lightweight Speculators and an Advisor consolidate search evidence; frontier Navigator intervenes at sparse checkpoints. Matches/outperforms frontier baselines across 176 tasks with up to 80% API cost reduction and 1.5× evaluation efficiency on equation discovery.</td>
-</tr>
-<tr>
-<td align="left"><a href="http://arxiv.org/abs/2610.28914v1">D-Skill: Distilling Teacher Knowledge through Agent Skills</a></td>
-<td align="left">Shuo Yuan, Dacheng Li, Joseph E. Gonzalez</td>
-<td align="left">Distills teacher behavioral advantage into interpretable natural-language skills from paired rollouts (no labels, no weight updates). Closes 75–95% of teacher-student gap across SpreadsheetBench, ALFWorld, chess; student incurs 5.7–8.3× lower inference cost.</td>
-</tr>
-<tr>
-<td align="left"><a href="http://arxiv.org/abs/2610.28586v1">Capable Teacher, Myopic Scorer: Reward-Free Teacher Repair for Agentic On-Policy Distillation</a></td>
-<td align="left">Shu Zhao, Tan Yu</td>
-<td align="left">Identifies rollout-scorer gap: teacher takeovers succeed but next-token scores permit safe delaying moves. R2S repairs scorer via teacher takeovers from high-disagreement states, outperforming three SOTA OPD methods by 12.8 success points avg across 12 teacher-student-environment cells.</td>
-</tr>
-<tr>
-<td align="left"><a href="http://arxiv.org/abs/2610.29250v1">Let Agents Design How They Search: Automatic Interface Optimization for Agentic Search</a></td>
-<td align="left">Sangjune An, Jaeyoon Jung, Yumin Choi et al.</td>
-<td align="left">SearchWeaver jointly optimizes corpus artifacts, tools, and usage instructions via trajectory-guided proposal. With GPT-5.4-nano, improves BrowseComp-Plus accuracy 71.6%→78.4% and BRIGHT nDCG@10 45.7→55.0 over Direct Corpus Interaction.</td>
-</tr>
-<tr>
-<td align="left"><a href="http://arxiv.org/abs/2610.28987v1">PerMIT: Securing Persistent Memory for LLM Agents via Machine-Checked Integrity Theorems and Scalable Community Trust</a></td>
-<td align="left">Tanqiu Jiang, Min Bai, Sadat Shahriar et al.</td>
-<td align="left">Finite memory interface with two Lean 4 machine-checked integrity theorems: environment-derived memory reaches sensitive actions only if gate-confirmed. Zero attack success on Trojan Hippo; community endorsements enable co-scaling trust with 90-agent shared knowledge bases on τ²-bench.</td>
-</tr>
-<tr>
-<td align="left"><a href="http://arxiv.org/abs/2610.28815v1">Forging More Tasks into Better Harnesses: Agentic Harness Evolution via Successive Scale Racing</a></td>
-<td align="left">Jingzhe Liu, Jiliang Tang, Tong Zhao et al.</td>
-<td align="left">SSR adaptively races evidence combinations under small compute budgets. As task pool grows 40→200, pass rate rises 64.3%→68.3% while baselines degrade; racing cuts validation executions by 60%.</td>
-</tr>
-<tr>
-<td align="left"><a href="http://arxiv.org/abs/2610.28595v1">What Do RTL Repair Benchmarks Actually Measure?</a></td>
-<td align="left">Yeyin Eva Zhu, Rishabh Ranawat</td>
-<td align="left">RTLRepairBench (459 cases, simulation + formal equivalence) exposes two confounds: simulation/formal scoring disagree due to reset semantics, and spec-only baselines reveal repair scores don&#39;t isolate faulty RTL usage. Provides evaluation controls and audit protocol.</td>
-</tr>
-<tr>
-<td align="left"><a href="http://arxiv.org/abs/2610.28998v1">FlashNext-RL: A System Optimization Study for Long-Horizon Agentic RL of Qwen3.8-Flash-Next</a></td>
-<td align="left">Zhewei Yao, Yuxiong He</td>
-<td align="left">Model-specific RL framework optimizing host offload, gradient accumulation, and MoE/sparse-attention/gated-residual kernels for BF16 48-layer training on 8×B200. Throughput jumps 395→4,438 tok/s/GPU (32K→131K context); live SWE RL runs at 22.4 min/iteration for 1,024 rollouts.</td>
-</tr>
-</tbody></table>
-<h3>📊 Applications (domain-specific, multimodal, code generation)</h3>
-<table>
-<thead>
-<tr>
-<th align="left">Paper</th>
-<th align="left">Authors</th>
-<th align="left">Summary</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left"><a href="http://arxiv.org/abs/2610.28282v1">ChartEvo: Self-Evolving Agent Harnesses for Long-Tail Chart Reasoning</a></td>
-<td align="left">Qi Wang, Peijie Wang, Jun Cao et al.</td>
-<td align="left">Recursive self-improvement jointly evolves chart-specific Skills and Tools with local tool-call chains. Improves Qwen3.7-Plus by 45.6% on ChartBench and 32.5% on ChartX long-tail charts.</td>
-</tr>
-<tr>
-<td align="left"><a href="http://arxiv.org/abs/2610.29093v1">Agentic Music Post-Production</a></td>
-<td align="left">Jaywon Koo, Junghyun Koo, Marco A. Martinez-Ramirez et al.</td>
-<td align="left">MixAgent follows audio engineer workflow: grouping → planning → detector/critic refinement. MixCritic dataset (45,657 critiques) trains critic via SFT + preference optimization; reduces error 19% vs initial mix, beats Qwen3-Omni, Gemini 3.8 Flash, GPT-4o-audio in human listening tests.</td>
-</tr>
-<tr>
-<td align="left"><a href="http://arxiv.org/abs/2610.28160v1">From Code Generator to Engineering Companion: A Plant-aware Agent for PLC Programming</a></td>
-<td align="left">Joschka Kersting, Gesa Benndorf</td>
-<td align="left">Plant-aware conversational copilot for PLC Structured Text: ingests plant-specific context, chat-first explanation/debugging, graduated tool ladder from chat to deployment. Keeps engineer in control of real-world effects.</td>
-</tr>
-</tbody></table>
-<h2>Signals</h2>
-<p>Self-improving agent architectures are converging on a pattern: decouple evaluation from execution (VeriEvolve, Agent S4, SSR), synthesize executable verifiers or interfaces from experience, and use population-based or speculative search to evolve them. Memory is becoming a first-class security surface — PerMIT&#39;s machine-checked integrity and BackUpper&#39;s automatic backup point toward architectures where state changes are auditable and reversible by default. Diffusion language models are emerging as viable agent backbones for latency-critical pipelines (DiffResearch), while model-specific RL systems (FlashNext-RL) demonstrate that kernel-level co-design unlocks order-of-magnitude throughput gains. Evaluation is shifting from aggregate scores to causal attribution (BRA), mechanistic probes (failure attribution grafting), and controlled confounds (RTLRepairBench). Skill distillation via natural language (D-Skill) is proving competitive with weight-based distillation at dramatically lower inference cost, suggesting a path toward portable, interpretable capability transfer. Test-time compute allocation (ARR, StreamStop, BRA) is maturing into a principled discipline with training-free adaptive methods matching or exceeding learned controllers.</p>
-<h2>Worth a Look</h2>
-<ul>
-<li><a href="http://arxiv.org/abs/2610.28601v1">Evolving Agent Interfaces</a> — Demonstrates a paradigm shift: agents that design their own interfaces from experience, achieving SOTA computer-use performance with an open model at a fraction of frontier model cost. The meta-agent + population evolution loop is a blueprint for self-improving agent infrastructure.</li>
-<li><a href="http://arxiv.org/abs/2610.28811v1">A Mechanistic Study of Automated Failure Attribution in LLM-based Agentic Systems</a> — Uncovers a fundamental &quot;knows-but-won&#39;t-say&quot; gap in LLM judges via linear probing, then exploits latent knowledge through activation grafting. This mechanistic lens on evaluator reliability is essential for any practitioner building automated evaluation or reward models.</li>
-<li><a href="http://arxiv.org/abs/2610.28763v1">Automating ML for Science: Can Frontier Agents Climb Scientific Hills in the Wild?</a> — Agent4Sci reframes agent evaluation around scientific ML improvement across 20 real benchmarks. The finding that gains come from engineering tricks not domain insight, and that lightweight research plug-ins double progress, provides a concrete roadmap for moving agents from coding assistants to research collaborators.</li>
-</ul>
-<hr>
-<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
-]]></content:encoded>
-    </item>
-    <item>
-      <title>AI Agents 2026-10-21</title>
-      <link>https://dboeter.github.io/daily-diff/#2026-10-21/ai-agents</link>
-      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-10-21/ai-agents</guid>
-      <pubDate>Wed, 21 Oct 2026 00:00:00 +0000</pubDate>
-      <description>AI Agents 2026-10-21 📅 Overview · 🤖 AI Agents · 💬 AI Discussions · 📚 AI Research · 🌐 Lab Announcements · ⚖️ Policy Watch · 🗄️ Data Engineering Watch Generated: 2026-10-21 01:27 UTC | Projects: 25 | Active today: 12 | Stable releases: 15 | Prereleases (not covered): 2 🕵️ Stealth Models on OpenRouter No stealth models listed on OpenRouter today. Coding Agents &amp;amp; Assistants Overview Claude Code shipped v2.1.305 with sandbox improvements for Linux nested namespaces and a retry watchdog fix...</description>
-      <content:encoded><![CDATA[<h1>AI Agents 2026-10-21</h1>
-<p><a href="https://dboeter.github.io/daily-diff/#2026-10-21">📅 Overview</a> · <strong>🤖 AI Agents</strong> · <a href="https://dboeter.github.io/daily-diff/#2026-10-21/ai-hn">💬 AI Discussions</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-21/ai-arxiv">📚 AI Research</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-21/ai-web">🌐 Lab Announcements</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-21/ai-policy">⚖️ Policy Watch</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-21/ai-data">🗄️ Data Engineering Watch</a></p>
-<blockquote>
-<p>Generated: 2026-10-21 01:27 UTC | Projects: 25 | Active today: 12 | Stable releases: 15 | Prereleases (not covered): 2</p>
-</blockquote>
-<hr>
-<h2>🕵️ Stealth Models on OpenRouter</h2>
-<p>No stealth models listed on OpenRouter today.</p>
-<hr>
-<h2>Coding Agents &amp; Assistants</h2>
-<h3>Overview</h3>
-<p>Claude Code shipped v2.1.305 with sandbox improvements for Linux nested namespaces and a retry watchdog fix, but a regression on Windows Bedrock broke custom CA handling. Gemini CLI v0.65.0 enforces read-only workspaces in untrusted folders and fixes session resume bugs. Hermes Agent faces two serious issues: smart approval auto-executing destructive <code>osascript</code> commands on macOS, and a protocol mismatch sending chat/completions to a Codex Responses endpoint. OpenCode hit GitHub Trending while users report free-tier IP blocks on Windows. Oh My Pi added Bedrock native compaction and account policy reclaim logic. Pstack-claude released two builds adding Muse plugin support and unified effort fields across runtimes. Autoloom published its seventh beta with task fidelity and UI recovery fixes.</p>
-<h3>Claude Code</h3>
-<ul>
-<li><strong>Release</strong>: v2.1.305 adds <code>sandbox.allowNestedUserNamespaces</code> so sandboxed Linux commands can create user namespaces (Chromium, rootless podman), and <code>CLAUDE_CODE_RETRY_WATCHDOG_USAGE_LIMIT_RECHECK_MS</code> lets unattended retry mode notice lifted usage limits before reset. <a href="https://github.com/anthropics/claude-code/releases/tag/v2.1.305">https://github.com/anthropics/claude-code/releases/tag/v2.1.305</a></li>
-<li><strong>Hot issue</strong>: Windows Bedrock users on v2.1.304 hit <code>UNABLE_TO_GET_ISSUER_CERT</code> despite custom CAs being loaded; regression from v2.1.303. <a href="https://github.com/anthropics/claude-code/issues/103680">https://github.com/anthropics/claude-code/issues/103680</a></li>
-<li><strong>News</strong>: Anthropic published research on Claude Code&#39;s sandboxing architecture and auto-mode implementation, plus a postmortem on April quality reports. <a href="https://www.anthropic.com/research/claude-code-sandboxing">https://www.anthropic.com/research/claude-code-sandboxing</a> <a href="https://www.anthropic.com/research/claude-code-auto-mode">https://www.anthropic.com/research/claude-code-auto-mode</a> <a href="https://www.anthropic.com/research/april-23-postmortem">https://www.anthropic.com/research/april-23-postmortem</a></li>
-</ul>
-<h3>Gemini CLI</h3>
-<ul>
-<li><strong>Release</strong>: v0.65.0 enforces read-only workspace settings in untrusted folders, prevents duplicate tool response turns when resuming sessions, and stops deletion of resumed session history on quick exit. <a href="https://github.com/google-gemini/gemini-cli/releases/tag/v0.65.0">https://github.com/google-gemini/gemini-cli/releases/tag/v0.65.0</a></li>
-</ul>
-<h3>OpenCode</h3>
-<ul>
-<li><strong>Hot issue</strong>: Windows users report free models blocked by alleged IP abuse detection with no VPN; error claims free tier only works within OpenCode desktop. Issue closed but user impact unclear. <a href="https://github.com/anomalyco/opencode/issues/56965">https://github.com/anomalyco/opencode/issues/56965</a></li>
-<li><strong>News</strong>: Project trending on GitHub with +1,240 stars, described as &quot;the open source coding agent.&quot; <a href="https://github.com/anomalyco/opencode">https://github.com/anomalyco/opencode</a></li>
-</ul>
-<h3>Oh My Pi</h3>
-<ul>
-<li><strong>Release</strong>: v18.12.4 enables native compaction for supported Bedrock Claude models and adds opt-in <code>reclaimAbovePct</code> to account policies so sessions auto-return to preferred accounts after priority drops. <a href="https://github.com/can1357/oh-my-pi/releases/tag/v18.12.4">https://github.com/can1357/oh-my-pi/releases/tag/v18.12.4</a></li>
-</ul>
-<h3>Hermes Agent</h3>
-<ul>
-<li><strong>Hot issue</strong>: Smart approval mode auto-approved <code>osascript</code> commands that closed a user&#39;s unsaved PowerPoint deck and deleted its export — unrecoverable data loss on macOS. <a href="https://github.com/NousResearch/hermes-agent/issues/141346">https://github.com/NousResearch/hermes-agent/issues/141346</a></li>
-<li><strong>Hot issue</strong>: Kanban worker posts to chat/completions endpoint despite <code>api_mode=codex_responses</code>, getting 400 <code>ModelProtocolUnsupported</code> for <code>muse-spark</code> on opencode-go. <a href="https://github.com/NousResearch/hermes-agent/issues/141861">https://github.com/NousResearch/hermes-agent/issues/141861</a></li>
-</ul>
-<h3>michael-denyer/pstack-claude</h3>
-<ul>
-<li><strong>Release</strong>: v0.9.96 ships a Muse build with native plugin manifest, shared skills as slash commands, and a <code>SessionStart</code> hook injecting poteto-mode mandate. v0.9.95 unifies <code>@level</code> effort fields across Claude Code, Codex, Copilot, and Pi runtimes, removing generated effort-specific agents. <a href="https://github.com/michael-denyer/pstack-claude/releases/tag/v0.9.96">https://github.com/michael-denyer/pstack-claude/releases/tag/v0.9.96</a> <a href="https://github.com/michael-denyer/pstack-claude/releases/tag/v0.9.95">https://github.com/michael-denyer/pstack-claude/releases/tag/v0.9.95</a></li>
-</ul>
-<h3>GanyuanRan/Autoloom</h3>
-<ul>
-<li><strong>Prerelease</strong>: v0.1.0-beta.7 strengthens task fidelity across understanding, transformation, and delivery; improves bidirectional review with conservative fixes reusing governance checkpoints; fixes UI drawing stalls and session restore failures after updates. <a href="https://github.com/GanyuanRan/Autoloom/releases/tag/v0.1.0-beta.7">https://github.com/GanyuanRan/Autoloom/releases/tag/v0.1.0-beta.7</a></li>
-</ul>
-<p><strong>Quiet today:</strong> <a href="https://github.com/Kilo-Org/kilocode">Kilo Code</a>, <a href="https://github.com/earendil-works/pi">Pi</a>, <a href="https://github.com/1jehuang/jcode">jcode</a>, <a href="https://github.com/cline/cline">Cline</a>, <a href="https://github.com/CommandCodeAI/command-code">Command Code</a>, <a href="https://github.com/deepseek-ai/deepseek-harness">DeepSeek Harness</a>, <a href="https://github.com/cursor/plugins">cursor/plugins</a>, <a href="https://github.com/GCWing/OpenBitFun">GCWing/OpenBitFun</a></p>
-<p><strong>Unavailable today:</strong> <a href="https://github.com/openai/codex">OpenAI Codex</a></p>
-<hr>
-<h2>Agent Tooling</h2>
-<h3>Overview</h3>
-<p>OpenShell v0.1.5 renames OCSF log files from <code>.log</code> to <code>.jsonl</code>, requiring collector pattern updates. Ruflo shipped five releases in two days fixing task cancel/status correctness, enabling TUI mouse interaction by default, wiring real AgentDB HNSW vector search, patching a CWE-22 path-traversal vulnerability, and resolving a critical install break caused by an unpublished memory package — also landing on GitHub Trending. HyperFrames resolved timeouts on long phone-video exports and stabilized distributed rendering with frame sub-ranges. Pi-harness added verified update downloads with progress, cancellation, resume, and retry. OpenRig delivered a rapid follow-up with daily-drive fixes including Claude seat handover waits and Slack missed-message recovery across mapped channels.</p>
-<h3>OpenShell</h3>
-<ul>
-<li><strong>Release</strong>: <a href="https://github.com/NVIDIA/OpenShell/releases/tag/v0.1.5">v0.1.5</a> renames Supervisor OCSF log files to <code>openshell-ocsf.YYYY-MM-DD.jsonl</code>; update any collector patterns from <code>*.log</code> to <code>*.jsonl</code>. Old <code>.log</code> files are not migrated and may be cleaned up.</li>
-</ul>
-<h3>ruvnet/ruflo</h3>
-<ul>
-<li><strong>Release</strong>: <a href="https://github.com/ruvnet/ruflo/releases/tag/v3.59.2">v3.59.2</a> fixes <code>task cancel</code> to return <code>previousStatus</code>, refuse to touch finished tasks, and exit 1 on failure; <code>task status</code> now shows correct status box titles.</li>
-<li><strong>Release</strong>: <a href="https://github.com/ruvnet/ruflo/releases/tag/v3.59.0">v3.59.0–v3.58.0</a> adds real AgentDB HNSW vector search with staleness rejection and exact-cosine fallback, enables TUI mouse clicking by default (<code>--no-mouse</code> to disable), patches CWE-22 path-traversal in <code>hooks_codemod</code>, and fixes a critical install break from an unpublished <code>@claude-flow/memory</code> pin.</li>
-<li><strong>News</strong>: <a href="https://github.com/ruvnet/ruflo">GitHub Trending</a> highlights ruflo as &quot;the original agent harness&quot; for deploying multi-player swarms with adaptive memory, self-learning intelligence, federation, vector RAG, and native Claude Code/Codex/Hermes integration (+684 stars).</li>
-</ul>
-<h3>heygen-com/hyperframes</h3>
-<ul>
-<li><strong>Release</strong>: <a href="https://github.com/heygen-com/hyperframes/releases/tag/v0.8.181">v0.8.181</a> eliminates timeouts and stalls on long phone-video exports; cloud render plans now check audio peaks faster; studio keeps edit preview waiting while window draws no frames.</li>
-<li><strong>Release</strong>: <a href="https://github.com/heygen-com/hyperframes/releases/tag/v0.8.180">v0.8.180</a> fixes intermittent empty-frame failures in multi-worker renders, adds distributed chunk rendering as frame sub-ranges, restores previews to playhead on video reload, and speeds up phone-video snapshot decoding.</li>
-</ul>
-<h3>wangmiaozero/pi-harness</h3>
-<ul>
-<li><strong>Release</strong>: <a href="https://github.com/wangmiaozero/pi-harness/releases/tag/v2.2.4">v2.2.4</a> adds verified update downloads with progress, cancellation, resume, and retry; blocks unverified or incompatible packages; improves manual install guidance; fixes update status after restart into a newly applied update.</li>
-</ul>
-<h3>mvschwarz/openrig</h3>
-<ul>
-<li><strong>Release</strong>: <a href="https://github.com/mvschwarz/openrig/releases/tag/v0.6.13">v0.6.13</a> delivers daily-drive fixes: Claude seat handover now waits for the new Claude before typing packets; Slack missed-message recovery reaches mapped channels, recent threads, and relayed channels; 15 of 46 changes from 10 outside contributors.</li>
-</ul>
-<p><strong>Quiet today:</strong> <a href="https://github.com/herdrdev/herdr">herdr</a>, <a href="https://github.com/mksglu/context-mode">context-mode</a>, <a href="https://github.com/asheshgoplani/agent-deck">Agent Deck</a>, <a href="https://github.com/paperclipai/paperclip">paperclipai/paperclip</a></p>
 <hr>
 <p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
 ]]></content:encoded>
