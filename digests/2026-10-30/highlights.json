@@ -1,0 +1,18 @@
+{
+  "ai-agents": [
+    "Oh My Pi v18.14.0 removes Bun workarounds, raw models.json export, cache API; moves provider helpers; requires qualified model selectors; changes tool loader cwd order",
+    "Users report Claude Code's agent_summary spinner consumes ~18% weighted tokens in subagent-heavy sessions, request env var or setting to disable"
+  ],
+  "ai-models": [
+    "Mistral AI releases Mistral Large 4, a 1T parameter multimodal model trained in Europe leading open-weight coding benchmarks",
+    "Epoch AI finds GLM 5.3 converts unshipped Firefox fixes into one-click exploits for six releases at ~$1,000 per exploit"
+  ],
+  "ai-policy": [
+    "Dutch government publishes guidance on jointly applying Human Rights and Algorithms Impact Assessment (IAMA) and model DPIA for public-sector use",
+    "Dutch Data Protection Authority contacts 29 debt-collection agencies after sample review of growing algorithm and AI use, signaling supervisory attention"
+  ],
+  "ai-data": [
+    "dbt-databricks v1.13.0 breaks view models: single materialization regardless of flag; view_update_via_alter alters Unity Catalog views in place, fails on Hive",
+    "dlt 1.32.0 breaks: naive SCD2 timestamps no longer read as UTC; refresh='drop_resources' and pipeline.drop() drop all resource tables; Jira and Salesforce sources rewritten"
+  ]
+}

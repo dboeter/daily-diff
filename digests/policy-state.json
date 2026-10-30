@@ -33,7 +33,9 @@
     "https://cset.georgetown.edu/?p=25690": "2026-10-27",
     "https://digital-strategy.ec.europa.eu/news-redirect/961661": "2026-10-28",
     "openstates:ocd-bill/3c3597c7-6bf8-4c5d-9362-b146492ce0d7": "2026-10-29",
-    "https://www.binnenlandsbestuur.nl/digitaal/handreiking-moet-gemeenten-helpen-met-ai-toepassingen": "2026-10-29"
+    "https://www.binnenlandsbestuur.nl/digitaal/handreiking-moet-gemeenten-helpen-met-ai-toepassingen": "2026-10-29",
+    "https://www.digitaleoverheid.nl/?p=142452": "2026-10-30",
+    "e6562348-6f8d-4cc3-b43e-12d427997904": "2026-10-30"
   },
   "stages": {
     "celex:32026D2274": "2026-10-12 Decision adopted",
@@ -65,9 +67,6 @@
     "Have your say": "2026-10-28",
     "Congress.gov": "2026-10-28",
     "Internetconsultatie": "2026-10-28",
-    "European Commission": "2026-10-28",
-    "EDPB": "2026-10-28",
-    "Autoriteit Persoonsgegevens": "2026-10-28",
-    "RDI": "2026-10-29"
+    "EDPB": "2026-10-28"
   }
 }
