@@ -315,7 +315,17 @@ describe("data project news", () => {
     expect(matches(repo("delta"), "Delta Air Lines cancels flights")).toBe(false);
     expect(matches(repo("delta"), "Measuring the delta between two runs")).toBe(false);
     expect(matches(repo("delta"), "Delta Lake 4.0 released")).toBe(true);
-    expect(matches(repo("delta"), "delta-rs adds deletion vectors")).toBe(true);
+  });
+
+  it("routes delta-rs stories to delta-rs, not Delta Lake", () => {
+    expect(matches(repo("delta"), "delta-rs adds deletion vectors")).toBe(false);
+    expect(matches(repo("delta-rs"), "delta-rs adds deletion vectors")).toBe(true);
+    expect(matches(repo("delta-rs"), "Reading Delta tables with the deltalake Python package")).toBe(true);
+  });
+
+  it("does not match Soda Core on the drink", () => {
+    expect(matches(repo("soda-core"), "Baking soda vs. baking powder")).toBe(false);
+    expect(matches(repo("soda-core"), "Soda Core 4.24 adds contract checks")).toBe(true);
   });
 
   it("matches dlt only by its keywords, never inside another word", () => {

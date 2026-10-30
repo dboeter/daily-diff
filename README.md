@@ -117,47 +117,57 @@ The data repos are covered the same way, plus a **Releases this week** table of 
 <!-- tracked:databricks -->
 <!-- generated from config.yml: edit config.yml, then run pnpm readme -->
 
-**Databricks**: Databricks and the open-source projects Databricks maintains (Delta Lake, Unity Catalog, MLflow, its CLI and dbt adapter).
+**Databricks**: Databricks and the open-source projects Databricks maintains (Delta Lake, Unity Catalog, MLflow, its CLI, Terraform provider and dbt adapter).
 
-| Project        | Repository                                                                |
-| -------------- | ------------------------------------------------------------------------- |
-| Delta Lake     | [delta-io/delta](https://github.com/delta-io/delta)                       |
-| Unity Catalog  | [unitycatalog/unitycatalog](https://github.com/unitycatalog/unitycatalog) |
-| MLflow         | [mlflow/mlflow](https://github.com/mlflow/mlflow)                         |
-| Databricks CLI | [databricks/cli](https://github.com/databricks/cli)                       |
-| dbt-databricks | [databricks/dbt-databricks](https://github.com/databricks/dbt-databricks) |
+| Project                           | Repository                                                                                              |
+| --------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| Delta Lake                        | [delta-io/delta](https://github.com/delta-io/delta)                                                     |
+| delta-rs                          | [delta-io/delta-rs](https://github.com/delta-io/delta-rs)                                               |
+| Unity Catalog                     | [unitycatalog/unitycatalog](https://github.com/unitycatalog/unitycatalog)                               |
+| MLflow                            | [mlflow/mlflow](https://github.com/mlflow/mlflow)                                                       |
+| Databricks CLI                    | [databricks/cli](https://github.com/databricks/cli)                                                     |
+| dbt-databricks                    | [databricks/dbt-databricks](https://github.com/databricks/dbt-databricks)                               |
+| Terraform provider for Databricks | [databricks/terraform-provider-databricks](https://github.com/databricks/terraform-provider-databricks) |
 
 <!-- /tracked:databricks -->
 
 <!-- tracked:snowflake -->
 <!-- generated from config.yml: edit config.yml, then run pnpm readme -->
 
-**Snowflake**: Snowflake's open-source clients and the Apache Polaris catalog Snowflake maintains.
+**Snowflake**: Snowflake's open-source clients, its Terraform provider and the Apache Polaris catalog Snowflake maintains.
 
-| Project                        | Repository                                                                                          |
-| ------------------------------ | --------------------------------------------------------------------------------------------------- |
-| Snowpark Python                | [snowflakedb/snowpark-python](https://github.com/snowflakedb/snowpark-python)                       |
-| Snowflake Connector for Python | [snowflakedb/snowflake-connector-python](https://github.com/snowflakedb/snowflake-connector-python) |
-| Apache Polaris                 | [apache/polaris](https://github.com/apache/polaris)                                                 |
+| Project                          | Repository                                                                                              |
+| -------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| Snowpark Python                  | [snowflakedb/snowpark-python](https://github.com/snowflakedb/snowpark-python)                           |
+| Snowflake Connector for Python   | [snowflakedb/snowflake-connector-python](https://github.com/snowflakedb/snowflake-connector-python)     |
+| Apache Polaris                   | [apache/polaris](https://github.com/apache/polaris)                                                     |
+| Terraform provider for Snowflake | [snowflakedb/terraform-provider-snowflake](https://github.com/snowflakedb/terraform-provider-snowflake) |
 
 <!-- /tracked:snowflake -->
 
 <!-- tracked:data_stack -->
 <!-- generated from config.yml: edit config.yml, then run pnpm readme -->
 
-**Open-source data stack**: open-source data engineering tools — transformation, orchestration, ingestion, table formats and query engines.
+**Open-source data stack**: open-source data engineering tools — transformation, orchestration, ingestion, table formats, query engines, data quality, lineage and metadata catalogs.
 
-| Project        | Repository                                                  |
-| -------------- | ----------------------------------------------------------- |
-| dbt Core       | [dbt-labs/dbt](https://github.com/dbt-labs/dbt)             |
-| SQLMesh        | [SQLMesh/sqlmesh](https://github.com/SQLMesh/sqlmesh)       |
-| Apache Airflow | [apache/airflow](https://github.com/apache/airflow)         |
-| Dagster        | [dagster-io/dagster](https://github.com/dagster-io/dagster) |
-| dlt            | [dlt-hub/dlt](https://github.com/dlt-hub/dlt)               |
-| Apache Iceberg | [apache/iceberg](https://github.com/apache/iceberg)         |
-| DuckDB         | [duckdb/duckdb](https://github.com/duckdb/duckdb)           |
-| Polars         | [pola-rs/polars](https://github.com/pola-rs/polars)         |
-| Trino          | [trinodb/trino](https://github.com/trinodb/trino)           |
+| Project            | Repository                                                                                        |
+| ------------------ | ------------------------------------------------------------------------------------------------- |
+| dbt Core           | [dbt-labs/dbt](https://github.com/dbt-labs/dbt)                                                   |
+| SQLMesh            | [SQLMesh/sqlmesh](https://github.com/SQLMesh/sqlmesh)                                             |
+| Apache Airflow     | [apache/airflow](https://github.com/apache/airflow)                                               |
+| Dagster            | [dagster-io/dagster](https://github.com/dagster-io/dagster)                                       |
+| Prefect            | [PrefectHQ/prefect](https://github.com/PrefectHQ/prefect)                                         |
+| dlt                | [dlt-hub/dlt](https://github.com/dlt-hub/dlt)                                                     |
+| Apache Iceberg     | [apache/iceberg](https://github.com/apache/iceberg)                                               |
+| PyIceberg          | [apache/iceberg-python](https://github.com/apache/iceberg-python)                                 |
+| DuckDB             | [duckdb/duckdb](https://github.com/duckdb/duckdb)                                                 |
+| Polars             | [pola-rs/polars](https://github.com/pola-rs/polars)                                               |
+| Trino              | [trinodb/trino](https://github.com/trinodb/trino)                                                 |
+| Great Expectations | [great-expectations/great_expectations](https://github.com/great-expectations/great_expectations) |
+| Soda Core          | [sodadata/soda-core](https://github.com/sodadata/soda-core)                                       |
+| OpenLineage        | [OpenLineage/OpenLineage](https://github.com/OpenLineage/OpenLineage)                             |
+| OpenMetadata       | [open-metadata/OpenMetadata](https://github.com/open-metadata/OpenMetadata)                       |
+| SQLFluff           | [sqlfluff/sqlfluff](https://github.com/sqlfluff/sqlfluff)                                         |
 
 <!-- /tracked:data_stack -->
 

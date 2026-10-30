@@ -111,16 +111,26 @@ infra:
 # published no GitHub release since 2024), dbt-fusion (no releases, issues off),
 # Apache Spark, Kafka and Flink (tags only, no GitHub releases), databricks-sdk-py
 # (14 generated releases in 30 days).
+# Checked 2026-10-30, not tracked: DataHub (9 of 10 releases are rc prereleases,
+# ~1 stable a quarter), Kestra (three parallel patch lines, ~8 releases a month),
+# Marquez (OpenLineage's reference server; OpenLineage itself is tracked),
+# DataFusion and DuckLake (tags only, no GitHub releases).
 
 databricks:
   title: Databricks
-  subject: Databricks and the open-source projects Databricks maintains (Delta Lake, Unity Catalog, MLflow, its CLI and dbt adapter)
+  subject: Databricks and the open-source projects Databricks maintains (Delta Lake, Unity Catalog, MLflow, its CLI, Terraform provider and dbt adapter)
   repos:
     - id: delta
       repo: delta-io/delta
       name: Delta Lake
       # Never bare "delta": Delta Air Lines, "the delta between", Delta Live Tables.
-      keywords: [delta lake, delta-rs, delta-io]
+      keywords: [delta lake, delta-io]
+    - id: delta-rs
+      repo: delta-io/delta-rs
+      name: delta-rs
+      # The Rust and Python bindings most non-Spark Delta readers use (Polars,
+      # DuckDB, dlt). Two tag families: python-v* and rust-v*.
+      keywords: [delta-rs, deltalake]
     - id: unity-catalog
       repo: unitycatalog/unitycatalog
       name: Unity Catalog
@@ -137,10 +147,15 @@ databricks:
     - id: dbt-databricks
       repo: databricks/dbt-databricks
       name: dbt-databricks
+    - id: terraform-provider-databricks
+      repo: databricks/terraform-provider-databricks
+      name: Terraform provider for Databricks
+      # Weekly hand-written releases (not generated like databricks-sdk-py).
+      keywords: [terraform-provider-databricks, databricks terraform]
 
 snowflake:
   title: Snowflake
-  subject: Snowflake's open-source clients and the Apache Polaris catalog Snowflake maintains
+  subject: Snowflake's open-source clients, its Terraform provider and the Apache Polaris catalog Snowflake maintains
   repos:
     - id: snowpark-python
       repo: snowflakedb/snowpark-python
@@ -154,10 +169,16 @@ snowflake:
       # Bare "polaris" is a star, a car brand and many products. Polaris Catalog
       # was its name before it moved to Apache.
       keywords: [apache polaris, polaris catalog]
+    - id: terraform-provider-snowflake
+      repo: snowflakedb/terraform-provider-snowflake
+      name: Terraform provider for Snowflake
+      # Monthly releases; its breaking-change migration guide is the deprecation
+      # signal for Snowflake IaC.
+      keywords: [terraform-provider-snowflake, snowflake terraform]
 
 data_stack:
   title: Open-source data stack
-  subject: open-source data engineering tools — transformation, orchestration, ingestion, table formats and query engines
+  subject: open-source data engineering tools — transformation, orchestration, ingestion, table formats, query engines, data quality, lineage and metadata catalogs
   repos:
     - id: dbt-core
       # Renamed from dbt-labs/dbt-core.
@@ -178,6 +199,11 @@ data_stack:
     - id: dagster
       repo: dagster-io/dagster
       name: Dagster
+    - id: prefect
+      repo: PrefectHQ/prefect
+      name: Prefect
+      # Acquired Dagster in July 2026. ~4 of 5 releases are .devN prereleases,
+      # which the tag filter drops; stable releases roughly weekly.
     - id: dlt
       repo: dlt-hub/dlt
       name: dlt
@@ -188,7 +214,11 @@ data_stack:
       repo: apache/iceberg
       name: Apache Iceberg
       # Bare "iceberg" is an ordinary word ("the tip of the iceberg").
-      keywords: [apache iceberg, iceberg table, iceberg tables, iceberg catalog, pyiceberg]
+      keywords: [apache iceberg, iceberg table, iceberg tables, iceberg catalog]
+    - id: pyiceberg
+      repo: apache/iceberg-python
+      name: PyIceberg
+      # 2–4 releases a year.
     - id: duckdb
       repo: duckdb/duckdb
       name: DuckDB
@@ -199,6 +229,28 @@ data_stack:
     - id: trino
       repo: trinodb/trino
       name: Trino
+    # Data quality, lineage and catalogs (platform engineering & governance).
+    - id: great-expectations
+      repo: great-expectations/great_expectations
+      name: Great Expectations
+      # 2–3 releases a month.
+    - id: soda-core
+      repo: sodadata/soda-core
+      name: Soda Core
+      # Bare "soda" is a drink.
+      keywords: [soda core, soda-core, sodadata, soda data]
+    - id: openlineage
+      repo: OpenLineage/OpenLineage
+      name: OpenLineage
+      # Monthly releases.
+    - id: openmetadata
+      repo: open-metadata/OpenMetadata
+      name: OpenMetadata
+      # Tags end in "-release"; rc builds are flagged prerelease.
+    - id: sqlfluff
+      repo: sqlfluff/sqlfluff
+      name: SQLFluff
+      # A release every 6–8 weeks.
 
 # ── Data: vendor feeds ────────────────────────────────────────────────────────
 # Vendor release notes for the data report (ai-data), from the 2026-10-17 feed
@@ -240,6 +292,16 @@ data:
         - Azure Database for MySQL
         - Azure HorizonDB
         - Azure Blob Storage
+        - Azure Data Lake Storage
+        - Azure Cosmos DB
+        # Seen in the feed's taxonomy but with no item in the 200-item window of
+        # 2026-10-30; the exact category strings are unverified.
+        - Azure Data Factory
+        - Azure Synapse Analytics
+        - Azure Event Hubs
+        - Azure Stream Analytics
+        - Microsoft Purview
+        - Azure Data Explorer
     - name: Snowflake
       vendor: snowflake
       url: https://docs.snowflake.com/en/release-notes/all-release-notes?bundle=false
