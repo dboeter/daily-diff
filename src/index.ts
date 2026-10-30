@@ -84,7 +84,7 @@ import { loadResearchState, nextResearchState, saveResearchState, weekPapers } f
 import { fetchPolicyData, loadPolicyState, type PolicyData } from "./policy/items.ts";
 import { isDataLaw } from "./policy/relevance.ts";
 import { fetchVendorData, loadDataState, type VendorData } from "./data/vendors.ts";
-import { fetchCommunityPosts, type CommunityPost } from "./data/community.ts";
+import { fetchCommunityPosts, unshownPosts, type CommunityPost } from "./data/community.ts";
 import { buildComingUp } from "./reports/coming-up.ts";
 import { fetchHfData, type HfData } from "./sources/huggingface.ts";
 import { fetchDevtoData, type DevtoData } from "./sources/devto.ts";
@@ -287,7 +287,7 @@ async function fetchAllData(
     fetchArxivData(toCstDateStr(now)),
     fetchPolicyData(CONFIG.policy, now, toCstDateStr(now)),
     fetchVendorData(CONFIG.data, now, { trackedProjects: DATA_SECTION_KEYS.flatMap((k) => CONFIG[k].repos) }),
-    fetchCommunityPosts(CONFIG.data.community, toCstDateStr(now)),
+    fetchCommunityPosts(CONFIG.data.community, now),
     weekly ? fetchHfData() : Promise.resolve<HfData>({ models: [], fetchSuccess: false }),
     fetchDevtoData(),
     fetchLobstersData(),
@@ -420,11 +420,13 @@ async function main(): Promise<void> {
   const infraActivities = infraFetches.map(withNews);
   // The data projects are a pool of their own, without the compatibility-list
   // drop: a story naming DuckDB, Polars and Iceberg is news about the stack. The community feeds'
-  // posts join it (a DuckDB blog post is DuckDB news); the posts no project takes are the data
-  // report's News & discussion candidates. Posts an earlier report showed are filtered in the builder.
+  // posts no earlier report showed (`unshownPosts`: a post stays in its feed for 7 days, and is
+  // news once) join it (a DuckDB blog post is DuckDB news); the posts no project takes are the data
+  // report's News & discussion candidates.
+  const posts = unshownPosts(communityData.posts, vendorData.nextState.reported, dateStr);
   const dataNews = matchProjectNews(
     DATA_SECTIONS.flatMap((s) => s.repos),
-    { stories: fresh, trending: trendingData, posts: communityData.posts },
+    { stories: fresh, trending: trendingData, posts },
     Infinity,
   );
   const dataSections = DATA_SECTION_KEYS.map((key, i) => ({
@@ -553,8 +555,8 @@ async function main(): Promise<void> {
       undefined,
       {
         feeds: CONFIG.data.community,
-        posts: communityData.posts.filter((p) => !matchedIds.has(p.id)),
-        newsPostIds: communityData.posts.filter((p) => matchedIds.has(p.id)).map((p) => p.id),
+        posts: posts.filter((p) => !matchedIds.has(p.id)),
+        newsPostIds: posts.filter((p) => matchedIds.has(p.id)).map((p) => p.id),
         counts: communityData.counts,
         // Every page's Spotted rows: a post whose link a story on any page shows is a repeat.
         taken: new Set(spottedRows.map((r) => linkKey(r.url))),

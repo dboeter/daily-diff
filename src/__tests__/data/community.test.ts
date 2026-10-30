@@ -7,6 +7,7 @@ import {
   communityVerdict,
   fetchCommunityPosts,
   INSIGHT_MIN,
+  unshownPosts,
   keywordVerdict,
   MAX_COMMUNITY_ROWS,
   postId,
@@ -63,7 +64,10 @@ describe("fetchCommunityPosts", () => {
       if (u.includes("medium")) return new Response(fixture("medium-snowflake-2026-10-30.xml"));
       return new Response("", { status: 403 });
     });
-    const { posts, fetchSuccess, counts } = await fetchCommunityPosts(feeds, "2026-10-30");
+    const { posts, fetchSuccess, counts } = await fetchCommunityPosts(
+      feeds,
+      new Date("2026-10-30T06:00:00Z"),
+    );
     expect(fetchSuccess).toBe(true);
     expect(counts).toEqual({ "DuckDB blog": 2, "Snowflake on Medium": 2, Broken: null });
     expect(posts.map((p) => [p.source, p.date, p.title])).toEqual([
@@ -97,14 +101,50 @@ describe("fetchCommunityPosts", () => {
     vi.spyOn(globalThis, "fetch").mockImplementation(
       async () => new Response(fixture("duckdb-blog-2026-10-30.xml")),
     );
-    const late = await fetchCommunityPosts([feed("DuckDB blog")], "2026-11-10");
+    const late = await fetchCommunityPosts([feed("DuckDB blog")], new Date("2026-11-10T06:00:00Z"));
     expect(late.posts).toEqual([]);
     expect(late.counts).toEqual({ "DuckDB blog": 2 });
     vi.spyOn(globalThis, "fetch").mockImplementation(async () => new Response("", { status: 500 }));
-    const failed = await fetchCommunityPosts([feed("DuckDB blog")], "2026-10-30");
+    const failed = await fetchCommunityPosts([feed("DuckDB blog")], new Date("2026-10-30T06:00:00Z"));
     expect(failed).toEqual({ posts: [], fetchSuccess: false, counts: { "DuckDB blog": null } });
     // No feeds configured is not a failure.
-    expect((await fetchCommunityPosts([], "2026-10-30")).fetchSuccess).toBe(true);
+    expect((await fetchCommunityPosts([], new Date("2026-10-30T06:00:00Z"))).fetchSuccess).toBe(true);
+  });
+
+  it("measures the 7-day window in time, not calendar dates", async () => {
+    vi.spyOn(console, "log").mockImplementation(() => {});
+    vi.spyOn(globalThis, "fetch").mockImplementation(
+      async () => new Response(fixture("duckdb-blog-2026-10-30.xml")),
+    );
+    // The older post is dated 2026-10-26T00:00Z: in the window up to that instant 7 days on, out after it.
+    const inWindow = await fetchCommunityPosts([feed("DuckDB blog")], new Date("2026-11-01T23:59:00Z"));
+    expect(inWindow.posts.map((p) => p.date)).toEqual(["2026-10-29", "2026-10-26"]);
+    const edge = await fetchCommunityPosts([feed("DuckDB blog")], new Date("2026-11-02T00:01:00Z"));
+    expect(edge.posts.map((p) => p.date)).toEqual(["2026-10-29"]);
+  });
+});
+
+describe("unshownPosts", () => {
+  it("drops a post an earlier report showed, as news or as a row, and keeps one shown today", async () => {
+    vi.spyOn(console, "log").mockImplementation(() => {});
+    const { matchProjectNews } = await import("../../reports/project-news.ts");
+    const duckdb = { id: "duckdb", repo: "duckdb/duckdb", name: "DuckDB" };
+    const posts = [
+      post("a", { title: "Gems of DuckDB 2.0.0" }),
+      post("b", { title: "Iceberg metadata explained" }),
+      post("c", { title: "A new post today" }),
+    ];
+    // Day 1: a is DuckDB news, b a News & discussion candidate; the report records both.
+    const day1 = unshownPosts(posts, {}, "2026-10-29");
+    const news1 = matchProjectNews([duckdb], { posts: day1 }, Infinity);
+    expect(news1.get("duckdb")!.map((n) => n.id)).toEqual([posts[0]!.id]);
+    const reported = { [posts[0]!.id]: "2026-10-29", [posts[1]!.id]: "2026-10-29" };
+    // Day 2: neither comes back, as news or as a candidate; the feed still lists them.
+    const day2 = unshownPosts(posts, reported, "2026-10-30");
+    expect(day2.map((p) => p.id)).toEqual([posts[2]!.id]);
+    expect(matchProjectNews([duckdb], { posts: day2 }, Infinity).get("duckdb")).toEqual([]);
+    // A same-day re-run shows day 1's posts again.
+    expect(unshownPosts(posts, reported, "2026-10-29")).toHaveLength(3);
   });
 });
 

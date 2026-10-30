@@ -99,6 +99,7 @@ import {
   COMMUNITY_VERDICTS_FILE,
   loadCommunityVerdicts,
   selectCommunityPosts,
+  unshownPosts,
   type CommunityPost,
   type CommunityVerdicts,
 } from "../data/community.ts";
@@ -623,7 +624,11 @@ export interface CommunityInput {
   newsPostIds: string[];
   /** Items per feed (null: failed), for the trace's `sources` header. */
   counts: Record<string, number | null>;
-  /** Links the report's Spotted rows show (`linkKey`s): a post with one is `repeat`. */
+  /**
+   * Links the report's Spotted rows show (`linkKey`s), on every page: a post with one is `repeat`.
+   * Not the agents pool's project news: the two pools claim links apart (AGENTS.md, Data
+   * engineering), so a post an agents project shows as news can still be a data row.
+   */
   taken: Set<string>;
   jev?: { apiKey?: string; cache: CommunityVerdicts | null; ask?: AskJev };
   verdictsFile?: string;
@@ -637,9 +642,6 @@ export const NO_COMMUNITY: CommunityInput = {
   counts: {},
   taken: new Set(),
 };
-
-/** The data state's key of a shown community post: its id (`post:<linkKey>`). */
-const postKey = (id: string): string => id;
 
 /** A bullet line: `- `, `* ` or `1. `. */
 const BULLET_RE = /^\s*(?:[-*]|\d+\.)\s/;
@@ -760,9 +762,9 @@ export async function buildDataReport(
     unshown.filter((r) => !r.inSection),
     items.length,
   );
-  // The community posts no earlier report showed (a same-day re-run shows today's again).
-  const reported = vendor.nextState.reported;
-  const candidates = community.posts.filter((p) => (reported[postKey(p.id)] ?? dateStr) === dateStr);
+  // The community posts no earlier report showed (main() filtered them before matching; a direct
+  // caller may not have).
+  const candidates = unshownPosts(community.posts, vendor.nextState.reported, dateStr);
   const selection = await selectCommunityPosts(candidates, {
     feeds: community.feeds,
     ...(community.jev ?? { apiKey: process.env["TYPESAFE_API_KEY"], cache: loadCommunityVerdicts() }),
@@ -905,7 +907,8 @@ export async function buildDataReport(
       ...vendor.nextState.reported,
       ...Object.fromEntries(unshown.map((r) => [r.key, dateStr])),
       ...Object.fromEntries(
-        [...posts.map((p) => p.id), ...community.newsPostIds].map((id) => [postKey(id), dateStr]),
+        // The state keys a shown post on its id (`post:<linkKey>`).
+        [...posts.map((p) => p.id), ...community.newsPostIds].map((id) => [id, dateStr]),
       ),
     },
   };

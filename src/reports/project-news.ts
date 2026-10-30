@@ -27,7 +27,7 @@ export interface NewsSources {
   /** The fresh community stories: HN, Lobste.rs, Dev.to. */
   stories?: Story[];
   trending?: TrendingData;
-  /** The data report's community feed posts (blogs, newsletters) no earlier report showed. */
+  /** The data report's community feed posts (blogs, newsletters), already filtered to those no earlier report showed (`unshownPosts`). */
   posts?: CommunityPost[];
 }
 

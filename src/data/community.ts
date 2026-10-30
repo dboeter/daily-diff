@@ -9,7 +9,6 @@
 
 import path from "node:path";
 import type { CommunityFeed, CommunityKind } from "../core/config.ts";
-import { daysBefore } from "../core/date.ts";
 import {
   droppedFor,
   judgeItems,
@@ -23,7 +22,7 @@ import {
   type RankedBy,
   type VerdictCache,
 } from "../core/jev.ts";
-import { fetchRssFeed, NEWS_MAX_AGE_DAYS, plainText } from "../core/rss.ts";
+import { fetchRssFeed, NEWS_MAX_AGE_DAYS, plainText, recentNewsItems } from "../core/rss.ts";
 import { numberRows, type Numbered } from "../reports/summarized-table.ts";
 import { DATA_KEYWORD_PATTERNS } from "../sources/hn.ts";
 import { linkKey } from "../spotted/pool.ts";
@@ -62,15 +61,31 @@ export function cleanPostUrl(url: string): string {
 }
 
 /**
- * Every configured feed's posts of the last NEWS_MAX_AGE_DAYS (by `dateStr`),
- * fetched in parallel, one per link. `counts` is per feed name: null when its
- * fetch failed. Never throws.
+ * The posts no earlier report showed, as news under a project or as a News &
+ * discussion row: `reported` is the data state's map (`post:` keys → CST date
+ * first reported). A post reported today stays, so a same-day re-run shows the
+ * same ones. Applied before `matchProjectNews` (a post is a project's news once,
+ * not for the 7 days it stays in its feed) and again in the builder for callers
+ * that bypass the pipeline.
+ */
+export function unshownPosts(
+  posts: CommunityPost[],
+  reported: Record<string, string> | undefined,
+  dateStr: string,
+): CommunityPost[] {
+  return posts.filter((p) => (reported?.[p.id] ?? dateStr) === dateStr);
+}
+
+/**
+ * Every configured feed's posts of the last NEWS_MAX_AGE_DAYS at `now`
+ * (`recentNewsItems`: timestamps, not calendar dates, so a UTC post date and
+ * the CST run date cannot disagree at the edge), fetched in parallel, one per
+ * link. `counts` is per feed name: null when its fetch failed. Never throws.
  */
 export async function fetchCommunityPosts(
   feeds: CommunityFeed[],
-  dateStr: string,
+  now: Date,
 ): Promise<{ posts: CommunityPost[]; fetchSuccess: boolean; counts: Record<string, number | null> }> {
-  const oldest = daysBefore(dateStr, NEWS_MAX_AGE_DAYS);
   const results = await Promise.allSettled(
     feeds.map((f) => fetchRssFeed(f.url, (html) => plainText(html, POST_DESCRIPTION_MAX_CHARS))),
   );
@@ -83,9 +98,7 @@ export async function fetchCommunityPosts(
       );
       return [];
     }
-    const recent = r.value.filter(
-      (item) => item.link && item.published && item.published.slice(0, 10) >= oldest,
-    );
+    const recent = recentNewsItems(r.value, now).filter((item) => item.link);
     console.log(
       `  [community] ${feed.name}: ${r.value.length} items, ${recent.length} in the last ${NEWS_MAX_AGE_DAYS} days`,
     );
