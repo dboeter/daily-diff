@@ -13,7 +13,196 @@
       <height>144</height>
     </image>
     <atom:link href="https://dboeter.github.io/daily-diff/feeds/ai-data.xml" rel="self" type="application/rss+xml"/>
-    <lastBuildDate>Thu, 29 Oct 2026 05:38:26 +0000</lastBuildDate>
+    <lastBuildDate>Fri, 30 Oct 2026 05:37:40 +0000</lastBuildDate>
+    <item>
+      <title>Data Engineering 2026-10-30</title>
+      <link>https://dboeter.github.io/daily-diff/#2026-10-30/ai-data</link>
+      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-10-30/ai-data</guid>
+      <pubDate>Fri, 30 Oct 2026 00:00:00 +0000</pubDate>
+      <description>Data Engineering 2026-10-30 ⬛ Overview · 🟪 AI Agents · 🟦 AI Models &amp;amp; Labs · 🟧 AI Policy · 🟨 Data Engineering Vendor items: 10 | Projects: 17 | Active today: 7 | Stable releases: 4 | Prereleases (not covered): 0 | Generated: 2026-10-30 05:34 UTC Highlights dbt-databricks v1.13.0 introduces a breaking change for view models: views now use a single materialization regardless of use_materialization_v2; with the flag off, view_update_via_alter alters Unity Catalog views in place and fails on ...</description>
+      <content:encoded><![CDATA[<h1>Data Engineering 2026-10-30</h1>
+<p><a href="https://dboeter.github.io/daily-diff/#2026-10-30">⬛ Overview</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-30/ai-agents">🟪 AI Agents</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-30/ai-models">🟦 AI Models &amp; Labs</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-30/ai-policy">🟧 AI Policy</a> · <strong>🟨 Data Engineering</strong></p>
+<blockquote>
+<p>Vendor items: 10 | Projects: 17 | Active today: 7 | Stable releases: 4 | Prereleases (not covered): 0 | Generated: 2026-10-30 05:34 UTC</p>
+</blockquote>
+<hr>
+<h2>Highlights</h2>
+<ul>
+<li>dbt-databricks v1.13.0 introduces a breaking change for view models: views now use a single materialization regardless of <code>use_materialization_v2</code>; with the flag off, <code>view_update_via_alter</code> alters Unity Catalog views in place and fails on Hive metastore views. Databricks teams using dbt with view models must test and adjust materialization logic.</li>
+<li>dlt 1.32.0 introduces breaking changes: naive SCD2 timestamps are no longer read as UTC, <code>refresh=&quot;drop_resources&quot;</code> and <code>pipeline.drop()</code> now drop all tables belonging to resources, and Jira and Salesforce verified sources are rewritten. dlt users across platforms must test pipelines and update source configurations.</li>
+<li>Databricks CLI v1.23.0 reverts bundle file uploads to the legacy endpoint, fixing notebook uploads, and immutable-folder deploys now refuse deployment onto externally modified snapshots (use <code>--force</code> for fresh snapshot). Databricks bundle users should validate deployment workflows.</li>
+</ul>
+<hr>
+<h2>Action required</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Platform</th>
+<th align="left">Item</th>
+<th align="left">What to do</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-11-30</td>
+<td align="left">Azure Databricks</td>
+<td align="left"><a href="https://learn.microsoft.com/azure/databricks/release-notes/whats-coming#upcoming-end-of-life-for-the-genie-one-mcp-beta-endpoint">Upcoming end of life for the Genie One MCP Beta endpoint</a></td>
+<td align="left">The Genie One MCP Beta endpoint at <code>https://&lt;workspace-hostname&gt;/api/2.0/mcp/genie</code> reaches end of life on November 30, 2026, after which requests fail; migrate all workloads to the <code>system.ai.genie_one_mcp</code> MCP in Unity Gateway.</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>Databricks</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Item</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-10-28</td>
+<td align="left"><a href="https://learn.microsoft.com/azure/databricks/release-notes/unity-gateway#view-personal-and-shared-spend-limits-with-the-ug-cli">View personal and shared spend limits with the ug CLI</a></td>
+<td align="left">The <code>ug</code> CLI now displays up to five personal and shared spend limits ordered by highest percentage used; run <code>ug usage --all</code> to see all applicable limits.</td>
+</tr>
+</tbody></table>
+<h3>Delta Lake</h3>
+<ul>
+<li><strong>News:</strong> <a href="https://news.ycombinator.com/item?id=50259697">MiniLake</a> is a local Databricks API emulator that runs real SQL, real Delta Lake, and real Spark jobs, letting developers point the Databricks SDK, Terraform, or an LLM agent at localhost for local development and testing.</li>
+</ul>
+<h3>Databricks CLI</h3>
+<ul>
+<li><strong>Release:</strong> <a href="https://github.com/databricks/cli/releases/tag/v1.23.0">v1.23.0</a> reverts bundle file uploads to the legacy <code>/workspace-files/import-file</code> endpoint, fixing notebooks being uploaded as plain files and deployments failing (e.g., SQL notebooks); immutable-folder deploys now refuse to deploy onto a snapshot modified outside the bundle, with <code>bundle deploy --force</code> moving to a fresh snapshot.</li>
+<li><strong>Release:</strong> Adds <code>lifecycle.depends_on</code> to order resources without referencing their fields, <code>bundle deploy --select</code> for resource deletion selection, and a <code>workspace.sync_mode</code> setting (<code>overwrite</code>, <code>in-place</code>, <code>immutable</code>); <code>databricks ssh connect</code> now makes <code>claude</code> and <code>codex</code> available on dedicated clusters, serverless IDE sessions, and non-interactive commands.</li>
+<li><strong>Release:</strong> Fixes <code>bundle validate</code> failing with &quot;expected a map to index&quot; when a job <code>schedule</code>, <code>trigger</code>, or <code>continuous</code> references a whole block; adds GPU_1xRTX6000 accelerator workload support and shows only workspace-available accelerator types in <code>databricks air run -h config.compute</code>.</li>
+</ul>
+<h3>dbt-databricks</h3>
+<ul>
+<li><strong>Release:</strong> <a href="https://github.com/databricks/dbt-databricks/releases/tag/v1.13.0">v1.13.0</a> <strong>BREAKING for some view models:</strong> views now use one materialization regardless of <code>use_materialization_v2</code>; with the flag off, <code>view_update_via_alter</code> alters Unity Catalog views in place and fails on Hive metastore views, grants apply after tags, and view replacement calls <code>get_create_view_as_sql</code> overrides.</li>
+<li><strong>Release:</strong> Merges <code>tblproperties</code> additively across config hierarchy levels instead of replacing parent values; adds opt-in invocation telemetry via <code>connection_parameters.enable_dbt_telemetry</code> reporting aggregate POST_PARSE model configuration and POST_RUN outcomes.</li>
+<li><strong>Release:</strong> Replaces views with <code>CREATE OR REPLACE VIEW</code> when <code>use_safer_relation_operations</code> is on (including views inheriting <code>file_format: parquet</code>), so upstream column drops or renames no longer fail with <code>UNRESOLVED_COLUMN</code>; lets Predictive Optimization manage models with <code>auto_liquid_cluster</code> instead of running synchronous <code>OPTIMIZE</code> after materialization.</li>
+</ul>
+<p><strong>Quiet today:</strong> <a href="https://github.com/unitycatalog/unitycatalog">Unity Catalog</a>, <a href="https://github.com/mlflow/mlflow">MLflow</a></p>
+<hr>
+<h2>Snowflake</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Item</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-10-30</td>
+<td align="left"><a href="https://docs.snowflake.com/en/release-notes/2026/other/2026-10-30-snowflake-postgres-external-oauth-ga">External OAuth for Snowflake Postgres (General availability)</a></td>
+<td align="left">External OAuth for Snowflake Postgres lets you authenticate connections using access tokens from an external identity provider.</td>
+</tr>
+<tr>
+<td align="left">2026-10-30</td>
+<td align="left"><a href="https://docs.snowflake.com/en/release-notes/2026/other/2026-10-30-hybrid-tables-gcp-preview">Hybrid table support for Google Cloud (Preview)</a></td>
+<td align="left">Hybrid tables are now supported in all Google Cloud commercial regions in Preview, while remaining generally available on AWS and Azure.</td>
+</tr>
+<tr>
+<td align="left">2026-10-29</td>
+<td align="left"><a href="https://docs.snowflake.com/en/release-notes/2026/other/2026-10-29-dcr">Snowflake Data Clean Rooms updates</a></td>
+<td align="left">Snowflake Data Clean Rooms receives API version 19.1 with general performance improvements, bug fixes, and updates to private preview features.</td>
+</tr>
+<tr>
+<td align="left">2026-10-28</td>
+<td align="left">🤖 <a href="https://docs.snowflake.com/en/release-notes/2026/other/2026-10-28-ai-parse-document-agentic-mode-preview">AI_PARSE_DOCUMENT introduces AGENTIC mode for intelligent document processing (Public Preview)</a></td>
+<td align="left"><code>AI_PARSE_DOCUMENT</code> adds an <code>AGENTIC</code> mode that extracts actionable information from complex documents including charts and diagrams, not just text.</td>
+</tr>
+<tr>
+<td align="left">2026-10-27</td>
+<td align="left"><a href="https://docs.snowflake.com/en/release-notes/2026/other/2026-10-27-copy-metadata-carry-over">Carry over comments, tags, and privileges with COPY = ( ... )</a></td>
+<td align="left">The <code>COPY</code> parameter on <code>CREATE OR REPLACE</code> statements carries over comments, tags, and privileges from the replaced object so they need not be restated.</td>
+</tr>
+</tbody></table>
+<h3>Snowpark Python</h3>
+<ul>
+<li><strong>Release:</strong> <a href="https://github.com/snowflakedb/snowpark-python/releases/tag/v1.56.0">v1.56.0</a> adds <code>DataFrameReader.documents()</code> (private preview) for reading staged documents into DataFrames with schema-based extraction and parallel processing. Eager schema validation now raises invalid column references in <code>filter</code> and <code>sort</code> at DataFrame creation. Two bugs are fixed: missing dataframe trace info in errors when debuggability is enabled, and <code>Session.client_telemetry</code> failing to obtain a workload-identity auth token on the v5 connector.</li>
+</ul>
+<p><strong>Quiet today:</strong> <a href="https://github.com/snowflakedb/snowflake-connector-python">Snowflake Connector for Python</a>, <a href="https://github.com/apache/polaris">Apache Polaris</a></p>
+<hr>
+<h2>Azure / Fabric &amp; GCP</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Item</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-10-29</td>
+<td align="left"><a href="https://community.fabric.microsoft.com/t5/Fabric-Updates-Blog/Strengthening-data-security-with-workspace-level-private/ba-p/5377347">Strengthening data security with workspace-level private connectivity for custom endpoints for Eventstream (Preview)</a></td>
+<td align="left">Eventstream adds workspace-level private links for custom endpoint sources (Preview), letting applications in restricted networks send events to Fabric without a public internet path.</td>
+</tr>
+<tr>
+<td align="left">2026-10-29</td>
+<td align="left"><a href="https://community.fabric.microsoft.com/t5/Fabric-Updates-Blog/Manage-once-reuse-everywhere-Introducing-variable-library/ba-p/5377349">Manage once, reuse everywhere: Introducing variable library support for Eventstream (Preview)</a></td>
+<td align="left">Variable library integration for Eventstream (Preview) lets teams reuse a single eventstream definition across environments by referencing environment-specific resources that resolve at runtime and persist through Git and deployment pipelines.</td>
+</tr>
+<tr>
+<td align="left">2026-10-29</td>
+<td align="left">🤖 <a href="https://community.fabric.microsoft.com/t5/Fabric-Updates-Blog/Introducing-the-data-engineering-agent-for-Fabric-Project-Osmos/ba-p/5377944">Introducing the data engineering agent for Fabric (Project Osmos)</a></td>
+<td align="left">Project Osmos introduces a data engineering agent that generates Spark code from natural language and addresses validation, schema drift, and incremental-load correctness concerns.</td>
+</tr>
+<tr>
+<td align="left">2026-10-29</td>
+<td align="left">🤖 <a href="https://community.fabric.microsoft.com/t5/Fabric-Updates-Blog/Bringing-Rust-native-Spark-compatibility-to-Microsoft-OneLake/ba-p/5377595">Bringing Rust-native Spark compatibility to Microsoft OneLake with Sail and LakeSail</a></td>
+<td align="left">Sail, a Rust-native drop-in replacement for Apache Spark with built-in Delta Lake and Apache Iceberg support, connects natively to OneLake alongside LakeSail Cloud Sessions for managed execution.</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>Open-source stack</h2>
+<h3>Apache Airflow</h3>
+<ul>
+<li><strong>Hot issue:</strong> <a href="https://github.com/apache/airflow/issues/75865">#75865</a>: An issue tracks the testing status of Apache Airflow 3.4.0rc1, requesting contributors to verify changes in the release candidate. (23 comments, 0 👍; +17 in the last 24h)</li>
+</ul>
+<h3>dlt</h3>
+<ul>
+<li><strong>Release:</strong> <a href="https://github.com/dlt-hub/dlt/releases/tag/1.32.0">1.32.0</a> introduces breaking changes: naive scd2 timestamps are no longer read as UTC, <code>refresh=&quot;drop_resources&quot;</code> and <code>pipeline.drop()</code> now drop all tables belonging to resources, Arrow extract shares resolved schema contract per table, and Jira and Salesforce verified sources are rewritten from scratch.</li>
+</ul>
+<h3>DuckDB</h3>
+<ul>
+<li><strong>News:</strong> A Hacker News post discusses a data engineer&#39;s journey from spreadsheets to DuckLake via DuckDB, highlighting DuckDB&#39;s ability to handle analytical tasks without operational complexity.</li>
+</ul>
+<p><strong>Quiet today:</strong> <a href="https://github.com/dbt-labs/dbt">dbt Core</a>, <a href="https://github.com/SQLMesh/sqlmesh">SQLMesh</a>, <a href="https://github.com/dagster-io/dagster">Dagster</a>, <a href="https://github.com/apache/iceberg">Apache Iceberg</a>, <a href="https://github.com/pola-rs/polars">Polars</a>, <a href="https://github.com/trinodb/trino">Trino</a></p>
+<hr>
+<h2>Across platforms</h2>
+<ul>
+<li>AI-assisted data engineering appears on Snowflake and Fabric: Snowflake&#39;s <code>AI_PARSE_DOCUMENT</code> adds <code>AGENTIC</code> mode (Public Preview) for extracting actionable information from complex documents including charts and diagrams; Fabric&#39;s Project Osmos (Preview) introduces a data engineering agent that generates Spark code from natural language and handles validation, schema drift, and incremental-load correctness. Both are in preview; Snowflake focuses on document understanding, Fabric on code generation.</li>
+</ul>
+<hr>
+<h2>Spotted</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Story</th>
+<th align="left">Source</th>
+<th align="left">Discussion</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a href="https://editsqlite.com/">Edit an SQLite database in your browser</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50255161">66 points, 33 comments</a></td>
+<td align="left">A browser-based tool lets users open, edit, and re-export SQLite databases locally with a spreadsheet grid, SQL console, and a writer that passes SQLite&#39;s official integrity check.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://www.paradedb.com/blog/opening-a-closed-tin-part-2">Solving Postgres&#39; Count Problem</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50269668">17 points, 0 comments</a></td>
+<td align="left">ParadeDB accelerated Wikipedia COUNT queries using ctid-aware segment partitioning, an inverted DocId map, and bitmap postings, achieving 10–22x higher throughput than Tantivy on filtered, time-sorted Hacker News queries.</td>
+</tr>
+</tbody></table>
+<hr>
+<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
+]]></content:encoded>
+    </item>
     <item>
       <title>Data Engineering 2026-10-29</title>
       <link>https://dboeter.github.io/daily-diff/#2026-10-29/ai-data</link>

@@ -13,7 +13,466 @@
       <height>144</height>
     </image>
     <atom:link href="https://dboeter.github.io/daily-diff/feed.xml" rel="self" type="application/rss+xml"/>
-    <lastBuildDate>Thu, 29 Oct 2026 05:38:25 +0000</lastBuildDate>
+    <lastBuildDate>Fri, 30 Oct 2026 05:37:39 +0000</lastBuildDate>
+    <item>
+      <title>AI Agents 2026-10-30</title>
+      <link>https://dboeter.github.io/daily-diff/#2026-10-30/ai-agents</link>
+      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-10-30/ai-agents</guid>
+      <pubDate>Fri, 30 Oct 2026 00:00:00 +0000</pubDate>
+      <description>AI Agents 2026-10-30 ⬛ Overview · 🟪 AI Agents · 🟦 AI Models &amp;amp; Labs · 🟧 AI Policy · 🟨 Data Engineering Projects: 16 | Active today: 5 | Stable releases: 6 | Prereleases (not covered): 6 | Generated: 2026-10-30 05:34 UTC Highlights Oh My Pi v18.14.0 introduces breaking changes: removes Bun event-loop workarounds, raw models.json export, and filesystem scan cache API; moves provider helpers to dedicated modules; requires provider-qualified model selectors; changes custom tool loader constru...</description>
+      <content:encoded><![CDATA[<h1>AI Agents 2026-10-30</h1>
+<p><a href="https://dboeter.github.io/daily-diff/#2026-10-30">⬛ Overview</a> · <strong>🟪 AI Agents</strong> · <a href="https://dboeter.github.io/daily-diff/#2026-10-30/ai-models">🟦 AI Models &amp; Labs</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-30/ai-policy">🟧 AI Policy</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-30/ai-data">🟨 Data Engineering</a></p>
+<blockquote>
+<p>Projects: 16 | Active today: 5 | Stable releases: 6 | Prereleases (not covered): 6 | Generated: 2026-10-30 05:34 UTC</p>
+</blockquote>
+<hr>
+<h2>Highlights</h2>
+<ul>
+<li>Oh My Pi v18.14.0 introduces breaking changes: removes Bun event-loop workarounds, raw <code>models.json</code> export, and filesystem scan cache API; moves provider helpers to dedicated modules; requires provider-qualified model selectors; changes custom tool loader constructors to take <code>cwd</code> first.</li>
+<li>Users report Claude Code&#39;s <code>agent_summary</code> spinner consumes ~18% of weighted tokens in subagent-heavy sessions, with requests for a supported way to disable it via env var or settings.</li>
+<li>OpenAI Codex rust-v0.166.0 adds GPT-6.1 Terra to model catalogs and <code>codex queue --resume</code> for resuming queued tasks, plus keyboard-driven transcript selection and clearer safety-block explanations.</li>
+</ul>
+<hr>
+<h2>Coding Agents &amp; Assistants</h2>
+<h3>Claude Code</h3>
+<ul>
+<li><strong>Release:</strong> <a href="https://github.com/anthropics/claude-code/releases/tag/v2.1.314">v2.1.314</a> adds <code>permissions.blockWritesOutsideWorkingDirectories</code> to block writes outside working directories in every permission mode; fixes sessions failing with &quot;Invalid effort level&quot; when org admins cap model effort; fixes <code>claude -p</code> exiting silently on startup failure; fixes Bedrock image handling and Microsoft Foundry model fallback.</li>
+<li><strong>Hot issue:</strong> <a href="https://github.com/anthropics/claude-code/issues/86879">#86879</a>: users report the <code>agent_summary</code> spinner consumes ~18% of weighted tokens in subagent-heavy sessions and request a supported way to disable it via env var or settings. (8 comments, 80 👍; +80 in the last 24h)</li>
+<li><strong>Hot issue:</strong> <a href="https://github.com/anthropics/claude-code/issues/105503">#105503</a>: an issue says the safety classifier blocks benign work on a public puzzle challenge (WeChall BrownOS), stopping protocol reverse-engineering of a toy lambda-calculus interpreter. (area:security; 3 comments, 0 👍; +3 since 2026-10-28)</li>
+<li><strong>News:</strong> <a href="https://news.ycombinator.com/item?id=50286306">Hacker News post</a> alleges Claude Code adds the user&#39;s email to the prompt and the LLM sends it to websites.</li>
+</ul>
+<h3>OpenAI Codex</h3>
+<ul>
+<li><strong>Release:</strong> <a href="https://github.com/openai/codex/releases/tag/rust-v0.166.0">rust-v0.166.0</a> adds keyboard-driven transcript selection with word/line/page motions, consistent Markdown rendering in async UI, GPT-6.1 Terra to model catalogs, <code>codex queue --resume</code>, clearer safety-block explanations, and <code>codex doctor --network-only</code>; fixes approval/permission preservation on resume/fork and TUI reconnection.</li>
+<li><strong>Hot issue:</strong> <a href="https://github.com/openai/codex/issues/57641">#57641</a>: users report Terminal CLI <code>@Browser</code> fails with &quot;The browser access host is unavailable&quot; on Windows 11 with Brave after desktop app update 26.1023.6123.0, while desktop app chats still work. (13 comments, 5 👍; +11 in the last 24h)</li>
+<li><strong>News:</strong> <a href="https://news.ycombinator.com/item?id=50292524">Hacker News post</a> announces OpenAI is doubling usage limits for all Pro 100/200/500 tiers and Business Premium, effective immediately.</li>
+</ul>
+<h3>OpenCode</h3>
+<ul>
+<li><strong>Release:</strong> <a href="https://github.com/anomalyco/opencode/releases/tag/v2.2.2">v2.2.2</a> enables <code>experimental_image_generate</code> by default when an image-capable provider is connected; adds faster worktree selection via Git branch click on new-session screen; unifies quotes and annotations around a compact optional-comment editor; fixes persistent terminal requests with missing working directories and media preservation on session fork/import.</li>
+<li><strong>Release:</strong> <a href="https://github.com/anomalyco/opencode/releases/tag/process-daemon-v0.4.0">process-daemon-v0.4.0</a> publishes opencode-pty 0.4.0 (protocol 7) as @opencode/<a href="mailto:pty@0.4.0">pty@0.4.0</a>.</li>
+</ul>
+<h3>Oh My Pi</h3>
+<ul>
+<li><strong>Release:</strong> <a href="https://github.com/can1357/oh-my-pi/releases/tag/v18.14.0">v18.14.0</a> removes Bun event-loop workaround utilities, moves Anthropic/Codex/OpenAI helpers to dedicated provider modules, updates auth-gateway model resolvers to receive <code>ModelResolveOptions</code>, removes raw <code>models.json</code> export in favor of bundled registry APIs, changes custom tool loader constructors to take <code>cwd</code> first, switches WebMCP to Chrome&#39;s native WebMcpController, requires provider-qualified model selectors to identify exact model IDs, and removes filesystem scan cache API and environment variables.</li>
+</ul>
+<h3>Hermes Agent</h3>
+<ul>
+<li><strong>Hot issue:</strong> <a href="https://github.com/NousResearch/hermes-agent/issues/146356">#146356</a>: an issue says plain-text input typed into an idle session&#39;s window is hijacked into a different running session&#39;s turn as a mid-turn steer on Hermes Desktop with multiple chat windows; the hijacked messages are never persisted to any session&#39;s messages table. (type/security; 5 comments, 0 👍; +5 in the last 24h)</li>
+<li><strong>Hot issue:</strong> <a href="https://github.com/NousResearch/hermes-agent/issues/118379">#118379</a>: an issue says Anthropic per-request credential refresh reverts credential-pool rotation — two pooled subscriptions bill as one, the turn falls through to fallback providers while the second account&#39;s quota remains untouched. (sweeper:risk-security-boundary; 11 comments, 1 👍; +3 since 2026-10-28; fix PR <a href="https://github.com/NousResearch/hermes-agent/pull/123361">#123361</a> open)</li>
+</ul>
+<p><strong>Quiet today:</strong> <a href="https://github.com/google-gemini/gemini-cli">Gemini CLI</a>, <a href="https://github.com/Kilo-Org/kilocode">Kilo Code</a>, <a href="https://github.com/earendil-works/pi">Pi</a>, <a href="https://github.com/1jehuang/jcode">jcode</a>, <a href="https://github.com/cline/cline">Cline</a>, <a href="https://github.com/CommandCodeAI/command-code">Command Code</a>, <a href="https://github.com/deepseek-ai/deepseek-harness">DeepSeek Harness</a></p>
+<hr>
+<h2>Agent Tooling</h2>
+<p><strong>Quiet today:</strong> <a href="https://github.com/NVIDIA/OpenShell">OpenShell</a>, <a href="https://github.com/herdrdev/herdr">herdr</a>, <a href="https://github.com/mksglu/context-mode">context-mode</a>, <a href="https://github.com/asheshgoplani/agent-deck">Agent Deck</a></p>
+<hr>
+<h2>Spotted</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Story</th>
+<th align="left">Source</th>
+<th align="left">Discussion</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a href="https://labs.ycombinator.com/projects/games/index.html">We ran AI agent swarms in Minecraft and Mindustry</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50296486">232 points, 76 comments</a></td>
+<td align="left">The authors ran swarms of Claude and GPT agents in Minecraft and Mindustry.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50291116">Launch HN: Simantic (YC F26) – Firmware Simulation for AI Agents</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50291116">58 points, 16 comments</a></td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left">Show HN: phpClaw – AI agent runtime for PHP with tools, memory and guards (<a href="https://github.com/phpclaw-php/phpclaw-monorepo">phpclaw-php/phpclaw-monorepo</a>)</td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50293361">11 points, 4 comments</a></td>
+<td align="left">The author released phpClaw, an open-source AI agent framework for PHP with a built-in ReAct loop, memory, tools, and security guards that integrates with frameworks like Laravel and WordPress.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://fig.blue/posts/duet-is-the-future/">Claude Duet is the first personal-assistant-type harness that feels useful</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50292727">113 points, 111 comments</a></td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left"><a href="https://www.wired.com/story/a-defense-contractor-gave-their-personal-ai-agent-access-to-a-secure-pentagon-system/">A Defense Contractor Gave Their AI Agent Access to a Secure Pentagon System</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50293979">19 points, 6 comments</a></td>
+<td align="left">An Accenture employee&#39;s personal Claude agent reportedly ran on a DOD network for two months before detection.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://skypilot.ai/blog/grace-blackwell-needs-a-new-scheduler">Grace Blackwell needs a new scheduler: 27% more usable GPUs from the same racks</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50290912">134 points, 21 comments</a></td>
+<td align="left">SkyPilot&#39;s topology-aware scheduler achieves 27% more usable GPUs on NVL72 racks by keeping multi-node training on NVLink with automatic defragmentation and in-place failure recovery.</td>
+</tr>
+</tbody></table>
+<hr>
+<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
+]]></content:encoded>
+    </item>
+    <item>
+      <title>AI Models &amp; Labs 2026-10-30</title>
+      <link>https://dboeter.github.io/daily-diff/#2026-10-30/ai-models</link>
+      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-10-30/ai-models</guid>
+      <pubDate>Fri, 30 Oct 2026 00:00:00 +0000</pubDate>
+      <description>AI Models &amp;amp; Labs 2026-10-30 ⬛ Overview · 🟪 AI Agents · 🟦 AI Models &amp;amp; Labs · 🟧 AI Policy · 🟨 Data Engineering Lab posts: 2 | New models: 0 | Spotted: 7 | Generated: 2026-10-30 05:34 UTC Highlights Mistral AI released Mistral Large 4 weights, a 1 trillion parameter multimodal model trained in Europe that leads open-weight models on coding benchmarks. Gemini 4 Carbon ranks first on the Artificial Analysis Intelligence Index v5 and second to Claude Opus 5.5 on the Coding Agent Index, acc...</description>
+      <content:encoded><![CDATA[<h1>AI Models &amp; Labs 2026-10-30</h1>
+<p><a href="https://dboeter.github.io/daily-diff/#2026-10-30">⬛ Overview</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-30/ai-agents">🟪 AI Agents</a> · <strong>🟦 AI Models &amp; Labs</strong> · <a href="https://dboeter.github.io/daily-diff/#2026-10-30/ai-policy">🟧 AI Policy</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-30/ai-data">🟨 Data Engineering</a></p>
+<blockquote>
+<p>Lab posts: 2 | New models: 0 | Spotted: 7 | Generated: 2026-10-30 05:34 UTC</p>
+</blockquote>
+<hr>
+<h2>Highlights</h2>
+<ul>
+<li>Mistral AI released Mistral Large 4 weights, a 1 trillion parameter multimodal model trained in Europe that leads open-weight models on coding benchmarks.</li>
+<li>Gemini 4 Carbon ranks first on the Artificial Analysis Intelligence Index v5 and second to Claude Opus 5.5 on the Coding Agent Index, according to Artificial Analysis.</li>
+<li>Epoch AI found GLM 5.3 converted published-but-unshipped Firefox security fixes into working one-click exploits for six releases at approximately $1,000 per exploit.</li>
+</ul>
+<hr>
+<h2>Lab announcements</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Lab</th>
+<th align="left">Post</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-10-30</td>
+<td align="left">OpenAI</td>
+<td align="left"><a href="https://openai.com/index/updated-model-spec/">Updated Model Spec</a></td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left">2026-10-30</td>
+<td align="left">OpenAI</td>
+<td align="left"><a href="https://openai.com/index/how-we-detect-frontier-model-misalignment/">How We Detect Frontier Model Misalignment</a></td>
+<td align="left">—</td>
+</tr>
+</tbody></table>
+<hr>
+<p>Nothing new from OpenRouter&#39;s new listings or OpenRouter&#39;s stealth models today.</p>
+<hr>
+<h2>Spotted</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Story</th>
+<th align="left">Source</th>
+<th align="left">Discussion</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a href="https://mistral.ai/news/mistral-large-4-oss/">We&#39;re releasing the weights of Mistral Large 4</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50289418">1294 points, 359 comments</a></td>
+<td align="left">Mistral AI released the weights of Mistral Large 4, a 1 trillion parameter multimodal model trained in Europe that leads open-weight models on coding benchmarks.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://artificialanalysis.ai/articles/gemini-4-carbon-new-number-1">Gemini 4 Carbon is the new #1 on the Artificial Analysis Intelligence Index v5</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50288019">329 points, 240 comments</a></td>
+<td align="left">Google&#39;s Gemini 4 Carbon tops the Artificial Analysis Intelligence Index v5 and ranks second to Claude Opus 5.5 on the Coding Agent Index.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://huggingface.co/Nanbeige/Nanbeige4.3-33B">Nanbeige4.3-33B – Flagship teacher LLM</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50296877">4 points, 0 comments</a></td>
+<td align="left">A 33B parameter text generation model named Nanbeige4.3-33B is available on Hugging Face.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://www.bbc.com/news/articles/cm9qzdqpxy48o">Google value plunges by $500B as AI fears rattle Wall Street</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50297037">48 points, 23 comments</a></td>
+<td align="left">Google&#39;s market value dropped $500B to a six-month low after the company disclosed that AI search summaries are impacting ad revenue.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://divergencelabs.com/publications/ige-preprint.pdf">IgE disruptor for food allergy with Claude-enabled antibody design [pdf]</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50294486">44 points, 34 comments</a></td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left"><a href="https://epoch.ai/publications/open-weight-models-patch-gap">Open-weight AI models can exploit the patch gap</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50297159">10 points, 8 comments</a></td>
+<td align="left">GLM 5.3 converted published-but-unshipped Firefox security fixes into working one-click exploits for six releases at approximately $1,000 per exploit.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://divagr.com/blog/qwenputer">Qwenputer: a fully functioning, deterministic RISC-V CPU inside Qwen3.5</a></td>
+<td align="left">Lobste.rs</td>
+<td align="left"><a href="https://lobste.rs/s/zftely/qwenputer_fully_functioning">42 points, 5 comments</a></td>
+<td align="left">The author embedded a deterministic RISC-V CPU into Qwen 3.5 4B&#39;s weights using Gated DeltaNet layers as RAM, enabling it to run C and MicroPython during forward passes for exact arithmetic.</td>
+</tr>
+</tbody></table>
+<hr>
+<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
+]]></content:encoded>
+    </item>
+    <item>
+      <title>AI Policy 2026-10-30</title>
+      <link>https://dboeter.github.io/daily-diff/#2026-10-30/ai-policy</link>
+      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-10-30/ai-policy</guid>
+      <pubDate>Fri, 30 Oct 2026 00:00:00 +0000</pubDate>
+      <description>AI Policy 2026-10-30 ⬛ Overview · 🟪 AI Agents · 🟦 AI Models &amp;amp; Labs · 🟧 AI Policy · 🟨 Data Engineering Sources: Digitale Overheid + Autoriteit Persoonsgegevens | 2 new items ranked by Jev relevance | Generated: 2026-10-30 05:34 UTC Highlights The Dutch government published new guidance on jointly applying the Human Rights and Algorithms Impact Assessment (IAMA) and a model Data Protection Impact Assessment (DPIA) for public-sector use. Separately, the Dutch Data Protection Authority (AP) ...</description>
+      <content:encoded><![CDATA[<h1>AI Policy 2026-10-30</h1>
+<p><a href="https://dboeter.github.io/daily-diff/#2026-10-30">⬛ Overview</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-30/ai-agents">🟪 AI Agents</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-30/ai-models">🟦 AI Models &amp; Labs</a> · <strong>🟧 AI Policy</strong> · <a href="https://dboeter.github.io/daily-diff/#2026-10-30/ai-data">🟨 Data Engineering</a></p>
+<blockquote>
+<p>Sources: Digitale Overheid + Autoriteit Persoonsgegevens | 2 new items ranked by <a href="https://typesafe.ai">Jev</a> relevance | Generated: 2026-10-30 05:34 UTC</p>
+</blockquote>
+<hr>
+<h2>Highlights</h2>
+<p>The Dutch government published new guidance on jointly applying the Human Rights and Algorithms Impact Assessment (IAMA) and a model Data Protection Impact Assessment (DPIA) for public-sector use. Separately, the Dutch Data Protection Authority (AP) contacted 29 debt-collection agencies following a sample review of their growing use of algorithms and AI, signalling supervisory attention to responsible deployment in that sector.</p>
+<h2>Netherlands</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Source</th>
+<th align="left">Title</th>
+<th align="left">Stage</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-10-29</td>
+<td align="left">Digitale Overheid</td>
+<td align="left"><a href="https://www.digitaleoverheid.nl/nieuws/nieuwe-handreiking-gebruik-iama-en-model-dpia-rijksdienst/">Nieuwe handreiking gebruik IAMA en Model DPIA Rijksdienst</a></td>
+<td align="left">—</td>
+<td align="left">The Dutch Digital Government published new guidance for the combined use of the Human Rights and Algorithms Impact Assessment (IAMA) and a model Data Protection Impact Assessment (DPIA) by the Government Service.</td>
+</tr>
+<tr>
+<td align="left">2026-10-29</td>
+<td align="left">Autoriteit Persoonsgegevens</td>
+<td align="left"><a href="https://autoriteitpersoonsgegevens.nl/actueel/ap-informeert-incassobureaus-over-verantwoorde-inzet-ai">AP informeert incassobureaus over verantwoorde inzet AI</a></td>
+<td align="left">—</td>
+<td align="left">The Dutch Data Protection Authority (AP) informed debt collection agencies about responsible AI use after a survey revealed risks of incorrect decisions, discrimination, and unequal treatment. The AP issued recommendations to the sector to help prevent misuse of algorithmic systems.</td>
+</tr>
+</tbody></table>
+<h2>Coming up</h2>
+<p>Deadlines and dates in the next 30 days.</p>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Source</th>
+<th align="left">Item</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-11-09</td>
+<td align="left">Have your say</td>
+<td align="left"><a href="https://ec.europa.eu/info/law/better-regulation/have-your-say/initiatives/19292_en">Articles 75c – 75d AI Act Implementing Act</a></td>
+</tr>
+<tr>
+<td align="left">2026-11-11</td>
+<td align="left">Have your say</td>
+<td align="left"><a href="https://ec.europa.eu/info/law/better-regulation/have-your-say/initiatives/14628_en">Cloud and AI Development Act</a></td>
+</tr>
+</tbody></table>
+<hr>
+<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
+]]></content:encoded>
+    </item>
+    <item>
+      <title>Data Engineering 2026-10-30</title>
+      <link>https://dboeter.github.io/daily-diff/#2026-10-30/ai-data</link>
+      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-10-30/ai-data</guid>
+      <pubDate>Fri, 30 Oct 2026 00:00:00 +0000</pubDate>
+      <description>Data Engineering 2026-10-30 ⬛ Overview · 🟪 AI Agents · 🟦 AI Models &amp;amp; Labs · 🟧 AI Policy · 🟨 Data Engineering Vendor items: 10 | Projects: 17 | Active today: 7 | Stable releases: 4 | Prereleases (not covered): 0 | Generated: 2026-10-30 05:34 UTC Highlights dbt-databricks v1.13.0 introduces a breaking change for view models: views now use a single materialization regardless of use_materialization_v2; with the flag off, view_update_via_alter alters Unity Catalog views in place and fails on ...</description>
+      <content:encoded><![CDATA[<h1>Data Engineering 2026-10-30</h1>
+<p><a href="https://dboeter.github.io/daily-diff/#2026-10-30">⬛ Overview</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-30/ai-agents">🟪 AI Agents</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-30/ai-models">🟦 AI Models &amp; Labs</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-30/ai-policy">🟧 AI Policy</a> · <strong>🟨 Data Engineering</strong></p>
+<blockquote>
+<p>Vendor items: 10 | Projects: 17 | Active today: 7 | Stable releases: 4 | Prereleases (not covered): 0 | Generated: 2026-10-30 05:34 UTC</p>
+</blockquote>
+<hr>
+<h2>Highlights</h2>
+<ul>
+<li>dbt-databricks v1.13.0 introduces a breaking change for view models: views now use a single materialization regardless of <code>use_materialization_v2</code>; with the flag off, <code>view_update_via_alter</code> alters Unity Catalog views in place and fails on Hive metastore views. Databricks teams using dbt with view models must test and adjust materialization logic.</li>
+<li>dlt 1.32.0 introduces breaking changes: naive SCD2 timestamps are no longer read as UTC, <code>refresh=&quot;drop_resources&quot;</code> and <code>pipeline.drop()</code> now drop all tables belonging to resources, and Jira and Salesforce verified sources are rewritten. dlt users across platforms must test pipelines and update source configurations.</li>
+<li>Databricks CLI v1.23.0 reverts bundle file uploads to the legacy endpoint, fixing notebook uploads, and immutable-folder deploys now refuse deployment onto externally modified snapshots (use <code>--force</code> for fresh snapshot). Databricks bundle users should validate deployment workflows.</li>
+</ul>
+<hr>
+<h2>Action required</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Platform</th>
+<th align="left">Item</th>
+<th align="left">What to do</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-11-30</td>
+<td align="left">Azure Databricks</td>
+<td align="left"><a href="https://learn.microsoft.com/azure/databricks/release-notes/whats-coming#upcoming-end-of-life-for-the-genie-one-mcp-beta-endpoint">Upcoming end of life for the Genie One MCP Beta endpoint</a></td>
+<td align="left">The Genie One MCP Beta endpoint at <code>https://&lt;workspace-hostname&gt;/api/2.0/mcp/genie</code> reaches end of life on November 30, 2026, after which requests fail; migrate all workloads to the <code>system.ai.genie_one_mcp</code> MCP in Unity Gateway.</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>Databricks</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Item</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-10-28</td>
+<td align="left"><a href="https://learn.microsoft.com/azure/databricks/release-notes/unity-gateway#view-personal-and-shared-spend-limits-with-the-ug-cli">View personal and shared spend limits with the ug CLI</a></td>
+<td align="left">The <code>ug</code> CLI now displays up to five personal and shared spend limits ordered by highest percentage used; run <code>ug usage --all</code> to see all applicable limits.</td>
+</tr>
+</tbody></table>
+<h3>Delta Lake</h3>
+<ul>
+<li><strong>News:</strong> <a href="https://news.ycombinator.com/item?id=50259697">MiniLake</a> is a local Databricks API emulator that runs real SQL, real Delta Lake, and real Spark jobs, letting developers point the Databricks SDK, Terraform, or an LLM agent at localhost for local development and testing.</li>
+</ul>
+<h3>Databricks CLI</h3>
+<ul>
+<li><strong>Release:</strong> <a href="https://github.com/databricks/cli/releases/tag/v1.23.0">v1.23.0</a> reverts bundle file uploads to the legacy <code>/workspace-files/import-file</code> endpoint, fixing notebooks being uploaded as plain files and deployments failing (e.g., SQL notebooks); immutable-folder deploys now refuse to deploy onto a snapshot modified outside the bundle, with <code>bundle deploy --force</code> moving to a fresh snapshot.</li>
+<li><strong>Release:</strong> Adds <code>lifecycle.depends_on</code> to order resources without referencing their fields, <code>bundle deploy --select</code> for resource deletion selection, and a <code>workspace.sync_mode</code> setting (<code>overwrite</code>, <code>in-place</code>, <code>immutable</code>); <code>databricks ssh connect</code> now makes <code>claude</code> and <code>codex</code> available on dedicated clusters, serverless IDE sessions, and non-interactive commands.</li>
+<li><strong>Release:</strong> Fixes <code>bundle validate</code> failing with &quot;expected a map to index&quot; when a job <code>schedule</code>, <code>trigger</code>, or <code>continuous</code> references a whole block; adds GPU_1xRTX6000 accelerator workload support and shows only workspace-available accelerator types in <code>databricks air run -h config.compute</code>.</li>
+</ul>
+<h3>dbt-databricks</h3>
+<ul>
+<li><strong>Release:</strong> <a href="https://github.com/databricks/dbt-databricks/releases/tag/v1.13.0">v1.13.0</a> <strong>BREAKING for some view models:</strong> views now use one materialization regardless of <code>use_materialization_v2</code>; with the flag off, <code>view_update_via_alter</code> alters Unity Catalog views in place and fails on Hive metastore views, grants apply after tags, and view replacement calls <code>get_create_view_as_sql</code> overrides.</li>
+<li><strong>Release:</strong> Merges <code>tblproperties</code> additively across config hierarchy levels instead of replacing parent values; adds opt-in invocation telemetry via <code>connection_parameters.enable_dbt_telemetry</code> reporting aggregate POST_PARSE model configuration and POST_RUN outcomes.</li>
+<li><strong>Release:</strong> Replaces views with <code>CREATE OR REPLACE VIEW</code> when <code>use_safer_relation_operations</code> is on (including views inheriting <code>file_format: parquet</code>), so upstream column drops or renames no longer fail with <code>UNRESOLVED_COLUMN</code>; lets Predictive Optimization manage models with <code>auto_liquid_cluster</code> instead of running synchronous <code>OPTIMIZE</code> after materialization.</li>
+</ul>
+<p><strong>Quiet today:</strong> <a href="https://github.com/unitycatalog/unitycatalog">Unity Catalog</a>, <a href="https://github.com/mlflow/mlflow">MLflow</a></p>
+<hr>
+<h2>Snowflake</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Item</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-10-30</td>
+<td align="left"><a href="https://docs.snowflake.com/en/release-notes/2026/other/2026-10-30-snowflake-postgres-external-oauth-ga">External OAuth for Snowflake Postgres (General availability)</a></td>
+<td align="left">External OAuth for Snowflake Postgres lets you authenticate connections using access tokens from an external identity provider.</td>
+</tr>
+<tr>
+<td align="left">2026-10-30</td>
+<td align="left"><a href="https://docs.snowflake.com/en/release-notes/2026/other/2026-10-30-hybrid-tables-gcp-preview">Hybrid table support for Google Cloud (Preview)</a></td>
+<td align="left">Hybrid tables are now supported in all Google Cloud commercial regions in Preview, while remaining generally available on AWS and Azure.</td>
+</tr>
+<tr>
+<td align="left">2026-10-29</td>
+<td align="left"><a href="https://docs.snowflake.com/en/release-notes/2026/other/2026-10-29-dcr">Snowflake Data Clean Rooms updates</a></td>
+<td align="left">Snowflake Data Clean Rooms receives API version 19.1 with general performance improvements, bug fixes, and updates to private preview features.</td>
+</tr>
+<tr>
+<td align="left">2026-10-28</td>
+<td align="left">🤖 <a href="https://docs.snowflake.com/en/release-notes/2026/other/2026-10-28-ai-parse-document-agentic-mode-preview">AI_PARSE_DOCUMENT introduces AGENTIC mode for intelligent document processing (Public Preview)</a></td>
+<td align="left"><code>AI_PARSE_DOCUMENT</code> adds an <code>AGENTIC</code> mode that extracts actionable information from complex documents including charts and diagrams, not just text.</td>
+</tr>
+<tr>
+<td align="left">2026-10-27</td>
+<td align="left"><a href="https://docs.snowflake.com/en/release-notes/2026/other/2026-10-27-copy-metadata-carry-over">Carry over comments, tags, and privileges with COPY = ( ... )</a></td>
+<td align="left">The <code>COPY</code> parameter on <code>CREATE OR REPLACE</code> statements carries over comments, tags, and privileges from the replaced object so they need not be restated.</td>
+</tr>
+</tbody></table>
+<h3>Snowpark Python</h3>
+<ul>
+<li><strong>Release:</strong> <a href="https://github.com/snowflakedb/snowpark-python/releases/tag/v1.56.0">v1.56.0</a> adds <code>DataFrameReader.documents()</code> (private preview) for reading staged documents into DataFrames with schema-based extraction and parallel processing. Eager schema validation now raises invalid column references in <code>filter</code> and <code>sort</code> at DataFrame creation. Two bugs are fixed: missing dataframe trace info in errors when debuggability is enabled, and <code>Session.client_telemetry</code> failing to obtain a workload-identity auth token on the v5 connector.</li>
+</ul>
+<p><strong>Quiet today:</strong> <a href="https://github.com/snowflakedb/snowflake-connector-python">Snowflake Connector for Python</a>, <a href="https://github.com/apache/polaris">Apache Polaris</a></p>
+<hr>
+<h2>Azure / Fabric &amp; GCP</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Item</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-10-29</td>
+<td align="left"><a href="https://community.fabric.microsoft.com/t5/Fabric-Updates-Blog/Strengthening-data-security-with-workspace-level-private/ba-p/5377347">Strengthening data security with workspace-level private connectivity for custom endpoints for Eventstream (Preview)</a></td>
+<td align="left">Eventstream adds workspace-level private links for custom endpoint sources (Preview), letting applications in restricted networks send events to Fabric without a public internet path.</td>
+</tr>
+<tr>
+<td align="left">2026-10-29</td>
+<td align="left"><a href="https://community.fabric.microsoft.com/t5/Fabric-Updates-Blog/Manage-once-reuse-everywhere-Introducing-variable-library/ba-p/5377349">Manage once, reuse everywhere: Introducing variable library support for Eventstream (Preview)</a></td>
+<td align="left">Variable library integration for Eventstream (Preview) lets teams reuse a single eventstream definition across environments by referencing environment-specific resources that resolve at runtime and persist through Git and deployment pipelines.</td>
+</tr>
+<tr>
+<td align="left">2026-10-29</td>
+<td align="left">🤖 <a href="https://community.fabric.microsoft.com/t5/Fabric-Updates-Blog/Introducing-the-data-engineering-agent-for-Fabric-Project-Osmos/ba-p/5377944">Introducing the data engineering agent for Fabric (Project Osmos)</a></td>
+<td align="left">Project Osmos introduces a data engineering agent that generates Spark code from natural language and addresses validation, schema drift, and incremental-load correctness concerns.</td>
+</tr>
+<tr>
+<td align="left">2026-10-29</td>
+<td align="left">🤖 <a href="https://community.fabric.microsoft.com/t5/Fabric-Updates-Blog/Bringing-Rust-native-Spark-compatibility-to-Microsoft-OneLake/ba-p/5377595">Bringing Rust-native Spark compatibility to Microsoft OneLake with Sail and LakeSail</a></td>
+<td align="left">Sail, a Rust-native drop-in replacement for Apache Spark with built-in Delta Lake and Apache Iceberg support, connects natively to OneLake alongside LakeSail Cloud Sessions for managed execution.</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>Open-source stack</h2>
+<h3>Apache Airflow</h3>
+<ul>
+<li><strong>Hot issue:</strong> <a href="https://github.com/apache/airflow/issues/75865">#75865</a>: An issue tracks the testing status of Apache Airflow 3.4.0rc1, requesting contributors to verify changes in the release candidate. (23 comments, 0 👍; +17 in the last 24h)</li>
+</ul>
+<h3>dlt</h3>
+<ul>
+<li><strong>Release:</strong> <a href="https://github.com/dlt-hub/dlt/releases/tag/1.32.0">1.32.0</a> introduces breaking changes: naive scd2 timestamps are no longer read as UTC, <code>refresh=&quot;drop_resources&quot;</code> and <code>pipeline.drop()</code> now drop all tables belonging to resources, Arrow extract shares resolved schema contract per table, and Jira and Salesforce verified sources are rewritten from scratch.</li>
+</ul>
+<h3>DuckDB</h3>
+<ul>
+<li><strong>News:</strong> A Hacker News post discusses a data engineer&#39;s journey from spreadsheets to DuckLake via DuckDB, highlighting DuckDB&#39;s ability to handle analytical tasks without operational complexity.</li>
+</ul>
+<p><strong>Quiet today:</strong> <a href="https://github.com/dbt-labs/dbt">dbt Core</a>, <a href="https://github.com/SQLMesh/sqlmesh">SQLMesh</a>, <a href="https://github.com/dagster-io/dagster">Dagster</a>, <a href="https://github.com/apache/iceberg">Apache Iceberg</a>, <a href="https://github.com/pola-rs/polars">Polars</a>, <a href="https://github.com/trinodb/trino">Trino</a></p>
+<hr>
+<h2>Across platforms</h2>
+<ul>
+<li>AI-assisted data engineering appears on Snowflake and Fabric: Snowflake&#39;s <code>AI_PARSE_DOCUMENT</code> adds <code>AGENTIC</code> mode (Public Preview) for extracting actionable information from complex documents including charts and diagrams; Fabric&#39;s Project Osmos (Preview) introduces a data engineering agent that generates Spark code from natural language and handles validation, schema drift, and incremental-load correctness. Both are in preview; Snowflake focuses on document understanding, Fabric on code generation.</li>
+</ul>
+<hr>
+<h2>Spotted</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Story</th>
+<th align="left">Source</th>
+<th align="left">Discussion</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a href="https://editsqlite.com/">Edit an SQLite database in your browser</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50255161">66 points, 33 comments</a></td>
+<td align="left">A browser-based tool lets users open, edit, and re-export SQLite databases locally with a spreadsheet grid, SQL console, and a writer that passes SQLite&#39;s official integrity check.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://www.paradedb.com/blog/opening-a-closed-tin-part-2">Solving Postgres&#39; Count Problem</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50269668">17 points, 0 comments</a></td>
+<td align="left">ParadeDB accelerated Wikipedia COUNT queries using ctid-aware segment partitioning, an inverted DocId map, and bitmap postings, achieving 10–22x higher throughput than Tantivy on filtered, time-sorted Hacker News queries.</td>
+</tr>
+</tbody></table>
+<hr>
+<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
+]]></content:encoded>
+    </item>
     <item>
       <title>AI Agents 2026-10-29</title>
       <link>https://dboeter.github.io/daily-diff/#2026-10-29/ai-agents</link>
@@ -3343,554 +3802,6 @@
 <td align="left"><a href="https://ec.europa.eu/info/law/better-regulation/have-your-say/initiatives/14628_en">Cloud and AI Development Act</a></td>
 </tr>
 </tbody></table>
-<hr>
-<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
-]]></content:encoded>
-    </item>
-    <item>
-      <title>Data Engineering 2026-10-23</title>
-      <link>https://dboeter.github.io/daily-diff/#2026-10-23/ai-data</link>
-      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-10-23/ai-data</guid>
-      <pubDate>Fri, 23 Oct 2026 00:00:00 +0000</pubDate>
-      <description>Data Engineering 2026-10-23 📅 Overview · 🤖 AI Agents · 🧠 AI Models &amp;amp; Labs · ⚖️ AI Policy · 🗄️ Data Engineering Generated: 2026-10-22 23:49 UTC | Vendor items: 13 | Projects: 17 | Active today: 5 | Stable releases: 4 | Prereleases (not covered): 0 Highlights Snowflake accounts in AWS US East 1 using Cortex fine-tuning — migrate new model training workloads to other regions; creation stopped October 20, 2026. DuckDB production users — test and migrate to 2.0.0 LTS “Cinnamon Teal” (breaking...</description>
-      <content:encoded><![CDATA[<h1>Data Engineering 2026-10-23</h1>
-<p><a href="https://dboeter.github.io/daily-diff/#2026-10-23">📅 Overview</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-23/ai-agents">🤖 AI Agents</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-23/ai-models">🧠 AI Models &amp; Labs</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-23/ai-policy">⚖️ AI Policy</a> · <strong>🗄️ Data Engineering</strong></p>
-<blockquote>
-<p>Generated: 2026-10-22 23:49 UTC | Vendor items: 13 | Projects: 17 | Active today: 5 | Stable releases: 4 | Prereleases (not covered): 0</p>
-</blockquote>
-<hr>
-<h2>Highlights</h2>
-<ul>
-<li><strong>Snowflake accounts in AWS US East 1 using Cortex fine-tuning</strong> — migrate new model training workloads to other regions; creation stopped October 20, 2026.</li>
-<li><strong>DuckDB production users</strong> — test and migrate to 2.0.0 LTS “Cinnamon Teal” (breaking changes: Quack protocol, async I/O, <code>VARIANT</code> type, extensible parser); released October 21, 2026.</li>
-<li><strong>Azure Databricks workspaces with the compliance security profile</strong> — plan for Genie Code tasks in Lakeflow Jobs to be enabled by default starting November 2026.</li>
-<li><strong>Snowpark Python users calling <code>DataFrame.to_polars()</code></strong> — upgrade to v1.55.3; method is now GA with Parquet default transport (performance shift) and JDBC lazy execution fix.</li>
-<li><strong>Azure Databricks users on serverless compute (env v5+, Connect Python 18.1.8+/Scala 18.1.5+)</strong> — validate <code>df.cache()</code>/<code>persist()</code> in Public Preview (on by default; admins can disable).</li>
-</ul>
-<hr>
-<h2>Databricks</h2>
-<table>
-<thead>
-<tr>
-<th align="left">Date</th>
-<th align="left">Source</th>
-<th align="left">Item</th>
-<th align="left">Summary</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left">2026-10-21</td>
-<td align="left">Azure Databricks</td>
-<td align="left">🤖 <a href="https://learn.microsoft.com/azure/databricks/release-notes/product/2026/october#genie-code-tasks-in-lakeflow-jobs-are-now-generally-available">Genie Code tasks in Lakeflow Jobs are now generally available</a></td>
-<td align="left">Enables running prompts autonomously in Lakeflow Jobs with access to upstream task outputs and tool calls, returning a link to the Genie Code chat response.</td>
-</tr>
-<tr>
-<td align="left">2026-10-21</td>
-<td align="left">Azure Databricks</td>
-<td align="left">🤖 <a href="https://learn.microsoft.com/azure/databricks/release-notes/whats-coming#genie-code-tasks-in-lakeflow-jobs-are-available-by-default-for-workspaces-with-the-compliance-security-profile-enabled-starting-in-november-2026">Genie Code tasks in Lakeflow Jobs are available by default for workspaces with the compliance security profile enabled starting in November 2026</a></td>
-<td align="left">Enables Genie Code tasks by default for workspaces with the compliance security profile starting November 2026.</td>
-</tr>
-<tr>
-<td align="left">2026-10-21</td>
-<td align="left">Azure Databricks</td>
-<td align="left"><a href="https://learn.microsoft.com/azure/databricks/release-notes/product/2026/october#lakeflow-pipelines-system-tables-are-now-generally-available-ga">Lakeflow pipelines system tables are now generally available (GA)</a></td>
-<td align="left">Enables querying the <code>lakeflow.pipelines</code> and <code>lakeflow.pipeline_update_timeline</code> system tables to audit pipeline runs across the account.</td>
-</tr>
-<tr>
-<td align="left">2026-10-23</td>
-<td align="left">Azure Databricks</td>
-<td align="left"><a href="https://learn.microsoft.com/azure/databricks/release-notes/serverless#dataframe-caching-on-serverless-compute-is-now-in-public-preview">DataFrame caching on serverless compute is now in Public Preview</a></td>
-<td align="left">Enables <code>df.cache()</code> and <code>df.persist()</code> on serverless compute (requires serverless environment version 5+, Databricks Connect Python 18.1.8+ or Scala 18.1.5+); preview is on by default but admins can disable it.</td>
-</tr>
-<tr>
-<td align="left">2026-10-22</td>
-<td align="left">Azure Databricks</td>
-<td align="left"><a href="https://learn.microsoft.com/azure/databricks/release-notes/product/2026/october#microsoft-entra-id-connector-is-available-in-beta">Microsoft Entra ID connector is available in Beta</a></td>
-<td align="left">Enables ingesting Microsoft Entra ID users, groups, applications, service principals, directory roles, identity configuration, and audit/sign-in logs via OAuth machine-to-machine auth with incremental ingestion for logs.</td>
-</tr>
-<tr>
-<td align="left">2026-10-20</td>
-<td align="left">Azure Databricks</td>
-<td align="left"><a href="https://learn.microsoft.com/azure/databricks/release-notes/product/2026/october#surveymonkey-connector-is-available-in-beta">SurveyMonkey connector is available in Beta</a></td>
-<td align="left">Enables ingesting SurveyMonkey surveys, structure, collectors, responses, and contacts via OAuth user-to-machine auth with incremental ingestion and multiple authoring options; workspace admins control access via the Previews page.</td>
-</tr>
-</tbody></table>
-<p><em>Also new:</em> <a href="https://learn.microsoft.com/azure/databricks/release-notes/product/2026/october#oracle-eloqua-connector-is-available-in-beta">Oracle Eloqua connector is available in Beta</a> · <a href="https://learn.microsoft.com/azure/databricks/release-notes/product/2026/october#asana-connector-is-available-in-beta">Asana connector is available in Beta</a> · <a href="https://learn.microsoft.com/azure/databricks/release-notes/lakebase#lakebase-insights-moves-to-per-project-settings-with-on-demand-runs-beta">Lakebase Insights moves to per-project settings, with on-demand runs (Beta)</a> · <a href="https://learn.microsoft.com/azure/databricks/release-notes/product/2026/october#box-audit-logs-managed-ingestion-connector-beta">Box Audit Logs managed ingestion connector (Beta)</a> · <a href="https://learn.microsoft.com/azure/databricks/release-notes/unity-gateway#screen-mcp-tool-calls-and-results-for-jailbreaks-beta">Screen MCP tool calls and results for jailbreaks (Beta)</a></p>
-<h3>Databricks CLI</h3>
-<ul>
-<li><strong>Release</strong>: <a href="https://github.com/databricks/cli/releases/tag/v1.22.0">v1.22.0</a>–<a href="https://github.com/databricks/cli/releases/tag/v1.22.1">v1.22.1</a> fix <code>aitools</code> skill installation to prevent downgrades and resolve GitHub API rate limits, and ensure <code>auth login --timeout</code> applies to browser-based OAuth.</li>
-</ul>
-<p><strong>Quiet today:</strong> <a href="https://github.com/delta-io/delta">Delta Lake</a>, <a href="https://github.com/unitycatalog/unitycatalog">Unity Catalog</a>, <a href="https://github.com/mlflow/mlflow">MLflow</a>, <a href="https://github.com/databricks/dbt-databricks">dbt-databricks</a></p>
-<hr>
-<h2>Snowflake</h2>
-<table>
-<thead>
-<tr>
-<th align="left">Date</th>
-<th align="left">Source</th>
-<th align="left">Item</th>
-<th align="left">Summary</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left">2026-10-20</td>
-<td align="left">Snowflake</td>
-<td align="left">⚠️ 🤖 <a href="https://docs.snowflake.com/en/release-notes/2026/other/2026-10-20-cortex-finetuning-aws-us-east-1">Oct 20, 2026: Cortex Fine-tuning: New model training no longer available in AWS US East 1</a></td>
-<td align="left">Stops creation of new Cortex fine-tuned models in AWS US East 1 (N. Virginia) as of October 20, 2026; workloads must move to other regions.</td>
-</tr>
-<tr>
-<td align="left">2026-10-22</td>
-<td align="left">Snowflake</td>
-<td align="left"><a href="https://docs.snowflake.com/en/release-notes/2026/other/2026-10-22-quiesce-primary-failover-group-ga">Oct 22, 2026: Quiesce a primary failover group (General availability)</a></td>
-<td align="left">Enables placing a primary failover group into read-only mode (quiesce) for maintenance or failover testing.</td>
-</tr>
-<tr>
-<td align="left">2026-10-22</td>
-<td align="left">Snowflake</td>
-<td align="left"><a href="https://docs.snowflake.com/en/release-notes/2026/other/2026-10-22-dcr">Oct 22, 2026: Snowflake Data Clean Rooms updates</a></td>
-<td align="left">Enables collaboration edits with approver workflow for role changes, fixes <code>REMOVE_TEMPLATE</code> to clean up orphaned code specs preventing security scan timeouts, and upgrades the Clean Rooms Python runtime to 3.13.</td>
-</tr>
-<tr>
-<td align="left">2026-10-22</td>
-<td align="left">Snowflake</td>
-<td align="left"><a href="https://docs.snowflake.com/en/release-notes/2026/10_38">IPADDRESS data type (Preview)</a></td>
-<td align="left">Enables storing IPv4 or IPv6 addresses as a validated, canonical 128-bit native type with numeric comparison semantics.</td>
-</tr>
-</tbody></table>
-<p><em>Also new:</em> <a href="https://docs.snowflake.com/en/release-notes/2026/other/2026-10-16-grok-4-7-glm-5-3-preview">Oct 16, 2026: Grok 4.7 and GLM 5.3 models (Preview)</a> · <a href="https://docs.snowflake.com/en/release-notes/2026/other/2026-10-20-dbt-projects-on-snowflake-updates">Oct 20, 2026: dbt Projects on Snowflake updates</a> · <a href="https://docs.snowflake.com/en/release-notes/2026/other/2026-10-19-cortex-ai-gateway-tools">Oct 19, 2026: Tools for Cortex AI Gateway (Preview)</a></p>
-<h3>Snowpark Python</h3>
-<ul>
-<li><strong>Release</strong>: v1.55.3 removes the experimental tag from <code>DataFrame.to_polars()</code> and switches its default transport to Parquet for better performance; it also fixes a timeout in <code>DataFrameReader.jdbc</code> on slow sources by lazy query execution. <a href="https://github.com/snowflakedb/snowpark-python/releases/tag/v1.55.3">v1.55.3</a></li>
-</ul>
-<p><strong>Quiet today:</strong> <a href="https://github.com/snowflakedb/snowflake-connector-python">Snowflake Connector for Python</a>, <a href="https://github.com/apache/polaris">Apache Polaris</a></p>
-<hr>
-<h2>Azure / Fabric &amp; GCP</h2>
-<table>
-<thead>
-<tr>
-<th align="left">Date</th>
-<th align="left">Source</th>
-<th align="left">Item</th>
-<th align="left">Summary</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left">2026-10-22</td>
-<td align="left">Azure updates</td>
-<td align="left"><a href="https://azure.microsoft.com/updates?id=577618">[Launched] Generally Available: ABFS Vectored Read for Azure Data Lake Storage</a></td>
-<td align="left">Enables compatible analytics engines to reduce request overhead for selective reads on Azure Data Lake Storage by combining nearby file ranges into fewer asynchronous storage requests.</td>
-</tr>
-<tr>
-<td align="left">2026-10-22</td>
-<td align="left">BigQuery</td>
-<td align="left">🤖 <a href="https://docs.cloud.google.com/bigquery/docs/release-notes#October_22_2026">Feature: The AI.TRANSLATE function lets you translate text strings between languages.</a></td>
-<td align="left">Enables translating text strings between languages using standard Neural Machine Translation or Translation LLM capabilities via the <code>AI.TRANSLATE</code> function.</td>
-</tr>
-<tr>
-<td align="left">2026-10-20</td>
-<td align="left">Microsoft Fabric</td>
-<td align="left"><a href="https://community.fabric.microsoft.com/t5/Fabric-Updates-Blog/T-SQL-language-enhancements-in-Microsoft-Fabric-Data-Warehouse/ba-p/5375433">T-SQL language enhancements in Microsoft Fabric Data Warehouse (Preview)</a></td>
-<td align="left">Enables <code>GROUP BY ALL</code>, <code>ORDER BY ALL</code>, <code>QUALIFY</code>, and <code>FROM ... SELECT</code> syntax to reduce repetitive SQL and simplify analytical queries in Microsoft Fabric Data Warehouse.</td>
-</tr>
-</tbody></table>
-<p><em>Also new:</em> <a href="https://community.fabric.microsoft.com/t5/Fabric-Updates-Blog/Advanced-NL2SQL-and-advanced-DAX-generation-in-Fabric-data/ba-p/5374654">Advanced NL2SQL and advanced DAX generation in Fabric data agents (Generally Available)</a> · <a href="https://community.fabric.microsoft.com/t5/Fabric-Updates-Blog/Explore-and-process-multiple-event-types-with-Schema-aware/ba-p/5376384">Explore and process multiple event types with Schema-aware Fabric Eventstreams (Preview)</a> · <a href="https://community.fabric.microsoft.com/t5/Fabric-Updates-Blog/Incrementally-migrate-and-re-migrate-database-objects-with/ba-p/5376060">Incrementally migrate and re-migrate database objects with Migration Assistant for Fabric Warehouse (Preview)</a> · <a href="https://community.fabric.microsoft.com/t5/Fabric-Updates-Blog/Create-purpose-built-custom-visuals-in-Real-Time-Dashboards-with/ba-p/5376359">Create purpose-built custom visuals in Real-Time Dashboards with Copilot (Preview)</a> · <a href="https://community.fabric.microsoft.com/t5/Fabric-Updates-Blog/From-mixed-events-to-real-time-action-Fabric-Eventstreams-Q3/ba-p/5375736">From mixed events to real-time action: Fabric Eventstreams Q3 2026</a></p>
-<hr>
-<h2>Open-source stack</h2>
-<h3>SQLMesh</h3>
-<ul>
-<li><strong>Release</strong>: <a href="https://github.com/SQLMesh/sqlmesh/releases/tag/v0.236.4">v0.236.4</a> fixes virtual catalog handling for ClickHouse, prevents cascading drops in DuckLake catalogs, adds no-op warehouse create for Fabric, improves Snowflake timestamp lookups, and updates Databricks PyArrow dependency.</li>
-</ul>
-<h3>Apache Airflow</h3>
-<ul>
-<li><strong>Hot issue</strong>: <a href="https://github.com/apache/airflow/issues/75332">#75332</a> requests contributor testing of provider release candidates prepared on October 20, 2026, to verify stability before final distribution.</li>
-</ul>
-<h3>DuckDB</h3>
-<ul>
-<li><strong>News</strong>: <a href="https://news.ycombinator.com/item?id=50181136">Hacker News</a> and <a href="https://lobste.rs/s/dcvs3u/announcing_duckdb_2_0_0_lts_cinnamon_teal">Lobste.rs</a> announce DuckDB 2.0.0 LTS &quot;Cinnamon Teal&quot;, a long-term support release emphasizing stability for production analytics workloads.</li>
-</ul>
-<p><strong>Quiet today:</strong> <a href="https://github.com/dbt-labs/dbt">dbt Core</a>, <a href="https://github.com/dagster-io/dagster">Dagster</a>, <a href="https://github.com/dlt-hub/dlt">dlt</a>, <a href="https://github.com/apache/iceberg">Apache Iceberg</a>, <a href="https://github.com/pola-rs/polars">Polars</a>, <a href="https://github.com/trinodb/trino">Trino</a></p>
-<hr>
-<h2>Releases this week</h2>
-<table>
-<thead>
-<tr>
-<th align="left">Project</th>
-<th align="left">Version</th>
-<th align="left">Date</th>
-<th align="left">Summary</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left"><a href="https://github.com/duckdb/duckdb">DuckDB</a></td>
-<td align="left"><a href="https://github.com/duckdb/duckdb/releases/tag/v2.0.0">v2.0.0</a></td>
-<td align="left">2026-10-21</td>
-<td align="left">Major release 2.0.0 introduces the Quack protocol, asynchronous I/O, a first-class <code>VARIANT</code> type, agent mode, triggers, and an extensible SQL parser.</td>
-</tr>
-<tr>
-<td align="left"><a href="https://github.com/mlflow/mlflow">MLflow</a></td>
-<td align="left"><a href="https://github.com/mlflow/mlflow/releases/tag/v3.17.2">v3.17.2</a></td>
-<td align="left">2026-10-21</td>
-<td align="left">Patch release adds lineage recording for dataset, scorer, and agent on <code>mlflow.genai.evaluate</code> runs and fixes Optuna trial tracking and sampler reseeding bugs.</td>
-</tr>
-<tr>
-<td align="left"><a href="https://github.com/trinodb/trino">Trino</a></td>
-<td align="left"><a href="https://github.com/trinodb/trino/releases/tag/484">484</a></td>
-<td align="left">2026-10-16</td>
-<td align="left">—</td>
-</tr>
-</tbody></table>
-<hr>
-<h2>Across platforms</h2>
-<ul>
-<li><strong>AI-assisted SQL authoring</strong>: BigQuery ships <code>AI.TRANSLATE</code> (GA, standard NMT or LLM); Databricks offers Genie Code tasks in Lakeflow Jobs (GA, agentic prompts with tool calls); Snowflake Cortex fine-tuning retracts in AWS us-east-1 only. All three platforms surface AI inside the warehouse, but(BigQuery, Databricks) add net-new functions while Snowflake restricts a training capability in one region.</li>
-</ul>
-<hr>
-<h2>Spotted</h2>
-<table>
-<thead>
-<tr>
-<th align="left">Story</th>
-<th align="left">Source</th>
-<th align="left">Discussion</th>
-<th align="left">Summary</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left"><a href="https://github.blog/engineering/architecture-optimization/the-bridge-to-agent-scale-git-infrastructure/">The bridge to agent-scale Git infrastructure</a></td>
-<td align="left">Hacker News</td>
-<td align="left"><a href="https://news.ycombinator.com/item?id=50183344">67 points, 20 comments</a></td>
-<td align="left">We moved a copy of 99.99999% of GitHub&#39;s repositories to Azure. Here&#39;s how per-reference quorums will bring over the rest.</td>
-</tr>
-<tr>
-<td align="left"><a href="https://ardentperf.com/2026/10/20/postgres-recovery_prefetch-considered-harmful-and-causing-outages/">Postgres recovery_prefetch can cause outages</a></td>
-<td align="left">Hacker News</td>
-<td align="left"><a href="https://news.ycombinator.com/item?id=50188614">28 points, 0 comments</a></td>
-<td align="left">Another story of something I saw in the field which surprised me. Turns out recovery_prefetch can cause outages.</td>
-</tr>
-<tr>
-<td align="left"><a href="https://www.pingcap.com/trust-hub/security/security-update-october-2026/">Unauthorized Access to PingCAP Cloud Resources</a></td>
-<td align="left">Lobste.rs</td>
-<td align="left"><a href="https://lobste.rs/s/x7codz/unauthorized_access_pingcap_cloud">5 points, 3 comments</a></td>
-<td align="left">PingCAP powers your digital transformation with a single source of truth at scale. Developed to be an open, unified, distributed SQL database solution.</td>
-</tr>
-</tbody></table>
-<hr>
-<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
-]]></content:encoded>
-    </item>
-    <item>
-      <title>AI Agents 2026-10-22</title>
-      <link>https://dboeter.github.io/daily-diff/#2026-10-22/ai-agents</link>
-      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-10-22/ai-agents</guid>
-      <pubDate>Thu, 22 Oct 2026 00:00:00 +0000</pubDate>
-      <description>AI Agents 2026-10-22 📅 Overview · 🤖 AI Agents · 💬 AI Discussions · 📚 AI Research · 🌐 Lab Announcements · ⚖️ Policy Watch · 🗄️ Data Engineering Watch Generated: 2026-10-22 01:26 UTC | Projects: 25 | Active today: 11 | Stable releases: 29 | Prereleases (not covered): 6 🕵️ Stealth Models on OpenRouter No stealth models listed on OpenRouter today. Coding Agents &amp;amp; Assistants Overview Claude Code shipped two patch releases adding API version control and OpenTelemetry safety events while a W...</description>
-      <content:encoded><![CDATA[<h1>AI Agents 2026-10-22</h1>
-<p><a href="https://dboeter.github.io/daily-diff/#2026-10-22">📅 Overview</a> · <strong>🤖 AI Agents</strong> · <a href="https://dboeter.github.io/daily-diff/#2026-10-22/ai-hn">💬 AI Discussions</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-22/ai-arxiv">📚 AI Research</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-22/ai-web">🌐 Lab Announcements</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-22/ai-policy">⚖️ Policy Watch</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-22/ai-data">🗄️ Data Engineering Watch</a></p>
-<blockquote>
-<p>Generated: 2026-10-22 01:26 UTC | Projects: 25 | Active today: 11 | Stable releases: 29 | Prereleases (not covered): 6</p>
-</blockquote>
-<hr>
-<h2>🕵️ Stealth Models on OpenRouter</h2>
-<p>No stealth models listed on OpenRouter today.</p>
-<hr>
-<h2>Coding Agents &amp; Assistants</h2>
-<h3>Overview</h3>
-<p>Claude Code shipped two patch releases adding API version control and OpenTelemetry safety events while a Windows Bedrock regression blocks custom CA certificates. OpenAI Codex&#39;s macOS desktop app breaks first-message sends in new chats and Windows users lose the Dots entry after updating. Pi 1.4.0 introduces image input for classifier models across multiple providers. Oh My Pi updated its catalog with persistent prompt caching for OpenAI Codex and refreshed bundled Yolo-Auto models. Hermes Agent removed intrusive suggestion pills and fixed a Kanban worker protocol mismatch alongside a terminal paging crash. pstack-claude released a series of fixes aligning transcript and plugin discovery with Claude Code&#39;s <code>CLAUDE_CONFIG_DIR</code>. OpenBitFun added offline session recovery and hardened Windows icon handling.</p>
-<h3>Claude Code</h3>
-<ul>
-<li><strong>Release</strong>: v2.1.307 adds <code>/claude-api api-version</code> to pin the API to <code>2026-10-21</code> and emits <code>claude_code.safety_event</code> OpenTelemetry events for every tool call blocked by permissions, auto-mode, safety checks, hooks, or the sandbox; v2.1.306 fixes <code>claude -p</code> authentication inside cloud sessions and stops spurious &quot;prompt too long&quot; errors in MCP-heavy sessions. <a href="https://github.com/anthropics/claude-code/releases/tag/v2.1.307">v2.1.307</a>, <a href="https://github.com/anthropics/claude-code/releases/tag/v2.1.306">v2.1.306</a></li>
-<li><strong>Hot issue</strong>: Windows users on Bedrock hit <code>UNABLE_TO_GET_ISSUER_CERT</code> in 2.1.304; custom CAs load but aren&#39;t used, a regression from 2.1.303. <a href="https://github.com/anthropics/claude-code/issues/103680">#103680</a></li>
-</ul>
-<h3>OpenAI Codex</h3>
-<ul>
-<li><strong>Hot issue</strong>: macOS desktop app 26.1016.51333 fails the first message in any new chat with &quot;Cannot serialize value (couldn&#39;t stringify value)&quot;. <a href="https://github.com/openai/codex/issues/55744">#55744</a></li>
-<li><strong>Hot issue</strong>: Windows Dots entry vanishes after updating to 26.1016.51333; reinstall and <code>Ctrl+.</code> don&#39;t restore it. <a href="https://github.com/openai/codex/issues/55795">#55795</a></li>
-</ul>
-<h3>Pi</h3>
-<ul>
-<li><strong>Release</strong>: v1.4.0 enables image input for <code>codemode models.classify()</code> with TypeSafe&#39;s Jev and Cloudflare&#39;s Clef models on <code>typesafe</code>, <code>cloudflare-workers-ai</code>, and OpenRouter. <a href="https://github.com/earendil-works/pi/releases/tag/v1.4.0">v1.4.0</a></li>
-</ul>
-<h3>Oh My Pi</h3>
-<ul>
-<li><strong>Release</strong>: v18.12.6 adds a <code>prompt-cache-persistent</code> catalog axis for providers with non-expiring prompt caches (logged-in OpenAI Codex) and updates the bundled Yolo-Auto catalog to <code>qwen3.8-27b</code> (new default), <code>yolo</code>, <code>yolo-small</code>, <code>yolo-128k</code>; v18.12.5 implements OpenAI 12-hour prompt caching for GPT-5.6+ via <code>cacheRetention: &quot;long&quot;</code> and fixes 404 errors on personal ChatGPT accounts. <a href="https://github.com/can1357/oh-my-pi/releases/tag/v18.12.6">v18.12.6</a>, <a href="https://github.com/can1357/oh-my-pi/releases/tag/v18.12.5">v18.12.5</a></li>
-</ul>
-<h3>Hermes Agent</h3>
-<ul>
-<li><strong>Release</strong>: v0.22.4 removes suggestion pills that appeared above the composer without clear purpose; v0.22.3 rolls up ~620 PRs since v0.22.2 into a stable release across CLI, installer, Microsoft Store, Docker, and Hermes Cloud. <a href="https://github.com/nousresearch/hermes-agent/releases/tag/v0.22.4">v0.22.4</a>, <a href="https://github.com/nousresearch/hermes-agent/releases/tag/v0.22.3">v0.22.3</a></li>
-<li><strong>Hot issue</strong>: Kanban worker posts to <code>chat/completions</code> despite <code>api_mode=codex_responses</code>, causing HTTP 400 <code>ModelProtocolUnsupported</code> for <code>muse-spark</code> on <code>opencode-go</code>. <a href="https://github.com/NousResearch/hermes-agent/issues/141861">#141861</a></li>
-<li><strong>Hot issue</strong>: <code>process_manage</code> throws <code>TypeError: slice indices must be integers</code> when paging background process output, blocking log retrieval. <a href="https://github.com/NousResearch/hermes-agent/issues/141988">#141988</a></li>
-</ul>
-<h3>michael-denyer/pstack-claude</h3>
-<ul>
-<li><strong>Release</strong>: v0.9.97–v0.9.101 fix transcript and plugin directory discovery to respect <code>CLAUDE_CONFIG_DIR</code>, switch hook argument passing from <code>awk -v</code> to environment variables to avoid backslash escape issues on Windows paths, and align skills with Claude Code&#39;s session ID and project layout. <a href="https://github.com/michael-denyer/pstack-claude/releases/tag/v0.9.101">v0.9.101</a>, <a href="https://github.com/michael-denyer/pstack-claude/releases/tag/v0.9.100">v0.9.100</a>, <a href="https://github.com/michael-denyer/pstack-claude/releases/tag/v0.9.99">v0.9.99</a>, <a href="https://github.com/michael-denyer/pstack-claude/releases/tag/v0.9.98">v0.9.98</a>, <a href="https://github.com/michael-denyer/pstack-claude/releases/tag/v0.9.97">v0.9.97</a></li>
-</ul>
-<h3>GCWing/OpenBitFun</h3>
-<ul>
-<li><strong>Release</strong>: v1.0.7 preserves icon source bytes on Windows, keeps official and LAN relay connections independent, and adds offline session recovery for data tools. <a href="https://github.com/GCWing/OpenBitFun/releases/tag/v1.0.7">v1.0.7</a></li>
-</ul>
-<p><strong>Quiet today:</strong> <a href="https://github.com/google-gemini/gemini-cli">Gemini CLI</a>, <a href="https://github.com/Kilo-Org/kilocode">Kilo Code</a>, <a href="https://github.com/anomalyco/opencode">OpenCode</a>, <a href="https://github.com/1jehuang/jcode">jcode</a>, <a href="https://github.com/cline/cline">Cline</a>, <a href="https://github.com/CommandCodeAI/command-code">Command Code</a>, <a href="https://github.com/deepseek-ai/deepseek-harness">DeepSeek Harness</a>, <a href="https://github.com/cursor/plugins">cursor/plugins</a>, <a href="https://github.com/GanyuanRan/Autoloom">GanyuanRan/Autoloom</a></p>
-<hr>
-<h2>Agent Tooling</h2>
-<h3>Overview</h3>
-<p>ruvnet/ruflo shipped eight rapid-fire patch releases (v3.59.3–v3.59.12) restoring the <code>pair</code> command, fixing Windows path handling, securing memory tombstones, and hardening policy locks. heygen-com/hyperframes released three versions (v0.8.183–v0.8.185) enabling 4K transparent renders, larger project uploads, and faster cold starts. wangmiaozero/pi-harness v2.2.5–v2.2.6 added local plugin support with trust approval, model verification, and refreshed skills. mvschwarz/openrig v0.6.14 delivered final 0.6-line stability fixes including in-place agent repair after upgrades.</p>
-<h3>ruvnet/ruflo</h3>
-<ul>
-<li><strong>Release</strong>: v3.59.3–v3.59.12 restore the <code>pair</code> command for the Claude Code skill, fix Windows ADR indexing and console path bugs, remove unused <code>toml</code> dependency with high-severity CVEs, scrub memory tombstone payloads on delete, harden policy lock acquisition, add <code>--path</code> to <code>memory export</code>, distill both memory stores, and honor <code>hive-mind_init</code> persistence flags. <a href="https://github.com/ruvnet/ruflo/releases/tag/v3.59.12">https://github.com/ruvnet/ruflo/releases/tag/v3.59.12</a></li>
-</ul>
-<h3>heygen-com/hyperframes</h3>
-<ul>
-<li><strong>Release</strong>: v0.8.183–v0.8.185 add 4K transparent MOV/WebM cloud rendering, support projects exceeding upload limits via chunked capture, start encoding during multi-worker MP4 capture, keep transparency in Studio previews, handle post-cookie-banner page reloads, and accelerate CLI cold starts with cached Chrome. <a href="https://github.com/heygen-com/hyperframes/releases/tag/v0.8.185">https://github.com/heygen-com/hyperframes/releases/tag/v0.8.185</a></li>
-</ul>
-<h3>wangmiaozero/pi-harness</h3>
-<ul>
-<li><strong>Release</strong>: v2.2.5–v2.2.6 introduce local Harness plugins for run metrics, custom evaluations, JSON trace exports, and team templates with explicit trust approval and permission diagnostics; add shared OpenCode Zen/Go setup with named API keys, individual and batch model verification, and model enablement controls. <a href="https://github.com/wangmiaozero/pi-harness/releases/tag/v2.2.6">https://github.com/wangmiaozero/pi-harness/releases/tag/v2.2.6</a></li>
-</ul>
-<h3>mvschwarz/openrig</h3>
-<ul>
-<li><strong>Release</strong>: v0.6.14 (final 0.6 release) fixes agents that stop receiving messages after an upgrade with in-place repair guidance, makes manual compaction wait at approvals, reduces refocus overhead on busy machines, and corrects inventory reads. <a href="https://github.com/mvschwarz/openrig/releases/tag/v0.6.14">https://github.com/mvschwarz/openrig/releases/tag/v0.6.14</a></li>
-</ul>
-<p><strong>Quiet today:</strong> <a href="https://github.com/NVIDIA/OpenShell">OpenShell</a>, <a href="https://github.com/herdrdev/herdr">herdr</a>, <a href="https://github.com/mksglu/context-mode">context-mode</a>, <a href="https://github.com/asheshgoplani/agent-deck">Agent Deck</a>, <a href="https://github.com/paperclipai/paperclip">paperclipai/paperclip</a></p>
-<hr>
-<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
-]]></content:encoded>
-    </item>
-    <item>
-      <title>AI Policy 2026-10-22</title>
-      <link>https://dboeter.github.io/daily-diff/#2026-10-22/ai-policy</link>
-      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-10-22/ai-policy</guid>
-      <pubDate>Thu, 22 Oct 2026 00:00:00 +0000</pubDate>
-      <description>Policy Watch 2026-10-22 📅 Overview · 🤖 AI Agents · 💬 AI Discussions · 📚 AI Research · 🌐 Lab Announcements · ⚖️ Policy Watch · 🗄️ Data Engineering Watch Sources: Politico Europe + Politico US | 3 new items ranked by Jev relevance | Generated: 2026-10-22 01:26 UTC Highlights The European Commission has opened feedback periods on two significant initiatives: the Articles 75c – 75d AI Act Implementing Act (deadline 9 November) and the Cloud and AI Development Act (deadline 11 November). Meanwh...</description>
-      <content:encoded><![CDATA[<h1>Policy Watch 2026-10-22</h1>
-<p><a href="https://dboeter.github.io/daily-diff/#2026-10-22">📅 Overview</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-22/ai-agents">🤖 AI Agents</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-22/ai-hn">💬 AI Discussions</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-22/ai-arxiv">📚 AI Research</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-22/ai-web">🌐 Lab Announcements</a> · <strong>⚖️ Policy Watch</strong> · <a href="https://dboeter.github.io/daily-diff/#2026-10-22/ai-data">🗄️ Data Engineering Watch</a></p>
-<blockquote>
-<p>Sources: Politico Europe + Politico US | 3 new items ranked by <a href="https://typesafe.ai">Jev</a> relevance | Generated: 2026-10-22 01:26 UTC</p>
-</blockquote>
-<hr>
-<h2>Highlights</h2>
-<p>The European Commission has opened feedback periods on two significant initiatives: the <a href="https://ec.europa.eu/info/law/better-regulation/have-your-say/initiatives/19292_en">Articles 75c – 75d AI Act Implementing Act</a> (deadline 9 November) and the <a href="https://ec.europa.eu/info/law/better-regulation/have-your-say/initiatives/14628_en">Cloud and AI Development Act</a> (deadline 11 November). Meanwhile, EU lawmakers are advancing new fronts — Socialists and Democrats are pushing for dedicated <a href="https://www.politico.eu/article/socialists-and-democrats-push-eu-law-deepfake/">deepfake legislation</a>, and publishers are pressing Brussels and London to challenge <a href="https://www.politico.eu/article/publishers-press-brussels-and-london-to-stop-metas-new-ai-terms/">Meta&#39;s new AI terms</a>. In the US, Anthropic has proposed a <a href="https://www.politico.com/news/2026/10/21/anthropic-bill-ai-risk-threshold-01128458">$1 billion threshold for AI risk regulation</a>, echoing California&#39;s approach.</p>
-<h2>Upcoming deadlines (next 30 days)</h2>
-<table>
-<thead>
-<tr>
-<th align="left">Date</th>
-<th align="left">Source</th>
-<th align="left">Item</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left">2026-11-09</td>
-<td align="left">Have your say</td>
-<td align="left"><a href="https://ec.europa.eu/info/law/better-regulation/have-your-say/initiatives/19292_en">Articles 75c – 75d AI Act Implementing Act</a></td>
-</tr>
-<tr>
-<td align="left">2026-11-11</td>
-<td align="left">Have your say</td>
-<td align="left"><a href="https://ec.europa.eu/info/law/better-regulation/have-your-say/initiatives/14628_en">Cloud and AI Development Act</a></td>
-</tr>
-</tbody></table>
-<h2>News &amp; commentary</h2>
-<table>
-<thead>
-<tr>
-<th align="left">Date</th>
-<th align="left">Source</th>
-<th align="left">Title</th>
-<th align="left">Summary</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left">2026-10-20</td>
-<td align="left">Politico Europe</td>
-<td align="left"><a href="https://www.politico.eu/article/socialists-and-democrats-push-eu-law-deepfake/?utm_source=RSS_Feed&utm_medium=RSS&utm_campaign=RSS_Syndication">Socialists push for EU law on deepfakes</a></td>
-<td align="left">Socialists are pushing for a new EU law on deepfakes to address ownership of AI-copied faces and voices. The legal answer remains unresolved, signalling potential future safeguards that could affect deployers of generative AI.</td>
-</tr>
-<tr>
-<td align="left">2026-10-21</td>
-<td align="left">Politico Europe</td>
-<td align="left"><a href="https://www.politico.eu/article/publishers-press-brussels-and-london-to-stop-metas-new-ai-terms/?utm_source=RSS_Feed&utm_medium=RSS&utm_campaign=RSS_Syndication">Publishers want Brussels and London to stop Meta’s new AI terms</a></td>
-<td align="left">Publishers are urging Brussels and London to halt Meta&#39;s new AI terms, with the European Commission stating Meta must comply with EU law and the UK competition watchdog summoning the company. This regulatory scrutiny of a major US vendor&#39;s terms may shape compliance expectations for organisations integrating such services.</td>
-</tr>
-<tr>
-<td align="left">2026-10-21</td>
-<td align="left">Politico US</td>
-<td align="left"><a href="https://www.politico.com/news/2026/10/21/anthropic-bill-ai-risk-threshold-01128458">Why Anthropic’s draft bill sets $1 billion threshold for AI risk</a></td>
-<td align="left">Anthropic has proposed a draft bill setting a $1 billion threshold for AI risk, mirroring a California law but repurposed to determine when government could block advanced models. The proposal signals a legislative approach linking financial scale to regulatory intervention that could influence US vendor governance.</td>
-</tr>
-</tbody></table>
-<h2>Signals</h2>
-<p>Policy is moving on three tracks relevant to Dutch deployers of US-built AI. First, the AI Act&#39;s implementing details are being finalised — Articles 75c–75d will shape obligations for general-purpose AI models, directly affecting vendor assessments and contractual protections. Second, the Cloud and AI Development Act signals a push to regulate cloud infrastructure and AI development environments, which could reshape data locality and vendor lock-in considerations for mid-sized firms. Third, the deepfake push and Meta terms dispute show rising regulatory appetite for controlling synthetic media and platform terms unilaterally imposed on downstream users. US developments like Anthropic&#39;s threshold proposal indicate a hardening transatlantic baseline: companies integrating frontier models should prepare for tiered obligations tied to compute or capital thresholds, not just use-case risk. For Dutch advisers, the immediate action is feeding deployment realities into the two open consultations before they close.</p>
-<h2>Worth a Look</h2>
-<ul>
-<li><strong><a href="https://ec.europa.eu/info/law/better-regulation/have-your-say/initiatives/19292_en">Articles 75c – 75d AI Act Implementing Act</a></strong> — Directly shapes GPAI obligations your clients inherit via US vendors; feedback window closes 9 November.</li>
-<li><strong><a href="https://ec.europa.eu/info/law/better-regulation/have-your-say/initiatives/14628_en">Cloud and AI Development Act</a></strong> — May redefine cloud provider responsibilities and data governance for AI workloads; consultation ends 11 November.</li>
-<li><strong><a href="https://www.politico.eu/article/publishers-press-brussels-and-london-to-stop-metas-new-ai-terms/">Publishers want Brussels and London to stop Meta&#39;s new AI terms</a></strong> — Illustrates how unilateral vendor term changes can trigger regulatory intervention, a pattern likely to repeat with other US foundation-model providers.</li>
-</ul>
-<hr>
-<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
-]]></content:encoded>
-    </item>
-    <item>
-      <title>Data Engineering 2026-10-22</title>
-      <link>https://dboeter.github.io/daily-diff/#2026-10-22/ai-data</link>
-      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-10-22/ai-data</guid>
-      <pubDate>Thu, 22 Oct 2026 00:00:00 +0000</pubDate>
-      <description>Data Engineering Watch 2026-10-22 📅 Overview · 🤖 AI Agents · 💬 AI Discussions · 📚 AI Research · 🌐 Lab Announcements · ⚖️ Policy Watch · 🗄️ Data Engineering Watch Generated: 2026-10-22 01:26 UTC | Vendor items: 12 | Projects: 17 | Active today: 3 | Stable releases: 2 | Prereleases (not covered): 0 Highlights DuckDB v2.0.0 &amp;quot;Cyanoptera&amp;quot; introduces a major internal overhaul converting identifiers to a dedicated class and adopting tidy-check tooling. Polars read_csv exhibits a 120× me...</description>
-      <content:encoded><![CDATA[<h1>Data Engineering Watch 2026-10-22</h1>
-<p><a href="https://dboeter.github.io/daily-diff/#2026-10-22">📅 Overview</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-22/ai-agents">🤖 AI Agents</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-22/ai-hn">💬 AI Discussions</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-22/ai-arxiv">📚 AI Research</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-22/ai-web">🌐 Lab Announcements</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-22/ai-policy">⚖️ Policy Watch</a> · <strong>🗄️ Data Engineering Watch</strong></p>
-<blockquote>
-<p>Generated: 2026-10-22 01:26 UTC | Vendor items: 12 | Projects: 17 | Active today: 3 | Stable releases: 2 | Prereleases (not covered): 0</p>
-</blockquote>
-<hr>
-<h2>Highlights</h2>
-<ul>
-<li>DuckDB v2.0.0 &quot;Cyanoptera&quot; introduces a major internal overhaul converting identifiers to a dedicated class and adopting tidy-check tooling.</li>
-<li>Polars <code>read_csv</code> exhibits a 120× memory overhead on wide tables in the v2 series, a severe performance regression under triage.</li>
-<li>Snowflake Declarative Feature Store reaches general availability with version-controlled YAML or Python definitions and plan-and-apply deployment.</li>
-<li>Azure Databricks enables native Postgres logical replication to stream changes into and out of Lakebase for migrations and continuous sync.</li>
-<li>Azure Databricks adds OAuth custom identity claims to service principal tokens for row-level filtering in multi-tenant scenarios.</li>
-</ul>
-<hr>
-<h2>Databricks</h2>
-<table>
-<thead>
-<tr>
-<th align="left">Date</th>
-<th align="left">Source</th>
-<th align="left">Item</th>
-<th align="left">Summary</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left">2026-10-16</td>
-<td align="left">Azure Databricks</td>
-<td align="left"><a href="https://learn.microsoft.com/azure/databricks/release-notes/whats-coming#file-upload-in-genie-one-and-genie-agents-will-soon-be-available-by-default-for-compliance-security-profile-workspaces-with-supported-compliance-standards">File upload in Genie One and Genie Agents will soon be available by default for compliance security profile workspaces with supported compliance standards</a></td>
-<td align="left">Starting November 15, 2026, file upload in Genie One and Genie Agents becomes available by default for compliance security profile workspaces where the compliance standard supports it, enabling natural language analysis of uploaded files alongside existing data.</td>
-</tr>
-<tr>
-<td align="left">2026-10-15</td>
-<td align="left">Azure Databricks</td>
-<td align="left"><a href="https://learn.microsoft.com/azure/databricks/release-notes/lakebase#replicate-data-in-and-out-of-lakebase-with-postgres-logical-replication">Replicate data in and out of Lakebase with Postgres logical replication</a></td>
-<td align="left">Native Postgres logical replication now supports streaming changes into and out of Lakebase, allowing migration of existing Postgres databases and continuous sync with external Postgres instances.</td>
-</tr>
-<tr>
-<td align="left">2026-10-19</td>
-<td align="left">Azure Databricks</td>
-<td align="left"><a href="https://learn.microsoft.com/azure/databricks/release-notes/product/2026/october#saving-an-unchanged-job-no-longer-adds-rows-to-the-jobs-system-tables">Saving an unchanged job no longer adds rows to the jobs system tables</a></td>
-<td align="left">Saving a job without changes no longer writes rows to system.lakeflow.jobs or system.lakeflow.job_tasks, and change_time remains at the last actual modification, reducing audit noise across UI, API, and bundle deployments.</td>
-</tr>
-<tr>
-<td align="left">2026-10-19</td>
-<td align="left">Azure Databricks</td>
-<td align="left"><a href="https://learn.microsoft.com/azure/databricks/release-notes/product/2026/october#filter-data-per-end-user-with-oauth-custom-identity-claims">Filter data per end user with OAuth custom identity claims</a></td>
-<td align="left">Custom identity claims can now be added to service principal OAuth tokens and used for row-level filtering in dynamic views or ABAC policies, enabling multi-tenant data access through a single service principal.</td>
-</tr>
-<tr>
-<td align="left">2026-10-16</td>
-<td align="left">Azure Databricks</td>
-<td align="left"><a href="https://learn.microsoft.com/azure/databricks/release-notes/unity-gateway#delegate-budget-access-with-access-control-lists-acls">Delegate budget access with access control lists (ACLs)</a></td>
-<td align="left">Budgets now support access control lists (ACLs), allowing account and workspace admins to delegate Budget Manager or Budget Viewer roles to users, groups, or service principals for granular cost governance.</td>
-</tr>
-<tr>
-<td align="left">2026-10-16</td>
-<td align="left">Azure Databricks</td>
-<td align="left"><a href="https://learn.microsoft.com/azure/databricks/ai-bi/release-notes/2026#delegate-access-to-genie-budgets">Delegate access to Genie budgets</a></td>
-<td align="left">Genie cost budgets now support ACLs, letting admins assign Budget Manager or Budget Viewer roles to specific principals for delegated management of Genie spending limits.</td>
-</tr>
-</tbody></table>
-<h3>Overview</h3>
-<p>MLflow shipped a patch release that adds lineage tracking for generative AI evaluation runs and fixes two tracking-related bugs affecting Optuna integration. The update improves reproducibility for hyperparameter tuning workloads and ensures dataset, scorer, and agent metadata are recorded during <code>mlflow.genai.evaluate</code> calls. No other Databricks-maintained projects reported releases, hot issues, or notable news in the last 24 hours.</p>
-<h3>MLflow</h3>
-<ul>
-<li><strong>Release</strong>: v3.17.2 adds lineage recording for dataset, scorer, and agent metadata on <code>mlflow.genai.evaluate</code> runs, and fixes two tracking issues: reseeding sampler and forwarding batch settings on <code>MlflowSparkStudy</code> executors, plus preventing <code>MlflowStorage</code> from marking Optuna trials finished prematurely. <a href="https://github.com/mlflow/mlflow/releases/tag/v3.17.2">v3.17.2</a></li>
-</ul>
-<p><strong>Quiet today:</strong> <a href="https://github.com/delta-io/delta">Delta Lake</a>, <a href="https://github.com/unitycatalog/unitycatalog">Unity Catalog</a>, <a href="https://github.com/databricks/cli">Databricks CLI</a>, <a href="https://github.com/databricks/dbt-databricks">dbt-databricks</a></p>
-<hr>
-<h2>Snowflake</h2>
-<table>
-<thead>
-<tr>
-<th align="left">Date</th>
-<th align="left">Source</th>
-<th align="left">Item</th>
-<th align="left">Summary</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left">2026-10-21</td>
-<td align="left">Snowflake</td>
-<td align="left"><a href="https://docs.snowflake.com/en/release-notes/2026/other/2026-10-21-declarative-feature-store-ga">October 21, 2026: Declarative Feature Store (General availability)</a></td>
-<td align="left">Declarative Feature Store is generally available, enabling version-controlled YAML or Python definitions of feature store resources with plan-and-apply deployment via the snow feature CLI.</td>
-</tr>
-<tr>
-<td align="left">2026-10-16</td>
-<td align="left">Snowflake</td>
-<td align="left"><a href="https://docs.snowflake.com/en/release-notes/2026/other/2026-10-16-parquet-direct-preview">Oct 16, 2026: Parquet Direct (Preview)</a></td>
-<td align="left">Parquet Direct preview allows creating read-only Apache Iceberg tables from Parquet files in cloud object storage, querying data in place without copying or rewriting.</td>
-</tr>
-<tr>
-<td align="left">2026-10-20</td>
-<td align="left">Snowflake</td>
-<td align="left"><a href="https://docs.snowflake.com/en/release-notes/2026/other/2026-10-20-sensitive-data-entitlement-access-reports-ga">Oct 20, 2026: Sensitive Data Entitlement and Access reports (General availability)</a></td>
-<td align="left">Sensitive Data Entitlement and Access reports in Trust Center are generally available for Enterprise Edition and higher, providing visibility into sensitive data access and entitlements.</td>
-</tr>
-</tbody></table>
-<hr>
-<h2>Azure / Fabric &amp; GCP</h2>
-<table>
-<thead>
-<tr>
-<th align="left">Date</th>
-<th align="left">Source</th>
-<th align="left">Item</th>
-<th align="left">Summary</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left">2026-10-21</td>
-<td align="left">BigQuery</td>
-<td align="left"><a href="https://docs.cloud.google.com/bigquery/docs/release-notes#October_21_2026">Feature: The AI.CHUNK_DOCUMENT function is a table-valued function that splits unstructured documents into semantically coherent text chunks optimized for vector embeddings and Retrieval-Augmented Gen…</a></td>
-<td align="left">BigQuery&#39;s AI.CHUNK_DOCUMENT function is generally available, splitting unstructured documents into semantically coherent chunks optimized for vector embeddings and RAG workflows.</td>
-</tr>
-<tr>
-<td align="left">2026-10-20</td>
-<td align="left">Microsoft Fabric</td>
-<td align="left"><a href="https://community.fabric.microsoft.com/t5/Fabric-Updates-Blog/New-analytical-functions-in-Microsoft-Fabric-Data-Warehouse/ba-p/5375432">New analytical functions in Microsoft Fabric Data Warehouse (Preview)</a></td>
-<td align="left">Microsoft Fabric Data Warehouse preview adds MEDIAN, QUANTILE, APPROX_MEDIAN, APPROX_QUANTILE, and aggregate syntax for PERCENTILE_CONT/DISC, enabling efficient distribution analytics in T-SQL.</td>
-</tr>
-<tr>
-<td align="left">2026-10-21</td>
-<td align="left">Azure updates</td>
-<td align="left"><a href="https://azure.microsoft.com/updates?id=576716">[Launched] Generally Available: Azure Cosmos DB Safe Key Rotation</a></td>
-<td align="left">Azure Cosmos DB Safe Key Rotation is generally available, providing last-used timestamps for account keys to safely identify active keys before rotating or retiring credentials.</td>
-</tr>
-</tbody></table>
-<hr>
-<h2>Open-source stack</h2>
-<h3>Overview</h3>
-<p>DuckDB released version 2.0.0 &quot;Cyanoptera&quot;, a major milestone that refactors internal identifiers and adopts tidy-check tooling. Polars users are reporting a severe memory regression in <code>read_csv</code> on wide tables, with the function consuming 120× more data memory than expected in the v2 series.</p>
-<h3>DuckDB</h3>
-<ul>
-<li><strong>Release</strong>: DuckDB v2.0.0 &quot;Cyanoptera&quot; introduces a major internal overhaul, converting <code>Identifier</code> from strings to a dedicated class and migrating to tidy-check for development workflows. The release marks a significant architectural step for the engine. <a href="https://github.com/duckdb/duckdb/releases/tag/v2.0.0">https://github.com/duckdb/duckdb/releases/tag/v2.0.0</a></li>
-</ul>
-<h3>Polars</h3>
-<ul>
-<li><strong>Hot issue</strong>: <code>read_csv</code> exhibits a 120× memory overhead on wide tables in Polars v2, flagged as a performance regression with medium priority. The issue is accepted and under triage, affecting Python users processing broad datasets. <a href="https://github.com/pola-rs/polars/issues/30114">https://github.com/pola-rs/polars/issues/30114</a></li>
-</ul>
-<p><strong>Quiet today:</strong> <a href="https://github.com/dbt-labs/dbt">dbt Core</a>, <a href="https://github.com/SQLMesh/sqlmesh">SQLMesh</a>, <a href="https://github.com/apache/airflow">Apache Airflow</a>, <a href="https://github.com/dagster-io/dagster">Dagster</a>, <a href="https://github.com/dlt-hub/dlt">dlt</a>, <a href="https://github.com/apache/iceberg">Apache Iceberg</a>, <a href="https://github.com/trinodb/trino">Trino</a></p>
-<hr>
-<h2>Data × AI</h2>
-<ul>
-<li>Azure Databricks will enable file upload in Genie One and Genie Agents by default for compliance security profile workspaces, allowing natural language analysis of uploaded files.</li>
-<li>Azure Databricks adds ACL-based delegation for Genie budgets so admins can assign Budget Manager or Budget Viewer roles to specific principals.</li>
-<li>BigQuery releases AI.CHUNK_DOCUMENT as a generally available table-valued function that splits documents into chunks optimized for vector embeddings and RAG workflows.</li>
-</ul>
-<hr>
-<h2>Worth a Look</h2>
-<ul>
-<li><a href="https://learn.microsoft.com/azure/databricks/release-notes/product/2026/october#saving-an-unchanged-job-no-longer-adds-rows-to-the-jobs-system-tables">Saving an unchanged job no longer adds rows to the jobs system tables</a> — Saving a job without changes no longer writes to system tables, reducing audit noise across UI, API, and bundle deployments.</li>
-<li><a href="https://community.fabric.microsoft.com/t5/Fabric-Updates-Blog/New-analytical-functions-in-Microsoft-Fabric-Data-Warehouse/ba-p/5375432">New analytical functions in Microsoft Fabric Data Warehouse (Preview)</a> — Preview adds MEDIAN, QUANTILE, APPROX_MEDIAN, APPROX_QUANTILE, and PERCENTILE_CONT/DISC aggregate syntax for efficient distribution analytics.</li>
-<li><a href="https://azure.microsoft.com/updates?id=576716">Generally Available: Azure Cosmos DB Safe Key Rotation</a> — Provides last-used timestamps for account keys to safely identify active keys before rotating or retiring credentials.</li>
-</ul>
 <hr>
 <p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
 ]]></content:encoded>

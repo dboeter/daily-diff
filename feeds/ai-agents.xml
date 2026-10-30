@@ -13,7 +13,110 @@
       <height>144</height>
     </image>
     <atom:link href="https://dboeter.github.io/daily-diff/feeds/ai-agents.xml" rel="self" type="application/rss+xml"/>
-    <lastBuildDate>Thu, 29 Oct 2026 05:38:26 +0000</lastBuildDate>
+    <lastBuildDate>Fri, 30 Oct 2026 05:37:40 +0000</lastBuildDate>
+    <item>
+      <title>AI Agents 2026-10-30</title>
+      <link>https://dboeter.github.io/daily-diff/#2026-10-30/ai-agents</link>
+      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-10-30/ai-agents</guid>
+      <pubDate>Fri, 30 Oct 2026 00:00:00 +0000</pubDate>
+      <description>AI Agents 2026-10-30 ⬛ Overview · 🟪 AI Agents · 🟦 AI Models &amp;amp; Labs · 🟧 AI Policy · 🟨 Data Engineering Projects: 16 | Active today: 5 | Stable releases: 6 | Prereleases (not covered): 6 | Generated: 2026-10-30 05:34 UTC Highlights Oh My Pi v18.14.0 introduces breaking changes: removes Bun event-loop workarounds, raw models.json export, and filesystem scan cache API; moves provider helpers to dedicated modules; requires provider-qualified model selectors; changes custom tool loader constru...</description>
+      <content:encoded><![CDATA[<h1>AI Agents 2026-10-30</h1>
+<p><a href="https://dboeter.github.io/daily-diff/#2026-10-30">⬛ Overview</a> · <strong>🟪 AI Agents</strong> · <a href="https://dboeter.github.io/daily-diff/#2026-10-30/ai-models">🟦 AI Models &amp; Labs</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-30/ai-policy">🟧 AI Policy</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-30/ai-data">🟨 Data Engineering</a></p>
+<blockquote>
+<p>Projects: 16 | Active today: 5 | Stable releases: 6 | Prereleases (not covered): 6 | Generated: 2026-10-30 05:34 UTC</p>
+</blockquote>
+<hr>
+<h2>Highlights</h2>
+<ul>
+<li>Oh My Pi v18.14.0 introduces breaking changes: removes Bun event-loop workarounds, raw <code>models.json</code> export, and filesystem scan cache API; moves provider helpers to dedicated modules; requires provider-qualified model selectors; changes custom tool loader constructors to take <code>cwd</code> first.</li>
+<li>Users report Claude Code&#39;s <code>agent_summary</code> spinner consumes ~18% of weighted tokens in subagent-heavy sessions, with requests for a supported way to disable it via env var or settings.</li>
+<li>OpenAI Codex rust-v0.166.0 adds GPT-6.1 Terra to model catalogs and <code>codex queue --resume</code> for resuming queued tasks, plus keyboard-driven transcript selection and clearer safety-block explanations.</li>
+</ul>
+<hr>
+<h2>Coding Agents &amp; Assistants</h2>
+<h3>Claude Code</h3>
+<ul>
+<li><strong>Release:</strong> <a href="https://github.com/anthropics/claude-code/releases/tag/v2.1.314">v2.1.314</a> adds <code>permissions.blockWritesOutsideWorkingDirectories</code> to block writes outside working directories in every permission mode; fixes sessions failing with &quot;Invalid effort level&quot; when org admins cap model effort; fixes <code>claude -p</code> exiting silently on startup failure; fixes Bedrock image handling and Microsoft Foundry model fallback.</li>
+<li><strong>Hot issue:</strong> <a href="https://github.com/anthropics/claude-code/issues/86879">#86879</a>: users report the <code>agent_summary</code> spinner consumes ~18% of weighted tokens in subagent-heavy sessions and request a supported way to disable it via env var or settings. (8 comments, 80 👍; +80 in the last 24h)</li>
+<li><strong>Hot issue:</strong> <a href="https://github.com/anthropics/claude-code/issues/105503">#105503</a>: an issue says the safety classifier blocks benign work on a public puzzle challenge (WeChall BrownOS), stopping protocol reverse-engineering of a toy lambda-calculus interpreter. (area:security; 3 comments, 0 👍; +3 since 2026-10-28)</li>
+<li><strong>News:</strong> <a href="https://news.ycombinator.com/item?id=50286306">Hacker News post</a> alleges Claude Code adds the user&#39;s email to the prompt and the LLM sends it to websites.</li>
+</ul>
+<h3>OpenAI Codex</h3>
+<ul>
+<li><strong>Release:</strong> <a href="https://github.com/openai/codex/releases/tag/rust-v0.166.0">rust-v0.166.0</a> adds keyboard-driven transcript selection with word/line/page motions, consistent Markdown rendering in async UI, GPT-6.1 Terra to model catalogs, <code>codex queue --resume</code>, clearer safety-block explanations, and <code>codex doctor --network-only</code>; fixes approval/permission preservation on resume/fork and TUI reconnection.</li>
+<li><strong>Hot issue:</strong> <a href="https://github.com/openai/codex/issues/57641">#57641</a>: users report Terminal CLI <code>@Browser</code> fails with &quot;The browser access host is unavailable&quot; on Windows 11 with Brave after desktop app update 26.1023.6123.0, while desktop app chats still work. (13 comments, 5 👍; +11 in the last 24h)</li>
+<li><strong>News:</strong> <a href="https://news.ycombinator.com/item?id=50292524">Hacker News post</a> announces OpenAI is doubling usage limits for all Pro 100/200/500 tiers and Business Premium, effective immediately.</li>
+</ul>
+<h3>OpenCode</h3>
+<ul>
+<li><strong>Release:</strong> <a href="https://github.com/anomalyco/opencode/releases/tag/v2.2.2">v2.2.2</a> enables <code>experimental_image_generate</code> by default when an image-capable provider is connected; adds faster worktree selection via Git branch click on new-session screen; unifies quotes and annotations around a compact optional-comment editor; fixes persistent terminal requests with missing working directories and media preservation on session fork/import.</li>
+<li><strong>Release:</strong> <a href="https://github.com/anomalyco/opencode/releases/tag/process-daemon-v0.4.0">process-daemon-v0.4.0</a> publishes opencode-pty 0.4.0 (protocol 7) as @opencode/<a href="mailto:pty@0.4.0">pty@0.4.0</a>.</li>
+</ul>
+<h3>Oh My Pi</h3>
+<ul>
+<li><strong>Release:</strong> <a href="https://github.com/can1357/oh-my-pi/releases/tag/v18.14.0">v18.14.0</a> removes Bun event-loop workaround utilities, moves Anthropic/Codex/OpenAI helpers to dedicated provider modules, updates auth-gateway model resolvers to receive <code>ModelResolveOptions</code>, removes raw <code>models.json</code> export in favor of bundled registry APIs, changes custom tool loader constructors to take <code>cwd</code> first, switches WebMCP to Chrome&#39;s native WebMcpController, requires provider-qualified model selectors to identify exact model IDs, and removes filesystem scan cache API and environment variables.</li>
+</ul>
+<h3>Hermes Agent</h3>
+<ul>
+<li><strong>Hot issue:</strong> <a href="https://github.com/NousResearch/hermes-agent/issues/146356">#146356</a>: an issue says plain-text input typed into an idle session&#39;s window is hijacked into a different running session&#39;s turn as a mid-turn steer on Hermes Desktop with multiple chat windows; the hijacked messages are never persisted to any session&#39;s messages table. (type/security; 5 comments, 0 👍; +5 in the last 24h)</li>
+<li><strong>Hot issue:</strong> <a href="https://github.com/NousResearch/hermes-agent/issues/118379">#118379</a>: an issue says Anthropic per-request credential refresh reverts credential-pool rotation — two pooled subscriptions bill as one, the turn falls through to fallback providers while the second account&#39;s quota remains untouched. (sweeper:risk-security-boundary; 11 comments, 1 👍; +3 since 2026-10-28; fix PR <a href="https://github.com/NousResearch/hermes-agent/pull/123361">#123361</a> open)</li>
+</ul>
+<p><strong>Quiet today:</strong> <a href="https://github.com/google-gemini/gemini-cli">Gemini CLI</a>, <a href="https://github.com/Kilo-Org/kilocode">Kilo Code</a>, <a href="https://github.com/earendil-works/pi">Pi</a>, <a href="https://github.com/1jehuang/jcode">jcode</a>, <a href="https://github.com/cline/cline">Cline</a>, <a href="https://github.com/CommandCodeAI/command-code">Command Code</a>, <a href="https://github.com/deepseek-ai/deepseek-harness">DeepSeek Harness</a></p>
+<hr>
+<h2>Agent Tooling</h2>
+<p><strong>Quiet today:</strong> <a href="https://github.com/NVIDIA/OpenShell">OpenShell</a>, <a href="https://github.com/herdrdev/herdr">herdr</a>, <a href="https://github.com/mksglu/context-mode">context-mode</a>, <a href="https://github.com/asheshgoplani/agent-deck">Agent Deck</a></p>
+<hr>
+<h2>Spotted</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Story</th>
+<th align="left">Source</th>
+<th align="left">Discussion</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a href="https://labs.ycombinator.com/projects/games/index.html">We ran AI agent swarms in Minecraft and Mindustry</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50296486">232 points, 76 comments</a></td>
+<td align="left">The authors ran swarms of Claude and GPT agents in Minecraft and Mindustry.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50291116">Launch HN: Simantic (YC F26) – Firmware Simulation for AI Agents</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50291116">58 points, 16 comments</a></td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left">Show HN: phpClaw – AI agent runtime for PHP with tools, memory and guards (<a href="https://github.com/phpclaw-php/phpclaw-monorepo">phpclaw-php/phpclaw-monorepo</a>)</td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50293361">11 points, 4 comments</a></td>
+<td align="left">The author released phpClaw, an open-source AI agent framework for PHP with a built-in ReAct loop, memory, tools, and security guards that integrates with frameworks like Laravel and WordPress.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://fig.blue/posts/duet-is-the-future/">Claude Duet is the first personal-assistant-type harness that feels useful</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50292727">113 points, 111 comments</a></td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left"><a href="https://www.wired.com/story/a-defense-contractor-gave-their-personal-ai-agent-access-to-a-secure-pentagon-system/">A Defense Contractor Gave Their AI Agent Access to a Secure Pentagon System</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50293979">19 points, 6 comments</a></td>
+<td align="left">An Accenture employee&#39;s personal Claude agent reportedly ran on a DOD network for two months before detection.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://skypilot.ai/blog/grace-blackwell-needs-a-new-scheduler">Grace Blackwell needs a new scheduler: 27% more usable GPUs from the same racks</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50290912">134 points, 21 comments</a></td>
+<td align="left">SkyPilot&#39;s topology-aware scheduler achieves 27% more usable GPUs on NVL72 racks by keeping multi-node training on NVLink with automatic defragmentation and in-place failure recovery.</td>
+</tr>
+</tbody></table>
+<hr>
+<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
+]]></content:encoded>
+    </item>
     <item>
       <title>AI Agents 2026-10-29</title>
       <link>https://dboeter.github.io/daily-diff/#2026-10-29/ai-agents</link>

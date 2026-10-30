@@ -1,5 +1,5 @@
 {
-  "generated": "2026-10-29T05:38:25.975Z",
+  "generated": "2026-10-30T05:37:39.975Z",
   "labels": {
     "ai-agents": "AI Agents",
     "ai-models": "AI Models & Labs",
@@ -38,12 +38,22 @@
   "overview": "Overview",
   "comingUp": "Coming up",
   "talkedAbout": "Also talked about",
+  "policyTalk": "Policy talk",
   "highlights": "Highlights",
   "proseColumns": [
     "Summary",
     "What to do"
   ],
   "dates": [
+    {
+      "date": "2026-10-30",
+      "reports": [
+        "ai-agents",
+        "ai-models",
+        "ai-policy",
+        "ai-data"
+      ]
+    },
     {
       "date": "2026-10-29",
       "reports": [
