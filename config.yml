@@ -151,8 +151,9 @@ databricks:
       repo: databricks/terraform-provider-databricks
       name: Terraform provider for Databricks
       # Weekly hand-written releases (not generated like databricks-sdk-py). The
-      # name is a phrase nobody writes; the keywords cover both word orders.
-      keywords: [terraform-provider-databricks, databricks terraform, terraform databricks, databricks provider]
+      # name is a phrase nobody writes; the keywords cover both word orders. Not
+      # "databricks provider": the dbt adapter and Airflow provider are providers too.
+      keywords: [terraform-provider-databricks, databricks terraform, terraform databricks]
 
 snowflake:
   title: Snowflake
@@ -175,7 +176,7 @@ snowflake:
       name: Terraform provider for Snowflake
       # Its migration guide per release is the breaking-change signal for
       # Snowflake IaC. Keywords cover both word orders.
-      keywords: [terraform-provider-snowflake, snowflake terraform, terraform snowflake, snowflake provider]
+      keywords: [terraform-provider-snowflake, snowflake terraform, terraform snowflake]
 
 data_stack:
   title: Open-source data stack

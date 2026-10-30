@@ -339,8 +339,15 @@ describe("data project news", () => {
   });
 
   it("matches the Terraform providers in either word order", () => {
-    expect(matches(repo("terraform-provider-databricks"), "Terraform 1.14 and the Databricks provider")).toBe(
-      true,
+    expect(
+      matches(
+        repo("terraform-provider-databricks"),
+        "Terraform Databricks provider 1.138 drops the legacy auth",
+      ),
+    ).toBe(true);
+    // "<vendor> provider" alone is not a keyword: the dbt adapter and the Airflow provider are providers too.
+    expect(matches(repo("terraform-provider-databricks"), "Airflow Databricks provider 7.0 released")).toBe(
+      false,
     );
     expect(
       matches(repo("terraform-provider-snowflake"), "Terraform Snowflake provider v2.22: migration notes"),
