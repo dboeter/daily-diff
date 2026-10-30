@@ -25,6 +25,7 @@ import { hfDescription, hfKeys, type HfRow } from "../sources/huggingface.ts";
 import type { PolicyItem } from "../policy/items.ts";
 import type { KeptVendorItem } from "../data/relevance.ts";
 import type { VendorAction } from "../data/vendors.ts";
+import type { CommunityRow } from "../data/community.ts";
 import type { StoryRow } from "../spotted/pool.ts";
 import type { ResearchPaper } from "../trending/research.ts";
 import type { Category } from "../trending/rank.ts";
@@ -754,6 +755,20 @@ export function renderSpottedTable(
       `${cell(summaryText(summaries, { n: r.n, description: r.description ?? "" }))} |`,
   );
   return `## ${heading}\n\n${SPOTTED.tableHeader}\n${lines.join("\n")}`;
+}
+
+/**
+ * The data report's News & discussion section: each community post linked, its feed, its summary by
+ * its own number (else its description, truncated). "" without rows.
+ */
+export function renderCommunityTable(rows: CommunityRow[], summaries: Map<number, string>): string {
+  if (!rows.length) return "";
+  const lines = rows.map(
+    (r) =>
+      `| ${r.date} | [${cell(r.title)}](${cell(r.url)}) | ${cell(r.source)} | ` +
+      `${cell(summaryText(summaries, { n: r.n, description: r.description }))} |`,
+  );
+  return `## ${DATA_REPORT.communityHeading}\n\n${DATA_REPORT.communityTableHeader}\n${lines.join("\n")}`;
 }
 
 /** Trends' Research section: each paper linked, its summary by its own number (else its abstract, truncated). */

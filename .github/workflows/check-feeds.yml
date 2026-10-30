@@ -1,0 +1,29 @@
+name: Check feeds
+
+# Fetches every data.feeds and data.community source from a GitHub runner and
+# lists its status and item count (scripts/check-feeds.ts), so a feed that
+# answers 403 to Actions is found before a digest builds on it. Manual only.
+on:
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Fetch every feed
+        run: pnpm feeds:check

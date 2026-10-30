@@ -121,9 +121,31 @@ export interface DataFeed {
   stableId?: boolean;
 }
 
+/** What a community feed publishes; a newsletter's items are issues, summarized as one row each. */
+export const COMMUNITY_KINDS = ["blog", "newsletter"] as const;
+export type CommunityKind = (typeof COMMUNITY_KINDS)[number];
+
+/** Rows a community feed may take in one report unless its config says otherwise. */
+export const COMMUNITY_DEFAULT_CAP = 1;
+
+/**
+ * An engineering blog or newsletter of the data report (config.yml
+ * `data.community`): RSS 2.0 or Atom, read by src/core/rss.ts. Its posts are
+ * project news when they name a tracked project, else News & discussion rows.
+ */
+export interface CommunityFeed {
+  name: string;
+  url: string;
+  kind: CommunityKind;
+  /** Rows the feed may take in one report (config `cap`, default COMMUNITY_DEFAULT_CAP). */
+  cap: number;
+}
+
 /** The data report's non-repo sources (config.yml `data`). */
 export interface DataConfig {
   feeds: DataFeed[];
+  /** May be empty. */
+  community: CommunityFeed[];
 }
 
 export interface RadarConfig extends Record<SectionKey, SectionConfig> {
@@ -231,8 +253,28 @@ function toPolicy(raw: unknown, file: string): PolicyConfig {
 
 function toData(raw: unknown, file: string): DataConfig {
   if (!raw || typeof raw !== "object") throw new Error(`${file}: missing section "data"`);
-  const { feeds } = raw as Record<string, unknown>;
+  const { feeds, community } = raw as Record<string, unknown>;
   if (!Array.isArray(feeds)) throw new Error(`${file}: data.feeds must be a list`);
+  if (!Array.isArray(community)) throw new Error(`${file}: data.community must be a list`);
+  const rawCommunity: { name?: unknown; url?: unknown; kind?: unknown; cap?: unknown }[] = community;
+  const communityFeeds = rawCommunity.map((f, i): CommunityFeed => {
+    if (!nonEmptyString(f?.name) || !nonEmptyString(f.url)) {
+      throw new Error(`${file}: data.community[${i}] needs name and url`);
+    }
+    const kind = f.kind ?? "blog";
+    if (!(COMMUNITY_KINDS as readonly unknown[]).includes(kind)) {
+      throw new Error(`${file}: data.community[${i}].kind must be one of ${COMMUNITY_KINDS.join(", ")}`);
+    }
+    if (f.cap !== undefined && (!Number.isInteger(f.cap) || (f.cap as number) < 1)) {
+      throw new Error(`${file}: data.community[${i}].cap must be a positive integer`);
+    }
+    return {
+      name: f.name.trim(),
+      url: f.url.trim(),
+      kind: kind as CommunityKind,
+      cap: (f.cap as number | undefined) ?? COMMUNITY_DEFAULT_CAP,
+    };
+  });
   const rawFeeds: {
     name?: unknown;
     vendor?: unknown;
@@ -267,6 +309,7 @@ function toData(raw: unknown, file: string): DataConfig {
         ...(f.stable_id ? { stableId: true } : {}),
       };
     }),
+    community: communityFeeds,
   };
 }
 

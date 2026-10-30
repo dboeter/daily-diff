@@ -37,6 +37,8 @@ import {
   sourceFidelityRules,
 } from "./prompts.ts";
 import type { ReleaseRow } from "./pages.ts";
+import type { CommunityRow } from "../data/community.ts";
+import { postDetail } from "./project-news.ts";
 import type { Deadline } from "../core/report-state.ts";
 import { formatParameters, type HfData, type HfRow } from "../sources/huggingface.ts";
 import type { ResearchPaper } from "../trending/research.ts";
@@ -307,6 +309,8 @@ export function buildDataSummariesPrompt(
   items: Numbered<KeptVendorItem>[],
   dateStr: string,
   releases: Numbered<ReleaseRow>[] = [],
+  /** News & discussion rows: community feed posts, numbered after the releases. */
+  posts: CommunityRow[] = [],
 ): string {
   const list = [
     rowList(
@@ -319,13 +323,25 @@ export function buildDataSummariesPrompt(
       (r) =>
         `${r.project.name} ${r.release.tag_name} (release, ${r.release.published_at.slice(0, 10)}) — ${r.release.announcement ? `Announcement: ${r.release.announcement} Notes: ` : ""}${releaseNotes(r.release.body, RELEASE_BODY_CHARS) || "(no release notes)"}`,
     ),
+    rowList(
+      posts,
+      (p) => `${p.title} (${postDetail(p)}, ${p.source}) — ${p.description || "(no description)"}`,
+    ),
   ]
     .filter(Boolean)
     .join("\n");
-  const count = items.length + releases.length;
+  const count = items.length + releases.length + posts.length;
+  const kinds = [
+    releases.length
+      ? "the ones marked (release) are open-source project releases, with their release notes"
+      : "",
+    posts.length
+      ? "the ones marked (blog post) or (newsletter issue) are community posts, with the feed's text, which may be cut"
+      : "",
+  ].filter(Boolean);
   return `You summarize data platform release notes for ${DATA_READER}.
 
-Below are ${count} numbered release notes and updates, new as of ${dateStr}, each with its source and text${releases.length ? "; the ones marked (release) are open-source project releases, with their release notes" : ""}.
+Below are ${count} numbered release notes and updates, new as of ${dateStr}, each with its source and text${kinds.length ? `; ${kinds.join("; ")}` : ""}.
 
 ${list}
 
@@ -333,7 +349,7 @@ ${summaryLine("1-2 sentences")} — what the change enables, breaks or requires 
 - Do not repeat the title or its status words (generally available, preview, now available): the title is shown next to the summary.
 - Ground every sentence only in the given text. Do not invent dates, versions, regions or availability.
 - ${IDENTIFIER_RULE}
-- When the text adds nothing beyond the title (or is empty), write \`N: —\` for that item.${releases.length ? `\n- For a release: its most important changes for users in 1 sentence, in this order: ${RELEASE_ORDER}; say so first when it is a major version (only a version x.0.0 is a major version). Notes are cut at ${RELEASE_BODY_CHARS} characters: summarize what they show, and never say they are cut.` : ""}
+- When the text adds nothing beyond the title (or is empty), write \`N: —\` for that item.${releases.length ? `\n- For a release: its most important changes for users in 1 sentence, in this order: ${RELEASE_ORDER}; say so first when it is a major version (only a version x.0.0 is a major version). Notes are cut at ${RELEASE_BODY_CHARS} characters: summarize what they show, and never say they are cut.` : ""}${posts.length ? `\n- For a community post: what a data engineer learns from it, in your own words, with one concrete fact from the text (a number, a named tool, a finding). You have not read the post: no claim, method or result its text does not state. A first-person post is its author's: say who did it ("the author benchmarked…"). Never copy the text: the reader can open the link.` : ""}
 ${summaryOutputRule(count)}
 - English.
 `;
@@ -359,7 +375,7 @@ export function buildDataProsePrompt(
   ];
   return `You are the editor of a daily data engineering report for ${DATA_READER}.
 
-Below are today's report sections, ${dateStr}: vendor release-note tables (⚠️ marks a deprecation, retirement or breaking change; 🤖 an AI feature in a data platform), the releases and hot issues of tracked open-source projects and, under Spotted, community stories about data engineering.
+Below are today's report sections, ${dateStr}: vendor release-note tables (⚠️ marks a deprecation, retirement or breaking change; 🤖 an AI feature in a data platform), the releases and hot issues of tracked open-source projects, under ${DATA_REPORT.communityHeading} posts from engineering blogs and newsletters, and, under Spotted, community stories about data engineering.
 
 ${sectionsMd}
 

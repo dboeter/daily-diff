@@ -9,6 +9,7 @@ import { escapeRegex } from "../core/regex.ts";
 import { SPOTTED } from "../core/strings.ts";
 import { linkKey, type Story } from "../spotted/pool.ts";
 import type { TrendingData } from "../trending/compose.ts";
+import type { CommunityPost } from "../data/community.ts";
 
 export interface NewsItem {
   source: string;
@@ -26,7 +27,13 @@ export interface NewsSources {
   /** The fresh community stories: HN, Lobste.rs, Dev.to. */
   stories?: Story[];
   trending?: TrendingData;
+  /** The data report's community feed posts (blogs, newsletters) no earlier report showed. */
+  posts?: CommunityPost[];
 }
+
+/** A community post's detail line: its feed and date; a post has no counts. */
+export const postDetail = (p: Pick<CommunityPost, "kind" | "date">): string =>
+  `${p.kind === "newsletter" ? "newsletter issue" : "blog post"}, ${p.date}`;
 
 /** News items per agent, so one viral thread cannot crowd out the rest. */
 export const NEWS_PER_AGENT = 5;
@@ -86,6 +93,23 @@ export function collectNewsItems(sources: NewsSources): { item: NewsItem; text: 
       // The description too: on 2026-10-25 a Dev.to story about OpenShell named it only there.
       text: `${s.title} ${s.description ?? ""}`,
       key: linkKey(s.url),
+    });
+  }
+
+  // After the stories: a story about a post (HN linking a DuckDB blog post) and the post itself share
+  // a link, so the story, with its counts, is the copy listed and the post is `claimed`.
+  for (const p of sources.posts ?? []) {
+    out.push({
+      item: {
+        source: p.source,
+        title: p.title,
+        url: p.url,
+        detail: postDetail(p),
+        id: p.id,
+        ...(p.description ? { description: p.description } : {}),
+      },
+      text: `${p.title} ${p.description}`,
+      key: linkKey(p.url),
     });
   }
 

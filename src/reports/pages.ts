@@ -73,6 +73,7 @@ import {
   renderVendorActions,
   renderReleaseTable,
   renderSpottedTable,
+  renderCommunityTable,
   policyTitleLabel,
   type ProjectGroup,
 } from "./markdown.ts";
@@ -94,6 +95,15 @@ import { nearPolicyDeadlines, renderDeadlines } from "../policy/deadlines.ts";
 import type { ModelCatalog } from "../sources/openrouter.ts";
 import { DATA_STATE_FILE, type DataState, type VendorData } from "../data/vendors.ts";
 import { DATA_VERDICTS_FILE } from "../data/relevance.ts";
+import {
+  COMMUNITY_VERDICTS_FILE,
+  loadCommunityVerdicts,
+  selectCommunityPosts,
+  type CommunityPost,
+  type CommunityVerdicts,
+} from "../data/community.ts";
+import type { CommunityFeed } from "../core/config.ts";
+import { saveItemsFile, type AskJev } from "../core/jev.ts";
 import { commitWrites, planWrites } from "../core/new-items.ts";
 import type { DataSectionKey } from "../core/config.ts";
 import type { SpottedSection, StoryRow } from "../spotted/pool.ts";
@@ -604,6 +614,33 @@ export interface DataSection {
   activities: ProjectActivity[];
 }
 
+/** The data report's community feed posts of the day (`src/data/community.ts`). */
+export interface CommunityInput {
+  feeds: CommunityFeed[];
+  /** The fetched posts no project took as news: the News & discussion candidates. */
+  posts: CommunityPost[];
+  /** The posts a project took as news: shown under it, so recorded with the report. */
+  newsPostIds: string[];
+  /** Items per feed (null: failed), for the trace's `sources` header. */
+  counts: Record<string, number | null>;
+  /** Links the report's Spotted rows show (`linkKey`s): a post with one is `repeat`. */
+  taken: Set<string>;
+  jev?: { apiKey?: string; cache: CommunityVerdicts | null; ask?: AskJev };
+  verdictsFile?: string;
+}
+
+/** No community feeds configured (or a test without them). */
+export const NO_COMMUNITY: CommunityInput = {
+  feeds: [],
+  posts: [],
+  newsPostIds: [],
+  counts: {},
+  taken: new Set(),
+};
+
+/** The data state's key of a shown community post: its id (`post:<linkKey>`). */
+const postKey = (id: string): string => id;
+
 /** A bullet line: `- `, `* ` or `1. `. */
 const BULLET_RE = /^\s*(?:[-*]|\d+\.)\s/;
 
@@ -695,7 +732,11 @@ export function hasDataNews(sections: DataSection[], vendor: VendorData, dateStr
  * AI Policy items that are EU data law), left out when there are none; it
  * never makes a report on its own. Spotted (code-rendered, summarized by
  * main()'s Spotted call) goes between Across platforms and EU data law, and
- * never makes a report on its own either; the prose call sees it.
+ * never makes a report on its own either; the prose call sees it. News & discussion (code-rendered,
+ * between Across platforms and Spotted) holds the community feed posts Jev kept that named no tracked
+ * project (`community`), summarized by the vendor summaries call and recorded in the state as shown
+ * (`post:` keys, with the posts a project took as news); its trace and verdicts are saved before the
+ * skip, like the vendor ones, and its rows never make a report on their own either.
  */
 export async function buildDataReport(
   sections: DataSection[],
@@ -706,15 +747,12 @@ export async function buildDataReport(
   dateStr: string,
   stateFile = DATA_STATE_FILE,
   verdictsFile = DATA_VERDICTS_FILE,
+  community: CommunityInput = NO_COMMUNITY,
 ): Promise<SavedReport | null> {
   // Before the skip, as in buildPolicyReport: dropped items are then not asked again tomorrow, and
   // a quiet day keeps its record-only bundles.
   const files = { state: stateFile, verdicts: verdictsFile, trace: "data-trace.json" };
   commitWrites(planWrites(vendor).onFetched, files, dateStr);
-  if (!hasDataNews(sections, vendor, dateStr)) {
-    console.log(`  [data] ${DATA_REPORT.noNewItems}`);
-    return null;
-  }
   const { items } = vendor;
   const unshown = newReleases(sections, vendor.nextState.reported, dateStr);
   // A release of the last 24h is in its repo section: recorded as shown, not listed twice.
@@ -722,6 +760,27 @@ export async function buildDataReport(
     unshown.filter((r) => !r.inSection),
     items.length,
   );
+  // The community posts no earlier report showed (a same-day re-run shows today's again).
+  const reported = vendor.nextState.reported;
+  const candidates = community.posts.filter((p) => (reported[postKey(p.id)] ?? dateStr) === dateStr);
+  const selection = await selectCommunityPosts(candidates, {
+    feeds: community.feeds,
+    ...(community.jev ?? { apiKey: process.env["TYPESAFE_API_KEY"], cache: loadCommunityVerdicts() }),
+    dateStr,
+    fetched: community.counts,
+    taken: community.taken,
+    numberAfter: items.length + releases.length,
+  });
+  if (community.feeds.length) {
+    console.log(`  Saved ${saveFile(selection.traceFile, dateStr, "community-trace.json")}`);
+    if (selection.nextVerdicts)
+      saveItemsFile(selection.nextVerdicts, community.verdictsFile ?? COMMUNITY_VERDICTS_FILE);
+  }
+  if (!hasDataNews(sections, vendor, dateStr)) {
+    console.log(`  [data] ${DATA_REPORT.noNewItems}`);
+    return null;
+  }
+  const posts = selection.rows;
   const H = DATA_REPORT.headings;
   const [repos, rowSummaries] = await Promise.all([
     Promise.all(
@@ -733,10 +792,10 @@ export async function buildDataReport(
         return { ...s, summary };
       }),
     ),
-    items.length + releases.length > 0
+    items.length + releases.length + posts.length > 0
       ? generateOr(
           "data-vendor-summaries",
-          buildDataSummariesPrompt(items, dateStr, releases),
+          buildDataSummariesPrompt(items, dateStr, releases, posts),
           "",
           LLM_TOKENS_LISTING,
         )
@@ -750,6 +809,7 @@ export async function buildDataReport(
         r.n,
         `${r.project.name} ${r.release.tag_name} ${r.release.body ?? ""}`,
       ]),
+      ...posts.map((p): [number, string] => [p.n, `${p.title} ${p.description}`]),
     ]),
     "data-vendor-summaries",
   );
@@ -785,8 +845,11 @@ export async function buildDataReport(
   const groups = groupsWith(tables);
 
   const spottedMd = renderSpottedTable(spotted.rows, spotted.summaries);
+  const communityMd = renderCommunityTable(posts, summaries);
   // The prose call sees what the reader sees below Highlights, except the over-cap links.
-  const sectionsMd = [...groupsMarkdown(groupsWith(proseTables)), spottedMd].filter(Boolean).join("\n\n");
+  const sectionsMd = [...groupsMarkdown(groupsWith(proseTables)), communityMd, spottedMd]
+    .filter(Boolean)
+    .join("\n\n");
   const minor = items.filter((i) => i.minor).map((i) => ({ name: i.title, url: i.link }));
   const prose = await generateOr(
     "data-highlights",
@@ -812,6 +875,7 @@ export async function buildDataReport(
     .join("\n");
   const epilogue = [
     acrossPlatforms,
+    communityMd,
     spottedMd,
     lawLinks ? `## ${DATA_REPORT.dataLawHeading}\n\n${lawLinks}` : "",
   ]
@@ -836,8 +900,14 @@ export async function buildDataReport(
   const nextState: DataState = {
     ...vendor.nextState,
     ...(vendor.nextState.actions ? { actions } : {}),
-    // Shown once: the next run skips them (newReleases); pruned with the vendor ids.
-    reported: { ...vendor.nextState.reported, ...Object.fromEntries(unshown.map((r) => [r.key, dateStr])) },
+    // Shown once: the next run skips them (newReleases, the community candidates); pruned with the vendor ids.
+    reported: {
+      ...vendor.nextState.reported,
+      ...Object.fromEntries(unshown.map((r) => [r.key, dateStr])),
+      ...Object.fromEntries(
+        [...posts.map((p) => p.id), ...community.newsPostIds].map((id) => [postKey(id), dateStr]),
+      ),
+    },
   };
   // The reported state as the report left it: today's action summaries and shown releases added.
   commitWrites(planWrites({ ...vendor, nextState }).onReported, files, dateStr);

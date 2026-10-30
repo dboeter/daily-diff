@@ -260,6 +260,9 @@ export const DATA_REPORT = {
   deprecationMarker: "⚠️",
   /** Written by the prose call after the tables: one capability compared across vendors. */
   acrossPlatforms: "Across platforms",
+  /** Code-rendered after Across platforms: the community feed posts (blogs, newsletters) Jev kept that named no tracked project. */
+  communityHeading: "News & discussion",
+  communityTableHeader: "| Date | Post | Source | Summary |\n| :--- | :--- | :--- | :--- |",
   /** Code-rendered after Open-source stack: the data repos' stable releases no earlier report showed. */
   releasesHeading: "Releases this week",
   releasesTableHeader: "| Project | Version | Date | Summary |\n| :--- | :--- | :--- | :--- |",
