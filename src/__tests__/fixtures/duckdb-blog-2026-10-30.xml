@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<feed xmlns="http://www.w3.org/2005/Atom" >
+  <generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator>
+  <link href="https://duckdb.org/feed.xml" rel="self" type="application/atom+xml" />
+  <link href="https://duckdb.org/" rel="alternate" type="text/html" />
+  <updated>2026-10-30T12:16:34+00:00</updated>
+  <id>https://duckdb.org/feed.xml</id>
+
+  
+  
+  
+
+  
+    <title type="html">DuckDB</title>
+  
+
+  
+    <subtitle>DuckDB is an in-process SQL database management system focused on analytical query processing. It is designed to be easy to install and easy to use. DuckDB has no external dependencies. DuckDB has bindings for C/C++, Python, R, Java, Node.js, Go and other languages.</subtitle>
+  
+
+  
+
+  
+
+  
+    <author>
+        <name>GitHub User</name>
+      
+        <email>your-email@domain.com</email>
+      
+      
+    </author>
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+    <entry>
+      
+
+      <title type="html">From Spreadsheets to DuckLake: A Data Engineer&apos;s Road to DuckDB</title>
+      <link href="https://duckdb.org/2026/10/29/from-spreadsheets-to-ducklake.html" rel="alternate" type="text/html" title="From Spreadsheets to DuckLake: A Data Engineer&apos;s Road to DuckDB" />
+      <published>2026-10-29T00:00:00+00:00</published>
+      <updated>2026-10-29T00:00:00+00:00</updated>
+      <id>https://duckdb.org/2026/10/29/from-spreadsheets-to-ducklake</id>
+      
+      
+        <content type="html" xml:base="https://duckdb.org/2026/10/29/from-spreadsheets-to-ducklake.html"><![CDATA[<h2 id="from-copy-paste-to-code">From Copy-Paste to Code</h2>
+
+<p>Matt's career started in 2008 the way many data careers do: with spreadsheets. As a fresh graduate, he spent his days copying and pasting between Excel, Microsoft Access, and SQL Server. Assembling a single report could take three hours, and one mistake meant starting over.</p>
+
+<p><strong>“There's got to be an easier way,”</strong>]]></content>
+      
+
+      
+        <author>
+          <name>Matt Martin</name>
+        </author>
+      
+        <author>
+          <name>Geertjan Wielenga</name>
+        </author>
+      
+        <author>
+          <name>Tim Cox</name>
+        </author>
+      
+
+      
+        
+      
+
+      
+        <category term="using-duckdb" />
+      
+
+      
+      
+        <summary type="html"><![CDATA[After nearly two decades working with increasingly sophisticated data infrastructure, data engineer [Matt Martin](https://www.linkedin.com/in/mattmartin14/) discovered DuckDB could handle many of the analytical tasks he cared about without the operational complexity he had come to associate with big data. The same preference for familiar SQL and simpler infrastructure drew him to DuckLake, and he has since become an active tester and advocate of DuckDB's evolving capabilities.]]></summary>
+      
+
+      
+      
+        
+        <media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="https://duckdb.org/images/blog/thumbs/user-matt-martin.png" />
+        <media:content medium="image" url="https://duckdb.org/images/blog/thumbs/user-matt-martin.png" xmlns:media="http://search.yahoo.com/mrss/" />
+      
+    </entry>
+<entry>
+      
+
+      <title type="html">Gems of DuckDB 2.0.0</title>
+      <link href="https://duckdb.org/2026/10/26/gems-of-duckdb-200.html" rel="alternate" type="text/html" title="Gems of DuckDB 2.0.0" />
+      <published>2026-10-26T00:00:00+00:00</published>
+      <updated>2026-10-26T00:00:00+00:00</updated>
+      <id>https://duckdb.org/2026/10/26/gems-of-duckdb-200</id>
+      
+      
+        <content type="html" xml:base="https://duckdb.org/2026/10/26/gems-of-duckdb-200.html"><![CDATA[<p>Last week we released <a href="/2026/10/21/announcing-duckdb-200.html">DuckDB 2.0.0 LTS</a>, our biggest feature release so far.
+The announcement covered the headline items: the Quack protocol, asynchronous I/O, the first-class <code class="language-plaintext highlighter-rouge">VARIANT</code> type, agent mode, the PEG parser, and triggers.
+DuckDB 2.0.0 is now available in <a href="/docs/2.0/cli]]></content>
+      
+
+      
+        <author>
+          <name>Gábor Szárnyas</name>
+        </author>
+      
+        <author>
+          <name>Geertjan Wielenga</name>
+        </author>
+      
+
+      
+        
+      
+
+      
+        <category term="release" />
+      
+
+      
+      
+        <summary type="html"><![CDATA[We released DuckDB 2.0.0 last week with an improved Quack protocol and `VARIANT` support, asynchronous I/O, and many other features. In this blog post, we highlight a few smaller features and improvements that did not make it into the release announcement.]]></summary>
+      
+
+      
+      
+        
+        <media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="https://duckdb.org/images/blog/thumbs/gems-of-duckdb-2-0-0.png" />
+        <media:content medium="image" url="https://duckdb.org/images/blog/thumbs/gems-of-duckdb-2-0-0.png" xmlns:media="http://search.yahoo.com/mrss/" />
+      
+    </entry>
+</feed>

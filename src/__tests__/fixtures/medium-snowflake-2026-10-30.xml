@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?><rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0" xmlns:cc="http://cyber.law.harvard.edu/rss/creativeCommonsRssModule.html">
+    <channel>
+        <title><![CDATA[Snowflake Builders Blog: Data Engineers, App Developers, AI, &amp; Data Science - Medium]]></title>
+        <description><![CDATA[Best practices, tips &amp; tricks from Snowflake experts and community - Medium]]></description>
+        <link>https://medium.com/snowflake?source=rss----34b6daafc07---4</link>
+        <image>
+            <url>https://cdn-images-1.medium.com/proxy/1*TGH72Nnw24QL3iV9IOm4VA.png</url>
+            <title>Snowflake Builders Blog: Data Engineers, App Developers, AI, &amp;amp; Data Science - Medium</title>
+            <link>https://medium.com/snowflake?source=rss----34b6daafc07---4</link>
+        </image>
+        <generator>Medium</generator>
+        <lastBuildDate>Fri, 30 Oct 2026 14:17:37 GMT</lastBuildDate>
+        <atom:link href="https://medium.com/feed/snowflake" rel="self" type="application/rss+xml"/>
+        <webMaster><![CDATA[yourfriends@medium.com]]></webMaster>
+        <atom:link href="http://medium.superfeedr.com" rel="hub"/>
+        <item>
+            <title><![CDATA[A Martech Perspective on Databricks’ New CDP Capability]]></title>
+            <link>https://medium.com/snowflake/a-martech-perspective-on-databricks-new-cdp-capability-b0fadcb6f2c9?source=rss----34b6daafc07---4</link>
+            <guid isPermaLink="false">https://medium.com/p/b0fadcb6f2c9</guid>
+            <category><![CDATA[customer-data-platform]]></category>
+            <category><![CDATA[snowflake]]></category>
+            <category><![CDATA[databricks]]></category>
+            <category><![CDATA[data-warehouse]]></category>
+            <category><![CDATA[digital-marketing]]></category>
+            <dc:creator><![CDATA[imagino]]></dc:creator>
+            <pubDate>Fri, 30 Oct 2026 14:01:04 GMT</pubDate>
+            <atom:updated>2026-10-30T14:01:04.527Z</atom:updated>
+            <content:encoded><![CDATA[<figure><img alt="" src="https://cdn-images-1.medium.com/max/1024/0*8hf1JiadRfkNiGov" /></figure><p>When Databricks announced that it was <a href="https://www.databricks.com/company/newsroom/press-releases/databricks-enters-marketing-industry-customerlake-agentic-customer">launching a CDP product</a>, it created a frenzy of activity on LinkedIn. It was an unusual move that created more questions than answers. Every expert chimed in with their two cents, and few added anything beyond hot takes. N]]></content:encoded>
+        </item>
+<item>
+            <title><![CDATA[The Agent Is Now a Pipeline Step: Keeping CoCo Automations and Cloud Agents Reproducible]]></title>
+            <link>https://medium.com/snowflake/the-agent-is-now-a-pipeline-step-keeping-coco-automations-and-cloud-agents-reproducible-e29cfabde47b?source=rss----34b6daafc07---4</link>
+            <guid isPermaLink="false">https://medium.com/p/e29cfabde47b</guid>
+            <category><![CDATA[snowflake]]></category>
+            <category><![CDATA[devops]]></category>
+            <category><![CDATA[data-engineering]]></category>
+            <category><![CDATA[ai-agent]]></category>
+            <category><![CDATA[snowflake-cortex]]></category>
+            <dc:creator><![CDATA[Vedprakash]]></dc:creator>
+            <pubDate>Thu, 29 Oct 2026 21:01:02 GMT</pubDate>
+            <atom:updated>2026-10-29T21:01:01.871Z</atom:updated>
+            <content:encoded><![CDATA[<h4>Running Snowflake in the Agent Era, Part 4 of 4. An agent on a schedule is a pipeline step, and it needs the same review, versioning, and deploy path as everything else.</h4><figure><img alt="" src="https://cdn-images-1.medium.com/max/1024/1*2TlbyOwPk09mwcFizbQ0Og.png" /><figcaption>An agent on a schedule is one more step on the pipeline, with a review gate before production.</figcaption></figure><p>During the proof of concept for this post, one of our scheduled agent runs reported success. ]]></content:encoded>
+        </item>
+</channel></rss>

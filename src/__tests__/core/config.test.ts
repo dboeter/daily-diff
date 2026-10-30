@@ -102,6 +102,13 @@ data:
       vendor: gcp
       url: https://example.com/bq.xml
       parser: bigquery
+  community:
+    - name: DuckDB blog
+      url: https://example.com/duckdb/feed.xml
+    - name: Snowflake on Medium
+      url: https://example.com/medium/snowflake
+      kind: blog
+      cap: 2
 `;
 
   function load(yamlText: string) {
@@ -171,8 +178,27 @@ data:
           },
           { name: "BigQuery", vendor: "gcp", url: "https://example.com/bq.xml", parser: "bigquery" },
         ],
+        community: [
+          { name: "DuckDB blog", url: "https://example.com/duckdb/feed.xml", kind: "blog", cap: 1 },
+          { name: "Snowflake on Medium", url: "https://example.com/medium/snowflake", kind: "blog", cap: 2 },
+        ],
       },
     });
+  });
+
+  it("throws when a community feed is malformed", () => {
+    expect(() => load(VALID.slice(0, VALID.indexOf("  community:")))).toThrow(
+      "data.community must be a list",
+    );
+    expect(() => load(VALID.replace("      kind: blog\n", "      kind: forum\n"))).toThrow(
+      "data.community[1].kind must be one of blog, newsletter",
+    );
+    expect(() => load(VALID.replace("      cap: 2\n", "      cap: 0\n"))).toThrow(
+      "data.community[1].cap must be a positive integer",
+    );
+    expect(() => load(VALID.replace("      url: https://example.com/duckdb/feed.xml\n", ""))).toThrow(
+      "data.community[0] needs name and url",
+    );
   });
 
   it("throws when the data section or a data feed field is missing or unknown", () => {

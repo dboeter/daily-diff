@@ -55,7 +55,7 @@ describe("fetchVendorFeeds", () => {
 
   it("dedupes a note listed twice under two guids, keeps future dates, and tags vendor and source", async () => {
     stubFetch();
-    const { items } = await fetchVendorFeeds({ feeds }, now);
+    const { items } = await fetchVendorFeeds({ feeds, community: [] }, now);
     const dbx = items.filter((i) => i.vendor === "databricks");
     expect(dbx.map((i) => i.date)).toEqual(["2026-10-19", "2026-10-16", "2026-10-15"]);
     expect(dbx[0]).toMatchObject({
@@ -67,14 +67,16 @@ describe("fetchVendorFeeds", () => {
 
   it("keeps only the RSS items in the feed's categories", async () => {
     stubFetch();
-    const azure = (await fetchVendorFeeds({ feeds }, now)).items.filter((i) => i.vendor === "azure");
+    const azure = (await fetchVendorFeeds({ feeds, community: [] }, now)).items.filter(
+      (i) => i.vendor === "azure",
+    );
     expect(azure.map((i) => i.id)).toEqual(["573691"]);
     expect(azure[0]).toMatchObject({ source: "Azure updates", date: "2026-10-08" });
   });
 
   it("logs and skips a failing feed", async () => {
     stubFetch();
-    const { items } = await fetchVendorFeeds({ feeds }, now);
+    const { items } = await fetchVendorFeeds({ feeds, community: [] }, now);
     expect(items.some((i) => i.vendor === "gcp")).toBe(false);
     expect(console.log).toHaveBeenCalledWith("  [data] BigQuery failed: HTTP 503");
   });
@@ -88,7 +90,7 @@ describe("fetchVendorData", () => {
   const run = (state: DataState | null) => {
     vi.spyOn(console, "log").mockImplementation(() => {});
     vi.spyOn(globalThis, "fetch").mockImplementation(async () => new Response(fixture("snowflake-bcr.html")));
-    return fetchVendorData({ feeds }, now, { state, jev: { cache: { items: {} } } });
+    return fetchVendorData({ feeds, community: [] }, now, { state, jev: { cache: { items: {} } } });
   };
 
   it("records a bundle first seen at a stage over 30 days old without reporting it", async () => {
@@ -110,7 +112,7 @@ describe("fetchVendorData", () => {
     const day = (date: string, planned: string, state: DataState | null) => {
       vi.spyOn(console, "log").mockImplementation(() => {});
       vi.spyOn(globalThis, "fetch").mockImplementation(async () => new Response(page(planned)));
-      return fetchVendorData({ feeds }, new Date(`${date}T01:00:00Z`), {
+      return fetchVendorData({ feeds, community: [] }, new Date(`${date}T01:00:00Z`), {
         state,
         jev: { cache: { items: {} } },
       });
@@ -162,7 +164,10 @@ describe("fetchVendorData across days", () => {
     vi.spyOn(globalThis, "fetch").mockImplementation(
       async (input) => new Response(rss(String(input).endsWith("fabric.xml") ? fabric : dbx)),
     );
-    return fetchVendorData({ feeds }, new Date(`${day}T01:00:00Z`), { state, jev: { cache: { items: {} } } });
+    return fetchVendorData({ feeds, community: [] }, new Date(`${day}T01:00:00Z`), {
+      state,
+      jev: { cache: { items: {} } },
+    });
   };
   const retiring = { guid: "ba-p/5374418", title: "Retirement of the custom tool: move to Fabric IQ" };
 
@@ -252,20 +257,24 @@ describe("fetchVendorData across days", () => {
     vi.spyOn(console, "log").mockImplementation(() => {});
     vi.spyOn(globalThis, "fetch").mockImplementation(async () => new Response(rss(notes)));
     const jev = { apiKey: "k", cache: { items: {} }, ask };
-    const day1 = await fetchVendorData({ feeds: [feeds[1]!] }, new Date("2026-10-21T01:00:00Z"), {
-      state: null,
-      jev,
-    });
+    const day1 = await fetchVendorData(
+      { feeds: [feeds[1]!], community: [] },
+      new Date("2026-10-21T01:00:00Z"),
+      {
+        state: null,
+        jev,
+      },
+    );
     expect(day1.nextState.actions).toEqual({
       a: { date: "2026-11-19", title: notes[0]!.title, link: "https://x/a", source: "Azure Databricks" },
     });
     // A quiet day keeps it; the day after it passes drops it.
-    const quiet = await fetchVendorData({ feeds: [] }, new Date("2026-11-19T01:00:00Z"), {
+    const quiet = await fetchVendorData({ feeds: [], community: [] }, new Date("2026-11-19T01:00:00Z"), {
       state: day1.nextState,
       jev,
     });
     expect(Object.keys(quiet.observedState.actions ?? {})).toEqual(["a"]);
-    const after = await fetchVendorData({ feeds: [] }, new Date("2026-11-20T01:00:00Z"), {
+    const after = await fetchVendorData({ feeds: [], community: [] }, new Date("2026-11-20T01:00:00Z"), {
       state: day1.nextState,
       jev,
     });

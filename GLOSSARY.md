@@ -89,7 +89,7 @@ _Avoid_: Release, preview
 An open issue on a Tracked Project's repo that gained real engagement (comments plus 👍), or less on a regression or security issue, however old. The gain is the issue's comments and 👍 created in the window, counted without bots and bare slash commands; the rise since an earlier day's snapshot total, or a new issue's whole total, only caps it. A page shows it once.
 
 **News Item**:
-A community story (Hacker News, Lobste.rs, Dev.to) that names a Tracked Project, or a Tracked Project's own repo on GitHub Trending. Lab posts are not News Items.
+A community story (Hacker News, Lobste.rs, Dev.to) or a Community Feed post that names a Tracked Project, or a Tracked Project's own repo on GitHub Trending. Lab posts are not News Items.
 _Avoid_: Mention
 
 **News Match**:
@@ -99,6 +99,14 @@ _Avoid_: Match (bare)
 **Vendor Feed**:
 A data platform's release notes (Databricks, Snowflake, Azure / Fabric, BigQuery) read by the data report, one item per note; a Snowflake behavior-change bundle is one item that returns when its status moves.
 _Avoid_: Blog, vendor news
+
+**Community Feed**:
+An engineering blog or newsletter (RSS or Atom) the data report reads; a post that names a Tracked Project is its News Item, the rest Jev judges for News & discussion. Not a Vendor Feed: it carries no release notes.
+_Avoid_: Blog feed, source
+
+**News & discussion**:
+The data report's section of Community Feed posts Jev kept that named no Tracked Project, one row per post, each shown once. Not Spotted, which holds community stories from Hacker News, Lobste.rs and Dev.to.
+_Avoid_: Blogs, Reading list
 
 **Quiet**:
 A Tracked Project with nothing worth reporting for the window, whether nothing happened or what happened was noise; a project that could not be checked is not Quiet.

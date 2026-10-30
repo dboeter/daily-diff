@@ -13,6 +13,7 @@ import {
   type TrendsInput,
   LAB_POSTS_MAX,
   type DataSection,
+  type CommunityInput,
 } from "../../reports/pages.ts";
 import { EMPTY_OPENROUTER, EMPTY_TRENDING, type TrendingData } from "../../trending/compose.ts";
 import { MSG, TRENDS_REPORT } from "../../core/strings.ts";
@@ -23,6 +24,8 @@ import { isDataLaw } from "../../policy/relevance.ts";
 import type { LabsFetchResult, LabPost } from "../../sources/labs.ts";
 import type { ModelCatalog } from "../../sources/openrouter.ts";
 import type { VendorData, VendorItem } from "../../data/vendors.ts";
+import type { CommunityPost } from "../../data/community.ts";
+import type { AskJev } from "../../core/jev.ts";
 import { selectVendorItems } from "../../data/relevance.ts";
 import { type DataState, fetchVendorData } from "../../data/vendors.ts";
 import { numberRows } from "../../reports/summarized-table.ts";
@@ -1470,7 +1473,7 @@ describe("buildDataReport", () => {
     const fetchWith = async (resp: () => Response, state: DataState | null) => {
       vi.spyOn(console, "log").mockImplementation(() => {});
       const spy = vi.spyOn(globalThis, "fetch").mockImplementation(async () => resp());
-      const data = await fetchVendorData({ feeds }, new Date("2026-10-17T00:00:00Z"), {
+      const data = await fetchVendorData({ feeds, community: [] }, new Date("2026-10-17T00:00:00Z"), {
         state,
         jev: { cache: { items: {} } },
       });
@@ -1508,6 +1511,126 @@ describe("buildDataReport", () => {
       expect(data.fetchSuccess).toBe(false);
       expect(await build(sections(false, false), data)).toBeNull();
       expect(fs.existsSync(stateFile)).toBe(false);
+    });
+  });
+
+  describe("News & discussion (community feeds)", () => {
+    const communityVerdicts = path.join(dir, "community-verdicts.json");
+    const feeds = [
+      { name: "DuckDB blog", url: "https://duckdb.org/feed.xml", kind: "blog" as const, cap: 1 },
+      {
+        name: "Snowflake on Medium",
+        url: "https://medium.com/feed/snowflake",
+        kind: "blog" as const,
+        cap: 2,
+      },
+    ];
+    const post = (id: string, source: string, title: string, date: string): CommunityPost => ({
+      id: `post:example.com/${id}`,
+      source,
+      kind: "blog",
+      title,
+      url: `https://example.com/${id}`,
+      published: `${date}T00:00:00.000Z`,
+      date,
+      description: `Text of ${id}.`,
+    });
+    const posts = [
+      post("a", "DuckDB blog", "What is inside an Iceberg table?", "2026-10-16"),
+      post("b", "Snowflake on Medium", "Snowpark to_polars", "2026-10-15"),
+      post("c", "Snowflake on Medium", "A conference recap", "2026-10-16"),
+    ];
+    const askJev: AskJev = async (state) => {
+      const title = (state as { title: string }).title;
+      const insight = title.includes("recap") ? 0.3 : 1.8;
+      return {
+        model: "jev-test",
+        answers: {
+          insight: { score: insight, confidence: 1 },
+          audience: {
+            choice: "open_source_stack",
+            confidence: 0.9,
+            probabilities: { open_source_stack: 0.9 },
+          },
+        },
+      };
+    };
+    const community = (over: Partial<CommunityInput> = {}): CommunityInput => ({
+      feeds,
+      posts,
+      newsPostIds: ["post:example.com/news"],
+      counts: { "DuckDB blog": 3, "Snowflake on Medium": 5 },
+      taken: new Set(),
+      jev: { apiKey: "k", cache: { items: {} }, ask: askJev },
+      verdictsFile: communityVerdicts,
+      ...over,
+    });
+    const withCommunity = (s: DataSection[], vendor: VendorData, c: CommunityInput) =>
+      buildDataReport(s, vendor, [], NO_SPOTTED, "00:00", "2026-10-17", stateFile, verdictsFile, c);
+
+    it("renders the kept posts between Across platforms and Spotted, summarized by the vendor call, and records them as shown", async () => {
+      generateBody.mockReset();
+      saveFile.mockClear();
+      generateBody.mockImplementation(async (prompt: string) => {
+        if (prompt.startsWith("You summarize data platform")) {
+          // The posts are numbered after the vendor rows (none here) and the releases (none).
+          expect(prompt).toContain(
+            "1. What is inside an Iceberg table? (blog post, 2026-10-16, DuckDB blog) — Text of a.",
+          );
+          expect(prompt).toContain(
+            "2. Snowpark to_polars (blog post, 2026-10-15, Snowflake on Medium) — Text of b.",
+          );
+          expect(prompt).not.toContain("conference recap");
+          return "1: Iceberg metadata walkthrough.\n2: Native Polars conversion.";
+        }
+        if (prompt.startsWith("You are the editor")) {
+          expect(prompt).toContain("## News & discussion");
+          return PROSE;
+        }
+        return reply(prompt);
+      });
+      const report = await withCommunity(sections(false), vendorOf([]), community());
+      const content = report!.content;
+      expect(content).toContain(
+        "## News & discussion\n\n| Date | Post | Source | Summary |\n| :--- | :--- | :--- | :--- |\n" +
+          "| 2026-10-16 | [What is inside an Iceberg table?](https://example.com/a) | DuckDB blog | Iceberg metadata walkthrough. |\n" +
+          "| 2026-10-15 | [Snowpark to_polars](https://example.com/b) | Snowflake on Medium | Native Polars conversion. |",
+      );
+      expect(content).not.toContain("conference recap");
+      expect(content.indexOf("## Open-source stack")).toBeLessThan(content.indexOf("## News & discussion"));
+      // Trace and verdicts saved; the shown posts and the one a project took as news are in the state.
+      expect(saveFile).toHaveBeenCalledWith(
+        expect.stringContaining('"insight_min"'),
+        "2026-10-17",
+        "community-trace.json",
+      );
+      expect(Object.keys(JSON.parse(fs.readFileSync(communityVerdicts, "utf-8")).items)).toHaveLength(3);
+      const state = JSON.parse(fs.readFileSync(stateFile, "utf-8")) as DataState;
+      expect(state.reported).toMatchObject({
+        "post:example.com/a": "2026-10-17",
+        "post:example.com/b": "2026-10-17",
+        "post:example.com/news": "2026-10-17",
+      });
+      expect(state.reported["post:example.com/c"]).toBeUndefined();
+    });
+
+    it("skips posts an earlier report showed and never makes a report on its own", async () => {
+      generateBody.mockReset();
+      generateBody.mockImplementation(async (prompt: string) => reply(prompt));
+      const shown = { reported: { "post:example.com/a": "2026-10-16" }, stages: {} };
+      // Quiet sections, no vendor item: the posts alone do not publish, but the trace is written.
+      saveFile.mockClear();
+      const quiet = await withCommunity(
+        sections(false, false),
+        { ...vendorOf([]), nextState: shown },
+        community(),
+      );
+      expect(quiet).toBeNull();
+      expect(saveFile).toHaveBeenCalledWith(expect.any(String), "2026-10-17", "community-trace.json");
+      // With news: a is left out as shown, b is a row.
+      const report = await withCommunity(sections(false), { ...vendorOf([]), nextState: shown }, community());
+      expect(report!.content).not.toContain("Iceberg table");
+      expect(report!.content).toContain("[Snowpark to_polars](https://example.com/b)");
     });
   });
 });

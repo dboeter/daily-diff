@@ -84,6 +84,7 @@ import { loadResearchState, nextResearchState, saveResearchState, weekPapers } f
 import { fetchPolicyData, loadPolicyState, type PolicyData } from "./policy/items.ts";
 import { isDataLaw } from "./policy/relevance.ts";
 import { fetchVendorData, loadDataState, type VendorData } from "./data/vendors.ts";
+import { fetchCommunityPosts, unshownPosts, type CommunityPost } from "./data/community.ts";
 import { buildComingUp } from "./reports/coming-up.ts";
 import { fetchHfData, type HfData } from "./sources/huggingface.ts";
 import { fetchDevtoData, type DevtoData } from "./sources/devto.ts";
@@ -232,6 +233,8 @@ async function fetchAllData(
   arxivData: ArxivData;
   policyData: PolicyData;
   vendorData: VendorData;
+  /** The community feeds' posts of the last 7 days (`data.community`). */
+  communityData: { posts: CommunityPost[]; fetchSuccess: boolean; counts: Record<string, number | null> };
   hfData: HfData;
   devtoData: DevtoData;
   lobstersData: LobstersData;
@@ -241,7 +244,7 @@ async function fetchAllData(
   // The data report's Releases this week: its repos release about weekly, so a 24h window saw none on most days.
   const weekSince = new Date(now.getTime() - 7 * DAY_MS);
   console.log(
-    `  Tracking daily: ${[...AGENTS, ...INFRA_REPOS, ...DATA_SECTIONS.flatMap((s) => s.repos)].map((r) => r.id).join(", ")}, labs, openrouter catalog, hn, devto, lobsters, arxiv, policy, trending (news only)` +
+    `  Tracking daily: ${[...AGENTS, ...INFRA_REPOS, ...DATA_SECTIONS.flatMap((s) => s.repos)].map((r) => r.id).join(", ")}, labs, openrouter catalog, hn, devto, lobsters, community feeds, arxiv, policy, trending (news only)` +
       (weekly ? " | weekly: skills, trending, hf" : ""),
   );
 
@@ -258,6 +261,7 @@ async function fetchAllData(
     arxivData,
     policyData,
     vendorData,
+    communityData,
     hfData,
     devtoData,
     lobstersData,
@@ -283,6 +287,7 @@ async function fetchAllData(
     fetchArxivData(toCstDateStr(now)),
     fetchPolicyData(CONFIG.policy, now, toCstDateStr(now)),
     fetchVendorData(CONFIG.data, now, { trackedProjects: DATA_SECTION_KEYS.flatMap((k) => CONFIG[k].repos) }),
+    fetchCommunityPosts(CONFIG.data.community, now),
     weekly ? fetchHfData() : Promise.resolve<HfData>({ models: [], fetchSuccess: false }),
     fetchDevtoData(),
     fetchLobstersData(),
@@ -301,6 +306,7 @@ async function fetchAllData(
     arxivData,
     policyData,
     vendorData,
+    communityData,
     hfData,
     devtoData,
     lobstersData,
@@ -383,6 +389,7 @@ async function main(): Promise<void> {
     arxivData,
     policyData,
     vendorData,
+    communityData,
     hfData,
     devtoData,
     lobstersData,
@@ -412,10 +419,14 @@ async function main(): Promise<void> {
   const agentActivities = agentFetches.map(withNews);
   const infraActivities = infraFetches.map(withNews);
   // The data projects are a pool of their own, without the compatibility-list
-  // drop: a story naming DuckDB, Polars and Iceberg is news about the stack.
+  // drop: a story naming DuckDB, Polars and Iceberg is news about the stack. The community feeds'
+  // posts no earlier report showed (`unshownPosts`: a post stays in its feed for 7 days, and is
+  // news once) join it (a DuckDB blog post is DuckDB news); the posts no project takes are the data
+  // report's News & discussion candidates.
+  const posts = unshownPosts(communityData.posts, vendorData.nextState.reported, dateStr);
   const dataNews = matchProjectNews(
     DATA_SECTIONS.flatMap((s) => s.repos),
-    { stories: fresh, trending: trendingData },
+    { stories: fresh, trending: trendingData, posts },
     Infinity,
   );
   const dataSections = DATA_SECTION_KEYS.map((key, i) => ({
@@ -540,6 +551,16 @@ async function main(): Promise<void> {
       { rows: spottedOf("data"), summaries: spottedSummaryMap },
       utcStr,
       dateStr,
+      undefined,
+      undefined,
+      {
+        feeds: CONFIG.data.community,
+        posts: posts.filter((p) => !matchedIds.has(p.id)),
+        newsPostIds: posts.filter((p) => matchedIds.has(p.id)).map((p) => p.id),
+        counts: communityData.counts,
+        // Every page's Spotted rows: a post whose link a story on any page shows is a repeat.
+        taken: new Set(spottedRows.map((r) => linkKey(r.url))),
+      },
     ),
     ...(weekly
       ? [

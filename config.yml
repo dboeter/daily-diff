@@ -257,7 +257,7 @@ data_stack:
       repo: sqlfluff/sqlfluff
       name: SQLFluff
 
-# ── Data: vendor feeds ────────────────────────────────────────────────────────
+# ── Data: vendor and community feeds ──────────────────────────────────────────
 # Vendor release notes for the data report (ai-data), from the 2026-10-17 feed
 # spike (.scratch/data-watch/issues/01-feed-spike.md); the vendor blogs repeat them.
 #   feeds   name, vendor (databricks | snowflake | azure | gcp), url and parser:
@@ -265,6 +265,13 @@ data_stack:
 #           (behavior-change bundles), bigquery (Atom, one entry per day);
 #           categories (rss only): keep an item only when one of its
 #           <category> values is listed
+# Engineering blogs and newsletters (RSS 2.0 or Atom), from the 2026-10-30 spike
+# (.scratch/data-watch/issues/12-community-sources.md). A post naming a tracked
+# project is that project's news; the rest Jev judges for the News & discussion
+# table (insight and audience). Substack and Reddit are out: Substack answers
+# 403 to GitHub Actions (spec.md).
+#   community   name, url; kind: blog (default) | newsletter (one row per issue);
+#               cap: rows the feed may take in one report (default 1)
 
 data:
   feeds:
@@ -315,6 +322,39 @@ data:
       vendor: gcp
       url: https://cloud.google.com/feeds/bigquery-release-notes.xml
       parser: bigquery
+  community:
+    # ~8 posts a month, all technical (Atom).
+    - name: DuckDB blog
+      url: https://duckdb.org/feed.xml
+    # Release and benchmark posts; the releases repeat the repo's.
+    - name: Polars blog
+      url: https://pola.rs/rss.xml
+    # ~2 a month (Atom).
+    - name: Apache Airflow blog
+      url: https://airflow.apache.org/blog/index.xml
+    # ~1 a month, engineering posts; not the dbt Labs marketing blog below.
+    - name: dbt Developer blog
+      url: https://docs.getdbt.com/blog/rss.xml
+    # Mostly customer stories, 25 on one Coalesce day (2026-10-27); kept on
+    # probation: measured after two weeks (ticket 14), removed under 1 kept in 5.
+    - name: dbt Labs blog
+      url: https://www.getdbt.com/blog/rss.xml
+    # Vendor opinion on the stack colleagues run (Atom).
+    - name: dltHub blog
+      url: https://dlthub.com/blog/rss.xml
+    # Quiet since the Prefect acquisition (2026-07); free when quiet.
+    - name: Dagster blog
+      url: https://dagster.io/blog/rss.xml
+    # The only Kafka release signal: Kafka publishes no GitHub releases.
+    - name: Confluent blog
+      url: https://www.confluent.io/rss.xml
+    # Monthly community news and release posts; the one governance source with a feed.
+    - name: OpenMetadata blog
+      url: https://blog.open-metadata.org/feed
+    # Community-written, ~5 a week, variable quality: 2 rows at most.
+    - name: Snowflake on Medium
+      url: https://medium.com/feed/snowflake
+      cap: 2
 
 # ── Policy ────────────────────────────────────────────────────────────────────
 # The daily AI Policy report (ai-policy): AI legislation, regulation and

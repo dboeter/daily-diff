@@ -14,6 +14,7 @@
     "readme": "tsx src/cli/readme.ts",
     "notify": "tsx src/cli/notify.ts",
     "close-stale": "tsx src/cli/close-stale.ts",
+    "feeds:check": "tsx scripts/check-feeds.ts",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",

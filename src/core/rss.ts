@@ -1,7 +1,8 @@
 /**
- * RSS 2.0 news feeds: fetch, parse, and the news age limit every news feed
- * shares. Regex parsing like arxiv.ts, no XML dependency: feeds are flat
- * enough. Atom is not handled yet — add it when a source needs it.
+ * RSS 2.0 and Atom news feeds: fetch, parse, and the news age limit every
+ * news feed shares. Regex parsing like arxiv.ts, no XML dependency: feeds are
+ * flat enough. Atom arrived with the community feeds (DuckDB, Airflow and
+ * dltHub publish Atom); BigQuery's per-day Atom entries keep their own parser.
  */
 
 import { fetchOk } from "./http.ts";
@@ -29,6 +30,19 @@ export const NEWS_MAX_AGE_DAYS = 7;
 
 const DESCRIPTION_MAX_CHARS = 600;
 
+/** The named entities blog feeds write besides the XML five (Hugo's Airflow feed: `&rsquo;`, `&mdash;`). */
+const NAMED_ENTITIES: Record<string, string> = {
+  lsquo: "\u2018",
+  rsquo: "\u2019",
+  ldquo: "\u201c",
+  rdquo: "\u201d",
+  ndash: "\u2013",
+  mdash: "\u2014",
+  hellip: "\u2026",
+  copy: "\u00a9",
+  trade: "\u2122",
+};
+
 function decodeEntities(s: string): string {
   return s
     .replace(/&#x([0-9a-f]+);/gi, (_, h: string) => String.fromCodePoint(parseInt(h, 16)))
@@ -38,6 +52,10 @@ function decodeEntities(s: string): string {
     .replace(/&quot;/g, '"')
     .replace(/&apos;/g, "'")
     .replace(/&nbsp;/g, " ")
+    .replace(
+      /&(lsquo|rsquo|ldquo|rdquo|ndash|mdash|hellip|copy|trade);/g,
+      (_, name: string) => NAMED_ENTITIES[name]!,
+    )
     .replace(/&amp;/g, "&");
 }
 
@@ -107,10 +125,49 @@ export function parseRssItems(xml: string, toText: (html: string) => string = pl
       link,
       published: Number.isFinite(date) ? new Date(date).toISOString() : "",
       // Description HTML arrives entity-encoded: tagText decodes it to HTML, plainText strips it.
-      description: toText(tagText(body!, "description")),
+      // Medium's feeds carry the body only as `<content:encoded>`.
+      description: toText(tagText(body!, "description") || tagText(body!, "content:encoded")),
       ...(categories.length ? { categories } : {}),
     };
   });
+}
+
+/**
+ * An Atom entry's `<link>`: the `rel="alternate"` one, else the first without a
+ * `rel` (dltHub's feed writes `<link href="…"/>`), from its `href`.
+ */
+function atomLink(entry: string): string {
+  const links = [...entry.matchAll(/<link\b([^>]*)\/?>/g)].map(([, attrs]) => attrs!);
+  const pick = links.find((a) => /\brel="alternate"/.test(a)) ?? links.find((a) => !/\brel=/.test(a));
+  return pick?.match(/\bhref="([^"]*)"/)?.[1]?.replace(/&amp;/g, "&") ?? "";
+}
+
+/**
+ * Atom entries as FeedItems: `<id>` (else the link), `<published>` (else
+ * `<updated>`), `<summary>` (else `<content>`) as the description, `<category
+ * term>` values as categories.
+ */
+export function parseAtomEntries(xml: string, toText: (html: string) => string = plainText): FeedItem[] {
+  return [...xml.matchAll(/<entry(?:\s[^>]*)?>([\s\S]*?)<\/entry>/g)].map(([, body]) => {
+    const link = atomLink(body!);
+    const date = Date.parse(tagText(body!, "published") || tagText(body!, "updated"));
+    const categories = [...body!.matchAll(/<category\b[^>]*\bterm="([^"]*)"/g)].map(([, t]) =>
+      decodeEntities(t!),
+    );
+    return {
+      id: tagText(body!, "id") || link,
+      title: tagText(body!, "title"),
+      link,
+      published: Number.isFinite(date) ? new Date(date).toISOString() : "",
+      description: toText(tagText(body!, "summary") || tagText(body!, "content")),
+      ...(categories.length ? { categories } : {}),
+    };
+  });
+}
+
+/** RSS 2.0 or Atom, by the document's root element. */
+export function parseFeedItems(xml: string, toText: (html: string) => string = plainText): FeedItem[] {
+  return /<feed[\s>]/.test(xml.slice(0, 2000)) ? parseAtomEntries(xml, toText) : parseRssItems(xml, toText);
 }
 
 /** The items no older than NEWS_MAX_AGE_DAYS at `now`; undated items are dropped. */
@@ -119,10 +176,10 @@ export function recentNewsItems(items: FeedItem[], now: Date): FeedItem[] {
   return items.filter((i) => Date.parse(i.published) >= oldest);
 }
 
-/** Fetch and parse a feed. Throws on HTTP errors and after http.ts's FETCH_TIMEOUT_MS. */
+/** Fetch and parse a feed (RSS 2.0 or Atom). Throws on HTTP errors and after http.ts's FETCH_TIMEOUT_MS. */
 export async function fetchRssFeed(
   url: string,
   toText: (html: string) => string = plainText,
 ): Promise<FeedItem[]> {
-  return parseRssItems(await (await fetchOk(url)).text(), toText);
+  return parseFeedItems(await (await fetchOk(url)).text(), toText);
 }

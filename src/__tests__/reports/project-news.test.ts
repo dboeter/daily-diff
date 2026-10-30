@@ -9,6 +9,7 @@ import {
 import { DATA_SECTION_KEYS, loadConfig } from "../../core/config.ts";
 import type { RepoConfig } from "../../core/github.ts";
 import type { Story } from "../../spotted/pool.ts";
+import type { CommunityPost } from "../../data/community.ts";
 import { EMPTY_NPM, EMPTY_OPENROUTER, type TrendingData } from "../../trending/compose.ts";
 import type { LabsFetchResult } from "../../sources/labs.ts";
 
@@ -310,6 +311,33 @@ describe("data project news", () => {
   const config = loadConfig();
   const dataRepos = DATA_SECTION_KEYS.flatMap((k) => config[k].repos);
   const repo = (id: string) => dataRepos.find((r) => r.id === id)!;
+
+  it("takes a community feed post as a project's news, and leaves the rest for News & discussion", () => {
+    const post = (id: string, source: string, title: string, description = ""): CommunityPost => ({
+      id: `post:example.com/${id}`,
+      source,
+      kind: "blog",
+      title,
+      url: `https://example.com/${id}`,
+      published: "2026-10-27T00:00:00Z",
+      date: "2026-10-27",
+      description,
+    });
+    const posts = [
+      post("polars", "Polars blog", "Announcing Polars 2.1", "Out-of-core group-by and recursive SQL."),
+      post("duck", "DuckDB blog", "What Is inside an Iceberg Table?", "A tour of Apache Iceberg metadata."),
+      post("essay", "dltHub blog", "The post-AI data stack", "An opinion."),
+    ];
+    const news = matchProjectNews(dataRepos, { posts }, Infinity);
+    expect(news.get("polars")!.map((n) => [n.source, n.title, n.detail, n.id])).toEqual([
+      ["Polars blog", "Announcing Polars 2.1", "blog post, 2026-10-27", "post:example.com/polars"],
+    ]);
+    // The description is matched too: "Iceberg Table" in the title is not a keyword, "Apache Iceberg" is.
+    expect(news.get("iceberg")!.map((n) => n.id)).toEqual(["post:example.com/duck"]);
+    expect(news.get("duckdb")!.map((n) => n.id)).toEqual([]);
+    const matched = new Set([...news.values()].flat().map((n) => n.id));
+    expect(posts.filter((p) => !matched.has(p.id)).map((p) => p.id)).toEqual(["post:example.com/essay"]);
+  });
 
   it("does not match Delta Lake on another delta", () => {
     expect(matches(repo("delta"), "Delta Air Lines cancels flights")).toBe(false);

@@ -1,6 +1,6 @@
 # News & discussion section from community feeds
 
-Status: ready-for-agent
+Status: ready-for-human
 Type: task
 Blocked by: 12
 
@@ -25,3 +25,7 @@ Implement the recommendation in `12-community-sources.md`:
 - Every feed in `data.community` returned items on an Actions run (step 1), recorded in this ticket.
 - A run with `TYPESAFE_API_KEY` shows the table with 1–3 rows on a weekday and none on a quiet day, and the trace explains every drop.
 - A follow-up note is added to this ticket's Comments naming the date two weeks on when the dbt Labs blog's kept share is read from the traces (the removal, if any, is a config edit, not part of this ticket).
+
+## Comments
+
+- 2026-10-30: implemented (branch `news-and-discussion`). `data.community` with the 10 feeds; `src/data/community.ts` (fetch, Jev insight + audience, `community-verdicts.json`, selection, `community-trace.json`); posts join the data pool of `matchProjectNews`; `## News & discussion` between Across platforms and Spotted, summarized by the vendor summaries call; shown posts as `post:<linkKey>` in the data state. Atom parsing added to `rss.ts` (DuckDB, Airflow, dltHub), `content:encoded` read where a feed has no description (Medium), named entities decoded. Step 1 (reachability from Actions) is the "Check feeds" workflow (`pnpm feeds:check`), to be dispatched once this is on `main`: every feed answered from the development container, Actions _unverified_ until then. The dbt Labs kept share is to be read from the traces on 2026-11-13.

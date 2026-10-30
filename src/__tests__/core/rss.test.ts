@@ -1,6 +1,8 @@
 import fs from "node:fs";
 import { describe, it, expect } from "vitest";
 import {
+  parseAtomEntries,
+  parseFeedItems,
   parseRssItems,
   plainText,
   recentNewsItems,
@@ -81,6 +83,49 @@ describe("parseRssItems", () => {
 
   it("returns nothing for a document that is not a feed", () => {
     expect(parseRssItems("<html><body>Maintenance</body></html>")).toEqual([]);
+  });
+});
+
+describe("parseAtomEntries", () => {
+  const atom = fs.readFileSync(new URL("../fixtures/duckdb-blog-2026-10-30.xml", import.meta.url), "utf-8");
+
+  it("reads Atom entries: alternate link, published date, summary else content, and term categories", () => {
+    const items = parseAtomEntries(atom);
+    expect(items).toHaveLength(2);
+    const [first, second] = items as [FeedItem, FeedItem];
+    expect(first.title).toBe("From Spreadsheets to DuckLake: A Data Engineer's Road to DuckDB");
+    expect(first.link).toBe("https://duckdb.org/2026/10/29/from-spreadsheets-to-ducklake.html");
+    expect(first.id).toBe("https://duckdb.org/2026/10/29/from-spreadsheets-to-ducklake");
+    expect(first.published).toBe("2026-10-29T00:00:00.000Z");
+    expect(first.description).toMatch(/^After nearly two decades/);
+    // No summary: the content, as plain text.
+    expect(second.title).toBe("Gems of DuckDB 2.0.0");
+    expect(second.description).not.toMatch(/<[a-z]/);
+    expect(second.description.length).toBeGreaterThan(20);
+  });
+
+  it("takes a bare <link href> when no link is marked alternate, and <updated> without <published>", () => {
+    const xml = `<?xml version="1.0"?><feed xmlns="http://www.w3.org/2005/Atom"><title>dltHub</title>
+<entry><title>Openflow and dlt</title><link href="https://dlthub.com/blog/openflow?a=1&amp;b=2"/><updated>2026-10-16T10:00:00Z</updated>
+<id>https://dlthub.com/blog/openflow</id><category term="snowflake"/><summary type="html">Which to use &lt;b&gt;when&lt;/b&gt; &amp;mdash; a guide</summary></entry></feed>`;
+    expect(parseAtomEntries(xml)).toEqual([
+      {
+        id: "https://dlthub.com/blog/openflow",
+        title: "Openflow and dlt",
+        link: "https://dlthub.com/blog/openflow?a=1&b=2",
+        published: "2026-10-16T10:00:00.000Z",
+        description: "Which to use when — a guide",
+        categories: ["snowflake"],
+      },
+    ]);
+  });
+
+  it("parseFeedItems picks the parser by the root element", () => {
+    expect(parseFeedItems(atom)).toHaveLength(2);
+    const rss = `<rss version="2.0"><channel><item><title>T</title><link>https://x.y/p</link><pubDate>Thu, 29 Oct 2026 21:01:02 GMT</pubDate>
+<content:encoded><![CDATA[<p>Body &rsquo;quoted&rsquo;</p>]]></content:encoded></item></channel></rss>`;
+    // Medium: no description, the body in content:encoded; named entities decoded.
+    expect(parseFeedItems(rss)[0]).toMatchObject({ title: "T", description: "Body ’quoted’" });
   });
 });
 
