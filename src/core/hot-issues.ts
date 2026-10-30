@@ -42,7 +42,7 @@ export const HOT_ISSUE_MAX_VERIFIED = 2 * HOT_ISSUES_PER_REPO;
 /**
  * Per-issue count calls per run, shared by every repo: with the list pages and
  * the releases it keeps a daily run under the Actions GITHUB_TOKEN's 1,000 core
- * requests an hour (33 repos × 10 × 3 would be 990 alone). Spent round-robin
+ * requests an hour (43 repos × 10 × 3 would be 1,290 alone). Spent round-robin
  * (`countHotIssues`), so the repos that list longest still get their turns.
  */
 export const HOT_ISSUE_MAX_COUNT_CALLS = 250;
@@ -53,15 +53,17 @@ export const HOT_ISSUE_MAX_COUNT_CALLS = 250;
  * plus the pull requests, so 8 pages covers it. Hitting the cap is logged.
  */
 export const HOT_ISSUE_MAX_PAGES = 8;
-/** The repos of config.yml's agents, infra and data sections on 2026-10-28, for the call budgets. */
-const TRACKED_REPOS = 33;
 /**
  * Timeline pages read per run for fix status (`fetchFixStatus`), shared by every repo: one per hot
- * issue sent to the prompt, though a busy issue can spend several. With the list pages, count calls
- * and release pages (33 × RELEASES_MAX_PAGES) the daily worst case is 264 + 250 + 66 + 165 = 745 core
- * calls, under the Actions token's 1,000 an hour.
+ * issue sent to the prompt (HOT_ISSUES_PER_REPO × the tracked repos, from the loaded config so a
+ * config edit cannot leave it stale), though a busy issue can spend several. With 43 tracked repos
+ * (2026-10-30), the list pages (43 × HOT_ISSUE_MAX_PAGES), count calls and release pages
+ * (43 × RELEASES_MAX_PAGES) make a daily worst case of 344 + 250 + 86 + 215 = 895 core calls,
+ * under the Actions token's 1,000 an hour.
  */
-export const HOT_ISSUE_MAX_STATUS_CALLS = TRACKED_REPOS * HOT_ISSUES_PER_REPO;
+export function hotIssueStatusCallCap(trackedRepos: number): number {
+  return trackedRepos * HOT_ISSUES_PER_REPO;
+}
 /** Matched against each label name, so "area:security" and "type: regression" count. */
 const HOT_LABEL = /regression|security/i;
 export function issueEngagement(i: GitHubItem): number {
@@ -380,8 +382,10 @@ export interface HotIssueCalls {
   countCalls: number;
   /** Candidates not counted: the run had used HOT_ISSUE_MAX_COUNT_CALLS. */
   skipped: number;
-  /** Fix-status timeline pages read (`fetchFixStatus`), at most HOT_ISSUE_MAX_STATUS_CALLS. */
+  /** Fix-status timeline pages read (`fetchFixStatus`), at most `maxStatusCalls`. */
   statusCalls: number;
+  /** The run's fix-status cap (`hotIssueStatusCallCap`). */
+  maxStatusCalls: number;
 }
 
 /** One repo's candidates waiting for the run's count phase, and the activity fetched for them. */
@@ -423,8 +427,15 @@ export interface HotIssueRun {
   queue: HotIssueQueue;
 }
 
-export function newHotIssueCalls(): HotIssueCalls {
-  return { listPages: 0, countCalls: 0, skipped: 0, statusCalls: 0 };
+/** A run's zeroed counters; `trackedRepos` is the number of repos the config tracks, for the fix-status cap. */
+export function newHotIssueCalls(trackedRepos: number): HotIssueCalls {
+  return {
+    listPages: 0,
+    countCalls: 0,
+    skipped: 0,
+    statusCalls: 0,
+    maxStatusCalls: hotIssueStatusCallCap(trackedRepos),
+  };
 }
 
 /** The run's one hot-issue log line. */
@@ -457,7 +468,7 @@ interface TimelineEvent {
  * open one; a PR that only mentions the issue is not its fix. The timeline is oldest first with
  * no sort, and holds at least every comment, so reading starts at the page the comment count
  * implies and goes forward to a short page: the newest events, one call per page while
- * HOT_ISSUE_MAX_STATUS_CALLS lasts. A fix PR referenced before the comments on earlier pages is unseen.
+ * the run's fix-status cap lasts. A fix PR referenced before the comments on earlier pages is unseen.
  */
 export async function fetchFixStatus(
   repo: string,
@@ -467,7 +478,7 @@ export async function fetchFixStatus(
   const events: TimelineEvent[] = [];
   for (let page = Math.max(1, Math.ceil(i.comments / TIMELINE_PAGE)); ; page++) {
     // Reserved before the await: the repos look up in parallel and share the cap.
-    if (calls.statusCalls >= HOT_ISSUE_MAX_STATUS_CALLS) break;
+    if (calls.statusCalls >= calls.maxStatusCalls) break;
     calls.statusCalls++;
     const batch = await githubGet<TimelineEvent[]>(
       `https://api.github.com/repos/${repo}/issues/${i.number}/timeline`,
@@ -599,7 +610,7 @@ export async function fetchHotIssues(repo: string, since: Date, run: HotIssueRun
   return Promise.all(selectHotIssues(issues, ctx).map((i) => withFixStatus(repo, i, run.calls)));
 }
 
-/** The issue with its fix status while HOT_ISSUE_MAX_STATUS_CALLS lasts; a failed lookup shows none and keeps the issue. */
+/** The issue with its fix status while the run's fix-status cap lasts; a failed lookup shows none and keeps the issue. */
 async function withFixStatus(repo: string, i: HotIssue, calls: HotIssueCalls): Promise<HotIssue> {
   try {
     const fix = await fetchFixStatus(repo, i, calls);

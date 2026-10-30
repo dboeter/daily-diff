@@ -8,7 +8,7 @@ import {
   HOT_ISSUE_MAX_CHECKED,
   HOT_ISSUE_MAX_COUNT_CALLS,
   HOT_ISSUE_MAX_PAGES,
-  HOT_ISSUE_MAX_STATUS_CALLS,
+  hotIssueStatusCallCap,
   HOT_ISSUE_MAX_VERIFIED,
   gainWindowStart,
   hotIssueCallsLine,
@@ -31,6 +31,8 @@ import {
 import { nextReportedState } from "../../core/report-state.ts";
 
 const SINCE = new Date("2026-10-03T22:37:00Z");
+/** Tracked repos for the fix-status cap in these tests. */
+const REPOS = 33;
 
 afterEach(() => {
   vi.restoreAllMocks();
@@ -444,7 +446,7 @@ describe("fetchHotIssues", () => {
     items: GitHubItem[],
     activity?: Record<number, IssueActivity | "fail">,
     snapshot: HotIssueSnapshot = EMPTY,
-    calls = newHotIssueCalls(),
+    calls = newHotIssueCalls(REPOS),
     timeline?: Record<number, unknown[] | "fail">,
   ) {
     const spy = mockGitHub(items, activity, timeline);
@@ -539,7 +541,7 @@ describe("fetchHotIssues", () => {
   });
 
   it("does not show a known gain whose recount the run cap skipped, and logs the skip", async () => {
-    const calls = { ...newHotIssueCalls(), countCalls: HOT_ISSUE_MAX_COUNT_CALLS };
+    const calls = { ...newHotIssueCalls(REPOS), countCalls: HOT_ISSUE_MAX_COUNT_CALLS };
     const { hot, urls } = await run(
       [issue({ number: 9, comments: 60 }), issue({ number: 7, comments: 12, created_at: IN_WINDOW })],
       {},
@@ -594,7 +596,13 @@ describe("fetchHotIssues", () => {
     expect(Object.keys(seen)).toHaveLength(117);
     expect(seen["org/repo#1"]).toBeUndefined();
     expect(hot.map((i) => [i.number, i.gain])).toEqual([[110, 12]]);
-    expect(calls).toEqual({ listPages: 2, countCalls: 1, skipped: 0, statusCalls: 1 });
+    expect(calls).toEqual({
+      listPages: 2,
+      countCalls: 1,
+      skipped: 0,
+      statusCalls: 1,
+      maxStatusCalls: hotIssueStatusCallCap(REPOS),
+    });
   });
 
   it(`stops after ${HOT_ISSUE_MAX_PAGES} list pages and logs it`, async () => {
@@ -626,7 +634,7 @@ describe("fetchHotIssues", () => {
 
   it(`skips candidates once the run used ${HOT_ISSUE_MAX_COUNT_CALLS} count calls, across repos`, async () => {
     // One call left: #1 needs two (comments and 👍), #2 needs one (comments only).
-    const calls = { ...newHotIssueCalls(), countCalls: HOT_ISSUE_MAX_COUNT_CALLS - 1 };
+    const calls = { ...newHotIssueCalls(REPOS), countCalls: HOT_ISSUE_MAX_COUNT_CALLS - 1 };
     const { hot, urls } = await run(
       [issue({ number: 1, comments: 30, thumbs: 5 }), issue({ number: 2, comments: 20 })],
       {},
@@ -642,6 +650,7 @@ describe("fetchHotIssues", () => {
       countCalls: HOT_ISSUE_MAX_COUNT_CALLS,
       skipped: 1,
       statusCalls: 1,
+      maxStatusCalls: hotIssueStatusCallCap(REPOS),
     });
     expect(hotIssueCallsLine(calls)).toBe(
       `[github] hot issues: 1 list pages, ${HOT_ISSUE_MAX_COUNT_CALLS} count calls, 1 fix-status calls, 1 candidates skipped past the run cap of ${HOT_ISSUE_MAX_COUNT_CALLS}`,
@@ -681,7 +690,7 @@ describe("fetchHotIssues", () => {
       counted.push(url.pathname);
       return json(dated(3, IN_WINDOW));
     });
-    const calls = { ...newHotIssueCalls(), countCalls: HOT_ISSUE_MAX_COUNT_CALLS - 3 };
+    const calls = { ...newHotIssueCalls(REPOS), countCalls: HOT_ISSUE_MAX_COUNT_CALLS - 3 };
     const hotRun: HotIssueRun = {
       snapshot: EMPTY,
       dateStr: TODAY,
@@ -722,7 +731,7 @@ describe("fetchHotIssues", () => {
 
     it("looks up each hot issue once and keeps an open fix PR", async () => {
       // Hermes #145452 (2026-10-28): its fix PR #145478 was open and the page did not say so.
-      const { hot, timelines, calls } = await run(hotOne, {}, EMPTY, newHotIssueCalls(), {
+      const { hot, timelines, calls } = await run(hotOne, {}, EMPTY, newHotIssueCalls(REPOS), {
         7: [xref({ number: 20, text: "Mentions #7 in passing" }), xref({ number: 21, text: "Fixes #7" })],
       });
       expect(timelines).toEqual(["/repos/org/repo/issues/7/timeline"]);
@@ -733,7 +742,7 @@ describe("fetchHotIssues", () => {
     });
 
     it("prefers a merged fix and ignores another repo's PR and a closed unmerged one", async () => {
-      const { hot } = await run(hotOne, {}, EMPTY, newHotIssueCalls(), {
+      const { hot } = await run(hotOne, {}, EMPTY, newHotIssueCalls(REPOS), {
         7: [
           xref({ number: 30, text: "closes org/repo#7", repo: "fork/repo" }),
           xref({ number: 31, text: "Resolves: #7", state: "closed" }),
@@ -748,10 +757,10 @@ describe("fetchHotIssues", () => {
 
     it("keeps the issue without a status when the lookup fails or the run cap is spent", async () => {
       vi.spyOn(console, "error").mockImplementation(() => {});
-      const failed = await run(hotOne, {}, EMPTY, newHotIssueCalls(), { 7: "fail" });
+      const failed = await run(hotOne, {}, EMPTY, newHotIssueCalls(REPOS), { 7: "fail" });
       expect(failed.hot.map((i) => [i.number, i.fix])).toEqual([[7, undefined]]);
       vi.restoreAllMocks();
-      const spent = { ...newHotIssueCalls(), statusCalls: HOT_ISSUE_MAX_STATUS_CALLS };
+      const spent = { ...newHotIssueCalls(REPOS), statusCalls: hotIssueStatusCallCap(REPOS) };
       const capped = await run(hotOne, {}, EMPTY, spent);
       expect(capped.timelines).toEqual([]);
       expect(capped.hot.map((i) => [i.number, i.fix])).toEqual([[7, undefined]]);
@@ -761,7 +770,7 @@ describe("fetchHotIssues", () => {
     const noise = (n: number) => Array.from({ length: n }, () => ({ event: "commented" }));
     const timelinePages = (spy: { timelinePages: URL[] }) =>
       spy.timelinePages.map((u) => u.searchParams.get("page"));
-    async function runTimeline(comments: number, events: unknown[], calls = newHotIssueCalls()) {
+    async function runTimeline(comments: number, events: unknown[], calls = newHotIssueCalls(REPOS)) {
       const busy = issue({ number: 7, comments, created_at: IN_WINDOW });
       const spy = mockGitHub([busy], { 7: act({ newComments: comments }) }, { 7: events });
       const hotRun: HotIssueRun = {
@@ -787,11 +796,11 @@ describe("fetchHotIssues", () => {
 
     it("counts every timeline page against the run cap and stops when it is spent", async () => {
       const fix = xref({ number: 40, text: "Fixes #7" });
-      const spent = { ...newHotIssueCalls(), statusCalls: HOT_ISSUE_MAX_STATUS_CALLS - 1 };
+      const spent = { ...newHotIssueCalls(REPOS), statusCalls: hotIssueStatusCallCap(REPOS) - 1 };
       const r = await runTimeline(150, [...noise(220), fix], spent);
       expect(timelinePages(r)).toEqual(["2"]);
       expect(r.hot.map((i) => i.fix)).toEqual([undefined]);
-      expect(r.calls.statusCalls).toBe(HOT_ISSUE_MAX_STATUS_CALLS);
+      expect(r.calls.statusCalls).toBe(hotIssueStatusCallCap(REPOS));
     });
   });
 
