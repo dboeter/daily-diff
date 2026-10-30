@@ -364,7 +364,9 @@ async function main(): Promise<void> {
     dateStr,
     isRepeat: (repo) => isRepeatHotIssue(hotIssuesState, dateStr, repo),
     seen: {},
-    calls: newHotIssueCalls(),
+    calls: newHotIssueCalls(
+      AGENTS.length + INFRA_REPOS.length + DATA_SECTIONS.flatMap((s) => s.repos).length,
+    ),
     // One fetchHotIssues call per tracked repo (fetchAllData's fetchProject calls).
     queue: newHotIssueQueue(
       AGENTS.length + INFRA_REPOS.length + DATA_SECTIONS.flatMap((s) => s.repos).length,

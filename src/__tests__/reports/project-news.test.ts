@@ -323,6 +323,33 @@ describe("data project news", () => {
     expect(matches(repo("delta-rs"), "Reading Delta tables with the deltalake Python package")).toBe(true);
   });
 
+  it("does not match Great Expectations on the phrase or the novel", () => {
+    expect(matches(repo("great-expectations"), "I had great expectations for this laptop")).toBe(false);
+    expect(matches(repo("great-expectations"), "Dickens' Great Expectations, annotated")).toBe(false);
+    expect(matches(repo("great-expectations"), "GX Core 1.24 adds checkpoint actions")).toBe(true);
+    expect(matches(repo("great-expectations"), "Validating Iceberg tables with great_expectations")).toBe(
+      true,
+    );
+  });
+
+  it("does not match Prefect on the school office", () => {
+    expect(matches(repo("prefect"), "Head prefect elected at Hogwarts")).toBe(false);
+    expect(matches(repo("prefect"), "Prefect 3.9 adds event-driven flows")).toBe(true);
+    expect(matches(repo("prefect"), "PrefectHQ ships a new worker")).toBe(true);
+  });
+
+  it("matches the Terraform providers in either word order", () => {
+    expect(matches(repo("terraform-provider-databricks"), "Terraform 1.14 and the Databricks provider")).toBe(
+      true,
+    );
+    expect(
+      matches(repo("terraform-provider-snowflake"), "Terraform Snowflake provider v2.22: migration notes"),
+    ).toBe(true);
+    // Only adjacent words match: a story that merely mentions both is not provider news.
+    expect(matches(repo("terraform-provider-snowflake"), "Managing Snowflake with Terraform")).toBe(false);
+    expect(matches(repo("terraform-provider-snowflake"), "Terraform provider for AWS 6.0")).toBe(false);
+  });
+
   it("does not match Soda Core on the drink", () => {
     expect(matches(repo("soda-core"), "Baking soda vs. baking powder")).toBe(false);
     expect(matches(repo("soda-core"), "Soda Core 4.24 adds contract checks")).toBe(true);

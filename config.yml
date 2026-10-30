@@ -150,8 +150,9 @@ databricks:
     - id: terraform-provider-databricks
       repo: databricks/terraform-provider-databricks
       name: Terraform provider for Databricks
-      # Weekly hand-written releases (not generated like databricks-sdk-py).
-      keywords: [terraform-provider-databricks, databricks terraform]
+      # Weekly hand-written releases (not generated like databricks-sdk-py). The
+      # name is a phrase nobody writes; the keywords cover both word orders.
+      keywords: [terraform-provider-databricks, databricks terraform, terraform databricks, databricks provider]
 
 snowflake:
   title: Snowflake
@@ -172,9 +173,9 @@ snowflake:
     - id: terraform-provider-snowflake
       repo: snowflakedb/terraform-provider-snowflake
       name: Terraform provider for Snowflake
-      # Monthly releases; its breaking-change migration guide is the deprecation
-      # signal for Snowflake IaC.
-      keywords: [terraform-provider-snowflake, snowflake terraform]
+      # Its migration guide per release is the breaking-change signal for
+      # Snowflake IaC. Keywords cover both word orders.
+      keywords: [terraform-provider-snowflake, snowflake terraform, terraform snowflake, snowflake provider]
 
 data_stack:
   title: Open-source data stack
@@ -202,8 +203,11 @@ data_stack:
     - id: prefect
       repo: PrefectHQ/prefect
       name: Prefect
-      # Acquired Dagster in July 2026. ~4 of 5 releases are .devN prereleases,
-      # which the tag filter drops; stable releases roughly weekly.
+      # ~4 of 5 releases are .devN prereleases, which the tag filter drops. Two
+      # stable lines ship (3.x weekly, 2.x patches about monthly): both show,
+      # accepted for one 2.x patch a month (Kestra's three lines were not).
+      # Bare "prefect" is a school or Roman office; the repo path always matches.
+      keywords: [prefecthq, prefect.io, prefect flow, prefect flows, prefect cloud, prefect workflow, prefect orchestration, prefect 2, prefect 3]
     - id: dlt
       repo: dlt-hub/dlt
       name: dlt
@@ -218,7 +222,6 @@ data_stack:
     - id: pyiceberg
       repo: apache/iceberg-python
       name: PyIceberg
-      # 2–4 releases a year.
     - id: duckdb
       repo: duckdb/duckdb
       name: DuckDB
@@ -233,7 +236,10 @@ data_stack:
     - id: great-expectations
       repo: great-expectations/great_expectations
       name: Great Expectations
-      # 2–3 releases a month.
+      # "Great expectations" is an everyday phrase and a Dickens title.
+      # A hyphenated keyword would match the bare phrase (separators are optional
+      # in the matcher), so only the underscore form and GX phrases are used.
+      keywords: [great_expectations, gx core, gx cloud, gx data quality, great expectations data quality, great expectations validation]
     - id: soda-core
       repo: sodadata/soda-core
       name: Soda Core
@@ -242,7 +248,6 @@ data_stack:
     - id: openlineage
       repo: OpenLineage/OpenLineage
       name: OpenLineage
-      # Monthly releases.
     - id: openmetadata
       repo: open-metadata/OpenMetadata
       name: OpenMetadata
@@ -250,7 +255,6 @@ data_stack:
     - id: sqlfluff
       repo: sqlfluff/sqlfluff
       name: SQLFluff
-      # A release every 6–8 weeks.
 
 # ── Data: vendor feeds ────────────────────────────────────────────────────────
 # Vendor release notes for the data report (ai-data), from the 2026-10-17 feed
@@ -294,14 +298,10 @@ data:
         - Azure Blob Storage
         - Azure Data Lake Storage
         - Azure Cosmos DB
-        # Seen in the feed's taxonomy but with no item in the 200-item window of
-        # 2026-10-30; the exact category strings are unverified.
-        - Azure Data Factory
-        - Azure Synapse Analytics
-        - Azure Event Hubs
-        - Azure Stream Analytics
-        - Microsoft Purview
-        - Azure Data Explorer
+        # Data Factory, Synapse, Event Hubs, Stream Analytics, Purview and Data
+        # Explorer had no item in the feed's 200-item window on 2026-10-30, so
+        # their category strings could not be read; the match is exact, so an
+        # unverified string would silently match nothing (ticket 15).
     - name: Snowflake
       vendor: snowflake
       url: https://docs.snowflake.com/en/release-notes/all-release-notes?bundle=false
