@@ -234,6 +234,22 @@ function withHotIssueFacts(section: string, g: ProjectGroup): string {
   return [...lines, ...missing].join("\n");
 }
 
+/**
+ * A news link in one form, written by code: a bare news URL in the section becomes
+ * `[<title>](<url>)`. The prompt asks for a Markdown link, but most News bullets of 2026-10-20 to
+ * 10-31 ended in a bare URL (15 of 24), next to linked ones on the same page.
+ */
+function withNewsLinks(section: string, g: ProjectGroup): string {
+  const a = projectOf(section, g);
+  return (a?.news ?? []).reduce((text, n) => {
+    // A trending repo's title is "owner/repo — description": the repo names the link.
+    const label = (n.source === "GitHub Trending" ? n.title.split(" — ")[0]! : n.title).replace(/[[\]]/g, "");
+    // Bare: not the target of a Markdown link or an autolink, and not the start of a longer URL.
+    const bare = new RegExp(`(?<![([<])${escapeRegex(n.url)}(?![\\w/?#=&%-])`, "g");
+    return text.replace(bare, () => `[${label}](${n.url})`);
+  }, section);
+}
+
 /** A model-written project section with its backticked tokens checked against that project's prompt block. */
 function checkProjectTokens(section: string, g: ProjectGroup): string {
   const a = projectOf(section, g);
@@ -246,7 +262,8 @@ function checkProjectTokens(section: string, g: ProjectGroup): string {
  * without a project section that has no bullet (both are absence notes the prompt forbids), plus a
  * code section for each project with a stable release or a hot issue the model did not cover, and a
  * code Release bullet appended to a covered section that does not show its release, and each Hot
- * issue bullet with its facts in code, a missing one code-written (`withHotIssueFacts`). Each project
+ * issue bullet with its facts in code, a missing one code-written (`withHotIssueFacts`), and each
+ * bare news URL linked with its title (`withNewsLinks`). Each project
  * section's backticked tokens are checked against the project's block in the prompt
  * (`checkCodeTokens`). `quiet` is every other checked project without a section; after a failed
  * call (MSG.summaryFailed) the data decides.
@@ -267,8 +284,11 @@ function groupProjects(g: ProjectGroup): { body: string; quiet: ProjectActivity[
             !g.activities.some((a) => sectionHeading(a.config.name).test(chunk) && !covers(chunk, a)),
         )
         .map((chunk) =>
-          withHotIssueFacts(
-            withReleaseBullet(boldLabelColonInside(checkProjectTokens(chunk.trim(), g)), g),
+          withNewsLinks(
+            withHotIssueFacts(
+              withReleaseBullet(boldLabelColonInside(checkProjectTokens(chunk.trim(), g)), g),
+              g,
+            ),
             g,
           ),
         );

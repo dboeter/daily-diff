@@ -423,7 +423,7 @@ ${sections}
 Write the report in English: one section per project above that has something left to report, in the order given, headed \`## <Project name>\`, with at most 3 bullets, one or two sentences each. Write no other sections:
 - **Release**: what the stable release(s) change for users, in this order: ${RELEASE_ORDER}. Several releases in a range: summarize the range, do not list each one. Link each release you name as a plain Markdown link, [tag](url), never inside backticks; a range as its oldest and newest, [v1.2.0](url)–[v1.2.5](url). A release with an Announcement: describe it from the announcement, not from its first changelog entries.
 - **Prerelease**: only from a "Prereleases (no stable release yet)" list, and only when it adds notable features or breaking changes; skip routine alpha/rc bumps. Say it is a prerelease and link it.
-- **News**: what the news item says about the project and why it matters. Link it.
+- **News**: what the news item says about the project and why it matters. Link it as a plain Markdown link, [<title>](<url>), never a bare URL.
 - **${HOT_ISSUE.label}**: one bullet per issue, written "- **${HOT_ISSUE.label}:** #<number>: <description>". The description says what the issue reports and how serious it is, worded as a report ("users report", "an issue says"), never as an established fact. When the body shows a tracking, announcement or FAQ thread rather than a bug report, say so. For a security issue, say where the problem shows and who is affected. Write no link, label, comment or 👍 count, gain or fix status: code adds them to the bullet.
 
 Rules:

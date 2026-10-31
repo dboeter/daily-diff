@@ -569,7 +569,7 @@ async function main(): Promise<void> {
       {
         feeds: CONFIG.data.community,
         posts: posts.filter((p) => !matchedIds.has(p.id)),
-        newsPostIds: posts.filter((p) => matchedIds.has(p.id)).map((p) => p.id),
+        matchedPosts: posts.filter((p) => matchedIds.has(p.id)),
         counts: communityData.counts,
         judgment: communityJudgment,
         // Every page's Spotted rows: a post whose link a story on any page shows is a repeat.
