@@ -1,6 +1,6 @@
 # News & discussion section from community feeds
 
-Status: ready-for-human
+Status: resolved
 Type: task
 Blocked by: 12
 
@@ -29,3 +29,4 @@ Implement the recommendation in `12-community-sources.md`:
 ## Comments
 
 - 2026-10-30: implemented (branch `news-and-discussion`). `data.community` with the 10 feeds; `src/data/community.ts` (fetch, Jev insight + audience, `community-verdicts.json`, selection, `community-trace.json`); posts join the data pool of `matchProjectNews`; `## News & discussion` between Across platforms and Spotted, summarized by the vendor summaries call; shown posts as `post:<linkKey>` in the data state. Atom parsing added to `rss.ts` (DuckDB, Airflow, dltHub), `content:encoded` read where a feed has no description (Medium), named entities decoded. Step 1 (reachability from Actions) is the "Check feeds" workflow (`pnpm feeds:check`), to be dispatched once this is on `main`: every feed answered from the development container, Actions _unverified_ until then. The dbt Labs kept share is to be read from the traces on 2026-11-13.
+- 2026-10-30: merged (PR #181). "Check feeds" dispatched twice on `main` from Actions: all 10 community feeds answered with items both times (DuckDB 10, Polars 82, Airflow 42, dbt Developer 20, dbt Labs 25, dltHub 209, Dagster 176, Confluent 10, OpenMetadata 10, Snowflake on Medium 10). The first run's one failure was the Microsoft Fabric vendor feed ("fetch failed"), which answered on the second run and on the daily runs of 10-28..10-30 (20 items each): transient. Step 1 done; dbt Labs kept share to read on 2026-11-13.
