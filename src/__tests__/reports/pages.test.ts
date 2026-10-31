@@ -1552,6 +1552,7 @@ describe("buildDataReport", () => {
             confidence: 0.9,
             probabilities: { open_source_stack: 0.9 },
           },
+          kind: { choice: "technical", confidence: 0.9, probabilities: { technical: 0.9 } },
         },
       };
     };

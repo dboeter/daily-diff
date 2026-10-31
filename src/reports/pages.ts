@@ -97,9 +97,11 @@ import { DATA_STATE_FILE, type DataState, type VendorData } from "../data/vendor
 import { DATA_VERDICTS_FILE } from "../data/relevance.ts";
 import {
   COMMUNITY_VERDICTS_FILE,
+  judgeCommunityPosts,
   loadCommunityVerdicts,
   selectCommunityPosts,
   unshownPosts,
+  type CommunityJudgment,
   type CommunityPost,
   type CommunityVerdicts,
 } from "../data/community.ts";
@@ -630,6 +632,8 @@ export interface CommunityInput {
    * engineering), so a post an agents project shows as news can still be a data row.
    */
   taken: Set<string>;
+  /** main()'s verdicts on every unshown post, made before news matching; without it the builder judges `posts`, with `jev`. */
+  judgment?: CommunityJudgment;
   jev?: { apiKey?: string; cache: CommunityVerdicts | null; ask?: AskJev };
   verdictsFile?: string;
 }
@@ -765,10 +769,15 @@ export async function buildDataReport(
   // The community posts no earlier report showed (main() filtered them before matching; a direct
   // caller may not have).
   const candidates = unshownPosts(community.posts, vendor.nextState.reported, dateStr);
-  const selection = await selectCommunityPosts(candidates, {
+  const judgment =
+    community.judgment ??
+    (await judgeCommunityPosts(candidates, {
+      ...(community.jev ?? { apiKey: process.env["TYPESAFE_API_KEY"], cache: loadCommunityVerdicts() }),
+      dateStr,
+    }));
+  const selection = selectCommunityPosts(candidates, {
     feeds: community.feeds,
-    ...(community.jev ?? { apiKey: process.env["TYPESAFE_API_KEY"], cache: loadCommunityVerdicts() }),
-    dateStr,
+    judgment,
     fetched: community.counts,
     taken: community.taken,
     numberAfter: items.length + releases.length,

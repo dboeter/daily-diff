@@ -137,9 +137,17 @@ export function collectNewsItems(sources: NewsSources): { item: NewsItem; text: 
 export const MAX_AGENTS_PER_ITEM = 2;
 
 /**
+ * The data pool's `maxPerItem`: an item naming several projects is listed once, under the one its
+ * text names first that has room. Listed under each, one post showed twice on one page (2026-10-31:
+ * a dbt blog post under dbt Core and Iceberg).
+ */
+export const FIRST_NAMED = "first-named";
+
+/**
  * News items per tracked project id. An item naming up to `maxPerItem`
  * projects is listed under each; one naming more is dropped (default
- * MAX_AGENTS_PER_ITEM, for the agents and infra pool). Items keep source order (community stories, then
+ * MAX_AGENTS_PER_ITEM, for the agents and infra pool); FIRST_NAMED lists it
+ * under one, however many it names. Items keep source order (community stories, then
  * trending), each `key` once: the first copy listed under a project claims it, so a copy whose title
  * names no project, or only projects whose lists are full, leaves the article to another copy.
  *
@@ -152,7 +160,7 @@ export const MAX_AGENTS_PER_ITEM = 2;
 export function matchProjectNews(
   agents: RepoConfig[],
   sources: NewsSources,
-  maxPerItem = MAX_AGENTS_PER_ITEM,
+  maxPerItem: number | typeof FIRST_NAMED = MAX_AGENTS_PER_ITEM,
 ): Map<string, NewsItem[]> {
   const matchers = agents.map((cfg) => ({
     id: cfg.id,
@@ -167,8 +175,10 @@ export function matchProjectNews(
     const hits = matchers.filter((m) =>
       item.source === "GitHub Trending" ? item.url.toLowerCase() === m.ownUrl : m.re.test(text),
     );
-    if (hits.length === 0 || hits.length > maxPerItem) continue;
-    const lists = hits.map(({ id }) => result.get(id)!).filter((list) => list.length < NEWS_PER_AGENT);
+    if (hits.length === 0 || (maxPerItem !== FIRST_NAMED && hits.length > maxPerItem)) continue;
+    if (maxPerItem === FIRST_NAMED) hits.sort((a, b) => text.search(a.re) - text.search(b.re));
+    const open = hits.map(({ id }) => result.get(id)!).filter((list) => list.length < NEWS_PER_AGENT);
+    const lists = maxPerItem === FIRST_NAMED ? open.slice(0, 1) : open;
     if (lists.length === 0) continue;
     claimed.add(key);
     for (const list of lists) list.push(item);
