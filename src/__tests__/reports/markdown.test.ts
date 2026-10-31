@@ -204,6 +204,22 @@ describe("buildProjectReportContent", () => {
     );
   });
 
+  it("links a news URL in plain parentheses, but not one inside code or a longer URL", () => {
+    const news = [{ source: "DuckDB blog", title: "A post", url: "https://duckdb.org/x", detail: "d" }];
+    const result = buildProjectReportContent(
+      withAgents({
+        summary:
+          "## ALPHA\n- **News:** DuckDB 2.0 is out (https://duckdb.org/x).\n" +
+          "- **News:** See https://duckdb.org/x.html and `https://duckdb.org/x`.",
+        activities: [makeActivity("alpha", { news }), makeActivity("beta"), makeActivity("gamma")],
+      }),
+    );
+    expect(result).toContain(
+      "- **News:** DuckDB 2.0 is out ([A post](https://duckdb.org/x)).\n" +
+        "- **News:** See https://duckdb.org/x.html and `https://duckdb.org/x`.",
+    );
+  });
+
   it("finds the section of a project named by its owner/repo", () => {
     const news = [{ source: "Hacker News", title: "cursor/plugins", url: "u", detail: "d" }];
     const project = (repo: string) => makeActivity("p", { config: { id: repo, repo, name: repo }, news });

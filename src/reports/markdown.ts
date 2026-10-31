@@ -244,8 +244,9 @@ function withNewsLinks(section: string, g: ProjectGroup): string {
   return (a?.news ?? []).reduce((text, n) => {
     // A trending repo's title is "owner/repo — description": the repo names the link.
     const label = (n.source === "GitHub Trending" ? n.title.split(" — ")[0]! : n.title).replace(/[[\]]/g, "");
-    // Bare: not the target of a Markdown link or an autolink, and not the start of a longer URL.
-    const bare = new RegExp(`(?<![([<])${escapeRegex(n.url)}(?![\\w/?#=&%-])`, "g");
+    // Bare: not a Markdown link's text or target, an autolink or code, and not the start of a longer
+    // URL ("x.html" continues "x"). A URL in plain parentheses is bare too.
+    const bare = new RegExp(`(?<![[<\`]|\\]\\()${escapeRegex(n.url)}(?![\\w/?#=&%\`-]|\\.\\w)`, "g");
     return text.replace(bare, () => `[${label}](${n.url})`);
   }, section);
 }

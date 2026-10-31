@@ -109,7 +109,7 @@ import type { CommunityFeed } from "../core/config.ts";
 import { saveItemsFile, type AskJev } from "../core/jev.ts";
 import { commitWrites, planWrites } from "../core/new-items.ts";
 import type { DataSectionKey } from "../core/config.ts";
-import type { SpottedSection, StoryRow } from "../spotted/pool.ts";
+import { linkKey, type SpottedSection, type StoryRow } from "../spotted/pool.ts";
 
 /** A finished report: main() writes its file and opens its issue (title and label from REPORTS). */
 export interface SavedReport {
@@ -744,8 +744,8 @@ export function hasDataNews(sections: DataSection[], vendor: VendorData, dateStr
  * never makes a report on its own either; the prose call sees it. News & discussion (code-rendered,
  * between Across platforms and Spotted) holds the community feed posts Jev kept that named no tracked
  * project (`community`), and those a project took as news that its section does not link, summarized
- * by the vendor summaries call and recorded in the state as shown (`post:` keys, with the news posts
- * a section links); the repo sections are written first for that. Its trace and verdicts are saved
+ * by the vendor summaries call and recorded in the state as shown (`post:` keys, with every news
+ * post); the repo sections are written first for that. Its trace and verdicts are saved
  * before the skip, like the vendor ones, and its rows never make a report on their own either.
  */
 export async function buildDataReport(
@@ -784,9 +784,13 @@ export async function buildDataReport(
         }),
       )
     : [];
-  const sectionsText = repos.map((r) => r.summary).join("\n");
-  const shownNews = community.matchedPosts.filter((p) => sectionsText.includes(p.url));
-  const leftOut = community.matchedPosts.filter((p) => !shownNews.includes(p));
+  // By `linkKey`: a model may drop a trailing slash or a utm parameter, and `…/x` is not `…/x-2`.
+  const linked = new Set(
+    repos.flatMap((r) =>
+      (r.summary.match(/https?:\/\/[^\s)\]>`"']+/g) ?? []).map((u) => linkKey(u.replace(/[.,;:]+$/, ""))),
+    ),
+  );
+  const leftOut = community.matchedPosts.filter((p) => !linked.has(linkKey(p.url)));
   // The community posts no earlier report showed (main() filtered them before matching; a direct
   // caller may not have).
   const candidates = unshownPosts([...community.posts, ...leftOut], vendor.nextState.reported, dateStr);
@@ -928,7 +932,9 @@ export async function buildDataReport(
       ...Object.fromEntries(unshown.map((r) => [r.key, dateStr])),
       ...Object.fromEntries(
         // The state keys a shown post on its id (`post:<linkKey>`).
-        [...posts, ...shownNews].map((p) => [p.id, dateStr]),
+        // Every matched post, linked or left out: one left out had its News & discussion chance
+        // today, and is not matched as news again on the next days.
+        [...posts, ...community.matchedPosts].map((p) => [p.id, dateStr]),
       ),
     },
   };

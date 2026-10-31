@@ -1593,7 +1593,8 @@ describe("buildDataReport", () => {
         }
         // The model links one matched post and leaves the other out as a passing mention.
         if (prompt.includes("## DuckDB (github.com"))
-          return "## DuckDB\n- Released v1.\n- **News:** [DuckDB 2.0 released](https://example.com/news).";
+          // A trailing slash the post's link lacks: still the same link.
+          return "## DuckDB\n- Released v1.\n- **News:** [DuckDB 2.0 released](https://example.com/news/).";
         return reply(prompt);
       });
       const report = await withCommunity(sections(false), vendorOf([]), community());
@@ -1605,10 +1606,11 @@ describe("buildDataReport", () => {
       );
       expect(content).not.toContain("conference recap");
       expect(content.indexOf("## Open-source stack")).toBeLessThan(content.indexOf("## News & discussion"));
-      // Trace and verdicts saved; the shown posts and the one a project's section links are in the
-      // state; the one the model left out was a News & discussion candidate (a recap: dropped) instead.
+      // Trace and verdicts saved; the one the model left out was a News & discussion candidate (a
+      // recap: dropped), the linked one was not. Every matched post is in the state.
       const trace = (saveFile.mock.calls as unknown[][]).find((c) => c[2] === "community-trace.json")![0];
       expect(trace).toContain("A DuckDB meetup recap");
+      expect(trace).not.toContain("DuckDB 2.0 released");
       expect(saveFile).toHaveBeenCalledWith(
         expect.stringContaining('"insight_min"'),
         "2026-10-17",
@@ -1622,7 +1624,7 @@ describe("buildDataReport", () => {
         "post:example.com/news": "2026-10-17",
       });
       expect(state.reported["post:example.com/c"]).toBeUndefined();
-      expect(state.reported["post:example.com/passing"]).toBeUndefined();
+      expect(state.reported["post:example.com/passing"]).toBe("2026-10-17");
     });
 
     it("skips posts an earlier report showed and never makes a report on its own", async () => {
