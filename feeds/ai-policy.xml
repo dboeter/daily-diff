@@ -13,7 +13,102 @@
       <height>144</height>
     </image>
     <atom:link href="https://dboeter.github.io/daily-diff/feeds/ai-policy.xml" rel="self" type="application/rss+xml"/>
-    <lastBuildDate>Fri, 30 Oct 2026 05:37:40 +0000</lastBuildDate>
+    <lastBuildDate>Sat, 31 Oct 2026 05:27:19 +0000</lastBuildDate>
+    <item>
+      <title>AI Policy 2026-10-31</title>
+      <link>https://dboeter.github.io/daily-diff/#2026-10-31/ai-policy</link>
+      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-10-31/ai-policy</guid>
+      <pubDate>Sat, 31 Oct 2026 00:00:00 +0000</pubDate>
+      <description>AI Policy 2026-10-31 ⬛ Overview · 🟪 AI Agents · 🟦 AI Models &amp;amp; Labs · 🟧 AI Policy · 🟨 Data Engineering Sources: Rijksoverheid + Tweede Kamer + Covington Inside Privacy + Binnenlands Bestuur | 5 new items ranked by Jev relevance | Generated: 2026-10-31 05:21 UTC Highlights The Dutch cabinet endorsed the European Commission’s EU Kids Act proposal while flagging privacy and fundamental-rights concerns, signalling tighter upcoming rules for online services used by children. In the United Stat...</description>
+      <content:encoded><![CDATA[<h1>AI Policy 2026-10-31</h1>
+<p><a href="https://dboeter.github.io/daily-diff/#2026-10-31">⬛ Overview</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-31/ai-agents">🟪 AI Agents</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-31/ai-models">🟦 AI Models &amp; Labs</a> · <strong>🟧 AI Policy</strong> · <a href="https://dboeter.github.io/daily-diff/#2026-10-31/ai-data">🟨 Data Engineering</a></p>
+<blockquote>
+<p>Sources: Rijksoverheid + Tweede Kamer + Covington Inside Privacy + Binnenlands Bestuur | 5 new items ranked by <a href="https://typesafe.ai">Jev</a> relevance | Generated: 2026-10-31 05:21 UTC</p>
+</blockquote>
+<hr>
+<h2>Highlights</h2>
+<p>The Dutch cabinet endorsed the European Commission’s EU Kids Act proposal while flagging privacy and fundamental-rights concerns, signalling tighter upcoming rules for online services used by children. In the United States, Covington reports a growing patchwork of state and federal legislative activity targeting algorithmic pricing, a development relevant to Dutch firms integrating US vendor solutions. Meanwhile, Binnenlands Bestuur notes that civil servants’ ChatGPT and Copilot conversations may be subject to disclosure under the Dutch Open Government Act (Woo), extending transparency obligations to generative-AI use in the public sector. Two parliamentary motions also call for systemic AI integration in education and improved AI literacy across vocational and higher education.</p>
+<h2>Netherlands</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Source</th>
+<th align="left">Title</th>
+<th align="left">Stage</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-10-30</td>
+<td align="left">Rijksoverheid</td>
+<td align="left"><a href="https://www.rijksoverheid.nl/actueel/nieuws/2026/10/30/kabinet-steunt-eu-kids-act-maar-uit-zorgen-over-privacy-en-grondrechten">Kabinet steunt EU Kids Act, maar uit zorgen over privacy en grondrechten</a></td>
+<td align="left">—</td>
+<td align="left">The Dutch cabinet supports the European Commission&#39;s EU Kids Act proposal to better protect children from online risks, which aims to make digital services such as social media, online games, and AI chatbots safer for children.</td>
+</tr>
+<tr>
+<td align="left">2026-10-29</td>
+<td align="left">Tweede Kamer</td>
+<td align="left"><a href="https://www.tweedekamer.nl/kamerstukken/detail?id=2026Z23514&did=2026D54213">Motie van het lid Dassen c.s. over het onderwijssysteem integraal aanpassen op AI</a></td>
+<td align="left">—</td>
+<td align="left">A motion by MP Dassen and others calls for the education system to be integrally adapted to AI, submitted during the 2027 budget approval for the Ministry of Education, Culture and Science.</td>
+</tr>
+<tr>
+<td align="left">2026-10-29</td>
+<td align="left">Tweede Kamer</td>
+<td align="left"><a href="https://www.tweedekamer.nl/kamerstukken/detail?id=2026Z23485&did=2026D54177">Motie van het lid Rooderkerk c.s. over de AI-vaardigheid van docenten en studenten in het mbo, hbo en wo bevorderen</a></td>
+<td align="left">—</td>
+<td align="left">A motion by MP Rooderkerk and others seeks to promote AI skills among teachers and students in vocational, higher professional, and university education, submitted during the 2027 budget approval for the Ministry of Education, Culture and Science.</td>
+</tr>
+</tbody></table>
+<h2>News &amp; commentary</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Source</th>
+<th align="left">Title</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-10-30</td>
+<td align="left">Covington Inside Privacy</td>
+<td align="left"><a href="https://www.insideprivacy.com/consumer-protection/algorithmic-pricing-laws-a-growing-state-patchwork-and-what-businesses-should-know/">Algorithmic Pricing Laws: A Growing State Patchwork and What Businesses Should Know</a></td>
+<td align="left">Lawmakers and regulators at state and federal levels are increasingly focusing on consumer protection considerations related to algorithmic pricing, with the FTC closing the comment period on a proposed enforcement policy statement on personalized pricing.</td>
+</tr>
+<tr>
+<td align="left">2026-10-30</td>
+<td align="left">Binnenlands Bestuur</td>
+<td align="left"><a href="https://www.binnenlandsbestuur.nl/digitaal/gesprekken-van-ambtenaren-met-chatgpt-kunnen-openbaar-worden">Ook ChatGPT-gesprekken van ambtenaren kunnen openbaar worden via Woo</a></td>
+<td align="left">An article reports that civil servants&#39; conversations with ChatGPT or Copilot used for policy preparation can become public under the Dutch Freedom of Information Act (Woo), and that deleting such AI chats may have legal consequences; existing laws provide a legal framework, but practical guidelines for government organisations deploying AI are still lacking.</td>
+</tr>
+</tbody></table>
+<h2>Coming up</h2>
+<p>Deadlines and dates in the next 30 days.</p>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Source</th>
+<th align="left">Item</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-11-09</td>
+<td align="left">Have your say</td>
+<td align="left"><a href="https://ec.europa.eu/info/law/better-regulation/have-your-say/initiatives/19292_en">Articles 75c – 75d AI Act Implementing Act</a></td>
+</tr>
+<tr>
+<td align="left">2026-11-11</td>
+<td align="left">Have your say</td>
+<td align="left"><a href="https://ec.europa.eu/info/law/better-regulation/have-your-say/initiatives/14628_en">Cloud and AI Development Act</a></td>
+</tr>
+</tbody></table>
+<hr>
+<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
+]]></content:encoded>
+    </item>
     <item>
       <title>AI Policy 2026-10-30</title>
       <link>https://dboeter.github.io/daily-diff/#2026-10-30/ai-policy</link>

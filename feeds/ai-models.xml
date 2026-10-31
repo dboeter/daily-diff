@@ -13,7 +13,115 @@
       <height>144</height>
     </image>
     <atom:link href="https://dboeter.github.io/daily-diff/feeds/ai-models.xml" rel="self" type="application/rss+xml"/>
-    <lastBuildDate>Fri, 30 Oct 2026 05:37:40 +0000</lastBuildDate>
+    <lastBuildDate>Sat, 31 Oct 2026 05:27:19 +0000</lastBuildDate>
+    <item>
+      <title>AI Models &amp; Labs 2026-10-31</title>
+      <link>https://dboeter.github.io/daily-diff/#2026-10-31/ai-models</link>
+      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-10-31/ai-models</guid>
+      <pubDate>Sat, 31 Oct 2026 00:00:00 +0000</pubDate>
+      <description>AI Models &amp;amp; Labs 2026-10-31 ⬛ Overview · 🟪 AI Agents · 🟦 AI Models &amp;amp; Labs · 🟧 AI Policy · 🟨 Data Engineering Lab posts: 3 | New models: 0 | Spotted: 7 | Generated: 2026-10-31 05:21 UTC Highlights Anthropic restructures pricing tiers to Free, Pro, Max, Ultra, Team, and Enterprise; the former Max 20x plan becomes Ultra and drops its 5-hour usage limit. MoE offloading does not consistently improve inference speed on a 16 GB GPU; testing five models showed mixed results depending on the ...</description>
+      <content:encoded><![CDATA[<h1>AI Models &amp; Labs 2026-10-31</h1>
+<p><a href="https://dboeter.github.io/daily-diff/#2026-10-31">⬛ Overview</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-31/ai-agents">🟪 AI Agents</a> · <strong>🟦 AI Models &amp; Labs</strong> · <a href="https://dboeter.github.io/daily-diff/#2026-10-31/ai-policy">🟧 AI Policy</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-31/ai-data">🟨 Data Engineering</a></p>
+<blockquote>
+<p>Lab posts: 3 | New models: 0 | Spotted: 7 | Generated: 2026-10-31 05:21 UTC</p>
+</blockquote>
+<hr>
+<h2>Highlights</h2>
+<ul>
+<li>Anthropic restructures pricing tiers to Free, Pro, Max, Ultra, Team, and Enterprise; the former Max 20x plan becomes Ultra and drops its 5-hour usage limit.</li>
+<li>MoE offloading does not consistently improve inference speed on a 16 GB GPU; testing five models showed mixed results depending on the model.</li>
+<li>Artificial Analysis releases v5 alongside a review of gaps in current LLM benchmarking practices.</li>
+</ul>
+<hr>
+<h2>Lab announcements</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Lab</th>
+<th align="left">Post</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-10-31</td>
+<td align="left">OpenAI</td>
+<td align="left"><a href="https://openai.com/index/fair-use-benefits-everyone/">Fair Use Benefits Everyone</a></td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left">2026-10-31</td>
+<td align="left">OpenAI</td>
+<td align="left"><a href="https://openai.com/index/community-safety-report-and-new-protections-for-teens/">Community Safety Report And New Protections For Teens</a></td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left">2026-10-31</td>
+<td align="left">OpenAI</td>
+<td align="left"><a href="https://openai.com/index/helping-websites-express-ai-training-preferences/">Helping Websites Express Ai Training Preferences</a></td>
+<td align="left">—</td>
+</tr>
+</tbody></table>
+<hr>
+<p>Nothing new from OpenRouter&#39;s new listings or OpenRouter&#39;s stealth models today.</p>
+<hr>
+<h2>Spotted</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Story</th>
+<th align="left">Source</th>
+<th align="left">Discussion</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a href="https://www.wsj.com/tech/ai/openai-raises-less-than-half-of-30-billion-target-in-latest-round-91aecdc5">OpenAI raises less than half of $30B target</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50312922">66 points, 43 comments</a></td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left"><a href="https://claude.com/pricing">Anthropic is renaming their Max plans</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50307370">13 points, 7 comments</a></td>
+<td align="left">Anthropic is renaming their Max plans to a new tier structure including Free, Pro, Max, Ultra, Team, and Enterprise.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://support.claude.com/en/articles/17728952-what-is-the-ultra-plan">Claude 20x is now Ultra without the 5-hour limit</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50308320">8 points, 5 comments</a></td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left"><a href="https://www.ft.com/content/59383c7f-8d82-493f-bf01-d2e862a1018f">Anthropic may not secure investment-grade rating after IPO, Blackstone says</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50307219">297 points, 246 comments</a></td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left"><a href="https://techcrunch.com/2026/10/30/anthropic-expected-to-receive-high-junk-rating-from-credit-agencies-following-ipo-report-says/">Anthropic to receive high &#39;junk&#39; rating from credit agencies following IPO</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50311311">82 points, 56 comments</a></td>
+<td align="left">Anthropic may receive a high &quot;junk&quot; credit rating following its IPO, which would make raising capital more difficult and expensive.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://www.interconnects.ai/p/artificial-analysis-v5-and-the-benchmarkers">Artificial Analysis v5 and the benchmarker&#39;s dilemma</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50273340">68 points, 44 comments</a></td>
+<td align="left">Artificial Analysis v5 is released alongside a review of the benchmarking industry and what is currently missing from it.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://dev.to/sizzlebop/moe-offloading-isnt-always-faster-i-tested-5-models-on-a-16gb-gpu-498a">MoE Offloading Isn’t Always Faster: I Tested 5 Models on a 16GB GPU</a></td>
+<td align="left">Dev.to</td>
+<td align="left"><a href="https://dev.to/sizzlebop/moe-offloading-isnt-always-faster-i-tested-5-models-on-a-16gb-gpu-498a">20 reactions, 8 comments</a></td>
+<td align="left">The author tested five MoE models on a 16GB GPU and found that offloading is not always faster.</td>
+</tr>
+</tbody></table>
+<hr>
+<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
+]]></content:encoded>
+    </item>
     <item>
       <title>AI Models &amp; Labs 2026-10-30</title>
       <link>https://dboeter.github.io/daily-diff/#2026-10-30/ai-models</link>
