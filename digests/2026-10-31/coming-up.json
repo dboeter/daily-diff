@@ -1,0 +1,23 @@
+[
+  {
+    "date": "2026-11-09",
+    "title": "Articles 75c – 75d AI Act Implementing Act",
+    "link": "https://ec.europa.eu/info/law/better-regulation/have-your-say/initiatives/19292_en",
+    "source": "Have your say",
+    "page": "ai-policy"
+  },
+  {
+    "date": "2026-11-11",
+    "title": "Cloud and AI Development Act",
+    "link": "https://ec.europa.eu/info/law/better-regulation/have-your-say/initiatives/14628_en",
+    "source": "Have your say",
+    "page": "ai-policy"
+  },
+  {
+    "date": "2026-11-30",
+    "title": "Upcoming end of life for the Genie One MCP Beta endpoint",
+    "link": "https://learn.microsoft.com/azure/databricks/release-notes/whats-coming#upcoming-end-of-life-for-the-genie-one-mcp-beta-endpoint",
+    "source": "Azure Databricks",
+    "page": "ai-data"
+  }
+]

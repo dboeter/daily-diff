@@ -14,7 +14,11 @@
     "issue:openai/codex#57641": "2026-10-30",
     "issue:nousresearch/hermes-agent#146356": "2026-10-30",
     "issue:nousresearch/hermes-agent#118379": "2026-10-30",
-    "issue:apache/airflow#75865": "2026-10-30"
+    "issue:apache/airflow#75865": "2026-10-30",
+    "issue:anthropics/claude-code#106167": "2026-10-31",
+    "issue:anthropics/claude-code#106037": "2026-10-31",
+    "issue:anomalyco/opencode#60399": "2026-10-31",
+    "issue:anomalyco/opencode#60573": "2026-10-31"
   },
   "stages": {}
 }

@@ -1,0 +1,18 @@
+{
+  "ai-agents": [
+    "Hacker News reports a backdoor in the official Claude Code VS Code extension on Cursor Marketplace dropping a persistent SSH backdoor across macOS, Linux, and Windows",
+    "OpenCode v2.2.3–v2.2.5 introduces breaking changes: TUI plugins require OpenTUI 0.8 and managed policy `integration.use` now covers only integrations with separate actions for MCP, skills, and plugins"
+  ],
+  "ai-models": [
+    "Anthropic restructures pricing tiers to Free, Pro, Max, Ultra, Team, and Enterprise; former Max 20x plan becomes Ultra and drops its 5-hour usage limit",
+    "MoE offloading does not consistently improve inference speed on a 16 GB GPU; testing five models showed mixed results depending on the model"
+  ],
+  "ai-policy": [
+    "Covington reports growing patchwork of state and federal legislative activity targeting algorithmic pricing, relevant to Dutch firms integrating US vendor solutions",
+    "Binnenlands Bestuur notes civil servants' ChatGPT and Copilot conversations may be subject to disclosure under Dutch Open Government Act (Woo)"
+  ],
+  "ai-data": [
+    "− Azure Databricks retires Thinking Machine Labs Inkling and Moonshot AI Kimi K2.7 on 2026-10-30; migrate to GLM 5.3 or Kimi K3 per deprecated models guide",
+    "Databricks Unity Catalog REST API clients: unpaginated list requests will soon return HTTP 400; adopt `max_results=0` with `next_page_token` or upgrade SDK/CLI"
+  ]
+}

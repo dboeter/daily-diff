@@ -1,0 +1,9 @@
+{
+"models": [],
+"weights": {"about_llms":0.5,"about_agents_or_code":0.2,"training_free_technique":0.1,"widely_used_models":0.1,"code_released":0.1},
+"domain_application_penalty": 0.2,
+"sources": {"cs.AI":{"fetched":300},"cs.CL":{"fetched":300},"cs.LG":{"fetched":300}},
+"papers": [
+
+]
+}
