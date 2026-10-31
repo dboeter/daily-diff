@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import {
   agentMatcher,
   agentTerms,
+  FIRST_NAMED,
   matchProjectNews,
   NEWS_PER_AGENT,
   type NewsSources,
@@ -328,7 +329,7 @@ describe("data project news", () => {
       post("duck", "DuckDB blog", "What Is inside an Iceberg Table?", "A tour of Apache Iceberg metadata."),
       post("essay", "dltHub blog", "The post-AI data stack", "An opinion."),
     ];
-    const news = matchProjectNews(dataRepos, { posts }, Infinity);
+    const news = matchProjectNews(dataRepos, { posts }, FIRST_NAMED);
     expect(news.get("polars")!.map((n) => [n.source, n.title, n.detail, n.id])).toEqual([
       ["Polars blog", "Announcing Polars 2.1", "blog post, 2026-10-27", "post:example.com/polars"],
     ]);
@@ -402,11 +403,24 @@ describe("data project news", () => {
     expect(matches(repo("databricks-cli"), "The new Databricks CLI bundles")).toBe(true);
   });
 
-  it("keeps a story naming three data projects, which the agents pool would drop", () => {
-    const sources = { stories: hn("DuckDB vs Polars on Apache Iceberg tables") };
-    const news = matchProjectNews(dataRepos, sources, Infinity);
-    for (const id of ["duckdb", "polars", "iceberg"]) expect(news.get(id)).toHaveLength(1);
-    expect(matchProjectNews(dataRepos, sources).get("duckdb")).toEqual([]);
+  it("keeps a story naming three data projects, which the agents pool would drop, under the one named first", () => {
+    const sources = { stories: hn("Polars vs DuckDB on Apache Iceberg tables") };
+    const news = matchProjectNews(dataRepos, sources, FIRST_NAMED);
+    expect(news.get("polars")).toHaveLength(1);
+    for (const id of ["duckdb", "iceberg"]) expect(news.get(id)).toEqual([]);
+    expect(matchProjectNews(dataRepos, sources).get("polars")).toEqual([]);
+  });
+
+  it("lists an item under the next project it names when the first one's list is full", () => {
+    const full = Array.from({ length: NEWS_PER_AGENT }, (_, i) => hn(`Polars trick ${i}`)).flat();
+    const news = matchProjectNews(
+      dataRepos,
+      { stories: [...full, ...hn("Polars vs DuckDB on Apache Iceberg tables")] },
+      FIRST_NAMED,
+    );
+    expect(news.get("polars")).toHaveLength(NEWS_PER_AGENT);
+    expect(news.get("duckdb")!.map((n) => n.title)).toEqual(["Polars vs DuckDB on Apache Iceberg tables"]);
+    expect(news.get("iceberg")).toEqual([]);
   });
 });
 

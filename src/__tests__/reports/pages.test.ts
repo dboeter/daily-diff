@@ -1552,13 +1552,17 @@ describe("buildDataReport", () => {
             confidence: 0.9,
             probabilities: { open_source_stack: 0.9 },
           },
+          kind: { choice: "technical", confidence: 0.9, probabilities: { technical: 0.9 } },
         },
       };
     };
     const community = (over: Partial<CommunityInput> = {}): CommunityInput => ({
       feeds,
       posts,
-      newsPostIds: ["post:example.com/news"],
+      matchedPosts: [
+        post("news", "DuckDB blog", "DuckDB 2.0 released", "2026-10-16"),
+        post("passing", "DuckDB blog", "A DuckDB meetup recap", "2026-10-16"),
+      ],
       counts: { "DuckDB blog": 3, "Snowflake on Medium": 5 },
       taken: new Set(),
       jev: { apiKey: "k", cache: { items: {} }, ask: askJev },
@@ -1587,6 +1591,10 @@ describe("buildDataReport", () => {
           expect(prompt).toContain("## News & discussion");
           return PROSE;
         }
+        // The model links one matched post and leaves the other out as a passing mention.
+        if (prompt.includes("## DuckDB (github.com"))
+          // A trailing slash the post's link lacks: still the same link.
+          return "## DuckDB\n- Released v1.\n- **News:** [DuckDB 2.0 released](https://example.com/news/).";
         return reply(prompt);
       });
       const report = await withCommunity(sections(false), vendorOf([]), community());
@@ -1598,13 +1606,17 @@ describe("buildDataReport", () => {
       );
       expect(content).not.toContain("conference recap");
       expect(content.indexOf("## Open-source stack")).toBeLessThan(content.indexOf("## News & discussion"));
-      // Trace and verdicts saved; the shown posts and the one a project took as news are in the state.
+      // Trace and verdicts saved; the one the model left out was a News & discussion candidate (a
+      // recap: dropped), the linked one was not. Every matched post is in the state.
+      const trace = (saveFile.mock.calls as unknown[][]).find((c) => c[2] === "community-trace.json")![0];
+      expect(trace).toContain("A DuckDB meetup recap");
+      expect(trace).not.toContain("DuckDB 2.0 released");
       expect(saveFile).toHaveBeenCalledWith(
         expect.stringContaining('"insight_min"'),
         "2026-10-17",
         "community-trace.json",
       );
-      expect(Object.keys(JSON.parse(fs.readFileSync(communityVerdicts, "utf-8")).items)).toHaveLength(3);
+      expect(Object.keys(JSON.parse(fs.readFileSync(communityVerdicts, "utf-8")).items)).toHaveLength(4);
       const state = JSON.parse(fs.readFileSync(stateFile, "utf-8")) as DataState;
       expect(state.reported).toMatchObject({
         "post:example.com/a": "2026-10-17",
@@ -1612,6 +1624,7 @@ describe("buildDataReport", () => {
         "post:example.com/news": "2026-10-17",
       });
       expect(state.reported["post:example.com/c"]).toBeUndefined();
+      expect(state.reported["post:example.com/passing"]).toBe("2026-10-17");
     });
 
     it("skips posts an earlier report showed and never makes a report on its own", async () => {

@@ -7,6 +7,8 @@ import {
   communityVerdict,
   fetchCommunityPosts,
   INSIGHT_MIN,
+  judgeCommunityPosts,
+  newsPosts,
   unshownPosts,
   keywordVerdict,
   MAX_COMMUNITY_ROWS,
@@ -38,9 +40,15 @@ const post = (id: string, over: Partial<CommunityPost> = {}): CommunityPost => (
   ...over,
 });
 
-const answers = (insight: number, audience: string, confidence = 1): CommunityAnswers => ({
+const answers = (
+  insight: number,
+  audience: string,
+  confidence = 1,
+  kind = "technical",
+): CommunityAnswers => ({
   insight: { score: insight, confidence },
   audience: { choice: audience, confidence: 0.9, probabilities: { [audience]: 0.9 } },
+  kind: { choice: kind, confidence: 0.9, probabilities: { [kind]: 0.9 } },
 });
 
 /** A Jev stub answering from `byTitle`; a title without an entry throws (a failed call). */
@@ -51,6 +59,19 @@ const askWith =
     if (!a) throw new Error("no stub answer");
     return { model: "jev-test", answers: a };
   };
+
+/** main()'s two steps in one: judge the posts, then select the rows. */
+const judgeAndSelect = async (
+  posts: CommunityPost[],
+  opts: Omit<Parameters<typeof selectCommunityPosts>[1], "judgment"> &
+    Parameters<typeof judgeCommunityPosts>[1],
+) => {
+  const { apiKey, cache, dateStr, ask, ...rest } = opts;
+  return selectCommunityPosts(posts, {
+    ...rest,
+    judgment: await judgeCommunityPosts(posts, { apiKey, cache, dateStr, ...(ask ? { ask } : {}) }),
+  });
+};
 
 afterEach(() => vi.restoreAllMocks());
 
@@ -127,7 +148,7 @@ describe("fetchCommunityPosts", () => {
 describe("unshownPosts", () => {
   it("drops a post an earlier report showed, as news or as a row, and keeps one shown today", async () => {
     vi.spyOn(console, "log").mockImplementation(() => {});
-    const { matchProjectNews } = await import("../../reports/project-news.ts");
+    const { FIRST_NAMED, matchProjectNews } = await import("../../reports/project-news.ts");
     const duckdb = { id: "duckdb", repo: "duckdb/duckdb", name: "DuckDB" };
     const posts = [
       post("a", { title: "Gems of DuckDB 2.0.0" }),
@@ -136,13 +157,13 @@ describe("unshownPosts", () => {
     ];
     // Day 1: a is DuckDB news, b a News & discussion candidate; the report records both.
     const day1 = unshownPosts(posts, {}, "2026-10-29");
-    const news1 = matchProjectNews([duckdb], { posts: day1 }, Infinity);
+    const news1 = matchProjectNews([duckdb], { posts: day1 }, FIRST_NAMED);
     expect(news1.get("duckdb")!.map((n) => n.id)).toEqual([posts[0]!.id]);
     const reported = { [posts[0]!.id]: "2026-10-29", [posts[1]!.id]: "2026-10-29" };
     // Day 2: neither comes back, as news or as a candidate; the feed still lists them.
     const day2 = unshownPosts(posts, reported, "2026-10-30");
     expect(day2.map((p) => p.id)).toEqual([posts[2]!.id]);
-    expect(matchProjectNews([duckdb], { posts: day2 }, Infinity).get("duckdb")).toEqual([]);
+    expect(matchProjectNews([duckdb], { posts: day2 }, FIRST_NAMED).get("duckdb")).toEqual([]);
     // A same-day re-run shows day 1's posts again.
     expect(unshownPosts(posts, reported, "2026-10-29")).toHaveLength(3);
   });
@@ -152,6 +173,7 @@ describe("communityVerdict", () => {
   it("keeps a confident insight at the bar for an on-audience post and nothing else", () => {
     expect(communityVerdict(answers(INSIGHT_MIN, "open_source_stack"))).toEqual({
       keep: true,
+      news: true,
       audience: "open_source_stack",
       relevance: INSIGHT_MIN,
     });
@@ -166,6 +188,53 @@ describe("communityVerdict", () => {
       "Unexpected Jev answers",
     );
     expect(() => communityVerdict(answers(1, "marketing"))).toThrow("Unexpected Jev answers");
+    // A verdict saved before the kind question is asked again.
+    const { kind: _, ...beforeKind } = answers(1, "open_source_stack");
+    expect(() => communityVerdict(beforeKind as CommunityAnswers)).toThrow("Unexpected Jev answers");
+  });
+
+  it("makes a release or technical post news, never a customer story or marketing", () => {
+    expect(communityVerdict(answers(0, "open_source_stack", 1, "release")).news).toBe(true);
+    expect(communityVerdict(answers(1, "open_source_stack", 1, "technical")).news).toBe(true);
+    expect(communityVerdict(answers(1, "open_source_stack", 1, "customer_story")).news).toBe(false);
+    expect(communityVerdict(answers(1, "open_source_stack", 1, "marketing")).news).toBe(false);
+  });
+});
+
+describe("newsPosts", () => {
+  it("keeps the posts Jev calls a release or technical, and without a verdict those with no marketing shape", async () => {
+    vi.spyOn(console, "log").mockImplementation(() => {});
+    const posts = [
+      post("a", { title: "Announcing Polars 2.1" }),
+      post("b", { title: "How Obie Insurance cut its month-end close with dbt" }),
+      post("c", { title: "October 2026 community news" }),
+    ];
+    const judgment = await judgeCommunityPosts(posts, {
+      apiKey: "k",
+      cache: { items: {} },
+      dateStr: "2026-10-31",
+      ask: askWith({
+        "Announcing Polars 2.1": answers(0, "open_source_stack", 1, "release"),
+        "How Obie Insurance cut its month-end close with dbt": answers(
+          1,
+          "open_source_stack",
+          1,
+          "customer_story",
+        ),
+        "October 2026 community news": answers(0, "general_data_engineering", 1, "marketing"),
+      }),
+    });
+    expect(newsPosts(posts, judgment).map((p) => p.title)).toEqual(["Announcing Polars 2.1"]);
+    const noKey = await judgeCommunityPosts(
+      [post("d", { title: "DuckDB 2.1 released" }), post("e", { title: "Join our webinar on DuckDB" })],
+      { cache: { items: {} }, dateStr: "2026-10-31" },
+    );
+    expect(
+      newsPosts(
+        [post("d", { title: "DuckDB 2.1 released" }), post("e", { title: "Join our webinar on DuckDB" })],
+        noKey,
+      ).map((p) => p.title),
+    ).toEqual(["DuckDB 2.1 released"]);
   });
 });
 
@@ -208,7 +277,7 @@ describe("selectCommunityPosts", () => {
         date: "2026-10-30",
       }),
     ];
-    const sel = await selectCommunityPosts(posts, {
+    const sel = await judgeAndSelect(posts, {
       feeds,
       apiKey: "k",
       cache: { items: {} },
@@ -257,7 +326,7 @@ describe("selectCommunityPosts", () => {
         published: `2026-10-${String(20 + i).padStart(2, "0")}T00:00:00Z`,
       }),
     );
-    const sel = await selectCommunityPosts(posts, {
+    const sel = await judgeAndSelect(posts, {
       feeds: posts.map((p) => feed(p.source)),
       apiKey: "k",
       cache: { items: {} },
@@ -282,7 +351,7 @@ describe("selectCommunityPosts", () => {
       post("a", { title: "Apache Iceberg metadata explained" }),
       post("b", { title: "Join our webinar" }),
     ];
-    const noKey = await selectCommunityPosts(posts, {
+    const noKey = await judgeAndSelect(posts, {
       feeds,
       cache: { items: {} },
       dateStr: "2026-10-30",
@@ -290,7 +359,7 @@ describe("selectCommunityPosts", () => {
     });
     expect(noKey.rankedBy).toBe("keywords");
     expect(noKey.rows.map((r) => r.title)).toEqual(["Apache Iceberg metadata explained"]);
-    const cached = await selectCommunityPosts(posts, {
+    const cached = await judgeAndSelect(posts, {
       feeds,
       apiKey: "k",
       cache: {

@@ -97,9 +97,11 @@ import { DATA_STATE_FILE, type DataState, type VendorData } from "../data/vendor
 import { DATA_VERDICTS_FILE } from "../data/relevance.ts";
 import {
   COMMUNITY_VERDICTS_FILE,
+  judgeCommunityPosts,
   loadCommunityVerdicts,
   selectCommunityPosts,
   unshownPosts,
+  type CommunityJudgment,
   type CommunityPost,
   type CommunityVerdicts,
 } from "../data/community.ts";
@@ -107,7 +109,7 @@ import type { CommunityFeed } from "../core/config.ts";
 import { saveItemsFile, type AskJev } from "../core/jev.ts";
 import { commitWrites, planWrites } from "../core/new-items.ts";
 import type { DataSectionKey } from "../core/config.ts";
-import type { SpottedSection, StoryRow } from "../spotted/pool.ts";
+import { linkKey, type SpottedSection, type StoryRow } from "../spotted/pool.ts";
 
 /** A finished report: main() writes its file and opens its issue (title and label from REPORTS). */
 export interface SavedReport {
@@ -620,8 +622,11 @@ export interface CommunityInput {
   feeds: CommunityFeed[];
   /** The fetched posts no project took as news: the News & discussion candidates. */
   posts: CommunityPost[];
-  /** The posts a project took as news: shown under it, so recorded with the report. */
-  newsPostIds: string[];
+  /**
+   * The posts a project took as news. One its section links is recorded with the report; one the
+   * model left out (a passing mention) joins `posts`.
+   */
+  matchedPosts: CommunityPost[];
   /** Items per feed (null: failed), for the trace's `sources` header. */
   counts: Record<string, number | null>;
   /**
@@ -630,6 +635,8 @@ export interface CommunityInput {
    * engineering), so a post an agents project shows as news can still be a data row.
    */
   taken: Set<string>;
+  /** main()'s verdicts on every unshown post, made before news matching; without it the builder judges `posts`, with `jev`. */
+  judgment?: CommunityJudgment;
   jev?: { apiKey?: string; cache: CommunityVerdicts | null; ask?: AskJev };
   verdictsFile?: string;
 }
@@ -638,7 +645,7 @@ export interface CommunityInput {
 export const NO_COMMUNITY: CommunityInput = {
   feeds: [],
   posts: [],
-  newsPostIds: [],
+  matchedPosts: [],
   counts: {},
   taken: new Set(),
 };
@@ -736,9 +743,10 @@ export function hasDataNews(sections: DataSection[], vendor: VendorData, dateStr
  * main()'s Spotted call) goes between Across platforms and EU data law, and
  * never makes a report on its own either; the prose call sees it. News & discussion (code-rendered,
  * between Across platforms and Spotted) holds the community feed posts Jev kept that named no tracked
- * project (`community`), summarized by the vendor summaries call and recorded in the state as shown
- * (`post:` keys, with the posts a project took as news); its trace and verdicts are saved before the
- * skip, like the vendor ones, and its rows never make a report on their own either.
+ * project (`community`), and those a project took as news that its section does not link, summarized
+ * by the vendor summaries call and recorded in the state as shown (`post:` keys, with every news
+ * post); the repo sections are written first for that. Its trace and verdicts are saved
+ * before the skip, like the vendor ones, and its rows never make a report on their own either.
  */
 export async function buildDataReport(
   sections: DataSection[],
@@ -762,13 +770,39 @@ export async function buildDataReport(
     unshown.filter((r) => !r.inSection),
     items.length,
   );
+  const hasNews = hasDataNews(sections, vendor, dateStr);
+  // The repo sections before the community selection: a news post the model left out (2026-10-31: a
+  // dbt post it judged a passing mention) is a News & discussion candidate, not lost as shown.
+  const repos = hasNews
+    ? await Promise.all(
+        sections.map(async (s) => {
+          const active = s.activities.filter(hasActivity);
+          if (!active.length) return { ...s, summary: "" };
+          const prompt = buildProjectDigestPrompt(active, { subject: s.subject, ...PROJECT_SCOPE }, dateStr);
+          const summary = await generateOr(`data-${s.key}`, prompt, MSG.summaryFailed, LLM_TOKENS_LISTING);
+          return { ...s, summary };
+        }),
+      )
+    : [];
+  // By `linkKey`: a model may drop a trailing slash or a utm parameter, and `…/x` is not `…/x-2`.
+  const linked = new Set(
+    repos.flatMap((r) =>
+      (r.summary.match(/https?:\/\/[^\s)\]>`"']+/g) ?? []).map((u) => linkKey(u.replace(/[.,;:]+$/, ""))),
+    ),
+  );
+  const leftOut = community.matchedPosts.filter((p) => !linked.has(linkKey(p.url)));
   // The community posts no earlier report showed (main() filtered them before matching; a direct
   // caller may not have).
-  const candidates = unshownPosts(community.posts, vendor.nextState.reported, dateStr);
-  const selection = await selectCommunityPosts(candidates, {
+  const candidates = unshownPosts([...community.posts, ...leftOut], vendor.nextState.reported, dateStr);
+  const judgment =
+    community.judgment ??
+    (await judgeCommunityPosts(candidates, {
+      ...(community.jev ?? { apiKey: process.env["TYPESAFE_API_KEY"], cache: loadCommunityVerdicts() }),
+      dateStr,
+    }));
+  const selection = selectCommunityPosts(candidates, {
     feeds: community.feeds,
-    ...(community.jev ?? { apiKey: process.env["TYPESAFE_API_KEY"], cache: loadCommunityVerdicts() }),
-    dateStr,
+    judgment,
     fetched: community.counts,
     taken: community.taken,
     numberAfter: items.length + releases.length,
@@ -778,31 +812,21 @@ export async function buildDataReport(
     if (selection.nextVerdicts)
       saveItemsFile(selection.nextVerdicts, community.verdictsFile ?? COMMUNITY_VERDICTS_FILE);
   }
-  if (!hasDataNews(sections, vendor, dateStr)) {
+  if (!hasNews) {
     console.log(`  [data] ${DATA_REPORT.noNewItems}`);
     return null;
   }
   const posts = selection.rows;
   const H = DATA_REPORT.headings;
-  const [repos, rowSummaries] = await Promise.all([
-    Promise.all(
-      sections.map(async (s) => {
-        const active = s.activities.filter(hasActivity);
-        if (!active.length) return { ...s, summary: "" };
-        const prompt = buildProjectDigestPrompt(active, { subject: s.subject, ...PROJECT_SCOPE }, dateStr);
-        const summary = await generateOr(`data-${s.key}`, prompt, MSG.summaryFailed, LLM_TOKENS_LISTING);
-        return { ...s, summary };
-      }),
-    ),
+  const rowSummaries =
     items.length + releases.length + posts.length > 0
-      ? generateOr(
+      ? await generateOr(
           "data-vendor-summaries",
           buildDataSummariesPrompt(items, dateStr, releases, posts),
           "",
           LLM_TOKENS_LISTING,
         )
-      : "",
-  ]);
+      : "";
   const summaries = checkCodeTokens(
     parseRowSummaries(rowSummaries),
     new Map([
@@ -908,7 +932,9 @@ export async function buildDataReport(
       ...Object.fromEntries(unshown.map((r) => [r.key, dateStr])),
       ...Object.fromEntries(
         // The state keys a shown post on its id (`post:<linkKey>`).
-        [...posts.map((p) => p.id), ...community.newsPostIds].map((id) => [id, dateStr]),
+        // Every matched post, linked or left out: one left out had its News & discussion chance
+        // today, and is not matched as news again on the next days.
+        [...posts, ...community.matchedPosts].map((p) => [p.id, dateStr]),
       ),
     },
   };

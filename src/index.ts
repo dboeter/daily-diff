@@ -40,7 +40,7 @@ import {
   hasActivity,
   isMajorRelease,
 } from "./reports/prompts.ts";
-import { matchProjectNews } from "./reports/project-news.ts";
+import { FIRST_NAMED, matchProjectNews } from "./reports/project-news.ts";
 import {
   buildHighlightsPrompt,
   buildSpottedSummariesPrompt,
@@ -84,7 +84,14 @@ import { loadResearchState, nextResearchState, saveResearchState, weekPapers } f
 import { fetchPolicyData, loadPolicyState, type PolicyData } from "./policy/items.ts";
 import { isDataLaw } from "./policy/relevance.ts";
 import { fetchVendorData, loadDataState, type VendorData } from "./data/vendors.ts";
-import { fetchCommunityPosts, unshownPosts, type CommunityPost } from "./data/community.ts";
+import {
+  fetchCommunityPosts,
+  judgeCommunityPosts,
+  loadCommunityVerdicts,
+  newsPosts,
+  unshownPosts,
+  type CommunityPost,
+} from "./data/community.ts";
 import { buildComingUp } from "./reports/coming-up.ts";
 import { fetchHfData, type HfData } from "./sources/huggingface.ts";
 import { fetchDevtoData, type DevtoData } from "./sources/devto.ts";
@@ -419,15 +426,21 @@ async function main(): Promise<void> {
   const agentActivities = agentFetches.map(withNews);
   const infraActivities = infraFetches.map(withNews);
   // The data projects are a pool of their own, without the compatibility-list
-  // drop: a story naming DuckDB, Polars and Iceberg is news about the stack. The community feeds'
-  // posts no earlier report showed (`unshownPosts`: a post stays in its feed for 7 days, and is
-  // news once) join it (a DuckDB blog post is DuckDB news); the posts no project takes are the data
-  // report's News & discussion candidates.
+  // drop: a story naming DuckDB, Polars and Iceberg is news about the stack, listed once, under
+  // the project it names first. The community feeds' posts no earlier report showed
+  // (`unshownPosts`: a post stays in its feed for 7 days, and is news once) are judged first, and
+  // the release and technical ones join it (a DuckDB blog post is DuckDB news; a vendor's customer
+  // story is not); the posts no project takes are the data report's News & discussion candidates.
   const posts = unshownPosts(communityData.posts, vendorData.nextState.reported, dateStr);
+  const communityJudgment = await judgeCommunityPosts(posts, {
+    apiKey: process.env["TYPESAFE_API_KEY"],
+    cache: loadCommunityVerdicts(),
+    dateStr,
+  });
   const dataNews = matchProjectNews(
     DATA_SECTIONS.flatMap((s) => s.repos),
-    { stories: fresh, trending: trendingData, posts },
-    Infinity,
+    { stories: fresh, trending: trendingData, posts: newsPosts(posts, communityJudgment) },
+    FIRST_NAMED,
   );
   const dataSections = DATA_SECTION_KEYS.map((key, i) => ({
     key,
@@ -556,8 +569,9 @@ async function main(): Promise<void> {
       {
         feeds: CONFIG.data.community,
         posts: posts.filter((p) => !matchedIds.has(p.id)),
-        newsPostIds: posts.filter((p) => matchedIds.has(p.id)).map((p) => p.id),
+        matchedPosts: posts.filter((p) => matchedIds.has(p.id)),
         counts: communityData.counts,
+        judgment: communityJudgment,
         // Every page's Spotted rows: a post whose link a story on any page shows is a repeat.
         taken: new Set(spottedRows.map((r) => linkKey(r.url))),
       },

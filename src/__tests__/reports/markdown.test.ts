@@ -172,6 +172,54 @@ describe("buildProjectReportContent", () => {
     );
   });
 
+  it("links a bare news URL with its title, and leaves a linked one as written", () => {
+    const news = [
+      {
+        source: "Hacker News",
+        title: "Alpha [v2] ships",
+        url: "https://news.ycombinator.com/item?id=12",
+        detail: "d",
+      },
+      {
+        source: "GitHub Trending",
+        title: "org/alpha — The alpha agent",
+        url: "https://github.com/org/alpha",
+        detail: "d",
+      },
+      { source: "DuckDB blog", title: "A post", url: "https://example.com/post", detail: "d" },
+    ];
+    const result = buildProjectReportContent(
+      withAgents({
+        summary:
+          "## ALPHA\n- **News:** Alpha 2 is out. https://news.ycombinator.com/item?id=12\n" +
+          "- **News:** Trending this week: https://github.com/org/alpha.\n" +
+          "- **News:** [A post](https://example.com/post) explains it; https://news.ycombinator.com/item?id=123 is another story.",
+        activities: [makeActivity("alpha", { news }), makeActivity("beta"), makeActivity("gamma")],
+      }),
+    );
+    expect(result).toContain(
+      "- **News:** Alpha 2 is out. [Alpha v2 ships](https://news.ycombinator.com/item?id=12)\n" +
+        "- **News:** Trending this week: [org/alpha](https://github.com/org/alpha).\n" +
+        "- **News:** [A post](https://example.com/post) explains it; https://news.ycombinator.com/item?id=123 is another story.",
+    );
+  });
+
+  it("links a news URL in plain parentheses, but not one inside code or a longer URL", () => {
+    const news = [{ source: "DuckDB blog", title: "A post", url: "https://duckdb.org/x", detail: "d" }];
+    const result = buildProjectReportContent(
+      withAgents({
+        summary:
+          "## ALPHA\n- **News:** DuckDB 2.0 is out (https://duckdb.org/x).\n" +
+          "- **News:** See https://duckdb.org/x.html and `https://duckdb.org/x`.",
+        activities: [makeActivity("alpha", { news }), makeActivity("beta"), makeActivity("gamma")],
+      }),
+    );
+    expect(result).toContain(
+      "- **News:** DuckDB 2.0 is out ([A post](https://duckdb.org/x)).\n" +
+        "- **News:** See https://duckdb.org/x.html and `https://duckdb.org/x`.",
+    );
+  });
+
   it("finds the section of a project named by its owner/repo", () => {
     const news = [{ source: "Hacker News", title: "cursor/plugins", url: "u", detail: "d" }];
     const project = (repo: string) => makeActivity("p", { config: { id: repo, repo, name: repo }, news });

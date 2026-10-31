@@ -1,9 +1,10 @@
 /**
  * The data report's community feeds (config.yml `data.community`): engineering
- * blogs and newsletters, RSS 2.0 or Atom, read through src/core/rss.ts. A post
+ * blogs and newsletters, RSS 2.0 or Atom, read through src/core/rss.ts. Jev
+ * judges every post here before news matching: a release or technical post
  * that names a tracked project is that project's news (`matchProjectNews`, the
- * data pool); the rest is judged by Jev here and goes in the News & discussion
- * table. A failing feed is logged and skipped. Spike and decisions:
+ * data pool); the rest are News & discussion candidates. A failing feed is
+ * logged and skipped. Spike and decisions:
  * `.scratch/data-watch/issues/12-community-sources.md`.
  */
 
@@ -19,6 +20,7 @@ import {
   type AskJev,
   type ChoiceAnswer,
   type DroppedReason,
+  type Judgment,
   type RankedBy,
   type VerdictCache,
 } from "../core/jev.ts";
@@ -198,35 +200,70 @@ const QUESTIONS = {
       },
     },
   },
+  // Gates project news, not the insight score: insight scored "Announcing Polars 2.1" 0.01 and the
+  // dbt blog's customer stories at confidence 0 (2026-10-31), so it cannot tell news from marketing.
+  kind: {
+    type: "choice",
+    instructions: "What kind of post from `source`, described by `title` and `description`, is this?",
+    criteria: {
+      release: {
+        what: "A release, a new feature or a deprecation of a tool or platform",
+        examples: ["Announcing Polars 2.1", "a feature now generally available"],
+      },
+      technical: {
+        what: "A technical post: how something works, a technique, a benchmark, a migration, a design decision",
+        examples: ["how a query engine plans joins", "a tutorial", "lessons from building a driver"],
+      },
+      customer_story: {
+        what: "A customer or user story told by the vendor: how a company uses the product",
+        examples: ["How Acme cut costs 30% with X", "What Y learned running X at scale"],
+      },
+      marketing: {
+        what: "An event, webinar, community roundup, newsletter, hiring or partnership post",
+        examples: ["monthly community news", "a conference recap"],
+      },
+    },
+  },
 };
 
 export interface CommunityAnswers {
   /** Probability-weighted level, 0–2, and how sure Jev is of it. */
   insight: { score: number; confidence?: number };
   audience: ChoiceAnswer;
+  kind: ChoiceAnswer;
 }
 
 export type Audience = keyof typeof QUESTIONS.audience.criteria;
+type Kind = keyof typeof QUESTIONS.kind.criteria;
+/** The kinds a post naming a tracked project is that project's news as. */
+const NEWS_KINDS: ReadonlySet<string> = new Set<Kind>(["release", "technical"]);
 
 /** Insight a kept post needs, on the 0–2 scale: "Some" alone is not a row, a sure "Some" leaning "Substantial" is. */
 export const INSIGHT_MIN = 1.2;
 const OFF_AUDIENCE: Audience = "off_audience";
 
-/** The decision Jev's answers weigh into. `relevance` is the insight score, for the trace and the order. */
+/**
+ * The decision Jev's answers weigh into. `keep`: a News & discussion row; `news`: may be a
+ * tracked project's news. `relevance` is the insight score, for the trace and the order.
+ */
 export interface CommunityVerdict {
   keep: boolean;
+  news: boolean;
   audience: Audience;
   relevance: number;
 }
 
-/** Throws on an unexpected shape, so the call counts as failed (or a saved entry as missing). */
+/** Throws on an unexpected shape, so the call counts as failed (or a saved entry as missing: one saved before `kind` is asked again). */
 export function communityVerdict(a: CommunityAnswers): CommunityVerdict {
   const score = a?.insight?.score;
   const audience = a?.audience?.choice;
+  const kind = a?.kind?.choice;
   if (
     typeof score !== "number" ||
     typeof audience !== "string" ||
-    !Object.hasOwn(QUESTIONS.audience.criteria, audience)
+    !Object.hasOwn(QUESTIONS.audience.criteria, audience) ||
+    typeof kind !== "string" ||
+    !Object.hasOwn(QUESTIONS.kind.criteria, kind)
   ) {
     throw new Error(`Unexpected Jev answers: ${JSON.stringify(a)}`);
   }
@@ -234,6 +271,7 @@ export function communityVerdict(a: CommunityAnswers): CommunityVerdict {
   const confident = (a.insight.confidence ?? 1) >= LOW_CONFIDENCE;
   return {
     keep: confident && score >= INSIGHT_MIN && audience !== OFF_AUDIENCE,
+    news: NEWS_KINDS.has(kind),
     audience: audience as Audience,
     relevance: score,
   };
@@ -245,12 +283,14 @@ const MARKETING_RE =
 
 /**
  * Without Jev (no key, or more than half the new calls failed): a post naming a data term
- * (the HN data filter's patterns) and no marketing shape is kept, at relevance 1.
+ * (the HN data filter's patterns) and no marketing shape is kept, at relevance 1; a post
+ * with no marketing shape may be news.
  */
 export function keywordVerdict(p: Pick<CommunityPost, "title" | "description">): CommunityVerdict {
   const text = `${p.title} ${p.description}`;
-  const keep = !MARKETING_RE.test(text) && DATA_KEYWORD_PATTERNS.some((re) => re.test(text));
-  return { keep, audience: "general_data_engineering", relevance: keep ? 1 : 0 };
+  const news = !MARKETING_RE.test(text);
+  const keep = news && DATA_KEYWORD_PATTERNS.some((re) => re.test(text));
+  return { keep, news, audience: "general_data_engineering", relevance: keep ? 1 : 0 };
 }
 
 // ---------------------------------------------------------------------------
@@ -284,32 +324,14 @@ export interface CommunitySelection {
   traceFile: string;
 }
 
-/**
- * The News & discussion rows among `posts` (the fetched posts no project took as
- * news and no earlier report showed): Jev's verdict (else `keywordVerdict`)
- * keeps a post; a kept post whose link another row of the report already shows
- * (`taken`, `linkKey`s) is `repeat`; per feed the top `cap` by insight, then the
- * top MAX_COMMUNITY_ROWS overall (`cap` in the trace), shown newest first.
- * `numberAfter`: the rows are numbered after the report's vendor and release
- * rows, for the one summaries call.
- */
-export async function selectCommunityPosts(
+export type CommunityJudgment = Judgment<CommunityPost, CommunityAnswers, CommunityVerdict>;
+
+/** Jev's verdict on every post (saved ones reused), before news matching: `news` gates matching. */
+export function judgeCommunityPosts(
   posts: CommunityPost[],
-  opts: {
-    feeds: CommunityFeed[];
-    apiKey?: string;
-    cache: CommunityVerdicts | null;
-    dateStr: string;
-    ask?: AskJev;
-    /** Items per feed (null: failed), for the trace's `sources` header. */
-    fetched: Record<string, number | null>;
-    /** Links the report's other rows show (project news, Spotted). */
-    taken?: Set<string>;
-    numberAfter?: number;
-  },
-): Promise<CommunitySelection> {
-  const { feeds, fetched, taken = new Set<string>(), numberAfter = 0, ...jev } = opts;
-  const judgment = await judgeItems(posts, {
+  jev: { apiKey?: string; cache: CommunityVerdicts | null; dateStr: string; ask?: AskJev },
+): Promise<CommunityJudgment> {
+  return judgeItems(posts, {
     ...jev,
     tag: "community",
     request: (p) => ({
@@ -319,7 +341,42 @@ export async function selectCommunityPosts(
     decide: (a: CommunityAnswers) => communityVerdict(a),
     unseenDays: VERDICT_UNSEEN_DAYS,
   });
-  const verdictOf = (p: CommunityPost): CommunityVerdict => judgment.verdicts.get(p.id) ?? keywordVerdict(p);
+}
+
+const verdictIn =
+  (judgment: CommunityJudgment) =>
+  (p: CommunityPost): CommunityVerdict =>
+    judgment.verdicts.get(p.id) ?? keywordVerdict(p);
+
+/** The posts that may be a tracked project's news: a release or technical post, not a customer story or marketing. */
+export function newsPosts(posts: CommunityPost[], judgment: CommunityJudgment): CommunityPost[] {
+  const verdictOf = verdictIn(judgment);
+  return posts.filter((p) => verdictOf(p).news);
+}
+
+/**
+ * The News & discussion rows among `posts` (the fetched posts no project took as
+ * news and no earlier report showed): the verdict in `judgment` (else `keywordVerdict`)
+ * keeps a post; a kept post whose link another row of the report already shows
+ * (`taken`, `linkKey`s) is `repeat`; per feed the top `cap` by insight, then the
+ * top MAX_COMMUNITY_ROWS overall (`cap` in the trace), shown newest first.
+ * `numberAfter`: the rows are numbered after the report's vendor and release
+ * rows, for the one summaries call.
+ */
+export function selectCommunityPosts(
+  posts: CommunityPost[],
+  opts: {
+    feeds: CommunityFeed[];
+    judgment: CommunityJudgment;
+    /** Items per feed (null: failed), for the trace's `sources` header. */
+    fetched: Record<string, number | null>;
+    /** Links the report's other rows show (project news, Spotted). */
+    taken?: Set<string>;
+    numberAfter?: number;
+  },
+): CommunitySelection {
+  const { feeds, judgment, fetched, taken = new Set<string>(), numberAfter = 0 } = opts;
+  const verdictOf = verdictIn(judgment);
   const dropped = new Map<string, DroppedReason>();
   const kept = posts.filter((p) => {
     const v = verdictOf(p);
