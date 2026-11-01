@@ -166,6 +166,22 @@ describe("selectVendorItems", () => {
     expect(sel.items.map((i) => [i.id, i.minor])).toEqual([["d5", true]]);
   });
 
+  it("an unsure significance near Notable (0.95 at confidence 0.2) is still minor", async () => {
+    const unsure: DataAnswers = {
+      real_change: { noul: 0.99 },
+      deprecation: { noul: 0.01 },
+      ai_in_data: { noul: 0.02 },
+      significance: { score: 0.95, confidence: 0.2 },
+    };
+    const sel = await selectVendorItems([item("u", { vendor: "snowflake", source: "Snowflake" })], {
+      apiKey: "k",
+      cache: { items: {} },
+      dateStr: DATE,
+      ask: async () => ({ model: "jev-test", answers: unsure }),
+    });
+    expect(sel.items.map((i) => [i.id, i.minor])).toEqual([["u", true]]);
+  });
+
   it("orders deprecations first, then by relevance; bundles skip Jev; saves the answers", async () => {
     ask.mockClear();
     const sel = await selectVendorItems(

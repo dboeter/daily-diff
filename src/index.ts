@@ -41,7 +41,12 @@ import {
   isMajorRelease,
 } from "./reports/prompts.ts";
 import { FIRST_NAMED, matchProjectNews } from "./reports/project-news.ts";
-import { dropSameEventRepeats, loadSameEventVerdicts, saveSameEventVerdicts } from "./spotted/same-event.ts";
+import {
+  dropSameDayRepeats,
+  dropShownRepeats,
+  loadSameEventVerdicts,
+  saveSameEventVerdicts,
+} from "./spotted/same-event.ts";
 import {
   buildHighlightsPrompt,
   buildSpottedSummariesPrompt,
@@ -411,13 +416,13 @@ async function main(): Promise<void> {
   );
   console.log(`  ${hotIssueCallsLine(hotIssueRun.calls)}`);
   const stories = storiesFrom(hnData, lobstersData, devtoData);
-  // A story on an event a higher-ranked fresh story or a recent page reported leaves the pool
-  // before news matching, so a repeat is neither project news nor Spotted.
-  const sameEvent = await dropSameEventRepeats(
+  // A story on an event a page showed on an earlier day leaves the pool before news matching, so
+  // a repeat is neither project news nor Spotted. Today's repeats are removed after selection.
+  const shownRepeats = await dropShownRepeats(
     freshStories([...stories, ...carriedStories(spottedLog, stories, dateStr)], spottedLog, dateStr),
     { log: spottedLog, apiKey: process.env["TYPESAFE_API_KEY"], cache: loadSameEventVerdicts(), dateStr },
   );
-  const fresh = sameEvent.kept;
+  const fresh = shownRepeats.kept;
 
   // Agent news is matched against the other sources' data, so it waits for them.
   // Agents and tooling in one pass: an item naming 3+ of them is a compatibility list.
@@ -476,7 +481,6 @@ async function main(): Promise<void> {
     cache: spottedVerdicts,
     dateStr,
   });
-  const spottedDropped = new Map<string, DroppedReason>();
   const pageOf = (s: Story): SpottedPage | null => {
     const topic = routing.topics.get(s.id);
     return topic ? PAGE_OF_TOPIC[topic] : null;
@@ -485,17 +489,34 @@ async function main(): Promise<void> {
     const topic = routing.topics.get(s.id);
     return topic ? routing.judgment.verdicts.get(s.id)?.answers.topic.probabilities?.[topic] : undefined;
   };
-  const spottedRows = selectSpotted(unmatched, pageOf, spottedDropped, { dateStr, probabilityOf });
-  const spottedOf = (page: SpottedPage) => spottedRows.filter((r) => r.page === page);
-  // The Overview's policy list and "Also talked about": stories routed to a topic with no page.
-  const talkedAbout = selectTalkedAbout(
-    unmatched,
-    (s) => routing.topics.get(s.id),
-    pageOf,
-    dateStr,
-    new Set(spottedRows.map((r) => linkKey(r.url))),
-    probabilityOf,
+  // Spotted rows and the Overview's policy list and "Also talked about" (stories routed to a topic
+  // with no page); a row that repeats an event shown above it today (project news first) is removed
+  // and its slot refilled.
+  const sameDay = await dropSameDayRepeats(
+    fresh.filter((s) => matchedIds.has(s.id)),
+    (removed) => {
+      const candidates = unmatched.filter((s) => !removed.has(s.id));
+      const dropped = new Map<string, DroppedReason>();
+      const rows = selectSpotted(candidates, pageOf, dropped, { dateStr, probabilityOf });
+      const talked = selectTalkedAbout(
+        candidates,
+        (s) => routing.topics.get(s.id),
+        pageOf,
+        dateStr,
+        new Set(rows.map((r) => linkKey(r.url))),
+        probabilityOf,
+      );
+      const talkedIds = new Set(talked.map((t) => t.id));
+      return {
+        selection: { rows, talked, dropped },
+        shown: [...rows, ...candidates.filter((s) => talkedIds.has(s.id))],
+      };
+    },
+    { apiKey: process.env["TYPESAFE_API_KEY"], cache: shownRepeats.nextCache, dateStr },
   );
+  const { rows: spottedRows, talked: talkedAbout, dropped: spottedDropped } = sameDay.selection;
+  for (const s of sameDay.repeats) spottedDropped.set(s.id, "repeat");
+  const spottedOf = (page: SpottedPage) => spottedRows.filter((r) => r.page === page);
   // Trends' Most discussed leaves out what today's pages show: a skipped data page shows no Spotted
   // rows (a data page with project news is never skipped, nor a models page with a lab post).
   const discussed = weekly
@@ -629,7 +650,8 @@ async function main(): Promise<void> {
   ]);
   const shownIds = [...dailyShown, ...(savedIds.has("ai-trends") ? discussed.map((s) => s.id) : [])];
   const cutIds = [...spottedDropped].flatMap(([id, reason]) => (reason === "cap" ? [id] : []));
-  saveSpottedLog(nextLog(spottedLog, stories, shownIds, dateStr, cutIds));
+  const repeatIds = [...shownRepeats.repeats, ...sameDay.repeats].map((s) => s.id);
+  saveSpottedLog(nextLog(spottedLog, stories, shownIds, dateStr, cutIds, repeatIds));
   saveReportedState(
     nextHotIssuesState(
       hotIssuesState,
@@ -644,14 +666,15 @@ async function main(): Promise<void> {
     HOT_ISSUES_SNAPSHOT_FILE,
   );
   if (routing.judgment.nextCache) saveSpottedVerdicts(routing.judgment.nextCache);
-  if (sameEvent.judgment.nextCache) saveSameEventVerdicts(sameEvent.judgment.nextCache);
+  if (sameDay.nextCache) saveSameEventVerdicts(sameDay.nextCache);
   console.log(
     `  Saved ${saveFile(
       spottedTraceFile(unmatched, routing, dailyShown, {
         rows: spottedRows,
         dropped: spottedDropped,
         talkedAbout: new Set(talkedAbout.map((s) => s.id)),
-        sameEvent,
+        shownRepeats,
+        sameDayRepeats: sameDay,
         sources: sourceCounts(
           {
             hn: hnData.fetchSuccess ? stories.filter((s) => s.source === "hn").length : null,
@@ -660,7 +683,7 @@ async function main(): Promise<void> {
               : null,
             devto: devtoData.fetchSuccess ? stories.filter((s) => s.source === "devto").length : null,
           },
-          [...unmatched, ...sameEvent.repeats].map((s) => s.source),
+          unmatched.map((s) => s.source),
         ),
       }),
       dateStr,

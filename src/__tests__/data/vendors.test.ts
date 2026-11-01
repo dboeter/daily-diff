@@ -259,6 +259,22 @@ describe("fetchVendorData across days", () => {
     expect(second.items.map((i) => i.title)).toEqual([preview.title]);
   });
 
+  it("matches a coming-soon note whose scope comes before its status words to its GA note", async () => {
+    const soon = {
+      guid: "whats-coming#ai-csp",
+      title: "AI Runtime for workspaces with the compliance security profile will soon be available",
+      date: "2026-10-14",
+    };
+    const shipped = {
+      guid: "october#ai-csp",
+      title: "AI Runtime for workspaces with the compliance security profile is now available",
+      date: "2026-10-15",
+    };
+    const first = await run("2026-10-20", [], [soon], null);
+    const second = await run("2026-10-21", [], [soon, shipped], first.nextState);
+    expect(second.items).toEqual([]);
+  });
+
   it("reports both when the coming-soon and GA notes arrive on the same day", async () => {
     const data = await run("2026-10-21", [], [comingSoon, ga], null);
     expect(data.items.map((i) => i.title).sort()).toEqual([ga.title, comingSoon.title].sort());

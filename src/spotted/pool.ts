@@ -141,6 +141,7 @@ export interface LoggedStory {
   lastSeen: string; // CST date
   shown?: string; // CST date a page first showed it
   cut?: string; // CST date Spotted's per-source cap alone left it out: next day's pool takes it again
+  repeat?: string; // CST date the same-event check dropped it: never a Most discussed row
 }
 
 export type SpottedLog = ItemsFile<LoggedStory>;
@@ -241,7 +242,8 @@ export function carriedStories(log: SpottedLog, fetched: Story[], dateStr: strin
 /**
  * Each fetched story with its latest counts and `lastSeen` (a story shown on
  * an earlier day too); `shown` set for each of `shownIds` that has none; `cut`
- * set to today for each of `cutIds` (Spotted's cap left it out) that no page showed;
+ * set to today for each of `cutIds` (Spotted's cap left it out) that no page showed, `repeat`
+ * for each of `repeatIds` (the same-event check dropped it) that no page showed;
  * entries unseen for more than LOG_UNSEEN_DAYS pruned.
  */
 export function nextLog(
@@ -250,6 +252,7 @@ export function nextLog(
   shownIds: Iterable<string>,
   dateStr: string,
   cutIds: Iterable<string> = [],
+  repeatIds: Iterable<string> = [],
 ): SpottedLog {
   const items = { ...log.items };
   for (const s of fetched) {
@@ -266,6 +269,7 @@ export function nextLog(
       lastSeen: dateStr,
       ...(prev?.shown ? { shown: prev.shown } : {}),
       ...(prev?.cut ? { cut: prev.cut } : {}),
+      ...(prev?.repeat ? { repeat: prev.repeat } : {}),
     };
   }
   for (const id of shownIds) {
@@ -275,6 +279,10 @@ export function nextLog(
   for (const id of cutIds) {
     const e = items[id];
     if (e && !e.shown) items[id] = { ...e, cut: dateStr };
+  }
+  for (const id of repeatIds) {
+    const e = items[id];
+    if (e && !e.shown) items[id] = { ...e, repeat: dateStr };
   }
   const oldest = daysBefore(dateStr, LOG_UNSEEN_DAYS);
   return { items: Object.fromEntries(Object.entries(items).filter(([, e]) => e.lastSeen >= oldest)) };
@@ -507,8 +515,9 @@ export const MOST_DISCUSSED_MIN_COMMENTS: Record<StorySource, number> = { hn: 20
  * Trends' Most discussed: the logged stories first seen in the 7 days before
  * the run (the run's own stories enter the log after the page is built, so
  * each day counts in one week), per source the top MOST_DISCUSSED_PER_SOURCE
- * by comments, each with at least MOST_DISCUSSED_MIN_COMMENTS and not routed to the `other` topic
- * (`topicOf`: its saved Spotted verdict; unknown passes). A story a page showed on an earlier day (`shown`: a same-day
+ * by comments, each with at least MOST_DISCUSSED_MIN_COMMENTS, routed to a topic other than `other`
+ * (`topicOf`: its saved Spotted verdict; a story without one is left out) and no same-event repeat
+ * (`repeat` in the log). A story a page showed on an earlier day (`shown`: a same-day
  * re-run shows today's rows again) or a daily page shows today (`showing`: the
  * run's project news and Spotted rows) is left out, by id or link; each link
  * once, in the first source whose rows take it. Unnumbered: main() numbers
@@ -518,7 +527,7 @@ export function mostDiscussed(
   log: SpottedLog,
   dateStr: string,
   showing: Pick<Story, "id" | "url">[],
-  topicOf: (id: string) => string | undefined = () => undefined,
+  topicOf: (id: string) => string | undefined,
 ): Omit<StoryRow, "n">[] {
   const from = daysBefore(dateStr, 7);
   const showingIds = new Set(showing.map((s) => s.id));
@@ -536,6 +545,8 @@ export function mostDiscussed(
         !shownEarlier(e.shown, dateStr) &&
         !showingIds.has(id) &&
         e.comments >= MOST_DISCUSSED_MIN_COMMENTS[e.source] &&
+        !e.repeat &&
+        topicOf(id) !== undefined &&
         topicOf(id) !== OTHER_TOPIC,
     )
     .map(([id, e]) => ({ id, ...e }));

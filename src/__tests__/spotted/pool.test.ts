@@ -211,6 +211,8 @@ describe("nextLog", () => {
 });
 
 describe("mostDiscussed", () => {
+  const onTopic = () => "agents";
+
   it("takes the stories first seen in the 7 days before the run, top 5 HN, 3 Lobste.rs, 3 Dev.to by comments", () => {
     const items: SpottedLog["items"] = {};
     const add = (id: string, source: StorySource, comments: number, firstSeen: string, extra = {}) => {
@@ -223,7 +225,7 @@ describe("mostDiscussed", () => {
     add("d1", "devto", 50, "2026-10-21", { description: "Desc." });
     add("old", "hn", 999, "2026-10-14");
     add("today", "hn", 999, DATE);
-    const rows = mostDiscussed({ items }, DATE, []);
+    const rows = mostDiscussed({ items }, DATE, [], onTopic);
     expect(rows.map((r) => r.id)).toEqual([
       "hn:h7",
       "hn:h6",
@@ -252,6 +254,29 @@ describe("mostDiscussed", () => {
     expect(rows.map((r) => r.id)).toEqual(["lobsters:busy"]);
   });
 
+  it("leaves out a same-event repeat and a story without a topic verdict", () => {
+    const items: SpottedLog["items"] = {};
+    for (const [id, extra] of [
+      ["kept", {}],
+      ["repeat", { repeat: "2026-10-20" }],
+      ["unrouted", {}],
+    ] as const) {
+      const s = story(id);
+      items[s.id] = logged(s, { comments: 30, firstSeen: "2026-10-20", ...extra });
+    }
+    const rows = mostDiscussed({ items }, DATE, [], (id) => (id === "hn:unrouted" ? undefined : "agents"));
+    expect(rows.map((r) => r.id)).toEqual(["hn:kept"]);
+  });
+
+  it("nextLog marks a repeat no page showed, and keeps the mark", () => {
+    const a = story("a");
+    const b = story("b");
+    const log = nextLog({ items: {} }, [a, b], [b.id], DATE, [], [a.id, b.id]);
+    expect(log.items[a.id]!.repeat).toBe(DATE);
+    expect(log.items[b.id]!.repeat).toBeUndefined();
+    expect(nextLog(log, [a], [], "2026-10-23").items[a.id]!.repeat).toBe(DATE);
+  });
+
   it("takes the stories shown only today again, so a same-day re-run shows the same rows", () => {
     const items: SpottedLog["items"] = {};
     for (const [id, shown] of [
@@ -261,7 +286,7 @@ describe("mostDiscussed", () => {
       const s = story(id);
       items[s.id] = logged(s, { comments: 30, firstSeen: "2026-10-20", shown });
     }
-    expect(mostDiscussed({ items }, DATE, []).map((r) => r.id)).toEqual(["hn:first"]);
+    expect(mostDiscussed({ items }, DATE, [], onTopic).map((r) => r.id)).toEqual(["hn:first"]);
   });
 
   it("skips a story a page showed or takes today, by id or link, and takes each link once", () => {
@@ -282,7 +307,10 @@ describe("mostDiscussed", () => {
       { id: "hn:today", url: "https://example.com/today" },
       { id: "devto:fresh", url: "https://example.com/spotted" },
     ];
-    expect(mostDiscussed({ items }, DATE, showing).map((r) => r.id)).toEqual(["hn:kept", "lobsters:other"]);
+    expect(mostDiscussed({ items }, DATE, showing, onTopic).map((r) => r.id)).toEqual([
+      "hn:kept",
+      "lobsters:other",
+    ]);
   });
 
   it("claims a link only for a row: a copy below one source's cut can be the next source's row", () => {
@@ -294,7 +322,7 @@ describe("mostDiscussed", () => {
     for (let i = 1; i <= 5; i++) add(`top${i}`, "hn", 100 - i, `https://example.com/top${i}`);
     add("belowCut", "hn", 10, "https://example.com/shared");
     add("sharedCopy", "lobsters", 50, "https://example.com/shared");
-    const ids = mostDiscussed({ items }, DATE, []).map((r) => r.id);
+    const ids = mostDiscussed({ items }, DATE, [], onTopic).map((r) => r.id);
     expect(ids).not.toContain("hn:belowCut");
     expect(ids).toContain("lobsters:sharedCopy");
   });

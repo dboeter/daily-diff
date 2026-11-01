@@ -14,3 +14,7 @@ Findings: 12 [low], see `../review.md`
 
 - `MODELS_PAGE.emptyNames.labs` is "Anthropic and OpenAI", so the `nothingNew` list has one "or".
 - `groupProjects` gives each model-written project section one blank line under its heading (`blankAfterHeading`). Test expectations in `markdown.test.ts` and `pages.test.ts` updated.
+
+### Review fixes
+
+- `projectFallbackSection` now has one blank line under its `## ` heading, like the model sections; `blankAfterHeading` moved above `groupProjects`' doc comment.

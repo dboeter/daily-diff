@@ -267,7 +267,7 @@ describe("buildProjectReportContent", () => {
     );
     expect(result).not.toContain("no reportable changes");
     expect(result).toContain(
-      "### Agent Deck\n- **Release:** [v1.16.34](https://github.com/asheshgoplani/agent-deck/releases/tag/v1.16.34): " +
+      "### Agent Deck\n\n- **Release:** [v1.16.34](https://github.com/asheshgoplani/agent-deck/releases/tag/v1.16.34): " +
         "Session forks keep their worktree; Fix status bar flicker; Add `--json` to list",
     );
     expect(result).toContain("Projects: 2 | Active today: 1 | Stable releases: 1 |");
@@ -535,7 +535,7 @@ describe("buildProjectReportContent", () => {
         }),
       );
       expect(result).toContain(
-        "### ALPHA\n- **Hot issue:** [#1](https://github.com/org/alpha/issues/1): Issue 1 (16 comments, 2 👍; +3 in the last 24h)",
+        "### ALPHA\n\n- **Hot issue:** [#1](https://github.com/org/alpha/issues/1): Issue 1 (16 comments, 2 👍; +3 in the last 24h)",
       );
       expect(result).not.toContain("[ALPHA](https://github.com/org/alpha)");
     });

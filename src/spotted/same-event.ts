@@ -1,13 +1,16 @@
 /**
- * Same-event repeats: one Jev choice per fresh story, through `judgeItems`, cached in
- * `digests/same-event-verdicts.json`. A story that reports the same event as a higher-ranked
- * fresh story or a story a page showed in the last SAME_EVENT_SHOWN_DAYS days, with no new
- * development, leaves today's pool before news matching, so it is neither project news nor
- * Spotted. On 2026-11-01 three outlets' stories on Claude blocking game reverse-engineering took
- * three Spotted rows, and a Dev.to follow-up on the Open-VSX incident shown on 10-31 led the agents
- * page again as news. Without a verdict (no key, or Jev failing too often) no story is dropped.
+ * Same-event repeats: one Jev choice per story, through `judgeItems`, cached in
+ * `digests/same-event-verdicts.json`, in two steps. Before news matching, a fresh story that reports
+ * the same event as a story a page showed on an earlier day (within SPOTTED_MAX_AGE_DAYS), with no
+ * new development, leaves today's pool (`dropShownRepeats`). After selection, a Spotted or
+ * talked-about row that repeats a story shown above it today is removed and its slot refilled
+ * (`dropSameDayRepeats`). Comparing only with stories that show means a drop never loses an event.
+ * On 2026-11-01 three outlets' stories on Claude blocking game reverse-engineering took three
+ * Spotted rows, and a Dev.to follow-up on the Open-VSX incident shown on 10-31 led the agents page
+ * again as news. Saved verdicts always apply; a story without one is kept.
  */
 
+import { createHash } from "node:crypto";
 import path from "node:path";
 import { daysBefore } from "../core/date.ts";
 import {
@@ -16,12 +19,12 @@ import {
   saveItemsFile,
   type AskJev,
   type ChoiceAnswer,
-  type Judgment,
   type VerdictCache,
 } from "../core/jev.ts";
 import {
   linkKey,
   siteOf,
+  SPOTTED_MAX_AGE_DAYS,
   SPOTTED_PER_SOURCE,
   type SpottedLog,
   type Story,
@@ -77,9 +80,6 @@ export function isRepeatEvent(answers: SameEventAnswers): boolean {
   return (choice as SameEvent) === "same_event_no_development";
 }
 
-/** A story shown this many days before the run, or fewer, is an earlier story. */
-export const SAME_EVENT_SHOWN_DAYS = 2;
-
 /**
  * Today's ranking for "higher-ranked": sources in SPOTTED_PER_SOURCE order, then points, then id.
  * Points are not comparable across sources, so an HN story outranks every Lobste.rs and Dev.to one.
@@ -94,30 +94,29 @@ export function rankFresh(stories: Story[]): Story[] {
 
 type Earlier = { title: string; site: string };
 
+const earlierOf = (stories: Pick<Story, "title" | "url">[], own: Pick<Story, "url">): Earlier[] =>
+  stories
+    .filter((e) => linkKey(e.url) !== linkKey(own.url))
+    .map((e) => ({ title: e.title, site: siteOf(e.url) }));
+
 /**
- * Each story's `earlier` list: the stories a page showed in the last SAME_EVENT_SHOWN_DAYS days
- * (not today: a same-day re-run shows today's again), then the fresh stories ranked above it.
- * A copy of its own link is left out: `freshStories` keeps every copy so one that lands nowhere
- * leaves the link to another.
+ * The run's date plus a hash of the `earlier` list: a same-day re-run whose ranking or shown
+ * stories changed asks again instead of reusing a verdict made against another list.
  */
-function earlierLists(ranked: Story[], log: SpottedLog, dateStr: string): Map<string, Earlier[]> {
-  const from = daysBefore(dateStr, SAME_EVENT_SHOWN_DAYS);
-  const shown = Object.values(log.items).filter((e) => e.shown && e.shown !== dateStr && e.shown >= from);
-  return new Map(
-    ranked.map((s, i) => {
-      const key = linkKey(s.url);
-      const list = [...shown, ...ranked.slice(0, i)]
-        .filter((e) => linkKey(e.url) !== key)
-        .map((e) => ({ title: e.title, site: siteOf(e.url) }));
-      return [s.id, list];
-    }),
-  );
+export function sameEventFingerprint(dateStr: string, earlier: Earlier[]): string {
+  const hash = createHash("sha1").update(JSON.stringify(earlier)).digest("hex").slice(0, 8);
+  return `${dateStr}:${hash}`;
 }
 
 export type SameEventVerdicts = VerdictCache<SameEventAnswers>;
 
 export const SAME_EVENT_VERDICTS_FILE = path.join("digests", "same-event-verdicts.json");
 const SAME_EVENT_UNSEEN_DAYS = 30;
+/**
+ * The same-day step's verdicts are saved under `<id>#same-day`: a story is judged in both steps against
+ * different lists, and one key would make each step overwrite the other's verdict and a re-run ask twice.
+ */
+const SAME_DAY_KEY = "#same-day";
 
 /** Missing file → empty cache. Unreadable or malformed → null: every story is asked and nothing is saved. */
 export function loadSameEventVerdicts(file = SAME_EVENT_VERDICTS_FILE): SameEventVerdicts | null {
@@ -128,51 +127,122 @@ export function saveSameEventVerdicts(cache: SameEventVerdicts, file = SAME_EVEN
   saveItemsFile(cache, file);
 }
 
-export interface SameEventCheck {
-  /** The fresh stories, repeats removed, in their input order. */
-  kept: Story[];
-  repeats: Story[];
-  judgment: Judgment<Story, SameEventAnswers, { repeat: boolean }>;
+interface JudgeOpts {
+  apiKey?: string;
+  cache: SameEventVerdicts | null;
+  dateStr: string;
+  ask?: AskJev;
 }
 
 /**
- * One Jev choice per fresh story with a non-empty `earlier` list. The fingerprint is the run's date:
- * the list changes from day to day, and a same-day re-run reuses the day's verdicts, so it drops the
- * same stories even when points reorder them.
+ * Judge each story against its `earlier` list. Saved verdicts apply whatever the key or Jev's health
+ * (`judgeItems` keeps them in `verdicts`); a story without a verdict is no repeat.
  */
-export async function dropSameEventRepeats(
-  fresh: Story[],
-  opts: { log: SpottedLog; apiKey?: string; cache: SameEventVerdicts | null; dateStr: string; ask?: AskJev },
-): Promise<SameEventCheck> {
-  const ranked = rankFresh(fresh);
-  const earlier = earlierLists(ranked, opts.log, opts.dateStr);
-  const judgment = await judgeItems(
-    ranked.filter((s) => earlier.get(s.id)!.length > 0),
-    {
-      ...opts,
-      tag: "same-event",
-      request: (story) => ({
-        state: {
-          title: story.title,
-          ...(story.description ? { description: story.description } : {}),
-          site: siteOf(story.url),
-          earlier: earlier.get(story.id),
-        },
-        questions: SAME_EVENT_QUESTIONS,
-      }),
-      decide: (a: SameEventAnswers) => ({ repeat: isRepeatEvent(a) }),
-      fingerprint: () => opts.dateStr,
-      unseenDays: SAME_EVENT_UNSEEN_DAYS,
-    },
-  );
+async function judgeAgainst(stories: Story[], earlier: Map<string, Earlier[]>, opts: JudgeOpts, key = "") {
+  const keyed = stories.map((s) => ({ ...s, id: `${s.id}${key}` }));
+  const listOf = (k: { id: string }) => earlier.get(k.id.slice(0, k.id.length - key.length))!;
+  const judgment = await judgeItems(keyed, {
+    ...opts,
+    tag: "same-event",
+    request: (story) => ({
+      state: {
+        title: story.title,
+        ...(story.description ? { description: story.description } : {}),
+        site: siteOf(story.url),
+        earlier: listOf(story),
+      },
+      questions: SAME_EVENT_QUESTIONS,
+    }),
+    decide: (a: SameEventAnswers) => ({ repeat: isRepeatEvent(a) }),
+    fingerprint: (story) => sameEventFingerprint(opts.dateStr, listOf(story)),
+    unseenDays: SAME_EVENT_UNSEEN_DAYS,
+  });
   if (judgment.rankedBy !== "jev") {
     console.log(
-      `  [same-event] No story dropped (fallback: ${opts.apiKey ? "too many Jev failures" : "no TYPESAFE_API_KEY"})`,
+      `  [same-event] Saved verdicts only (fallback: ${opts.apiKey ? "too many Jev failures" : "no TYPESAFE_API_KEY"})`,
     );
-    return { kept: fresh, repeats: [], judgment };
   }
-  const isRepeat = (s: Story) => judgment.verdicts.get(s.id)?.repeat === true;
-  const repeats = fresh.filter(isRepeat);
-  console.log(`  [same-event] Dropped ${repeats.length} of ${fresh.length} fresh stories as repeats`);
-  return { kept: fresh.filter((s) => !isRepeat(s)), repeats, judgment };
+  return {
+    isRepeat: (s: Story) => judgment.verdicts.get(`${s.id}${key}`)?.repeat === true,
+    traceFields: (s: Story) => judgment.traceFields({ ...s, id: `${s.id}${key}` }),
+    nextCache: judgment.nextCache,
+  };
+}
+
+export interface SameEventCheck {
+  repeats: Story[];
+  /** A judged story's `same_event` answers and `decided`, for the Spotted trace. */
+  traceFields(story: Story): Record<string, unknown>;
+  /** The cache to save, null when the file was malformed. */
+  nextCache: SameEventVerdicts | null;
+}
+
+/**
+ * Before news matching: each fresh story against the stories a page showed on an earlier day within
+ * SPOTTED_MAX_AGE_DAYS (a follow-up is still returned days later), a copy of its own link left out.
+ * Not today's: a same-day re-run shows them again. A story with nothing to compare is not asked.
+ */
+export async function dropShownRepeats(
+  fresh: Story[],
+  opts: JudgeOpts & { log: SpottedLog },
+): Promise<SameEventCheck & { kept: Story[] }> {
+  const from = daysBefore(opts.dateStr, SPOTTED_MAX_AGE_DAYS);
+  const shown = Object.values(opts.log.items)
+    .filter((e) => e.shown && e.shown !== opts.dateStr && e.shown >= from)
+    .sort((a, b) => b.shown!.localeCompare(a.shown!) || a.title.localeCompare(b.title));
+  const earlier = new Map(fresh.map((s) => [s.id, earlierOf(shown, s)]));
+  const asked = fresh.filter((s) => earlier.get(s.id)!.length > 0);
+  const judged = await judgeAgainst(asked, earlier, opts);
+  const repeats = asked.filter(judged.isRepeat);
+  const ids = new Set(repeats.map((s) => s.id));
+  console.log(
+    `  [same-event] Dropped ${repeats.length} of ${fresh.length} fresh stories as repeats of earlier days`,
+  );
+  return {
+    kept: fresh.filter((s) => !ids.has(s.id)),
+    repeats,
+    traceFields: judged.traceFields,
+    nextCache: judged.nextCache,
+  };
+}
+
+/**
+ * After selection: what shows today ranked as project news first (`news`, context only, never
+ * removed), then the Spotted and talked-about rows by `rankFresh`. Each row with a story above it
+ * (a copy of its own link left out) is asked once per run; a repeat is removed and `select` runs
+ * again without it, so its slot goes to the next candidate, which is checked the same way. A row
+ * judged no repeat stays one when a story above it is later removed: its list only shrank.
+ */
+export async function dropSameDayRepeats<T>(
+  news: Story[],
+  select: (removed: ReadonlySet<string>) => { selection: T; shown: Story[] },
+  opts: JudgeOpts,
+): Promise<SameEventCheck & { selection: T }> {
+  const removed = new Map<string, Story>();
+  const decided = new Set<string>();
+  const traces = new Map<string, Record<string, unknown>>();
+  let cache = opts.cache;
+  for (;;) {
+    const { selection, shown } = select(new Set(removed.keys()));
+    const order = [...rankFresh(news), ...rankFresh(shown)];
+    const earlier = new Map(order.map((s, i) => [s.id, earlierOf(order.slice(0, i), s)]));
+    const toAsk = shown.filter((s) => !decided.has(s.id) && earlier.get(s.id)!.length > 0);
+    const judged = await judgeAgainst(toAsk, earlier, { ...opts, cache }, SAME_DAY_KEY);
+    if (cache) cache = judged.nextCache;
+    const repeats = toAsk.filter(judged.isRepeat);
+    for (const s of toAsk) {
+      decided.add(s.id);
+      traces.set(s.id, judged.traceFields(s));
+    }
+    for (const s of repeats) removed.set(s.id, s);
+    if (repeats.length === 0) {
+      console.log(`  [same-event] Removed ${removed.size} of today's rows as repeats of a higher one`);
+      return {
+        selection,
+        repeats: [...removed.values()],
+        traceFields: (s) => traces.get(s.id) ?? {},
+        nextCache: cache,
+      };
+    }
+  }
 }

@@ -16,3 +16,7 @@ Tighten the match (a shipped note must not predate its coming-soon note; the CSP
 ### Done
 
 Cause: `STATUS_RE` cut "X will soon be available by default for workspaces with the compliance security profile" to the bare feature, the match ignored dates, and the count was logged before the age and reported filters. Change (`src/data/vendors.ts`): `titleStem` keeps a "for workspaces with …" scope; a note dated before its coming-soon note does not match; the skip count is taken after `recentVendorItems` and `newItems`. Tests (`src/__tests__/data/vendors.test.ts`): a GA note dated before its coming-soon note is reported; a CSP coming-soon note skips only its CSP note, not "AI Runtime is now in Public Preview".
+
+### Review fixes
+
+- `titleStem` appended a "for workspaces with …" scope that came before the status words a second time (it was still in the stem). Now it appends the scope only when the status strip cut it off. Test in `src/__tests__/data/vendors.test.ts`. Also `src/__tests__/data/relevance.test.ts`: an unsure significance of 0.95 at confidence 0.2 is still `minor`.

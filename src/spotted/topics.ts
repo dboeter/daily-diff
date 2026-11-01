@@ -259,7 +259,8 @@ export async function routeStories(
  * topic, page, whether a page showed it (`rendered`, `rank`: its row number), why
  * not (`selectSpotted`'s `dropped`, or its page went unpublished), and its answers.
  * A story the Overview's "Policy talk" or "Also talked about" showed gets `talked_about: true` and no drop reason.
- * A story the same-event check dropped (`dropSameEventRepeats`) follows, `repeat`, with its same-event answers.
+ * A row the same-day check removed (`dropSameDayRepeats`, `repeat` in `dropped`) also gets its same-event answers.
+ * A story dropped before routing (`dropShownRepeats`) follows, `repeat`, with its same-event answers.
  */
 export function spottedTraceFile(
   stories: Story[],
@@ -271,11 +272,14 @@ export function spottedTraceFile(
     /** The ids `selectTalkedAbout` took. */
     talkedAbout?: Set<string>;
     /** The fresh stories the same-event check dropped before routing: `repeat` rows with its answers. */
-    sameEvent?: Pick<SameEventCheck, "repeats" | "judgment">;
+    shownRepeats?: Pick<SameEventCheck, "repeats" | "traceFields">;
+    /** The routed stories the same-day check removed: their rows get its answers. */
+    sameDayRepeats?: Pick<SameEventCheck, "repeats" | "traceFields">;
     sources: SourceCounts;
   },
 ): string {
   const rowOf = new Map(selection.rows.map((r) => [r.id, r.n]));
+  const sameDay = new Set(selection.sameDayRepeats?.repeats.map((s) => s.id));
   const rows = stories.map((s) => {
     const topic = routing.topics.get(s.id) ?? null;
     const n = rowOf.get(s.id);
@@ -292,9 +296,11 @@ export function spottedTraceFile(
           ? { rendered: false, rank: null, talked_about: true }
           : droppedFor(selection.dropped.get(s.id) ?? "unpublished")),
       ...routing.judgment.traceFields(s),
+      // Its answer only: `decided` is the topic verdict's.
+      ...(sameDay.has(s.id) ? { same_event: selection.sameDayRepeats!.traceFields(s)["same_event"] } : {}),
     };
   });
-  const repeats = (selection.sameEvent?.repeats ?? []).map((s) => ({
+  const repeats = (selection.shownRepeats?.repeats ?? []).map((s) => ({
     id: s.id,
     title: s.title,
     source: s.source,
@@ -302,7 +308,7 @@ export function spottedTraceFile(
     page: null,
     shown: false,
     ...droppedFor("repeat"),
-    ...selection.sameEvent!.judgment.traceFields(s),
+    ...selection.shownRepeats!.traceFields(s),
   }));
   return routing.judgment.traceFile([...rows, ...repeats], { sources: selection.sources });
 }

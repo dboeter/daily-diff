@@ -28,3 +28,11 @@ Cause: repeats were caught by item id and `linkKey` only, so another outlet's ar
 ### Live check (2026-11-01)
 
 The 11-01 pool rebuilt from `digests/spotted-log.json` (55 fresh stories, live Jev, nothing saved): 55/55 answered, 6 dropped, all correct: the two later video-game stories (repeats of hn:50320255), two Postgres 19 delay stories and the Wall Street selloff story (repeats of stories shown 10-31: hn:50309439, hn:50306008), and devto:4945893 (Open-VSX audit guide, repeat of hn:50300683). The last one needed the criteria to say a guide or checklist prompted by an event is no new development: before, Jev chose `same_event_new_development` (0.67); after, `same_event_no_development` (0.56, confidence 0.34, so borderline). No wrong drop among the 55.
+
+### Review fixes
+
+- The same-day comparison ran before routing and selection, so a story could be dropped as a repeat of one that then showed nowhere. Split in two (`src/spotted/same-event.ts`): `dropShownRepeats` before news matching compares only with stories shown on earlier days, now within `SPOTTED_MAX_AGE_DAYS` (was 2 days); `dropSameDayRepeats` after selection ranks what shows today (project news first, then Spotted and talked-about rows by `rankFresh`), asks each row once against the stories above it, removes a repeat and reruns selection so the next candidate takes the slot and is checked too. Project news is never removed.
+- Fingerprint = CST day + 8-char sha1 of the `earlier` list, so a re-run with another ranking asks again (it could drop both copies). The same-day step's verdicts are keyed `<id>#same-day` so the two steps do not overwrite each other's entry.
+- Saved verdicts apply without a key or with Jev failing; a story without one is kept.
+- Repeats are `repeat: <date>` in the spotted log and skipped by Most discussed, which also skips a story without a topic verdict. `sources.judged` counts topic-routed stories only.
+- Tests: `src/__tests__/spotted/same-event.test.ts` (stub Jev answers by the `earlier` list, so ordering matters), `pool.test.ts`. No live Jev run.

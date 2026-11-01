@@ -183,8 +183,10 @@ const STATUS_RE = new RegExp(
 const SCOPE_RE = /\s+for workspaces with\b.*$/i;
 const titleStem = (title: string): string => {
   const t = title.toLowerCase().replace(/\s+/g, " ").trim();
-  const scope = (SCOPE_RE.exec(t)?.[0] ?? "").replace(/[\s.…]+$/, "");
-  return `${t.replace(STATUS_RE, "").trim()}${scope}`;
+  const stem = t.replace(STATUS_RE, "").trim();
+  // Only a scope the status strip cut off: one before the status words is still in the stem.
+  const scope = SCOPE_RE.test(stem) ? "" : (SCOPE_RE.exec(t)?.[0] ?? "").replace(/[\s.…]+$/, "");
+  return `${stem}${scope}`;
 };
 
 /**
