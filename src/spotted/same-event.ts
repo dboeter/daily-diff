@@ -213,6 +213,27 @@ export async function dropShownRepeats(
 }
 
 /**
+ * Today's project news of one pool (`pool`: the agents or the data projects, which claim links
+ * apart on purpose): a story repeating the event of a higher-ranked news story (`rankFresh`) is
+ * removed, so two outlets on one event are one news bullet. Nothing refills a news slot.
+ */
+export async function dropSameDayNewsRepeats(
+  news: Story[],
+  pool: string,
+  opts: JudgeOpts,
+): Promise<{ repeats: Story[]; nextCache: SameEventVerdicts | null }> {
+  const order = rankFresh(news);
+  const asked = order
+    .map((story, i) => ({ story, earlier: earlierOf(order.slice(0, i), story) }))
+    .filter((a) => a.earlier.length > 0);
+  if (!asked.length) return { repeats: [], nextCache: opts.cache };
+  const judged = await judgeAgainst(asked, opts, `#news-${pool}`);
+  const repeats = asked.map((a) => a.story).filter(judged.isRepeat);
+  console.log(`  [same-event] Removed ${repeats.length} of ${news.length} ${pool} news stories as repeats`);
+  return { repeats, nextCache: opts.cache ? judged.nextCache : null };
+}
+
+/**
  * After selection: what shows today ranked as project news first (`news`, context only, never
  * removed), then the Spotted and talked-about rows by `rankFresh`. Each row with a story above it
  * (a copy of its own link left out) is asked once per run; a repeat is removed and `select` runs

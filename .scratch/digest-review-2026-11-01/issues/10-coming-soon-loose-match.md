@@ -20,3 +20,7 @@ Cause: `STATUS_RE` cut "X will soon be available by default for workspaces with 
 ### Review fixes
 
 - `titleStem` appended a "for workspaces with …" scope that came before the status words a second time (it was still in the stem). Now it appends the scope only when the status strip cut it off. Test in `src/__tests__/data/vendors.test.ts`. Also `src/__tests__/data/relevance.test.ts`: an unsure significance of 0.95 at confidence 0.2 is still `minor`.
+
+### Code review follow-up (2026-11-01)
+
+`SCOPE_RE` keeps any "for|in|on …" clause after the status words (not a stage such as "in Public Preview"), so a region- or account-scoped coming-soon note matches only a note with the same scope. On the current data state every reported coming-soon note is a compliance-security-profile rollout, so none now pairs with a feature's general GA note. Test in `vendors.test.ts`.

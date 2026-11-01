@@ -259,6 +259,27 @@ describe("fetchVendorData across days", () => {
     expect(second.items.map((i) => i.title)).toEqual([preview.title]);
   });
 
+  it("keeps any scope after the status words: a region-scoped coming-soon note matches only its region", async () => {
+    const soon = {
+      guid: "whats-coming#ai-gov",
+      title: "AI Runtime will soon be available in Azure Government",
+      date: "2026-10-14",
+    };
+    const other = {
+      guid: "october#ai-pp",
+      title: "AI Runtime is now generally available on AWS",
+      date: "2026-10-15",
+    };
+    const shipped = {
+      guid: "october#ai-gov",
+      title: "AI Runtime is now available in Azure Government",
+      date: "2026-10-15",
+    };
+    const first = await run("2026-10-20", [], [soon], null);
+    const second = await run("2026-10-21", [], [soon, other, shipped], first.nextState);
+    expect(second.items.map((i) => i.title)).toEqual([other.title]);
+  });
+
   it("matches a coming-soon note whose scope comes before its status words to its GA note", async () => {
     const soon = {
       guid: "whats-coming#ai-csp",

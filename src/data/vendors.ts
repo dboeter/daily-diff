@@ -177,16 +177,17 @@ const STATUS_RE = new RegExp(
   "i",
 );
 /**
- * A scope a title restricts the change to, kept in the stem: "X will soon be available by default for
- * workspaces with the compliance security profile" must not match every later note on X.
+ * A scope after the status words ("for workspaces with …", "in Azure Government", "on AWS"), kept in
+ * the stem: "X will soon be available by default for workspaces with the compliance security
+ * profile" must not match every later note on X. A stage ("in Public Preview") is no scope.
  */
-const SCOPE_RE = /\s+for workspaces with\b.*$/i;
+const SCOPE_RE = /\s(?:for|in|on)\s(?!(?:public |private )?preview\b|beta\b)\S.*$/i;
 const titleStem = (title: string): string => {
   const t = title.toLowerCase().replace(/\s+/g, " ").trim();
-  const stem = t.replace(STATUS_RE, "").trim();
+  const status = STATUS_RE.exec(t)?.[0] ?? "";
   // Only a scope the status strip cut off: one before the status words is still in the stem.
-  const scope = SCOPE_RE.test(stem) ? "" : (SCOPE_RE.exec(t)?.[0] ?? "").replace(/[\s.…]+$/, "");
-  return `${stem}${scope}`;
+  const scope = (SCOPE_RE.exec(status)?.[0] ?? "").replace(/[\s.…]+$/, "");
+  return `${t.replace(STATUS_RE, "").trim()}${scope}`;
 };
 
 /**

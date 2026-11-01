@@ -40,3 +40,7 @@ The 11-01 pool rebuilt from `digests/spotted-log.json` (55 fresh stories, live J
 ### Code review fixes
 
 - `sameEventFingerprint` is the hash of the `earlier` list only (no date), so a verdict is reused on a later day while its list is unchanged; `#same-day` keys unchanged. Assertions removed from `same-event.ts` and `topics.ts` (stories travel with their lists).
+
+### Code review follow-up (2026-11-01)
+
+`dropSameDayNewsRepeats` runs after each `matchProjectNews` (agents, data pools apart): a news story repeating a higher-ranked news story's event (`rankFresh`) leaves that pool's news, stays out of Spotted (link still matched) and is logged `repeat`. Cache keys `<id>#news-<pool>`. Tests in `same-event.test.ts`.

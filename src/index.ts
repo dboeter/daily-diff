@@ -40,8 +40,9 @@ import {
   hasActivity,
   isMajorRelease,
 } from "./reports/prompts.ts";
-import { FIRST_NAMED, matchProjectNews } from "./reports/project-news.ts";
+import { FIRST_NAMED, matchProjectNews, type NewsItem } from "./reports/project-news.ts";
 import {
+  dropSameDayNewsRepeats,
   dropSameDayRepeats,
   dropShownRepeats,
   loadSameEventVerdicts,
@@ -426,10 +427,25 @@ async function main(): Promise<void> {
 
   // Agent news is matched against the other sources' data, so it waits for them.
   // Agents and tooling in one pass: an item naming 3+ of them is a compatibility list.
-  const projectNews = matchProjectNews([...AGENTS, ...INFRA_REPOS], {
+  const matchedProjectNews = matchProjectNews([...AGENTS, ...INFRA_REPOS], {
     stories: fresh,
     trending: trendingData,
   });
+  // Two outlets on one event are one news bullet: a story repeating a higher-ranked news story's
+  // event leaves its pool's news (and stays out of Spotted, its link being matched).
+  const sameEventOpts = { apiKey: process.env["TYPESAFE_API_KEY"], dateStr };
+  const newsIds = (news: Map<string, NewsItem[]>) =>
+    new Set([...news.values()].flat().flatMap((n) => (n.id ? [n.id] : [])));
+  const agentsNewsRepeats = await dropSameDayNewsRepeats(
+    fresh.filter((s) => newsIds(matchedProjectNews).has(s.id)),
+    "agents",
+    { ...sameEventOpts, cache: shownRepeats.nextCache },
+  );
+  const withoutRepeats = (news: Map<string, NewsItem[]>, repeats: Story[]) => {
+    const ids = new Set(repeats.map((s) => s.id));
+    return new Map([...news].map(([k, items]) => [k, items.filter((n) => !n.id || !ids.has(n.id))]));
+  };
+  const projectNews = withoutRepeats(matchedProjectNews, agentsNewsRepeats.repeats);
   const withNews = (f: ProjectFetch): ProjectActivity => ({ ...f, news: projectNews.get(f.config.id) ?? [] });
   const agentActivities = agentFetches.map(withNews);
   const infraActivities = infraFetches.map(withNews);
@@ -445,11 +461,17 @@ async function main(): Promise<void> {
     cache: loadCommunityVerdicts(),
     dateStr,
   });
-  const dataNews = matchProjectNews(
+  const matchedDataNews = matchProjectNews(
     DATA_SECTIONS.flatMap((s) => s.repos),
     { stories: fresh, trending: trendingData, posts: newsPosts(posts, communityJudgment) },
     FIRST_NAMED,
   );
+  const dataNewsRepeats = await dropSameDayNewsRepeats(
+    fresh.filter((s) => newsIds(matchedDataNews).has(s.id)),
+    "data",
+    { ...sameEventOpts, cache: agentsNewsRepeats.nextCache },
+  );
+  const dataNews = withoutRepeats(matchedDataNews, dataNewsRepeats.repeats);
   const dataSections = DATA_SECTION_KEYS.map((key, i) => ({
     key,
     subject: CONFIG[key].subject,
@@ -462,8 +484,10 @@ async function main(): Promise<void> {
   // Spotted: the fresh stories whose link no project in either pool took as news and no lab post
   // the models page lists is, routed to their topic's page.
   const matchedIds = new Set(
-    [...projectNews.values(), ...dataNews.values()].flat().flatMap((n) => (n.id ? [n.id] : [])),
+    [...matchedProjectNews.values(), ...matchedDataNews.values()].flat().flatMap((n) => (n.id ? [n.id] : [])),
   );
+  const newsRepeatIds = new Set([...agentsNewsRepeats.repeats, ...dataNewsRepeats.repeats].map((s) => s.id));
+  const shownNews = fresh.filter((s) => matchedIds.has(s.id) && !newsRepeatIds.has(s.id));
   const newsLinks = new Set(fresh.filter((s) => matchedIds.has(s.id)).map((s) => linkKey(s.url)));
   // Every copy of a link is routed: copies' titles differ, and one routed nowhere must not hide one
   // a page takes.
@@ -493,7 +517,7 @@ async function main(): Promise<void> {
   // with no page); a row that repeats an event shown above it today (project news first) is removed
   // and its slot refilled.
   const sameDay = await dropSameDayRepeats(
-    fresh.filter((s) => matchedIds.has(s.id)),
+    shownNews,
     (removed) => {
       const candidates = unmatched.filter((s) => !removed.has(s.id));
       const dropped = new Map<string, DroppedReason>();
@@ -512,7 +536,7 @@ async function main(): Promise<void> {
         shown: [...rows, ...candidates.filter((s) => talkedIds.has(s.id))],
       };
     },
-    { apiKey: process.env["TYPESAFE_API_KEY"], cache: shownRepeats.nextCache, dateStr },
+    { ...sameEventOpts, cache: dataNewsRepeats.nextCache },
   );
   const { rows: spottedRows, talked: talkedAbout, dropped: spottedDropped } = sameDay.selection;
   for (const s of sameDay.repeats) spottedDropped.set(s.id, "repeat");
@@ -524,7 +548,7 @@ async function main(): Promise<void> {
         spottedLog,
         dateStr,
         [
-          ...fresh.filter((s) => matchedIds.has(s.id)),
+          ...shownNews,
           ...pool.lab,
           ...talkedAbout,
           ...(hasDataNews(dataSections, vendorData, dateStr)
@@ -650,7 +674,7 @@ async function main(): Promise<void> {
   ]);
   const shownIds = [...dailyShown, ...(savedIds.has("ai-trends") ? discussed.map((s) => s.id) : [])];
   const cutIds = [...spottedDropped].flatMap(([id, reason]) => (reason === "cap" ? [id] : []));
-  const repeatIds = [...shownRepeats.repeats, ...sameDay.repeats].map((s) => s.id);
+  const repeatIds = [...[...shownRepeats.repeats, ...sameDay.repeats].map((s) => s.id), ...newsRepeatIds];
   saveSpottedLog(nextLog(spottedLog, stories, shownIds, dateStr, cutIds, repeatIds));
   saveReportedState(
     nextHotIssuesState(

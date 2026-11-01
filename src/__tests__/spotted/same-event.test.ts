@@ -3,6 +3,7 @@ import { describe, expect, it, vi } from "vitest";
 import type { AskJev } from "../../core/jev.ts";
 import type { SpottedLog, Story } from "../../spotted/pool.ts";
 import {
+  dropSameDayNewsRepeats,
   dropSameDayRepeats,
   dropShownRepeats,
   isRepeatEvent,
@@ -257,5 +258,31 @@ describe("spottedTraceFile: same-event repeats", () => {
     expect(row("hn:50315987")).toMatchObject({ rendered: false, dropped_reason: "repeat" });
     expect(row("hn:50315987")["topic"]).not.toBeNull();
     expect(row("hn:50315987")["same_event"]).toMatchObject({ choice: "same_event_no_development" });
+  });
+});
+
+describe("dropSameDayNewsRepeats: two outlets on one event are one news bullet", () => {
+  it("removes the lower-ranked news story on the same event; keeps the top one and a bystander", async () => {
+    const news = [byId("hn:50316635"), byId(TOP), byId(BYSTANDER)];
+    const check = await dropSameDayNewsRepeats(news, "agents", {
+      apiKey: "k",
+      cache: { items: {} },
+      dateStr: DATE,
+      ask: truth,
+    });
+    expect(check.repeats.map((s) => s.id)).toEqual(["hn:50316635"]);
+    expect(Object.keys(check.nextCache?.items ?? {}).every((k) => k.endsWith("#news-agents"))).toBe(true);
+  });
+
+  it("asks nothing for a single news story", async () => {
+    const ask = vi.fn(truth);
+    const check = await dropSameDayNewsRepeats([byId(TOP)], "data", {
+      apiKey: "k",
+      cache: { items: {} },
+      dateStr: DATE,
+      ask,
+    });
+    expect(check.repeats).toEqual([]);
+    expect(ask).not.toHaveBeenCalled();
   });
 });
