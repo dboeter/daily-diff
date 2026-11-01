@@ -1,6 +1,6 @@
 # 06: Near-bar data items lost to hard cut-offs
 
-Status: ready-for-agent
+Status: done
 Findings: 6 [medium], see `../review.md`
 
 ## Problem
@@ -22,3 +22,7 @@ Findings: 6 [medium], see `../review.md`
 ### Decision (2026-11-01)
 
 Both: on the data side Notable means significance ≥ 0.9; a community post with insight ≥ `INSIGHT_MIN`, on-audience, and p(nothing) < 0.2 is kept even under `LOW_CONFIDENCE`.
+
+### Done
+
+Cause: `confidentlyNotable` needed a score of 1, and community kept only confident insight scores. Change: data-side "Notable" is `NOTABLE_MIN` 0.9 (`src/data/relevance.ts`); `communityVerdict` also keeps an unsure insight whose "nothing" probability is under 0.2 (`NOTHING_MAX`). Tests: relevance (0.99 Notable, 0.85 not), community (the three 2026-11-01 posts).

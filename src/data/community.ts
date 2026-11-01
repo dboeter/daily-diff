@@ -228,7 +228,7 @@ const QUESTIONS = {
 
 export interface CommunityAnswers {
   /** Probability-weighted level, 0–2, and how sure Jev is of it. */
-  insight: { score: number; confidence?: number };
+  insight: { score: number; confidence?: number; probabilities?: Record<string, number> };
   audience: ChoiceAnswer;
   kind: ChoiceAnswer;
 }
@@ -240,6 +240,8 @@ const NEWS_KINDS: ReadonlySet<string> = new Set<Kind>(["release", "technical"]);
 
 /** Insight a kept post needs, on the 0–2 scale: "Some" alone is not a row, a sure "Some" leaning "Substantial" is. */
 export const INSIGHT_MIN = 1.2;
+/** Under this probability of insight "nothing" (level 0), an unsure insight score still keeps a post. */
+const NOTHING_MAX = 0.2;
 const OFF_AUDIENCE: Audience = "off_audience";
 
 /**
@@ -267,8 +269,10 @@ export function communityVerdict(a: CommunityAnswers): CommunityVerdict {
   ) {
     throw new Error(`Unexpected Jev answers: ${JSON.stringify(a)}`);
   }
-  // An unsure insight score counts as unknown: it neither keeps nor drops on its own, so it drops.
-  const confident = (a.insight.confidence ?? 1) >= LOW_CONFIDENCE;
+  // An unsure insight score counts as unknown, which drops, unless Jev puts almost no weight on
+  // "nothing": then the doubt is between "some" and "substantial" (2026-11-01: 1.56 at confidence 0.34).
+  const confident =
+    (a.insight.confidence ?? 1) >= LOW_CONFIDENCE || (a.insight.probabilities?.["0"] ?? 1) < NOTHING_MAX;
   return {
     keep: confident && score >= INSIGHT_MIN && audience !== OFF_AUDIENCE,
     news: NEWS_KINDS.has(kind),

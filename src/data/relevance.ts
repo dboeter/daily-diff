@@ -181,8 +181,12 @@ const KEEP_MIN_RELEVANCE = 0.5;
 const DEPRECATION_MIN = 0.5;
 /** How far under KEEP_MIN_RELEVANCE a section's best item may be when the section has no kept item. */
 const NEAR_CUT_MARGIN = 0.05;
-/** Significance level 1 ("Notable"): a kept item under it, or not confidently at it, is `minor`. */
-const NOTABLE_LEVEL = 1;
+/**
+ * A significance score this high counts as "Notable" (level 1): a kept item under it, or not confidently
+ * at it, is `minor`. Under 1, since a score is an expectation: on 2026-11-01 a Snowflake note at 0.99
+ * (confidence 0.96) counted as minor.
+ */
+const NOTABLE_MIN = 0.9;
 
 /** The level an unknown significance (under LOW_CONFIDENCE) counts as in relevance: "Notable", the middle. */
 const UNKNOWN_LEVEL = 1;
@@ -209,7 +213,7 @@ export function significanceLevel(a: Pick<DataAnswers, "significance">): number 
  * feature policy rules", 0.52 at confidence 0.25).
  */
 const confidentlyNotable = (a: Pick<DataAnswers, "significance">): boolean =>
-  !unsure(a) && a.significance.score >= NOTABLE_LEVEL;
+  !unsure(a) && a.significance.score >= NOTABLE_MIN;
 
 /**
  * Weighted relevance in 0–1, the keep decision and the deprecation flag. An item about a Tracked

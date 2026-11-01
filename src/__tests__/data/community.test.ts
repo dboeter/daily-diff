@@ -183,6 +183,16 @@ describe("communityVerdict", () => {
     expect(communityVerdict(answers(2, "databricks", 0.2)).keep).toBe(false);
   });
 
+  it("keeps an unsure insight when Jev puts almost no weight on nothing (2026-11-01 posts)", () => {
+    const post = (score: number, confidence: number, p: [number, number, number]): CommunityAnswers => {
+      const a = answers(score, "snowflake", confidence);
+      return { ...a, insight: { ...a.insight, probabilities: { "0": p[0], "1": p[1], "2": p[2] } } };
+    };
+    expect(communityVerdict(post(1.56, 0.34, [0, 0.44, 0.56])).keep).toBe(true);
+    expect(communityVerdict(post(1.43, 0.36, [0, 0.57, 0.43])).keep).toBe(true);
+    expect(communityVerdict(post(1.21, 0, [0.31, 0.18, 0.51])).keep).toBe(false);
+  });
+
   it("throws on an unexpected shape, so the call counts as failed", () => {
     expect(() => communityVerdict({ insight: { score: 1 } } as CommunityAnswers)).toThrow(
       "Unexpected Jev answers",

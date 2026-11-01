@@ -76,6 +76,16 @@ describe("dataRelevance", () => {
     expect(dataRelevance(fntk).keep).toBe(true);
   });
 
+  it("counts a confident significance of 0.9 or more as Notable (2026-11-01 Snowflake note at 0.99)", () => {
+    const notable: DataAnswers = {
+      ...answers(0.45, 0, 0.99),
+      significance: { score: 0.99, confidence: 0.96 },
+    };
+    const under: DataAnswers = { ...answers(0.45, 0, 0.85), significance: { score: 0.85, confidence: 0.96 } };
+    expect(dataRelevance(notable).keep).toBe(true);
+    expect(dataRelevance(under).keep).toBe(false);
+  });
+
   it("does not exempt an untracked item whose significance is only unknown", () => {
     // Real change 0.45 is under REAL_CHANGE_MIN; Notable at confidence 0.2 is not known to be Notable.
     const unsure: DataAnswers = { ...answers(0.45, 0, 1.5), significance: { score: 1.5, confidence: 0.2 } };
