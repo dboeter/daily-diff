@@ -32,6 +32,7 @@ import {
   labPostsNoHighlightNote,
   modelSources,
   dropNoHighlightRows,
+  isGroupOrAbsenceBullet,
 } from "./prompts-pages.ts";
 import { generateOr, saveFile, autoGenFooter, LLM_TOKENS_LISTING } from "../core/llm.ts";
 import { saveLabsState, type LabsFetchResult, type LabPost, type LabsState } from "../sources/labs.ts";
@@ -892,7 +893,7 @@ export async function buildDataReport(
       ? { highlights: `## ${SECTIONS.highlights}\n\n${MSG.summaryFailed}`, acrossPlatforms: "" }
       : splitProse(prose);
   const { acrossPlatforms } = split;
-  const highlights = dropNoHighlightRows(split.highlights, minor, "data");
+  const highlights = dropNoHighlightRows(split.highlights, minor, "data", isGroupOrAbsenceBullet);
   const lawLinks = dataLaw
     .map(
       (i) =>

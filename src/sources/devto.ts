@@ -2,6 +2,9 @@
  * Dev.to AI articles fetched via the Forem API.
  */
 
+import { sleep } from "../core/date.ts";
+import { FETCH_TIMEOUT_MS } from "../core/http.ts";
+
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
@@ -32,7 +35,11 @@ const DEVTO_PER_PAGE = 30;
  */
 const DEVTO_MIN_REACTIONS = 15;
 const API_URL = "https://dev.to/api/articles";
-/** The wait before the one retry of a 429: its `Retry-After` seconds, capped, or the default without one. */
+/**
+ * The wait before the one retry of a 429: its `Retry-After` seconds, capped, or the default without one.
+ * A second is enough between sequential tag requests; the cap keeps a long `Retry-After` from stalling
+ * the fetch phase, since a skipped tag costs only a few articles.
+ */
 const RETRY_AFTER_DEFAULT_MS = 1000;
 const RETRY_AFTER_MAX_MS = 5000;
 
@@ -91,10 +98,15 @@ export async function fetchDevtoData(): Promise<DevtoData> {
           top: "2",
         });
 
-        const get = () => fetch(`${API_URL}?${params}`, { headers: { "User-Agent": "daily-diff/1.0" } });
+        // Not fetchOk: it throws on a non-2xx answer, and the 429 retry needs its status and Retry-After.
+        const get = () =>
+          fetch(`${API_URL}?${params}`, {
+            headers: { "User-Agent": "daily-diff/1.0" },
+            signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
+          });
         let resp = await get();
         if (resp.status === 429) {
-          await new Promise((r) => setTimeout(r, retryDelayMs(resp)));
+          await sleep(retryDelayMs(resp));
           resp = await get();
         }
 

@@ -88,7 +88,7 @@ describe("dropShownRepeats: the 2026-11-01 pool against earlier days", () => {
         log.items["hn:50300683"]!.title,
       ]);
     }
-    expect(check.nextCache!.items["devto:4945893"]!.fingerprint).toMatch(/^2026-11-01:[0-9a-f]{8}$/);
+    expect(check.nextCache!.items["devto:4945893"]!.fingerprint).toMatch(/^[0-9a-f]{8}$/);
   });
 
   it("compares with stories shown within SPOTTED_MAX_AGE_DAYS, not today, 8 days ago or a copy of its own link", async () => {
@@ -181,6 +181,14 @@ describe("dropSameDayRepeats: among what shows today", () => {
     const ask = vi.fn(truth);
     const noKey = await dropSameDayRepeats([], lane(games, 2), {
       dateStr: DATE,
+      cache: first.nextCache,
+      ask,
+    });
+    expect(ask).not.toHaveBeenCalled();
+    // The fingerprint has no date: the next day, an unchanged list reuses the verdict.
+    await dropSameDayRepeats([], lane(games, 2), {
+      ...opts,
+      dateStr: "2026-11-02",
       cache: first.nextCache,
       ask,
     });

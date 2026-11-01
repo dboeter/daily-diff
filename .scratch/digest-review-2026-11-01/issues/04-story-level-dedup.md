@@ -36,3 +36,7 @@ The 11-01 pool rebuilt from `digests/spotted-log.json` (55 fresh stories, live J
 - Saved verdicts apply without a key or with Jev failing; a story without one is kept.
 - Repeats are `repeat: <date>` in the spotted log and skipped by Most discussed, which also skips a story without a topic verdict. `sources.judged` counts topic-routed stories only.
 - Tests: `src/__tests__/spotted/same-event.test.ts` (stub Jev answers by the `earlier` list, so ordering matters), `pool.test.ts`. No live Jev run.
+
+### Code review fixes
+
+- `sameEventFingerprint` is the hash of the `earlier` list only (no date), so a verdict is reused on a later day while its list is unchanged; `#same-day` keys unchanged. Assertions removed from `same-event.ts` and `topics.ts` (stories travel with their lists).

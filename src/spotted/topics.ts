@@ -279,7 +279,8 @@ export function spottedTraceFile(
   },
 ): string {
   const rowOf = new Map(selection.rows.map((r) => [r.id, r.n]));
-  const sameDay = new Set(selection.sameDayRepeats?.repeats.map((s) => s.id));
+  const { sameDayRepeats, shownRepeats } = selection;
+  const sameDay = new Set(sameDayRepeats?.repeats.map((s) => s.id));
   const rows = stories.map((s) => {
     const topic = routing.topics.get(s.id) ?? null;
     const n = rowOf.get(s.id);
@@ -297,10 +298,12 @@ export function spottedTraceFile(
           : droppedFor(selection.dropped.get(s.id) ?? "unpublished")),
       ...routing.judgment.traceFields(s),
       // Its answer only: `decided` is the topic verdict's.
-      ...(sameDay.has(s.id) ? { same_event: selection.sameDayRepeats!.traceFields(s)["same_event"] } : {}),
+      ...(sameDayRepeats && sameDay.has(s.id)
+        ? { same_event: sameDayRepeats.traceFields(s)["same_event"] }
+        : {}),
     };
   });
-  const repeats = (selection.shownRepeats?.repeats ?? []).map((s) => ({
+  const repeats = (shownRepeats?.repeats ?? []).map((s) => ({
     id: s.id,
     title: s.title,
     source: s.source,
@@ -308,7 +311,7 @@ export function spottedTraceFile(
     page: null,
     shown: false,
     ...droppedFor("repeat"),
-    ...selection.shownRepeats!.traceFields(s),
+    ...shownRepeats?.traceFields(s),
   }));
   return routing.judgment.traceFile([...rows, ...repeats], { sources: selection.sources });
 }

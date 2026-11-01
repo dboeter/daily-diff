@@ -362,8 +362,7 @@ export const isContestEntry = (s: Pick<Story, "title" | "description">): boolean
 
 /**
  * Each page's rows: per source up to SPOTTED_PER_SOURCE, sources in SPOTTED_PER_SOURCE order,
- * ranked by points, topic probability breaking ties (on 2026-11-01 a 7-point story at 0.81 outranked
- * a 75-point one at 0.62 when tenths of probability came first); numbered across pages in SPOTTED_PAGES order.
+ * ranked by points, topic probability breaking ties; numbered across pages in SPOTTED_PAGES order.
  * Left out before ranking (`threshold`): a topic probability under SPOTTED_MIN_TOPIC_PROBABILITY,
  * a story over SPOTTED_MAX_AGE_DAYS old (when `dateStr` is given) and a contest entry; while
  * ranking, a story under SPOTTED_MIN_POINTS once its page has SPOTTED_ROWS_BEFORE_FLOOR rows.

@@ -20,6 +20,7 @@ import {
   withFallbackHighlights,
   restatesLead,
   dropNoHighlightRows,
+  isGroupOrAbsenceBullet,
 } from "../../reports/prompts-pages.ts";
 import { TABLES_MARKER, numberRows, parseRowSummaries } from "../../reports/summarized-table.ts";
 import {
@@ -746,5 +747,15 @@ describe("dropNoHighlightRows", () => {
     const page = dropNoHighlightRows("## Highlights\n\n- Strix is up 40%.", [strix], "test");
     expect(page).toBe(`## Highlights\n\n- ${NO_HIGHLIGHT_NOTE}`);
     expect(withFallbackHighlights({}, { "ai-data": page }, ["ai-data"])).toEqual({});
+  });
+
+  it("on the data page, drops a bullet stating an absence or calling the rows minor (2026-11-01)", () => {
+    const prose =
+      "## Highlights\n- All vendor release notes today are minor fixes and previews; no deprecations or breaking changes.";
+    expect(dropNoHighlightRows(prose, [], "data", isGroupOrAbsenceBullet)).toBe(
+      `## Highlights\n- ${NO_HIGHLIGHT_NOTE}`,
+    );
+    const normal = `## Highlights\n\n${polars}`;
+    expect(dropNoHighlightRows(normal, [minor], "data", isGroupOrAbsenceBullet)).toBe(normal);
   });
 });

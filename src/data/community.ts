@@ -240,7 +240,10 @@ const NEWS_KINDS: ReadonlySet<string> = new Set<Kind>(["release", "technical"]);
 
 /** Insight a kept post needs, on the 0–2 scale: "Some" alone is not a row, a sure "Some" leaning "Substantial" is. */
 export const INSIGHT_MIN = 1.2;
-/** Under this probability of insight "nothing" (level 0), an unsure insight score still keeps a post. */
+/**
+ * Under this probability of insight "nothing" (level 0), an unsure insight score still keeps a post:
+ * an unsure score whose mass is on "some"/"substantial" is no reason to drop it.
+ */
 const NOTHING_MAX = 0.2;
 const OFF_AUDIENCE: Audience = "off_audience";
 

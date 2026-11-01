@@ -436,23 +436,26 @@ export async function selectVendorItems(
   const selectedIds = new Set(selected.map((i) => i.id));
   const numbered = numberRows(selected);
   const rowOf = new Map(numbered.map((i) => [i.id, i.n]));
-  const rows = items.map((i) => ({
-    id: i.id,
-    title: i.title,
-    source: i.source,
-    kept: selectedIds.has(i.id),
-    ...(keptById.has(i.id) && !selectedIds.has(i.id) ? { overCap: true } : {}),
-    ...(rowOf.has(i.id)
-      ? renderedAt(rowOf.get(i.id)!)
-      : droppedFor(keptById.has(i.id) ? "cap" : "threshold")),
-    deprecation: decide(i).deprecation,
-    ...(keptById.has(i.id) ? { minor: keptById.get(i.id)!.minor === true } : {}),
-    // The text the summaries call sees, so a shown row's summary can be checked from the trace.
-    ...(selectedIds.has(i.id) ? { text: i.description } : {}),
-    ...(keptById.get(i.id)?.endDate ? { endDate: keptById.get(i.id)!.endDate } : {}),
-    ...judgment.traceFields(i),
-    ...(i.stage !== undefined ? { stage: i.stage } : { keyword: keywordVerdict(i) }),
-  }));
+  const rows = items.map((i) => {
+    const keptItem = keptById.get(i.id);
+    return {
+      id: i.id,
+      title: i.title,
+      source: i.source,
+      kept: selectedIds.has(i.id),
+      ...(keptById.has(i.id) && !selectedIds.has(i.id) ? { overCap: true } : {}),
+      ...(rowOf.has(i.id)
+        ? renderedAt(rowOf.get(i.id)!)
+        : droppedFor(keptById.has(i.id) ? "cap" : "threshold")),
+      deprecation: decide(i).deprecation,
+      ...(keptItem ? { minor: keptItem.minor === true } : {}),
+      // The text the summaries call sees, so a shown row's summary can be checked from the trace.
+      ...(selectedIds.has(i.id) ? { text: i.description } : {}),
+      ...(keptItem?.endDate ? { endDate: keptItem.endDate } : {}),
+      ...judgment.traceFields(i),
+      ...(i.stage !== undefined ? { stage: i.stage } : { keyword: keywordVerdict(i) }),
+    };
+  });
   const traceFile = judgment.traceFile(rows, {
     ...(fetched
       ? {

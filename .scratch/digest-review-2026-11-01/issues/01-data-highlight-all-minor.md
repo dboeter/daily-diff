@@ -15,3 +15,7 @@ On 2026-11-01 all three kept vendor rows were `minor`, there was no release or h
 ### Done (2026-11-01)
 
 **Cause:** `buildDataProsePrompt` asked for 1–3 bullets and named every row minor, with no instruction for a day with nothing to pick, and the Action required table is rendered outside `sectionsMd`, so the model never saw the end-of-life row it contradicted. Prompt now: when no item qualifies, the one bullet `- NO_HIGHLIGHT_NOTE`; never a bullet about the rows as a group or about absence. No code net: a meta bullet names no row, so `dropNoHighlightRows` cannot tell it apart; test in `prompts-pages.test.ts`.
+
+### Code review fixes
+
+- Code net added: `isGroupOrAbsenceBullet` (`src/reports/prompts-pages.ts`) drops a data Highlight containing "minor" or an absence phrase ("no deprecations", "no breaking changes", "no notable", "nothing new") through `dropNoHighlightRows`' new `alsoDrop` predicate; when none is left `NO_HIGHLIGHT_NOTE` stands in. Test replays the 11-01 bullet.

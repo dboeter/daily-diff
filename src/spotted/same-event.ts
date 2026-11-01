@@ -77,7 +77,7 @@ export function isRepeatEvent(answers: SameEventAnswers): boolean {
   if (typeof choice !== "string" || !Object.hasOwn(SAME_EVENT_QUESTIONS.same_event.criteria, choice)) {
     throw new Error(`Unexpected Jev answers: ${JSON.stringify(answers)}`);
   }
-  return (choice as SameEvent) === "same_event_no_development";
+  return choice === ("same_event_no_development" satisfies SameEvent);
 }
 
 /**
@@ -99,18 +99,21 @@ const earlierOf = (stories: Pick<Story, "title" | "url">[], own: Pick<Story, "ur
     .filter((e) => linkKey(e.url) !== linkKey(own.url))
     .map((e) => ({ title: e.title, site: siteOf(e.url) }));
 
+/** Hex digits of the list hash kept: enough to tell one story's lists apart, short in the cache file. */
+const FINGERPRINT_HASH_CHARS = 8;
+
 /**
- * The run's date plus a hash of the `earlier` list: a same-day re-run whose ranking or shown
- * stories changed asks again instead of reusing a verdict made against another list.
+ * A hash of the `earlier` list, without the date: a verdict is reused on a later day while its list
+ * is unchanged, and a re-run whose ranking or shown stories changed asks again.
  */
-export function sameEventFingerprint(dateStr: string, earlier: Earlier[]): string {
-  const hash = createHash("sha1").update(JSON.stringify(earlier)).digest("hex").slice(0, 8);
-  return `${dateStr}:${hash}`;
+export function sameEventFingerprint(earlier: Earlier[]): string {
+  return createHash("sha1").update(JSON.stringify(earlier)).digest("hex").slice(0, FINGERPRINT_HASH_CHARS);
 }
 
 export type SameEventVerdicts = VerdictCache<SameEventAnswers>;
 
 export const SAME_EVENT_VERDICTS_FILE = path.join("digests", "same-event-verdicts.json");
+/** Like the other verdict caches: a story is long out of every pool after 30 days unseen. */
 const SAME_EVENT_UNSEEN_DAYS = 30;
 /**
  * The same-day step's verdicts are saved under `<id>#same-day`: a story is judged in both steps against
@@ -123,6 +126,7 @@ export function loadSameEventVerdicts(file = SAME_EVENT_VERDICTS_FILE): SameEven
   return loadItemsFile(file, "same-event");
 }
 
+/** Write the cache, one item per line. */
 export function saveSameEventVerdicts(cache: SameEventVerdicts, file = SAME_EVENT_VERDICTS_FILE): void {
   saveItemsFile(cache, file);
 }
@@ -138,9 +142,8 @@ interface JudgeOpts {
  * Judge each story against its `earlier` list. Saved verdicts apply whatever the key or Jev's health
  * (`judgeItems` keeps them in `verdicts`); a story without a verdict is no repeat.
  */
-async function judgeAgainst(stories: Story[], earlier: Map<string, Earlier[]>, opts: JudgeOpts, key = "") {
-  const keyed = stories.map((s) => ({ ...s, id: `${s.id}${key}` }));
-  const listOf = (k: { id: string }) => earlier.get(k.id.slice(0, k.id.length - key.length))!;
+async function judgeAgainst(asked: { story: Story; earlier: Earlier[] }[], opts: JudgeOpts, key = "") {
+  const keyed = asked.map(({ story, earlier }) => ({ ...story, id: `${story.id}${key}`, earlier }));
   const judgment = await judgeItems(keyed, {
     ...opts,
     tag: "same-event",
@@ -149,12 +152,12 @@ async function judgeAgainst(stories: Story[], earlier: Map<string, Earlier[]>, o
         title: story.title,
         ...(story.description ? { description: story.description } : {}),
         site: siteOf(story.url),
-        earlier: listOf(story),
+        earlier: story.earlier,
       },
       questions: SAME_EVENT_QUESTIONS,
     }),
     decide: (a: SameEventAnswers) => ({ repeat: isRepeatEvent(a) }),
-    fingerprint: (story) => sameEventFingerprint(opts.dateStr, listOf(story)),
+    fingerprint: (story) => sameEventFingerprint(story.earlier),
     unseenDays: SAME_EVENT_UNSEEN_DAYS,
   });
   if (judgment.rankedBy !== "jev") {
@@ -164,7 +167,7 @@ async function judgeAgainst(stories: Story[], earlier: Map<string, Earlier[]>, o
   }
   return {
     isRepeat: (s: Story) => judgment.verdicts.get(`${s.id}${key}`)?.repeat === true,
-    traceFields: (s: Story) => judgment.traceFields({ ...s, id: `${s.id}${key}` }),
+    traceFields: (s: Story) => judgment.traceFields({ ...s, id: `${s.id}${key}`, earlier: [] }),
     nextCache: judgment.nextCache,
   };
 }
@@ -188,12 +191,15 @@ export async function dropShownRepeats(
 ): Promise<SameEventCheck & { kept: Story[] }> {
   const from = daysBefore(opts.dateStr, SPOTTED_MAX_AGE_DAYS);
   const shown = Object.values(opts.log.items)
-    .filter((e) => e.shown && e.shown !== opts.dateStr && e.shown >= from)
-    .sort((a, b) => b.shown!.localeCompare(a.shown!) || a.title.localeCompare(b.title));
-  const earlier = new Map(fresh.map((s) => [s.id, earlierOf(shown, s)]));
-  const asked = fresh.filter((s) => earlier.get(s.id)!.length > 0);
-  const judged = await judgeAgainst(asked, earlier, opts);
-  const repeats = asked.filter(judged.isRepeat);
+    .flatMap((e) =>
+      e.shown && e.shown !== opts.dateStr && e.shown >= from ? [{ ...e, shown: e.shown }] : [],
+    )
+    .sort((a, b) => b.shown.localeCompare(a.shown) || a.title.localeCompare(b.title));
+  const asked = fresh
+    .map((story) => ({ story, earlier: earlierOf(shown, story) }))
+    .filter((a) => a.earlier.length > 0);
+  const judged = await judgeAgainst(asked, opts);
+  const repeats = asked.map((a) => a.story).filter(judged.isRepeat);
   const ids = new Set(repeats.map((s) => s.id));
   console.log(
     `  [same-event] Dropped ${repeats.length} of ${fresh.length} fresh stories as repeats of earlier days`,
@@ -226,8 +232,12 @@ export async function dropSameDayRepeats<T>(
     const { selection, shown } = select(new Set(removed.keys()));
     const order = [...rankFresh(news), ...rankFresh(shown)];
     const earlier = new Map(order.map((s, i) => [s.id, earlierOf(order.slice(0, i), s)]));
-    const toAsk = shown.filter((s) => !decided.has(s.id) && earlier.get(s.id)!.length > 0);
-    const judged = await judgeAgainst(toAsk, earlier, { ...opts, cache }, SAME_DAY_KEY);
+    const asked = shown.flatMap((story) => {
+      const list = earlier.get(story.id) ?? [];
+      return !decided.has(story.id) && list.length > 0 ? [{ story, earlier: list }] : [];
+    });
+    const toAsk = asked.map((a) => a.story);
+    const judged = await judgeAgainst(asked, { ...opts, cache }, SAME_DAY_KEY);
     if (cache) cache = judged.nextCache;
     const repeats = toAsk.filter(judged.isRepeat);
     for (const s of toAsk) {

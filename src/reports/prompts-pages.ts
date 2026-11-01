@@ -556,6 +556,14 @@ export interface NoHighlightRow {
   url: string;
 }
 
+/**
+ * A data Highlight that speaks of the rows as a group ("minor", our internal label) or states an
+ * absence: on 2026-11-01 the only Highlight read "All vendor release notes today are minor fixes and
+ * previews; no deprecations or breaking changes." Narrow on purpose: only these phrases.
+ */
+export const isGroupOrAbsenceBullet = (bullet: string): boolean =>
+  /\bminor\b|\bno (?:deprecations|breaking changes|notable)\b|\bnothing new\b/i.test(bullet);
+
 // A title of at least this many content words also matches a bullet restating most of them
 // (4 words of 3+ letters before stopwords were dropped).
 const RESTATED_NAME_MIN_WORDS = 3;
@@ -565,10 +573,16 @@ const RESTATED_NAME_MIN_WORDS = 3;
  * `rows` entry: one linking its URL, naming it (word-bounded), or restating most of a longer
  * name's words (`restatesLead`). The prompt names these rows as no Highlight; this is the net for
  * a model that writes one anyway. Each drop is logged; when every bullet goes, NO_HIGHLIGHT_NOTE
- * stands in, as an empty section would send highlights.json to the page body.
+ * stands in, as an empty section would send highlights.json to the page body. `alsoDrop` drops a
+ * bullet for its own text (the data page's `isGroupOrAbsenceBullet`).
  */
-export function dropNoHighlightRows(prose: string, rows: readonly NoHighlightRow[], tag: string): string {
-  if (!rows.length) return prose;
+export function dropNoHighlightRows(
+  prose: string,
+  rows: readonly NoHighlightRow[],
+  tag: string,
+  alsoDrop?: (bullet: string) => boolean,
+): string {
+  if (!rows.length && !alsoDrop) return prose;
   const at = prose.indexOf(TABLES_MARKER);
   const head = at === -1 ? prose : prose.slice(0, at);
   const about = (bullet: string) =>
@@ -577,7 +591,7 @@ export function dropNoHighlightRows(prose: string, rows: readonly NoHighlightRow
         (r.url !== "" && bullet.includes(`](${r.url})`)) ||
         new RegExp(`(^|[^\\p{L}\\p{N}])${escapeRegex(r.name)}($|[^\\p{L}\\p{N}])`, "iu").test(bullet) ||
         (leadWords(r.name).size >= RESTATED_NAME_MIN_WORDS && restatesLead(r.name, bullet)),
-    );
+    ) || alsoDrop?.(bullet) === true;
   // A bullet is its marker line and the indented lines continuing it.
   const lines = head.split("\n");
   const bullets: number[][] = [];
@@ -591,7 +605,9 @@ export function dropNoHighlightRows(prose: string, rows: readonly NoHighlightRow
   const dropped = bullets.filter((b) => about(textOf(b)));
   if (!dropped.length) return prose;
   for (const b of dropped)
-    console.log(`  [${tag}] Highlight about a no-Highlight row dropped: ${textOf(b).slice(0, 80)}`);
+    console.log(
+      `  [${tag}] Highlight about a no-Highlight row or an absence dropped: ${textOf(b).slice(0, 80)}`,
+    );
   const gone = new Set(dropped.flat());
   // The note takes the first dropped bullet's place when none is left.
   const kept = lines.flatMap((l, n) =>

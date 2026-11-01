@@ -273,7 +273,6 @@ const blankAfterHeading = (chunk: string): string => chunk.trim().replace(/^(##[
  * (`checkCodeTokens`). `quiet` is every other checked project without a section; after a failed
  * call (MSG.summaryFailed) the data decides.
  */
-
 function groupProjects(g: ProjectGroup): { body: string; quiet: ProjectActivity[] } {
   const failed = g.summary.trim() === MSG.summaryFailed;
   const covered = g.activities.filter((a) => covers(g.summary, a));
