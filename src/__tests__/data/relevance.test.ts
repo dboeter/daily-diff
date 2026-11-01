@@ -270,6 +270,20 @@ describe("selectVendorItems", () => {
     expect(row(`dbx${MAX_VENDOR_ITEMS + 1}`)).toMatchObject({ rendered: false, dropped_reason: "cap" });
   });
 
+  it("traces a kept item's minor flag, and a shown one's text, so its summary can be checked", async () => {
+    const many = Array.from({ length: MAX_VENDOR_ITEMS + 1 }, (_, i) =>
+      item(`dbx${i}`, { title: "Feature now available", description: `Text ${i}` }),
+    );
+    const sel = await selectVendorItems(many, { cache: { items: {} }, dateStr: DATE });
+    const trace = JSON.parse(sel.traceFile) as { items: Record<string, unknown>[] };
+    const row = (id: string) => trace.items.find((i) => i["id"] === id)!;
+    const shown = sel.items[0]!;
+    expect(row(shown.id)).toMatchObject({ minor: false, text: shown.description });
+    const cut = row(`dbx${MAX_VENDOR_ITEMS}`);
+    expect(cut).toMatchObject({ minor: false, dropped_reason: "cap" });
+    expect(cut).not.toHaveProperty("text");
+  });
+
   it("gives slots the floors leave to Databricks first", async () => {
     const many = [
       ...Array.from({ length: 14 }, (_, i) => item(`dbx${i}`, { title: "Feature now available" })),

@@ -269,6 +269,9 @@ function checkProjectTokens(section: string, g: ProjectGroup): string {
  * (`checkCodeTokens`). `quiet` is every other checked project without a section; after a failed
  * call (MSG.summaryFailed) the data decides.
  */
+/** A project section with one blank line under its heading, however the model spaced it (2026-11-01: the agents and infra calls differed). */
+const blankAfterHeading = (chunk: string): string => chunk.trim().replace(/^(##[^\n]*)\n+/, "$1\n\n");
+
 function groupProjects(g: ProjectGroup): { body: string; quiet: ProjectActivity[] } {
   const failed = g.summary.trim() === MSG.summaryFailed;
   const covered = g.activities.filter((a) => covers(g.summary, a));
@@ -287,7 +290,7 @@ function groupProjects(g: ProjectGroup): { body: string; quiet: ProjectActivity[
         .map((chunk) =>
           withNewsLinks(
             withHotIssueFacts(
-              withReleaseBullet(boldLabelColonInside(checkProjectTokens(chunk.trim(), g)), g),
+              withReleaseBullet(boldLabelColonInside(checkProjectTokens(blankAfterHeading(chunk), g)), g),
               g,
             ),
             g,

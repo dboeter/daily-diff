@@ -540,7 +540,7 @@ describe("buildAgentsReport", () => {
     // The Highlights call reads the rendered groups and the Spotted table.
     const prompt = generateBody.mock.calls[0]![0] as string;
     expect(prompt).toContain("You are the editor of AI Agents");
-    expect(prompt).toContain("## Coding Agents\n\n### Codex\n- Released v1.");
+    expect(prompt).toContain("## Coding Agents\n\n### Codex\n\n- Released v1.");
     expect(prompt).toContain("| [Story 1](https://example.com/1) |");
     expect(generateBody).toHaveBeenCalledTimes(1);
   });
@@ -730,7 +730,7 @@ describe("buildModelsPage", () => {
     const content = (await build([site([])], catalog(), spotted))!.content;
     expect(headings(content)).toEqual(["Highlights", "Spotted"]);
     expect(content).toContain(
-      "Nothing new from Anthropic or OpenAI, OpenRouter's new listings or OpenRouter's stealth models today.",
+      "Nothing new from Anthropic and OpenAI, OpenRouter's new listings or OpenRouter's stealth models today.",
     );
   });
 
@@ -741,7 +741,7 @@ describe("buildModelsPage", () => {
     const spotted = { rows: [spottedRow(1, "models")], summaries: new Map<number, string>() };
     const report = await build([site([])], null, spotted);
     // The lab section has nothing to show: one line names it. An unavailable catalog is news.
-    expect(report?.content).toContain("Nothing new from Anthropic or OpenAI today.");
+    expect(report?.content).toContain("Nothing new from Anthropic and OpenAI today.");
     expect(report?.content).not.toContain("## Lab announcements");
     expect(report?.content).toContain("⚠️ OpenRouter model catalog unavailable.");
   });

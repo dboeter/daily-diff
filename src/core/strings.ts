@@ -295,7 +295,8 @@ export const MODELS_PAGE = {
   catalogUnavailable: "⚠️ OpenRouter model catalog unavailable.",
   /** One line in place of the tracked sections with nothing to show, named by `emptyNames`. */
   emptyNames: {
-    labs: "Anthropic or OpenAI",
+    // "and": nothingNew joins the names with "or", and a second "or" made the list unreadable (2026-11-01).
+    labs: "Anthropic and OpenAI",
     models: "OpenRouter's new listings",
     stealth: "OpenRouter's stealth models",
   },

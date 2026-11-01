@@ -146,7 +146,7 @@ describe("buildProjectReportContent", () => {
     expect(result).toContain(
       "Projects: 3 | Active today: 1 | Stable releases: 1 | Prereleases (not covered): 7",
     );
-    expect(result).toContain("## Coding Agents\n\n### Overview\nLLM_BODY");
+    expect(result).toContain("## Coding Agents\n\n### Overview\n\nLLM_BODY");
     expect(result.endsWith("FOOTER")).toBe(true);
   });
 
@@ -444,7 +444,7 @@ describe("buildProjectReportContent", () => {
     expect(agentsAt).toBeGreaterThan(-1);
     expect(toolingAt).toBeGreaterThan(agentsAt);
     expect(result.indexOf("[GAMMA]")).toBeLessThan(toolingAt);
-    expect(result.slice(toolingAt)).toContain("### DELTA\n- release");
+    expect(result.slice(toolingAt)).toContain("### DELTA\n\n- release");
     expect(result.slice(toolingAt)).toContain("**Quiet today:** [EPS](https://github.com/org/eps)");
   });
 

@@ -446,6 +446,9 @@ export async function selectVendorItems(
       ? renderedAt(rowOf.get(i.id)!)
       : droppedFor(keptById.has(i.id) ? "cap" : "threshold")),
     deprecation: decide(i).deprecation,
+    ...(keptById.has(i.id) ? { minor: keptById.get(i.id)!.minor === true } : {}),
+    // The text the summaries call sees, so a shown row's summary can be checked from the trace.
+    ...(selectedIds.has(i.id) ? { text: i.description } : {}),
     ...(keptById.get(i.id)?.endDate ? { endDate: keptById.get(i.id)!.endDate } : {}),
     ...judgment.traceFields(i),
     ...(i.stage !== undefined ? { stage: i.stage } : { keyword: keywordVerdict(i) }),
