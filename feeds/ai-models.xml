@@ -13,7 +13,91 @@
       <height>144</height>
     </image>
     <atom:link href="https://dboeter.github.io/daily-diff/feeds/ai-models.xml" rel="self" type="application/rss+xml"/>
-    <lastBuildDate>Sat, 31 Oct 2026 05:27:19 +0000</lastBuildDate>
+    <lastBuildDate>Sun, 01 Nov 2026 05:52:13 +0000</lastBuildDate>
+    <item>
+      <title>AI Models &amp; Labs 2026-11-01</title>
+      <link>https://dboeter.github.io/daily-diff/#2026-11-01/ai-models</link>
+      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-11-01/ai-models</guid>
+      <pubDate>Sun, 01 Nov 2026 00:00:00 +0000</pubDate>
+      <description>AI Models &amp;amp; Labs 2026-11-01 ⬛ Overview · 🟪 AI Agents · 🟦 AI Models &amp;amp; Labs · 🟨 Data Engineering Lab posts: 0 | New models: 0 | Spotted: 8 | Generated: 2026-11-01 05:49 UTC Highlights No lab or model news today. Anthropic is blocking accounts and downgrading access for work involving RFT, SFT, or training larger models; users report broad enforcement that affects legitimate development. Claude now refuses video‑game reverse‑engineering and cloning requests, with developers saying the re...</description>
+      <content:encoded><![CDATA[<h1>AI Models &amp; Labs 2026-11-01</h1>
+<p><a href="https://dboeter.github.io/daily-diff/#2026-11-01">⬛ Overview</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-01/ai-agents">🟪 AI Agents</a> · <strong>🟦 AI Models &amp; Labs</strong> · <a href="https://dboeter.github.io/daily-diff/#2026-11-01/ai-data">🟨 Data Engineering</a></p>
+<blockquote>
+<p>Lab posts: 0 | New models: 0 | Spotted: 8 | Generated: 2026-11-01 05:49 UTC</p>
+</blockquote>
+<hr>
+<h2>Highlights</h2>
+<ul>
+<li>No lab or model news today.</li>
+<li>Anthropic is blocking accounts and downgrading access for work involving RFT, SFT, or training larger models; users report broad enforcement that affects legitimate development.</li>
+<li>Claude now refuses video‑game reverse‑engineering and cloning requests, with developers saying the restriction also blocks routine troubleshooting on their own projects.</li>
+</ul>
+<hr>
+<p>Nothing new from Anthropic or OpenAI, OpenRouter&#39;s new listings or OpenRouter&#39;s stealth models today.</p>
+<hr>
+<h2>Spotted</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Story</th>
+<th align="left">Source</th>
+<th align="left">Discussion</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a href="https://twitter.com/jiahaoshao1/status/2116475922190922088">Anthropic blocks users for anything touching training larger models</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50319358">286 points, 160 comments</a></td>
+<td align="left">A user reports Anthropic blocked their account for allegedly &quot;training a competitor&quot; after using Claude for job submission and analysis, with the restriction now applying to any work touching RFT, SFT, or training larger models and resulting in an Opus 5.5 downgrade.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://mashable.com/tech/anthropic-takes-steps-to-block-video-game-cloning-and-reverse-engineering">Anthropic takes steps to block Claude from reverse-engineering video games</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50320255">125 points, 77 comments</a></td>
+<td align="left">Anthropic has implemented broad restrictions preventing Claude from reverse-engineering video games, which are reportedly hindering legitimate game developers and basic troubleshooting tasks.</td>
+</tr>
+<tr>
+<td align="left">Show HN: A language model that lives in a boot sector (<a href="https://github.com/kerlenton/bootgpt">kerlenton/bootgpt</a>)</td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50315782">71 points, 3 comments</a></td>
+<td align="left">A language model has been implemented to run entirely within a computer&#39;s boot sector.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://www.tomshardware.com/tech-industry/artificial-intelligence/anthropics-ai-model-is-now-blocking-attempts-at-video-game-recreation-and-cloning-users-also-claim-non-malicious-generic-reverse-engineering-tasks-are-blocked">Anthropic&#39;s Claude AI blocks video game cloning and reverse-engineering</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50315987">69 points, 41 comments</a></td>
+<td align="left">Anthropic&#39;s Claude now refuses to assist with video game cloning and reverse-engineering, with many game developers reporting it will not work on their own projects.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://www.gamedeveloper.com/programming/anthropic-appears-to-have-ordered-ai-tool-claude-to-stop-remaking-video-games">Anthropic orders AI tool Claude to stop remaking video games</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50316635">29 points, 16 comments</a></td>
+<td align="left">Anthropic updated Claude with a new rule that bars the AI from remaking video games, according to user reports.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://quoththeraven.substack.com/p/very-intentional-steve-eisman-thinks">&quot;Very Intentional&quot;: Steve Eisman Thinks Anthropic Is Hiding Something</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50320601">7 points, 1 comment</a></td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left"><a href="https://aatishb.com/myriad/lets-build-a-brain/">Let’s Build a Brain</a></td>
+<td align="left">Lobste.rs</td>
+<td align="left"><a href="https://lobste.rs/s/bmmj1e/let_s_build_brain">10 points, 1 comment</a></td>
+<td align="left">The article demonstrates how simple circuits can give rise to complex behaviors in a brain-building exploration.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://dev.to/sizzlebop/i-retested-my-moe-offloading-benchmarks-some-of-my-conclusions-changed-6f4">I Retested My MoE Offloading Benchmarks. Some of My Conclusions Changed.</a></td>
+<td align="left">Dev.to</td>
+<td align="left"><a href="https://dev.to/sizzlebop/i-retested-my-moe-offloading-benchmarks-some-of-my-conclusions-changed-6f4">16 reactions, 7 comments</a></td>
+<td align="left">The author retested their Mixture of Experts offloading benchmarks on a 16GB GPU using consistent quantization, finding that some of their original conclusions changed.</td>
+</tr>
+</tbody></table>
+<hr>
+<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
+]]></content:encoded>
+    </item>
     <item>
       <title>AI Models &amp; Labs 2026-10-31</title>
       <link>https://dboeter.github.io/daily-diff/#2026-10-31/ai-models</link>

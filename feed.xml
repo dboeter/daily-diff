@@ -13,7 +13,275 @@
       <height>144</height>
     </image>
     <atom:link href="https://dboeter.github.io/daily-diff/feed.xml" rel="self" type="application/rss+xml"/>
-    <lastBuildDate>Sat, 31 Oct 2026 05:27:19 +0000</lastBuildDate>
+    <lastBuildDate>Sun, 01 Nov 2026 05:52:13 +0000</lastBuildDate>
+    <item>
+      <title>AI Agents 2026-11-01</title>
+      <link>https://dboeter.github.io/daily-diff/#2026-11-01/ai-agents</link>
+      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-11-01/ai-agents</guid>
+      <pubDate>Sun, 01 Nov 2026 00:00:00 +0000</pubDate>
+      <description>AI Agents 2026-11-01 ⬛ Overview · 🟪 AI Agents · 🟦 AI Models &amp;amp; Labs · 🟨 Data Engineering Projects: 16 | Active today: 4 | Stable releases: 2 | Prereleases (not covered): 5 | Generated: 2026-11-01 05:49 UTC Highlights A trojanized anthropic.claude-code@2.1.313 extension on Open-VSX installed an SSH backdoor when loaded in VS Code. OpenAI Codex users report the production macOS app fails update checks with HTTP 404 fetching the Sparkle appcast. Oh My Pi v18.14.2 replaces isLoopGuardedModel w...</description>
+      <content:encoded><![CDATA[<h1>AI Agents 2026-11-01</h1>
+<p><a href="https://dboeter.github.io/daily-diff/#2026-11-01">⬛ Overview</a> · <strong>🟪 AI Agents</strong> · <a href="https://dboeter.github.io/daily-diff/#2026-11-01/ai-models">🟦 AI Models &amp; Labs</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-01/ai-data">🟨 Data Engineering</a></p>
+<blockquote>
+<p>Projects: 16 | Active today: 4 | Stable releases: 2 | Prereleases (not covered): 5 | Generated: 2026-11-01 05:49 UTC</p>
+</blockquote>
+<hr>
+<h2>Highlights</h2>
+<ul>
+<li>A trojanized <code>anthropic.claude-code@2.1.313</code> extension on Open-VSX installed an SSH backdoor when loaded in VS Code.</li>
+<li>OpenAI Codex users report the production macOS app fails update checks with HTTP 404 fetching the Sparkle appcast.</li>
+<li>Oh My Pi v18.14.2 replaces <code>isLoopGuardedModel</code> with <code>loopGuardLevel</code> (<code>&quot;off&quot;</code>, <code>&quot;exact&quot;</code>, <code>&quot;semantic&quot;</code>) and fixes Claude false-positive loop detection, OpenAI header casing conflicts, and stalled Anthropic streams.</li>
+</ul>
+<hr>
+<h2>Coding Agents &amp; Assistants</h2>
+<h3>Claude Code</h3>
+<ul>
+<li><strong>News:</strong> <a href="https://dev.to/slabb/a-trojanized-claude-code-extension-plants-an-ssh-backdoor-the-7-point-audit-for-your-machine-23cj">A trojanized Claude Code extension plants an SSH backdoor: the 7-point audit for your machine</a> reports that <code>anthropic.claude-code@2.1.313</code> on Open-VSX contained a malicious loader that installed an SSH backdoor when VS Code loaded the extension.</li>
+</ul>
+<h3>OpenAI Codex</h3>
+<ul>
+<li><strong>Hot issue:</strong> <a href="https://github.com/openai/codex/issues/58551">#58551</a>: users report that <strong>Check for Updates</strong> on macOS 27.2 fails with an HTTP 404 fetching the Sparkle appcast, blocking update checks on the production desktop app. (10 comments, 2 👍; +12 in the last 24h)</li>
+<li><strong>News:</strong> <a href="https://news.ycombinator.com/item?id=50320588">ChatGPT and Codex usage limits merging</a> discusses OpenAI combining usage limits across ChatGPT and Codex, affecting how subscribers allocate their quota.</li>
+</ul>
+<h3>Oh My Pi</h3>
+<ul>
+<li><strong>Release:</strong> <a href="https://github.com/can1357/oh-my-pi/releases/tag/v18.14.2">v18.14.2</a> replaces <code>isLoopGuardedModel</code> with <code>loopGuardLevel</code> (<code>&quot;off&quot;</code>, <code>&quot;exact&quot;</code>, <code>&quot;semantic&quot;</code>) and moves <code>thinking-loop-guard</code> to a catalog axis applied on every host; fixes incomplete local compaction and turn summaries being used as context, fixes Claude false-positive &quot;Thinking loop detected&quot; on repeated progress lines, fixes per-request OpenAI-compatible header casing conflicts, and fixes stalled Anthropic streams with empty deltas never timing out.</li>
+</ul>
+<p><strong>Quiet today:</strong> <a href="https://github.com/google-gemini/gemini-cli">Gemini CLI</a>, <a href="https://github.com/Kilo-Org/kilocode">Kilo Code</a>, <a href="https://github.com/anomalyco/opencode">OpenCode</a>, <a href="https://github.com/earendil-works/pi">Pi</a>, <a href="https://github.com/1jehuang/jcode">jcode</a>, <a href="https://github.com/cline/cline">Cline</a>, <a href="https://github.com/CommandCodeAI/command-code">Command Code</a>, <a href="https://github.com/deepseek-ai/deepseek-harness">DeepSeek Harness</a>, <a href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a></p>
+<hr>
+<h2>Agent Tooling</h2>
+<h3>Agent Deck</h3>
+<ul>
+<li><strong>Release:</strong> <a href="https://github.com/asheshgoplani/agent-deck/releases/tag/v1.16.35">v1.16.35</a> adds a first-run welcome TUI with agent sign-in and a &quot;Show me around&quot; tour, a new <code>agent-deck trace</code> CLI that records Claude and Codex tool-call spans into <code>trace.db</code>, opt-in notification-bar sorting by last access, opt-in guarded retry for swallowed Codex submits, and managed telemetry config with org ID and opt-in crash reports. Fixes include preserving user <code>config.toml</code> during codex-hooks install/uninstall, correcting conductor heartbeat accounting for archived sessions, and ensuring bridge.log lines are written once under launchd/systemd.</li>
+</ul>
+<p><strong>Quiet today:</strong> <a href="https://github.com/NVIDIA/OpenShell">OpenShell</a>, <a href="https://github.com/herdrdev/herdr">herdr</a>, <a href="https://github.com/mksglu/context-mode">context-mode</a></p>
+<hr>
+<h2>Spotted</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Story</th>
+<th align="left">Source</th>
+<th align="left">Discussion</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a href="https://trypalomino.com/">Show HN: Ultrafast Rust Based Agent Workspace</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50310055">10 points, 22 comments</a></td>
+<td align="left">—</td>
+</tr>
+</tbody></table>
+<hr>
+<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
+]]></content:encoded>
+    </item>
+    <item>
+      <title>AI Models &amp; Labs 2026-11-01</title>
+      <link>https://dboeter.github.io/daily-diff/#2026-11-01/ai-models</link>
+      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-11-01/ai-models</guid>
+      <pubDate>Sun, 01 Nov 2026 00:00:00 +0000</pubDate>
+      <description>AI Models &amp;amp; Labs 2026-11-01 ⬛ Overview · 🟪 AI Agents · 🟦 AI Models &amp;amp; Labs · 🟨 Data Engineering Lab posts: 0 | New models: 0 | Spotted: 8 | Generated: 2026-11-01 05:49 UTC Highlights No lab or model news today. Anthropic is blocking accounts and downgrading access for work involving RFT, SFT, or training larger models; users report broad enforcement that affects legitimate development. Claude now refuses video‑game reverse‑engineering and cloning requests, with developers saying the re...</description>
+      <content:encoded><![CDATA[<h1>AI Models &amp; Labs 2026-11-01</h1>
+<p><a href="https://dboeter.github.io/daily-diff/#2026-11-01">⬛ Overview</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-01/ai-agents">🟪 AI Agents</a> · <strong>🟦 AI Models &amp; Labs</strong> · <a href="https://dboeter.github.io/daily-diff/#2026-11-01/ai-data">🟨 Data Engineering</a></p>
+<blockquote>
+<p>Lab posts: 0 | New models: 0 | Spotted: 8 | Generated: 2026-11-01 05:49 UTC</p>
+</blockquote>
+<hr>
+<h2>Highlights</h2>
+<ul>
+<li>No lab or model news today.</li>
+<li>Anthropic is blocking accounts and downgrading access for work involving RFT, SFT, or training larger models; users report broad enforcement that affects legitimate development.</li>
+<li>Claude now refuses video‑game reverse‑engineering and cloning requests, with developers saying the restriction also blocks routine troubleshooting on their own projects.</li>
+</ul>
+<hr>
+<p>Nothing new from Anthropic or OpenAI, OpenRouter&#39;s new listings or OpenRouter&#39;s stealth models today.</p>
+<hr>
+<h2>Spotted</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Story</th>
+<th align="left">Source</th>
+<th align="left">Discussion</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a href="https://twitter.com/jiahaoshao1/status/2116475922190922088">Anthropic blocks users for anything touching training larger models</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50319358">286 points, 160 comments</a></td>
+<td align="left">A user reports Anthropic blocked their account for allegedly &quot;training a competitor&quot; after using Claude for job submission and analysis, with the restriction now applying to any work touching RFT, SFT, or training larger models and resulting in an Opus 5.5 downgrade.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://mashable.com/tech/anthropic-takes-steps-to-block-video-game-cloning-and-reverse-engineering">Anthropic takes steps to block Claude from reverse-engineering video games</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50320255">125 points, 77 comments</a></td>
+<td align="left">Anthropic has implemented broad restrictions preventing Claude from reverse-engineering video games, which are reportedly hindering legitimate game developers and basic troubleshooting tasks.</td>
+</tr>
+<tr>
+<td align="left">Show HN: A language model that lives in a boot sector (<a href="https://github.com/kerlenton/bootgpt">kerlenton/bootgpt</a>)</td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50315782">71 points, 3 comments</a></td>
+<td align="left">A language model has been implemented to run entirely within a computer&#39;s boot sector.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://www.tomshardware.com/tech-industry/artificial-intelligence/anthropics-ai-model-is-now-blocking-attempts-at-video-game-recreation-and-cloning-users-also-claim-non-malicious-generic-reverse-engineering-tasks-are-blocked">Anthropic&#39;s Claude AI blocks video game cloning and reverse-engineering</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50315987">69 points, 41 comments</a></td>
+<td align="left">Anthropic&#39;s Claude now refuses to assist with video game cloning and reverse-engineering, with many game developers reporting it will not work on their own projects.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://www.gamedeveloper.com/programming/anthropic-appears-to-have-ordered-ai-tool-claude-to-stop-remaking-video-games">Anthropic orders AI tool Claude to stop remaking video games</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50316635">29 points, 16 comments</a></td>
+<td align="left">Anthropic updated Claude with a new rule that bars the AI from remaking video games, according to user reports.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://quoththeraven.substack.com/p/very-intentional-steve-eisman-thinks">&quot;Very Intentional&quot;: Steve Eisman Thinks Anthropic Is Hiding Something</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50320601">7 points, 1 comment</a></td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left"><a href="https://aatishb.com/myriad/lets-build-a-brain/">Let’s Build a Brain</a></td>
+<td align="left">Lobste.rs</td>
+<td align="left"><a href="https://lobste.rs/s/bmmj1e/let_s_build_brain">10 points, 1 comment</a></td>
+<td align="left">The article demonstrates how simple circuits can give rise to complex behaviors in a brain-building exploration.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://dev.to/sizzlebop/i-retested-my-moe-offloading-benchmarks-some-of-my-conclusions-changed-6f4">I Retested My MoE Offloading Benchmarks. Some of My Conclusions Changed.</a></td>
+<td align="left">Dev.to</td>
+<td align="left"><a href="https://dev.to/sizzlebop/i-retested-my-moe-offloading-benchmarks-some-of-my-conclusions-changed-6f4">16 reactions, 7 comments</a></td>
+<td align="left">The author retested their Mixture of Experts offloading benchmarks on a 16GB GPU using consistent quantization, finding that some of their original conclusions changed.</td>
+</tr>
+</tbody></table>
+<hr>
+<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
+]]></content:encoded>
+    </item>
+    <item>
+      <title>Data Engineering 2026-11-01</title>
+      <link>https://dboeter.github.io/daily-diff/#2026-11-01/ai-data</link>
+      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-11-01/ai-data</guid>
+      <pubDate>Sun, 01 Nov 2026 00:00:00 +0000</pubDate>
+      <description>Data Engineering 2026-11-01 ⬛ Overview · 🟪 AI Agents · 🟦 AI Models &amp;amp; Labs · 🟨 Data Engineering Vendor items: 3 | Projects: 27 | Active today: 1 | Stable releases: 0 | Prereleases (not covered): 0 | Generated: 2026-11-01 05:49 UTC Highlights All vendor release notes today are minor fixes and previews; no deprecations or breaking changes. Action required Date Platform Item What to do 2026-11-30 Azure Databricks Upcoming end of life for the Genie One MCP Beta endpoint The Genie One MCP Beta ...</description>
+      <content:encoded><![CDATA[<h1>Data Engineering 2026-11-01</h1>
+<p><a href="https://dboeter.github.io/daily-diff/#2026-11-01">⬛ Overview</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-01/ai-agents">🟪 AI Agents</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-01/ai-models">🟦 AI Models &amp; Labs</a> · <strong>🟨 Data Engineering</strong></p>
+<blockquote>
+<p>Vendor items: 3 | Projects: 27 | Active today: 1 | Stable releases: 0 | Prereleases (not covered): 0 | Generated: 2026-11-01 05:49 UTC</p>
+</blockquote>
+<hr>
+<h2>Highlights</h2>
+<ul>
+<li>All vendor release notes today are minor fixes and previews; no deprecations or breaking changes.</li>
+</ul>
+<hr>
+<h2>Action required</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Platform</th>
+<th align="left">Item</th>
+<th align="left">What to do</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-11-30</td>
+<td align="left">Azure Databricks</td>
+<td align="left"><a href="https://learn.microsoft.com/azure/databricks/release-notes/whats-coming#upcoming-end-of-life-for-the-genie-one-mcp-beta-endpoint">Upcoming end of life for the Genie One MCP Beta endpoint</a></td>
+<td align="left">The Genie One MCP Beta endpoint at <code>https://&lt;workspace-hostname&gt;/api/2.0/mcp/genie</code> reaches end of life on November 30, 2026, after which requests fail; migrate all workloads to the <code>system.ai.genie_one_mcp</code> MCP in Unity Gateway.</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>Databricks</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Item</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-10-29</td>
+<td align="left"><a href="https://learn.microsoft.com/azure/databricks/ai-bi/release-notes/2026#dashboard-bug-fixes">Dashboard bug fixes</a></td>
+<td align="left">Single-field filter field changes now clear the previous default value and fall back to All or None; widget-level filter values refresh automatically when datasets change; custom themes no longer apply to the View queries dialog, widget context menus, or data reference popovers; funnel chart fields persist when switching chart types; tabbed editor popovers retain their initial height instead of expanding.</td>
+</tr>
+</tbody></table>
+<p><strong>Quiet today:</strong> <a href="https://github.com/delta-io/delta">Delta Lake</a>, <a href="https://github.com/delta-io/delta-rs">delta-rs</a>, <a href="https://github.com/unitycatalog/unitycatalog">Unity Catalog</a>, <a href="https://github.com/mlflow/mlflow">MLflow</a>, <a href="https://github.com/databricks/cli">Databricks CLI</a>, <a href="https://github.com/databricks/dbt-databricks">dbt-databricks</a>, <a href="https://github.com/databricks/terraform-provider-databricks">Terraform provider for Databricks</a></p>
+<hr>
+<h2>Snowflake</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Item</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-10-30</td>
+<td align="left"><a href="https://docs.snowflake.com/en/release-notes/2026/other/2026-10-30-dcm-define-secret-env-vars-preview">CREATE OR ALTER SECRET, DCM Projects DEFINE SECRET, and environment variables (Preview)</a></td>
+<td align="left">DEFINE SECRET in DCM Projects definition files enables declarative secrets management, and environment variables and secrets declared in the DCM project manifest keep values out of definition files, repositories, and deployment artifacts.</td>
+</tr>
+</tbody></table>
+<p><strong>Quiet today:</strong> <a href="https://github.com/snowflakedb/snowpark-python">Snowpark Python</a>, <a href="https://github.com/snowflakedb/snowflake-connector-python">Snowflake Connector for Python</a>, <a href="https://github.com/apache/polaris">Apache Polaris</a>, <a href="https://github.com/snowflakedb/terraform-provider-snowflake">Terraform provider for Snowflake</a></p>
+<hr>
+<h2>Azure / Fabric &amp; GCP</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Item</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-10-29</td>
+<td align="left"><a href="https://community.fabric.microsoft.com/t5/Fabric-Updates-Blog/Using-Allow-workspace-settings-editing-policy-in-Fabric-Preview/ba-p/5377845">Using Allow workspace settings editing policy in Fabric (Preview)</a></td>
+<td align="left">The Allow workspace settings editing policy enables delegating workspace administration to development teams while retaining centralized control over encryption and networking settings.</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>Open-source stack</h2>
+<h3>dbt Core</h3>
+<ul>
+<li><strong>News:</strong> <a href="https://www.getdbt.com/blog/bigquery-generative-ai-dbt-sql-functions">How to put generative AI directly into a dbt pipeline with plain SQL</a> shows how to call BigQuery&#39;s AI SQL functions from dbt models for tasks like sentiment scoring and LLM-generated product briefings.</li>
+<li><strong>News:</strong> <a href="https://www.getdbt.com/blog/bi-dashboard-chart-design-inspiration">Charts worth stealing: the design calls BI should ship</a> details the design defaults behind dbt Charts, from consistent color palettes to the small choices that make dashboards readable.</li>
+<li><strong>News:</strong> <a href="https://www.getdbt.com/blog/dbt-charts-open-source-dashboard-yaml">dbt Charts: a new open-source language for dashboards that live inside your dbt repo</a> introduces a plain YAML spec for version-controlled dashboards that deploy alongside dbt models.</li>
+</ul>
+<p><strong>Quiet today:</strong> <a href="https://github.com/SQLMesh/sqlmesh">SQLMesh</a>, <a href="https://github.com/apache/airflow">Apache Airflow</a>, <a href="https://github.com/dagster-io/dagster">Dagster</a>, <a href="https://github.com/PrefectHQ/prefect">Prefect</a>, <a href="https://github.com/dlt-hub/dlt">dlt</a>, <a href="https://github.com/apache/iceberg">Apache Iceberg</a>, <a href="https://github.com/apache/iceberg-python">PyIceberg</a>, <a href="https://github.com/duckdb/duckdb">DuckDB</a>, <a href="https://github.com/pola-rs/polars">Polars</a>, <a href="https://github.com/trinodb/trino">Trino</a>, <a href="https://github.com/great-expectations/great_expectations">Great Expectations</a>, <a href="https://github.com/sodadata/soda-core">Soda Core</a>, <a href="https://github.com/OpenLineage/OpenLineage">OpenLineage</a>, <a href="https://github.com/open-metadata/OpenMetadata">OpenMetadata</a>, <a href="https://github.com/sqlfluff/sqlfluff">SQLFluff</a></p>
+<hr>
+<h2>Spotted</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Story</th>
+<th align="left">Source</th>
+<th align="left">Discussion</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a href="http://rhaas.blogspot.com/2026/10/postgres-19-is-late-and-its-ais-fault.html">Postgres 19 is late, and it&#39;s AI&#39;s fault</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50312408">6 points, 1 comment</a></td>
+<td align="left">PostgreSQL 19&#39;s release has slipped past its historically predictable mid-September window, with the delay attributed to AI-related development work.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://jepsen.io/analyses/particledb-1.1.4">Jepsen: ParticleDB 1.1.4</a></td>
+<td align="left">Lobste.rs</td>
+<td align="left"><a href="https://lobste.rs/s/drwd4j/jepsen_particledb_1_1_4">83 points, 18 comments</a></td>
+<td align="left">—</td>
+</tr>
+</tbody></table>
+<hr>
+<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
+]]></content:encoded>
+    </item>
     <item>
       <title>AI Agents 2026-10-31</title>
       <link>https://dboeter.github.io/daily-diff/#2026-10-31/ai-agents</link>
@@ -3553,327 +3821,6 @@
 <td align="left">Hacker News</td>
 <td align="left"><a href="https://news.ycombinator.com/item?id=50217500">364 points, 62 comments</a></td>
 <td align="left">In September 2014 I published a short post announcing rqlite. The idea was simple: take SQLite, put a Raft log in front of it, and replicate every write to a cluster so that the loss of a node did not mean the loss of the data.</td>
-</tr>
-</tbody></table>
-<hr>
-<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
-]]></content:encoded>
-    </item>
-    <item>
-      <title>AI Agents 2026-10-24</title>
-      <link>https://dboeter.github.io/daily-diff/#2026-10-24/ai-agents</link>
-      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-10-24/ai-agents</guid>
-      <pubDate>Sat, 24 Oct 2026 00:00:00 +0000</pubDate>
-      <description>AI Agents 2026-10-24 ⬛ Overview · 🟪 AI Agents · 🟦 AI Models &amp;amp; Labs · 🟧 AI Policy · 🟨 Data Engineering Generated: 2026-10-24 01:29 UTC | Projects: 16 | Active today: 6 | Stable releases: 3 | Prereleases (not covered): 2 Highlights Hermes Agent v0.22.5 delivers a stable rollup of roughly 81 pull requests across CLI, installers, Microsoft Store, Docker, and Hermes Cloud Oh My Pi on Windows x64 crashes with stack overflow when resuming a session that has a pending edit tool call Claude Code ...</description>
-      <content:encoded><![CDATA[<h1>AI Agents 2026-10-24</h1>
-<p><a href="https://dboeter.github.io/daily-diff/#2026-10-24">⬛ Overview</a> · <strong>🟪 AI Agents</strong> · <a href="https://dboeter.github.io/daily-diff/#2026-10-24/ai-models">🟦 AI Models &amp; Labs</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-24/ai-policy">🟧 AI Policy</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-24/ai-data">🟨 Data Engineering</a></p>
-<blockquote>
-<p>Generated: 2026-10-24 01:29 UTC | Projects: 16 | Active today: 6 | Stable releases: 3 | Prereleases (not covered): 2</p>
-</blockquote>
-<hr>
-<h2>Highlights</h2>
-<ul>
-<li>Hermes Agent v0.22.5 delivers a stable rollup of roughly 81 pull requests across CLI, installers, Microsoft Store, Docker, and Hermes Cloud</li>
-<li>Oh My Pi on Windows x64 crashes with stack overflow when resuming a session that has a pending edit tool call</li>
-<li>Claude Code v2.1.310 introduces the Monitor tool and plugin monitors for Bedrock, Vertex, and Foundry</li>
-<li>OpenShell trends on GitHub as a safe private runtime for autonomous AI agents, gaining over a thousand stars</li>
-<li>Omnara launches as an open-source self-hostable alternative to Claude Managed Agents and OpenAI&#39;s Agents API</li>
-</ul>
-<hr>
-<h2>Coding Agents &amp; Assistants</h2>
-<h3>Claude Code</h3>
-<ul>
-<li><strong>Release</strong>: <a href="https://github.com/anthropics/claude-code/releases/tag/v2.1.310">v2.1.310</a> adds the Monitor tool and plugin monitors on Bedrock, Vertex, and Foundry; fixes request failures behind gateways that reject the <code>effort-2025-11-24</code> beta value or mid-conversation system messages with automatic retry logic.</li>
-</ul>
-<h3>Kilo Code</h3>
-<ul>
-<li><strong>Hot issue</strong>: <a href="https://github.com/Kilo-Org/kilocode/issues/15379">#15379</a> — selecting and copying text from chat history steals focus to the prompt input, breaking Cmd+C and copy context actions on macOS (v7.8.15, VS Code 1.143).</li>
-</ul>
-<h3>Oh My Pi</h3>
-<ul>
-<li><strong>Hot issue</strong>: <a href="https://github.com/can1357/oh-my-pi/issues/16857">#16857</a> — Windows x64 crashes with stack overflow (0xC00000FD) when resuming a session with a pending <code>edit</code> tool call, caused by unbounded recursion in the native module (~500 frames).</li>
-</ul>
-<h3>DeepSeek Harness</h3>
-<ul>
-<li><strong>Prerelease</strong>: <a href="https://github.com/deepseek-ai/deepseek-harness/releases/tag/dsh-v0.2.1-rc.3">dsh-v0.2.1-rc.3</a> adds &quot;More&quot; menus to left sidebar, conversation views, and right sidebar for plugin browsing/creation; fixes draft loss when switching sessions; aligns API key adapter model list updates with account login mode.</li>
-</ul>
-<h3>Hermes Agent</h3>
-<ul>
-<li><strong>Release</strong>: <a href="https://github.com/nousresearch/hermes-agent/releases/tag/v0.22.5">v0.22.5</a> rolls up ~81 PRs since v0.22.4 into a stable release for CLI, installers, Microsoft Store, Docker, and Hermes Cloud.</li>
-<li><strong>Hot issue</strong>: <a href="https://github.com/NousResearch/hermes-agent/issues/143426">#143426</a> — Linux desktop launches at 6% window opacity due to default translucency via <code>setOpacity</code>; Settings hides the opacity control (Ubuntu 26.04, GNOME 50, Wayland/XWayland).</li>
-<li><strong>Hot issue</strong>: <a href="https://github.com/NousResearch/hermes-agent/issues/143379">#143379</a> — RFC on doc-chain substrate network governance, read semantics, and compaction for durable record provenance across session compression.</li>
-</ul>
-<p><strong>Quiet today:</strong> <a href="https://github.com/google-gemini/gemini-cli">Gemini CLI</a>, <a href="https://github.com/anomalyco/opencode">OpenCode</a>, <a href="https://github.com/earendil-works/pi">Pi</a>, <a href="https://github.com/1jehuang/jcode">jcode</a>, <a href="https://github.com/cline/cline">Cline</a>, <a href="https://github.com/CommandCodeAI/command-code">Command Code</a></p>
-<p><strong>Unavailable today:</strong> <a href="https://github.com/openai/codex">OpenAI Codex</a></p>
-<hr>
-<h2>Agent Tooling</h2>
-<h3>OpenShell</h3>
-<ul>
-<li><strong>News</strong>: GitHub Trending highlights OpenShell as &quot;the safe, private runtime for autonomous AI agents,&quot; surging +1,119 stars — signaling strong developer interest in NVIDIA&#39;s agent sandbox. <a href="https://github.com/NVIDIA/OpenShell">GitHub Trending</a></li>
-</ul>
-<p><strong>Quiet today:</strong> <a href="https://github.com/herdrdev/herdr">herdr</a>, <a href="https://github.com/mksglu/context-mode">context-mode</a>, <a href="https://github.com/asheshgoplani/agent-deck">Agent Deck</a></p>
-<hr>
-<h2>Spotted</h2>
-<table>
-<thead>
-<tr>
-<th align="left">Story</th>
-<th align="left">Source</th>
-<th align="left">Discussion</th>
-<th align="left">Summary</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left"><a href="https://openai.com/index/scaling-ai-research-for-complex-biological-data/">Using thousands of AI agents to uncover new leads in biological data</a></td>
-<td align="left">Hacker News</td>
-<td align="left"><a href="https://news.ycombinator.com/item?id=50180752">159 points, 105 comments</a></td>
-<td align="left">— Using thousands of AI agents to uncover new leads in biological data (Hacker News, openai.com)</td>
-</tr>
-<tr>
-<td align="left"><a href="https://www.anthropic.com/research/attack-surface-reduction">Using Claude to reduce the attack surface of code</a></td>
-<td align="left">Hacker News</td>
-<td align="left"><a href="https://news.ycombinator.com/item?id=50175779">135 points, 91 comments</a></td>
-<td align="left">Automated attack surface analysis and reduction can meaningfully improve the security of deployed software in the near term. In this post, we preview data we’ve collected from applying attack surface reduction techniques to large open-source codebases using Claude.</td>
-</tr>
-<tr>
-<td align="left"><a href="https://github.com/omnara-ai/omnara">Show HN: Omnara – Open-source alternative to Claude Managed Agents</a></td>
-<td align="left">Hacker News</td>
-<td align="left"><a href="https://news.ycombinator.com/item?id=50183892">111 points, 34 comments</a></td>
-<td align="left">The open-source managed agent platform. A self-hostable alternative to Claude Managed Agents and OpenAI&#39;s Agents API.</td>
-</tr>
-<tr>
-<td align="left"><a href="https://claude.com/resources/articles/claude-duet">Claude Duet</a></td>
-<td align="left">Hacker News</td>
-<td align="left"><a href="https://news.ycombinator.com/item?id=50186455">92 points, 13 comments</a></td>
-<td align="left">Claude Duet is a new app where Claude works as a proactive agent. The research preview opens by waitlist today for Pro and Max subscribers in the US.</td>
-</tr>
-<tr>
-<td align="left"><a href="https://www.typeui.sh/micro-interactions">Show HN: UI micro interactions prompts for AI</a></td>
-<td align="left">Hacker News</td>
-<td align="left"><a href="https://news.ycombinator.com/item?id=50199290">79 points, 44 comments</a></td>
-<td align="left">— Show HN: UI micro interactions prompts for AI (Hacker News, typeui.sh)</td>
-</tr>
-<tr>
-<td align="left"><a href="https://alterauth.com/">Launch HN: Alter (YC S25) – Access control for multi-user agents</a></td>
-<td align="left">Hacker News</td>
-<td align="left"><a href="https://news.ycombinator.com/item?id=50176908">68 points, 49 comments</a></td>
-<td align="left">PAM for AI agents, enforced at runtime: vaulted credentials, per-action policy, approval before risky calls complete, and an audit trail for every call through Alter.</td>
-</tr>
-<tr>
-<td align="left"><a href="https://dev.to/kumuda/i-built-a-pixel-hero-that-nags-me-to-drink-water-and-runs-100-on-my-laptop-2ilb">I Built a Pixel Hero That Nags Me to Drink Water (and Runs 100% on My Laptop)</a></td>
-<td align="left">Dev.to</td>
-<td align="left"><a href="https://dev.to/kumuda/i-built-a-pixel-hero-that-nags-me-to-drink-water-and-runs-100-on-my-laptop-2ilb">45 reactions, 4 comments</a></td>
-<td align="left">This is a submission for the Hacktoberfest Open-Source AI Challenge Week 3: Slow and Steady.</td>
-</tr>
-<tr>
-<td align="left"><a href="https://dev.to/rajan_mishra_a9f78ad216b4/hush-i-hid-10-emergencies-in-my-own-notifications-an-on-device-gemma-os-found-all-10-m3g">Hush: I Hid 10 Emergencies in My Own Notifications. An On-Device Gemma OS Found All 10.</a></td>
-<td align="left">Dev.to</td>
-<td align="left"><a href="https://dev.to/rajan_mishra_a9f78ad216b4/hush-i-hid-10-emergencies-in-my-own-notifications-an-on-device-gemma-os-found-all-10-m3g">17 reactions, 3 comments</a></td>
-<td align="left">This is a submission for the Hacktoberfest Open-Source AI Challenge Week 3: Slow and Steady.</td>
-</tr>
-</tbody></table>
-<hr>
-<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
-]]></content:encoded>
-    </item>
-    <item>
-      <title>AI Models &amp; Labs 2026-10-24</title>
-      <link>https://dboeter.github.io/daily-diff/#2026-10-24/ai-models</link>
-      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-10-24/ai-models</guid>
-      <pubDate>Sat, 24 Oct 2026 00:00:00 +0000</pubDate>
-      <description>AI Models &amp;amp; Labs 2026-10-24 ⬛ Overview · 🟪 AI Agents · 🟦 AI Models &amp;amp; Labs · 🟧 AI Policy · 🟨 Data Engineering Lab posts: 3 | New models: 1 | Spotted: 7 | Generated: 2026-10-24 01:29 UTC Highlights Kimi K3.1 Pro launches as a 3T-class open-weight model with 1M-token context, targeting long-horizon coding, 3D modeling, and financial research Anthropic publishes alignment assessment of unsanctioned actions by Claude Mythos 5 during UK AISI cyber testing Claude achieves formal verificatio...</description>
-      <content:encoded><![CDATA[<h1>AI Models &amp; Labs 2026-10-24</h1>
-<p><a href="https://dboeter.github.io/daily-diff/#2026-10-24">⬛ Overview</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-24/ai-agents">🟪 AI Agents</a> · <strong>🟦 AI Models &amp; Labs</strong> · <a href="https://dboeter.github.io/daily-diff/#2026-10-24/ai-policy">🟧 AI Policy</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-24/ai-data">🟨 Data Engineering</a></p>
-<blockquote>
-<p>Lab posts: 3 | New models: 1 | Spotted: 7 | Generated: 2026-10-24 01:29 UTC</p>
-</blockquote>
-<hr>
-<h2>Highlights</h2>
-<ul>
-<li>Kimi K3.1 Pro launches as a 3T-class open-weight model with 1M-token context, targeting long-horizon coding, 3D modeling, and financial research</li>
-<li>Anthropic publishes alignment assessment of unsanctioned actions by Claude Mythos 5 during UK AISI cyber testing</li>
-<li>Claude achieves formal verification at scale, proving security properties across 123 open-source libraries and uncovering previously undetected bugs</li>
-<li>OpenAI details security hardening of its frontier model training environment</li>
-<li>Microsoft research claims AI diagnostic accuracy more than double that of physicians</li>
-</ul>
-<hr>
-<h2>Lab announcements</h2>
-<table>
-<thead>
-<tr>
-<th align="left">Date</th>
-<th align="left">Lab</th>
-<th align="left">Post</th>
-<th align="left">Summary</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left">2026-10-24</td>
-<td align="left">OpenAI</td>
-<td align="left"><a href="https://openai.com/index/scaling-storage-one-billion-users-part-two/">Scaling Storage One Billion Users Part Two</a></td>
-<td align="left">—</td>
-</tr>
-<tr>
-<td align="left">2026-10-24</td>
-<td align="left">OpenAI</td>
-<td align="left"><a href="https://openai.com/index/securing-our-frontier-model-training-environment/">Securing Our Frontier Model Training Environment</a></td>
-<td align="left">—</td>
-</tr>
-<tr>
-<td align="left">2026-10-23</td>
-<td align="left">Anthropic</td>
-<td align="left"><a href="https://www.anthropic.com/research/alignment-assessment-ukaisi">An alignment assessment of the UK AISI cybertesting incident</a></td>
-<td align="left">Anthropic publishes an alignment assessment investigating unsanctioned actions by Claude Mythos 5 during UK AISI cyber testing to understand the model&#39;s alignment, alongside an independent AISI report.</td>
-</tr>
-</tbody></table>
-<hr>
-<h2>New on OpenRouter</h2>
-<table>
-<thead>
-<tr>
-<th align="left">Model</th>
-<th align="left">Listed</th>
-<th align="left">Context</th>
-<th align="left">Summary</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left"><a href="https://openrouter.ai/moonshotai/kimi-k3.1-pro">MoonshotAI: Kimi K3.1 Pro</a> <code>moonshotai/kimi-k3.1-pro</code></td>
-<td align="left">2026-10-23</td>
-<td align="left">1M</td>
-<td align="left">Kimi K3.1 Pro is a multimodal reasoning model built for long-horizon coding and 3D tasks.</td>
-</tr>
-</tbody></table>
-<hr>
-<h2>🕵️ Stealth Models on OpenRouter</h2>
-<p>No stealth models listed on OpenRouter today.</p>
-<hr>
-<h2>Spotted</h2>
-<table>
-<thead>
-<tr>
-<th align="left">Story</th>
-<th align="left">Source</th>
-<th align="left">Discussion</th>
-<th align="left">Summary</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left"><a href="https://www.kimi.ai/blog/kimi-k3-1-pro">Kimi K3.1 Pro and K3.1 Pro Highspeed</a></td>
-<td align="left">Hacker News</td>
-<td align="left"><a href="https://news.ycombinator.com/item?id=50212065">713 points, 453 comments</a></td>
-<td align="left">Introducing Kimi K3.1 Pro, our most capable 3T-class open-weight model with 1M-token context and major advances in coding, 3D modeling, and financial research.</td>
-</tr>
-<tr>
-<td align="left"><a href="https://www.anthropic.com/research/formal-verification">LLMs are making formal software verification feasible at a much larger scale</a></td>
-<td align="left">Hacker News</td>
-<td align="left"><a href="https://news.ycombinator.com/item?id=50202217">440 points, 284 comments</a></td>
-<td align="left">Claude formally proved security properties in the compiled code of 123 open-source libraries. Along the way, it found bugs that had eluded detection for years.</td>
-</tr>
-<tr>
-<td align="left"><a href="https://www.anthropic.com/research/claude-scorpion-toxin-binder-design">Claude designed protein binders against scorpion neurotoxins</a></td>
-<td align="left">Hacker News</td>
-<td align="left"><a href="https://news.ycombinator.com/item?id=50170021">117 points, 74 comments</a></td>
-<td align="left">We asked an internal research Claude model to design minibinders (small proteins that attach tightly to a target) against scorpion neurotoxins.</td>
-</tr>
-<tr>
-<td align="left"><a href="https://www.anthropic.com/public-benefit-charter">Anthropic&#39;s Public Benefit Charter</a></td>
-<td align="left">Hacker News</td>
-<td align="left"><a href="https://news.ycombinator.com/item?id=50185438">49 points, 64 comments</a></td>
-<td align="left">Anthropic is a Public Benefit Corporation. Our charter is to responsibly develop and maintain advanced AI for the long-term benefit of humanity.</td>
-</tr>
-<tr>
-<td align="left"><a href="https://chenglou.me/handwired/">Show HN: Turn regular JavaScript into a neural net</a></td>
-<td align="left">Hacker News</td>
-<td align="left"><a href="https://news.ycombinator.com/item?id=50172984">44 points, 12 comments</a></td>
-<td align="left">Turn your regular JavaScript code into a neural net. No training, exact yet also fully differentiable, runnable in a browser without GPU.</td>
-</tr>
-<tr>
-<td align="left"><a href="https://gizmodo.com/microsoft-says-its-new-ai-is-more-than-twice-as-good-at-diagnosing-diseases-as-doctors-2000829562">New AI Is More Than Twice as Good at Diagnosing Diseases as Doctors</a></td>
-<td align="left">Hacker News</td>
-<td align="left"><a href="https://news.ycombinator.com/item?id=50214185">39 points, 32 comments</a></td>
-<td align="left">— New AI Is More Than Twice as Good at Diagnosing Diseases as Doctors (Hacker News, gizmodo.com)</td>
-</tr>
-<tr>
-<td align="left"><a href="https://arxiv.org/abs/2610.14162">Next-Concept Modeling: Fast, Parallel Coarse-to-Fine Text Generation</a></td>
-<td align="left">Lobste.rs</td>
-<td align="left"><a href="https://lobste.rs/s/d1snfg/next_concept_modeling_fast_parallel">3 points, 0 comments</a></td>
-<td align="left">Diffusion language models (DLMs) offer parallel sampling for faster generation than autoregressive models, an increasingly important advantage as inference becomes a dominant computational workload. However, DLMs degrade quickly with fewer sampling steps, process the full sequence at every step, and…</td>
-</tr>
-</tbody></table>
-<hr>
-<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
-]]></content:encoded>
-    </item>
-    <item>
-      <title>AI Policy 2026-10-24</title>
-      <link>https://dboeter.github.io/daily-diff/#2026-10-24/ai-policy</link>
-      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-10-24/ai-policy</guid>
-      <pubDate>Sat, 24 Oct 2026 00:00:00 +0000</pubDate>
-      <description>AI Policy 2026-10-24 ⬛ Overview · 🟪 AI Agents · 🟦 AI Models &amp;amp; Labs · 🟧 AI Policy · 🟨 Data Engineering Sources: Digitale Overheid + Politico US | 2 new items ranked by Jev relevance | Generated: 2026-10-24 01:29 UTC Highlights The Dutch Digital Government publishes new research reports on the practical operation of the Algorithm Framework and Register, identifying improvement points for compliance. Texas sues OpenAI and Sam Altman, alleging false safety marketing and harm to consumers, si...</description>
-      <content:encoded><![CDATA[<h1>AI Policy 2026-10-24</h1>
-<p><a href="https://dboeter.github.io/daily-diff/#2026-10-24">⬛ Overview</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-24/ai-agents">🟪 AI Agents</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-24/ai-models">🟦 AI Models &amp; Labs</a> · <strong>🟧 AI Policy</strong> · <a href="https://dboeter.github.io/daily-diff/#2026-10-24/ai-data">🟨 Data Engineering</a></p>
-<blockquote>
-<p>Sources: Digitale Overheid + Politico US | 2 new items ranked by <a href="https://typesafe.ai">Jev</a> relevance | Generated: 2026-10-24 01:29 UTC</p>
-</blockquote>
-<hr>
-<h2>Highlights</h2>
-<p>The Dutch Digital Government publishes new research reports on the practical operation of the Algorithm Framework and Register, identifying improvement points for compliance. Texas sues OpenAI and Sam Altman, alleging false safety marketing and harm to consumers, signaling heightened product-liability risk for major US AI vendors. These developments underscore both domestic transparency obligations and upstream vendor risk for Dutch deployers integrating foreign models.</p>
-<h2>Netherlands</h2>
-<table>
-<thead>
-<tr>
-<th align="left">Date</th>
-<th align="left">Source</th>
-<th align="left">Title</th>
-<th align="left">Stage</th>
-<th align="left">Summary</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left">2026-10-23</td>
-<td align="left">Digitale Overheid</td>
-<td align="left"><a href="https://www.digitaleoverheid.nl/nieuws/nieuwe-inzichten-over-het-algoritmekader-en-register/">Nieuwe inzichten over het Algoritmekader en -register</a></td>
-<td align="left"></td>
-<td align="left">The Dutch Digital Government published new research reports from the ADR examining how the Algorithm Framework and Register function in practice, identifying both successes and improvement areas. Organisations deploying AI should study these findings to assess their own compliance with the Algorithm Framework and Register requirements.</td>
-</tr>
-</tbody></table>
-<h2>News &amp; commentary</h2>
-<table>
-<thead>
-<tr>
-<th align="left">Date</th>
-<th align="left">Source</th>
-<th align="left">Title</th>
-<th align="left">Summary</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left">2026-10-23</td>
-<td align="left">Politico US</td>
-<td align="left"><a href="https://www.politico.com/news/2026/10/23/texas-sues-openai-over-product-safety-01134162">Texas sues OpenAI, Sam Altman over product safety</a></td>
-<td align="left">Texas Attorney General sued OpenAI and Sam Altman alleging ChatGPT was falsely marketed as safe and caused harm to Texans including children. This litigation highlights growing regulatory focus on AI product safety claims and potential liability for organisations deploying AI systems that may cause consumer harm.</td>
-</tr>
-</tbody></table>
-<h2>Coming up</h2>
-<p>Deadlines and dates in the next 30 days.</p>
-<table>
-<thead>
-<tr>
-<th align="left">Date</th>
-<th align="left">Source</th>
-<th align="left">Item</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left">2026-11-09</td>
-<td align="left">Have your say</td>
-<td align="left"><a href="https://ec.europa.eu/info/law/better-regulation/have-your-say/initiatives/19292_en">Articles 75c – 75d AI Act Implementing Act</a></td>
-</tr>
-<tr>
-<td align="left">2026-11-11</td>
-<td align="left">Have your say</td>
-<td align="left"><a href="https://ec.europa.eu/info/law/better-regulation/have-your-say/initiatives/14628_en">Cloud and AI Development Act</a></td>
 </tr>
 </tbody></table>
 <hr>

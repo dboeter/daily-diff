@@ -13,7 +13,70 @@
       <height>144</height>
     </image>
     <atom:link href="https://dboeter.github.io/daily-diff/feeds/ai-agents.xml" rel="self" type="application/rss+xml"/>
-    <lastBuildDate>Sat, 31 Oct 2026 05:27:19 +0000</lastBuildDate>
+    <lastBuildDate>Sun, 01 Nov 2026 05:52:13 +0000</lastBuildDate>
+    <item>
+      <title>AI Agents 2026-11-01</title>
+      <link>https://dboeter.github.io/daily-diff/#2026-11-01/ai-agents</link>
+      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-11-01/ai-agents</guid>
+      <pubDate>Sun, 01 Nov 2026 00:00:00 +0000</pubDate>
+      <description>AI Agents 2026-11-01 ⬛ Overview · 🟪 AI Agents · 🟦 AI Models &amp;amp; Labs · 🟨 Data Engineering Projects: 16 | Active today: 4 | Stable releases: 2 | Prereleases (not covered): 5 | Generated: 2026-11-01 05:49 UTC Highlights A trojanized anthropic.claude-code@2.1.313 extension on Open-VSX installed an SSH backdoor when loaded in VS Code. OpenAI Codex users report the production macOS app fails update checks with HTTP 404 fetching the Sparkle appcast. Oh My Pi v18.14.2 replaces isLoopGuardedModel w...</description>
+      <content:encoded><![CDATA[<h1>AI Agents 2026-11-01</h1>
+<p><a href="https://dboeter.github.io/daily-diff/#2026-11-01">⬛ Overview</a> · <strong>🟪 AI Agents</strong> · <a href="https://dboeter.github.io/daily-diff/#2026-11-01/ai-models">🟦 AI Models &amp; Labs</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-01/ai-data">🟨 Data Engineering</a></p>
+<blockquote>
+<p>Projects: 16 | Active today: 4 | Stable releases: 2 | Prereleases (not covered): 5 | Generated: 2026-11-01 05:49 UTC</p>
+</blockquote>
+<hr>
+<h2>Highlights</h2>
+<ul>
+<li>A trojanized <code>anthropic.claude-code@2.1.313</code> extension on Open-VSX installed an SSH backdoor when loaded in VS Code.</li>
+<li>OpenAI Codex users report the production macOS app fails update checks with HTTP 404 fetching the Sparkle appcast.</li>
+<li>Oh My Pi v18.14.2 replaces <code>isLoopGuardedModel</code> with <code>loopGuardLevel</code> (<code>&quot;off&quot;</code>, <code>&quot;exact&quot;</code>, <code>&quot;semantic&quot;</code>) and fixes Claude false-positive loop detection, OpenAI header casing conflicts, and stalled Anthropic streams.</li>
+</ul>
+<hr>
+<h2>Coding Agents &amp; Assistants</h2>
+<h3>Claude Code</h3>
+<ul>
+<li><strong>News:</strong> <a href="https://dev.to/slabb/a-trojanized-claude-code-extension-plants-an-ssh-backdoor-the-7-point-audit-for-your-machine-23cj">A trojanized Claude Code extension plants an SSH backdoor: the 7-point audit for your machine</a> reports that <code>anthropic.claude-code@2.1.313</code> on Open-VSX contained a malicious loader that installed an SSH backdoor when VS Code loaded the extension.</li>
+</ul>
+<h3>OpenAI Codex</h3>
+<ul>
+<li><strong>Hot issue:</strong> <a href="https://github.com/openai/codex/issues/58551">#58551</a>: users report that <strong>Check for Updates</strong> on macOS 27.2 fails with an HTTP 404 fetching the Sparkle appcast, blocking update checks on the production desktop app. (10 comments, 2 👍; +12 in the last 24h)</li>
+<li><strong>News:</strong> <a href="https://news.ycombinator.com/item?id=50320588">ChatGPT and Codex usage limits merging</a> discusses OpenAI combining usage limits across ChatGPT and Codex, affecting how subscribers allocate their quota.</li>
+</ul>
+<h3>Oh My Pi</h3>
+<ul>
+<li><strong>Release:</strong> <a href="https://github.com/can1357/oh-my-pi/releases/tag/v18.14.2">v18.14.2</a> replaces <code>isLoopGuardedModel</code> with <code>loopGuardLevel</code> (<code>&quot;off&quot;</code>, <code>&quot;exact&quot;</code>, <code>&quot;semantic&quot;</code>) and moves <code>thinking-loop-guard</code> to a catalog axis applied on every host; fixes incomplete local compaction and turn summaries being used as context, fixes Claude false-positive &quot;Thinking loop detected&quot; on repeated progress lines, fixes per-request OpenAI-compatible header casing conflicts, and fixes stalled Anthropic streams with empty deltas never timing out.</li>
+</ul>
+<p><strong>Quiet today:</strong> <a href="https://github.com/google-gemini/gemini-cli">Gemini CLI</a>, <a href="https://github.com/Kilo-Org/kilocode">Kilo Code</a>, <a href="https://github.com/anomalyco/opencode">OpenCode</a>, <a href="https://github.com/earendil-works/pi">Pi</a>, <a href="https://github.com/1jehuang/jcode">jcode</a>, <a href="https://github.com/cline/cline">Cline</a>, <a href="https://github.com/CommandCodeAI/command-code">Command Code</a>, <a href="https://github.com/deepseek-ai/deepseek-harness">DeepSeek Harness</a>, <a href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a></p>
+<hr>
+<h2>Agent Tooling</h2>
+<h3>Agent Deck</h3>
+<ul>
+<li><strong>Release:</strong> <a href="https://github.com/asheshgoplani/agent-deck/releases/tag/v1.16.35">v1.16.35</a> adds a first-run welcome TUI with agent sign-in and a &quot;Show me around&quot; tour, a new <code>agent-deck trace</code> CLI that records Claude and Codex tool-call spans into <code>trace.db</code>, opt-in notification-bar sorting by last access, opt-in guarded retry for swallowed Codex submits, and managed telemetry config with org ID and opt-in crash reports. Fixes include preserving user <code>config.toml</code> during codex-hooks install/uninstall, correcting conductor heartbeat accounting for archived sessions, and ensuring bridge.log lines are written once under launchd/systemd.</li>
+</ul>
+<p><strong>Quiet today:</strong> <a href="https://github.com/NVIDIA/OpenShell">OpenShell</a>, <a href="https://github.com/herdrdev/herdr">herdr</a>, <a href="https://github.com/mksglu/context-mode">context-mode</a></p>
+<hr>
+<h2>Spotted</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Story</th>
+<th align="left">Source</th>
+<th align="left">Discussion</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a href="https://trypalomino.com/">Show HN: Ultrafast Rust Based Agent Workspace</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50310055">10 points, 22 comments</a></td>
+<td align="left">—</td>
+</tr>
+</tbody></table>
+<hr>
+<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
+]]></content:encoded>
+    </item>
     <item>
       <title>AI Agents 2026-10-31</title>
       <link>https://dboeter.github.io/daily-diff/#2026-10-31/ai-agents</link>

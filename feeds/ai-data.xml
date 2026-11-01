@@ -13,7 +13,128 @@
       <height>144</height>
     </image>
     <atom:link href="https://dboeter.github.io/daily-diff/feeds/ai-data.xml" rel="self" type="application/rss+xml"/>
-    <lastBuildDate>Sat, 31 Oct 2026 05:27:19 +0000</lastBuildDate>
+    <lastBuildDate>Sun, 01 Nov 2026 05:52:13 +0000</lastBuildDate>
+    <item>
+      <title>Data Engineering 2026-11-01</title>
+      <link>https://dboeter.github.io/daily-diff/#2026-11-01/ai-data</link>
+      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-11-01/ai-data</guid>
+      <pubDate>Sun, 01 Nov 2026 00:00:00 +0000</pubDate>
+      <description>Data Engineering 2026-11-01 ⬛ Overview · 🟪 AI Agents · 🟦 AI Models &amp;amp; Labs · 🟨 Data Engineering Vendor items: 3 | Projects: 27 | Active today: 1 | Stable releases: 0 | Prereleases (not covered): 0 | Generated: 2026-11-01 05:49 UTC Highlights All vendor release notes today are minor fixes and previews; no deprecations or breaking changes. Action required Date Platform Item What to do 2026-11-30 Azure Databricks Upcoming end of life for the Genie One MCP Beta endpoint The Genie One MCP Beta ...</description>
+      <content:encoded><![CDATA[<h1>Data Engineering 2026-11-01</h1>
+<p><a href="https://dboeter.github.io/daily-diff/#2026-11-01">⬛ Overview</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-01/ai-agents">🟪 AI Agents</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-01/ai-models">🟦 AI Models &amp; Labs</a> · <strong>🟨 Data Engineering</strong></p>
+<blockquote>
+<p>Vendor items: 3 | Projects: 27 | Active today: 1 | Stable releases: 0 | Prereleases (not covered): 0 | Generated: 2026-11-01 05:49 UTC</p>
+</blockquote>
+<hr>
+<h2>Highlights</h2>
+<ul>
+<li>All vendor release notes today are minor fixes and previews; no deprecations or breaking changes.</li>
+</ul>
+<hr>
+<h2>Action required</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Platform</th>
+<th align="left">Item</th>
+<th align="left">What to do</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-11-30</td>
+<td align="left">Azure Databricks</td>
+<td align="left"><a href="https://learn.microsoft.com/azure/databricks/release-notes/whats-coming#upcoming-end-of-life-for-the-genie-one-mcp-beta-endpoint">Upcoming end of life for the Genie One MCP Beta endpoint</a></td>
+<td align="left">The Genie One MCP Beta endpoint at <code>https://&lt;workspace-hostname&gt;/api/2.0/mcp/genie</code> reaches end of life on November 30, 2026, after which requests fail; migrate all workloads to the <code>system.ai.genie_one_mcp</code> MCP in Unity Gateway.</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>Databricks</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Item</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-10-29</td>
+<td align="left"><a href="https://learn.microsoft.com/azure/databricks/ai-bi/release-notes/2026#dashboard-bug-fixes">Dashboard bug fixes</a></td>
+<td align="left">Single-field filter field changes now clear the previous default value and fall back to All or None; widget-level filter values refresh automatically when datasets change; custom themes no longer apply to the View queries dialog, widget context menus, or data reference popovers; funnel chart fields persist when switching chart types; tabbed editor popovers retain their initial height instead of expanding.</td>
+</tr>
+</tbody></table>
+<p><strong>Quiet today:</strong> <a href="https://github.com/delta-io/delta">Delta Lake</a>, <a href="https://github.com/delta-io/delta-rs">delta-rs</a>, <a href="https://github.com/unitycatalog/unitycatalog">Unity Catalog</a>, <a href="https://github.com/mlflow/mlflow">MLflow</a>, <a href="https://github.com/databricks/cli">Databricks CLI</a>, <a href="https://github.com/databricks/dbt-databricks">dbt-databricks</a>, <a href="https://github.com/databricks/terraform-provider-databricks">Terraform provider for Databricks</a></p>
+<hr>
+<h2>Snowflake</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Item</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-10-30</td>
+<td align="left"><a href="https://docs.snowflake.com/en/release-notes/2026/other/2026-10-30-dcm-define-secret-env-vars-preview">CREATE OR ALTER SECRET, DCM Projects DEFINE SECRET, and environment variables (Preview)</a></td>
+<td align="left">DEFINE SECRET in DCM Projects definition files enables declarative secrets management, and environment variables and secrets declared in the DCM project manifest keep values out of definition files, repositories, and deployment artifacts.</td>
+</tr>
+</tbody></table>
+<p><strong>Quiet today:</strong> <a href="https://github.com/snowflakedb/snowpark-python">Snowpark Python</a>, <a href="https://github.com/snowflakedb/snowflake-connector-python">Snowflake Connector for Python</a>, <a href="https://github.com/apache/polaris">Apache Polaris</a>, <a href="https://github.com/snowflakedb/terraform-provider-snowflake">Terraform provider for Snowflake</a></p>
+<hr>
+<h2>Azure / Fabric &amp; GCP</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Item</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-10-29</td>
+<td align="left"><a href="https://community.fabric.microsoft.com/t5/Fabric-Updates-Blog/Using-Allow-workspace-settings-editing-policy-in-Fabric-Preview/ba-p/5377845">Using Allow workspace settings editing policy in Fabric (Preview)</a></td>
+<td align="left">The Allow workspace settings editing policy enables delegating workspace administration to development teams while retaining centralized control over encryption and networking settings.</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>Open-source stack</h2>
+<h3>dbt Core</h3>
+<ul>
+<li><strong>News:</strong> <a href="https://www.getdbt.com/blog/bigquery-generative-ai-dbt-sql-functions">How to put generative AI directly into a dbt pipeline with plain SQL</a> shows how to call BigQuery&#39;s AI SQL functions from dbt models for tasks like sentiment scoring and LLM-generated product briefings.</li>
+<li><strong>News:</strong> <a href="https://www.getdbt.com/blog/bi-dashboard-chart-design-inspiration">Charts worth stealing: the design calls BI should ship</a> details the design defaults behind dbt Charts, from consistent color palettes to the small choices that make dashboards readable.</li>
+<li><strong>News:</strong> <a href="https://www.getdbt.com/blog/dbt-charts-open-source-dashboard-yaml">dbt Charts: a new open-source language for dashboards that live inside your dbt repo</a> introduces a plain YAML spec for version-controlled dashboards that deploy alongside dbt models.</li>
+</ul>
+<p><strong>Quiet today:</strong> <a href="https://github.com/SQLMesh/sqlmesh">SQLMesh</a>, <a href="https://github.com/apache/airflow">Apache Airflow</a>, <a href="https://github.com/dagster-io/dagster">Dagster</a>, <a href="https://github.com/PrefectHQ/prefect">Prefect</a>, <a href="https://github.com/dlt-hub/dlt">dlt</a>, <a href="https://github.com/apache/iceberg">Apache Iceberg</a>, <a href="https://github.com/apache/iceberg-python">PyIceberg</a>, <a href="https://github.com/duckdb/duckdb">DuckDB</a>, <a href="https://github.com/pola-rs/polars">Polars</a>, <a href="https://github.com/trinodb/trino">Trino</a>, <a href="https://github.com/great-expectations/great_expectations">Great Expectations</a>, <a href="https://github.com/sodadata/soda-core">Soda Core</a>, <a href="https://github.com/OpenLineage/OpenLineage">OpenLineage</a>, <a href="https://github.com/open-metadata/OpenMetadata">OpenMetadata</a>, <a href="https://github.com/sqlfluff/sqlfluff">SQLFluff</a></p>
+<hr>
+<h2>Spotted</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Story</th>
+<th align="left">Source</th>
+<th align="left">Discussion</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a href="http://rhaas.blogspot.com/2026/10/postgres-19-is-late-and-its-ais-fault.html">Postgres 19 is late, and it&#39;s AI&#39;s fault</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50312408">6 points, 1 comment</a></td>
+<td align="left">PostgreSQL 19&#39;s release has slipped past its historically predictable mid-September window, with the delay attributed to AI-related development work.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://jepsen.io/analyses/particledb-1.1.4">Jepsen: ParticleDB 1.1.4</a></td>
+<td align="left">Lobste.rs</td>
+<td align="left"><a href="https://lobste.rs/s/drwd4j/jepsen_particledb_1_1_4">83 points, 18 comments</a></td>
+<td align="left">—</td>
+</tr>
+</tbody></table>
+<hr>
+<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
+]]></content:encoded>
+    </item>
     <item>
       <title>Data Engineering 2026-10-31</title>
       <link>https://dboeter.github.io/daily-diff/#2026-10-31/ai-data</link>
