@@ -49,7 +49,7 @@ export interface PolicyItem extends FeedItem {
 export interface PolicyState extends ReportedState {
   /** Item id → the open deadline of a reported item; dropped once passed (policy/deadlines.ts). */
   deadlines?: Record<string, Deadline>;
-  /** Primary source name → the first day of its run of days with no judged item (`nextZeroSince`). */
+  /** Primary source name → the first day of its run of days with no fetched item (`nextZeroSince`). */
   zeroSince?: Record<string, string>;
 }
 
@@ -112,24 +112,24 @@ export async function fetchPolicySources(
 }
 
 /**
- * Days a primary source may go without a judged item before the run warns. A week: the official
+ * Days a primary source may go without a fetched item before the run warns. A week: the official
  * sources publish on weekdays, so a quiet weekend or a slow week alone does not warn.
  */
 export const QUIET_SOURCE_WARN_DAYS = 7;
 
 /**
- * Each primary source (a registered source, or a feed without `kind: news`) without a judged item
- * today keeps the first day of its quiet run; a source with one leaves the map. A failed fetch counts
+ * Each primary source (a registered source, or a feed without `kind: news`) that fetched no item
+ * today keeps the first day of its quiet run; a source that fetched one leaves the map, judged or not
+ * (a watchlist item already reported at its stage is not judged again). A failed fetch (null) counts
  * as quiet: a broken source is what the warning is for. Same-day re-runs keep the date.
  */
 export function nextZeroSince(
   prev: Record<string, string> | undefined,
   primary: string[],
-  judgedSources: string[],
+  fetched: Record<string, number | null>,
   dateStr: string,
 ): Record<string, string> {
-  const judged = new Set(judgedSources);
-  return Object.fromEntries(primary.filter((n) => !judged.has(n)).map((n) => [n, prev?.[n] ?? dateStr]));
+  return Object.fromEntries(primary.filter((n) => !fetched[n]).map((n) => [n, prev?.[n] ?? dateStr]));
 }
 
 /** The sources quiet for QUIET_SOURCE_WARN_DAYS days or more, today included. */
@@ -176,9 +176,9 @@ export async function fetchPolicyData(
     select: async (candidates) => {
       console.log(`  [policy] ${POLICY_REPORT.newItems(candidates.length)}`);
       const judged = candidates.map((c) => originOf.get(c.id) ?? c.source);
-      zeroSince = nextZeroSince(state?.zeroSince, primary, judged, dateStr);
+      zeroSince = nextZeroSince(state?.zeroSince, primary, fetched, dateStr);
       for (const [name, since] of quietSources(zeroSince, dateStr)) {
-        warnStep(`[policy] WARN ${name}: no judged item since ${since}; check whether the source is broken`);
+        warnStep(`[policy] WARN ${name}: no item fetched since ${since}; check whether the source is broken`);
       }
       const selection = await selectPolicyItems(candidates, {
         readerProfile: config.readerProfile,

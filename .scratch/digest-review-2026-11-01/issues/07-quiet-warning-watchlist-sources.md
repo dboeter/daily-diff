@@ -1,6 +1,6 @@
 # 07: Quiet-source warning fires for sources that do fetch
 
-Status: ready-for-agent
+Status: done
 Findings: 7 [low], see `../review.md`
 
 ## Problem
@@ -16,3 +16,7 @@ Findings: 7 [low], see `../review.md`
 ### Decision (2026-11-01)
 
 A source that fetched ≥ 1 item is not quiet; a failed or empty fetch is.
+
+### Done
+
+Cause: `nextZeroSince` counted judged items, and a watchlist item already reported at its stage is fetched but never judged. Change: it takes the per-source fetch counts (`fetched`); a source with at least 1 item leaves `zeroSince`, a failed (null) or empty fetch stays quiet; the warning reads "no item fetched since". Tests: `quiet sources` and the `fetchPolicyData` observed-state test in `src/__tests__/policy/items.test.ts`.
