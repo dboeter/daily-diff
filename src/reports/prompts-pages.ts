@@ -387,7 +387,8 @@ ${parts.map((p, i) => `${i + 1}. ${p}`).join("\n")}
 
 Rules:
 - ${NO_TITLE_RULE}
-- In ${SECTIONS.highlights}: ${goingAwayRule("bullet")} ${HIGHLIGHTS_PICK_RULE}${minorTitles.length ? `\n- These rows are minor: no Highlight for them. ${minorTitles.map((t) => `"${t}"`).join(", ")}` : ""}
+- In ${SECTIONS.highlights}: ${goingAwayRule("bullet")} ${HIGHLIGHTS_PICK_RULE}
+- When no item qualifies, ${SECTIONS.highlights} is the one bullet "- ${NO_HIGHLIGHT_NOTE}". Never a bullet about the rows as a group or about what is absent ("all notes are minor", "no deprecations"): the Action required table above the sections is not shown here.${minorTitles.length ? `\n- These rows are minor: no Highlight for them. ${minorTitles.map((t) => `"${t}"`).join(", ")}` : ""}
 - Length: at most ~150 words for ${SECTIONS.highlights}, ~120 for ${DATA_REPORT.acrossPlatforms}.
 - A major release in ${DATA_REPORT.releasesHeading} (a version x.0.0, or one whose summary names breaking changes) is a Highlights candidate: say who must test or migrate.
 - Never restate a row: the reader sees the tables right below. A bullet that only says what changed, without who is affected and what to do, is left out.

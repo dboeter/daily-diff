@@ -16,6 +16,7 @@ import {
   HOT_ISSUE_BODY_CHARS,
   hasActivity,
   isMajorRelease,
+  NEWS_TITLE_ONLY,
   releaseNotes,
   stripLinkNoise,
   topN,
@@ -206,6 +207,31 @@ describe("hasActivity", () => {
 });
 
 describe("buildProjectDigestPrompt", () => {
+  // 2026-11-01: a title-only HN story became "discusses … affecting how subscribers allocate their quota".
+  it("marks a news item without a description as title only, and bars inferring from it", () => {
+    const prompt = buildProjectDigestPrompt(
+      [
+        makeActivity({
+          news: [
+            { source: "Hacker News", title: "Limits merging", url: "https://hn/2", detail: "40 points" },
+            {
+              source: "Hacker News",
+              title: "TestTool 2",
+              url: "https://hn/3",
+              detail: "9 points",
+              description: "It ships.",
+            },
+          ],
+        }),
+      ],
+      scope,
+      "2026-11-01",
+    );
+    expect(prompt).toContain(`Limits merging — https://hn/2 (40 points)\n  ${NEWS_TITLE_ONLY}`);
+    expect(prompt).toContain("TestTool 2 — https://hn/3 (9 points)\n  Description: It ships.");
+    expect(prompt).toContain(`An item marked "${NEWS_TITLE_ONLY}": say only what its title says`);
+  });
+
   it("includes releases with their tag URL, hot issues and news", () => {
     const prompt = buildProjectDigestPrompt(
       [

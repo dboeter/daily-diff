@@ -140,6 +140,7 @@ export const SOURCE_FIDELITY_RULES = [
   "Release-stage words (GA, generally available, preview, beta, deprecated) only when the item's own row or text uses them.",
   "No call to action, audience or conclusion the source does not state: never add advice such as 'audit now' or 'upgrade immediately'.",
   "A vendor's or a self-published figure is that source's claim: attribute it ('X says', 'according to X'), and never state a target or estimate as achieved. An open issue is a report ('users report'), not an established fact.",
+  "Keep the attribution and scope a row gives: an item it words as a report ('a user reports', 'X reports that') stays a report, and one person's report never becomes 'users report', 'broad' or a company's policy.",
   "A study result keeps its scope when the source gives it: sample size, a single run, not peer reviewed.",
   "Several items on one theme in the same period are not a trend: a trend or causal claim needs rows that show it (a summary that states it, or figures such as gains or ranks), never titles, descriptions or co-occurrence alone.",
 ];
@@ -385,7 +386,7 @@ export function formatProject(a: ProjectActivity): string {
     a.news
       .map(
         (n) =>
-          `- [${n.source}] ${n.title} — ${n.url} (${n.detail})${n.description ? `\n  Description: ${n.description.slice(0, NEWS_DESCRIPTION_CHARS)}` : ""}`,
+          `- [${n.source}] ${n.title} — ${n.url} (${n.detail})\n  ${n.description ? `Description: ${n.description.slice(0, NEWS_DESCRIPTION_CHARS)}` : NEWS_TITLE_ONLY}`,
       )
       .join("\n") || "None";
 
@@ -400,6 +401,12 @@ ${issues}
 ### News mentioning ${cfg.name}
 ${news}`;
 }
+
+/**
+ * Marks a news item the model sees by its title alone. On 2026-11-01 a title-only HN story became
+ * "discusses … affecting how subscribers allocate their quota".
+ */
+export const NEWS_TITLE_ONLY = "Title only: no description";
 
 /**
  * One prompt for every active project: stable releases (or, for a project without one yet,
@@ -423,7 +430,7 @@ ${sections}
 Write the report in English: one section per project above that has something left to report, in the order given, headed \`## <Project name>\`, with at most 3 bullets, one or two sentences each. Write no other sections:
 - **Release**: what the stable release(s) change for users, in this order: ${RELEASE_ORDER}. Several releases in a range: summarize the range, do not list each one. Link each release you name as a plain Markdown link, [tag](url), never inside backticks; a range as its oldest and newest, [v1.2.0](url)–[v1.2.5](url). A release with an Announcement: describe it from the announcement, not from its first changelog entries.
 - **Prerelease**: only from a "Prereleases (no stable release yet)" list, and only when it adds notable features or breaking changes; skip routine alpha/rc bumps. Say it is a prerelease and link it.
-- **News**: what the news item says about the project and why it matters. Link it as a plain Markdown link, [<title>](<url>), never a bare URL.
+- **News**: what the news item says about the project and why it matters. Link it as a plain Markdown link, [<title>](<url>), never a bare URL. An item marked "${NEWS_TITLE_ONLY}": say only what its title says, with no consequence or reason it matters, and never describe a discussion ("discusses", "commenters").
 - **${HOT_ISSUE.label}**: one bullet per issue, written "- **${HOT_ISSUE.label}:** #<number>: <description>". The description says what the issue reports and how serious it is, worded as a report ("users report", "an issue says"), never as an established fact. When the body shows a tracking, announcement or FAQ thread rather than a bug report, say so. For a security issue, say where the problem shows and who is affected. Write no link, label, comment or 👍 count, gain or fix status: code adds them to the bullet.
 
 Rules:

@@ -550,6 +550,7 @@ describe("source fidelity rules", () => {
     expect(rules).toMatch(/GA, generally available, preview, beta/);
     expect(rules).toMatch(/No call to action/);
     expect(rules).toMatch(/X says/);
+    expect(rules).toMatch(/one person's report never becomes 'users report'/);
     expect(rules).toMatch(/sample size, a single run, not peer reviewed/);
     expect(rules).toMatch(/Several items on one theme in the same period are not a trend/);
     expect(rules).toMatch(/never titles, descriptions or co-occurrence alone/);
@@ -597,6 +598,14 @@ describe("Highlights pick, they don't restate", () => {
     expect(p).toContain("1-3 bullets");
     expect(p).toContain('These rows are minor: no Highlight for them. "Oct 26, 2026: Custom error messages"');
     expect(buildDataProsePrompt("## Snowflake", "2026-10-26")).not.toContain("These rows are minor");
+  });
+
+  // 2026-11-01: every vendor row minor, and the model wrote "All vendor release notes today are minor
+  // fixes and previews; no deprecations" above an Action required end-of-life row it never saw.
+  it("the data Highlights fall back to the no-highlight note, never a bullet about absence", () => {
+    const p = buildDataProsePrompt("## Snowflake", "2026-11-01", ["Dashboard bug fixes"]);
+    expect(p).toContain(`When no item qualifies, Highlights is the one bullet "- ${NO_HIGHLIGHT_NOTE}"`);
+    expect(p).toContain("Never a bullet about the rows as a group or about what is absent");
   });
 
   it("Trends Highlights hold 1-3 ranked bullets, one subject each, with their window", () => {
