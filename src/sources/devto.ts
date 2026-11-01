@@ -32,8 +32,20 @@ const DEVTO_PER_PAGE = 30;
  */
 const DEVTO_MIN_REACTIONS = 15;
 const API_URL = "https://dev.to/api/articles";
+/** The wait before the one retry of a 429: its `Retry-After` seconds, capped, or the default without one. */
+const RETRY_AFTER_DEFAULT_MS = 1000;
+const RETRY_AFTER_MAX_MS = 5000;
 
-/** Tags to query — run in parallel, dedup by id. */
+const retryDelayMs = (resp: Response): number => {
+  const seconds = Number(resp.headers.get("retry-after"));
+  const ms = Number.isFinite(seconds) && seconds > 0 ? seconds * 1000 : RETRY_AFTER_DEFAULT_MS;
+  return Math.min(ms, RETRY_AFTER_MAX_MS);
+};
+
+/**
+ * Tags to query, one at a time, dedup by id: in parallel, Dev.to answered HTTP 429 to three of the
+ * five on 2026-11-01.
+ */
 const TAGS = ["ai", "llm", "machinelearning", "openai", "langchain"];
 
 // ---------------------------------------------------------------------------
@@ -70,36 +82,37 @@ export async function fetchDevtoData(): Promise<DevtoData> {
   const seen = new Map<number, DevtoArticle>();
 
   try {
-    await Promise.all(
-      TAGS.map(async (tag) => {
-        try {
-          const params = new URLSearchParams({
-            tag,
-            per_page: String(DEVTO_PER_PAGE),
-            // Fetched daily: the most popular articles of the last 2 days.
-            top: "2",
-          });
+    for (const tag of TAGS) {
+      try {
+        const params = new URLSearchParams({
+          tag,
+          per_page: String(DEVTO_PER_PAGE),
+          // Fetched daily: the most popular articles of the last 2 days.
+          top: "2",
+        });
 
-          const resp = await fetch(`${API_URL}?${params}`, {
-            headers: { "User-Agent": "daily-diff/1.0" },
-          });
-
-          if (!resp.ok) {
-            console.error(`  [devto] "${tag}": HTTP ${resp.status}`);
-            return;
-          }
-
-          const raw = (await resp.json()) as DevtoApiArticle[];
-          for (const a of raw) {
-            if (!seen.has(a.id)) {
-              seen.set(a.id, toDevtoArticle(a));
-            }
-          }
-        } catch (err) {
-          console.error(`  [devto] "${tag}": ${err}`);
+        const get = () => fetch(`${API_URL}?${params}`, { headers: { "User-Agent": "daily-diff/1.0" } });
+        let resp = await get();
+        if (resp.status === 429) {
+          await new Promise((r) => setTimeout(r, retryDelayMs(resp)));
+          resp = await get();
         }
-      }),
-    );
+
+        if (!resp.ok) {
+          console.error(`  [devto] "${tag}": HTTP ${resp.status}`);
+          continue;
+        }
+
+        const raw = (await resp.json()) as DevtoApiArticle[];
+        for (const a of raw) {
+          if (!seen.has(a.id)) {
+            seen.set(a.id, toDevtoArticle(a));
+          }
+        }
+      } catch (err) {
+        console.error(`  [devto] "${tag}": ${err}`);
+      }
+    }
 
     const articles = [...seen.values()]
       .filter((a) => a.positiveReactionsCount >= DEVTO_MIN_REACTIONS)
