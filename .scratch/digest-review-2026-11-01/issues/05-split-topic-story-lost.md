@@ -1,6 +1,6 @@
 # 05: A highly discussed story with a split topic lands nowhere
 
-Status: ready-for-agent
+Status: done
 Findings: 5 [medium], see `../review.md`
 
 ## Problem
@@ -18,3 +18,7 @@ Findings: 5 [medium], see `../review.md`
 ### Decision (2026-11-01)
 
 A story that misses the Spotted topic bar but clears `TALKED_ABOUT_MIN_POINTS` goes to Also talked about, whatever its top topic.
+
+### Done
+
+Cause: `selectTalkedAbout` took only stories routed to no page, so a story on a page's topic under `SPOTTED_MIN_TOPIC_PROBABILITY` fell through both lists. Now such a story (with a Jev probability) joins the "Also talked about" lane with topic `other`, under the same points floor and per-source cap; policy talk still claims first (`src/spotted/pool.ts`, `probabilityOf` passed from `src/index.ts`). Its trace row reads `talked_about: true`. AGENTS.md's talked-about sentence updated. Test: "issue 05: a story under the Spotted topic bar with talked-about points is Also talked about".

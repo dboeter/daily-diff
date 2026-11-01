@@ -424,6 +424,7 @@ export const POLICY_TALK_PER_SOURCE: Record<StorySource, number> = { hn: 2, lobs
 /** Points a policy story needs for the Overview, per source: the same bar as `other`. */
 export const POLICY_TALK_MIN_POINTS = TALKED_ABOUT_MIN_POINTS;
 const POLICY_TOPIC = "policy";
+const OTHER_TOPIC = "other";
 
 /** An Overview "Also talked about" row: a story with the topic Jev routed it to. */
 export type TalkedAboutRow = Pick<
@@ -439,7 +440,10 @@ export type TalkedAboutRow = Pick<
  * at least POLICY_TALK_MIN_POINTS, then the rest (`other`, "Also talked about"), per source the top
  * TALKED_ABOUT_PER_SOURCE with at least TALKED_ABOUT_MIN_POINTS; at most SPOTTED_MAX_AGE_DAYS old,
  * no contest entry, each link once and none a Spotted row took (`taken`, `linkKey`s). No topic
- * probability floor: a story split between policy and other goes by its leading topic.
+ * probability floor: a story split between policy and other goes by its leading topic. A story on a
+ * page's topic but under SPOTTED_MIN_TOPIC_PROBABILITY (`probabilityOf`) joins the `other` list,
+ * whatever its topic: on 2026-11-01 a 315-point story split between research, other and models
+ * landed nowhere.
  */
 export function selectTalkedAbout(
   stories: Story[],
@@ -447,9 +451,15 @@ export function selectTalkedAbout(
   pageOf: (story: Story) => SpottedPage | null,
   dateStr: string,
   taken: Set<string>,
+  probabilityOf: (story: Story) => number | undefined = () => undefined,
 ): TalkedAboutRow[] {
   const oldest = daysBefore(dateStr, SPOTTED_MAX_AGE_DAYS);
   const claimed = new Set(taken);
+  const underBar = (s: Story) => {
+    const p = probabilityOf(s);
+    return pageOf(s) !== null && p !== undefined && p < SPOTTED_MIN_TOPIC_PROBABILITY;
+  };
+  const offPage = (s: Story) => pageOf(s) === null || underBar(s);
   const lanes = [
     { isPolicy: true, perSource: POLICY_TALK_PER_SOURCE, minPoints: POLICY_TALK_MIN_POINTS },
     { isPolicy: false, perSource: TALKED_ABOUT_PER_SOURCE, minPoints: TALKED_ABOUT_MIN_POINTS },
@@ -464,7 +474,7 @@ export function selectTalkedAbout(
                 s.source === source &&
                 topicOf(s) !== undefined &&
                 (topicOf(s) === POLICY_TOPIC) === isPolicy &&
-                pageOf(s) === null &&
+                offPage(s) &&
                 s.points >= minPoints[source] &&
                 s.published.slice(0, 10) >= oldest &&
                 !isContestEntry(s),
@@ -483,7 +493,7 @@ export function selectTalkedAbout(
       discussionUrl: s.discussionUrl,
       points: s.points,
       comments: s.comments,
-      topic: topicOf(s)!,
+      topic: underBar(s) ? OTHER_TOPIC : topicOf(s)!,
     }));
 }
 

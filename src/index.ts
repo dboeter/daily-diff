@@ -478,13 +478,11 @@ async function main(): Promise<void> {
     const topic = routing.topics.get(s.id);
     return topic ? PAGE_OF_TOPIC[topic] : null;
   };
-  const spottedRows = selectSpotted(unmatched, pageOf, spottedDropped, {
-    dateStr,
-    probabilityOf: (s) => {
-      const topic = routing.topics.get(s.id);
-      return topic ? routing.judgment.verdicts.get(s.id)?.answers.topic.probabilities?.[topic] : undefined;
-    },
-  });
+  const probabilityOf = (s: Story): number | undefined => {
+    const topic = routing.topics.get(s.id);
+    return topic ? routing.judgment.verdicts.get(s.id)?.answers.topic.probabilities?.[topic] : undefined;
+  };
+  const spottedRows = selectSpotted(unmatched, pageOf, spottedDropped, { dateStr, probabilityOf });
   const spottedOf = (page: SpottedPage) => spottedRows.filter((r) => r.page === page);
   // The Overview's policy list and "Also talked about": stories routed to a topic with no page.
   const talkedAbout = selectTalkedAbout(
@@ -493,6 +491,7 @@ async function main(): Promise<void> {
     pageOf,
     dateStr,
     new Set(spottedRows.map((r) => linkKey(r.url))),
+    probabilityOf,
   );
   // Trends' Most discussed leaves out what today's pages show: a skipped data page shows no Spotted
   // rows (a data page with project news is never skipped, nor a models page with a lab post).

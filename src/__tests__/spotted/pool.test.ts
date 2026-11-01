@@ -559,6 +559,30 @@ describe("selectTalkedAbout", () => {
     ]);
   });
 
+  it("issue 05: a story under the Spotted topic bar with talked-about points is Also talked about", () => {
+    // 2026-11-01: "Do the math" (315 pts) was research 0.43 and landed nowhere.
+    const split = story("split", "hn", 315);
+    const splitQuiet = story("splitQuiet", "hn", 20);
+    const sure = story("sure", "hn", 400);
+    const noVerdict = story("kw", "hn", 300);
+    const topic: Record<string, string> = {
+      [split.id]: "research",
+      [splitQuiet.id]: "agents",
+      [sure.id]: "agents",
+      [noVerdict.id]: "agents",
+    };
+    const probability: Record<string, number> = { [split.id]: 0.43, [splitQuiet.id]: 0.5, [sure.id]: 0.9 };
+    const rows = selectTalkedAbout(
+      [split, splitQuiet, sure, noVerdict],
+      (s) => topic[s.id],
+      (s) => PAGE[topic[s.id]!] ?? null,
+      DATE,
+      new Set(),
+      (s) => probability[s.id],
+    );
+    expect(rows.map((r) => [r.id, r.topic])).toEqual([[split.id, "other"]]);
+  });
+
   it("ticket 14 replay: the 2026-10-26 pool puts the AI-found PHP RCE on the Overview", () => {
     const day = JSON.parse(
       fs.readFileSync(new URL("../fixtures/spotted-2026-10-26.json", import.meta.url), "utf-8"),
