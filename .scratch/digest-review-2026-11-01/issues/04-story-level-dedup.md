@@ -1,6 +1,6 @@
 # 04: One event, one row
 
-Status: needs-triage
+Status: ready-for-agent
 Findings: 4 [medium], see `../review.md`
 
 ## Problem
@@ -14,3 +14,9 @@ Repeats are caught by item id and `linkKey` only (`src/spotted/pool.ts:174-209`,
 
 - Same-day grouping (one row, other outlets folded in) vs cross-day "already covered" check; Jev same-event judgment vs title-token overlap.
 - Should a genuinely new development (a follow-up with new facts) still show?
+
+## Comments
+
+### Decision (2026-11-01)
+
+Jev same-event check: a fresh story that reports the same event as a higher-ranked story today or a story shown in the last 2 days, with no new development, is dropped as `repeat`. Runs before news matching, so it covers project news too. Cached in a verdict file.

@@ -1,6 +1,6 @@
 # 07: Quiet-source warning fires for sources that do fetch
 
-Status: needs-triage
+Status: ready-for-agent
 Findings: 7 [low], see `../review.md`
 
 ## Problem
@@ -10,3 +10,9 @@ Findings: 7 [low], see `../review.md`
 ## Open questions
 
 - Count "fetched ≥ 1" rather than "judged ≥ 1" as not quiet?
+
+## Comments
+
+### Decision (2026-11-01)
+
+A source that fetched ≥ 1 item is not quiet; a failed or empty fetch is.

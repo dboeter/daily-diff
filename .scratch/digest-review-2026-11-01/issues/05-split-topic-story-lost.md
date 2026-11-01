@@ -1,6 +1,6 @@
 # 05: A highly discussed story with a split topic lands nowhere
 
-Status: needs-triage
+Status: ready-for-agent
 Findings: 5 [medium], see `../review.md`
 
 ## Problem
@@ -12,3 +12,9 @@ Findings: 5 [medium], see `../review.md`
 - Route a below-bar story with talked-about points to "Also talked about" whatever its top topic?
 - Or lower the topic bar when points are high?
 - Does Trends' Most discussed pick it up on Monday (it needs a topic other than `other`)?
+
+## Comments
+
+### Decision (2026-11-01)
+
+A story that misses the Spotted topic bar but clears `TALKED_ABOUT_MIN_POINTS` goes to Also talked about, whatever its top topic.

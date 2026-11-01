@@ -1,6 +1,6 @@
 # 06: Near-bar data items lost to hard cut-offs
 
-Status: needs-triage
+Status: ready-for-agent
 Findings: 6 [medium], see `../review.md`
 
 ## Problem
@@ -10,9 +10,15 @@ Findings: 6 [medium], see `../review.md`
   - budgets-quotas-and-monitors: 1.56, conf 0.34, p(0/1/2) = 0/0.44/0.56
   - before-you-model-a-single-table: 1.43, conf 0.36, 0/0.57/0.43
   - snowflake-optima-planning: 1.21, conf 0, 0.31/0.18/0.51
-  The first two put no weight on "nothing"; low confidence is doubt between "some" and "substantial". The vendor side treats an unsure significance as level 1 instead of dropping.
+    The first two put no weight on "nothing"; low confidence is doubt between "some" and "substantial". The vendor side treats an unsure significance as level 1 instead of dropping.
 
 ## Open questions
 
 - Notable as a score threshold below 1 (e.g. 0.9), or round the expectation?
 - Community: keep on `p(nothing)` low instead of confidence?
+
+## Comments
+
+### Decision (2026-11-01)
+
+Both: on the data side Notable means significance ≥ 0.9; a community post with insight ≥ `INSIGHT_MIN`, on-audience, and p(nothing) < 0.2 is kept even under `LOW_CONFIDENCE`.
