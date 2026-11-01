@@ -41,6 +41,7 @@ import {
   isMajorRelease,
 } from "./reports/prompts.ts";
 import { FIRST_NAMED, matchProjectNews } from "./reports/project-news.ts";
+import { dropSameEventRepeats, loadSameEventVerdicts, saveSameEventVerdicts } from "./spotted/same-event.ts";
 import {
   buildHighlightsPrompt,
   buildSpottedSummariesPrompt,
@@ -410,11 +411,13 @@ async function main(): Promise<void> {
   );
   console.log(`  ${hotIssueCallsLine(hotIssueRun.calls)}`);
   const stories = storiesFrom(hnData, lobstersData, devtoData);
-  const fresh = freshStories(
-    [...stories, ...carriedStories(spottedLog, stories, dateStr)],
-    spottedLog,
-    dateStr,
+  // A story on an event a higher-ranked fresh story or a recent page reported leaves the pool
+  // before news matching, so a repeat is neither project news nor Spotted.
+  const sameEvent = await dropSameEventRepeats(
+    freshStories([...stories, ...carriedStories(spottedLog, stories, dateStr)], spottedLog, dateStr),
+    { log: spottedLog, apiKey: process.env["TYPESAFE_API_KEY"], cache: loadSameEventVerdicts(), dateStr },
   );
+  const fresh = sameEvent.kept;
 
   // Agent news is matched against the other sources' data, so it waits for them.
   // Agents and tooling in one pass: an item naming 3+ of them is a compatibility list.
@@ -641,12 +644,14 @@ async function main(): Promise<void> {
     HOT_ISSUES_SNAPSHOT_FILE,
   );
   if (routing.judgment.nextCache) saveSpottedVerdicts(routing.judgment.nextCache);
+  if (sameEvent.judgment.nextCache) saveSameEventVerdicts(sameEvent.judgment.nextCache);
   console.log(
     `  Saved ${saveFile(
       spottedTraceFile(unmatched, routing, dailyShown, {
         rows: spottedRows,
         dropped: spottedDropped,
         talkedAbout: new Set(talkedAbout.map((s) => s.id)),
+        sameEvent,
         sources: sourceCounts(
           {
             hn: hnData.fetchSuccess ? stories.filter((s) => s.source === "hn").length : null,
@@ -655,7 +660,7 @@ async function main(): Promise<void> {
               : null,
             devto: devtoData.fetchSuccess ? stories.filter((s) => s.source === "devto").length : null,
           },
-          unmatched.map((s) => s.source),
+          [...unmatched, ...sameEvent.repeats].map((s) => s.source),
         ),
       }),
       dateStr,

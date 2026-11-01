@@ -1,0 +1,68 @@
+{
+  "pool": [
+    {
+      "id": "hn:50320255",
+      "source": "hn",
+      "title": "Anthropic takes steps to block Claude from reverse-engineering video games",
+      "url": "https://mashable.com/tech/anthropic-takes-steps-to-block-video-game-cloning-and-reverse-engineering",
+      "discussionUrl": "https://news.ycombinator.com/item?id=50320255",
+      "points": 125,
+      "comments": 77,
+      "published": "2026-11-01T00:00:00Z"
+    },
+    {
+      "id": "hn:50315987",
+      "source": "hn",
+      "title": "Anthropic's Claude AI blocks video game cloning and reverse-engineering",
+      "url": "https://www.tomshardware.com/tech-industry/artificial-intelligence/anthropics-ai-model-is-now-blocking-attempts-at-video-game-recreation-and-cloning-users-also-claim-non-malicious-generic-reverse-engineering-tasks-are-blocked",
+      "discussionUrl": "https://news.ycombinator.com/item?id=50315987",
+      "points": 69,
+      "comments": 41,
+      "published": "2026-11-01T00:00:00Z"
+    },
+    {
+      "id": "hn:50316635",
+      "source": "hn",
+      "title": "Anthropic orders AI tool Claude to stop remaking video games",
+      "url": "https://www.gamedeveloper.com/programming/anthropic-appears-to-have-ordered-ai-tool-claude-to-stop-remaking-video-games",
+      "discussionUrl": "https://news.ycombinator.com/item?id=50316635",
+      "points": 29,
+      "comments": 16,
+      "published": "2026-11-01T00:00:00Z"
+    },
+    {
+      "id": "devto:4945893",
+      "source": "devto",
+      "title": "A trojanized Claude Code extension plants an SSH backdoor: the 7-point audit for your machine",
+      "url": "https://dev.to/slabb/a-trojanized-claude-code-extension-plants-an-ssh-backdoor-the-7-point-audit-for-your-machine-23cj",
+      "discussionUrl": "https://dev.to/slabb/a-trojanized-claude-code-extension-plants-an-ssh-backdoor-the-7-point-audit-for-your-machine-23cj",
+      "points": 16,
+      "comments": 15,
+      "published": "2026-11-01T00:00:00Z"
+    },
+    {
+      "id": "hn:50320588",
+      "source": "hn",
+      "title": "ChatGPT and Codex usage limits merging",
+      "url": "https://help.openai.com/en/articles/20001625-understanding-chatgpt-and-codex-usage-limits",
+      "discussionUrl": "https://news.ycombinator.com/item?id=50320588",
+      "points": 53,
+      "comments": 21,
+      "published": "2026-11-01T00:00:00Z"
+    }
+  ],
+  "log": {
+    "hn:50300683": {
+      "source": "hn",
+      "title": "Backdoor in Claude Code for VS Code extension on the Cursor Marketplace",
+      "url": "https://phorion.io/blog/offical-claude-code-vsx-compromise/",
+      "discussionUrl": "https://news.ycombinator.com/item?id=50300683",
+      "points": 972,
+      "comments": 547,
+      "description": "Phorion has detected a backdoor in the official Claude Code for VS Code extension bundle on the Cursor Marketplace that drops a persistent SSH backdoor across macOS, Linux, and Windows. This write-up",
+      "firstSeen": "2026-10-31",
+      "lastSeen": "2026-11-01",
+      "shown": "2026-10-31"
+    }
+  }
+}

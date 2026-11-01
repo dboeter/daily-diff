@@ -1,6 +1,6 @@
 # 04: One event, one row
 
-Status: ready-for-agent
+Status: done
 Findings: 4 [medium], see `../review.md`
 
 ## Problem
@@ -20,3 +20,7 @@ Repeats are caught by item id and `linkKey` only (`src/spotted/pool.ts:174-209`,
 ### Decision (2026-11-01)
 
 Jev same-event check: a fresh story that reports the same event as a higher-ranked story today or a story shown in the last 2 days, with no new development, is dropped as `repeat`. Runs before news matching, so it covers project news too. Cached in a verdict file.
+
+### Done
+
+Cause: repeats were caught by item id and `linkKey` only, so another outlet's article on the same event, or a follow-up of a story shown the day before, was fresh. Now `dropSameEventRepeats` (`src/spotted/same-event.ts`) ranks the fresh stories (source order, then points) and asks Jev per story, against the titles of the stories shown in the last 2 days and the fresh ones ranked above it (own-link copies left out), whether it reports the same event without a new development; such a story leaves the pool before `matchProjectNews` (`src/index.ts`) and is `repeat` in `spotted-trace.json`. Cache `digests/same-event-verdicts.json`, fingerprint = the CST day, pruned after 30 days; without a verdict nothing is dropped. AGENTS.md: phase 2, caches table, Spotted section, trace `repeat`, `talked-about.json` row (issue 05). Tests: `src/__tests__/spotted/same-event.test.ts` on a fixture frozen from 2026-11-01 (stubbed Jev: verifies wiring and ordering, not Jev's judgment). No live Jev run.

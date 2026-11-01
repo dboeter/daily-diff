@@ -192,7 +192,8 @@ export interface ChoiceAnswer {
 
 /**
  * Why a judged item got no row: below the keep bar (`threshold`), cut by a row cap (`cap`), routed to
- * no page or out of scope (`routing`), its link already taken by another row (`repeat`); a row on a
+ * no page or out of scope (`routing`), its link already taken by another row or, Spotted only, its event
+ * reported by a higher-ranked or recently shown story (`repeat`); a row on a
  * page the run did not publish (`unpublished`, Spotted only: the other traces are saved before the skip).
  */
 export type DroppedReason = "threshold" | "cap" | "routing" | "repeat" | "unpublished";

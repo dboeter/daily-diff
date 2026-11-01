@@ -21,6 +21,7 @@ import {
 } from "../core/jev.ts";
 import { DATA_KEYWORD_PATTERNS } from "../sources/hn.ts";
 import { siteOf, type SpottedPage, type SpottedRow, type Story } from "./pool.ts";
+import type { SameEventCheck } from "./same-event.ts";
 
 const TOPIC_QUESTIONS = {
   topic: {
@@ -258,6 +259,7 @@ export async function routeStories(
  * topic, page, whether a page showed it (`rendered`, `rank`: its row number), why
  * not (`selectSpotted`'s `dropped`, or its page went unpublished), and its answers.
  * A story the Overview's "Policy talk" or "Also talked about" showed gets `talked_about: true` and no drop reason.
+ * A story the same-event check dropped (`dropSameEventRepeats`) follows, `repeat`, with its same-event answers.
  */
 export function spottedTraceFile(
   stories: Story[],
@@ -268,6 +270,8 @@ export function spottedTraceFile(
     dropped: Map<string, DroppedReason>;
     /** The ids `selectTalkedAbout` took. */
     talkedAbout?: Set<string>;
+    /** The fresh stories the same-event check dropped before routing: `repeat` rows with its answers. */
+    sameEvent?: Pick<SameEventCheck, "repeats" | "judgment">;
     sources: SourceCounts;
   },
 ): string {
@@ -290,5 +294,15 @@ export function spottedTraceFile(
       ...routing.judgment.traceFields(s),
     };
   });
-  return routing.judgment.traceFile(rows, { sources: selection.sources });
+  const repeats = (selection.sameEvent?.repeats ?? []).map((s) => ({
+    id: s.id,
+    title: s.title,
+    source: s.source,
+    topic: null,
+    page: null,
+    shown: false,
+    ...droppedFor("repeat"),
+    ...selection.sameEvent!.judgment.traceFields(s),
+  }));
+  return routing.judgment.traceFile([...rows, ...repeats], { sources: selection.sources });
 }
