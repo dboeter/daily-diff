@@ -283,13 +283,20 @@ export function lastWeekKeys(history: StarHistory, dateStr: string): Set<string>
 }
 
 /**
- * The newest entry dated before `dateStr`: the previous weekly run, however many
- * days back (GitHub's late cron or a missed Monday makes it 6, 8 or more), so a
- * same-day re-run compares against the same run.
+ * The previous weekly run's date among `dates`: the one exactly STAR_GAIN_DAYS
+ * before `dateStr`, so a forced mid-week run does not shift the Monday rhythm;
+ * without it (a missed Monday) the newest earlier one, however many days back.
+ * Today's own date is never picked, so a same-day re-run compares the same.
  */
+export function previousRunDate(dates: string[], dateStr: string): string | undefined {
+  const earlier = dates.filter((date) => date < dateStr).sort();
+  return earlier.find((date) => daysBetween(date, dateStr) === STAR_GAIN_DAYS) ?? earlier.at(-1);
+}
+
+/** The entry of the previous weekly run (`previousRunDate`). */
 export function previousRun<T>(byDate: Record<string, T> | undefined, dateStr: string): T | undefined {
-  const earlier = Object.keys(byDate ?? {}).filter((date) => date < dateStr);
-  return earlier.length > 0 ? byDate![earlier.sort().at(-1)!] : undefined;
+  const date = previousRunDate(Object.keys(byDate ?? {}), dateStr);
+  return date !== undefined ? byDate![date] : undefined;
 }
 
 /** The previous weekly run's Radar figures by lowercased key (`StarHistory.figures`). */
@@ -308,7 +315,7 @@ export function reportedKeys(report: Pick<TrendingReportData, "radar" | "categor
 /**
  * History after this run: today's points recorded or replaced, unseen repos
  * carried forward, old points pruned; today's report keys recorded or
- * replaced, and of the earlier reports only the newest (`previousRun`) kept.
+ * replaced, reports older than a week pruned unless still the previous run (`previousRunDate`).
  */
 export function nextStarHistory(
   history: StarHistory,
@@ -330,12 +337,9 @@ export function nextStarHistory(
   // Repos not seen this run are kept until pruned: a forced mid-week run must not drop Monday's points.
   const next: StarHistory = { repos: {} };
   const byDate = <T>(old: Record<string, T> | undefined, todays: T | undefined) => {
-    const previous = Object.keys(old ?? {})
-      .filter((date) => date < dateStr)
-      .sort()
-      .at(-1);
+    const previous = previousRunDate(Object.keys(old ?? {}), dateStr);
     const kept = Object.entries({ ...old, ...(todays !== undefined ? { [dateStr]: todays } : {}) })
-      .filter(([date]) => date === dateStr || date === previous)
+      .filter(([date]) => daysBetween(date, dateStr) <= STAR_HISTORY_DAYS || date === previous)
       .sort(([a], [b]) => a.localeCompare(b));
     return kept.length > 0 ? Object.fromEntries(kept) : undefined;
   };

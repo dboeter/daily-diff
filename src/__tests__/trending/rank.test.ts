@@ -1069,28 +1069,42 @@ describe("nextStarHistory", () => {
     );
   });
 
-  it("records today's report keys, replaces them on a re-run and keeps only the newest earlier report", () => {
+  it("records today's report keys, replaces them on a re-run and prunes reports older than 7 days but the previous run", () => {
     const h = {
       repos: {},
-      // 2026-09-26 is 9 days back but the previous run: a same-day re-run must still read it.
+      // 2026-09-26 is 9 days back but the previous run (a missed Monday): a same-day re-run must still read it.
       reported: { "2026-09-25": ["npm:gone"], "2026-09-26": ["npm:last"], [DATE]: ["npm:x"] },
     };
     expect(nextStarHistory(h, [], DATE, ["npm:y"]).reported).toEqual({
       "2026-09-26": ["npm:last"],
       [DATE]: ["npm:y"],
     });
+    // A forced run keeps the Monday before it, so the next Monday still reads its run 7 days back.
+    const forced = nextStarHistory(
+      { repos: {}, reported: { "2026-09-28": ["npm:monday"] } },
+      [],
+      "2026-10-01",
+      ["npm:forced"],
+    );
+    expect(nextStarHistory(forced, [], "2026-10-02", ["npm:again"]).reported?.["2026-09-28"]).toEqual([
+      "npm:monday",
+    ]);
     // Without a report (no keys given) today's entry is left as it was.
     expect(nextStarHistory(h, [], DATE).reported?.[DATE]).toEqual(["npm:x"]);
   });
 });
 
 describe("lastWeekKeys", () => {
-  it("reads the newest report dated before today, however many days back", () => {
+  it("reads the report 7 days back over a later forced run, else the newest earlier one", () => {
     const h = {
       repos: {},
       reported: { "2026-09-27": ["npm:a"], "2026-09-28": ["npm:b"], [DATE]: ["npm:today"] },
     };
-    // 8 days back (a late cron), and a same-day re-run skips today's own entry.
+    // 2026-10-01 was a forced mid-week run: the Monday 7 days back still wins.
+    expect([
+      ...lastWeekKeys({ ...h, reported: { ...h.reported, "2026-10-01": ["npm:forced"] } }, "2026-10-05"),
+    ]).toEqual(["npm:b"]);
+    // No run 7 days back: 8 days back (a missed Monday), and a same-day re-run skips today's own entry.
     expect([...lastWeekKeys(h, DATE)]).toEqual(["npm:b"]);
     expect([...lastWeekKeys(h, "2026-09-28")]).toEqual(["npm:a"]);
     expect(lastWeekKeys(h, "2026-09-27").size).toBe(0);
@@ -1139,7 +1153,7 @@ describe("loadStarHistory / saveStarHistory", () => {
     });
     expect(next.figures).toEqual({ [DATE]: h.figures[DATE], "2026-10-12": { "openrouter:1": 12.67e12 } });
     expect(next.modelRanking).toEqual({ [DATE]: ["a/one", "b/two"], "2026-10-12": ["b/two"] });
-    // The next run keeps only the newest earlier entries: the 2026-10-05 ones are pruned.
+    // Eight days on, the 2026-10-05 entries are pruned: 2026-10-12 is the previous run.
     expect(nextStarHistory(next, [], "2026-10-13").figures).toEqual({
       "2026-10-12": { "openrouter:1": 12.67e12 },
     });

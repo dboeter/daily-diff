@@ -41,7 +41,7 @@ describe("shownSkillsNumbers / loadShownSkills", () => {
     for (const n of [1298, 1245, 1742, 1703, 1771, 492, 228, 556]) expect(shown.has(n)).toBe(true);
   });
 
-  it("reads the newest page dated before today, however many days back, and nothing without one", () => {
+  it("reads the page 7 days back over a later forced one, else the newest earlier, and nothing without one", () => {
     const dir = fs.mkdtempSync(path.join(os.tmpdir(), "skills-"));
     fs.mkdirSync(path.join(dir, "2026-10-26"));
     fs.writeFileSync(
@@ -53,6 +53,10 @@ describe("shownSkillsNumbers / loadShownSkills", () => {
     expect([...loadShownSkills(REPO, "2026-11-02", dir)]).toEqual([1742]);
     expect([...loadShownSkills(REPO, "2026-11-03", dir)]).toEqual([1742]);
     expect(loadShownSkills(REPO, "2026-10-26", dir).size).toBe(0);
+    fs.mkdirSync(path.join(dir, "2026-10-29"));
+    fs.writeFileSync(path.join(dir, "2026-10-29", "ai-trends.md"), "## Skills\n\n#7\n");
+    expect([...loadShownSkills(REPO, "2026-11-02", dir)]).toEqual([1742]);
+    expect([...loadShownSkills(REPO, "2026-11-03", dir)]).toEqual([7]);
   });
 });
 

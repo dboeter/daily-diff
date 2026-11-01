@@ -8,6 +8,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { DAY_MS } from "../core/date.ts";
 import { type GitHubItem, type SkillsData } from "../core/github.ts";
+import { previousRunDate } from "./rank.ts";
 
 /** An item is eligible when updated within this many days. */
 export const SKILLS_WINDOW_DAYS = 7;
@@ -24,19 +25,15 @@ export function shownSkillsNumbers(markdown: string, repo: string): Set<number> 
 }
 
 /**
- * The Skills items the newest Trends page dated before `dateStr` showed, the
- * same "last week" as 🔥 (`previousRun`), however many days back. No page → empty.
+ * The Skills items the previous weekly run's Trends page showed, the same
+ * "last week" as 🔥 (`previousRunDate`). No such page → empty.
  */
 export function loadShownSkills(repo: string, dateStr: string, dir = "digests"): Set<number> {
   try {
-    const previous = fs
+    const pages = fs
       .readdirSync(dir)
-      .filter(
-        (d) =>
-          /^\d{4}-\d{2}-\d{2}$/.test(d) && d < dateStr && fs.existsSync(path.join(dir, d, "ai-trends.md")),
-      )
-      .sort()
-      .at(-1);
+      .filter((d) => /^\d{4}-\d{2}-\d{2}$/.test(d) && fs.existsSync(path.join(dir, d, "ai-trends.md")));
+    const previous = previousRunDate(pages, dateStr);
     if (!previous) return new Set();
     return shownSkillsNumbers(fs.readFileSync(path.join(dir, previous, "ai-trends.md"), "utf-8"), repo);
   } catch {
