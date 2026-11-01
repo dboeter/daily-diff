@@ -757,5 +757,8 @@ describe("dropNoHighlightRows", () => {
     );
     const normal = `## Highlights\n\n${polars}`;
     expect(dropNoHighlightRows(normal, [minor], "data", isGroupOrAbsenceBullet)).toBe(normal);
+    expect(
+      isGroupOrAbsenceBullet("- dbt-core 1.12, a minor version, drops Python 3.9: test before upgrading."),
+    ).toBe(false);
   });
 });

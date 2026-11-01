@@ -562,7 +562,9 @@ export interface NoHighlightRow {
  * previews; no deprecations or breaking changes." Narrow on purpose: only these phrases.
  */
 export const isGroupOrAbsenceBullet = (bullet: string): boolean =>
-  /\bminor\b|\bno (?:deprecations|breaking changes|notable)\b|\bnothing new\b/i.test(bullet);
+  /\b(?:are|all|only) minor\b|\bminor (?:fixes|changes|updates|notes)\b|\bno (?:deprecations|breaking changes|notable)\b|\bnothing new\b/i.test(
+    bullet,
+  );
 
 // A title of at least this many content words also matches a bullet restating most of them
 // (4 words of 3+ letters before stopwords were dropped).
