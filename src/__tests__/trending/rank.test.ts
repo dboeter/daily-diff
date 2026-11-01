@@ -340,10 +340,12 @@ describe("buildRadarCandidates", () => {
     );
     expect(signal(rows, "npm:@reason-machines/cli")).toBe("30,245 downloads/week (+33% vs previous week)");
     expect(signal(rows, "openrouter:2")).toBe("week #10 / month #20, 1.0B tokens/week");
-    // A forced mid-week run is not "last week": no comparison.
+    // The previous run is "last week" whatever its distance: 6 days back here.
     expect(
-      lastWeekFigures({ repos: {}, figures: { "2026-10-22": { "openrouter:1": 1 } } }, "2026-10-26").size,
-    ).toBe(0);
+      lastWeekFigures({ repos: {}, figures: { "2026-10-20": { "openrouter:1": 1 } } }, "2026-10-26").get(
+        "openrouter:1",
+      ),
+    ).toBe(1);
   });
 
   it("gives an app without a description its GitHub repo's description", () => {
@@ -1067,13 +1069,14 @@ describe("nextStarHistory", () => {
     );
   });
 
-  it("records today's report keys, replaces them on a re-run and prunes reports older than 7 days", () => {
+  it("records today's report keys, replaces them on a re-run and keeps only the newest earlier report", () => {
     const h = {
       repos: {},
-      reported: { "2026-09-27": ["npm:gone"], "2026-09-28": ["npm:last"], [DATE]: ["npm:x"] },
+      // 2026-09-26 is 9 days back but the previous run: a same-day re-run must still read it.
+      reported: { "2026-09-25": ["npm:gone"], "2026-09-26": ["npm:last"], [DATE]: ["npm:x"] },
     };
     expect(nextStarHistory(h, [], DATE, ["npm:y"]).reported).toEqual({
-      "2026-09-28": ["npm:last"],
+      "2026-09-26": ["npm:last"],
       [DATE]: ["npm:y"],
     });
     // Without a report (no keys given) today's entry is left as it was.
@@ -1082,12 +1085,15 @@ describe("nextStarHistory", () => {
 });
 
 describe("lastWeekKeys", () => {
-  it("reads only the report dated exactly 7 days earlier", () => {
+  it("reads the newest report dated before today, however many days back", () => {
     const h = {
       repos: {},
-      reported: { "2026-09-27": ["npm:a"], "2026-09-28": ["npm:b"], "2026-10-01": ["npm:c"] },
+      reported: { "2026-09-27": ["npm:a"], "2026-09-28": ["npm:b"], [DATE]: ["npm:today"] },
     };
+    // 8 days back (a late cron), and a same-day re-run skips today's own entry.
     expect([...lastWeekKeys(h, DATE)]).toEqual(["npm:b"]);
+    expect([...lastWeekKeys(h, "2026-09-28")]).toEqual(["npm:a"]);
+    expect(lastWeekKeys(h, "2026-09-27").size).toBe(0);
     expect(lastWeekKeys(hist({}), DATE).size).toBe(0);
   });
 });
@@ -1133,7 +1139,7 @@ describe("loadStarHistory / saveStarHistory", () => {
     });
     expect(next.figures).toEqual({ [DATE]: h.figures[DATE], "2026-10-12": { "openrouter:1": 12.67e12 } });
     expect(next.modelRanking).toEqual({ [DATE]: ["a/one", "b/two"], "2026-10-12": ["b/two"] });
-    // Eight days on, the 2026-10-05 entries are pruned.
+    // The next run keeps only the newest earlier entries: the 2026-10-05 ones are pruned.
     expect(nextStarHistory(next, [], "2026-10-13").figures).toEqual({
       "2026-10-12": { "openrouter:1": 12.67e12 },
     });

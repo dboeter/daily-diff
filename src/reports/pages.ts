@@ -40,7 +40,7 @@ import { loadReportedState, newItems, nextReportedState, saveReportedState } fro
 import type { TrendingData } from "../trending/compose.ts";
 import { saveTrendingVerdicts } from "../trending/classify.ts";
 import { saveMatchState } from "../trending/match.ts";
-import { lastWeekKeys, saveStarHistory, summaryRows, weekAgo } from "../trending/rank.ts";
+import { lastWeekKeys, previousRun, saveStarHistory, summaryRows } from "../trending/rank.ts";
 import { trendsFacts } from "../trending/facts.ts";
 import {
   AGENTS_HIGHLIGHTS_FOCUS,
@@ -268,7 +268,7 @@ export async function buildTrendsReport(
           renderOpenRouterUsage(
             trending.openrouter.topModels,
             trending.openrouter.topModelsDate,
-            weekAgo(history?.modelRanking, dateStr),
+            previousRun(history?.modelRanking, dateStr),
           ),
           hfTable,
         ]

@@ -171,7 +171,7 @@ export const TRENDS_REPORT = {
     `Top models by tokens (prompt + completion) on OpenRouter${date ? ` on ${date}` : ""}, one day's snapshot.` +
     (lastWeek ? " Last week: the model's rank on last week's page, new when it was not ranked there." : ""),
   openRouterHeader: "| # | Model | Tokens |\n| ---: | :--- | ---: |",
-  /** With a ranking saved by the run dated 7 days earlier: its rank, or "new" for a model not in it. */
+  /** With a ranking saved by the previous weekly run: its rank, or "new" for a model not in it. */
   openRouterHeaderLastWeek: "| # | Model | Tokens | Last week |\n| ---: | :--- | ---: | :---: |",
   openRouterNewcomer: "new",
   hfHeading: "Hugging Face trending",

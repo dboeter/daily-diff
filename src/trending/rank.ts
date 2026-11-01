@@ -54,7 +54,7 @@ export interface GithubRow {
   relative: number | null;
   starsCell: string;
   isNew: boolean;
-  /** Also in the report dated exactly 7 days earlier (`selectTrendingReport`): 🔥. */
+  /** Also in the previous weekly run's report (`lastWeekKeys`): 🔥. */
   onFire?: boolean;
   /** The search topic that found it; absent for trending-page-only repos. */
   topic?: string;
@@ -77,7 +77,7 @@ export interface RadarRow {
   signals: string[];
   /** Some member is new. */
   isNew: boolean;
-  /** Some member was also in the report dated exactly 7 days earlier (`selectTrendingReport`): 🔥. */
+  /** Some member was also in the previous weekly run's report (`lastWeekKeys`): 🔥. */
   onFire?: boolean;
   /** Normalized merge links (`repo:<owner/repo>`, `host:<hostname>`), see `urlMerge`. */
   links: string[];
@@ -277,23 +277,24 @@ export function starBaseline(history: StarHistory, fullName: string, dateStr: st
   return point ? point[1] : null;
 }
 
-/**
- * The item keys of the report dated exactly STAR_GAIN_DAYS before `dateStr`,
- * the same rule as `starBaseline`: a forced mid-week run is not "last week",
- * and a missed Monday breaks the run of weeks, so its rows get no 🔥.
- */
+/** The item keys of the previous weekly run's report (`previousRun`), for 🔥. */
 export function lastWeekKeys(history: StarHistory, dateStr: string): Set<string> {
-  return new Set(weekAgo(history.reported, dateStr) ?? []);
+  return new Set(previousRun(history.reported, dateStr) ?? []);
 }
 
-/** The entry dated exactly STAR_GAIN_DAYS before `dateStr`, the rule `lastWeekKeys` explains. */
-export function weekAgo<T>(byDate: Record<string, T> | undefined, dateStr: string): T | undefined {
-  return Object.entries(byDate ?? {}).find(([date]) => daysBetween(date, dateStr) === STAR_GAIN_DAYS)?.[1];
+/**
+ * The newest entry dated before `dateStr`: the previous weekly run, however many
+ * days back (GitHub's late cron or a missed Monday makes it 6, 8 or more), so a
+ * same-day re-run compares against the same run.
+ */
+export function previousRun<T>(byDate: Record<string, T> | undefined, dateStr: string): T | undefined {
+  const earlier = Object.keys(byDate ?? {}).filter((date) => date < dateStr);
+  return earlier.length > 0 ? byDate![earlier.sort().at(-1)!] : undefined;
 }
 
 /** The previous weekly run's Radar figures by lowercased key (`StarHistory.figures`). */
 export function lastWeekFigures(history: StarHistory, dateStr: string): Map<string, number> {
-  return new Map(Object.entries(weekAgo(history.figures, dateStr) ?? {}));
+  return new Map(Object.entries(previousRun(history.figures, dateStr) ?? {}));
 }
 
 /** Every item key the report shows, merged Radar members included, lowercased like the star history. */
@@ -307,7 +308,7 @@ export function reportedKeys(report: Pick<TrendingReportData, "radar" | "categor
 /**
  * History after this run: today's points recorded or replaced, unseen repos
  * carried forward, old points pruned; today's report keys recorded or
- * replaced, reports older than a week pruned.
+ * replaced, and of the earlier reports only the newest (`previousRun`) kept.
  */
 export function nextStarHistory(
   history: StarHistory,
@@ -329,8 +330,12 @@ export function nextStarHistory(
   // Repos not seen this run are kept until pruned: a forced mid-week run must not drop Monday's points.
   const next: StarHistory = { repos: {} };
   const byDate = <T>(old: Record<string, T> | undefined, todays: T | undefined) => {
+    const previous = Object.keys(old ?? {})
+      .filter((date) => date < dateStr)
+      .sort()
+      .at(-1);
     const kept = Object.entries({ ...old, ...(todays !== undefined ? { [dateStr]: todays } : {}) })
-      .filter(([date]) => daysBetween(date, dateStr) <= STAR_HISTORY_DAYS)
+      .filter(([date]) => date === dateStr || date === previous)
       .sort(([a], [b]) => a.localeCompare(b));
     return kept.length > 0 ? Object.fromEntries(kept) : undefined;
   };

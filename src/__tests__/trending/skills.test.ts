@@ -41,15 +41,18 @@ describe("shownSkillsNumbers / loadShownSkills", () => {
     for (const n of [1298, 1245, 1742, 1703, 1771, 492, 228, 556]) expect(shown.has(n)).toBe(true);
   });
 
-  it("reads the page dated exactly a week earlier, and nothing when there is none (a forced mid-week run)", () => {
+  it("reads the newest page dated before today, however many days back, and nothing without one", () => {
     const dir = fs.mkdtempSync(path.join(os.tmpdir(), "skills-"));
     fs.mkdirSync(path.join(dir, "2026-10-26"));
     fs.writeFileSync(
       path.join(dir, "2026-10-26", "ai-trends.md"),
       "## Skills: open PRs worth watching\n\n[PR](https://github.com/anthropics/skills/pull/1742)\n",
     );
+    fs.mkdirSync(path.join(dir, "2026-10-27"));
+    fs.writeFileSync(path.join(dir, "2026-10-27", "ai-agents.md"), "#99\n");
     expect([...loadShownSkills(REPO, "2026-11-02", dir)]).toEqual([1742]);
-    expect(loadShownSkills(REPO, "2026-11-03", dir).size).toBe(0);
+    expect([...loadShownSkills(REPO, "2026-11-03", dir)]).toEqual([1742]);
+    expect(loadShownSkills(REPO, "2026-10-26", dir).size).toBe(0);
   });
 });
 

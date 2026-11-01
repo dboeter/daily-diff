@@ -869,7 +869,7 @@ export function renderCandidates(
 export function renderOpenRouterUsage(
   models: OpenRouterModel[],
   date: string,
-  /** The slugs, in rank order, that the run dated 7 days earlier saved; no Last week column without them. */
+  /** The slugs, in rank order, that the previous weekly run saved; no Last week column without them. */
   lastWeek?: string[],
 ): string {
   if (!models.length) return "";
