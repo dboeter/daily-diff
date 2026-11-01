@@ -419,13 +419,15 @@ describe("selectSpotted floors", () => {
     });
   });
 
-  it("ranks by topic confidence band, then points", () => {
+  it("ranks by points over the topic bar; topic probability breaks ties only", () => {
+    // 2026-11-01: a 7-point finance story at 0.81 outranked a 75-point one at 0.62.
     const sure = story("sure", "hn", 7);
-    const loud = story("loud", "hn", 400);
-    const rows = selectSpotted([loud, sure], agents, undefined, {
-      probabilityOf: (s) => (s === sure ? 1 : 0.7),
+    const loud = story("loud", "hn", 75);
+    const tieSure = story("tieSure", "hn", 7);
+    const rows = selectSpotted([sure, loud, tieSure], agents, undefined, {
+      probabilityOf: (s) => (s === loud ? 0.62 : s === sure ? 0.81 : 0.95),
     });
-    expect(rows.map((r) => r.id)).toEqual([sure.id, loud.id]);
+    expect(rows.map((r) => r.id)).toEqual([loud.id, tieSure.id, sure.id]);
   });
 
   it("needs SPOTTED_MIN_POINTS once a page has 3 rows", () => {

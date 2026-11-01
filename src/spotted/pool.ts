@@ -352,12 +352,10 @@ export const SPOTTED_MIN_POINTS: Record<StorySource, number> = { hn: 5, lobsters
 export const isContestEntry = (s: Pick<Story, "title" | "description">): boolean =>
   /\bthis is a submission for\b/i.test(`${s.title} ${s.description ?? ""}`);
 
-/** Topic probability in tenths: a sure story ranks above an unsure one, points decide within a band. */
-const confidenceBand = (p: number | undefined) => Math.round((p ?? 1) * 10);
-
 /**
  * Each page's rows: per source up to SPOTTED_PER_SOURCE, sources in SPOTTED_PER_SOURCE order,
- * ranked by topic probability band, then points; numbered across pages in SPOTTED_PAGES order.
+ * ranked by points, topic probability breaking ties (on 2026-11-01 a 7-point story at 0.81 outranked
+ * a 75-point one at 0.62 when tenths of probability came first); numbered across pages in SPOTTED_PAGES order.
  * Left out before ranking (`threshold`): a topic probability under SPOTTED_MIN_TOPIC_PROBABILITY,
  * a story over SPOTTED_MAX_AGE_DAYS old (when `dateStr` is given) and a contest entry; while
  * ranking, a story under SPOTTED_MIN_POINTS once its page has SPOTTED_ROWS_BEFORE_FLOOR rows.
@@ -395,9 +393,7 @@ export function selectSpotted(
       for (const source of sources) {
         const ranked = eligible
           .filter((s) => s.source === source && pageOf(s) === page)
-          .sort(
-            (a, b) => confidenceBand(probability(b)) - confidenceBand(probability(a)) || b.points - a.points,
-          );
+          .sort((a, b) => b.points - a.points || (probability(b) ?? 1) - (probability(a) ?? 1));
         const claimed = claimRows(
           ranked,
           SPOTTED_PER_SOURCE[source],

@@ -1,6 +1,6 @@
 # 08: Topic probability outranks points too strongly in Spotted
 
-Status: ready-for-agent
+Status: done
 Findings: 8 [low], see `../review.md`
 
 ## Problem
@@ -12,3 +12,7 @@ Spotted ranks each source by topic probability in tenths, then points. Models 20
 ### Decision (2026-11-01)
 
 Over the 0.6 topic bar, rank by points per source; topic probability breaks ties only.
+
+### Done
+
+Cause: `selectSpotted` sorted each source by topic probability rounded to tenths before points. Now it sorts by points, probability breaking ties (`src/spotted/pool.ts`); AGENTS.md's Spotted sentence updated. Test: "ranks by points over the topic bar; topic probability breaks ties only" (`src/__tests__/spotted/pool.test.ts`).
