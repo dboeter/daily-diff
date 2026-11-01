@@ -1,6 +1,6 @@
 # 10: `shippedComingSoon` matches too loosely; its count is inflated
 
-Status: ready-for-agent
+Status: done
 Findings: 10 [low], see `../review.md`
 
 ## Problem
@@ -12,3 +12,7 @@ Findings: 10 [low], see `../review.md`
 ### Decision (2026-11-01)
 
 Tighten the match (a shipped note must not predate its coming-soon note; the CSP-default stem must not match any note on the feature) and log the count after the reported and age filters.
+
+### Done
+
+Cause: `STATUS_RE` cut "X will soon be available by default for workspaces with the compliance security profile" to the bare feature, the match ignored dates, and the count was logged before the age and reported filters. Change (`src/data/vendors.ts`): `titleStem` keeps a "for workspaces with …" scope; a note dated before its coming-soon note does not match; the skip count is taken after `recentVendorItems` and `newItems`. Tests (`src/__tests__/data/vendors.test.ts`): a GA note dated before its coming-soon note is reported; a CSP coming-soon note skips only its CSP note, not "AI Runtime is now in Public Preview".

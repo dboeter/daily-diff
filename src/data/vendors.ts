@@ -18,6 +18,7 @@ import {
   type StateItem,
 } from "../core/report-state.ts";
 import { collectNewItems, type NewItems } from "../core/new-items.ts";
+import { newItems } from "../core/report-state.ts";
 import type { Numbered } from "../reports/summarized-table.ts";
 import { loadDataVerdicts, selectVendorItems, type DataVerdicts, type KeptVendorItem } from "./relevance.ts";
 import type { AskJev } from "../core/jev.ts";
@@ -175,14 +176,23 @@ const STATUS_RE = new RegExp(
   String.raw`\s+(?:will soon be|will be|is now|are now|is generally|are generally|is available|are available|now available|(?:is|are) in (?:public )?preview)\b.*$|\s*${STAGE_MARKER}\s*$`,
   "i",
 );
-const titleStem = (title: string): string =>
-  title.toLowerCase().replace(/\s+/g, " ").replace(STATUS_RE, "").trim();
+/**
+ * A scope a title restricts the change to, kept in the stem: "X will soon be available by default for
+ * workspaces with the compliance security profile" must not match every later note on X.
+ */
+const SCOPE_RE = /\s+for workspaces with\b.*$/i;
+const titleStem = (title: string): string => {
+  const t = title.toLowerCase().replace(/\s+/g, " ").trim();
+  const scope = (SCOPE_RE.exec(t)?.[0] ?? "").replace(/[\s.…]+$/, "");
+  return `${t.replace(STATUS_RE, "").trim()}${scope}`;
+};
 
 /**
  * Notes that ship what a coming-soon note, reported on an earlier day, announced
  * ("… will soon be available by default …" → "… are generally available"):
  * the reader already has it. Matched on the title stem, read from the state's
- * title + date keys. Same-day pairs stay, for the prose call to mention once.
+ * title + date keys; a note dated before its coming-soon note is not its shipping. Same-day pairs
+ * stay, for the prose call to mention once.
  * Checked on the 2026-10-12..21 state: it pairs only the Databricks Apps
  * package repositories, Genie file upload and feature views notes.
  */
@@ -191,15 +201,22 @@ export function shippedComingSoon(
   state: DataState | null,
   dateStr: string,
 ): Set<VendorItem> {
-  const announced = new Set(
-    Object.entries(state?.reported ?? {})
-      .filter(([key, day]) => day < dateStr && COMING_SOON_RE.test(key))
-      .map(([key]) => titleStem(key.slice(0, key.lastIndexOf("|")))),
-  );
+  // Stem → the earliest date of a coming-soon note with it.
+  const announced = new Map<string, string>();
+  for (const [key, day] of Object.entries(state?.reported ?? {})) {
+    if (day >= dateStr || !COMING_SOON_RE.test(key)) continue;
+    const cut = key.lastIndexOf("|");
+    const stem = titleStem(key.slice(0, cut));
+    const date = key.slice(cut + 1);
+    const prev = announced.get(stem);
+    if (prev === undefined || date < prev) announced.set(stem, date);
+  }
   return new Set(
-    items.filter(
-      (i) => i.stage === undefined && !COMING_SOON_RE.test(i.title) && announced.has(titleStem(i.title)),
-    ),
+    items.filter((i) => {
+      if (i.stage !== undefined || COMING_SOON_RE.test(i.title)) return false;
+      const since = announced.get(titleStem(i.title));
+      return since !== undefined && i.date >= since;
+    }),
   );
 }
 
@@ -244,8 +261,13 @@ export async function fetchVendorData(
       const { items, fetchSuccess } = fetched;
       counts = fetched.counts;
       const shipped = shippedComingSoon(items, state, dateStr);
-      if (shipped.size)
-        console.log(`  [data] ${shipped.size} notes ship a reported coming-soon note, skipped`);
+      // Counted after the age and reported filters: only notes that would otherwise have shown.
+      const skipped = newItems(
+        recentVendorItems([...shipped], dateStr).map(asStateItem),
+        state,
+        dateStr,
+      ).length;
+      if (skipped) console.log(`  [data] ${skipped} notes ship a reported coming-soon note, skipped`);
       return {
         // A bundle first seen at a stage over 30 days old (or with no full date) is recorded without
         // reporting, as AI Policy does: a first run must not open with months-old bundles.

@@ -234,6 +234,31 @@ describe("fetchVendorData across days", () => {
     expect(second.items).toEqual([]);
   });
 
+  it("reports a GA note dated before its coming-soon note", async () => {
+    const later = { ...comingSoon, date: "2026-10-16" };
+    const first = await run("2026-10-20", [], [later], null);
+    const second = await run("2026-10-21", [], [later, { ...ga, date: "2026-10-15" }], first.nextState);
+    expect(second.items.map((i) => i.title)).toEqual([ga.title]);
+  });
+
+  it("does not match a compliance-security-profile coming-soon note to any note on the feature", async () => {
+    const csp = {
+      guid: "whats-coming#ai",
+      title:
+        "AI Runtime will soon be available by default for workspaces with the compliance security profile",
+      date: "2026-10-14",
+    };
+    const preview = { guid: "october#ai", title: "AI Runtime is now in Public Preview", date: "2026-10-15" };
+    const cspGa = {
+      guid: "october#ai-csp",
+      title: "AI Runtime is now available for workspaces with the compliance security profile",
+      date: "2026-10-15",
+    };
+    const first = await run("2026-10-20", [], [csp], null);
+    const second = await run("2026-10-21", [], [csp, preview, cspGa], first.nextState);
+    expect(second.items.map((i) => i.title)).toEqual([preview.title]);
+  });
+
   it("reports both when the coming-soon and GA notes arrive on the same day", async () => {
     const data = await run("2026-10-21", [], [comingSoon, ga], null);
     expect(data.items.map((i) => i.title).sort()).toEqual([ga.title, comingSoon.title].sort());
