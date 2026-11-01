@@ -46,13 +46,15 @@ const SAME_EVENT_QUESTIONS = {
         what: "A story in `earlier` reports the same event, and this one adds no new development",
         examples: [
           "another outlet's article on the same announcement",
-          "a how-to or commentary on an incident already reported",
+          "a how-to, audit checklist or commentary on an incident already reported",
         ],
       },
       same_event_new_development: {
-        what: "A story in `earlier` reports the same event, and this one reports a new development of it",
+        what:
+          "A story in `earlier` reports the same event, and this one reports new facts about the event itself; " +
+          "advice, a guide or a checklist prompted by it is no new development",
         examples: [
-          "a fix, reversal or response that followed",
+          "a fix, reversal or official response that followed",
           "new findings on an incident's cause or scale",
         ],
       },

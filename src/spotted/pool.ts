@@ -424,6 +424,7 @@ export const POLICY_TALK_PER_SOURCE: Record<StorySource, number> = { hn: 2, lobs
 /** Points a policy story needs for the Overview, per source: the same bar as `other`. */
 export const POLICY_TALK_MIN_POINTS = TALKED_ABOUT_MIN_POINTS;
 const POLICY_TOPIC = "policy";
+/** The topic off the reader's page subjects: Also talked about, never Most discussed. */
 const OTHER_TOPIC = "other";
 
 /** An Overview "Also talked about" row: a story with the topic Jev routed it to. */
@@ -501,8 +502,6 @@ export function selectTalkedAbout(
 export const MOST_DISCUSSED_PER_SOURCE: Record<StorySource, number> = { hn: 5, lobsters: 3, devto: 3 };
 /** Comments a Most discussed row needs, per source: a 0-comment Lobste.rs row stood among 500-comment threads (2026-10-26). */
 export const MOST_DISCUSSED_MIN_COMMENTS: Record<StorySource, number> = { hn: 20, lobsters: 3, devto: 5 };
-/** The Spotted topic that is off the reader's subjects: never Most discussed. */
-const OFF_AUDIENCE_TOPIC = "other";
 
 /**
  * Trends' Most discussed: the logged stories first seen in the 7 days before
@@ -537,7 +536,7 @@ export function mostDiscussed(
         !shownEarlier(e.shown, dateStr) &&
         !showingIds.has(id) &&
         e.comments >= MOST_DISCUSSED_MIN_COMMENTS[e.source] &&
-        topicOf(id) !== OFF_AUDIENCE_TOPIC,
+        topicOf(id) !== OTHER_TOPIC,
     )
     .map(([id, e]) => ({ id, ...e }));
   return (Object.keys(MOST_DISCUSSED_PER_SOURCE) as StorySource[]).flatMap((source) =>
