@@ -1,0 +1,13 @@
+{
+  "ai-agents": [
+    "Trojanized `anthropic.claude-code@2.1.313` extension on Open-VSX installs SSH backdoor when loaded in VS Code",
+    "Oh My Pi v18.14.2 replaces `isLoopGuardedModel` with `loopGuardLevel` options and fixes Claude loop detection, OpenAI header casing, Anthropic stream stalls"
+  ],
+  "ai-models": [
+    "Anthropic blocks accounts and downgrades access for RFT, SFT, or larger-model training work, affecting legitimate development per user reports",
+    "Claude refuses video-game reverse-engineering and cloning requests, also blocking routine troubleshooting on own projects per developers"
+  ],
+  "ai-data": [
+    "All vendor release notes are minor fixes and previews with no deprecations or breaking changes"
+  ]
+}

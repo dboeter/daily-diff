@@ -221,7 +221,13 @@
     "post:blog.open-metadata.org/october-2026-openmetadata-community-news-3010803f5f73": "2026-10-31",
     "post:blog.open-metadata.org/september-2026-openmetadata-community-news-47623585d3a1": "2026-10-31",
     "post:medium.com/snowflake/the-missing-ai-layer-in-your-iceberg-lakehouse-19a4b4bf8a94": "2026-10-31",
-    "post:medium.com/snowflake/snowpark-python-supports-native-to-polars-b84e03721b5d": "2026-10-31"
+    "post:medium.com/snowflake/snowpark-python-supports-native-to-polars-b84e03721b5d": "2026-10-31",
+    "dashboard bug fixes|2026-10-29": "2026-11-01",
+    "oct 30, 2026: create or alter secret, dcm projects define secret, and environment variables (preview)|2026-10-30": "2026-11-01",
+    "https://community.fabric.microsoft.com/t5/Fabric-Updates-Blog/Using-Allow-workspace-settings-editing-policy-in-Fabric-Preview/ba-p/5377845": "2026-11-01",
+    "post:getdbt.com/blog/bigquery-generative-ai-dbt-sql-functions": "2026-11-01",
+    "post:getdbt.com/blog/bi-dashboard-chart-design-inspiration": "2026-11-01",
+    "post:getdbt.com/blog/dbt-charts-open-source-dashboard-yaml": "2026-11-01"
   },
   "stages": {
     "snowflake-bcr:2026_08": "2026-10-16 Introduced in the 10.37 release (October 8-16, 2026) as Disabled by Default; account admins can enable for testing."

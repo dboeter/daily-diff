@@ -1,0 +1,15 @@
+{
+"attempted": 9,
+"failed": 0,
+"calls": [
+{"label":"infra","outcome":"ok","chars":658},
+{"label":"agents","outcome":"ok","chars":1359},
+{"label":"spotted-summaries","outcome":"ok","chars":1297},
+{"label":"models-highlights","outcome":"ok","chars":395},
+{"label":"data-data_stack","outcome":"ok","chars":825},
+{"label":"agents-highlights","outcome":"ok","chars":453},
+{"label":"data-vendor-summaries","outcome":"ok","chars":844},
+{"label":"data-highlights","outcome":"ok","chars":130},
+{"label":"highlights","outcome":"ok","chars":693}
+]
+}

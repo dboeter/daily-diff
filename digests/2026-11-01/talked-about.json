@@ -1,0 +1,46 @@
+[
+  {
+    "id": "hn:50316531",
+    "source": "hn",
+    "title": "Malware uses LLMs to rank victims by how much they're worth",
+    "url": "https://blog.talosintelligence.com/appraisal-by-ai-model-driven-victim-prioritization-in-the-volta-infostealer/",
+    "discussionUrl": "https://news.ycombinator.com/item?id=50316531",
+    "points": 241,
+    "comments": 131,
+    "topic": "other",
+    "counts": "241 points, 131 comments"
+  },
+  {
+    "id": "hn:50296730",
+    "source": "hn",
+    "title": "Building an AI-native engineering org",
+    "url": "https://twitter.com/sgondala2/status/2115832070274723875",
+    "discussionUrl": "https://news.ycombinator.com/item?id=50296730",
+    "points": 185,
+    "comments": 196,
+    "topic": "other",
+    "counts": "185 points, 196 comments"
+  },
+  {
+    "id": "hn:50263012",
+    "source": "hn",
+    "title": "She Worried About Cutting Her Medication Dose. ChatGPT Told Her to Push On",
+    "url": "https://www.nytimes.com/2026/10/27/well/ai-chatgpt-medication-epilepsy-death.html",
+    "discussionUrl": "https://news.ycombinator.com/item?id=50263012",
+    "points": 72,
+    "comments": 27,
+    "topic": "other",
+    "counts": "72 points, 27 comments"
+  },
+  {
+    "id": "devto:4918252",
+    "source": "devto",
+    "title": "My open source project is brand new and already has contributors. Here's what I did.",
+    "url": "https://dev.to/nathan_tarbert/my-open-source-project-is-brand-new-and-already-has-contributors-heres-what-i-did-3fb4",
+    "discussionUrl": "https://dev.to/nathan_tarbert/my-open-source-project-is-brand-new-and-already-has-contributors-heres-what-i-did-3fb4",
+    "points": 66,
+    "comments": 17,
+    "topic": "other",
+    "counts": "66 reactions, 17 comments"
+  }
+]
