@@ -19,7 +19,9 @@
     "issue:anthropics/claude-code#106037": "2026-10-31",
     "issue:anomalyco/opencode#60399": "2026-10-31",
     "issue:anomalyco/opencode#60573": "2026-10-31",
-    "issue:openai/codex#58551": "2026-11-01"
+    "issue:openai/codex#58551": "2026-11-01",
+    "issue:anthropics/claude-code#106479": "2026-11-02",
+    "issue:openai/codex#58530": "2026-11-02"
   },
   "stages": {}
 }

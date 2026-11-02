@@ -1,0 +1,19 @@
+{
+"attempted": 13,
+"failed": 0,
+"calls": [
+{"label":"infra","outcome":"ok","chars":540},
+{"label":"spotted-summaries","outcome":"ok","chars":1562},
+{"label":"agents","outcome":"ok","chars":2031},
+{"label":"trends-hf-summaries","outcome":"ok","chars":608},
+{"label":"models-highlights","outcome":"ok","chars":197},
+{"label":"claude-code-skills","outcome":"ok","chars":1341},
+{"label":"agents-highlights","outcome":"ok","chars":576},
+{"label":"data-vendor-summaries","outcome":"ok","chars":898},
+{"label":"data-highlights","outcome":"ok","chars":58},
+{"label":"trends-summaries","outcome":"ok","chars":2221},
+{"label":"trending-summaries","outcome":"ok","chars":6826},
+{"label":"trends","outcome":"ok","chars":1424},
+{"label":"highlights","outcome":"ok","chars":481}
+]
+}

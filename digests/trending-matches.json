@@ -2,185 +2,295 @@
   "apps": {
     "189563": {
       "title": "OpenHands",
-      "lastSeen": "2026-10-26",
+      "lastSeen": "2026-11-02",
       "rejected": [
-        "npm:@reason-machines/cli",
-        "npm:@earendil-works/pi-coding-agent"
+        "npm:@earendil-works/pi-coding-agent",
+        "npm:teapot-coding-agent",
+        "npm:@iinm/plain-agent",
+        "npm:yiyan-browser-agent",
+        "npm:clavue-v1",
+        "github:ccch1mneyyy/dsh-Go",
+        "github:haydenschmitty/floorplan",
+        "github:MiniMax-AI/mcode-stack"
       ]
     },
     "190604": {
       "title": "Cline",
-      "lastSeen": "2026-10-26",
+      "lastSeen": "2026-11-02",
       "rejected": [
-        "npm:@reason-machines/cli",
-        "npm:@earendil-works/pi-coding-agent"
+        "npm:@earendil-works/pi-coding-agent",
+        "npm:teapot-coding-agent",
+        "npm:@iinm/plain-agent",
+        "npm:yiyan-browser-agent",
+        "npm:clavue-v1",
+        "github:ccch1mneyyy/dsh-Go",
+        "github:haydenschmitty/floorplan",
+        "github:MiniMax-AI/mcode-stack"
       ]
     },
     "2237546": {
       "title": "Cursor",
-      "lastSeen": "2026-10-26",
+      "lastSeen": "2026-11-02",
       "rejected": [
-        "npm:@reason-machines/cli",
-        "npm:@earendil-works/pi-coding-agent"
+        "npm:@earendil-works/pi-coding-agent",
+        "npm:teapot-coding-agent",
+        "npm:@iinm/plain-agent",
+        "npm:yiyan-browser-agent",
+        "npm:clavue-v1",
+        "github:ccch1mneyyy/dsh-Go",
+        "github:haydenschmitty/floorplan",
+        "github:MiniMax-AI/mcode-stack"
       ]
     },
     "2262242": {
       "title": "Kilo Code",
-      "lastSeen": "2026-10-26",
+      "lastSeen": "2026-11-02",
       "rejected": [
-        "npm:@reason-machines/cli",
-        "npm:@earendil-works/pi-coding-agent"
+        "npm:@earendil-works/pi-coding-agent",
+        "npm:teapot-coding-agent",
+        "npm:@iinm/plain-agent",
+        "npm:yiyan-browser-agent",
+        "npm:clavue-v1",
+        "github:ccch1mneyyy/dsh-Go",
+        "github:haydenschmitty/floorplan",
+        "github:MiniMax-AI/mcode-stack"
       ]
     },
     "2267189": {
       "title": "Zed Editor",
-      "lastSeen": "2026-10-26",
+      "lastSeen": "2026-11-02",
       "rejected": [
-        "npm:@reason-machines/cli",
-        "npm:@earendil-works/pi-coding-agent"
+        "npm:@earendil-works/pi-coding-agent",
+        "npm:teapot-coding-agent",
+        "npm:@iinm/plain-agent",
+        "npm:yiyan-browser-agent",
+        "npm:clavue-v1",
+        "github:ccch1mneyyy/dsh-Go",
+        "github:haydenschmitty/floorplan",
+        "github:MiniMax-AI/mcode-stack"
       ]
     },
     "2627404": {
       "title": "Claude Code",
-      "lastSeen": "2026-10-26",
+      "lastSeen": "2026-11-02",
       "rejected": [
-        "npm:@reason-machines/cli",
-        "npm:@earendil-works/pi-coding-agent"
+        "npm:@earendil-works/pi-coding-agent",
+        "npm:teapot-coding-agent",
+        "npm:@iinm/plain-agent",
+        "npm:yiyan-browser-agent",
+        "npm:clavue-v1",
+        "github:ccch1mneyyy/dsh-Go",
+        "github:haydenschmitty/floorplan",
+        "github:MiniMax-AI/mcode-stack"
       ]
     },
     "2637375": {
       "title": "Lemonade",
-      "lastSeen": "2026-10-26",
+      "lastSeen": "2026-11-02",
       "rejected": [
-        "npm:@reason-machines/cli",
-        "npm:@earendil-works/pi-coding-agent"
+        "npm:@earendil-works/pi-coding-agent",
+        "npm:teapot-coding-agent",
+        "npm:@iinm/plain-agent",
+        "npm:yiyan-browser-agent",
+        "npm:clavue-v1",
+        "github:ccch1mneyyy/dsh-Go",
+        "github:haydenschmitty/floorplan",
+        "github:MiniMax-AI/mcode-stack"
       ]
     },
     "2668297": {
       "title": "Codex",
-      "lastSeen": "2026-10-26",
+      "lastSeen": "2026-11-02",
       "rejected": [
-        "npm:@reason-machines/cli",
-        "npm:@earendil-works/pi-coding-agent"
+        "npm:@earendil-works/pi-coding-agent",
+        "npm:teapot-coding-agent",
+        "npm:@iinm/plain-agent",
+        "npm:yiyan-browser-agent",
+        "npm:clavue-v1",
+        "github:ccch1mneyyy/dsh-Go",
+        "github:haydenschmitty/floorplan",
+        "github:MiniMax-AI/mcode-stack"
       ]
     },
     "2725608": {
       "title": "OpenClaw",
-      "lastSeen": "2026-10-26",
+      "lastSeen": "2026-11-02",
       "rejected": [
-        "npm:@reason-machines/cli",
-        "npm:@earendil-works/pi-coding-agent"
+        "npm:@earendil-works/pi-coding-agent",
+        "npm:teapot-coding-agent",
+        "npm:@iinm/plain-agent",
+        "npm:yiyan-browser-agent",
+        "npm:clavue-v1",
+        "github:ccch1mneyyy/dsh-Go",
+        "github:haydenschmitty/floorplan",
+        "github:MiniMax-AI/mcode-stack"
       ]
     },
     "2823243": {
       "title": "ZCode",
-      "lastSeen": "2026-10-26",
+      "lastSeen": "2026-11-02",
       "rejected": [
-        "npm:@reason-machines/cli",
-        "npm:@earendil-works/pi-coding-agent"
+        "npm:@earendil-works/pi-coding-agent",
+        "npm:teapot-coding-agent",
+        "npm:@iinm/plain-agent",
+        "npm:yiyan-browser-agent",
+        "npm:clavue-v1",
+        "github:ccch1mneyyy/dsh-Go",
+        "github:haydenschmitty/floorplan",
+        "github:MiniMax-AI/mcode-stack"
       ]
     },
     "2853275": {
       "title": "pi",
-      "lastSeen": "2026-10-26",
+      "lastSeen": "2026-11-02",
       "rejected": [
-        "npm:@reason-machines/cli",
-        "npm:@earendil-works/pi-coding-agent"
+        "npm:@earendil-works/pi-coding-agent",
+        "npm:teapot-coding-agent",
+        "npm:@iinm/plain-agent",
+        "npm:yiyan-browser-agent",
+        "npm:clavue-v1",
+        "github:ccch1mneyyy/dsh-Go",
+        "github:haydenschmitty/floorplan",
+        "github:MiniMax-AI/mcode-stack"
       ]
     },
     "3003505": {
       "title": "Strix",
-      "lastSeen": "2026-10-26",
+      "lastSeen": "2026-11-02",
       "rejected": [
-        "npm:@reason-machines/cli",
-        "npm:@earendil-works/pi-coding-agent"
+        "npm:@earendil-works/pi-coding-agent",
+        "npm:teapot-coding-agent",
+        "npm:@iinm/plain-agent",
+        "npm:yiyan-browser-agent",
+        "npm:clavue-v1",
+        "github:ccch1mneyyy/dsh-Go",
+        "github:haydenschmitty/floorplan",
+        "github:MiniMax-AI/mcode-stack"
       ]
     },
     "3067167": {
       "title": "Hermes Agent",
-      "lastSeen": "2026-10-26",
+      "lastSeen": "2026-11-02",
       "rejected": [
-        "npm:@reason-machines/cli",
-        "npm:@earendil-works/pi-coding-agent"
+        "npm:@earendil-works/pi-coding-agent",
+        "npm:teapot-coding-agent",
+        "npm:@iinm/plain-agent",
+        "npm:yiyan-browser-agent",
+        "npm:clavue-v1",
+        "github:ccch1mneyyy/dsh-Go",
+        "github:haydenschmitty/floorplan",
+        "github:MiniMax-AI/mcode-stack"
       ]
     },
     "3248223": {
       "title": "goose",
       "lastSeen": "2026-10-26",
       "rejected": [
-        "npm:@reason-machines/cli",
         "npm:@earendil-works/pi-coding-agent"
       ]
     },
     "3296290": {
       "title": "Mira is the leading AI agent inside Telegram",
-      "lastSeen": "2026-10-26",
+      "lastSeen": "2026-11-02",
       "rejected": [
-        "npm:@reason-machines/cli",
-        "npm:@earendil-works/pi-coding-agent"
+        "npm:@earendil-works/pi-coding-agent",
+        "npm:teapot-coding-agent",
+        "npm:@iinm/plain-agent",
+        "npm:yiyan-browser-agent",
+        "npm:clavue-v1",
+        "github:ccch1mneyyy/dsh-Go",
+        "github:haydenschmitty/floorplan",
+        "github:MiniMax-AI/mcode-stack"
       ]
     },
     "3682314": {
       "title": "omp",
-      "lastSeen": "2026-10-26",
+      "lastSeen": "2026-11-02",
       "rejected": [
-        "npm:@reason-machines/cli",
-        "npm:@earendil-works/pi-coding-agent"
+        "npm:@earendil-works/pi-coding-agent",
+        "npm:teapot-coding-agent",
+        "npm:@iinm/plain-agent",
+        "npm:yiyan-browser-agent",
+        "npm:clavue-v1",
+        "github:ccch1mneyyy/dsh-Go",
+        "github:haydenschmitty/floorplan",
+        "github:MiniMax-AI/mcode-stack"
       ]
     },
     "3980383": {
       "title": "mimocode",
       "lastSeen": "2026-10-26",
       "rejected": [
-        "npm:@reason-machines/cli",
         "npm:@earendil-works/pi-coding-agent"
       ]
     },
     "4132065": {
       "title": "Hello Minds, powered by Ethoswarm",
-      "lastSeen": "2026-10-26",
+      "lastSeen": "2026-11-02",
       "rejected": [
-        "npm:@reason-machines/cli",
-        "npm:@earendil-works/pi-coding-agent"
+        "npm:@earendil-works/pi-coding-agent",
+        "npm:teapot-coding-agent",
+        "npm:@iinm/plain-agent",
+        "npm:yiyan-browser-agent",
+        "npm:clavue-v1",
+        "github:ccch1mneyyy/dsh-Go",
+        "github:haydenschmitty/floorplan",
+        "github:MiniMax-AI/mcode-stack"
       ]
     },
     "4706207": {
       "title": "DeepSeek Harness",
       "lastSeen": "2026-10-26",
       "rejected": [
-        "npm:@reason-machines/cli",
         "npm:@earendil-works/pi-coding-agent"
       ]
     },
     "4725308": {
       "title": "Proto Agent",
-      "lastSeen": "2026-10-26",
+      "lastSeen": "2026-11-02",
       "rejected": [
-        "npm:@reason-machines/cli",
-        "npm:@earendil-works/pi-coding-agent"
+        "npm:@earendil-works/pi-coding-agent",
+        "npm:teapot-coding-agent",
+        "npm:@iinm/plain-agent",
+        "npm:yiyan-browser-agent",
+        "npm:clavue-v1",
+        "github:ccch1mneyyy/dsh-Go",
+        "github:haydenschmitty/floorplan",
+        "github:MiniMax-AI/mcode-stack"
       ]
     },
     "4749832": {
       "title": "Aura",
-      "lastSeen": "2026-10-26",
+      "lastSeen": "2026-11-02",
       "rejected": [
-        "npm:@reason-machines/cli",
-        "npm:@earendil-works/pi-coding-agent"
+        "npm:@earendil-works/pi-coding-agent",
+        "npm:teapot-coding-agent",
+        "npm:@iinm/plain-agent",
+        "npm:yiyan-browser-agent",
+        "npm:clavue-v1",
+        "github:ccch1mneyyy/dsh-Go",
+        "github:haydenschmitty/floorplan",
+        "github:MiniMax-AI/mcode-stack"
       ]
     },
     "4780809": {
       "title": "CodeGPT",
-      "lastSeen": "2026-10-26",
+      "lastSeen": "2026-11-02",
       "rejected": [
-        "npm:@reason-machines/cli",
-        "npm:@earendil-works/pi-coding-agent"
+        "npm:@earendil-works/pi-coding-agent",
+        "npm:teapot-coding-agent",
+        "npm:@iinm/plain-agent",
+        "npm:yiyan-browser-agent",
+        "npm:clavue-v1",
+        "github:ccch1mneyyy/dsh-Go",
+        "github:haydenschmitty/floorplan",
+        "github:MiniMax-AI/mcode-stack"
       ]
     },
     "4832946": {
       "title": "Digen AI",
       "lastSeen": "2026-10-26",
       "rejected": [
-        "npm:@reason-machines/cli",
         "npm:@earendil-works/pi-coding-agent"
       ]
     },
@@ -188,7 +298,6 @@
       "title": "ai-copilot-prod",
       "lastSeen": "2026-10-19",
       "rejected": [
-        "npm:@reason-machines/cli",
         "npm:@earendil-works/pi-coding-agent"
       ]
     },
@@ -196,29 +305,23 @@
       "title": "Diligent NS Name Matching v2",
       "lastSeen": "2026-10-19",
       "rejected": [
-        "npm:@reason-machines/cli",
         "npm:@earendil-works/pi-coding-agent"
       ]
     },
     "5217301": {
       "title": "isdlc.ai",
       "lastSeen": "2026-10-12",
-      "rejected": [
-        "npm:@reason-machines/cli"
-      ]
+      "rejected": []
     },
     "5223849": {
       "title": "codex-fleet conductor",
       "lastSeen": "2026-10-12",
-      "rejected": [
-        "npm:@reason-machines/cli"
-      ]
+      "rejected": []
     },
     "5268002": {
       "title": "StepCode",
       "lastSeen": "2026-10-19",
       "rejected": [
-        "npm:@reason-machines/cli",
         "npm:@earendil-works/pi-coding-agent"
       ]
     },
@@ -226,7 +329,6 @@
       "title": "HunterSwarm",
       "lastSeen": "2026-10-19",
       "rejected": [
-        "npm:@reason-machines/cli",
         "npm:@earendil-works/pi-coding-agent"
       ]
     },
@@ -234,7 +336,6 @@
       "title": "rn-lean agents",
       "lastSeen": "2026-10-19",
       "rejected": [
-        "npm:@reason-machines/cli",
         "npm:@earendil-works/pi-coding-agent"
       ]
     },
@@ -242,7 +343,6 @@
       "title": "alt-data-harness",
       "lastSeen": "2026-10-19",
       "rejected": [
-        "npm:@reason-machines/cli",
         "npm:@earendil-works/pi-coding-agent"
       ]
     },
@@ -250,31 +350,55 @@
       "title": "Prime Agent + Birdstrike Security",
       "lastSeen": "2026-10-26",
       "rejected": [
-        "npm:@reason-machines/cli",
         "npm:@earendil-works/pi-coding-agent"
+      ]
+    },
+    "5367673": {
+      "title": "Agents SDK",
+      "lastSeen": "2026-11-02",
+      "rejected": [
+        "npm:teapot-coding-agent",
+        "npm:@iinm/plain-agent",
+        "npm:yiyan-browser-agent",
+        "npm:clavue-v1",
+        "npm:@earendil-works/pi-coding-agent",
+        "github:ccch1mneyyy/dsh-Go",
+        "github:haydenschmitty/floorplan",
+        "github:MiniMax-AI/mcode-stack"
       ]
     },
     "5378936": {
       "title": "HunterSwarm",
-      "lastSeen": "2026-10-26",
+      "lastSeen": "2026-11-02",
       "rejected": [
-        "npm:@reason-machines/cli",
-        "npm:@earendil-works/pi-coding-agent"
+        "npm:@earendil-works/pi-coding-agent",
+        "npm:teapot-coding-agent",
+        "npm:@iinm/plain-agent",
+        "npm:yiyan-browser-agent",
+        "npm:clavue-v1",
+        "github:ccch1mneyyy/dsh-Go",
+        "github:haydenschmitty/floorplan",
+        "github:MiniMax-AI/mcode-stack"
       ]
     },
     "5390824": {
       "title": "OpenPAVE",
-      "lastSeen": "2026-10-26",
+      "lastSeen": "2026-11-02",
       "rejected": [
-        "npm:@reason-machines/cli",
-        "npm:@earendil-works/pi-coding-agent"
+        "npm:@earendil-works/pi-coding-agent",
+        "npm:teapot-coding-agent",
+        "npm:@iinm/plain-agent",
+        "npm:yiyan-browser-agent",
+        "npm:clavue-v1",
+        "github:ccch1mneyyy/dsh-Go",
+        "github:haydenschmitty/floorplan",
+        "github:MiniMax-AI/mcode-stack"
       ]
     },
     "5393423": {
       "title": "Real-SWE",
       "lastSeen": "2026-10-26",
       "rejected": [
-        "npm:@reason-machines/cli",
         "npm:@earendil-works/pi-coding-agent"
       ]
     }

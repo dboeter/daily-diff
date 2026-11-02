@@ -227,7 +227,10 @@
     "https://community.fabric.microsoft.com/t5/Fabric-Updates-Blog/Using-Allow-workspace-settings-editing-policy-in-Fabric-Preview/ba-p/5377845": "2026-11-01",
     "post:getdbt.com/blog/bigquery-generative-ai-dbt-sql-functions": "2026-11-01",
     "post:getdbt.com/blog/bi-dashboard-chart-design-inspiration": "2026-11-01",
-    "post:getdbt.com/blog/dbt-charts-open-source-dashboard-yaml": "2026-11-01"
+    "post:getdbt.com/blog/dbt-charts-open-source-dashboard-yaml": "2026-11-01",
+    "https://community.fabric.microsoft.com/t5/Fabric-Updates-Blog/Build-clearer-more-expressive-Real-Time-Dashboards-with-new/ba-p/5377578": "2026-11-02",
+    "post:medium.com/snowflake/budgets-quotas-and-monitors-the-cost-controls-i-map-before-agents-go-wider-7554c3301c4d": "2026-11-02",
+    "post:medium.com/snowflake/before-you-model-a-single-table-data-modelling-questions-to-ask-for-ai-agents-in-snowflake-ad242d437d16": "2026-11-02"
   },
   "stages": {
     "snowflake-bcr:2026_08": "2026-10-16 Introduced in the 10.37 release (October 8-16, 2026) as Disabled by Default; account admins can enable for testing."

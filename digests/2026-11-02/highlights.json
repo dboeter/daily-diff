@@ -1,0 +1,10 @@
+{
+  "ai-agents": [
+    "Oh My Pi v18.15.0 adds Modular Cloud provider with models.dev pricing and per-model reasoning controls, plus SambaNova Cloud prefix cache reuse.",
+    "Microsoft postmortem details persistent SSH backdoor in malicious Claude Code extension and detection guidance."
+  ],
+  "ai-trends": [
+    "OpenRouter reports deepseek/deepseek-v4.1-flash-20261017 led with 48.08T tokens on 2026-11-01.",
+    "JetBrains/thinkrail gained 5,760 stars in 7 days (+454%), largest gain among Coding Agents."
+  ]
+}

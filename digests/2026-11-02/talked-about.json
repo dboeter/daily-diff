@@ -1,0 +1,57 @@
+[
+  {
+    "id": "hn:50320599",
+    "source": "hn",
+    "title": "AI text watermarking and quality loss",
+    "url": "https://blog.keyvan.net/p/ai-text-watermarking-and-quality",
+    "discussionUrl": "https://news.ycombinator.com/item?id=50320599",
+    "points": 72,
+    "comments": 16,
+    "topic": "policy",
+    "counts": "72 points, 16 comments"
+  },
+  {
+    "id": "hn:50314699",
+    "source": "hn",
+    "title": "Do the math: How we took over ChatGPT accounts",
+    "url": "https://www.parameter.ai/labs/we-found-a-gap-at-openai",
+    "discussionUrl": "https://news.ycombinator.com/item?id=50314699",
+    "points": 358,
+    "comments": 176,
+    "topic": "other",
+    "counts": "358 points, 176 comments"
+  },
+  {
+    "id": "hn:50323088",
+    "source": "hn",
+    "title": "The AI cost of JavaScript frameworks",
+    "url": "https://nolanlawson.com/2026/10/28/the-ai-cost-of-javascript-frameworks/",
+    "discussionUrl": "https://news.ycombinator.com/item?id=50323088",
+    "points": 336,
+    "comments": 258,
+    "topic": "other",
+    "counts": "336 points, 258 comments"
+  },
+  {
+    "id": "hn:50290652",
+    "source": "hn",
+    "title": "AI, Lean, and the Future of Formal Verification, with Lean Creator Leo de Moura",
+    "url": "https://thedataexchange.media/leo-de-moura-lean-aws/",
+    "discussionUrl": "https://news.ycombinator.com/item?id=50290652",
+    "points": 213,
+    "comments": 57,
+    "topic": "other",
+    "counts": "213 points, 57 comments"
+  },
+  {
+    "id": "devto:4957348",
+    "source": "devto",
+    "title": "I grepped for @ts-ignore and found zero. Then I grepped for the cast nobody bans",
+    "url": "https://dev.to/chet103cc/i-grepped-for-ts-ignore-and-found-zero-then-i-grepped-for-the-cast-nobody-bans-723",
+    "discussionUrl": "https://dev.to/chet103cc/i-grepped-for-ts-ignore-and-found-zero-then-i-grepped-for-the-cast-nobody-bans-723",
+    "points": 57,
+    "comments": 12,
+    "topic": "other",
+    "counts": "57 reactions, 12 comments"
+  }
+]
