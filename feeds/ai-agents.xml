@@ -13,7 +13,84 @@
       <height>144</height>
     </image>
     <atom:link href="https://dboeter.github.io/daily-diff/feeds/ai-agents.xml" rel="self" type="application/rss+xml"/>
-    <lastBuildDate>Sun, 01 Nov 2026 05:52:13 +0000</lastBuildDate>
+    <lastBuildDate>Mon, 02 Nov 2026 06:00:38 +0000</lastBuildDate>
+    <item>
+      <title>AI Agents 2026-11-02</title>
+      <link>https://dboeter.github.io/daily-diff/#2026-11-02/ai-agents</link>
+      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-11-02/ai-agents</guid>
+      <pubDate>Mon, 02 Nov 2026 00:00:00 +0000</pubDate>
+      <description>AI Agents 2026-11-02 ⬛ Overview · 🟪 AI Agents · 🟦 AI Models &amp;amp; Labs · 🟨 Data Engineering · 🟫 Trends Projects: 16 | Active today: 4 | Stable releases: 2 | Prereleases (not covered): 7 | Generated: 2026-11-02 05:48 UTC Highlights Oh My Pi v18.15.0 release adds Modular Cloud as a provider via /login modular with models.dev prices and per-model reasoning controls, and makes SambaNova Cloud follow-up turns reuse prefix cache. Users report dead keys fail in the Claude desktop app on Windows wit...</description>
+      <content:encoded><![CDATA[<h1>AI Agents 2026-11-02</h1>
+<p><a href="https://dboeter.github.io/daily-diff/#2026-11-02">⬛ Overview</a> · <strong>🟪 AI Agents</strong> · <a href="https://dboeter.github.io/daily-diff/#2026-11-02/ai-models">🟦 AI Models &amp; Labs</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-02/ai-data">🟨 Data Engineering</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-02/ai-trends">🟫 Trends</a></p>
+<blockquote>
+<p>Projects: 16 | Active today: 4 | Stable releases: 2 | Prereleases (not covered): 7 | Generated: 2026-11-02 05:48 UTC</p>
+</blockquote>
+<hr>
+<h2>Highlights</h2>
+<ul>
+<li>Oh My Pi v18.15.0 release adds Modular Cloud as a provider via <code>/login modular</code> with models.dev prices and per-model reasoning controls, and makes SambaNova Cloud follow-up turns reuse prefix cache.</li>
+<li>Users report dead keys fail in the Claude desktop app on Windows with Spanish (Latin America) layouts, so ´ then a yields a instead of á; the issue persists in Claude desktop app 4.4212.0 and Claude Code 2.1.309.</li>
+<li>Microsoft&#39;s postmortem on a malicious Claude Code–branded extension describes a persistent SSH backdoor and guidance to detect and remediate it.</li>
+</ul>
+<hr>
+<h2>Coding Agents &amp; Assistants</h2>
+<h3>Claude Code</h3>
+<ul>
+<li><strong>Hot issue:</strong> <a href="https://github.com/anthropics/claude-code/issues/106479">#106479</a>: Users report that dead keys do not work in the Claude desktop app on Windows with Spanish (Latin America) keyboard layouts, so pressing ´ then a produces a instead of á, making accented vowels impossible to type; the issue persists in Claude desktop app 4.4212.0 and Claude Code 2.1.309. (7 comments, 7 👍; +14 in the last 24h)</li>
+<li><a href="https://news.ycombinator.com/item?id=50332497">Postmortem on Claude Code Cursor extension hack</a> — Microsoft analyzes a malicious Claude Code–branded extension, its persistent SSH backdoor, and guidance to detect and remediate it.</li>
+</ul>
+<h3>OpenAI Codex</h3>
+<ul>
+<li><strong>Hot issue:</strong> <a href="https://github.com/openai/codex/issues/58530">#58530</a>: A ChatGPT Plus subscriber asks OpenAI to preserve separate usage allowances for regular ChatGPT conversations and Codex, warning that reports of a shared limit starting in December could make the product less valuable for users who combine coding and everyday conversations. (17 comments, 21 👍; +32 in the last 24h)</li>
+</ul>
+<h3>Oh My Pi</h3>
+<ul>
+<li><strong>Release:</strong> <a href="https://github.com/can1357/oh-my-pi/releases/tag/v18.15.0">v18.15.0</a> replaces <code>GroupedLineContext.isUrl</code> with <code>url</code>. It fixes OpenAI remote compaction replaying backend-only <code>internal_chat_message_metadata_passthrough</code> metadata that Codex rejects, and fixes Codex conversation replay failing on unknown <code>internal_chat_message_metadata_passthrough.content_token_count</code> by omitting backend-internal response metadata from replayed input.</li>
+<li>It also fixes <code>service_tier: &quot;ultrafast&quot;</code> being dropped for OpenAI-family models on custom providers, Google Vertex Workforce Identity Federation ADC token refresh hitting the wrong endpoint, Anthropic and rotating-token OAuth accounts being signed out on <code>invalid_grant</code> from background usage polls, and OpenAI-compatible models ignoring provider-reported context and output token limits.</li>
+<li>Headline features add Modular Cloud (<code>modular</code>) as a provider via <code>/login modular</code> with models.dev prices and per-model reasoning controls, make SambaNova Cloud follow-up turns reuse prefix cache, and add one-line captions for long background shell commands through the <code>widget</code> model role.</li>
+</ul>
+<p><strong>Quiet today:</strong> <a href="https://github.com/google-gemini/gemini-cli">Gemini CLI</a>, <a href="https://github.com/Kilo-Org/kilocode">Kilo Code</a>, <a href="https://github.com/anomalyco/opencode">OpenCode</a>, <a href="https://github.com/earendil-works/pi">Pi</a>, <a href="https://github.com/1jehuang/jcode">jcode</a>, <a href="https://github.com/cline/cline">Cline</a>, <a href="https://github.com/CommandCodeAI/command-code">Command Code</a>, <a href="https://github.com/deepseek-ai/deepseek-harness">DeepSeek Harness</a>, <a href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a></p>
+<hr>
+<h2>Agent Tooling</h2>
+<h3>Agent Deck</h3>
+<ul>
+<li><strong>Release:</strong> <a href="https://github.com/asheshgoplani/agent-deck/releases/tag/v1.16.36">v1.16.36</a> fixes the UI by reordering orphaned sub-sessions among top-level rows and starting global-search sessions through the resume builder. It also fixes session handling so a fresh Claude start’s boot reaches the parent as info and its token lasts until the first turn, makes <code>launchesFresh</code> an <code>atomic.Bool</code> to stop a concurrent-restart race, and changes update polling to run on every <code>check_interval</code> tick instead of every second one.</li>
+</ul>
+<p><strong>Quiet today:</strong> <a href="https://github.com/NVIDIA/OpenShell">OpenShell</a>, <a href="https://github.com/herdrdev/herdr">herdr</a>, <a href="https://github.com/mksglu/context-mode">context-mode</a></p>
+<hr>
+<h2>Spotted</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Story</th>
+<th align="left">Source</th>
+<th align="left">Discussion</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a href="https://www.tomshardware.com/tech-industry/artificial-intelligence/ai-agent-swarms-unleashed-in-minecraft-to-build-a-thriving-civilization-50-agent-teams-fail-after-falling-into-paralyzing-bureaucracy">AI agent swarms in Minecraft fail to build civilization, drown in bureaucracy</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50325662">162 points, 77 comments</a></td>
+<td align="left">The story describes AI agent swarms in Minecraft failing to build civilization and drowning in bureaucracy, based on game testing intended to provide insight into recent AI agent headlines.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://paulfwalsh.substack.com/p/metas-muse-ai-agent-is-a-commercial">Muse AI agent is a commercial surveillance network disguised as an AI assistant</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50328293">43 points, 6 comments</a></td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left"><a href="https://chaosmanage.github.io/i-killed-unlimited-chatgpt/">I Am the Reason OpenAI Is Killing Unlimited Chats</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50327416">38 points, 7 comments</a></td>
+<td align="left">The author built custom MCP integrations and used multiple ChatGPT conversations for software development.</td>
+</tr>
+</tbody></table>
+<hr>
+<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
+]]></content:encoded>
+    </item>
     <item>
       <title>AI Agents 2026-11-01</title>
       <link>https://dboeter.github.io/daily-diff/#2026-11-01/ai-agents</link>
