@@ -1,9 +1,12 @@
 {
   "reported": {
+    "574541": "2026-11-03",
     "576716": "2026-10-22",
     "577491": "2026-10-31",
     "577618": "2026-10-23",
+    "577992": "2026-11-03",
     "578358": "2026-10-28",
+    "578628": "2026-11-03",
     "databricks ai runtime sdk replaces serverless_gpu|2026-10-13": "2026-10-19",
     "knowledge assistant and supervisor agent are now legacy|2026-10-12": "2026-10-19",
     "feature views are now generally available|2026-10-12": "2026-10-19",
@@ -230,7 +233,25 @@
     "post:getdbt.com/blog/dbt-charts-open-source-dashboard-yaml": "2026-11-01",
     "https://community.fabric.microsoft.com/t5/Fabric-Updates-Blog/Build-clearer-more-expressive-Real-Time-Dashboards-with-new/ba-p/5377578": "2026-11-02",
     "post:medium.com/snowflake/budgets-quotas-and-monitors-the-cost-controls-i-map-before-agents-go-wider-7554c3301c4d": "2026-11-02",
-    "post:medium.com/snowflake/before-you-model-a-single-table-data-modelling-questions-to-ask-for-ai-agents-in-snowflake-ad242d437d16": "2026-11-02"
+    "post:medium.com/snowflake/before-you-model-a-single-table-data-modelling-questions-to-ask-for-ai-agents-in-snowflake-ad242d437d16": "2026-11-02",
+    "databricks-provided mcp connectors in genie one and genie code will soon be enabled by default for workspaces with the compliance security profile enabled|2026-10-29": "2026-11-03",
+    "lakeflow designer october release|2026-10-27": "2026-11-03",
+    "higher limits and browse support for unity catalog secrets|2026-11-02": "2026-11-03",
+    "onelake external locations are in public preview|2026-11-02": "2026-11-03",
+    "serverless log delivery to unity catalog volumes (beta)|2026-10-28": "2026-11-03",
+    "databricks runtime 19: november 2, 2026|2026-11-02": "2026-11-03",
+    "nov 02, 2026: open data sharing (general availability)|2026-11-02": "2026-11-03",
+    "nov 02, 2026: ai_extract updates|2026-11-02": "2026-11-03",
+    "oct 28, 2026: openai gpt-5.6 luna, gpt-5.6 terra, and gpt-6 luna in ai functions (preview)|2026-10-28": "2026-11-03",
+    "the data engineering agent now supports bigquery ai, ml, and object functions and statements in generated dataform sqlx pipelines and agent instruction files (ga)|2026-11-02": "2026-11-03",
+    "you can now monitor the performance, adoption, latency, and costs of your data agents and their conversations by using google cloud observability in bigquery (ga)|2026-11-02": "2026-11-03",
+    "lakehouse caching for cross-cloud data access (ga)|2026-11-02": "2026-11-03",
+    "the secure_context function is now available in preview (preview)|2026-11-02": "2026-11-03",
+    "you can use the ai.parse_document function to extract layout elements such as titles, headings, paragraphs, lists, tables, and images by using the document ai layout parser to convert unstructured documents into structured json data|2026-11-02": "2026-11-03",
+    "oct 27, 2026: openai gpt-6.1 terra (preview)|2026-10-27": "2026-11-03",
+    "genie agents enhancements|2026-11-02": "2026-11-03",
+    "release:databricks/terraform-provider-databricks@v1.141.0": "2026-11-03",
+    "post:medium.com/snowflake/from-seats-to-prompts-reclaiming-crm-licenses-with-a-governed-read-model-5d18a8ebdfda": "2026-11-03"
   },
   "stages": {
     "snowflake-bcr:2026_08": "2026-10-16 Introduced in the 10.37 release (October 8-16, 2026) as Disabled by Default; account admins can enable for testing."

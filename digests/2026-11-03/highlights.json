@@ -1,0 +1,18 @@
+{
+  "ai-agents": [
+    "Pi v1.5.0 breaks tool validation: TypeBox-only features dropped, plain JSON Schema tools get same coercion, errors use pi-schema messages.",
+    "− Oh My Pi v18.16.0 removes PI_TOKENIZER_ACCURATE, replaces Editor.prediction with Editor.predictions, deprecates compaction utilities for @oh-my-pi/snapcompact."
+  ],
+  "ai-models": [
+    "Z.ai releases GLM 5.3 FlashX Legal on OpenRouter: native multimodal, 1M-token context, accepts text, image, video for legal tasks.",
+    "LongCat-2.5 launches as 1.6T-parameter multimodal model trained entirely on domestically produced chips."
+  ],
+  "ai-policy": [
+    "Germany plans to become a “sovereign AI nation” by 2030 per Berlin blueprint.",
+    "EU consultation on AI Act implementing act for Articles 75c–75d open until 2026-11-09."
+  ],
+  "ai-data": [
+    "Azure Databricks compliance workspaces: MCP connectors (Google, M365, Atlassian, Slack, GitHub) default in Genie One/Code from Dec 2026; governed via Unity Catalog/Gateway.",
+    "Azure Databricks: OneLake external locations enter Public Preview as managed storage for Unity Catalog catalogs with governance; enable via Previews page."
+  ]
+}
