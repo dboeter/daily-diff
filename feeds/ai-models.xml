@@ -13,7 +13,145 @@
       <height>144</height>
     </image>
     <atom:link href="https://dboeter.github.io/daily-diff/feeds/ai-models.xml" rel="self" type="application/rss+xml"/>
-    <lastBuildDate>Mon, 02 Nov 2026 06:00:38 +0000</lastBuildDate>
+    <lastBuildDate>Tue, 03 Nov 2026 06:35:21 +0000</lastBuildDate>
+    <item>
+      <title>AI Models &amp; Labs 2026-11-03</title>
+      <link>https://dboeter.github.io/daily-diff/#2026-11-03/ai-models</link>
+      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-11-03/ai-models</guid>
+      <pubDate>Tue, 03 Nov 2026 00:00:00 +0000</pubDate>
+      <description>AI Models &amp;amp; Labs 2026-11-03 ⬛ Overview · 🟪 AI Agents · 🟦 AI Models &amp;amp; Labs · 🟧 AI Policy · 🟨 Data Engineering Lab posts: 5 | New models: 1 | Spotted: 7 | Generated: 2026-11-03 06:30 UTC Highlights Z.ai releases GLM 5.3 FlashX Legal on OpenRouter, a native multimodal model with 1M-token context accepting text, image, and video input for legal-domain tasks. LongCat-2.5 launches as a 1.6-trillion-parameter multimodal model trained entirely on domestically produced chips. Research demonst...</description>
+      <content:encoded><![CDATA[<h1>AI Models &amp; Labs 2026-11-03</h1>
+<p><a href="https://dboeter.github.io/daily-diff/#2026-11-03">⬛ Overview</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-03/ai-agents">🟪 AI Agents</a> · <strong>🟦 AI Models &amp; Labs</strong> · <a href="https://dboeter.github.io/daily-diff/#2026-11-03/ai-policy">🟧 AI Policy</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-03/ai-data">🟨 Data Engineering</a></p>
+<blockquote>
+<p>Lab posts: 5 | New models: 1 | Spotted: 7 | Generated: 2026-11-03 06:30 UTC</p>
+</blockquote>
+<hr>
+<h2>Highlights</h2>
+<ul>
+<li>Z.ai releases GLM 5.3 FlashX Legal on OpenRouter, a native multimodal model with 1M-token context accepting text, image, and video input for legal-domain tasks.</li>
+<li>LongCat-2.5 launches as a 1.6-trillion-parameter multimodal model trained entirely on domestically produced chips.</li>
+<li>Research demonstrates frontier LLMs can natively read and write neural-network weights, surpassing human and conventional algorithm performance.</li>
+</ul>
+<hr>
+<h2>Lab announcements</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Lab</th>
+<th align="left">Post</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-11-03</td>
+<td align="left">OpenAI</td>
+<td align="left"><a href="https://openai.com/index/lifeval/">Lifeval</a></td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left">2026-11-03</td>
+<td align="left">OpenAI</td>
+<td align="left"><a href="https://openai.com/index/scaling-git-at-openai/">Scaling Git At Openai</a></td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left">2026-11-03</td>
+<td align="left">OpenAI</td>
+<td align="left"><a href="https://openai.com/index/dan-driscoll-joins-openai/">Dan Driscoll Joins Openai</a></td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left">2026-11-03</td>
+<td align="left">OpenAI</td>
+<td align="left"><a href="https://openai.com/index/forward-deployed-engineering-means/">Forward Deployed Engineering Means</a></td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left">2026-11-03</td>
+<td align="left">OpenAI</td>
+<td align="left"><a href="https://openai.com/index/grid-protectors-program/">Grid Protectors Program</a></td>
+<td align="left">—</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>New on OpenRouter</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Model</th>
+<th align="left">Listed</th>
+<th align="left">Context</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a href="https://openrouter.ai/z-ai/glm-5.3-flashx-legal">Z.ai: GLM 5.3 FlashX Legal</a> <code>z-ai/glm-5.3-flashx-legal</code></td>
+<td align="left">2026-11-02</td>
+<td align="left">1M</td>
+<td align="left"><code>GLM-5.3-FlashX-Legal</code> (<code>GLM-Legal</code>) is Z.ai&#39;s legal-domain variant of <code>GLM-5.3-FlashX</code>, a native multimodal model that accepts text, image, and video input and produces text.</td>
+</tr>
+</tbody></table>
+<hr>
+<p>Nothing new from OpenRouter&#39;s stealth models today.</p>
+<hr>
+<h2>Spotted</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Story</th>
+<th align="left">Source</th>
+<th align="left">Discussion</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a href="https://www.businessinsider.com/anthropic-claude-internal-ai-use-exceeds-employee-pay-tokens-2026-11">Anthropic&#39;s internal AI use, at retail prices, now exceeds its employee pay</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50339494">310 points, 246 comments</a></td>
+<td align="left">Anthropic’s IPO filing shows its internal AI usage, valued at retail prices, now exceeds total employee compensation.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://www.cnbc.com/2026/11/02/anthropic-ant-s-1-quarter-financials.html">Anthropic reports $17B in Q3 revenue, commitments of $895B in revised S-1</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50337439">228 points, 270 comments</a></td>
+<td align="left">Anthropic’s revised S‑1 reports $17 billion in Q3 revenue and $895 billion in committed spending.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://www.regenerator1.com/p/anthropics-growth-just-flattened">Anthropic&#39;s growth just flattened</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50344958">197 points, 226 comments</a></td>
+<td align="left">An analysis of monthly metrics indicates Anthropic’s growth has plateaued.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://stephenjgallagher.substack.com/p/ai-can-draw-blueprints-now">Claude Opus 5.5 Can Draw Permit-Level Architectural Drawings</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50339224">94 points, 31 comments</a></td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left"><a href="https://longcat.ai/blog/longcat-2.5/">LongCat-2.5: Native Multimodality for Agentic Tasks</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50337716">82 points, 22 comments</a></td>
+<td align="left">LongCat‑2.5 is a 1.6 trillion‑parameter multimodal model trained entirely on domestically produced chips.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://www.ft.com/content/4d91dbab-6fe4-45ab-beee-d77e091cb37f">Anthropic reveals $900B AI spending commitments ahead of IPO</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50342424">71 points, 44 comments</a></td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left"><a href="https://rikiyat.github.io/blog/weight-space-programming/">Sparks of Weight-Space Programming: LLMs can natively read &amp; write neural network weights</a></td>
+<td align="left">Lobste.rs</td>
+<td align="left"><a href="https://lobste.rs/s/u7wdqj/sparks_weight_space_programming_llms_can">14 points, 1 comment</a></td>
+<td align="left">Research demonstrates that frontier LLMs can natively read and write neural‑network weights, surpassing human and conventional algorithm performance.</td>
+</tr>
+</tbody></table>
+<hr>
+<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
+]]></content:encoded>
+    </item>
     <item>
       <title>AI Models &amp; Labs 2026-11-02</title>
       <link>https://dboeter.github.io/daily-diff/#2026-11-02/ai-models</link>

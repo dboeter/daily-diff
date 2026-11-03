@@ -13,7 +13,102 @@
       <height>144</height>
     </image>
     <atom:link href="https://dboeter.github.io/daily-diff/feeds/ai-agents.xml" rel="self" type="application/rss+xml"/>
-    <lastBuildDate>Mon, 02 Nov 2026 06:00:38 +0000</lastBuildDate>
+    <lastBuildDate>Tue, 03 Nov 2026 06:35:21 +0000</lastBuildDate>
+    <item>
+      <title>AI Agents 2026-11-03</title>
+      <link>https://dboeter.github.io/daily-diff/#2026-11-03/ai-agents</link>
+      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-11-03/ai-agents</guid>
+      <pubDate>Tue, 03 Nov 2026 00:00:00 +0000</pubDate>
+      <description>AI Agents 2026-11-03 ⬛ Overview · 🟪 AI Agents · 🟦 AI Models &amp;amp; Labs · 🟧 AI Policy · 🟨 Data Engineering Projects: 16 | Active today: 5 | Stable releases: 4 | Prereleases (not covered): 9 | Generated: 2026-11-03 06:30 UTC Highlights Pi v1.5.0 breaks tool argument validation — TypeBox features outside JSON Schema no longer apply, plain JSON Schema tools get same coercion as TypeBox tools, validation errors show pi-schema messages instead of TypeBox messages − Oh My Pi v18.16.0 removes PI_TOK...</description>
+      <content:encoded><![CDATA[<h1>AI Agents 2026-11-03</h1>
+<p><a href="https://dboeter.github.io/daily-diff/#2026-11-03">⬛ Overview</a> · <strong>🟪 AI Agents</strong> · <a href="https://dboeter.github.io/daily-diff/#2026-11-03/ai-models">🟦 AI Models &amp; Labs</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-03/ai-policy">🟧 AI Policy</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-03/ai-data">🟨 Data Engineering</a></p>
+<blockquote>
+<p>Projects: 16 | Active today: 5 | Stable releases: 4 | Prereleases (not covered): 9 | Generated: 2026-11-03 06:30 UTC</p>
+</blockquote>
+<hr>
+<h2>Highlights</h2>
+<ul>
+<li>Pi v1.5.0 breaks tool argument validation — TypeBox features outside JSON Schema no longer apply, plain JSON Schema tools get same coercion as TypeBox tools, validation errors show pi-schema messages instead of TypeBox messages</li>
+<li>− Oh My Pi v18.16.0 removes PI_TOKENIZER_ACCURATE (all models now use native tokenizer), replaces Editor.prediction with Editor.predictions, and deprecates compaction utilities in favor of @oh-my-pi/snapcompact</li>
+<li>Hermes Agent v0.22.6 rolls up ~776 PRs adding webapp served from gateway, /model reset, per-skill locks, opt-in OS-keychain vault storage, agent-picked ElevenLabs voices, pre_llm_call hook, and resumable downloads</li>
+</ul>
+<hr>
+<h2>Coding Agents &amp; Assistants</h2>
+<h3>Claude Code</h3>
+<ul>
+<li><strong>Release:</strong> <a href="https://github.com/anthropics/claude-code/releases/tag/v2.1.317">v2.1.317</a> fixes project and local MCP servers disconnecting after the first turn in desktop sessions, fixes auto mode failing on 403/422 from LLM gateways, fixes <code>claude auth status</code> exiting before slow token refresh saves, and fixes <code>effortLevel</code> setting ignored by pre-started sessions.</li>
+<li><strong>Release:</strong> Adds warnings for <code>/schedule</code> when cloud tasks get unrequested connectors, adds confirmation before web/shell tools send account email, adds <code>onFailure: &quot;block&quot;</code> for Agent SDK hook callbacks, and adds cost report API <code>GET /v1/organizations/analytics/cost</code> for admin gateways.</li>
+<li><strong>Hot issue:</strong> <a href="https://github.com/anthropics/claude-code/issues/18435">#18435</a>: users report inability to switch between multiple Claude accounts in Desktop without signing out and losing context, requesting native profile switching like Slack workspaces. (230 comments, 987 👍; +10 since 2026-11-01)</li>
+<li><strong>Hot issue:</strong> <a href="https://github.com/anthropics/claude-code/issues/88391">#88391</a>: users report prompt suggestions silently stopped appearing in Desktop on 2026-08-18 (regression in 2.1.229), with no error or local override since a server-side feature gate controls it. (regression; 18 comments, 18 👍; +3 since 2026-11-01)</li>
+</ul>
+<h3>OpenAI Codex</h3>
+<ul>
+<li><strong>Hot issue:</strong> <a href="https://github.com/openai/codex/issues/58302">#58302</a>: users report XLSX attachments stay pending with spinning send control on macOS desktop version 26.1027.30824, and the composer stops accepting typing until the app is restarted. (17 comments, 1 👍; +11 in the last 24h)</li>
+</ul>
+<h3>Pi</h3>
+<ul>
+<li><strong>Release:</strong> <a href="https://github.com/earendil-works/pi/releases/tag/v1.5.0">v1.5.0</a> breaks tool argument validation: TypeBox features outside JSON Schema no longer apply, plain JSON Schema tools now get same coercion as TypeBox tools, and validation errors show pi-schema messages instead of TypeBox messages.</li>
+<li><strong>Release:</strong> Adds extension update changelogs on fresh launch, faster incremental streaming for large tool calls and code-heavy answers, custom self-update commands via <code>PI_SELF_UPDATE_COMMAND</code>, and GPT-6.1 Terra model support with 500K context via Codex.</li>
+</ul>
+<h3>Oh My Pi</h3>
+<ul>
+<li><strong>Release:</strong> <a href="https://github.com/can1357/oh-my-pi/releases/tag/v18.16.0">v18.16.0</a> removes <code>PI_TOKENIZER_ACCURATE</code> (every model now uses native tokenizer), changes <code>buildExecutionFrame</code> to set loader into <code>bottomBorder</code> directly, replaces <code>Editor.prediction</code> with <code>Editor.predictions</code> returning all predictions, and deprecates several compaction utilities in favor of <code>@oh-my-pi/snapcompact</code>.</li>
+<li><strong>Release:</strong> Fixes context estimates for models without known tokenizer (Gemini, Grok) to use o200k_base instead of 4 bytes/token, which undercounted by 11–48% on code sessions, and fixes estimates no longer charging for another model&#39;s thinking signatures when switching providers.</li>
+</ul>
+<h3>Hermes Agent</h3>
+<ul>
+<li><strong>Release:</strong> <a href="https://github.com/nousresearch/hermes-agent/releases/tag/v0.22.6">v0.22.6</a> rolls up ~776 PRs since v0.22.5 including webapp served from gateway listener, <code>/model reset</code> to clear model pin without losing history, per-skill locks against autonomous writes, opt-in prepared compaction, <code>hermes cron cancel</code> with missed-run policy, <code>/delegation</code> choices saved across sessions, <code>hermes migrate</code> for Grok Bot and OpenBot users, opt-in OS-keychain vault key storage, agent-picked ElevenLabs voices, <code>pre_llm_call</code> hook, desktop group chat improvements, Telegram video notes, Slack emoji reactions in threads, and resumable downloads in package manager.</li>
+</ul>
+<p><strong>Quiet today:</strong> <a href="https://github.com/google-gemini/gemini-cli">Gemini CLI</a>, <a href="https://github.com/Kilo-Org/kilocode">Kilo Code</a>, <a href="https://github.com/anomalyco/opencode">OpenCode</a>, <a href="https://github.com/1jehuang/jcode">jcode</a>, <a href="https://github.com/cline/cline">Cline</a>, <a href="https://github.com/CommandCodeAI/command-code">Command Code</a>, <a href="https://github.com/deepseek-ai/deepseek-harness">DeepSeek Harness</a></p>
+<hr>
+<h2>Agent Tooling</h2>
+<p><strong>Quiet today:</strong> <a href="https://github.com/NVIDIA/OpenShell">OpenShell</a>, <a href="https://github.com/herdrdev/herdr">herdr</a>, <a href="https://github.com/mksglu/context-mode">context-mode</a>, <a href="https://github.com/asheshgoplani/agent-deck">Agent Deck</a></p>
+<hr>
+<h2>Spotted</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Story</th>
+<th align="left">Source</th>
+<th align="left">Discussion</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a href="https://momentic.ai/">Launch HN: Momentic (YC W24) – Agents that catch bugs by using your app</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50339913">137 points, 92 comments</a></td>
+<td align="left">Momentic launches Mo, an AI QA engineer that automatically finds bugs in web, iOS, and Android apps with repro steps and converts each run into regression tests for every pull request.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://twitter.com/OcanaSantero/status/2115442964574908902">Last night an AI agent performed brain surgery on a mouse</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50336138">128 points, 101 comments</a></td>
+<td align="left">An AI agent autonomously performed brain surgery on a mouse, selecting among 19 gene‑therapy vectors and deriving target coordinates to reduce seizures.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://better-together.fun/">Show HN: Better Together – AI agents team up against spam calls and texts</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50331415">6 points, 0 comments</a></td>
+<td align="left">Better Together introduces a system where multiple AI agents collaborate to block spam calls and texts, starting with that use case.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://www.youtube.com/watch?v=ntO2eQ2iu6o">AI Agents Still Can&#39;t Maintain Your Codebase</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50337738">6 points, 0 comments</a></td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left"><a href="https://dev.to/kenielzep97/my-agent-gave-the-right-answer-then-it-wrote-down-that-it-was-wrong-311d">My Agent Gave the Right Answer. Then It Wrote Down That It Was Wrong.</a></td>
+<td align="left">Dev.to</td>
+<td align="left"><a href="https://dev.to/kenielzep97/my-agent-gave-the-right-answer-then-it-wrote-down-that-it-was-wrong-311d">17 reactions, 4 comments</a></td>
+<td align="left">The author tested an AI agent with a fabricated query on October 31 at 15:15 Eastern and observed it initially answer correctly but then record that it was wrong.</td>
+</tr>
+</tbody></table>
+<hr>
+<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
+]]></content:encoded>
+    </item>
     <item>
       <title>AI Agents 2026-11-02</title>
       <link>https://dboeter.github.io/daily-diff/#2026-11-02/ai-agents</link>
