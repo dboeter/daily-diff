@@ -13,7 +13,97 @@
       <height>144</height>
     </image>
     <atom:link href="https://dboeter.github.io/daily-diff/feeds/ai-agents.xml" rel="self" type="application/rss+xml"/>
-    <lastBuildDate>Tue, 03 Nov 2026 06:35:21 +0000</lastBuildDate>
+    <lastBuildDate>Wed, 04 Nov 2026 06:04:32 +0000</lastBuildDate>
+    <item>
+      <title>AI Agents 2026-11-04</title>
+      <link>https://dboeter.github.io/daily-diff/#2026-11-04/ai-agents</link>
+      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-11-04/ai-agents</guid>
+      <pubDate>Wed, 04 Nov 2026 00:00:00 +0000</pubDate>
+      <description>AI Agents 2026-11-04 ⬛ Overview · 🟪 AI Agents · 🟦 AI Models &amp;amp; Labs · 🟨 Data Engineering Projects: 16 | Active today: 5 | Stable releases: 3 | Prereleases (not covered): 9 | Generated: 2026-11-04 06:01 UTC Highlights OpenShell v0.1.7 introduces breaking changes: emits only native OCSF 1.8.0 records, deprecates multiple schema_version settings, moves Podman CA-bundle config under supervisor.network, and runs MicroVM sandboxes as the image&amp;#39;s sandbox account instead of UID 1000:1000. Code...</description>
+      <content:encoded><![CDATA[<h1>AI Agents 2026-11-04</h1>
+<p><a href="https://dboeter.github.io/daily-diff/#2026-11-04">⬛ Overview</a> · <strong>🟪 AI Agents</strong> · <a href="https://dboeter.github.io/daily-diff/#2026-11-04/ai-models">🟦 AI Models &amp; Labs</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-04/ai-data">🟨 Data Engineering</a></p>
+<blockquote>
+<p>Projects: 16 | Active today: 5 | Stable releases: 3 | Prereleases (not covered): 9 | Generated: 2026-11-04 06:01 UTC</p>
+</blockquote>
+<hr>
+<h2>Highlights</h2>
+<ul>
+<li>OpenShell v0.1.7 introduces breaking changes: emits only native OCSF 1.8.0 records, deprecates multiple <code>schema_version</code> settings, moves Podman CA-bundle config under <code>supervisor.network</code>, and runs MicroVM sandboxes as the image&#39;s <code>sandbox</code> account instead of UID 1000:1000.</li>
+<li>Codex CLI v0.166.0 on gpt-6-sol medium reportedly destroyed systemd, containers, and ran random scripts when asked to reboot a server, costing $10,000+; issue has 114 comments in 24 hours.</li>
+<li>Revolut moved ~2,000 engineers off Claude Code and Codex to self-hosted GLM from Z.ai, claiming a 90% reduction in AI coding spend.</li>
+</ul>
+<hr>
+<h2>Coding Agents &amp; Assistants</h2>
+<h3>Claude Code</h3>
+<ul>
+<li><strong>Release:</strong> <a href="https://github.com/anthropics/claude-code/releases/tag/v2.1.318">v2.1.318</a> fixes <code>--continue</code> losing conversation after malformed tool call retries, macOS Bash memory growth stalls, permission prompts eating keystrokes, config writes failing silently on shared network homes, and MCP server re-probing on every start.</li>
+<li><strong>Hot issue:</strong> <a href="https://github.com/anthropics/claude-code/issues/106878">#106878</a>: users report Opus 4.6 <code>thinkingDurationMs</code> dropped ~3.4× between CLI 2.1.296 and 2.1.316 with <code>effort=max</code> unchanged; a server-side <code>supportsAdaptiveThinking</code> catalog flip is suspected, workaround is <code>CLAUDE_CODE_DISABLE_ADAPTIVE_THINKING=1</code> + <code>MAX_THINKING_TOKENS=</code>. (regression; 3 comments, 0 👍; +3 in the last 24h)</li>
+<li><strong>News:</strong> <a href="https://news.ycombinator.com/item?id=50358078">Revolut swaps Claude for GLM open-weight model, cutting AI coding bill by 90%</a>: Revolut moved ~2,000 engineers off Claude Code and Codex to GLM from Z.ai.</li>
+</ul>
+<h3>OpenAI Codex</h3>
+<ul>
+<li><strong>Hot issue:</strong> <a href="https://github.com/openai/codex/issues/59060">#59060</a>: an issue says Codex CLI v0.166.0 on gpt-6-sol medium destroyed systemd, containers, and ran random scripts when asked to reboot a server, costing $10,000+. (114 comments, 14 👍; +114 in the last 24h)</li>
+<li><strong>Hot issue:</strong> <a href="https://github.com/openai/codex/issues/58258">#58258</a>: users report Windows desktop app 26.1027.30824 spins indefinitely sending PPTX attachments in Office preflight with zero-GC capability query loops. (23 comments, 3 👍; +13 in the last 24h)</li>
+<li><strong>News:</strong> <a href="https://news.ycombinator.com/item?id=50352757">OpenAI seems to be silently re-enabling model training on Codex chats</a>.</li>
+<li><strong>News:</strong> <a href="https://news.ycombinator.com/item?id=50358078">Revolut swaps Claude for GLM open-weight model, cutting AI coding bill by 90%</a>: Revolut moved ~2,000 engineers off Codex and Claude Code to GLM from Z.ai.</li>
+</ul>
+<h3>DeepSeek Harness</h3>
+<ul>
+<li><strong>Prerelease:</strong> <a href="https://github.com/deepseek-ai/deepseek-harness/releases/tag/dsh-v0.2.2-alpha.3">dsh-v0.2.2-alpha.3</a> adds unified right-click/keyboard menus across sessions/workspace/sidebar with developer extensibility, persistent directory tree in file preview, experimental &quot;Change Request &amp; Worktree&quot; unified code review entry, and syncs Cordis Core to 4.0.0-rc.11.</li>
+</ul>
+<h3>Hermes Agent</h3>
+<ul>
+<li><strong>Release:</strong> <a href="https://github.com/nousresearch/hermes-agent/releases/tag/v0.22.7">v0.22.7</a> rolls up ~174 PRs since v0.22.6 including opt-in lead routing for Desktop Group Chats, cron jobs posting to Group Chats, room purpose/shared notes, pinned Kanban boards as quick-switch tabs, <code>$$TeX$$</code> and Mermaid diagram rendering via Pele, Desktop update error box with failed output and report link, Web Access step naming with running clock, Telegram on Team Gateway via shared bot, opt-in Slack <code>thread_followup_silence</code>, and Daybreak switch for catalog-listed ChatGPT subscription models.</li>
+</ul>
+<p><strong>Quiet today:</strong> <a href="https://github.com/google-gemini/gemini-cli">Gemini CLI</a>, <a href="https://github.com/Kilo-Org/kilocode">Kilo Code</a>, <a href="https://github.com/anomalyco/opencode">OpenCode</a>, <a href="https://github.com/earendil-works/pi">Pi</a>, <a href="https://github.com/can1357/oh-my-pi">Oh My Pi</a>, <a href="https://github.com/1jehuang/jcode">jcode</a>, <a href="https://github.com/cline/cline">Cline</a>, <a href="https://github.com/CommandCodeAI/command-code">Command Code</a></p>
+<hr>
+<h2>Agent Tooling</h2>
+<h3>OpenShell</h3>
+<ul>
+<li><strong>Release:</strong> <a href="https://github.com/NVIDIA/OpenShell/releases/tag/v0.1.7">v0.1.7</a> breaks compatibility by emitting only native OCSF 1.8.0 records and deprecating the <code>ocsf_schema_version</code> setting, the gateway <code>schema_version</code> fields, Helm <code>server.ocsfLog.schemaVersion</code>, and <code>OPENSHELL_OTLP_OCSF_SCHEMA_VERSION</code>. The Podman-only <code>[openshell.drivers.podman].additional_ca_bundle</code> is deprecated in favor of <code>[openshell.supervisor.network].additional_ca_bundle</code>, and MicroVM driver sandboxes now run as the image&#39;s <code>sandbox</code> account instead of UID 1000:1000.</li>
+<li><strong>Release:</strong> Fixes include shared-pool sandboxes correctly showing <code>Stopped</code> after a 60‑second supervisor recovery deadline, <code>sandbox create</code> now explains placement failures, VM sandboxes start under restrictive umasks (e.g., <code>UMask=0077</code>), policy DNS address selection passes the same destination checks as endpoints, and the gateway accepts a supervisor&#39;s full 200‑line reconnect log backlog.</li>
+</ul>
+<p><strong>Quiet today:</strong> <a href="https://github.com/herdrdev/herdr">herdr</a>, <a href="https://github.com/mksglu/context-mode">context-mode</a>, <a href="https://github.com/asheshgoplani/agent-deck">Agent Deck</a></p>
+<hr>
+<h2>Spotted</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Story</th>
+<th align="left">Source</th>
+<th align="left">Discussion</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a href="https://github.com/postmanlabs/postman-app-support/issues/14370">Postman silently auto-installs AI plugins and attempts to share all API data</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50354960">1150 points, 376 comments</a></td>
+<td align="left">A GitHub issue reports that Postman silently auto-installs AI plugins and attempts to share all API data without user consent.</td>
+</tr>
+<tr>
+<td align="left">Octomind – open-source AI harness that saves your tokens, static rust (<a href="https://github.com/Muvon/octomind">Muvon/octomind</a>)</td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50352898">53 points, 36 comments</a></td>
+<td align="left">Octomind is an open-source AI coding agent and runtime distributed as a single static Rust binary that is MCP-native and runs in terminals, CI, or as a daemon.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://www.theregister.com/ai-and-ml/2026/11/03/british-fintech-revolut-slashes-ai-coding-costs-10x-by-cutting-out-claude-and-going-self-hosted/5307345">British fintech Revolut slashes AI coding costs 10x by going self-hosted</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50358388">15 points, 1 comment</a></td>
+<td align="left">British fintech Revolut reduced its AI coding costs tenfold by moving to self-hosted models.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://dev.to/harsh2644/i-let-ai-build-a-feature-without-giving-it-the-full-context-6h">I Let AI Build a Feature Without Giving It the Full Context</a></td>
+<td align="left">Dev.to</td>
+<td align="left"><a href="https://dev.to/harsh2644/i-let-ai-build-a-feature-without-giving-it-the-full-context-6h">25 reactions, 21 comments</a></td>
+<td align="left">The author tested giving an AI a vague prompt to build a feature and found it produced a confident but costly answer.</td>
+</tr>
+</tbody></table>
+<hr>
+<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
+]]></content:encoded>
+    </item>
     <item>
       <title>AI Agents 2026-11-03</title>
       <link>https://dboeter.github.io/daily-diff/#2026-11-03/ai-agents</link>
@@ -2544,287 +2634,6 @@ Security debt is the other major concern, with 24 of 30 reported npm findings ra
 <p>Users report unreliable cron context, lost session metadata, silent ZeroCode pauses, absent channel access, and invisible runtime context. Overall satisfaction appears mixed: active contributors are shipping fixes, but S0/S1 defects and release-gate work indicate meaningful operational risk.</p>
 <h2>9. Backlog Watch</h2>
 <p>Maintainers should prioritize <a href="https://github.com/zeroclaw-labs/zeroclaw/issues/11239">#11239</a>, <a href="https://github.com/zeroclaw-labs/zeroclaw/issues/9799">#9799</a>, and <a href="https://github.com/zeroclaw-labs/zeroclaw/issues/10536">#10536</a>; several are long-running, high-risk, and marked accepted or in progress.</p>
-</details>
-
-<hr>
-<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
-]]></content:encoded>
-    </item>
-    <item>
-      <title>AI Agents 2026-10-03</title>
-      <link>https://dboeter.github.io/daily-diff/#2026-10-03/ai-agents</link>
-      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-10-03/ai-agents</guid>
-      <pubDate>Sat, 03 Oct 2026 00:00:00 +0000</pubDate>
-      <description>OpenClaw Ecosystem Digest 2026-10-03 Issues: 500 | PRs: 500 | Projects covered: 5 | Generated: 2026-10-03 15:36 UTC OpenClaw Hermes Agent IronClaw QwenPaw ZeroClaw OpenClaw Deep Dive 1. TL;DR OpenClaw released v2026.9.8, containing 58 commits and 43 PRs, while sustaining very high development activity: 1,000 items updated in 24 hours. Stability and durability remain the dominant concerns, especially SQLite growth/locking, session recovery, subagent settlement, and process leaks. New fixes target...</description>
-      <content:encoded><![CDATA[<h1>OpenClaw Ecosystem Digest 2026-10-03</h1>
-<blockquote>
-<p>Issues: 500 | PRs: 500 | Projects covered: 5 | Generated: 2026-10-03 15:36 UTC</p>
-</blockquote>
-<ul>
-<li><a href="https://github.com/openclaw/openclaw">OpenClaw</a></li>
-<li><a href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a></li>
-<li><a href="https://github.com/nearai/ironclaw">IronClaw</a></li>
-<li><a href="https://github.com/agentscope-ai/QwenPaw">QwenPaw</a></li>
-<li><a href="https://github.com/zeroclaw-labs/zeroclaw">ZeroClaw</a></li>
-</ul>
-<hr>
-<h2>OpenClaw Deep Dive</h2>
-<h2>1. TL;DR</h2>
-<ul>
-<li>OpenClaw released <a href="https://github.com/openclaw/openclaw/releases/tag/v2026.9.8">v2026.9.8</a>, containing 58 commits and 43 PRs, while sustaining very high development activity: 1,000 items updated in 24 hours.</li>
-<li>Stability and durability remain the dominant concerns, especially SQLite growth/locking, session recovery, subagent settlement, and process leaks.</li>
-<li>New fixes target CLI conversation retention, concurrent workspace initialization, model-fallback visibility, MCP pagination, and release automation, but several P0/P1 incidents still lack fix PRs.</li>
-</ul>
-<h2>2. Today&#39;s Overview</h2>
-<p>The project is highly active but operationally stressed: 337 issues and 276 PRs remain open. Activity spans release preparation, persistence performance, agent lifecycle correctness, security boundaries, and channel UX, indicating sustained maintenance pressure around the Gateway.</p>
-<h2>3. Releases</h2>
-<p><a href="https://github.com/openclaw/openclaw/releases/tag/v2026.9.8">v2026.9.8</a> was published with 58 commits, 43 PRs, and 21 contributors. The supplied release excerpt omits itemized changes and migration notes, so no specific breaking changes can be verified.</p>
-<h2>4. Project Progress</h2>
-<ul>
-<li>A security fix now <a href="https://github.com/openclaw/openclaw/pull/164370">releases caller context from reusable SQLite read workers</a>, reducing retention of completed-turn and transcript data.</li>
-<li>The <a href="https://github.com/openclaw/openclaw/issues/108473">cron tool schema regression</a> was closed, alongside clarification of <a href="https://github.com/openclaw/openclaw/issues/132601">generated-video URL materialization</a>.</li>
-<li>Open fixes address <a href="https://github.com/openclaw/openclaw/pull/164378">CLI child-completion conversation retention</a>, <a href="https://github.com/openclaw/openclaw/pull/164377">concurrent workspace setup</a>, and <a href="https://github.com/openclaw/openclaw/pull/164364">fallback-model visibility</a>.</li>
-</ul>
-<h2>5. Community Hot Topics</h2>
-<p>The largest discussions center on <a href="https://github.com/openclaw/openclaw/issues/143524">unbounded SQLite WAL growth</a> (105 comments), <a href="https://github.com/openclaw/openclaw/issues/119720">Gateway event-loop blocking</a> (22), and <a href="https://github.com/openclaw/openclaw/issues/102175">embedded prompt-cache loss</a> (21). These reveal demand for predictable long-running persistence, efficient session maintenance, and stable provider performance.</p>
-<h2>6. Bugs &amp; Stability</h2>
-<ul>
-<li><strong>P0:</strong> <a href="https://github.com/openclaw/openclaw/issues/143524">Windows WAL growth can block startup</a>; <a href="https://github.com/openclaw/openclaw/issues/160386">large-store SQLite pressure causes RPC timeouts</a>; and <a href="https://github.com/openclaw/openclaw/issues/158126">shutdown intermittently fails</a>. No fix PRs are linked in the supplied data.</li>
-<li><strong>P1:</strong> <a href="https://github.com/openclaw/openclaw/issues/160548">prepared-model-catalog leaks ~1 GiB/5 minutes</a> and <a href="https://github.com/openclaw/openclaw/issues/157989">plugin captures rewrite gigabytes per start</a>, indicating severe resource and SSD-wear risks.</li>
-<li><a href="https://github.com/openclaw/openclaw/issues/144911">MCP timeout cleanup crashes</a> was closed; related <a href="https://github.com/openclaw/openclaw/pull/158348">plugin-generation fencing</a> and <a href="https://github.com/openclaw/openclaw/pull/164378">CLI completion retention</a> remain open.</li>
-</ul>
-<h2>7. Feature Requests &amp; Roadmap Signals</h2>
-<ul>
-<li><a href="https://github.com/openclaw/openclaw/issues/67413">Per-agent dreaming controls</a> could plausibly land soon to prevent simultaneous memory spikes.</li>
-<li>A <a href="https://github.com/openclaw/openclaw/issues/120244">daily maintenance window</a> may improve cron reliability, while <a href="https://github.com/openclaw/openclaw/issues/119992">per-turn message budgets</a> would reduce duplicate-answer storms.</li>
-</ul>
-<h2>8. User Feedback Summary</h2>
-<p>Users report acceptable ordinary operation but serious reliability degradation under large databases, many agents, Windows, WhatsApp, Telegram, and CLI-backed sessions. Recurring dissatisfaction centers on silent memory/index staleness, missing replies, duplicate retries, runaway processes, and confusing provider errors.</p>
-<h2>9. Backlog Watch</h2>
-<p>Long-lived P1s needing maintainer action include <a href="https://github.com/openclaw/openclaw/issues/38327">Google Vertex regression</a>, <a href="https://github.com/openclaw/openclaw/issues/120415">loop-detection absence</a>, <a href="https://github.com/openclaw/openclaw/issues/119411">memory watcher failure</a>, and <a href="https://github.com/openclaw/openclaw/issues/97616">zombie child accumulation</a>.</p>
-<hr>
-<h2>Cross-Ecosystem Comparison</h2>
-<h2>1. Ecosystem Overview</h2>
-<p>The ecosystem remains highly active but operationally immature: every project is prioritizing persistence, subprocess lifecycle, provider compatibility, and observability. OpenClaw leads in release cadence and overall throughput, while ZeroClaw and QwenPaw show comparable maintenance intensity. Hermes emphasizes desktop usability and security hardening; IronClaw is comparatively quiet, with insufficient evidence to assess broader momentum.</p>
-<h2>2. Activity Comparison</h2>
-<table>
-<thead>
-<tr>
-<th>Project</th>
-<th align="right">Active Issues</th>
-<th align="right">Open PRs</th>
-<th>Release Status</th>
-<th align="right">Health Score*</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>OpenClaw</td>
-<td align="right">337</td>
-<td align="right">276</td>
-<td>v2026.9.8 released</td>
-<td align="right">6/10</td>
-</tr>
-<tr>
-<td>Hermes Agent</td>
-<td align="right">44</td>
-<td align="right">35</td>
-<td>No release today</td>
-<td align="right">6/10</td>
-</tr>
-<tr>
-<td>IronClaw</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td>No release today</td>
-<td align="right">5/10</td>
-</tr>
-<tr>
-<td>QwenPaw</td>
-<td align="right">Large backlog; 10 updated</td>
-<td align="right">8</td>
-<td>No release today</td>
-<td align="right">6/10</td>
-</tr>
-<tr>
-<td>ZeroClaw</td>
-<td align="right">33</td>
-<td align="right">42</td>
-<td>No release today</td>
-<td align="right">5/10</td>
-</tr>
-</tbody></table>
-<p>*Inferred from severity, fix coverage, release cadence, and user impact; not an official metric.</p>
-<h2>3. OpenClaw&#39;s Position</h2>
-<ul>
-<li><strong>Advantages:</strong> Highest throughput, only project with a release today, broad Gateway/channel coverage, and active fixes for SQLite security, workspace concurrency, CLI retention, and fallback visibility.</li>
-<li><strong>Technical/community distinction:</strong> More operationally complex—and more community scrutiny—around SQLite, sessions, agents, and channels. Peer activity is substantial, but OpenClaw’s 1,000 daily updates and much larger backlog indicate the ecosystem’s broadest engagement, not necessarily the healthiest runtime.</li>
-</ul>
-<h2>4. Shared Technical Focus Areas</h2>
-<ul>
-<li><strong>Runtime reliability:</strong> OpenClaw, Hermes, QwenPaw, and ZeroClaw all confront hangs, crashes, stale state, duplicate output, or runaway processes.</li>
-<li><strong>Provider and gateway compatibility:</strong> OpenClaw, Hermes, QwenPaw, and ZeroClaw are addressing model fallback, malformed requests, token parameters, connection validation, and gateway isolation.</li>
-<li><strong>Resource governance:</strong> SQLite/WAL growth, daemon CPU, memory leaks, subprocess limits, and image truncation require bounded storage and resource budgets.</li>
-</ul>
-<h2>5. Differentiation Analysis</h2>
-<ul>
-<li>OpenClaw targets multi-agent, multi-channel, always-on operation; IronClaw focuses on local credential-backed services; QwenPaw differentiates through console UX and subagent lineage.</li>
-<li>Hermes targets desktop/voice interactions, while ZeroClaw emphasizes ZeroCode, delegation policy, gateway/runtime separation, and cross-platform execution.</li>
-</ul>
-<h2>6. Community Momentum &amp; Maturity</h2>
-<ul>
-<li><strong>Rapid iteration:</strong> OpenClaw, ZeroClaw, QwenPaw, and Hermes. <strong>Lower observed momentum:</strong> IronClaw.</li>
-<li>OpenClaw is scaling fastest but carrying severe operational debt. ZeroClaw and QwenPaw are actively stabilizing; Hermes shows strong focused delivery. No project appears fully mature.</li>
-</ul>
-<h2>7. Trend Signals</h2>
-<ul>
-<li>Agent platforms are moving from feature expansion toward <strong>durable operations</strong>: bounded persistence, deterministic recovery, resource isolation, and trustworthy diagnostics.</li>
-<li>Developer value is shifting toward <strong>provider portability, explicit fallbacks, secure delegation, lineage/attribution, and observable failure modes</strong>. These capabilities increasingly distinguish dependable assistants from feature-rich prototypes.</li>
-</ul>
-<hr>
-<h2>Peer Project Reports</h2>
-<details>
-<summary><strong>Hermes Agent</strong> — <a href="https://github.com/nousresearch/hermes-agent">nousresearch/hermes-agent</a></summary>
-
-<h2>TL;DR</h2>
-<ul>
-<li>Hermes Agent remained highly active: <strong>50 issues and 50 PRs updated</strong>, with <strong>6 issues closed</strong>, <strong>15 PRs merged/closed</strong>, and no release.</li>
-<li>Desktop reliability dominated discussion, especially duplicate replies, Linux/macOS launch failures, bot-screen control, and remote gateway connectivity.</li>
-<li>Security and delivery hardening advanced through closed email-authentication PRs and open validation work for web-provider URLs.</li>
-</ul>
-<h2>Today’s Overview</h2>
-<p>The project shows <strong>very high but unresolved activity</strong>: 44 active issues and 35 open PRs indicate a fast-moving backlog. Closed work addressed session metadata, worker-process cleanup, streamed desktop rendering, CLI update behavior, and email authentication; release cadence is currently absent.</p>
-<h2>Project Progress</h2>
-<ul>
-<li><a href="https://github.com/NousResearch/hermes-agent/pull/129772">PR #129772</a>, closed today, moves email sender authorization before MIME-body retrieval, reducing resource exposure for unauthenticated mail.</li>
-<li><a href="https://github.com/NousResearch/hermes-agent/pull/98611">PR #98611</a> and <a href="https://github.com/NousResearch/hermes-agent/pull/125405">PR #125405</a> close email-auth pinning gaps involving the From-domain default and RFC-compliant comments.</li>
-<li><a href="https://github.com/NousResearch/hermes-agent/pull/128887">PR #128887</a> strengthens worktree cleanup by rechecking safety gates immediately before deletion.</li>
-</ul>
-<h2>Community Hot Topics</h2>
-<ul>
-<li><a href="https://github.com/NousResearch/hermes-agent/issues/123801">Issue #123801</a>, the day’s most discussed thread (<strong>23 comments</strong>), closed after investigating duplicate macOS replies despite a single stored completion.</li>
-<li><a href="https://github.com/NousResearch/hermes-agent/issues/131055">Issue #131055</a> reports sticky Linux sandbox fallback state causing renderer crash loops; <a href="https://github.com/NousResearch/hermes-agent/issues/120828">Issue #120828</a> covers malformed tool-only Ollama requests. Both have <strong>6 comments</strong>, pointing to demand for safer launcher state and provider payload normalization.</li>
-<li><a href="https://github.com/NousResearch/hermes-agent/pull/132268">PR #132268</a> addresses wake-word failures with noise-suppressed microphones, reflecting broader voice-assistant usability concerns.</li>
-</ul>
-<h2>Bugs &amp; Stability</h2>
-<ul>
-<li><strong>P1/security:</strong> <a href="https://github.com/NousResearch/hermes-agent/issues/132178">Issue #132178</a> shows macOS tests replacing a checkout’s virtual-environment Python; <a href="https://github.com/NousResearch/hermes-agent/issues/132189">Issue #132189</a> was closed after remote Desktop-to-gateway origin validation failures.</li>
-<li><strong>P2:</strong> <a href="https://github.com/NousResearch/hermes-agent/pull/120955">PR #120955</a> preserves indented fenced code in gateway replies; <a href="https://github.com/NousResearch/hermes-agent/pull/120969">PR #120969</a> preserves startup-resume placeholders.</li>
-<li><strong>P2:</strong> <a href="https://github.com/NousResearch/hermes-agent/issues/132223">Issue #132223</a> reports healthy cron runs being released as stale; <a href="https://github.com/NousResearch/hermes-agent/issues/131055">Issue #131055</a> remains unfixed.</li>
-</ul>
-<h2>Feature Requests &amp; Roadmap Signals</h2>
-<ul>
-<li><a href="https://github.com/NousResearch/hermes-agent/pull/120970">PR #120970</a> and <a href="https://github.com/NousResearch/hermes-agent/pull/120977">PR #120977</a> advance bot-screen profile routing and explicit stopping, likely near-term desktop priorities.</li>
-<li><a href="https://github.com/NousResearch/hermes-agent/issues/131337">Issue #131337</a> requests a names-only skill accessor to reduce prompt size and support retrieval-oriented plugins.</li>
-<li><a href="https://github.com/NousResearch/hermes-agent/issues/125813">Issue #125813</a> proposes Linux launch diagnostics, aligning with improving desktop failure visibility.</li>
-</ul>
-<h2>User Feedback Summary</h2>
-<p>Users report tangible reliability pain: duplicated desktop output, inaccessible or crashing bots, broken installers, malformed model requests, and update-dependent plugin loss (<a href="https://github.com/NousResearch/hermes-agent/issues/132242">Issue #132242</a>). Meanwhile, requests target better observability, safer plugin policy, and transparent learning/reliability feedback.</p>
-<h2>Backlog Watch</h2>
-<ul>
-<li><a href="https://github.com/NousResearch/hermes-agent/pull/72367">PR #72367</a>, open since July, proposes fail-closed validation of web-provider final URLs; it needs security review.</li>
-<li><a href="https://github.com/NousResearch/hermes-agent/issues/79152">Issue #79152</a>, open since August, requests a strict <code>pre_gateway_dispatch</code> policy mode and remains marked <code>needs-decision</code>.</li>
-</ul>
-</details>
-
-<details>
-<summary><strong>IronClaw</strong> — <a href="https://github.com/nearai/ironclaw">nearai/ironclaw</a></summary>
-
-<h2>1. TL;DR</h2>
-<ul>
-<li>IronClaw recorded one new issue concerning <code>ironclaw serve</code> credential access in the macOS <code>local-dev</code> profile.</li>
-<li>The failure affects both IronClaw 1.4.1 installed officially and 1.4.0 installed from source, despite all eight <code>ironclaw doctor</code> checks passing.</li>
-<li>No pull requests, releases, fixes, or other notable activity were reported today.</li>
-</ul>
-<h2>2. Today’s Overview</h2>
-<p>Project activity was low: one issue was updated and remains open, with no PR or release activity. The report indicates a potentially significant local-development reliability gap, but it does not yet establish broader production impact.</p>
-<h2>5. Community Hot Topics</h2>
-<ul>
-<li><strong><a href="https://github.com/nearai/ironclaw/issues/8122">#8122 — <code>ironclaw serve</code> fails with credential read failed: BackendUnavailable</a>:</strong> The only active report, submitted today, has no comments or reactions. It highlights a need for dependable credential access across extension-backed services on macOS development setups.</li>
-</ul>
-<h2>6. Bugs &amp; Stability</h2>
-<ul>
-<li><strong>High: macOS credential backend failure</strong> — [<code>ironclaw serve</code> cannot read credentials for the <code>web-app</code> extension under the <code>local-dev</code> profile on Apple Silicon, using <code>aarch64-apple-darwin</code> and Darwin 27.0.0. The issue reproduces on both 1.4.0 and 1.4.1, while <code>ironclaw doctor</code> passes 8/8 checks; no fix PR is linked.<br><strong>Assessment:</strong> A version-spanning reproducibility across installation methods suggests an environmental, backend-discovery, or platform-compatibility problem rather than a single-release regression.</li>
-</ul>
-<h2>7. Feature Requests &amp; Roadmap Signals</h2>
-<p>No explicit feature requests were submitted. However, improving credential-backend diagnostics and aligning <code>ironclaw doctor</code> checks with actual <code>serve</code> behavior would be a likely near-term stability priority.</p>
-<h2>8. User Feedback Summary</h2>
-<p>Users can install and validate IronClaw successfully, but core credential access still breaks during local service startup. This disconnect between successful health checks and failed execution creates meaningful developer friction.</p>
-</details>
-
-<details>
-<summary><strong>QwenPaw</strong> — <a href="https://github.com/agentscope-ai/QwenPaw">agentscope-ai/QwenPaw</a></summary>
-
-<h2>1. TL;DR</h2>
-<ul>
-<li>QwenPaw recorded <strong>10 updated issues and 15 PRs</strong>, with fixes advancing for session routing, GPT-6 compatibility, mobile UI, and chat truncation handling.</li>
-<li>Reliability concerns dominated the day, including console boot failures, gateway-triggered turn termination, incorrect multimodal handling, and image-processing hangs (<a href="https://github.com/agentscope-ai/QwenPaw/issues/8094">#8094</a>, <a href="https://github.com/agentscope-ai/QwenPaw/issues/8092">#8092</a>).</li>
-<li>No release shipped; <strong>8 PRs remain open</strong>, while 7 are listed as merged/closed.</li>
-</ul>
-<h2>2. Today&#39;s Overview</h2>
-<p>Activity was high and strongly maintenance-oriented: six focused fixes were opened alongside seven closed PRs. The backlog remains unusually large, and several recently filed stability issues have only one comment, indicating limited maintainer response so far.</p>
-<h2>4. Project Progress</h2>
-<ul>
-<li>Console usability advanced through a mobile settings drawer, LAN-safe terminal identity, and fixes for rich-input caret visibility and chat scrolling (<a href="https://github.com/agentscope-ai/QwenPaw/pull/8086">#8086</a>, <a href="https://github.com/agentscope-ai/QwenPaw/pull/8089">#8089</a>, <a href="https://github.com/agentscope-ai/QwenPaw/pull/7347">#7347</a>).</li>
-<li>Closed work also added tool-call visibility controls, per-media provider limits, configurable MCP timeouts, game-development language support, and desktop window persistence (<a href="https://github.com/agentscope-ai/QwenPaw/pull/7357">#7357</a>, <a href="https://github.com/agentscope-ai/QwenPaw/pull/7359">#7359</a>, <a href="https://github.com/agentscope-ai/QwenPaw/pull/6874">#6874</a>).</li>
-<li>Open work now includes explicit truncation metadata, inter-agent attribution, and persisted subagent lineage (<a href="https://github.com/agentscope-ai/QwenPaw/pull/8096">#8096</a>, <a href="https://github.com/agentscope-ai/QwenPaw/pull/8095">#8095</a>, <a href="https://github.com/agentscope-ai/QwenPaw/pull/7004">#7004</a>).</li>
-</ul>
-<h2>5. Community Hot Topics</h2>
-<ul>
-<li>History persistence/loading and incorrect new-session creation remained the most discussed UX concerns (<a href="https://github.com/agentscope-ai/QwenPaw/issues/7884">#7884</a>, 8 comments; <a href="https://github.com/agentscope-ai/QwenPaw/issues/7661">#7661</a>, 5).</li>
-<li>These reflect a core need for dependable conversation continuity and navigable long-term memory.</li>
-</ul>
-<h2>6. Bugs &amp; Stability</h2>
-<ul>
-<li><strong>High:</strong> Ali-compatible gateway inspection false positives abort turns without retry/fallback (<a href="https://github.com/agentscope-ai/QwenPaw/issues/8092">#8092</a>); no fix PR shown.</li>
-<li><strong>High:</strong> GPT-6 connection tests return 400 due to outdated token parameters; fix proposed in <a href="https://github.com/agentscope-ai/QwenPaw/pull/8090">#8090</a>.</li>
-<li><strong>High:</strong> stale WebView2 cache can permanently stall console startup (<a href="https://github.com/agentscope-ai/QwenPaw/issues/8094">#8094</a>); image and multimodal failures also remain unresolved (<a href="https://github.com/agentscope-ai/QwenPaw/issues/8088">#8088</a>, <a href="https://github.com/agentscope-ai/QwenPaw/issues/8093">#8093</a>).</li>
-</ul>
-<h2>7. Feature Requests &amp; Roadmap Signals</h2>
-<p>Mobile support and richer response metadata are likely next-version candidates (<a href="https://github.com/agentscope-ai/QwenPaw/issues/6281">#6281</a>, <a href="https://github.com/agentscope-ai/QwenPaw/issues/8087">#8087</a>).</p>
-<h2>8. User Feedback Summary</h2>
-<p>Users report lost historical context, duplicate sessions, unusable small-screen layouts, silent failures, and opaque model behavior. Overall satisfaction appears strained around reliability, continuity, and observability.</p>
-<h2>9. Backlog Watch</h2>
-<p>PR <a href="https://github.com/agentscope-ai/QwenPaw/pull/7004">#7004</a>, created August 13, remains open; history-loss issue <a href="https://github.com/agentscope-ai/QwenPaw/issues/7884">#7884</a> needs maintainer attention.</p>
-</details>
-
-<details>
-<summary><strong>ZeroClaw</strong> — <a href="https://github.com/zeroclaw-labs/zeroclaw">zeroclaw-labs/zeroclaw</a></summary>
-
-<h2>TL;DR</h2>
-<ul>
-<li>ZeroClaw recorded <strong>41 updated issues and 50 PRs</strong>, with most work focused on runtime reliability, ZeroCode, delegation security, and first-run usability.</li>
-<li><strong>Eight PRs closed</strong>, including fixes for ZeroCode launch-directory regression, ACP recovery notices, transcript layout, and <code>sessions_send</code> documentation.</li>
-<li>No release shipped; urgent signals include daemon CPU spinning, oversized-image truncation, Windows stack pressure, and subprocess memory limits.</li>
-</ul>
-<h2>Today’s Overview</h2>
-<p>Activity was high: <strong>33 issues remain active</strong> and <strong>42 PRs open</strong>, indicating a substantial review and stabilization workload. No new release was published, while v0.8.6/v0.9.0 runtime and gateway separation continued.</p>
-<h2>Project Progress</h2>
-<ul>
-<li><a href="https://github.com/zeroclaw-labs/zeroclaw/pull/11219">PR #11219</a> closed after fixing fresh local ZeroCode sessions to honor their launch directory, resolving <a href="https://github.com/zeroclaw-labs/zeroclaw/issues/11387">#11387</a>.</li>
-<li><a href="https://github.com/zeroclaw-labs/zeroclaw/pull/11445">PR #11445</a> preserved ACP recovery notices in ZeroCode history; <a href="https://github.com/zeroclaw-labs/zeroclaw/pull/11459">PR #11459</a> centralized transcript layout state.</li>
-<li><a href="https://github.com/zeroclaw-labs/zeroclaw/pull/11461">PR #11461</a> clarified <code>sessions_send</code> as legacy history append rather than agent messaging.</li>
-</ul>
-<h2>Community Hot Topics</h2>
-<ul>
-<li>Runtime test hardening led discussion in <a href="https://github.com/zeroclaw-labs/zeroclaw/issues/9965">#9965</a>: 13 comments, reflecting cross-platform reliability and executable-fixture concerns.</li>
-<li>Prompt-budget pressure in <a href="https://github.com/zeroclaw-labs/zeroclaw/issues/5808">#5808</a> generated active implementation work around deferred tool schemas.</li>
-<li>Gateway separation remains strategically important in <a href="https://github.com/zeroclaw-labs/zeroclaw/issues/11002">#11002</a>, though it is currently blocked.</li>
-</ul>
-<h2>Bugs &amp; Stability</h2>
-<ul>
-<li><strong>High:</strong> Long-lived daemons may sustain <strong>140–177% CPU</strong> in <a href="https://github.com/zeroclaw-labs/zeroclaw/issues/9799">#9799</a>; no fix PR is identified.</li>
-<li><strong>High:</strong> Shell/skill subprocesses lack memory limits in <a href="https://github.com/zeroclaw-labs/zeroclaw/issues/6916">#6916</a>.</li>
-<li><strong>Medium:</strong> Images over 64 KB may be silently truncated in <a href="https://github.com/zeroclaw-labs/zeroclaw/issues/11478">#11478</a>; Windows stack pressure in <a href="https://github.com/zeroclaw-labs/zeroclaw/issues/10734">#10734</a> is closed.</li>
-</ul>
-<h2>Feature Requests &amp; Roadmap Signals</h2>
-<ul>
-<li>Likely near-term: ZeroCode session refresh, provider-alias renaming, delegated approvals, and file-write overwrite reporting via <a href="https://github.com/zeroclaw-labs/zeroclaw/pull/11457">#11457</a>, <a href="https://github.com/zeroclaw-labs/zeroclaw/pull/11460">#11460</a>, <a href="https://github.com/zeroclaw-labs/zeroclaw/pull/11462">#11462</a>, and <a href="https://github.com/zeroclaw-labs/zeroclaw/pull/11463">#11463</a>.</li>
-<li>Deferred tool schemas could materially improve small-context workflows tracked by <a href="https://github.com/zeroclaw-labs/zeroclaw/issues/5808">#5808</a>.</li>
-</ul>
-<h2>User Feedback Summary</h2>
-<p>Users report blocked workflows and degraded trust around cron context, channel-backed ZeroCode sessions, images, daemon CPU, workspace selection, and queued-task pauses (<a href="https://github.com/zeroclaw-labs/zeroclaw/issues/6105">#6105</a>, <a href="https://github.com/zeroclaw-labs/zeroclaw/issues/10225">#10225</a>, <a href="https://github.com/zeroclaw-labs/zeroclaw/issues/10741">#10741</a>).</p>
-<h2>Backlog Watch</h2>
-<p>Maintainer attention is needed on <a href="https://github.com/zeroclaw-labs/zeroclaw/pull/10412">PR #10412</a>, explicitly requiring author action, and the long-running v0.8.6/v0.9.0 tracker <a href="https://github.com/zeroclaw-labs/zeroclaw/issues/7432">#7432</a>.</p>
 </details>
 
 <hr>

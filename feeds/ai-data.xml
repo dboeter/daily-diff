@@ -13,7 +13,213 @@
       <height>144</height>
     </image>
     <atom:link href="https://dboeter.github.io/daily-diff/feeds/ai-data.xml" rel="self" type="application/rss+xml"/>
-    <lastBuildDate>Tue, 03 Nov 2026 06:35:21 +0000</lastBuildDate>
+    <lastBuildDate>Wed, 04 Nov 2026 06:04:33 +0000</lastBuildDate>
+    <item>
+      <title>Data Engineering 2026-11-04</title>
+      <link>https://dboeter.github.io/daily-diff/#2026-11-04/ai-data</link>
+      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-11-04/ai-data</guid>
+      <pubDate>Wed, 04 Nov 2026 00:00:00 +0000</pubDate>
+      <description>Data Engineering 2026-11-04 ⬛ Overview · 🟪 AI Agents · 🟦 AI Models &amp;amp; Labs · 🟨 Data Engineering Vendor items: 12 | Projects: 27 | Active today: 2 | Stable releases: 1 | Prereleases (not covered): 1 | Generated: 2026-11-04 06:01 UTC Highlights dbt Core v2.0.11 renames --run-cache-mode to --state-mode (deprecated alias kept) — dbt Core users must update scripts and CI pipelines using the old flag. Snowflake Cortex AI Gateway reaches GA — Snowflake customers get a single governed endpoint for...</description>
+      <content:encoded><![CDATA[<h1>Data Engineering 2026-11-04</h1>
+<p><a href="https://dboeter.github.io/daily-diff/#2026-11-04">⬛ Overview</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-04/ai-agents">🟪 AI Agents</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-04/ai-models">🟦 AI Models &amp; Labs</a> · <strong>🟨 Data Engineering</strong></p>
+<blockquote>
+<p>Vendor items: 12 | Projects: 27 | Active today: 2 | Stable releases: 1 | Prereleases (not covered): 1 | Generated: 2026-11-04 06:01 UTC</p>
+</blockquote>
+<hr>
+<h2>Highlights</h2>
+<ul>
+<li>dbt Core v2.0.11 renames <code>--run-cache-mode</code> to <code>--state-mode</code> (deprecated alias kept) — dbt Core users must update scripts and CI pipelines using the old flag.</li>
+<li>Snowflake Cortex AI Gateway reaches GA — Snowflake customers get a single governed endpoint for AI inference with request tracing and spend attribution per user.</li>
+<li>Microsoft Fabric adds materialized views and streaming tables to Mirrored Azure Databricks catalogs — Fabric workspaces mirroring Unity Catalog can now read those object types via shortcuts without replication.</li>
+</ul>
+<hr>
+<h2>Action required</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Platform</th>
+<th align="left">Item</th>
+<th align="left">What to do</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-11-30</td>
+<td align="left">Azure Databricks</td>
+<td align="left"><a href="https://learn.microsoft.com/azure/databricks/release-notes/whats-coming#upcoming-end-of-life-for-the-genie-one-mcp-beta-endpoint">Upcoming end of life for the Genie One MCP Beta endpoint</a></td>
+<td align="left">The Genie One MCP Beta endpoint at <code>https://&lt;workspace-hostname&gt;/api/2.0/mcp/genie</code> reaches end of life on November 30, 2026, after which requests fail; migrate all workloads to the <code>system.ai.genie_one_mcp</code> MCP in Unity Gateway.</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>Databricks</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Item</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-11-03</td>
+<td align="left"><a href="https://learn.microsoft.com/azure/databricks/release-notes/product/2026/november#trigger-lakeflow-jobs-when-upstream-jobs-complete-beta">Trigger Lakeflow Jobs when upstream jobs complete (Beta)</a></td>
+<td align="left">Lakeflow Jobs can now be triggered when upstream jobs complete, including across workspaces sharing the same Unity Catalog metastore, by configuring dependencies on the downstream job.</td>
+</tr>
+<tr>
+<td align="left">2026-11-02</td>
+<td align="left"><a href="https://learn.microsoft.com/azure/databricks/release-notes/product/2026/november#zerobus-ingest-into-default-storage-is-now-generally-available">Zerobus Ingest into default storage is now generally available</a></td>
+<td align="left">Zerobus Ingest in Lakeflow Connect now supports ingesting into tables backed by default storage.</td>
+</tr>
+<tr>
+<td align="left">2026-11-01</td>
+<td align="left">🤖 <a href="https://learn.microsoft.com/azure/databricks/release-notes/unity-gateway#ai-functions-usage-is-now-included-in-unity-gateway-budgets">AI Functions usage is now included in Unity Gateway budgets</a></td>
+<td align="left">Unity Gateway budgets now track spend from AI Functions including <code>ai_parse_document</code>, <code>ai_extract</code>, and <code>ai_classify</code> across batch and real-time execution paths starting November 1, 2026.</td>
+</tr>
+<tr>
+<td align="left">2026-10-30</td>
+<td align="left"><a href="https://learn.microsoft.com/azure/databricks/release-notes/product/2026/october#monitor-data-freshness-in-lakeflow-connect-database-connector-pipelines-public-preview">Monitor data freshness in Lakeflow Connect database connector pipelines (Public Preview)</a></td>
+<td align="left">A new Data freshness column in Lakeflow Connect database connector pipelines shows time since latest source commit ingested for CDC tables across SQL Server, PostgreSQL, MySQL, and Oracle sources; data freshness and end-to-end lag can be queried from the event log and alerted on.</td>
+</tr>
+<tr>
+<td align="left">2026-10-29</td>
+<td align="left"><a href="https://learn.microsoft.com/azure/databricks/release-notes/product/2026/october#data-quality-monitoring-anomaly-detection-is-now-generally-available">Data quality monitoring anomaly detection is now generally available</a></td>
+<td align="left">Enable anomaly detection at the schema level to monitor freshness and completeness of all tables based on historical patterns; results are stored in <code>system.data_quality_monitoring.table_results</code>.</td>
+</tr>
+<tr>
+<td align="left">2026-10-28</td>
+<td align="left"><a href="https://learn.microsoft.com/azure/databricks/release-notes/product/2026/october#request-for-access-is-now-generally-available">Request for access is now generally available</a></td>
+<td align="left">Users can request privileges on Unity Catalog objects from anywhere in Azure Databricks and track request status in Catalog Explorer.</td>
+</tr>
+</tbody></table>
+<p><em>Also new:</em> <a href="https://learn.microsoft.com/azure/databricks/release-notes/product/2026/november#okta-connector-is-available-in-beta">Okta connector is available in Beta</a> · <a href="https://learn.microsoft.com/azure/databricks/release-notes/product/2026/october#user-aware-workspace-instructions-for-genie-one">User-aware workspace instructions for Genie One</a> · <a href="https://learn.microsoft.com/azure/databricks/release-notes/product/2026/november#control-lakebase-sink-upserts-with-merge-strategies">Control Lakebase sink upserts with merge strategies</a></p>
+<p><strong>Quiet today:</strong> <a href="https://github.com/delta-io/delta">Delta Lake</a>, <a href="https://github.com/delta-io/delta-rs">delta-rs</a>, <a href="https://github.com/unitycatalog/unitycatalog">Unity Catalog</a>, <a href="https://github.com/mlflow/mlflow">MLflow</a>, <a href="https://github.com/databricks/cli">Databricks CLI</a>, <a href="https://github.com/databricks/dbt-databricks">dbt-databricks</a>, <a href="https://github.com/databricks/terraform-provider-databricks">Terraform provider for Databricks</a></p>
+<hr>
+<h2>Snowflake</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Item</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-11-03</td>
+<td align="left">🤖 <a href="https://docs.snowflake.com/en/release-notes/2026/other/2026-11-03-cortex-ai-gateway-ga">Cortex AI Gateway inference, observability, and cost management (General availability)</a></td>
+<td align="left">Cortex AI Gateway provides a single governed endpoint for AI model inference with full request tracing and spend attribution to users.</td>
+</tr>
+<tr>
+<td align="left">2026-11-03</td>
+<td align="left">🤖 <a href="https://docs.snowflake.com/en/release-notes/2026/other/2026-11-03-coco-excel-sheets-preview">Snowflake CoCo for Excel and Snowflake CoCo for Google Sheets (Preview)</a></td>
+<td align="left">Snowflake CoCo adds a chat pane inside Excel and Google Sheets connected to live Snowflake data, enabling natural language or SQL queries, pivot tables, charts, and formulas.</td>
+</tr>
+<tr>
+<td align="left">2026-11-03</td>
+<td align="left">🤖 <a href="https://docs.snowflake.com/en/release-notes/2026/other/2026-11-03-gemini-4-argon-ga">Google Gemini 4 Argon model (General availability)</a></td>
+<td align="left">The <code>gemini-4-argon</code> model is now generally available for use in AI Functions.</td>
+</tr>
+</tbody></table>
+<p><strong>Quiet today:</strong> <a href="https://github.com/snowflakedb/snowpark-python">Snowpark Python</a>, <a href="https://github.com/snowflakedb/snowflake-connector-python">Snowflake Connector for Python</a>, <a href="https://github.com/apache/polaris">Apache Polaris</a>, <a href="https://github.com/snowflakedb/terraform-provider-snowflake">Terraform provider for Snowflake</a></p>
+<hr>
+<h2>Azure / Fabric &amp; GCP</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Source</th>
+<th align="left">Item</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-11-03</td>
+<td align="left">Microsoft Fabric</td>
+<td align="left"><a href="https://community.fabric.microsoft.com/t5/Fabric-Updates-Blog/Announcing-support-for-Materialized-views-and-streaming-tables/ba-p/5377928">Announcing support for Materialized views and streaming tables in Mirrored Azure Databricks catalog</a></td>
+<td align="left">Mirrored Azure Databricks catalogs in Microsoft Fabric now support materialized views and streaming tables alongside tables, providing read-only access via shortcuts without data replication; configure which Unity Catalog catalogs, schemas, and objects to mirror.</td>
+</tr>
+<tr>
+<td align="left">2026-11-03</td>
+<td align="left">Microsoft Fabric</td>
+<td align="left">🤖 <a href="https://community.fabric.microsoft.com/t5/Fabric-Updates-Blog/OneLake-The-file-system-for-agent-first-data-engineering/ba-p/5383035">OneLake: The file system for agent-first data engineering</a></td>
+<td align="left">OneLake introduces a remotely hosted MCP server (preview) allowing agents to explore and manage data without a local server, positioning OneLake as the file system for agent-first data engineering with Fabric engines as programs and AI prompts as the terminal.</td>
+</tr>
+<tr>
+<td align="left">2026-11-03</td>
+<td align="left">Azure updates</td>
+<td align="left"><a href="https://azure.microsoft.com/updates?id=579305">[In preview] Public Preview: Extend immutability for PITR backups for Azure SQL Database and Azure SQL Managed Instance</a></td>
+<td align="left">PITR backup immutability can now be extended beyond the default 7 days to match configured PITR retention, useful for financial customers requiring 35-day retention.</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>Open-source stack</h2>
+<h3>dbt Core</h3>
+<ul>
+<li><strong>Release:</strong> v2.0.11 renames <code>--run-cache-mode</code> to <code>--state-mode</code> (with deprecated alias), adds BigQuery query reservation config, improves parse progress bar, introduces state config to ignore external modifications on views, supports <code>allow_jinja_file_extensions</code>, enables authenticated private S3 downloads, adds <code>DBT_CLOUD_LOGIN_HOST</code> for SSO, includes resource filter in lineage view, and provides a feature flag registry via <code>--feature</code> and <code>DBT_ENGINE_FEATURES</code>. <a href="https://github.com/dbt-labs/dbt/releases/tag/v2.0.11">v2.0.11</a></li>
+</ul>
+<h3>dlt</h3>
+<ul>
+<li><strong>News:</strong> The <a href="https://dlthub.com/blog/introducing-pipeline-observability">Building pipelines has become easy. Knowing if they work correctly is now easy, too</a> blog announces the general availability of dltHub&#39;s observability UI, providing a context graph interface to help detect missing data issues that aren&#39;t visible from surface-level pipeline checks.</li>
+</ul>
+<p><strong>Quiet today:</strong> <a href="https://github.com/SQLMesh/sqlmesh">SQLMesh</a>, <a href="https://github.com/apache/airflow">Apache Airflow</a>, <a href="https://github.com/dagster-io/dagster">Dagster</a>, <a href="https://github.com/PrefectHQ/prefect">Prefect</a>, <a href="https://github.com/apache/iceberg">Apache Iceberg</a>, <a href="https://github.com/apache/iceberg-python">PyIceberg</a>, <a href="https://github.com/duckdb/duckdb">DuckDB</a>, <a href="https://github.com/pola-rs/polars">Polars</a>, <a href="https://github.com/trinodb/trino">Trino</a>, <a href="https://github.com/great-expectations/great_expectations">Great Expectations</a>, <a href="https://github.com/sodadata/soda-core">Soda Core</a>, <a href="https://github.com/OpenLineage/OpenLineage">OpenLineage</a>, <a href="https://github.com/open-metadata/OpenMetadata">OpenMetadata</a>, <a href="https://github.com/sqlfluff/sqlfluff">SQLFluff</a></p>
+<hr>
+<h2>Across platforms</h2>
+<ul>
+<li>AI cost governance: Databricks Unity Gateway budgets now include AI Functions (<code>ai_parse_document</code>, <code>ai_extract</code>, <code>ai_classify</code>) spend (GA Nov 1); Snowflake Cortex AI Gateway GA provides request tracing and spend attribution per user — both platforms now meter AI SQL functions.</li>
+<li>Agent-style data access: Snowflake CoCo adds a chat pane in Excel/Sheets (Preview); Fabric OneLake exposes a hosted MCP server (Preview) so agents explore data — similar copilot/agent entry points, different surfaces.</li>
+<li>Cross-cloud catalog mirroring: Fabric mirrors Unity Catalog materialized views and streaming tables read-only via shortcuts; Databricks Lakeflow Jobs now trigger across workspaces sharing a metastore — both enable multi-workspace lineage without data movement.</li>
+</ul>
+<hr>
+<h2>News &amp; discussion</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Post</th>
+<th align="left">Source</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-11-03</td>
+<td align="left"><a href="https://medium.com/snowflake/before-you-model-a-single-table-data-modelling-questions-to-ask-for-ai-agents-in-snowflake-0ac71edf8172">Before You Model a Single Table: Data Modelling Questions to Ask for AI Agents in Snowflake</a></td>
+<td align="left">Snowflake on Medium</td>
+<td align="left">The author, a Snowflake Architect, outlines six modelling questions (grain, shape, semantic views, business meaning, performance, evaluation) to resolve before building Cortex Agents, noting that agents lack the tacit knowledge analysts carry and every schema ambiguity becomes a risky inference.</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>Spotted</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Story</th>
+<th align="left">Source</th>
+<th align="left">Discussion</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a href="https://www.interdb.jp/pg/index.html">The Internals of PostgreSQL</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50358702">205 points, 13 comments</a></td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left"><a href="https://www.snowflake.com/en/blog/engineering/postgres-19-repack-table-bloat/">Postgres 19 REPACK: Built-In Online Table Bloat Cleanup</a></td>
+<td align="left">Lobste.rs</td>
+<td align="left"><a href="https://lobste.rs/s/uutnr5/postgres_19_repack_built_online_table">4 points, 0 comments</a></td>
+<td align="left">PostgreSQL 19 introduces REPACK and REPACK CONCURRENTLY to reclaim bloated table space online without downtime, external extensions, or table locks.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://planetscale.com/blog/designing-a-planned-switchover-for-minimum-disruption">Designing a planned switchover for minimum disruption</a></td>
+<td align="left">Lobste.rs</td>
+<td align="left"><a href="https://lobste.rs/s/cwxne0/designing_planned_switchover_for">2 points, 0 comments</a></td>
+<td align="left">Neki designs low-disruption Postgres primary switchovers using preflight checks, query buffering, synchronous replication, and fast rollback.</td>
+</tr>
+</tbody></table>
+<hr>
+<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
+]]></content:encoded>
+    </item>
     <item>
       <title>Data Engineering 2026-11-03</title>
       <link>https://dboeter.github.io/daily-diff/#2026-11-03/ai-data</link>

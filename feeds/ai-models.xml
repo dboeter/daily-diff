@@ -13,7 +13,155 @@
       <height>144</height>
     </image>
     <atom:link href="https://dboeter.github.io/daily-diff/feeds/ai-models.xml" rel="self" type="application/rss+xml"/>
-    <lastBuildDate>Tue, 03 Nov 2026 06:35:21 +0000</lastBuildDate>
+    <lastBuildDate>Wed, 04 Nov 2026 06:04:33 +0000</lastBuildDate>
+    <item>
+      <title>AI Models &amp; Labs 2026-11-04</title>
+      <link>https://dboeter.github.io/daily-diff/#2026-11-04/ai-models</link>
+      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-11-04/ai-models</guid>
+      <pubDate>Wed, 04 Nov 2026 00:00:00 +0000</pubDate>
+      <description>AI Models &amp;amp; Labs 2026-11-04 ⬛ Overview · 🟪 AI Agents · 🟦 AI Models &amp;amp; Labs · 🟨 Data Engineering Lab posts: 3 | New models: 1 | Spotted: 8 | Generated: 2026-11-04 06:01 UTC Highlights Anthropic introduces FlashProve, a system that provides cryptographic proofs of inference so model providers can commit to a specific model and prove each response originated from it, targeting trust and compliance verification. Tencent releases Hy4 on OpenRouter with a 1 M token context window, citing str...</description>
+      <content:encoded><![CDATA[<h1>AI Models &amp; Labs 2026-11-04</h1>
+<p><a href="https://dboeter.github.io/daily-diff/#2026-11-04">⬛ Overview</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-04/ai-agents">🟪 AI Agents</a> · <strong>🟦 AI Models &amp; Labs</strong> · <a href="https://dboeter.github.io/daily-diff/#2026-11-04/ai-data">🟨 Data Engineering</a></p>
+<blockquote>
+<p>Lab posts: 3 | New models: 1 | Spotted: 8 | Generated: 2026-11-04 06:01 UTC</p>
+</blockquote>
+<hr>
+<h2>Highlights</h2>
+<ul>
+<li>Anthropic introduces <code>FlashProve</code>, a system that provides cryptographic proofs of inference so model providers can commit to a specific model and prove each response originated from it, targeting trust and compliance verification.</li>
+<li>Tencent releases Hy4 on OpenRouter with a 1 M token context window, citing strong gains in agentic capabilities and performance on long-horizon, real-world productivity tasks over the preview version.</li>
+<li>OpenAI publishes a system card addendum for GPT-Rosalind-6 detailing safety evaluations for the deployed model.</li>
+</ul>
+<hr>
+<h2>Lab announcements</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Lab</th>
+<th align="left">Post</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-11-04</td>
+<td align="left">OpenAI</td>
+<td align="left"><a href="https://openai.com/index/accelerating-engineering-for-the-physical-world/">Accelerating Engineering For The Physical World</a></td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left">2026-11-04</td>
+<td align="left">OpenAI</td>
+<td align="left"><a href="https://openai.com/index/jill-hazelbaker-chief-corporate-affairs-officer/">Jill Hazelbaker Chief Corporate Affairs Officer</a></td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left">2026-11-03</td>
+<td align="left">Anthropic</td>
+<td align="left"><a href="https://www.anthropic.com/research/provable-inference">Progress on provable inference for large language models</a></td>
+<td align="left">Anthropic presents <code>FlashProve</code>, a system providing cryptographic proofs of inference so model providers can commit to a model and prove each response came from it, targeting trust challenges for users and applications from consumer products to compliance verification.</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>New on OpenRouter</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Model</th>
+<th align="left">Listed</th>
+<th align="left">Context</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a href="https://openrouter.ai/tencent/hy4">Tencent: Hy4</a> <code>tencent/hy4</code></td>
+<td align="left">2026-11-04</td>
+<td align="left">1M</td>
+<td align="left">Tencent&#39;s Hy4 official release improves on Hy4 Preview with strong gains in agentic capabilities and performance across long-horizon, real-world productivity tasks.</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>Stealth Models on OpenRouter</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Model</th>
+<th align="left">Listed</th>
+<th align="left">Expires</th>
+<th align="left">Status</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a href="https://openrouter.ai/stealth/crouton-alpha">Crouton Alpha</a> <code>stealth/crouton-alpha</code></td>
+<td align="left">2026-11-03</td>
+<td align="left">—</td>
+<td align="left">🆕 new</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>Spotted</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Story</th>
+<th align="left">Source</th>
+<th align="left">Discussion</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a href="https://asia.nikkei.com/business/technology/artificial-intelligence/us-tech-giants-hidden-ai-debt-swells-90-to-3.2tn-in-6-months">US tech giants&#39; hidden AI debt swells 90% to $3.2T in 6 months</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50358422">321 points, 139 comments</a></td>
+<td align="left">Hidden AI-related debt at major US tech firms surged 90% to $3.2 trillion in six months, reaching 80% of their assets.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://arxiv.org/abs/2605.29713">The Little Book of Generative AI Foundations: An Intuitive Mathematical Primer</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50358582">292 points, 49 comments</a></td>
+<td align="left">The Little Book of Generative AI Foundations* on arXiv offers a compact, derivation-oriented mathematical primer for generative AI.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://deploymentsafety.openai.com/gpt-rosalind-6">GPT-Rosalind-6 System Card Addendum</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50337503">66 points, 55 comments</a></td>
+<td align="left">OpenAI published a system card addendum for GPT-Rosalind-6 detailing safety evaluations for the deployed model.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://concepts.laxmena.com/">Show HN: Interactive notes on RLHF, attention, LoRA and LLM evals</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50353468">40 points, 4 comments</a></td>
+<td align="left">A Show HN project presents interactive one-page explainers covering RLHF, attention, LoRA, and LLM evaluation concepts.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50337431">Ask HN: What hardware are you using to run local LLMs?</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50337431">40 points, 39 comments</a></td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left"><a href="https://edwardbenson.com/2026/10/embedding-boolean-circuits-in-a-neural-network">Embedding boolean circuits in a neural network</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50326545">28 points, 7 comments</a></td>
+<td align="left">The author demonstrates embedding AND, OR, and NOT gates as fixed-weight neural circuits that read model activations.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://dev.to/chet103cc/gpt-image-25-the-quality-knob-is-the-expensive-one-not-4k-3b0o">GPT Image 2.5: the quality knob is the expensive one, not 4K</a></td>
+<td align="left">Dev.to</td>
+<td align="left"><a href="https://dev.to/chet103cc/gpt-image-25-the-quality-knob-is-the-expensive-one-not-4k-3b0o">60 reactions, 4 comments</a></td>
+<td align="left">The author found that with GPT Image 2.5 the quality setting drives cost far more than 4K resolution, noting max quality at 1K is the expensive tier.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://dev.to/chet103cc/nano-banana-21-fourteen-references-four-that-matter-247b">Nano Banana 2.1: fourteen references, four that matter</a></td>
+<td align="left">Dev.to</td>
+<td align="left"><a href="https://dev.to/chet103cc/nano-banana-21-fourteen-references-four-that-matter-247b">59 reactions, 4 comments</a></td>
+<td align="left">The author tested Nano Banana 2.1 with fourteen reference images and discovered only four actually mattered; using all fourteen degraded the result.</td>
+</tr>
+</tbody></table>
+<hr>
+<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
+]]></content:encoded>
+    </item>
     <item>
       <title>AI Models &amp; Labs 2026-11-03</title>
       <link>https://dboeter.github.io/daily-diff/#2026-11-03/ai-models</link>
