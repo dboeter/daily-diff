@@ -7,6 +7,7 @@
     "577992": "2026-11-03",
     "578358": "2026-10-28",
     "578628": "2026-11-03",
+    "579305": "2026-11-04",
     "databricks ai runtime sdk replaces serverless_gpu|2026-10-13": "2026-10-19",
     "knowledge assistant and supervisor agent are now legacy|2026-10-12": "2026-10-19",
     "feature views are now generally available|2026-10-12": "2026-10-19",
@@ -251,7 +252,24 @@
     "oct 27, 2026: openai gpt-6.1 terra (preview)|2026-10-27": "2026-11-03",
     "genie agents enhancements|2026-11-02": "2026-11-03",
     "release:databricks/terraform-provider-databricks@v1.141.0": "2026-11-03",
-    "post:medium.com/snowflake/from-seats-to-prompts-reclaiming-crm-licenses-with-a-governed-read-model-5d18a8ebdfda": "2026-11-03"
+    "post:medium.com/snowflake/from-seats-to-prompts-reclaiming-crm-licenses-with-a-governed-read-model-5d18a8ebdfda": "2026-11-03",
+    "ai functions usage is now included in unity gateway budgets|2026-11-01": "2026-11-04",
+    "data quality monitoring anomaly detection is now generally available|2026-10-29": "2026-11-04",
+    "request for access is now generally available|2026-10-28": "2026-11-04",
+    "zerobus ingest into default storage is now generally available|2026-11-02": "2026-11-04",
+    "monitor data freshness in lakeflow connect database connector pipelines (public preview)|2026-10-30": "2026-11-04",
+    "trigger lakeflow jobs when upstream jobs complete (beta)|2026-11-03": "2026-11-04",
+    "nov 3, 2026: cortex ai gateway inference, observability, and cost management (general availability)|2026-11-03": "2026-11-04",
+    "nov 03, 2026: snowflake coco for excel and snowflake coco for google sheets (preview)|2026-11-03": "2026-11-04",
+    "nov 03, 2026: google gemini 4 argon model (general availability)|2026-11-03": "2026-11-04",
+    "https://community.fabric.microsoft.com/t5/Fabric-Updates-Blog/Announcing-support-for-Materialized-views-and-streaming-tables/ba-p/5377928": "2026-11-04",
+    "https://community.fabric.microsoft.com/t5/Fabric-Updates-Blog/OneLake-The-file-system-for-agent-first-data-engineering/ba-p/5383035": "2026-11-04",
+    "okta connector is available in beta|2026-11-03": "2026-11-04",
+    "user-aware workspace instructions for genie one|2026-10-28": "2026-11-04",
+    "control lakebase sink upserts with merge strategies|2026-11-03": "2026-11-04",
+    "release:dbt-labs/dbt@v2.0.11": "2026-11-04",
+    "post:medium.com/snowflake/before-you-model-a-single-table-data-modelling-questions-to-ask-for-ai-agents-in-snowflake-0ac71edf8172": "2026-11-04",
+    "post:dlthub.com/blog/introducing-pipeline-observability": "2026-11-04"
   },
   "stages": {
     "snowflake-bcr:2026_08": "2026-10-16 Introduced in the 10.37 release (October 8-16, 2026) as Disabled by Default; account admins can enable for testing."

@@ -1,0 +1,14 @@
+{
+  "ai-agents": [
+    "OpenShell v0.1.7 emits only native OCSF 1.8.0 records, deprecates schema_version settings, moves Podman CA-bundle config, and runs MicroVM sandboxes as sandbox account.",
+    "Codex CLI v0.166.0 reportedly destroyed systemd and containers when asked to reboot a server, costing over $10,000."
+  ],
+  "ai-models": [
+    "Anthropic introduces FlashProve, a system providing cryptographic proofs of inference for model verification and compliance.",
+    "OpenAI publishes a system card addendum for GPT-Rosalind-6 detailing safety evaluations for the deployed model."
+  ],
+  "ai-data": [
+    "− dbt Core v2.0.11 renames `--run-cache-mode` to `--state-mode`, keeping the old flag as a deprecated alias.",
+    "Snowflake Cortex AI Gateway reaches GA, providing a single governed endpoint for AI inference with request tracing and spend attribution per user."
+  ]
+}
