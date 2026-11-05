@@ -41,7 +41,9 @@
     "tk:2026Z23485": "2026-10-31",
     "https://www.insideprivacy.com/?p=16492": "2026-10-31",
     "https://www.binnenlandsbestuur.nl/digitaal/gesprekken-van-ambtenaren-met-chatgpt-kunnen-openbaar-worden": "2026-10-31",
-    "https://www.politico.eu/?post_type=pro&p=9254931": "2026-11-03"
+    "https://www.politico.eu/?post_type=pro&p=9254931": "2026-11-03",
+    "https://www.transformernews.ai/p/midterms-democrats-blue-tsunami-ai-policy-legislation": "2026-11-05",
+    "https://www.politico.eu/?post_type=article&p=9270750": "2026-11-05"
   },
   "stages": {
     "celex:32026D2274": "2026-10-12 Decision adopted",
@@ -68,7 +70,6 @@
   },
   "zeroSince": {
     "Congress.gov": "2026-10-28",
-    "Open States": "2026-11-04",
     "Internetconsultatie": "2026-10-28",
     "EDPB": "2026-10-28"
   }

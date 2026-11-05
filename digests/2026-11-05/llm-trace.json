@@ -1,0 +1,19 @@
+{
+"attempted": 13,
+"failed": 0,
+"calls": [
+{"label":"agents","outcome":"ok","chars":1477},
+{"label":"infra","outcome":"ok","chars":658},
+{"label":"spotted-summaries","outcome":"ok","chars":1817},
+{"label":"policy","outcome":"ok","chars":767},
+{"label":"data-databricks","outcome":"ok","chars":1078},
+{"label":"agents-highlights","outcome":"ok","chars":735},
+{"label":"policy-summaries","outcome":"ok","chars":308},
+{"label":"models-summaries","outcome":"ok","chars":562},
+{"label":"models-highlights","outcome":"ok","chars":421},
+{"label":"data-data_stack","outcome":"ok","chars":219},
+{"label":"data-vendor-summaries","outcome":"ok","chars":2718},
+{"label":"data-highlights","outcome":"ok","chars":1516},
+{"label":"highlights","outcome":"ok","chars":1198}
+]
+}

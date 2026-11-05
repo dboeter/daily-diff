@@ -1,0 +1,46 @@
+[
+  {
+    "id": "hn:50364336",
+    "source": "hn",
+    "title": "AI is forcing us to pay off 40 years of technical debt",
+    "url": "https://spectrum.ieee.org/ai-in-cybersecurity-php2shell-vulnerability",
+    "discussionUrl": "https://news.ycombinator.com/item?id=50364336",
+    "points": 1144,
+    "comments": 663,
+    "topic": "other",
+    "counts": "1144 points, 663 comments"
+  },
+  {
+    "id": "hn:50362905",
+    "source": "hn",
+    "title": "Nvidia RTX Spark encrypted firmware slows inference speed to 35% on Linux",
+    "url": "https://www.mindstudio.ai/blog/linux-nvidia-rtx-spark-laptop",
+    "discussionUrl": "https://news.ycombinator.com/item?id=50362905",
+    "points": 597,
+    "comments": 276,
+    "topic": "other",
+    "counts": "597 points, 276 comments"
+  },
+  {
+    "id": "hn:50363554",
+    "source": "hn",
+    "title": "Geoffrey Hinton: it might turn out we were better off without AI",
+    "url": "https://www.theguardian.com/uk-news/2026/nov/03/ai-godfather-geoffrey-hinton-better-off-without-ai",
+    "discussionUrl": "https://news.ycombinator.com/item?id=50363554",
+    "points": 304,
+    "comments": 301,
+    "topic": "other",
+    "counts": "304 points, 301 comments"
+  },
+  {
+    "id": "devto:4971955",
+    "source": "devto",
+    "title": "We're Building AI to Replace Ourselves. What's the Plan?",
+    "url": "https://dev.to/sylwia-lask/were-building-ai-to-replace-ourselves-whats-the-plan-4oll",
+    "discussionUrl": "https://dev.to/sylwia-lask/were-building-ai-to-replace-ourselves-whats-the-plan-4oll",
+    "points": 110,
+    "comments": 70,
+    "topic": "other",
+    "counts": "110 reactions, 70 comments"
+  }
+]

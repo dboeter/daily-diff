@@ -7,6 +7,7 @@
     "577992": "2026-11-03",
     "578358": "2026-10-28",
     "578628": "2026-11-03",
+    "579300": "2026-11-05",
     "579305": "2026-11-04",
     "databricks ai runtime sdk replaces serverless_gpu|2026-10-13": "2026-10-19",
     "knowledge assistant and supervisor agent are now legacy|2026-10-12": "2026-10-19",
@@ -269,7 +270,23 @@
     "control lakebase sink upserts with merge strategies|2026-11-03": "2026-11-04",
     "release:dbt-labs/dbt@v2.0.11": "2026-11-04",
     "post:medium.com/snowflake/before-you-model-a-single-table-data-modelling-questions-to-ask-for-ai-agents-in-snowflake-0ac71edf8172": "2026-11-04",
-    "post:dlthub.com/blog/introducing-pipeline-observability": "2026-11-04"
+    "post:dlthub.com/blog/introducing-pipeline-observability": "2026-11-04",
+    "simba jdbc driver (legacy) 2.8.7 is available|2026-11-02": "2026-11-05",
+    "nov 3, 2026: delta direct: structured type evolution (general availability)|2026-11-03": "2026-11-05",
+    "nov 4, 2026: backups for snowflake storage for apache iceberg™ tables (general availability)|2026-11-04": "2026-11-05",
+    "nov 02, 2026: level of detail (lod) expressions in semantic views (preview)|2026-11-02": "2026-11-05",
+    "nov 3, 2026: coco desktop v1.24.0|2026-11-03": "2026-11-05",
+    "november 4, 2026: background runs and additional supplementary tools for agents in the snowflake-managed mcp server|2026-11-04": "2026-11-05",
+    "https://community.fabric.microsoft.com/t5/Fabric-Updates-Blog/OneLake-table-APIs-Now-with-Iceberg-writes-plus-richer-table/ba-p/5391262": "2026-11-05",
+    "you can now use persistent and temporary sql user-defined functions (udfs) in bigquery continuous queries to encapsulate and reuse custom real-time transformation logic|2026-11-03": "2026-11-05",
+    "https://community.fabric.microsoft.com/t5/Fabric-Updates-Blog/Eventhouse-support-for-OneLake-security-Generally-Available/ba-p/5377875": "2026-11-05",
+    "https://community.fabric.microsoft.com/t5/Fabric-Updates-Blog/Salesforce-Data-360-integration-with-OneLake-Preview/ba-p/5384626": "2026-11-05",
+    "https://community.fabric.microsoft.com/t5/Fabric-Updates-Blog/Find-expensive-queries-from-Capacity-Metrics-Generally-Available/ba-p/5393588": "2026-11-05",
+    "https://community.fabric.microsoft.com/t5/Fabric-Updates-Blog/Govern-Fabric-connections-with-admin-APIs-and-data-connection/ba-p/5383656": "2026-11-05",
+    "release:databricks/cli@v1.24.0": "2026-11-05",
+    "release:mlflow/mlflow@v3.18.0": "2026-11-05",
+    "post:medium.com/snowflake/cortex-agent-versioning-and-multi-environment-deployment-18cb43e8097e": "2026-11-05",
+    "post:medium.com/snowflake/enterprise-ml-architecture-making-every-boundary-earn-its-place-c0ffaac36fd4": "2026-11-05"
   },
   "stages": {
     "snowflake-bcr:2026_08": "2026-10-16 Introduced in the 10.37 release (October 8-16, 2026) as Disabled by Default; account admins can enable for testing."

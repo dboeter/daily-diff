@@ -1,0 +1,18 @@
+{
+  "ai-agents": [
+    "context-mode v2.0.0 rewrites runtime: agents execute scripts in local sandbox, only printed answers enter context, full output stored in SQLite index with nine new tools",
+    "DeepSeek Harness dsh-v0.2.2-rc.1 adds subagent_oar plugin to delegate to local Codex or Claude CLI and change-requests running in isolated Git worktrees"
+  ],
+  "ai-models": [
+    "Anthropic reports progress on provable inference using zkSNARK cryptographic proofs for verifiable large language model inference",
+    "ricursiveAI lists Ripple-65B-Preview on OpenRouter: 65B model with native tool calling, 1M context, and BF16 serving"
+  ],
+  "ai-policy": [
+    "Democratic midterm gains make strong US federal AI legislation more likely, affecting Dutch firms using US-vendor models",
+    "European Parliament President instructs MEPs not to rely on AI for drafting laws as internal guidelines are prepared"
+  ],
+  "ai-data": [
+    "MLflow v3.18.0 breaks: search_logged_models filters metrics by step then timestamp, registered_model_meta dropped from downloads, MCP version case-sensitive on MySQL/SQL Server",
+    "Snowflake GA: Iceberg table backups on AWS and Delta Direct structured type evolution for OBJECT, ARRAY, MAP changes eliminating error 091989"
+  ]
+}
