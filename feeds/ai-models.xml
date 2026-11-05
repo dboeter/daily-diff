@@ -13,7 +13,167 @@
       <height>144</height>
     </image>
     <atom:link href="https://dboeter.github.io/daily-diff/feeds/ai-models.xml" rel="self" type="application/rss+xml"/>
-    <lastBuildDate>Wed, 04 Nov 2026 06:04:33 +0000</lastBuildDate>
+    <lastBuildDate>Thu, 05 Nov 2026 06:33:03 +0000</lastBuildDate>
+    <item>
+      <title>AI Models &amp; Labs 2026-11-05</title>
+      <link>https://dboeter.github.io/daily-diff/#2026-11-05/ai-models</link>
+      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-11-05/ai-models</guid>
+      <pubDate>Thu, 05 Nov 2026 00:00:00 +0000</pubDate>
+      <description>AI Models &amp;amp; Labs 2026-11-05 ⬛ Overview · 🟪 AI Agents · 🟦 AI Models &amp;amp; Labs · 🟧 AI Policy · 🟨 Data Engineering Lab posts: 5 | New models: 2 | Spotted: 7 | Generated: 2026-11-05 06:28 UTC Highlights Anthropic reports progress on provable inference using zkSNARK cryptographic proofs to enable verifiable inference for large language models. Research across twelve frontier models finds a 30% or higher token cost premium for Nordic languages versus English across 3,000 sentences. ricursiveA...</description>
+      <content:encoded><![CDATA[<h1>AI Models &amp; Labs 2026-11-05</h1>
+<p><a href="https://dboeter.github.io/daily-diff/#2026-11-05">⬛ Overview</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-05/ai-agents">🟪 AI Agents</a> · <strong>🟦 AI Models &amp; Labs</strong> · <a href="https://dboeter.github.io/daily-diff/#2026-11-05/ai-policy">🟧 AI Policy</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-05/ai-data">🟨 Data Engineering</a></p>
+<blockquote>
+<p>Lab posts: 5 | New models: 2 | Spotted: 7 | Generated: 2026-11-05 06:28 UTC</p>
+</blockquote>
+<hr>
+<h2>Highlights</h2>
+<ul>
+<li>Anthropic reports progress on provable inference using zkSNARK cryptographic proofs to enable verifiable inference for large language models.</li>
+<li>Research across twelve frontier models finds a 30% or higher token cost premium for Nordic languages versus English across 3,000 sentences.</li>
+<li>ricursiveAI lists Ripple-65B-Preview on OpenRouter, a 65B model with native tool calling, 1M context, and BF16 serving.</li>
+</ul>
+<hr>
+<h2>Lab announcements</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Lab</th>
+<th align="left">Post</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-11-05</td>
+<td align="left">OpenAI</td>
+<td align="left"><a href="https://openai.com/index/openai-to-acquire-pierre/">Openai To Acquire Pierre</a></td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left">2026-11-05</td>
+<td align="left">OpenAI</td>
+<td align="left"><a href="https://openai.com/index/daybreak-red-aws-govcloud/">Daybreak Red Aws Govcloud</a></td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left">2026-11-05</td>
+<td align="left">OpenAI</td>
+<td align="left"><a href="https://openai.com/index/a-thousand-fewer-paths-to-root/">A Thousand Fewer Paths To Root</a></td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left">2026-11-05</td>
+<td align="left">OpenAI</td>
+<td align="left"><a href="https://openai.com/index/introducing-images-2-6/">Introducing Images 2 6</a></td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left">2026-11-04</td>
+<td align="left">Anthropic</td>
+<td align="left"><a href="https://www.anthropic.com/research/investigating-vault-particles-with-claude">Investigating vault particles with Claude</a></td>
+<td align="left">Anthropic announced the first 3D structure of a vault particle found in prokaryotic cells, detailing how Claude assisted in searching sequence literature, optimizing particle isolation, and mapping the vault&#39;s structure for the scientific community.</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>New on OpenRouter</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Model</th>
+<th align="left">Listed</th>
+<th align="left">Context</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a href="https://openrouter.ai/inclusionai/ling-3.0-tiny">inclusionAI: Ling 3.0 Tiny</a> <code>inclusionai/ling-3.0-tiny</code></td>
+<td align="left">2026-11-05</td>
+<td align="left">262K</td>
+<td align="left">Ling 3.0 Tiny is a mixture-of-experts model from InclusionAI with 1.3B active parameters out of 7.9B total, designed for responsive agents, instruction following, and multi-turn conversations.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://openrouter.ai/ricursiveai/ripple-65b-preview">ricursiveAI/Ripple-65B-Preview</a> <code>ricursiveai/ripple-65b-preview</code></td>
+<td align="left">2026-11-04</td>
+<td align="left">1M</td>
+<td align="left">Ripple-65B-Preview by ricursiveAI is a 65B model with native tool calling, served in BF16.</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>Stealth Models on OpenRouter</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Model</th>
+<th align="left">Listed</th>
+<th align="left">Expires</th>
+<th align="left">Status</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a href="https://openrouter.ai/stealth/crouton-alpha">Crouton Alpha</a> <code>stealth/crouton-alpha</code></td>
+<td align="left">2026-11-03</td>
+<td align="left">—</td>
+<td align="left">live</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>Spotted</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Story</th>
+<th align="left">Source</th>
+<th align="left">Discussion</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50363461">Tell HN: Gemini trains on chat history, even for subscribers (personal accounts)</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50363461">652 points, 168 comments</a></td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left"><a href="https://hy.tencent.ai/research/hy4">Tencent Hy4</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50365780">220 points, 72 comments</a></td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left"><a href="https://www.anthropic.com/research/provable-inference">Progress on provable inference for large language models</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50368626">202 points, 88 comments</a></td>
+<td align="left">Anthropic shares progress on using zkSNARK cryptographic proofs to enable verifiable inference for large language models.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://zou-group.github.io/llm-claims-shelf-life/">Mass attempted replication of old findings of LLMs with new models</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50347766">30 points, 4 comments</a></td>
+<td align="left">Researchers replicated 50 published LLM findings across 20 models to determine which results fade, persist, or strengthen with newer architectures.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://research.klang.ai/papers/the-nordic-token-tax">The Nordic Token Tax</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50348535">28 points, 6 comments</a></td>
+<td align="left">Testing twelve frontier models reveals a 30% or higher token cost premium for Swedish, Norwegian, Danish, and Finnish compared to English across 3,000 sentences.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://arxiv.org/abs/2610.40269">When Modernization Breaks Working Code: A Study of LLMs on Legacy PHP</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50330033">19 points, 12 comments</a></td>
+<td align="left">A study tests five LLMs on modernizing 100 WordPress 4.0 PHP files to PHP 8.3 while preserving behavior, evaluating whether LLM-driven modernization improves or breaks working legacy code.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://dev.to/chet103cc/flare-vs-sunburst-five-prompts-rendered-twice-one-clear-rule-1aae">Flare vs Sunburst: five prompts, rendered twice, one clear rule</a></td>
+<td align="left">Dev.to</td>
+<td align="left"><a href="https://dev.to/chet103cc/flare-vs-sunburst-five-prompts-rendered-twice-one-clear-rule-1aae">62 reactions, 3 comments</a></td>
+<td align="left">The author compares GPT Image 2.5&#39;s two variants, Flare and Sunburst, across five prompts to evaluate their differing outputs at the same per-image price.</td>
+</tr>
+</tbody></table>
+<hr>
+<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
+]]></content:encoded>
+    </item>
     <item>
       <title>AI Models &amp; Labs 2026-11-04</title>
       <link>https://dboeter.github.io/daily-diff/#2026-11-04/ai-models</link>

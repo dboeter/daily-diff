@@ -13,7 +13,214 @@
       <height>144</height>
     </image>
     <atom:link href="https://dboeter.github.io/daily-diff/feeds/ai-data.xml" rel="self" type="application/rss+xml"/>
-    <lastBuildDate>Wed, 04 Nov 2026 06:04:33 +0000</lastBuildDate>
+    <lastBuildDate>Thu, 05 Nov 2026 06:33:03 +0000</lastBuildDate>
+    <item>
+      <title>Data Engineering 2026-11-05</title>
+      <link>https://dboeter.github.io/daily-diff/#2026-11-05/ai-data</link>
+      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-11-05/ai-data</guid>
+      <pubDate>Thu, 05 Nov 2026 00:00:00 +0000</pubDate>
+      <description>Data Engineering 2026-11-05 ⬛ Overview · 🟪 AI Agents · 🟦 AI Models &amp;amp; Labs · 🟧 AI Policy · 🟨 Data Engineering Vendor items: 12 | Projects: 27 | Active today: 2 | Stable releases: 2 | Prereleases (not covered): 2 | Generated: 2026-11-05 06:28 UTC Highlights MLflow v3.18.0 introduces breaking changes: search_logged_models now filters and sorts metrics by highest step then latest timestamp on SQL stores, registered_model_meta is no longer added to models:/ downloads, and MCP server version i...</description>
+      <content:encoded><![CDATA[<h1>Data Engineering 2026-11-05</h1>
+<p><a href="https://dboeter.github.io/daily-diff/#2026-11-05">⬛ Overview</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-05/ai-agents">🟪 AI Agents</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-05/ai-models">🟦 AI Models &amp; Labs</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-05/ai-policy">🟧 AI Policy</a> · <strong>🟨 Data Engineering</strong></p>
+<blockquote>
+<p>Vendor items: 12 | Projects: 27 | Active today: 2 | Stable releases: 2 | Prereleases (not covered): 2 | Generated: 2026-11-05 06:28 UTC</p>
+</blockquote>
+<hr>
+<h2>Highlights</h2>
+<ul>
+<li>MLflow v3.18.0 introduces breaking changes: <code>search_logged_models</code> now filters and sorts metrics by highest step then latest timestamp on SQL stores, <code>registered_model_meta</code> is no longer added to <code>models:/</code> downloads, and MCP server version identity becomes case-sensitive on MySQL and SQL Server requiring a database upgrade; Databricks MLflow users must test and migrate.</li>
+<li>Snowflake ships two GA features: Iceberg table backups for Snowflake Storage on AWS, and Delta Direct structured type evolution reconciling <code>OBJECT</code>, <code>ARRAY</code>, <code>MAP</code> changes during refresh (eliminating error <code>091989</code>); Snowflake users with Iceberg or Delta Direct tables can adopt both.</li>
+<li>Microsoft Fabric OneLake table APIs add Iceberg REST Catalog writes (Preview) for creating native Iceberg tables, committing snapshots, and requesting short-lived credentials; Fabric users on supported clouds can preview Iceberg table management.</li>
+</ul>
+<hr>
+<h2>Action required</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Platform</th>
+<th align="left">Item</th>
+<th align="left">What to do</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-11-30</td>
+<td align="left">Azure Databricks</td>
+<td align="left"><a href="https://learn.microsoft.com/azure/databricks/release-notes/whats-coming#upcoming-end-of-life-for-the-genie-one-mcp-beta-endpoint">Upcoming end of life for the Genie One MCP Beta endpoint</a></td>
+<td align="left">The Genie One MCP Beta endpoint at <code>https://&lt;workspace-hostname&gt;/api/2.0/mcp/genie</code> reaches end of life on November 30, 2026, after which requests fail; migrate all workloads to the <code>system.ai.genie_one_mcp</code> MCP in Unity Gateway.</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>Databricks</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Item</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-11-02</td>
+<td align="left"><a href="https://learn.microsoft.com/azure/databricks/release-notes/product/2026/november#simba-jdbc-driver-legacy-287-is-available">Simba JDBC Driver (Legacy) 2.8.7 is available</a></td>
+<td align="left">Simba JDBC Driver (Legacy) 2.8.7 updates <code>jackson-core</code>, <code>jackson-databind</code>, and <code>jackson-datatype-jsr310</code> to <code>2.21.8</code>, available from the JDBC drivers archive under All JDBC Driver Versions (Simba).</td>
+</tr>
+</tbody></table>
+<h3>MLflow</h3>
+<ul>
+<li><strong>Release:</strong> <a href="https://github.com/mlflow/mlflow/releases/tag/v3.18.0">v3.18.0</a> introduces breaking changes: <code>search_logged_models</code> now filters and sorts metrics by highest step then latest timestamp on SQL stores, <code>registered_model_meta</code> is no longer added to <code>models:/</code> downloads, and MCP server version identity becomes case-sensitive on MySQL and SQL Server requiring a database upgrade. It adds Automatic Issue Detection to turn recurring agent failures into investigable issues and an experimental Skill Registry for sharing reusable skills across agents and projects.</li>
+</ul>
+<h3>Databricks CLI</h3>
+<ul>
+<li><strong>Release:</strong> <a href="https://github.com/databricks/cli/releases/tag/v1.24.0">v1.24.0</a> marks variables used as secret values as sensitive, preventing their plain-text use in other fields, and fixes <code>databricks auth login</code> and <code>databricks configure</code> overwriting parent profile credentials when saving dotted-name profiles. It adds workspace-supported accelerator types to <code>databricks air run -h config.compute.accelerator_type</code> and improves <code>air list</code> and <code>air run --watch</code> output.</li>
+</ul>
+<p><strong>Quiet today:</strong> <a href="https://github.com/delta-io/delta">Delta Lake</a>, <a href="https://github.com/delta-io/delta-rs">delta-rs</a>, <a href="https://github.com/unitycatalog/unitycatalog">Unity Catalog</a>, <a href="https://github.com/databricks/dbt-databricks">dbt-databricks</a>, <a href="https://github.com/databricks/terraform-provider-databricks">Terraform provider for Databricks</a></p>
+<hr>
+<h2>Snowflake</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Item</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-11-04</td>
+<td align="left"><a href="https://docs.snowflake.com/en/release-notes/2026/other/2026-11-04-iceberg-backups">Backups for Snowflake Storage for Apache Iceberg™ tables (General availability)</a></td>
+<td align="left">Backups are now generally available for Snowflake Storage for Apache Iceberg tables and dynamic Iceberg tables on AWS.</td>
+</tr>
+<tr>
+<td align="left">2026-11-04</td>
+<td align="left">🤖 <a href="https://docs.snowflake.com/en/release-notes/2026/other/2026-11-04-mcp-async-agent-tools">Background runs and additional supplementary tools for agents in the Snowflake-managed MCP server</a></td>
+<td align="left">The <code>CORTEXAGENTRUN</code> and <code>CODINGAGENT</code> tools in the Snowflake-managed MCP server accept a <code>background</code> boolean argument that returns a pollable handle immediately when set to <code>true</code>.</td>
+</tr>
+<tr>
+<td align="left">2026-11-03</td>
+<td align="left"><a href="https://docs.snowflake.com/en/release-notes/2026/other/2026-11-03-delta-direct-structured-type-evolution">Delta Direct: Structured type evolution (General availability)</a></td>
+<td align="left">Delta Direct tables now reconcile structural changes to <code>OBJECT</code>, <code>ARRAY</code>, and <code>MAP</code> columns during refresh, eliminating the previous <code>091989</code> error that required dropping and recreating the table.</td>
+</tr>
+<tr>
+<td align="left">2026-11-03</td>
+<td align="left"><a href="https://docs.snowflake.com/en/release-notes/2026/other/2026-11-03-coco-desktop-v1-24-0">CoCo Desktop v1.24.0</a></td>
+<td align="left">CoCo Desktop v1.24.0 introduces <code>Artifacts</code> and <code>Cloud automations</code> in preview.</td>
+</tr>
+<tr>
+<td align="left">2026-11-02</td>
+<td align="left"><a href="https://docs.snowflake.com/en/release-notes/2026/other/2026-11-02-semantic-views-lod-metrics-preview">Level of detail (LOD) expressions in semantic views (Preview)</a></td>
+<td align="left"><code>LOD</code> expressions in semantic views calculate values at a grain different from the query grain, enabling multi-granularity analysis within a single view.</td>
+</tr>
+</tbody></table>
+<p><strong>Quiet today:</strong> <a href="https://github.com/snowflakedb/snowpark-python">Snowpark Python</a>, <a href="https://github.com/snowflakedb/snowflake-connector-python">Snowflake Connector for Python</a>, <a href="https://github.com/apache/polaris">Apache Polaris</a>, <a href="https://github.com/snowflakedb/terraform-provider-snowflake">Terraform provider for Snowflake</a></p>
+<hr>
+<h2>Azure / Fabric &amp; GCP</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Source</th>
+<th align="left">Item</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-11-04</td>
+<td align="left">Microsoft Fabric</td>
+<td align="left"><a href="https://community.fabric.microsoft.com/t5/Fabric-Updates-Blog/OneLake-table-APIs-Now-with-Iceberg-writes-plus-richer-table/ba-p/5391262">OneLake table APIs: Now with Iceberg writes, plus richer table metadata (Preview)</a></td>
+<td align="left">OneLake table APIs now support Iceberg REST Catalog writes for creating native Iceberg tables, committing snapshots, and requesting short-lived storage credentials, plus a metadata API for adding descriptions and tags to tables and columns.</td>
+</tr>
+<tr>
+<td align="left">2026-11-04</td>
+<td align="left">Azure updates</td>
+<td align="left"><a href="https://azure.microsoft.com/updates?id=579300">[Launched] Generally Available: Azure Database for PostgreSQL stable REST API version 2026-10-01</a></td>
+<td align="left">The Azure Database for PostgreSQL Flexible Server REST API <code>2026-10-01</code> is generally available with expanded maintenance management, immutable backups, and multi-tenant encryption capabilities.</td>
+</tr>
+<tr>
+<td align="left">2026-11-04</td>
+<td align="left">Microsoft Fabric</td>
+<td align="left"><a href="https://community.fabric.microsoft.com/t5/Fabric-Updates-Blog/Eventhouse-support-for-OneLake-security-Generally-Available/ba-p/5377875">Eventhouse support for OneLake security (Generally Available)</a></td>
+<td align="left">Eventhouse external tables now enforce OneLake security <code>object-level</code>, <code>column-level</code>, and <code>row-level</code> access controls automatically when querying secured data, extending the centrally managed model to KQL queries.</td>
+</tr>
+<tr>
+<td align="left">2026-11-04</td>
+<td align="left">Microsoft Fabric</td>
+<td align="left"><a href="https://community.fabric.microsoft.com/t5/Fabric-Updates-Blog/Salesforce-Data-360-integration-with-OneLake-Preview/ba-p/5384626">Salesforce Data 360 integration with OneLake (Preview)</a></td>
+<td align="left">Salesforce Data 360 integration with OneLake enables zero-copy file sharing so source data is available for analysis without building separate ingestion pipelines, keeping data current across Salesforce and Fabric.</td>
+</tr>
+<tr>
+<td align="left">2026-11-04</td>
+<td align="left">Microsoft Fabric</td>
+<td align="left"><a href="https://community.fabric.microsoft.com/t5/Fabric-Updates-Blog/Find-expensive-queries-from-Capacity-Metrics-Generally-Available/ba-p/5393588">Find expensive queries from Capacity Metrics (Generally Available)</a></td>
+<td align="left">The Capacity Metrics app&#39;s &quot;Monitor in warehouse&quot; action links capacity usage spikes directly to Warehouse Monitor with the relevant time window pre-applied, using <code>CU %</code> to identify queries worth investigating.</td>
+</tr>
+<tr>
+<td align="left">2026-11-03</td>
+<td align="left">BigQuery</td>
+<td align="left"><a href="https://docs.cloud.google.com/bigquery/docs/release-notes#November_03_2026">You can now use persistent and temporary SQL user-defined functions (UDFs) in BigQuery continuous queries to encapsulate and reuse custom real-time transformation logic</a></td>
+<td align="left">BigQuery continuous queries now support persistent and temporary SQL <code>UDFs</code> for encapsulating and reusing custom real-time transformation logic.</td>
+</tr>
+</tbody></table>
+<p><em>Also new:</em> <a href="https://community.fabric.microsoft.com/t5/Fabric-Updates-Blog/Govern-Fabric-connections-with-admin-APIs-and-data-connection/ba-p/5383656">Govern Fabric connections with admin APIs and data connection policies (Preview)</a></p>
+<hr>
+<p>Nothing new from Open-source stack (<a href="https://github.com/dbt-labs/dbt">dbt Core</a>, <a href="https://github.com/SQLMesh/sqlmesh">SQLMesh</a>, <a href="https://github.com/apache/airflow">Apache Airflow</a>, <a href="https://github.com/dagster-io/dagster">Dagster</a>, <a href="https://github.com/PrefectHQ/prefect">Prefect</a>, <a href="https://github.com/dlt-hub/dlt">dlt</a>, <a href="https://github.com/apache/iceberg">Apache Iceberg</a>, <a href="https://github.com/apache/iceberg-python">PyIceberg</a>, <a href="https://github.com/duckdb/duckdb">DuckDB</a>, <a href="https://github.com/pola-rs/polars">Polars</a>, <a href="https://github.com/trinodb/trino">Trino</a>, <a href="https://github.com/great-expectations/great_expectations">Great Expectations</a>, <a href="https://github.com/sodadata/soda-core">Soda Core</a>, <a href="https://github.com/OpenLineage/OpenLineage">OpenLineage</a>, <a href="https://github.com/open-metadata/OpenMetadata">OpenMetadata</a>, <a href="https://github.com/sqlfluff/sqlfluff">SQLFluff</a>) today.</p>
+<hr>
+<h2>Across platforms</h2>
+<ul>
+<li>Iceberg table management: Snowflake reaches GA for backups on AWS while Fabric enters Preview for Iceberg REST Catalog writes (create, commit, credentials) via OneLake APIs; Snowflake covers backup/restore, Fabric covers write-path operations.</li>
+<li>AI agent runtimes: Snowflake&#39;s MCP server adds background runs for <code>CORTEXAGENTRUN</code> and <code>CODINGAGENT</code> tools; Databricks MLflow adds experimental Skill Registry for sharing reusable skills across agents; both extend agent orchestration but Snowflake focuses on async execution, Databricks on skill reuse.</li>
+</ul>
+<hr>
+<h2>News &amp; discussion</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Post</th>
+<th align="left">Source</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-11-04</td>
+<td align="left"><a href="https://medium.com/snowflake/cortex-agent-versioning-and-multi-environment-deployment-18cb43e8097e">Cortex Agent Versioning and Multi-Environment Deployment</a></td>
+<td align="left">Snowflake on Medium</td>
+<td align="left">The author outlines a practical approach to versioning and multi-environment deployment for Snowflake Cortex Agents, noting that agents add a configuration layer (instructions, tools) atop existing dbt-based silver/gold table promotion workflows.</td>
+</tr>
+<tr>
+<td align="left">2026-11-04</td>
+<td align="left"><a href="https://medium.com/snowflake/enterprise-ml-architecture-making-every-boundary-earn-its-place-c0ffaac36fd4">Enterprise ML Architecture: Making Every Boundary Earn Its Place</a></td>
+<td align="left">Snowflake on Medium</td>
+<td align="left">The author presents seven workload tests to reassess enterprise ML architecture placement as Snowflake expands across the ML lifecycle including feature management, model governance, warehouse and container-based inference, observability, explainability, and lineage.</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>Spotted</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Story</th>
+<th align="left">Source</th>
+<th align="left">Discussion</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a href="https://dennisforbes.ca/blog/microblog/2026/10/the_accidental_12000x_sqlite_slowdown/">Shlemiel the Painter Is Back: How Zig&#39;s Libc Rewrite Made SQLite 12,000× Slower</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50367576">19 points, 0 comments</a></td>
+<td align="left">The author examines how a libc rewrite in Zig caused SQLite to become 12,000 times slower, highlighting recurring performance patterns across Rust, SQLite, and Zig.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://www.pgedge.com/blog/burnt-toast">Burnt TOAST</a></td>
+<td align="left">Lobste.rs</td>
+<td align="left"><a href="https://lobste.rs/s/dmpdid/burnt_toast">13 points, 2 comments</a></td>
+<td align="left">Shaun Thomas analyzes PostgreSQL&#39;s TOAST storage for large columns, benchmarking when it accelerates scans and updates versus when table splitting or lz4 compression performs better.</td>
+</tr>
+</tbody></table>
+<hr>
+<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
+]]></content:encoded>
+    </item>
     <item>
       <title>Data Engineering 2026-11-04</title>
       <link>https://dboeter.github.io/daily-diff/#2026-11-04/ai-data</link>
