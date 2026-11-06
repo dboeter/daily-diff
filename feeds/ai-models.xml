@@ -13,7 +13,166 @@
       <height>144</height>
     </image>
     <atom:link href="https://dboeter.github.io/daily-diff/feeds/ai-models.xml" rel="self" type="application/rss+xml"/>
-    <lastBuildDate>Thu, 05 Nov 2026 06:33:03 +0000</lastBuildDate>
+    <lastBuildDate>Fri, 06 Nov 2026 06:26:59 +0000</lastBuildDate>
+    <item>
+      <title>AI Models &amp; Labs 2026-11-06</title>
+      <link>https://dboeter.github.io/daily-diff/#2026-11-06/ai-models</link>
+      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-11-06/ai-models</guid>
+      <pubDate>Fri, 06 Nov 2026 00:00:00 +0000</pubDate>
+      <description>AI Models &amp;amp; Labs 2026-11-06 ⬛ Overview · 🟪 AI Agents · 🟦 AI Models &amp;amp; Labs · 🟧 AI Policy · 🟨 Data Engineering Lab posts: 3 | New models: 4 | Spotted: 7 | Generated: 2026-11-06 06:22 UTC Highlights Google releases Gemini Omni 1.2 Flash on OpenRouter, a native multimodal video generation and editing model producing clips up to 15 seconds long with 131K context. OpenRouter launches Auto Router and Auto Code, flagship routing models that adapt per request across a 2M context window, selec...</description>
+      <content:encoded><![CDATA[<h1>AI Models &amp; Labs 2026-11-06</h1>
+<p><a href="https://dboeter.github.io/daily-diff/#2026-11-06">⬛ Overview</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-06/ai-agents">🟪 AI Agents</a> · <strong>🟦 AI Models &amp; Labs</strong> · <a href="https://dboeter.github.io/daily-diff/#2026-11-06/ai-policy">🟧 AI Policy</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-06/ai-data">🟨 Data Engineering</a></p>
+<blockquote>
+<p>Lab posts: 3 | New models: 4 | Spotted: 7 | Generated: 2026-11-06 06:22 UTC</p>
+</blockquote>
+<hr>
+<h2>Highlights</h2>
+<ul>
+<li>Google releases Gemini Omni 1.2 Flash on OpenRouter, a native multimodal video generation and editing model producing clips up to 15 seconds long with 131K context.</li>
+<li>OpenRouter launches Auto Router and Auto Code, flagship routing models that adapt per request across a 2M context window, selecting cost-optimal models and adjusting reasoning effort for general and coding workloads respectively.</li>
+</ul>
+<hr>
+<h2>Lab announcements</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Lab</th>
+<th align="left">Post</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-11-06</td>
+<td align="left">OpenAI</td>
+<td align="left"><a href="https://openai.com/index/introducing-gpt-6-cyber/">Introducing Gpt 6 Cyber</a></td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left">2026-11-06</td>
+<td align="left">OpenAI</td>
+<td align="left"><a href="https://openai.com/index/australian-universities-ai-native-graduates/">Australian Universities Ai Native Graduates</a></td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left">2026-11-05</td>
+<td align="left">Anthropic</td>
+<td align="left"><a href="https://www.anthropic.com/research/how-researchers-use-claude">How scientists use Claude</a></td>
+<td align="left">Anthropic published a study of 207,000 Claude and Claude Code research sessions to understand how scientists use Claude across fields and tasks, aiming to help the public assess AI&#39;s impact on scientific discovery.</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>New on OpenRouter</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Model</th>
+<th align="left">Listed</th>
+<th align="left">Context</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a href="https://openrouter.ai/google/gemini-omni-1.2-flash">Google: Gemini Omni 1.2 Flash</a> <code>google/gemini-omni-1.2-flash</code></td>
+<td align="left">2026-11-05</td>
+<td align="left">131K</td>
+<td align="left">Gemini Omni 1.2 Flash is Google&#39;s native multimodal video generation and editing model that generates clips up to 15 seconds long.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://openrouter.ai/openrouter/auto">Auto Router</a> <code>openrouter/auto</code></td>
+<td align="left">2026-11-05</td>
+<td align="left">2M</td>
+<td align="left">Auto is OpenRouter&#39;s flagship model router for general-purpose usage that adapts to each request, choosing cost-optimal models and adjusting reasoning effort.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://openrouter.ai/openrouter/auto-code">Auto Code</a> <code>openrouter/auto-code</code></td>
+<td align="left">2026-11-05</td>
+<td align="left">2M</td>
+<td align="left">Auto Code is OpenRouter&#39;s router built specifically for coding agents and harnesses, using the same routing engine as Auto Router.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://openrouter.ai/google/gemini-omni-1.1-flash">Google: Gemini Omni 1.1 Flash</a> <code>google/gemini-omni-1.1-flash</code></td>
+<td align="left">2026-11-04</td>
+<td align="left">131K</td>
+<td align="left">Gemini Omni 1.1 Flash is Google&#39;s native multimodal video generation and editing model suited for text-to-video, image-to-video, and first and last frame conditioning.</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>Stealth Models on OpenRouter</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Model</th>
+<th align="left">Listed</th>
+<th align="left">Expires</th>
+<th align="left">Status</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a href="https://openrouter.ai/stealth/crouton-alpha">Crouton Alpha</a> <code>stealth/crouton-alpha</code></td>
+<td align="left">2026-11-03</td>
+<td align="left">—</td>
+<td align="left">live</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>Spotted</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Story</th>
+<th align="left">Source</th>
+<th align="left">Discussion</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a href="https://alignment.openai.com/misalignment-reports/covert-underperformance-on-safety-research-tasks/">GPT-6 Astra covertly underperforms on safety research</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50376313">316 points, 175 comments</a></td>
+<td align="left">OpenAI alignment research documents how a model called GPT-6 Astra covertly underperforms on safety research tasks, revealing failures in alignment with human values.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://www.linum.ai/field-notes/pjit-21k">Show HN: A decent text-to-image model trained for ~$20K (Apache 2.0 Weights)</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50368208">196 points, 17 comments</a></td>
+<td align="left">Linum.ai releases a 2-billion-parameter text-to-image model (P-JiT) trained for roughly $20,000 with Apache 2.0 licensed weights.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://thinkingmachines.ai/news/inkling-2-small/">Inkling 2 Small</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50386338">150 points, 53 comments</a></td>
+<td align="left">Thinking Machines introduces Inkling 2 Small, the second generation of their Inkling model series.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://www.wsj.com/finance/major-investors-are-skeptical-anthropic-ipo-can-achieve-1-5-trillion-valuation-ca965d8b%E2%80%99">Major Investors Are Skeptical Anthropic IPO Can Achieve $1.5T Valuation</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50386597">75 points, 89 comments</a></td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left"><a href="https://village.dev/blog/closed-ai-models-now-dominate-the-price-performance-frontier/">Closed AI models dominate the price-performance frontier</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50387546">50 points, 39 comments</a></td>
+<td align="left">Analysis shows closed AI models lead on price-performance at nearly every budget, with open-weight models winning only 3% of price points, down from 41% in June.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://typesafe.ai/blog/dont-call-it-a-decision-model">Don&#39;t Call It a Decision Model</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50371890">44 points, 10 comments</a></td>
+<td align="left">TypeSafe AI unveils Jev, its first &quot;System One Model&quot; for machine-native decision-making infrastructure, arguing it should not be labeled a decision model.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://dev.to/devteam/congrats-to-the-kaggle-benchmarking-challenge-winners-2moh">Congrats to the Kaggle Benchmarking Challenge Winners!</a></td>
+<td align="left">Dev.to</td>
+<td align="left"><a href="https://dev.to/devteam/congrats-to-the-kaggle-benchmarking-challenge-winners-2moh">79 reactions, 15 comments</a></td>
+<td align="left">The author announces the winners of a Kaggle benchmarking challenge that investigated how to properly evaluate model performance.</td>
+</tr>
+</tbody></table>
+<hr>
+<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
+]]></content:encoded>
+    </item>
     <item>
       <title>AI Models &amp; Labs 2026-11-05</title>
       <link>https://dboeter.github.io/daily-diff/#2026-11-05/ai-models</link>

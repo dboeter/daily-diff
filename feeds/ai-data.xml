@@ -13,7 +13,257 @@
       <height>144</height>
     </image>
     <atom:link href="https://dboeter.github.io/daily-diff/feeds/ai-data.xml" rel="self" type="application/rss+xml"/>
-    <lastBuildDate>Thu, 05 Nov 2026 06:33:03 +0000</lastBuildDate>
+    <lastBuildDate>Fri, 06 Nov 2026 06:26:59 +0000</lastBuildDate>
+    <item>
+      <title>Data Engineering 2026-11-06</title>
+      <link>https://dboeter.github.io/daily-diff/#2026-11-06/ai-data</link>
+      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-11-06/ai-data</guid>
+      <pubDate>Fri, 06 Nov 2026 00:00:00 +0000</pubDate>
+      <description>Data Engineering 2026-11-06 ⬛ Overview · 🟪 AI Agents · 🟦 AI Models &amp;amp; Labs · 🟧 AI Policy · 🟨 Data Engineering Vendor items: 16 | Projects: 27 | Active today: 6 | Stable releases: 3 | Prereleases (not covered): 1 | Generated: 2026-11-06 06:22 UTC Highlights − Azure Databricks workspaces using AI Functions in SQL on runtimes below 17.3 LTS: upgrade affected compute to 17.3 LTS or above before January 2027 when calls will start returning errors. − Teams running DeepSeek V4 Flash (0731) on Da...</description>
+      <content:encoded><![CDATA[<h1>Data Engineering 2026-11-06</h1>
+<p><a href="https://dboeter.github.io/daily-diff/#2026-11-06">⬛ Overview</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-06/ai-agents">🟪 AI Agents</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-06/ai-models">🟦 AI Models &amp; Labs</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-06/ai-policy">🟧 AI Policy</a> · <strong>🟨 Data Engineering</strong></p>
+<blockquote>
+<p>Vendor items: 16 | Projects: 27 | Active today: 6 | Stable releases: 3 | Prereleases (not covered): 1 | Generated: 2026-11-06 06:22 UTC</p>
+</blockquote>
+<hr>
+<h2>Highlights</h2>
+<ul>
+<li>− Azure Databricks workspaces using AI Functions in SQL on runtimes below 17.3 LTS: upgrade affected compute to 17.3 LTS or above before January 2027 when calls will start returning errors.</li>
+<li>− Teams running DeepSeek V4 Flash (0731) on Databricks: migrate to DeepSeek V4.1 Flash (1017) using the legacy model migration guidance; the old model was retired November 5, 2026.</li>
+<li>− BigQuery users who relied on the Metadata curation console page: switch to Knowledge Catalog for Cloud Storage discovery scans, data profiling, quality, and governance tasks; the console page was removed November 5, 2026.</li>
+<li>Terraform provider for Snowflake v2.23.0 introduces breaking changes with a migration guide; review and test plans for reworked preview resources (<code>snowflake_alert</code>, <code>snowflake_pipe</code>, <code>snowflake_share</code>) and new preview resources before adopting.</li>
+</ul>
+<hr>
+<h2>Action required</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Platform</th>
+<th align="left">Item</th>
+<th align="left">What to do</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-11-30</td>
+<td align="left">Azure Databricks</td>
+<td align="left"><a href="https://learn.microsoft.com/azure/databricks/release-notes/whats-coming#upcoming-end-of-life-for-the-genie-one-mcp-beta-endpoint">Upcoming end of life for the Genie One MCP Beta endpoint</a></td>
+<td align="left">The Genie One MCP Beta endpoint at <code>https://&lt;workspace-hostname&gt;/api/2.0/mcp/genie</code> reaches end of life on November 30, 2026, after which requests fail; migrate all workloads to the <code>system.ai.genie_one_mcp</code> MCP in Unity Gateway.</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>Databricks</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Item</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-11-05</td>
+<td align="left">⚠️ 🤖 <a href="https://learn.microsoft.com/azure/databricks/release-notes/product/2026/november#upcoming-removal-of-ai-functions-support-on-older-runtimes">Upcoming removal of AI Functions support on older runtimes</a></td>
+<td align="left">Starting January 2027, AI Functions in SQL queries will stop working on Databricks Runtime versions below 17.3 LTS; upgrade affected compute to 17.3 LTS or above before then.</td>
+</tr>
+<tr>
+<td align="left">2026-11-05</td>
+<td align="left">⚠️ 🤖 <a href="https://learn.microsoft.com/azure/databricks/release-notes/product/2026/november#deepseek-v4-flash-0731-is-retired">DeepSeek V4 Flash (0731) is retired</a></td>
+<td align="left">DeepSeek V4 Flash (0731) was retired on November 5, 2026; migrate to DeepSeek V4.1 Flash (1017) using the legacy model migration guidance.</td>
+</tr>
+<tr>
+<td align="left">2026-11-04</td>
+<td align="left">⚠️ 🤖 <a href="https://learn.microsoft.com/azure/databricks/release-notes/whats-coming#ai-functions-require-databricks-runtime-173-lts-or-above">AI Functions require Databricks Runtime 17.3 LTS or above</a></td>
+<td align="left">Beginning January 2027, AI Functions other than <code>ai_similarity</code> require Databricks Runtime 17.3 LTS or above; calls on older runtimes will return an error.</td>
+</tr>
+<tr>
+<td align="left">2026-11-05</td>
+<td align="left"><a href="https://learn.microsoft.com/azure/databricks/release-notes/product/2026/november#allow-partner-platforms-in-context-based-ingress-policies">Allow partner platforms in context-based ingress policies</a></td>
+<td align="left">Context-based ingress policies can now allow traffic from Power BI, Tableau Cloud, dbt Cloud, and Genie apps for Slack and Microsoft Teams without manual IP tracking.</td>
+</tr>
+<tr>
+<td align="left">2026-11-05</td>
+<td align="left">🤖 <a href="https://learn.microsoft.com/azure/databricks/ai-bi/release-notes/2026#dashboard-enhancements-and-bug-fixes">Dashboard enhancements and bug fixes</a></td>
+<td align="left">Dashboard authors can reorder variables in the editor, set display names for field variable options (e.g., &quot;Total revenue&quot; instead of &quot;Sum of sales&quot;), and use Genie Code to import Unity Catalog metric view relationships as dashboard relationships (Beta).</td>
+</tr>
+<tr>
+<td align="left">2026-11-05</td>
+<td align="left">🤖 <a href="https://learn.microsoft.com/azure/databricks/release-notes/product/2026/november#external-knowledge-sources-are-in-beta">External knowledge sources are in Beta</a></td>
+<td align="left">External knowledge sources (Beta) let an account admin pull Power BI semantic model metadata into Azure Databricks so Genie can use Power BI measure definitions; enable via the account console Previews page.</td>
+</tr>
+<tr>
+<td align="left">2026-11-04</td>
+<td align="left">🤖 <a href="https://learn.microsoft.com/azure/databricks/release-notes/product/2026/november#ai-function-tasks-for-jobs-beta">AI Function tasks for jobs (Beta)</a></td>
+<td align="left">AI Function tasks for jobs (Beta) run <code>ai_parse_document</code>, <code>ai_extract</code>, or <code>ai_classify</code> on volume files or table rows without SQL, processing only new or changed inputs per run and writing results to a Unity Catalog table.</td>
+</tr>
+<tr>
+<td align="left">2026-11-03</td>
+<td align="left"><a href="https://learn.microsoft.com/azure/databricks/release-notes/product/2026/november#lakehousert-supports-fine-grained-access-control-beta">Lakehouse//RT supports fine-grained access control (Beta)</a></td>
+<td align="left">Lakehouse//RT (Beta) now supports read queries on tables protected by row filters, column masks, and ABAC policies.</td>
+</tr>
+<tr>
+<td align="left">2026-10-31</td>
+<td align="left"><a href="https://learn.microsoft.com/azure/databricks/release-notes/product/2026/october#new-azure-instance-types-dsv7-ddsv7-esv7-edsv7-famdsv7-and-larger-lsv4-and-lasv4">New Azure instance types: Dsv7, Ddsv7, Esv7, Edsv7, Famdsv7, and larger Lsv4 and Lasv4</a></td>
+<td align="left">New Azure instance types Dsv7, Ddsv7, Esv7, Edsv7, Famdsv7 (4–32 vCPUs) and larger Lsv4/Lasv4 sizes (48, 64, 80 vCPUs) are available for classic compute.</td>
+</tr>
+</tbody></table>
+<p><em>Also new:</em> <a href="https://learn.microsoft.com/azure/databricks/release-notes/product/2026/november#fedramp-high-compliance-controls-now-available-on-azure-databricks-on-azure">FedRAMP High compliance controls now available on Azure Databricks on Azure</a> · <a href="https://learn.microsoft.com/azure/databricks/release-notes/product/2026/november#run-claude-code-and-codex-in-the-ssh-tunnel">Run Claude Code and Codex in the SSH tunnel</a> · <a href="https://learn.microsoft.com/azure/databricks/sql/release-notes/2026#databricks-sql-version-202644-is-rolling-out-in-current">Databricks SQL version 2026.44 is rolling out in Current</a> · <a href="https://learn.microsoft.com/azure/databricks/release-notes/product/2026/november#approve-genie-tool-actions-in-slack-and-microsoft-teams-public-preview">Approve Genie tool actions in Slack and Microsoft Teams (Public Preview)</a> · <a href="https://learn.microsoft.com/azure/databricks/ai-bi/release-notes/2026#genie-one-enhancements">Genie One enhancements</a> · <a href="https://learn.microsoft.com/azure/databricks/release-notes/whats-coming#more-external-knowledge-sources">More external knowledge sources</a> · <a href="https://learn.microsoft.com/azure/databricks/release-notes/unity-gateway#publish-unity-gateway-skills-with-a-github-action-in-beta">Publish Unity Gateway Skills with a GitHub Action in Beta</a> · <a href="https://learn.microsoft.com/azure/databricks/ai-bi/release-notes/2026#genie-agents-enhancements">Genie Agents enhancements</a></p>
+<p><strong>Quiet today:</strong> <a href="https://github.com/delta-io/delta">Delta Lake</a>, <a href="https://github.com/delta-io/delta-rs">delta-rs</a>, <a href="https://github.com/unitycatalog/unitycatalog">Unity Catalog</a>, <a href="https://github.com/mlflow/mlflow">MLflow</a>, <a href="https://github.com/databricks/cli">Databricks CLI</a>, <a href="https://github.com/databricks/dbt-databricks">dbt-databricks</a>, <a href="https://github.com/databricks/terraform-provider-databricks">Terraform provider for Databricks</a></p>
+<hr>
+<h2>Snowflake</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Item</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-11-05</td>
+<td align="left"><a href="https://docs.snowflake.com/en/release-notes/2026/other/2026-11-05-coco-desktop-v1-25-0">CoCo Desktop v1.25.0</a></td>
+<td align="left">CoCo Desktop v1.25.0 improves dbt performance and stability.</td>
+</tr>
+<tr>
+<td align="left">2026-11-04</td>
+<td align="left">🤖 <a href="https://docs.snowflake.com/en/release-notes/2026/other/2026-11-04-html-reports-preview">HTML reports (Preview)</a></td>
+<td align="left">HTML reports (Preview) can be created as self-contained files in Snowsight Workspaces, CoCo Desktop, or Snowflake CoWork with a code-execution agent and published as Report artifacts to share snapshots.</td>
+</tr>
+<tr>
+<td align="left">2026-11-02</td>
+<td align="left"><a href="https://docs.snowflake.com/en/release-notes/2026/other/2026-11-02-secret-object-tagging">SECRET object tagging</a></td>
+<td align="left">Snowflake now allows assigning tags to secrets on create or alter to track sensitive objects, manage governance workflows, and organize secrets consistently with other tagged objects.</td>
+</tr>
+</tbody></table>
+<h3>Terraform provider for Snowflake</h3>
+<ul>
+<li><strong>Release:</strong> <a href="https://github.com/snowflakedb/terraform-provider-snowflake/releases/tag/v2.23.0">v2.23.0</a> includes a migration guide for breaking changes, reworks preview <code>snowflake_alert</code>, <code>snowflake_pipe</code>, and <code>snowflake_share</code> resources and data sources, adds new preview resources for <code>snowflake_postgres_mirror</code>, <code>snowflake_replication_group</code>, <code>snowflake_projection_policy</code>, <code>snowflake_code_bundle</code>, and <code>snowflake_backup_policy</code>, makes <code>snowflake_warehouse</code> default to <code>WAREHOUSE_TYPE = STANDARD</code> when <code>warehouse_type</code> is omitted, adds a <code>token_file_path</code> provider field for token-file authentication, and adds <code>version_trigger</code> to <code>snowflake_openflow_connector</code> for in-place bundle updates.</li>
+</ul>
+<p><strong>Quiet today:</strong> <a href="https://github.com/snowflakedb/snowpark-python">Snowpark Python</a>, <a href="https://github.com/snowflakedb/snowflake-connector-python">Snowflake Connector for Python</a>, <a href="https://github.com/apache/polaris">Apache Polaris</a></p>
+<hr>
+<h2>Azure / Fabric &amp; GCP</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Source</th>
+<th align="left">Item</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-11-05</td>
+<td align="left">BigQuery</td>
+<td align="left">⚠️ <a href="https://docs.cloud.google.com/bigquery/docs/release-notes#November_05_2026">The BigQuery Metadata curation console page has been removed</a></td>
+<td align="left">The BigQuery Metadata curation console page has been removed; use Knowledge Catalog to schedule Cloud Storage discovery scans, manage data profiling and quality, and perform governance tasks.</td>
+</tr>
+<tr>
+<td align="left">2026-11-05</td>
+<td align="left">Microsoft Fabric</td>
+<td align="left"><a href="https://community.fabric.microsoft.com/t5/Fabric-Updates-Blog/Use-OneLake-as-native-storage-for-Azure-Databricks-Generally/ba-p/5377939">Use OneLake as native storage for Azure Databricks (Generally Available)</a></td>
+<td align="left">OneLake external-location support for Azure Databricks Unity Catalog is generally available from the Microsoft Fabric side with OneLake Security enabled by default, allowing supported Unity Catalog-managed data to be stored directly in OneLake.</td>
+</tr>
+<tr>
+<td align="left">2026-11-05</td>
+<td align="left">Microsoft Fabric</td>
+<td align="left"><a href="https://community.fabric.microsoft.com/t5/Fabric-Updates-Blog/Regular-expression-functions-in-Microsoft-Fabric-Data-Warehouse/ba-p/5382375">Regular expression functions in Microsoft Fabric Data Warehouse (Preview)</a></td>
+<td align="left">Microsoft Fabric Data Warehouse (Preview) adds scalar T-SQL functions <code>REGEXP_LIKE</code> and <code>REGEXP_REPLACE</code> to extract, validate, standardize, and mask text patterns directly in the warehouse.</td>
+</tr>
+<tr>
+<td align="left">2026-11-05</td>
+<td align="left">Microsoft Fabric</td>
+<td align="left"><a href="https://community.fabric.microsoft.com/t5/Fabric-Updates-Blog/Build-more-connected-workflows-with-Fabric-Actions-and-Business/ba-p/5377911">Build more connected workflows with Fabric Actions and Business Actions in Fabric Pipelines (Preview)</a></td>
+<td align="left">Fabric Actions and Business Actions (Preview) let pipelines orchestrate Fabric operations (e.g., semantic model refresh) and business application steps without custom API integrations.</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>Open-source stack</h2>
+<h3>Dagster</h3>
+<ul>
+<li><strong>Release:</strong> <a href="https://github.com/dagster-io/dagster/releases/tag/1.13.29">1.13.29</a> fixes <code>dg --help</code> breaking with <code>typer</code> 0.26+, shift-click selection across row 10, and mobile layout issues on asset pages and run tables. It adds mobile layouts for code location overview, sensor and schedule detail pages, and improves global search and asset catalog load performance by sharing filtering logic.</li>
+</ul>
+<h3>dlt</h3>
+<ul>
+<li><strong>News:</strong> <a href="https://dlthub.com/blog/databricks-unity-catalog-pages-genie-ontology-walkthrough">dltHub on Databricks: the Unity Catalog Pages walkthrough</a> demonstrates a single CI waste definition in a Unity Catalog Page driving the dlt pipeline, model, metric view, and Genie&#39;s answer. <a href="https://dlthub.com/blog/dlthub-databricks-unity-catalog-pages-genie">Trusted answers on new data from day one, with dltHub on Databricks</a> announces private preview integration with Databricks Unity Catalog Pages and Genie Ontology for trusted answers on fresh data. <a href="https://dlthub.com/blog/sql-benchmark-saas">Postgres to BigQuery benchmark: dltHub vs. Fivetran, Airbyte, and Stitch</a> benchmarks 191.5M rows across tools for performance, ease of use, and customizability.</li>
+</ul>
+<h3>DuckDB</h3>
+<ul>
+<li><strong>News:</strong> <a href="https://duckdb.org/2026/11/05/jetbrains-datagrip.html">How JetBrains Built Cross-Database Queries into DataGrip with DuckDB</a> explains how JetBrains embedded DuckDB in DataGrip using custom table functions to enable cross-database joins without building a new query engine.</li>
+</ul>
+<h3>Polars</h3>
+<ul>
+<li><strong>News:</strong> <a href="https://pola.rs/posts/polars-cloud-becomes-polars-nanook/">Polars Cloud becomes Polars Nanook</a> announces the rebrand as the platform expands beyond managed cloud compute to a full data platform supporting both cloud and on-premise airgapped environments.</li>
+</ul>
+<h3>Soda Core</h3>
+<ul>
+<li><strong>Release:</strong> <a href="https://github.com/sodadata/soda-core/releases/tag/v4.30.0">v4.30.0</a> adds data-plane statement and expression nodes rendered for Postgres, SQL Server, Snowflake, and Athena, plus workload identity federation authentication for SQL Server, Synapse, and Fabric. It fixes contract invalid-value counting when lists contain nulls, keeps distinct rows separate in combined row keys, and redacts session post-processing per file via a RedactionPolicy.</li>
+</ul>
+<p><strong>Quiet today:</strong> <a href="https://github.com/dbt-labs/dbt">dbt Core</a>, <a href="https://github.com/SQLMesh/sqlmesh">SQLMesh</a>, <a href="https://github.com/apache/airflow">Apache Airflow</a>, <a href="https://github.com/PrefectHQ/prefect">Prefect</a>, <a href="https://github.com/apache/iceberg">Apache Iceberg</a>, <a href="https://github.com/apache/iceberg-python">PyIceberg</a>, <a href="https://github.com/trinodb/trino">Trino</a>, <a href="https://github.com/great-expectations/great_expectations">Great Expectations</a>, <a href="https://github.com/OpenLineage/OpenLineage">OpenLineage</a>, <a href="https://github.com/open-metadata/OpenMetadata">OpenMetadata</a>, <a href="https://github.com/sqlfluff/sqlfluff">SQLFluff</a></p>
+<hr>
+<h2>Across platforms</h2>
+<ul>
+<li>OneLake as Unity Catalog external location is now GA from the Microsoft Fabric side, enabling Azure Databricks to store Unity Catalog‑managed data directly in OneLake with OneLake Security enabled by default.</li>
+<li>Fine‑grained access control expands: Databricks Lakehouse//RT (Beta) adds read support for row filters, column masks, and ABAC policies; Snowflake adds SECRET object tagging for governance workflows on secrets alongside other tagged objects.</li>
+<li>AI‑assisted authoring surfaces: Databricks Dashboards (Beta) gain Genie Code to import Unity Catalog metric view relationships; Snowflake HTML reports (Preview) can be created via a code‑execution agent in Snowsight, CoCo Desktop, or CoWork and published as Report artifacts.</li>
+</ul>
+<hr>
+<h2>News &amp; discussion</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Post</th>
+<th align="left">Source</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-11-05</td>
+<td align="left"><a href="https://medium.com/snowflake/choosing-how-ml-models-move-to-production-on-snowflake-code-model-or-hybrid-promotion-aca2ae322bb6">Choosing How ML Models Move to Production on Snowflake: Code, Model, or Hybrid Promotion</a></td>
+<td align="left">Snowflake on Medium</td>
+<td align="left">The author walks through model promotion patterns (code, model, hybrid) on Snowflake, noting that environments are typically separate databases or accounts (DEV/STAGING/PROD) and that data access, training cost, CI/CD readiness, and business needs shape the right pattern.</td>
+</tr>
+<tr>
+<td align="left">2026-11-05</td>
+<td align="left"><a href="https://medium.com/snowflake/best-practices-for-scoping-and-organising-snowflake-semantic-views-6e2e2758b538">Best Practices for Scoping and Organising Snowflake Semantic Views</a></td>
+<td align="left">Snowflake on Medium</td>
+<td align="left">The author tested semantic view topologies on the Tasty Bytes dataset with a 20-question suite and found neither topology nor size affected accuracy, but a single duplicated column name did; Composable semantic views and strict mode remain in private preview.</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>Spotted</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Story</th>
+<th align="left">Source</th>
+<th align="left">Discussion</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a href="https://blog.arpe.io/fastbcp-1-6-export-sql-server-backup-to-parquet">Exporting tables from a SQL Server backup (.bak) to Parquet without restoring it</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50380410">22 points, 3 comments</a></td>
+<td align="left">FastBCP 1.6 extracts tables directly from SQL Server .bak backup files into Parquet without restoring the database or running a SQL Server instance.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://www.reddit.com/r/SideProject/comments/1xly9r8/i_turned_100_old_science_fiction_books_into_a/">I turned 100 old science fiction books into a database of 6,222 startup ideas</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50383975">10 points, 5 comments</a></td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left"><a href="https://dalelane.co.uk/blog/?p=6161">How Flink&#39;s Kafka connector commits offsets to Kafka</a></td>
+<td align="left">Lobste.rs</td>
+<td align="left"><a href="https://lobste.rs/s/wfw32o/how_flink_s_kafka_connector_commits">2 points, 0 comments</a></td>
+<td align="left">The author details, with diagrams, how Apache Flink&#39;s Kafka connector commits consumer offsets to Kafka, based on a pull request they merged into flink-connector-kafka.</td>
+</tr>
+</tbody></table>
+<hr>
+<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
+]]></content:encoded>
+    </item>
     <item>
       <title>Data Engineering 2026-11-05</title>
       <link>https://dboeter.github.io/daily-diff/#2026-11-05/ai-data</link>
