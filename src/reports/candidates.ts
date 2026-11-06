@@ -36,7 +36,10 @@ export interface Candidate {
   text: string;
 }
 
-export type ProjectItems = Pick<ProjectActivity, "config" | "releases" | "previews" | "hotIssues">;
+export type ProjectItems = Pick<
+  ProjectActivity,
+  "config" | "releases" | "previews" | "hotIssues" | "weekReleases"
+>;
 
 export interface CandidateSources {
   /** The agents and infra projects: page ai-agents. */
@@ -74,18 +77,21 @@ const modelCandidate = (m: { id: string; name: string; created: string }, text: 
 
 function projectCandidates(
   page: "ai-agents" | "ai-data",
-  { config, releases, previews, hotIssues }: ProjectItems,
+  { config, releases, previews, hotIssues, weekReleases = [] }: ProjectItems,
 ): Candidate[] {
   return [
-    ...[...releases, ...previews].map((r): Candidate => ({
-      page,
-      kind: "release",
-      source: config.repo,
-      title: `${config.name} ${r.name || r.tag_name}`,
-      url: `https://github.com/${config.repo}/releases/tag/${r.tag_name}`,
-      published: r.published_at,
-      text: textOf(r.body),
-    })),
+    // A data project's page also lists the week's releases; the day's are among them.
+    ...[...new Map([...releases, ...previews, ...weekReleases].map((r) => [r.tag_name, r])).values()].map(
+      (r): Candidate => ({
+        page,
+        kind: "release",
+        source: config.repo,
+        title: `${config.name} ${r.name || r.tag_name}`,
+        url: `https://github.com/${config.repo}/releases/tag/${r.tag_name}`,
+        published: r.published_at,
+        text: textOf(r.body),
+      }),
+    ),
     ...hotIssues.map((i): Candidate => ({
       page,
       kind: "hot-issue",

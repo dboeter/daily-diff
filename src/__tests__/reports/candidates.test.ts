@@ -279,6 +279,26 @@ describe("buildCandidates", () => {
     expect(out[0]?.text).toHaveLength(1500);
   });
 
+  it("lists a data project's releases of the week once each, the day's included", () => {
+    const today = release("v2.0.1", "", "Patch");
+    const out = buildCandidates({
+      ...nothing,
+      data: [
+        {
+          config: duckdb,
+          releases: [today],
+          previews: [],
+          hotIssues: [],
+          weekReleases: [today, release("v2.0.0", "", "Big release")],
+        },
+      ],
+    });
+    expect(out.map((c) => c.url)).toEqual([
+      "https://github.com/duckdb/duckdb/releases/tag/v2.0.1",
+      "https://github.com/duckdb/duckdb/releases/tag/v2.0.0",
+    ]);
+  });
+
   it("gives every candidate the same seven fields, with no score, verdict or count", () => {
     const out = buildCandidates(sources);
     expect(out).toHaveLength(12);

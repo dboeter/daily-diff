@@ -418,12 +418,15 @@ async function main(): Promise<void> {
   );
   console.log(`  ${hotIssueCallsLine(hotIssueRun.calls)}`);
   const stories = storiesFrom(hnData, lobstersData, devtoData);
+  const carried = carriedStories(spottedLog, stories, dateStr);
   // A story on an event a page showed on an earlier day leaves the pool before news matching, so
   // a repeat is neither project news nor Spotted. Today's repeats are removed after selection.
-  const shownRepeats = await dropShownRepeats(
-    freshStories([...stories, ...carriedStories(spottedLog, stories, dateStr)], spottedLog, dateStr),
-    { log: spottedLog, apiKey: process.env["TYPESAFE_API_KEY"], cache: loadSameEventVerdicts(), dateStr },
-  );
+  const shownRepeats = await dropShownRepeats(freshStories([...stories, ...carried], spottedLog, dateStr), {
+    log: spottedLog,
+    apiKey: process.env["TYPESAFE_API_KEY"],
+    cache: loadSameEventVerdicts(),
+    dateStr,
+  });
   const fresh = shownRepeats.kept;
 
   // Agent news is matched against the other sources' data, so it waits for them.
@@ -740,7 +743,8 @@ async function main(): Promise<void> {
   const candidates = buildCandidates({
     agents: [...agentFetches, ...infraFetches],
     data: dataFetches.flat(),
-    stories,
+    // Yesterday's stories the cap alone cut are in today's Spotted pool too.
+    stories: [...stories, ...carried],
     labs: labsResults,
     catalog: modelCatalog,
     trending: trendingData.trendingRepos,
