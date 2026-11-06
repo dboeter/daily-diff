@@ -10,7 +10,11 @@
     "z-ai/glm-5.3-flashx-legal": "2026-11-03",
     "tencent/hy4": "2026-11-04",
     "inclusionai/ling-3.0-tiny": "2026-11-05",
-    "ricursiveai/ripple-65b-preview": "2026-11-05"
+    "ricursiveai/ripple-65b-preview": "2026-11-05",
+    "google/gemini-omni-1.2-flash": "2026-11-06",
+    "openrouter/auto": "2026-11-06",
+    "openrouter/auto-code": "2026-11-06",
+    "google/gemini-omni-1.1-flash": "2026-11-06"
   },
   "stages": {}
 }

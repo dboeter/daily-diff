@@ -1,0 +1,68 @@
+[
+  {
+    "id": "hn:50385870",
+    "source": "hn",
+    "title": "Cuban: Facebook knowingly runs AI deepfake scam ads; docs say $16B fraud revenue",
+    "url": "https://finance.yahoo.com/technology/ai/articles/mark-cuban-says-facebook-knowingly-213000020.html",
+    "discussionUrl": "https://news.ycombinator.com/item?id=50385870",
+    "points": 243,
+    "comments": 109,
+    "topic": "policy",
+    "counts": "243 points, 109 comments"
+  },
+  {
+    "id": "hn:50383057",
+    "source": "hn",
+    "title": "The Hackintosh Reborn",
+    "url": "https://www.naut.ca/blog/2026/11/05/the-hackintosh-reborn-with-ai/",
+    "discussionUrl": "https://news.ycombinator.com/item?id=50383057",
+    "points": 275,
+    "comments": 132,
+    "topic": "other",
+    "counts": "275 points, 132 comments"
+  },
+  {
+    "id": "hn:50355767",
+    "source": "hn",
+    "title": "How I use AI (Oct 2026)",
+    "url": "https://ben.stolovitz.com/posts/how-use-ai-oct-2026/",
+    "discussionUrl": "https://news.ycombinator.com/item?id=50355767",
+    "points": 256,
+    "comments": 317,
+    "topic": "other",
+    "counts": "256 points, 317 comments"
+  },
+  {
+    "id": "hn:50349667",
+    "source": "hn",
+    "title": "The Lisp curse, now coming to your ecosystem",
+    "url": "https://javahippie.net/programming/llm/2026/03/05/the-lisp-curse-coming-to-your-ecosystem.html",
+    "discussionUrl": "https://news.ycombinator.com/item?id=50349667",
+    "points": 220,
+    "comments": 185,
+    "topic": "other",
+    "counts": "220 points, 185 comments"
+  },
+  {
+    "id": "lobsters:gqis6q",
+    "source": "lobsters",
+    "title": "Arrows to Arrows, Categories to Queries",
+    "url": "https://reasonablypolymorphic.com/blog/arrows-to-arrows/",
+    "discussionUrl": "https://lobste.rs/s/gqis6q/arrows_arrows_categories_queries",
+    "points": 10,
+    "comments": 0,
+    "topic": "other",
+    "counts": "10 points, 0 comments"
+  },
+  {
+    "id": "devto:4980734",
+    "source": "devto",
+    "title": "A Maintainer's Advice on Contributing to Open Source in 2026",
+    "url": "https://dev.to/wasp/a-maintainers-advice-on-contributing-to-open-source-in-2026-4ea1",
+    "discussionUrl": "https://dev.to/wasp/a-maintainers-advice-on-contributing-to-open-source-in-2026-4ea1",
+    "points": 37,
+    "comments": 8,
+    "topic": "other",
+    "counts": "37 reactions, 8 comments"
+  }
+]

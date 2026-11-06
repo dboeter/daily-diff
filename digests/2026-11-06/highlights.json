@@ -1,0 +1,18 @@
+{
+  "ai-agents": [
+    "Claude Code's User-Agent header includes user email addresses during web searches, exposing them to third parties per user reports",
+    "Oh My Pi v18.17.0 introduces breaking changes: `parseShell()` replaced, `fromJsonSchema` returns opaque validator, `MarkdownTheme.heading` requires depth argument"
+  ],
+  "ai-models": [
+    "Google releases Gemini Omni 1.2 Flash on OpenRouter, a native multimodal video generation model producing 15-second clips with 131K context",
+    "OpenRouter launches Auto Router and Auto Code, routing models that adapt per request across a 2M context window for cost-optimal model selection"
+  ],
+  "ai-policy": [
+    "European Commission releases AI toolbox to help public administrations implement the Apply AI Strategy",
+    "Two European Commission consultations remain open: Articles 75c–75d AI Act Implementing Act (closes 9 Nov) and Cloud and AI Development Act (closes 11 Nov)"
+  ],
+  "ai-data": [
+    "− Azure Databricks AI Functions in SQL on runtimes below 17.3 LTS must upgrade before January 2027 when calls will return errors",
+    "Terraform provider for Snowflake v2.23.0 introduces breaking changes with migration guide for reworked preview resources"
+  ]
+}

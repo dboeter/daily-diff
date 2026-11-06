@@ -28,7 +28,10 @@
     "issue:anthropics/claude-code#106878": "2026-11-04",
     "issue:openai/codex#59060": "2026-11-04",
     "issue:openai/codex#58258": "2026-11-04",
-    "issue:nousresearch/hermes-agent#24770": "2026-11-05"
+    "issue:nousresearch/hermes-agent#24770": "2026-11-05",
+    "issue:anthropics/claude-code#107757": "2026-11-06",
+    "issue:anthropics/claude-code#107318": "2026-11-06",
+    "issue:openai/codex#59301": "2026-11-06"
   },
   "stages": {}
 }
