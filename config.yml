@@ -91,14 +91,9 @@ infra:
     - id: herdr
       repo: herdrdev/herdr
       name: herdr
-    - id: context-mode
-      repo: mksglu/context-mode
-      name: context-mode
-      # Publishes few releases: often quiet.
-    - id: agent-deck
-      repo: asheshgoplani/agent-deck
-      name: Agent Deck
-      # Rarely reaches the hot-issue bar: often quiet.
+    - id: conductor
+      repo: conductor-oss/conductor
+      name: Conductor
 
 # ── Data engineering ──────────────────────────────────────────────────────────
 # The repo sections of the daily data report (ai-data), for Digital Power's data
@@ -252,10 +247,6 @@ data_stack:
     - id: openmetadata
       repo: open-metadata/OpenMetadata
       name: OpenMetadata
-      # Tags end in "-release"; rc builds are flagged prerelease.
-    - id: sqlfluff
-      repo: sqlfluff/sqlfluff
-      name: SQLFluff
 
 # ── Data: vendor and community feeds ──────────────────────────────────────────
 # Vendor release notes for the data report (ai-data), from the 2026-10-17 feed

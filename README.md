@@ -102,12 +102,11 @@ Each tracked repo is covered by its stable releases of the last 24h (prereleases
 
 **Agent Tooling**: AI agent tooling — agent sandboxes, terminal session multiplexers and context-management tools.
 
-| Project      | Repository                                                              |
-| ------------ | ----------------------------------------------------------------------- |
-| OpenShell    | [NVIDIA/OpenShell](https://github.com/NVIDIA/OpenShell)                 |
-| herdr        | [herdrdev/herdr](https://github.com/herdrdev/herdr)                     |
-| context-mode | [mksglu/context-mode](https://github.com/mksglu/context-mode)           |
-| Agent Deck   | [asheshgoplani/agent-deck](https://github.com/asheshgoplani/agent-deck) |
+| Project   | Repository                                                            |
+| --------- | --------------------------------------------------------------------- |
+| OpenShell | [NVIDIA/OpenShell](https://github.com/NVIDIA/OpenShell)               |
+| herdr     | [herdrdev/herdr](https://github.com/herdrdev/herdr)                   |
+| Conductor | [conductor-oss/conductor](https://github.com/conductor-oss/conductor) |
 
 <!-- /tracked:infra -->
 
@@ -168,7 +167,6 @@ The data repos are covered the same way, plus a **Releases this week** table of 
 | Soda Core          | [sodadata/soda-core](https://github.com/sodadata/soda-core)                                       |
 | OpenLineage        | [OpenLineage/OpenLineage](https://github.com/OpenLineage/OpenLineage)                             |
 | OpenMetadata       | [open-metadata/OpenMetadata](https://github.com/open-metadata/OpenMetadata)                       |
-| SQLFluff           | [sqlfluff/sqlfluff](https://github.com/sqlfluff/sqlfluff)                                         |
 
 <!-- /tracked:data_stack -->
 
@@ -236,7 +234,3 @@ The workflow's cron is `7 1 * * *` in `Europe/Amsterdam`. GitHub starts schedule
 Every day is kept under [`digests/`](./digests/) and in the Web UI. Issues are labelled by report: [`agents`](../../issues?q=is%3Aissue+label%3Aagents) · [`models`](../../issues?q=is%3Aissue+label%3Amodels) · [`policy`](../../issues?q=is%3Aissue+label%3Apolicy) · [`data`](../../issues?q=is%3Aissue+label%3Adata) · [`trends`](../../issues?q=is%3Aissue+label%3Atrends). Each run closes the issues of earlier days (Trends stays open until the next Monday); issues without a digest label and pull requests are never touched.
 
 Older days also hold reports retired or merged in October 2026 (`ai-cli`, `ai-ph`, `ai-infra`, `ai-community`, `ai-hn`, `ai-web`, `ai-trending`, `ai-hf`, `ai-arxiv`) and, until July 2026, weekly and monthly rollups.
-
-## Star History
-
-[![Star History Chart](https://star-history.dera.page/svg?repos=dboeter/daily-diff&type=Date)](https://star-history.dera.page/#dboeter/daily-diff&Date)
