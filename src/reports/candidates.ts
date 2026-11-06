@@ -104,6 +104,7 @@ function projectCandidates(
   ];
 }
 
+/** One candidate per fetched item, in source order; the policy and vendor items are those before selection. */
 export function buildCandidates(s: CandidateSources): Candidate[] {
   return [
     ...s.agents.flatMap((p) => projectCandidates("ai-agents", p)),
