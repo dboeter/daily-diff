@@ -233,7 +233,13 @@ export function recentVendorItems(items: VendorItem[], dateStr: string): VendorI
 }
 
 /** The kept items in report order, and the over-cap ones by relevance (selectVendorItems). */
-export type VendorData = NewItems<Numbered<KeptVendorItem>, DataState, DataVerdicts, KeptVendorItem>;
+export type VendorData = NewItems<
+  Numbered<KeptVendorItem>,
+  DataState,
+  DataVerdicts,
+  KeptVendorItem,
+  VendorItem
+>;
 
 /** Fetch every feed, keep the new items, and let Jev (or the keyword rules) select them. Never throws. */
 export async function fetchVendorData(

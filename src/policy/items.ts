@@ -53,7 +53,13 @@ export interface PolicyState extends ReportedState {
   zeroSince?: Record<string, string>;
 }
 
-export interface PolicyData extends NewItems<Numbered<PolicyItem>, PolicyState, PolicyVerdicts> {
+export interface PolicyData extends NewItems<
+  Numbered<PolicyItem>,
+  PolicyState,
+  PolicyVerdicts,
+  never,
+  PolicyItem
+> {
   /** The Coming up section's rows; shown only when there are items. */
   deadlines: Deadline[];
   /** config.yml `policy.reader_profile`, for the report prompts. */

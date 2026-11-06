@@ -93,6 +93,8 @@ describe("collectNewItems", () => {
       { reported: { seen: "2026-10-17" }, stages: {} },
     );
     expect(data.items.map((i) => i.id)).toEqual(["keep-1"]);
+    // Every new item before selection: the dropped one too; not the reported or the record-only one.
+    expect(data.candidates?.map((i) => i.id)).toEqual(["keep-1", "drop-1"]);
     expect(ask).not.toHaveBeenCalledWith(expect.objectContaining({ title: "Title old" }), {}, "k");
     expect(data.nextState).toEqual({
       reported: { seen: "2026-10-17", "keep-1": DATE },
@@ -135,6 +137,7 @@ describe("collectNewItems", () => {
       select: async () => Promise.reject(new Error("unreachable")),
     });
     expect(data).toMatchObject({ items: [], fetchSuccess: false, nextState: { reported: {}, stages: {} } });
+    expect(data.candidates).toBeUndefined();
   });
 });
 

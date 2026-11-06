@@ -100,6 +100,7 @@ import {
   type CommunityPost,
 } from "./data/community.ts";
 import { buildComingUp } from "./reports/coming-up.ts";
+import { buildCandidates, candidatesFile } from "./reports/candidates.ts";
 import { fetchHfData, type HfData } from "./sources/huggingface.ts";
 import { fetchDevtoData, type DevtoData } from "./sources/devto.ts";
 import { fetchLobstersData, type LobstersData } from "./sources/lobsters.ts";
@@ -736,6 +737,19 @@ async function main(): Promise<void> {
     counts: SPOTTED.counts(t.source, t.points, t.comments),
   }));
   console.log(`  Saved ${saveFile(JSON.stringify(talkedFile, null, 2), dateStr, "talked-about.json")}`);
+  const candidates = buildCandidates({
+    agents: [...agentFetches, ...infraFetches],
+    data: dataFetches.flat(),
+    stories,
+    labs: labsResults,
+    catalog: modelCatalog,
+    trending: trendingData.trendingRepos,
+    posts: communityData.posts,
+    policy: policyData.candidates ?? [],
+    vendor: vendorData.candidates ?? [],
+    dateStr,
+  });
+  console.log(`  Saved ${saveFile(candidatesFile(candidates), dateStr, "candidates.json")}`);
 
   // The highlights pass reads the bodies, not the link bars.
   const reports: Record<string, string> = Object.fromEntries(saved.map((r) => [r.id, r.content]));

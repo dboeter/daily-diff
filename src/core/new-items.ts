@@ -34,9 +34,11 @@ export interface Selection<I, V extends ItemsFile<unknown>, A = never> {
   traceFile: string;
 }
 
-export interface NewItems<I, S extends ReportedState, V extends ItemsFile<unknown>, A = never> {
+export interface NewItems<I, S extends ReportedState, V extends ItemsFile<unknown>, A = never, F = I> {
   /** The kept items, in the selection's order. */
   items: I[];
+  /** Every new item before selection, record-only stage items left out; absent on a failed fetch. */
+  candidates?: F[];
   /** The selection's `alsoNew`; absent on a failed fetch. */
   alsoNew?: A[];
   /** False when every source failed, or the pipeline threw. */
@@ -76,7 +78,7 @@ export async function collectNewItems<
   stateItem: (item: F) => StateItem;
   select: (candidates: F[]) => Promise<Selection<I, V, A>>;
   extend?: Extend<S, I, F>;
-}): Promise<NewItems<I, S, V, A>> {
+}): Promise<NewItems<I, S, V, A, F>> {
   const { tag, state, dateStr, stateItem } = opts;
   // `extend` sees the kept items only: an over-cap item has no row to carry its fields.
   const stateFor = (kept: I[], recorded: F[], fetched: F[], alsoNew: A[] = []): S =>
@@ -99,6 +101,7 @@ export async function collectNewItems<
     const selection = await opts.select(candidates);
     return {
       items: selection.items,
+      candidates,
       ...(selection.alsoNew ? { alsoNew: selection.alsoNew } : {}),
       fetchSuccess,
       rankedBy: selection.rankedBy,
