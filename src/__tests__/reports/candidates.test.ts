@@ -199,6 +199,7 @@ describe("buildCandidates", () => {
         source: "Lobste.rs",
         title: "A story",
         url: "https://example.com/story",
+        discussion: "https://lobste.rs/s/abc",
         published: "2026-11-05T06:00:00Z",
         text: "About a thing.",
       },
@@ -299,11 +300,12 @@ describe("buildCandidates", () => {
     ]);
   });
 
-  it("gives every candidate the same seven fields, with no score, verdict or count", () => {
+  it("gives every candidate the same seven fields, a story also its discussion, with no score, verdict or count", () => {
     const out = buildCandidates(sources);
     expect(out).toHaveLength(12);
     for (const c of out) {
-      expect(Object.keys(c).sort()).toEqual(["kind", "page", "published", "source", "text", "title", "url"]);
+      const fields = ["kind", "page", "published", "source", "text", "title", "url"];
+      expect(Object.keys(c).sort()).toEqual(c.kind === "story" ? [...fields, "discussion"].sort() : fields);
     }
   });
 

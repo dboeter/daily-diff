@@ -30,6 +30,8 @@ export interface Candidate {
   source: string;
   title: string;
   url: string;
+  /** A story's discussion page: project News links it instead of `url`. */
+  discussion?: string;
   /** As the item has it: an ISO date or time. */
   published: string;
   /** The item's own text, whitespace-collapsed and cut to `MAX_TEXT_CHARS`; "" when it has none. */
@@ -115,6 +117,7 @@ export function buildCandidates(s: CandidateSources): Candidate[] {
       source: SPOTTED.sources[story.source],
       title: story.title,
       url: story.url,
+      discussion: story.discussionUrl,
       published: story.published,
       text: textOf(story.description),
     })),
