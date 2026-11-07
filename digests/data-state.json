@@ -320,7 +320,31 @@
     "post:pola.rs/posts/polars-cloud-becomes-polars-nanook": "2026-11-06",
     "post:dlthub.com/blog/databricks-unity-catalog-pages-genie-ontology-walkthrough": "2026-11-06",
     "post:dlthub.com/blog/dlthub-databricks-unity-catalog-pages-genie": "2026-11-06",
-    "post:dlthub.com/blog/sql-benchmark-saas": "2026-11-06"
+    "post:dlthub.com/blog/sql-benchmark-saas": "2026-11-06",
+    "new jobs compute defaults to auto access mode|2026-11-09": "2026-11-07",
+    "new jobs compute will soon default to auto access mode for workspaces with the compliance security profile enabled|2026-11-09": "2026-11-07",
+    "install drivers for jdbc unity catalog connections from maven|2026-11-06": "2026-11-07",
+    "restore a deleted unity catalog metastore with the rest api (public preview)|2026-11-06": "2026-11-07",
+    "metric view listings are generally available in databricks marketplace|2026-11-05": "2026-11-07",
+    "unity catalog wikis are in beta|2026-11-06": "2026-11-07",
+    "start lakeflow designer workflows from suggested or recent tables|2026-11-03": "2026-11-07",
+    "nov 1, 2026: apache iceberg™ tables: read and write across snowflake accounts with snowflake horizon catalog, now without managing secrets (general availability)|2026-11-01": "2026-11-07",
+    "nov 3, 2026: on-demand table creation for catalog-linked databases (general availability)|2026-11-03": "2026-11-07",
+    "nov 05, 2026: organization users and user groups in organization command center (preview)|2026-11-05": "2026-11-07",
+    "starting january 31, 2027, the bigquery data transfer service for shopify connector will no longer support the following fields|2026-11-06": "2026-11-07",
+    "lakehouse supports the following remote catalog providers for cross-cloud data access (ga)|2026-11-02": "2026-11-07",
+    "you can now use bigquery change history and continuous queries for apache iceberg managed tables in lakehouse (ga)|2026-11-02": "2026-11-07",
+    "you can now use bigquery graph and run graph query language (gql) queries when you use on-demand pricing|2026-11-06": "2026-11-07",
+    "you can now use a custom organization policy to allow or deny specific operations on models in bigquery (preview)|2026-11-06": "2026-11-07",
+    "in the query execution graph's query text heatmap, you can now view and navigate through a hierarchical list of context references, such as nested function calls or view references, for stage steps (ga)|2026-11-05": "2026-11-07",
+    "in the query execution graph, the query text heatmap now supports displaying the sql text for persistent and temporary user-defined functions (udfs) (ga)|2026-11-05": "2026-11-07",
+    "https://community.fabric.microsoft.com/t5/Fabric-Updates-Blog/Share-data-and-context-across-organizations-with-IQ-Share/ba-p/5378764": "2026-11-07",
+    "release:PrefectHQ/prefect@3.9.2": "2026-11-07",
+    "release:apache/airflow@3.4.0": "2026-11-07",
+    "release:dbt-labs/dbt@v1.11.17": "2026-11-07",
+    "post:medium.com/snowflake/shipping-a-data-catalog-app-on-snowflake-app-runtime-notes-from-a-real-build-2fcc74d4e5c0": "2026-11-07",
+    "post:airflow.apache.org/blog/airflow-3.4.0": "2026-11-07",
+    "post:medium.com/snowflake/query-databricks-lakeflow-pipeline-tables-from-snowflake-without-copying-data-dde301ede202": "2026-11-07"
   },
   "stages": {
     "snowflake-bcr:2026_08": "2026-10-16 Introduced in the 10.37 release (October 8-16, 2026) as Disabled by Default; account admins can enable for testing."
@@ -332,6 +356,13 @@
       "link": "https://learn.microsoft.com/azure/databricks/release-notes/whats-coming#upcoming-end-of-life-for-the-genie-one-mcp-beta-endpoint",
       "source": "Azure Databricks",
       "summary": "The Genie One MCP Beta endpoint at `https://<workspace-hostname>/api/2.0/mcp/genie` reaches end of life on November 30, 2026, after which requests fail; migrate all workloads to the `system.ai.genie_one_mcp` MCP in Unity Gateway."
+    },
+    "November_06_2026#Breaking: Starting January 31, 2027, the BigQuery Data Transfer Service for Shopify connector will no longer support the following fields:": {
+      "date": "2027-01-31",
+      "title": "Starting January 31, 2027, the BigQuery Data Transfer Service for Shopify connector will no longer support the following fields",
+      "link": "https://docs.cloud.google.com/bigquery/docs/release-notes#November_06_2026",
+      "source": "BigQuery",
+      "summary": "Starting January 31, 2027, the BigQuery Data Transfer Service for Shopify connector will drop support for the `legacyMode` field in the DeliveryProfile dataset schema and the `permitSkuSharing` field in the FulfillmentService dataset schema."
     }
   }
 }

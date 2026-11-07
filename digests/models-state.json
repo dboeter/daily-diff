@@ -14,7 +14,9 @@
     "google/gemini-omni-1.2-flash": "2026-11-06",
     "openrouter/auto": "2026-11-06",
     "openrouter/auto-code": "2026-11-06",
-    "google/gemini-omni-1.1-flash": "2026-11-06"
+    "google/gemini-omni-1.1-flash": "2026-11-06",
+    "liquid/lfm-3-1.7b": "2026-11-07",
+    "liquid/lfm-3-1.7b:free": "2026-11-07"
   },
   "stages": {}
 }

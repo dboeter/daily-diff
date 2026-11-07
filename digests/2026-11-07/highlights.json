@@ -1,0 +1,18 @@
+{
+  "ai-agents": [
+    "Claude Code v2.1.319 changes auto-mode to prompt or deny server-uncheckable calls when telemetry is disabled, adds MCP background tasks and spend tracking",
+    "Report: Claude Code sends user email in User-Agent header during web searches without consent, causing spam"
+  ],
+  "ai-models": [
+    "LiquidAI LFM3-1.7B listed on OpenRouter with 262K context, agent tooling, structured outputs, and free tier",
+    "Google says Gemini Omni 1.2 Flash adds native 15-second video generation with 30% lower pricing"
+  ],
+  "ai-policy": [
+    "Dutch Cabinet publishes AI vision for open strategic autonomy with responses to SER advice and AI Deltaplan",
+    "European Commission preliminarily finds TikTok recommender system breaches DSA via harmful algorithmic rabbit holes"
+  ],
+  "ai-data": [
+    "Databricks new jobs UI defaults to Auto access mode instead of Dedicated; Azure compliance profile effective Dec 2026",
+    "Snowflake GA: cross-account Iceberg read/write via Horizon Catalog without managing secrets"
+  ]
+}

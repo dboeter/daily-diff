@@ -1,0 +1,57 @@
+[
+  {
+    "id": "hn:50397994",
+    "source": "hn",
+    "title": "AI is dramatically accelerating AI research",
+    "url": "https://www.planned-obsolescence.org/p/ai-is-dramatically-accelerating-ai",
+    "discussionUrl": "https://news.ycombinator.com/item?id=50397994",
+    "points": 251,
+    "comments": 200,
+    "topic": "other",
+    "counts": "251 points, 200 comments"
+  },
+  {
+    "id": "hn:50383163",
+    "source": "hn",
+    "title": "Hungary: Communist-era files released, up to 60k former agents revealed",
+    "url": "https://www.euronews.com/2026/11/04/hungary-communist-era-files-opened-up-to-60000-former-agents-revealed",
+    "discussionUrl": "https://news.ycombinator.com/item?id=50383163",
+    "points": 234,
+    "comments": 67,
+    "topic": "other",
+    "counts": "234 points, 67 comments"
+  },
+  {
+    "id": "hn:50397219",
+    "source": "hn",
+    "title": "Firecracker VM Escape: PwnEscape Part 2",
+    "url": "https://pwn.ai/blog/firecracker-escape",
+    "discussionUrl": "https://news.ycombinator.com/item?id=50397219",
+    "points": 204,
+    "comments": 99,
+    "topic": "other",
+    "counts": "204 points, 99 comments"
+  },
+  {
+    "id": "lobsters:yomksa",
+    "source": "lobsters",
+    "title": "Reflections on Rust in the LLM Age",
+    "url": "https://www.youtube.com/watch?v=5D7QPOIZ7gY",
+    "discussionUrl": "https://lobste.rs/s/yomksa/reflections_on_rust_llm_age",
+    "points": 21,
+    "comments": 6,
+    "topic": "other",
+    "counts": "21 points, 6 comments"
+  },
+  {
+    "id": "devto:4990855",
+    "source": "devto",
+    "title": "An Update on the Hacktoberfest Open-Source AI Challenge: Ghost in the Machine Winners",
+    "url": "https://dev.to/devteam/an-update-on-the-hacktoberfest-open-source-ai-challenge-ghost-in-the-machine-winners-44bp",
+    "discussionUrl": "https://dev.to/devteam/an-update-on-the-hacktoberfest-open-source-ai-challenge-ghost-in-the-machine-winners-44bp",
+    "points": 44,
+    "comments": 8,
+    "topic": "other",
+    "counts": "44 reactions, 8 comments"
+  }
+]

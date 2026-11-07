@@ -31,7 +31,12 @@
     "issue:nousresearch/hermes-agent#24770": "2026-11-05",
     "issue:anthropics/claude-code#107757": "2026-11-06",
     "issue:anthropics/claude-code#107318": "2026-11-06",
-    "issue:openai/codex#59301": "2026-11-06"
+    "issue:openai/codex#59301": "2026-11-06",
+    "issue:anthropics/claude-code#107454": "2026-11-07",
+    "issue:anthropics/claude-code#107467": "2026-11-07",
+    "issue:openai/codex#59895": "2026-11-07",
+    "issue:can1357/oh-my-pi#18341": "2026-11-07",
+    "issue:nousresearch/hermes-agent#138974": "2026-11-07"
   },
   "stages": {}
 }
