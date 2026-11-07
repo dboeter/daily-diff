@@ -13,7 +13,161 @@
       <height>144</height>
     </image>
     <atom:link href="https://dboeter.github.io/daily-diff/feeds/ai-models.xml" rel="self" type="application/rss+xml"/>
-    <lastBuildDate>Fri, 06 Nov 2026 06:26:59 +0000</lastBuildDate>
+    <lastBuildDate>Sat, 07 Nov 2026 05:50:00 +0000</lastBuildDate>
+    <item>
+      <title>AI Models &amp; Labs 2026-11-07</title>
+      <link>https://dboeter.github.io/daily-diff/#2026-11-07/ai-models</link>
+      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-11-07/ai-models</guid>
+      <pubDate>Sat, 07 Nov 2026 00:00:00 +0000</pubDate>
+      <description>AI Models &amp;amp; Labs 2026-11-07 ⬛ Overview · 🟪 AI Agents · 🟦 AI Models &amp;amp; Labs · 🟧 AI Policy · 🟨 Data Engineering Lab posts: 4 | New models: 2 | Spotted: 7 | Generated: 2026-11-07 05:47 UTC Highlights LiquidAI LFM3-1.7B is listed on OpenRouter: a 1.7B-parameter model post-trained for agents, tool calling, and structured outputs with 262K context and reasoning before answering; a free tier is also available. Google says Gemini Omni 1.2 Flash adds native 15-second video generation and editi...</description>
+      <content:encoded><![CDATA[<h1>AI Models &amp; Labs 2026-11-07</h1>
+<p><a href="https://dboeter.github.io/daily-diff/#2026-11-07">⬛ Overview</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-07/ai-agents">🟪 AI Agents</a> · <strong>🟦 AI Models &amp; Labs</strong> · <a href="https://dboeter.github.io/daily-diff/#2026-11-07/ai-policy">🟧 AI Policy</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-07/ai-data">🟨 Data Engineering</a></p>
+<blockquote>
+<p>Lab posts: 4 | New models: 2 | Spotted: 7 | Generated: 2026-11-07 05:47 UTC</p>
+</blockquote>
+<hr>
+<h2>Highlights</h2>
+<ul>
+<li>LiquidAI LFM3-1.7B is listed on OpenRouter: a 1.7B-parameter model post-trained for agents, tool calling, and structured outputs with 262K context and reasoning before answering; a free tier is also available.</li>
+<li>Google says Gemini Omni 1.2 Flash adds native 15-second video generation and editing with stronger consistency and 30% lower pricing.</li>
+<li>A hybrid Jev + Claude Opus system for identity resolution reached frontier accuracy at over 4× lower cost, per Hightouch testing.</li>
+</ul>
+<hr>
+<h2>Lab announcements</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Lab</th>
+<th align="left">Post</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-11-07</td>
+<td align="left">OpenAI</td>
+<td align="left"><a href="https://openai.com/index/measuring-how-ai-agents-handle-wet-lab-science/">Measuring How Ai Agents Handle Wet Lab Science</a></td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left">2026-11-06</td>
+<td align="left">Anthropic</td>
+<td align="left"><a href="https://www.anthropic.com/research/components-of-agent-memory">The components of agent memory</a></td>
+<td align="left">Researchers at Letta and UC Berkeley proposed sleep-time compute for models to reorganize context during idle time, and the post explores how dreaming helps agents reflect on logs to fix mistakes and produce new representations for agent memory design.</td>
+</tr>
+<tr>
+<td align="left">2026-11-06</td>
+<td align="left">Anthropic</td>
+<td align="left"><a href="https://www.anthropic.com/research/teaching-ai-to-build-scientific-models">Teaching AI to build scientific models</a></td>
+<td align="left">AI for Science grantees Jakob Macke, Daniel Gedon, and Stefan Wahl discuss a three-step program for teaching AI to build scientific models, exploring how AI tools are changing scientific modeling in neuroscience and beyond.</td>
+</tr>
+<tr>
+<td align="left">2026-11-06</td>
+<td align="left">Anthropic</td>
+<td align="left"><a href="https://www.anthropic.com/research/project-eve-claude-plays-mmorpgs">Project EVE: Claude plays MMORPGs</a></td>
+<td align="left">The Anthropic Fellows Program partnered with Fenris Creations to have Claude play EVE Online and EVE Frontier, exploring how AI models might participate in real companies and markets through complex virtual economies and multiplayer coordination.</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>New on OpenRouter</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Model</th>
+<th align="left">Listed</th>
+<th align="left">Context</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a href="https://openrouter.ai/liquid/lfm-3-1.7b">LiquidAI: LFM3-1.7B</a> <code>liquid/lfm-3-1.7b</code></td>
+<td align="left">2026-11-06</td>
+<td align="left">262K</td>
+<td align="left">A compact 1.7B-parameter text model post-trained for agents, tool calling, and structured outputs that reasons before answering.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://openrouter.ai/liquid/lfm-3-1.7b:free">LiquidAI: LFM3-1.7B (free)</a> <code>liquid/lfm-3-1.7b:free</code></td>
+<td align="left">2026-11-06</td>
+<td align="left">262K</td>
+<td align="left">A compact 1.7B-parameter text model post-trained for agents, tool calling, and structured outputs that reasons before answering.</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>Stealth Models on OpenRouter</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Model</th>
+<th align="left">Listed</th>
+<th align="left">Expires</th>
+<th align="left">Status</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a href="https://openrouter.ai/stealth/crouton-alpha">Crouton Alpha</a> <code>stealth/crouton-alpha</code></td>
+<td align="left">2026-11-03</td>
+<td align="left">—</td>
+<td align="left">live</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>Spotted</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Story</th>
+<th align="left">Source</th>
+<th align="left">Discussion</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a href="https://hightouch.com/blog/llm-judges-identity-resolution">A Jev that can ask Opus for help gives Opus accuracy at 4x lower cost</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50397429">405 points, 91 comments</a></td>
+<td align="left">The authors tested a hybrid of Jev and Claude Opus for identity resolution, achieving frontier accuracy at over 4x lower cost.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://blog.google/innovation-and-ai/technology/developers-tools/introducing-gemini-omni-1-2-flash/">Gemini Omni 1.2 Flash</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50392118">311 points, 225 comments</a></td>
+<td align="left">Google released Gemini Omni 1.2 Flash with native 15-second video generation and editing, stronger consistency, and 30% lower pricing.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://www.bloomberg.com/news/articles/2026-11-06/anthropic-ipo-valuation-expectations-pressured-after-ai-rout">Anthropic IPO buyers see valuation as low as $1.1T</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50394906">265 points, 529 comments</a></td>
+<td align="left">Anthropic&#39;s IPO plans faced a post-election selloff, prompting investors to reassess the valuation as low as $1.1 trillion.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://arxiv.org/abs/2610.21375">Memorilla: Latent Semantic Memory for LLMs</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50395919">101 points, 10 comments</a></td>
+<td align="left">The paper introduces Memorilla, a latent semantic memory system that lets frozen LLMs access accumulated knowledge like past conversations and documents by placing relevant information in the context window.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://www.reuters.com/business/microsoft-is-winding-down-oracle-deal-rent-ai-cloud-capacity-bloomberg-news-2026-11-06/">Microsoft is winding down Oracle deal to rent AI cloud capacity</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50395933">88 points, 17 comments</a></td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left"><a href="https://www.sec.gov/Archives/edgar/data/2130357/000162828026068676/anthropicpbc-sx1ax1.htm">Anthropic&#39;s Amended S1 Filing Shows Slowing Q3 Growth</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50338510">16 points, 5 comments</a></td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left"><a href="https://dev.to/aws-builders/part-3-your-first-steps-in-computer-vision-on-aws-deploying-models-for-an-asl-recognition-app-14hf">[Part 3] Your first steps in Computer Vision on AWS: deploying models for an ASL recognition app</a></td>
+<td align="left">Dev.to</td>
+<td align="left"><a href="https://dev.to/aws-builders/part-3-your-first-steps-in-computer-vision-on-aws-deploying-models-for-an-asl-recognition-app-14hf">18 reactions, 0 comments</a></td>
+<td align="left">The author presents the third part of a tutorial series on deploying computer vision models on AWS for an American Sign Language recognition app.</td>
+</tr>
+</tbody></table>
+<hr>
+<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
+]]></content:encoded>
+    </item>
     <item>
       <title>AI Models &amp; Labs 2026-11-06</title>
       <link>https://dboeter.github.io/daily-diff/#2026-11-06/ai-models</link>

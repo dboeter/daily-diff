@@ -13,7 +13,202 @@
       <height>144</height>
     </image>
     <atom:link href="https://dboeter.github.io/daily-diff/feeds/ai-data.xml" rel="self" type="application/rss+xml"/>
-    <lastBuildDate>Fri, 06 Nov 2026 06:26:59 +0000</lastBuildDate>
+    <lastBuildDate>Sat, 07 Nov 2026 05:50:00 +0000</lastBuildDate>
+    <item>
+      <title>Data Engineering 2026-11-07</title>
+      <link>https://dboeter.github.io/daily-diff/#2026-11-07/ai-data</link>
+      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-11-07/ai-data</guid>
+      <pubDate>Sat, 07 Nov 2026 00:00:00 +0000</pubDate>
+      <description>Data Engineering 2026-11-07 ⬛ Overview · 🟪 AI Agents · 🟦 AI Models &amp;amp; Labs · 🟧 AI Policy · 🟨 Data Engineering Vendor items: 14 | Projects: 26 | Active today: 4 | Stable releases: 3 | Prereleases (not covered): 1 | Generated: 2026-11-07 05:47 UTC Highlights Databricks: New jobs compute in the UI defaults to Auto access mode instead of Dedicated for new jobs; for Azure Databricks workspaces with the compliance security profile this default takes effect in December 2026. − BigQuery: Data Tra...</description>
+      <content:encoded><![CDATA[<h1>Data Engineering 2026-11-07</h1>
+<p><a href="https://dboeter.github.io/daily-diff/#2026-11-07">⬛ Overview</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-07/ai-agents">🟪 AI Agents</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-07/ai-models">🟦 AI Models &amp; Labs</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-07/ai-policy">🟧 AI Policy</a> · <strong>🟨 Data Engineering</strong></p>
+<blockquote>
+<p>Vendor items: 14 | Projects: 26 | Active today: 4 | Stable releases: 3 | Prereleases (not covered): 1 | Generated: 2026-11-07 05:47 UTC</p>
+</blockquote>
+<hr>
+<h2>Highlights</h2>
+<ul>
+<li>Databricks: New jobs compute in the UI defaults to Auto access mode instead of Dedicated for new jobs; for Azure Databricks workspaces with the compliance security profile this default takes effect in December 2026.</li>
+<li>− BigQuery: Data Transfer Service for Shopify connector will drop support for the <code>legacyMode</code> and <code>permitSkuSharing</code> fields on January 31, 2027; affected transfers must be updated before then.</li>
+<li>Snowflake: Apache Iceberg tables can now be read and written across Snowflake accounts via Horizon Catalog without managing secrets (GA); affects multi-account Iceberg setups.</li>
+</ul>
+<hr>
+<h2>Action required</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Platform</th>
+<th align="left">Item</th>
+<th align="left">What to do</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-11-30</td>
+<td align="left">Azure Databricks</td>
+<td align="left"><a href="https://learn.microsoft.com/azure/databricks/release-notes/whats-coming#upcoming-end-of-life-for-the-genie-one-mcp-beta-endpoint">Upcoming end of life for the Genie One MCP Beta endpoint</a></td>
+<td align="left">The Genie One MCP Beta endpoint at <code>https://&lt;workspace-hostname&gt;/api/2.0/mcp/genie</code> reaches end of life on November 30, 2026, after which requests fail; migrate all workloads to the <code>system.ai.genie_one_mcp</code> MCP in Unity Gateway.</td>
+</tr>
+<tr>
+<td align="left">2027-01-31</td>
+<td align="left">BigQuery</td>
+<td align="left"><a href="https://docs.cloud.google.com/bigquery/docs/release-notes#November_06_2026">Starting January 31, 2027, the BigQuery Data Transfer Service for Shopify connector will no longer support the following fields</a></td>
+<td align="left">Starting January 31, 2027, the BigQuery Data Transfer Service for Shopify connector will drop support for the <code>legacyMode</code> field in the DeliveryProfile dataset schema and the <code>permitSkuSharing</code> field in the FulfillmentService dataset schema.</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>Databricks</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Item</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-11-09</td>
+<td align="left">⚠️ <a href="https://learn.microsoft.com/azure/databricks/release-notes/product/2026/november#new-jobs-compute-defaults-to-auto-access-mode">New jobs compute defaults to Auto access mode</a></td>
+<td align="left">New jobs compute in the UI now defaults to <code>Auto</code> access mode instead of <code>Dedicated</code>; <code>Auto</code> uses <code>Standard</code> access mode unless a machine learning runtime, GPU instance type, or Databricks Runtime below 14.3 is selected, and cluster policies enforcing a different mode still take precedence. Existing jobs are unaffected; for workspaces with the compliance security profile this default takes effect in December 2026.</td>
+</tr>
+<tr>
+<td align="left">2026-11-09</td>
+<td align="left">⚠️ <a href="https://learn.microsoft.com/azure/databricks/release-notes/whats-coming#new-jobs-compute-will-soon-default-to-auto-access-mode-for-workspaces-with-the-compliance-security-profile-enabled">New jobs compute will soon default to Auto access mode for workspaces with the compliance security profile enabled</a></td>
+<td align="left">Starting December 2026, new jobs compute created in the UI will default to <code>Auto</code> access mode in workspaces with the compliance security profile enabled, using <code>Standard</code> access mode unless a machine learning runtime, GPU instance type, or Databricks Runtime below 14.3 is selected, with cluster policies still taking precedence.</td>
+</tr>
+<tr>
+<td align="left">2026-11-06</td>
+<td align="left"><a href="https://learn.microsoft.com/azure/databricks/release-notes/product/2026/november#install-drivers-for-jdbc-unity-catalog-connections-from-maven">Install drivers for JDBC Unity Catalog connections from Maven</a></td>
+<td align="left">JDBC drivers for Unity Catalog connections can now be installed from a Maven coordinate instead of uploading to a volume, requiring serverless compute, Databricks Runtime 19 or above, or SQL warehouses 2026.43 or above.</td>
+</tr>
+<tr>
+<td align="left">2026-11-06</td>
+<td align="left"><a href="https://learn.microsoft.com/azure/databricks/release-notes/product/2026/november#restore-a-deleted-unity-catalog-metastore-with-the-rest-api-public-preview">Restore a deleted Unity Catalog metastore with the REST API (Public Preview)</a></td>
+<td align="left">Account admins can restore a deleted Unity Catalog metastore by its ID via the REST API for up to 5 days after deletion.</td>
+</tr>
+<tr>
+<td align="left">2026-11-06</td>
+<td align="left">🤖 <a href="https://learn.microsoft.com/azure/databricks/release-notes/product/2026/november#unity-catalog-wikis-are-in-beta">Unity Catalog wikis are in Beta</a></td>
+<td align="left">Unity Catalog wikis enter Beta, allowing data owners and stewards to draft and publish table documentation in Catalog Explorer manually or with Genie Code, while any user with metadata view permissions can comment, suggest edits, and react; account admins control feature access from the Previews page.</td>
+</tr>
+<tr>
+<td align="left">2026-11-05</td>
+<td align="left"><a href="https://learn.microsoft.com/azure/databricks/release-notes/product/2026/november#metric-view-listings-are-generally-available-in-databricks-marketplace">Metric view listings are generally available in Databricks Marketplace</a></td>
+<td align="left">Providers can publish governed business metrics in Databricks Marketplace by adding metric views, though only Azure Databricks recipients can consume shared metric views.</td>
+</tr>
+<tr>
+<td align="left">2026-11-03</td>
+<td align="left"><a href="https://learn.microsoft.com/azure/databricks/release-notes/product/2026/november#start-lakeflow-designer-workflows-from-suggested-or-recent-tables">Start Lakeflow Designer workflows from suggested or recent tables</a></td>
+<td align="left">Lakeflow Designer now lets users start visual data prep workflows from suggested, favorite, or recently used tables on the welcome screen.</td>
+</tr>
+</tbody></table>
+<p><strong>Quiet today:</strong> <a href="https://github.com/delta-io/delta">Delta Lake</a>, <a href="https://github.com/delta-io/delta-rs">delta-rs</a>, <a href="https://github.com/unitycatalog/unitycatalog">Unity Catalog</a>, <a href="https://github.com/mlflow/mlflow">MLflow</a>, <a href="https://github.com/databricks/cli">Databricks CLI</a>, <a href="https://github.com/databricks/dbt-databricks">dbt-databricks</a>, <a href="https://github.com/databricks/terraform-provider-databricks">Terraform provider for Databricks</a></p>
+<hr>
+<h2>Snowflake</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Item</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-11-05</td>
+<td align="left"><a href="https://docs.snowflake.com/en/release-notes/2026/other/2026-11-05-organization-hub-command-center-users-preview">Organization users and user groups in Organization Command Center (Preview)</a></td>
+<td align="left">Organization users and user groups are now available in preview in Organization Command Center.</td>
+</tr>
+<tr>
+<td align="left">2026-11-03</td>
+<td align="left"><a href="https://docs.snowflake.com/en/release-notes/2026/other/2026-11-03-cld-on-demand-table-creation">On-demand table creation for catalog-linked databases (General availability)</a></td>
+<td align="left">On-demand table creation for catalog-linked databases is now generally available.</td>
+</tr>
+<tr>
+<td align="left">2026-11-01</td>
+<td align="left"><a href="https://docs.snowflake.com/en/release-notes/2026/other/2026-11-01-horizon-catalog-integration-wif-ga">Apache Iceberg™ tables: Read and write across Snowflake accounts with Snowflake Horizon Catalog, now without managing secrets (General availability)</a></td>
+<td align="left">Snowflake Horizon Catalog catalog integrations now enable reading and writing Apache Iceberg tables across Snowflake accounts without creating, storing, or rotating secrets, with both accounts accessing the same table data without copying.</td>
+</tr>
+</tbody></table>
+<p><strong>Quiet today:</strong> <a href="https://github.com/snowflakedb/snowpark-python">Snowpark Python</a>, <a href="https://github.com/snowflakedb/snowflake-connector-python">Snowflake Connector for Python</a>, <a href="https://github.com/apache/polaris">Apache Polaris</a>, <a href="https://github.com/snowflakedb/terraform-provider-snowflake">Terraform provider for Snowflake</a></p>
+<hr>
+<h2>Azure / Fabric &amp; GCP</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Item</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-11-06</td>
+<td align="left">⚠️ <a href="https://docs.cloud.google.com/bigquery/docs/release-notes#November_06_2026">Starting January 31, 2027, the BigQuery Data Transfer Service for Shopify connector will no longer support the following fields</a></td>
+<td align="left">Starting January 31, 2027, the BigQuery Data Transfer Service for Shopify connector will drop support for the <code>legacyMode</code> field in the DeliveryProfile dataset schema and the <code>permitSkuSharing</code> field in the FulfillmentService dataset schema.</td>
+</tr>
+<tr>
+<td align="left">2026-11-06</td>
+<td align="left"><a href="https://docs.cloud.google.com/bigquery/docs/release-notes#November_06_2026">You can now use BigQuery Graph and run Graph Query Language (GQL) queries when you use on-demand pricing</a></td>
+<td align="left">BigQuery Graph and Graph Query Language (GQL) queries are now supported when using on-demand pricing.</td>
+</tr>
+<tr>
+<td align="left">2026-11-02</td>
+<td align="left"><a href="https://docs.cloud.google.com/bigquery/docs/release-notes#November_02_2026">Lakehouse supports the following remote catalog providers for cross-cloud data access (GA)</a></td>
+<td align="left">BigQuery Lakehouse adds GA support for federated catalog endpoints across Databricks Unity Catalog on AWS/Azure/GCP, AWS Glue Data Catalog on AWS, Snowflake Horizon Catalog on AWS/Azure/GCP, and Workday Data Lake on AWS/GCP, enabling metadata synchronization and direct Apache Iceberg table queries from BigQuery, Managed Service for Apache Spark, and Apache Spark without data migration or ETL, with routing over public internet or Cross-Cloud Interconnect and protection via VPC Service Controls; for Databricks Unity Catalog, user identity federation can propagate end-user identities for permission enforcement.</td>
+</tr>
+<tr>
+<td align="left">2026-11-02</td>
+<td align="left"><a href="https://docs.cloud.google.com/bigquery/docs/release-notes#November_02_2026">You can now use BigQuery change history and continuous queries for Apache Iceberg managed tables in Lakehouse (GA)</a></td>
+<td align="left">BigQuery change history and continuous queries are now generally available for Apache Iceberg managed tables in Lakehouse, allowing the <code>APPENDS</code> table-valued function to track appended rows over a time range and continuous queries to read incoming data from and write output rows to Iceberg managed tables.</td>
+</tr>
+</tbody></table>
+<p><em>Also new:</em> <a href="https://docs.cloud.google.com/bigquery/docs/release-notes#November_06_2026">You can now use a custom organization policy to allow or deny specific operations on models in BigQuery (Preview)</a> · <a href="https://docs.cloud.google.com/bigquery/docs/release-notes#November_05_2026">In the query execution graph&#39;s query text heatmap, you can now view and navigate through a hierarchical list of context references, such as nested function calls or view references, for stage steps (G…</a> · <a href="https://docs.cloud.google.com/bigquery/docs/release-notes#November_05_2026">In the query execution graph, the query text heatmap now supports displaying the SQL text for persistent and temporary user-defined functions (UDFs) (GA)</a> · <a href="https://community.fabric.microsoft.com/t5/Fabric-Updates-Blog/Share-data-and-context-across-organizations-with-IQ-Share/ba-p/5378764">Share data and context across organizations with IQ Share (Preview)</a></p>
+<hr>
+<h2>Open-source stack</h2>
+<h3>dbt Core</h3>
+<ul>
+<li><strong>Release:</strong> <a href="https://github.com/dbt-labs/dbt/releases/tag/v1.11.17">v1.11.17</a> fixes <code>dbt deps</code> git credential handling by using a git credential helper instead of embedding credentials in clone URLs, and fixes credential supply during <code>git reset --hard</code> for subdirectory installs.</li>
+</ul>
+<h3>Apache Airflow</h3>
+<ul>
+<li><strong>Release:</strong> <a href="https://github.com/apache/airflow/releases/tag/3.4.0">3.4.0</a> introduces Task Loops (AIP-111) allowing decorated task groups to repeat at runtime with conditional do...while logic, and adds a Dag Importer for authoring DAGs in non-Python languages like TypeScript.</li>
+<li><strong>News:</strong> The <a href="https://airflow.apache.org/blog/airflow-3.4.0/">Apache Airflow 3.4.0 announcement</a> highlights Task Loops, multi-language DAG authoring, and AI agent integration as the release&#39;s headline features.</li>
+</ul>
+<h3>Prefect</h3>
+<ul>
+<li><strong>Release:</strong> <a href="https://github.com/PrefectHQ/prefect/releases/tag/3.9.2">3.9.2</a> reduces deployment writes from queue polling, fixes lock release handling in <code>RedisLockManager</code> and <code>MemoryLockManager</code>, preserves datetime instants during timezone changes, and resolves multiple UI, CLI, and <code>GitRepository</code> bugs.</li>
+</ul>
+<h3>Apache Iceberg</h3>
+<ul>
+<li><strong>News:</strong> <a href="https://medium.com/snowflake/query-databricks-lakeflow-pipeline-tables-from-snowflake-without-copying-data-dde301ede202">Query Databricks Lakeflow Pipeline Tables from Snowflake, Without Copying Data</a> demonstrates reading Databricks Lakeflow streaming tables and materialized views directly as Iceberg tables from Snowflake, showing cross-platform Iceberg interoperability.</li>
+</ul>
+<p><strong>Quiet today:</strong> <a href="https://github.com/SQLMesh/sqlmesh">SQLMesh</a>, <a href="https://github.com/dagster-io/dagster">Dagster</a>, <a href="https://github.com/dlt-hub/dlt">dlt</a>, <a href="https://github.com/apache/iceberg-python">PyIceberg</a>, <a href="https://github.com/duckdb/duckdb">DuckDB</a>, <a href="https://github.com/pola-rs/polars">Polars</a>, <a href="https://github.com/trinodb/trino">Trino</a>, <a href="https://github.com/great-expectations/great_expectations">Great Expectations</a>, <a href="https://github.com/sodadata/soda-core">Soda Core</a>, <a href="https://github.com/OpenLineage/OpenLineage">OpenLineage</a>, <a href="https://github.com/open-metadata/OpenMetadata">OpenMetadata</a></p>
+<hr>
+<h2>Across platforms</h2>
+<ul>
+<li>Apache Iceberg interoperability advanced on three platforms: Snowflake Horizon Catalog enables cross-account Iceberg read/write without secrets (GA); BigQuery Lakehouse adds GA federated catalog endpoints for Unity Catalog, Glue, Horizon Catalog, and Workday; Databricks Lakeflow Pipeline Tables are readable as Iceberg tables from Snowflake per the Iceberg project.</li>
+</ul>
+<hr>
+<h2>News &amp; discussion</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Post</th>
+<th align="left">Source</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-11-06</td>
+<td align="left"><a href="https://medium.com/snowflake/shipping-a-data-catalog-app-on-snowflake-app-runtime-notes-from-a-real-build-2fcc74d4e5c0">Shipping a Data Catalog App on Snowflake App Runtime: Notes From a Real Build</a></td>
+<td align="left">Snowflake on Medium</td>
+<td align="left">The author rebuilt a business glossary and definition-approval app on Snowflake App Runtime in five days, deploying with <code>snow app deploy</code> without Docker, a container registry, or a separate auth layer, keeping data in the client account and using existing SSO for sign-in.</td>
+</tr>
+</tbody></table>
+<hr>
+<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
+]]></content:encoded>
+    </item>
     <item>
       <title>Data Engineering 2026-11-06</title>
       <link>https://dboeter.github.io/daily-diff/#2026-11-06/ai-data</link>

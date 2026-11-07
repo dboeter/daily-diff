@@ -13,7 +13,118 @@
       <height>144</height>
     </image>
     <atom:link href="https://dboeter.github.io/daily-diff/feeds/ai-agents.xml" rel="self" type="application/rss+xml"/>
-    <lastBuildDate>Fri, 06 Nov 2026 06:26:59 +0000</lastBuildDate>
+    <lastBuildDate>Sat, 07 Nov 2026 05:50:00 +0000</lastBuildDate>
+    <item>
+      <title>AI Agents 2026-11-07</title>
+      <link>https://dboeter.github.io/daily-diff/#2026-11-07/ai-agents</link>
+      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-11-07/ai-agents</guid>
+      <pubDate>Sat, 07 Nov 2026 00:00:00 +0000</pubDate>
+      <description>AI Agents 2026-11-07 ⬛ Overview · 🟪 AI Agents · 🟦 AI Models &amp;amp; Labs · 🟧 AI Policy · 🟨 Data Engineering Projects: 15 | Active today: 5 | Stable releases: 3 | Prereleases (not covered): 3 | Generated: 2026-11-07 05:47 UTC Highlights Claude Code v2.1.319 changes auto-mode behavior when telemetry or feature flags are disabled: server-uncheckable calls are now prompted or denied with no built-in fallback (use CLAUDE_CODE_AUTO_MODE_SERVER=0 to retain old behavior); also adds MCP task background...</description>
+      <content:encoded><![CDATA[<h1>AI Agents 2026-11-07</h1>
+<p><a href="https://dboeter.github.io/daily-diff/#2026-11-07">⬛ Overview</a> · <strong>🟪 AI Agents</strong> · <a href="https://dboeter.github.io/daily-diff/#2026-11-07/ai-models">🟦 AI Models &amp; Labs</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-07/ai-policy">🟧 AI Policy</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-07/ai-data">🟨 Data Engineering</a></p>
+<blockquote>
+<p>Projects: 15 | Active today: 5 | Stable releases: 3 | Prereleases (not covered): 3 | Generated: 2026-11-07 05:47 UTC</p>
+</blockquote>
+<hr>
+<h2>Highlights</h2>
+<ul>
+<li>Claude Code v2.1.319 changes auto-mode behavior when telemetry or feature flags are disabled: server-uncheckable calls are now prompted or denied with no built-in fallback (use <code>CLAUDE_CODE_AUTO_MODE_SERVER=0</code> to retain old behavior); also adds MCP task background execution, <code>permissions.denyInsteadOfPrompting</code>, spend tracking in <code>/usage</code>, and gateway admin settings.</li>
+<li>A report shows Claude Code sends the user&#39;s email address in the User-Agent header during web searches without consent, resulting in spam.</li>
+<li>OpenAI Codex users report all local projects vanish from the Projects list after switching from an enterprise back to a personal account on Windows, though folders and chats remain visible but ungrouped.</li>
+</ul>
+<hr>
+<h2>Coding Agents &amp; Assistants</h2>
+<h3>Claude Code</h3>
+<ul>
+<li><strong>Release:</strong> <a href="https://github.com/anthropics/claude-code/releases/tag/v2.1.319">v2.1.319</a> changes auto mode when telemetry/feature flags are off (server-uncheckable calls are asked about or denied with no built-in fallback; use <code>CLAUDE_CODE_AUTO_MODE_SERVER=0</code> to keep old behavior), adds MCP task background execution, <code>permissions.denyInsteadOfPrompting</code>, <code>/claude-api latency-optimize</code>, <code>CLAUDE_CODE_DISABLE_FEATURE_FLAGS</code>, spend tracking in <code>/usage</code>, and gateway admin settings.</li>
+<li><strong>News:</strong> <a href="https://news.ycombinator.com/item?id=50385272">Claude Code sends your email address to websites</a> reports the User-Agent header includes the user&#39;s email during web searches without consent, causing spam.</li>
+<li><strong>Hot issue:</strong> <a href="https://github.com/anthropics/claude-code/issues/107454">#107454</a>: users report Remote Control write tools in auto mode stall on a server-side approval card with no &quot;always allow&quot; option since ~4 Nov; <a href="https://github.com/anthropics/claude-code/issues/107467">#107467</a>: users report Artifact.read no longer accepts <code>path</code>/<code>paths</code> in 2.1.318, breaking Migrated Design canvas file reading. (#107454: regression; 6 comments, 0 👍; +6 in the last 24h) (#107467: regression; 2 comments, 1 👍; +3 in the last 24h)</li>
+</ul>
+<h3>OpenAI Codex</h3>
+<ul>
+<li><strong>Hot issue:</strong> <a href="https://github.com/openai/codex/issues/59895">#59895</a>: users report all local projects disappear from the Projects list after switching from enterprise back to personal account on Windows, though folders exist and chats remain visible but ungrouped. (9 comments, 2 👍; +10 in the last 24h)</li>
+</ul>
+<h3>OpenCode</h3>
+<ul>
+<li><strong>Release:</strong> <a href="https://github.com/anomalyco/opencode/releases/tag/v2.2.6">v2.2.6</a> adds opt-in MCP connection pooling (<code>pool: true</code>), <code>--archived</code> and <code>--worktree</code> flags for <code>opencode run</code>, provider/model-specific session warming, experimental bytecode VM for Code Mode (<code>experimental.codemode_vm</code>), PowerShell 7 Microsoft Store support, and Azure Messages for Foundry Claude models.</li>
+</ul>
+<h3>Oh My Pi</h3>
+<ul>
+<li><strong>Release:</strong> <a href="https://github.com/can1357/oh-my-pi/releases/tag/v18.18.0">v18.18.0</a> fixes Mistral discovery listing non-chat models, cached catalog replacement on failed refresh, transcript freezing after provider restarts, bash tool card <code>cd</code> visualization, <code>cd ;</code> working directory handling, task-file approval symlink protection, subagent instruction formatting, hindsight memory persistence, long multi-byte bash command crashes, <code>grep -e</code>/<code>rg -e</code> pattern handling, and non-UTF-8 byte visualization.</li>
+<li><strong>Hot issue:</strong> <a href="https://github.com/can1357/oh-my-pi/issues/18341">#18341</a>: users report the Antigravity provider receives 403 PERMISSION_DENIED from Google Cloud Code Assist API due to ToS violation, possibly from upstream authentication/fingerprint changes. (10 comments, 2 👍; +12 in the last 24h)</li>
+</ul>
+<h3>Hermes Agent</h3>
+<ul>
+<li><strong>Hot issue:</strong> <a href="https://github.com/NousResearch/hermes-agent/issues/138974">#138974</a>: users report upgrade to v0.22.0+119.g0e427d7 breaks inherited ACLs on <code>%LOCALAPPDATA%\hermes\tools\*</code> on Windows, removing user access to tool executables and causing desktop backend spawn failure (&quot;Access is denied&quot;). (type/security; 6 comments, 0 👍; +3 in the last 24h)</li>
+</ul>
+<p><strong>Quiet today:</strong> <a href="https://github.com/google-gemini/gemini-cli">Gemini CLI</a>, <a href="https://github.com/Kilo-Org/kilocode">Kilo Code</a>, <a href="https://github.com/earendil-works/pi">Pi</a>, <a href="https://github.com/1jehuang/jcode">jcode</a>, <a href="https://github.com/cline/cline">Cline</a>, <a href="https://github.com/CommandCodeAI/command-code">Command Code</a>, <a href="https://github.com/deepseek-ai/deepseek-harness">DeepSeek Harness</a></p>
+<hr>
+<h2>Agent Tooling</h2>
+<p><strong>Quiet today:</strong> <a href="https://github.com/NVIDIA/OpenShell">OpenShell</a>, <a href="https://github.com/herdrdev/herdr">herdr</a>, <a href="https://github.com/conductor-oss/conductor">Conductor</a></p>
+<hr>
+<h2>Spotted</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Story</th>
+<th align="left">Source</th>
+<th align="left">Discussion</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a href="https://community.openai.com/t/security-follow-up-tool-call-silently-routed-to-a-different-connector/1413053">ChatGPT silently passes data between connectors and the bounty wants an ID card</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50399569">83 points, 35 comments</a></td>
+<td align="left">ChatGPT silently switched between connectors during a conversation, passing a one-time confirmation code from the first connector&#39;s widget to the second without informing the user.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://developers.openai.com/api/docs/guides/voice-sip">Outbound SIP calling is now available to all organizations</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50399695">62 points, 52 comments</a></td>
+<td align="left">OpenAI has made outbound SIP calling available to all organizations, enabling phone calls to be connected to OpenAI via SIP.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://www.perplexity.ai/en-GB/hub/blog/teammates-are-agents-for-complex-ongoing-work">Perplexity launches AI agents for work</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50395866">60 points, 53 comments</a></td>
+<td align="left">Perplexity launched AI agents called teammates that coordinate to manage ongoing projects across operations, marketing, and other functions.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://github.com/anteloc/ldraw-mecha/tree/v0.5.0">Show HN: Agents infer Lego mechanisms from sources, then animate them</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50397325">25 points, 1 comment</a></td>
+<td align="left">The author built an agent system that infers Lego mechanisms from sources and animates them in Blender.</td>
+</tr>
+<tr>
+<td align="left">Show HN: Tmux-restore saves tmux windows and agent sessions across reboots (<a href="https://github.com/andrewboldi/tmux-restore">andrewboldi/tmux-restore</a>)</td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50355009">22 points, 9 comments</a></td>
+<td align="left">The author created tmux-restore, a tool that restores tmux sessions, layouts, scrollback, and reopens AI agent conversations (including Claude Code, Codex, and Gemini CLI) after a reboot.</td>
+</tr>
+<tr>
+<td align="left">Show HN: Agentic Identity Broker, OAuth Delegation for AI Agents (<a href="https://github.com/zalando-incubator/agentic-identity-broker">zalando-incubator/agentic-identity-broker</a>)</td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50393235">21 points, 3 comments</a></td>
+<td align="left">The author developed an identity broker for AI agents that handles OAuth2 delegation and consent management.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://dev.to/dannwaneri/dont-write-markdown-files-for-your-coding-agent-write-scripts-j00">Don&#39;t Write Markdown Files for Your Coding Agent. Write Scripts.</a></td>
+<td align="left">Dev.to</td>
+<td align="left"><a href="https://dev.to/dannwaneri/dont-write-markdown-files-for-your-coding-agent-write-scripts-j00">51 reactions, 33 comments</a></td>
+<td align="left">The author argues that writing scripts, not markdown files, is necessary to box coding agents into deterministic actions.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://dev.to/johnnylemonny/one-markdown-file-can-hijack-your-ai-coding-agent-the-hidden-cost-of-blindly-trusting-agentsmd-167n">One Markdown File Can Hijack Your AI Coding Agent: The Hidden Cost of Blindly Trusting AGENTS.md</a></td>
+<td align="left">Dev.to</td>
+<td align="left"><a href="https://dev.to/johnnylemonny/one-markdown-file-can-hijack-your-ai-coding-agent-the-hidden-cost-of-blindly-trusting-agentsmd-167n">44 reactions, 30 comments</a></td>
+<td align="left">The author demonstrates how a single malicious AGENTS.md or CLAUDE.md file can hijack an AI coding agent to steal OAuth tokens and execute shell commands, and explains how to lock down the workflow.</td>
+</tr>
+</tbody></table>
+<hr>
+<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
+]]></content:encoded>
+    </item>
     <item>
       <title>AI Agents 2026-11-06</title>
       <link>https://dboeter.github.io/daily-diff/#2026-11-06/ai-agents</link>
@@ -2418,65 +2529,6 @@
 </ul>
 <hr>
 <p><strong>Quiet today:</strong> <a href="https://github.com/github/copilot-cli">GitHub Copilot CLI</a>, <a href="https://github.com/nearai/ironclaw">IronClaw</a>, <a href="https://github.com/agentscope-ai/QwenPaw">QwenPaw</a>, <a href="https://github.com/zeroclaw-labs/zeroclaw">ZeroClaw</a></p>
-<hr>
-<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
-]]></content:encoded>
-    </item>
-    <item>
-      <title>AI Agents 2026-10-06</title>
-      <link>https://dboeter.github.io/daily-diff/#2026-10-06/ai-agents</link>
-      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-10-06/ai-agents</guid>
-      <pubDate>Tue, 06 Oct 2026 00:00:00 +0000</pubDate>
-      <description>AI Agents Digest 2026-10-06 Generated: 2026-10-06 02:26 UTC | Projects: 12 | Active today: 9 | Stable releases: 7 | Prereleases (not covered): 5 🕵️ Stealth Models on OpenRouter No stealth models listed on OpenRouter today. Overview Claude Code shipped v2.1.290 with hook enhancements for server tool visibility and sub-agent permission tracking. GitHub Copilot CLI v1.0.92 added configuration subcommands, an environment picker, and MCP connection fixes. Pi released v1.0.4 with tool pattern filters...</description>
-      <content:encoded><![CDATA[<h1>AI Agents Digest 2026-10-06</h1>
-<blockquote>
-<p>Generated: 2026-10-06 02:26 UTC | Projects: 12 | Active today: 9 | Stable releases: 7 | Prereleases (not covered): 5</p>
-</blockquote>
-<hr>
-<h2>🕵️ Stealth Models on OpenRouter</h2>
-<p>No stealth models listed on OpenRouter today.</p>
-<hr>
-<h2>Overview</h2>
-<p>Claude Code shipped v2.1.290 with hook enhancements for server tool visibility and sub-agent permission tracking. GitHub Copilot CLI v1.0.92 added configuration subcommands, an environment picker, and MCP connection fixes. Pi released v1.0.4 with tool pattern filters and v1.0.3 with Azure Foundry support. Qwen Code v0.25.0 introduced local workspace-agent collaboration and broker provider controls, while tracking Kubernetes runtime progress and a hosted-session file-access issue. OpenClaw users report a workspace promotion failure and multi-agent team breakdowns on the claude-cli runtime. Hermes Agent faces a credential cooldown bug that benches keys for days after a single 429. ZeroClaw&#39;s quickstart fails on Android/Termux due to config persistence.</p>
-<h2>Claude Code</h2>
-<ul>
-<li><strong>Release</strong>: v2.1.290 adds <code>serverToolUses</code> to the <code>turn.step</code> hook result so mods can see the advisor&#39;s tool calls with IDs, names, inputs, and timing; <code>agentId</code> is now included in <code>tool.check</code> events to distinguish sub-agent permission checks; <code>ceiling</code> field added to hook questions and verdicts. <a href="https://github.com/anthropics/claude-code/releases/tag/v2.1.290">https://github.com/anthropics/claude-code/releases/tag/v2.1.290</a></li>
-<li><strong>News</strong>: A Hacker News thread (31 points, 22 comments) features an engineer describing Claude Code as making their job &quot;soul-sucking,&quot; sparking discussion on AI-assisted coding burnout. <a href="https://news.ycombinator.com/item?id=49971473">https://news.ycombinator.com/item?id=49971473</a></li>
-</ul>
-<h2>OpenAI Codex</h2>
-<p><em>(No releases, news, or hot issues meeting criteria.)</em></p>
-<h2>GitHub Copilot CLI</h2>
-<ul>
-<li><strong>Release</strong>: v1.0.92 introduces <code>copilot config</code> subcommands to list, read, set, and remove settings; adds a pre-conversation Ctrl+E environment picker for local vs. cloud runs; enables silent token renewal for Entra-protected MCP servers; fixes legacy HTTP+SSE MCP connections that hung on unacknowledged POSTs. <a href="https://github.com/github/copilot-cli/releases/tag/v1.0.92">https://github.com/github/copilot-cli/releases/tag/v1.0.92</a></li>
-</ul>
-<h2>Pi</h2>
-<ul>
-<li><strong>Release</strong>: v1.0.4 adds tool pattern support (<code>--tools</code>, <code>--exclude-tools</code> accept <code>*</code> wildcards) and <code>--no-mcp</code> to disable MCP for a single run; v1.0.3 adds Azure Foundry Chat Completions via the <code>azure</code> provider and saves codemode images to files. <a href="https://github.com/earendil-works/pi/releases/tag/v1.0.4">https://github.com/earendil-works/pi/releases/tag/v1.0.4</a></li>
-<li><strong>News</strong>: Show HN post (119 points, 47 comments) introduces Pi pod, a way to run the Pi coding agent in sandboxes on your own server. <a href="https://news.ycombinator.com/item?id=49937304">https://news.ycombinator.com/item?id=49937304</a></li>
-</ul>
-<h2>Qwen Code</h2>
-<ul>
-<li><strong>Release</strong>: v0.25.0 adds local workspace-agent collaboration with a generic Broker provider and versioned worker contract; SDK TypeScript v0.1.18 and Desktop v0.25.0 bundle the CLI. <a href="https://github.com/QwenLM/qwen-code/releases/tag/v0.25.0">https://github.com/QwenLM/qwen-code/releases/tag/v0.25.0</a></li>
-<li><strong>Hot issue</strong>: #13395 tracks remaining Kubernetes tool-runtime implementation, portability, and acceptance gates under proposal #12380. <a href="https://github.com/QwenLM/qwen-code/issues/13395">https://github.com/QwenLM/qwen-code/issues/13395</a></li>
-<li><strong>Hot issue</strong>: #13426 requests a safe way for hosted workspace sessions to read linked dependencies outside the session directory but inside the workspace mount (e.g., monorepo setups). <a href="https://github.com/QwenLM/qwen-code/issues/13426">https://github.com/QwenLM/qwen-code/issues/13426</a></li>
-</ul>
-<h2>OpenClaw</h2>
-<ul>
-<li><strong>Hot issue</strong>: #164923 reports one workspace promotes 0/512 short-term candidates while siblings promote 50–90%, even with all thresholds overridden to zero; filters structurally reject raw conversation-turn snippets. <a href="https://github.com/openclaw/openclaw/issues/164923">https://github.com/openclaw/openclaw/issues/164923</a></li>
-<li><strong>Hot issue</strong>: #164972 documents multi-agent team failures on the <code>claude-cli</code> runtime: coordinator/specialist delegation breaks across visibility modes (agent/tree/all), with failures appearing as successes. <a href="https://github.com/openclaw/openclaw/issues/164972">https://github.com/openclaw/openclaw/issues/164972</a></li>
-</ul>
-<h2>Hermes Agent</h2>
-<ul>
-<li><strong>Hot issue</strong>: #132817 describes a pain cluster where a single transient 429/entitlement cooldown benches a credential for hours to days with no reset-time probe, no visibility into cooldown state, and no in-product pointer to <code>hermes auth reset</code> (13 reports this week). <a href="https://github.com/NousResearch/hermes-agent/issues/132817">https://github.com/NousResearch/hermes-agent/issues/132817</a></li>
-</ul>
-<h2>QwenPaw</h2>
-<p><em>(No releases, news, or hot issues meeting criteria.)</em></p>
-<h2>ZeroClaw</h2>
-<ul>
-<li><strong>Hot issue</strong>: #11525 reports <code>quickstart</code> fails on Android 16/Termux (aarch64) with &quot;Unable to persist config&quot; and no agent created; workflow blocked on mobile. <a href="https://github.com/zeroclaw-labs/zeroclaw/issues/11525">https://github.com/zeroclaw-labs/zeroclaw/issues/11525</a></li>
-</ul>
-<hr>
-<p><strong>Quiet today:</strong> <a href="https://github.com/google-gemini/gemini-cli">Gemini CLI</a>, <a href="https://github.com/anomalyco/opencode">OpenCode</a>, <a href="https://github.com/nearai/ironclaw">IronClaw</a></p>
 <hr>
 <p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
 ]]></content:encoded>
