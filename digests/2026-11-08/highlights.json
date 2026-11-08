@@ -1,0 +1,10 @@
+{
+  "ai-agents": [
+    "Oh My Pi v18.18.1 breaks Rust SDK with new `exclude_from_context` fields, caps Cursor timeout at 3600s, treats 429/402 as rate limits",
+    "Claude Code Desktop 4.23118.0 on macOS fails to render MCP Apps from local stdio servers: tool runs but `ui://` resource not requested"
+  ],
+  "ai-models": [
+    "Microsoft Research's AI Frontiers group is ending",
+    "Anthropic now requires a government ID to create an account"
+  ]
+}
