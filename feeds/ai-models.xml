@@ -13,7 +13,109 @@
       <height>144</height>
     </image>
     <atom:link href="https://dboeter.github.io/daily-diff/feeds/ai-models.xml" rel="self" type="application/rss+xml"/>
-    <lastBuildDate>Sat, 07 Nov 2026 05:50:00 +0000</lastBuildDate>
+    <lastBuildDate>Sun, 08 Nov 2026 05:52:17 +0000</lastBuildDate>
+    <item>
+      <title>AI Models &amp; Labs 2026-11-08</title>
+      <link>https://dboeter.github.io/daily-diff/#2026-11-08/ai-models</link>
+      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-11-08/ai-models</guid>
+      <pubDate>Sun, 08 Nov 2026 00:00:00 +0000</pubDate>
+      <description>AI Models &amp;amp; Labs 2026-11-08 ⬛ Overview · 🟪 AI Agents · 🟦 AI Models &amp;amp; Labs · 🟨 Data Engineering Lab posts: 0 | New models: 0 | Spotted: 8 | Generated: 2026-11-08 05:50 UTC Highlights No lab or model news today. Microsoft Research&amp;#39;s AI Frontiers group is ending. Anthropic now requires a government ID to create an account. Stealth Models on OpenRouter Model Listed Expires Status Crouton Alpha stealth/crouton-alpha 2026-11-03 — live Nothing new from Anthropic and OpenAI or OpenRouter&amp;...</description>
+      <content:encoded><![CDATA[<h1>AI Models &amp; Labs 2026-11-08</h1>
+<p><a href="https://dboeter.github.io/daily-diff/#2026-11-08">⬛ Overview</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-08/ai-agents">🟪 AI Agents</a> · <strong>🟦 AI Models &amp; Labs</strong> · <a href="https://dboeter.github.io/daily-diff/#2026-11-08/ai-data">🟨 Data Engineering</a></p>
+<blockquote>
+<p>Lab posts: 0 | New models: 0 | Spotted: 8 | Generated: 2026-11-08 05:50 UTC</p>
+</blockquote>
+<hr>
+<h2>Highlights</h2>
+<ul>
+<li>No lab or model news today.</li>
+<li>Microsoft Research&#39;s AI Frontiers group is ending.</li>
+<li>Anthropic now requires a government ID to create an account.</li>
+</ul>
+<hr>
+<h2>Stealth Models on OpenRouter</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Model</th>
+<th align="left">Listed</th>
+<th align="left">Expires</th>
+<th align="left">Status</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a href="https://openrouter.ai/stealth/crouton-alpha">Crouton Alpha</a> <code>stealth/crouton-alpha</code></td>
+<td align="left">2026-11-03</td>
+<td align="left">—</td>
+<td align="left">live</td>
+</tr>
+</tbody></table>
+<hr>
+<p>Nothing new from Anthropic and OpenAI or OpenRouter&#39;s new listings today.</p>
+<hr>
+<h2>Spotted</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Story</th>
+<th align="left">Source</th>
+<th align="left">Discussion</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a href="https://hunch.net/?p=13764006">The end of Microsoft Research&#39;s AI Frontiers group</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50406563">430 points, 255 comments</a></td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left"><a href="https://maxxbench.unlap.ai/research/why-maxxbench/">MaxxBench – &quot;Nice DeepSWE score. But is it true?&quot;</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50406222">254 points, 72 comments</a></td>
+<td align="left">MaxxBench evaluates how coding models handle familiar engineering tasks with altered requirements.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://caleb.software/posts/claude-to-pi.html">Goodbye Claude, Hello Pi</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50410107">64 points, 32 comments</a></td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left"><a href="https://www.silasdata.com/llm-playground-inside-architectures/">The architecture of open-weight LLMs: MoE, hybrid layers, ternary weights</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50379331">16 points, 0 comments</a></td>
+<td align="left">The article covers open-weight LLM architectures including MoE, hybrid layers, and ternary weights, written by a PhD in Electrical Engineering from UFMG.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50356209">Tell HN: You now need a government id in order to create an Anthropic account</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50356209">16 points, 4 comments</a></td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50399909">Claude usage credits purchased after Dec 7 will expire 12 months after purchase</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50399909">15 points, 8 comments</a></td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left"><a href="https://dev.to/chet103cc/gpt-image-25-or-nano-banana-21-cost-per-usable-image-3o0p">GPT Image 2.5 or Nano Banana 2.1? Cost per usable image</a></td>
+<td align="left">Dev.to</td>
+<td align="left"><a href="https://dev.to/chet103cc/gpt-image-25-or-nano-banana-21-cost-per-usable-image-3o0p">59 reactions, 4 comments</a></td>
+<td align="left">The author finds Nano Banana 2.1 cheaper for iteration than GPT Image 2.5, costing 3 credits at 1K, 4 at 2K, and 5 at 4K resolution.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://dev.to/kendall_codes/where-can-you-run-minimax-h3-cheapest-per-tier-comparison-34e7">Where can you run MiniMax H3 cheapest? (per-tier comparison)</a></td>
+<td align="left">Dev.to</td>
+<td align="left"><a href="https://dev.to/kendall_codes/where-can-you-run-minimax-h3-cheapest-per-tier-comparison-34e7">57 reactions, 3 comments</a></td>
+<td align="left">The author determines Callirra offers the cheapest MiniMax H3 pricing at one credit per output second for 480P ($0.01) and two credits for 768P.</td>
+</tr>
+</tbody></table>
+<hr>
+<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
+]]></content:encoded>
+    </item>
     <item>
       <title>AI Models &amp; Labs 2026-11-07</title>
       <link>https://dboeter.github.io/daily-diff/#2026-11-07/ai-models</link>

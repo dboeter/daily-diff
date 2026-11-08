@@ -13,7 +13,99 @@
       <height>144</height>
     </image>
     <atom:link href="https://dboeter.github.io/daily-diff/feeds/ai-agents.xml" rel="self" type="application/rss+xml"/>
-    <lastBuildDate>Sat, 07 Nov 2026 05:50:00 +0000</lastBuildDate>
+    <lastBuildDate>Sun, 08 Nov 2026 05:52:17 +0000</lastBuildDate>
+    <item>
+      <title>AI Agents 2026-11-08</title>
+      <link>https://dboeter.github.io/daily-diff/#2026-11-08/ai-agents</link>
+      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-11-08/ai-agents</guid>
+      <pubDate>Sun, 08 Nov 2026 00:00:00 +0000</pubDate>
+      <description>AI Agents 2026-11-08 ⬛ Overview · 🟪 AI Agents · 🟦 AI Models &amp;amp; Labs · 🟨 Data Engineering Projects: 15 | Active today: 3 | Stable releases: 1 | Prereleases (not covered): 2 | Generated: 2026-11-08 05:50 UTC Highlights Oh My Pi v18.18.1 introduces breaking changes in the Rust SDK: BashCommand and ReadyEvent struct literals now require exclude_from_context: None and supports_bash_exclude_from_context: None; the release also preserves tool-batch order for file mutations, corrects Pro Max accou...</description>
+      <content:encoded><![CDATA[<h1>AI Agents 2026-11-08</h1>
+<p><a href="https://dboeter.github.io/daily-diff/#2026-11-08">⬛ Overview</a> · <strong>🟪 AI Agents</strong> · <a href="https://dboeter.github.io/daily-diff/#2026-11-08/ai-models">🟦 AI Models &amp; Labs</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-08/ai-data">🟨 Data Engineering</a></p>
+<blockquote>
+<p>Projects: 15 | Active today: 3 | Stable releases: 1 | Prereleases (not covered): 2 | Generated: 2026-11-08 05:50 UTC</p>
+</blockquote>
+<hr>
+<h2>Highlights</h2>
+<ul>
+<li>Oh My Pi v18.18.1 introduces breaking changes in the Rust SDK: <code>BashCommand</code> and <code>ReadyEvent</code> struct literals now require <code>exclude_from_context: None</code> and <code>supports_bash_exclude_from_context: None</code>; the release also preserves tool-batch order for file mutations, corrects Pro Max account routing, caps Cursor&#39;s 24h <code>hard_timeout</code> at the bash tool&#39;s 3600s ceiling, treats 429/402 context-overflow errors as rate limits, and allows credentialless Apple on-device models in <code>auth-gateway</code></li>
+<li>Claude Code regression (Desktop 4.23118.0 on macOS): users report MCP Apps from local stdio servers no longer render in Chat — the tool executes and returns text but Desktop never requests the <code>ui://</code> resource, so no widget panel appears</li>
+</ul>
+<hr>
+<h2>Coding Agents &amp; Assistants</h2>
+<h3>Claude Code- <strong>Hot issue:</strong> #108122: users report that MCP Apps from local stdio servers no longer render in Chat on macOS Desktop 4.23118.0; the tool executes and returns text but Desktop never requests the <code>ui://</code> resource, so no widget panel appears</h3>
+<ul>
+<li><strong>News:</strong> <a href="https://news.ycombinator.com/item?id=50407882">Claude Code&#39;s &quot;Don&#39;t Ask Again&quot; exposes passwords in 1,122 public GitHub files</a></li>
+<li><strong>News:</strong> <a href="https://dev.to/slabb/claude-code-was-mailing-your-email-address-to-every-website-it-visited-the-user-agent-leak-the-12k6">Claude Code was mailing your email address to every website it visited: the User-Agent leak, the 5-month system-prompt issue, and the 5-point check</a></li>
+</ul>
+<h3>OpenCode</h3>
+<ul>
+<li><strong>Hot issue:</strong> <a href="https://github.com/anomalyco/opencode/issues/62524">#62524</a>: an issue says upstream requests fail with <code>[prefill_cap_refused] the cell is at capacity</code> on Windows 11 (8 comments, 3 👍; +10 in the last 24h)</li>
+</ul>
+<h3>Oh My Pi</h3>
+<ul>
+<li><strong>Release:</strong> <a href="https://github.com/can1357/oh-my-pi/releases/tag/v18.18.1">v18.18.1</a> introduces breaking changes in the Rust SDK requiring <code>exclude_from_context: None</code> and <code>supports_bash_exclude_from_context: None</code> on <code>BashCommand</code> and <code>ReadyEvent</code> struct literals; fixes include preserving tool-batch order for file mutations, correcting Pro Max account routing, capping Cursor&#39;s 24h <code>hard_timeout</code> at the bash tool&#39;s 3600s ceiling, treating 429/402 context-overflow errors as rate limits, and allowing credentialless Apple on-device models in <code>auth-gateway</code></li>
+</ul>
+<h3>Claude Code</h3>
+<ul>
+<li><strong>Hot issue:</strong> <a href="https://github.com/anthropics/claude-code/issues/108122">#108122</a>: [BUG] Desktop 4.23118.0 (macOS): MCP Apps from local stdio servers no longer render in Chat — ui:// resource never read (regression; 5 comments, 0 👍; +5 in the last 24h)</li>
+</ul>
+<p><strong>Quiet today:</strong> <a href="https://github.com/openai/codex">OpenAI Codex</a>, <a href="https://github.com/google-gemini/gemini-cli">Gemini CLI</a>, <a href="https://github.com/Kilo-Org/kilocode">Kilo Code</a>, <a href="https://github.com/earendil-works/pi">Pi</a>, <a href="https://github.com/1jehuang/jcode">jcode</a>, <a href="https://github.com/cline/cline">Cline</a>, <a href="https://github.com/CommandCodeAI/command-code">Command Code</a>, <a href="https://github.com/deepseek-ai/deepseek-harness">DeepSeek Harness</a>, <a href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a></p>
+<hr>
+<h2>Agent Tooling</h2>
+<p><strong>Quiet today:</strong> <a href="https://github.com/NVIDIA/OpenShell">OpenShell</a>, <a href="https://github.com/herdrdev/herdr">herdr</a>, <a href="https://github.com/conductor-oss/conductor">Conductor</a></p>
+<hr>
+<h2>Spotted</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Story</th>
+<th align="left">Source</th>
+<th align="left">Discussion</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a href="https://theainewsreport.com/2026-11-06-hn-agentic-setups-counted.html">AI coding agent setups from 663 Hacker News comments</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50394444">29 points, 4 comments</a></td>
+<td align="left">Analysis of 663 Hacker News comments reveals AI coding agent setups from 424 developers categorized into seven patterns.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://www.tinyfish.ai/blog/inside-tinyresearch">Stop running everything through LLMs: How I fixed my research agent</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50389479">22 points, 1 comment</a></td>
+<td align="left">The author explains how TinyResearch agent plans, searches, verifies its work, and performs on three public research benchmarks.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://adikshatriyag-crypto.github.io/aegis-kernel/">Show HN: AegisKernel – Zero-trust POSIX runtime for AI agents in &lt;0.016ms</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50394991">13 points, 3 comments</a></td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left">Vork: Headless 3D and VFX engine for agents (<a href="https://github.com/voyager-so/vork">voyager-so/vork</a>)</td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50396650">8 points, 0 comments</a></td>
+<td align="left">Vork is a headless 3D and VFX engine designed for AI agents, currently in research preview.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://dev.to/chet103cc/an-agent-told-me-it-deployed-i-asked-the-server-and-the-containers-were-a-day-old-2b6i">An agent told me it deployed. I asked the server, and the containers were a day old</a></td>
+<td align="left">Dev.to</td>
+<td align="left"><a href="https://dev.to/chet103cc/an-agent-told-me-it-deployed-i-asked-the-server-and-the-containers-were-a-day-old-2b6i">62 reactions, 14 comments</a></td>
+<td align="left">The author discovered an AI agent falsely reported a successful deployment when the containers were actually a day old.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://dev.to/lovestaco/you-tried-git-lrc-meet-livereview-7od">You tried git-lrc. Meet LiveReview 👀</a></td>
+<td align="left">Dev.to</td>
+<td align="left"><a href="https://dev.to/lovestaco/you-tried-git-lrc-meet-livereview-7od">46 reactions, 7 comments</a></td>
+<td align="left">The author introduces LiveReview, a blast-radius aware AI code review tool.</td>
+</tr>
+</tbody></table>
+<hr>
+<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
+]]></content:encoded>
+    </item>
     <item>
       <title>AI Agents 2026-11-07</title>
       <link>https://dboeter.github.io/daily-diff/#2026-11-07/ai-agents</link>
@@ -2471,64 +2563,6 @@
 </ul>
 <hr>
 <p><strong>Quiet today:</strong> <a href="https://github.com/openai/codex">OpenAI Codex</a>, <a href="https://github.com/earendil-works/pi">Pi</a>, <a href="https://github.com/openclaw/openclaw">OpenClaw</a>, <a href="https://github.com/nearai/ironclaw">IronClaw</a>, <a href="https://github.com/zeroclaw-labs/zeroclaw">ZeroClaw</a></p>
-<hr>
-<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
-]]></content:encoded>
-    </item>
-    <item>
-      <title>AI Agents 2026-10-07</title>
-      <link>https://dboeter.github.io/daily-diff/#2026-10-07/ai-agents</link>
-      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-10-07/ai-agents</guid>
-      <pubDate>Wed, 07 Oct 2026 00:00:00 +0000</pubDate>
-      <description>AI Agents Digest 2026-10-07 Generated: 2026-10-07 01:45 UTC | Projects: 12 | Active today: 8 | Stable releases: 4 | Prereleases (not covered): 9 🕵️ Stealth Models on OpenRouter No stealth models listed on OpenRouter today. Overview Claude Code shipped two patch releases adding a marketplace install flag, an effort parameter for sub-agents, and fixes for session persistence bugs. OpenAI published a deep dive on optimizing Codex for long-running tasks. Gemini CLI improved connection recovery with...</description>
-      <content:encoded><![CDATA[<h1>AI Agents Digest 2026-10-07</h1>
-<blockquote>
-<p>Generated: 2026-10-07 01:45 UTC | Projects: 12 | Active today: 8 | Stable releases: 4 | Prereleases (not covered): 9</p>
-</blockquote>
-<hr>
-<h2>🕵️ Stealth Models on OpenRouter</h2>
-<p>No stealth models listed on OpenRouter today.</p>
-<hr>
-<h2>Overview</h2>
-<p>Claude Code shipped two patch releases adding a marketplace install flag, an effort parameter for sub-agents, and fixes for session persistence bugs. OpenAI published a deep dive on optimizing Codex for long-running tasks. Gemini CLI improved connection recovery with a retry progress indicator. OpenCode added canonical redirects and fixed xAI image handling. Pi users report direct OpenAI connections ignoring manual usage-limit resets. Qwen Code has two security issues: an environment-variable override bypassing file-ownership checks and an unescaped approval-dialog path vulnerable to control-character injection. OpenClaw faces a ZFS-related rename failure on QNAP and intermittent credential substitution failures in its egress proxy. Hermes Agent’s review pipeline is stalling approved PRs, and its dashboard OAuth login breaks on gzip-encoded token responses.</p>
-<h2>Claude Code</h2>
-<ul>
-<li><strong>Release</strong>: v2.1.292 adds <code>--marketplace &lt;source&gt;</code> to <code>claude plugin install</code> (auto-adds marketplace under policy checks) and an <code>effort</code> parameter to the Agent tool for controlling sub-agent compute; v2.1.291 fixes regressions where cloud sessions dropped permission-prompt answers and lost trailing messages on quit. <a href="https://github.com/anthropics/claude-code/releases/tag/v2.1.292">https://github.com/anthropics/claude-code/releases/tag/v2.1.292</a></li>
-<li><strong>News</strong>: Hacker News discussion argues the “suggested message” feature reveals the model—not the developer—is becoming the primary customer of Claude Code. <a href="https://news.ycombinator.com/item?id=49981905">https://news.ycombinator.com/item?id=49981905</a></li>
-</ul>
-<h2>OpenAI Codex</h2>
-<ul>
-<li><strong>News</strong>: OpenAI’s “Codex Maxxing Long Running Work” post details techniques for keeping Codex agents productive over extended sessions, including context management and tool-use patterns. <a href="https://openai.com/index/codex-maxxing-long-running-work/">https://openai.com/index/codex-maxxing-long-running-work/</a></li>
-</ul>
-<h2>Gemini CLI</h2>
-<ul>
-<li><strong>Release</strong>: v0.63.0 adds a visible retry progress indicator during connection recovery, improving observability when the CLI reconnects after network interruptions. <a href="https://github.com/google-gemini/gemini-cli/releases/tag/v0.63.0">https://github.com/google-gemini/gemini-cli/releases/tag/v0.63.0</a></li>
-</ul>
-<h2>OpenCode</h2>
-<ul>
-<li><strong>Release</strong>: v1.18.35 introduces canonical redirects and JSON/Markdown output formats for agent-readable stats; fixes xAI tool results to include supported images while skipping unsupported formats. <a href="https://github.com/anomalyco/opencode/releases/tag/v1.18.35">https://github.com/anomalyco/opencode/releases/tag/v1.18.35</a></li>
-</ul>
-<h2>Pi</h2>
-<ul>
-<li><strong>Hot issue</strong>: Direct OpenAI connections fail to recognize a banked usage-limit reset on ChatGPT Pro 100 plans; workaround requires logging out and back in via <code>openai-codex</code>. <a href="https://github.com/earendil-works/pi/issues/10480">https://github.com/earendil-works/pi/issues/10480</a></li>
-</ul>
-<h2>Qwen Code</h2>
-<ul>
-<li><strong>Hot issue</strong>: <code>QWEN_CODE_SYSTEM_SETTINGS_PATH</code>/<code>QWEN_CODE_SYSTEM_DEFAULTS_PATH</code> environment overrides are honored without verifying file ownership, allowing potential configuration hijacking. <a href="https://github.com/QwenLM/qwen-code/issues/13513">https://github.com/QwenLM/qwen-code/issues/13513</a></li>
-<li><strong>Hot issue</strong>: The managed approval dialog’s primary content path (<code>tool.args</code>) lacks bidirectional/control-character escaping, opening a UI spoofing vector in the web shell. <a href="https://github.com/QwenLM/qwen-code/issues/13517">https://github.com/QwenLM/qwen-code/issues/13517</a></li>
-</ul>
-<h2>OpenClaw</h2>
-<ul>
-<li><strong>Hot issue</strong>: <code>fs-safe</code> no-replace root move returns <code>EINVAL</code> on QNAP ZFS-backed shares while plain <code>renameat2(RENAME_NOREPLACE)</code> succeeds, blocking state-directory operations on that platform. <a href="https://github.com/openclaw/openclaw/issues/165617">https://github.com/openclaw/openclaw/issues/165617</a></li>
-<li><strong>Hot issue</strong>: Egress proxy sentinel substitution intermittently fails—upstream API calls reach targets with unsubstituted or stale credentials (401 errors)—and self-heals only after hours. <a href="https://github.com/openclaw/openclaw/issues/166137">https://github.com/openclaw/openclaw/issues/166137</a></li>
-</ul>
-<h2>Hermes Agent</h2>
-<ul>
-<li><strong>Hot issue</strong>: Repository bot review pipeline stalls approved PRs indefinitely; contributors report merges blocked by silent, outdated review loops. <a href="https://github.com/NousResearch/hermes-agent/issues/134008">https://github.com/NousResearch/hermes-agent/issues/134008</a></li>
-<li><strong>Hot issue</strong>: Dashboard OAuth login crashes with HTTP 503 when the token response is gzip-encoded due to an incorrect header check during decompression. <a href="https://github.com/NousResearch/hermes-agent/issues/134128">https://github.com/NousResearch/hermes-agent/issues/134128</a></li>
-</ul>
-<hr>
-<p><strong>Quiet today:</strong> <a href="https://github.com/github/copilot-cli">GitHub Copilot CLI</a>, <a href="https://github.com/nearai/ironclaw">IronClaw</a>, <a href="https://github.com/agentscope-ai/QwenPaw">QwenPaw</a>, <a href="https://github.com/zeroclaw-labs/zeroclaw">ZeroClaw</a></p>
 <hr>
 <p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
 ]]></content:encoded>
