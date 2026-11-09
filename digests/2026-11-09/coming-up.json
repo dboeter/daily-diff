@@ -1,0 +1,30 @@
+[
+  {
+    "date": "2026-11-09",
+    "title": "Articles 75c – 75d AI Act Implementing Act",
+    "link": "https://ec.europa.eu/info/law/better-regulation/have-your-say/initiatives/19292_en",
+    "source": "Have your say",
+    "page": "ai-policy"
+  },
+  {
+    "date": "2026-11-11",
+    "title": "Cloud and AI Development Act",
+    "link": "https://ec.europa.eu/info/law/better-regulation/have-your-say/initiatives/14628_en",
+    "source": "Have your say",
+    "page": "ai-policy"
+  },
+  {
+    "date": "2026-11-30",
+    "title": "Upcoming end of life for the Genie One MCP Beta endpoint",
+    "link": "https://learn.microsoft.com/azure/databricks/release-notes/whats-coming#upcoming-end-of-life-for-the-genie-one-mcp-beta-endpoint",
+    "source": "Azure Databricks",
+    "page": "ai-data"
+  },
+  {
+    "date": "2026-12-02",
+    "title": "AI Act: bans on sexual deepfakes and CSAM generators; Art. 50(2) transition ends",
+    "link": "https://ai-act-service-desk.ec.europa.eu/en/ai-act/timeline/timeline-implementation-eu-ai-act",
+    "source": "Calendar",
+    "page": "ai-policy"
+  }
+]

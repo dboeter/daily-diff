@@ -1,0 +1,13 @@
+{
+  "ai-agents": [
+    "Oh My Pi v18.18.2–v18.18.3 breaks `ask` tool to accept single HTML form, changes `AskToolDetails`, removes `QuestionResult`, requires `AgentSession` for logout.",
+    "Goldman Sachs pulls Claude Code from bankers and traders."
+  ],
+  "ai-policy": [
+    "Politico Europe reports 16 EU states lack AI safety captains and missed data-center deadlines; two Commission consultations open until Nov 2026."
+  ],
+  "ai-trends": [
+    "ccch1mneyyy/dsh-Go gained 11,544 stars this week (+230%), largest gain across 32 tracked repos.",
+    "Hermes Agent leads Agent & Coding Tool Radar at 12.39T tokens/week; omp leads npm at 221,076 downloads/week."
+  ]
+}

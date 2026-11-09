@@ -1,0 +1,20 @@
+{
+"attempted": 14,
+"failed": 0,
+"calls": [
+{"label":"agents","outcome":"ok","chars":1655},
+{"label":"spotted-summaries","outcome":"ok","chars":1946},
+{"label":"policy-summaries","outcome":"ok","chars":121},
+{"label":"policy","outcome":"ok","chars":406},
+{"label":"agents-highlights","outcome":"ok","chars":777},
+{"label":"models-highlights","outcome":"ok","chars":273},
+{"label":"data-vendor-summaries","outcome":"ok","chars":225},
+{"label":"claude-code-skills","outcome":"ok","chars":1923},
+{"label":"data-highlights","outcome":"ok","chars":57},
+{"label":"trending-summaries","outcome":"ok","chars":7787},
+{"label":"trends-summaries","outcome":"ok","chars":2020},
+{"label":"trends-hf-summaries","outcome":"ok","chars":528},
+{"label":"trends","outcome":"ok","chars":3274},
+{"label":"highlights","outcome":"ok","chars":622}
+]
+}
