@@ -1,5 +1,5 @@
 {
-  "generated": "2026-11-08T05:52:16.925Z",
+  "generated": "2026-11-09T06:06:45.409Z",
   "labels": {
     "ai-agents": "AI Agents",
     "ai-models": "AI Models & Labs",
@@ -45,6 +45,16 @@
     "What to do"
   ],
   "dates": [
+    {
+      "date": "2026-11-09",
+      "reports": [
+        "ai-agents",
+        "ai-models",
+        "ai-policy",
+        "ai-data",
+        "ai-trends"
+      ]
+    },
     {
       "date": "2026-11-08",
       "reports": [

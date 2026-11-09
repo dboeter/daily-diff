@@ -13,7 +13,96 @@
       <height>144</height>
     </image>
     <atom:link href="https://dboeter.github.io/daily-diff/feeds/ai-agents.xml" rel="self" type="application/rss+xml"/>
-    <lastBuildDate>Sun, 08 Nov 2026 05:52:17 +0000</lastBuildDate>
+    <lastBuildDate>Mon, 09 Nov 2026 06:06:45 +0000</lastBuildDate>
+    <item>
+      <title>AI Agents 2026-11-09</title>
+      <link>https://dboeter.github.io/daily-diff/#2026-11-09/ai-agents</link>
+      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-11-09/ai-agents</guid>
+      <pubDate>Mon, 09 Nov 2026 00:00:00 +0000</pubDate>
+      <description>AI Agents 2026-11-09 ⬛ Overview · 🟪 AI Agents · 🟦 AI Models &amp;amp; Labs · 🟧 AI Policy · 🟨 Data Engineering · 🟫 Trends Projects: 15 | Active today: 3 | Stable releases: 2 | Prereleases (not covered): 0 | Generated: 2026-11-09 06:01 UTC Highlights Oh My Pi v18.18.2–v18.18.3 introduces breaking changes: ask tool now accepts a single HTML form ({ html }) instead of questions[]; AskToolDetails becomes { answers, timedOut? }; QuestionResult removed; logoutCredential() requires AgentSession; Sessio...</description>
+      <content:encoded><![CDATA[<h1>AI Agents 2026-11-09</h1>
+<p><a href="https://dboeter.github.io/daily-diff/#2026-11-09">⬛ Overview</a> · <strong>🟪 AI Agents</strong> · <a href="https://dboeter.github.io/daily-diff/#2026-11-09/ai-models">🟦 AI Models &amp; Labs</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-09/ai-policy">🟧 AI Policy</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-09/ai-data">🟨 Data Engineering</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-09/ai-trends">🟫 Trends</a></p>
+<blockquote>
+<p>Projects: 15 | Active today: 3 | Stable releases: 2 | Prereleases (not covered): 0 | Generated: 2026-11-09 06:01 UTC</p>
+</blockquote>
+<hr>
+<h2>Highlights</h2>
+<ul>
+<li>Oh My Pi v18.18.2–v18.18.3 introduces breaking changes: <code>ask</code> tool now accepts a single HTML form (<code>{ html }</code>) instead of <code>questions[]</code>; <code>AskToolDetails</code> becomes <code>{ answers, timedOut? }</code>; <code>QuestionResult</code> removed; <code>logoutCredential()</code> requires <code>AgentSession</code>; <code>SessionStorage.hasAssistantTurn()</code> replaced by <code>scanLines(path, visit)</code>. New features include <code>balanced</code> delegation bias, <code>ask</code> forms supporting images and free-text options, and <code>ui.formDialog(html, options)</code> extension.</li>
+<li>Goldman Sachs is pulling Claude Code from its bankers and traders.</li>
+<li>An article argues agent memory suffers from fragmentation analogous to pre-OpenTelemetry observability, with every tool storing memory in its own incompatible format (177 points, 105 comments on Hacker News).</li>
+</ul>
+<hr>
+<h2>Coding Agents &amp; Assistants</h2>
+<h3>Claude Code</h3>
+<ul>
+<li><strong>News:</strong> <a href="https://news.ycombinator.com/item?id=50415628">Goldman Sachs is pulling Claude Code from its bankers and traders</a></li>
+<li><strong>News:</strong> <a href="https://news.ycombinator.com/item?id=50416363">How I Fight AI Brain Fry</a> — describes terminal workflow strain when using Claude Code or Codex.</li>
+</ul>
+<h3>OpenAI Codex</h3>
+<ul>
+<li><strong>News:</strong> <a href="https://news.ycombinator.com/item?id=50416363">How I Fight AI Brain Fry</a> — describes terminal workflow strain when using Codex or Claude Code.</li>
+</ul>
+<h3>Oh My Pi</h3>
+<ul>
+<li><strong>Release:</strong> <a href="https://github.com/can1357/oh-my-pi/releases/tag/v18.18.2">v18.18.2</a>–<a href="https://github.com/can1357/oh-my-pi/releases/tag/v18.18.3">v18.18.3</a>: breaking — <code>ask</code> tool now takes a single HTML form (<code>{ html }</code>) instead of <code>questions[]</code>; <code>AskToolDetails</code> becomes { answers, timedOut? }; <code>QuestionResult</code> removed; <code>logoutCredential()</code> requires <code>AgentSession</code> and a scoped-model refresher; <code>SessionStorage.hasAssistantTurn()</code> replaced by <code>scanLines(path, visit)</code>. fixes — GenAI message-content capture from <code>.env</code> files works again; remote OpenAI compaction preparation and generic <code>/chat/completions</code> compaction retain correct model attribution; rotated credential pools report exhausted credential status correctly; OpenAI multi-image edits and Cursor xd:// device reads fixed. features — <code>balanced</code> delegation bias added; Tern right-click <code>ask</code> answer adds Note annotation; <code>task.eager</code> scopes to main agent only; <code>ask</code> forms support images (URL, data URI, local file, Mermaid) and &quot;Other&quot; free-text options; extension gains <code>ui.formDialog(html, options)</code>; <code>canReplayRemoteCompactionFrom()</code>, Cursor edit execution context, and Responses replay utilities added.</li>
+</ul>
+<p><strong>Quiet today:</strong> <a href="https://github.com/google-gemini/gemini-cli">Gemini CLI</a>, <a href="https://github.com/Kilo-Org/kilocode">Kilo Code</a>, <a href="https://github.com/anomalyco/opencode">OpenCode</a>, <a href="https://github.com/earendil-works/pi">Pi</a>, <a href="https://github.com/1jehuang/jcode">jcode</a>, <a href="https://github.com/cline/cline">Cline</a>, <a href="https://github.com/CommandCodeAI/command-code">Command Code</a>, <a href="https://github.com/deepseek-ai/deepseek-harness">DeepSeek Harness</a>, <a href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a></p>
+<hr>
+<h2>Agent Tooling</h2>
+<p><strong>Quiet today:</strong> <a href="https://github.com/NVIDIA/OpenShell">OpenShell</a>, <a href="https://github.com/herdrdev/herdr">herdr</a>, <a href="https://github.com/conductor-oss/conductor">Conductor</a></p>
+<hr>
+<h2>Spotted</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Story</th>
+<th align="left">Source</th>
+<th align="left">Discussion</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a href="https://www.lorekit.io/blog/open-agent-memory-format">Agent memory needs its OpenTelemetry moment</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50411467">177 points, 105 comments</a></td>
+<td align="left">The article argues that AI agent memory suffers from fragmentation similar to pre-OpenTelemetry observability, noting that every tool currently stores memory in its own incompatible format.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50403153">Ask HN: How do you manage your AI agents&#39; context across clients and projects?</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50403153">35 points, 26 comments</a></td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left">Show HN: LLM weight editing tool made by a 15-year-old (<a href="https://github.com/Miyamoto-Renya/LaplacesScissors">Miyamoto-Renya/LaplacesScissors</a>)</td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50409986">13 points, 2 comments</a></td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left"><a href="https://javimosch.github.io/linux-use/">Linux-use – agent-first GUI control for Linux</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50390950">5 points, 0 comments</a></td>
+<td align="left">The post introduces Linux-use, a single static binary built with MFL that gives agents CLI-first GUI control over Linux desktops via the AT-SPI2 accessibility tree.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://dev.to/gde/building-railpulse-ai-deploying-an-open-source-railway-dispatch-agent-with-gemma-and-google-cloud-2b9g">Building RailPulse AI: Deploying an Open-Source Railway Dispatch Agent with Gemma and Google Cloud Run</a></td>
+<td align="left">Dev.to</td>
+<td align="left"><a href="https://dev.to/gde/building-railpulse-ai-deploying-an-open-source-railway-dispatch-agent-with-gemma-and-google-cloud-2b9g">28 reactions, 23 comments</a></td>
+<td align="left">The author, Robina Mirbahar, describes deploying RailPulse AI, an open-source railway dispatch agent powered by Gemma on Google Cloud Run.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://dev.to/kenielzep97/the-correct-timestamp-was-in-my-agents-prompt-it-still-said-we-were-talking-eh7">The Correct Timestamp Was in My Agent&#39;s Prompt. It Still Said We Were Talking.</a></td>
+<td align="left">Dev.to</td>
+<td align="left"><a href="https://dev.to/kenielzep97/the-correct-timestamp-was-in-my-agents-prompt-it-still-said-we-were-talking-eh7">23 reactions, 6 comments</a></td>
+<td align="left">The author recounts a scheduled self-audit at 05:57 Eastern on November 6 where their agent received the correct timestamp in its prompt yet still claimed they were actively talking.</td>
+</tr>
+</tbody></table>
+<hr>
+<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
+]]></content:encoded>
+    </item>
     <item>
       <title>AI Agents 2026-11-08</title>
       <link>https://dboeter.github.io/daily-diff/#2026-11-08/ai-agents</link>
@@ -2510,59 +2599,6 @@
 </ul>
 <hr>
 <p><strong>Quiet today:</strong> <a href="https://github.com/google-gemini/gemini-cli">Gemini CLI</a>, <a href="https://github.com/Kilo-Org/kilocode">Kilo Code</a>, <a href="https://github.com/cline/cline">Cline</a>, <a href="https://github.com/CommandCodeAI/command-code">Command Code</a>, <a href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a></p>
-<hr>
-<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
-]]></content:encoded>
-    </item>
-    <item>
-      <title>AI Agents 2026-10-10</title>
-      <link>https://dboeter.github.io/daily-diff/#2026-10-10/ai-agents</link>
-      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-10-10/ai-agents</guid>
-      <pubDate>Sat, 10 Oct 2026 00:00:00 +0000</pubDate>
-      <description>AI Agents Digest 2026-10-10 Generated: 2026-10-10 01:52 UTC | Projects: 12 | Active today: 7 | Stable releases: 2 | Prereleases (not covered): 8 🕵️ Stealth Models on OpenRouter No stealth models listed on OpenRouter today. Overview Claude Code shipped v2.1.296 adding gateway policy support for Claude Desktop&amp;#39;s Code tab and subagent auto-compact configuration, while GitHub Copilot CLI v1.0.95 brought native Microsoft Entra authentication to macOS. Claude Code&amp;#39;s auto-mode classifier is bl...</description>
-      <content:encoded><![CDATA[<h1>AI Agents Digest 2026-10-10</h1>
-<blockquote>
-<p>Generated: 2026-10-10 01:52 UTC | Projects: 12 | Active today: 7 | Stable releases: 2 | Prereleases (not covered): 8</p>
-</blockquote>
-<hr>
-<h2>🕵️ Stealth Models on OpenRouter</h2>
-<p>No stealth models listed on OpenRouter today.</p>
-<hr>
-<h2>Overview</h2>
-<p>Claude Code shipped v2.1.296 adding gateway policy support for Claude Desktop&#39;s Code tab and subagent auto-compact configuration, while GitHub Copilot CLI v1.0.95 brought native Microsoft Entra authentication to macOS. Claude Code&#39;s auto-mode classifier is blocking account owners from running their own scheduled Cowork routines and transferring files between their machines, and a separate report shows Opus 4.6 running at 200K context instead of the documented 500K on Max plans. Gemini CLI&#39;s strict RFC 9207 enforcement breaks MCP OAuth with providers like Atlassian that don&#39;t support the &quot;iss&quot; field. Qwen Code has a daemon git worktree guard vulnerability where heredoc bodies fed to shells still execute, and Hermes Agent misclassifies new <code>sk-ant-usr-</code> personal API keys as OAuth tokens, causing credit balance errors.</p>
-<h2>Claude Code</h2>
-<ul>
-<li><strong>Release</strong>: v2.1.296 adds a <code>code</code> key to the Claude apps gateway&#39;s managed policies for Claude Desktop&#39;s Code tab, and introduces <code>autoCompactWindow</code> in subagent frontmatter so subagents can compact earlier than the main conversation. <a href="https://github.com/anthropics/claude-code/releases/tag/v2.1.296">Release</a></li>
-<li><strong>Hot issue</strong>: Auto mode classifier blocks the account owner&#39;s own scheduled Cowork routines and file transfers between their own machines, a regression since late September. <a href="https://github.com/anthropics/claude-code/issues/100730">Issue #100730</a></li>
-<li><strong>Hot issue</strong>: Merged Claude app runs Opus 4.6 at 200K context on Max 5x plans (help center documents 500K), leaving only ~50K per compaction cycle after ~92K fixed overhead. <a href="https://github.com/anthropics/claude-code/issues/100502">Issue #100502</a></li>
-</ul>
-<h2>GitHub Copilot CLI</h2>
-<ul>
-<li><strong>Release</strong>: v1.0.95 enables native Microsoft Entra broker authentication on macOS with browser fallback, adds sandbox credential <code>injectHosts</code> keys to <code>copilot config</code> with shell completion, and fixes <code>--context</code> to apply to new and resumed ACP sessions. <a href="https://github.com/github/copilot-cli/releases/tag/v1.0.95">Release</a></li>
-</ul>
-<h2>Gemini CLI</h2>
-<ul>
-<li><strong>Hot issue</strong>: Strict RFC 9207 enforcement in MCP OAuth blocks providers like Atlassian that don&#39;t advertise an &quot;iss&quot; field in discovery metadata; an opt-in config is proposed. <a href="https://github.com/google-gemini/gemini-cli/issues/29681">Issue #29681</a></li>
-</ul>
-<h2>OpenCode</h2>
-<ul>
-<li><strong>Hot issue</strong>: Cannot connect to API through fixed networks with self-signed certificates even when the root CA is installed locally; suggests Node.js <code>--use-system-ca</code> flag as workaround. <a href="https://github.com/anomalyco/opencode/issues/54095">Issue #54095</a></li>
-</ul>
-<h2>Qwen Code</h2>
-<ul>
-<li><strong>Hot issue</strong>: Feature request for <code>/auto-mode-setup</code> command to ground the auto-mode classifier with local environment context (project type, build tools, package managers). <a href="https://github.com/QwenLM/qwen-code/issues/13691">Issue #13691</a></li>
-<li><strong>Hot issue</strong>: Daemon git worktree guard strips heredoc bodies before parsing, but when the receiver is a shell or interpreter the stripped body still executes as program code — a security vulnerability. <a href="https://github.com/QwenLM/qwen-code/issues/13705">Issue #13705</a></li>
-</ul>
-<h2>Hermes Agent</h2>
-<ul>
-<li><strong>Hot issue</strong>: <code>_is_oauth_token()</code> misclassifies new Console personal API keys (<code>sk-ant-usr-</code>) as OAuth tokens, injecting Claude Code identity and failing requests with &quot;credit balance too low&quot;. <a href="https://github.com/NousResearch/hermes-agent/issues/135376">Issue #135376</a></li>
-</ul>
-<h2>QwenPaw</h2>
-<ul>
-<li><strong>Hot issue</strong>: Chat history disappears unexpectedly; user argues this is unrelated to model context window and demands a fix. <a href="https://github.com/agentscope-ai/QwenPaw/issues/8134">Issue #8134</a></li>
-</ul>
-<hr>
-<p><strong>Quiet today:</strong> <a href="https://github.com/openai/codex">OpenAI Codex</a>, <a href="https://github.com/earendil-works/pi">Pi</a>, <a href="https://github.com/openclaw/openclaw">OpenClaw</a>, <a href="https://github.com/nearai/ironclaw">IronClaw</a>, <a href="https://github.com/zeroclaw-labs/zeroclaw">ZeroClaw</a></p>
 <hr>
 <p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
 ]]></content:encoded>

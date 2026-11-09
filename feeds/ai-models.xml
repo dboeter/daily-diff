@@ -13,7 +13,103 @@
       <height>144</height>
     </image>
     <atom:link href="https://dboeter.github.io/daily-diff/feeds/ai-models.xml" rel="self" type="application/rss+xml"/>
-    <lastBuildDate>Sun, 08 Nov 2026 05:52:17 +0000</lastBuildDate>
+    <lastBuildDate>Mon, 09 Nov 2026 06:06:45 +0000</lastBuildDate>
+    <item>
+      <title>AI Models &amp; Labs 2026-11-09</title>
+      <link>https://dboeter.github.io/daily-diff/#2026-11-09/ai-models</link>
+      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-11-09/ai-models</guid>
+      <pubDate>Mon, 09 Nov 2026 00:00:00 +0000</pubDate>
+      <description>AI Models &amp;amp; Labs 2026-11-09 ⬛ Overview · 🟪 AI Agents · 🟦 AI Models &amp;amp; Labs · 🟧 AI Policy · 🟨 Data Engineering · 🟫 Trends Lab posts: 0 | New models: 0 | Spotted: 7 | Generated: 2026-11-09 06:01 UTC Highlights No lab or model news today. OpenAI raised $11 B at a $1.25 T valuation, below its initial $1.4 T target, per a 24/7 Wall St. report discussed on Hacker News. Anthropic agreed a $3.4 B deal to generate gas‑fired power for its data centres, the Financial Times reports. Stealth Mode...</description>
+      <content:encoded><![CDATA[<h1>AI Models &amp; Labs 2026-11-09</h1>
+<p><a href="https://dboeter.github.io/daily-diff/#2026-11-09">⬛ Overview</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-09/ai-agents">🟪 AI Agents</a> · <strong>🟦 AI Models &amp; Labs</strong> · <a href="https://dboeter.github.io/daily-diff/#2026-11-09/ai-policy">🟧 AI Policy</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-09/ai-data">🟨 Data Engineering</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-09/ai-trends">🟫 Trends</a></p>
+<blockquote>
+<p>Lab posts: 0 | New models: 0 | Spotted: 7 | Generated: 2026-11-09 06:01 UTC</p>
+</blockquote>
+<hr>
+<h2>Highlights</h2>
+<ul>
+<li>No lab or model news today.</li>
+<li>OpenAI raised $11 B at a $1.25 T valuation, below its initial $1.4 T target, per a 24/7 Wall St. report discussed on Hacker News.</li>
+<li>Anthropic agreed a $3.4 B deal to generate gas‑fired power for its data centres, the Financial Times reports.</li>
+</ul>
+<hr>
+<h2>Stealth Models on OpenRouter</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Model</th>
+<th align="left">Listed</th>
+<th align="left">Expires</th>
+<th align="left">Status</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a href="https://openrouter.ai/stealth/crouton-alpha">Crouton Alpha</a> <code>stealth/crouton-alpha</code></td>
+<td align="left">2026-11-03</td>
+<td align="left">—</td>
+<td align="left">live</td>
+</tr>
+</tbody></table>
+<hr>
+<p>Nothing new from Anthropic and OpenAI or OpenRouter&#39;s new listings today.</p>
+<hr>
+<h2>Spotted</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Story</th>
+<th align="left">Source</th>
+<th align="left">Discussion</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a href="https://247wallst.com/investing/2026/11/07/openai-just-raised-11-billion-at-a-1-25-trillion-valuation-below-the-1-4-trillion-it-first-sought/">OpenAI raises $11B at a $1.25T valuation</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50413822">185 points, 204 comments</a></td>
+<td align="left">OpenAI secured an $11 billion raise at a $1.25 trillion valuation, though the piece notes the terms fell short of what the company wanted and highlight a growing gap between its growth narrative and investor appetite.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://www.ft.com/content/41bf5c6a-9735-4f1a-a8e3-2bcccad58ba0">Anthropic strikes $3.4B deal to generate gas-fired power for data centres</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50412760">40 points, 28 comments</a></td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left"><a href="https://www.bloomberg.com/news/newsletters/2026-11-08/apple-explores-turning-siri-ai-into-chatgpt-dots-like-agent-ios-28-shake-up">Apple CEO Presses Software Chief to Pursue More Ambitious AI Strategy</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50414021">35 points, 60 comments</a></td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left"><a href="https://www.businessinsider.com/michael-burry-anthropic-ipo-outlook-ant-big-short-2026-11">Michael Burry says Anthropic is &#39;betting its existence&#39; on optimism</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50385642">12 points, 6 comments</a></td>
+<td align="left">Michael Burry warns that Anthropic is &quot;betting its existence&quot; on optimism, citing concern that its revenue may not keep pace with future spending commitments.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://twitter.com/bebuu_ai/status/2118052769856888892">Z.ai says GLM 5.5 built on 1T web pages</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50384093">11 points, 2 comments</a></td>
+<td align="left">Z.ai&#39;s chief scientist Jie Tang revealed that GLM-5.5 (in 32B, 122B, and 256B sizes) was pretrained on 1 trillion web pages drawn from six internal engines rather than public datasets.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://www.doubleai.com/research/can-llms-redesign-themselves-as-they-train">Can LLMs redesign themselves as they train?</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50398045">10 points, 0 comments</a></td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left"><a href="https://dev.to/advikdivekar/theres-a-pattern-hidden-in-qwen35-08bs-neurons-that-training-cant-explain-58od">There&#39;s a Pattern Hidden in Qwen3.5-0.8B&#39;s Neurons That Training Can&#39;t Explain</a></td>
+<td align="left">Dev.to</td>
+<td align="left"><a href="https://dev.to/advikdivekar/theres-a-pattern-hidden-in-qwen35-08bs-neurons-that-training-cant-explain-58od">43 reactions, 0 comments</a></td>
+<td align="left">An analysis finds that the MLP neurons in Qwen3.5-0.8B appear to be secretly ranked in a pattern that standard training dynamics cannot explain.</td>
+</tr>
+</tbody></table>
+<hr>
+<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
+]]></content:encoded>
+    </item>
     <item>
       <title>AI Models &amp; Labs 2026-11-08</title>
       <link>https://dboeter.github.io/daily-diff/#2026-11-08/ai-models</link>
