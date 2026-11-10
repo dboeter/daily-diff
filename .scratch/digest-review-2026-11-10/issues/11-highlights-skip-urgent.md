@@ -17,3 +17,5 @@ The Highlights prompt asks for 1–3 bullets with one subject each, and gives no
 - [ ] Replay the two pages of 11-10 with the changed prompt before deciding
 
 ## Comments
+
+- 2026-11-11: the maintainer chose a dedicated Security section on every page, incidents and fixes: `../../security-section/spec.md`. It takes the security fixes out of this issue; the near deadline (Genie One) stays here.

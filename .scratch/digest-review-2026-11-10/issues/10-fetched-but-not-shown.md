@@ -22,3 +22,5 @@ Related: issue 08 covers news no source fetches, and its last item asks the same
 - [ ] Review repo: a story the Overview lists ("Also talked about", `talked-about.json`) counts as shown. `scripts/collect.sh` and `scripts/candidates.py` do not read that file, so the TPU story reads as `excluded`
 
 ## Comments
+
+- 2026-11-11: the maintainer chose a dedicated Security section on every page, incidents and fixes: `../../security-section/spec.md`. It gives a security story its own slots, so the Fireworks case leaves this issue; the row cap and the policy items stay here.
