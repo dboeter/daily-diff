@@ -1,6 +1,6 @@
-# Digest reviews 2026-11-04, 11-07, 11-08 (nightly black-box review)
+# Digest reviews 2026-11-04 … 11-10 (nightly black-box review)
 
-Source: `~/daily-diff-review/reviews/` (dagent plan: four blind reviewers, four scouts, a Codex verifier, a summary, an ops check of the CI run). 11-04: 13 findings. 11-07: 22 findings, 18 missed stories. 11-08: 19 findings, 1 missed story. No review ran on 11-09 and 11-10 until the plan was fixed (below).
+Source: `~/daily-diff-review/reviews/` (dagent plan: four blind reviewers, four scouts, a Codex verifier, a summary, an ops check of the CI run). 11-04: 13 findings. 11-07: 22 findings, 18 missed stories. 11-08: 19 findings, 1 missed story. The reviews of 11-09 and 11-10 ran later, on 11-10, once the plan was fixed; their findings are in the second section.
 
 ## Findings, by theme
 
@@ -18,7 +18,27 @@ Source: `~/daily-diff-review/reviews/` (dagent plan: four blind reviewers, four 
 | 10  | low    | models, agents | Missed news is mostly sources the digest does not fetch (Meta AI blog, GitHub changelog, funding news)                                                                     | 08    |
 | 11  | low    | docs           | `GLOSSARY.md` says agents, models and data stories never reach "Also talked about"; `AGENTS.md` and the code send stories under the topic bar there                        | 09    |
 
-## Noted, no issue
+## Reviews 2026-11-09 and 11-10
+
+11-09: 23 findings, 2 missed stories. 11-10: 25 findings (2 high), 9 missed stories. Most repeat findings 1–5 and 8–10; that evidence is a dated comment in issues 01–08. New:
+
+| #   | Sev    | Page           | Finding                                                                                                                                                       | Issue |
+| --- | ------ | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----- |
+| 12  | high   | models, policy | Fetched stories lose the selection: the Fireworks AI breach (three submissions, none shown), the Fable launch offers, US and Dutch policy items under the bar | 10    |
+| 13  | medium | data, agents   | Highlights leave out the most urgent item: the Genie One end of life on 11-30, Claude Code's OAuth-secret and sandbox fixes                                   | 11    |
+| 14  | low    | models         | "No lab or model news today." above Highlights about OpenAI's raise and Anthropic's power deal (11-09)                                                        | 12    |
+| 15  | low    | data           | Header says `Vendor items: 15`, the page lists 20: the Also new lines are not counted (11-10)                                                                 | 13    |
+| 16  | medium | agents         | One general post is News under Claude Code and Codex, and alone makes Codex active (11-09)                                                                    | 14    |
+
+Finding 1 also has its first high case in a repo section: "make Claude Fable 5.2 the default model" (issue 05).
+
+Noted, no issue, from these two reviews:
+
+- By design, flagged by the reviewers: a Spotted row for a GitHub repo links the repo name, not the title; the `−` that opens a going-away Highlight.
+- `[lobsters] 0 stories (from 74 unique)` on 11-10, once. File it if it repeats.
+- A type written outside code formatting in one bullet and inside in another (Oh My Pi, 11-09); "handtyped" in a title and "handwritten" in its summary (11-10).
+
+## Noted, no issue (11-04, 11-07, 11-08)
 
 - Same-event misses: Revolut as News and as a Spotted row from a second outlet (11-04); the Claude Code email-leak story again on 11-08 through a Dev.to write-up (it had a development, the fix in 2.1.317, which the summary left out: finding 1's class).
 - Policy: one Dutch cabinet package filled 5 of 8 rows on 11-07; two rows restated their titles ("Government letter" as the only text).

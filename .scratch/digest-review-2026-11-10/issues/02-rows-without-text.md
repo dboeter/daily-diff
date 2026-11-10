@@ -16,3 +16,5 @@ Lab posts without page text, `minor` vendor rows and unsummarized Trends rows ar
 - [ ] Tests replaying the 11-08 models page
 
 ## Comments
+
+- 2026-11-10, from the reviews of 11-09 and 11-10: the same on both days. 11-09: two agents Spotted rows and three models Spotted rows with `—`, and the lead agents Highlight "Goldman Sachs is pulling Claude Code from its bankers and traders" rests on a title alone (empty candidate text). 11-10: two agents Spotted rows with `—`, one of them the top row, and two OpenAI lab rows with `—` and titles made from the URL slug (by design: OpenAI answers 403).

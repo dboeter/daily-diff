@@ -13,3 +13,5 @@ Findings: 5 [medium], see `../review.md`
 - [ ] If the pages had real Highlights: fall back to the page's first Highlight for every published daily page, as `ai-policy` does
 
 ## Comments
+
+- 2026-11-10, from the reviews of 11-09 and 11-10: no new case on 11-10. The 11-09 case is the one named above. On that day the models page opened with "No lab or model news today." (issue 12), which may explain its missing entry.

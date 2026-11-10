@@ -15,3 +15,5 @@ Lives in the review repo, not here.
 - [ ] Check one day's tagged candidates: the BigQuery and Databricks notes not linked are `excluded`
 
 ## Comments
+
+- 2026-11-10, from the reviews of 11-09 and 11-10: two BigQuery notes on 11-09 and six candidates on 11-10 read as `shown` without a link in the report: one Unity Gateway note, three Lakeflow Designer notes and the two BigQuery notes. The Databricks notes confirm the second half of the cause above.

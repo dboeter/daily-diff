@@ -20,3 +20,5 @@ Not a bug: Internetconsultatie logs "32 open consultations" then "0 items" becau
 - [ ] Internetconsultatie: a source that listed items and kept none should not count as quiet
 
 ## Comments
+
+- 2026-11-10, from the reviews of 11-09 and 11-10: EDPB still answers `HTTP 503` on both days. Congress.gov and Internetconsultatie give `0 items`, and all three have the quiet warning since 10-28. New on 11-10: digital-strategy.ec.europa.eu answered `HTTP 429` to 9 Commission mail redirects (the items stayed, under their redirect links). New on 11-09: the GitHub Trending page answered `HTTP 504` and was not retried, so the star gains came from the snapshot only. That fetch belongs to the retry decision above, though it is not a policy source.

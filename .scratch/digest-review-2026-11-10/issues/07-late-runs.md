@@ -14,3 +14,5 @@ Cron `7 1 * * *` Europe/Amsterdam. Runs were created at 05:46Z (11-07), 05:50Z (
 - Accept it: update the comment and `AGENTS.md` to the measured delay
 
 ## Comments
+
+- 2026-11-10, from the reviews of 11-09 and 11-10: later still. The runs were created at 06:01Z on 11-09 (5h54m late) and at 07:03Z on 11-10 (6h56m late, 08:03 Amsterdam).
