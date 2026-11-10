@@ -24,5 +24,5 @@ Source: `~/daily-diff-review/reviews/` (dagent plan: four blind reviewers, four 
 - Policy: one Dutch cabinet package filled 5 of 8 rows on 11-07; two rows restated their titles ("Government letter" as the only text).
 - Cosmetic: link text cut at "(G…" in the data report's Also new line (11-07); a stray `*` in a models Spotted summary (11-04).
 - By design, flagged by the reviewers: the `−` that opens a going-away Highlight; "Internetconsultatie: 32 open consultations" then "0 items" (the keyword filter kept none: no open AI consultation).
-- Conductor: `config.yml` tracks `conductor-oss/conductor` (a workflow engine). The Conductor of the 11-07 scout finding (Meta's acquisition, conductor.build) is closed source. Open decision: drop or keep.
+- Conductor: `config.yml` tracked `conductor-oss/conductor` (a workflow engine) by mistake; the entry is `microsoft/conductor`, with `keywords` (fixed 2026-11-10). The Conductor of the 11-07 scout finding (Meta's acquisition, conductor.build) is a third product, closed source and not tracked.
 - Node 20 deprecation warning on every run (`actions/checkout@v4`, `actions/setup-node@v4`, `pnpm/action-setup@v4`).

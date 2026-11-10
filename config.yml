@@ -92,8 +92,11 @@ infra:
       repo: herdrdev/herdr
       name: herdr
     - id: conductor
-      repo: conductor-oss/conductor
+      repo: microsoft/conductor
       name: Conductor
+      # Bare "conductor" also names Conductor OSS (the workflow engine) and the
+      # Mac app conductor.build, whose news is not this project's.
+      keywords: [microsoft conductor]
 
 # ── Data engineering ──────────────────────────────────────────────────────────
 # The repo sections of the daily data report (ai-data), for Digital Power's data
