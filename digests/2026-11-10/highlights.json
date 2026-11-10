@@ -1,0 +1,18 @@
+{
+  "ai-agents": [
+    "Pi v1.5.1 removes GrepOperations.readFile callbacks for context lines, a breaking change",
+    "Claude Code users report Team usage exhausted in ~30.5 hours after reset, far faster than prior burn rate"
+  ],
+  "ai-models": [
+    "Anthropic released Claude Fable 5.2 with gains in coding, reasoning, vision, scoring 65 on Artificial Analysis",
+    "Meta introduced Muse Ember, its smallest efficient model for complex reasoning, tool calls, agent workflows"
+  ],
+  "ai-policy": [
+    "European Commission preliminarily finds TikTok’s ‘For You’ feed in breach of Digital Services Act for ‘rabbit hole effect’",
+    "Pennsylvania enacts Artificial Intelligence Deceptive Advertising Act, new rules for AI use in advertising"
+  ],
+  "ai-data": [
+    "− Azure Databricks workspaces using Zhipu AI GLM 5.2 must migrate to GLM 5.3 before retirement on February 4, 2027",
+    "Databricks CLI v1.25.0 removes CRITICAL as a valid compute.priority_class value; API callers must update"
+  ]
+}

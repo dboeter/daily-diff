@@ -347,7 +347,30 @@
     "post:medium.com/snowflake/query-databricks-lakeflow-pipeline-tables-from-snowflake-without-copying-data-dde301ede202": "2026-11-07",
     "nov 2, 2026: coco automations (general availability)|2026-11-02": "2026-11-08",
     "https://community.fabric.microsoft.com/t5/Fabric-Updates-Blog/From-a-prompt-to-an-operational-dashboard-Generate-Real-Time/ba-p/5380258": "2026-11-08",
-    "https://community.fabric.microsoft.com/t5/Fabric-Updates-Blog/Adding-the-Context-Streaming-Events-Need-Reference-Data-Joins/ba-p/5382230": "2026-11-09"
+    "https://community.fabric.microsoft.com/t5/Fabric-Updates-Blog/Adding-the-Context-Streaming-Events-Need-Reference-Data-Joins/ba-p/5382230": "2026-11-09",
+    "zhipu ai glm 5.2 is scheduled for retirement|2026-11-06": "2026-11-10",
+    "smart routing is faster and lower cost, and now routes subagents only (beta)|2026-11-05": "2026-11-10",
+    "recover dropped unity catalog volumes with undrop volume|2026-11-07": "2026-11-10",
+    "genie search is now generally available|2026-11-09": "2026-11-10",
+    "genie ontology is now generally available|2026-11-09": "2026-11-10",
+    "shift dates in lakeflow jobs parameters with date arithmetic (beta)|2026-11-09": "2026-11-10",
+    "databricks sql version 2026.45 is now available in preview|2026-11-03": "2026-11-10",
+    "load unity catalog tables into pytorch on ai runtime (beta)|2026-11-06": "2026-11-10",
+    "ipaddress data type (general availability)|2026-11-08": "2026-11-10",
+    "coco admin in snowsight (preview)|2026-11-08": "2026-11-10",
+    "nov 06, 2026: anthropic claude 5.5 and openai gpt-6 models (general availability)|2026-11-06": "2026-11-10",
+    "https://community.fabric.microsoft.com/t5/Fabric-Updates-Blog/Unifying-SQL-Pools-Upcoming-changes-to-UI-and-APIs/ba-p/5397390": "2026-11-10",
+    "query performance troubleshooting and job and system performance comparison in the bigquery jobs explorer (ga)|2026-11-09": "2026-11-10",
+    "when you create or schedule a pipeline, you can specify the maximum number of concurrently executed pipeline tasks (ga)|2026-11-09": "2026-11-10",
+    "to support your finops practices, you can now opt in to compute cost attribution in bigquery editions (preview)|2026-11-09": "2026-11-10",
+    "nov 03, 2026: snowflake coco for microsoft excel and snowflake coco for google sheets (preview)|2026-11-03": "2026-11-10",
+    "you can use compression functions in googlesql to compress or decompress bytes or string values by using the zstandard (zstd) lossless data compression algorithm|2026-11-09": "2026-11-10",
+    "databricks genie app in microsoft teams is now generally available|2026-11-09": "2026-11-10",
+    "databricks genie app for slack is now generally available|2026-11-09": "2026-11-10",
+    "nov 09, 2026: skill recommendations and suggestions to create and share skills in coco|2026-11-09": "2026-11-10",
+    "release:databricks/cli@v1.25.0": "2026-11-10",
+    "release:databricks/terraform-provider-databricks@v1.142.0": "2026-11-10",
+    "post:medium.com/snowflake/who-is-actually-using-your-snowflake-mcp-server-683a6cb543d7": "2026-11-10"
   },
   "stages": {
     "snowflake-bcr:2026_08": "2026-10-16 Introduced in the 10.37 release (October 8-16, 2026) as Disabled by Default; account admins can enable for testing."
@@ -366,6 +389,13 @@
       "link": "https://docs.cloud.google.com/bigquery/docs/release-notes#November_06_2026",
       "source": "BigQuery",
       "summary": "Starting January 31, 2027, the BigQuery Data Transfer Service for Shopify connector will drop support for the `legacyMode` field in the DeliveryProfile dataset schema and the `permitSkuSharing` field in the FulfillmentService dataset schema."
+    },
+    "https://learn.microsoft.com/azure/databricks/release-notes/product/2026/november#zhipu-ai-glm-52-is-scheduled-for-retirement": {
+      "date": "2027-02-04",
+      "title": "Zhipu AI GLM 5.2 is scheduled for retirement",
+      "link": "https://learn.microsoft.com/azure/databricks/release-notes/product/2026/november#zhipu-ai-glm-52-is-scheduled-for-retirement",
+      "source": "Azure Databricks",
+      "summary": "Zhipu AI GLM 5.2 is deprecated and will be retired on February 4, 2027, requiring migration to GLM 5.3 per the Legacy, deprecated, and retired models guidance."
     }
   }
 }

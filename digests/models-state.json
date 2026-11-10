@@ -16,7 +16,12 @@
     "openrouter/auto-code": "2026-11-06",
     "google/gemini-omni-1.1-flash": "2026-11-06",
     "liquid/lfm-3-1.7b": "2026-11-07",
-    "liquid/lfm-3-1.7b:free": "2026-11-07"
+    "liquid/lfm-3-1.7b:free": "2026-11-07",
+    "nex-agi/nex-n2.6": "2026-11-10",
+    "thinkingmachines/inkling-2-small:free": "2026-11-10",
+    "anthropic/claude-fable-5.2": "2026-11-10",
+    "anthropic/claude-fable-5.2:batch": "2026-11-10",
+    "meta/muse-ember": "2026-11-10"
   },
   "stages": {}
 }

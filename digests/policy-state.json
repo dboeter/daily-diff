@@ -54,7 +54,9 @@
     "https://www.politico.eu/?post_type=pro&p=9285009": "2026-11-07",
     "https://www.binnenlandsbestuur.nl/digitaal/kabinet-wil-eigen-ai-koers-maar-de-vs-is-nooit-ver-weg": "2026-11-07",
     "https://www.binnenlandsbestuur.nl/digitaal/mensenrechtencollege-mist-geld-voor-toezicht-op-ai-systemen": "2026-11-07",
-    "https://www.politico.eu/?post_type=pro&p=9264438": "2026-11-09"
+    "https://www.politico.eu/?post_type=pro&p=9264438": "2026-11-09",
+    "https://digital-strategy.ec.europa.eu/news-redirect/964582": "2026-11-10",
+    "https://www.insideprivacy.com/?p=16498": "2026-11-10"
   },
   "stages": {
     "celex:32026D2274": "2026-10-12 Decision adopted",
@@ -70,12 +72,6 @@
       "date": "2026-11-11",
       "title": "Cloud and AI Development Act",
       "link": "https://ec.europa.eu/info/law/better-regulation/have-your-say/initiatives/14628_en",
-      "source": "Have your say"
-    },
-    "hys:19292": {
-      "date": "2026-11-09",
-      "title": "Articles 75c – 75d AI Act Implementing Act",
-      "link": "https://ec.europa.eu/info/law/better-regulation/have-your-say/initiatives/19292_en",
       "source": "Have your say"
     }
   },

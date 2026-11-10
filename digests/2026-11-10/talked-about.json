@@ -1,0 +1,46 @@
+[
+  {
+    "id": "hn:50418975",
+    "source": "hn",
+    "title": "I'm not convinced the AI bubble exists",
+    "url": "https://matteoraso.github.io/im-not-convinced-the-ai-bubble-exists.html#im-not-convinced-the-ai-bubble-exists",
+    "discussionUrl": "https://news.ycombinator.com/item?id=50418975",
+    "points": 549,
+    "comments": 943,
+    "topic": "other",
+    "counts": "549 points, 943 comments"
+  },
+  {
+    "id": "hn:50432831",
+    "source": "hn",
+    "title": "TPU 8tx and TPU 8i Max",
+    "url": "https://blog.google/innovation-and-ai/infrastructure-and-cloud/global-network/tpu-8i-max-and-8tx/",
+    "discussionUrl": "https://news.ycombinator.com/item?id=50432831",
+    "points": 243,
+    "comments": 73,
+    "topic": "other",
+    "counts": "243 points, 73 comments"
+  },
+  {
+    "id": "hn:50387738",
+    "source": "hn",
+    "title": "Nvidia Kubernetes Engine (NVKE)",
+    "url": "https://github.com/dsx-ai-factory/nvke",
+    "discussionUrl": "https://news.ycombinator.com/item?id=50387738",
+    "points": 124,
+    "comments": 30,
+    "topic": "other",
+    "counts": "124 points, 30 comments"
+  },
+  {
+    "id": "devto:4977112",
+    "source": "devto",
+    "title": "Our Looping Factory Cut DEV Page Load Time by 75% and Counting",
+    "url": "https://dev.to/dailycontext/our-looping-factory-cut-dev-page-load-time-by-75-and-counting-1hnf",
+    "discussionUrl": "https://dev.to/dailycontext/our-looping-factory-cut-dev-page-load-time-by-75-and-counting-1hnf",
+    "points": 88,
+    "comments": 15,
+    "topic": "other",
+    "counts": "88 reactions, 15 comments"
+  }
+]
