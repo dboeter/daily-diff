@@ -138,6 +138,7 @@ const sources: CandidateSources = {
   posts: [post],
   policy: [policyItem],
   vendor: [vendorItem],
+  actions: {},
   dateStr: "2026-11-05",
 };
 
@@ -151,6 +152,7 @@ const nothing: CandidateSources = {
   posts: [],
   policy: [],
   vendor: [],
+  actions: {},
   dateStr: "2026-11-05",
 };
 
@@ -307,6 +309,40 @@ describe("buildCandidates", () => {
       const fields = ["kind", "page", "published", "source", "text", "title", "url"];
       expect(Object.keys(c).sort()).toEqual(c.kind === "story" ? [...fields, "discussion"].sort() : fields);
     }
+  });
+
+  it("lists an Action required row an earlier report opened, not the one of a note fetched today", () => {
+    const out = buildCandidates({
+      ...nothing,
+      vendor: [vendorItem],
+      actions: {
+        "dbx:1": {
+          date: "2026-12-01",
+          title: vendorItem.title,
+          link: vendorItem.link,
+          source: vendorItem.source,
+        },
+        "dbx:0": {
+          date: "2026-11-30",
+          title: "End of life for the Genie MCP endpoint",
+          link: "https://docs.databricks.com/whats-coming#genie-mcp",
+          source: "Databricks release notes",
+          summary: "Requests fail after November 30;\n migrate to Unity Gateway.",
+        },
+      },
+    });
+    expect(out.filter((c) => c.kind === "open-action")).toEqual([
+      {
+        page: "ai-data",
+        kind: "open-action",
+        source: "Databricks release notes",
+        title: "End of life for the Genie MCP endpoint",
+        url: "https://docs.databricks.com/whats-coming#genie-mcp",
+        published: "",
+        ends: "2026-11-30",
+        text: "Requests fail after November 30; migrate to Unity Gateway.",
+      },
+    ]);
   });
 
   it("is empty when nothing was fetched", () => {

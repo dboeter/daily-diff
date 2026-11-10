@@ -751,6 +751,7 @@ async function main(): Promise<void> {
     posts: communityData.posts,
     policy: policyData.candidates ?? [],
     vendor: vendorData.candidates ?? [],
+    actions: vendorData.nextState.actions ?? {},
     dateStr,
   });
   console.log(`  Saved ${saveFile(candidatesFile(candidates), dateStr, "candidates.json")}`);
