@@ -13,7 +13,115 @@
       <height>144</height>
     </image>
     <atom:link href="https://dboeter.github.io/daily-diff/feeds/ai-agents.xml" rel="self" type="application/rss+xml"/>
-    <lastBuildDate>Mon, 09 Nov 2026 06:06:45 +0000</lastBuildDate>
+    <lastBuildDate>Tue, 10 Nov 2026 07:07:50 +0000</lastBuildDate>
+    <item>
+      <title>AI Agents 2026-11-10</title>
+      <link>https://dboeter.github.io/daily-diff/#2026-11-10/ai-agents</link>
+      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-11-10/ai-agents</guid>
+      <pubDate>Tue, 10 Nov 2026 00:00:00 +0000</pubDate>
+      <description>AI Agents 2026-11-10 ⬛ Overview · 🟪 AI Agents · 🟦 AI Models &amp;amp; Labs · 🟧 AI Policy · 🟨 Data Engineering Projects: 15 | Active today: 4 | Stable releases: 7 | Prereleases (not covered): 3 | Generated: 2026-11-10 07:03 UTC Highlights Pi v1.5.1 removes GrepOperations.readFile callbacks for context lines (breaking change) Claude Code users report Team usage exhausted in ~30.5 hours after reset, far faster than prior burn rate (regression) Hermes Agent v0.23.1 raises plugin catalog cap to 16 Mi...</description>
+      <content:encoded><![CDATA[<h1>AI Agents 2026-11-10</h1>
+<p><a href="https://dboeter.github.io/daily-diff/#2026-11-10">⬛ Overview</a> · <strong>🟪 AI Agents</strong> · <a href="https://dboeter.github.io/daily-diff/#2026-11-10/ai-models">🟦 AI Models &amp; Labs</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-10/ai-policy">🟧 AI Policy</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-10/ai-data">🟨 Data Engineering</a></p>
+<blockquote>
+<p>Projects: 15 | Active today: 4 | Stable releases: 7 | Prereleases (not covered): 3 | Generated: 2026-11-10 07:03 UTC</p>
+</blockquote>
+<hr>
+<h2>Highlights</h2>
+<ul>
+<li>Pi v1.5.1 removes <code>GrepOperations.readFile</code> callbacks for context lines (breaking change)</li>
+<li>Claude Code users report Team usage exhausted in ~30.5 hours after reset, far faster than prior burn rate (regression)</li>
+<li>Hermes Agent v0.23.1 raises plugin catalog cap to 16 MiB, fixing silent install failures for plugins added since last update</li>
+</ul>
+<hr>
+<h2>Coding Agents &amp; Assistants</h2>
+<h3>Claude Code</h3>
+<ul>
+<li><strong>Release:</strong> <a href="https://github.com/anthropics/claude-code/releases/tag/v2.1.321">v2.1.321</a>–<a href="https://github.com/anthropics/claude-code/releases/tag/v2.1.322">v2.1.322</a> add fast mode on Vertex in global/US/EU regions, make Claude Fable 5.2 the default model (1M context, $8/$40 per Mtok), add <code>--settings</code> to <code>claude remote-control</code>, and fix multiple regressions including MCP OAuth token leaks, Bash permission prompts on network paths, <code>NotebookEdit</code>/<code>Edit</code> corruption on UNC/WSL paths, and Windows <code>FileChanged</code> hook failures with lowercase drive letters.</li>
+<li><strong>Hot issue:</strong> <a href="https://github.com/anthropics/claude-code/issues/107390">#107390</a>: users report weekly Team usage exhausted in ~30.5 hours after reset (Nov 4–5), far faster than the prior ~2-hour session burn rate, with no workflow change. (regression; 11 comments, 5 👍; +9 since 2026-11-08)</li>
+<li><strong>Hot issue:</strong> <a href="https://github.com/anthropics/claude-code/issues/107922">#107922</a>: an issue says Claude in Chrome fails to connect to the desktop app on Windows with 403 &quot;OAuth token forbidden&quot; on the bridge WebSocket since ~Oct 29, despite an active Pro plan confirmed by support. (regression; 4 comments, 1 👍; +3 since 2026-11-08)</li>
+<li><strong>News:</strong> <a href="https://news.ycombinator.com/item?id=50433799">Why Is AI Slop So Frustrating to Read?</a> analyzes unclear writing in AI output, measuring 78% of Claude Code reply sentences as unclear versus 11% on Stack Overflow.</li>
+<li><strong>News:</strong> <a href="https://dev.to/gde/take-claude-code-above-average-let-antigravity-review-it-1f3g">Take Claude Code Above Average: Let Antigravity Review It</a> describes building a tool that lets a second AI review Claude Code&#39;s work to improve quality.</li>
+</ul>
+<h3>Pi</h3>
+<ul>
+<li><strong>Release:</strong> <a href="https://github.com/earendil-works/pi/releases/tag/v1.5.1">v1.5.1</a> removes <code>GrepOperations.readFile</code> callbacks for context lines (breaking), stops sending empty <code>tools</code> for OpenAI-compatible models to fix vLLM 0.20+ 400 errors, adds pi auth login/logout without starting a session, enables idle prompt cache warming up to 30 minutes, implements Anthropic message threads sending only new messages, enriches Mermaid diagrams with pie charts and clickable labels, adds GitHub Copilot classifiers via <code>models.classify()</code>, and shows package update summaries with <code>pi update --extensions</code>.</li>
+</ul>
+<h3>Oh My Pi</h3>
+<ul>
+<li><strong>Release:</strong> <a href="https://github.com/can1357/oh-my-pi/releases/tag/v18.18.4">v18.18.4</a>–<a href="https://github.com/can1357/oh-my-pi/releases/tag/v18.18.6">v18.18.6</a> add Claude Fable 5.2 and Mythos 5.2 models, introduce Otari gateway provider (<code>/login otari</code>), pause Google Antigravity via a <code>disabled</code> auth rule, add <code>base64SkipThoughtSignature</code> compat flag for Gemini gateways, fix MCP <code>headers</code>/stdio <code>env</code> with <code>!command</code> retrying on 401/403, fix exclusive MCP tools keeping batch position, add Tern long-press menu to edit/resend/fork turns, fix multi-question ask forms showing Submit on last tab, and raise plugin catalog cap to 16 MiB so live catalog works again.</li>
+</ul>
+<h3>Hermes Agent</h3>
+<ul>
+<li><strong>Release:</strong> <a href="https://github.com/nousresearch/hermes-agent/releases/tag/v0.23.1">v0.23.1</a> raises the plugin catalog size cap from 2 MiB to 16 MiB so the live catalog is used instead of falling back to the bundled one, fixing silent install failures for plugins added since the last update; the patch rolls up ~618 PRs since v0.23.0 including Esc backtrack in TUI/CLI, group chats on gateways without Desktop, shared gateway connections, in-app browser sign-in with real browser profile, <code>hermes gateway attach</code>, new plugin API (session-scoped env, JSON-RPC, <code>llm.oneshot</code>, stable <code>conversation_id</code>, hooks), and faster transcript/handoff reads.</li>
+</ul>
+<p><strong>Quiet today:</strong> <a href="https://github.com/openai/codex">OpenAI Codex</a>, <a href="https://github.com/google-gemini/gemini-cli">Gemini CLI</a>, <a href="https://github.com/Kilo-Org/kilocode">Kilo Code</a>, <a href="https://github.com/anomalyco/opencode">OpenCode</a>, <a href="https://github.com/1jehuang/jcode">jcode</a>, <a href="https://github.com/cline/cline">Cline</a>, <a href="https://github.com/CommandCodeAI/command-code">Command Code</a>, <a href="https://github.com/deepseek-ai/deepseek-harness">DeepSeek Harness</a></p>
+<hr>
+<h2>Agent Tooling</h2>
+<p><strong>Quiet today:</strong> <a href="https://github.com/NVIDIA/OpenShell">OpenShell</a>, <a href="https://github.com/herdrdev/herdr">herdr</a>, <a href="https://github.com/conductor-oss/conductor">Conductor</a></p>
+<hr>
+<h2>Spotted</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Story</th>
+<th align="left">Source</th>
+<th align="left">Discussion</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50422628">ChatGPT Desktop forwards your SSH agent to remote machines</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50422628">208 points, 73 comments</a></td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left">Show HN: STE80 Humanizer – de-AI text by writing 80% of the way to ASD-STE100 (<a href="https://github.com/Dodaios/ste80-humanizer">Dodaios/ste80-humanizer</a>)</td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50429144">83 points, 24 comments</a></td>
+<td align="left">The author released an agent skill called STE80 Humanizer that rewrites text to reach 80% of the ASD-STE100 Simplified Technical English standard.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50426070">Ask HN: How do you evaluate the skills your AI agents use?</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50426070">18 points, 4 comments</a></td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left">USB: A trust layer for AI skills and MCP servers (<a href="https://github.com/PeepSick/usbplus">PeepSick/usbplus</a>)</td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50432661">11 points, 2 comments</a></td>
+<td align="left">USB+ provides a universal skill format with 529 skills and 16 target formats, including a trust layer with secscan and mcprobe.</td>
+</tr>
+<tr>
+<td align="left">Show HN: Airgap-check – find what your AI app silently downloads offline (<a href="https://github.com/humanethq/airgap-check">humanethq/airgap-check</a>)</td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50431705">9 points, 0 comments</a></td>
+<td align="left">Airgap-check audits AI repositories for offline crashes, silent telemetry, and .env secret routing when run with --network none.</td>
+</tr>
+<tr>
+<td align="left">Show HN: Glassbrain – Read your agent&#39;s brain, know what your agent knows (<a href="https://github.com/voidixyn/glassbrain">voidixyn/glassbrain</a>)</td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50423154">6 points, 1 comment</a></td>
+<td align="left">Glassbrain lets you inspect agents&#39; knowledge graphs by converting plain JSON into a single HTML file for review.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://dev.to/varshithvhegde/top-7-best-agent-gateways-lhi">Top 7 Best Agent Gateways</a></td>
+<td align="left">Dev.to</td>
+<td align="left"><a href="https://dev.to/varshithvhegde/top-7-best-agent-gateways-lhi">21 reactions, 3 comments</a></td>
+<td align="left">The author reviews seven agent gateways, highlighting that agents can call a model five times and search.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://dev.to/taqui/dont-write-more-prompts-install-these-10-trending-skills-instead-3lpc">Don&#39;t Write More Prompts. Install These 10 Trending &#39;Skills&#39; Instead</a></td>
+<td align="left">Dev.to</td>
+<td align="left"><a href="https://dev.to/taqui/dont-write-more-prompts-install-these-10-trending-skills-instead-3lpc">20 reactions, 7 comments</a></td>
+<td align="left">The author tested 10 trending GitHub skills that enhance agent capabilities.</td>
+</tr>
+</tbody></table>
+<hr>
+<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
+]]></content:encoded>
+    </item>
     <item>
       <title>AI Agents 2026-11-09</title>
       <link>https://dboeter.github.io/daily-diff/#2026-11-09/ai-agents</link>
@@ -2546,59 +2654,6 @@
 </ul>
 <hr>
 <p><strong>Quiet today:</strong> <a href="https://github.com/google-gemini/gemini-cli">Gemini CLI</a>, <a href="https://github.com/Kilo-Org/kilocode">Kilo Code</a>, <a href="https://github.com/cline/cline">Cline</a>, <a href="https://github.com/CommandCodeAI/command-code">Command Code</a></p>
-<hr>
-<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
-]]></content:encoded>
-    </item>
-    <item>
-      <title>AI Agents 2026-10-11</title>
-      <link>https://dboeter.github.io/daily-diff/#2026-10-11/ai-agents</link>
-      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-10-11/ai-agents</guid>
-      <pubDate>Sun, 11 Oct 2026 00:00:00 +0000</pubDate>
-      <description>AI Agents Digest 2026-10-11 Generated: 2026-10-11 01:10 UTC | Projects: 12 | Active today: 7 | Stable releases: 3 | Prereleases (not covered): 1 🕵️ Stealth Models on OpenRouter No stealth models listed on OpenRouter today. Overview Claude Code users are hitting a regression where the auto mode classifier blocks the account owner&amp;#39;s own scheduled tasks and file transfers between their machines. OpenAI Codex on Windows is failing with an HRESULT 0x80070003 error in the CUA MXC launcher after s...</description>
-      <content:encoded><![CDATA[<h1>AI Agents Digest 2026-10-11</h1>
-<blockquote>
-<p>Generated: 2026-10-11 01:10 UTC | Projects: 12 | Active today: 7 | Stable releases: 3 | Prereleases (not covered): 1</p>
-</blockquote>
-<hr>
-<h2>🕵️ Stealth Models on OpenRouter</h2>
-<p>No stealth models listed on OpenRouter today.</p>
-<hr>
-<h2>Overview</h2>
-<p>Claude Code users are hitting a regression where the auto mode classifier blocks the account owner&#39;s own scheduled tasks and file transfers between their machines. OpenAI Codex on Windows is failing with an HRESULT 0x80070003 error in the CUA MXC launcher after shell recovery. Oh My Pi shipped two releases adding model resolver configuration and capability-driven terminal multiplexer support, while jcode v0.94.0 introduced queued commands and faster startup. Community interest is clustering around multi-agent orchestration layers that sit atop Claude Code, Codex, and Pi.</p>
-<h2>Claude Code</h2>
-<ul>
-<li><strong>Hot issue</strong>: The auto mode classifier incorrectly blocks the account owner&#39;s own &quot;Cowork Run Routine Now&quot; scheduled tasks and prevents file transfer between the owner&#39;s machines — a regression since late September. <a href="https://github.com/anthropics/claude-code/issues/100730">https://github.com/anthropics/claude-code/issues/100730</a></li>
-<li><strong>News</strong>: A developer discovered an unknown exoplanet using Claude Code, drawing significant attention on Hacker News. <a href="https://news.ycombinator.com/item?id=50002665">https://news.ycombinator.com/item?id=50002665</a></li>
-<li><strong>News</strong>: A single CLAUDE.md file derived from Andrej Karpathy&#39;s observations on LLM coding pitfalls is trending as a behavior-improvement config for Claude Code. <a href="https://github.com/multica-ai/andrej-karpathy-skills">https://github.com/multica-ai/andrej-karpathy-skills</a></li>
-</ul>
-<h2>OpenAI Codex</h2>
-<ul>
-<li><strong>Hot issue</strong>: Windows Dots CUA MXC launcher fails with HRESULT 0x80070003 after direct shell recovery on Windows 25H2 build 26200.9457. <a href="https://github.com/openai/codex/issues/52407">https://github.com/openai/codex/issues/52407</a></li>
-<li><strong>Hot issue</strong>: Feature request for a persistent ChatGPT-style supervisor that can oversee multiple Codex threads independently without executing code itself. <a href="https://github.com/openai/codex/issues/52564">https://github.com/openai/codex/issues/52564</a></li>
-</ul>
-<h2>OpenCode</h2>
-<ul>
-<li><strong>Hot issue</strong>: Cannot connect to API due to self-signed certificate error; Node.js <code>--use-system-ca</code> flag suggested as workaround when root CA is installed locally. <a href="https://github.com/anomalyco/opencode/issues/54095">https://github.com/anomalyco/opencode/issues/54095</a></li>
-</ul>
-<h2>Pi</h2>
-<ul>
-<li><strong>News</strong>: Local-first AI coding agent desktop (Electron + Rust host core + Pi Agent Harness + user-installable plugins) gaining traction on GitHub. <a href="https://github.com/vastsa/PI-Desktop">https://github.com/vastsa/PI-Desktop</a></li>
-</ul>
-<h2>Oh My Pi</h2>
-<ul>
-<li><strong>Release</strong>: v18.8.9 adds capability-driven extension terminal launches for tmux, Zellij, Herdr, and CMUX with consolidated multiplexer detection and POSIX-shell confirmation. v18.8.8 adds <code>Agent.setModelResolver()</code> to fit every model an agent adopts before use and <code>CompactionSettings.baseWindowTokens</code> for threshold scaling. <a href="https://github.com/can1357/oh-my-pi/releases/tag/v18.8.9">https://github.com/can1357/oh-my-pi/releases/tag/v18.8.9</a></li>
-</ul>
-<h2>jcode</h2>
-<ul>
-<li><strong>Release</strong>: v0.94.0 introduces queued commands (Ctrl+Enter queues slash and <code>!</code> commands to run after current turn), Alt+G opens git commit log, startup frame settles immediately instead of ~200ms pop-in, and harness API clients can observe/cancel mid-turn messages. <a href="https://github.com/1jehuang/jcode/releases/tag/v0.94.0">https://github.com/1jehuang/jcode/releases/tag/v0.94.0</a></li>
-</ul>
-<h2>DeepSeek Harness</h2>
-<ul>
-<li><strong>News</strong>: DeepSeek Harness Desktop (DSHDesktop) — a desktop wrapper for the harness — is attracting stars on GitHub. <a href="https://github.com/dataelement/dsh-desktop">https://github.com/dataelement/dsh-desktop</a></li>
-</ul>
-<hr>
-<p><strong>Quiet today:</strong> <a href="https://github.com/google-gemini/gemini-cli">Gemini CLI</a>, <a href="https://github.com/Kilo-Org/kilocode">Kilo Code</a>, <a href="https://github.com/cline/cline">Cline</a>, <a href="https://github.com/CommandCodeAI/command-code">Command Code</a>, <a href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a></p>
 <hr>
 <p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
 ]]></content:encoded>

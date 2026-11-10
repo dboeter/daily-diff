@@ -13,7 +13,157 @@
       <height>144</height>
     </image>
     <atom:link href="https://dboeter.github.io/daily-diff/feeds/ai-models.xml" rel="self" type="application/rss+xml"/>
-    <lastBuildDate>Mon, 09 Nov 2026 06:06:45 +0000</lastBuildDate>
+    <lastBuildDate>Tue, 10 Nov 2026 07:07:50 +0000</lastBuildDate>
+    <item>
+      <title>AI Models &amp; Labs 2026-11-10</title>
+      <link>https://dboeter.github.io/daily-diff/#2026-11-10/ai-models</link>
+      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-11-10/ai-models</guid>
+      <pubDate>Tue, 10 Nov 2026 00:00:00 +0000</pubDate>
+      <description>AI Models &amp;amp; Labs 2026-11-10 ⬛ Overview · 🟪 AI Agents · 🟦 AI Models &amp;amp; Labs · 🟧 AI Policy · 🟨 Data Engineering Lab posts: 3 | New models: 5 | Spotted: 7 | Generated: 2026-11-10 07:03 UTC Highlights Anthropic released Claude Fable 5.2 with gains over 5.1 in coding, reasoning, and vision; it scores 65 on Artificial Analysis, the highest to date, and demonstrates end-to-end electronic hardware design. Meta introduced Muse Ember, its smallest and most efficient model built for complex reas...</description>
+      <content:encoded><![CDATA[<h1>AI Models &amp; Labs 2026-11-10</h1>
+<p><a href="https://dboeter.github.io/daily-diff/#2026-11-10">⬛ Overview</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-10/ai-agents">🟪 AI Agents</a> · <strong>🟦 AI Models &amp; Labs</strong> · <a href="https://dboeter.github.io/daily-diff/#2026-11-10/ai-policy">🟧 AI Policy</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-10/ai-data">🟨 Data Engineering</a></p>
+<blockquote>
+<p>Lab posts: 3 | New models: 5 | Spotted: 7 | Generated: 2026-11-10 07:03 UTC</p>
+</blockquote>
+<hr>
+<h2>Highlights</h2>
+<ul>
+<li>Anthropic released Claude Fable 5.2 with gains over 5.1 in coding, reasoning, and vision; it scores 65 on Artificial Analysis, the highest to date, and demonstrates end-to-end electronic hardware design.  </li>
+<li>Meta introduced Muse Ember, its smallest and most efficient model built for complex reasoning, tool calls, and agent workflows.  </li>
+<li>A GitHub repository documents that Google Gemini routes personal Drive files and emails to human annotators.</li>
+</ul>
+<hr>
+<h2>Lab announcements</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Lab</th>
+<th align="left">Post</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-11-10</td>
+<td align="left">OpenAI</td>
+<td align="left"><a href="https://openai.com/index/control-room/">Control Room</a></td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left">2026-11-10</td>
+<td align="left">OpenAI</td>
+<td align="left"><a href="https://openai.com/index/chatgpt-enterprise-aws-marketplace/">Chatgpt Enterprise Aws Marketplace</a></td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left">2026-11-09</td>
+<td align="left">Anthropic</td>
+<td align="left"><a href="https://www.anthropic.com/research/claude-electronics-design">Claude can design electronic prototypes from start to finish</a></td>
+<td align="left">Anthropic announced that Claude can now design and prototype electronic hardware from start to finish, demonstrated by collaborating with Diode Computers to have Claude Fable 5.2 design three electronic devices including a speakerphone and voice-assistant hub.</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>New on OpenRouter</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Model</th>
+<th align="left">Listed</th>
+<th align="left">Context</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a href="https://openrouter.ai/nex-agi/nex-n2.6">Nex AGI: Nex-N2.6</a> <code>nex-agi/nex-n2.6</code></td>
+<td align="left">2026-11-10</td>
+<td align="left">262K</td>
+<td align="left">Nex-N2.6 is an agentic model built on GLM-5.3-Flash with about 321B parameters, suited for computer use, coding, and long-horizon tasks that involve tools.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://openrouter.ai/thinkingmachines/inkling-2-small:free">Thinking Machines: Inkling 2 Small (free)</a> <code>thinkingmachines/inkling-2-small:free</code></td>
+<td align="left">2026-11-09</td>
+<td align="left">1M</td>
+<td align="left">Inkling 2 Small is a multimodal mixture-of-experts reasoning model from Thinking Machines Lab with 17B active parameters out of 594B total, the first model in the second Inkling series.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://openrouter.ai/anthropic/claude-fable-5.2">Anthropic: Claude Fable 5.2</a> <code>anthropic/claude-fable-5.2</code></td>
+<td align="left">2026-11-09</td>
+<td align="left">1M</td>
+<td align="left">Claude Fable 5.2 is Anthropic&#39;s model with gains over Fable 5.1 in coding, reasoning, and vision.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://openrouter.ai/anthropic/claude-fable-5.2:batch">Anthropic: Claude Fable 5.2 (batch)</a> <code>anthropic/claude-fable-5.2:batch</code></td>
+<td align="left">2026-11-09</td>
+<td align="left">1M</td>
+<td align="left">Claude Fable 5.2 (batch) is Anthropic&#39;s model with gains over Fable 5.1 in coding, reasoning, and vision.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://openrouter.ai/meta/muse-ember">Meta: Muse Ember</a> <code>meta/muse-ember</code></td>
+<td align="left">2026-11-09</td>
+<td align="left">1M</td>
+<td align="left">Muse Ember is a model from Meta designed for complex reasoning execution and agent workflows including tool calls, coding agent subtasks, and routing.</td>
+</tr>
+</tbody></table>
+<hr>
+<p>Nothing new from OpenRouter&#39;s stealth models today.</p>
+<hr>
+<h2>Spotted</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Story</th>
+<th align="left">Source</th>
+<th align="left">Discussion</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">Google Gemini routes personal Drive files and emails to human annotators (<a href="https://github.com/thisisme6598/gemini_files/">thisisme6598/gemini_files</a>)</td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50429426">531 points, 120 comments</a></td>
+<td align="left">The documentation shows that Google Gemini sends personal Drive files and emails to human annotators.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://www.anthropic.com/claude-fable-and-mythos-5-2">Claude Fable 5.2 and Mythos 5.2</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50429068">464 points, 741 comments</a></td>
+<td align="left">Anthropic released Claude Fable 5.2 and Mythos 5.2, with Fable 5.2 achieving a new benchmark in coding, finance, and science.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://artificialanalysis.ai/models/claude-fable-5-2">Claude Fable 5.2 scores 65 on Artificial Analysis, highest so far</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50431144">335 points, 242 comments</a></td>
+<td align="left">An analysis reports Claude Fable 5.2 scoring 65 on Artificial Analysis, the highest score to date, comparing quality, price, and performance metrics.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://research.meta.ai/blog/muse-ember">Muse Ember: Our smallest, most efficient model</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50429024">287 points, 118 comments</a></td>
+<td align="left">Meta introduced Muse Ember, its smallest and most efficient model built for complex reasoning and repetitive agent tasks.</td>
+</tr>
+<tr>
+<td align="left">6 Hours of YouTube and 85 handtyped pages of notes on LLM Inference – Start here (<a href="https://github.com/samir-sarwar/samir-vllm">samir-sarwar/samir-vllm</a>)</td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50424199">78 points, 12 comments</a></td>
+<td align="left">The project provides a from-scratch LLM inference engine accompanied by over 6 hours of YouTube tutorials and 85 pages of handwritten notes.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://strandsagents.com/blog/amazon-saves-millions-replacing-sonnet-with-strands-decider/">Amazon saves millions by replacing Sonnet 4.6 with Strands Decider</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50436640">75 points, 14 comments</a></td>
+<td align="left">Two Amazon engineers replaced Claude Sonnet 4.6 with a decision model in a massive internal ticketing system, saving millions.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://dev.to/hiper2d/how-much-does-it-cost-to-run-a-text-game-with-llms-57o7">How much does it cost to run a text game with LLMs</a></td>
+<td align="left">Dev.to</td>
+<td align="left"><a href="https://dev.to/hiper2d/how-much-does-it-cost-to-run-a-text-game-with-llms-57o7">30 reactions, 32 comments</a></td>
+<td align="left">The author reviews real-world costs of running a text game across 27 frontier models, analyzing token pricing and caching.</td>
+</tr>
+</tbody></table>
+<hr>
+<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
+]]></content:encoded>
+    </item>
     <item>
       <title>AI Models &amp; Labs 2026-11-09</title>
       <link>https://dboeter.github.io/daily-diff/#2026-11-09/ai-models</link>
