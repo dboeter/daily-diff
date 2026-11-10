@@ -527,6 +527,18 @@ describe("buildProjectReportContent", () => {
       );
     });
 
+    it("splits a heading the model glued to its first bullet, so the project keeps one section (Claude Code #108122, 2026-11-08)", () => {
+      const result = render(
+        "## ALPHA- **Hot issue:** #1: users report a crash\n\n- **News:** [a story](https://x) about alpha",
+        [hot(1)],
+      );
+      expect(result).toContain(
+        "### ALPHA\n\n- **Hot issue:** [#1](https://github.com/org/alpha/issues/1): users report a crash (16 comments, 2 👍; +3 in the last 24h)",
+      );
+      expect(result.match(/^### ALPHA/gm)).toHaveLength(1);
+      expect(result.match(/#1\]/g)).toHaveLength(1);
+    });
+
     it("writes the section of a project the model left out that has only a hot issue", () => {
       const result = buildProjectReportContent(
         withAgents({
