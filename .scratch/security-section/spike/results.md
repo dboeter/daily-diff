@@ -83,4 +83,4 @@ Each of three Claude Code stories was asked against the 25 Claude Code lines fla
 
 ## Credits
 
-The run ended with the organization out of TypeSafe credits: `402 billing_error`, "no available TypeSafe API credits", on the first call after the pair run. Whether the balance was already low is not known; it was not checked before the run, and the estimate counted calls, not tokens. Until credits are added, the daily digest falls back to keyword rules where it has no saved verdict, and saves no research papers, if its key is on the same organization. Credits were added later on 2026-11-11, and the two calls above ran.
+The run ended with the organization out of TypeSafe credits: `402 billing_error`, "no available TypeSafe API credits", on the first call after the pair run. Whether the balance was already low is not known; it was not checked before the run, and the estimate counted calls, not tokens. Until credits are added, the daily digest falls back to keyword rules where it has no saved verdict, and saves no research papers: its key is on the same organization (confirmed by the maintainer). Credits were added later on 2026-11-11, and the two calls above ran.
