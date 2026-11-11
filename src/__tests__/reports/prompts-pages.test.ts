@@ -18,6 +18,7 @@ import {
   firstHighlight,
   forcedHighlightReports,
   withFallbackHighlights,
+  skippedReports,
   restatesLead,
   dropNoHighlightRows,
   isGroupOrAbsenceBullet,
@@ -465,6 +466,27 @@ describe("withFallbackHighlights", () => {
     expect(firstHighlight("## Highlights\n- *Delta Lake* 4.0 adds `variant` type.")).toBe(
       "Delta Lake 4.0 adds variant type.",
     );
+  });
+});
+
+describe("skippedReports", () => {
+  const page = (bullets: string) => `# P\n\n## Highlights\n\n${bullets}\n\n---\n\n## Spotted`;
+  it("names a published page the model gave no highlight, but not one with nothing to restate (ai-data, 2026-11-08)", () => {
+    const reports = {
+      "ai-agents": page("- Codex shipped v1."),
+      "ai-models": page("- OpenAI raised $11 B."),
+      "ai-data": page(`- ${NO_HIGHLIGHT_NOTE}`),
+      "ai-policy": page("⚠️ Summary generation failed."),
+      // No Highlights section: the page was sent whole.
+      "ai-trends": "# P\n\n## Radar\n\n| a |",
+    };
+    expect(skippedReports(reports, { "ai-agents": ["Codex shipped v1."], "ai-models": [] })).toEqual([
+      "ai-models",
+      "ai-trends",
+    ]);
+    expect(
+      skippedReports(reports, { "ai-agents": ["A."], "ai-models": ["B."], "ai-trends": ["C."] }),
+    ).toEqual([]);
   });
 });
 

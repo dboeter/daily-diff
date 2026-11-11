@@ -681,6 +681,23 @@ export function withFallbackHighlights(
   return out;
 }
 
+/**
+ * The published reports the highlights reply left out though their page has something to restate.
+ * A page whose only Highlight is NO_HIGHLIGHT_NOTE or a failure notice is rightly absent: on
+ * 2026-11-08 and 11-09 the log named ai-data for it.
+ */
+export function skippedReports(reportContents: Record<string, string>, reply: ReportHighlights): string[] {
+  return Object.entries(reportContents)
+    .filter(([id, content]) => {
+      if (reply[id]?.length) return false;
+      // A page without the section was sent whole.
+      if (!highlightsSection(content)) return true;
+      const lead = firstHighlight(content);
+      return lead !== null && lead !== NO_HIGHLIGHT_NOTE;
+    })
+    .map(([id]) => id);
+}
+
 // A period after one of these, or inside a dotted abbreviation (U.S., E.U.), ends no
 // sentence: AI Policy prose cites "Art. 50", "the U.S. Senate" and
 // deadlines such as "closes Nov. 9". A sentence that really ends on "Dec." runs

@@ -1,6 +1,6 @@
 # 12: "No lab or model news today" above Highlights about lab news
 
-Status: ready-for-agent
+Status: done
 Findings: 14 [low], see `../review.md`
 
 ## Problem
@@ -11,8 +11,10 @@ Cause: `NO_MODEL_NEWS_NOTE` (`src/reports/prompts.ts:451`) tells the model to op
 
 ## What to build
 
-- [ ] Reword the bullet so it says only what the code knows, for example "No new lab post or new model today", or drop the bullet and let the page's "Nothing new from …" line carry it
-- [ ] Update the test that expects the string (`src/__tests__/reports/prompts.test.ts:607`) and `AGENTS.md` (Key conventions, `NO_MODEL_NEWS_NOTE`)
-- [ ] Check `highlights.json`: a page whose first bullet is this note must not send it as the report's lead
+- [x] Reword the bullet so it says only what the code knows, for example "No new lab post or new model today", or drop the bullet and let the page's "Nothing new from …" line carry it
+- [x] Update the test that expects the string (`src/__tests__/reports/prompts.test.ts:607`) and `AGENTS.md` (Key conventions, `NO_MODEL_NEWS_NOTE`)
+- [x] Check `highlights.json`: a page whose first bullet is this note must not send it as the report's lead
 
 ## Comments
+
+- 2026-11-11: the bullet is dropped. `NO_MODEL_NEWS_NOTE` now caps the Highlights at 2 bullets and forbids stating an absence; the page's sections (the "Nothing new from …" line, or a failure line) say what is missing. With no such bullet, `highlights.json` has no note to send as the lead.
