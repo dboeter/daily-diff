@@ -1,8 +1,8 @@
 # 01: Replay a week of stories and release lines against a Jev security question
 
-Status: needs-info
+Status: done
 
-Waits on the maintainer's go-ahead: it spends Jev calls (estimate below).
+Run on 2026-11-11 after the maintainer's go-ahead. Results: `../spike/results.md`.
 
 ## Question
 
@@ -21,3 +21,5 @@ Does one Jev question separate security incidents and fixes from the rest, at a 
 About 300 distinct stories and a few hundred release lines: under 1,000 Jev calls, about one daily run's worth. Unverified until the lines are counted.
 
 ## Comments
+
+- 2026-11-11: done with 1,152 Jev calls, over the estimate of 1,000. The story question finds 15 of 17 at a bar of 0.6 with 5 false hits in 363. Release lines are about 19 security lines a day, too many for one row each. The email leak links to its fix line at 0.93. Not done: the daily count used all lines of one week, not a second week; lines got no severity question.
