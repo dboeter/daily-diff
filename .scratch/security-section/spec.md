@@ -1,6 +1,6 @@
 # Security section: incidents and fixes on every page
 
-Status: draft. The two decisions under "Decided" are the maintainer's (2026-11-11). Nothing is built.
+Status: draft. The decisions under "Decided" are the maintainer's (2026-11-11). The spike is done (`spike/results.md`). Placement is open again. Nothing is built.
 
 ## Why
 
@@ -12,10 +12,20 @@ The nightly reviews of 2026-11-07 to 11-10 found security news that was fetched 
 
 ## Decided
 
-1. **Readers**: the maintainer and the colleagues who read only the Data page. So each page has its own section, and the Overview lists every page's rows.
+1. **Readers**: the maintainer and the colleagues who read only the Data page. Where the rows show is open again, see "Placement".
 2. **Scope**: incidents (a breach, a leak, a vulnerability) and security fixes. A fix that follows an incident an earlier digest reported must point back to it.
 
-## Shape
+3. **Messages**: a page's security rows go into `highlights.json`, so Telegram and the Teams post carry them.
+
+## Placement (open, roadmap `security/1.2`)
+
+The maintainer is weighing three forms: a table on each page (below), a separate Security page, and a banner or sidebar for the high-confidence, high-impact items (the backdoored Claude Code extension of 2026-10-31 is the example). What the spike says:
+
+- No story in 13 days concerned a data platform, so a table on the Data page would hold release fixes only. A severe incident in a tool the colleagues use reaches them only through something that crosses pages.
+- A banner rule over three Jev answers (flagged, severity 1.5 or more, claim by the vendor, a researcher or the press) gives 5 events in 13 days and passes the extension backdoor. 2 of its 8 stories are out of scope, and it leaves out the Claude Code email leak, which was one user's report.
+- About 19 release lines a day have a security effect: too many for a row each on any page.
+
+## Shape of a page table
 
 - `## Security`, a code-rendered table directly under Highlights, as `## Action required` is on the Data page. No row: no section.
 - Columns: Date, Item (linked), Source, What happened (the model's row summary, from the item's text only). The Source column keeps "a Hacker News post" visible, so a claim is never in the digest's own voice. A row without text shows `—`.
@@ -24,7 +34,7 @@ The nightly reviews of 2026-11-07 to 11-10 found security news that was fetched 
 ## Feeds
 
 1. **Community stories**: one Jev question per fresh story, cached like the topic verdicts. A flagged story has its own slots. It skips the topic bar (`SPOTTED_MIN_TOPIC_PROBABILITY`) and the per-source row cap, and leaves Spotted and "Also talked about". Several submissions of one event are one row.
-2. **Release notes**: a judgment per line of the full release body. A heading check is not enough, see the evidence.
+2. **Release notes**: a judgment per line of the full release body. A heading check is not enough, see the evidence. The spike found about 19 such lines a day, so a line is not a row: the lines go to their project's release bullets, and only graded ones are raised.
 3. **Hot issues** with a security label, which code already knows.
 4. **Vendor notes** on the Data page that Jev marks as a security change (not checked yet).
 
@@ -49,12 +59,12 @@ Four days of `candidates.json` (11-07 to 11-10, the file exists since 11-07), a 
 ## Open decisions
 
 1. **An incident outside a page's topic.** With page-scoped tables the Fireworks breach is on AI Models & Labs and on the Overview, not on Data. Proposed: keep "one item, one page, once"; an incident that names a tracked data project or vendor is on Data too (the existing exception for News).
-2. **Messages**: whether a page's security rows go into `highlights.json`, so Telegram and the Teams post of the Data page carry them.
-3. **Page of a flagged story**: proposed is the page of its best page topic, with no bar, or the page of the tracked project it names.
+2. **Page of a flagged story**: proposed is the page of its best page topic, with no bar, or the page of the tracked project it names.
 
 ## Order of work
 
-1. Spike: `issues/01-replay-spike.md`.
-2. Table, state and the story feed.
-3. Release-line feed and the incident-to-fix link.
-4. Overview list, messages, `GLOSSARY.md` and `AGENTS.md`.
+1. Spike: done, `spike/results.md`.
+1. Placement decision.
+1. Table, state and the story feed.
+1. Release-line feed and the incident-to-fix link.
+1. Overview list, messages, `GLOSSARY.md` and `AGENTS.md`.
