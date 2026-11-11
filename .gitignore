@@ -9,6 +9,6 @@ mcp/.wrangler/
 mcp/.dev.vars
 .claude/*.local.json
 .claude/worktrees/
-.scratch/ai-policy/lab/
+.scratch/
 .zed/
 .husky/
