@@ -1,6 +1,6 @@
 # 13: The data report's "Vendor items" count leaves out the Also new lines
 
-Status: ready-for-agent
+Status: done
 Findings: 15 [low], see `../review.md`
 
 ## Problem
@@ -9,7 +9,9 @@ The 2026-11-10 data report says `Vendor items: 15` in its meta line. Its tables 
 
 ## What to build
 
-- [ ] Count the Also new items too, or name them apart ("Vendor items: 15, also new: 5")
-- [ ] A test with items over the cap
+- [x] Count the Also new items too, or name them apart ("Vendor items: 15, also new: 5")
+- [x] A test with items over the cap
 
 ## Comments
+
+- 2026-11-11: the meta line names them apart: `Vendor items: 15 | Also new: 5` (`DATA_REPORT.vendorCount`). Without Also new links the line is unchanged.

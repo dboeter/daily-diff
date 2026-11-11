@@ -1164,6 +1164,16 @@ describe("buildDataReport", () => {
     expect(generateBody).toHaveBeenCalledTimes(2);
   });
 
+  it("counts the Also new links apart in the meta line (2026-11-10: 15 rows and 5 links read as 15)", async () => {
+    generateBody.mockReset();
+    generateBody.mockImplementation(async (prompt: string) => reply(prompt));
+    const data = await vendorData();
+    const content = (await build(sections(false, false), { ...data, alsoNew: data.items.slice(0, 2) }))!
+      .content;
+    expect(content).toContain("*Also new:*");
+    expect(content).toContain("Vendor items: 5 | Also new: 2 | Projects:");
+  });
+
   const PROSE_AI =
     "## Highlights\n- H.\n\n<!-- tables -->\n\n## Worth a Look\n- Read this.\n\n## Data × AI\n- Genie spaces arrive.";
   const prosePrompts = () =>

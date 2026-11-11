@@ -1,6 +1,6 @@
 # 09: GLOSSARY says page-topic stories never reach "Also talked about"
 
-Status: ready-for-agent
+Status: needs-triage
 Findings: 11 [low], see `../review.md`
 
 ## Problem
@@ -9,7 +9,9 @@ Findings: 11 [low], see `../review.md`
 
 ## What to build
 
-- [ ] Bring the glossary entry in line with `AGENTS.md`
+- [x] Bring the glossary entry in line with `AGENTS.md`
 - [ ] Decide whether `talked-about.json` should carry the story's routed topic instead of `other` (the trace says `models`, the file says `other`)
 
 ## Comments
+
+- 2026-11-11: the glossary entry now says that a story under the Spotted topic bar is listed too, whatever its topic, as topic `other`. Open: whether `talked-about.json` should carry the routed topic, a decision, hence `needs-triage`.

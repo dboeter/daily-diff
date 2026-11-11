@@ -942,7 +942,7 @@ export async function buildDataReport(
       .map((s) => `${s}\n\n---\n\n`)
       .join(""),
     // On 2026-10-19 "Projects: 17 | Active today: 0" was all the header said above 16 vendor rows.
-    leadingCounts: DATA_REPORT.vendorCount(items.length),
+    leadingCounts: DATA_REPORT.vendorCount(items.length, vendor.alsoNew?.length),
     ...(epilogue ? { epilogue: `\n\n---\n\n${epilogue}` } : {}),
     footer: autoGenFooter(),
   });
