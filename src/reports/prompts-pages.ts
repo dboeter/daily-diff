@@ -298,12 +298,12 @@ export function labPostsNoHighlightNote(titles: string[]): string | undefined {
 }
 
 /**
- * A page's Highlights rule for its Spotted rows that show only a title (`titleOnlyStories`);
- * undefined when every row has text.
+ * A page's Highlights rule for its stories that show only a title (`titleOnlyStories`,
+ * `titleOnlyNews`); undefined when every story has text.
  */
 export function storiesNoHighlightNote(titles: string[]): string | undefined {
   return titles.length
-    ? `These Spotted rows show only a title, no description: no Highlight for them. ${titles.map((t) => `"${t}"`).join(", ")}`
+    ? `These stories (Spotted rows and News items) show only a title, no description: no Highlight for them. ${titles.map((t) => `"${t}"`).join(", ")}`
     : undefined;
 }
 
@@ -567,6 +567,12 @@ export interface NoHighlightRow {
   name: string;
   /** "" when the row has no link. */
   url: string;
+  /**
+   * A community story that shows only its title. A bullet is about it only when it says little
+   * more than that title: on a launch day a lab post or release with text shares the title's
+   * words, and its bullet says much more.
+   */
+  story?: true;
 }
 
 /**
@@ -604,8 +610,10 @@ export function dropNoHighlightRows(
     rows.some(
       (r) =>
         (r.url !== "" && bullet.includes(`](${r.url})`)) ||
-        new RegExp(`(^|[^\\p{L}\\p{N}])${escapeRegex(r.name)}($|[^\\p{L}\\p{N}])`, "iu").test(bullet) ||
-        (leadWords(r.name).size >= RESTATED_NAME_MIN_WORDS && restatesLead(r.name, bullet)),
+        (r.story
+          ? restatesLead(r.name, bullet) && restatesLead(bullet, r.name)
+          : new RegExp(`(^|[^\\p{L}\\p{N}])${escapeRegex(r.name)}($|[^\\p{L}\\p{N}])`, "iu").test(bullet) ||
+            (leadWords(r.name).size >= RESTATED_NAME_MIN_WORDS && restatesLead(r.name, bullet))),
     ) || alsoDrop?.(bullet) === true;
   // A bullet is its marker line and the indented lines continuing it.
   const lines = head.split("\n");

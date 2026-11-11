@@ -632,7 +632,20 @@ export function titleOnlyStories(rows: StoryRow[], summaries: Map<number, string
     .filter(
       (r) => !r.description?.trim() || summaryText(summaries, { n: r.n, description: r.description }) === "—",
     )
-    .map((r) => ({ name: r.title, url: r.url }));
+    .map((r) => ({ name: r.title, url: r.url, story: true }));
+}
+
+/**
+ * The community stories matched as a project's News that show only a title: the lead agents
+ * Highlight of 2026-11-09, "Goldman Sachs is pulling Claude Code from its bankers and traders",
+ * was one. A news item without an `id` is the project's own repo on GitHub Trending, whose
+ * title is the project's name.
+ */
+export function titleOnlyNews(groups: ProjectGroup[]): NoHighlightRow[] {
+  return groups
+    .flatMap((g) => g.activities.flatMap((a) => a.news))
+    .filter((n) => n.id !== undefined && !n.description?.trim())
+    .map((n) => ({ name: n.title, url: n.url, story: true }));
 }
 
 /** The Radar and category tables, a `##` heading each; "" when both are empty. */

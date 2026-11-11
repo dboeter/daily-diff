@@ -57,6 +57,7 @@ import type { GitHubRelease, RepoConfig, SkillsData } from "../core/github.ts";
 import {
   renderHfTable,
   renderOpenRouterUsage,
+  titleOnlyNews,
   titleOnlyStories,
   unsummarizedRows,
   buildProjectReportContent,
@@ -350,7 +351,7 @@ export async function buildAgentsReport(
   dateStr: string,
 ): Promise<SavedReport> {
   const spottedMd = renderSpottedTable(spotted.rows, spotted.summaries);
-  const titleOnly = titleOnlyStories(spotted.rows, spotted.summaries);
+  const titleOnly = [...titleOnlyStories(spotted.rows, spotted.summaries), ...titleOnlyNews(groups)];
   let highlights = "";
   if (groups.some((g) => g.activities.some(hasActivity)) || spottedMd) {
     const bodyMd = [...groupsMarkdown(groups), spottedMd].filter(Boolean).join("\n\n");
@@ -894,7 +895,7 @@ export async function buildDataReport(
     .filter(Boolean)
     .join("\n\n");
   const minor = items.filter((i) => i.minor).map((i) => ({ name: i.title, url: i.link }));
-  const titleOnly = titleOnlyStories(spotted.rows, spotted.summaries);
+  const titleOnly = [...titleOnlyStories(spotted.rows, spotted.summaries), ...titleOnlyNews(groups)];
   const prose = await generateOr(
     "data-highlights",
     buildDataProsePrompt(

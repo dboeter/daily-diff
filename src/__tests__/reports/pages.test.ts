@@ -568,17 +568,13 @@ describe("buildAgentsReport", () => {
     expect(report.content).toContain(`## Highlights\n\n${MSG.summaryFailed}\n\n---\n\n## Coding Agents`);
   });
 
-  it("names a Spotted row that shows only a title as no Highlight, and drops one about it (Goldman Sachs, 2026-11-09)", async () => {
+  it("names a Spotted row that shows only a title as no Highlight, and drops one about it", async () => {
     generateBody.mockReset();
     generateBody.mockImplementation(
-      async () =>
-        "## Highlights\n\n- Goldman Sachs is pulling Claude Code from its bankers and traders.\n- Codex shipped v1.",
+      async () => "## Highlights\n\n- AegisKernel is a kernel for agents.\n- Codex shipped v1.",
     );
     const rows = [
-      {
-        ...spottedRow(1, "agents"),
-        title: "Goldman Sachs is pulling Claude Code from its bankers and traders",
-      },
+      { ...spottedRow(1, "agents"), title: "AegisKernel: a kernel for agents" },
       { ...spottedRow(2, "agents"), description: "A sandbox for agents." },
     ];
     const report = await build(groups(true), {
@@ -590,9 +586,41 @@ describe("buildAgentsReport", () => {
     });
     const prompt = generateBody.mock.calls[0]![0] as string;
     expect(prompt).toContain(
-      'only a title, no description: no Highlight for them. "Goldman Sachs is pulling Claude Code from its bankers and traders"',
+      'only a title, no description: no Highlight for them. "AegisKernel: a kernel for agents"',
     );
     expect(prompt).not.toContain('"Story 2"');
+    expect(report.content).not.toContain("- AegisKernel is a kernel");
+    expect(report.content).toContain("- Codex shipped v1.");
+  });
+
+  it("does the same for a project's News story without a description (Goldman Sachs under Claude Code, 2026-11-09)", async () => {
+    generateBody.mockReset();
+    generateBody.mockImplementation(
+      async () =>
+        "## Highlights\n\n- Goldman Sachs is pulling Claude Code from its bankers and traders.\n- Codex shipped v1.",
+    );
+    const title = "Goldman Sachs is pulling Claude Code from its bankers and traders";
+    const g = groups(true);
+    g[0]!.activities[0]!.news = [
+      {
+        source: "Hacker News",
+        title,
+        url: "https://news.ycombinator.com/item?id=1",
+        detail: "600 points",
+        id: "hn:1",
+      },
+      // The project's own repo on GitHub Trending is no story: its name would match every bullet on the project.
+      {
+        source: "GitHub Trending",
+        title: "Codex",
+        url: "https://github.com/org/codex",
+        detail: "+500 stars today",
+      },
+    ];
+    const report = await build(g, NO_SPOTTED);
+    const prompt = generateBody.mock.calls[0]![0] as string;
+    expect(prompt).toContain(`only a title, no description: no Highlight for them. "${title}"`);
+    expect(prompt).not.toContain('"Codex"');
     expect(report.content).not.toContain("- Goldman Sachs is pulling");
     expect(report.content).toContain("- Codex shipped v1.");
   });
