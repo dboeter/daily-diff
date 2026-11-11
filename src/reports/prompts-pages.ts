@@ -377,7 +377,7 @@ export function buildDataProsePrompt(
   dateStr: string,
   /** Kept vendor rows under "Notable" significance or unsure of it (`minor`): in the tables, never a Highlight. */
   minorTitles: string[] = [],
-  /** Spotted rows that show only a title (`titleOnlyStories`): never a Highlight. */
+  /** Stories that show only a title (`titleOnlyStories`, `titleOnlyNews`): never a Highlight. */
   titleOnlyTitles: string[] = [],
 ): string {
   const storiesNote = storiesNoHighlightNote(titleOnlyTitles);
@@ -568,9 +568,9 @@ export interface NoHighlightRow {
   /** "" when the row has no link. */
   url: string;
   /**
-   * A community story that shows only its title. A bullet is about it only when it says little
-   * more than that title: on a launch day a lab post or release with text shares the title's
-   * words, and its bullet says much more.
+   * A community story that shows only its title. A bullet is about it only when it links the
+   * story or says little more than that title: on a launch day a lab post or release with text
+   * shares the title's words, and its bullet says much more.
    */
   story?: true;
 }

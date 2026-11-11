@@ -17,7 +17,7 @@ import {
 } from "../../reports/pages.ts";
 import { EMPTY_OPENROUTER, EMPTY_TRENDING, type TrendingData } from "../../trending/compose.ts";
 import { MSG, TRENDS_REPORT } from "../../core/strings.ts";
-import type { ProjectActivity } from "../../reports/prompts.ts";
+import { NO_MODEL_NEWS_NOTE, type ProjectActivity } from "../../reports/prompts.ts";
 import type { GitHubItem } from "../../core/github.ts";
 import type { PolicyData, PolicyItem } from "../../policy/items.ts";
 import { isDataLaw } from "../../policy/relevance.ts";
@@ -743,6 +743,19 @@ describe("buildModelsPage", () => {
     );
     expect(content).not.toContain("- Anthropic now requires a government ID");
     expect(content).toContain("- Post 2 ships something.");
+  });
+
+  it("gives the Highlights call the no-news rule and the title-only stories as two rule lines", async () => {
+    stub();
+    const story = { ...spottedRow(2, "models"), title: "Tell HN: a lab now requires a government ID" };
+    const report = await build([site([])], catalog(), { rows: [story], summaries: new Map() });
+    expect(report?.id).toBe("ai-models");
+    const highlightsPrompt = generateBody.mock.calls
+      .map((c) => c[0] as string)
+      .find((p) => p.includes("You are the editor"));
+    expect(highlightsPrompt).toContain(
+      `- ${NO_MODEL_NEWS_NOTE}\n- These stories (Spotted rows and News items) show only a title`,
+    );
   });
 
   it("shows at most LAB_POSTS_MAX posts, newest first, then how many more came in", async () => {
@@ -1624,7 +1637,7 @@ describe("buildDataReport", () => {
     it("reports fetchSuccess false when every feed fails, and writes no state on a quiet day", async () => {
       generateBody.mockReset();
       fs.rmSync(stateFile, { force: true });
-      const data = await fetchWith(() => new Response("", { status: 503 }), { reported: {} });
+      const data = await fetchWith(() => new Response("", { status: 500 }), { reported: {} });
       expect(data.fetchSuccess).toBe(false);
       expect(await build(sections(false, false), data)).toBeNull();
       expect(fs.existsSync(stateFile)).toBe(false);

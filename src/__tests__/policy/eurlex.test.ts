@@ -92,7 +92,7 @@ describe("fetchEurLex", () => {
   });
 
   it("throws on an HTTP error", async () => {
-    vi.spyOn(globalThis, "fetch").mockResolvedValue(new Response("", { status: 503 }));
-    await expect(fetchEurLex(ctx([]))).rejects.toThrow("HTTP 503");
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(new Response("", { status: 500 }));
+    await expect(fetchEurLex(ctx([]))).rejects.toThrow("HTTP 500");
   });
 });

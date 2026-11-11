@@ -49,7 +49,7 @@ describe("fetchVendorFeeds", () => {
       const url = String(input);
       if (url.endsWith("dbx.xml")) return new Response(fixture("azure-databricks.xml"));
       if (url.endsWith("azure.xml")) return new Response(fixture("azure-updates.xml"));
-      return new Response("", { status: 503 });
+      return new Response("", { status: 500 });
     });
   }
 
@@ -78,7 +78,7 @@ describe("fetchVendorFeeds", () => {
     stubFetch();
     const { items } = await fetchVendorFeeds({ feeds, community: [] }, now);
     expect(items.some((i) => i.vendor === "gcp")).toBe(false);
-    expect(console.log).toHaveBeenCalledWith("  [data] BigQuery failed: HTTP 503");
+    expect(console.log).toHaveBeenCalledWith("  [data] BigQuery failed: HTTP 500");
   });
 });
 
