@@ -2,6 +2,8 @@
 
 Issues and specs for this repo live as markdown files in `.scratch/`.
 
+`.scratch/` is in `.gitignore`: nothing in it is committed, so do not `git add` an issue or spec. A search skips ignored files unless the path is given: use `rg <term> .scratch`.
+
 ## Conventions
 
 - One feature per directory: `.scratch/<feature-slug>/`
