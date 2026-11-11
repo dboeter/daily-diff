@@ -24,3 +24,4 @@ About 300 distinct stories and a few hundred release lines: under 1,000 Jev call
 
 - 2026-11-11: done with 1,152 Jev calls, over the estimate of 1,000. The story question finds 15 of 17 at a bar of 0.6 with 5 false hits in 363. Release lines are about 19 security lines a day, too many for one row each. The email leak links to its fix line at 0.93. Not done: the daily count used all lines of one week, not a second week; lines got no severity question.
 - 2026-11-11: the organization ran out of TypeSafe credits at the end of the run (`402`). Two follow-up calls, the v2.1.321 email-check line against the leak stories, did not run. The balance was not checked before the run.
+- 2026-11-11, later: credits were added and the two calls ran. The v2.1.321 email-check line scores 0.22 and 0.11 against the leak stories: not linked. See `spike/results.md`.

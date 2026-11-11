@@ -55,6 +55,7 @@ Four days of `candidates.json` (11-07 to 11-10, the file exists since 11-07), a 
 - A new fix line is asked against the open incidents of its project; a new incident against that project's recent fix lines. A match adds "fixes the leak reported on 11-07" or "fixed in v2.1.317 (11-03)" to the row.
 - This crosses the show-once rules (`dropShownRepeats`, the hot-issue state, one link once on Spotted). A follow-up row is a new item that names the earlier one; the earlier row is not shown again.
 - Acceptance case: the email leak (story 11-05, shown 11-07) and v2.1.317 (11-03). Replayed over those days, the 11-07 row says it is fixed.
+- Not covered: a later change to a fix. The v2.1.321 line that narrows the email check scores 0.43 as a security line and 0.22 and 0.11 against the leak stories (spike, 2026-11-11), so it is neither flagged nor linked. If such a change must show, it needs a link to the earlier fix line of its project; that is not tested.
 
 ## Open decisions
 

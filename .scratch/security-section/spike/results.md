@@ -58,7 +58,7 @@ Labels in the sample: 101 yes, 542 no, 13 borderline.
 Each of three Claude Code stories was asked against the 25 Claude Code lines flagged at 0.7.
 
 - **The email leak links cleanly.** Both stories pick the v2.1.317 line (0.93 and 0.77); the next line scores 0.14.
-- **The follow-up line was not tested.** v2.1.321 (11-09) has "Changed the account email check to refuse only a shell command that holds your email and names a User-Agent": the fix after the story, the case the maintainer named. It scored 0.43 as a security line, under the 0.7 gate, so the pair run never saw it. The two calls to test it failed with `402`. If it holds, a line gate drops the follow-up before any link is tried, and an open incident must be matched against every line of its project's releases.
+- **The follow-up line is not linked.** v2.1.321 (11-09) has "Changed the account email check to refuse only a shell command that holds your email and names a User-Agent": the change after the story, the case the maintainer named. It scored 0.43 as a security line, under the 0.7 gate, so the pair run never saw it. Asked on its own once credits were back (2 calls, 1,103 tokens), it scores 0.22 against the Hacker News story and 0.11 against the write-up, where the first fix scored 0.93 and 0.77. The line narrows the check and names no leak, so neither the line gate nor the link question sees it as part of the incident. A follow-up to a fix needs another route: a link to the earlier fix line of the same project, not to the story. That route is not tested.
 - **A story without text does not.** "Claude Code's 'Don't Ask Again' exposes passwords in 1,122 public GitHub files" (title only, no known fix) scores four unrelated lines 0.62 to 0.80. A link needs a bar near 0.9, or a story with a description.
 
 ## Cost of a daily run
@@ -71,7 +71,7 @@ Each of three Claude Code stories was asked against the 25 Claude Code lines fla
 
 - Vendor notes, the Data page's own feed.
 - A severity question for release lines.
-- The follow-up line of v2.1.321 against the email-leak stories (above).
+- A link from a follow-up line to the earlier fix line it changes (above).
 - Points as a third banner signal.
 
 ## What this says about the design
@@ -83,4 +83,4 @@ Each of three Claude Code stories was asked against the 25 Claude Code lines fla
 
 ## Credits
 
-The run ended with the organization out of TypeSafe credits: `402 billing_error`, "no available TypeSafe API credits", on the first call after the pair run. Whether the balance was already low is not known; it was not checked before the run, and the estimate counted calls, not tokens. Until credits are added, the daily digest falls back to keyword rules where it has no saved verdict, and saves no research papers, if its key is on the same organization.
+The run ended with the organization out of TypeSafe credits: `402 billing_error`, "no available TypeSafe API credits", on the first call after the pair run. Whether the balance was already low is not known; it was not checked before the run, and the estimate counted calls, not tokens. Until credits are added, the daily digest falls back to keyword rules where it has no saved verdict, and saves no research papers, if its key is on the same organization. Credits were added later on 2026-11-11, and the two calls above ran.
