@@ -370,7 +370,16 @@
     "nov 09, 2026: skill recommendations and suggestions to create and share skills in coco|2026-11-09": "2026-11-10",
     "release:databricks/cli@v1.25.0": "2026-11-10",
     "release:databricks/terraform-provider-databricks@v1.142.0": "2026-11-10",
-    "post:medium.com/snowflake/who-is-actually-using-your-snowflake-mcp-server-683a6cb543d7": "2026-11-10"
+    "post:medium.com/snowflake/who-is-actually-using-your-snowflake-mcp-server-683a6cb543d7": "2026-11-10",
+    "all unity catalog managed tables will be upgraded to catalog commits|2026-11-06": "2026-11-11",
+    "nov 10, 2026: ai_extract and ai_parse_document now support page filtering with fl_filter_pages|2026-11-10": "2026-11-11",
+    "nov 10, 2026: temporary role grants to users (preview)|2026-11-10": "2026-11-11",
+    "you can use graph measures to lock an aggregation to a key in order to perform complex aggregations without overcounting (ga)|2026-11-10": "2026-11-11",
+    "bigquery generative ai functions now support the gemini-4-carbon model|2026-11-10": "2026-11-11",
+    "post:duckdb.org/2026/11/10/ducks-in-a-column.html": "2026-11-11",
+    "post:dlthub.com/blog/introducing-performance-optimization": "2026-11-11",
+    "post:medium.com/snowflake/is-your-iceberg-catalog-healthy-939dc7817154": "2026-11-11",
+    "post:medium.com/snowflake/native-asyncio-comes-to-the-snowflake-python-connector-5941385ac80e": "2026-11-11"
   },
   "stages": {
     "snowflake-bcr:2026_08": "2026-10-16 Introduced in the 10.37 release (October 8-16, 2026) as Disabled by Default; account admins can enable for testing."
@@ -396,6 +405,13 @@
       "link": "https://learn.microsoft.com/azure/databricks/release-notes/product/2026/november#zhipu-ai-glm-52-is-scheduled-for-retirement",
       "source": "Azure Databricks",
       "summary": "Zhipu AI GLM 5.2 is deprecated and will be retired on February 4, 2027, requiring migration to GLM 5.3 per the Legacy, deprecated, and retired models guidance."
+    },
+    "https://learn.microsoft.com/azure/databricks/release-notes/whats-coming#all-unity-catalog-managed-tables-will-be-upgraded-to-catalog-commits": {
+      "date": "2027-08-19",
+      "title": "All Unity Catalog managed tables will be upgraded to catalog commits",
+      "link": "https://learn.microsoft.com/azure/databricks/release-notes/whats-coming#all-unity-catalog-managed-tables-will-be-upgraded-to-catalog-commits",
+      "source": "Azure Databricks",
+      "summary": "After Databricks Runtime 15.4 LTS end of support on August 19, 2027, all Unity Catalog managed tables will be automatically upgraded to `catalog commits`, making Unity Catalog the system of coordination and enabling multi-statement transactions, external engine writes, and consistent governance; clients must plan for this breaking change before the 2027 deadline."
     }
   }
 }

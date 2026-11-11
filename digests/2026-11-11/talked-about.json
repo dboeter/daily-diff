@@ -1,0 +1,46 @@
+[
+  {
+    "id": "hn:50438318",
+    "source": "hn",
+    "title": "AI usage generates a fragile codebase",
+    "url": "https://evanxmerz.com/post/ai-usage-generates-a-fragile-codebase/",
+    "discussionUrl": "https://news.ycombinator.com/item?id=50438318",
+    "points": 458,
+    "comments": 453,
+    "topic": "other",
+    "counts": "458 points, 453 comments"
+  },
+  {
+    "id": "hn:50447074",
+    "source": "hn",
+    "title": "Tracking Anthropic-discovered vulnerabilities",
+    "url": "https://www.vulncheck.com/blog/anthropic-glasswing-november-update",
+    "discussionUrl": "https://news.ycombinator.com/item?id=50447074",
+    "points": 366,
+    "comments": 168,
+    "topic": "other",
+    "counts": "366 points, 168 comments"
+  },
+  {
+    "id": "hn:50435660",
+    "source": "hn",
+    "title": "CoreWeave bond yield tops 16% as AI credit stress rises",
+    "url": "https://www.cnbc.com/2026/11/06/coreweave-bond-yield-tops-16percent-as-ai-credit-stress-rises.html",
+    "discussionUrl": "https://news.ycombinator.com/item?id=50435660",
+    "points": 193,
+    "comments": 189,
+    "topic": "other",
+    "counts": "193 points, 189 comments"
+  },
+  {
+    "id": "devto:5002973",
+    "source": "devto",
+    "title": "Prompt injection isn't a prompt problem. It's an authorization problem.",
+    "url": "https://dev.to/cyclopt_dimitrisk/prompt-injection-isnt-a-prompt-problem-its-an-authorization-problem-59j6",
+    "discussionUrl": "https://dev.to/cyclopt_dimitrisk/prompt-injection-isnt-a-prompt-problem-its-an-authorization-problem-59j6",
+    "points": 29,
+    "comments": 23,
+    "topic": "other",
+    "counts": "29 reactions, 23 comments"
+  }
+]

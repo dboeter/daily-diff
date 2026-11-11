@@ -1,0 +1,17 @@
+{
+  "ai-agents": [
+    "OpenShell v0.1.8 breaks: explicit auth_style for static credentials, 403 on HTTP upgrade, OCSF fields moved, symlink traversal fails, IPv4-mapped IPv6 as IPv4, SDKs relocated."
+  ],
+  "ai-models": [
+    "Google releases Gemini 4 Carbon, a frontier multimodal model for coding, agentic and complex reasoning with 1M-token context, now on OpenRouter and Google AI Studio.",
+    "Baidu adds ERNIE 5.5 Flash Preview to OpenRouter, a 1M-context model claiming comprehensive gains in coding, agentic tasks, knowledge work and deep research."
+  ],
+  "ai-policy": [
+    "Tweede Kamer tables motions for AI Act enforcement supervision and AI model damage liability framework.",
+    "European Commission opens consultation on revised DSA election guidelines addressing generative AI risks for very large platforms."
+  ],
+  "ai-data": [
+    "− Azure Databricks Unity Catalog managed tables face automatic upgrade to catalog commits after Databricks Runtime 15.4 LTS ends August 19, 2027.",
+    "Snowflake Python Connector 5.0.0 adds native asyncio awaitable API on Universal Core, requiring migration from thread pools."
+  ]
+}

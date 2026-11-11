@@ -40,7 +40,11 @@
     "issue:anthropics/claude-code#108122": "2026-11-08",
     "issue:anomalyco/opencode#62524": "2026-11-08",
     "issue:anthropics/claude-code#107390": "2026-11-10",
-    "issue:anthropics/claude-code#107922": "2026-11-10"
+    "issue:anthropics/claude-code#107922": "2026-11-10",
+    "issue:anthropics/claude-code#108726": "2026-11-11",
+    "issue:anthropics/claude-code#89673": "2026-11-11",
+    "issue:openai/codex#56655": "2026-11-11",
+    "issue:nousresearch/hermes-agent#152674": "2026-11-11"
   },
   "stages": {}
 }
