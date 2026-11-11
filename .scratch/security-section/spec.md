@@ -1,6 +1,6 @@
-# Security section: incidents and fixes on every page
+# Security: a banner for severe incidents, marked rows for the rest
 
-Status: draft. The decisions under "Decided" are the maintainer's (2026-11-11). The spike is done (`spike/results.md`). Placement is open again. Nothing is built.
+Status: placement decided on 2026-11-11. The decisions under "Decided" are the maintainer's. The spike is done (`spike/results.md`). Nothing is built.
 
 ## Why
 
@@ -12,29 +12,55 @@ The nightly reviews of 2026-11-07 to 11-10 found security news that was fetched 
 
 ## Decided
 
-1. **Readers**: the maintainer and the colleagues who read only the Data page. Where the rows show is open again, see "Placement".
+1. **Readers**: the maintainer and the colleagues who read only the Data page.
 2. **Scope**: incidents (a breach, a leak, a vulnerability) and security fixes. A fix that follows an incident an earlier digest reported must point back to it.
+3. **Messages**: security items go into `highlights.json`, so Telegram and the Teams post carry them. Which items, see "Open decisions".
+4. **Placement**: a banner for the severe incidents, a marker and an own slot for the other security stories, a marked bullet for a fix. No Security page and no Security table on the pages.
 
-3. **Messages**: a page's security rows go into `highlights.json`, so Telegram and the Teams post carry them.
+## Placement
 
-## Placement (open, roadmap `security/1.2`)
+| What                    | Where it shows                                                                                   |
+| ----------------------- | ------------------------------------------------------------------------------------------------ |
+| A severe incident       | A banner on every page, on the Overview and in both messages                                     |
+| Any other flagged story | Where it shows today (its project's News, Spotted, "Also talked about"), marked, in its own slot |
+| A security fix          | A marked bullet in its project's release section                                                 |
 
-The maintainer is weighing three forms: a table on each page (below), a separate Security page, and a banner or sidebar for the high-confidence, high-impact items (the backdoored Claude Code extension of 2026-10-31 is the example). What the spike says:
+Why, from the spike:
 
-- No story in 13 days concerned a data platform, so a table on the Data page would hold release fixes only. A severe incident in a tool the colleagues use reaches them only through something that crosses pages.
-- A banner rule over three Jev answers (flagged, severity 1.5 or more, claim by the vendor, a researcher or the press) gives 5 events in 13 days and passes the extension backdoor. 2 of its 8 stories are out of scope, and it leaves out the Claude Code email leak, which was one user's report.
-- About 19 release lines a day have a security effect: too many for a row each on any page.
+- **A banner crosses pages.** No story in 13 days concerned a data platform. A severe incident in a tool the colleagues use reaches them only through something on every page. A banner also needs no choice of page.
+- **The banner rule is three Jev answers**: the story is flagged, its severity is 1.5 or more, and the claim is by the vendor, a researcher or the press. In 13 days that is 5 events, 2 to 3 a week. It passes the backdoored Claude Code extension of 2026-10-31, the maintainer's example.
+- **The rule has two known faults.** 2 of its 8 stories were out of scope (security news about something other than AI or data tooling). It leaves out the Claude Code email leak, which was one user's report; that story is then a marked row.
+- **No table.** About one security event a day shows across all pages, so a table would hold no row or one row on most days. The fault the reviews found was that such a story was cut: the three Fireworks submissions fell to the row cap, the topic bar and the routing. An own slot fixes that, and the item still shows once, on one page.
+- **No Security page.** It would be empty on many days, the colleagues who read only Data would not open it, and it breaks "one item, one page, once" (`../digest-structure/spec.md`).
+- **A fix is a bullet, not a row.** About 19 release lines a day have a security effect.
 
-## Shape of a page table
+## Shape
 
-- `## Security`, a code-rendered table directly under Highlights, as `## Action required` is on the Data page. No row: no section.
-- Columns: Date, Item (linked), Source, What happened (the model's row summary, from the item's text only). The Source column keeps "a Hacker News post" visible, so a claim is never in the digest's own voice. A row without text shows `—`.
-- Not a Highlight rule. Highlights only see what the page shows, and free prose is where security claims went wrong.
+Proposed; the maintainer has decided the placement, not these details.
+
+- **Banner**: code-rendered, above `## Highlights` on every page published that day and at the top of the Overview. One line per event: the story's title linked, its source ("a Hacker News post", "Wiz Research") and its date. No model prose: free prose is where security claims went wrong (issue 05 of the 11-10 review). Several submissions of one event are one line.
+- **Shown once.** A banner line shows on the day its story is first seen. A later fix or postmortem that clears the rule is a new line that names the earlier one.
+- **Marker**: one emoji before the row's title, defined in `GLOSSARY.md`. Not green or red, and not ⚠️, which the Data page uses for a deprecation.
+- **Own slot**: a flagged story skips the topic bar (`SPOTTED_MIN_TOPIC_PROBABILITY`) and the per-source row cap. It stays in the list it belongs to and takes no other story's row.
+- **Without Jev** (no key, or more than half the calls failing) there is no banner and no marker that day. There is no keyword fallback, see the evidence.
+- **A wrong banner is on every page.** The answers are cached like the topic verdicts, so a wrong one is fixed by editing and pinning it, and a trace file lists every flagged story with its three answers.
+
+## Cost
+
+The digest's Jev key and the local key are on one TypeSafe organization, and the spike emptied its credits. Estimates from the spike's token counts; the price per token and the digest's daily use today are not known.
+
+| Part                                                       | Jev tokens a day            |
+| ---------------------------------------------------------- | --------------------------- |
+| Stories, all four spike questions                          | about 140,000               |
+| Stories, severity and claim asked only for a flagged story | about 50,000 (not measured) |
+| Release lines, every line of every release body            | about 200,000               |
+
+So the story feed comes first, with the flag asked for every fresh story and the other answers only for a flagged one. The release-line feed waits until a week of the story feed shows what it costs.
 
 ## Feeds
 
-1. **Community stories**: one Jev question per fresh story, cached like the topic verdicts. A flagged story has its own slots. It skips the topic bar (`SPOTTED_MIN_TOPIC_PROBABILITY`) and the per-source row cap, and leaves Spotted and "Also talked about". Several submissions of one event are one row.
-2. **Release notes**: a judgment per line of the full release body. A heading check is not enough, see the evidence. The spike found about 19 such lines a day, so a line is not a row: the lines go to their project's release bullets, and only graded ones are raised.
+1. **Community stories**: one Jev question per fresh story, cached like the topic verdicts; a flagged story gets the severity and claim questions too. The topic request sees only the stories no project took, so this is a request of its own, about 80 to 115 stories a day. A story that clears the banner rule is a banner line; any other flagged story is marked and has its own slot.
+2. **Release notes**: a judgment per line of the full release body. A heading check is not enough, see the evidence. The spike found about 19 such lines a day, so a line is not a row: a flagged line is a marked bullet in its project's release section. Built after the story feed, see "Cost".
 3. **Hot issues** with a security label, which code already knows.
 4. **Vendor notes** on the Data page that Jev marks as a security change (not checked yet).
 
@@ -51,21 +77,24 @@ Four days of `candidates.json` (11-07 to 11-10, the file exists since 11-07), a 
 
 ## Linking an incident and its fix
 
-- A state file keeps each shown security row (incident or fix) for N days, like the data state's `actions`.
-- A new fix line is asked against the open incidents of its project; a new incident against that project's recent fix lines. A match adds "fixes the leak reported on 11-07" or "fixed in v2.1.317 (11-03)" to the row.
-- This crosses the show-once rules (`dropShownRepeats`, the hot-issue state, one link once on Spotted). A follow-up row is a new item that names the earlier one; the earlier row is not shown again.
-- Acceptance case: the email leak (story 11-05, shown 11-07) and v2.1.317 (11-03). Replayed over those days, the 11-07 row says it is fixed.
+- A state file keeps each shown security item (a banner line, a marked story or a fix bullet) for N days, like the data state's `actions`.
+- A new fix line is asked against the open incidents of its project; a new incident against that project's recent fix lines. A match adds "fixes the leak reported on 11-07" or "fixed in v2.1.317 (11-03)" to the item.
+- This crosses the show-once rules (`dropShownRepeats`, the hot-issue state, one link once on Spotted). A follow-up is a new item that names the earlier one; the earlier item is not shown again.
+- Acceptance case: the email leak (story 11-05, shown 11-07) and v2.1.317 (11-03). Replayed over those days, the story shown on 11-07 says it is fixed.
 - Not covered: a later change to a fix. The v2.1.321 line that narrows the email check scores 0.43 as a security line and 0.22 and 0.11 against the leak stories (spike, 2026-11-11), so it is neither flagged nor linked. If such a change must show, it needs a link to the earlier fix line of its project; that is not tested.
 
 ## Open decisions
 
-1. **An incident outside a page's topic.** With page-scoped tables the Fireworks breach is on AI Models & Labs and on the Overview, not on Data. Proposed: keep "one item, one page, once"; an incident that names a tracked data project or vendor is on Data too (the existing exception for News).
-2. **Page of a flagged story**: proposed is the page of its best page topic, with no bar, or the page of the tracked project it names.
+1. **Which items the messages carry.** Decision 3 was made when every item was a row. Proposed: code adds the banner lines to both messages; a marked row or a fix reaches a message only when its page's Highlights pick it.
+2. **Page of a flagged story no project took**: proposed is the page of its best page topic, with no bar; a story routed to no page goes to "Also talked about".
+3. **A banner that is one user's report with many points.** The email leak had 1,612 points and is not a banner. Points as a third signal are not tested.
 
 ## Order of work
 
 1. Spike: done, `spike/results.md`.
-1. Placement decision.
-1. Table, state and the story feed.
-1. Release-line feed and the incident-to-fix link.
-1. Overview list, messages, `GLOSSARY.md` and `AGENTS.md`.
+1. Placement: decided.
+1. The story question with its verdict cache and trace, the banner, and the banner lines in `highlights.json`.
+1. The marker and the own slot.
+1. A week of runs: the cost in tokens, and every banner checked by hand.
+1. Release-line feed, then the incident-to-fix link and its state.
+1. `GLOSSARY.md` and `AGENTS.md`, each with the step that changes what they describe.
