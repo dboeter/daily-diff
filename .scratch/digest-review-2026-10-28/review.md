@@ -1,0 +1,169 @@
+# Daily Diff review, edition 2026-10-28: aggregated report
+
+Edition generated locally on branch `digest-review-2026-10-28` (= origin/main `c973de9`) with `DIGEST_FORCE_WEEKLY=1` and CI's own LLM settings (OpenRouter, `nvidia/nemotron-3-super-120b-a12b:free` + fallbacks, reasoning effort low): 16/16 LLM calls ok, all five pages published. Model-output findings are what CI would publish. Per-page findings with full evidence: `ai-agents.md` (A), `ai-models-policy.md` (M, L), `ai-data.md` (D), `ai-trends.md` (T) in this folder. Severity: high = a reader is misled or acts wrongly; medium = noticeably lowers value or trust; low = polish.
+
+Local-run differences, not findings: `PLURAL_API_KEY` and `USA_GOV_API_KEY` unset (no US bills or dockets); the forced Wednesday weekly compares against 2026-10-21, which has no Trends page (no 🔥, no "vs previous week", no Skills repeat-skip); the run started 16 h after CI's 10-27 run, so some 10-27 releases fall in both windows; the hot-issue state starts empty (it reached main after CI's 10-27 run), so one round of hot-issue repeats is expected on CI's first run too.
+
+## Verdict
+
+Structure, counts, selection rules, traces and nearly every table figure check out; the data page is the cleanest (0 high, every row matches its source). It is not clean: 3 high findings. Codex has been missing from the agents page on 4 of the last 5 days because its releases request times out. Two release bullets invent or leave out facts because the model sees only the first 400 characters of the notes; one of them hides that OpenCode removed its GitHub Action. And the Skills section presents 7 PRs that were closed without merging as shipped work. Four tickets from the 10-26 round regressed in outcome (03, 04, 14, and 17 on one string) and three hold only partly (05, 08, 15).
+
+## High
+
+| ID  | Page   | Finding                                                                                                                                                                                                                                                                 | Cause                                                                                                                                                                                                   |
+| --- | ------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| A3  | agents | Codex is "Unavailable" on 10-24, 10-26, 10-27 and 10-28; its stable rust-v0.165.0 (10-27) never showed. `/releases?per_page=100` serializes ~13k asset records and hits GitHub's ~11 s limit (504, or a truncated 200); `per_page=10` answers in 4.9 s.                 | `githubGet` retries only connection errors, never a 5xx, and has no timeout (`src/core/github.ts:114-136`); `RELEASES_PAGE = 100` (`:162`). Fix must keep `noStableYet`, which counts on a page of 100. |
+| A1  | agents | OpenShell v0.1.6 bullet says new sandboxes "now open terminals automatically". The notes say they open the control connection to the supervisor, and the supervisor and runtime binaries must be upgraded together. The model completed a sentence cut at "now open t". | `RELEASE_BODY_CHARS = 400` (`src/reports/prompts.ts:149`), cut mid-word, mostly link URLs                                                                                                               |
+| A2  | agents | OpenCode v2.2.0 bullet lists features only; the release has three breaking changes, including "The OpenCode GitHub Action is removed … Remove it from your workflows" (a going-away item). Not in the bullet, the Highlights or `highlights.json`.                      | Same 400-char cut; nothing pulls "Breaking changes" ahead of it                                                                                                                                         |
+| T1  | trends | All 7 "Closed this week" Skills PRs were closed unmerged, yet read as shipped ("#1961 – Hardens `skill-creator` eval viewer against … DNS rebinding"); the Takeaway builds a trend on two rejected refactors.                                                           | Prompt says "may or may not have been merged: do not say which" (`src/reports/prompts.ts:388`); `GitHubItem` has no `merged_at` (`src/core/github.ts:49`) though the issues API returns it              |
+
+## Medium
+
+| ID  | Page     | Finding                                                                                                                                                                                                                                                                                                                                                          | Cause                                                                                                                                                                                                                                                                                         |
+| --- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| T2  | overview | `highlights.json` has no `ai-trends` entry: the weekly page is missing from the Overview, Telegram and Teams. Regression of ticket 04.                                                                                                                                                                                                                           | The prompt bans raw counts (stars) and "X dominates" while requiring the page's lead, and Trends' lead and second bullet are figures (`src/reports/prompts-pages.ts:443-456`); `ai-trends` is not in `forcedHighlightReports` (`:474`). Raw reply not saved, so the tipping rule is inferred. |
+| M1  | models   | The OpenAI "Oracle Apps In Chatgpt" row, Highlight 3 and `highlights.json` were written from a URL slug and "(no page text)"; the prompt says write `—`. Same on 10-27 (GPT-6.1 Terra). Regression of ticket 03. Medium, not high (the 10-26 scale put source-less claims at high) only because the guess matches the real post closely; the next guess may not. | Rule only in the prompt (`prompts-pages.ts:271`); `labs.ts:357` leaves `content` empty. `openai.com/news/rss.xml` gives real titles, descriptions and dates (reachable from CI: unverified).                                                                                                  |
+| M4  | overview | A policy story at Jev 0.95 and 323 points (Claude trained on illegally obtained books, $1.5B settlement) and a 279-point police-AI story appear nowhere: three `other` essays took HN's three talked-about slots. Regression of ticket 14.                                                                                                                       | `selectTalkedAbout` ranks policy and other together by points (`src/spotted/pool.ts:447-461`)                                                                                                                                                                                                 |
+| A5  | agents   | Highlight 3 and `highlights.json` state "Hermes Agent leaks valid `OPENAI_API_KEY`…" as fact from one open P3 issue; the open fix PR #145478 is not mentioned. Regression of ticket 03.                                                                                                                                                                          | Rule only in the prompt; the issue block carries no linked PRs                                                                                                                                                                                                                                |
+| A4  | agents   | The other release bullets summarize the first 400 chars: Gemini's ends on "updates roadmap and changelog" and misses the git credential-prompt fix; Oh My Pi misses `tools.restrictedFolders`; OpenShell misses four CVE fixes.                                                                                                                                  | Same as A1                                                                                                                                                                                                                                                                                    |
+| A6  | agents   | Gemini #15404, a 10-month-old antivirus false positive, qualifies on +3: two bot comments and a "/assign". Its row hides the `area/security` label it qualified on; the Hermes rows show theirs.                                                                                                                                                                 | No bot or command filter in the gain count (`src/core/github.ts`); `HOT_LABEL` matches `area/security`                                                                                                                                                                                        |
+| A7  | agents   | OpenCode #59387 repeats 10-27 and is framed as a live bug; it is the maintainers' "Free tier issues: read this first" thread (fix: update to v2).                                                                                                                                                                                                                | Repeat: empty first-run state (one-off). Framing: 300-char body excerpt                                                                                                                                                                                                                       |
+| M2  | overview | `highlights.json` kept the slug-only Oracle item and dropped Anthropic's vulnerability-research post (five exploit chains, 62 Chrome CVEs fixed).                                                                                                                                                                                                                | The highlights call is not told that a row had no page text                                                                                                                                                                                                                                   |
+| M3  | policy   | Policy row summary ends "The provided text does not specify any direct implications for organisations that deploy AI."                                                                                                                                                                                                                                           | Prompt demands a 2nd sentence on implications (`prompts-pages.ts:139-140`), with no way to stop at one                                                                                                                                                                                        |
+| D1  | data     | Fabric gateway row omits the post's one new capability, Admin APIs for connections and gateways (Preview); Jev judged the same cut text (`minor`, unknown significance).                                                                                                                                                                                         | `VENDOR_DESCRIPTION_MAX_CHARS = 1000` (`src/core/rss.ts:69`); the feature starts ~1,600 chars in                                                                                                                                                                                              |
+| D2  | data     | BigQuery row never shows its stage; Highlight 3 says "released", Across platforms says "GA". The note's 2nd sentence says GA, but the Item cell holds only the 1st and the prompt forbids status words in summaries. 10-27 rendered "(GA)".                                                                                                                      | `src/data/bigquery.ts:33`, `prompts-pages.ts:315`, prose sees rendered rows only (`pages.ts:774-783`)                                                                                                                                                                                         |
+| T3  | trends   | 42 of 53 row summaries add a 2nd sentence restating the 1st ("pi is a coding agent positioned as personally yours. It is positioned as personally yours…"); 30 end "in TypeScript." repeating the Lang column.                                                                                                                                                   | Model ignores the prompt's own ban; `summaryRows` passes `Language:` as the only fact                                                                                                                                                                                                         |
+| T4  | trends   | 5 of 10 Research papers apply agents to other fields (nnInteractive medical imaging leads); 7 of 10 repeat 10-26. The ticket-16 penalty works live but the page reads relevance saved before it existed; 11-02 inherits it too.                                                                                                                                  | `src/trending/research.ts:57-58` reads stored relevance; penalize at read time or re-score                                                                                                                                                                                                    |
+
+## Low (one line each; details in the page files)
+
+- A8 `checkCodeTokens` rightly rejected `AgentTool.handlesToolInterrupt`, but strips the backticks instead of keeping `handlesToolInterrupt`; the warning logs twice. A9 hot-issue count parentheticals take a different form on every row (model-written). A10 "large `CLAUDE.md` files" should be "a very long list item". A11 4-point, 0-comment, "—" Show HN at Spotted rank 2 (by spec: band 10 before points). A12 a 30-day personal field report as Claude Code news; "highlighting growth" filler.
+- L1 talked-about's Dev.to entry is an episode of a fiction serial. L2 "Is my data used for model training?" (205 points) split across topics and fell through both nets. L3 policy Highlights drop "with systemic risk". L4 "1 new items" (regression of ticket 17, `src/core/strings.ts:227`). L5 AllModels' features credited to "5 providers". L6 lab summaries miss the results (page text cut at 1,500 chars, `labs.ts:104`), so the vulnerability post reads as open zero-days. L7 OpenAI row dates are sitemap generation time. L8 OpenAI `security` and `global-affairs` sub-sitemaps not crawled. L9 empty Stage cell, not `—`. L10 two Spotted summaries near-copies of their descriptions. L11 watchlist-only policy sources (EP, Tweede Kamer) will raise quiet-source WARNs after 7 days.
+- D3 BigQuery Item cell is a full "Feature: …" sentence that the Summary repeats. D4 Across platforms lumps BigQuery's Drive input with external-agent connectivity. D5 data Highlights restate rows without client impact (maintainer call against ticket 03). D6 the "5 notes … skipped" log overstates (none was a candidate); the stem match pairs unrelated notes; docstring stale. D7 trace `rank` is not the displayed order. D8 CoCo row lacks 🤖 (Jev 0.37). D9 no blank line after `## Highlights` (Trends too).
+- X1 the models meta line counts Spotted ("Spotted: 6"); the agents meta line does not, though it has a Spotted table too.
+- T5 "nearly double" for 2.03×, against the same model's earlier snapshot. T6 Radar order has no visible key (Hermes, the top token figure, sits 11th). T7 `dropped_reason: threshold` for repos dropped for no description (t3code +1,881). T8 DeepSeek Harness still "—" though its repo has a description (partial regression of ticket 15). T9 Most discussed has one row; `other` excluded with no confidence floor. T10 `trending-trace.json` `models: []`. T11 repeats against 10-26 (artifact of the forced run). T12 a Signal states an absence. T13 weak category fit (ohmygame, rune, TradingAgents, Aura). T14 SWE-VERIFIER "reduces computation"; abstract says 1.09× cost. T15 "starting Monday" in a weekly table four days later. T16 Trends meta line has sources, not counts.
+
+## Tickets
+
+In `issues/`, one per fix; lows ride along where they share it. `needs-triage` = a maintainer decision first.
+
+| Ticket                                                             | Findings        | Status          |
+| ------------------------------------------------------------------ | --------------- | --------------- |
+| 01 Codex's releases reach the agents page                          | A3              | ready-for-agent |
+| 02 Release bullets from the notes that matter                      | A1, A2, A4      | ready-for-agent |
+| 03 Skills says whether a closed PR was merged                      | T1              | ready-for-agent |
+| 04 highlights.json covers a published Trends page                  | T2              | ready-for-agent |
+| 05 A lab post without page text is never summarized or highlighted | M1, M2 (L7, L8) | ready-for-agent |
+| 06 Hot issues count people, show label and fix status              | A5, A6, A7 (A9) | needs-triage    |
+| 07 A much-discussed policy story reaches the Overview              | M4 (L1, L2)     | needs-triage    |
+| 08 Policy summaries say only what the source says                  | M3 (L4, L9)     | ready-for-agent |
+| 09 Vendor items judged on their whole feature list                 | D1 (L6)         | ready-for-agent |
+| 10 BigQuery rows show their release stage                          | D2 (D3)         | ready-for-agent |
+| 11 Trends row summaries say one thing once                         | T3              | ready-for-agent |
+| 12 The Research table applies the domain penalty to the whole pool | T4              | needs-triage    |
+
+## Systemic causes
+
+1. **Fixed-length input cuts drop the facts that matter** (A1, A2, A4, A7, D1, L6). Release notes 400 chars, issue bodies 300, vendor descriptions 1,000, lab pages 1,500, each cut from the top with no section awareness. The model then completes the cut sentence (A1) or summarizes the boilerplate head (A4). One change pattern fixes all: a larger budget with link URLs stripped before counting, and "Breaking changes"/"Upgrade" sections pulled ahead of the cut.
+2. **Rules that live only in the prompt fail on the free model** (M1, A5, M3, T3, and T1 where the prompt withholds the fact). Where a rule is checkable, code should enforce it: force `—` for empty input, add `merged_at` and render "merged"/"closed unmerged" in code, render hot-issue counts and labels in code (A9, A6).
+3. **highlights.json selection** (T2, M2): the call's bans conflict with the Trends page's figure-led Highlights, and it cannot see which rows lack a source.
+4. **Topic routing leaves high-signal stories without a home** (M4, L2, T9, L1): talked-about ranks `other` and `policy` by points together; a story split across topics falls under every floor.
+5. **Traces and logs that mislead a maintainer** (T7, D6, D7, T10, A8): reasons and counts that do not say what happened.
+
+## Prior tickets (2026-10-26 round)
+
+Hold: 01, 02, 06 (identifier check; not the ordering, see A4), 07, 09, 10, 11, 12, 13 (not exercised), 16 (live; page lag in T4). Regressed in outcome: 03 (M1, A5; T1 on the Skills Takeaway), 04 (T2), 14 (M4), 17 (L4). Partial: 05 (L10), 15 (T8), 08 (A7, first-run state).
+
+## Checked and fine (summary)
+
+All header and meta-line counts; hot-issue bars and gains (#97074 +29, #59387 +35 recounted); Claude Code, Oh My Pi and Anthropic rows against their sources; every data row and its status word against the vendor note; data releases (all 17 repos via `gh api`), the behavior-change bundle and empty Action required; all four data drops; New models: 0; `coming-up.json` dates; Spotted floors, caps and order on both pages; every Trends Highlight and Signal figure against its row and `trendsFacts`; 20 repos' star totals; 6 Hugging Face rows; 15 Skills items' dates and audience filter; 10 arXiv abstracts; page size 29,887 bytes.
+
+## Not checked
+
+OpenRouter and npm figures against live sources (snapshot not reloadable); 15 of 32 category rows; the Axios story, IPO PDF and OpenAI post (HTTP 403); Fabric community pages (JS challenge; RSS bodies used); the raw `highlights` reply (not saved); whether CI can reach `openai.com/news/rss.xml`; data-repo hot issues.
+
+## Integration notes
+
+Behavior between the merged changes:
+
+- **01 × 06, GitHub core-call budget**: each ticket stated its worst case without the other's calls (01: 679 with 5 release pages a repo; 06: 613 with 66 fix-status calls). Together: 33 × 8 list pages + 250 count calls + 66 fix-status calls + 33 × 5 release pages = 745 core calls a daily run, plus up to 2 retries per request; still under the Actions token's 1,000 an hour, but the weekly run's star-history calls come on top. AGENTS.md and the `HOT_ISSUE_MAX_STATUS_CALLS` comment now give 745.
+- **10, BigQuery state keys**: decided in the fix round, option (c): `formerTitles` keeps the `<type>: <first sentence>|date` key as the state item's alias, so no BigQuery note an earlier report showed comes back.
+- No other two changes conflict. 02 and 06 share `stripLinkNoise`; 05 and 04 both lean on `dropNoHighlightRows`/`restatesLead` without overlap; 09's `Sections:` prefix does not reach BigQuery (split on `<h3>`, as 10 relies on).
+
+Fixed in integration: 06 and 11 each added an inline regex escape (`escapeRe` in `src/core/github.ts`, one in `tidyTrendsSummaries`); both now use `escapeRegex` (`src/reports/project-news.ts`). 01's private `isRetryable` in `src/core/github.ts` shared its name with `src/core/llm.ts`'s exported one, a different rule: it is now `isRetryableGet`. No test was added by two tickets (checked by `describe`/`it` name across `src/__tests__`). The `src/spotted/topics.ts` comments name Policy talk (07), and `buildPageHighlightsPrompt`'s `note` doc names the lab posts without page text (05).
+
+- 01: done. Unticked: a live run shows Codex as active or quiet, not Unavailable: needs a CI run with network. The box names a `[codex] releases:` log line; the only release log line in `src/` is `[github] <repo> releases: stopped at 5 pages`, written at the page cap, so check the agents page's Unavailable today line instead.
+- 02: done. All boxes ticked.
+- 03: done. All boxes ticked.
+- 04: done. All boxes ticked.
+- 05: done. Unticked: the optional OpenAI `news/rss.xml` source: needs a reachability check from a GitHub runner first.
+- 06: done. All boxes ticked.
+- 07: done. All boxes ticked (the docs box in this integration step).
+- 08: done. All boxes ticked.
+- 09: done. Unticked: re-judging the gateway item: needs a live Jev call, and `digests/data-verdicts.json` has no entry for it to delete.
+- 10: done. All boxes ticked.
+- 11: done. All boxes ticked.
+- 12: done. Unticked: the 2026-11-02 pool has no unpenalized pre-10-28 entry: waits for the maintainer to run `scripts/rejudge-research.ts` with `TYPESAFE_API_KEY` and for that page.
+
+### Fix round
+
+One line per finding of `code-review.md`. After the merge: `pnpm typecheck`, `pnpm lint`, `pnpm format:check` clean, `pnpm test` 1112 passed.
+
+Standards, hard:
+
+- 1, inline hot-issue strings and "1 comments": fixed (06). `HOT_ISSUE.totals` (`plural`), `.gain`, `.fix` and `.label` in `strings.ts`; `hotIssueGain` and `HOT_ISSUE.gain` share `gainPeriod`.
+- 2, `tidyTrendsSummaries` in `rank.ts`: fixed (11). Moved to `summarized-table.ts` with `RESTATED_SENTENCE_SHARE` and `contentWords`.
+- 3, AGENTS.md history line and undocumented scripts: fixed in this integration. The BigQuery sentence states the current rule; the scripts list has one line per file in `scripts/`.
+
+Standards, judgement calls:
+
+- `STAGE_PHRASE_RE`/`stageOf` vs `STATUS_RE`: partly fixed (10). The marker list is one `STAGE_MARKER`; the verb phrases stay apart on purpose (`STATUS_RE` also cuts the future tense for coming-soon stems).
+- Code-fence and HTML-tag regex pair in three functions: fixed (02, `withoutCodeAndTags`).
+- `vendorText` truncating twice: fixed (09, `untruncatedText` + one `truncate`).
+- Two word-overlap tokenizers: fixed (11 and 04). `contentWords` serves `tidyTrendsSummaries` and `restatesLead`.
+- Third copy of the `sectionHeading(...).test` lookup: fixed (06, `projectOf`).
+- `POLICY_TALK_MIN_POINTS` copying `TALKED_ABOUT_MIN_POINTS`: fixed (07). It is the same constant.
+- `"Sections: "` literal in `rss.ts` and `snowflake.ts`: fixed (09, `SECTIONS_LABEL`).
+- `**Hot issue:**` in the prompt and a regex: fixed (06, `HOT_ISSUE.label`).
+- `escapeRegex` imported from `reports/project-news.ts`: fixed (11). It now lives in `src/core/regex.ts`.
+- `"ai-trends"` special-cased four times in `prompts-pages.ts`: fixed (04, `HIGHLIGHT_RULES`).
+- `forced` not filtered to published reports: fixed (04). The prompt names only the forced reports in its input.
+- `github.ts` at 1,127 lines: fixed (split). The hot-issue code is now `src/core/hot-issues.ts` (611 lines), and `github.ts` is 537.
+- `QueuedRepo.since` holding a function: fixed (06, `countFrom`).
+- `const c = ctx` alias: fixed (06).
+- `HOT_ISSUE_MAX_STATUS_CALLS = 66` hard-coded: fixed (06). It is `TRACKED_REPOS × HOT_ISSUES_PER_REPO`, and `TRACKED_REPOS = 33` remains a commented literal.
+- `per_page: "100"` in `fetchFixStatus`: fixed (06, `TIMELINE_PAGE`).
+- `formatItem(item, bodyChars = 300)`: fixed (02, `ITEM_BODY_CHARS`).
+- `skills.ts` testing `html_url.includes("/pull/")`: fixed (03). Items are told apart by the list they came in. Left: `prompts.ts` `formatItem` still tests `/pull/` for the item kind, outside this round's files and correct for both lists.
+- Comments over 3 sentences, `RELEASE_BODY_CHARS`: fixed (02, two sentences).
+- Comments over 3 sentences, `isRetryableGet`: fixed (01 and 06, one sentence).
+
+Spec, blocking:
+
+- 10, BigQuery notes repeating once after the merge: fixed. Option (c): `formerTitles` puts the old `<type>: <first sentence>|date` key in the state item's `aliases`.- 06, bots and slash commands counted outside the API count: fixed. Only a gain counted through the API is shown; a known gain is an upper bound.
+
+Spec, wrong or partial:
+
+- 06, `fetchFixStatus` reading the first 100 timeline events: fixed. It reads from the page the comment count implies to the end, one capped call per page. A fix referenced before those comments is still missed (documented).
+- 06, no fallback for a hot issue the model left out: fixed (`hotIssueBullet`, `projectFallbackSection`).
+- 04, `ai-trends` forced on daily runs: fixed (as above).
+- 10, `stageOf` reading the whole note: fixed. It reads the present tense in the first sentence or a "This feature …" sentence, and gives no stage when the note states both.
+- 12, a failed Jev call silently keeping the old relevance: fixed. The script lists the failed entries and exits 1.
+- 01, write requests without a timeout: fixed. `ensureLabel`, `createGitHubIssue` and the closing PATCH pass `AbortSignal.timeout(FETCH_TIMEOUT_MS)`.
+- 02, `priorityFirst` missing bold-label sections: fixed (`BOLD_LABEL_RE`).
+- 02, the 35 KB claim resting on a 4 KB fixture: left. No full-size fixture was added; the 35 KB/17 KB measurement in the ticket stays the only evidence.
+
+Holds (03, 07, 08, 11; 01 paging, retries and `noStableYet`; the 745-call budget): still hold. 06 changed the status cap's unit to timeline pages but left the cap at 66, so the total stays at 745.
+
+Small mismatches fixed in this integration: `scripts/regen-highlights.ts`'s Usage line now shows the `[YYYY-MM-DD]` argument the script reads. Checked and left: `bigquery.ts` builds `stageOf`'s text with `vendorText(body, Number.MAX_SAFE_INTEGER)`, which would put a `Sections:` line first only if a note body had `<h2>`–`<h4>` headings; the feed splits on `<h3>`, and the fixture has no `<h4>`.
+
+### PR review (2026-10-28)
+
+A fresh-context review of the fix round and the re-judge fix (`37bff2f..HEAD`) found six issues; all six are fixed, each with a test or a doc fix:
+
+1. `contentWords` kept `'` and `-` inside words, so "OpenAI's open-source" no longer matched "OpenAI open source" in `restatesLead`, the sign carry-over and `dropNoHighlightRows`. It now drops a possessive and splits hyphenated words. `RESTATED_NAME_MIN_WORDS` went from 4 to 3, because stopwords no longer count.
+2. `HOT_ISSUE_BULLET` was case-sensitive. A model's `**Hot Issue:**` bullet got no facts and a duplicate code bullet; the label now matches in any case.
+3. `fetchAbstracts` sent an empty `id_list`, which arXiv answers with HTTP 400. It now returns early. The header now says a failed request changes nothing.
+4. AGENTS.md: a rerun of `rejudge-research.ts` asks Jev again for every entry before the date.
+5. `stageOf` skipped every sentence containing "will". "This feature is in Preview and will be GA" now shows "(Preview)"; the present-tense regexes already exclude "will be".
+6. The `scripts/regen-highlights.ts` comment now says Trends is forced too.

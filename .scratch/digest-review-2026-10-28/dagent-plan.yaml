@@ -1,0 +1,282 @@
+name: digest-review-2026-10-28
+# 16 nodes, above the usual 10: one per ticket (12), reviews of the two riskiest, integration, final check.
+max_parallel: 4
+test: pnpm install --frozen-lockfile --offline --silent && pnpm test && pnpm typecheck && pnpm lint && pnpm format:check
+allow:
+  - "Bash(pnpm install*)"
+  - "Bash(pnpm test*)"
+  - "Bash(pnpm vitest*)"
+  - "Bash(pnpm exec vitest*)"
+  - "Bash(pnpm typecheck)"
+  - "Bash(pnpm lint)"
+  - "Bash(pnpm lint:fix)"
+  - "Bash(pnpm format)"
+  - "Bash(pnpm format:check)"
+  - "Bash(pnpm readme*)"
+nodes:
+  - id: t01-codex-releases
+    agent: claude
+    timeout: 3600
+    prompt: |
+      Implement ticket `.scratch/digest-review-2026-10-28/issues/01-codex-releases-fetch.md` in this repo (Daily Diff: TypeScript, pnpm, vitest; AGENTS.md describes the pipeline and conventions). Read the ticket in full first, Comments included.
+
+      Goal: OpenAI Codex's releases fetch stops failing. Page the releases list in small pages until a release is older than the window, retry a 5xx with backoff in `githubGet`, give every GitHub request a timeout, and keep `noStableYet` correct without relying on a page of 100.
+
+      Edit only `src/core/github.ts`, its tests in `src/__tests__/core/github.test.ts`, and the ticket file.
+
+      Rules:
+      - Do not edit AGENTS.md, GLOSSARY.md, README.md or anything under `digests/`; other nodes run in parallel and a later integration step updates the docs.
+      - Put new tests in a `describe` block next to the existing tests of the function you change, not at the end of the file.
+      - Do exactly what the ticket asks, existing helper/stdlib first, no unrequested deps, no speculative abstraction. Match the surrounding comment density and naming; a non-obvious constraint gets a comment of under 3 sentences where it lives.
+      - When done: tick the boxes you met (the live-run box stays unticked: no network here), set `Status: done`, and append to the ticket's Comments: cause, what changed (file and function), tests added, and a `Docs:` line naming each AGENTS.md statement that is now wrong and its new wording (for example the worst-case core-call count). A box you could not meet stays unticked with the reason.
+      - Run `pnpm format` before finishing. Batch independent Read/Bash calls. Budget: about 60 tool calls.
+
+  - id: t01-review
+    agent: claude
+    reviews: t01-codex-releases
+    prompt: |
+      Check the releases-fetch change against ticket `.scratch/digest-review-2026-10-28/issues/01-codex-releases-fetch.md`:
+      - the retry covers 502/503/504 and a truncated or unparsable body, never a 4xx such as 403/404/422/429 handling that already exists elsewhere in `githubGet`'s callers (search rate limits must keep their behavior);
+      - the timeout cannot leave a request hanging and is not shorter than GitHub's own ~11 s for a heavy page;
+      - paging stops at the first release older than the window and cannot loop forever on an empty or repeated page;
+      - `noStableYet` is right for a short history with no stable release, a long prerelease-only history (Codex), and a repo whose only stable release is older than the window;
+      - tests exist for each of those cases.
+
+  - id: t02-release-notes
+    agent: claude
+    timeout: 3600
+    prompt: |
+      Implement ticket `.scratch/digest-review-2026-10-28/issues/02-release-notes-keep-what-matters.md` in this repo (Daily Diff: TypeScript, pnpm, vitest; AGENTS.md describes the pipeline and conventions). Read the ticket in full first, Comments included.
+
+      Goal: the release-notes excerpt the agents and data prompts get (`releaseNotes`, `RELEASE_BODY_CHARS` in `src/reports/prompts.ts`) strips link URLs, PR references and contributor lines before counting, puts Breaking changes / Removed / Deprecated / Upgrade or Migration / Security sections first, ends on a whole item, and has a budget that reaches past a long Highlights section. Write fixture-based tests: build small fixtures modelled on the two bodies the ticket describes (OpenShell v0.1.6, whose upgrade note is the control-connection item; OpenCode v2.2.0, whose `### Breaking changes` section has three items) under `src/__tests__/fixtures/`.
+
+      Keep the URL and boilerplate stripping in a small exported function that the hot-issue block (`formatItem`, same file) can reuse later; do not change `formatItem` itself, another step does that.
+
+      Edit only `src/reports/prompts.ts`, `src/reports/markdown.ts` only where it calls `releaseNotes` (if a signature changes), their tests in `src/__tests__/reports/`, new fixtures, and the ticket file.
+
+      Rules:
+      - Do not edit AGENTS.md, GLOSSARY.md, README.md or anything under `digests/`; other nodes run in parallel and a later integration step updates the docs.
+      - Put new tests in a `describe` block next to the existing tests of the function you change, not at the end of the file.
+      - Do exactly what the ticket asks, existing helper/stdlib first, no unrequested deps, no speculative abstraction. Match the surrounding comment density and naming; a non-obvious constraint gets a comment of under 3 sentences where it lives. Keep the total prompt size in mind: 16 agents and 17 data repos each send their releases; say in a comment why the new budget is safe against `callLlm`'s token budgets (`src/core/llm.ts`).
+      - When done: tick the boxes you met, set `Status: done`, and append to the ticket's Comments: cause, what changed (file and function), tests added, and a `Docs:` line naming each AGENTS.md statement that is now wrong and its new wording. A box you could not meet stays unticked with the reason.
+      - Run `pnpm format` before finishing. Batch independent Read/Bash calls. Budget: about 60 tool calls.
+
+  - id: t03-skills-merged
+    agent: claude
+    timeout: 3600
+    depends_on: [t01-codex-releases, t02-release-notes]
+    prompt: |
+      Implement ticket `.scratch/digest-review-2026-10-28/issues/03-skills-merged-or-not.md` in this repo (Daily Diff: TypeScript, pnpm, vitest; AGENTS.md describes the pipeline and conventions). Read the ticket in full first, Comments included.
+
+      Goal: Trends' "Skills: PRs and requests this week" section tells merged PRs from PRs closed without merging. Keep `pull_request.merged_at` from the issues API response the Skills fetch already makes (no extra API call), let code (not the model) split or mark closed PRs, drop the prompt's "do not say which" rule, and make the Takeaway rest only on merged PRs, open PRs and issues. Pick between listing unmerged PRs as "closed without merging" or leaving them out, and record the choice in the ticket.
+
+      Edit only `src/core/github.ts` (the `GitHubItem` type and the Skills fetch mapping, nothing else), `src/trending/skills.ts`, the Skills prompt in `src/reports/prompts.ts` (only that prompt), `src/reports/pages.ts` only where the Skills section is assembled, their tests in `src/__tests__/`, and the ticket file.
+
+      Rules:
+      - Do not edit AGENTS.md, GLOSSARY.md, README.md or anything under `digests/`; other nodes run in parallel and a later integration step updates the docs.
+      - Put new tests in a `describe` block next to the existing tests of the function you change, not at the end of the file.
+      - Do exactly what the ticket asks, existing helper/stdlib first, no unrequested deps, no speculative abstraction. Match the surrounding comment density and naming.
+      - When done: tick the boxes you met, set `Status: done`, and append to the ticket's Comments: cause, what changed (file and function), tests added, and a `Docs:` line naming each AGENTS.md statement that is now wrong and its new wording. A box you could not meet stays unticked with the reason.
+      - Run `pnpm format` before finishing. Batch independent Read/Bash calls. Budget: about 60 tool calls.
+
+  - id: t06-hot-issues
+    agent: claude
+    timeout: 3600
+    depends_on: [t03-skills-merged]
+    prompt: |
+      Implement ticket `.scratch/digest-review-2026-10-28/issues/06-hot-issues-real-engagement-and-status.md` in this repo (Daily Diff: TypeScript, pnpm, vitest; AGENTS.md describes the pipeline and conventions, including the hot-issue call budget). Read the ticket in full first; its Comments hold the maintainer's decision on fix status.
+
+      Goal, on the agents page's (and data report's) hot issues:
+      1. Comments by bots (`user.type == "Bot"` or a `[bot]` login) and bare slash commands such as `/assign` do not count toward an issue's gain.
+      2. Code renders each hot-issue row's counts and the label it qualified on in one form; the model writes only the description.
+      3. The issue block the model gets (`formatItem` in `src/reports/prompts.ts`) has enough of the body, with template boilerplate and link URLs stripped (reuse the exported stripping helper near `releaseNotes` in the same file), to tell a tracking or announcement thread from a bug report.
+      4. Per the maintainer's decision: one fix-status lookup (a linked open or merged pull request, e.g. from the issue timeline's cross-referenced events) per hot issue sent to the prompt, counted against a documented cap so the per-run worst case stays under the Actions token's 1,000 core calls an hour; the row shows "fix PR open" or "fix merged" when one exists. A failed lookup shows nothing and never drops the issue.
+      5. Decide whether code can check that a Highlight drawn from an open issue is worded as a report; if not, keep the prompt rule and say so in the ticket.
+
+      Edit only `src/core/github.ts`, `src/reports/prompts.ts` (`formatItem` and the hot-issue parts of the repo-section prompt), `src/reports/markdown.ts` (only the project-section rendering, `groupProjects` and its helpers), `src/index.ts` only if the call budget must be wired there, their tests in `src/__tests__/`, and the ticket file.
+
+      Rules:
+      - Do not edit AGENTS.md, GLOSSARY.md, README.md or anything under `digests/`; other nodes run in parallel and a later integration step updates the docs.
+      - Put new tests in a `describe` block next to the existing tests of the function you change, not at the end of the file.
+      - Do exactly what the ticket asks, existing helper/stdlib first, no unrequested deps, no speculative abstraction. Match the surrounding comment density and naming; a non-obvious constraint gets a comment of under 3 sentences where it lives.
+      - When done: tick the boxes you met, set `Status: done`, and append to the ticket's Comments: cause, what changed (file and function), tests added, and a `Docs:` line naming each AGENTS.md statement that is now wrong and its new wording (the hot-issues paragraph's call counts in particular). A box you could not meet stays unticked with the reason.
+      - Run `pnpm format` before finishing. Batch independent Read/Bash calls. Budget: about 80 tool calls (the largest ticket).
+
+  - id: t06-review
+    agent: claude
+    reviews: t06-hot-issues
+    prompt: |
+      Check the hot-issue change against ticket `.scratch/digest-review-2026-10-28/issues/06-hot-issues-real-engagement-and-status.md` and AGENTS.md's hot-issues paragraph:
+      - the bot and slash-command filter applies to every path that computes a gain (snapshot baseline, opened-in-window total, API count), or the ticket says why one path is exempt;
+      - the fix-status lookup is bounded by a named cap, spends calls only on issues actually sent to the prompt, and a failure never drops an issue or the repo's releases;
+      - the worst-case core-call arithmetic in the ticket's `Docs:` line is correct;
+      - the rendered row format is one form for every hot issue, and tests pin it;
+      - nothing changed in the release fetch or Skills code beyond what the ticket needs.
+
+  - id: t04-highlights-trends
+    agent: claude
+    timeout: 3600
+    prompt: |
+      Implement ticket `.scratch/digest-review-2026-10-28/issues/04-highlights-json-covers-trends.md` in this repo (Daily Diff: TypeScript, pnpm, vitest; AGENTS.md describes `highlights.json` under "Report outputs"). Read the ticket in full first, Comments included.
+
+      Goal: a published Trends page with Highlights always gets at least one `highlights.json` entry, its lead first; the highlights prompt lets Trends restate a code-computed figure with its window while raw counts stay banned for the daily pages; and when the model omits a published report's key, the run logs the raw reply so a maintainer can see why.
+
+      Edit only `src/reports/prompts-pages.ts` (the `highlights.json` prompt, `forcedHighlightReports`, `withFallbackHighlights` and their helpers), `src/index.ts` (only the block that generates `highlights.json`), their tests in `src/__tests__/`, and the ticket file.
+
+      Rules:
+      - Do not edit AGENTS.md, GLOSSARY.md, README.md or anything under `digests/`; other nodes run in parallel and a later integration step updates the docs.
+      - Put new tests in a `describe` block next to the existing tests of the function you change, not at the end of the file.
+      - Do exactly what the ticket asks, existing helper/stdlib first, no unrequested deps, no speculative abstraction. Match the surrounding comment density and naming.
+      - When done: tick the boxes you met, set `Status: done`, and append to the ticket's Comments: cause, what changed (file and function), tests added, and a `Docs:` line naming each AGENTS.md statement that is now wrong and its new wording. A box you could not meet stays unticked with the reason.
+      - Run `pnpm format` before finishing. Batch independent Read/Bash calls. Budget: about 60 tool calls.
+
+  - id: t05-lab-posts
+    agent: claude
+    timeout: 3600
+    depends_on: [t04-highlights-trends]
+    prompt: |
+      Implement ticket `.scratch/digest-review-2026-10-28/issues/05-lab-posts-without-text.md` in this repo (Daily Diff: TypeScript, pnpm, vitest; AGENTS.md describes the models page under "AI Models & Labs"). Read the ticket in full first, Comments included.
+
+      Goal: a lab post with no page text (OpenAI's posts, whose pages answer 403) gets `—` as its summary in code whatever the model returns, is named to the models Highlights prose call as no Highlight, and a Highlight about it is dropped in code with the existing `dropNoHighlightRows` (as Trends and the data report do), so `highlights.json` cannot restate it either. Leave the optional OpenAI RSS box unticked: it needs a check from a GitHub runner first; say so in the ticket.
+
+      Edit only `src/reports/pages.ts` (the models page builder), `src/reports/prompts-pages.ts` (only the models summaries and models Highlights prompts), their tests in `src/__tests__/`, and the ticket file. Do not edit `src/sources/labs.ts`.
+
+      Rules:
+      - Do not edit AGENTS.md, GLOSSARY.md, README.md or anything under `digests/`; other nodes run in parallel and a later integration step updates the docs.
+      - Put new tests in a `describe` block next to the existing tests of the function you change, not at the end of the file.
+      - Do exactly what the ticket asks, existing helper/stdlib first, no unrequested deps, no speculative abstraction. Match the surrounding comment density and naming.
+      - When done: tick the boxes you met, set `Status: done`, and append to the ticket's Comments: cause, what changed (file and function), tests added, and a `Docs:` line naming each AGENTS.md statement that is now wrong and its new wording. A box you could not meet stays unticked with the reason.
+      - Run `pnpm format` before finishing. Batch independent Read/Bash calls. Budget: about 60 tool calls.
+
+  - id: t08-policy-summaries
+    agent: claude
+    timeout: 3600
+    depends_on: [t05-lab-posts]
+    prompt: |
+      Implement ticket `.scratch/digest-review-2026-10-28/issues/08-policy-summary-no-filler.md` in this repo (Daily Diff: TypeScript, pnpm, vitest; AGENTS.md describes AI Policy). Read the ticket in full first, Comments included.
+
+      Goal: an AI Policy row summary is one sentence, plus a second only when the source states what the item means for organisations; code drops a summary sentence about the model's input ("the provided text", "the text does not …") and logs it; the policy meta line pluralizes ("1 new item"); an empty Stage cell shows `—`.
+
+      Edit only `src/reports/prompts-pages.ts` (only the policy summaries prompt), `src/core/strings.ts` (only the policy meta-line strings), `src/reports/markdown.ts` (only the policy table rendering), `src/reports/pages.ts` (only the policy page builder) or `src/reports/summarized-table.ts` for the sentence strip, their tests in `src/__tests__/`, and the ticket file.
+
+      Rules:
+      - Do not edit AGENTS.md, GLOSSARY.md, README.md or anything under `digests/`; other nodes run in parallel and a later integration step updates the docs.
+      - Put new tests in a `describe` block next to the existing tests of the function you change, not at the end of the file.
+      - Do exactly what the ticket asks, existing helper/stdlib first, no unrequested deps, no speculative abstraction. Match the surrounding comment density and naming.
+      - When done: tick the boxes you met, set `Status: done`, and append to the ticket's Comments: cause, what changed (file and function), tests added, and a `Docs:` line naming each AGENTS.md statement that is now wrong and its new wording. A box you could not meet stays unticked with the reason.
+      - Run `pnpm format` before finishing. Batch independent Read/Bash calls. Budget: about 60 tool calls.
+
+  - id: t07-policy-talk
+    agent: claude
+    timeout: 3600
+    prompt: |
+      Implement ticket `.scratch/digest-review-2026-10-28/issues/07-talked-about-keeps-policy-stories.md` in this repo (Daily Diff: TypeScript, pnpm, vitest; AGENTS.md describes Spotted and "Also talked about" under "Community and Spotted", and the web UI under "Web UI & RSS Feed"). Read the ticket in full first; its Comments hold the maintainer's decision: a separate policy line.
+
+      Goal: policy-topic stories get their own selection for the Overview (their own per-source slots and points floor, not competing with `other`), keep `topic: "policy"` in `talked-about.json`, and the Overview in `index.html` renders them as a separate list next to "Also talked about", with its own heading. Older days' `talked-about.json` files (no policy split) must still render. With the 2026-10-28 numbers in the ticket, the 323-point Stanford-books story must be selected (add a test). Decide the L2 box (a story split between topics) or record it as accepted.
+
+      Edit only `src/spotted/pool.ts`, `src/index.ts` (only the talked-about block), `src/core/strings.ts` (only talked-about strings), `src/cli/manifest.ts` (only if the heading reaches the UI through the manifest), `index.html`, their tests in `src/__tests__/`, and the ticket file.
+
+      Rules:
+      - Do not edit AGENTS.md, GLOSSARY.md, README.md or anything under `digests/`; other nodes run in parallel and a later integration step updates the docs.
+      - Put new tests in a `describe` block next to the existing tests of the function you change, not at the end of the file.
+      - Do exactly what the ticket asks, existing helper/stdlib first, no unrequested deps, no speculative abstraction. Match the surrounding comment density and naming, and the existing look in `index.html` (no new colors: green and red mean added and going away only).
+      - When done: tick the boxes you met (leave the AGENTS.md/GLOSSARY.md box for the integration step, noting it), set `Status: done`, and append to the ticket's Comments: what changed (file and function), tests added, and a `Docs:` line naming each AGENTS.md and GLOSSARY.md statement that is now wrong and its new wording. A box you could not meet stays unticked with the reason.
+      - Run `pnpm format` before finishing. Batch independent Read/Bash calls. Budget: about 60 tool calls.
+
+  - id: t09-vendor-text
+    agent: claude
+    timeout: 3600
+    prompt: |
+      Implement ticket `.scratch/digest-review-2026-10-28/issues/09-vendor-text-keeps-features.md` in this repo (Daily Diff: TypeScript, pnpm, vitest; AGENTS.md describes the data report's vendor feeds). Read the ticket in full first, Comments included.
+
+      Goal: a vendor item's description (`vendorText` and `VENDOR_DESCRIPTION_MAX_CHARS` in `src/core/rss.ts`) reaches every feature heading of a multi-feature post, so Jev and the summaries prompt see the same, complete feature list. Add a test with a fixture modelled on the Fabric "On-premises data gateway October 2026 release" post as the ticket describes it (the "Admin APIs for connections and gateways (Preview)" heading about 1,600 characters in), under `src/__tests__/fixtures/`. The lab-post cut (L6, `MAX_CONTENT_LENGTH` in `src/sources/labs.ts`) is optional: change it only if the same helper fits cleanly. Leave the re-judge box (it needs a live Jev call) unticked with that reason.
+
+      Edit only `src/core/rss.ts`, `src/data/vendors.ts` and the feed parsers in `src/data/` other than `bigquery.ts`, optionally `src/sources/labs.ts` (only `MAX_CONTENT_LENGTH` and the text extraction), their tests in `src/__tests__/`, new fixtures, and the ticket file.
+
+      Rules:
+      - Do not edit AGENTS.md, GLOSSARY.md, README.md or anything under `digests/`; other nodes run in parallel and a later integration step updates the docs.
+      - Put new tests in a `describe` block next to the existing tests of the function you change, not at the end of the file.
+      - Do exactly what the ticket asks, existing helper/stdlib first, no unrequested deps, no speculative abstraction. Note that a longer description changes the text Jev judges, so cached verdicts in `digests/data-verdicts.json` may be re-asked: say in the ticket whether that happens (see `judgeItems` in `src/core/jev.ts`).
+      - When done: tick the boxes you met, set `Status: done`, and append to the ticket's Comments: cause, what changed (file and function), tests added, and a `Docs:` line naming each AGENTS.md statement that is now wrong and its new wording. A box you could not meet stays unticked with the reason.
+      - Run `pnpm format` before finishing. Batch independent Read/Bash calls. Budget: about 60 tool calls.
+
+  - id: t10-bigquery-stage
+    agent: claude
+    timeout: 2700
+    prompt: |
+      Implement ticket `.scratch/digest-review-2026-10-28/issues/10-bigquery-rows-show-stage.md` in this repo (Daily Diff: TypeScript, pnpm, vitest; AGENTS.md describes the data report's vendor tables). Read the ticket in full first, Comments included.
+
+      Goal: a BigQuery vendor item's title shows its release stage the way the other vendors' titles do ("(GA)", "(Preview)"), read from the note's body in code, and is a short label without the "Feature:" prefix sentence that the Summary would repeat. Test it on a fixture modelled on the 2026-10-27 Drive note as the ticket quotes it (second sentence "This feature is generally available (GA).").
+
+      Edit only `src/data/bigquery.ts`, `src/__tests__/data/bigquery.test.ts`, fixtures, and the ticket file. If the prose call or `vendorTitleLabel` would also need a change, describe it in the ticket's Comments instead of editing those files.
+
+      Rules:
+      - Do not edit AGENTS.md, GLOSSARY.md, README.md or anything under `digests/`; other nodes run in parallel and a later integration step updates the docs.
+      - The item id is built from the title (`id: ${anchor}#${title}`): changing the title changes every BigQuery id, which would make already-reported notes new again. Keep ids stable (build the id from the old form, or another stable key) and test that an existing id is unchanged.
+      - Do exactly what the ticket asks, existing helper/stdlib first, no unrequested deps, no speculative abstraction. Match the surrounding comment density and naming.
+      - When done: tick the boxes you met, set `Status: done`, and append to the ticket's Comments: cause, what changed (file and function), tests added, and a `Docs:` line naming each AGENTS.md statement that is now wrong and its new wording. A box you could not meet stays unticked with the reason.
+      - Run `pnpm format` before finishing. Batch independent Read/Bash calls. Budget: about 40 tool calls.
+
+  - id: t11-trends-summaries
+    agent: claude
+    timeout: 3600
+    prompt: |
+      Implement ticket `.scratch/digest-review-2026-10-28/issues/11-trends-summaries-no-restating.md` in this repo (Daily Diff: TypeScript, pnpm, vitest; AGENTS.md describes Trends). Read the ticket in full first, Comments included.
+
+      Goal: a Trends table summary (Radar, category tables, Hugging Face) says one thing once: code drops a second sentence whose content words are mostly in the first (pick the threshold from the three examples in the ticket, documented next to the constant) and a trailing "in <language>." that repeats the row's Lang column, or the row's language stops being passed as its only fact. Tests on the three ticket examples (pi, Proto Agent, anomalyco/opencode).
+
+      Edit only files under `src/trending/` (not `research.ts`), their tests in `src/__tests__/trending/`, and the ticket file. If the summaries are applied outside `src/trending/`, add an exported helper in `src/trending/` and call it from that one call site, changing nothing else there.
+
+      Rules:
+      - Do not edit AGENTS.md, GLOSSARY.md, README.md or anything under `digests/`; other nodes run in parallel and a later integration step updates the docs.
+      - Put new tests in a `describe` block next to the existing tests of the function you change, not at the end of the file.
+      - Do exactly what the ticket asks, existing helper/stdlib first, no unrequested deps, no speculative abstraction. Match the surrounding comment density and naming.
+      - When done: tick the boxes you met, set `Status: done`, and append to the ticket's Comments: cause, what changed (file and function), tests added, and a `Docs:` line naming each AGENTS.md statement that is now wrong and its new wording. A box you could not meet stays unticked with the reason.
+      - Run `pnpm format` before finishing. Batch independent Read/Bash calls. Budget: about 50 tool calls.
+
+  - id: t12-research-rejudge
+    agent: claude
+    timeout: 3600
+    prompt: |
+      Implement ticket `.scratch/digest-review-2026-10-28/issues/12-research-pool-penalty.md` in this repo (Daily Diff: TypeScript, pnpm, vitest; AGENTS.md describes Research under Trends). Read the ticket in full first; its Comments hold the maintainer's decision: a one-off re-judge.
+
+      Goal: a script `scripts/rejudge-research.ts` (look at `scripts/regen-highlights.ts` for the house style of a one-off script and its usage header) that reads `digests/research-state.json`, takes the entries whose `date` is before a cutoff (default 2026-10-28, overridable by an argument), asks Jev the same ArXiv relevance questions the daily ranking asks (reuse the question set and `arxivRelevance` from `src/sources/arxiv.ts`; export what you need without changing behavior), recomputes `relevance` from the fresh answers (so a second run gives the same result, not a double penalty), rewrites only those entries, and prints each change (title, old, new). With `--dry-run` it writes nothing. It needs `TYPESAFE_API_KEY`; without it, it exits with a clear message. Do not run it against the API: there is no key here. Add unit tests for the entry selection and the rewrite with a stubbed judge.
+
+      Edit only `scripts/rejudge-research.ts` (new), `src/sources/arxiv.ts` (exports only, no behavior change), `src/trending/research.ts` only if a state read/write helper must be exported, their tests in `src/__tests__/`, and the ticket file.
+
+      Rules:
+      - Do not edit AGENTS.md, GLOSSARY.md, README.md or anything under `digests/`; other nodes run in parallel and a later integration step updates the docs.
+      - Do exactly what the ticket asks, existing helper/stdlib first, no unrequested deps, no speculative abstraction. Match the surrounding comment density and naming.
+      - When done: tick the code boxes you met (the 2026-11-02 box needs the maintainer to run the script; leave it unticked and say so), set `Status: done`, and append to the ticket's Comments: what changed, tests added, the exact command the maintainer runs, and a `Docs:` line (AGENTS.md lists the one-off scripts after "Report outputs").
+      - Run `pnpm format` before finishing. Batch independent Read/Bash calls. Budget: about 50 tool calls.
+
+  - id: integrate
+    agent: claude
+    timeout: 3600
+    depends_on:
+      - t01-codex-releases
+      - t02-release-notes
+      - t03-skills-merged
+      - t04-highlights-trends
+      - t05-lab-posts
+      - t06-hot-issues
+      - t07-policy-talk
+      - t08-policy-summaries
+      - t09-vendor-text
+      - t10-bigquery-stage
+      - t11-trends-summaries
+      - t12-research-rejudge
+    test: pnpm install --frozen-lockfile --offline --silent && pnpm test && pnpm typecheck && pnpm lint && pnpm format:check && pnpm readme --check
+    prompt: |
+      This repo (Daily Diff: TypeScript, pnpm, vitest) now holds the merged work of twelve tickets in `.scratch/digest-review-2026-10-28/issues/01-*.md` … `12-*.md`, each done on its own branch. Read every ticket's Comments: each ends with a `Docs:` line naming the AGENTS.md (and for ticket 07, GLOSSARY.md) statements its change made wrong.
+
+      1. Update AGENTS.md and GLOSSARY.md so they describe the current behavior, per those `Docs:` lines and by checking the code: current state only, no changelog wording, in the file's existing style and sentence length. Check README.md for any statement the changes made wrong. Tick ticket 07's docs box.
+      2. Fix small mismatches between the merged changes (duplicate helpers doing the same stripping, a test that two tickets both added, inconsistent names). Do not redesign any ticket's work; if two changes conflict in behavior, describe it in `.scratch/digest-review-2026-10-28/review.md` under a new `## Integration notes` heading instead.
+      3. Append one line per ticket to `## Integration notes` in that review.md: ticket number, Status, and any box left unticked with its reason.
+
+      Do not edit anything under `digests/`. Run `pnpm format` before finishing. Batch independent Read/Bash calls. Budget: about 60 tool calls.
+
+  - id: check
+    agent: shell
+    depends_on: [integrate]
+    prompt: pnpm install --frozen-lockfile --offline --silent && pnpm test && pnpm typecheck && pnpm lint && pnpm format:check && pnpm readme --check

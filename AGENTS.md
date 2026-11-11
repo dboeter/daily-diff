@@ -248,7 +248,7 @@ Every Jev judgment except ArXiv's goes through `judgeItems` (`src/core/jev.ts`) 
 
 ### Issue tracker
 
-Work issues live as local markdown under `.scratch/<feature>/` (GitHub Issues are reserved for the published digests). `.scratch/` is in `.gitignore`: its files are not committed, so the `.scratch/…` paths this file and code comments name exist only on the maintainer's machine, and a search finds them only with the path given (`rg <term> .scratch`). See `docs/agents/issue-tracker.md`.
+Work issues live as local markdown under `.scratch/<feature>/` (GitHub Issues are reserved for the published digests). See `docs/agents/issue-tracker.md`.
 
 ### Triage labels
 
