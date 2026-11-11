@@ -13,7 +13,148 @@
       <height>144</height>
     </image>
     <atom:link href="https://dboeter.github.io/daily-diff/feeds/ai-policy.xml" rel="self" type="application/rss+xml"/>
-    <lastBuildDate>Tue, 10 Nov 2026 07:07:50 +0000</lastBuildDate>
+    <lastBuildDate>Wed, 11 Nov 2026 06:00:49 +0000</lastBuildDate>
+    <item>
+      <title>AI Policy 2026-11-11</title>
+      <link>https://dboeter.github.io/daily-diff/#2026-11-11/ai-policy</link>
+      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-11-11/ai-policy</guid>
+      <pubDate>Wed, 11 Nov 2026 00:00:00 +0000</pubDate>
+      <description>AI Policy 2026-11-11 ⬛ Overview · 🟪 AI Agents · 🟦 AI Models &amp;amp; Labs · 🟧 AI Policy · 🟨 Data Engineering Sources: European Commission + Digitale Overheid + Tweede Kamer + Binnenlands Bestuur + Politico US | 10 new items ranked by Jev relevance | Generated: 2026-11-11 05:56 UTC Highlights The Tweede Kamer tabled motions urging the government to equip supervisors for AI Act enforcement (El Boujdaini) and to develop a liability framework for AI model damage (Dassen), signaling stricter oversig...</description>
+      <content:encoded><![CDATA[<h1>AI Policy 2026-11-11</h1>
+<p><a href="https://dboeter.github.io/daily-diff/#2026-11-11">⬛ Overview</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-11/ai-agents">🟪 AI Agents</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-11/ai-models">🟦 AI Models &amp; Labs</a> · <strong>🟧 AI Policy</strong> · <a href="https://dboeter.github.io/daily-diff/#2026-11-11/ai-data">🟨 Data Engineering</a></p>
+<blockquote>
+<p>Sources: European Commission + Digitale Overheid + Tweede Kamer + Binnenlands Bestuur + Politico US | 10 new items ranked by <a href="https://typesafe.ai">Jev</a> relevance | Generated: 2026-11-11 05:56 UTC</p>
+</blockquote>
+<hr>
+<h2>Highlights</h2>
+<p>The Tweede Kamer tabled motions urging the government to equip supervisors for AI Act enforcement (<a href="https://www.tweedekamer.nl/kamerstukken/detail?id=2026Z24543&did=2026D56682">El Boujdaini</a>) and to develop a liability framework for AI model damage (<a href="https://www.tweedekamer.nl/kamerstukken/detail?id=2026Z24563&did=2026D56703">Dassen</a>), signaling stricter oversight and clearer accountability for deployers. The European Commission opened a targeted consultation on revised DSA election guidelines addressing generative AI risks for very large platforms (<a href="https://digital-strategy.ec.europa.eu/news-redirect/964768">European Commission</a>), which may shape emerging governance standards for GenAI integrations. Today is the deadline for the consultation on the Cloud and AI Development Act (<a href="https://ec.europa.eu/info/law/better-regulation/have-your-say/initiatives/14628_en">Have your say</a>), a proposed regulation affecting the cloud infrastructure underpinning many AI deployments. The Dutch cabinet published its strategic vision for AI aimed at economic strength and public service improvement (<a href="https://www.digitaleoverheid.nl/nieuws/kabinet-kiest-voor-ai-die-nederland-vooruithelpt/">Digitale Overheid</a>), while Binnenlands Bestuur reports the government is preparing a legal basis for facial recognition scanners in identity verification (<a href="https://www.binnenlandsbestuur.nl/digitaal/gezichtsscanner-rukt-op-omvang-fraude-onbekend">Binnenlands Bestuur</a>).</p>
+<h2>EU</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Source</th>
+<th align="left">Title</th>
+<th align="left">Stage</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-11-10</td>
+<td align="left">European Commission</td>
+<td align="left"><a href="https://digital-strategy.ec.europa.eu/news-redirect/964768">Targeted consultation on the draft revised election guidelines under the Digital Services Act (DSA)</a></td>
+<td align="left">—</td>
+<td align="left">The European Commission launched a targeted consultation on draft revised election guidelines under the DSA focusing on measures VLOPs and VLOSEs should adopt to address generative AI and information manipulation risks to electoral processes.</td>
+</tr>
+<tr>
+<td align="left">2026-11-10</td>
+<td align="left">European Commission</td>
+<td align="left"><a href="https://digital-strategy.ec.europa.eu/news-redirect/964805">Commission invites views on draft revised election guidelines under Digital Services Act</a></td>
+<td align="left">—</td>
+<td align="left">The European Commission launched a consultation to update its election guidelines under the DSA addressing the rapid evolution of generative AI and growing sophistication of manipulation risks.</td>
+</tr>
+<tr>
+<td align="left">2026-11-05</td>
+<td align="left">European Commission</td>
+<td align="left"><a href="https://digital-strategy.ec.europa.eu/news-redirect/964507">AI toolbox supports public administrations to put the Apply AI Strategy into practice</a></td>
+<td align="left">—</td>
+<td align="left">The European Commission published an AI toolbox on the Interoperable Europe portal to support public administrations in implementing the Apply AI Strategy with practical tools, guidance and examples.</td>
+</tr>
+</tbody></table>
+<h2>Netherlands</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Source</th>
+<th align="left">Title</th>
+<th align="left">Stage</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-11-10</td>
+<td align="left">Digitale Overheid</td>
+<td align="left"><a href="https://www.digitaleoverheid.nl/nieuws/kabinet-kiest-voor-ai-die-nederland-vooruithelpt/">Kabinet kiest voor AI die Nederland vooruithelpt</a></td>
+<td align="left">—</td>
+<td align="left">The Dutch cabinet adopted a vision for AI aimed at contributing to a strong economy, good public service delivery and solutions for societal challenges.</td>
+</tr>
+<tr>
+<td align="left">2026-11-09</td>
+<td align="left">Tweede Kamer</td>
+<td align="left"><a href="https://www.tweedekamer.nl/kamerstukken/detail?id=2026Z24543&did=2026D56682">Motie van het lid El Boujdaini c.s. over autoriteiten voldoende toerusten voor het toezicht op de AI-verordening</a></td>
+<td align="left">—</td>
+<td align="left">The Dutch House of Representatives received a motion by El Boujdaini and others calling for authorities to be sufficiently equipped for supervision of the AI Regulation.</td>
+</tr>
+<tr>
+<td align="left">2026-11-09</td>
+<td align="left">Tweede Kamer</td>
+<td align="left"><a href="https://www.tweedekamer.nl/kamerstukken/detail?id=2026Z24563&did=2026D56703">Motie van het lid Dassen over een juridisch kader voor de aansprakelijkheid bij schade van AI-modellen</a></td>
+<td align="left">—</td>
+<td align="left">The Dutch House of Representatives received a motion by Dassen calling for a legal framework for liability for damage caused by AI models.</td>
+</tr>
+<tr>
+<td align="left">2026-11-09</td>
+<td align="left">Tweede Kamer</td>
+<td align="left"><a href="https://www.tweedekamer.nl/kamerstukken/detail?id=2026Z24559&did=2026D56699">Motie van het lid Beckerman over onderzoeken hoe kunstenaars en makers beter beschermd kunnen worden tegen AI</a></td>
+<td align="left">—</td>
+<td align="left">The Dutch House of Representatives received a motion by Beckerman calling for an investigation into how artists and creators can be better protected against AI.</td>
+</tr>
+</tbody></table>
+<h2>News &amp; commentary</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Source</th>
+<th align="left">Title</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-11-10</td>
+<td align="left">Binnenlands Bestuur</td>
+<td align="left"><a href="https://www.binnenlandsbestuur.nl/digitaal/gezichtsscanner-rukt-op-omvang-fraude-onbekend">Gezichtsscanner rukt op, maar cijfers over omvang fraude ontbreken</a></td>
+<td align="left">The Dutch cabinet is working on a legal basis for using facial scanners for passport and ID applications while more than half of municipalities already use automatic facial comparison, though the scale of fraud remains unknown.</td>
+</tr>
+<tr>
+<td align="left">2026-11-10</td>
+<td align="left">Politico US</td>
+<td align="left"><a href="https://www.politico.com/live-updates/2026/11/10/congress/trahan-crafting-ai-safety-bill-with-narrower-state-law-preemption-01158965">Trahan crafting AI safety bill with narrower state preemption</a></td>
+<td align="left">US Representative Trahan is crafting an AI safety bill with narrower state preemption as a Democrat-controlled Congress may be less likely to supersede state AI laws.</td>
+</tr>
+<tr>
+<td align="left">2026-11-11</td>
+<td align="left">Politico US</td>
+<td align="left"><a href="https://www.politico.com/news/2026/11/10/nvidia-ceos-spy-scandal-tilts-capitol-hills-chip-fight-01160548">Nvidia loses ground in Washington chip fight after CEO spy scandal</a></td>
+<td align="left">Nvidia&#39;s influence in Washington has weakened amid a CEO spy scandal as it tries to block new curbs on AI chips.</td>
+</tr>
+</tbody></table>
+<h2>Coming up</h2>
+<p>Deadlines and dates in the next 30 days.</p>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Source</th>
+<th align="left">Item</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-11-11</td>
+<td align="left">Have your say</td>
+<td align="left"><a href="https://ec.europa.eu/info/law/better-regulation/have-your-say/initiatives/14628_en">Cloud and AI Development Act</a></td>
+</tr>
+<tr>
+<td align="left">2026-12-02</td>
+<td align="left">Calendar</td>
+<td align="left"><a href="https://ai-act-service-desk.ec.europa.eu/en/ai-act/timeline/timeline-implementation-eu-ai-act">AI Act: bans on sexual deepfakes and CSAM generators; Art. 50(2) transition ends</a></td>
+</tr>
+</tbody></table>
+<hr>
+<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
+]]></content:encoded>
+    </item>
     <item>
       <title>AI Policy 2026-11-10</title>
       <link>https://dboeter.github.io/daily-diff/#2026-11-10/ai-policy</link>

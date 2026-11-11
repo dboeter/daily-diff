@@ -13,7 +13,180 @@
       <height>144</height>
     </image>
     <atom:link href="https://dboeter.github.io/daily-diff/feeds/ai-data.xml" rel="self" type="application/rss+xml"/>
-    <lastBuildDate>Tue, 10 Nov 2026 07:07:50 +0000</lastBuildDate>
+    <lastBuildDate>Wed, 11 Nov 2026 06:00:49 +0000</lastBuildDate>
+    <item>
+      <title>Data Engineering 2026-11-11</title>
+      <link>https://dboeter.github.io/daily-diff/#2026-11-11/ai-data</link>
+      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-11-11/ai-data</guid>
+      <pubDate>Wed, 11 Nov 2026 00:00:00 +0000</pubDate>
+      <description>Data Engineering 2026-11-11 ⬛ Overview · 🟪 AI Agents · 🟦 AI Models &amp;amp; Labs · 🟧 AI Policy · 🟨 Data Engineering Vendor items: 5 | Projects: 26 | Active today: 4 | Stable releases: 0 | Prereleases (not covered): 1 | Generated: 2026-11-11 05:56 UTC Highlights − Azure Databricks workspaces with Unity Catalog managed tables must plan for automatic upgrade to catalog commits after Databricks Runtime 15.4 LTS end of support on August 19, 2027, enabling multi-statement transactions, external engin...</description>
+      <content:encoded><![CDATA[<h1>Data Engineering 2026-11-11</h1>
+<p><a href="https://dboeter.github.io/daily-diff/#2026-11-11">⬛ Overview</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-11/ai-agents">🟪 AI Agents</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-11/ai-models">🟦 AI Models &amp; Labs</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-11/ai-policy">🟧 AI Policy</a> · <strong>🟨 Data Engineering</strong></p>
+<blockquote>
+<p>Vendor items: 5 | Projects: 26 | Active today: 4 | Stable releases: 0 | Prereleases (not covered): 1 | Generated: 2026-11-11 05:56 UTC</p>
+</blockquote>
+<hr>
+<h2>Highlights</h2>
+<ul>
+<li>− Azure Databricks workspaces with Unity Catalog managed tables must plan for automatic upgrade to catalog commits after Databricks Runtime 15.4 LTS end of support on August 19, 2027, enabling multi-statement transactions, external engine writes, and consistent governance.</li>
+<li>Snowflake Python Connector 5.0.0 introduces a native asyncio awaitable API built on Universal Core; teams using the connector in event-loop-based Python services must test migration to eliminate thread pools.</li>
+<li>BigQuery generative AI functions now support the gemini-4-carbon model (GA), and graph measures for locking aggregations to a key to prevent overcounting are GA with GRAPH_EXPAND TVF supporting multi-fact-table queries.</li>
+</ul>
+<hr>
+<h2>Action required</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Platform</th>
+<th align="left">Item</th>
+<th align="left">What to do</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-11-30</td>
+<td align="left">Azure Databricks</td>
+<td align="left"><a href="https://learn.microsoft.com/azure/databricks/release-notes/whats-coming#upcoming-end-of-life-for-the-genie-one-mcp-beta-endpoint">Upcoming end of life for the Genie One MCP Beta endpoint</a></td>
+<td align="left">The Genie One MCP Beta endpoint at <code>https://&lt;workspace-hostname&gt;/api/2.0/mcp/genie</code> reaches end of life on November 30, 2026, after which requests fail; migrate all workloads to the <code>system.ai.genie_one_mcp</code> MCP in Unity Gateway.</td>
+</tr>
+<tr>
+<td align="left">2027-01-31</td>
+<td align="left">BigQuery</td>
+<td align="left"><a href="https://docs.cloud.google.com/bigquery/docs/release-notes#November_06_2026">Starting January 31, 2027, the BigQuery Data Transfer Service for Shopify connector will no longer support the following fields</a></td>
+<td align="left">Starting January 31, 2027, the BigQuery Data Transfer Service for Shopify connector will drop support for the <code>legacyMode</code> field in the DeliveryProfile dataset schema and the <code>permitSkuSharing</code> field in the FulfillmentService dataset schema.</td>
+</tr>
+<tr>
+<td align="left">2027-02-04</td>
+<td align="left">Azure Databricks</td>
+<td align="left"><a href="https://learn.microsoft.com/azure/databricks/release-notes/product/2026/november#zhipu-ai-glm-52-is-scheduled-for-retirement">Zhipu AI GLM 5.2 is scheduled for retirement</a></td>
+<td align="left">Zhipu AI GLM 5.2 is deprecated and will be retired on February 4, 2027, requiring migration to GLM 5.3 per the Legacy, deprecated, and retired models guidance.</td>
+</tr>
+<tr>
+<td align="left">2027-08-19</td>
+<td align="left">Azure Databricks</td>
+<td align="left"><a href="https://learn.microsoft.com/azure/databricks/release-notes/whats-coming#all-unity-catalog-managed-tables-will-be-upgraded-to-catalog-commits">All Unity Catalog managed tables will be upgraded to catalog commits</a></td>
+<td align="left">After Databricks Runtime 15.4 LTS end of support on August 19, 2027, all Unity Catalog managed tables will be automatically upgraded to <code>catalog commits</code>, making Unity Catalog the system of coordination and enabling multi-statement transactions, external engine writes, and consistent governance; clients must plan for this breaking change before the 2027 deadline.</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>Databricks</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Item</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-11-06</td>
+<td align="left">⚠️ <a href="https://learn.microsoft.com/azure/databricks/release-notes/whats-coming#all-unity-catalog-managed-tables-will-be-upgraded-to-catalog-commits">All Unity Catalog managed tables will be upgraded to catalog commits</a></td>
+<td align="left">After Databricks Runtime 15.4 LTS end of support on August 19, 2027, all Unity Catalog managed tables will be automatically upgraded to <code>catalog commits</code>, making Unity Catalog the system of coordination and enabling multi-statement transactions, external engine writes, and consistent governance; clients must plan for this breaking change before the 2027 deadline.</td>
+</tr>
+</tbody></table>
+<p><strong>Quiet today:</strong> <a href="https://github.com/delta-io/delta">Delta Lake</a>, <a href="https://github.com/delta-io/delta-rs">delta-rs</a>, <a href="https://github.com/unitycatalog/unitycatalog">Unity Catalog</a>, <a href="https://github.com/mlflow/mlflow">MLflow</a>, <a href="https://github.com/databricks/cli">Databricks CLI</a>, <a href="https://github.com/databricks/dbt-databricks">dbt-databricks</a>, <a href="https://github.com/databricks/terraform-provider-databricks">Terraform provider for Databricks</a></p>
+<hr>
+<h2>Snowflake</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Item</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-11-10</td>
+<td align="left">🤖 <a href="https://docs.snowflake.com/en/release-notes/2026/other/2026-11-10-fl-filter-pages">AI_EXTRACT and AI_PARSE_DOCUMENT now support page filtering with FL_FILTER_PAGES</a></td>
+<td align="left"><code>AI_EXTRACT</code> and <code>AI_PARSE_DOCUMENT</code> now accept <code>FL_FILTER_PAGES</code> to process specific document pages directly in SQL, eliminating the need to create separate files for each section.</td>
+</tr>
+<tr>
+<td align="left">2026-11-10</td>
+<td align="left"><a href="https://docs.snowflake.com/en/release-notes/2026/other/2026-11-10-temporary-role-grants-preview">Temporary role grants to users (Preview)</a></td>
+<td align="left">Account roles can be granted to users temporarily using <code>FOR INTERVAL</code> or <code>UNTIL</code> clauses in GRANT ROLE, with automatic revocation when the grant expires.</td>
+</tr>
+</tbody></table>
+<h3>Snowflake Connector for Python</h3>
+<ul>
+<li><strong>News:</strong> <a href="https://medium.com/snowflake/native-asyncio-comes-to-the-snowflake-python-connector-5941385ac80e">Native Asyncio Comes to the Snowflake Python Connector</a> announces version 5.0.0 with a native awaitable API built on Universal Core, eliminating the need for thread pools when calling Snowflake from event-loop-based Python services.</li>
+</ul>
+<p><strong>Quiet today:</strong> <a href="https://github.com/snowflakedb/snowpark-python">Snowpark Python</a>, <a href="https://github.com/apache/polaris">Apache Polaris</a>, <a href="https://github.com/snowflakedb/terraform-provider-snowflake">Terraform provider for Snowflake</a></p>
+<hr>
+<h2>Azure / Fabric &amp; GCP</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Item</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-11-10</td>
+<td align="left"><a href="https://docs.cloud.google.com/bigquery/docs/release-notes#November_10_2026">You can use graph measures to lock an aggregation to a key in order to perform complex aggregations without overcounting (GA)</a></td>
+<td align="left"><code>graph measures</code> lock aggregations to a key to prevent overcounting, supporting expressions including <code>AGG</code>-wrapped combinations, queried via <code>GRAPH_EXPAND</code> TVF (now multi-fact-table) and <code>AGG</code> function, with schema inspection via <code>BQ.SHOW_GRAPH_EXPAND_SCHEMA</code> and custom metadata via <code>OPTIONS</code> clause extensions.</td>
+</tr>
+<tr>
+<td align="left">2026-11-10</td>
+<td align="left">🤖 <a href="https://docs.cloud.google.com/bigquery/docs/release-notes#November_10_2026">BigQuery generative AI functions now support the gemini-4-carbon model</a></td>
+<td align="left">BigQuery generative AI functions now support the <code>gemini-4-carbon</code> model for generally available use.</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>Open-source stack</h2>
+<h3>dlt</h3>
+<ul>
+<li><strong>News:</strong> <a href="https://dlthub.com/blog/introducing-performance-optimization">Introducing performance optimization in dltHub</a> announces new performance optimization features for the data ingestion library.</li>
+</ul>
+<h3>Apache Iceberg</h3>
+<ul>
+<li><strong>News:</strong> <a href="https://medium.com/snowflake/is-your-iceberg-catalog-healthy-939dc7817154">Is your Iceberg catalog healthy?</a> compares five open-source Iceberg catalogs on functionality and project health, highlighting catalog choice as critical for Iceberg adoption.</li>
+</ul>
+<h3>DuckDB</h3>
+<ul>
+<li><strong>News:</strong> <a href="https://news.ycombinator.com/item?id=50444907">Measuring Quack: DuckDB&#39;s New Client-Server Protocol</a> — title only, no description.</li>
+<li><strong>News:</strong> <a href="https://duckdb.org/2026/11/10/ducks-in-a-column.html">Ducks in a Column</a> details how DuckDB&#39;s columnar storage enables features like column-level SQL, aggregation shortcuts, window functions, and ASOF joins.</li>
+</ul>
+<p><strong>Quiet today:</strong> <a href="https://github.com/dbt-labs/dbt">dbt Core</a>, <a href="https://github.com/SQLMesh/sqlmesh">SQLMesh</a>, <a href="https://github.com/apache/airflow">Apache Airflow</a>, <a href="https://github.com/dagster-io/dagster">Dagster</a>, <a href="https://github.com/PrefectHQ/prefect">Prefect</a>, <a href="https://github.com/apache/iceberg-python">PyIceberg</a>, <a href="https://github.com/pola-rs/polars">Polars</a>, <a href="https://github.com/trinodb/trino">Trino</a>, <a href="https://github.com/great-expectations/great_expectations">Great Expectations</a>, <a href="https://github.com/sodadata/soda-core">Soda Core</a>, <a href="https://github.com/OpenLineage/OpenLineage">OpenLineage</a>, <a href="https://github.com/open-metadata/OpenMetadata">OpenMetadata</a></p>
+<hr>
+<h2>Across platforms</h2>
+<ul>
+<li>AI functions in SQL: Snowflake adds page filtering to AI_EXTRACT and AI_PARSE_DOCUMENT (GA), while BigQuery generative AI functions add gemini-4-carbon model support (GA); both run in-warehouse but expose different function sets and models.</li>
+</ul>
+<hr>
+<h2>Spotted</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Story</th>
+<th align="left">Source</th>
+<th align="left">Discussion</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a href="https://xata.io/blog/xata-is-joining-clickhouse">ClickHouse Acquires Xata</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50436706">99 points, 10 comments</a></td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left">Show HN: WolveKafka – Consume Kafka with a plain HTTP endpoint (<a href="https://github.com/wolveflake/wolvekafka">wolveflake/wolvekafka</a>)</td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50443596">11 points, 2 comments</a></td>
+<td align="left">A Show HN tool called WolveKafka that enables consuming Kafka via a plain HTTP endpoint in any language, handling retries, dead-letter queues, batching, and offsets.</td>
+</tr>
+<tr>
+<td align="left"><a href="http://databasearchitects.blogspot.com/2026/11/next-level-benchmarking-overfitting.html">Next-Level Benchmarking Overfitting</a></td>
+<td align="left">Lobste.rs</td>
+<td align="left"><a href="https://lobste.rs/s/nuoce5/next_level_benchmarking_overfitting">18 points, 3 comments</a></td>
+<td align="left">A blog post by and for database architects examining overfitting in benchmarking practices.</td>
+</tr>
+</tbody></table>
+<hr>
+<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
+]]></content:encoded>
+    </item>
     <item>
       <title>Data Engineering 2026-11-10</title>
       <link>https://dboeter.github.io/daily-diff/#2026-11-10/ai-data</link>

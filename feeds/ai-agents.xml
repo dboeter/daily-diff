@@ -13,7 +13,114 @@
       <height>144</height>
     </image>
     <atom:link href="https://dboeter.github.io/daily-diff/feeds/ai-agents.xml" rel="self" type="application/rss+xml"/>
-    <lastBuildDate>Tue, 10 Nov 2026 07:07:50 +0000</lastBuildDate>
+    <lastBuildDate>Wed, 11 Nov 2026 06:00:49 +0000</lastBuildDate>
+    <item>
+      <title>AI Agents 2026-11-11</title>
+      <link>https://dboeter.github.io/daily-diff/#2026-11-11/ai-agents</link>
+      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-11-11/ai-agents</guid>
+      <pubDate>Wed, 11 Nov 2026 00:00:00 +0000</pubDate>
+      <description>AI Agents 2026-11-11 ⬛ Overview · 🟪 AI Agents · 🟦 AI Models &amp;amp; Labs · 🟧 AI Policy · 🟨 Data Engineering Projects: 15 | Active today: 8 | Stable releases: 7 | Prereleases (not covered): 6 | Generated: 2026-11-11 05:56 UTC Highlights OpenShell v0.1.8 introduces breaking changes: static provider credentials now require explicit auth_style declarations, REST endpoints return 403 for HTTP upgrade requests, OCSF sandbox attribution fields move to resources or unmapped, sandboxes fail when filesy...</description>
+      <content:encoded><![CDATA[<h1>AI Agents 2026-11-11</h1>
+<p><a href="https://dboeter.github.io/daily-diff/#2026-11-11">⬛ Overview</a> · <strong>🟪 AI Agents</strong> · <a href="https://dboeter.github.io/daily-diff/#2026-11-11/ai-models">🟦 AI Models &amp; Labs</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-11/ai-policy">🟧 AI Policy</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-11/ai-data">🟨 Data Engineering</a></p>
+<blockquote>
+<p>Projects: 15 | Active today: 8 | Stable releases: 7 | Prereleases (not covered): 6 | Generated: 2026-11-11 05:56 UTC</p>
+</blockquote>
+<hr>
+<h2>Highlights</h2>
+<ul>
+<li>OpenShell v0.1.8 introduces breaking changes: static provider credentials now require explicit <code>auth_style</code> declarations, REST endpoints return 403 for HTTP upgrade requests, OCSF sandbox attribution fields move to <code>resources</code> or <code>unmapped</code>, sandboxes fail when filesystem policies traverse symlinks in writable workspaces, and IPv4-mapped IPv6 destinations are evaluated as IPv4; the Python SDK moves to <code>ai-openshell/sdk-python</code> and the Go SDK module is deprecated.</li>
+<li>Users report the OpenAI Codex VS Code extension fails to start its UI on Windows after upgrading to v26.51021.22027; rolling back to v26.51007.21434 restores function (78 comments, 85 👍).</li>
+<li>Users report <code>DISABLE_TELEMETRY=1</code> prevents feature flags from loading in Claude Code, causing the <code>/model</code> picker to hide Fable 5.2 and fall back to compiled defaults.</li>
+</ul>
+<hr>
+<h2>Coding Agents &amp; Assistants</h2>
+<h3>Claude Code</h3>
+<ul>
+<li><strong>Hot issue:</strong> <a href="https://github.com/anthropics/claude-code/issues/108726">#108726</a>: users report that <code>DISABLE_TELEMETRY=1</code> prevents feature flags from loading, causing the <code>/model</code> picker to hide Fable 5.2 and fall back to compiled defaults. (5 comments, 12 👍; +17 in the last 24h)</li>
+<li><strong>Hot issue:</strong> <a href="https://github.com/anthropics/claude-code/issues/89673">#89673</a>: users request an option in the Desktop app to make Enter insert a newline and Ctrl+Enter submit, matching common chat conventions; the existing <code>keybindings.json</code> works only in the terminal TUI. (24 comments, 104 👍; +11 in the last 24h)</li>
+</ul>
+<h3>OpenAI Codex</h3>
+<ul>
+<li><strong>Release:</strong> <a href="https://github.com/openai/codex/releases/tag/rust-v0.167.1">rust-v0.167.1</a></li>
+<li><strong>Hot issue:</strong> <a href="https://github.com/openai/codex/issues/56655">#56655</a>: users report the VS Code extension fails to start its UI on Windows after upgrading to v26.51021.22027; rolling back to v26.51007.21434 restores function. (78 comments, 85 👍; +27 in the last 24h)</li>
+<li><strong>News:</strong> <a href="https://news.ycombinator.com/item?id=50439141">Show HN: Cosh – An open-source AI agent orchestrator</a> mentions Codex as one of the external agents Cosh integrates with.</li>
+</ul>
+<h3>Gemini CLI</h3>
+<ul>
+<li><strong>Release:</strong> <a href="https://github.com/google-gemini/gemini-cli/releases/tag/v0.68.0">v0.68.0</a> fixes case-insensitive root detection on Windows, surrogate-pair handling in display truncation, <code>.git/info/exclude</code> honoring in shadow repos, 429 rate-limit countdown in the loading indicator, and preserves the selected model across fallback and rewind.</li>
+</ul>
+<h3>OpenCode</h3>
+<ul>
+<li><strong>Release:</strong> <a href="https://github.com/anomalyco/opencode/releases/tag/v2.2.7">v2.2.7</a> removes <code>ImageResponse.image</code> (use <code>response.images[0]</code>), adds GitHub Copilot Auto model picking, side-panel tab shortcuts (<code>⌘W</code>, <code>⌥⌘W</code>, <code>⌘⇧T</code>), session read/unread marking, MCP login persistence across concurrent refreshes, negative <code>read</code> offsets, and file-not-found suggestions.</li>
+</ul>
+<h3>Pi</h3>
+<ul>
+<li><strong>Release:</strong> <a href="https://github.com/earendil-works/pi/releases/tag/v1.5.2">v1.5.2</a> adds forking sessions whose original folder is gone, changes the missing-directory prompt to offer Continue/Fork/Cancel, and fixes <code>/import</code> leaving duplicate session files and an outdated Claude Code version in Anthropic OAuth requests.</li>
+</ul>
+<h3>Oh My Pi</h3>
+<ul>
+<li><strong>Release:</strong> <a href="https://github.com/can1357/oh-my-pi/releases/tag/v18.18.8">v18.18.8</a>–<a href="https://github.com/can1357/oh-my-pi/releases/tag/v18.18.7">v18.18.7</a> removes <code>getConfigAgentDirName()</code>, adds LiteLLM usage adapter with key/user budgets, login-warning auth rule for risky accounts, Muse Ember model with reasoning ladder, per-window saved-reset auto-redeem settings, and fixes Morph session-id header, Claude Fable limit reporting, and child-browser isolation.</li>
+</ul>
+<h3>Hermes Agent</h3>
+<ul>
+<li><strong>Hot issue:</strong> <a href="https://github.com/NousResearch/hermes-agent/issues/152674">#152674</a>: an issue says the Desktop app loses the logged-in Nous user identity — the server mints a correct ws ticket but chat messages are admitted as <code>uid:10000</code> for two different accounts after full restarts and storage cleanup. (type/security; 3 comments, 0 👍; +3 in the last 24h)</li>
+</ul>
+<p><strong>Quiet today:</strong> <a href="https://github.com/Kilo-Org/kilocode">Kilo Code</a>, <a href="https://github.com/1jehuang/jcode">jcode</a>, <a href="https://github.com/cline/cline">Cline</a>, <a href="https://github.com/CommandCodeAI/command-code">Command Code</a>, <a href="https://github.com/deepseek-ai/deepseek-harness">DeepSeek Harness</a></p>
+<hr>
+<h2>Agent Tooling</h2>
+<h3>OpenShell</h3>
+<ul>
+<li><strong>Release:</strong> <a href="https://github.com/NVIDIA/OpenShell/releases/tag/v0.1.8">v0.1.8</a> makes several breaking changes: static provider credentials now require explicit <code>auth_style</code> placement declarations for custom headers, query parameters, and path slots; REST endpoints return <code>403</code> for HTTP upgrade requests; OCSF sandbox attribution fields move to <code>resources</code> entries or <code>unmapped</code> fields; sandboxes fail to launch when filesystem policies traverse symlinks in writable workspaces; and IPv4-mapped IPv6 destinations are evaluated as IPv4.</li>
+<li><strong>Release:</strong> The <code>openshell</code> Python SDK is now published from <code>ai-openshell/sdk-python</code> (install via <code>pip install openshell</code>), and the Go SDK module <code>github.com/NVIDIA/OpenShell/sdk/go</code> is deprecated in favor of <code>github.com/ai-openshell/sdk-go</code>.</li>
+<li><strong>Release:</strong> WebSocket traffic must be configured with <code>protocol: websocket</code> and explicit handshake/message rules; <code>websocket_credential_rewrite: true</code> now requires a WebSocket endpoint.</li>
+</ul>
+<p><strong>Quiet today:</strong> <a href="https://github.com/herdrdev/herdr">herdr</a>, <a href="https://github.com/conductor-oss/conductor">Conductor</a></p>
+<hr>
+<h2>Spotted</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Story</th>
+<th align="left">Source</th>
+<th align="left">Discussion</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">Show HN: Get your coding agent off ~2019 JavaScript, onto modern web primitives (<a href="https://github.com/GoogleChrome/modern-web-guidance">GoogleChrome/modern-web-guidance</a>)</td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50443812">322 points, 98 comments</a></td>
+<td align="left">A Show HN project that updates coding agents from roughly 2019-era JavaScript to modern web primitives.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://babuschk.in/posts/2026-01-25-life-on-claude-nine.html">Life on Claude Nine</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50443587">96 points, 57 comments</a></td>
+<td align="left">The author describes adopting Claude for daily life, beginning with email automation.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://barterpilot.com/">Show HN: AI agents that barter your stuff for things you want</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50446649">6 points, 4 comments</a></td>
+<td align="left">A Show HN service where AI agents barter listed personal items for desired goods, treating possessions as currency.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://dev.to/m4rri4nne/detecting-flaky-tests-and-finding-their-root-causes-with-strands-agents-and-gemini-4kan">Detecting Flaky Tests and Finding Their Root Causes with Strands Agents and Gemini</a></td>
+<td align="left">Dev.to</td>
+<td align="left"><a href="https://dev.to/m4rri4nne/detecting-flaky-tests-and-finding-their-root-causes-with-strands-agents-and-gemini-4kan">48 reactions, 5 comments</a></td>
+<td align="left">The author explores detecting flaky tests and identifying root causes using Strands Agents and Gemini.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://dev.to/aws/once-upon-agentic-ai-part-1-create-your-own-agent-and-forge-its-tools-with-strands-agents-22mo">Once Upon Agentic AI (Part 1): Create your own agent and forge its tools with Strands Agents</a></td>
+<td align="left">Dev.to</td>
+<td align="left"><a href="https://dev.to/aws/once-upon-agentic-ai-part-1-create-your-own-agent-and-forge-its-tools-with-strands-agents-22mo">23 reactions, 3 comments</a></td>
+<td align="left">A tutorial (Part 1) on building a custom agent and its tools with the Strands Agents framework.</td>
+</tr>
+</tbody></table>
+<hr>
+<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
+]]></content:encoded>
+    </item>
     <item>
       <title>AI Agents 2026-11-10</title>
       <link>https://dboeter.github.io/daily-diff/#2026-11-10/ai-agents</link>
@@ -2600,60 +2707,6 @@
 <p>Quiet — no releases, hot issues, or project-focused news in the last 24h.</p>
 <hr>
 <p><strong>Quiet today:</strong> <a href="https://github.com/google-gemini/gemini-cli">Gemini CLI</a>, <a href="https://github.com/Kilo-Org/kilocode">Kilo Code</a>, <a href="https://github.com/1jehuang/jcode">jcode</a>, <a href="https://github.com/cline/cline">Cline</a>, <a href="https://github.com/CommandCodeAI/command-code">Command Code</a></p>
-<hr>
-<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
-]]></content:encoded>
-    </item>
-    <item>
-      <title>AI Agents 2026-10-12</title>
-      <link>https://dboeter.github.io/daily-diff/#2026-10-12/ai-agents</link>
-      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-10-12/ai-agents</guid>
-      <pubDate>Mon, 12 Oct 2026 00:00:00 +0000</pubDate>
-      <description>AI Agents Digest 2026-10-12 Generated: 2026-10-12 01:37 UTC | Projects: 12 | Active today: 8 | Stable releases: 6 | Prereleases (not covered): 1 🕵️ Stealth Models on OpenRouter No stealth models listed on OpenRouter today. Overview OpenCode shipped v1.19.0 with a major upgrade path to v2, while Oh My Pi released four versions raising context windows to 500K and introducing breaking API changes. jcode v0.95.0 added Responses API routing for new models and turn-level token hooks. Hermes Agent has...</description>
-      <content:encoded><![CDATA[<h1>AI Agents Digest 2026-10-12</h1>
-<blockquote>
-<p>Generated: 2026-10-12 01:37 UTC | Projects: 12 | Active today: 8 | Stable releases: 6 | Prereleases (not covered): 1</p>
-</blockquote>
-<hr>
-<h2>🕵️ Stealth Models on OpenRouter</h2>
-<p>No stealth models listed on OpenRouter today.</p>
-<hr>
-<h2>Overview</h2>
-<p>OpenCode shipped v1.19.0 with a major upgrade path to v2, while Oh My Pi released four versions raising context windows to 500K and introducing breaking API changes. jcode v0.95.0 added Responses API routing for new models and turn-level token hooks. Hermes Agent has a live Telegram threading bug misrouting new-topic messages, and OpenAI Codex users report a skills/resource mismatch breaking child resource reads. Community tooling continues expanding around Claude Code, Pi, and DeepSeek Harness with desktop workbenches, mobile clients, and multi-agent bridges.</p>
-<h2>OpenCode</h2>
-<ul>
-<li><strong>Release</strong>: v1.19.0 adds <code>opencode upgrade --major</code> for OpenCode 2 migration, allows OpenAI <code>ultrafast</code> tier, validates PTY origins, and moves updates to manual <code>/update</code> command. <a href="https://github.com/anomalyco/opencode/releases/tag/v1.19.0">v1.19.0</a></li>
-</ul>
-<h2>Oh My Pi</h2>
-<ul>
-<li><strong>Release</strong>: v18.9.0–v18.10.0 raise default context for <code>gpt-6.1-sol</code> models to 500K (extended 922K), rename <code>TypeSafeJudge</code>→<code>NativeJudge</code>, remove <code>retainTextSignature</code> and <code>JUDGMENT_ROUTES</code>, fix stale queue updates, and add Bedrock thinking-binding compat flag. <a href="https://github.com/can1357/oh-my-pi/releases/tag/v18.10.0">v18.10.0</a> · <a href="https://github.com/can1357/oh-my-pi/releases/tag/v18.9.0">v18.9.0</a></li>
-</ul>
-<h2>jcode</h2>
-<ul>
-<li><strong>Release</strong>: v0.95.0 routes OpenCode Go models (grok-4.7, gpt-6-luna) via Responses API, exposes turn-end token usage in hooks, fires turn_start/turn_end for one-shot runs, adds per-session worker model overrides in <code>/agents</code>, and improves swarm stall detection. <a href="https://github.com/1jehuang/jcode/releases/tag/v0.95.0">v0.95.0</a></li>
-</ul>
-<h2>Hermes Agent</h2>
-<ul>
-<li><strong>Hot issue</strong>: In Telegram forum DMs, the opening message of a newly created topic arrives without <code>message_thread_id</code>, causing lobby recovery to misroute it to the previous topic. <a href="https://github.com/NousResearch/hermes-agent/issues/136567">#136567</a></li>
-</ul>
-<h2>OpenAI Codex</h2>
-<ul>
-<li><strong>Hot issue</strong>: User Skills advertise child resources that <code>resources/read</code> rejects as &quot;Unknown resource,&quot; breaking skill resource access in ChatGPT-hosted Codex tasks. <a href="https://github.com/openai/codex/issues/53002">#53002</a></li>
-</ul>
-<h2>Claude Code</h2>
-<ul>
-<li><strong>News</strong>: A developer discovered an unknown planet using Claude Code for data analysis, drawing significant community attention on Hacker News. <a href="https://news.ycombinator.com/item?id=50002665">HN discussion</a></li>
-</ul>
-<h2>Pi</h2>
-<ul>
-<li><strong>News</strong>: Multiple desktop and web UIs are emerging for Pi, including an Electron+Rust desktop app (PI-Desktop), a web UI keeping sessions alive (pi-web), and a token-efficient MCP adapter. <a href="https://github.com/vastsa/PI-Desktop">PI-Desktop</a> · <a href="https://github.com/jmfederico/pi-web">pi-web</a> · <a href="https://github.com/nicobailon/pi-mcp-adapter">pi-mcp-adapter</a></li>
-</ul>
-<h2>DeepSeek Harness</h2>
-<ul>
-<li><strong>News</strong>: Native mobile clients are arriving for iOS (dsh-mobile) and Android (DSHA, dsh-android, Deepseek-Harness-Local-Android), plus a context-pruning plugin (dsh-sieve) reporting 36% payload reduction. <a href="https://github.com/DSH-APP/DSHA">DSHA</a> · <a href="https://github.com/Clarklevis1995/dsh-mobile">dsh-mobile</a> · <a href="https://github.com/Sev7eEn7/dsh-sieve">dsh-sieve</a></li>
-</ul>
-<hr>
-<p><strong>Quiet today:</strong> <a href="https://github.com/google-gemini/gemini-cli">Gemini CLI</a>, <a href="https://github.com/Kilo-Org/kilocode">Kilo Code</a>, <a href="https://github.com/cline/cline">Cline</a>, <a href="https://github.com/CommandCodeAI/command-code">Command Code</a></p>
 <hr>
 <p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
 ]]></content:encoded>

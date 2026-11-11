@@ -13,7 +13,187 @@
       <height>144</height>
     </image>
     <atom:link href="https://dboeter.github.io/daily-diff/feeds/ai-models.xml" rel="self" type="application/rss+xml"/>
-    <lastBuildDate>Tue, 10 Nov 2026 07:07:50 +0000</lastBuildDate>
+    <lastBuildDate>Wed, 11 Nov 2026 06:00:49 +0000</lastBuildDate>
+    <item>
+      <title>AI Models &amp; Labs 2026-11-11</title>
+      <link>https://dboeter.github.io/daily-diff/#2026-11-11/ai-models</link>
+      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-11-11/ai-models</guid>
+      <pubDate>Wed, 11 Nov 2026 00:00:00 +0000</pubDate>
+      <description>AI Models &amp;amp; Labs 2026-11-11 ⬛ Overview · 🟪 AI Agents · 🟦 AI Models &amp;amp; Labs · 🟧 AI Policy · 🟨 Data Engineering Lab posts: 10 | New models: 4 | Spotted: 6 | Generated: 2026-11-11 05:56 UTC Highlights Google releases Gemini 4 Carbon, a frontier multimodal model for coding, agentic and complex reasoning with 1M-token context, now on OpenRouter and Google AI Studio. Anthropic launches its IPO roadshow for 825 million Class A shares priced at $70–78, targeting a Nasdaq listing under “ANT” a...</description>
+      <content:encoded><![CDATA[<h1>AI Models &amp; Labs 2026-11-11</h1>
+<p><a href="https://dboeter.github.io/daily-diff/#2026-11-11">⬛ Overview</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-11/ai-agents">🟪 AI Agents</a> · <strong>🟦 AI Models &amp; Labs</strong> · <a href="https://dboeter.github.io/daily-diff/#2026-11-11/ai-policy">🟧 AI Policy</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-11/ai-data">🟨 Data Engineering</a></p>
+<blockquote>
+<p>Lab posts: 10 | New models: 4 | Spotted: 6 | Generated: 2026-11-11 05:56 UTC</p>
+</blockquote>
+<hr>
+<h2>Highlights</h2>
+<ul>
+<li>Google releases Gemini 4 Carbon, a frontier multimodal model for coding, agentic and complex reasoning with 1M-token context, now on OpenRouter and Google AI Studio.</li>
+<li>Anthropic launches its IPO roadshow for 825 million Class A shares priced at $70–78, targeting a Nasdaq listing under “ANT” at a reported $1.3 trillion valuation.</li>
+<li>Baidu adds ERNIE 5.5 Flash Preview to OpenRouter, a 1M-context model claiming comprehensive gains in coding, agentic tasks, knowledge work and deep research.</li>
+</ul>
+<hr>
+<h2>Lab announcements</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Lab</th>
+<th align="left">Post</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-11-11</td>
+<td align="left">OpenAI</td>
+<td align="left"><a href="https://openai.com/index/ai-effect-on-freelance-work/">Ai Effect On Freelance Work</a></td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left">2026-11-11</td>
+<td align="left">OpenAI</td>
+<td align="left"><a href="https://openai.com/index/chatgpt-plus-for-veterans/">Chatgpt Plus For Veterans</a></td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left">2026-11-11</td>
+<td align="left">OpenAI</td>
+<td align="left"><a href="https://openai.com/index/helping-caregivers-use-ai-in-everyday-life/">Helping Caregivers Use Ai In Everyday Life</a></td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left">2026-11-11</td>
+<td align="left">OpenAI</td>
+<td align="left"><a href="https://openai.com/index/introducing-businesses-chatgpt/">Introducing Businesses Chatgpt</a></td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left">2026-11-10</td>
+<td align="left">OpenAI</td>
+<td align="left"><a href="https://openai.com/index/closing-ai-guidance-gap-education/">Closing Ai Guidance Gap Education</a></td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left">2026-11-10</td>
+<td align="left">OpenAI</td>
+<td align="left"><a href="https://openai.com/business/learn/enabling-a-data-driven-workforce-webinar/">Enabling A Data Driven Workforce Webinar</a></td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left">2026-11-10</td>
+<td align="left">OpenAI</td>
+<td align="left"><a href="https://openai.com/business/learn/identifying-and-scaling-ai-use-cases/">Identifying And Scaling Ai Use Cases</a></td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left">2026-11-10</td>
+<td align="left">OpenAI</td>
+<td align="left"><a href="https://openai.com/business/learn/how-openai-uses-codex/">How Openai Uses Codex</a></td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left">2026-11-10</td>
+<td align="left">OpenAI</td>
+<td align="left"><a href="https://openai.com/business/learn/fine-tuning-gpt-4o-webinar/">Fine Tuning Gpt 4o Webinar</a></td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left">2026-11-10</td>
+<td align="left">Anthropic</td>
+<td align="left"><a href="https://www.anthropic.com/news/roadshow-launch">Anthropic launches roadshow for proposed initial public offering</a></td>
+<td align="left">Anthropic launched a roadshow for its proposed initial public offering of 825,000,000 shares of Class A common stock, with an expected price between $70.00 and $78.00 per share and plans to list on the Nasdaq Global Select Market under the symbol “ANT.”</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>New on OpenRouter</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Model</th>
+<th align="left">Listed</th>
+<th align="left">Context</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a href="https://openrouter.ai/baidu/ernie-5.5-flash-preview">Baidu: ERNIE-5.5-Flash-Preview</a> <code>baidu/ernie-5.5-flash-preview</code></td>
+<td align="left">2026-11-10</td>
+<td align="left">1M</td>
+<td align="left">ERNIE 5.5 Flash Preview is the latest foundation model in the ERNIE family with comprehensive improvements in coding, agentic capabilities, knowledge work, and deep research.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://openrouter.ai/baidu/ernie-light-dt-1.0-intl">Baidu: ERNIE-Light-DT-1.0</a> <code>baidu/ernie-light-dt-1.0-intl</code></td>
+<td align="left">2026-11-10</td>
+<td align="left">1M</td>
+<td align="left">ERNIE-Light-DT-1.0 is based on open-source GLM models and includes research findings from Baidu Search&#39;s Lightning large model, featuring Baidu Sparse Attention (BSA).</td>
+</tr>
+<tr>
+<td align="left"><a href="https://openrouter.ai/google/gemini-4-carbon">Google: Gemini 4 Carbon</a> <code>google/gemini-4-carbon</code></td>
+<td align="left">2026-11-10</td>
+<td align="left">1M</td>
+<td align="left">Gemini 4 Carbon is a frontier Gemini 4 model for coding, agentic and complex reasoning work that takes text, image, audio, video and file input.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://openrouter.ai/google/gemini-4-carbon:batch">Google: Gemini 4 Carbon (batch)</a> <code>google/gemini-4-carbon:batch</code></td>
+<td align="left">2026-11-10</td>
+<td align="left">1M</td>
+<td align="left">Gemini 4 Carbon is a frontier Gemini 4 model for coding, agentic and complex reasoning work that takes text, image, audio, video and file input.</td>
+</tr>
+</tbody></table>
+<hr>
+<p>Nothing new from OpenRouter&#39;s stealth models today.</p>
+<hr>
+<h2>Spotted</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Story</th>
+<th align="left">Source</th>
+<th align="left">Discussion</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a href="https://blog.google/innovation-and-ai/models-and-research/gemini-models/gemini-4-carbon-now-available/">Gemini 4 Carbon is now available</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50442303">281 points, 154 comments</a></td>
+<td align="left">Google announces the release of Gemini 4 Carbon for developers, enterprises, scientists, and consumers.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://alexwang.ai/posts/reasoning-as-pathfinding/">What objective is reasoning solving?</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50445013">136 points, 63 comments</a></td>
+<td align="left">An essay framing reasoning as a pathfinding problem within token space.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://docs.modelplane.ai/guides/inference-guide">An Open Field Guide to Inference Engineering</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50443714">80 points, 8 comments</a></td>
+<td align="left">An open field guide covering inference engineering concepts, production operations, tooling, and career paths for platform engineers.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://www.wsj.com/finance/stocks/anthropic-to-seek-1-3-trillion-valuation-in-ipo-8337b669">Anthropic to Seek $1.3T Valuation in IPO</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50439616">59 points, 83 comments</a></td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left"><a href="https://tis-100.wincon.dev/">LLMs Play Zachtronics&#39; TIS-100</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50448340">34 points, 4 comments</a></td>
+<td align="left">Sixteen LLMs were evaluated on Zachtronics&#39; TIS-100 puzzles, discovering 133 new frontier points across 18 of 55 puzzles and three cycle records.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://support.claude.com/en/articles/17506494-claude-fable-5-2-launch-offers">Claude Fable 5.2 launch offers</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50430176">29 points, 5 comments</a></td>
+<td align="left">—</td>
+</tr>
+</tbody></table>
+<hr>
+<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
+]]></content:encoded>
+    </item>
     <item>
       <title>AI Models &amp; Labs 2026-11-10</title>
       <link>https://dboeter.github.io/daily-diff/#2026-11-10/ai-models</link>
