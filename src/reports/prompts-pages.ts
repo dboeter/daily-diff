@@ -297,6 +297,16 @@ export function labPostsNoHighlightNote(titles: string[]): string | undefined {
     : undefined;
 }
 
+/**
+ * A page's Highlights rule for its stories that show only a title (`titleOnlyStories`,
+ * `titleOnlyNews`); undefined when every story has text.
+ */
+export function storiesNoHighlightNote(titles: string[]): string | undefined {
+  return titles.length
+    ? `These stories (Spotted rows and News items) show only a title, no description: no Highlight for them. ${titles.map((t) => `"${t}"`).join(", ")}`
+    : undefined;
+}
+
 /** The data report's reader, shared by its two vendor calls. */
 const DATA_READER =
   "a data engineer at a consultancy whose clients run Databricks, Snowflake, Azure / Microsoft Fabric and GCP / BigQuery";
@@ -367,7 +377,10 @@ export function buildDataProsePrompt(
   dateStr: string,
   /** Kept vendor rows under "Notable" significance or unsure of it (`minor`): in the tables, never a Highlight. */
   minorTitles: string[] = [],
+  /** Stories that show only a title (`titleOnlyStories`, `titleOnlyNews`): never a Highlight. */
+  titleOnlyTitles: string[] = [],
 ): string {
+  const storiesNote = storiesNoHighlightNote(titleOnlyTitles);
   const parts = [
     `\`## ${SECTIONS.highlights}\` — 1-3 bullets, the most consequential changes today, deprecations, retirements and breaking changes first. Each bullet says who is affected (which client setup: e.g. Azure Databricks workspaces with the compliance security profile, Snowflake Native App providers, BigQuery users of AI functions), what to do when the row says or its change requires it (enable, migrate, test, plan for) and by when, if the row gives a date.`,
     `The line \`${TABLES_MARKER}\` exactly once, on its own line. The sections are inserted there.`,
@@ -388,7 +401,7 @@ ${parts.map((p, i) => `${i + 1}. ${p}`).join("\n")}
 Rules:
 - ${NO_TITLE_RULE}
 - In ${SECTIONS.highlights}: ${goingAwayRule("bullet")} ${HIGHLIGHTS_PICK_RULE}
-- When no item qualifies, ${SECTIONS.highlights} is the one bullet "- ${NO_HIGHLIGHT_NOTE}". Never a bullet about the rows as a group or about what is absent ("all notes are minor", "no deprecations"): the Action required table above the sections is not shown here.${minorTitles.length ? `\n- These rows are minor: no Highlight for them. ${minorTitles.map((t) => `"${t}"`).join(", ")}` : ""}
+- When no item qualifies, ${SECTIONS.highlights} is the one bullet "- ${NO_HIGHLIGHT_NOTE}". Never a bullet about the rows as a group or about what is absent ("all notes are minor", "no deprecations"): the Action required table above the sections is not shown here.${minorTitles.length ? `\n- These rows are minor: no Highlight for them. ${minorTitles.map((t) => `"${t}"`).join(", ")}` : ""}${storiesNote ? `\n- ${storiesNote}` : ""}
 - Length: at most ~150 words for ${SECTIONS.highlights}, ~120 for ${DATA_REPORT.acrossPlatforms}.
 - A major release in ${DATA_REPORT.releasesHeading} (a version x.0.0, or one whose summary names breaking changes) is a Highlights candidate: say who must test or migrate.
 - Never restate a row: the reader sees the tables right below. A bullet that only says what changed, without who is affected and what to do, is left out.
@@ -554,6 +567,12 @@ export interface NoHighlightRow {
   name: string;
   /** "" when the row has no link. */
   url: string;
+  /**
+   * A community story that shows only its title. A bullet is about it only when it links the
+   * story or says little more than that title: on a launch day a lab post or release with text
+   * shares the title's words, and its bullet says much more.
+   */
+  story?: true;
 }
 
 /**
@@ -591,8 +610,10 @@ export function dropNoHighlightRows(
     rows.some(
       (r) =>
         (r.url !== "" && bullet.includes(`](${r.url})`)) ||
-        new RegExp(`(^|[^\\p{L}\\p{N}])${escapeRegex(r.name)}($|[^\\p{L}\\p{N}])`, "iu").test(bullet) ||
-        (leadWords(r.name).size >= RESTATED_NAME_MIN_WORDS && restatesLead(r.name, bullet)),
+        (r.story
+          ? restatesLead(r.name, bullet) && restatesLead(bullet, r.name)
+          : new RegExp(`(^|[^\\p{L}\\p{N}])${escapeRegex(r.name)}($|[^\\p{L}\\p{N}])`, "iu").test(bullet) ||
+            (leadWords(r.name).size >= RESTATED_NAME_MIN_WORDS && restatesLead(r.name, bullet))),
     ) || alsoDrop?.(bullet) === true;
   // A bullet is its marker line and the indented lines continuing it.
   const lines = head.split("\n");
@@ -666,6 +687,23 @@ export function withFallbackHighlights(
     if (line && line !== NO_HIGHLIGHT_NOTE) out[id] = [line];
   }
   return out;
+}
+
+/**
+ * The published reports the highlights reply left out though their page has something to restate.
+ * A page whose only Highlight is NO_HIGHLIGHT_NOTE or a failure notice is rightly absent: on
+ * 2026-11-08 and 11-09 the log named ai-data for it.
+ */
+export function skippedReports(reportContents: Record<string, string>, reply: ReportHighlights): string[] {
+  return Object.entries(reportContents)
+    .filter(([id, content]) => {
+      if (reply[id]?.length) return false;
+      // A page without the section was sent whole.
+      if (!highlightsSection(content)) return true;
+      const lead = firstHighlight(content);
+      return lead !== null && lead !== NO_HIGHLIGHT_NOTE;
+    })
+    .map(([id]) => id);
 }
 
 // A period after one of these, or inside a dotted abbreviation (U.S., E.U.), ends no

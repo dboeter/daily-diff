@@ -23,6 +23,11 @@ export interface PolicySourceContext {
   dateStr: string;
   /** The saved state; null on a first run or a malformed file. */
   state: PolicyState | null;
+  /**
+   * For a source that keeps only the matches of a longer list: the list's length. With entries
+   * listed and none kept the source reached its site, so it is not quiet (`nextZeroSince`).
+   */
+  listed?: (count: number) => void;
 }
 
 export interface PolicySource {

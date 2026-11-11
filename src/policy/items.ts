@@ -81,10 +81,13 @@ export async function fetchPolicySources(
   dateStr: string,
   state: PolicyState | null,
   sources: PolicySource[] = POLICY_SOURCES,
+  /** Hears the length of the list a source filtered its items from (`PolicySourceContext.listed`). */
+  onListed?: (source: string, count: number) => void,
 ): Promise<(PolicyItem[] | null)[]> {
   const fromSources = sources.map(async (source) => {
     try {
-      const items = await source.fetch({ config, now, dateStr, state });
+      const listed = (count: number) => onListed?.(source.name, count);
+      const items = await source.fetch({ config, now, dateStr, state, listed });
       console.log(`  [policy] ${source.name}: ${items.length} items`);
       return items;
     } catch (err) {
@@ -127,15 +130,20 @@ export const QUIET_SOURCE_WARN_DAYS = 7;
  * Each primary source (a registered source, or a feed without `kind: news`) that fetched no item
  * today keeps the first day of its quiet run; a source that fetched one leaves the map, judged or not
  * (a watchlist item already reported at its stage is not judged again). A failed fetch (null) counts
- * as quiet: a broken source is what the warning is for. Same-day re-runs keep the date.
+ * as quiet: a broken source is what the warning is for. A source that kept no item of the entries
+ * it `listed` reached its site and is not quiet: Internetconsultatie ("32 open consultations",
+ * "0 items") and Congress.gov warned daily from 2026-10-28 without being broken. Same-day re-runs
+ * keep the date.
  */
 export function nextZeroSince(
   prev: Record<string, string> | undefined,
   primary: string[],
   fetched: Record<string, number | null>,
   dateStr: string,
+  listed: Record<string, number> = {},
 ): Record<string, string> {
-  return Object.fromEntries(primary.filter((n) => !fetched[n]).map((n) => [n, prev?.[n] ?? dateStr]));
+  const quiet = (n: string) => !fetched[n] && !(fetched[n] === 0 && listed[n]);
+  return Object.fromEntries(primary.filter(quiet).map((n) => [n, prev?.[n] ?? dateStr]));
 }
 
 /** The sources quiet for QUIET_SOURCE_WARN_DAYS days or more, today included. */
@@ -160,6 +168,7 @@ export async function fetchPolicyData(
   const names = [...sources.map((s) => s.name), ...config.feeds.map((f) => f.name)];
   const primary = [...sources.map((s) => s.name), ...config.feeds.filter((f) => !f.news).map((f) => f.name)];
   let fetched: Record<string, number | null> = {};
+  const listed: Record<string, number> = {};
   const originOf = new Map<string, string>();
   let zeroSince = state?.zeroSince;
   const data = await collectNewItems({
@@ -167,7 +176,9 @@ export async function fetchPolicyData(
     state,
     dateStr,
     fetch: async () => {
-      const results = await fetchPolicySources(config, now, dateStr, state, sources);
+      const results = await fetchPolicySources(config, now, dateStr, state, sources, (name, count) => {
+        listed[name] = count;
+      });
       fetched = Object.fromEntries(names.map((n, i) => [n, results[i]?.length ?? null]));
       // Last copy wins, as in byId below.
       results.forEach((r, i) => r?.forEach((item) => originOf.set(item.id, names[i]!)));
@@ -182,7 +193,7 @@ export async function fetchPolicyData(
     select: async (candidates) => {
       console.log(`  [policy] ${POLICY_REPORT.newItems(candidates.length)}`);
       const judged = candidates.map((c) => originOf.get(c.id) ?? c.source);
-      zeroSince = nextZeroSince(state?.zeroSince, primary, fetched, dateStr);
+      zeroSince = nextZeroSince(state?.zeroSince, primary, fetched, dateStr, listed);
       for (const [name, since] of quietSources(zeroSince, dateStr)) {
         warnStep(`[policy] WARN ${name}: no item fetched since ${since}; check whether the source is broken`);
       }

@@ -60,9 +60,10 @@ const get = async (url: string): Promise<string> => (await fetchOk(url)).text();
  * date, and the list has no opening date, so each kept consultation's detail
  * page is fetched for its `Startdatum consultatie`.
  */
-export async function fetchInternetConsultatie(_ctx: PolicySourceContext): Promise<PolicyItem[]> {
+export async function fetchInternetConsultatie(ctx: PolicySourceContext): Promise<PolicyItem[]> {
   const all = parseConsultations(await get(`${SITE}/`));
   console.log(`  [policy] Internetconsultatie: ${all.length} open consultations`);
+  ctx.listed?.(all.length);
   const ai = all.filter((c) => keywordHit({ title: c.title, description: c.summary }));
   return Promise.all(
     ai.map(async (c): Promise<PolicyItem> => {

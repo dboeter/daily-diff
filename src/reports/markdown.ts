@@ -263,6 +263,21 @@ function checkProjectTokens(section: string, g: ProjectGroup): string {
 const blankAfterHeading = (chunk: string): string => chunk.trim().replace(/^(##[^\n]*)\n+/, "$1\n\n");
 
 /**
+ * A project heading on a line of its own. A model can glue the section's first bullet to it
+ * ("## Claude Code- **Hot issue:** …", 2026-11-08): that heading names no project, so the project
+ * got a second, code-written section.
+ */
+const splitGluedHeadings = (summary: string, g: ProjectGroup): string =>
+  g.activities.reduce(
+    (text, a) =>
+      text.replace(
+        new RegExp(`^(##\\s+${escapeRegex(a.config.name)})[ \\t]*([-*]\\s+\\*\\*)`, "gm"),
+        "$1\n\n$2",
+      ),
+    summary,
+  );
+
+/**
  * A group's projects as rendered: the model's summary without text outside a `##` section and
  * without a project section that has no bullet (both are absence notes the prompt forbids), plus a
  * code section for each project with a stable release or a hot issue the model did not cover, and a
@@ -275,13 +290,14 @@ const blankAfterHeading = (chunk: string): string => chunk.trim().replace(/^(##[
  */
 function groupProjects(g: ProjectGroup): { body: string; quiet: ProjectActivity[] } {
   const failed = g.summary.trim() === MSG.summaryFailed;
-  const covered = g.activities.filter((a) => covers(g.summary, a));
+  const summary = splitGluedHeadings(g.summary, g);
+  const covered = g.activities.filter((a) => covers(summary, a));
   const fallback = g.activities.filter(
     (a) => (a.releases.length > 0 || a.hotIssues.length > 0) && !covered.includes(a),
   );
   const kept = failed
-    ? [g.summary.trim()]
-    : g.summary
+    ? [summary.trim()]
+    : summary
         .split(/^(?=##\s)/m)
         .filter((chunk) => /^##\s/.test(chunk))
         .filter(
@@ -604,6 +620,32 @@ export function unsummarizedRows(
     ...tables.filter((r) => summaryText(summaries, r) === "—").map((r) => ({ name: r.fullName, url: r.url })),
     ...hf.filter((r) => hfSummaryText(hfSummaries, r) === "—").map((r) => ({ name: r.id, url: r.url })),
   ];
+}
+
+/**
+ * The story rows that show only a title: no description, or a "—" summary cell. A Highlight about
+ * one rests on the title alone ("Anthropic now requires a government ID to create an account",
+ * a Tell HN title, 2026-11-08), so they make no Highlight, like `unsummarizedRows`.
+ */
+export function titleOnlyStories(rows: StoryRow[], summaries: Map<number, string>): NoHighlightRow[] {
+  return rows
+    .filter(
+      (r) => !r.description?.trim() || summaryText(summaries, { n: r.n, description: r.description }) === "—",
+    )
+    .map((r) => ({ name: r.title, url: r.url, story: true }));
+}
+
+/**
+ * The community stories matched as a project's News that show only a title: the lead agents
+ * Highlight of 2026-11-09, "Goldman Sachs is pulling Claude Code from its bankers and traders",
+ * was one. A news item without an `id` is the project's own repo on GitHub Trending, whose
+ * title is the project's name.
+ */
+export function titleOnlyNews(groups: ProjectGroup[]): NoHighlightRow[] {
+  return groups
+    .flatMap((g) => g.activities.flatMap((a) => a.news))
+    .filter((n) => n.id !== undefined && !n.description?.trim())
+    .map((n) => ({ name: n.title, url: n.url, story: true }));
 }
 
 /** The Radar and category tables, a `##` heading each; "" when both are empty. */

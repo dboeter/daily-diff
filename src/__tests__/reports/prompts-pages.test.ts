@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { NO_HIGHLIGHT_NOTE, SECTIONS, TRENDS_REPORT } from "../../core/strings.ts";
 import type { ReleaseRow } from "../../reports/pages.ts";
 import {
@@ -18,6 +18,7 @@ import {
   firstHighlight,
   forcedHighlightReports,
   withFallbackHighlights,
+  skippedReports,
   restatesLead,
   dropNoHighlightRows,
   isGroupOrAbsenceBullet,
@@ -465,6 +466,71 @@ describe("withFallbackHighlights", () => {
     expect(firstHighlight("## Highlights\n- *Delta Lake* 4.0 adds `variant` type.")).toBe(
       "Delta Lake 4.0 adds variant type.",
     );
+  });
+});
+
+describe("dropNoHighlightRows with a title-only story", () => {
+  const story = (name: string) => [{ name, url: "https://example.com/s", story: true as const }];
+  const drop = (bullets: string[], name: string) => {
+    vi.spyOn(console, "log").mockImplementation(() => {});
+    const out = dropNoHighlightRows(
+      `## Highlights\n\n${bullets.map((b) => `- ${b}`).join("\n")}`,
+      story(name),
+      "t",
+    );
+    vi.restoreAllMocks();
+    return out;
+  };
+
+  it("drops a bullet that says little more than the title (2026-11-08 and 11-09)", () => {
+    const cases: [string, string][] = [
+      [
+        "Goldman Sachs is pulling Claude Code from its bankers and traders",
+        "Goldman Sachs is pulling Claude Code from its bankers and traders.",
+      ],
+      [
+        "Tell HN: You now need a government id in order to create an Anthropic account",
+        "Anthropic now requires a government ID to create an account.",
+      ],
+      [
+        "The end of Microsoft Research's AI Frontiers group",
+        "Microsoft Research's AI Frontiers group is ending.",
+      ],
+    ];
+    for (const [title, bullet] of cases) {
+      expect(drop([bullet, "Codex shipped v1."], title)).toBe("## Highlights\n\n- Codex shipped v1.");
+    }
+  });
+
+  it("keeps a bullet that says much more than the title: another row with text backs it (a launch day)", () => {
+    const bullet =
+      "OpenAI released GPT-6 with a 2M-token context window, lower input prices and a new batch tier for agents.";
+    expect(drop([bullet], "OpenAI releases GPT-6 with 2M context")).toContain(bullet);
+    // The title's words alone do not make a bullet about the story.
+    const release =
+      "Claude Code v2.1.330 changes the hooks contract: every PreToolUse hook must return JSON.";
+    expect(drop([release], "Claude Code v2.1.330 released")).toContain(release);
+  });
+});
+
+describe("skippedReports", () => {
+  const page = (bullets: string) => `# P\n\n## Highlights\n\n${bullets}\n\n---\n\n## Spotted`;
+  it("names a published page the model gave no highlight, but not one with nothing to restate (ai-data, 2026-11-08)", () => {
+    const reports = {
+      "ai-agents": page("- Codex shipped v1."),
+      "ai-models": page("- OpenAI raised $11 B."),
+      "ai-data": page(`- ${NO_HIGHLIGHT_NOTE}`),
+      "ai-policy": page("⚠️ Summary generation failed."),
+      // No Highlights section: the page was sent whole.
+      "ai-trends": "# P\n\n## Radar\n\n| a |",
+    };
+    expect(skippedReports(reports, { "ai-agents": ["Codex shipped v1."], "ai-models": [] })).toEqual([
+      "ai-models",
+      "ai-trends",
+    ]);
+    expect(
+      skippedReports(reports, { "ai-agents": ["A."], "ai-models": ["B."], "ai-trends": ["C."] }),
+    ).toEqual([]);
   });
 });
 

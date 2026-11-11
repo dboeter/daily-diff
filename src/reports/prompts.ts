@@ -447,9 +447,13 @@ Rules:
 export const HIGHLIGHTS_PICK_RULE =
   "One subject per bullet. Keep an item's window as the sections give it ('this week', 'in 7 days'): never present a weekly figure as today's.";
 
-/** The models page's Highlights note on a day without a lab post or new model: Spotted rows alone are not model news. */
+/**
+ * The models page's Highlights note on a day without a lab post or new model. No absence bullet:
+ * "No lab or model news today." stood above Highlights on OpenAI's raise and Anthropic's power
+ * deal (2026-11-09), and highlights.json then left the page out.
+ */
 export const NO_MODEL_NEWS_NOTE =
-  "The page has no lab post and no new model today: open with the bullet '- No lab or model news today.' and add at most 2 bullets.";
+  "The page has no lab post and no new model today: write at most 2 bullets and state no absence; the sections already say what is missing.";
 
 /** What the agents page's Highlights rank first: its focus line for buildPageHighlightsPrompt. */
 export const AGENTS_HIGHLIGHTS_FOCUS =

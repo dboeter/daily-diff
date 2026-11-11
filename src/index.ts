@@ -52,6 +52,7 @@ import {
   buildHighlightsPrompt,
   buildSpottedSummariesPrompt,
   forcedHighlightReports,
+  skippedReports,
   withFallbackHighlights,
   type ReportHighlights,
 } from "./reports/prompts-pages.ts";
@@ -751,6 +752,7 @@ async function main(): Promise<void> {
     posts: communityData.posts,
     policy: policyData.candidates ?? [],
     vendor: vendorData.candidates ?? [],
+    actions: vendorData.nextState.actions ?? {},
     dateStr,
   });
   console.log(`  Saved ${saveFile(candidatesFile(candidates), dateStr, "candidates.json")}`);
@@ -788,7 +790,7 @@ async function main(): Promise<void> {
         const parsed = parseLlmJson<ReportHighlights>(raw);
         // A published report without a key may be a rightful skip or a misread rule (Trends on
         // 2026-10-28): the reply in the log tells which.
-        const missing = Object.keys(reports).filter((id) => !parsed[id]?.length);
+        const missing = skippedReports(reports, parsed);
         if (missing.length)
           console.log(`  [highlights] no highlight for ${missing.join(", ")}; reply: ${raw}`);
         return parsed;

@@ -10,5 +10,8 @@ mcp/.dev.vars
 .claude/*.local.json
 .claude/worktrees/
 .scratch/ai-policy/lab/
+# The security spike's script and data stay local; only its write-up is committed.
+.scratch/security-section/spike/*
+!.scratch/security-section/spike/results.md
 .zed/
 .husky/

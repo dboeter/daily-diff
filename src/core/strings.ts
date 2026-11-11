@@ -250,7 +250,9 @@ export const DATA_REPORT = {
     cloud: "Azure / Fabric & GCP",
     data_stack: "Open-source stack",
   },
-  vendorCount: (count: number) => `Vendor items: ${count}`,
+  /** The table rows, and apart the links of the `alsoNew` lines: on 2026-11-10 "15" stood above 20 linked notes. */
+  vendorCount: (count: number, alsoNew = 0) =>
+    `Vendor items: ${count}${alsoNew ? ` | Also new: ${alsoNew}` : ""}`,
   vendorTableHeader: "| Date | Source | Item | Summary |\n| :--- | :--- | :--- | :--- |",
   /** A section whose rows all share one source: the Source column would repeat it in every row. */
   vendorTableHeaderOneSource: "| Date | Item | Summary |\n| :--- | :--- | :--- |",

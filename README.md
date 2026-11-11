@@ -102,11 +102,11 @@ Each tracked repo is covered by its stable releases of the last 24h (prereleases
 
 **Agent Tooling**: AI agent tooling — agent sandboxes, terminal session multiplexers and context-management tools.
 
-| Project   | Repository                                                            |
-| --------- | --------------------------------------------------------------------- |
-| OpenShell | [NVIDIA/OpenShell](https://github.com/NVIDIA/OpenShell)               |
-| herdr     | [herdrdev/herdr](https://github.com/herdrdev/herdr)                   |
-| Conductor | [conductor-oss/conductor](https://github.com/conductor-oss/conductor) |
+| Project   | Repository                                                    |
+| --------- | ------------------------------------------------------------- |
+| OpenShell | [NVIDIA/OpenShell](https://github.com/NVIDIA/OpenShell)       |
+| herdr     | [herdrdev/herdr](https://github.com/herdrdev/herdr)           |
+| Conductor | [microsoft/conductor](https://github.com/microsoft/conductor) |
 
 <!-- /tracked:infra -->
 

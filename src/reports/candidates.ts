@@ -6,7 +6,7 @@
 
 import type { ProjectActivity } from "./prompts.ts";
 import type { PolicyItem } from "../policy/items.ts";
-import type { VendorItem } from "../data/vendors.ts";
+import type { VendorAction, VendorItem } from "../data/vendors.ts";
 import type { CommunityPost } from "../data/community.ts";
 import type { LabsFetchResult } from "../sources/labs.ts";
 import type { ModelCatalog } from "../sources/openrouter.ts";
@@ -24,6 +24,7 @@ export interface Candidate {
     | "model"
     | "policy-item"
     | "vendor-note"
+    | "open-action"
     | "community-post"
     | "trending-repo";
   /** Human source name: a repo's full name, "Hacker News", a feed's name, "OpenRouter", a lab's site. */
@@ -32,9 +33,14 @@ export interface Candidate {
   url: string;
   /** A story's discussion page: project News links it instead of `url`. */
   discussion?: string;
-  /** As the item has it: an ISO date or time. */
+  /** As the item has it: an ISO date or time; "" for an open action, which the day did not fetch. */
   published: string;
-  /** The item's own text, whitespace-collapsed and cut to `MAX_TEXT_CHARS`; "" when it has none. */
+  /** An open action's end date: its Action required row stays until that date passes. */
+  ends?: string;
+  /**
+   * The item's own text, whitespace-collapsed and cut to `MAX_TEXT_CHARS`; "" when it has none.
+   * An open action: the row summary of the day it was reported, all the state keeps of it.
+   */
   text: string;
 }
 
@@ -57,6 +63,8 @@ export interface CandidateSources {
   policy: PolicyItem[];
   /** Every new vendor note before selection (`NewItems.candidates`). */
   vendor: VendorItem[];
+  /** The data report's open Action required rows by item id (`DataState.actions`), today's included. */
+  actions: Record<string, VendorAction>;
   /** The run's CST date: a trending repo has no date of its own. */
   dateStr: string;
 }
@@ -106,8 +114,14 @@ function projectCandidates(
   ];
 }
 
-/** One candidate per fetched item, in source order; the policy and vendor items are those before selection. */
+/**
+ * One candidate per fetched item, in source order; the policy and vendor items are those before
+ * selection. An Action required row an earlier report opened is a candidate too (`open-action`):
+ * the page repeats it until its end date, and without it the reviewers found the row unsourced
+ * (Genie One MCP end of life, 2026-11-07 and 11-08). Today's own are vendor notes already.
+ */
 export function buildCandidates(s: CandidateSources): Candidate[] {
+  const fetchedToday = new Set(s.vendor.map((i) => i.id));
   return [
     ...s.agents.flatMap((p) => projectCandidates("ai-agents", p)),
     ...s.data.flatMap((p) => projectCandidates("ai-data", p)),
@@ -170,6 +184,18 @@ export function buildCandidates(s: CandidateSources): Candidate[] {
       published: i.date,
       text: textOf(i.description),
     })),
+    ...Object.entries(s.actions)
+      .filter(([id]) => !fetchedToday.has(id))
+      .map(([, a]): Candidate => ({
+        page: "ai-data",
+        kind: "open-action",
+        source: a.source,
+        title: a.title,
+        url: a.link,
+        published: "",
+        ends: a.date,
+        text: textOf(a.summary),
+      })),
   ];
 }
 

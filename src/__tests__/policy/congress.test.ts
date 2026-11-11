@@ -136,7 +136,11 @@ describe("fetchCongress", () => {
       });
     });
     actions["s/50"]![1] = act("2026-09-01", "Passed/agreed to in House: Passed.", "8000");
-    const items = await fetchCongress(ctx);
+    const listed = vi.fn();
+    const items = await fetchCongress({ ...ctx, listed });
+    // The bills the list returned, kept or not: a quiet week is not a broken source.
+    expect(listed).toHaveBeenCalledTimes(1);
+    expect(listed.mock.calls[0]![0]).toBeGreaterThan(items.length);
     expect(items).toEqual([
       expect.objectContaining({
         id: "congress:s195-119",

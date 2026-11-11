@@ -92,8 +92,11 @@ infra:
       repo: herdrdev/herdr
       name: herdr
     - id: conductor
-      repo: conductor-oss/conductor
+      repo: microsoft/conductor
       name: Conductor
+      # Bare "conductor" also names Conductor OSS (the workflow engine) and the
+      # Mac app conductor.build, whose news is not this project's.
+      keywords: [microsoft conductor]
 
 # ── Data engineering ──────────────────────────────────────────────────────────
 # The repo sections of the daily data report (ai-data), for Digital Power's data
@@ -203,7 +206,18 @@ data_stack:
       # stable lines ship (3.x weekly, 2.x patches about monthly): both show,
       # accepted for one 2.x patch a month (Kestra's three lines were not).
       # Bare "prefect" is a school or Roman office; the repo path always matches.
-      keywords: [prefecthq, prefect.io, prefect flow, prefect flows, prefect cloud, prefect workflow, prefect orchestration, prefect 2, prefect 3]
+      keywords:
+        [
+          prefecthq,
+          prefect.io,
+          prefect flow,
+          prefect flows,
+          prefect cloud,
+          prefect workflow,
+          prefect orchestration,
+          prefect 2,
+          prefect 3,
+        ]
     - id: dlt
       repo: dlt-hub/dlt
       name: dlt
@@ -235,7 +249,15 @@ data_stack:
       # "Great expectations" is an everyday phrase and a Dickens title.
       # A hyphenated keyword would match the bare phrase (separators are optional
       # in the matcher), so only the underscore form and GX phrases are used.
-      keywords: [great_expectations, gx core, gx cloud, gx data quality, great expectations data quality, great expectations validation]
+      keywords:
+        [
+          great_expectations,
+          gx core,
+          gx cloud,
+          gx data quality,
+          great expectations data quality,
+          great expectations validation,
+        ]
     - id: soda-core
       repo: sodadata/soda-core
       name: Soda Core
@@ -416,8 +438,9 @@ policy:
       jurisdiction: eu
     # EU data protection board; ~10 items. AI-relevant items often name no AI
     # term (a fine for automated decision-making), so all go to Jev.
+    # Its old address, /feed/news_en, answers HTTP 503 since 2026-10-28, from any network.
     - name: EDPB
-      url: https://www.edpb.europa.eu/feed/news_en
+      url: https://www.edpb.europa.eu/rss.xml_en
       jurisdiction: eu
       jev_only: true
     # Dutch AI supervisor (data protection); ~1.4 a week, AI items often name no AI term.

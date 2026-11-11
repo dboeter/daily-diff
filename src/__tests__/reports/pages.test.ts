@@ -17,7 +17,7 @@ import {
 } from "../../reports/pages.ts";
 import { EMPTY_OPENROUTER, EMPTY_TRENDING, type TrendingData } from "../../trending/compose.ts";
 import { MSG, TRENDS_REPORT } from "../../core/strings.ts";
-import type { ProjectActivity } from "../../reports/prompts.ts";
+import { NO_MODEL_NEWS_NOTE, type ProjectActivity } from "../../reports/prompts.ts";
 import type { GitHubItem } from "../../core/github.ts";
 import type { PolicyData, PolicyItem } from "../../policy/items.ts";
 import { isDataLaw } from "../../policy/relevance.ts";
@@ -567,6 +567,63 @@ describe("buildAgentsReport", () => {
     const report = await build();
     expect(report.content).toContain(`## Highlights\n\n${MSG.summaryFailed}\n\n---\n\n## Coding Agents`);
   });
+
+  it("names a Spotted row that shows only a title as no Highlight, and drops one about it", async () => {
+    generateBody.mockReset();
+    generateBody.mockImplementation(
+      async () => "## Highlights\n\n- AegisKernel is a kernel for agents.\n- Codex shipped v1.",
+    );
+    const rows = [
+      { ...spottedRow(1, "agents"), title: "AegisKernel: a kernel for agents" },
+      { ...spottedRow(2, "agents"), description: "A sandbox for agents." },
+    ];
+    const report = await build(groups(true), {
+      rows,
+      summaries: new Map([
+        [1, "—"],
+        [2, "A sandbox."],
+      ]),
+    });
+    const prompt = generateBody.mock.calls[0]![0] as string;
+    expect(prompt).toContain(
+      'only a title, no description: no Highlight for them. "AegisKernel: a kernel for agents"',
+    );
+    expect(prompt).not.toContain('"Story 2"');
+    expect(report.content).not.toContain("- AegisKernel is a kernel");
+    expect(report.content).toContain("- Codex shipped v1.");
+  });
+
+  it("does the same for a project's News story without a description (Goldman Sachs under Claude Code, 2026-11-09)", async () => {
+    generateBody.mockReset();
+    generateBody.mockImplementation(
+      async () =>
+        "## Highlights\n\n- Goldman Sachs is pulling Claude Code from its bankers and traders.\n- Codex shipped v1.",
+    );
+    const title = "Goldman Sachs is pulling Claude Code from its bankers and traders";
+    const g = groups(true);
+    g[0]!.activities[0]!.news = [
+      {
+        source: "Hacker News",
+        title,
+        url: "https://news.ycombinator.com/item?id=1",
+        detail: "600 points",
+        id: "hn:1",
+      },
+      // The project's own repo on GitHub Trending is no story: its name would match every bullet on the project.
+      {
+        source: "GitHub Trending",
+        title: "Codex",
+        url: "https://github.com/org/codex",
+        detail: "+500 stars today",
+      },
+    ];
+    const report = await build(g, NO_SPOTTED);
+    const prompt = generateBody.mock.calls[0]![0] as string;
+    expect(prompt).toContain(`only a title, no description: no Highlight for them. "${title}"`);
+    expect(prompt).not.toContain('"Codex"');
+    expect(report.content).not.toContain("- Goldman Sachs is pulling");
+    expect(report.content).toContain("- Codex shipped v1.");
+  });
 });
 
 describe("buildModelsPage", () => {
@@ -664,6 +721,41 @@ describe("buildModelsPage", () => {
     expect(highlightsPrompt).toContain('only a title: no Highlight for them. "Post 1"');
     expect(content).not.toContain("Post 1 ships a guess.");
     expect(content).toContain("- Post 2 ships something.");
+  });
+
+  it("drops a Highlight about a Spotted row that shows only a title (government ID, 2026-11-08)", async () => {
+    generateBody.mockReset();
+    generateBody.mockImplementation(async (prompt: string) =>
+      prompt.includes("You are the editor")
+        ? "## Highlights\n\n- Anthropic now requires a government ID to create an account.\n- Post 2 ships something."
+        : "1: Summary two.",
+    );
+    const story = {
+      ...spottedRow(2, "models"),
+      title: "Tell HN: Anthropic now requires a government ID to create an account",
+    };
+    const report = await build([site([post(2)])], catalog(), { rows: [story], summaries: new Map() });
+    const content = report!.content;
+    expect(content).toContain("| [Tell HN: Anthropic now requires a government ID to create an account]");
+    const highlightsPrompt = generateBody.mock.calls[1]![0] as string;
+    expect(highlightsPrompt).toContain(
+      'only a title, no description: no Highlight for them. "Tell HN: Anthropic now requires a government ID to create an account"',
+    );
+    expect(content).not.toContain("- Anthropic now requires a government ID");
+    expect(content).toContain("- Post 2 ships something.");
+  });
+
+  it("gives the Highlights call the no-news rule and the title-only stories as two rule lines", async () => {
+    stub();
+    const story = { ...spottedRow(2, "models"), title: "Tell HN: a lab now requires a government ID" };
+    const report = await build([site([])], catalog(), { rows: [story], summaries: new Map() });
+    expect(report?.id).toBe("ai-models");
+    const highlightsPrompt = generateBody.mock.calls
+      .map((c) => c[0] as string)
+      .find((p) => p.includes("You are the editor"));
+    expect(highlightsPrompt).toContain(
+      `- ${NO_MODEL_NEWS_NOTE}\n- These stories (Spotted rows and News items) show only a title`,
+    );
   });
 
   it("shows at most LAB_POSTS_MAX posts, newest first, then how many more came in", async () => {
@@ -1113,6 +1205,16 @@ describe("buildDataReport", () => {
     expect(generateBody).toHaveBeenCalledTimes(2);
   });
 
+  it("counts the Also new links apart in the meta line (2026-11-10: 15 rows and 5 links read as 15)", async () => {
+    generateBody.mockReset();
+    generateBody.mockImplementation(async (prompt: string) => reply(prompt));
+    const data = await vendorData();
+    const content = (await build(sections(false, false), { ...data, alsoNew: data.items.slice(0, 2) }))!
+      .content;
+    expect(content).toContain("*Also new:*");
+    expect(content).toContain("Vendor items: 5 | Also new: 2 | Projects:");
+  });
+
   const PROSE_AI =
     "## Highlights\n- H.\n\n<!-- tables -->\n\n## Worth a Look\n- Read this.\n\n## Data × AI\n- Genie spaces arrive.";
   const prosePrompts = () =>
@@ -1276,6 +1378,34 @@ describe("buildDataReport", () => {
       "Spotted",
       "EU data law",
     ]);
+  });
+
+  it("drops a Highlight about a Spotted row that shows only a title (PostgreSQL Internals, 2026-11-08)", async () => {
+    generateBody.mockReset();
+    generateBody.mockImplementation(async (prompt: string) =>
+      prompt.startsWith("You are the editor")
+        ? "## Highlights\n- The PostgreSQL Internals pdf explains the planner.\n- H.\n\n<!-- tables -->"
+        : reply(prompt),
+    );
+    const story = { ...spottedRow(1, "data"), title: "PostgreSQL Internals [pdf] (2023)" };
+    const report = await buildDataReport(
+      sections(true),
+      await vendorData(),
+      dataLawOf([]),
+      { rows: [story], summaries: new Map([[1, "—"]]) },
+      "00:00",
+      "2026-10-17",
+      stateFile,
+      verdictsFile,
+    );
+    const prosePrompt = generateBody.mock.calls
+      .map((c) => c[0] as string)
+      .find((prompt) => prompt.startsWith("You are the editor"))!;
+    expect(prosePrompt).toContain(
+      'only a title, no description: no Highlight for them. "PostgreSQL Internals [pdf] (2023)"',
+    );
+    expect(report!.content).not.toContain("PostgreSQL Internals pdf explains");
+    expect(report!.content).toContain("- H.");
   });
 
   it("leaves a release of the last 24h to its repo section, and records it as shown", async () => {
@@ -1507,7 +1637,7 @@ describe("buildDataReport", () => {
     it("reports fetchSuccess false when every feed fails, and writes no state on a quiet day", async () => {
       generateBody.mockReset();
       fs.rmSync(stateFile, { force: true });
-      const data = await fetchWith(() => new Response("", { status: 503 }), { reported: {} });
+      const data = await fetchWith(() => new Response("", { status: 500 }), { reported: {} });
       expect(data.fetchSuccess).toBe(false);
       expect(await build(sections(false, false), data)).toBeNull();
       expect(fs.existsSync(stateFile)).toBe(false);

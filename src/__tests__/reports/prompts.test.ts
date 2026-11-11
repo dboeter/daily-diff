@@ -602,9 +602,11 @@ describe("buildSkillsPrompt", () => {
 });
 
 describe("buildPageHighlightsPrompt note", () => {
-  it("a models page without lab or model news says so instead of padding with Spotted rows", () => {
+  it("a models page without lab or model news caps its Highlights and states no absence (2026-11-09)", () => {
     const p = buildPageHighlightsPrompt("AI Models", "## Spotted", "f", "2026-10-26", NO_MODEL_NEWS_NOTE);
-    expect(p).toContain("No lab or model news today.");
+    // "No lab or model news today." stood above Highlights on OpenAI's raise and Anthropic's power deal.
+    expect(p).not.toContain("No lab or model news today");
     expect(p).toContain("at most 2 bullets");
+    expect(p).toContain("state no absence");
   });
 });

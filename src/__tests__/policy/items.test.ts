@@ -217,7 +217,7 @@ describe("fetchPolicyData", () => {
   });
 
   it("reports a failed feed as fetchSuccess false instead of throwing", async () => {
-    vi.spyOn(globalThis, "fetch").mockResolvedValue(new Response("", { status: 503 }));
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(new Response("", { status: 500 }));
     const data = await fetchPolicyData(
       config,
       new Date("2026-10-13T23:00:00Z"),
@@ -283,5 +283,16 @@ describe("quiet sources", () => {
     expect(nextZeroSince(day2, ["A", "B"], { A: 2, B: null }, "2026-10-03")).toEqual({ B: "2026-10-02" });
     expect(quietSources(day2, "2026-10-06")).toEqual([]);
     expect(quietSources(day2, "2026-10-07")).toEqual([["A", "2026-10-01"]]);
+  });
+
+  it("does not count a source that listed entries and kept none (Internetconsultatie: 32 open consultations, 0 items)", () => {
+    const fetched = { A: 0, B: 0, C: null };
+    // A reached its site and listed 32 entries; B listed nothing; C failed after listing.
+    expect(nextZeroSince(undefined, ["A", "B", "C"], fetched, "2026-10-01", { A: 32, B: 0, C: 5 })).toEqual({
+      B: "2026-10-01",
+      C: "2026-10-01",
+    });
+    // It also ends A's earlier quiet run.
+    expect(nextZeroSince({ A: "2026-09-20" }, ["A"], { A: 0 }, "2026-10-01", { A: 32 })).toEqual({});
   });
 });
