@@ -9,6 +9,7 @@ import { fetchOpenRouterData, type OpenRouterData } from "../sources/openrouter.
 import { pageDescription } from "../sources/hn.ts";
 import { fetchNpmData, type NpmData } from "./npm.ts";
 import { fetchWeeklyStarGain, GitHubApiError, githubGet, searchSlot } from "../core/github.ts";
+import { fetchOk } from "../core/http.ts";
 import {
   buildRadarCandidates,
   loadStarHistory,
@@ -208,16 +209,13 @@ async function fetchGitHubTrending(
   period: TrendingPeriod,
 ): Promise<{ repos: TrendingRepo[]; success: boolean }> {
   try {
-    const resp = await fetch(`https://github.com/trending?since=${period}&spoken_language_code=`, {
+    // fetchOk: its timeout and its one retry (the page answered 504 on 2026-11-09).
+    const resp = await fetchOk(`https://github.com/trending?since=${period}&spoken_language_code=`, {
       headers: {
         "User-Agent": "Mozilla/5.0 (compatible; daily-diff/1.0)",
         Accept: "text/html",
       },
     });
-    if (!resp.ok) {
-      console.error(`  [trending] HTTP ${resp.status} fetching github.com/trending`);
-      return { repos: [], success: false };
-    }
 
     const html = await resp.text();
     const repos = parseTrendingHtml(html);

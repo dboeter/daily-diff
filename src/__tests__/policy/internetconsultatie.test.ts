@@ -59,7 +59,10 @@ describe("fetchInternetConsultatie", () => {
               ),
             ),
       );
-    const items = await fetchInternetConsultatie(ctx);
+    const listed = vi.fn();
+    const items = await fetchInternetConsultatie({ ...ctx, listed });
+    // All three open consultations, though one is kept.
+    expect(listed).toHaveBeenCalledWith(3);
     expect(items).toEqual([
       {
         id: "internetconsultatie:aiverordening",

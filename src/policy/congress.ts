@@ -122,6 +122,8 @@ export async function fetchCongress(ctx: PolicySourceContext): Promise<PolicyIte
       console.log(`  [policy] Congress.gov: page cap reached, older updates skipped`);
   }
 
+  // ~1,100 bills a week are listed and few pass a chamber: no item is the usual answer.
+  ctx.listed?.(bills.length);
   const watchlist = ctx.config.watchlist.usFederal;
   const candidates = bills.filter(
     (b) =>
