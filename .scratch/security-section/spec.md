@@ -19,19 +19,21 @@ The nightly reviews of 2026-11-07 to 11-10 found security news that was fetched 
 
 ## Placement
 
-| What                    | Where it shows                                                                                   |
-| ----------------------- | ------------------------------------------------------------------------------------------------ |
-| A severe incident       | A banner on every page, on the Overview and in both messages                                     |
-| Any other flagged story | Where it shows today (its project's News, Spotted, "Also talked about"), marked, in its own slot |
-| A security fix          | A marked bullet in its project's release section                                                 |
+| What                                 | Where it shows                                                                                   |
+| ------------------------------------ | ------------------------------------------------------------------------------------------------ |
+| A severe incident                    | A banner on every page, on the Overview and in both messages                                     |
+| Any other flagged story              | Where it shows today (its project's News, Spotted, "Also talked about"), marked, in its own slot |
+| A security fix                       | A marked bullet in its project's release section                                                 |
+| A hot issue with a security label    | Unchanged: its bullet already shows the label                                                    |
+| A vendor note with a security change | Its row in the vendor table, marked; not checked yet                                             |
 
 Why, from the spike:
 
-- **A banner crosses pages.** No story in 13 days concerned a data platform. A severe incident in a tool the colleagues use reaches them only through something on every page. A banner also needs no choice of page.
+- **A banner crosses pages.** No story in 13 days concerned a data platform. A severe incident in a tool the colleagues use reaches them only through something on every page. A banner also needs no choice of page. It is the one deliberate exception to "one item, one page, once" (`../digest-structure/spec.md`).
 - **The banner rule is three Jev answers**: the story is flagged, its severity is 1.5 or more, and the claim is by the vendor, a researcher or the press. In 13 days that is 5 events, 2 to 3 a week. It passes the backdoored Claude Code extension of 2026-10-31, the maintainer's example.
-- **The rule has two known faults.** 2 of its 8 stories were out of scope (security news about something other than AI or data tooling). It leaves out the Claude Code email leak, which was one user's report; that story is then a marked row.
+- **The rule has two known faults.** 2 of its 8 stories in 13 days were out of scope (security news about something other than AI or data tooling): about one wrong banner a week, on every page and in the colleagues' Teams channel. It also leaves out the Claude Code email leak, which was one user's report; that story is then a marked row. So the banner is checked for a week before it shows, see "Order of work".
 - **No table.** About one security event a day shows across all pages, so a table would hold no row or one row on most days. The fault the reviews found was that such a story was cut: the three Fireworks submissions fell to the row cap, the topic bar and the routing. An own slot fixes that, and the item still shows once, on one page.
-- **No Security page.** It would be empty on many days, the colleagues who read only Data would not open it, and it breaks "one item, one page, once" (`../digest-structure/spec.md`).
+- **No Security page.** It would be empty on many days, and the colleagues who read only Data would not open it.
 - **A fix is a bullet, not a row.** About 19 release lines a day have a security effect.
 
 ## Shape
@@ -39,7 +41,8 @@ Why, from the spike:
 Proposed; the maintainer has decided the placement, not these details.
 
 - **Banner**: code-rendered, above `## Highlights` on every page published that day and at the top of the Overview. One line per event: the story's title linked, its source ("a Hacker News post", "Wiz Research") and its date. No model prose: free prose is where security claims went wrong (issue 05 of the 11-10 review). Several submissions of one event are one line.
-- **Shown once.** A banner line shows on the day its story is first seen. A later fix or postmortem that clears the rule is a new line that names the earlier one.
+- **Shown once.** A banner line shows on the day its story is first seen. A later fix or postmortem that clears the rule is a new line. It names the earlier line only once the link is built (the last build step).
+- **Messages**: `highlights.json` is keyed by report, so the banner lines are stored once, under a key of their own, not once per report. Telegram shows them once, above the reports. The Teams post today holds only the `ai-data` highlights and is skipped when there are none (`sendTeams`, `src/cli/notify.ts`), so it must take the banner lines too.
 - **Marker**: one emoji before the row's title, defined in `GLOSSARY.md`. Not green or red, and not ⚠️, which the Data page uses for a deprecation.
 - **Own slot**: a flagged story skips the topic bar (`SPOTTED_MIN_TOPIC_PROBABILITY`) and the per-source row cap. It stays in the list it belongs to and takes no other story's row.
 - **Without Jev** (no key, or more than half the calls failing) there is no banner and no marker that day. There is no keyword fallback, see the evidence.
@@ -86,15 +89,18 @@ Four days of `candidates.json` (11-07 to 11-10, the file exists since 11-07), a 
 ## Open decisions
 
 1. **Which items the messages carry.** Decision 3 was made when every item was a row. Proposed: code adds the banner lines to both messages; a marked row or a fix reaches a message only when its page's Highlights pick it.
-2. **Page of a flagged story no project took**: proposed is the page of its best page topic, with no bar; a story routed to no page goes to "Also talked about".
-3. **A banner that is one user's report with many points.** The email leak had 1,612 points and is not a banner. Points as a third signal are not tested.
+2. **A banner on a day without a data report.** Proposed: a banner alone sends the Teams post, since reaching the colleagues is the reason for the banner. It does not publish a page that was skipped; it shows on the Overview and on the pages that exist.
+3. **Page of a flagged story no project took**: proposed is the page of its best page topic, with no bar; a story routed to no page goes to "Also talked about".
+4. **A banner that is one user's report with many points.** The email leak had 1,612 points and is not a banner. Points as a third signal are not tested.
 
 ## Order of work
 
 1. Spike: done, `spike/results.md`.
 1. Placement: decided.
-1. The story question with its verdict cache and trace, the banner, and the banner lines in `highlights.json`.
+1. The story question with its verdict cache and trace. Nothing shows yet.
 1. The marker and the own slot.
-1. A week of runs: the cost in tokens, and every banner checked by hand.
-1. Release-line feed, then the incident-to-fix link and its state.
-1. `GLOSSARY.md` and `AGENTS.md`, each with the step that changes what they describe.
+1. A week of runs: the cost in tokens, and every line the banner rule would have shown, checked by hand.
+1. The banner on the pages, the Overview and in both messages.
+1. The release-line feed, then the state and the incident-to-fix link.
+
+`GLOSSARY.md` and `AGENTS.md` change with the step that changes what they describe.

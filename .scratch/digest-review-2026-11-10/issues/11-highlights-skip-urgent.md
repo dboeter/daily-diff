@@ -19,3 +19,4 @@ The Highlights prompt asks for 1–3 bullets with one subject each, and gives no
 ## Comments
 
 - 2026-11-11: the maintainer chose a dedicated Security section on every page, incidents and fixes: `../../security-section/spec.md`. It takes the security fixes out of this issue; the near deadline (Genie One) stays here.
+- 2026-11-11, later: the placement changed. There is no Security section: a security fix is a marked bullet in its project's release section, built after the story feed (`../../security-section/spec.md`, "Cost").

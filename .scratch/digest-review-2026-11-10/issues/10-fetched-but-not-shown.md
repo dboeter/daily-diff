@@ -24,3 +24,4 @@ Related: issue 08 covers news no source fetches, and its last item asks the same
 ## Comments
 
 - 2026-11-11: the maintainer chose a dedicated Security section on every page, incidents and fixes: `../../security-section/spec.md`. It gives a security story its own slots, so the Fireworks case leaves this issue; the row cap and the policy items stay here.
+- 2026-11-11, later: the placement changed. There is no Security section: a severe incident is a banner on every page, and any other flagged story is marked and keeps an own slot where it shows today. The Fireworks case is still covered by that slot.
