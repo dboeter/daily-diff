@@ -567,6 +567,35 @@ describe("buildAgentsReport", () => {
     const report = await build();
     expect(report.content).toContain(`## Highlights\n\n${MSG.summaryFailed}\n\n---\n\n## Coding Agents`);
   });
+
+  it("names a Spotted row that shows only a title as no Highlight, and drops one about it (Goldman Sachs, 2026-11-09)", async () => {
+    generateBody.mockReset();
+    generateBody.mockImplementation(
+      async () =>
+        "## Highlights\n\n- Goldman Sachs is pulling Claude Code from its bankers and traders.\n- Codex shipped v1.",
+    );
+    const rows = [
+      {
+        ...spottedRow(1, "agents"),
+        title: "Goldman Sachs is pulling Claude Code from its bankers and traders",
+      },
+      { ...spottedRow(2, "agents"), description: "A sandbox for agents." },
+    ];
+    const report = await build(groups(true), {
+      rows,
+      summaries: new Map([
+        [1, "—"],
+        [2, "A sandbox."],
+      ]),
+    });
+    const prompt = generateBody.mock.calls[0]![0] as string;
+    expect(prompt).toContain(
+      'only a title, no description: no Highlight for them. "Goldman Sachs is pulling Claude Code from its bankers and traders"',
+    );
+    expect(prompt).not.toContain('"Story 2"');
+    expect(report.content).not.toContain("- Goldman Sachs is pulling");
+    expect(report.content).toContain("- Codex shipped v1.");
+  });
 });
 
 describe("buildModelsPage", () => {
@@ -663,6 +692,28 @@ describe("buildModelsPage", () => {
     const highlightsPrompt = generateBody.mock.calls[1]![0] as string;
     expect(highlightsPrompt).toContain('only a title: no Highlight for them. "Post 1"');
     expect(content).not.toContain("Post 1 ships a guess.");
+    expect(content).toContain("- Post 2 ships something.");
+  });
+
+  it("drops a Highlight about a Spotted row that shows only a title (government ID, 2026-11-08)", async () => {
+    generateBody.mockReset();
+    generateBody.mockImplementation(async (prompt: string) =>
+      prompt.includes("You are the editor")
+        ? "## Highlights\n\n- Anthropic now requires a government ID to create an account.\n- Post 2 ships something."
+        : "1: Summary two.",
+    );
+    const story = {
+      ...spottedRow(2, "models"),
+      title: "Tell HN: Anthropic now requires a government ID to create an account",
+    };
+    const report = await build([site([post(2)])], catalog(), { rows: [story], summaries: new Map() });
+    const content = report!.content;
+    expect(content).toContain("| [Tell HN: Anthropic now requires a government ID to create an account]");
+    const highlightsPrompt = generateBody.mock.calls[1]![0] as string;
+    expect(highlightsPrompt).toContain(
+      'only a title, no description: no Highlight for them. "Tell HN: Anthropic now requires a government ID to create an account"',
+    );
+    expect(content).not.toContain("- Anthropic now requires a government ID");
     expect(content).toContain("- Post 2 ships something.");
   });
 
@@ -1276,6 +1327,34 @@ describe("buildDataReport", () => {
       "Spotted",
       "EU data law",
     ]);
+  });
+
+  it("drops a Highlight about a Spotted row that shows only a title (PostgreSQL Internals, 2026-11-08)", async () => {
+    generateBody.mockReset();
+    generateBody.mockImplementation(async (prompt: string) =>
+      prompt.startsWith("You are the editor")
+        ? "## Highlights\n- The PostgreSQL Internals pdf explains the planner.\n- H.\n\n<!-- tables -->"
+        : reply(prompt),
+    );
+    const story = { ...spottedRow(1, "data"), title: "PostgreSQL Internals [pdf] (2023)" };
+    const report = await buildDataReport(
+      sections(true),
+      await vendorData(),
+      dataLawOf([]),
+      { rows: [story], summaries: new Map([[1, "—"]]) },
+      "00:00",
+      "2026-10-17",
+      stateFile,
+      verdictsFile,
+    );
+    const prosePrompt = generateBody.mock.calls
+      .map((c) => c[0] as string)
+      .find((prompt) => prompt.startsWith("You are the editor"))!;
+    expect(prosePrompt).toContain(
+      'only a title, no description: no Highlight for them. "PostgreSQL Internals [pdf] (2023)"',
+    );
+    expect(report!.content).not.toContain("PostgreSQL Internals pdf explains");
+    expect(report!.content).toContain("- H.");
   });
 
   it("leaves a release of the last 24h to its repo section, and records it as shown", async () => {

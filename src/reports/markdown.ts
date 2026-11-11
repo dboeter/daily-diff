@@ -622,6 +622,19 @@ export function unsummarizedRows(
   ];
 }
 
+/**
+ * The story rows that show only a title: no description, or a "—" summary cell. A Highlight about
+ * one rests on the title alone ("Anthropic now requires a government ID to create an account",
+ * a Tell HN title, 2026-11-08), so they make no Highlight, like `unsummarizedRows`.
+ */
+export function titleOnlyStories(rows: StoryRow[], summaries: Map<number, string>): NoHighlightRow[] {
+  return rows
+    .filter(
+      (r) => !r.description?.trim() || summaryText(summaries, { n: r.n, description: r.description }) === "—",
+    )
+    .map((r) => ({ name: r.title, url: r.url }));
+}
+
 /** The Radar and category tables, a `##` heading each; "" when both are empty. */
 export function renderTrendingTables(report: TrendingReportData, summaries: Map<number, string>): string {
   const T = TRENDS_REPORT;

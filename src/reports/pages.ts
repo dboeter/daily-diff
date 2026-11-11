@@ -30,6 +30,7 @@ import {
   buildDataProsePrompt,
   buildModelsSummariesPrompt,
   labPostsNoHighlightNote,
+  storiesNoHighlightNote,
   modelSources,
   dropNoHighlightRows,
   isGroupOrAbsenceBullet,
@@ -56,6 +57,7 @@ import type { GitHubRelease, RepoConfig, SkillsData } from "../core/github.ts";
 import {
   renderHfTable,
   renderOpenRouterUsage,
+  titleOnlyStories,
   unsummarizedRows,
   buildProjectReportContent,
   buildStealthSection,
@@ -348,16 +350,23 @@ export async function buildAgentsReport(
   dateStr: string,
 ): Promise<SavedReport> {
   const spottedMd = renderSpottedTable(spotted.rows, spotted.summaries);
+  const titleOnly = titleOnlyStories(spotted.rows, spotted.summaries);
   let highlights = "";
   if (groups.some((g) => g.activities.some(hasActivity)) || spottedMd) {
     const bodyMd = [...groupsMarkdown(groups), spottedMd].filter(Boolean).join("\n\n");
     const prose = await generateOr(
       "agents-highlights",
-      buildPageHighlightsPrompt(REPORTS["ai-agents"].name, bodyMd, AGENTS_HIGHLIGHTS_FOCUS, dateStr),
+      buildPageHighlightsPrompt(
+        REPORTS["ai-agents"].name,
+        bodyMd,
+        AGENTS_HIGHLIGHTS_FOCUS,
+        dateStr,
+        storiesNoHighlightNote(titleOnly.map((r) => r.name)),
+      ),
       null,
       LLM_TOKENS_LISTING,
     );
-    highlights = highlightsOnly(prose ?? MSG.summaryFailed);
+    highlights = dropNoHighlightRows(highlightsOnly(prose ?? MSG.summaryFailed), titleOnly, "agents");
   }
   const content = buildProjectReportContent({
     heading: reportHeading("ai-agents", dateStr),
@@ -496,6 +505,7 @@ export async function buildModelsPage(
     ...(empty.length ? [nothingNew(empty)] : []),
   ];
   const spottedMd = renderSpottedTable(spotted.rows, spotted.summaries);
+  const titleOnly = titleOnlyStories(spotted.rows, spotted.summaries);
   // The Highlights call reads everything below Highlights: a 🆕 stealth model is this page's news too.
   const bodyMd = [...tracked, spottedMd].filter(Boolean).join("\n\n");
   const prose = await generateOr(
@@ -505,16 +515,22 @@ export async function buildModelsPage(
       bodyMd,
       MODELS_HIGHLIGHTS_FOCUS,
       dateStr,
-      shownPosts.length || models.length
-        ? labPostsNoHighlightNote(noText.map((p) => p.title))
-        : NO_MODEL_NEWS_NOTE,
+      // Each note is one rule line of the prompt.
+      [
+        shownPosts.length || models.length
+          ? labPostsNoHighlightNote(noText.map((p) => p.title))
+          : NO_MODEL_NEWS_NOTE,
+        storiesNoHighlightNote(titleOnly.map((r) => r.name)),
+      ]
+        .filter(Boolean)
+        .join("\n- ") || undefined,
     ),
     null,
     LLM_TOKENS_LISTING,
   );
   const highlights = dropNoHighlightRows(
     highlightsOnly(prose ?? MSG.summaryFailed),
-    noText.map((p) => ({ name: p.title, url: p.url })),
+    [...noText.map((p) => ({ name: p.title, url: p.url })), ...titleOnly],
     "models",
   );
 
@@ -878,12 +894,14 @@ export async function buildDataReport(
     .filter(Boolean)
     .join("\n\n");
   const minor = items.filter((i) => i.minor).map((i) => ({ name: i.title, url: i.link }));
+  const titleOnly = titleOnlyStories(spotted.rows, spotted.summaries);
   const prose = await generateOr(
     "data-highlights",
     buildDataProsePrompt(
       sectionsMd,
       dateStr,
       minor.map((r) => r.name),
+      titleOnly.map((r) => r.name),
     ),
     null,
     LLM_TOKENS_LISTING,
@@ -893,7 +911,12 @@ export async function buildDataReport(
       ? { highlights: `## ${SECTIONS.highlights}\n\n${MSG.summaryFailed}`, acrossPlatforms: "" }
       : splitProse(prose);
   const { acrossPlatforms } = split;
-  const highlights = dropNoHighlightRows(split.highlights, minor, "data", isGroupOrAbsenceBullet);
+  const highlights = dropNoHighlightRows(
+    split.highlights,
+    [...minor, ...titleOnly],
+    "data",
+    isGroupOrAbsenceBullet,
+  );
   const lawLinks = dataLaw
     .map(
       (i) =>
