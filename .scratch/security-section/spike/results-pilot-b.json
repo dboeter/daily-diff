@@ -1,0 +1,902 @@
+{
+  "s000": {
+    "model": "jev-1.14.0",
+    "answers": {
+      "is_security": {
+        "type": "noul",
+        "noul": 0.03
+      },
+      "kind": {
+        "type": "choice",
+        "choice": "none",
+        "confidence": 1.0,
+        "probabilities": {
+          "incident": 0.0,
+          "vulnerability": 0.0,
+          "fix": 0.0,
+          "none": 1.0
+        }
+      },
+      "severity": {
+        "type": "score",
+        "score": 0.01,
+        "confidence": 1.0,
+        "probabilities": {
+          "0": 1.0,
+          "1": 0.0,
+          "2": 0.0
+        }
+      },
+      "claim_by": {
+        "type": "choice",
+        "choice": "unclear",
+        "confidence": 0.48,
+        "probabilities": {
+          "vendor_or_researcher": 0.22,
+          "press": 0.01,
+          "individual": 0.16,
+          "unclear": 0.61
+        }
+      }
+    },
+    "usage": {
+      "input_tokens": 1269,
+      "output_tokens": 129
+    }
+  },
+  "s019": {
+    "model": "jev-1.14.0",
+    "answers": {
+      "is_security": {
+        "type": "noul",
+        "noul": 0.02
+      },
+      "kind": {
+        "type": "choice",
+        "choice": "none",
+        "confidence": 1.0,
+        "probabilities": {
+          "incident": 0.0,
+          "vulnerability": 0.0,
+          "fix": 0.0,
+          "none": 1.0
+        }
+      },
+      "severity": {
+        "type": "score",
+        "score": 0.01,
+        "confidence": 1.0,
+        "probabilities": {
+          "0": 1.0,
+          "1": 0.0,
+          "2": 0.0
+        }
+      },
+      "claim_by": {
+        "type": "choice",
+        "choice": "vendor_or_researcher",
+        "confidence": 0.71,
+        "probabilities": {
+          "vendor_or_researcher": 0.78,
+          "press": 0.01,
+          "individual": 0.0,
+          "unclear": 0.21
+        }
+      }
+    },
+    "usage": {
+      "input_tokens": 1250,
+      "output_tokens": 133
+    }
+  },
+  "s038": {
+    "model": "jev-1.14.0",
+    "answers": {
+      "is_security": {
+        "type": "noul",
+        "noul": 0.02
+      },
+      "kind": {
+        "type": "choice",
+        "choice": "none",
+        "confidence": 1.0,
+        "probabilities": {
+          "incident": 0.0,
+          "vulnerability": 0.0,
+          "fix": 0.0,
+          "none": 1.0
+        }
+      },
+      "severity": {
+        "type": "score",
+        "score": 0.0,
+        "confidence": 1.0,
+        "probabilities": {
+          "0": 1.0,
+          "1": 0.0,
+          "2": 0.0
+        }
+      },
+      "claim_by": {
+        "type": "choice",
+        "choice": "press",
+        "confidence": 0.99,
+        "probabilities": {
+          "vendor_or_researcher": 0.0,
+          "press": 0.99,
+          "individual": 0.0,
+          "unclear": 0.01
+        }
+      }
+    },
+    "usage": {
+      "input_tokens": 1271,
+      "output_tokens": 128
+    }
+  },
+  "s057": {
+    "model": "jev-1.14.0",
+    "answers": {
+      "is_security": {
+        "type": "noul",
+        "noul": 0.02
+      },
+      "kind": {
+        "type": "choice",
+        "choice": "none",
+        "confidence": 1.0,
+        "probabilities": {
+          "incident": 0.0,
+          "vulnerability": 0.0,
+          "fix": 0.0,
+          "none": 1.0
+        }
+      },
+      "severity": {
+        "type": "score",
+        "score": 0.0,
+        "confidence": 1.0,
+        "probabilities": {
+          "0": 1.0,
+          "1": 0.0,
+          "2": 0.0
+        }
+      },
+      "claim_by": {
+        "type": "choice",
+        "choice": "individual",
+        "confidence": 0.97,
+        "probabilities": {
+          "vendor_or_researcher": 0.01,
+          "press": 0.0,
+          "individual": 0.98,
+          "unclear": 0.01
+        }
+      }
+    },
+    "usage": {
+      "input_tokens": 1280,
+      "output_tokens": 128
+    }
+  },
+  "s076": {
+    "model": "jev-1.14.0",
+    "answers": {
+      "is_security": {
+        "type": "noul",
+        "noul": 0.06
+      },
+      "kind": {
+        "type": "choice",
+        "choice": "none",
+        "confidence": 1.0,
+        "probabilities": {
+          "incident": 0.0,
+          "vulnerability": 0.0,
+          "fix": 0.0,
+          "none": 1.0
+        }
+      },
+      "severity": {
+        "type": "score",
+        "score": 0.01,
+        "confidence": 0.97,
+        "probabilities": {
+          "0": 0.99,
+          "1": 0.0,
+          "2": 0.01
+        }
+      },
+      "claim_by": {
+        "type": "choice",
+        "choice": "unclear",
+        "confidence": 0.53,
+        "probabilities": {
+          "vendor_or_researcher": 0.09,
+          "press": 0.03,
+          "individual": 0.23,
+          "unclear": 0.65
+        }
+      }
+    },
+    "usage": {
+      "input_tokens": 1247,
+      "output_tokens": 129
+    }
+  },
+  "s095": {
+    "model": "jev-1.14.0",
+    "answers": {
+      "is_security": {
+        "type": "noul",
+        "noul": 0.02
+      },
+      "kind": {
+        "type": "choice",
+        "choice": "none",
+        "confidence": 1.0,
+        "probabilities": {
+          "incident": 0.0,
+          "vulnerability": 0.0,
+          "fix": 0.0,
+          "none": 1.0
+        }
+      },
+      "severity": {
+        "type": "score",
+        "score": 0.0,
+        "confidence": 1.0,
+        "probabilities": {
+          "0": 1.0,
+          "1": 0.0,
+          "2": 0.0
+        }
+      },
+      "claim_by": {
+        "type": "choice",
+        "choice": "unclear",
+        "confidence": 0.32,
+        "probabilities": {
+          "vendor_or_researcher": 0.37,
+          "press": 0.01,
+          "individual": 0.13,
+          "unclear": 0.49
+        }
+      }
+    },
+    "usage": {
+      "input_tokens": 1283,
+      "output_tokens": 129
+    }
+  },
+  "s114": {
+    "model": "jev-1.14.0",
+    "answers": {
+      "is_security": {
+        "type": "noul",
+        "noul": 0.02
+      },
+      "kind": {
+        "type": "choice",
+        "choice": "none",
+        "confidence": 1.0,
+        "probabilities": {
+          "incident": 0.0,
+          "vulnerability": 0.0,
+          "fix": 0.0,
+          "none": 1.0
+        }
+      },
+      "severity": {
+        "type": "score",
+        "score": 0.0,
+        "confidence": 1.0,
+        "probabilities": {
+          "0": 1.0,
+          "1": 0.0,
+          "2": 0.0
+        }
+      },
+      "claim_by": {
+        "type": "choice",
+        "choice": "press",
+        "confidence": 1.0,
+        "probabilities": {
+          "vendor_or_researcher": 0.0,
+          "press": 1.0,
+          "individual": 0.0,
+          "unclear": 0.0
+        }
+      }
+    },
+    "usage": {
+      "input_tokens": 1279,
+      "output_tokens": 128
+    }
+  },
+  "s133": {
+    "model": "jev-1.14.0",
+    "answers": {
+      "is_security": {
+        "type": "noul",
+        "noul": 0.03
+      },
+      "kind": {
+        "type": "choice",
+        "choice": "none",
+        "confidence": 1.0,
+        "probabilities": {
+          "incident": 0.0,
+          "vulnerability": 0.0,
+          "fix": 0.0,
+          "none": 1.0
+        }
+      },
+      "severity": {
+        "type": "score",
+        "score": 0.0,
+        "confidence": 1.0,
+        "probabilities": {
+          "0": 1.0,
+          "1": 0.0,
+          "2": 0.0
+        }
+      },
+      "claim_by": {
+        "type": "choice",
+        "choice": "vendor_or_researcher",
+        "confidence": 0.35,
+        "probabilities": {
+          "vendor_or_researcher": 0.51,
+          "press": 0.0,
+          "individual": 0.0,
+          "unclear": 0.49
+        }
+      }
+    },
+    "usage": {
+      "input_tokens": 1282,
+      "output_tokens": 133
+    }
+  },
+  "s152": {
+    "model": "jev-1.14.0",
+    "answers": {
+      "is_security": {
+        "type": "noul",
+        "noul": 0.02
+      },
+      "kind": {
+        "type": "choice",
+        "choice": "none",
+        "confidence": 1.0,
+        "probabilities": {
+          "incident": 0.0,
+          "vulnerability": 0.0,
+          "fix": 0.0,
+          "none": 1.0
+        }
+      },
+      "severity": {
+        "type": "score",
+        "score": 0.01,
+        "confidence": 1.0,
+        "probabilities": {
+          "0": 1.0,
+          "1": 0.0,
+          "2": 0.0
+        }
+      },
+      "claim_by": {
+        "type": "choice",
+        "choice": "press",
+        "confidence": 0.95,
+        "probabilities": {
+          "vendor_or_researcher": 0.01,
+          "press": 0.96,
+          "individual": 0.0,
+          "unclear": 0.03
+        }
+      }
+    },
+    "usage": {
+      "input_tokens": 1272,
+      "output_tokens": 128
+    }
+  },
+  "s171": {
+    "model": "jev-1.14.0",
+    "answers": {
+      "is_security": {
+        "type": "noul",
+        "noul": 0.02
+      },
+      "kind": {
+        "type": "choice",
+        "choice": "none",
+        "confidence": 1.0,
+        "probabilities": {
+          "incident": 0.0,
+          "vulnerability": 0.0,
+          "fix": 0.0,
+          "none": 1.0
+        }
+      },
+      "severity": {
+        "type": "score",
+        "score": 0.01,
+        "confidence": 0.98,
+        "probabilities": {
+          "0": 0.99,
+          "1": 0.01,
+          "2": 0.0
+        }
+      },
+      "claim_by": {
+        "type": "choice",
+        "choice": "press",
+        "confidence": 0.89,
+        "probabilities": {
+          "vendor_or_researcher": 0.02,
+          "press": 0.92,
+          "individual": 0.0,
+          "unclear": 0.06
+        }
+      }
+    },
+    "usage": {
+      "input_tokens": 1279,
+      "output_tokens": 128
+    }
+  },
+  "s190": {
+    "model": "jev-1.14.0",
+    "answers": {
+      "is_security": {
+        "type": "noul",
+        "noul": 0.02
+      },
+      "kind": {
+        "type": "choice",
+        "choice": "none",
+        "confidence": 1.0,
+        "probabilities": {
+          "incident": 0.0,
+          "vulnerability": 0.0,
+          "fix": 0.0,
+          "none": 1.0
+        }
+      },
+      "severity": {
+        "type": "score",
+        "score": 0.0,
+        "confidence": 1.0,
+        "probabilities": {
+          "0": 1.0,
+          "1": 0.0,
+          "2": 0.0
+        }
+      },
+      "claim_by": {
+        "type": "choice",
+        "choice": "vendor_or_researcher",
+        "confidence": 0.65,
+        "probabilities": {
+          "vendor_or_researcher": 0.74,
+          "press": 0.01,
+          "individual": 0.01,
+          "unclear": 0.24
+        }
+      }
+    },
+    "usage": {
+      "input_tokens": 1282,
+      "output_tokens": 133
+    }
+  },
+  "s209": {
+    "model": "jev-1.14.0",
+    "answers": {
+      "is_security": {
+        "type": "noul",
+        "noul": 0.03
+      },
+      "kind": {
+        "type": "choice",
+        "choice": "none",
+        "confidence": 1.0,
+        "probabilities": {
+          "incident": 0.0,
+          "vulnerability": 0.0,
+          "fix": 0.0,
+          "none": 1.0
+        }
+      },
+      "severity": {
+        "type": "score",
+        "score": 0.01,
+        "confidence": 1.0,
+        "probabilities": {
+          "0": 1.0,
+          "1": 0.0,
+          "2": 0.0
+        }
+      },
+      "claim_by": {
+        "type": "choice",
+        "choice": "individual",
+        "confidence": 0.95,
+        "probabilities": {
+          "vendor_or_researcher": 0.0,
+          "press": 0.0,
+          "individual": 0.96,
+          "unclear": 0.04
+        }
+      }
+    },
+    "usage": {
+      "input_tokens": 1271,
+      "output_tokens": 128
+    }
+  },
+  "s228": {
+    "model": "jev-1.14.0",
+    "answers": {
+      "is_security": {
+        "type": "noul",
+        "noul": 0.02
+      },
+      "kind": {
+        "type": "choice",
+        "choice": "none",
+        "confidence": 1.0,
+        "probabilities": {
+          "incident": 0.0,
+          "vulnerability": 0.0,
+          "fix": 0.0,
+          "none": 1.0
+        }
+      },
+      "severity": {
+        "type": "score",
+        "score": 0.0,
+        "confidence": 1.0,
+        "probabilities": {
+          "0": 1.0,
+          "1": 0.0,
+          "2": 0.0
+        }
+      },
+      "claim_by": {
+        "type": "choice",
+        "choice": "vendor_or_researcher",
+        "confidence": 0.99,
+        "probabilities": {
+          "vendor_or_researcher": 0.99,
+          "press": 0.0,
+          "individual": 0.0,
+          "unclear": 0.01
+        }
+      }
+    },
+    "usage": {
+      "input_tokens": 1267,
+      "output_tokens": 133
+    }
+  },
+  "s247": {
+    "model": "jev-1.14.0",
+    "answers": {
+      "is_security": {
+        "type": "noul",
+        "noul": 0.03
+      },
+      "kind": {
+        "type": "choice",
+        "choice": "none",
+        "confidence": 1.0,
+        "probabilities": {
+          "incident": 0.0,
+          "vulnerability": 0.0,
+          "fix": 0.0,
+          "none": 1.0
+        }
+      },
+      "severity": {
+        "type": "score",
+        "score": 0.0,
+        "confidence": 1.0,
+        "probabilities": {
+          "0": 1.0,
+          "1": 0.0,
+          "2": 0.0
+        }
+      },
+      "claim_by": {
+        "type": "choice",
+        "choice": "unclear",
+        "confidence": 0.4,
+        "probabilities": {
+          "vendor_or_researcher": 0.01,
+          "press": 0.0,
+          "individual": 0.44,
+          "unclear": 0.55
+        }
+      }
+    },
+    "usage": {
+      "input_tokens": 1301,
+      "output_tokens": 129
+    }
+  },
+  "s266": {
+    "model": "jev-1.14.0",
+    "answers": {
+      "is_security": {
+        "type": "noul",
+        "noul": 0.03
+      },
+      "kind": {
+        "type": "choice",
+        "choice": "none",
+        "confidence": 1.0,
+        "probabilities": {
+          "incident": 0.0,
+          "vulnerability": 0.0,
+          "fix": 0.0,
+          "none": 1.0
+        }
+      },
+      "severity": {
+        "type": "score",
+        "score": 0.0,
+        "confidence": 1.0,
+        "probabilities": {
+          "0": 1.0,
+          "1": 0.0,
+          "2": 0.0
+        }
+      },
+      "claim_by": {
+        "type": "choice",
+        "choice": "individual",
+        "confidence": 0.79,
+        "probabilities": {
+          "vendor_or_researcher": 0.0,
+          "press": 0.0,
+          "individual": 0.84,
+          "unclear": 0.16
+        }
+      }
+    },
+    "usage": {
+      "input_tokens": 1242,
+      "output_tokens": 128
+    }
+  },
+  "s285": {
+    "model": "jev-1.14.0",
+    "answers": {
+      "is_security": {
+        "type": "noul",
+        "noul": 0.19
+      },
+      "kind": {
+        "type": "choice",
+        "choice": "none",
+        "confidence": 0.8,
+        "probabilities": {
+          "incident": 0.14,
+          "vulnerability": 0.01,
+          "fix": 0.0,
+          "none": 0.85
+        }
+      },
+      "severity": {
+        "type": "score",
+        "score": 0.62,
+        "confidence": 0.26,
+        "probabilities": {
+          "0": 0.44,
+          "1": 0.51,
+          "2": 0.05
+        }
+      },
+      "claim_by": {
+        "type": "choice",
+        "choice": "press",
+        "confidence": 0.97,
+        "probabilities": {
+          "vendor_or_researcher": 0.01,
+          "press": 0.98,
+          "individual": 0.0,
+          "unclear": 0.01
+        }
+      }
+    },
+    "usage": {
+      "input_tokens": 1299,
+      "output_tokens": 128
+    }
+  },
+  "s304": {
+    "model": "jev-1.14.0",
+    "answers": {
+      "is_security": {
+        "type": "noul",
+        "noul": 0.02
+      },
+      "kind": {
+        "type": "choice",
+        "choice": "none",
+        "confidence": 1.0,
+        "probabilities": {
+          "incident": 0.0,
+          "vulnerability": 0.0,
+          "fix": 0.0,
+          "none": 1.0
+        }
+      },
+      "severity": {
+        "type": "score",
+        "score": 0.0,
+        "confidence": 1.0,
+        "probabilities": {
+          "0": 1.0,
+          "1": 0.0,
+          "2": 0.0
+        }
+      },
+      "claim_by": {
+        "type": "choice",
+        "choice": "individual",
+        "confidence": 0.75,
+        "probabilities": {
+          "vendor_or_researcher": 0.0,
+          "press": 0.0,
+          "individual": 0.81,
+          "unclear": 0.19
+        }
+      }
+    },
+    "usage": {
+      "input_tokens": 1276,
+      "output_tokens": 128
+    }
+  },
+  "s323": {
+    "model": "jev-1.14.0",
+    "answers": {
+      "is_security": {
+        "type": "noul",
+        "noul": 0.02
+      },
+      "kind": {
+        "type": "choice",
+        "choice": "none",
+        "confidence": 1.0,
+        "probabilities": {
+          "incident": 0.0,
+          "vulnerability": 0.0,
+          "fix": 0.0,
+          "none": 1.0
+        }
+      },
+      "severity": {
+        "type": "score",
+        "score": 0.0,
+        "confidence": 1.0,
+        "probabilities": {
+          "0": 1.0,
+          "1": 0.0,
+          "2": 0.0
+        }
+      },
+      "claim_by": {
+        "type": "choice",
+        "choice": "press",
+        "confidence": 0.93,
+        "probabilities": {
+          "vendor_or_researcher": 0.03,
+          "press": 0.95,
+          "individual": 0.0,
+          "unclear": 0.02
+        }
+      }
+    },
+    "usage": {
+      "input_tokens": 1248,
+      "output_tokens": 128
+    }
+  },
+  "s342": {
+    "model": "jev-1.14.0",
+    "answers": {
+      "is_security": {
+        "type": "noul",
+        "noul": 0.02
+      },
+      "kind": {
+        "type": "choice",
+        "choice": "none",
+        "confidence": 1.0,
+        "probabilities": {
+          "incident": 0.0,
+          "vulnerability": 0.0,
+          "fix": 0.0,
+          "none": 1.0
+        }
+      },
+      "severity": {
+        "type": "score",
+        "score": 0.01,
+        "confidence": 0.98,
+        "probabilities": {
+          "0": 0.99,
+          "1": 0.01,
+          "2": 0.0
+        }
+      },
+      "claim_by": {
+        "type": "choice",
+        "choice": "vendor_or_researcher",
+        "confidence": 0.72,
+        "probabilities": {
+          "vendor_or_researcher": 0.79,
+          "press": 0.07,
+          "individual": 0.03,
+          "unclear": 0.11
+        }
+      }
+    },
+    "usage": {
+      "input_tokens": 1283,
+      "output_tokens": 133
+    }
+  },
+  "s361": {
+    "model": "jev-1.14.0",
+    "answers": {
+      "is_security": {
+        "type": "noul",
+        "noul": 0.02
+      },
+      "kind": {
+        "type": "choice",
+        "choice": "none",
+        "confidence": 0.99,
+        "probabilities": {
+          "incident": 0.0,
+          "vulnerability": 0.0,
+          "fix": 0.01,
+          "none": 0.99
+        }
+      },
+      "severity": {
+        "type": "score",
+        "score": 0.01,
+        "confidence": 1.0,
+        "probabilities": {
+          "0": 1.0,
+          "1": 0.0,
+          "2": 0.0
+        }
+      },
+      "claim_by": {
+        "type": "choice",
+        "choice": "individual",
+        "confidence": 0.63,
+        "probabilities": {
+          "vendor_or_researcher": 0.12,
+          "press": 0.0,
+          "individual": 0.72,
+          "unclear": 0.16
+        }
+      }
+    },
+    "usage": {
+      "input_tokens": 1279,
+      "output_tokens": 128
+    }
+  }
+}
