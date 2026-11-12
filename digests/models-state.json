@@ -25,7 +25,8 @@
     "baidu/ernie-5.5-flash-preview": "2026-11-11",
     "baidu/ernie-light-dt-1.0-intl": "2026-11-11",
     "google/gemini-4-carbon": "2026-11-11",
-    "google/gemini-4-carbon:batch": "2026-11-11"
+    "google/gemini-4-carbon:batch": "2026-11-11",
+    "baidu/ernie-5.5-flash-preview:free": "2026-11-12"
   },
   "stages": {}
 }

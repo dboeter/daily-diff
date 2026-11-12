@@ -1,0 +1,57 @@
+[
+  {
+    "id": "hn:50458900",
+    "source": "hn",
+    "title": "United Airlines bans AI agents from booking flights on behalf of travelers",
+    "url": "https://www.cbsnews.com/news/united-airlines-bans-ai-agents-booking-flights/",
+    "discussionUrl": "https://news.ycombinator.com/item?id=50458900",
+    "points": 508,
+    "comments": 494,
+    "topic": "policy",
+    "counts": "508 points, 494 comments"
+  },
+  {
+    "id": "hn:50452455",
+    "source": "hn",
+    "title": "My AI agents found an unmapped Maya site?",
+    "url": "https://pietromiotti.com/latest/maya-site",
+    "discussionUrl": "https://news.ycombinator.com/item?id=50452455",
+    "points": 968,
+    "comments": 354,
+    "topic": "other",
+    "counts": "968 points, 354 comments"
+  },
+  {
+    "id": "hn:50446520",
+    "source": "hn",
+    "title": "Apple has new Mac app coming to make running local AI models easy",
+    "url": "https://9to5mac.com/2026/11/10/apple-has-new-mac-app-coming-to-make-running-local-ai-models-easy/",
+    "discussionUrl": "https://news.ycombinator.com/item?id=50446520",
+    "points": 528,
+    "comments": 535,
+    "topic": "other",
+    "counts": "528 points, 535 comments"
+  },
+  {
+    "id": "hn:50443716",
+    "source": "hn",
+    "title": "Claude Whiteboards, Claude Sheets, and Claude Data",
+    "url": "https://claude.com/resources/articles/sheets-whiteboards-data",
+    "discussionUrl": "https://news.ycombinator.com/item?id=50443716",
+    "points": 285,
+    "comments": 216,
+    "topic": "other",
+    "counts": "285 points, 216 comments"
+  },
+  {
+    "id": "devto:5015589",
+    "source": "devto",
+    "title": "We Keep Hearing About AI Productivity. The QA Group Chat Told a Different Story.",
+    "url": "https://dev.to/xulingfeng/we-keep-hearing-about-ai-productivity-the-qa-group-chat-told-a-different-story-2nma",
+    "discussionUrl": "https://dev.to/xulingfeng/we-keep-hearing-about-ai-productivity-the-qa-group-chat-told-a-different-story-2nma",
+    "points": 99,
+    "comments": 62,
+    "topic": "other",
+    "counts": "99 reactions, 62 comments"
+  }
+]

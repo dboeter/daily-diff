@@ -1,0 +1,17 @@
+{
+  "ai-agents": [
+    "Oh My Pi 18.19.0 breaks API (ignore_https_errors→insecure, allow_file_access removed), changes app option to string, removes task.file/blocked status, adds Liquid AI judgment API",
+    "Users report Claude Code iOS mid-turn messages don't reach Claude until turn ends, regression since 2.1.321 blocking long-task steering"
+  ],
+  "ai-models": [
+    "Google launches Gemini Decisions API powered by dedicated Gemini Decision model for fast calibrated multimodal decisions"
+  ],
+  "ai-policy": [
+    "European Commission adopts Implementing Regulation (EU) 2026/2487 for AI Act application",
+    "Finland and Estonia urge EU-level arrangements for serious AI incident response, per Politico Europe letter"
+  ],
+  "ai-data": [
+    "Azure Databricks compliance workspaces get default external access to Unity Catalog managed Delta tables from Dec 10, 2026",
+    "BigQuery Enterprise/Plus adds optional principal property on reservation assignments (GA) to route queries by user, service account, or third-party identity"
+  ]
+}
