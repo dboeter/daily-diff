@@ -1,0 +1,3938 @@
+[
+{
+"id": "l1819",
+"project": "Hermes Agent",
+"tag": "v0.23.0",
+"line": "**Daybreak for approved ChatGPT subscriptions** \u2014 An off-by-default `agent.daybreak` switch turns on OpenAI's Trusted Access for Cyber program. It only appears on models that your account's own Codex catalog lists as approved, and it is checked again on every request. ([#148056](https://github.com/NousResearch/hermes-agent/pull/148056) \u2014 @unsupportedpastels, @Froraut)"
+},
+{
+"id": "l3171",
+"project": "Apache Airflow",
+"tag": "3.4.0",
+"line": "Update multi-team docs to match the teams CLI and name rules (#72045)"
+},
+{
+"id": "l1898",
+"project": "Hermes Agent",
+"tag": "v0.23.0",
+"line": "**Leaner built-in skills** \u2014 a fresh install ships 44 built-in skills instead of 58. Word, PowerPoint and Excel merge into one `microsoft-office` skill, 12 niche skills become optional installs, and optional skills that vendor repos, catalog MCPs or the built-in web search now cover are removed. The vendor repos for W&B, Qdrant, Pinecone, Notion, Airtable and Shopify are now trusted taps in `hermes skills browse`. The skills index in the prompt is shorter too. ([#146333](https://github.com/NousR"
+},
+{
+"id": "l2361",
+"project": "Terraform provider for Snowflake",
+"tag": "v2.23.0",
+"line": "Add the `token_file_path` provider field. The driver re-reads that file on every new connection for OAuth, programmatic access token, and OIDC workload identity authentication. ([fed96f3](https://github.com/snowflakedb/terraform-provider-snowflake/commit/fed96f376a27abd6f7f1bc0c787d12fe13fb89fc)), references [#5364](https://github.com/snowflakedb/terraform-provider-snowflake/issues/5364)"
+},
+{
+"id": "l1928",
+"project": "Hermes Agent",
+"tag": "v0.23.0",
+"line": "Windows Desktop attaches to a Scheduled-Task gateway again. ([#139167](https://github.com/NousResearch/hermes-agent/pull/139167) \u2014 @srymak1r7, @Wenfengcheng)"
+},
+{
+"id": "l0538",
+"project": "OpenAI Codex",
+"tag": "rust-v0.167.0",
+"line": "#58390 Expose parent context for host-managed child startup @rhan-oai"
+},
+{
+"id": "l1365",
+"project": "Oh My Pi",
+"tag": "v18.18.0",
+"line": "MCP OAuth requests tokens for the MCP server's own resource (from its protected-resource metadata) instead of a different `resource` advertised by the authorization server, fixing `401 invalid_token` after `/mcp reauth` on servers such as Firecrawl's hosted MCP ([#18315](https://github.com/can1357/oh-my-pi/issues/18315))"
+},
+{
+"id": "l2012",
+"project": "OpenShell",
+"tag": "v0.1.8",
+"line": "Documented every unsafe block in the sandbox crate and enforced `SAFETY` comments with clippy. [#5232](https://github.com/NVIDIA/OpenShell/pull/5232)"
+},
+{
+"id": "l2408",
+"project": "dbt Core",
+"tag": "v2.0.11",
+"line": "Support authenticated private S3 downloads for dbt update manifests and binaries."
+},
+{
+"id": "l3076",
+"project": "Apache Airflow",
+"tag": "3.4.0",
+"line": "Gate raw Dag deserialization error detail behind api.expose_stacktrace and log it server-side (#68388)"
+},
+{
+"id": "l1979",
+"project": "OpenShell",
+"tag": "v0.1.8",
+"line": "`openshell sandbox download` now works on busybox-based images. [#5420](https://github.com/NVIDIA/OpenShell/pull/5420)"
+},
+{
+"id": "l1402",
+"project": "Oh My Pi",
+"tag": "v18.18.0",
+"line": "fix(mcp): preferred protected-resource indicator over auth-server resource by @roboomp in https://github.com/can1357/oh-my-pi/pull/18316"
+},
+{
+"id": "l2366",
+"project": "Terraform provider for Snowflake",
+"tag": "v2.23.0",
+"line": "Add the opt-in `IMPORT_PERMISSIVE_MODE` experiment. Enforcing mode stays the default, and `IMPORT_BOOLEAN_DEFAULT` is opt-in again. Supported on authentication policies, backup policies, backup sets, catalog integrations, compute pools, external volumes, pipes, Postgres mirrors, shares, and warehouses."
+},
+{
+"id": "l0191",
+"project": "Claude Code",
+"tag": "v2.1.319",
+"line": "Fixed cloud sessions losing session-scoped deny and ask permission rules, such as those a PermissionRequest hook adds, when the session moves to a new worker"
+},
+{
+"id": "l1666",
+"project": "Oh My Pi",
+"tag": "v18.17.0",
+"line": "Fixed the terminal stderr guard leaking a copy of the terminal into processes spawned from native code."
+},
+{
+"id": "l2865",
+"project": "Apache Airflow",
+"tag": "3.4.0",
+"line": "Let non-task callers set and delete Variables over the Execution API (#76375)"
+},
+{
+"id": "l2167",
+"project": "MLflow",
+"tag": "v3.18.0",
+"line": "[Tracing] Include cache-read and cache-creation tokens in TypeScript Anthropic input and total token counts (#27188, @mlflow-app)"
+},
+{
+"id": "l0976",
+"project": "Oh My Pi",
+"tag": "v18.18.4",
+"line": "fix(pi-shell): stop the pseudo view drawing statement separators as rows by @yuzu-octopus in https://github.com/can1357/oh-my-pi/pull/18497"
+},
+{
+"id": "l2251",
+"project": "MLflow",
+"tag": "v3.18.0",
+"line": "[Tracing] Count Gemini `thoughts_token_count` as output tokens in `mlflow.gemini.autolog` (#26744, @github-actions)"
+},
+{
+"id": "l1961",
+"project": "OpenShell",
+"tag": "v0.1.8",
+"line": "REST endpoints now return `403` for HTTP upgrade requests in both enforce and audit modes. Configure WebSocket traffic with `protocol: websocket` and explicit handshake and message rules; `websocket_credential_rewrite: true` now requires a WebSocket endpoint. [#5336](https://github.com/NVIDIA/OpenShell/pull/5336)"
+},
+{
+"id": "l0201",
+"project": "Claude Code",
+"tag": "v2.1.319",
+"line": "Fixed self-hosted runners: `--trust-workspace false` now also stops hooks in the repository's settings files and skills from running"
+},
+{
+"id": "l1050",
+"project": "Oh My Pi",
+"tag": "v18.18.2",
+"line": "Fixed GenAI message-content capture configured in omp's own `.env` files so it continues to apply when those values are no longer exposed through the process environment."
+},
+{
+"id": "l0753",
+"project": "Pi",
+"tag": "v1.5.1",
+"line": "**Richer Mermaid diagrams**: pie charts, author-defined styles, clickable labels on supported terminals, and diagrams in expanded branch and compaction summaries. See [Display settings](https://github.com/earendil-works/pi/blob/v1.5.1/packages/coding-agent/docs/settings.md#terminal-and-display) and [Markdown transformers](https://github.com/earendil-works/pi/blob/v1.5.1/packages/coding-agent/docs/extensions.md#piregistermarkdowntransformertransformer-options)."
+},
+{
+"id": "l2432",
+"project": "dbt Core",
+"tag": "v2.0.11",
+"line": "Unit tests with `overrides.vars` no longer drop project vars; overrides layer over `--vars` like dbt Core"
+},
+{
+"id": "l1052",
+"project": "Oh My Pi",
+"tag": "v18.18.2",
+"line": "Fixed generic remote compaction requests to `/chat/completions` so gateway sessions retain the correct per-request model attribution."
+},
+{
+"id": "l3107",
+"project": "Apache Airflow",
+"tag": "3.4.0",
+"line": "Fix missing and incorrect endpoints in the API permission reference (#74871)"
+},
+{
+"id": "l1446",
+"project": "Oh My Pi",
+"tag": "v18.17.0",
+"line": "API-key logins now store keys under the auth rule's `store-as` provider ([#13637](https://github.com/can1357/oh-my-pi/pull/13637) by [@pavel-kalmykov](https://github.com/pavel-kalmykov))"
+},
+{
+"id": "l2039",
+"project": "OpenShell",
+"tag": "v0.1.7",
+"line": "Sandboxed agents can send OpenTelemetry traces to your collector without an egress rule: add `[openshell.gateway.otlp.agent]` with `enabled = true` to `gateway.toml`, and the supervisor tags each span with the sandbox id before forwarding it. [#4276](https://github.com/NVIDIA/OpenShell/pull/4276)"
+},
+{
+"id": "l0682",
+"project": "OpenCode",
+"tag": "v2.2.7",
+"line": "`session.generate` returns `tokens` and `cost` along with `text`. ([#62835](https://github.com/anomalyco/opencode/pull/62835))"
+},
+{
+"id": "l2842",
+"project": "Apache Airflow",
+"tag": "3.4.0",
+"line": "Don't fail API server startup when a plugin uses an unknown team (#69976)"
+},
+{
+"id": "l0993",
+"project": "Oh My Pi",
+"tag": "v18.18.4",
+"line": "feat(auth): pause providers with a KDL `disabled` rule; pause Google Antigravity by @H4vC in https://github.com/can1357/oh-my-pi/pull/18622"
+},
+{
+"id": "l2044",
+"project": "OpenShell",
+"tag": "v0.1.7",
+"line": "A new opt-in supervisor TLS listener lets declared HTTP and WebSocket sandbox services take application traffic directly, without going through the gateway. It is disabled by default. [#4936](https://github.com/NVIDIA/OpenShell/pull/4936)"
+},
+{
+"id": "l1566",
+"project": "Oh My Pi",
+"tag": "v18.17.0",
+"line": "`computer` window lookup and app opening work for app IDs, paths, and `~` paths, and survive Wayland permission timeouts"
+},
+{
+"id": "l0118",
+"project": "Claude Code",
+"tag": "v2.1.321",
+"line": "[VSCode] Fixed a plugin's permission request showing a name with hidden characters: it now reads \"a plugin\""
+},
+{
+"id": "l1107",
+"project": "Oh My Pi",
+"tag": "v18.18.2",
+"line": "Remote MCP HTTP and SSE connections now honor `NODE_EXTRA_CA_CERTS` from the agent environment, including certificates loaded after startup."
+},
+{
+"id": "l0650",
+"project": "OpenCode",
+"tag": "v2.2.7",
+"line": "Cloudflare AI Gateway providers set up with only `gatewayApiKey` now send that key. ([#62574](https://github.com/anomalyco/opencode/pull/62574))"
+},
+{
+"id": "l1866",
+"project": "Hermes Agent",
+"tag": "v0.23.0",
+"line": "**Language packs actually apply** \u2014 Korean and other pack-only languages now load on a cold gateway, and the picker hides languages the app cannot show. ([#147515](https://github.com/NousResearch/hermes-agent/pull/147515) \u2014 @kshitijk4poor)"
+},
+{
+"id": "l2445",
+"project": "dbt Core",
+"tag": "v2.0.11",
+"line": "Setting `DBT_ENGINE_AI_PROVIDER` no longer aborts the invocation. The variable was moved onto the reserved `DBT_ENGINE_` prefix without being registered as a known engine variable, so `validate_engine_env_vars` rejected it as user-authored and every command that reached setup exited 1 with dbt1005."
+},
+{
+"id": "l0615",
+"project": "Gemini CLI",
+"tag": "v0.67.0",
+"line": "fix(a2a-server,core): preserve extended token usage metadata and align per-turn reporting by @jvargassanchez-dot in https://github.com/google-gemini/gemini-cli/pull/29834"
+},
+{
+"id": "l3085",
+"project": "Apache Airflow",
+"tag": "3.4.0",
+"line": "Improve doc_md rendering in Dag Documentation (#66809)"
+},
+{
+"id": "l2396",
+"project": "dbt Core",
+"tag": "v1.11.17",
+"line": "Supply credentials for `dbt deps` git packages through a git credential helper instead of embedding them in the clone URL, so clones of redirecting repositories keep working with libcurl 7.81.0-1ubuntu1.30 and later ([#16861](https://github.com/dbt-labs/dbt-core/issues/16861))"
+},
+{
+"id": "l2415",
+"project": "dbt Core",
+"tag": "v2.0.11",
+"line": "Read and publish AWS Databricks Unity Catalog tables through Lake Compute using profile PAT or OAuth M2M credentials. Use canonical lower-case relation names and full-refresh existing models when adopting propagation with mixed-case database or schema names."
+},
+{
+"id": "l3045",
+"project": "Apache Airflow",
+"tag": "3.4.0",
+"line": "Show backfill Dag runs in the UI (#70159)"
+},
+{
+"id": "l1364",
+"project": "Oh My Pi",
+"tag": "v18.18.0",
+"line": "Fixed MCP OAuth login and token refresh failing with `JSON Parse error: Unexpected identifier \"access_token\"` against GitHub's token endpoint ([#18292](https://github.com/can1357/oh-my-pi/issues/18292))"
+},
+{
+"id": "l3241",
+"project": "Prefect",
+"tag": "3.9.2",
+"line": "Accept the same flow state hook signatures in the engine and the runner by [@CassianoE](https://github.com/CassianoE) in [#23715](https://github.com/PrefectHQ/prefect/pull/23715)"
+},
+{
+"id": "l0923",
+"project": "Oh My Pi",
+"tag": "v18.18.6",
+"line": "fix(natives): find GTK4 app elements on X11 and stop marking them disabled by @will-bogusz in https://github.com/can1357/oh-my-pi/pull/18643"
+},
+{
+"id": "l3026",
+"project": "Apache Airflow",
+"tag": "3.4.0",
+"line": "Show the teams of the signed-in user in multi-team mode (#71503)"
+},
+{
+"id": "l2121",
+"project": "MLflow",
+"tag": "v3.18.0",
+"line": "[Scoring] Fix absolute symlinks in `spark_udf` environment archives (#26668, @B-Step62)"
+},
+{
+"id": "l2304",
+"project": "Databricks CLI",
+"tag": "v1.25.0",
+"line": "`databricks aitools install --output json` now reports a more specific `error_category` (`MANIFEST_NOT_FOUND`, `PERMISSION_DENIED`, `FILESYSTEM`) for some failures it reported as `UNCATEGORIZED`. ([#7380](https://github.com/databricks/cli/pull/7380))"
+},
+{
+"id": "l1061",
+"project": "Oh My Pi",
+"tag": "v18.18.2",
+"line": "Improved Cursor compatibility with TLS-intercepting proxies that block HTTP/2 by falling back to HTTP/1 for subsequent turns."
+},
+{
+"id": "l1989",
+"project": "OpenShell",
+"tag": "v0.1.8",
+"line": "The TypeScript SDK now revokes SSH forward tokens when you call `forward().close()`. [#5079](https://github.com/NVIDIA/OpenShell/pull/5079)"
+},
+{
+"id": "l0087",
+"project": "Claude Code",
+"tag": "v2.1.321",
+"line": "Improved start-up time by loading trusted TLS certificates faster"
+},
+{
+"id": "l2466",
+"project": "dbt Core",
+"tag": "v2.0.11",
+"line": "Send Redshift's case-sensitive sqlglot dialect setting to the server when enable_case_sensitive_identifier is enabled"
+},
+{
+"id": "l1892",
+"project": "Hermes Agent",
+"tag": "v0.23.0",
+"line": "**Plugins can sign you in to third-party APIs without seeing the token** \u2014 a plugin declares an OAuth client, `hermes auth add <plugin>:<id>` runs the browser sign-in, and Hermes attaches the token only on requests to the hosts the plugin declared. ([#141510](https://github.com/NousResearch/hermes-agent/pull/141510) \u2014 @bablobanov)"
+},
+{
+"id": "l0326",
+"project": "Claude Code",
+"tag": "v2.1.318",
+"line": "Changed the `/permissions` rule details, built-in rules and delete confirmation views to use the standard dialog; pressing Ctrl+C twice there now goes back or cancels instead of quitting"
+},
+{
+"id": "l3170",
+"project": "Apache Airflow",
+"tag": "3.4.0",
+"line": "i18n(ko): add missing translations(Aug 25) (#72050)"
+},
+{
+"id": "l0613",
+"project": "Gemini CLI",
+"tag": "v0.67.0",
+"line": "fix(core): adhere to RFC 9110 token rules when splitting custom headers by @diegogodinezr in https://github.com/google-gemini/gemini-cli/pull/29865"
+},
+{
+"id": "l0644",
+"project": "OpenCode",
+"tag": "v2.2.7",
+"line": "A temporary failure while refreshing an MCP OAuth token keeps your login for the next try instead of marking the server `needs_auth`. ([#63012](https://github.com/anomalyco/opencode/pull/63012))"
+},
+{
+"id": "l0711",
+"project": "OpenCode",
+"tag": "v2.2.6",
+"line": "Added **Scroll on send** in Settings. Choose **Keep** (`session.submit_scroll: \"keep\"`) to retain your reading position after submitting a prompt. ([#61460](https://github.com/anomalyco/opencode/pull/61460))"
+},
+{
+"id": "l2485",
+"project": "dbt Core",
+"tag": "v2.0.11",
+"line": "Strip CR and BOM from PEM-headered Snowflake private keys so keys saved with Windows line endings decode correctly ([#15107](https://github.com/dbt-labs/dbt-core/issues/15107))"
+},
+{
+"id": "l1485",
+"project": "Oh My Pi",
+"tag": "v18.17.0",
+"line": "`devin-windsurf` login authenticates the `devin` provider with an existing Windsurf Enterprise account ([#13288](https://github.com/can1357/oh-my-pi/pull/13288) by [@pavel-kalmykov](https://github.com/pavel-kalmykov))"
+},
+{
+"id": "l0839",
+"project": "Pi",
+"tag": "v1.5.1",
+"line": "Fixed OpenCode Go Claude Haiku 5.5 failing with a 400 (`Invalid signature in thinking block ... bound to a different conversation`) after the tool list, system prompt, or earlier history changed, which left the session failing on every retry. OpenCode Go and Zen Claude 5.5 models, Opus 5, and Fable 5.1 now use per-message effort and send `thinking.block_binding: drop_block`, like the Anthropic provider ([#10954](https://github.com/earendil-works/pi/issues/10954))"
+},
+{
+"id": "l0012",
+"project": "Claude Code",
+"tag": "v2.1.321",
+"line": "Fixed `/config` showing Manual as the default permission mode when new sessions start in auto mode; pressing Space on \"Auto (default)\" now saves Don't Ask, not Plan"
+},
+{
+"id": "l2043",
+"project": "OpenShell",
+"tag": "v0.1.7",
+"line": "Sandbox egress can now trust private PKI through `[openshell.supervisor.network].additional_ca_bundle`, which adds a PEM bundle on top of the default roots for every first-party compute driver. [#3292](https://github.com/NVIDIA/OpenShell/pull/3292)"
+},
+{
+"id": "l1975",
+"project": "OpenShell",
+"tag": "v0.1.8",
+"line": "AWS SigV4 signing diagnostics no longer appear in supervisor TRACE logs, where they could expose the temporary session token. [#4558](https://github.com/NVIDIA/OpenShell/pull/4558)"
+},
+{
+"id": "l0174",
+"project": "Claude Code",
+"tag": "v2.1.319",
+"line": "Fixed needless permission prompts for read-only commands wrapped in a plain `timeout DURATION`, such as `timeout 30 rg foo`"
+},
+{
+"id": "l0810",
+"project": "Pi",
+"tag": "v1.5.1",
+"line": "Fixed internal cursor markers leaking into terminal output, including with multiple markers or horizontally clipped content ([#9441](https://github.com/earendil-works/pi/pull/9441) by [@muyiyr](https://github.com/muyiyr))"
+},
+{
+"id": "l0514",
+"project": "OpenAI Codex",
+"tag": "rust-v0.167.0",
+"line": "#58251 Reload remote executor credentials safely across token rotation @tgrue-openai"
+},
+{
+"id": "l0813",
+"project": "Pi",
+"tag": "v1.5.1",
+"line": "Fixed prompts and session-tree navigation overlapping during asynchronous input hooks, authentication, or branch summaries, which could install the wrong conversation context ([#9155](https://github.com/earendil-works/pi/pull/9155) by [@acmerfight](https://github.com/acmerfight))"
+},
+{
+"id": "l0267",
+"project": "Claude Code",
+"tag": "v2.1.318",
+"line": "Added an `effort` option to a mod's `$.model.fork`, so a quick side job can run at `low` whatever effort the session uses; the result reports the effort sent"
+},
+{
+"id": "l0440",
+"project": "OpenAI Codex",
+"tag": "rust-v0.167.0",
+"line": "Opt into macOS or Windows system proxy settings from `/experimental` (#58157)."
+},
+{
+"id": "l0150",
+"project": "Claude Code",
+"tag": "v2.1.319",
+"line": "Fixed auto mode refusing actions without saying why when permission rules or `autoMode` settings are very large: it now explains and, unless `autoMode` deny rules are set, asks you in the terminal"
+},
+{
+"id": "l1870",
+"project": "Hermes Agent",
+"tag": "v0.23.0",
+"line": "**Webapp hardening** \u2014 Launch links are private to the signed-in user, and the page sends a Content-Security-Policy; a signed-out `/api/status` reveals no profile names. The Webapp, dashboard and `hermes serve` trust only their own bound loopback port for CORS and WebSockets. ([#144721](https://github.com/NousResearch/hermes-agent/pull/144721), [#145573](https://github.com/NousResearch/hermes-agent/pull/145573), [#145931](https://github.com/NousResearch/hermes-agent/pull/145931), [#146636](https"
+},
+{
+"id": "l2008",
+"project": "OpenShell",
+"tag": "v0.1.8",
+"line": "Moved credential storage and built-in refresh execution into an embedded credential issuer, with no change to commands, configuration, or APIs. [#5266](https://github.com/NVIDIA/OpenShell/pull/5266), [#5283](https://github.com/NVIDIA/OpenShell/pull/5283)"
+},
+{
+"id": "l0327",
+"project": "Claude Code",
+"tag": "v2.1.318",
+"line": "Changed `/claude-api managed-agents-onboard` to give a new agent's built-in tools, and a quickstart template's MCP tools, the `auto` permission policy (\"Judge risky actions\") by default, matching the Claude Console; say \"run without asking\" to opt out"
+},
+{
+"id": "l0407",
+"project": "Claude Code",
+"tag": "v2.1.317",
+"line": "Improved the startup error when a required Claude apps gateway can't be reached: it points to the network instead of a sign-in, and says when the gateway's TLS certificate can't be verified"
+},
+{
+"id": "l2493",
+"project": "dbt Core",
+"tag": "v2.0.11",
+"line": "Fix `--write-index` and `--dirty` runs missing files added since the last parse: new models, seeds, macros and other resources are now loaded, `--dirty` selects newly added SQL models and analyses, and `--no-partial-load` now turns off the cached-state shortcut."
+},
+{
+"id": "l3003",
+"project": "Apache Airflow",
+"tag": "3.4.0",
+"line": "Mask CLI secrets in the audit log by parsed argument, not argv position (#72650)"
+},
+{
+"id": "l2390",
+"project": "Terraform provider for Snowflake",
+"tag": "v2.23.0",
+"line": "Save configured catalog integration and adaptive and interactive warehouse values in state when they already match Snowflake. ([01305b4](https://github.com/snowflakedb/terraform-provider-snowflake/commit/01305b4a8bb52c919809d2e01c5a534ed5ba8e7b))"
+},
+{
+"id": "l1941",
+"project": "Hermes Agent",
+"tag": "v0.23.0",
+"line": "Host-isolated plugins keep provider types, so secret sources apply ([#144430](https://github.com/NousResearch/hermes-agent/pull/144430))"
+},
+{
+"id": "l1901",
+"project": "Hermes Agent",
+"tag": "v0.23.0",
+"line": "**Tool costs and per-chat spend limits** \u2014 MCP servers, from plugin packages or `config.yaml`, can declare what each tool costs and a spend limit per chat. The approval prompt shows the cost and the chat's running total, and a call that would go over the limit asks first, even on a trusted server or in YOLO mode. ([#142470](https://github.com/NousResearch/hermes-agent/pull/142470), [#143787](https://github.com/NousResearch/hermes-agent/pull/143787))"
+},
+{
+"id": "l1452",
+"project": "Oh My Pi",
+"tag": "v18.17.0",
+"line": "Added `tool-name-prefix` compat axis for Responses hosts that reject certain tool names; Muse Code sets it to `_` ([#17435](https://github.com/can1357/oh-my-pi/issues/17435), [#17515](https://github.com/can1357/oh-my-pi/pull/17515) by [@harshav167](https://github.com/harshav167), continued in [#18053](https://github.com/can1357/oh-my-pi/pull/18053) by [@abilliontokens](https://github.com/abilliontokens))"
+},
+{
+"id": "l1473",
+"project": "Oh My Pi",
+"tag": "v18.17.0",
+"line": "Added a `cache` status-line segment (`full`/`nerd` presets) showing whether the next message hits the prompt cache; Tern and `/session` show why not and how much is resent ([#12677](https://github.com/can1357/oh-my-pi/issues/12677)) ([#17496](https://github.com/can1357/oh-my-pi/pull/17496) by [@will-bogusz](https://github.com/will-bogusz))"
+},
+{
+"id": "l1516",
+"project": "Oh My Pi",
+"tag": "v18.17.0",
+"line": "Browser `open({ viewport })` now sizes relay tabs, `app.cdp_url`/`app.path` browsers, and headed Chromium on first open ([#18160](https://github.com/can1357/oh-my-pi/pull/18160) by [@will-bogusz](https://github.com/will-bogusz))"
+},
+{
+"id": "l0893",
+"project": "Oh My Pi",
+"tag": "v18.18.6",
+"line": "Focusing a subagent or returning to the main session no longer loses or freezes the next assistant reply when a fast tool turn finishes before the previous reply's links finish resolving, and messages and tool runs that arrive during the switch show exactly once, in order ([#18564](https://github.com/can1357/oh-my-pi/pull/18564) by [@eggpeat](https://github.com/eggpeat))"
+},
+{
+"id": "l0412",
+"project": "Claude Code",
+"tag": "v2.1.317",
+"line": "Changed SendMessage so a message to a running background agent arrives earlier: its running command moves to the background, without being stopped"
+},
+{
+"id": "l2031",
+"project": "OpenShell",
+"tag": "v0.1.7",
+"line": "Shared-pool sandboxes whose supervisor stays gone past the 60-second recovery deadline now show as `Stopped`, and `sandbox start` runs them again. [#5076](https://github.com/NVIDIA/OpenShell/pull/5076)"
+},
+{
+"id": "l0456",
+"project": "OpenAI Codex",
+"tag": "rust-v0.167.0",
+"line": "#57859 Extend the provider OAuth sign-in timeout to ten minutes @smurching-oai"
+},
+{
+"id": "l2443",
+"project": "dbt Core",
+"tag": "v2.0.11",
+"line": "Replace `DBT_AI_PROVIDER` with `DBT_ENGINE_AI_PROVIDER` ([#16312](https://github.com/dbt-labs/dbt-core/issues/16312))"
+},
+{
+"id": "l1809",
+"project": "Hermes Agent",
+"tag": "v0.23.0",
+"line": "**Password managers and a keychain vault key** \u2014 Verified password-manager plugins can hand the browser your logins without seeing anyone else's, and the browser vault's key can now live in your OS keychain. ([#143964](https://github.com/NousResearch/hermes-agent/pull/143964), [#144246](https://github.com/NousResearch/hermes-agent/pull/144246) \u2014 @Jesssullivan)"
+},
+{
+"id": "l2320",
+"project": "Databricks CLI",
+"tag": "v1.25.0",
+"line": "Update the Go SDK to [v0.195.0](https://github.com/databricks/databricks-sdk-go/releases/tag/v0.195.0). ([#7384](https://github.com/databricks/cli/pull/7384))"
+},
+{
+"id": "l1938",
+"project": "Hermes Agent",
+"tag": "v0.23.0",
+"line": "Plugin MCP `${VAR}` header auth survives reconnects; unset optional vars aren't passed literally ([#148879](https://github.com/NousResearch/hermes-agent/pull/148879), [#141379](https://github.com/NousResearch/hermes-agent/pull/141379))"
+},
+{
+"id": "l1974",
+"project": "OpenShell",
+"tag": "v0.1.8",
+"line": "On Kubernetes, a late status update during a stop no longer flips a stopped sandbox back to `Provisioning` and blocks the next stop. [#5196](https://github.com/NVIDIA/OpenShell/pull/5196)"
+},
+{
+"id": "l1845",
+"project": "Hermes Agent",
+"tag": "v0.23.0",
+"line": "**Terminal backends** \u2014 Sandboxing backends can set `uses_host_filesystem = False` so the file tools run inside the sandbox, and plugin backends can set their start directory. Singularity moved to its plugin. Command output no longer vanishes once a process has more than 1024 open file descriptors. ([#143756](https://github.com/NousResearch/hermes-agent/pull/143756), [#142225](https://github.com/NousResearch/hermes-agent/pull/142225), [#142561](https://github.com/NousResearch/hermes-agent/pull/1"
+},
+{
+"id": "l2554",
+"project": "dbt Core",
+"tag": "v2.0.11",
+"line": "[@dbeatty10](https://github.com/dbeatty10) ([#16312](https://github.com/dbt-labs/dbt-core/issues/16312))"
+},
+{
+"id": "l2155",
+"project": "MLflow",
+"tag": "v3.18.0",
+"line": "[Tracking] Validate `roles/list` and `create_role` workspaces; use `sender_is_admin` in GraphQL (#27171, @a-gajam)"
+},
+{
+"id": "l2450",
+"project": "dbt Core",
+"tag": "v2.0.11",
+"line": "BigQuery unit tests no longer leak partition pseudocolumns into expected results ([#15357](https://github.com/dbt-labs/dbt-core/issues/15357))"
+},
+{
+"id": "l1528",
+"project": "Oh My Pi",
+"tag": "v18.17.0",
+"line": "Extension links, renderers, and `ctx.ui.getLinkClicksAvailable()` now work on every launch, not only the first after an edit ([#18116](https://github.com/can1357/oh-my-pi/pull/18116) by [@materemias](https://github.com/materemias))"
+},
+{
+"id": "l0360",
+"project": "Claude Code",
+"tag": "v2.1.317",
+"line": "Fixed `claude auth status` exiting before a slow token refresh was saved, which could sign you out on the next run"
+},
+{
+"id": "l1289",
+"project": "Oh My Pi",
+"tag": "v18.18.1",
+"line": "macOS spellchecking (typo underlines, autocorrect, `apple` word completion) no longer leaks native memory for the life of the process ([#18285](https://github.com/can1357/oh-my-pi/pull/18285) by [@aleister1102](https://github.com/aleister1102))"
+},
+{
+"id": "l1188",
+"project": "Oh My Pi",
+"tag": "v18.18.2",
+"line": "fix(ai): heal a refused latest turn when user messages follow it by @aramalipoor in https://github.com/can1357/oh-my-pi/pull/17791"
+},
+{
+"id": "l1091",
+"project": "Oh My Pi",
+"tag": "v18.18.2",
+"line": "`omp gc` now shows a progress bar for each slow step (listing and scanning sessions, scanning transcripts for blob refs, archiving) on interactive terminals."
+},
+{
+"id": "l0763",
+"project": "Pi",
+"tag": "v1.5.1",
+"line": "Added the `qwen-token-plan-individual-cn` provider for Qwen Token Plan Individual on the China endpoint, using `QWEN_TOKEN_PLAN_CN_API_KEY` ([#7989](https://github.com/earendil-works/pi/pull/7989) by [@bigoldcat123](https://github.com/bigoldcat123))"
+},
+{
+"id": "l2200",
+"project": "MLflow",
+"tag": "v3.18.0",
+"line": "[Docs / Evaluation / Tracking] Match scorer names exactly on MySQL and SQL Server and reject registrations that differ only by case or accents (#26977, @kriscon-db)"
+},
+{
+"id": "l1837",
+"project": "Hermes Agent",
+"tag": "v0.23.0",
+"line": "**Telegram** \u2014 New opt-in `dm_topic_auto_transfer` opens a fresh topic for root-DM messages. A new topic's first message lands in it, video notes reach the agent, and group messages not addressed to the bot can stay silent. ([#141347](https://github.com/NousResearch/hermes-agent/pull/141347), [#141751](https://github.com/NousResearch/hermes-agent/pull/141751), [#147572](https://github.com/NousResearch/hermes-agent/pull/147572), [#147144](https://github.com/NousResearch/hermes-agent/pull/147144) "
+},
+{
+"id": "l1596",
+"project": "Oh My Pi",
+"tag": "v18.17.0",
+"line": "Fixed associative arrays slowing quadratically: 100,000 inserts and lookups drop from ~90 s to ~0.1 s."
+},
+{
+"id": "l2395",
+"project": "Terraform provider for Snowflake",
+"tag": "v2.23.0",
+"line": "Manage `external_oauth_scope_delimiter` only for `CUSTOM` external OAuth integrations. Other types leave it unset and omit it from SQL. ([4a32747](https://github.com/snowflakedb/terraform-provider-snowflake/commit/4a327472a4091e83376b00658f4bbd57232801f0)), references [#5322](https://github.com/snowflakedb/terraform-provider-snowflake/issues/5322)"
+},
+{
+"id": "l2748",
+"project": "Apache Airflow",
+"tag": "3.4.0",
+"line": "Fix JWT token not refreshed when token expires mid-request (#74865)"
+},
+{
+"id": "l3293",
+"project": "Soda Core",
+"tag": "v4.30.0",
+"line": "feat(synapse,fabric): workload identity federation authentication (PLATL-1427) by @nielsn in https://github.com/sodadata/soda-core/pull/2970"
+},
+{
+"id": "l2477",
+"project": "dbt Core",
+"tag": "v2.0.11",
+"line": "Auto-exposures discovered from BI tools now carry the target's adapter instead of defaulting to Snowflake, so non-Snowflake projects no longer fail selection with dbt1005 'selected nodes need adapters the target does not declare'"
+},
+{
+"id": "l2714",
+"project": "Apache Airflow",
+"tag": "3.4.0",
+"line": "UI: Fix slow pending Dag run checks on large databases (#75674)"
+},
+{
+"id": "l0195",
+"project": "Claude Code",
+"tag": "v2.1.319",
+"line": "Fixed a case where `/rewind` could restore or delete a file through a directory symlink"
+},
+{
+"id": "l2038",
+"project": "OpenShell",
+"tag": "v0.1.7",
+"line": "Kubernetes sandboxes can now update their image, command, environment, and metadata without being recreated or losing persistent storage. Updates require operator activation and a stopped sandbox, and stopping a completed, failed, or timed-out sandbox now moves it to `Stopped` while keeping its exit code or timeout diagnosis. [#4873](https://github.com/NVIDIA/OpenShell/pull/4873)"
+},
+{
+"id": "l0894",
+"project": "Oh My Pi",
+"tag": "v18.18.6",
+"line": "`omp gc --strip` now keeps every response of the latest replay turn (including earlier tool-call steps joined by their tool results), reference-only images, and the transcript's file permissions ([#18636](https://github.com/can1357/oh-my-pi/pull/18636) by [@eggpeat](https://github.com/eggpeat))"
+},
+{
+"id": "l0777",
+"project": "Pi",
+"tag": "v1.5.1",
+"line": "Fixed the grep tool's `glob` matching from the folder pi was started in instead of from `path`: with `path: \"repo\"`, `glob: \"migrations/main/*.js\"` returned `No matches found` even though `repo/migrations/main/a.js` exists. Globs are now relative to `path`, the same form grep prints its results in, also when `path` is a symlink. A leading `./` (`./src/*.ts`) is ignored instead of matching nothing ([#11807](https://github.com/earendil-works/pi/issues/11807), [#10998](https://github.com/earendil-w"
+},
+{
+"id": "l0811",
+"project": "Pi",
+"tag": "v1.5.1",
+"line": "Fixed the subagent extension example showing running tasks as completed, losing subprocess failure diagnostics, and failing to stop child processes on abort. Agent discovery and trust checks now use each task's working directory, and single and chain results are truncated without losing the full tool details ([#8250](https://github.com/earendil-works/pi/pull/8250) by [@terrorobe](https://github.com/terrorobe))"
+},
+{
+"id": "l0819",
+"project": "Pi",
+"tag": "v1.5.1",
+"line": "Fixed cancellation during lazy provider loading or authentication being reported as an error instead of an abort ([#8635](https://github.com/earendil-works/pi/pull/8635) by [@Mallikarjun-0](https://github.com/Mallikarjun-0))"
+},
+{
+"id": "l2649",
+"project": "Apache Airflow",
+"tag": "3.4.0",
+"line": "``is_scheduled`` REST API parameter (#72029)"
+},
+{
+"id": "l1055",
+"project": "Oh My Pi",
+"tag": "v18.18.2",
+"line": "Fixed rotated credential pools reporting a stale sibling credential's authentication error instead of the exhausted credential's usage-limit status and reset time."
+},
+{
+"id": "l1064",
+"project": "Oh My Pi",
+"tag": "v18.18.2",
+"line": "Updated xAI Grok 4.20 beta and multi-agent aliases to use the current Grok 4.20-0309 pricing, including the higher rates for prompts exceeding 200K tokens."
+},
+{
+"id": "l1568",
+"project": "Oh My Pi",
+"tag": "v18.17.0",
+"line": "Out-of-credit provider errors now fail immediately instead of retrying for long periods; Retry works promptly once the account is funded."
+},
+{
+"id": "l0481",
+"project": "OpenAI Codex",
+"tag": "rust-v0.167.0",
+"line": "#58121 Centralize provider request preparation auth checks @sgarg-oai"
+},
+{
+"id": "l2857",
+"project": "Apache Airflow",
+"tag": "3.4.0",
+"line": "Fix CLI connection display reporting wrong is_extra_encrypted flag (#67561)"
+},
+{
+"id": "l2593",
+"project": "Apache Airflow",
+"tag": "3.4.0",
+"line": "An auth manager that cannot map a requested ``AccessView`` now denies that view and emits a"
+},
+{
+"id": "l1069",
+"project": "Oh My Pi",
+"tag": "v18.18.2",
+"line": "Added `omp gc --strip` (or `gc.strip`), which removes provider replay data (thinking signatures, encrypted reasoning, cached native responses, request controls) from sessions idle for `gc.stripAfterDays` (default 30, `--strip-after-days`), including subagent and archived transcripts; stripped sessions still resume on any model."
+},
+{
+"id": "l2535",
+"project": "dbt Core",
+"tag": "v2.0.11",
+"line": "Upgrade gix to 0.84.0 to address security advisories in the gix dependency family."
+},
+{
+"id": "l0851",
+"project": "Oh My Pi",
+"tag": "v18.18.7",
+"line": "Providers with a `login-warning` auth rule show their account risk before a new login and start it only after the user answers `yes`; any other answer or a cancel stores nothing, and their login-list entry is marked \"(at your own risk)\" ([#18499](https://github.com/can1357/oh-my-pi/issues/18499))"
+},
+{
+"id": "l2752",
+"project": "Apache Airflow",
+"tag": "3.4.0",
+"line": "Keep ``.airflowignore`` rules when the Dags folder symlink is switched (#74853)"
+},
+{
+"id": "l0724",
+"project": "OpenCode",
+"tag": "v2.2.6",
+"line": "Added unread-session grouping in Inbox and failed-run indicators on tabs. ([#61691](https://github.com/anomalyco/opencode/pull/61691), [#62077](https://github.com/anomalyco/opencode/pull/62077))"
+},
+{
+"id": "l3265",
+"project": "Prefect",
+"tag": "3.9.2",
+"line": "Bump `@vitest/mocker` and `vitest` in /ui by [@dependabot](https://github.com/dependabot)[bot] in [#23717](https://github.com/PrefectHQ/prefect/pull/23717)"
+},
+{
+"id": "l3066",
+"project": "Apache Airflow",
+"tag": "3.4.0",
+"line": "Raise a warning instead of an error if extra teams are defined in the auth manager (#68935)"
+},
+{
+"id": "l0576",
+"project": "Gemini CLI",
+"tag": "v0.68.0",
+"line": "fix(ui): handle surrogate pairs when truncating in sanitizeForDisplay by @diegogodinezr in https://github.com/google-gemini/gemini-cli/pull/29993"
+},
+{
+"id": "l1031",
+"project": "Oh My Pi",
+"tag": "v18.18.3",
+"line": "The `ask` tool renderer now draws `{ html }` form calls and `AskToolDetails { answers, timedOut }` results; `QuestionResult` and the question-list detail fields were removed."
+},
+{
+"id": "l1795",
+"project": "Hermes Agent",
+"tag": "v0.23.1",
+"line": "CLI: `hermes update`, or re-run the installer one-liner."
+},
+{
+"id": "l2112",
+"project": "MLflow",
+"tag": "v3.18.0",
+"line": "[Tracking] Fix basic-auth `_find_validator` missing `GetWorkspace` validator for concrete workspace paths (#27355, @mlflow-app)"
+},
+{
+"id": "l1992",
+"project": "OpenShell",
+"tag": "v0.1.8",
+"line": "The Python SDK adds an opt-in `delete_timeout_seconds` on `Sandbox` and a `timeout_seconds` argument on `delete`, for Kubernetes pods that take longer than 30 seconds to terminate. [#4697](https://github.com/NVIDIA/OpenShell/pull/4697)"
+},
+{
+"id": "l1825",
+"project": "Hermes Agent",
+"tag": "v0.23.0",
+"line": "**Lower prompt-token and cache costs** \u2014 Every fire of the same cron job now shares one prompt-cache key. Background one-shot calls (summaries, titles, `/moa`) stop paying for cache writes. One-shot runs send 1,570 fewer prompt tokens per call, and four tool schemas are 319 tokens shorter. Gateway goal and heartbeat turns, post-compaction turns and between-turn MCP refreshes no longer rewrite the cached prefix. ([#139876](https://github.com/NousResearch/hermes-agent/pull/139876), [#140478](https"
+},
+{
+"id": "l2594",
+"project": "Apache Airflow",
+"tag": "3.4.0",
+"line": "``PUT /parseDagFile/{file_token}`` for a file with no registered Dag authorizes against"
+},
+{
+"id": "l2446",
+"project": "dbt Core",
+"tag": "v2.0.11",
+"line": "Support credential-independent profile metadata and scoped environment values while preserving secret access rules."
+},
+{
+"id": "l2850",
+"project": "Apache Airflow",
+"tag": "3.4.0",
+"line": "Fix mapped task group XCom collapsing to a bare value for a single expansion (#69075)"
+},
+{
+"id": "l0386",
+"project": "Claude Code",
+"tag": "v2.1.317",
+"line": "Fixed API requests failing with \"unable to get local issuer certificate\" behind some TLS-inspecting proxies after a root certificate renewal"
+},
+{
+"id": "l1108",
+"project": "Oh My Pi",
+"tag": "v18.18.2",
+"line": "Preserved provider prompt-cache reuse across auto-learn captures, skill updates, and other session changes that do not require rebuilding the full system prompt."
+},
+{
+"id": "l1851",
+"project": "Hermes Agent",
+"tag": "v0.23.0",
+"line": "**More secret shapes are masked** \u2014 Quoted secrets, connection strings, glued and flag-passed secrets, Azure keys, non-PEM private keys and SMB passwords are now masked, and JSON pages are no longer mangled. ([#149435](https://github.com/NousResearch/hermes-agent/pull/149435), [#148862](https://github.com/NousResearch/hermes-agent/pull/148862), [#149470](https://github.com/NousResearch/hermes-agent/pull/149470) \u2014 @r266-tech, @liuhao1024, @mtp-44, @arbianshkodra, @Baophan00)"
+},
+{
+"id": "l2128",
+"project": "MLflow",
+"tag": "v3.18.0",
+"line": "[Model Registry / Prompts] Apply registry and MCP permissions to stored resource names on case-insensitive databases; re-save differently cased grants (#27230, @joshuawong-db)"
+},
+{
+"id": "l1879",
+"project": "Hermes Agent",
+"tag": "v0.23.0",
+"line": "**Desktop updates are faster and say more** \u2014 An update skips the Desktop rebuild when no desktop input changed, and the update window names its current stage. The dialog shows real release notes. A failed update shows the updater's output and offers a one-click diagnostics upload. Large `state.db` files, comma locales and the system proxy no longer break updates. ([#144922](https://github.com/NousResearch/hermes-agent/pull/144922), [#138483](https://github.com/NousResearch/hermes-agent/pull/138"
+},
+{
+"id": "l3267",
+"project": "Prefect",
+"tag": "3.9.2",
+"line": "Bump `oauthlib` from 4.0.0 to 4.0.1 by [@dependabot](https://github.com/dependabot)[bot] in [#23787](https://github.com/PrefectHQ/prefect/pull/23787)"
+},
+{
+"id": "l0789",
+"project": "Pi",
+"tag": "v1.5.1",
+"line": "Fixed the find tool on Windows returning no results for patterns with Windows separators such as `src\\**\\*.ts`, and for every path pattern such as `src/**/*.ts` with fd 10.5.1, which pi now downloads. Windows path patterns now match the same way with every fd version: `src/**/*.ts` also finds files directly in `src/`, and `src/*.ts` no longer finds files in subdirectories ([#9262](https://github.com/earendil-works/pi/issues/9262))"
+},
+{
+"id": "l0217",
+"project": "Claude Code",
+"tag": "v2.1.319",
+"line": "Improved the contrast of faint gray secondary text, such as hints, details in `/stats`, `/model` and `/sandbox`, and rejected-action messages"
+},
+{
+"id": "l1409",
+"project": "Oh My Pi",
+"tag": "v18.18.0",
+"line": "fix(models): kept extension catalogs with auth headers on failed refresh by @roboomp in https://github.com/can1357/oh-my-pi/pull/18229"
+},
+{
+"id": "l1972",
+"project": "OpenShell",
+"tag": "v0.1.8",
+"line": "Deleting a sandbox on Kubernetes no longer waits out the pod's 30-second termination grace period. [#5279](https://github.com/NVIDIA/OpenShell/pull/5279)"
+},
+{
+"id": "l3084",
+"project": "Apache Airflow",
+"tag": "3.4.0",
+"line": "Show per-Dag run state counts on the Dags list page (#67242)"
+},
+{
+"id": "l2491",
+"project": "dbt Core",
+"tag": "v2.0.11",
+"line": "DuckDB unit test fixtures for TIMESTAMP WITH TIME ZONE columns are no longer cast to a naive timestamp, which previously dropped the offset and shifted the value by the session timezone ([#16470](https://github.com/dbt-labs/dbt-core/issues/16470))"
+},
+{
+"id": "l0683",
+"project": "OpenCode",
+"tag": "v2.2.7",
+"line": "`credential.updated` includes the `integrationID` and `credentialID` of the login that changed. ([#62762](https://github.com/anomalyco/opencode/pull/62762))"
+},
+{
+"id": "l2190",
+"project": "MLflow",
+"tag": "v3.18.0",
+"line": "[Tracing] Exclude potentially sensitive `extra_headers` and `headers` LM kwargs from DSPy autologging (#27067, @mlflow-app)"
+},
+{
+"id": "l0831",
+"project": "Pi",
+"tag": "v1.5.1",
+"line": "Fixed Alacritty hyperlinks not being enabled when `TERM_PROGRAM` is unset; detection now also uses `TERM` and `ALACRITTY_WINDOW_ID` ([#11767](https://github.com/earendil-works/pi/issues/11767))"
+},
+{
+"id": "l0611",
+"project": "Gemini CLI",
+"tag": "v0.67.0",
+"line": "fix(core): scope untrusted flag checks to external output and remember approved flags by @luisfelipe-alt in https://github.com/google-gemini/gemini-cli/pull/29833"
+},
+{
+"id": "l1954",
+"project": "Hermes Agent",
+"tag": "v0.23.0",
+"line": "**@TakeshiTGAL** (27), **@itpartypattaya** (19), **@100yenadmin** (18), **@olric3015** (16), **@Yicheng-Mark** (13), **@mister-ideas** (10), **@apoapostolov** (8) \u2014 the catalog's biggest authors: Japanese data sources and game tooling, hermes-dreaming and holographic, plan mode and Cloud file manager, the ledger family, Windows operations, usage-guard and git-review, provider status"
+},
+{
+"id": "l1304",
+"project": "Oh My Pi",
+"tag": "v18.18.1",
+"line": "feat(rpc): support excluding bash executions from model context by @andrebrait in https://github.com/can1357/oh-my-pi/pull/18206"
+},
+{
+"id": "l3145",
+"project": "Apache Airflow",
+"tag": "3.4.0",
+"line": "Update Go SDK docs for the airflow.Bundle authoring surface (#73528)"
+},
+{
+"id": "l1130",
+"project": "Oh My Pi",
+"tag": "v18.18.2",
+"line": "Fixed closed file descriptors passed to external commands on Unix so writes fail as expected; closed standard streams on Windows now use the null device."
+},
+{
+"id": "l0827",
+"project": "Pi",
+"tag": "v1.5.1",
+"line": "Fixed concurrent OAuth refreshes through symlinked paths to the same `auth.json` by sharing the lock on the resolved file ([#11655](https://github.com/earendil-works/pi/issues/11655))"
+},
+{
+"id": "l2542",
+"project": "dbt Core",
+"tag": "v2.0.11",
+"line": "[@TIHan](https://github.com/TIHan)"
+},
+{
+"id": "l2376",
+"project": "Terraform provider for Snowflake",
+"tag": "v2.23.0",
+"line": "Add `token_accessor.min_tls_version` to set the minimum TLS version for the refresh-token HTTP client. ([8947efc](https://github.com/snowflakedb/terraform-provider-snowflake/commit/8947efcfcc3fa16b29f2f2b75ed0062804776472))"
+},
+{
+"id": "l0935",
+"project": "Oh My Pi",
+"tag": "v18.18.4",
+"line": "SDK: `PromptOptions.followUps` queues prompts to run after the prompt, in order; if the prompt never reaches the agent they come back with it in `DroppedPrompt.followUps`"
+},
+{
+"id": "l0846",
+"project": "Pi",
+"tag": "v1.5.1",
+"line": "Fixed MCP Streamable HTTP JSON replies bypassing message-size limits and HTTP errors buffering entire response bodies. Oversized replies and error-body content beyond the first 8 KiB are now cancelled ([#11335](https://github.com/earendil-works/pi/issues/11335))"
+},
+{
+"id": "l2284",
+"project": "MLflow",
+"tag": "v3.18.0",
+"line": "[Tracing / UI] Improve framework icon contrast in `LogTracesDrawer` dark mode (#26563, @copilot-swe-agent)"
+},
+{
+"id": "l1863",
+"project": "Hermes Agent",
+"tag": "v0.23.0",
+"line": "**MCP consent shows what will run** \u2014 The MCP install/enable/authorize card now shows the exact command or URL each server will run or contact, with secrets masked. Approval prompts on every surface now reveal hidden Unicode, control bytes and padding. ([#85775](https://github.com/NousResearch/hermes-agent/pull/85775), [#81403](https://github.com/NousResearch/hermes-agent/pull/81403))"
+},
+{
+"id": "l3043",
+"project": "Apache Airflow",
+"tag": "3.4.0",
+"line": "Feature expand health endpoint reporting (#70416)"
+},
+{
+"id": "l3112",
+"project": "Apache Airflow",
+"tag": "3.4.0",
+"line": "TS SDK: Align the README with the authoring guide (#74693)"
+},
+{
+"id": "l2592",
+"project": "Apache Airflow",
+"tag": "3.4.0",
+"line": "With the simple auth manager the view is granted to the ``ADMIN`` role only. With the FAB auth"
+},
+{
+"id": "l0133",
+"project": "Claude Code",
+"tag": "v2.1.319",
+"line": "Added a line at startup naming the Claude Console organization that is billed in a case where Claude Code uses the sign-in from `ant auth login`"
+},
+{
+"id": "l2507",
+"project": "dbt Core",
+"tag": "v2.0.11",
+"line": "[Redshift] Fix issues with external OAuth breaking for multi-threaded execution ([#15555](https://github.com/dbt-labs/dbt-core/issues/15555))"
+},
+{
+"id": "l2165",
+"project": "MLflow",
+"tag": "v3.18.0",
+"line": "[Tracking] Authorize the run and logged model IDs that handlers act on (#27167, @joshuawong-db)"
+},
+{
+"id": "l0173",
+"project": "Claude Code",
+"tag": "v2.1.319",
+"line": "Fixed the `/claude-api` skill saying Console web settings don't apply to Managed Agents sessions, and tightened its credential and permission examples"
+},
+{
+"id": "l1065",
+"project": "Oh My Pi",
+"tag": "v18.18.2",
+"line": "`logoutCredential()` now accepts an `AgentSession` instead of a model registry and session ID. Hosts must install a scoped-model refresher with `AgentSession.setScopedModelsRefresher()`; `InteractiveMode` and `InteractiveModeContext` no longer accept `refreshScopedModelsAfterLogin`."
+},
+{
+"id": "l2766",
+"project": "Apache Airflow",
+"tag": "3.4.0",
+"line": "Stop the secrets backend lookup from importing the task runner outside tasks (#74641)"
+},
+{
+"id": "l2145",
+"project": "MLflow",
+"tag": "v3.18.0",
+"line": "[UI] Pass the API key to the sandboxed Codex CLI as `CODEX_API_KEY` (#27074, @kriscon-db)"
+},
+{
+"id": "l1310",
+"project": "Oh My Pi",
+"tag": "v18.18.1",
+"line": "fix(task): reported cost-cap refusal as a capped subagent's error by @roboomp in https://github.com/can1357/oh-my-pi/pull/18364"
+},
+{
+"id": "l0330",
+"project": "Claude Code",
+"tag": "v2.1.318",
+"line": "Gateway: Improved the log hints about `listen.trusted_proxies`: they now say to list only a proxy that adds the connecting address to `X-Forwarded-For` itself"
+},
+{
+"id": "l1968",
+"project": "OpenShell",
+"tag": "v0.1.8",
+"line": "Gateway interceptors can now intercept sandbox start, stop, suspend, and resume RPCs. After you upgrade and restart the gateway, dynamic interceptor registrations that advertise these RPCs can start intercepting them, while strict allowlist or exact registrations need matching operator configuration. [#5173](https://github.com/NVIDIA/OpenShell/pull/5173)"
+},
+{
+"id": "l2640",
+"project": "Apache Airflow",
+"tag": "3.4.0",
+"line": "Add dry-run mode to teams sync (#72494)"
+},
+{
+"id": "l1929",
+"project": "Hermes Agent",
+"tag": "v0.23.0",
+"line": "Sandboxed or review Hermes homes no longer rewrite the Windows User PATH or the real `hermes.exe`. ([#137951](https://github.com/NousResearch/hermes-agent/pull/137951), [#145140](https://github.com/NousResearch/hermes-agent/pull/145140) \u2014 @jquesnelle)"
+},
+{
+"id": "l0114",
+"project": "Claude Code",
+"tag": "v2.1.321",
+"line": "Changed the account email check to refuse only a shell command that holds your email and names a User-Agent, without asking, so other commands and scheduled runs no longer stop at its prompt"
+},
+{
+"id": "l1214",
+"project": "Oh My Pi",
+"tag": "v18.18.2",
+"line": "fix(shell): preserve Windows roots during logical cd by @jchanghong023 in https://github.com/can1357/oh-my-pi/pull/18042"
+},
+{
+"id": "l0329",
+"project": "Claude Code",
+"tag": "v2.1.318",
+"line": "Gateway: Added a log warning when the Google access token from a federation (`external_account`) credentials file is about to expire"
+},
+{
+"id": "l1611",
+"project": "Oh My Pi",
+"tag": "v18.17.0",
+"line": "An unanswered Wayland RemoteDesktop permission dialog now fails input with `Timeout` before the run deadline, sending nothing ([#17932](https://github.com/can1357/oh-my-pi/pull/17932) by [@will-bogusz](https://github.com/will-bogusz))"
+},
+{
+"id": "l0037",
+"project": "Claude Code",
+"tag": "v2.1.321",
+"line": "Fixed one request carrying far more background agent reports than intended after Claude was stopped while several were waiting"
+},
+{
+"id": "l2360",
+"project": "Terraform provider for Snowflake",
+"tag": "v2.23.0",
+"line": "`snowflake_warehouse` sends `WAREHOUSE_TYPE = STANDARD` when `warehouse_type` is omitted, including when the field is removed from an existing warehouse, so the type stays `STANDARD` when Snowflake changes the default to `ADAPTIVE`. ([3731455](https://github.com/snowflakedb/terraform-provider-snowflake/commit/37314554e1ba35c7ced165b7ebd2919a9f82a7af))"
+},
+{
+"id": "l0363",
+"project": "Claude Code",
+"tag": "v2.1.317",
+"line": "Fixed the second of two simultaneous permission prompts showing no file path or command on claude.ai and the mobile apps"
+},
+{
+"id": "l0475",
+"project": "OpenAI Codex",
+"tag": "rust-v0.167.0",
+"line": "#58071 Share the Guardian context delivery token limit @ioanbudea-OAI"
+},
+{
+"id": "l2250",
+"project": "MLflow",
+"tag": "v3.18.0",
+"line": "[Gateway] Include Gemini thinking tokens in Gateway output usage (#26746, @copilot-swe-agent)"
+},
+{
+"id": "l2096",
+"project": "MLflow",
+"tag": "v3.18.0",
+"line": "[Tracking] Apply dataset authorization to the same experiment IDs parsed by the request handlers (#27441, @kriscon-db)"
+},
+{
+"id": "l0681",
+"project": "OpenCode",
+"tag": "v2.2.7",
+"line": "Scrolling titlebar search results no longer jumps back when late results arrive, the inbox no longer announces already-running sessions as working on load, and the quote toolbar comes back after `Escape`. ([#62597](https://github.com/anomalyco/opencode/pull/62597))"
+},
+{
+"id": "l2289",
+"project": "MLflow",
+"tag": "v3.18.0",
+"line": "[Scoring] Fix `dump_input_data` serialization of dict inputs (#26519, @copilot-swe-agent)"
+},
+{
+"id": "l1940",
+"project": "Hermes Agent",
+"tag": "v0.23.0",
+"line": "Windows: Desktop plugin names can't escape the plugins folder ([#146394](https://github.com/NousResearch/hermes-agent/pull/146394))"
+},
+{
+"id": "l0006",
+"project": "Claude Code",
+"tag": "v2.1.321",
+"line": "Fixed deny rules and protected-file prompts not applying to the file that a `cp` or `mv` into a directory writes"
+},
+{
+"id": "l0232",
+"project": "Claude Code",
+"tag": "v2.1.319",
+"line": "Changed nested skill loading: with the Bash sandbox on, skills in `.claude/skills` folders below the starting folder load only if you start Claude Code there or `/cd` there"
+},
+{
+"id": "l0276",
+"project": "Claude Code",
+"tag": "v2.1.318",
+"line": "Fixed `claude plugin` commands exiting before a slow token refresh was saved, which could sign you out on the next run"
+},
+{
+"id": "l0854",
+"project": "Oh My Pi",
+"tag": "v18.18.7",
+"line": "Added the `login-warning \"<text>\"` auth rule, which makes a new login accept the stated account risk first ([#18499](https://github.com/can1357/oh-my-pi/issues/18499))"
+},
+{
+"id": "l0507",
+"project": "OpenAI Codex",
+"tag": "rust-v0.167.0",
+"line": "#58219 Add file-backed storage for gateway OAuth credentials @alexsong-oai"
+},
+{
+"id": "l0225",
+"project": "Claude Code",
+"tag": "v2.1.319",
+"line": "Changed MCP tasks to work in the terminal without feature-flag fetching (Bedrock, Vertex, Foundry, LLM gateways, `DISABLE_TELEMETRY`); set `CLAUDE_CODE_DISABLE_MCP_TASKS=1` to turn them off"
+},
+{
+"id": "l2305",
+"project": "Databricks CLI",
+"tag": "v1.25.0",
+"line": "Suggest `databricks auth logout --profile <profile-name> --delete` when multiple profiles match the same workspace in `databricks auth docker` commands. ([#7363](https://github.com/databricks/cli/pull/7363))"
+},
+{
+"id": "l0190",
+"project": "Claude Code",
+"tag": "v2.1.319",
+"line": "Fixed `/permissions` in cloud sessions replying only that it isn't available; it now says where the session's rules live and how to change them"
+},
+{
+"id": "l2322",
+"project": "Databricks CLI",
+"tag": "v1.24.0",
+"line": "Fix `databricks auth login` and `databricks configure` overwriting the parent profile's host and token when saving a profile with a dotted name such as `team.prod` next to an existing `[team]`. ([#7266](https://github.com/databricks/cli/pull/7266))"
+},
+{
+"id": "l3284",
+"project": "Soda Core",
+"tag": "v4.30.0",
+"line": "feat(logging): redact records carrying group values by @nielsn in https://github.com/sodadata/soda-core/pull/2952"
+},
+{
+"id": "l1058",
+"project": "Oh My Pi",
+"tag": "v18.18.2",
+"line": "Fixed Anthropic sessions getting stuck after refused turns containing thinking or redacted-thinking blocks when followed by a steer, reminder, or new prompt."
+},
+{
+"id": "l2731",
+"project": "Apache Airflow",
+"tag": "3.4.0",
+"line": "Keep the token cookie set by a route in ``JWTRefreshMiddleware`` (#75217)"
+},
+{
+"id": "l2807",
+"project": "Apache Airflow",
+"tag": "3.4.0",
+"line": "Fix Dags staying blocked by max_active_runs until the next parse (#73032)"
+},
+{
+"id": "l0781",
+"project": "Pi",
+"tag": "v1.5.1",
+"line": "A failed token refresh of an MCP connection no longer registers an OAuth client or replaces the PKCE verifier of a sign-in in progress, which made that sign-in fail. MCP sign-in now refreshes the stored tokens with the stored client even when the loopback callback port changed, instead of registering a new client and opening the browser. Ctrl+C in `/mcp` and the `--timeout` of `pi mcp login` now also stop a sign-in while it waits up to 25 seconds for another pi process's token refresh, and a ref"
+},
+{
+"id": "l1691",
+"project": "Oh My Pi",
+"tag": "v18.17.0",
+"line": "fix(natives): keep X11 takeover keys running when the core keyboard switches source by @will-bogusz in https://github.com/can1357/oh-my-pi/pull/17912"
+},
+{
+"id": "l0500",
+"project": "OpenAI Codex",
+"tag": "rust-v0.167.0",
+"line": "#58182 Support managed network requirements under `permissions.network` @viyatb-oai"
+},
+{
+"id": "l2106",
+"project": "MLflow",
+"tag": "v3.18.0",
+"line": "[Tracing] Skip LLM cost on `AGENT` spans at store time and record Strands cache tokens (#27371, @mlflow-app)"
+},
+{
+"id": "l0648",
+"project": "OpenCode",
+"tag": "v2.2.7",
+"line": "After `opencode auth logout` on a `.well-known` integration, its remote providers and policies stop applying until you log back in. ([#62760](https://github.com/anomalyco/opencode/pull/62760))"
+},
+{
+"id": "l0026",
+"project": "Claude Code",
+"tag": "v2.1.321",
+"line": "Fixed a rare crash on permission prompts and background tasks"
+},
+{
+"id": "l0151",
+"project": "Claude Code",
+"tag": "v2.1.319",
+"line": "Fixed a case where Bash deny and ask rules missed commands written with quoted words"
+},
+{
+"id": "l1718",
+"project": "Oh My Pi",
+"tag": "v18.17.0",
+"line": "Devin: adopt CLI credentials (credentials.toml) as a stored devin account by @pavel-kalmykov in https://github.com/can1357/oh-my-pi/pull/13637"
+},
+{
+"id": "l3185",
+"project": "Apache Airflow",
+"tag": "3.4.0",
+"line": "Document config-backed enum Dag Params (#71180)"
+},
+{
+"id": "l0643",
+"project": "OpenCode",
+"tag": "v2.2.7",
+"line": "Remote MCP servers that rotate refresh tokens no longer log you out when the TUI, desktop app, background service or several projects refresh the same login at once. ([#62827](https://github.com/anomalyco/opencode/pull/62827))"
+},
+{
+"id": "l0432",
+"project": "Claude Code",
+"tag": "v2.1.317",
+"line": "[Cloud sessions] Fixed adding a network secret for a host that already has one silently replacing it; the Add secret form now refuses and points you to the existing secret"
+},
+{
+"id": "l3069",
+"project": "Apache Airflow",
+"tag": "3.4.0",
+"line": "Warn in UI when the same dag_id is registered from multiple files (#68791)"
+},
+{
+"id": "l1488",
+"project": "Oh My Pi",
+"tag": "v18.17.0",
+"line": "A cost cap set on the main thread now applies to running subagents immediately"
+},
+{
+"id": "l2239",
+"project": "MLflow",
+"tag": "v3.18.0",
+"line": "[Gateway / UI] Fix Gateway Usage Logs filtering by the authenticated user (#26827, @mlflow-app)"
+},
+{
+"id": "l0991",
+"project": "Oh My Pi",
+"tag": "v18.18.4",
+"line": "fix(wait): explain the idle window in timed-out wait results by @alphastorm in https://github.com/can1357/oh-my-pi/pull/18612"
+},
+{
+"id": "l0372",
+"project": "Claude Code",
+"tag": "v2.1.317",
+"line": "Fixed Claude saying a working claude.ai connector needed authorization or had failed in cloud sessions when a synced plugin included the same server"
+},
+{
+"id": "l0804",
+"project": "Pi",
+"tag": "v1.5.1",
+"line": "Fixed `pi update --models` failing with `Could not refresh model catalogs: openai: OAuth refresh failed for openai: ... invalid_grant` when a provider's login had gone stale. Built-in providers whose catalog comes from pi.dev, such as `openai`, no longer refresh their OAuth token for a catalog refresh at all. For providers that list models with the login, such as Radius and OpenRouter, a failed token refresh now prints a warning naming the provider and `pi auth login <provider>`, and the other c"
+},
+{
+"id": "l2328",
+"project": "Databricks CLI",
+"tag": "v1.24.0",
+"line": "`air list` now reports `No active runs found.` for an empty active-only result. ([#7276](https://github.com/databricks/cli/pull/7276))"
+},
+{
+"id": "l0229",
+"project": "Claude Code",
+"tag": "v2.1.319",
+"line": "Changed a session's exact Bash or PowerShell ask rule to be refused, not asked about, when a broader deny rule covers the command"
+},
+{
+"id": "l2947",
+"project": "Apache Airflow",
+"tag": "3.4.0",
+"line": "Let a Dag importer find the coordinator that parses its files (#74042)"
+},
+{
+"id": "l1890",
+"project": "Hermes Agent",
+"tag": "v0.23.0",
+"line": "**New official plugins** \u2014 REA (reverse engineering), X Chat (encrypted X DMs as a gateway platform), Meshy (3D generation), ElevenLabs Sound Effects, ElevenLabs Music (songs, lyrics, stems, video scores), advanced-delegation, and bubblewrap (a Linux sandbox for terminal and code commands). Hermes Labs adds `hermes inbox`, `hermes record` (workflow recording that masks passwords) and Patsnap patent search. ([#138225](https://github.com/NousResearch/hermes-agent/pull/138225), [#139725](https://gi"
+},
+{
+"id": "l0236",
+"project": "Claude Code",
+"tag": "v2.1.319",
+"line": "Changed cloud sessions to drop session-scoped allow rules at a move to a new worker when their deny and ask rules can't all be kept, so you may be asked again"
+},
+{
+"id": "l2461",
+"project": "dbt Core",
+"tag": "v2.0.11",
+"line": "Exempt ad-hoc inline (preview) nodes from the model access check, so `dbt show --inline` and `dbt compile --inline` can `ref()` a private or protected model"
+},
+{
+"id": "l2565",
+"project": "dbt Core",
+"tag": "v2.0.11",
+"line": "[@izeigerman](https://github.com/izeigerman)"
+},
+{
+"id": "l0297",
+"project": "Claude Code",
+"tag": "v2.1.318",
+"line": "Fixed every connection failing when the `NODE_EXTRA_CA_CERTS` file is empty, not PEM, or starts with a damaged certificate: readable certificates are now used, with a warning on stderr"
+},
+{
+"id": "l0594",
+"project": "Gemini CLI",
+"tag": "v0.68.0",
+"line": "fix(core): handle Windows libuv zero-device stat reporting in readSecureFileBuffer by @jvargassanchez-dot in https://github.com/google-gemini/gemini-cli/pull/30044"
+},
+{
+"id": "l2029",
+"project": "OpenShell",
+"tag": "v0.1.7",
+"line": "On the MicroVM driver, sandboxes from registry images and rootfs tars now run as the image's `sandbox` account, as documented, instead of always running as `1000:1000`. New sandboxes from images whose `sandbox` account isn't UID 1000 now run under that UID, and requesting the image's own UID with `run_as_user` now works. [#5131](https://github.com/NVIDIA/OpenShell/pull/5131)"
+},
+{
+"id": "l2434",
+"project": "dbt Core",
+"tag": "v2.0.11",
+"line": "Sidecar: Fixed interpolated values for getting relation info"
+},
+{
+"id": "l3001",
+"project": "Apache Airflow",
+"tag": "3.4.0",
+"line": "Keep the task instance in dag callbacks when its Dag version is missing (#72721)"
+},
+{
+"id": "l0399",
+"project": "Claude Code",
+"tag": "v2.1.317",
+"line": "Fixed a background session sometimes losing a just-made change of permission mode when it was upgraded or retired"
+},
+{
+"id": "l0088",
+"project": "Claude Code",
+"tag": "v2.1.321",
+"line": "Improved Claude apps gateway error messages to show the gateway's address without any user name or password"
+},
+{
+"id": "l3227",
+"project": "Prefect",
+"tag": "3.9.2",
+"line": "Preserve datetime instants when changing timezone by [@ashutosh8021](https://github.com/ashutosh8021) in [#23682](https://github.com/PrefectHQ/prefect/pull/23682)"
+},
+{
+"id": "l1092",
+"project": "Oh My Pi",
+"tag": "v18.18.2",
+"line": "`omp gc --strip` and `--compress` start work immediately instead of first reading every session's metadata, and `--strip` processes several sessions at once with a running tally of transcripts stripped."
+},
+{
+"id": "l2259",
+"project": "MLflow",
+"tag": "v3.18.0",
+"line": "[Build] Build development Assistant sandbox fallback images from the server's source and show failed build output (#26536, @kriscon-db)"
+},
+{
+"id": "l0925",
+"project": "Oh My Pi",
+"tag": "v18.18.5",
+"line": "Added Claude Fable 5.2 and Claude Mythos 5.2 ($8/$40 per MTok, $0.20 cache reads, 1M context)"
+},
+{
+"id": "l0231",
+"project": "Claude Code",
+"tag": "v2.1.319",
+"line": "Changed `--add-dir` directories to register plugin marketplaces only once that directory's own trust dialog has been accepted"
+},
+{
+"id": "l0598",
+"project": "Gemini CLI",
+"tag": "v0.68.0",
+"line": "fix(core,cli): preserve selected model across transient fallback, cancel, and rewind by @villahernandez-coder in https://github.com/google-gemini/gemini-cli/pull/30059"
+},
+{
+"id": "l1636",
+"project": "Oh My Pi",
+"tag": "v18.17.0",
+"line": "`PresentedBlock` applies transcript presenters to advisor, skill, execution, background-job, TTSR and other non-tool blocks; `TtsrNotificationComponent.rules` exposes its merged rules ([#17997](https://github.com/can1357/oh-my-pi/pull/17997) by [@materemias](https://github.com/materemias))"
+},
+{
+"id": "l2184",
+"project": "MLflow",
+"tag": "v3.18.0",
+"line": "[Tracking] Use the same run id in `upload_artifact_handler` as the permission check (#27128, @joshuawong-db)"
+},
+{
+"id": "l1633",
+"project": "Oh My Pi",
+"tag": "v18.17.0",
+"line": "`SettingItem.menu` exposes a cycling row's choices as a menu opened by `SettingsList.openSubmenuFor`; Enter/Space still cycle."
+},
+{
+"id": "l0604",
+"project": "Gemini CLI",
+"tag": "v0.68.0",
+"line": "fix(sandbox): supply --userns=keep-id for rootless podman by @diegogodinezr in https://github.com/google-gemini/gemini-cli/pull/30118"
+},
+{
+"id": "l1993",
+"project": "OpenShell",
+"tag": "v0.1.8",
+"line": "The installer no longer prints awk escape warnings while looking up RPM assets. [#4845](https://github.com/NVIDIA/OpenShell/pull/4845)"
+},
+{
+"id": "l1822",
+"project": "Hermes Agent",
+"tag": "v0.23.0",
+"line": "**Custom endpoints resolve reliably** \u2014 New profiles inherit `custom:<name>`, `${VAR}` and legacy custom endpoints instead of failing with \"Unknown provider\". Resumed chats stay on the endpoint that served them, and a built-in provider's key no longer leaks onto a custom entry with the same name. ([#138513](https://github.com/NousResearch/hermes-agent/pull/138513), [#139947](https://github.com/NousResearch/hermes-agent/pull/139947), [#140335](https://github.com/NousResearch/hermes-agent/pull/140"
+},
+{
+"id": "l2974",
+"project": "Apache Airflow",
+"tag": "3.4.0",
+"line": "Widen revoked_token.jti to store external-issuer token identifiers (#73562)"
+},
+{
+"id": "l0776",
+"project": "Pi",
+"tag": "v1.5.1",
+"line": "Upgraded terminal Mermaid rendering to support more diagram types, including pie charts, author-defined styles, and clickable labels on terminals with hyperlink support ([#8158](https://github.com/earendil-works/pi/pull/8158) by [@xl0](https://github.com/xl0))"
+},
+{
+"id": "l2058",
+"project": "OpenShell",
+"tag": "v0.1.7",
+"line": "The Gator agent launcher can run on Kubernetes gateways with reusable tooling images, and it now applies manifest settings to the launched sandbox only. [#4744](https://github.com/NVIDIA/OpenShell/pull/4744), [#4888](https://github.com/NVIDIA/OpenShell/pull/4888)"
+},
+{
+"id": "l1909",
+"project": "Hermes Agent",
+"tag": "v0.23.0",
+"line": "**Secrets and sandboxes** \u2014 Proton Pass [#138662](https://github.com/NousResearch/hermes-agent/pull/138662) and Windows Credential Manager [#141475](https://github.com/NousResearch/hermes-agent/pull/141475) secret sources; WSL Containers [#139946](https://github.com/NousResearch/hermes-agent/pull/139946), WSL distro [#141146](https://github.com/NousResearch/hermes-agent/pull/141146) and smolmachines [#145765](https://github.com/NousResearch/hermes-agent/pull/145765) terminal backends \u2014 @lucas-ni"
+},
+{
+"id": "l2234",
+"project": "MLflow",
+"tag": "v3.18.0",
+"line": "[Gateway] Fix empty Bedrock AI Gateway chat responses for inference profile ARNs with API key auth (#26792, @kimnamu)"
+},
+{
+"id": "l2207",
+"project": "MLflow",
+"tag": "v3.18.0",
+"line": "[Tracing] Record the final response and token usage for incomplete or failed OpenAI Responses streams (#26818, @mlflow-app)"
+},
+{
+"id": "l2311",
+"project": "Databricks CLI",
+"tag": "v1.25.0",
+"line": "Fix permissions of a recreated pipeline, app, dashboard, model serving endpoint or other resource staying recorded under the old ID, which made every later `bundle plan` propose to apply them again. ([#7361](https://github.com/databricks/cli/pull/7361))"
+},
+{
+"id": "l2934",
+"project": "Apache Airflow",
+"tag": "3.4.0",
+"line": "Parse native Go Dags and show each Dag's own source (#74341)"
+},
+{
+"id": "l0933",
+"project": "Oh My Pi",
+"tag": "v18.18.4",
+"line": "Added a `disabled \"<reason>\"` auth rule that pauses a provider: no login offers it and nothing calls it, while its code and users' stored logins stay in place ([#18622](https://github.com/can1357/oh-my-pi/pull/18622) by [@H4vC](https://github.com/H4vC))"
+},
+{
+"id": "l0749",
+"project": "Pi",
+"tag": "v1.5.2",
+"line": "Fixed Anthropic OAuth requests reporting an outdated Claude Code version"
+},
+{
+"id": "l0616",
+"project": "Gemini CLI",
+"tag": "v0.67.0",
+"line": "fix(core): ensure all model turns with function calls receive thought signatures by @amelidev in https://github.com/google-gemini/gemini-cli/pull/29828"
+},
+{
+"id": "l0405",
+"project": "Claude Code",
+"tag": "v2.1.317",
+"line": "Improved the error shown on Microsoft Foundry when Azure credentials can't be loaded: it now says to check or refresh them, and reports as `cloud_credential_error`"
+},
+{
+"id": "l0094",
+"project": "Claude Code",
+"tag": "v2.1.321",
+"line": "Changed mods Claude writes to turn on without asking in auto and bypass modes, even with managed `allowUnsandboxedCommands: false` or `allowManagedDomainsOnly`, and not to load in `dontAsk` mode"
+},
+{
+"id": "l1484",
+"project": "Oh My Pi",
+"tag": "v18.17.0",
+"line": "`devin-cli` login imports Devin CLI credentials, so the `devin` provider no longer requires `DEVIN_API_KEY` ([#13637](https://github.com/can1357/oh-my-pi/pull/13637) by [@pavel-kalmykov](https://github.com/pavel-kalmykov))"
+},
+{
+"id": "l2057",
+"project": "OpenShell",
+"tag": "v0.1.7",
+"line": "E2E fixes: the shared supervisor harness now works with gateway TLS, and kind now gets its Calico images through the runner mirror. [#4984](https://github.com/NVIDIA/OpenShell/pull/4984), [#5178](https://github.com/NVIDIA/OpenShell/pull/5178)"
+},
+{
+"id": "l2045",
+"project": "OpenShell",
+"tag": "v0.1.7",
+"line": "When several gateways share a Kubernetes cluster, ingress, and wildcard certificate, you can set `service_hostname_format = \"hashed\"` under `[openshell.gateway]` to give each exposed service a unique hostname. The default `readable` format is unchanged. [#4842](https://github.com/NVIDIA/OpenShell/pull/4842)"
+},
+{
+"id": "l2688",
+"project": "Apache Airflow",
+"tag": "3.4.0",
+"line": "Add async task store accessors for async tasks (#68232)"
+},
+{
+"id": "l0542",
+"project": "OpenAI Codex",
+"tag": "rust-v0.167.0",
+"line": "#58404 Fix context token estimates for responses without usable usage @dkovalenko-oai"
+},
+{
+"id": "l1433",
+"project": "Oh My Pi",
+"tag": "v18.17.0",
+"line": "`AuthStorage` can now be constructed over an `AuthStorageBackend` instead of a credential store, so another thread's instance can serve every call"
+},
+{
+"id": "l2262",
+"project": "MLflow",
+"tag": "v3.18.0",
+"line": "[UI] Disable experiments Delete button when no checked experiment is in the current list (#26677, @github-actions)"
+},
+{
+"id": "l0070",
+"project": "Claude Code",
+"tag": "v2.1.321",
+"line": "Fixed NotebookEdit reporting success to hooks and telemetry when the edit failed, for example when the notebook changed while the permission prompt was open"
+},
+{
+"id": "l2368",
+"project": "Terraform provider for Snowflake",
+"tag": "v2.23.0",
+"line": "Authentication policy ([74cb1dd](https://github.com/snowflakedb/terraform-provider-snowflake/commit/74cb1dd81a188632c9b49cb37a8a83454af4ba50))"
+},
+{
+"id": "l1224",
+"project": "Oh My Pi",
+"tag": "v18.18.2",
+"line": "fix(robomp): fetch PR head branch when pull ref is missing by @djdembeck in https://github.com/can1357/oh-my-pi/pull/18170"
+},
+{
+"id": "l0628",
+"project": "Gemini CLI",
+"tag": "v0.67.0",
+"line": "fix(core): allow trusted system paths on Android (Termux) for ripgrep resolution (#21836) by @amelidev in https://github.com/google-gemini/gemini-cli/pull/29884"
+},
+{
+"id": "l3230",
+"project": "Prefect",
+"tag": "3.9.2",
+"line": "Align positional-only argument defaults in source-parsed signatures by [@udsy19](https://github.com/udsy19) in [#23428](https://github.com/PrefectHQ/prefect/pull/23428)"
+},
+{
+"id": "l2051",
+"project": "OpenShell",
+"tag": "v0.1.7",
+"line": "The service expose example in the docs now uses an image that includes Python. [#4197](https://github.com/NVIDIA/OpenShell/pull/4197)"
+},
+{
+"id": "l2753",
+"project": "Apache Airflow",
+"tag": "3.4.0",
+"line": "Match camelCase keys against sensitive field names in masker (#74840)"
+},
+{
+"id": "l0116",
+"project": "Claude Code",
+"tag": "v2.1.321",
+"line": "Changed managed `extraKnownMarketplaces` take-overs from an undeclared source: saved data is set aside for `cleanupPeriodDays`, and options and secrets until `claude plugin restore-set-aside`"
+},
+{
+"id": "l2852",
+"project": "Apache Airflow",
+"tag": "3.4.0",
+"line": "Fix branch not skipping mapped tasks with custom XCom backend (#68954)"
+},
+{
+"id": "l1995",
+"project": "OpenShell",
+"tag": "v0.1.8",
+"line": "The metrics listener can now serve `/metrics` over TLS, with optional mutual TLS, configured through gateway TOML, CLI flags, environment variables, or Helm Secrets. Plaintext remains the default. [#3877](https://github.com/NVIDIA/OpenShell/pull/3877)"
+},
+{
+"id": "l0635",
+"project": "OpenCode",
+"tag": "v2.2.7",
+"line": "**MCP Logins Stay Signed In**: Remote MCP servers that rotate refresh tokens no longer sign you out when several clients refresh at once or the token endpoint fails for a moment. ([#62827](https://github.com/anomalyco/opencode/pull/62827), [#63012](https://github.com/anomalyco/opencode/pull/63012))"
+},
+{
+"id": "l3258",
+"project": "Prefect",
+"tag": "3.9.2",
+"line": "Surface import errors when the placeholder flow fallback cannot find a non-`def` entrypoint by [@devin-ai-integration](https://github.com/devin-ai-integration)[bot] in [#23773](https://github.com/PrefectHQ/prefect/pull/23773)"
+},
+{
+"id": "l2073",
+"project": "MLflow",
+"tag": "v3.18.0",
+"line": "[Tracking] Make MCP server version identity case-sensitive on MySQL and SQL Server; correct case-mismatched references before upgrading (#25920, @LobsterQBA)"
+},
+{
+"id": "l1949",
+"project": "Hermes Agent",
+"tag": "v0.23.0",
+"line": "**@c2h5oh** (41 PRs) \u2014 CI on new runners, race-condition sweeps, flaky-test roots and security dependency updates"
+},
+{
+"id": "l2300",
+"project": "MLflow",
+"tag": "v3.18.0",
+"line": "[Build / Docs] Document stacked PR guidance in `CLAUDE.md` (#26957, @copilot-swe-agent)"
+},
+{
+"id": "l2270",
+"project": "MLflow",
+"tag": "v3.18.0",
+"line": "[UI] Show zero input/output token counts with their labels in `TokensCell` hover card (#26642, @github-actions)"
+},
+{
+"id": "l0325",
+"project": "Claude Code",
+"tag": "v2.1.318",
+"line": "Changed `deniedMcpServers` URL entries to also block Anthropic-provided servers whose upstream URL matches, and connectors in cloud sessions and on self-hosted runners, where the session is given the connector's own URL; otherwise deny a connector by name"
+},
+{
+"id": "l0534",
+"project": "OpenAI Codex",
+"tag": "rust-v0.167.0",
+"line": "#58380 Broadcast thread section changes to connected clients @charliemarsh-oai"
+},
+{
+"id": "l2628",
+"project": "Apache Airflow",
+"tag": "3.4.0",
+"line": "Add fab-oauth meta-package extra (#73565)"
+},
+{
+"id": "l0929",
+"project": "Oh My Pi",
+"tag": "v18.18.4",
+"line": "Providers paused by a `disabled` auth rule (currently Google Antigravity) are left out of the built-in login list, refuse login, token refresh and usage probes, resolve no key from any source, and refuse requests and image generation with the pause reason; stored logins are kept and work again once the rule is removed, and an extension that registers its own login under the paused id takes it back ([#18622](https://github.com/can1357/oh-my-pi/pull/18622) by [@H4vC](https://github.com/H4vC))"
+},
+{
+"id": "l1977",
+"project": "OpenShell",
+"tag": "v0.1.8",
+"line": "SSH relays and service forwards now have separate per-sandbox connection limits, set with `max_ssh_connections_per_sandbox` and `max_service_connections_per_sandbox` in the gateway config (default 20). [#5063](https://github.com/NVIDIA/OpenShell/pull/5063)"
+},
+{
+"id": "l2337",
+"project": "Databricks CLI",
+"tag": "v1.24.0",
+"line": "Bump dependencies with known vulnerabilities. ([#7305](https://github.com/databricks/cli/pull/7305))"
+},
+{
+"id": "l2962",
+"project": "Apache Airflow",
+"tag": "3.4.0",
+"line": "Mask registered secrets at any nesting depth (#73793)"
+},
+{
+"id": "l1248",
+"project": "Oh My Pi",
+"tag": "v18.18.1",
+"line": "`auth-gateway stdio` and `serve` no longer reject credentialless Apple on-device models ([#18370](https://github.com/can1357/oh-my-pi/issues/18370))"
+},
+{
+"id": "l2393",
+"project": "Terraform provider for Snowflake",
+"tag": "v2.23.0",
+"line": "Cap `expire_rotated_token_after_hours` at the remaining lifetime when rotating a programmatic access token. ([397e591](https://github.com/snowflakedb/terraform-provider-snowflake/commit/397e59185e6dcbf59b53a40bdafa17c7a9af616a))"
+},
+{
+"id": "l0701",
+"project": "OpenCode",
+"tag": "v2.2.6",
+"line": "Serve file reads and media from the server API as sandboxed downloads, and refuse cross-site browser navigations and requests from disallowed origins to `/api/*`, so a file in your project cannot run scripts on the server's origin. ([#62422](https://github.com/anomalyco/opencode/pull/62422))"
+},
+{
+"id": "l1173",
+"project": "Oh My Pi",
+"tag": "v18.18.2",
+"line": "feat(tui): enabled OSC 8 hyperlinks in Rex by @yuzu-octopus in https://github.com/can1357/oh-my-pi/pull/18467"
+},
+{
+"id": "l2163",
+"project": "MLflow",
+"tag": "v3.18.0",
+"line": "[Build] Refresh Docker base image to remove compromised CA trust (#27199, @copilot-swe-agent)"
+},
+{
+"id": "l3160",
+"project": "Apache Airflow",
+"tag": "3.4.0",
+"line": "Remove \u503c from passwordToggle translations (#72684)"
+},
+{
+"id": "l0546",
+"project": "OpenAI Codex",
+"tag": "rust-v0.167.0",
+"line": "#58411 Expose non-consuming input activity waits to hosts @rhan-oai"
+},
+{
+"id": "l1612",
+"project": "Oh My Pi",
+"tag": "v18.17.0",
+"line": "Fixed X11 takeover input stopping with `Cancelled` after you typed locally; Escape now stops computer use for the rest of the turn ([#17912](https://github.com/can1357/oh-my-pi/pull/17912) by [@will-bogusz](https://github.com/will-bogusz))"
+},
+{
+"id": "l0654",
+"project": "OpenCode",
+"tag": "v2.2.7",
+"line": "A fresh install imports saved provider credentials from the legacy `auth.json`, and skips an invalid one with a warning instead of stopping setup. ([#62568](https://github.com/anomalyco/opencode/pull/62568))"
+},
+{
+"id": "l1988",
+"project": "OpenShell",
+"tag": "v0.1.8",
+"line": "The TUI policy viewer now shows each allowed or denied MCP tool name or pattern instead of `tools/call *`. [#5345](https://github.com/NVIDIA/OpenShell/pull/5345)"
+},
+{
+"id": "l1102",
+"project": "Oh My Pi",
+"tag": "v18.18.2",
+"line": "Prevented OpenTelemetry settings from omp-managed `.env` files from leaking into child processes or in-process extensions."
+},
+{
+"id": "l2333",
+"project": "Databricks CLI",
+"tag": "v1.24.0",
+"line": "Accept grant `privileges` values that the SDK enum does not list yet: `bundle validate` no longer warns (or errors under `--strict`) on them, and the PyDABs `Privilege` enum accepts unknown strings instead of raising. The JSON schema and PyDABs still advertise the known values for completion. ([#7315](https://github.com/databricks/cli/pull/7315))"
+},
+{
+"id": "l2159",
+"project": "MLflow",
+"tag": "v3.18.0",
+"line": "[UI] Stop pinning the Issues-tab evidence card's \"Open trace\", and drop a count it cannot know (#27226, @tanghaoji)"
+},
+{
+"id": "l1398",
+"project": "Oh My Pi",
+"tag": "v18.18.0",
+"line": "fix(mcp): requested json from oauth token endpoints by @roboomp in https://github.com/can1357/oh-my-pi/pull/18293"
+},
+{
+"id": "l1385",
+"project": "Oh My Pi",
+"tag": "v18.18.0",
+"line": "The BTW history page (`f` on a side answer) scrolls its reader and history list with the mouse wheel, matching the other scrolling sheets ([#18303](https://github.com/can1357/oh-my-pi/pull/18303) by [@ImAlexBlock](https://github.com/ImAlexBlock))"
+},
+{
+"id": "l0928",
+"project": "Oh My Pi",
+"tag": "v18.18.4",
+"line": "Added the `base64SkipThoughtSignature` compat flag so Gemini gateways that decode `thoughtSignature` as base64 (such as the Hyperspace AI LLM proxy) can receive the unsigned-tool-call bypass sentinel without rejecting the request with a 400 ([#18586](https://github.com/can1357/oh-my-pi/pull/18586) by [@tuandinh0801](https://github.com/tuandinh0801))."
+},
+{
+"id": "l0347",
+"project": "Claude Code",
+"tag": "v2.1.318",
+"line": "[Claude Tag] Fixed keyboard focus and screen reader announcements in Claude Tag admin setup; pressing Escape in the connect form no longer also closes the Add dialog"
+},
+{
+"id": "l0737",
+"project": "OpenCode",
+"tag": "v2.2.6",
+"line": "While an input method is composing text, Escape, Enter, and Tab go to the input method instead of stopping the agent or picking a suggestion. ([#62318](https://github.com/anomalyco/opencode/pull/62318))"
+},
+{
+"id": "l1324",
+"project": "Oh My Pi",
+"tag": "v18.18.1",
+"line": "fix(pi-shell): a brace expansion over the limit fails instead of going literal by @H4vC in https://github.com/can1357/oh-my-pi/pull/18368"
+},
+{
+"id": "l0448",
+"project": "OpenAI Codex",
+"tag": "rust-v0.167.0",
+"line": "The app-server README covers managed network constraints under `[permissions.network]` and `prompt-user` command rules that require fresh human approval (#58045, #58182)."
+},
+{
+"id": "l1167",
+"project": "Oh My Pi",
+"tag": "v18.18.2",
+"line": "perf(task): start ovnfs-isolated subagents without a per-run baseline by @Gabriel-Hiss in https://github.com/can1357/oh-my-pi/pull/18457"
+},
+{
+"id": "l0200",
+"project": "Claude Code",
+"tag": "v2.1.319",
+"line": "Fixed a sandbox escape when creating a worktree"
+},
+{
+"id": "l1251",
+"project": "Oh My Pi",
+"tag": "v18.18.1",
+"line": "Corrected Devin SWE-2 Flash and SWE-2 Fast token pricing, and SWE-2's promotional rates and end time ([#18332](https://github.com/can1357/oh-my-pi/pull/18332) by [@eggpeat](https://github.com/eggpeat))"
+},
+{
+"id": "l2436",
+"project": "dbt Core",
+"tag": "v2.0.11",
+"line": "Refresh an account-scoped OAuth session when a server rejects an access token before its cached expiry."
+},
+{
+"id": "l0703",
+"project": "OpenCode",
+"tag": "v2.2.6",
+"line": "Ask for `external_directory` permission before `session_move` leaves the current project. ([#62204](https://github.com/anomalyco/opencode/pull/62204))"
+},
+{
+"id": "l1366",
+"project": "Oh My Pi",
+"tag": "v18.18.0",
+"line": "Concurrent subagent MCP calls now grant newly loaded tools to the session that made each call, even when providers reuse call IDs. ([#18324](https://github.com/can1357/oh-my-pi/pull/18324) by [@eggpeat](https://github.com/eggpeat))"
+},
+{
+"id": "l2995",
+"project": "Apache Airflow",
+"tag": "3.4.0",
+"line": "Scope UI next_run_assets endpoint to assets the caller may read (#72862)"
+},
+{
+"id": "l1443",
+"project": "Oh My Pi",
+"tag": "v18.17.0",
+"line": "Fixed Muse Code subscription sessions failing with `403 client_attestation_denied` when tools were available ([#17435](https://github.com/can1357/oh-my-pi/issues/17435), [#17515](https://github.com/can1357/oh-my-pi/pull/17515) by [@harshav167](https://github.com/harshav167), continued in [#18053](https://github.com/can1357/oh-my-pi/pull/18053) by [@abilliontokens](https://github.com/abilliontokens))"
+},
+{
+"id": "l0387",
+"project": "Claude Code",
+"tag": "v2.1.317",
+"line": "Fixed very long conversations losing their earlier summary when compaction had to shorten its own request"
+},
+{
+"id": "l1301",
+"project": "Oh My Pi",
+"tag": "v18.18.1",
+"line": "fix(bash): enforce deny precedence across non-compound segments and operator authority by @asuffield in https://github.com/can1357/oh-my-pi/pull/18349"
+},
+{
+"id": "l0480",
+"project": "OpenAI Codex",
+"tag": "rust-v0.167.0",
+"line": "#58119 Add experimental Guardian review for injected thread commands @swastik-oai"
+},
+{
+"id": "l2405",
+"project": "dbt Core",
+"tag": "v2.0.11",
+"line": "Add state configuration to ignore external modifications on model target tables/views (only implemented for views to begin with)"
+},
+{
+"id": "l0951",
+"project": "Oh My Pi",
+"tag": "v18.18.4",
+"line": "The compaction display summary no longer requests reasoning, so thinking models return a summary instead of spending the 512-token cap on reasoning and returning nothing ([#18541](https://github.com/can1357/oh-my-pi/pull/18541) by [@phillipxkang](https://github.com/phillipxkang))"
+},
+{
+"id": "l2637",
+"project": "Apache Airflow",
+"tag": "3.4.0",
+"line": "Allow template-field copies into StartTriggerArgs in operator __init__ (#73040)"
+},
+{
+"id": "l0181",
+"project": "Claude Code",
+"tag": "v2.1.319",
+"line": "Fixed a terminal whose Claude apps gateway sign-in had expired sending telemetry and managed-settings requests that the gateway refused and logged as `invalid_token`"
+},
+{
+"id": "l1300",
+"project": "Oh My Pi",
+"tag": "v18.18.1",
+"line": "fix(isolation): preserve ovnfs recovery records after cleanup failures by @eggpeat in https://github.com/can1357/oh-my-pi/pull/18337"
+},
+{
+"id": "l1059",
+"project": "Oh My Pi",
+"tag": "v18.18.2",
+"line": "Fixed Codex Responses requests losing tool namespaces and developer-provided additional tools when replayed through the authentication gateway."
+},
+{
+"id": "l0156",
+"project": "Claude Code",
+"tag": "v2.1.319",
+"line": "Fixed `CLAUDE_CODE_RESUME_INTERRUPTED_TURN` re-running a turn that was interrupted in plan mode when the session resumes in another permission mode"
+},
+{
+"id": "l0061",
+"project": "Claude Code",
+"tag": "v2.1.321",
+"line": "Fixed remote sessions giving no reply after a restart when a `UserPromptSubmit` hook blocked a replayed permission answer; these hooks no longer run on that replay"
+},
+{
+"id": "l0415",
+"project": "Claude Code",
+"tag": "v2.1.317",
+"line": "Changed the built-in `plugin-authoring` skill to offer once, after a mod you built works, to help share the mod"
+},
+{
+"id": "l0175",
+"project": "Claude Code",
+"tag": "v2.1.319",
+"line": "Fixed WebFetch describing claude.ai shared-chat links as empty pages; it now says shared chats can't be read and to paste the conversation instead"
+},
+{
+"id": "l1882",
+"project": "Hermes Agent",
+"tag": "v0.23.0",
+"line": "**Webapp ships in Docker and Nix; Docker sandboxes give files back** \u2014 The Docker image and the Nix package now ship the Webapp bundle. The image adds tmux and Office/PDF libraries. Files a root Docker sandbox writes are handed back to your user, and setuid bits and file capabilities are stripped from them. ([#145153](https://github.com/NousResearch/hermes-agent/pull/145153), [#145521](https://github.com/NousResearch/hermes-agent/pull/145521), [#146111](https://github.com/NousResearch/hermes-age"
+},
+{
+"id": "l0348",
+"project": "Claude Code",
+"tag": "v2.1.318",
+"line": "[Code Review] Improved the Code Review analytics page to retry once after a server or network failure, then show a Try again banner instead of empty cards"
+},
+{
+"id": "l1097",
+"project": "Oh My Pi",
+"tag": "v18.18.2",
+"line": "On Windows, commands run by the bash tool, including `nohup` background commands, get a console of their own, so programs that draw directly on the console (xperf and PowerShell progress bars, password prompts) no longer corrupt the TUI ([#18517](https://github.com/can1357/oh-my-pi/pull/18517) by [@H4vC](https://github.com/H4vC))."
+},
+{
+"id": "l3210",
+"project": "Apache Airflow",
+"tag": "3.4.0",
+"line": "Regenerate REST API permission reference to fix static check (#69341)"
+},
+{
+"id": "l0836",
+"project": "Pi",
+"tag": "v1.5.1",
+"line": "Fixed Azure GPT-6 Astra, Luna, Sol, GPT-6.1 Sol, and GPT-6.1 Terra using a 272K context window instead of the 1,050,000 tokens Azure Foundry deploys them with ([#11742](https://github.com/earendil-works/pi/issues/11742))"
+},
+{
+"id": "l2323",
+"project": "Databricks CLI",
+"tag": "v1.24.0",
+"line": "`databricks auth login` and `databricks auth token` now reject the name of an existing profile after \"Create a new profile\" instead of logging in to that profile. ([#7196](https://github.com/databricks/cli/pull/7196))"
+},
+{
+"id": "l1477",
+"project": "Oh My Pi",
+"tag": "v18.17.0",
+"line": "Added `tui.motion` (`full`/`reduced`/`none`), `tui.spinnerInterval` (`0` = static) and `tui.maxFps` to control animation and repaint rate, also via `--motion`/`--spinner-interval`/`--max-fps` and `PI_MOTION`/`PI_SPINNER_INTERVAL`/`PI_MAX_FPS`; an explicit `tui.spinnerInterval` beats `tui.motion`, and keystroke echo keeps 30 fps ([#14240](https://github.com/can1357/oh-my-pi/pull/14240) by [@mccraigmccraig](https://github.com/mccraigmccraig))"
+},
+{
+"id": "l1671",
+"project": "Oh My Pi",
+"tag": "v18.17.0",
+"line": "feat(coding-agent,tui): let ^ model tags set a subagent's initial effort level by @a-glapinski in https://github.com/can1357/oh-my-pi/pull/17574"
+},
+{
+"id": "l0769",
+"project": "Pi",
+"tag": "v1.5.1",
+"line": "Added Claude Fable 5.2 (`claude-fable-5-2`) to the `anthropic` provider ($8/$40 per million input/output tokens, 1M context, 128K output). Like Fable 5.1 it uses per-message effort and mid-conversation system messages; requests its safety classifiers refuse before any output are answered by Claude Opus 5 through server-side fallback and billed at Opus 5's price. Claude Fable 5.2 and Mythos 5.2 on other providers, such as OpenRouter's `anthropic/claude-fable-5.2`, get the same per-message effort "
+},
+{
+"id": "l0378",
+"project": "Claude Code",
+"tag": "v2.1.317",
+"line": "Fixed stored scheduled tasks being impossible to list or delete after scheduled tasks were turned off"
+},
+{
+"id": "l1157",
+"project": "Oh My Pi",
+"tag": "v18.18.2",
+"line": "test(ai,coding-agent): remove the temp directories two test files leak by @sjawhar in https://github.com/can1357/oh-my-pi/pull/18376"
+},
+{
+"id": "l0882",
+"project": "Oh My Pi",
+"tag": "v18.18.6",
+"line": "LiteLLM lists only the models the configured key can call (its authenticated `/v1/models`), keeping the proxy's metadata for them; a proxy whose `/v1/models` fails now lists no models instead of every model it serves ([#18601](https://github.com/can1357/oh-my-pi/issues/18601))"
+},
+{
+"id": "l2226",
+"project": "MLflow",
+"tag": "v3.18.0",
+"line": "[Tracking / UI] Fix pagination for the experiment Issues tab (#26857, @tanghaoji)"
+},
+{
+"id": "l0447",
+"project": "OpenAI Codex",
+"tag": "rust-v0.167.0",
+"line": "Automatic context compaction now accounts for retained output from failed responses and responses with missing token usage data (#58404)."
+},
+{
+"id": "l2404",
+"project": "dbt Core",
+"tag": "v2.0.11",
+"line": "Rename the --run-cache-mode CLI flag to --state-mode to match the dbt State terminology it configures. --run-cache-mode is kept as a deprecated alias and will keep working, with a warning, until it is removed in a future release."
+},
+{
+"id": "l2183",
+"project": "MLflow",
+"tag": "v3.18.0",
+"line": "[Tracing] Skip credential attributes in `mlflow.smolagents` model spans (#27129, @joshuawong-db)"
+},
+{
+"id": "l1996",
+"project": "OpenShell",
+"tag": "v0.1.8",
+"line": "In multi-replica gateways, shared-supervisor pool sandbox sessions now stay on the gateway replica that serves their supervisor, including across gateway and supervisor failures. [#5052](https://github.com/NVIDIA/OpenShell/pull/5052)"
+},
+{
+"id": "l0444",
+"project": "OpenAI Codex",
+"tag": "rust-v0.167.0",
+"line": "Deleting text that exposes a leading `!` keeps an ordinary draft in chat mode (#58412)."
+},
+{
+"id": "l1655",
+"project": "Oh My Pi",
+"tag": "v18.17.0",
+"line": "Ask notes no longer carry over between successive single-select questions ([#17979](https://github.com/can1357/oh-my-pi/issues/17979))"
+},
+{
+"id": "l0034",
+"project": "Claude Code",
+"tag": "v2.1.321",
+"line": "Fixed a turn ending with \"API Error: EPROTO: The TLS handshake failed\" when the connection broke partway through a reply; the partial reply is kept or the request is retried, as before 2.1.302"
+},
+{
+"id": "l0608",
+"project": "Gemini CLI",
+"tag": "v0.67.0",
+"line": "feat(cli): bridge the IDE companion into container sandboxes over exec stdio by @elberthc-byte in https://github.com/google-gemini/gemini-cli/pull/29858"
+},
+{
+"id": "l0864",
+"project": "Oh My Pi",
+"tag": "v18.18.7",
+"line": "A second exit request now skips pending `worktree.onExit` prompts and keeps those worktrees instead of waiting for an answer ([#18424](https://github.com/can1357/oh-my-pi/pull/18424) by [@aw1cks](https://github.com/aw1cks))"
+},
+{
+"id": "l1254",
+"project": "Oh My Pi",
+"tag": "v18.18.1",
+"line": "Rust SDK: `BashCommand` and `ReadyEvent` struct literals need `exclude_from_context: None` and `supports_bash_exclude_from_context: None` ([#18206](https://github.com/can1357/oh-my-pi/pull/18206) by [@andrebrait](https://github.com/andrebrait))"
+},
+{
+"id": "l1969",
+"project": "OpenShell",
+"tag": "v0.1.8",
+"line": "Deleted sandboxes no longer leave memory behind on the gateway, so repeated create/delete cycles no longer grow gateway memory until it is OOM-killed. [#5428](https://github.com/NVIDIA/OpenShell/pull/5428)"
+},
+{
+"id": "l1720",
+"project": "Oh My Pi",
+"tag": "v18.17.0",
+"line": "feat(extensions): add getShortcutConflict and export unwrapHashlineHeaderPath by @materemias in https://github.com/can1357/oh-my-pi/pull/17961"
+},
+{
+"id": "l2595",
+"project": "Apache Airflow",
+"tag": "3.4.0",
+"line": "With the simple auth manager the view is granted to the ``ADMIN`` role only. With the FAB auth"
+},
+{
+"id": "l0750",
+"project": "Pi",
+"tag": "v1.5.1",
+"line": "**Shell login and logout**: use `pi auth login <provider>` and `pi auth logout <provider>` without starting a session, with API-key and no-browser sign-in options. See [Credential commands](https://github.com/earendil-works/pi/blob/v1.5.1/packages/coding-agent/docs/cli.md#credential-commands)."
+},
+{
+"id": "l2046",
+"project": "OpenShell",
+"tag": "v0.1.7",
+"line": "The Rust, Go, Python, and TypeScript SDKs now send exec calls straight to the gateway replica that owns the sandbox when replica routing is enabled. Go also routes port-forward and SSH tunnel calls this way, and TypeScript routes port-forward. [#4790](https://github.com/NVIDIA/OpenShell/pull/4790), [#4852](https://github.com/NVIDIA/OpenShell/pull/4852), [#4918](https://github.com/NVIDIA/OpenShell/pull/4918), [#4877](https://github.com/NVIDIA/OpenShell/pull/4877)"
+},
+{
+"id": "l0040",
+"project": "Claude Code",
+"tag": "v2.1.321",
+"line": "Fixed a case where Remote Control showed as off with \"login expired\" in the desktop app while its connection was still up, because the app was briefly unable to hand over a sign-in token"
+},
+{
+"id": "l2074",
+"project": "MLflow",
+"tag": "v3.18.0",
+"line": "[UI] Choose the target agent first when installing a skill, with agent icons in the selector (#27457, @B-Step62)"
+},
+{
+"id": "l1312",
+"project": "Oh My Pi",
+"tag": "v18.18.1",
+"line": "fix(ai): allowed keyless models through auth gateway by @roboomp in https://github.com/can1357/oh-my-pi/pull/18371"
+},
+{
+"id": "l0053",
+"project": "Claude Code",
+"tag": "v2.1.321",
+"line": "Fixed sign-in, token refresh and logout waiting indefinitely when something on the network accepts the connection but never answers the TLS handshake"
+},
+{
+"id": "l1982",
+"project": "OpenShell",
+"tag": "v0.1.8",
+"line": "Podman sandbox deletion and create rollback now remove only volumes labeled as owned by that sandbox, and keep any others with a warning. [#4714](https://github.com/NVIDIA/OpenShell/pull/4714)"
+},
+{
+"id": "l2773",
+"project": "Apache Airflow",
+"tag": "3.4.0",
+"line": "Fix plugin applies_to scoping (#74425)"
+},
+{
+"id": "l1559",
+"project": "Oh My Pi",
+"tag": "v18.17.0",
+"line": "macOS: starting a bash tool session no longer briefly sets umask to 022, which could give new files wrong permissions"
+},
+{
+"id": "l0005",
+"project": "Claude Code",
+"tag": "v2.1.321",
+"line": "Fixed a case where Bash permission checks judged a file write from the wrong folder and didn't prompt"
+},
+{
+"id": "l2018",
+"project": "OpenShell",
+"tag": "v0.1.8",
+"line": "Ported the credential gating E2E tests to conformance and split them into independent parallel tests. [#5318](https://github.com/NVIDIA/OpenShell/pull/5318), [#5264](https://github.com/NVIDIA/OpenShell/pull/5264)"
+},
+{
+"id": "l0761",
+"project": "Pi",
+"tag": "v1.5.1",
+"line": "`pi auth login <provider>` logs in to a provider from the shell without starting a session, for example `pi auth login radius`. It signs in with an account in the browser and exits; `--api-key` saves an API key instead, and `--no-browser` uses device code or copy-code sign-in instead. Logging in to Radius also configures the Radius MCP server. `pi auth logout <provider>` removes the stored credentials, like `/logout`"
+},
+{
+"id": "l1867",
+"project": "Hermes Agent",
+"tag": "v0.23.0",
+"line": "**The Webapp: Desktop in a browser tab, served by your gateway** \u2014 With `webapp.enabled: true`, the gateway serves the Desktop workspace on its own listener. `hermes webapp` opens it, and Desktop's Settings \u2192 Web Access serves it on your network or a public URL behind sign-in. It is **off by default**. The Webapp is single-user: a signed-in tab acts as you, so its sessions and Group Chats are the same ones native Desktop shows, and display settings follow you across devices on the same machine. "
+},
+{
+"id": "l0764",
+"project": "Pi",
+"tag": "v1.5.1",
+"line": "Added Microsoft-Decision-1 classifier support through GitHub Copilot, including codemode `models.classify()` ([#11679](https://github.com/earendil-works/pi/pull/11679) by [@Marvae](https://github.com/Marvae))"
+},
+{
+"id": "l2409",
+"project": "dbt Core",
+"tag": "v2.0.11",
+"line": "Add DBT_CLOUD_LOGIN_HOST (and optional DBT_CLOUD_LOGIN_ACCOUNT_ID) so dbt login can authenticate through an account host's /oauth/authorize instead of the registration page, for SSO accounts the registration page cannot route."
+},
+{
+"id": "l0439",
+"project": "OpenAI Codex",
+"tag": "rust-v0.167.0",
+"line": "Find API key and cloud provider options under \u201cSign in another way.\u201d Enable `gcp_setup_wizard` to set up Google Cloud Vertex AI with Application Default Credentials or a credential file (#57857, #58427)."
+},
+{
+"id": "l1078",
+"project": "Oh My Pi",
+"tag": "v18.18.2",
+"line": "Browser automation now supports downloads from relay tabs and broader `role/` selectors for implicit landmarks and structural roles."
+},
+{
+"id": "l0095",
+"project": "Claude Code",
+"tag": "v2.1.321",
+"line": "Changed mods' own tool calls (`$.tool.call`, `$.mcp.call`) to raise no permission prompt, even under your own ask rules or in `dontAsk` and `-p` runs; deny rules and organization policy still apply"
+},
+{
+"id": "l0268",
+"project": "Claude Code",
+"tag": "v2.1.318",
+"line": "Added the date a stored claude.ai sign-in ends to `claude auth status` (`loginExpiresAt`) and to `claude -p` JSON results (`credential_expires_at`)"
+},
+{
+"id": "l0523",
+"project": "OpenAI Codex",
+"tag": "rust-v0.167.0",
+"line": "#58324 Treat auth reload failures as transient during token refresh @jif-oai"
+},
+{
+"id": "l2033",
+"project": "OpenShell",
+"tag": "v0.1.7",
+"line": "VM sandboxes now start when the gateway runs with a restrictive umask, such as the packaged `UMask=0077`. [#5099](https://github.com/NVIDIA/OpenShell/pull/5099)"
+},
+{
+"id": "l3179",
+"project": "Apache Airflow",
+"tag": "3.4.0",
+"line": "Fix inverted docstring for config write hide_sensitive option (#71623)"
+},
+{
+"id": "l1955",
+"project": "Hermes Agent",
+"tag": "v0.23.0",
+"line": "**@metamindedu**, **@Sahil-SS9**, **@dyiapanis** (7 each), **@KoNit-K**, **@SaguaroDev**, **@dskwe**, **@janviernine**, **@liuhao1024**, **@fangliquanflq**, **@charan-rathore**, **@Jesssullivan**, **@daviseford** \u2014 Model Router and YouTube Dock, limbic and tabella, Group Chat routing, `/rewind`, multi-gateway Desktop, MCP costs, plugin auto-update, password-manager vaults and skill locks"
+},
+{
+"id": "l1450",
+"project": "Oh My Pi",
+"tag": "v18.17.0",
+"line": "Reranking requests now send configured model headers, including custom `Authorization`"
+},
+{
+"id": "l0785",
+"project": "Pi",
+"tag": "v1.5.1",
+"line": "Fixed RPC mode cutting off shutdown cleanup, such as a pending MCP token refresh, when stdin closed and SIGTERM arrived together, which process managers like Paseo and systemd do. Pi lost the refreshed token and the MCP server revoked the sign-in. Once a shutdown has started, a stdin EOF or a single signal no longer interrupts it; a second signal still exits at once. Print mode likewise no longer dies from a signal that arrives during its final cleanup ([#11599](https://github.com/earendil-works"
+},
+{
+"id": "l0385",
+"project": "Claude Code",
+"tag": "v2.1.317",
+"line": "Fixed stdio MCP servers receiving an empty `AWS_BEARER_TOKEN_BEDROCK` when their env config sets it to empty; the variable is now unset, so the server can use the machine's own AWS credentials"
+},
+{
+"id": "l1255",
+"project": "Oh My Pi",
+"tag": "v18.18.1",
+"line": "RPC `bash` accepts `excludeFromContext: true` to keep a run out of model context like terminal `!!`; runtimes advertise support with `supportsBashExcludeFromContext` in the `ready` frame, and the Python SDK exposes that frame as `client.ready` ([#18206](https://github.com/can1357/oh-my-pi/pull/18206) by [@andrebrait](https://github.com/andrebrait))"
+},
+{
+"id": "l2728",
+"project": "Apache Airflow",
+"tag": "3.4.0",
+"line": "UI: Show errors when the task clear confirmation check fails (#75269)"
+},
+{
+"id": "l1040",
+"project": "Oh My Pi",
+"tag": "v18.18.3",
+"line": "fix(build): give bazel pi-shell's Windows console terminfo entry by @H4vC in https://github.com/can1357/oh-my-pi/pull/18555"
+},
+{
+"id": "l0056",
+"project": "Claude Code",
+"tag": "v2.1.321",
+"line": "Fixed Bash reads such as `grep -r foo \"$PWD/src\"` asking for permission when the same command with the path typed out runs without asking"
+},
+{
+"id": "l1817",
+"project": "Hermes Agent",
+"tag": "v0.23.0",
+"line": "**New models** \u2014 GPT-6.1 Terra, DeepSeek V4.1 Flash 1017 and Gemini 4 Argon on Solstice. Claude Mythos is treated as always-thinking, so reasoning-off requests stop failing their first try. Nemotron 3.5 Super VL gets default parameters. ([#145204](https://github.com/NousResearch/hermes-agent/pull/145204), [#140496](https://github.com/NousResearch/hermes-agent/pull/140496), [#139466](https://github.com/NousResearch/hermes-agent/pull/139466), [#148127](https://github.com/NousResearch/hermes-agent/"
+},
+{
+"id": "l1463",
+"project": "Oh My Pi",
+"tag": "v18.17.0",
+"line": "Added Keenable web search (`web/keenable`), using `KEENABLE_API_KEY` or a stored `keenable` credential, or a keyless public endpoint when explicitly selected ([#17953](https://github.com/can1357/oh-my-pi/pull/17953) by [@KGKallasmaa](https://github.com/KGKallasmaa))"
+},
+{
+"id": "l0888",
+"project": "Oh My Pi",
+"tag": "v18.18.6",
+"line": "MCP `headers` and stdio `env` values that use `!command` now run again on a 401/403 (the request is retried once), on `/mcp reconnect` and other reconnects, and on `/mcp reload`, so servers whose command mints short-lived tokens keep working past expiry instead of staying 401 until restart ([#18631](https://github.com/can1357/oh-my-pi/issues/18631))"
+},
+{
+"id": "l1217",
+"project": "Oh My Pi",
+"tag": "v18.18.2",
+"line": "fix(settings): dropped disabled providers from the project settings layer by @roboomp in https://github.com/can1357/oh-my-pi/pull/18054"
+},
+{
+"id": "l0906",
+"project": "Oh My Pi",
+"tag": "v18.18.6",
+"line": "Fixed streamed rows being clipped above the screen before they reached scrollback while the working row was up, so a scrolled-back terminal saw rows jump at the screen's top edge and the whole screen dropped when a run ended ([#12307](https://github.com/can1357/oh-my-pi/issues/12307), [#16117](https://github.com/can1357/oh-my-pi/pull/16117) by [@galtamam-cmyk](https://github.com/galtamam-cmyk)). `Composer.setRuntimeChildren` takes a `billedChrome` option for roots billed at their current height "
+},
+{
+"id": "l2063",
+"project": "Conductor",
+"tag": "v0.1.45",
+"line": "The `claude-agent-sdk` provider now defaults to `claude-sonnet-4-6` instead of"
+},
+{
+"id": "l3002",
+"project": "Apache Airflow",
+"tag": "3.4.0",
+"line": "Read XCom without object reconstruction during dependency evaluation (#72718)"
+},
+{
+"id": "l2338",
+"project": "Databricks CLI",
+"tag": "v1.24.0",
+"line": "Bump dependencies with known vulnerabilities. ([#7327](https://github.com/databricks/cli/pull/7327))"
+},
+{
+"id": "l0833",
+"project": "Pi",
+"tag": "v1.5.1",
+"line": "Azure OpenAI models now keep OpenAI's long-context price tier, so requests above 272K input tokens are costed at Azure's long-context rates ([#11948](https://github.com/earendil-works/pi/issues/11948))"
+},
+{
+"id": "l1587",
+"project": "Oh My Pi",
+"tag": "v18.17.0",
+"line": "Fixed Windows `rsync` treating a one-letter daemon host like `h::module` as a drive path ([#18048](https://github.com/can1357/oh-my-pi/pull/18048) by [@jchanghong023](https://github.com/jchanghong023))"
+},
+{
+"id": "l0910",
+"project": "Oh My Pi",
+"tag": "v18.18.6",
+"line": "fix(builtins): refuse to grep the file grep writes its output to by @yuzu-octopus in https://github.com/can1357/oh-my-pi/pull/16489"
+},
+{
+"id": "l2230",
+"project": "MLflow",
+"tag": "v3.18.0",
+"line": "[Gateway] Report Bedrock prompt cache tokens in gateway usage (#26835, @r14dd)"
+},
+{
+"id": "l1736",
+"project": "Oh My Pi",
+"tag": "v18.17.0",
+"line": "fix(retry): skip model-kind roles when resolving the fallback chain key by @haesol-shin in https://github.com/can1357/oh-my-pi/pull/18056"
+},
+{
+"id": "l2656",
+"project": "Apache Airflow",
+"tag": "3.4.0",
+"line": "Add ConnectionNotFoundError to the TypeScript SDK (#71375)"
+},
+{
+"id": "l0596",
+"project": "Gemini CLI",
+"tag": "v0.68.0",
+"line": "fix(core): resolve symlinked paths canonically in GlobTool by @ugorla-dev in https://github.com/google-gemini/gemini-cli/pull/30042"
+},
+{
+"id": "l3029",
+"project": "Apache Airflow",
+"tag": "3.4.0",
+"line": "API: Return asset events for Dag Runs without a start date (#71379)"
+},
+{
+"id": "l2438",
+"project": "dbt Core",
+"tag": "v2.0.11",
+"line": "Preserve Snowflake nested JSON fixture escapes and heterogeneous array values during local execution."
+},
+{
+"id": "l2837",
+"project": "Apache Airflow",
+"tag": "3.4.0",
+"line": "Fix log template sync failing when a custom SQL Alchemy schema is configured (#70793)"
+},
+{
+"id": "l0003",
+"project": "Claude Code",
+"tag": "v2.1.321",
+"line": "Fixed MCP OAuth requests sending secrets such as refresh tokens to another host when a server redirected them"
+},
+{
+"id": "l2003",
+"project": "OpenShell",
+"tag": "v0.1.8",
+"line": "Documentation clarifies security boundaries, supervisor recovery, credential rotation, and native inference guidance. [#5331](https://github.com/NVIDIA/OpenShell/pull/5331)"
+},
+{
+"id": "l0153",
+"project": "Claude Code",
+"tag": "v2.1.319",
+"line": "Fixed `claude -p --resume` with a prompt losing a deferred tool call when its MCP server is missing: the run now exits 1, keeps the call and refuses later input"
+},
+{
+"id": "l0312",
+"project": "Claude Code",
+"tag": "v2.1.318",
+"line": "Improved sessions on network file systems to look again when the configuration file is wrongly reported as missing, so fewer start without your MCP servers and trusted folders"
+},
+{
+"id": "l0251",
+"project": "Claude Code",
+"tag": "v2.1.319",
+"line": "[VSCode] Fixed Claude carrying out an unapproved plan after a window reload: a step interrupted in plan mode now stops with a notice when the session comes back in another permission mode"
+},
+{
+"id": "l1726",
+"project": "Oh My Pi",
+"tag": "v18.17.0",
+"line": "feat(tui): render LSP results under one header, with reference previews by @JustasMasiulis in https://github.com/can1357/oh-my-pi/pull/18106"
+},
+{
+"id": "l2800",
+"project": "Apache Airflow",
+"tag": "3.4.0",
+"line": "Fix 500 from POST ``/auth/token`` on a request body it cannot parse (#73258)"
+},
+{
+"id": "l1196",
+"project": "Oh My Pi",
+"tag": "v18.18.2",
+"line": "fix(ai): keep Codex namespaced tools through the auth gateway by @codyw912 in https://github.com/can1357/oh-my-pi/pull/17863"
+},
+{
+"id": "l0547",
+"project": "OpenAI Codex",
+"tag": "rust-v0.167.0",
+"line": "#58412 Keep exposed leading bangs literal in the chat composer @xma-oai"
+},
+{
+"id": "l3290",
+"project": "Soda Core",
+"tag": "v4.30.0",
+"line": "feat(contracts): redact session post-processing per file via a RedactionPolicy (PLATL-1404) by @nielsn in https://github.com/sodadata/soda-core/pull/2966"
+},
+{
+"id": "l0529",
+"project": "OpenAI Codex",
+"tag": "rust-v0.167.0",
+"line": "#58355 Fix remote executor authentication timeout recovery @jif-oai"
+},
+{
+"id": "l3021",
+"project": "Apache Airflow",
+"tag": "3.4.0",
+"line": "Improve DAG authorization filtering performance (#71722)"
+},
+{
+"id": "l0557",
+"project": "OpenAI Codex",
+"tag": "rust-v0.167.0",
+"line": "#58454 Add elastic budgeting for Guardian context preparation @ioanbudea-OAI"
+},
+{
+"id": "l1243",
+"project": "Oh My Pi",
+"tag": "v18.18.2",
+"line": "@Flare576 made their first contribution in https://github.com/can1357/oh-my-pi/pull/17685"
+},
+{
+"id": "l2777",
+"project": "Apache Airflow",
+"tag": "3.4.0",
+"line": "Make ``ZIP_REGEX`` case-insensitive to match .ZIP archives (#74269)"
+},
+{
+"id": "l0837",
+"project": "Pi",
+"tag": "v1.5.1",
+"line": "Fixed OpenRouter rejecting requests with a 400 (`This endpoint's maximum context length is ...`) for models whose output limit is close to the context window, such as DeepSeek flash. OpenRouter counts the input with its own tokenizer, which can be several percent higher than the provider's count, and pi left only 4,096 tokens spare. pi then treated the 400 as a context overflow and compacted the session, even at around 20% of the window. The default output limit now leaves 15% of the estimated i"
+},
+{
+"id": "l1393",
+"project": "Oh My Pi",
+"tag": "v18.18.0",
+"line": "fix(wire): accept shell trace byte values that are not UTF-8 by @H4vC in https://github.com/can1357/oh-my-pi/pull/18291"
+},
+{
+"id": "l3189",
+"project": "Apache Airflow",
+"tag": "3.4.0",
+"line": "Clarify How to upgrade docs for PyPI installs (#70897)"
+},
+{
+"id": "l0791",
+"project": "Pi",
+"tag": "v1.5.1",
+"line": "Fixed OAuth logins such as `openai` and `anthropic` failing with `invalid_grant` after pi was stopped while it refreshed an expired token, for example an RPC client that stops pi right after startup while the background catalog refresh runs. The token endpoint had already replaced the refresh token, but pi exited before saving the new one. On exit, pi now waits for a token refresh in progress to be saved ([#11692](https://github.com/earendil-works/pi/issues/11692))"
+},
+{
+"id": "l0828",
+"project": "Pi",
+"tag": "v1.5.1",
+"line": "Fixed provider connection errors hiding their underlying cause, such as connection refusal or certificate errors, behind generic messages ([#11695](https://github.com/earendil-works/pi/issues/11695))"
+},
+{
+"id": "l0587",
+"project": "Gemini CLI",
+"tag": "v0.68.0",
+"line": "fix(ci,sdk): run SDK tests in PR CI and fix AgentLoopContext mock in session.test.ts by @duvanka-prasad in https://github.com/google-gemini/gemini-cli/pull/30023"
+},
+{
+"id": "l1306",
+"project": "Oh My Pi",
+"tag": "v18.18.1",
+"line": "fix(compaction): deferred unused native memory recall by @roboomp in https://github.com/can1357/oh-my-pi/pull/18330"
+},
+{
+"id": "l1353",
+"project": "Oh My Pi",
+"tag": "v18.18.0",
+"line": "Bash tool cards for a command whose leading `cd <dir> &&` / `cd <dir>;` was hoisted into the working directory show that `cd` again above the visualized command, with the separator the model wrote, instead of dropping where it ran"
+},
+{
+"id": "l0577",
+"project": "Gemini CLI",
+"tag": "v0.68.0",
+"line": "fix(core): make isWithinRoot case-insensitive on Windows by @duvanka-prasad in https://github.com/google-gemini/gemini-cli/pull/29999"
+},
+{
+"id": "l3017",
+"project": "Apache Airflow",
+"tag": "3.4.0",
+"line": "Authorize team-scoped plugin API endpoints in multi-team mode (#71919)"
+},
+{
+"id": "l1307",
+"project": "Oh My Pi",
+"tag": "v18.18.1",
+"line": "fix(tui): rendered unrestorable bash traces plainly instead of crashing by @roboomp in https://github.com/can1357/oh-my-pi/pull/18340"
+},
+{
+"id": "l1950",
+"project": "Hermes Agent",
+"tag": "v0.23.0",
+"line": "**@ethernet8023** (33 PRs) \u2014 the stable release pipeline, Electron 44, signed bundles and Docker plugin installs"
+},
+{
+"id": "l0771",
+"project": "Pi",
+"tag": "v1.5.1",
+"line": "Default models moved to newer models at the same or a lower price: `amazon-bedrock` Claude Opus 5.5, `azure` GPT-6.1 Sol, `google` and `google-vertex` Gemini 4 Argon, `vercel-ai-gateway` GLM 5.3, `baseten` GLM 5.3, `minimax` and `minimax-cn` MiniMax-M3, `qwen-token-plan` and `qwen-token-plan-cn` Qwen3.8 Max, `opencode-go` Kimi K3.1 Pro, and Kimi K2.7 Code instead of Kimi K2.6 for `moonshotai`, `moonshotai-cn`, `huggingface`, `opencode`, `openrouter`, `cloudflare-workers-ai` and `cloudflare-ai-ga"
+},
+{
+"id": "l2608",
+"project": "Apache Airflow",
+"tag": "3.4.0",
+"line": "Expose task instance loop pass and expansion size to listeners (#75132)"
+},
+{
+"id": "l0306",
+"project": "Claude Code",
+"tag": "v2.1.318",
+"line": "Fixed tokens from `setup-token` being refused at start on machines with `forceLoginOrgUUID`, when the token belongs to a permitted organization"
+},
+{
+"id": "l2504",
+"project": "dbt Core",
+"tag": "v2.0.11",
+"line": "Bump lake compute driver to enable jwt authentication users to no longer need a background pat to be generated."
+},
+{
+"id": "l0668",
+"project": "OpenCode",
+"tag": "v2.2.7",
+"line": "Session exports are saved in the current working directory instead of the system temp folder. ([#62253](https://github.com/anomalyco/opencode/pull/62253))"
+},
+{
+"id": "l1247",
+"project": "Oh My Pi",
+"tag": "v18.18.1",
+"line": "A 429 or 402 worded like a context overflow (Bedrock's \"429 Too many tokens, please wait\u2026\") is treated as a rate limit, so it retries and walks the fallback chain instead of compacting ([#18345](https://github.com/can1357/oh-my-pi/pull/18345) by [@nick-maderight](https://github.com/nick-maderight))"
+},
+{
+"id": "l0331",
+"project": "Claude Code",
+"tag": "v2.1.318",
+"line": "Gateway: Improved the warning when AWS CountTokens fails on Amazon Bedrock: it says Claude Code, not the gateway, counts after the 501, and points at IAM only when AWS denies access"
+},
+{
+"id": "l0178",
+"project": "Claude Code",
+"tag": "v2.1.319",
+"line": "Fixed detailed beta tracing not presenting `CLAUDE_CODE_CLIENT_CERT` to collectors that require a client certificate"
+},
+{
+"id": "l0973",
+"project": "Oh My Pi",
+"tag": "v18.18.4",
+"line": "fix(gemini): added base64 skip-thought-signature compat for Gemini gateways by @tuandinh0801 in https://github.com/can1357/oh-my-pi/pull/18586"
+},
+{
+"id": "l1205",
+"project": "Oh My Pi",
+"tag": "v18.18.2",
+"line": "fix(coding-agent): scoped models re-resolve after logout, model-hub refresh and RPC login by @breakwaterlabs in https://github.com/can1357/oh-my-pi/pull/17981"
+},
+{
+"id": "l2633",
+"project": "Apache Airflow",
+"tag": "3.4.0",
+"line": "UI: Add a default preference for expanded task groups (#73429)"
+},
+{
+"id": "l0144",
+"project": "Claude Code",
+"tag": "v2.1.319",
+"line": "Fixed `claude -p` exiting 0 in auto mode when its actions were refused because no safety check was available: text and JSON output now exit 1"
+},
+{
+"id": "l2185",
+"project": "MLflow",
+"tag": "v3.18.0",
+"line": "[Projects / Tracking] Preserve literal percent characters in SQLite tracking paths with SQLAlchemy 2.1 (#27102, @mlflow-app)"
+},
+{
+"id": "l0693",
+"project": "OpenCode",
+"tag": "v2.2.6",
+"line": "Added `opencode run --worktree` (`-w`), which starts the session in a new git worktree. Use `--worktree=<name>` to choose the worktree name. It cannot be combined with `--continue` or `--session`. ([#60712](https://github.com/anomalyco/opencode/pull/60712))"
+},
+{
+"id": "l2042",
+"project": "OpenShell",
+"tag": "v0.1.7",
+"line": "OTLP collectors can use a private CA and mutual TLS: set `ca_file`, and optionally `cert_file` and `key_file`, on `[openshell.gateway.otlp]` or a signal table. The agent trace relay and OTLP/HTTP export now also support `https://` collectors. [#5084](https://github.com/NVIDIA/OpenShell/pull/5084)"
+},
+{
+"id": "l0794",
+"project": "Pi",
+"tag": "v1.5.1",
+"line": "Fixed `/mcp` sign-in staying on \"Connecting\u2026\" for minutes after a successful browser sign-in, with Ctrl+C doing nothing: pi waited for the browser to drop an unused connection to the OAuth callback port. The callback server now closes remaining connections when it shuts down ([#11311](https://github.com/earendil-works/pi/issues/11311))"
+},
+{
+"id": "l1355",
+"project": "Oh My Pi",
+"tag": "v18.18.0",
+"line": "Task-file approvals show and keep the checked file target through dispatch, so retargeted symlinks cannot silently substitute another assignment; replaced files require a retry ([#18314](https://github.com/can1357/oh-my-pi/pull/18314) by [@iliaal](https://github.com/iliaal))."
+},
+{
+"id": "l2655",
+"project": "Apache Airflow",
+"tag": "3.4.0",
+"line": "Add SSL cipher list option to the api server (#71645)"
+},
+{
+"id": "l0164",
+"project": "Claude Code",
+"tag": "v2.1.319",
+"line": "Fixed a case where `NotebookEdit` changed the wrong cell when the notebook changed while a permission prompt was open"
+},
+{
+"id": "l3294",
+"project": "Soda Core",
+"tag": "v4.30.0",
+"line": "fix(deps): raise 4 vulnerable dependencies by @paulteehan in https://github.com/sodadata/soda-core/pull/2983"
+},
+{
+"id": "l0359",
+"project": "Claude Code",
+"tag": "v2.1.317",
+"line": "Fixed auto mode failing every turn when an LLM gateway set as the base URL answers 403 or 422 to its server-side safety check (a 403 with an apiKeyHelper is unchanged)"
+},
+{
+"id": "l1347",
+"project": "Oh My Pi",
+"tag": "v18.18.1",
+"line": "fix(browser-relay): keep a tab omp drives usable when a password manager's menu opens in it by @will-bogusz in https://github.com/can1357/oh-my-pi/pull/16908"
+},
+{
+"id": "l2037",
+"project": "OpenShell",
+"tag": "v0.1.7",
+"line": "Vulnerable Rust dependencies are updated, including `zip` (GHSA-m665-v7pm-7grj), `russh` and `pageant` (open Dependabot alerts), and `pulldown-cmark`, and the unmaintained `rustls-pemfile` parser is replaced. [#5026](https://github.com/NVIDIA/OpenShell/pull/5026), [#5030](https://github.com/NVIDIA/OpenShell/pull/5030), [#5122](https://github.com/NVIDIA/OpenShell/pull/5122), [#5123](https://github.com/NVIDIA/OpenShell/pull/5123)"
+},
+{
+"id": "l0625",
+"project": "Gemini CLI",
+"tag": "v0.67.0",
+"line": "fix(acp): include MCP server and tool metadata in permission requests by @duvanka-prasad in https://github.com/google-gemini/gemini-cli/pull/29910"
+},
+{
+"id": "l0425",
+"project": "Claude Code",
+"tag": "v2.1.317",
+"line": "[VSCode] Fixed the sign-in screen opening when a request is blocked for its region or network"
+},
+{
+"id": "l2437",
+"project": "dbt Core",
+"tag": "v2.0.11",
+"line": "Validate refreshed OAuth credentials against the cached account and host before persisting."
+},
+{
+"id": "l3059",
+"project": "Apache Airflow",
+"tag": "3.4.0",
+"line": "Resolve NPM vulnerabilities in Simple auth manager (#69488)"
+},
+{
+"id": "l0352",
+"project": "Claude Code",
+"tag": "v2.1.317",
+"line": "Added a notice in Claude Desktop's Code tab when your organization's remote managed settings haven't loaded for the session, and another once they do"
+},
+{
+"id": "l2208",
+"project": "MLflow",
+"tag": "v3.18.0",
+"line": "[Tracking] Apply permission grants to every spelling of an experiment ID (#26917, @kriscon-db)"
+},
+{
+"id": "l2317",
+"project": "Databricks CLI",
+"tag": "v1.25.0",
+"line": "Bump dependencies with known vulnerabilities. ([#7394](https://github.com/databricks/cli/pull/7394))"
+},
+{
+"id": "l1798",
+"project": "Hermes Agent",
+"tag": "v0.23.0",
+"line": "**One gateway owns every conversation** \u2014 Before, the CLI, TUI, Desktop, editors (ACP), messaging bots and cron could each run their own copy of the agent against the same chat, which is how messages got written twice or went missing between surfaces. Now each machine runs one gateway that owns every session, and every surface attaches to it as a client: a chat you open anywhere is the same chat, with one queue and one history. You can even steer or edit a queued prompt from Desktop without it r"
+},
+{
+"id": "l1852",
+"project": "Hermes Agent",
+"tag": "v0.23.0",
+"line": "**Approval gate catches more** \u2014 The gate now prompts for `curl \u2026 | sudo bash` pipes, later or abbreviated PowerShell deletes, and credential uploads hidden behind an approved rule. A stale approval card can no longer approve the next request. ([#87362](https://github.com/NousResearch/hermes-agent/pull/87362), [#148865](https://github.com/NousResearch/hermes-agent/pull/148865), [#141377](https://github.com/NousResearch/hermes-agent/pull/141377), [#87554](https://github.com/NousResearch/hermes-ag"
+},
+{
+"id": "l1623",
+"project": "Oh My Pi",
+"tag": "v18.17.0",
+"line": "Replaced `CustomEditor.modelMentionLabel` with `resolveModelMention` (returns `{ label, selector }`); `collapseModelMentions` takes the same callback; `getModelMentionSuggestions` returns `ModelMentionCompletion`."
+},
+{
+"id": "l0768",
+"project": "Pi",
+"tag": "v1.5.1",
+"line": "Added GLM 5.3 to the Qwen Token Plan Individual model allowlist ([#11658](https://github.com/earendil-works/pi/issues/11658))"
+},
+{
+"id": "l2104",
+"project": "MLflow",
+"tag": "v3.18.0",
+"line": "[Gateway] Route guardrail sanitization calls to the server's own address (#27383, @kriscon-db)"
+},
+{
+"id": "l2324",
+"project": "Databricks CLI",
+"tag": "v1.24.0",
+"line": "`databricks auth login` and `databricks auth token` now reject a host that is not a URL with a hostname, such as `/`, `?o=123` or `https://`, instead of falling back to `DATABRICKS_HOST` or failing later. An empty host after \"Enter a host URL manually\" in the login profile picker no longer starts discovery login. ([#7195](https://github.com/databricks/cli/pull/7195))"
+},
+{
+"id": "l2397",
+"project": "dbt Core",
+"tag": "v1.11.17",
+"line": "Fix `dbt deps` failing with \"could not read Username\" when installing a git package from a `subdirectory` with credentials in the URL, by supplying credentials to the checkout's `git reset --hard` as well ([#16861](https://github.com/dbt-labs/dbt-core/issues/16861))"
+},
+{
+"id": "l1006",
+"project": "Oh My Pi",
+"tag": "v18.18.3",
+"line": "Extension UI gains optional `ui.formDialog(html, options)`, which renders an HTML `<form>` and resolves to `{ data, timedOut? }` (undefined when cancelled). The interactive TUI renders it as a form dialog, ACP clients with form elicitation get one elicitation with a property per field, and hosts without it (RPC) answer the `ask` tool field by field through `select`/`input`/`editor`."
+},
+{
+"id": "l1967",
+"project": "OpenShell",
+"tag": "v0.1.8",
+"line": "The Go SDK now shares `oidc_token.json` with the CLI, and `v1.RefreshableToken` no longer returns an expired cached token after a failed refresh for any token source. Run `openshell gateway login` once to replace token files written by earlier Go SDK releases. [#4830](https://github.com/NVIDIA/OpenShell/pull/4830)"
+},
+{
+"id": "l2858",
+"project": "Apache Airflow",
+"tag": "3.4.0",
+"line": "Fix remote processor injection happening before dictConfig runs in configure_logging (#66633)"
+},
+{
+"id": "l1723",
+"project": "Oh My Pi",
+"tag": "v18.17.0",
+"line": "feat(tui): put the search scope in Grep, AST Grep and AST Edit headers by @JustasMasiulis in https://github.com/can1357/oh-my-pi/pull/18105"
+},
+{
+"id": "l1260",
+"project": "Oh My Pi",
+"tag": "v18.18.1",
+"line": "A browser relay tab stays usable after a password manager's inline autofill menu opens in it; the call that opened the menu still fails once (reinstall the extension with `omp browser-relay install` and reload it) ([#16908](https://github.com/can1357/oh-my-pi/pull/16908) by [@will-bogusz](https://github.com/will-bogusz))"
+},
+{
+"id": "l1978",
+"project": "OpenShell",
+"tag": "v0.1.8",
+"line": "The CLI now renews expired OIDC client credentials tokens by repeating the grant instead of failing with `no refresh token available`. Renewal needs `OPENSHELL_OIDC_CLIENT_SECRET` to be set. [#4389](https://github.com/NVIDIA/OpenShell/pull/4389)"
+},
+{
+"id": "l3203",
+"project": "Apache Airflow",
+"tag": "3.4.0",
+"line": "Enhance/standardize documentation for ``AssetOrTimeSchedule`` (#69831)"
+},
+{
+"id": "l1435",
+"project": "Oh My Pi",
+"tag": "v18.17.0",
+"line": "Added `devin-cli` (Devin CLI seat key) and `devin-windsurf` (Windsurf Enterprise sign-in) logins, both stored as a `devin` API key ([#13637](https://github.com/can1357/oh-my-pi/pull/13637) by [@pavel-kalmykov](https://github.com/pavel-kalmykov), [#13288](https://github.com/can1357/oh-my-pi/pull/13288) by [@pavel-kalmykov](https://github.com/pavel-kalmykov))"
+},
+{
+"id": "l3049",
+"project": "Apache Airflow",
+"tag": "3.4.0",
+"line": "Improve Dag run metrics (#70013)"
+},
+{
+"id": "l0971",
+"project": "Oh My Pi",
+"tag": "v18.18.4",
+"line": "fix(eval): treat a blank per-call model as omitted by @iwangjie in https://github.com/can1357/oh-my-pi/pull/18576"
+},
+{
+"id": "l2140",
+"project": "MLflow",
+"tag": "v3.18.0",
+"line": "[Tracking] Ignore `.` path segments when authorizing artifact proxy requests (#27229, @joshuawong-db)"
+},
+{
+"id": "l2600",
+"project": "Apache Airflow",
+"tag": "3.4.0",
+"line": "Tests that patch ``airflow.utils.email.send_mime_email`` no longer intercept the call made by"
+},
+{
+"id": "l2826",
+"project": "Apache Airflow",
+"tag": "3.4.0",
+"line": "Redact secrets written through ``RedactedIO.writelines()`` (#72063)"
+},
+{
+"id": "l0182",
+"project": "Claude Code",
+"tag": "v2.1.319",
+"line": "Fixed the agents view appearing to send a reply to a background session waiting on a permission prompt; the reply now stays in the box with a hint to open the session and answer"
+},
+{
+"id": "l2336",
+"project": "Databricks CLI",
+"tag": "v1.24.0",
+"line": "Add `sensitive: true` for bundle variables. A variable used as the value of a secret is sensitive by default. `bundle validate -o json` redacts only sensitive variables instead of every string variable, and a sensitive variable can only be referenced from a sensitive resource field (such as a secret's `value`) or from another sensitive variable. ([#7288](https://github.com/databricks/cli/pull/7288))"
+},
+{
+"id": "l1965",
+"project": "OpenShell",
+"tag": "v0.1.8",
+"line": "The `openshell` Python SDK is now published from [ai-openshell/sdk-python](https://github.com/ai-openshell/sdk-python) starting with `0.1.8`, and core GitHub Releases no longer attach its wheel or checksum. Keep installing it with `pip install openshell` from PyPI. [#5350](https://github.com/NVIDIA/OpenShell/pull/5350)"
+},
+{
+"id": "l1268",
+"project": "Oh My Pi",
+"tag": "v18.18.1",
+"line": "A `bash.patterns` `deny` rule now blocks a command anywhere in a `;`, `|`, `||` or `&&` line even when an earlier `prompt` rule matches another part of it, and project settings can no longer override the operator's `deny` or `prompt` patterns with `allow` ([#18349](https://github.com/can1357/oh-my-pi/pull/18349) by [@asuffield](https://github.com/asuffield))"
+},
+{
+"id": "l0057",
+"project": "Claude Code",
+"tag": "v2.1.321",
+"line": "Fixed Claude apps gateway refusing to start when a `desktop` setting holds a field newer than the gateway, such as a managed MCP server's `oauth.omitResource`; it now warns and serves it"
+},
+{
+"id": "l1147",
+"project": "Oh My Pi",
+"tag": "v18.18.2",
+"line": "Added filesystem path utilities for checking paths through symlinked roots, including paths that do not yet exist, and for optionally propagating filesystem errors in directory checks."
+},
+{
+"id": "l1719",
+"project": "Oh My Pi",
+"tag": "v18.17.0",
+"line": "Devin (Windsurf Enterprise) login: devin-windsurf auth hook by @pavel-kalmykov in https://github.com/can1357/oh-my-pi/pull/13288"
+},
+{
+"id": "l0946",
+"project": "Oh My Pi",
+"tag": "v18.18.4",
+"line": "`auth-gateway stdio` now follows a role's configured fallback chain even when `modelRoles` does not set the role (a chat role without its own chain inherits the `default` chain) ([#18509](https://github.com/can1357/oh-my-pi/pull/18509) by [@enieuwy](https://github.com/enieuwy))"
+},
+{
+"id": "l0350",
+"project": "Claude Code",
+"tag": "v2.1.317",
+"line": "Added a check that asks before a web or shell tool call sends your account email address to the network"
+},
+{
+"id": "l1523",
+"project": "Oh My Pi",
+"tag": "v18.17.0",
+"line": "LSP results stay current for open files edited outside OMP, and files unused for 5 minutes are closed in the language server ([#18153](https://github.com/can1357/oh-my-pi/pull/18153) by [@will-bogusz](https://github.com/will-bogusz))"
+},
+{
+"id": "l2098",
+"project": "MLflow",
+"tag": "v3.18.0",
+"line": "[Gateway] Take the final input and cache token counts from Anthropic `message_delta` (#26908, @pcbeingused333)"
+},
+{
+"id": "l0586",
+"project": "Gemini CLI",
+"tag": "v0.68.0",
+"line": "fix(cli): anchor .git suffix removal to end of repo URL by @diegogodinezr in https://github.com/google-gemini/gemini-cli/pull/30013"
+},
+{
+"id": "l0103",
+"project": "Claude Code",
+"tag": "v2.1.321",
+"line": "Changed `AskUserQuestion` in `claude -p` and SDK sessions to deny a host's permission answer that sets the undocumented `afkTimeoutMs` input field"
+},
+{
+"id": "l2571",
+"project": "dbt Core",
+"tag": "v2.0.11",
+"line": "[@joaodaher](https://github.com/joaodaher)"
+},
+{
+"id": "l0039",
+"project": "Claude Code",
+"tag": "v2.1.321",
+"line": "Fixed `claude agents` ignoring `--permission-mode`, `--dangerously-skip-permissions`, `--model`, `--effort` or `--agent` typed before `agents` when a flag such as `--verbose` was also on the line"
+},
+{
+"id": "l2316",
+"project": "Databricks CLI",
+"tag": "v1.25.0",
+"line": "Expose the workspace of the selected profile to bundle templates as `.workspace`, with `Hostname`, `ID`, and `URL`, so templates can address a workspace on a host shared by several workspaces. A template input named `workspace` takes precedence. ([#7349](https://github.com/databricks/cli/pull/7349))"
+},
+{
+"id": "l2050",
+"project": "OpenShell",
+"tag": "v0.1.7",
+"line": "The Podman container gateway docs now give a tested mTLS procedure and list every cause of the `--tls-cert is required when TLS is enabled` startup error. [#4977](https://github.com/NVIDIA/OpenShell/pull/4977), [#5001](https://github.com/NVIDIA/OpenShell/pull/5001)"
+},
+{
+"id": "l1937",
+"project": "Hermes Agent",
+"tag": "v0.23.0",
+"line": "Plugin-rewritten messages no longer refused on multi-profile gateways ([#139076](https://github.com/NousResearch/hermes-agent/pull/139076))"
+},
+{
+"id": "l2462",
+"project": "dbt Core",
+"tag": "v2.0.11",
+"line": "Fix Redshift OAuth authentication failures with an updated ADBC driver."
+},
+{
+"id": "l1902",
+"project": "Hermes Agent",
+"tag": "v0.23.0",
+"line": "**Clearer approvals for untrusted servers** \u2014 choosing Allow for this session or Always now actually stops the next prompt for that tool, prompts show the call's arguments with secrets masked, and YOLO or `approvals.mode: off` skips them. ([#143780](https://github.com/NousResearch/hermes-agent/pull/143780), [#143795](https://github.com/NousResearch/hermes-agent/pull/143795), [#143787](https://github.com/NousResearch/hermes-agent/pull/143787) \u2014 @liuhao1024, @fangliquanflq)"
+},
+{
+"id": "l3205",
+"project": "Apache Airflow",
+"tag": "3.4.0",
+"line": "Document that connection secrets without conn_type remain supported (#69780)"
+},
+{
+"id": "l3223",
+"project": "Dagster",
+"tag": "1.13.29",
+"line": "[ui] Fixed the Runs page's bulk actions menu so that actions the user doesn't have permission for cannot be taken, and are shown as disabled."
+},
+{
+"id": "l3012",
+"project": "Apache Airflow",
+"tag": "3.4.0",
+"line": "Use a structured SecretCache key instead of a concatenated string (#72201)"
+},
+{
+"id": "l0583",
+"project": "Gemini CLI",
+"tag": "v0.68.0",
+"line": "fix(core,cli): fix instances of incorrect \\n escape behavior by @ugorla-dev in https://github.com/google-gemini/gemini-cli/pull/29989"
+},
+{
+"id": "l0310",
+"project": "Claude Code",
+"tag": "v2.1.318",
+"line": "Fixed the sign-in failure when a stored claude.ai login reaches its time limit: it now says so, and in `claude -p` names `claude auth login` and `claude setup-token`"
+},
+{
+"id": "l1113",
+"project": "Oh My Pi",
+"tag": "v18.18.2",
+"line": "HUD job status updates now continue to reflect elapsed time instead of freezing until matching output arrives."
+},
+{
+"id": "l0844",
+"project": "Pi",
+"tag": "v1.5.1",
+"line": "Fixed oversized MCP SSE responses keeping their HTTP connections open after the message-size limit rejected them ([#11729](https://github.com/earendil-works/pi/issues/11729))"
+},
+{
+"id": "l0273",
+"project": "Claude Code",
+"tag": "v2.1.318",
+"line": "Fixed `/logout`, `claude auth logout` and `claude mcp remove` reporting success, and changes to trust, consent or MCP settings being dropped with no word, when the config file could not be updated on a shared network home directory"
+},
+{
+"id": "l1226",
+"project": "Oh My Pi",
+"tag": "v18.18.2",
+"line": "fix(natives): read back AT-SPI text writes before reporting success by @will-bogusz in https://github.com/can1357/oh-my-pi/pull/18220"
+},
+{
+"id": "l0113",
+"project": "Claude Code",
+"tag": "v2.1.321",
+"line": "Changed artifact design guidance to treat Inter and Space Grotesk as good default typefaces"
+},
+{
+"id": "l2172",
+"project": "MLflow",
+"tag": "v3.18.0",
+"line": "[Tracking] Reject auth store values the database would refuse; stop leaking `IntegrityError` (#27160, @a-gajam)"
+},
+{
+"id": "l0198",
+"project": "Claude Code",
+"tag": "v2.1.319",
+"line": "Fixed a Bash permission bypass where a crafted environment prefix could hide part of a command from permission checks"
+},
+{
+"id": "l3184",
+"project": "Apache Airflow",
+"tag": "3.4.0",
+"line": "Clarify that DAG.access_control is only read by the FAB auth manager (#71260)"
+},
+{
+"id": "l2447",
+"project": "dbt Core",
+"tag": "v2.0.11",
+"line": "Match BigQuery partition fields case-insensitively when inspecting existing tables ([#14646](https://github.com/dbt-labs/dbt-core/issues/14646))"
+},
+{
+"id": "l0555",
+"project": "OpenAI Codex",
+"tag": "rust-v0.167.0",
+"line": "#58444 Cap Guardian context entries before elastic allocation @ioanbudea-OAI"
+},
+{
+"id": "l0340",
+"project": "Claude Code",
+"tag": "v2.1.318",
+"line": "[Cloud sessions] Added a No repository option: a cloud session on an Anthropic-hosted environment can now start without picking a repository"
+},
+{
+"id": "l0204",
+"project": "Claude Code",
+"tag": "v2.1.319",
+"line": "Fixed a case where certificate errors behind a TLS-inspecting proxy persisted when `CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC` was set. With it set, Claude Code now makes a TLS handshake with the configured API host after a certificate failure, through your http:// proxy if one is set; it sends no API request"
+},
+{
+"id": "l2547",
+"project": "dbt Core",
+"tag": "v2.0.11",
+"line": "[@akbog](https://github.com/akbog)"
+},
+{
+"id": "l2240",
+"project": "MLflow",
+"tag": "v3.18.0",
+"line": "[Tracing] Preserve selected null-valued fields in trace CLI `--extract-fields` output (#26824, @mlflow-app)"
+},
+{
+"id": "l1388",
+"project": "Oh My Pi",
+"tag": "v18.18.0",
+"line": "`ShellTrace` fields that carry values from the run (argv, assignments, redirect targets, unlocated unit sources, diagnostics) are `ShellTraceBytes`: a string when the bytes are UTF-8, otherwise the raw byte values. `isShellTrace` accepts both forms"
+},
+{
+"id": "l2720",
+"project": "Apache Airflow",
+"tag": "3.4.0",
+"line": "Fix task loop iteration log links pointing to a nonexistent page (#75458)"
+},
+{
+"id": "l0702",
+"project": "OpenCode",
+"tag": "v2.2.6",
+"line": "Webfetch and Code Mode `fetch` now reject URLs that contain credentials and ignore the `#fragment` when matching permission rules, and Code Mode `fetch` checks every redirect against your webfetch rules. ([#60502](https://github.com/anomalyco/opencode/pull/60502), [#61701](https://github.com/anomalyco/opencode/pull/61701), [#62373](https://github.com/anomalyco/opencode/pull/62373))"
+},
+{
+"id": "l0787",
+"project": "Pi",
+"tag": "v1.5.1",
+"line": "Fixed the find tool reporting the result limit when exactly `limit` files match, and `limit: 0` in find and ls returning every result or an empty listing; limits below 1 now mean 1 ([#7121](https://github.com/earendil-works/pi/issues/7121))"
+},
+{
+"id": "l1442",
+"project": "Oh My Pi",
+"tag": "v18.17.0",
+"line": "OAuth broker now validates residency, inference-region, and selected-organization metadata in uploaded credentials and remote snapshots"
+},
+{
+"id": "l0955",
+"project": "Oh My Pi",
+"tag": "v18.18.4",
+"line": "Fixed late background embedding writes overwriting newer vectors for updated memories or recreating vectors for deleted memories ([#18503](https://github.com/can1357/oh-my-pi/pull/18503) by [@eggpeat](https://github.com/eggpeat))"
+},
+{
+"id": "l1649",
+"project": "Oh My Pi",
+"tag": "v18.17.0",
+"line": "Centered sheets and dialogs on narrow native terminals fill the pane only once their content reaches half the screen height."
+},
+{
+"id": "l2014",
+"project": "OpenShell",
+"tag": "v0.1.8",
+"line": "Made the Codex Security check advisory and kept SDK error messages in compatibility reviews. [#5246](https://github.com/NVIDIA/OpenShell/pull/5246), [#5292](https://github.com/NVIDIA/OpenShell/pull/5292)"
+},
+{
+"id": "l0486",
+"project": "OpenAI Codex",
+"tag": "rust-v0.167.0",
+"line": "#58129 Persist subagent relationships before creating child storage @radai-oai"
+},
+{
+"id": "l0798",
+"project": "Pi",
+"tag": "v1.5.1",
+"line": "Fixed every codemode script failing with `URI malformed` when any callable tool, such as an MCP tool, had a `$ref` with a malformed percent escape (`#/$defs/%E0`) in its schema, even scripts that do not call that tool. The parameter now renders as `unknown` in the tool's declaration ([#11803](https://github.com/earendil-works/pi/issues/11803))"
+},
+{
+"id": "l3102",
+"project": "Apache Airflow",
+"tag": "3.4.0",
+"line": "Complete German UI translations (#75301)"
+},
+{
+"id": "l1652",
+"project": "Oh My Pi",
+"tag": "v18.17.0",
+"line": "Tern's classic renderer no longer leaves stale inline images over text while an answer streams or the pane resizes."
+},
+{
+"id": "l2990",
+"project": "Apache Airflow",
+"tag": "3.4.0",
+"line": "Speed up the event logs API by loading only display names (#73021)"
+},
+{
+"id": "l2094",
+"project": "MLflow",
+"tag": "v3.18.0",
+"line": "[UI] Show a skill-folder URL in the registration example (#27455, @B-Step62)"
+},
+{
+"id": "l0015",
+"project": "Claude Code",
+"tag": "v2.1.321",
+"line": "Fixed context usage estimates overcounting tool definitions when exact token counts are unavailable"
+},
+{
+"id": "l2899",
+"project": "Apache Airflow",
+"tag": "3.4.0",
+"line": "Warn about overly large task state values from language SDK tasks (#74945)"
+},
+{
+"id": "l2326",
+"project": "Databricks CLI",
+"tag": "v1.24.0",
+"line": "`databricks ssh connect` now documents `--environment-version` for choosing the serverless environment version, starts a separate default-named server for each version, and rejects the flag together with `--cluster`. Default connection names also include the environment version in their hash, so the default name when `--environment-version` is not specified changes with this release. Configuration associated with the old connection name (secret scope, SSH keys and known hosts in your local `.dat"
+},
+{
+"id": "l1924",
+"project": "Hermes Agent",
+"tag": "v0.23.0",
+"line": "Edge TTS works again after Microsoft's token change. ([#140896](https://github.com/NousResearch/hermes-agent/pull/140896) \u2014 @ebrearley)"
+},
+{
+"id": "l1174",
+"project": "Oh My Pi",
+"tag": "v18.18.2",
+"line": "fix(mcp): map positional tokens onto a prompt's declared arguments by @tatus9 in https://github.com/can1357/oh-my-pi/pull/18473"
+},
+{
+"id": "l0237",
+"project": "Claude Code",
+"tag": "v2.1.319",
+"line": "Changed the automatic certificate repair behind a TLS-inspecting proxy: it no longer runs when `ALL_PROXY` is the only proxy variable set. Set `HTTPS_PROXY` to the proxy's http:// URL instead"
+},
+{
+"id": "l3095",
+"project": "Apache Airflow",
+"tag": "3.4.0",
+"line": "Limit the CLI reference's page contents to top-level commands (#75483)"
+},
+{
+"id": "l2021",
+"project": "OpenShell",
+"tag": "v0.1.8",
+"line": "Testkit errors now name unsupported gateway auth modes. [#5248](https://github.com/NVIDIA/OpenShell/pull/5248)"
+},
+{
+"id": "l2293",
+"project": "MLflow",
+"tag": "v3.18.0",
+"line": "[Gateway] Propagate token usage in Mistral gateway streaming responses (#26440, @maharanay22)"
+},
+{
+"id": "l3271",
+"project": "Prefect",
+"tag": "3.9.2",
+"line": "Stop credential-obfuscation git clone tests from hitting GitHub by [@devin-ai-integration](https://github.com/devin-ai-integration)[bot] in [#23660](https://github.com/PrefectHQ/prefect/pull/23660)"
+},
+{
+"id": "l0252",
+"project": "Claude Code",
+"tag": "v2.1.319",
+"line": "[VSCode] Improved the \"not signed in\" message behind a Claude apps gateway: it now looks like an error and has a Sign in link"
+},
+{
+"id": "l2001",
+"project": "OpenShell",
+"tag": "v0.1.8",
+"line": "The Helm chart now supports `priorityClassName` and `topologySpreadConstraints` for the gateway pod. [#2832](https://github.com/NVIDIA/OpenShell/pull/2832)"
+},
+{
+"id": "l0709",
+"project": "OpenCode",
+"tag": "v2.2.6",
+"line": "Prevent repeated zsh `q` flags from freezing shell permission scanning. Thanks @yangguan-xue. ([#60791](https://github.com/anomalyco/opencode/pull/60791))"
+},
+{
+"id": "l2961",
+"project": "Apache Airflow",
+"tag": "3.4.0",
+"line": "Mask provider-declared sensitive connection extras on every connection type (#73794)"
+},
+{
+"id": "l2180",
+"project": "MLflow",
+"tag": "v3.18.0",
+"line": "[Tracking] Read DELETE request params like the handlers do in basic-auth (#27132, @joshuawong-db)"
+},
+{
+"id": "l2518",
+"project": "dbt Core",
+"tag": "v2.0.11",
+"line": "Verify TLS certificates against the operating system's certificate store instead of a bundled CA list, so HTTPS connections work behind TLS-inspecting proxies whose CA is only installed in the OS store."
+},
+{
+"id": "l2321",
+"project": "Databricks CLI",
+"tag": "v1.24.0",
+"line": "A variable used as the value of a secret is now sensitive: referencing it from any other field, such as a job parameter or a secret's `comment`, is an error because the value would be used in plain text. Mark other secret-holding variables with `sensitive: true` to get the same protection. ([#7288](https://github.com/databricks/cli/pull/7288))"
+},
+{
+"id": "l2498",
+"project": "dbt Core",
+"tag": "v2.0.11",
+"line": "Removed lingering 'dbt' naming from parse-failure and warn_error_options log output, and pointed the parse-failure suggestion at the dbt v2 upgrade guide."
+},
+{
+"id": "l1963",
+"project": "OpenShell",
+"tag": "v0.1.8",
+"line": "Sandboxes now fail to launch when a filesystem policy path goes through a symlink inside a writable workspace, including in best-effort mode. Use the symlink's target path in the policy instead. [#5278](https://github.com/NVIDIA/OpenShell/pull/5278)"
+},
+{
+"id": "l1131",
+"project": "Oh My Pi",
+"tag": "v18.18.2",
+"line": "Fixed setValue() on Linux reporting success when Firefox or Thunderbird fields, including password fields, were not actually updated; failures now identify the affected field appropriately."
+},
+{
+"id": "l0501",
+"project": "OpenAI Codex",
+"tag": "rust-v0.167.0",
+"line": "#58189 Use turn-scoped permissions for standalone web search @sayan-oai"
+},
+{
+"id": "l2812",
+"project": "Apache Airflow",
+"tag": "3.4.0",
+"line": "Avoid a full asset table scan per request in simple auth manager (#72934)"
+},
+{
+"id": "l2312",
+"project": "Databricks CLI",
+"tag": "v1.25.0",
+"line": "Add the `postgres_data_apis` resource (Private Preview) for enabling and configuring the Data API of a Lakebase Postgres database. ([#7160](https://github.com/databricks/cli/pull/7160))"
+},
+{
+"id": "l1373",
+"project": "Oh My Pi",
+"tag": "v18.18.0",
+"line": "Browser `open` now returns the same tab with a recovery notice when Chrome detaches the relay during navigation and omp successfully reattaches, instead of failing the open and closing newly opened tabs ([#18252](https://github.com/can1357/oh-my-pi/pull/18252) by [@will-bogusz](https://github.com/will-bogusz))"
+},
+{
+"id": "l0221",
+"project": "Claude Code",
+"tag": "v2.1.319",
+"line": "Improved the `/model` picker: older models are now grouped under a \"More models\" row instead of being listed after the current ones"
+},
+{
+"id": "l0842",
+"project": "Pi",
+"tag": "v1.5.1",
+"line": "Fixed large MCP stdio messages being repeatedly copied and scanned as chunks arrived, causing slow tool responses ([#11761](https://github.com/earendil-works/pi/issues/11761))"
+},
+{
+"id": "l0782",
+"project": "Pi",
+"tag": "v1.5.1",
+"line": "Fixed `pi mcp list` reporting MCP servers with `\"auth\": { \"provider\": \"<provider>\" }`, such as Radius, as needing sign-in although the provider was signed in: the shell command sent no token. It now sends the provider's `/login` token and refreshes it when it expired. For these servers the sign-in hint names `/login <provider>` instead of `pi mcp login`, and `pi mcp login` and `pi mcp logout` point to `/login` and `/logout` instead of failing with \"does not use OAuth\""
+},
+{
+"id": "l0187",
+"project": "Claude Code",
+"tag": "v2.1.319",
+"line": "Fixed Remote Control sessions still showing \"Limit reached\" on other devices after a usage limit was lifted outside the session"
+},
+{
+"id": "l0370",
+"project": "Claude Code",
+"tag": "v2.1.317",
+"line": "Fixed screen readers speaking a running subagent's elapsed time and token count on every change in screen reader mode"
+},
+{
+"id": "l2232",
+"project": "MLflow",
+"tag": "v3.18.0",
+"line": "[Tracking] Require role identifiers in a request to agree in `_get_role_workspace_from_request` (#26864, @tanghaoji)"
+},
+{
+"id": "l0525",
+"project": "OpenAI Codex",
+"tag": "rust-v0.167.0",
+"line": "#58343 Preserve fallback token refreshes when the keyring is unreadable @jif-oai"
+},
+{
+"id": "l1976",
+"project": "OpenShell",
+"tag": "v0.1.8",
+"line": "Provider attachment now checks credential inspection against the sandbox's latest saved policy instead of its creation policy. [#5310](https://github.com/NVIDIA/OpenShell/pull/5310)"
+},
+{
+"id": "l2041",
+"project": "OpenShell",
+"tag": "v0.1.7",
+"line": "OTLP collectors that require authentication or routing headers are now supported through `headers` or `headers_file` on `[openshell.gateway.otlp]` or a signal table. Supervisors and the agent trace relay send them too, so MLflow can ingest relayed agent traces directly with `x-mlflow-experiment-id`. [#5083](https://github.com/NVIDIA/OpenShell/pull/5083)"
+},
+{
+"id": "l1807",
+"project": "Hermes Agent",
+"tag": "v0.23.0",
+"line": "**Lighter and faster, especially when Hermes runs all day** \u2014 Recurring cron jobs share a prompt cache, one-shot runs send about 1,570 fewer prompt tokens per call, and `patch`/`write_file` return in milliseconds with LSP on. Long-lived gateways now let go of closed sessions' memory, and the Desktop sidebar no longer slows down as sessions pile up (one store with ~35k cron runs went from a 121 s refresh to instant). ([#139876](https://github.com/NousResearch/hermes-agent/pull/139876), [#144177]("
+},
+{
+"id": "l0298",
+"project": "Claude Code",
+"tag": "v2.1.318",
+"line": "Fixed workflows re-running finished agents when resumed after a usage limit"
+},
+{
+"id": "l0082",
+"project": "Claude Code",
+"tag": "v2.1.321",
+"line": "Improved auto mode in headless sessions, the desktop app and VS Code: reports from background subagents that wait together are answered in one model call, as in the terminal"
+},
+{
+"id": "l1377",
+"project": "Oh My Pi",
+"tag": "v18.18.0",
+"line": "Prewalk no longer hands a subagent to its cheap model when the subagent messages its parent or another agent (`write agent://\u2026`) before its first file edit ([#18322](https://github.com/can1357/oh-my-pi/pull/18322) by [@1vivy](https://github.com/1vivy))"
+},
+{
+"id": "l1448",
+"project": "Oh My Pi",
+"tag": "v18.17.0",
+"line": "Gemini and Vertex malformed-response finishes now report the correct stop reason and keep token usage; RPC prompt errors are reported as retryable"
+},
+{
+"id": "l1893",
+"project": "Hermes Agent",
+"tag": "v0.23.0",
+"line": "**Bigger Desktop plugin SDK** \u2014 Desktop plugins can add rows to the composer's right-click menu and words to the spell checker, render media from their own tools, post cards into their own chat, and script the preview Browser once they declare the capability and you allow it for that site. Portable plugins get a Settings \u25b8 Plugins form, and a newly saved API key reaches their MCP server without a restart. ([#143678](https://github.com/NousResearch/hermes-agent/pull/143678), [#143980](https://git"
+},
+{
+"id": "l3231",
+"project": "Prefect",
+"tag": "3.9.2",
+"line": "Preserve `init=False` dataclass fields in `visit_collection` by [@Kayvan-Zahiri](https://github.com/Kayvan-Zahiri) in [#23270](https://github.com/PrefectHQ/prefect/pull/23270)"
+},
+{
+"id": "l1985",
+"project": "OpenShell",
+"tag": "v0.1.8",
+"line": "Sandbox signal masks are now built from zero-initialized memory, which fixes reads of uninitialized bytes on 64-bit musl. [#5194](https://github.com/NVIDIA/OpenShell/pull/5194)"
+},
+{
+"id": "l3291",
+"project": "Soda Core",
+"tag": "v4.30.0",
+"line": "feat(sqlserver): workload identity federation authentication (PLATL-1425) by @nielsn in https://github.com/sodadata/soda-core/pull/2974"
+},
+{
+"id": "l3036",
+"project": "Apache Airflow",
+"tag": "3.4.0",
+"line": "Multi-Team: Add teams verify command to validate multi-team configuration (#70947)"
+},
+{
+"id": "l1080",
+"project": "Oh My Pi",
+"tag": "v18.18.2",
+"line": "Validated security findings now display validation status, timestamp, and summary information."
+},
+{
+"id": "l1382",
+"project": "Oh My Pi",
+"tag": "v18.18.0",
+"line": "`glob`, `grep`, `fuzzyFind`, `ast_grep` and `ast_edit` now run their directory traversal on a filesystem runtime of their own, so a search over a large or cold tree can no longer take the worker threads that the embedded shell and every other native call are scheduled on. Those threads are named `pi-fs-worker`, so a stall in a search is tellable apart from a stall elsewhere."
+},
+{
+"id": "l1843",
+"project": "Hermes Agent",
+"tag": "v0.23.0",
+"line": "**Password managers in `browser_vault`** \u2014 Bundled or verified/official catalog plugins can add their own logins through `ctx.register_login_backend`, and each one can touch only its own entries. The vault key can move into the OS keychain (opt-in `vault.key_storage: keychain`). Saved passwords fill on Camofox pages. ([#143964](https://github.com/NousResearch/hermes-agent/pull/143964), [#144246](https://github.com/NousResearch/hermes-agent/pull/144246), [#146240](https://github.com/NousResearch/"
+},
+{
+"id": "l2198",
+"project": "MLflow",
+"tag": "v3.18.0",
+"line": "[Tracing / UI] Fix the span search crash on deeply nested traces and show OTel span cache tokens in the trace explorer (#26794, @joshuawong-db)"
+},
+{
+"id": "l1060",
+"project": "Oh My Pi",
+"tag": "v18.18.2",
+"line": "Fixed Gemini malformed responses being treated as unhandled stop reasons and losing token usage; they are now handled as transient transport errors."
+},
+{
+"id": "l0911",
+"project": "Oh My Pi",
+"tag": "v18.18.6",
+"line": "fix(mcp): re-ran command-backed headers on 401 and reconnect by @roboomp in https://github.com/can1357/oh-my-pi/pull/18633"
+},
+{
+"id": "l1905",
+"project": "Hermes Agent",
+"tag": "v0.23.0",
+"line": "**Connections** \u2014 servers now see `hermes-agent/<version>` as the client name, results and tool lists over 1 MiB work on Streamable HTTP, and Otter.ai OAuth logins complete. The MCP catalog adds RentAHuman. ([#106395](https://github.com/NousResearch/hermes-agent/pull/106395), [#143803](https://github.com/NousResearch/hermes-agent/pull/143803), [#148635](https://github.com/NousResearch/hermes-agent/pull/148635), [#142246](https://github.com/NousResearch/hermes-agent/pull/142246) \u2014 @yulunz, @khana"
+},
+{
+"id": "l1220",
+"project": "Oh My Pi",
+"tag": "v18.18.2",
+"line": "fix(security): showed finding validation in resource pages by @roboomp in https://github.com/can1357/oh-my-pi/pull/18085"
+},
+{
+"id": "l2164",
+"project": "MLflow",
+"tag": "v3.18.0",
+"line": "[Model Registry / Prompts] Reject `*` as a registered model or prompt name when auth is enabled (#27202, @a-gajam)"
+},
+{
+"id": "l0620",
+"project": "Gemini CLI",
+"tag": "v0.67.0",
+"line": "fix(cli): correct Thai and Lao SARA AM display width by @elberthc-byte in https://github.com/google-gemini/gemini-cli/pull/29883"
+},
+{
+"id": "l0467",
+"project": "OpenAI Codex",
+"tag": "rust-v0.167.0",
+"line": "#57985 Skip read-only volume-root expansion in the MXC sandbox @iceweasel-oai"
+},
+{
+"id": "l1434",
+"project": "Oh My Pi",
+"tag": "v18.17.0",
+"line": "Anthropic official-API sessions use message threads, sending only new messages per turn for faster first tokens; toggle with `statefulResponses: false` or `PI_ANTHROPIC_MESSAGE_THREADS=0`/`1`"
+},
+{
+"id": "l2216",
+"project": "MLflow",
+"tag": "v3.18.0",
+"line": "[Evaluation / Tracking] Check scorer permissions on the online scoring config endpoints (#26877, @kriscon-db)"
+},
+{
+"id": "l2919",
+"project": "Apache Airflow",
+"tag": "3.4.0",
+"line": "Disable psycopg3 auto-prepare by default behind connection poolers (#74581)"
+},
+{
+"id": "l0492",
+"project": "OpenAI Codex",
+"tag": "rust-v0.167.0",
+"line": "#58157 Expose system proxy support as an experimental setting @abhinav-oai"
+},
+{
+"id": "l0272",
+"project": "Claude Code",
+"tag": "v2.1.318",
+"line": "Fixed permission prompts being answered by keys typed just after sending a message, or before a slow prompt appeared"
+},
+{
+"id": "l1915",
+"project": "Hermes Agent",
+"tag": "v0.23.0",
+"line": "**Payments and agents-for-hire** \u2014 pay [#138020](https://github.com/NousResearch/hermes-agent/pull/138020), switch402 [#147689](https://github.com/NousResearch/hermes-agent/pull/147689), genesispay [#143950](https://github.com/NousResearch/hermes-agent/pull/143950), RentAHuman [#141775](https://github.com/NousResearch/hermes-agent/pull/141775), Sai by Simular [#146322](https://github.com/NousResearch/hermes-agent/pull/146322) \u2014 @lgalabru, @Duffey234, @Smokefarmer, @AlexanderLiteplo, @chenchenSim"
+},
+{
+"id": "l2182",
+"project": "MLflow",
+"tag": "v3.18.0",
+"line": "[Tracing] Stop bound methods from exposing tool API keys in `mlflow.crewai` spans (#27130, @joshuawong-db)"
+},
+{
+"id": "l1973",
+"project": "OpenShell",
+"tag": "v0.1.8",
+"line": "A sandbox no longer exits when its control listener hits a transient accept error such as `EMFILE`, and DNS over TCP keeps working after a client resets a connection before it is accepted. [#5211](https://github.com/NVIDIA/OpenShell/pull/5211)"
+},
+{
+"id": "l1749",
+"project": "Oh My Pi",
+"tag": "v18.17.0",
+"line": "fix(shell): run a host callout's own operand inside a function body by @sjawhar in https://github.com/can1357/oh-my-pi/pull/18030"
+},
+{
+"id": "l1725",
+"project": "Oh My Pi",
+"tag": "v18.17.0",
+"line": "feat(skills): add manual-only skill patterns by @Shadorain in https://github.com/can1357/oh-my-pi/pull/18114"
+},
+{
+"id": "l0227",
+"project": "Claude Code",
+"tag": "v2.1.319",
+"line": "Changed Monitor's WebSocket watch to follow a rule on every Bash command: a deny refuses it, and under an ask rule an allow on Monitor, bypass mode or auto mode no longer skips the prompt"
+},
+{
+"id": "l2533",
+"project": "dbt Core",
+"tag": "v2.0.11",
+"line": "Harden Databricks logged-SQL credential redaction: match `credential` and `encryption` clauses case-insensitively, redact every clause rather than only the first, and correctly handle option values containing commas, newlines, quotes or escaped quotes and keys containing dots. ([#16053](https://github.com/dbt-labs/dbt-core/issues/16053))"
+},
+{
+"id": "l0110",
+"project": "Claude Code",
+"tag": "v2.1.321",
+"line": "Changed Cowork cloud sessions: a PostToolUse hook can no longer replace the answer to AskUserQuestion or the plan in ExitPlanMode's result; Claude reads the originals"
+},
+{
+"id": "l1250",
+"project": "Oh My Pi",
+"tag": "v18.18.1",
+"line": "Fixed a password manager's inline autofill menu locking omp out of a tab it drives: the extension empties and hides such frames in that tab and retries the attach or command Chrome refused ([#16908](https://github.com/can1357/oh-my-pi/pull/16908) by [@will-bogusz](https://github.com/will-bogusz))"
+},
+{
+"id": "l2290",
+"project": "MLflow",
+"tag": "v3.18.0",
+"line": "[Tracing] Fix cache-inclusive token totals in `mlflow.claude_code` (#26510, @B-Step62)"
+},
+{
+"id": "l2363",
+"project": "Terraform provider for Snowflake",
+"tag": "v2.23.0",
+"line": "Accept `AWS_S3TABLES` and `AWS_PRIVATE_S3TABLES` as `rest_config.catalog_api_type` on `snowflake_catalog_integration_iceberg_rest`. ([00c6cd6](https://github.com/snowflakedb/terraform-provider-snowflake/commit/00c6cd605d65cd78bcd3a38409c77104c1c56667)), references [#5344](https://github.com/snowflakedb/terraform-provider-snowflake/issues/5344)"
+},
+{
+"id": "l1314",
+"project": "Oh My Pi",
+"tag": "v18.18.1",
+"line": "fix(auth): classify mistral vibe login as subscription billing by @roboomp in https://github.com/can1357/oh-my-pi/pull/18378"
+},
+{
+"id": "l0230",
+"project": "Claude Code",
+"tag": "v2.1.319",
+"line": "Changed the Bash tool to ask for permission before running `which` with flags outside a lookup/display set"
+},
+{
+"id": "l2381",
+"project": "Terraform provider for Snowflake",
+"tag": "v2.23.0",
+"line": "Include the resource name and id in import errors. ([0312883](https://github.com/snowflakedb/terraform-provider-snowflake/commit/0312883351f2f9c0a173340aabe69c2d2c39cc79))"
+},
+{
+"id": "l0196",
+"project": "Claude Code",
+"tag": "v2.1.319",
+"line": "Fixed a case where a `sed` command could skip the permission check in accept-edits and auto mode"
+},
+{
+"id": "l2494",
+"project": "dbt Core",
+"tag": "v2.0.11",
+"line": "Honor OS-assigned loopback ports in OAuth authorization and token-exchange callback URLs."
+},
+{
+"id": "l0981",
+"project": "Oh My Pi",
+"tag": "v18.18.4",
+"line": "fix(coding-agent): preserve role fallback chains in auth-gateway stdio by @enieuwy in https://github.com/can1357/oh-my-pi/pull/18509"
+},
+{
+"id": "l1960",
+"project": "OpenShell",
+"tag": "v0.1.8",
+"line": "Static provider credentials without placement metadata now resolve only in the `Authorization` header or through explicitly enabled body/WebSocket rewrite policies, so custom headers such as `x-api-key`, query parameters, and path slots need an explicit placement declaration. Upgrade the gateway before the supervisor, and update existing imported profiles as needed, since editing reference YAML alone does not update the gateway catalog. `auth_style` selects the active placement, and fields for o"
+},
+{
+"id": "l1332",
+"project": "Oh My Pi",
+"tag": "v18.18.1",
+"line": "fix(catalog): kept image input on hyphenated deepseek v4.1 flash ids by @roboomp in https://github.com/can1357/oh-my-pi/pull/18409"
+},
+{
+"id": "l0497",
+"project": "OpenAI Codex",
+"tag": "rust-v0.167.0",
+"line": "#58168 Create missing parent directories for MXC deny paths on Windows @iceweasel-oai"
+},
+{
+"id": "l1947",
+"project": "Hermes Agent",
+"tag": "v0.23.0",
+"line": "**@unsupportedpastels** (125 PRs) \u2014 the unified gateway's session authority: classic CLI, ACP, Ink and Desktop clients on one owner, queued-prompt steering"
+},
+{
+"id": "l1375",
+"project": "Oh My Pi",
+"tag": "v18.18.0",
+"line": "An extension provider with `authHeader: true` keeps its cached `fetchDynamicModels` catalog when `omp models refresh` fails, instead of showing 0 models until the next successful forced refresh ([#18227](https://github.com/can1357/oh-my-pi/issues/18227))"
+},
+{
+"id": "l0816",
+"project": "Pi",
+"tag": "v1.5.1",
+"line": "Fixed the plan-mode extension example missing completion markers in thinking blocks and common completion phrases, dropping formatted or long plan steps, and sending an extra model turn to acknowledge completion ([#7950](https://github.com/earendil-works/pi/pull/7950) by [@giannisCKS](https://github.com/giannisCKS))"
+},
+{
+"id": "l1309",
+"project": "Oh My Pi",
+"tag": "v18.18.1",
+"line": "fix(ai): a 429 or 402 with token-cap wording is not context overflow by @nick-maderight in https://github.com/can1357/oh-my-pi/pull/18345"
+},
+{
+"id": "l1076",
+"project": "Oh My Pi",
+"tag": "v18.18.2",
+"line": "Scoped model lists now refresh after logout, model-catalog refreshes, and RPC login or logout, so available models stay synchronized with authentication and provider changes."
+},
+{
+"id": "l1598",
+"project": "Oh My Pi",
+"tag": "v18.17.0",
+"line": "`capabilities()` now reports `input: false` and `inputPermission: \"unavailable\"` on Wayland without a RemoteDesktop portal (e.g. sway); input fails immediately ([#18012](https://github.com/can1357/oh-my-pi/pull/18012) by [@will-bogusz](https://github.com/will-bogusz))"
+},
+{
+"id": "l2274",
+"project": "MLflow",
+"tag": "v3.18.0",
+"line": "[UI] Clear stale error in `ShowArtifactTextView` when loading a new artifact (#26631, @github-actions)"
+},
+{
+"id": "l2119",
+"project": "MLflow",
+"tag": "v3.18.0",
+"line": "[Tracing] Record token usage for Groq embedding calls in `mlflow.groq.autolog` (#27294, @mlflow-app)"
+},
+{
+"id": "l0656",
+"project": "OpenCode",
+"tag": "v2.2.7",
+"line": "Tokens and cost from `session.generate` requests, including cache warming pings, count toward the session's totals. ([#63006](https://github.com/anomalyco/opencode/pull/63006))"
+},
+{
+"id": "l1062",
+"project": "Oh My Pi",
+"tag": "v18.18.2",
+"line": "The browser extension now requests Chrome\u2019s downloads permission so relay tabs can report where downloads were saved to omp."
+},
+{
+"id": "l0815",
+"project": "Pi",
+"tag": "v1.5.1",
+"line": "Fixed extensions loaded through symlinked paths failing to resolve their dependencies by resolving the entry file's real path before importing it ([#8112](https://github.com/earendil-works/pi/pull/8112) by [@cad0p](https://github.com/cad0p))"
+},
+{
+"id": "l2537",
+"project": "dbt Core",
+"tag": "v2.0.11",
+"line": "Update rustls-webpki to 0.103.16 and webpki-root-certs to 1.0.10 to reject distrusted certificate chains."
+},
+{
+"id": "l2550",
+"project": "dbt Core",
+"tag": "v2.0.11",
+"line": "[@b-per](https://github.com/b-per) ([#16364](https://github.com/dbt-labs/dbt-core/issues/16364))"
+},
+{
+"id": "l1865",
+"project": "Hermes Agent",
+"tag": "v0.23.0",
+"line": "**Messages and replies you can trust** \u2014 A message sent just before closing the window is no longer lost, and drafts survive clock jumps and downgrades. Replies are drawn once across reconnects, reloads and stopped turns. Healthy connections are no longer dropped on focus or wake. Old phone-app chats can be continued instead of opening read-only. ([#145018](https://github.com/NousResearch/hermes-agent/pull/145018), [#145528](https://github.com/NousResearch/hermes-agent/pull/145528), [#144899](ht"
+},
+{
+"id": "l0954",
+"project": "Oh My Pi",
+"tag": "v18.18.4",
+"line": "Isolated task sandboxes now finish cleanup after a SIGHUP or other signal even when releasing them takes longer than the agent shutdown grace period ([#18519](https://github.com/can1357/oh-my-pi/issues/18519))."
+},
+{
+"id": "l2341",
+"project": "Terraform provider for Databricks",
+"tag": "v1.142.0",
+"line": "`databricks_connection` now supports referencing Unity Catalog secrets through the `secrets` argument ([#6126](https://github.com/databricks/terraform-provider-databricks/pull/6126))."
+},
+{
+"id": "l0541",
+"project": "OpenAI Codex",
+"tag": "rust-v0.167.0",
+"line": "#58403 Run package updates outside the project on non-Windows platforms @viyatb-oai"
+},
+{
+"id": "l0132",
+"project": "Claude Code",
+"tag": "v2.1.319",
+"line": "Added a warning when your claude.ai login ends and Claude Code continues on the sign-in from `ant auth login`, which bills usage to your Claude Console organization"
+},
+{
+"id": "l3127",
+"project": "Apache Airflow",
+"tag": "3.4.0",
+"line": "Update docs and diagrams for the Airflow 3 Dag processor (#74073)"
+},
+{
+"id": "l2126",
+"project": "MLflow",
+"tag": "v3.18.0",
+"line": "[Tracing / Tracking] Fix FileStore trace path traversal (CVE-2026-53995) (#26842, @SaiTeja-Erukude)"
+},
+{
+"id": "l0199",
+"project": "Claude Code",
+"tag": "v2.1.319",
+"line": "Fixed a case where deny and ask rules, hook matchers and `disallowedTools` entries written with a claude.ai connector's terminal name (`mcp__claude_ai_Slack`) were ignored in Claude Desktop (takes effect once Claude Desktop includes this version)"
+},
+{
+"id": "l2032",
+"project": "OpenShell",
+"tag": "v0.1.7",
+"line": "When the shared supervisor pool can't place a sandbox, `sandbox create` now says why: the pool isn't ready, no replica is attached, no replica has room, or placement failed. [#4985](https://github.com/NVIDIA/OpenShell/pull/4985)"
+},
+{
+"id": "l2817",
+"project": "Apache Airflow",
+"tag": "3.4.0",
+"line": "Fix airflow dags list --columns help showing wrong default columns (#72607)"
+},
+{
+"id": "l1962",
+"project": "OpenShell",
+"tag": "v0.1.8",
+"line": "OCSF sandbox attribution moved: supervisor events use `device.container.uid` and `device.container.name`, gateway API Activity and Detection Finding events use `resources` entries with `type: \"sandbox\"`, and other gateway classes use `unmapped.sandbox_id` and `unmapped.sandbox_name`. SIEM parsers that read top-level `container.uid` or `container.name` must update their mappings. [#5048](https://github.com/NVIDIA/OpenShell/pull/5048)"
+},
+{
+"id": "l1869",
+"project": "Hermes Agent",
+"tag": "v0.23.0",
+"line": "**Phone and browser polish** \u2014 When a chat needs you, the tab title flashes and the favicon gets a dot. Opt-in browser notifications open the right chat. One tap focuses the composer on iPhone, and the phone tab picker reaches every tab's menu. Files and media resolve inside a session's Docker sandbox or SSH workspace. ([#146882](https://github.com/NousResearch/hermes-agent/pull/146882), [#145569](https://github.com/NousResearch/hermes-agent/pull/145569), [#145788](https://github.com/NousResearc"
+},
+{
+"id": "l1805",
+"project": "Hermes Agent",
+"tag": "v0.23.0",
+"line": "**New official plugins, and a smaller core** \u2014 Meshy (text and image to 3D), ElevenLabs Music and Sound Effects, X Chat, REA (reverse engineering) and a bubblewrap sandbox are now one-command installs. Camofox, `mcp-serve`, the agent importers and Singularity moved out of core into plugins that install themselves for anyone who used them. ([#142619](https://github.com/NousResearch/hermes-agent/pull/142619), [#146294](https://github.com/NousResearch/hermes-agent/pull/146294), [#139725](https://gi"
+},
+{
+"id": "l0123",
+"project": "Claude Code",
+"tag": "v2.1.319",
+"line": "Added `permissions.denyInsteadOfPrompting` setting: a tool call that would wait on a permission prompt is denied and the turn continues, in terminal sessions, subagents and teammates"
+},
+{
+"id": "l1853",
+"project": "Hermes Agent",
+"tag": "v0.23.0",
+"line": "**Network boundaries** \u2014 URLs whose host parses differently across clients are refused, and without a token A2A refuses requests from browsers and from foreign `Host` headers. ([#145578](https://github.com/NousResearch/hermes-agent/pull/145578), [#145310](https://github.com/NousResearch/hermes-agent/pull/145310) \u2014 @unsupportedpastels)"
+},
+{
+"id": "l1970",
+"project": "OpenShell",
+"tag": "v0.1.8",
+"line": "The gateway no longer pre-allocates about 3.4 MiB of stream buffers for every sandbox. [#5408](https://github.com/NVIDIA/OpenShell/pull/5408)"
+},
+{
+"id": "l0117",
+"project": "Claude Code",
+"tag": "v2.1.321",
+"line": "[VSCode] Added a warning above the prompt box when both an auth token and an API key are set, matching the terminal's startup warning"
+},
+{
+"id": "l0140",
+"project": "Claude Code",
+"tag": "v2.1.319",
+"line": "Fixed the `/diff` pane opening blank in sessions where 64 or more turns edited files"
+},
+{
+"id": "l3286",
+"project": "Soda Core",
+"tag": "v4.30.0",
+"line": "feat(logging): add is_redacted to ask the run's redaction policy by @nielsn in https://github.com/sodadata/soda-core/pull/2961"
+},
+{
+"id": "l3088",
+"project": "Apache Airflow",
+"tag": "3.4.0",
+"line": "Fix retry policy docs and the example Dag's ``ConnectionError`` rules (#76313)"
+},
+{
+"id": "l2007",
+"project": "OpenShell",
+"tag": "v0.1.8",
+"line": "Security reports can now be filed through a structured private vulnerability reporting form. [#5203](https://github.com/NVIDIA/OpenShell/pull/5203)"
+},
+{
+"id": "l2429",
+"project": "dbt Core",
+"tag": "v2.0.11",
+"line": "Support `exposure` in the list command's `--resource-type` option ([#16224](https://github.com/dbt-labs/dbt-core/issues/16224))"
+},
+{
+"id": "l0004",
+"project": "Claude Code",
+"tag": "v2.1.321",
+"line": "Fixed a case where a read-only Bash command ran outside the sandbox without a permission prompt"
+},
+{
+"id": "l3292",
+"project": "Soda Core",
+"tag": "v4.30.0",
+"line": "feat(sqlserver): diagnostic workload identity errors, no credentials in logs (PLATL-1426) by @nielsn in https://github.com/sodadata/soda-core/pull/2969"
+},
+{
+"id": "l0932",
+"project": "Oh My Pi",
+"tag": "v18.18.4",
+"line": "Added the `base64SkipThoughtSignature` Google compat flag, which sends the Gemini unsigned-tool-call bypass sentinel base64-encoded for gateways that decode `thoughtSignature` as bytes ([#18586](https://github.com/can1357/oh-my-pi/pull/18586) by [@tuandinh0801](https://github.com/tuandinh0801))."
+}
+]

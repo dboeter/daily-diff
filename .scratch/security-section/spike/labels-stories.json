@@ -1,0 +1,1180 @@
+{
+  "s000": {
+    "label": "no"
+  },
+  "s001": {
+    "label": "no"
+  },
+  "s002": {
+    "label": "no"
+  },
+  "s003": {
+    "label": "no"
+  },
+  "s004": {
+    "label": "no"
+  },
+  "s005": {
+    "label": "no"
+  },
+  "s006": {
+    "label": "no"
+  },
+  "s007": {
+    "label": "no"
+  },
+  "s008": {
+    "label": "no"
+  },
+  "s009": {
+    "label": "no"
+  },
+  "s010": {
+    "label": "no"
+  },
+  "s011": {
+    "label": "no"
+  },
+  "s012": {
+    "label": "no"
+  },
+  "s013": {
+    "label": "no"
+  },
+  "s014": {
+    "label": "no"
+  },
+  "s015": {
+    "label": "no"
+  },
+  "s016": {
+    "label": "no"
+  },
+  "s017": {
+    "label": "no"
+  },
+  "s018": {
+    "label": "no"
+  },
+  "s019": {
+    "label": "no"
+  },
+  "s020": {
+    "label": "no"
+  },
+  "s021": {
+    "label": "no"
+  },
+  "s022": {
+    "label": "no"
+  },
+  "s023": {
+    "label": "no"
+  },
+  "s024": {
+    "label": "no"
+  },
+  "s025": {
+    "label": "no"
+  },
+  "s026": {
+    "label": "no"
+  },
+  "s027": {
+    "label": "no"
+  },
+  "s028": {
+    "label": "no"
+  },
+  "s029": {
+    "label": "no"
+  },
+  "s030": {
+    "label": "yes",
+    "kind": "incident",
+    "severe": "yes"
+  },
+  "s031": {
+    "label": "no"
+  },
+  "s032": {
+    "label": "no"
+  },
+  "s033": {
+    "label": "yes",
+    "kind": "incident",
+    "severe": "no"
+  },
+  "s034": {
+    "label": "no"
+  },
+  "s035": {
+    "label": "no"
+  },
+  "s036": {
+    "label": "no"
+  },
+  "s037": {
+    "label": "no"
+  },
+  "s038": {
+    "label": "no"
+  },
+  "s039": {
+    "label": "no"
+  },
+  "s040": {
+    "label": "no"
+  },
+  "s041": {
+    "label": "no"
+  },
+  "s042": {
+    "label": "no"
+  },
+  "s043": {
+    "label": "no"
+  },
+  "s044": {
+    "label": "no"
+  },
+  "s045": {
+    "label": "no"
+  },
+  "s046": {
+    "label": "no"
+  },
+  "s047": {
+    "label": "no"
+  },
+  "s048": {
+    "label": "no"
+  },
+  "s049": {
+    "label": "no"
+  },
+  "s050": {
+    "label": "no"
+  },
+  "s051": {
+    "label": "yes",
+    "kind": "vulnerability",
+    "severe": "no"
+  },
+  "s052": {
+    "label": "no"
+  },
+  "s053": {
+    "label": "no"
+  },
+  "s054": {
+    "label": "no"
+  },
+  "s055": {
+    "label": "no"
+  },
+  "s056": {
+    "label": "no"
+  },
+  "s057": {
+    "label": "no"
+  },
+  "s058": {
+    "label": "no"
+  },
+  "s059": {
+    "label": "no"
+  },
+  "s060": {
+    "label": "no"
+  },
+  "s061": {
+    "label": "no"
+  },
+  "s062": {
+    "label": "no"
+  },
+  "s063": {
+    "label": "no"
+  },
+  "s064": {
+    "label": "no"
+  },
+  "s065": {
+    "label": "no"
+  },
+  "s066": {
+    "label": "no"
+  },
+  "s067": {
+    "label": "no"
+  },
+  "s068": {
+    "label": "no"
+  },
+  "s069": {
+    "label": "no"
+  },
+  "s070": {
+    "label": "no"
+  },
+  "s071": {
+    "label": "no"
+  },
+  "s072": {
+    "label": "no"
+  },
+  "s073": {
+    "label": "no"
+  },
+  "s074": {
+    "label": "no"
+  },
+  "s075": {
+    "label": "no"
+  },
+  "s076": {
+    "label": "no"
+  },
+  "s077": {
+    "label": "no"
+  },
+  "s078": {
+    "label": "no"
+  },
+  "s079": {
+    "label": "no"
+  },
+  "s080": {
+    "label": "no"
+  },
+  "s081": {
+    "label": "no"
+  },
+  "s082": {
+    "label": "borderline",
+    "note": "Calls an AI agent a surveillance network but names no specific leak or flaw."
+  },
+  "s083": {
+    "label": "no"
+  },
+  "s084": {
+    "label": "no"
+  },
+  "s085": {
+    "label": "no"
+  },
+  "s086": {
+    "label": "yes",
+    "kind": "fix",
+    "severe": "yes"
+  },
+  "s087": {
+    "label": "no"
+  },
+  "s088": {
+    "label": "no"
+  },
+  "s089": {
+    "label": "no"
+  },
+  "s090": {
+    "label": "no"
+  },
+  "s091": {
+    "label": "no"
+  },
+  "s092": {
+    "label": "no"
+  },
+  "s093": {
+    "label": "no"
+  },
+  "s094": {
+    "label": "no"
+  },
+  "s095": {
+    "label": "no"
+  },
+  "s096": {
+    "label": "no"
+  },
+  "s097": {
+    "label": "no"
+  },
+  "s098": {
+    "label": "no"
+  },
+  "s099": {
+    "label": "no"
+  },
+  "s100": {
+    "label": "no"
+  },
+  "s101": {
+    "label": "no"
+  },
+  "s102": {
+    "label": "no"
+  },
+  "s103": {
+    "label": "no"
+  },
+  "s104": {
+    "label": "no"
+  },
+  "s105": {
+    "label": "no"
+  },
+  "s106": {
+    "label": "no"
+  },
+  "s107": {
+    "label": "no"
+  },
+  "s108": {
+    "label": "no"
+  },
+  "s109": {
+    "label": "no"
+  },
+  "s110": {
+    "label": "no"
+  },
+  "s111": {
+    "label": "no"
+  },
+  "s112": {
+    "label": "no"
+  },
+  "s113": {
+    "label": "no"
+  },
+  "s114": {
+    "label": "no"
+  },
+  "s115": {
+    "label": "no"
+  },
+  "s116": {
+    "label": "no"
+  },
+  "s117": {
+    "label": "no"
+  },
+  "s118": {
+    "label": "no"
+  },
+  "s119": {
+    "label": "no"
+  },
+  "s120": {
+    "label": "no"
+  },
+  "s121": {
+    "label": "no"
+  },
+  "s122": {
+    "label": "no"
+  },
+  "s123": {
+    "label": "no"
+  },
+  "s124": {
+    "label": "no"
+  },
+  "s125": {
+    "label": "no"
+  },
+  "s126": {
+    "label": "no"
+  },
+  "s127": {
+    "label": "no"
+  },
+  "s128": {
+    "label": "no"
+  },
+  "s129": {
+    "label": "yes",
+    "kind": "incident",
+    "severe": "no"
+  },
+  "s130": {
+    "label": "no"
+  },
+  "s131": {
+    "label": "no"
+  },
+  "s132": {
+    "label": "no"
+  },
+  "s133": {
+    "label": "no"
+  },
+  "s134": {
+    "label": "no"
+  },
+  "s135": {
+    "label": "no"
+  },
+  "s136": {
+    "label": "no"
+  },
+  "s137": {
+    "label": "no"
+  },
+  "s138": {
+    "label": "no"
+  },
+  "s139": {
+    "label": "no"
+  },
+  "s140": {
+    "label": "no"
+  },
+  "s141": {
+    "label": "no"
+  },
+  "s142": {
+    "label": "no"
+  },
+  "s143": {
+    "label": "no"
+  },
+  "s144": {
+    "label": "no"
+  },
+  "s145": {
+    "label": "no"
+  },
+  "s146": {
+    "label": "no"
+  },
+  "s147": {
+    "label": "no"
+  },
+  "s148": {
+    "label": "no"
+  },
+  "s149": {
+    "label": "no"
+  },
+  "s150": {
+    "label": "no"
+  },
+  "s151": {
+    "label": "no"
+  },
+  "s152": {
+    "label": "no"
+  },
+  "s153": {
+    "label": "yes",
+    "kind": "incident",
+    "severe": "no"
+  },
+  "s154": {
+    "label": "no"
+  },
+  "s155": {
+    "label": "yes",
+    "kind": "incident",
+    "severe": "yes"
+  },
+  "s156": {
+    "label": "no"
+  },
+  "s157": {
+    "label": "no"
+  },
+  "s158": {
+    "label": "no"
+  },
+  "s159": {
+    "label": "no"
+  },
+  "s160": {
+    "label": "no"
+  },
+  "s161": {
+    "label": "no"
+  },
+  "s162": {
+    "label": "no"
+  },
+  "s163": {
+    "label": "no"
+  },
+  "s164": {
+    "label": "no"
+  },
+  "s165": {
+    "label": "no"
+  },
+  "s166": {
+    "label": "no"
+  },
+  "s167": {
+    "label": "no"
+  },
+  "s168": {
+    "label": "no"
+  },
+  "s169": {
+    "label": "no"
+  },
+  "s170": {
+    "label": "no"
+  },
+  "s171": {
+    "label": "no"
+  },
+  "s172": {
+    "label": "no"
+  },
+  "s173": {
+    "label": "no"
+  },
+  "s174": {
+    "label": "no"
+  },
+  "s175": {
+    "label": "no"
+  },
+  "s176": {
+    "label": "no"
+  },
+  "s177": {
+    "label": "no"
+  },
+  "s178": {
+    "label": "no"
+  },
+  "s179": {
+    "label": "no"
+  },
+  "s180": {
+    "label": "no"
+  },
+  "s181": {
+    "label": "no"
+  },
+  "s182": {
+    "label": "no"
+  },
+  "s183": {
+    "label": "no"
+  },
+  "s184": {
+    "label": "no"
+  },
+  "s185": {
+    "label": "no"
+  },
+  "s186": {
+    "label": "no"
+  },
+  "s187": {
+    "label": "no"
+  },
+  "s188": {
+    "label": "no"
+  },
+  "s189": {
+    "label": "no"
+  },
+  "s190": {
+    "label": "no"
+  },
+  "s191": {
+    "label": "no"
+  },
+  "s192": {
+    "label": "no"
+  },
+  "s193": {
+    "label": "no"
+  },
+  "s194": {
+    "label": "no"
+  },
+  "s195": {
+    "label": "no"
+  },
+  "s196": {
+    "label": "no"
+  },
+  "s197": {
+    "label": "no"
+  },
+  "s198": {
+    "label": "no"
+  },
+  "s199": {
+    "label": "no"
+  },
+  "s200": {
+    "label": "no"
+  },
+  "s201": {
+    "label": "yes",
+    "kind": "incident",
+    "severe": "no"
+  },
+  "s202": {
+    "label": "no"
+  },
+  "s203": {
+    "label": "no"
+  },
+  "s204": {
+    "label": "no"
+  },
+  "s205": {
+    "label": "no"
+  },
+  "s206": {
+    "label": "no"
+  },
+  "s207": {
+    "label": "no"
+  },
+  "s208": {
+    "label": "no"
+  },
+  "s209": {
+    "label": "no"
+  },
+  "s210": {
+    "label": "no"
+  },
+  "s211": {
+    "label": "no"
+  },
+  "s212": {
+    "label": "no"
+  },
+  "s213": {
+    "label": "yes",
+    "kind": "incident",
+    "severe": "yes"
+  },
+  "s214": {
+    "label": "no"
+  },
+  "s215": {
+    "label": "no"
+  },
+  "s216": {
+    "label": "no"
+  },
+  "s217": {
+    "label": "no"
+  },
+  "s218": {
+    "label": "no"
+  },
+  "s219": {
+    "label": "no"
+  },
+  "s220": {
+    "label": "no"
+  },
+  "s221": {
+    "label": "no"
+  },
+  "s222": {
+    "label": "no"
+  },
+  "s223": {
+    "label": "no"
+  },
+  "s224": {
+    "label": "no"
+  },
+  "s225": {
+    "label": "no"
+  },
+  "s226": {
+    "label": "no"
+  },
+  "s227": {
+    "label": "no"
+  },
+  "s228": {
+    "label": "no"
+  },
+  "s229": {
+    "label": "no"
+  },
+  "s230": {
+    "label": "no"
+  },
+  "s231": {
+    "label": "no"
+  },
+  "s232": {
+    "label": "no"
+  },
+  "s233": {
+    "label": "no"
+  },
+  "s234": {
+    "label": "no"
+  },
+  "s235": {
+    "label": "no"
+  },
+  "s236": {
+    "label": "no"
+  },
+  "s237": {
+    "label": "no"
+  },
+  "s238": {
+    "label": "no"
+  },
+  "s239": {
+    "label": "no"
+  },
+  "s240": {
+    "label": "no"
+  },
+  "s241": {
+    "label": "no"
+  },
+  "s242": {
+    "label": "no"
+  },
+  "s243": {
+    "label": "no"
+  },
+  "s244": {
+    "label": "no"
+  },
+  "s245": {
+    "label": "no"
+  },
+  "s246": {
+    "label": "no"
+  },
+  "s247": {
+    "label": "no"
+  },
+  "s248": {
+    "label": "no"
+  },
+  "s249": {
+    "label": "no"
+  },
+  "s250": {
+    "label": "no"
+  },
+  "s251": {
+    "label": "no"
+  },
+  "s252": {
+    "label": "no"
+  },
+  "s253": {
+    "label": "no"
+  },
+  "s254": {
+    "label": "no"
+  },
+  "s255": {
+    "label": "no"
+  },
+  "s256": {
+    "label": "no"
+  },
+  "s257": {
+    "label": "no"
+  },
+  "s258": {
+    "label": "no"
+  },
+  "s259": {
+    "label": "no"
+  },
+  "s260": {
+    "label": "yes",
+    "kind": "vulnerability",
+    "severe": "no"
+  },
+  "s261": {
+    "label": "no"
+  },
+  "s262": {
+    "label": "no"
+  },
+  "s263": {
+    "label": "no"
+  },
+  "s264": {
+    "label": "no"
+  },
+  "s265": {
+    "label": "no"
+  },
+  "s266": {
+    "label": "no"
+  },
+  "s267": {
+    "label": "no"
+  },
+  "s268": {
+    "label": "no"
+  },
+  "s269": {
+    "label": "no"
+  },
+  "s270": {
+    "label": "no"
+  },
+  "s271": {
+    "label": "no"
+  },
+  "s272": {
+    "label": "no"
+  },
+  "s273": {
+    "label": "no"
+  },
+  "s274": {
+    "label": "no"
+  },
+  "s275": {
+    "label": "no"
+  },
+  "s276": {
+    "label": "no"
+  },
+  "s277": {
+    "label": "no"
+  },
+  "s278": {
+    "label": "no"
+  },
+  "s279": {
+    "label": "no"
+  },
+  "s280": {
+    "label": "no"
+  },
+  "s281": {
+    "label": "no"
+  },
+  "s282": {
+    "label": "no"
+  },
+  "s283": {
+    "label": "no"
+  },
+  "s284": {
+    "label": "no"
+  },
+  "s285": {
+    "label": "no"
+  },
+  "s286": {
+    "label": "no"
+  },
+  "s287": {
+    "label": "no"
+  },
+  "s288": {
+    "label": "no"
+  },
+  "s289": {
+    "label": "no"
+  },
+  "s290": {
+    "label": "no"
+  },
+  "s291": {
+    "label": "no"
+  },
+  "s292": {
+    "label": "yes",
+    "kind": "incident",
+    "severe": "yes"
+  },
+  "s293": {
+    "label": "yes",
+    "kind": "incident",
+    "severe": "yes"
+  },
+  "s294": {
+    "label": "no"
+  },
+  "s295": {
+    "label": "no"
+  },
+  "s296": {
+    "label": "no"
+  },
+  "s297": {
+    "label": "no"
+  },
+  "s298": {
+    "label": "no"
+  },
+  "s299": {
+    "label": "no"
+  },
+  "s300": {
+    "label": "no"
+  },
+  "s301": {
+    "label": "no"
+  },
+  "s302": {
+    "label": "no"
+  },
+  "s303": {
+    "label": "no"
+  },
+  "s304": {
+    "label": "no"
+  },
+  "s305": {
+    "label": "no"
+  },
+  "s306": {
+    "label": "no"
+  },
+  "s307": {
+    "label": "no"
+  },
+  "s308": {
+    "label": "no"
+  },
+  "s309": {
+    "label": "no"
+  },
+  "s310": {
+    "label": "no"
+  },
+  "s311": {
+    "label": "no"
+  },
+  "s312": {
+    "label": "no"
+  },
+  "s313": {
+    "label": "no"
+  },
+  "s314": {
+    "label": "no"
+  },
+  "s315": {
+    "label": "no"
+  },
+  "s316": {
+    "label": "no"
+  },
+  "s317": {
+    "label": "no"
+  },
+  "s318": {
+    "label": "no"
+  },
+  "s319": {
+    "label": "no"
+  },
+  "s320": {
+    "label": "no"
+  },
+  "s321": {
+    "label": "no"
+  },
+  "s322": {
+    "label": "no"
+  },
+  "s323": {
+    "label": "no"
+  },
+  "s324": {
+    "label": "no"
+  },
+  "s325": {
+    "label": "no"
+  },
+  "s326": {
+    "label": "no"
+  },
+  "s327": {
+    "label": "no"
+  },
+  "s328": {
+    "label": "no"
+  },
+  "s329": {
+    "label": "no"
+  },
+  "s330": {
+    "label": "no"
+  },
+  "s331": {
+    "label": "no"
+  },
+  "s332": {
+    "label": "no"
+  },
+  "s333": {
+    "label": "no"
+  },
+  "s334": {
+    "label": "no"
+  },
+  "s335": {
+    "label": "no"
+  },
+  "s336": {
+    "label": "no"
+  },
+  "s337": {
+    "label": "no"
+  },
+  "s338": {
+    "label": "no"
+  },
+  "s339": {
+    "label": "no"
+  },
+  "s340": {
+    "label": "no"
+  },
+  "s341": {
+    "label": "no"
+  },
+  "s342": {
+    "label": "no"
+  },
+  "s343": {
+    "label": "no"
+  },
+  "s344": {
+    "label": "no"
+  },
+  "s345": {
+    "label": "yes",
+    "kind": "vulnerability",
+    "severe": "yes"
+  },
+  "s346": {
+    "label": "no"
+  },
+  "s347": {
+    "label": "no"
+  },
+  "s348": {
+    "label": "no"
+  },
+  "s349": {
+    "label": "no"
+  },
+  "s350": {
+    "label": "no"
+  },
+  "s351": {
+    "label": "no"
+  },
+  "s352": {
+    "label": "no"
+  },
+  "s353": {
+    "label": "yes",
+    "kind": "incident",
+    "severe": "yes"
+  },
+  "s354": {
+    "label": "yes",
+    "kind": "incident",
+    "severe": "yes"
+  },
+  "s355": {
+    "label": "yes",
+    "kind": "incident",
+    "severe": "yes"
+  },
+  "s356": {
+    "label": "no"
+  },
+  "s357": {
+    "label": "no"
+  },
+  "s358": {
+    "label": "no"
+  },
+  "s359": {
+    "label": "no"
+  },
+  "s360": {
+    "label": "no"
+  },
+  "s361": {
+    "label": "no"
+  },
+  "s362": {
+    "label": "no"
+  },
+  "s363": {
+    "label": "no"
+  },
+  "s364": {
+    "label": "no"
+  },
+  "s365": {
+    "label": "no"
+  },
+  "s366": {
+    "label": "no"
+  },
+  "s367": {
+    "label": "no"
+  },
+  "s368": {
+    "label": "no"
+  },
+  "s369": {
+    "label": "no"
+  },
+  "s370": {
+    "label": "no"
+  },
+  "s371": {
+    "label": "no"
+  },
+  "s372": {
+    "label": "yes",
+    "kind": "incident",
+    "severe": "yes"
+  },
+  "s373": {
+    "label": "no"
+  },
+  "s374": {
+    "label": "no"
+  },
+  "s375": {
+    "label": "no"
+  },
+  "s376": {
+    "label": "no"
+  },
+  "s377": {
+    "label": "no"
+  },
+  "s378": {
+    "label": "no"
+  },
+  "s379": {
+    "label": "no"
+  },
+  "s380": {
+    "label": "no"
+  }
+}

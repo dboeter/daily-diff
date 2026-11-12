@@ -1,6 +1,6 @@
 # Spike results: a Jev security question over a week of stories and release lines
 
-Run on 2026-11-11 with `jev-1.14.0`. 1,152 Jev calls and about 0.95 million tokens: 40 pilot, 381 stories (534,000 tokens), 656 release lines (318,000 input tokens), 75 story-to-line pairs. The estimate was under 1,000 calls. After the run the API answered `402`: the organization has no credits left (see the end). Script: `replay.py`. Rubric: `rubric.md`, frozen before any label or call. Every file named here other than this one is in `.gitignore` and exists only in the maintainer's local `spike/` folder. Labels: one independent labeller (a subagent that saw neither the questions nor the answers); I read every disagreement and changed no label.
+Run on 2026-11-11 with `jev-1.14.0`. 1,152 Jev calls and about 0.95 million tokens: 40 pilot, 381 stories (534,000 tokens), 656 release lines (318,000 input tokens), 75 story-to-line pairs. The estimate was under 1,000 calls. After the run the API answered `402`: the organization has no credits left (see the end). Script: `replay.py`. Rubric: `rubric.md`, frozen before any label or call. Every file named here is in this `spike/` folder: the inputs (`stories.json`, `lines.json`, `lines-sample.json`), the labels (`labels-*.json`) and Jev's raw answers (`results-*.json`). They cannot be made again: the credits are gone, and the Spotted log has pruned that week's stories. Labels: one independent labeller (a subagent that saw neither the questions nor the answers); I read every disagreement and changed no label.
 
 ## Test set
 
