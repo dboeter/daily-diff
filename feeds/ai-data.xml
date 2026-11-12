@@ -13,7 +13,229 @@
       <height>144</height>
     </image>
     <atom:link href="https://dboeter.github.io/daily-diff/feeds/ai-data.xml" rel="self" type="application/rss+xml"/>
-    <lastBuildDate>Wed, 11 Nov 2026 06:00:49 +0000</lastBuildDate>
+    <lastBuildDate>Thu, 12 Nov 2026 07:05:00 +0000</lastBuildDate>
+    <item>
+      <title>Data Engineering 2026-11-12</title>
+      <link>https://dboeter.github.io/daily-diff/#2026-11-12/ai-data</link>
+      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-11-12/ai-data</guid>
+      <pubDate>Thu, 12 Nov 2026 00:00:00 +0000</pubDate>
+      <description>Data Engineering 2026-11-12 ⬛ Overview · 🟪 AI Agents · 🟦 AI Models &amp;amp; Labs · 🟧 AI Policy · 🟨 Data Engineering Vendor items: 12 | Also new: 5 | Projects: 26 | Active today: 2 | Stable releases: 1 | Prereleases (not covered): 1 | Generated: 2026-11-12 06:59 UTC Highlights Azure Databricks workspaces with the compliance security profile enabled will have external access to Unity Catalog managed Delta tables enabled by default on or after December 10, 2026; plan for external Delta clients to ...</description>
+      <content:encoded><![CDATA[<h1>Data Engineering 2026-11-12</h1>
+<p><a href="https://dboeter.github.io/daily-diff/#2026-11-12">⬛ Overview</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-12/ai-agents">🟪 AI Agents</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-12/ai-models">🟦 AI Models &amp; Labs</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-12/ai-policy">🟧 AI Policy</a> · <strong>🟨 Data Engineering</strong></p>
+<blockquote>
+<p>Vendor items: 12 | Also new: 5 | Projects: 26 | Active today: 2 | Stable releases: 1 | Prereleases (not covered): 1 | Generated: 2026-11-12 06:59 UTC</p>
+</blockquote>
+<hr>
+<h2>Highlights</h2>
+<ul>
+<li>Azure Databricks workspaces with the compliance security profile enabled will have external access to Unity Catalog managed Delta tables enabled by default on or after December 10, 2026; plan for external Delta clients to create, read, and write managed tables.</li>
+<li>BigQuery Enterprise and Enterprise Plus users can now specify an optional principal property on reservation assignments (generally available) to route queries by user, service account, or third-party identity.</li>
+<li>Fabric Warehouse CI/CD (preview) adds DacFx schema deployment, pre- and post-deployment scripts, and Warehouse Item Definition APIs for a more complete lifecycle.</li>
+</ul>
+<hr>
+<h2>Action required</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Platform</th>
+<th align="left">Item</th>
+<th align="left">What to do</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-11-30</td>
+<td align="left">Azure Databricks</td>
+<td align="left"><a href="https://learn.microsoft.com/azure/databricks/release-notes/whats-coming#upcoming-end-of-life-for-the-genie-one-mcp-beta-endpoint">Upcoming end of life for the Genie One MCP Beta endpoint</a></td>
+<td align="left">The Genie One MCP Beta endpoint at <code>https://&lt;workspace-hostname&gt;/api/2.0/mcp/genie</code> reaches end of life on November 30, 2026, after which requests fail; migrate all workloads to the <code>system.ai.genie_one_mcp</code> MCP in Unity Gateway.</td>
+</tr>
+<tr>
+<td align="left">2027-01-31</td>
+<td align="left">BigQuery</td>
+<td align="left"><a href="https://docs.cloud.google.com/bigquery/docs/release-notes#November_06_2026">Starting January 31, 2027, the BigQuery Data Transfer Service for Shopify connector will no longer support the following fields</a></td>
+<td align="left">Starting January 31, 2027, the BigQuery Data Transfer Service for Shopify connector will drop support for the <code>legacyMode</code> field in the DeliveryProfile dataset schema and the <code>permitSkuSharing</code> field in the FulfillmentService dataset schema.</td>
+</tr>
+<tr>
+<td align="left">2027-02-04</td>
+<td align="left">Azure Databricks</td>
+<td align="left"><a href="https://learn.microsoft.com/azure/databricks/release-notes/product/2026/november#zhipu-ai-glm-52-is-scheduled-for-retirement">Zhipu AI GLM 5.2 is scheduled for retirement</a></td>
+<td align="left">Zhipu AI GLM 5.2 is deprecated and will be retired on February 4, 2027, requiring migration to GLM 5.3 per the Legacy, deprecated, and retired models guidance.</td>
+</tr>
+<tr>
+<td align="left">2027-08-19</td>
+<td align="left">Azure Databricks</td>
+<td align="left"><a href="https://learn.microsoft.com/azure/databricks/release-notes/whats-coming#all-unity-catalog-managed-tables-will-be-upgraded-to-catalog-commits">All Unity Catalog managed tables will be upgraded to catalog commits</a></td>
+<td align="left">After Databricks Runtime 15.4 LTS end of support on August 19, 2027, all Unity Catalog managed tables will be automatically upgraded to <code>catalog commits</code>, making Unity Catalog the system of coordination and enabling multi-statement transactions, external engine writes, and consistent governance; clients must plan for this breaking change before the 2027 deadline.</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>Databricks</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Item</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-11-12</td>
+<td align="left">🤖 <a href="https://learn.microsoft.com/azure/databricks/release-notes/product/2026/november#genie-zeroops-is-available-in-beta">Genie ZeroOps is available in Beta</a></td>
+<td align="left">Genie ZeroOps monitors jobs, pipelines, and tables in the background, detects failures and data quality issues, investigates the root cause, and proposes a fix.</td>
+</tr>
+<tr>
+<td align="left">2026-11-11</td>
+<td align="left"><a href="https://learn.microsoft.com/azure/databricks/release-notes/product/2026/november#pages-are-generally-available">Pages are generally available</a></td>
+<td align="left">Curators can certify and deprecate Pages, the new MANAGE PAGES permission controls who can publish and manage Pages in a domain, and Pages can be managed via the REST API.</td>
+</tr>
+<tr>
+<td align="left">2026-11-11</td>
+<td align="left">🤖 <a href="https://learn.microsoft.com/azure/databricks/release-notes/product/2026/november#azure-databricks-genie-plugin-for-microsoft-copilot-cowork-public-preview">Azure Databricks Genie plugin for Microsoft Copilot Cowork (Public Preview)</a></td>
+<td align="left">The Azure Databricks Genie plugin connects Microsoft Copilot Cowork to Genie One without creating an OAuth app or editing a plugin manifest; existing Beta manifest-based plugin installations are not migrated automatically and users must add the new plugin in Copilot Cowork.</td>
+</tr>
+<tr>
+<td align="left">2026-11-11</td>
+<td align="left"><a href="https://learn.microsoft.com/azure/databricks/release-notes/product/2026/november#write-custom-service-policies-in-python-beta">Write custom service policies in Python (Beta)</a></td>
+<td align="left">Custom service policies can be written as Python functions in Unity Catalog for rules SQL cannot express, such as regular expressions, Python packages, or calls to an external guardrail through a service credential; available in select regions.</td>
+</tr>
+<tr>
+<td align="left">2026-11-11</td>
+<td align="left">🤖 <a href="https://learn.microsoft.com/azure/databricks/release-notes/product/2026/november#the-genie-one-desktop-app-for-windows-is-in-beta">The Genie One desktop app for Windows is in Beta</a></td>
+<td align="left">The Genie One desktop app for Windows in Beta opens Genie One on the desktop instead of a browser tab, letting business users chat with data in natural language, work with threads and documents, and use Genie Agents without a browser.</td>
+</tr>
+<tr>
+<td align="left">2026-11-10</td>
+<td align="left"><a href="https://learn.microsoft.com/azure/databricks/release-notes/whats-coming#external-access-to-unity-catalog-managed-delta-tables-will-soon-be-available-by-default-for-workspaces-with-the-compliance-security-profile-enabled">External access to Unity Catalog managed Delta tables will soon be available by default for workspaces with the compliance security profile enabled</a></td>
+<td align="left">External Delta clients can create, read, and write Unity Catalog managed Delta tables by default for workspaces with the compliance security profile enabled starting on or after December 10, 2026; creating and writing requires catalog commits and access continues to be controlled by metastore external data access settings and Unity Catalog privileges.</td>
+</tr>
+<tr>
+<td align="left">2026-11-10</td>
+<td align="left">🤖 <a href="https://learn.microsoft.com/azure/databricks/release-notes/product/2026/november#text-and-binary-inputs-for-protobuf-requests-to-custom-model-serving-endpoints-public-preview">Text and binary inputs for protobuf requests to custom model serving endpoints (Public Preview)</a></td>
+<td align="left">Protobuf requests to custom model serving endpoints can carry text and binary data as KServe v2 BYTES tensors alongside numeric tensors, with text and binary outputs returned as BYTES tensors; this is only available on endpoints deployed after November 10, 2026.</td>
+</tr>
+<tr>
+<td align="left">2026-11-09</td>
+<td align="left">🤖 <a href="https://learn.microsoft.com/azure/databricks/release-notes/product/2026/november#use-cleaned-ai-answers-in-lakeflow-designer-public-preview">Use cleaned AI answers in Lakeflow Designer (Public Preview)</a></td>
+<td align="left">Supported AI Function outputs in Lakeflow Designer can be cleaned for downstream transformations, with cleaned results including answer values, error messages, and raw responses in separate columns.</td>
+</tr>
+<tr>
+<td align="left">2026-11-06</td>
+<td align="left"><a href="https://learn.microsoft.com/azure/databricks/release-notes/product/2026/november#distinguish-lakeflow-designer-python-previews-from-full-runs-public-preview">Distinguish Lakeflow Designer Python previews from full runs (Public Preview)</a></td>
+<td align="left">Python operators in Lakeflow Designer now expose config[&quot;is_preview&quot;] so code can skip side effects during previews.</td>
+</tr>
+</tbody></table>
+<p><em>Also new:</em> <a href="https://learn.microsoft.com/azure/databricks/release-notes/product/2026/november#azure-databricks-genie-plugin-for-microsoft-365-copilot-public-preview">Azure Databricks Genie plugin for Microsoft 365 Copilot (Public Preview)</a> · <a href="https://learn.microsoft.com/azure/databricks/release-notes/product/2026/november#bring-your-own-chatgpt-subscription-to-codex-with-unity-gateway">Bring your own ChatGPT subscription to Codex with Unity Gateway</a> · <a href="https://learn.microsoft.com/azure/databricks/release-notes/product/2026/november#allow-chatgpt-and-claude-as-partner-platforms-in-context-based-ingress-policies">Allow ChatGPT and Claude as partner platforms in context-based ingress policies</a> · <a href="https://learn.microsoft.com/azure/databricks/release-notes/product/2026/november#calculate-across-rows-in-lakeflow-designer-public-preview">Calculate across rows in Lakeflow Designer (Public Preview)</a></p>
+<h3>Databricks CLI</h3>
+<ul>
+<li><strong>Release:</strong> <a href="https://github.com/databricks/cli/releases/tag/v1.26.0">v1.26.0</a> fixes explicit <code>false</code> values on optional boolean bundle fields being dropped, which hid them from <code>bundle validate -o json</code> and prevented targets from overriding <code>true</code> with <code>false</code>; it also stops sending <code>compute_size</code> in the app update mask when undeclared, preventing a deploy from resetting a manually resized app to the default size.</li>
+<li><strong>Release:</strong> Adds the <code>feature_specs</code> resource type with Unity Catalog grants, extends <code>lifecycle.depends_on</code> to target grants or permissions (e.g., <code>schemas.foo.grants</code>), and introduces <code>DATABRICKS_BUNDLE_INIT_WORKSPACE_HOST_PROFILE</code> to control the host returned by the <code>workspace_host</code> template helper.</li>
+<li><strong>Release:</strong> <code>air run</code> now reuses its existing workspace connection for config validation instead of opening a second one, saving a TCP and TLS handshake per submission, and parallelizes archive compression for git-pinned <code>code_source</code> snapshots to speed up packaging on large repositories.</li>
+</ul>
+<p><strong>Quiet today:</strong> <a href="https://github.com/delta-io/delta">Delta Lake</a>, <a href="https://github.com/delta-io/delta-rs">delta-rs</a>, <a href="https://github.com/unitycatalog/unitycatalog">Unity Catalog</a>, <a href="https://github.com/mlflow/mlflow">MLflow</a>, <a href="https://github.com/databricks/dbt-databricks">dbt-databricks</a>, <a href="https://github.com/databricks/terraform-provider-databricks">Terraform provider for Databricks</a></p>
+<hr>
+<h2>Azure / Fabric &amp; GCP</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Source</th>
+<th align="left">Item</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-11-11</td>
+<td align="left">Microsoft Fabric</td>
+<td align="left"><a href="https://community.fabric.microsoft.com/t5/Fabric-Updates-Blog/Use-OneLake-as-native-storage-for-Azure-Databricks-Preview/ba-p/5377939">Use OneLake as native storage for Azure Databricks (Preview)</a></td>
+<td align="left">OneLake external-location support for Unity Catalog is generally available in Microsoft Fabric with OneLake Security enabled by default for Azure Databricks Storage items, while on the Azure Databricks side the feature is in preview; supported Unity Catalog-managed data can be stored directly in OneLake.</td>
+</tr>
+<tr>
+<td align="left">2026-11-11</td>
+<td align="left">BigQuery</td>
+<td align="left"><a href="https://docs.cloud.google.com/bigquery/docs/release-notes#November_11_2026">You can specify an optional principal property on BigQuery reservation assignments to route queries to specific reservations based on the identity of the user, service account, or third-party identity…</a></td>
+<td align="left">An optional principal property can be specified on BigQuery reservation assignments to route queries to specific reservations based on the identity of the user, service account, or third-party identity executing the job; supported only in BigQuery Enterprise and Enterprise Plus editions and generally available.</td>
+</tr>
+<tr>
+<td align="left">2026-11-11</td>
+<td align="left">Microsoft Fabric</td>
+<td align="left"><a href="https://community.fabric.microsoft.com/t5/Fabric-Updates-Blog/The-next-chapter-for-CI-CD-in-Fabric-Warehouse-Preview/ba-p/5401222">The next chapter for CI/CD in Fabric Warehouse (Preview)</a></td>
+<td align="left">CI/CD in Fabric Warehouse now includes DacFx for a common schema deployment foundation, pre- and post-deployment scripts for changes beyond schema, and Warehouse Item Definition APIs for automation, creating a more complete CI/CD lifecycle.</td>
+</tr>
+</tbody></table>
+<p><em>Also new:</em> <a href="https://docs.cloud.google.com/bigquery/docs/release-notes#November_11_2026">Project caps (also known as scheduling policies) let you limit maximum slots and concurrency per project within a BigQuery reservation (GA)</a></p>
+<hr>
+<h2>Open-source stack</h2>
+<h3>DuckDB</h3>
+<ul>
+<li><strong>News:</strong> <a href="https://news.ycombinator.com/item?id=50452389">Show HN: NoDOM high performance WASM UI kit for DuckDB-WASM</a></li>
+<li><strong>News:</strong> <a href="https://duckdb.org/2026/11/12/local-analytics-without-a-database-server.html">Local Analytics Doesn&#39;t Need a Database Server</a> describes how DuckDB enables serverless local analytics, powering SQLRooms for interactive data, visualizations, and AI-assisted analysis on the user&#39;s machine.</li>
+</ul>
+<p><strong>Quiet today:</strong> <a href="https://github.com/dbt-labs/dbt">dbt Core</a>, <a href="https://github.com/SQLMesh/sqlmesh">SQLMesh</a>, <a href="https://github.com/apache/airflow">Apache Airflow</a>, <a href="https://github.com/dagster-io/dagster">Dagster</a>, <a href="https://github.com/PrefectHQ/prefect">Prefect</a>, <a href="https://github.com/dlt-hub/dlt">dlt</a>, <a href="https://github.com/apache/iceberg">Apache Iceberg</a>, <a href="https://github.com/apache/iceberg-python">PyIceberg</a>, <a href="https://github.com/pola-rs/polars">Polars</a>, <a href="https://github.com/trinodb/trino">Trino</a>, <a href="https://github.com/great-expectations/great_expectations">Great Expectations</a>, <a href="https://github.com/sodadata/soda-core">Soda Core</a>, <a href="https://github.com/OpenLineage/OpenLineage">OpenLineage</a>, <a href="https://github.com/open-metadata/OpenMetadata">OpenMetadata</a></p>
+<hr>
+<p>Nothing new from Snowflake (<a href="https://github.com/snowflakedb/snowpark-python">Snowpark Python</a>, <a href="https://github.com/snowflakedb/snowflake-connector-python">Snowflake Connector for Python</a>, <a href="https://github.com/apache/polaris">Apache Polaris</a>, <a href="https://github.com/snowflakedb/terraform-provider-snowflake">Terraform provider for Snowflake</a>) today.</p>
+<hr>
+<h2>Across platforms</h2>
+<ul>
+<li>OneLake as native storage for Unity Catalog: in Microsoft Fabric the external-location support is generally available with OneLake Security enabled by default; on Azure Databricks the same capability is in preview.</li>
+</ul>
+<hr>
+<h2>News &amp; discussion</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Post</th>
+<th align="left">Source</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-11-11</td>
+<td align="left"><a href="https://medium.com/snowflake/agents-are-code-too-what-i-learned-shipping-a-cortex-agent-through-azure-devops-fab3adae29e8">Agents Are Code Too: What I Learned Shipping a Cortex Agent Through Azure DevOps</a></td>
+<td align="left">Snowflake on Medium</td>
+<td align="left">The author built a Cortex Agent for the finance domain and moved it through sbx, dev, uat, and prod with the same discipline applied to other Snowflake objects, learning that an agent you cannot rebuild from Git is a prototype regardless of answer quality.</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>Spotted</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Story</th>
+<th align="left">Source</th>
+<th align="left">Discussion</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">TimeNet: Open-source data infrastructure for Temporal Foundation Models (<a href="https://github.com/OpenTSLM/TimeNet">OpenTSLM/TimeNet</a>)</td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50443264">49 points, 8 comments</a></td>
+<td align="left">TimeNet offers open‑source infrastructure to download and explore time‑series datasets in a unified format.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://now-next.nl/en/insights/postgresql-json-vs-jsonb-measured/">JSON vs. jsonb in Postgres: size and speed, measured</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50452394">29 points, 0 comments</a></td>
+<td align="left">Benchmarks of JSON versus jsonb in PostgreSQL 17/18 reveal jsonb can be 23 % smaller or 41 % larger depending on document shape.</td>
+</tr>
+<tr>
+<td align="left">Show HN: I created a library for correctly using SQLite in Go programs (<a href="https://github.com/cattlecloud/litesql">cattlecloud/litesql</a>)</td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50453176">21 points, 1 comment</a></td>
+<td align="left">The author released litesql, a Go library for convenient and performant SQLite3 database access.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://dev.to/ndcodes/part-5-the-control-that-protected-an-empty-bucket-e1j">Part 5: The Control That Protected an Empty Bucket</a></td>
+<td align="left">Dev.to</td>
+<td align="left"><a href="https://dev.to/ndcodes/part-5-the-control-that-protected-an-empty-bucket-e1j">18 reactions, 4 comments</a></td>
+<td align="left">This installment continues a public series building an HL7 v2 to FHIR R4 interoperability service.</td>
+</tr>
+</tbody></table>
+<hr>
+<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
+]]></content:encoded>
+    </item>
     <item>
       <title>Data Engineering 2026-11-11</title>
       <link>https://dboeter.github.io/daily-diff/#2026-11-11/ai-data</link>

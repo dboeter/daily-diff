@@ -13,7 +13,117 @@
       <height>144</height>
     </image>
     <atom:link href="https://dboeter.github.io/daily-diff/feeds/ai-agents.xml" rel="self" type="application/rss+xml"/>
-    <lastBuildDate>Wed, 11 Nov 2026 06:00:49 +0000</lastBuildDate>
+    <lastBuildDate>Thu, 12 Nov 2026 07:05:00 +0000</lastBuildDate>
+    <item>
+      <title>AI Agents 2026-11-12</title>
+      <link>https://dboeter.github.io/daily-diff/#2026-11-12/ai-agents</link>
+      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-11-12/ai-agents</guid>
+      <pubDate>Thu, 12 Nov 2026 00:00:00 +0000</pubDate>
+      <description>AI Agents 2026-11-12 ⬛ Overview · 🟪 AI Agents · 🟦 AI Models &amp;amp; Labs · 🟧 AI Policy · 🟨 Data Engineering Projects: 15 | Active today: 6 | Stable releases: 4 | Prereleases (not covered): 7 | Generated: 2026-11-12 06:59 UTC Highlights Oh My Pi v18.19.0 breaks the browser open API (ignore_https_errors → insecure, allow_file_access removed), changes app option from object to string, removes task.file and blocked todo status, and adds Liquid AI liquid-systemone judgment API with 10,000-patch val...</description>
+      <content:encoded><![CDATA[<h1>AI Agents 2026-11-12</h1>
+<p><a href="https://dboeter.github.io/daily-diff/#2026-11-12">⬛ Overview</a> · <strong>🟪 AI Agents</strong> · <a href="https://dboeter.github.io/daily-diff/#2026-11-12/ai-models">🟦 AI Models &amp; Labs</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-12/ai-policy">🟧 AI Policy</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-12/ai-data">🟨 Data Engineering</a></p>
+<blockquote>
+<p>Projects: 15 | Active today: 6 | Stable releases: 4 | Prereleases (not covered): 7 | Generated: 2026-11-12 06:59 UTC</p>
+</blockquote>
+<hr>
+<h2>Highlights</h2>
+<ul>
+<li>Oh My Pi v18.19.0 breaks the browser <code>open</code> API (<code>ignore_https_errors</code> → <code>insecure</code>, <code>allow_file_access</code> removed), changes <code>app</code> option from object to string, removes <code>task.file</code> and <code>blocked</code> todo status, and adds Liquid AI <code>liquid-systemone</code> judgment API with 10,000-patch validation  </li>
+<li>Users report Claude Code iOS app messages sent mid-turn no longer reach Claude until the turn ends, a regression since version 2.1.321 preventing steering of long-running tasks  </li>
+<li>DeepSeek Harness prerelease dsh-v0.2.2-rc.2 adds Git Worktree review by branch/commit/file-type with GitHub review sync, named and multi-layer SubAgent support with AgentTeam session sharing, and desktop update channel switching</li>
+</ul>
+<hr>
+<h2>Coding Agents &amp; Assistants</h2>
+<h3>Claude Code</h3>
+<ul>
+<li><strong>Hot issue:</strong> <a href="https://github.com/anthropics/claude-code/issues/108975">#108975</a>: users report that messages sent from the iOS app mid-turn no longer reach Claude until the turn ends, a regression since version 2.1.321 that prevents steering long-running tasks. (regression; 5 comments, 1 👍; +6 in the last 24h)</li>
+<li><strong>Hot issue:</strong> <a href="https://github.com/anthropics/claude-code/issues/108984">#108984</a>: users report that Claude Code drops text in the middle of scrollback when appending new console output on Linux, making it impossible to read previous output while the agent continues working. (regression; 3 comments, 2 👍; +4 in the last 24h)</li>
+<li><strong>News:</strong> <a href="https://news.ycombinator.com/item?id=50453637">Atuin Threads: All your agent sessions on every machine</a> describes a tool that syncs and searches agent session history across machines, letting users start a task in Claude Code and resume it in Codex.</li>
+</ul>
+<h3>OpenAI Codex</h3>
+<ul>
+<li><strong>Release:</strong> <a href="https://github.com/openai/codex/releases/tag/rust-v0.167.2">rust-v0.167.2</a> adds incremental tool updates by default on Google Cloud Vertex AI, with an opt-out via <code>incremental_tools_legacy_gcp = false</code> in <code>config.toml</code>.</li>
+<li><strong>News:</strong> <a href="https://news.ycombinator.com/item?id=50453637">Atuin Threads: All your agent sessions on every machine</a> describes a tool that syncs and searches agent session history across machines, letting users start a task in Codex and resume it in Claude Code.</li>
+</ul>
+<h3>OpenCode</h3>
+<ul>
+<li><strong>Release:</strong> <a href="https://github.com/anomalyco/opencode/releases/tag/process-daemon-v0.5.2">process-daemon-v0.5.2</a> publishes opencode-pty 0.5.2 (protocol 8) as <code>@opencode/pty@0.5.2</code> to npm.</li>
+</ul>
+<h3>Oh My Pi</h3>
+<ul>
+<li><strong>Release:</strong> <a href="https://github.com/can1357/oh-my-pi/releases/tag/v18.19.0">v18.19.0</a> breaks the browser <code>open</code> API (<code>ignore_https_errors</code> → <code>insecure</code>, <code>allow_file_access</code> removed), changes <code>app</code> option from object to string, removes <code>task.file</code> and <code>blocked</code> todo status, adds Liquid AI <code>liquid-systemone</code> judgment API with 10,000-patch validation, and fixes Gemini CLI/Antigravity thought signature ordering and quota bucket handling.</li>
+<li><strong>Release:</strong> <a href="https://github.com/can1357/oh-my-pi/releases/tag/v18.18.9">v18.18.9</a> removes Devin&#39;s retired SWE-1.6 Fast model, removes Smithery MCP commands (API shut down Oct 31), adds <code>SOFYA_API_KEY</code> for the <code>sofya</code> provider, fixes Devin requests sending <code>temperature: 0</code> (now raised to <code>0.0001</code>), and improves auth-gateway credential rotation.</li>
+</ul>
+<h3>DeepSeek Harness</h3>
+<ul>
+<li><strong>Prerelease:</strong> <a href="https://github.com/deepseek-ai/deepseek-harness/releases/tag/dsh-v0.2.2-rc.2">dsh-v0.2.2-rc.2</a> adds Git Worktree review by branch/commit/file-type with GitHub review sync, named and multi-layer SubAgent support with AgentTeam session sharing, desktop update channel switching, and extensive UI/UX improvements across code review, sidebar, chat history, patch editing, and agent terminal visibility.</li>
+</ul>
+<h3>Hermes Agent</h3>
+<ul>
+<li><strong>Hot issue:</strong> <a href="https://github.com/NousResearch/hermes-agent/issues/153396">#153396</a>: users request the ability to bring their own Slack app per agent on the Team Gateway so each agent keeps its own bot name and avatar while still suspending when idle. (8 comments, 7 👍; +15 in the last 24h)</li>
+</ul>
+<p><strong>Quiet today:</strong> <a href="https://github.com/google-gemini/gemini-cli">Gemini CLI</a>, <a href="https://github.com/Kilo-Org/kilocode">Kilo Code</a>, <a href="https://github.com/earendil-works/pi">Pi</a>, <a href="https://github.com/1jehuang/jcode">jcode</a>, <a href="https://github.com/cline/cline">Cline</a>, <a href="https://github.com/CommandCodeAI/command-code">Command Code</a></p>
+<hr>
+<h2>Agent Tooling</h2>
+<p><strong>Quiet today:</strong> <a href="https://github.com/NVIDIA/OpenShell">OpenShell</a>, <a href="https://github.com/herdrdev/herdr">herdr</a>, <a href="https://github.com/microsoft/conductor">Conductor</a></p>
+<hr>
+<h2>Spotted</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Story</th>
+<th align="left">Source</th>
+<th align="left">Discussion</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">Show HN: Klad, a paint app your coding agent can drive (source-available) (<a href="https://github.com/klad-app/klad">klad-app/klad</a>)</td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50454951">78 points, 31 comments</a></td>
+<td align="left">Klad is a source‑available drawing application designed for collaborative use between coding agents and humans.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50455811">Launch HN: Pomerado (YC F26) – Turn any website into an MCP for agents</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50455811">53 points, 42 comments</a></td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left"><a href="https://developer.chrome.com/blog/modern-web-guidance-v1">Modern Web Guidance 1.0: The web platform expertise your coding agent is missing</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50460398">30 points, 7 comments</a></td>
+<td align="left">Modern Web Guidance 1.0 supplies expert‑vetted web platform skills, browser compatibility data, and codebase modernization guidance for AI coding agents.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://nikvdp.com/notes/subagents-considered-harmful/">Subagents Conwidered Harmful</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50450268">24 points, 8 comments</a></td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left"><a href="https://jatorre.github.io/garden/">I gave an agent a lakehouse and control of my garden</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50415162">5 points, 0 comments</a></td>
+<td align="left">The author gave an AI agent control of a garden equipped with eleven sensors, a camera, and an old phone, producing a €60 lettuce.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://dev.to/earlgreyhot1701d/a-small-laptop-is-a-full-build-kit-bootstrapping-with-a-chromebook-claude-and-github-4j16">A Small Laptop Is a Full Build Kit: Bootstrapping with a Chromebook, Claude, and GitHub</a></td>
+<td align="left">Dev.to</td>
+<td align="left"><a href="https://dev.to/earlgreyhot1701d/a-small-laptop-is-a-full-build-kit-bootstrapping-with-a-chromebook-claude-and-github-4j16">22 reactions, 7 comments</a></td>
+<td align="left">The author bootstrapped a development environment using a Chromebook, Claude, and GitHub, demonstrating a small laptop can serve as a full build kit.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://dev.to/aws-builders/the-limits-that-dont-limit-2o4j">The Limits That Don&#39;t Limit</a></td>
+<td align="left">Dev.to</td>
+<td align="left"><a href="https://dev.to/aws-builders/the-limits-that-dont-limit-2o4j">19 reactions, 4 comments</a></td>
+<td align="left">The post outlines four guards against runaway agents, noting that a 5‑second deadline actually took 21.9 seconds to enforce.</td>
+</tr>
+</tbody></table>
+<hr>
+<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
+]]></content:encoded>
+    </item>
     <item>
       <title>AI Agents 2026-11-11</title>
       <link>https://dboeter.github.io/daily-diff/#2026-11-11/ai-agents</link>
@@ -2654,59 +2764,6 @@
 <li><strong>News</strong>: GitHub Trending highlights context-mode for AI coding agents — it sandboxes tool output (98% reduction), persists session memory, and enforces routing across 17 platforms via MCP + hooks. <a href="https://github.com/mksglu/context-mode">https://github.com/mksglu/context-mode</a></li>
 </ul>
 <p><strong>Quiet today:</strong> <a href="https://github.com/asheshgoplani/agent-deck">Agent Deck</a></p>
-<hr>
-<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
-]]></content:encoded>
-    </item>
-    <item>
-      <title>AI Agents 2026-10-13</title>
-      <link>https://dboeter.github.io/daily-diff/#2026-10-13/ai-agents</link>
-      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-10-13/ai-agents</guid>
-      <pubDate>Tue, 13 Oct 2026 00:00:00 +0000</pubDate>
-      <description>AI Agents Digest 2026-10-13 Generated: 2026-10-13 03:29 UTC | Projects: 12 | Active today: 7 | Stable releases: 5 | Prereleases (not covered): 2 🕵️ Stealth Models on OpenRouter No stealth models listed on OpenRouter today. Overview Pi shipped v1.2.0 with per-key OpenRouter model listings and published configuration schemas, while Oh My Pi released three consecutive versions (v18.10.1–v18.10.3) that include breaking changes to image token estimation and new agent loop configurations. Hermes Agen...</description>
-      <content:encoded><![CDATA[<h1>AI Agents Digest 2026-10-13</h1>
-<blockquote>
-<p>Generated: 2026-10-13 03:29 UTC | Projects: 12 | Active today: 7 | Stable releases: 5 | Prereleases (not covered): 2</p>
-</blockquote>
-<hr>
-<h2>🕵️ Stealth Models on OpenRouter</h2>
-<p>No stealth models listed on OpenRouter today.</p>
-<hr>
-<h2>Overview</h2>
-<p>Pi shipped v1.2.0 with per-key OpenRouter model listings and published configuration schemas, while Oh My Pi released three consecutive versions (v18.10.1–v18.10.3) that include breaking changes to image token estimation and new agent loop configurations. Hermes Agent delivered v0.21.7, a patch rolling up over 200 PRs for desktop, Docker, and cloud targets. OpenAI Codex users are hitting two regressions: browser tools failing to initialize on Windows and Quick Chat not launching on macOS. OpenCode 2.0.27 users report all models returning &quot;Invalid credential&quot; errors.</p>
-<h2>Pi</h2>
-<ul>
-<li><strong>Release</strong>: v1.2.0 adds per-key OpenRouter model lists showing only models the key can access with context size, max output, pricing, and regional endpoints; also publishes configuration schemas with <code>$schema</code> references. <a href="https://github.com/earendil-works/pi/releases/tag/v1.2.0">Release</a></li>
-</ul>
-<h2>Oh My Pi</h2>
-<ul>
-<li><strong>Release</strong>: v18.10.1–v18.10.3 introduce breaking changes: removed <code>estimateImageContentTokens()</code> in favor of <code>Tokenizer.imageTokens()</code>, added <code>AgentLoopConfig.onDetachedToolUpdate</code> for background job events, and added a copy button in Tern turn footers. <a href="https://github.com/can1357/oh-my-pi/releases/tag/v18.10.3">v18.10.3</a> | <a href="https://github.com/can1357/oh-my-pi/releases/tag/v18.10.2">v18.10.2</a> | <a href="https://github.com/can1357/oh-my-pi/releases/tag/v18.10.1">v18.10.1</a></li>
-</ul>
-<h2>Hermes Agent</h2>
-<ul>
-<li><strong>Release</strong>: v0.21.7 is a patch release rolling up ~204 PRs since v0.21.6 for macOS Apple silicon, Windows, Microsoft Store, MSIX, installer, Docker, and Hermes Cloud. <a href="https://github.com/nousresearch/hermes-agent/releases/tag/v0.21.7">Release</a></li>
-<li><strong>Hot issue</strong>: Telegram DM topics deliver opening messages without <code>message_thread_id</code>, causing lobby recovery to misroute them to the previous topic. <a href="https://github.com/NousResearch/hermes-agent/issues/136567">Issue #136567</a></li>
-<li><strong>Hot issue</strong>: Memory provider &#39;holographic&#39; fails to auto-install, disabling external memory; users asked to run <code>hermes plugins install holographic</code> manually. <a href="https://github.com/NousResearch/hermes-agent/issues/137017">Issue #137017</a></li>
-</ul>
-<h2>OpenAI Codex</h2>
-<ul>
-<li><strong>Hot issue</strong>: On Windows 11, browser tools fail to initialize with MXC launcher HRESULT 0x80070003. <a href="https://github.com/openai/codex/issues/53188">Issue #53188</a></li>
-<li><strong>Hot issue</strong>: On macOS 26.1007.30912, Quick Chat no longer launches; the former command and native window service are absent. <a href="https://github.com/openai/codex/issues/53042">Issue #53042</a></li>
-<li><strong>News</strong>: Hacker News discussion highlights that Codex CLI installs a persistent, self-updating background daemon by default, raising concerns about transparency and resource usage. <a href="https://news.ycombinator.com/item?id=50060694">HN Thread</a></li>
-</ul>
-<h2>OpenCode</h2>
-<ul>
-<li><strong>Hot issue</strong>: All models return &quot;Error: Upstream request failed: Invalid credential&quot; on version 2.0.27, blocking all usage. <a href="https://github.com/anomalyco/opencode/issues/54833">Issue #54833</a></li>
-<li><strong>News</strong>: Hacker News post discusses migrating to OpenCode 2.0. <a href="https://news.ycombinator.com/item?id=50057747">HN Thread</a></li>
-</ul>
-<h2>DeepSeek Harness</h2>
-<ul>
-<li><strong>News</strong>: DSHDesktop project provides a desktop wrapper for DeepSeek Harness using Electron + Rust. <a href="https://github.com/dataelement/dsh-desktop">GitHub</a></li>
-</ul>
-<h2>Claude Code</h2>
-<p>Quiet — no releases, hot issues, or project-focused news in the last 24h.</p>
-<hr>
-<p><strong>Quiet today:</strong> <a href="https://github.com/google-gemini/gemini-cli">Gemini CLI</a>, <a href="https://github.com/Kilo-Org/kilocode">Kilo Code</a>, <a href="https://github.com/1jehuang/jcode">jcode</a>, <a href="https://github.com/cline/cline">Cline</a>, <a href="https://github.com/CommandCodeAI/command-code">Command Code</a></p>
 <hr>
 <p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
 ]]></content:encoded>

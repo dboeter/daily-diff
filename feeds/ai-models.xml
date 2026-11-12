@@ -13,7 +13,103 @@
       <height>144</height>
     </image>
     <atom:link href="https://dboeter.github.io/daily-diff/feeds/ai-models.xml" rel="self" type="application/rss+xml"/>
-    <lastBuildDate>Wed, 11 Nov 2026 06:00:49 +0000</lastBuildDate>
+    <lastBuildDate>Thu, 12 Nov 2026 07:05:00 +0000</lastBuildDate>
+    <item>
+      <title>AI Models &amp; Labs 2026-11-12</title>
+      <link>https://dboeter.github.io/daily-diff/#2026-11-12/ai-models</link>
+      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-11-12/ai-models</guid>
+      <pubDate>Thu, 12 Nov 2026 00:00:00 +0000</pubDate>
+      <description>AI Models &amp;amp; Labs 2026-11-12 ⬛ Overview · 🟪 AI Agents · 🟦 AI Models &amp;amp; Labs · 🟧 AI Policy · 🟨 Data Engineering Lab posts: 0 | New models: 1 | Spotted: 7 | Generated: 2026-11-12 06:59 UTC Highlights Baidu&amp;#39;s ERNIE-5.5-Flash-Preview is listed free on OpenRouter with a 1 M‑token context window, targeting coding, agentic tasks, knowledge work and deep research. Google launches the Gemini Decisions API, powered by a dedicated Gemini Decision model for fast, calibrated multimodal decision...</description>
+      <content:encoded><![CDATA[<h1>AI Models &amp; Labs 2026-11-12</h1>
+<p><a href="https://dboeter.github.io/daily-diff/#2026-11-12">⬛ Overview</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-12/ai-agents">🟪 AI Agents</a> · <strong>🟦 AI Models &amp; Labs</strong> · <a href="https://dboeter.github.io/daily-diff/#2026-11-12/ai-policy">🟧 AI Policy</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-12/ai-data">🟨 Data Engineering</a></p>
+<blockquote>
+<p>Lab posts: 0 | New models: 1 | Spotted: 7 | Generated: 2026-11-12 06:59 UTC</p>
+</blockquote>
+<hr>
+<h2>Highlights</h2>
+<ul>
+<li>Baidu&#39;s ERNIE-5.5-Flash-Preview is listed free on OpenRouter with a 1 M‑token context window, targeting coding, agentic tasks, knowledge work and deep research.</li>
+<li>Google launches the Gemini Decisions API, powered by a dedicated Gemini Decision model for fast, calibrated multimodal decisions.</li>
+<li>Apple researchers describe accelerating retrieval‑augmented generation by applying Maximum Inner Product Search (MIPS) to speed up the retrieval step.</li>
+</ul>
+<hr>
+<h2>New on OpenRouter</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Model</th>
+<th align="left">Listed</th>
+<th align="left">Context</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a href="https://openrouter.ai/baidu/ernie-5.5-flash-preview:free">Baidu: ERNIE-5.5-Flash-Preview (free)</a> <code>baidu/ernie-5.5-flash-preview:free</code></td>
+<td align="left">2026-11-10</td>
+<td align="left">1M</td>
+<td align="left">ERNIE 5.5 Flash Preview is the latest foundation model in the ERNIE family with comprehensive improvements in coding, agentic capabilities, knowledge work, and deep research.</td>
+</tr>
+</tbody></table>
+<hr>
+<p>Nothing new from Anthropic and OpenAI or OpenRouter&#39;s stealth models today.</p>
+<hr>
+<h2>Spotted</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Story</th>
+<th align="left">Source</th>
+<th align="left">Discussion</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a href="https://blog.google/innovation-and-ai/technology/developers-tools/gemini-decisions-api/">Gemini Decisions API</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50456791">375 points, 120 comments</a></td>
+<td align="left">Google launched the Gemini Decisions API, powered by the Gemini Decision model for fast, calibrated multimodal decisions.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://machinelearning.apple.com/research/faster-retrieval">Faster Retrieval for Better, More Efficient RAG</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50455633">190 points, 36 comments</a></td>
+<td align="left">Apple researchers describe accelerating retrieval‑augmented generation by leveraging Maximum Inner Product Search (MIPS).</td>
+</tr>
+<tr>
+<td align="left"><a href="https://oshea00.github.io/posts/tinygpt-visualizer/">Tools for exploring the souls of large language models</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50458434">43 points, 12 comments</a></td>
+<td align="left">The article explores LLM internals using the TinyGPT Visualizer to decode model behavior.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://arxiv.org/abs/2611.10866">The Surprising Effectiveness of Deleting Weights in LLM Post-Training</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50447363">30 points, 0 comments</a></td>
+<td align="left">Research shows zeroing fewer than 0.05 % of an LLM’s weights matches full fine‑tuning performance across three post‑training regimes.</td>
+</tr>
+<tr>
+<td align="left">Compress any LLM 3x in one click, near-lossless, in under 50 MB RAM (<a href="https://github.com/NeuraCryption/SPECTRA">NeuraCryption/SPECTRA</a>)</td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50450729">24 points, 1 comment</a></td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left"><a href="https://www.bloomberg.com/news/videos/2026-11-10/anthropic-targets-1-4-trillion-valuation-in-ipo-video">Anthropic Targets $1.4T Valuation in IPO</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50445463">16 points, 1 comment</a></td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left"><a href="https://alexandergoslin.me/writing-a-siggraph-paper-from-scratch/">Writing a SIGGRAPH paper from scratch</a></td>
+<td align="left">Lobste.rs</td>
+<td align="left"><a href="https://lobste.rs/s/793ecg/writing_siggraph_paper_from_scratch">8 points, 0 comments</a></td>
+<td align="left">The author built a learned procedural terrain generator called Terrain Diffusion using a single RTX 3090 Ti GPU.</td>
+</tr>
+</tbody></table>
+<hr>
+<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
+]]></content:encoded>
+    </item>
     <item>
       <title>AI Models &amp; Labs 2026-11-11</title>
       <link>https://dboeter.github.io/daily-diff/#2026-11-11/ai-models</link>
