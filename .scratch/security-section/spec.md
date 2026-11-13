@@ -99,7 +99,7 @@ Four days of `candidates.json` (11-07 to 11-10, the file exists since 11-07), a 
 
 ## Deferred
 
-- **Page of a flagged story no project took.** Deferred until it happens: in 13 days of the spike no flagged story was left without a place for that reason. Until then such a story goes where today's selection puts it, and the security trace shows it (`flagged: true`, `placed: null` with its `dropped_reason`). The step 5 check of a week of traces looks for it. The proposal when it happens: the page of its best page topic, with no topic bar; a story routed to no page goes to "Also talked about".
+- **Page of a flagged story no project took.** Deferred until it happens in a nightly run (the spike's Fireworks stories were such a case, before the marker existed). Until then such a story goes where today's selection puts it, and the security trace shows it (`flagged: true`, `placed: null` with its `dropped_reason`). The step 5 check of a week of traces looks for it. The proposal when it happens: the page of its best page topic, with no topic bar; a story routed to no page goes to "Also talked about".
 
 ## Order of work
 
