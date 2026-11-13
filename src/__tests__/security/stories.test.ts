@@ -88,17 +88,17 @@ describe("judgeSecurityStories", () => {
     expect(j.verdicts.get("hn:s354")).toMatchObject({ flagged: true, banner: true });
     expect(Object.keys(j.nextCache!.items)).toEqual(["hn:s354", "hn:s213"]);
 
-    // A saved verdict is reused; a story whose description arrived is asked again.
+    // A saved verdict is reused, even when the text changed: a failed page fetch empties it.
     const again = vi.fn(recorded);
     const described = { ...story("s354"), description: "Customer data and models exposed." };
-    await judgeSecurityStories([story("s213"), described], {
+    await judgeSecurityStories([story("s213"), described, story("s000")], {
       apiKey: "k",
       cache: j.nextCache,
       dateStr: DATE,
       ask: again,
     });
     expect(again).toHaveBeenCalledTimes(1);
-    expect(again.mock.calls[0]![0]).toMatchObject({ description: "Customer data and models exposed." });
+    expect(again.mock.calls[0]![0]).toMatchObject({ title: RECORDED["s000"]!.title });
   });
 
   it("flags nothing without Jev: keywords cannot tell a security event", async () => {
@@ -118,7 +118,13 @@ describe("securityTraceFile", () => {
       ask: recorded,
     });
     const trace = JSON.parse(
-      securityTraceFile(stories, j, new Map([["hn:s213", "news"]]), new Set(["hn:s213"])),
+      securityTraceFile(
+        stories,
+        j,
+        new Map([["hn:s213", "news"]]),
+        new Set(["hn:s213"]),
+        new Map([["hn:s354", "cap"]]),
+      ),
     ) as { rankedBy: string; flagged: number; banner: number; items: Record<string, unknown>[] };
     expect(trace.rankedBy).toBe("jev");
     expect(trace).toMatchObject({ flagged: 2, banner: 1 });
@@ -137,6 +143,7 @@ describe("securityTraceFile", () => {
       shown: true,
     });
     expect(trace.items[0]).toHaveProperty("severity");
-    expect(trace.items[2]).toMatchObject({ flagged: false });
+    expect(trace.items[2]).toMatchObject({ flagged: false, placed: null, dropped_reason: null });
+    expect(trace.items[1]).not.toHaveProperty("dropped_reason");
   });
 });

@@ -10,10 +10,10 @@
  * or replay first.
  */
 
-import { createHash } from "node:crypto";
 import path from "node:path";
 import {
   judgeItems,
+  type DroppedReason,
   loadItemsFile,
   saveItemsFile,
   type AskJev,
@@ -25,7 +25,7 @@ import { siteOf, type Story } from "../spotted/pool.ts";
 
 const SCOPE = "an AI tool, an AI model provider or AI service, or a data platform or data tool";
 
-const SECURITY_QUESTIONS = {
+export const SECURITY_QUESTIONS = {
   is_security: {
     type: "noul",
     instructions:
@@ -193,18 +193,9 @@ function securityState(story: Story): object {
 }
 
 /**
- * A story is asked again when its description changes: text is often missing on
- * the first day (all three Fireworks stories had none), and the claim and the
- * severity rest on it.
- */
-function descriptionFingerprint(story: Story): string {
-  return story.description
-    ? createHash("sha256").update(story.description).digest("hex").slice(0, 12)
-    : "none";
-}
-
-/**
- * One Jev request per story not in the cache. Without a key, or when more than half
+ * One Jev request per story not in the cache. No fingerprint: a story's text flips between
+ * filled and empty when its page fetch fails (11 of 103 stories seen on two days or more,
+ * 2026-11-07 to 11-10, none from empty to filled), so a text hash would only ask again. Without a key, or when more than half
  * the new calls fail, nothing is flagged: there is no keyword fallback, since the
  * spike found keywords cannot tell a security event ("60k former agents revealed").
  */
@@ -217,15 +208,15 @@ export async function judgeSecurityStories(
     tag: "security",
     request: (story) => ({ state: securityState(story), questions: SECURITY_QUESTIONS }),
     decide: (a: SecurityAnswers) => securityDecision(a),
-    fingerprint: descriptionFingerprint,
     unseenDays: SECURITY_UNSEEN_DAYS,
   });
   const decided = [...judgment.verdicts.values()];
   console.log(
-    `  [security] ${stories.length} stories: ` +
+    `  [security] ${stories.length} stories: ${decided.filter((d) => d.flagged).length} flagged, ` +
+      `${decided.filter((d) => d.banner).length} banner-grade` +
       (judgment.rankedBy === "jev"
-        ? `${decided.filter((d) => d.flagged).length} flagged, ${decided.filter((d) => d.banner).length} banner-grade`
-        : `none flagged (${opts.apiKey ? "too many Jev failures" : "no TYPESAFE_API_KEY"})`),
+        ? ""
+        : ` from saved verdicts only (${opts.apiKey ? "too many Jev failures" : "no TYPESAFE_API_KEY"})`),
   );
   return judgment;
 }
@@ -235,15 +226,18 @@ export type Placement = "news" | "lab" | "spotted" | "talked_about";
 
 /**
  * `digests/YYYY-MM-DD/security-trace.json`: every judged story with `flagged`, `banner`,
- * its answers, where today's selection placed it (`placed`, null: nowhere) and whether a
- * published page showed it (`shown`). A flagged story placed nowhere is one the
- * marker step must catch. The header counts the flagged and banner-grade stories.
+ * its answers, where today's selection placed it (`placed`) and whether a published page
+ * showed it (`shown`). A story placed nowhere gets the reason (`dropped_reason`: Spotted's
+ * `cap`, `threshold` or `routing`, or `repeat`; null when it has none), so a flagged story
+ * lost to selection reads apart from one a same-event check removed. The header counts the
+ * flagged and banner-grade stories.
  */
 export function securityTraceFile(
   stories: Story[],
   judgment: SecurityJudgment,
   placed: Map<string, Placement>,
   shownIds: Set<string>,
+  dropped: Map<string, DroppedReason>,
 ): string {
   const rows = stories.map((s) => {
     const v = judgment.verdicts.get(s.id);
@@ -254,6 +248,7 @@ export function securityTraceFile(
       flagged: v?.flagged ?? null,
       banner: v?.banner ?? null,
       placed: placed.get(s.id) ?? null,
+      ...(placed.has(s.id) ? {} : { dropped_reason: dropped.get(s.id) ?? null }),
       shown: shownIds.has(s.id),
       ...judgment.traceFields(s),
     };

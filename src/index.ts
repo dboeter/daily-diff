@@ -741,7 +741,20 @@ async function main(): Promise<void> {
     ...talkedAbout.map((s): [string, Placement] => [s.id, "talked_about"]),
   ]);
   console.log(
-    `  Saved ${saveFile(securityTraceFile(fresh, security, placed, dailyShown), dateStr, "security-trace.json")}`,
+    `  Saved ${saveFile(
+      securityTraceFile(
+        fresh,
+        security,
+        placed,
+        dailyShown,
+        new Map([
+          ...spottedDropped,
+          ...[...newsRepeatIds].map((id): [string, DroppedReason] => [id, "repeat"]),
+        ]),
+      ),
+      dateStr,
+      "security-trace.json",
+    )}`,
   );
   // Research: the day's top papers for the weekly Trends page; the arXiv cutoff moves on every run.
   if (arxivData.traceFile) {
