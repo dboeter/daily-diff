@@ -14,7 +14,7 @@ The nightly reviews of 2026-11-07 to 11-10 found security news that was fetched 
 
 1. **Readers**: the maintainer and the colleagues who read only the Data page.
 2. **Scope**: incidents (a breach, a leak, a vulnerability) and security fixes. A fix that follows an incident an earlier digest reported must point back to it.
-3. **Messages**: security items go into `highlights.json`, so Telegram and the Teams post carry them. Which items, see "Open decisions".
+3. **Messages**: security items go into `highlights.json`, so Telegram and the Teams post carry them. Which items, see "Open decisions"; a banner alone sends the Teams post (decided 2026-11-13).
 4. **Placement**: a banner for the severe incidents, a marker and an own slot for the other security stories, a marked bullet for a fix. No Security page and no Security table on the pages.
 
 ## Placement
@@ -88,10 +88,18 @@ Four days of `candidates.json` (11-07 to 11-10, the file exists since 11-07), a 
 
 ## Open decisions
 
-1. **Which items the messages carry.** Decision 3 was made when every item was a row. Proposed: code adds the banner lines to both messages; a marked row or a fix reaches a message only when its page's Highlights pick it.
-2. **A banner on a day without a data report.** Proposed: a banner alone sends the Teams post, since reaching the colleagues is the reason for the banner. It does not publish a page that was skipped; it shows on the Overview and on the pages that exist.
-3. **Page of a flagged story no project took**: proposed is the page of its best page topic, with no bar; a story routed to no page goes to "Also talked about".
-4. **A banner that is one user's report with many points.** The email leak had 1,612 points and is not a banner. Points as a third signal are not tested.
+1. **Which items the messages carry.** Decision 3 was made when every item was a row. The maintainer leans to AI lab and data security items (2026-11-13). Proposed, not yet agreed:
+   - Telegram (the maintainer): every banner line, added by code; a marked row or a fix only when its page's Highlights pick it.
+   - Teams (the colleagues): the banner lines that concern an AI model provider or a data platform or tool, not those about an AI developer tool alone (an editor extension, a coding agent). This needs a fifth Jev question, what the event concerns, which the spike did not ask.
+
+## Decided on 2026-11-13
+
+- **A banner on a day without a data report** sends the Teams post on its own, since reaching the colleagues is the reason for the banner. It does not publish a page that was skipped; it shows on the Overview and on the pages that exist.
+- **No points signal, and no allegation shown as fact.** Points say a story is popular, not that it is true. A banner needs a claim by the vendor, a researcher or the press. A flagged story that is one person's claim (`claim_by: individual`) is never written as an incident: its marked row and its summary say who claims it ("one user reports …"). The email leak (1,612 points) stays a marked row.
+
+## Deferred
+
+- **Page of a flagged story no project took.** Deferred until it happens: in 13 days of the spike no flagged story was left without a place for that reason. Until then such a story goes where today's selection puts it, and the security trace shows it (`flagged: true`, `placed: null` with its `dropped_reason`). The step 5 check of a week of traces looks for it. The proposal when it happens: the page of its best page topic, with no topic bar; a story routed to no page goes to "Also talked about".
 
 ## Order of work
 
