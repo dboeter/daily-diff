@@ -13,7 +13,109 @@
       <height>144</height>
     </image>
     <atom:link href="https://dboeter.github.io/daily-diff/feeds/ai-models.xml" rel="self" type="application/rss+xml"/>
-    <lastBuildDate>Thu, 12 Nov 2026 07:05:00 +0000</lastBuildDate>
+    <lastBuildDate>Fri, 13 Nov 2026 06:28:33 +0000</lastBuildDate>
+    <item>
+      <title>AI Models &amp; Labs 2026-11-13</title>
+      <link>https://dboeter.github.io/daily-diff/#2026-11-13/ai-models</link>
+      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-11-13/ai-models</guid>
+      <pubDate>Fri, 13 Nov 2026 00:00:00 +0000</pubDate>
+      <description>AI Models &amp;amp; Labs 2026-11-13 ⬛ Overview · 🟪 AI Agents · 🟦 AI Models &amp;amp; Labs · 🟧 AI Policy · 🟨 Data Engineering Lab posts: 0 | New models: 2 | Spotted: 7 | Generated: 2026-11-13 06:24 UTC Highlights Google&amp;#39;s Gemini 4 Hydrogen is now available on OpenRouter with 1M context, positioned as a high-efficiency model for agentic workflows and coding at lower cost and latency Edge0-145B released as an open-source 145B-parameter model for local coding, reasoning, and agent tasks with no clou...</description>
+      <content:encoded><![CDATA[<h1>AI Models &amp; Labs 2026-11-13</h1>
+<p><a href="https://dboeter.github.io/daily-diff/#2026-11-13">⬛ Overview</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-13/ai-agents">🟪 AI Agents</a> · <strong>🟦 AI Models &amp; Labs</strong> · <a href="https://dboeter.github.io/daily-diff/#2026-11-13/ai-policy">🟧 AI Policy</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-13/ai-data">🟨 Data Engineering</a></p>
+<blockquote>
+<p>Lab posts: 0 | New models: 2 | Spotted: 7 | Generated: 2026-11-13 06:24 UTC</p>
+</blockquote>
+<hr>
+<h2>Highlights</h2>
+<ul>
+<li>Google&#39;s Gemini 4 Hydrogen is now available on OpenRouter with 1M context, positioned as a high-efficiency model for agentic workflows and coding at lower cost and latency</li>
+<li>Edge0-145B released as an open-source 145B-parameter model for local coding, reasoning, and agent tasks with no cloud token fees</li>
+<li>Anthropic filed for an initial public offering and published a founders&#39; letter detailing the move</li>
+</ul>
+<hr>
+<h2>New on OpenRouter</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Model</th>
+<th align="left">Listed</th>
+<th align="left">Context</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a href="https://openrouter.ai/google/gemini-4-hydrogen">Google: Gemini 4 Hydrogen</a> <code>google/gemini-4-hydrogen</code></td>
+<td align="left">2026-11-12</td>
+<td align="left">1M</td>
+<td align="left">Gemini 4 Hydrogen is a high-efficiency workhorse model of the Gemini 4 family from Google, built for high-throughput agentic workflows, coding, and multi-model routing at lower cost and latency.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://openrouter.ai/google/gemini-4-hydrogen:batch">Google: Gemini 4 Hydrogen (batch)</a> <code>google/gemini-4-hydrogen:batch</code></td>
+<td align="left">2026-11-12</td>
+<td align="left">1M</td>
+<td align="left">Gemini 4 Hydrogen (batch) is a high-efficiency workhorse model of the Gemini 4 family from Google, built for high-throughput agentic workflows, coding, and multi-model routing at lower cost and latency.</td>
+</tr>
+</tbody></table>
+<hr>
+<p>Nothing new from Anthropic and OpenAI or OpenRouter&#39;s stealth models today.</p>
+<hr>
+<h2>Spotted</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Story</th>
+<th align="left">Source</th>
+<th align="left">Discussion</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a href="https://ipo.anthropic.com/us/">Anthropic IPO</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50465829">887 points, 848 comments</a></td>
+<td align="left">Anthropic has filed for an initial public offering and published a founders’ letter detailing the move.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://blog.google/innovation-and-ai/models-and-research/gemini-models/introducing-gemini-4-hydrogen/">Gemini 4 Hydrogen</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50471431">505 points, 321 comments</a></td>
+<td align="left">Google introduced Gemini 4 Hydrogen, positioning it as a daily driver model for agentic workflows.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://antigravity.google/blog/gemini-4-hydrogen-in-google-antigravity/">Gemini 4 Hydrogen and Orchestrator</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50472260">374 points, 101 comments</a></td>
+<td align="left">Google rolled out Gemini 4 Hydrogen inside Google Antigravity alongside a new Orchestrator model dropdown that pairs Hydrogen with another system.</td>
+</tr>
+<tr>
+<td align="left">I&#39;m making LLMs work on small and old devices (<a href="https://github.com/hyperionaidev/smolmaxxing/">hyperionaidev/smolmaxxing</a>)</td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50468888">327 points, 120 comments</a></td>
+<td align="left">The author is maximizing the ability to run various LLMs on the smallest and oldest devices possible.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://unemploymentlabs.com/checkpoint-forensics">Chinese frontier AI models carry the fingerprint of export-controlled GPUs</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50474883">246 points, 66 comments</a></td>
+<td align="left">Forensic analysis of public model releases found evidence that DeepSeek, Moonshot AI, MiniMax, and Ant Group used NVIDIA Blackwell GPUs despite export restrictions.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://edge0.ai/blog/introducing-edge0-145b-frontier-ai-capabilities-on-your-own-computer">Edge0-145B: Frontier AI Capabilities on Your Own Computer</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50475713">183 points, 44 comments</a></td>
+<td align="left">Edge0-145B is an open-source 145-billion-parameter model for local coding, reasoning, and agent tasks with no cloud token fees.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://libreagi.com/">libreagi - save OS models</a></td>
+<td align="left">Lobste.rs</td>
+<td align="left"><a href="https://lobste.rs/s/7c4iar/libreagi_save_os_models">12 points, 6 comments</a></td>
+<td align="left">LibreAGI operates a private BitTorrent tracker where members archive open models most at risk of disappearing.</td>
+</tr>
+</tbody></table>
+<hr>
+<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
+]]></content:encoded>
+    </item>
     <item>
       <title>AI Models &amp; Labs 2026-11-12</title>
       <link>https://dboeter.github.io/daily-diff/#2026-11-12/ai-models</link>

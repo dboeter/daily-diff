@@ -13,7 +13,96 @@
       <height>144</height>
     </image>
     <atom:link href="https://dboeter.github.io/daily-diff/feeds/ai-agents.xml" rel="self" type="application/rss+xml"/>
-    <lastBuildDate>Thu, 12 Nov 2026 07:05:00 +0000</lastBuildDate>
+    <lastBuildDate>Fri, 13 Nov 2026 06:28:33 +0000</lastBuildDate>
+    <item>
+      <title>AI Agents 2026-11-13</title>
+      <link>https://dboeter.github.io/daily-diff/#2026-11-13/ai-agents</link>
+      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-11-13/ai-agents</guid>
+      <pubDate>Fri, 13 Nov 2026 00:00:00 +0000</pubDate>
+      <description>AI Agents 2026-11-13 ⬛ Overview · 🟪 AI Agents · 🟦 AI Models &amp;amp; Labs · 🟧 AI Policy · 🟨 Data Engineering Projects: 15 | Active today: 4 | Stable releases: 3 | Prereleases (not covered): 3 | Generated: 2026-11-13 06:24 UTC Highlights Claude Code v2.1.323 silently removed subagentStatusLine with no replacement, hiding per-subagent context, cost, model, effort, and status; users report the regression arrived without warning or migration path. Oh My Pi v18.20.0 introduces breaking changes: secr...</description>
+      <content:encoded><![CDATA[<h1>AI Agents 2026-11-13</h1>
+<p><a href="https://dboeter.github.io/daily-diff/#2026-11-13">⬛ Overview</a> · <strong>🟪 AI Agents</strong> · <a href="https://dboeter.github.io/daily-diff/#2026-11-13/ai-models">🟦 AI Models &amp; Labs</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-13/ai-policy">🟧 AI Policy</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-13/ai-data">🟨 Data Engineering</a></p>
+<blockquote>
+<p>Projects: 15 | Active today: 4 | Stable releases: 3 | Prereleases (not covered): 3 | Generated: 2026-11-13 06:24 UTC</p>
+</blockquote>
+<hr>
+<h2>Highlights</h2>
+<ul>
+<li>Claude Code v2.1.323 silently removed <code>subagentStatusLine</code> with no replacement, hiding per-subagent context, cost, model, effort, and status; users report the regression arrived without warning or migration path.</li>
+<li>Oh My Pi v18.20.0 introduces breaking changes: <code>secrets.yml</code> regex rules now use Rust <code>regex</code> patterns (no lookarounds/backreferences), secret placeholders become four camelCased words without <code>$$</code> delimiters, and <code>task.file</code>/<code>taskFile</code> fields are removed.</li>
+<li>OpenAI Codex rust-v0.168.0 adds model provider browsing in Sessions, TUI workspace split view, audio recording attachments, animated GIF generation, fullscreen image previews in tmux on Ghostty/Kitty, and <code>tui.notification_method = &quot;osc777&quot;</code> for terminal notifications.</li>
+</ul>
+<hr>
+<h2>Coding Agents &amp; Assistants</h2>
+<h3>Claude Code</h3>
+<ul>
+<li><strong>Release:</strong> <a href="https://github.com/anthropics/claude-code/releases/tag/v2.1.323">v2.1.323</a> adds Code Mode (experimental opt-in for JavaScript tool calls), plugin version validation via <code>engines[&quot;claude-code&quot;]</code>, TypeScript hook type checking in <code>claude plugin validate</code>, <code>.docx</code> support for Artifact uploads, and new environment variables including <code>CLAUDE_CODE_DISABLE_AGENT_PROGRESS_SUMMARIES</code> and <code>CLAUDE_CODE_RESUME_HINT_COMMAND</code>.</li>
+<li><strong>Hot issue:</strong> <a href="https://github.com/anthropics/claude-code/issues/109446">#109446</a>: an issue says 2.1.323 silently removed <code>subagentStatusLine</code> with no replacement, hiding per-subagent context, cost, model, effort, and status. (regression; 2 comments, 2 👍; +4 in the last 24h)</li>
+<li><strong>News:</strong> <a href="https://news.ycombinator.com/item?id=50477704">Anthropic carelessly killed a Claude Code feature users built on, no warning</a> reports the regression removing <code>subagentStatusLine</code> without warning or migration path.</li>
+<li><strong>Hot issue:</strong> <a href="https://github.com/anthropics/claude-code/issues/84862">#84862</a>: [FEATURE] Passkey (WebAuthn) sign-in for Claude accounts, across every surface (37 comments, 185 👍; +11 since 2026-11-11)</li>
+</ul>
+<h3>OpenAI Codex</h3>
+<ul>
+<li><strong>Release:</strong> <a href="https://github.com/openai/codex/releases/tag/rust-v0.168.0">rust-v0.168.0</a> adds model provider browsing in Sessions, TUI workspace split view via <code>features.tui_workspace</code>, audio recording attachments, animated GIF generation via <code>features.image_generation_animation</code>, fullscreen image previews in tmux on Ghostty/Kitty, and <code>tui.notification_method = &quot;osc777&quot;</code> for terminal notifications.</li>
+</ul>
+<h3>Pi</h3>
+<ul>
+<li><strong>News:</strong> <a href="https://news.ycombinator.com/item?id=50464872">Pi GPUI: A native GUI for the pi coding agent, built with Rust and GPUI.</a> announces a native GUI for the pi coding agent built with Rust and GPUI for macOS and Linux.</li>
+</ul>
+<h3>Oh My Pi</h3>
+<ul>
+<li><strong>Release:</strong> <a href="https://github.com/can1357/oh-my-pi/releases/tag/v18.20.0">v18.20.0</a> breaks <code>secrets.yml</code> regex rules (now Rust <code>regex</code> patterns, no lookarounds/backreferences, <code>(?P …)</code> marks redacted part), changes secret placeholders to four camelCased words without <code>$$</code> delimiters, makes model output from placeholders byte-identical on replay, and removes <code>task.file</code> and <code>taskFile</code> field.</li>
+</ul>
+<p><strong>Quiet today:</strong> <a href="https://github.com/google-gemini/gemini-cli">Gemini CLI</a>, <a href="https://github.com/Kilo-Org/kilocode">Kilo Code</a>, <a href="https://github.com/anomalyco/opencode">OpenCode</a>, <a href="https://github.com/1jehuang/jcode">jcode</a>, <a href="https://github.com/cline/cline">Cline</a>, <a href="https://github.com/CommandCodeAI/command-code">Command Code</a>, <a href="https://github.com/deepseek-ai/deepseek-harness">DeepSeek Harness</a>, <a href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a></p>
+<hr>
+<h2>Agent Tooling</h2>
+<p><strong>Quiet today:</strong> <a href="https://github.com/NVIDIA/OpenShell">OpenShell</a>, <a href="https://github.com/herdrdev/herdr">herdr</a>, <a href="https://github.com/microsoft/conductor">Conductor</a></p>
+<hr>
+<h2>Spotted</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Story</th>
+<th align="left">Source</th>
+<th align="left">Discussion</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a href="https://developer.apple.com/foundation-models-framework/">Foundation Models framework</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50474361">181 points, 26 comments</a></td>
+<td align="left">Apple released a native Swift API called Foundation Models for integrating any large language model directly into apps.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://github.com/Parcha-ai/agentrun/blob/main/README.md">Show HN: AgentRun – open-source, Self-improving Managed Agents</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50471650">90 points, 25 comments</a></td>
+<td align="left">AgentRun is an open-source platform that adds self-improvement, durable execution, and a control plane on top of existing agent harnesses.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://martinfowler.com/articles/durable-execution-agents.html">Durable Execution Agents</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50462904">5 points, 0 comments</a></td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left"><a href="https://dev.to/sylwia-lask/mcp-is-dead-simple-and-thats-exactly-the-problem-5811">MCP Is Dead Simple. And That&#39;s Exactly the Problem</a></td>
+<td align="left">Dev.to</td>
+<td align="left"><a href="https://dev.to/sylwia-lask/mcp-is-dead-simple-and-thats-exactly-the-problem-5811">97 reactions, 61 comments</a></td>
+<td align="left">The article examines Model Context Protocol (MCP), questioning what it is and whether its simplicity masks deeper implementation problems.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://dev.to/necoz/your-mcp-servers-are-silently-draining-your-context-window-the-hidden-cost-of-tool-heavy-ai-agents-fkl">Your MCP Servers Are Silently Draining Your Context Window: The Hidden Cost of Tool-Heavy AI Agents</a></td>
+<td align="left">Dev.to</td>
+<td align="left"><a href="https://dev.to/necoz/your-mcp-servers-are-silently-draining-your-context-window-the-hidden-cost-of-tool-heavy-ai-agents-fkl">42 reactions, 16 comments</a></td>
+<td align="left">Attaching dozens of MCP tools to agents degrades LLM reasoning and inflates API costs, while small TypeScript micro-tools can mitigate the issue.</td>
+</tr>
+</tbody></table>
+<hr>
+<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
+]]></content:encoded>
+    </item>
     <item>
       <title>AI Agents 2026-11-12</title>
       <link>https://dboeter.github.io/daily-diff/#2026-11-12/ai-agents</link>
@@ -2699,71 +2788,6 @@
 <li><strong>News</strong>: GitHub Trending highlights context-mode as a context-window optimizer for AI coding agents, claiming 98% tool-output reduction, persistent session memory, and routing enforcement across 17 platforms via MCP and hooks. <a href="https://github.com/mksglu/context-mode">https://github.com/mksglu/context-mode</a></li>
 </ul>
 <p><strong>Quiet today:</strong> <a href="https://github.com/NVIDIA/OpenShell">OpenShell</a>, <a href="https://github.com/asheshgoplani/agent-deck">Agent Deck</a></p>
-<hr>
-<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
-]]></content:encoded>
-    </item>
-    <item>
-      <title>AI Agents 2026-10-14</title>
-      <link>https://dboeter.github.io/daily-diff/#2026-10-14/ai-agents</link>
-      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-10-14/ai-agents</guid>
-      <pubDate>Wed, 14 Oct 2026 00:00:00 +0000</pubDate>
-      <description>AI Agents 2026-10-14 📅 Overview · 🤖 AI Agents · 💬 AI Discussions · 📚 AI Research · 🌐 Lab Announcements Generated: 2026-10-14 01:48 UTC | Projects: 16 | Active today: 9 | Stable releases: 8 | Prereleases (not covered): 6 🕵️ Stealth Models on OpenRouter No stealth models listed on OpenRouter today. Coding Agents &amp;amp; Assistants Overview Gemini CLI shipped v0.64.0 with A2A server settings migration and ACP usage notification fixes. Cline released a cluster of updates — v4.1.24 refreshes the ...</description>
-      <content:encoded><![CDATA[<h1>AI Agents 2026-10-14</h1>
-<p><a href="https://dboeter.github.io/daily-diff/#2026-10-14">📅 Overview</a> · <strong>🤖 AI Agents</strong> · <a href="https://dboeter.github.io/daily-diff/#2026-10-14/ai-hn">💬 AI Discussions</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-14/ai-arxiv">📚 AI Research</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-14/ai-web">🌐 Lab Announcements</a></p>
-<blockquote>
-<p>Generated: 2026-10-14 01:48 UTC | Projects: 16 | Active today: 9 | Stable releases: 8 | Prereleases (not covered): 6</p>
-</blockquote>
-<hr>
-<h2>🕵️ Stealth Models on OpenRouter</h2>
-<p>No stealth models listed on OpenRouter today.</p>
-<hr>
-<h2>Coding Agents &amp; Assistants</h2>
-<h3>Overview</h3>
-<p>Gemini CLI shipped v0.64.0 with A2A server settings migration and ACP usage notification fixes. Cline released a cluster of updates — v4.1.24 refreshes the model catalog with Claude Haiku 5.5 and new providers, while SDK, Desktop, and CLI releases rework plugin loading to run in-process. OpenCode users face a high-severity &quot;Invalid credential&quot; error that breaks all model access. Hermes Agent has an open security issue logging llama-server API keys in plain text. Oh My Pi v18.10.4 adds compact approval prompts and passes loop context to pre-model hooks.</p>
-<h3>Gemini CLI</h3>
-<ul>
-<li><strong>Release</strong>: v0.64.0 implements V1-to-V2 settings migration for the A2A server and fixes the ACP bridge to emit <code>usage_update</code> notifications with proper PromptResponse usage data. <a href="https://github.com/google-gemini/gemini-cli/releases/tag/v0.64.0">https://github.com/google-gemini/gemini-cli/releases/tag/v0.64.0</a></li>
-</ul>
-<h3>OpenCode</h3>
-<ul>
-<li><strong>Hot issue</strong>: All models return &quot;Error: Upstream request failed: Invalid credential&quot; on v2.0.27, blocking any session start. Marked high severity, reproduced, with 19 comments. <a href="https://github.com/anomalyco/opencode/issues/54833">https://github.com/anomalyco/opencode/issues/54833</a></li>
-</ul>
-<h3>Oh My Pi</h3>
-<ul>
-<li><strong>Release</strong>: v18.10.4 adds <code>compact: true</code> option to <code>AgentTool.formatApprovalDetails</code> for untruncated bodies in compact approval prompts, and passes loop context as a second argument to before-model-call hooks. <a href="https://github.com/can1357/oh-my-pi/releases/tag/v18.10.4">https://github.com/can1357/oh-my-pi/releases/tag/v18.10.4</a></li>
-<li><strong>Hot issue</strong>: Closed bug where <code>gemini-4-argon-medium</code> via the antigravity provider returned a 404 error when selected in <code>/model</code>. <a href="https://github.com/can1357/oh-my-pi/issues/15624">https://github.com/can1357/oh-my-pi/issues/15624</a></li>
-</ul>
-<h3>Cline</h3>
-<ul>
-<li><strong>Release</strong>: v4.1.24 defaults to Claude Sonnet 5.5 when no model is chosen, adds Claude Haiku 5.5 plus AI/ML API, LowRouter, and Prime Inference providers, and gives ai&amp; its own API key and model picker. SDK v0.0.93, Desktop v0.0.46, and CLI v3.0.71 all move plugins to in-process loading, removing the need for a separate Node/Bun runtime and surfacing plugin load errors in the UI and <code>cline config tools --json</code>. <a href="https://github.com/cline/cline/releases/tag/v4.1.24">https://github.com/cline/cline/releases/tag/v4.1.24</a></li>
-</ul>
-<h3>Hermes Agent</h3>
-<ul>
-<li><strong>Hot issue</strong>: Open security issue — the local runtime supervisor writes the full <code>llama-server</code> command line (including the <code>--api-key</code> value) to <code>llama-server.log</code> on every spawn and crash restart, exposing the stable key in plain text. <a href="https://github.com/NousResearch/hermes-agent/issues/137804">https://github.com/NousResearch/hermes-agent/issues/137804</a></li>
-</ul>
-<h3>OpenAI Codex</h3>
-<ul>
-<li><strong>News</strong>: Hacker News discussion highlights that Codex CLI installs a persistent, self-updating background daemon by default, raising concerns about transparency and system impact. <a href="https://news.ycombinator.com/item?id=50060694">https://news.ycombinator.com/item?id=50060694</a></li>
-</ul>
-<p><strong>Quiet today:</strong> <a href="https://github.com/anthropics/claude-code">Claude Code</a>, <a href="https://github.com/Kilo-Org/kilocode">Kilo Code</a>, <a href="https://github.com/earendil-works/pi">Pi</a>, <a href="https://github.com/1jehuang/jcode">jcode</a>, <a href="https://github.com/CommandCodeAI/command-code">Command Code</a>, <a href="https://github.com/deepseek-ai/deepseek-harness">DeepSeek Harness</a></p>
-<hr>
-<h2>Agent Tooling</h2>
-<h3>Overview</h3>
-<p>OpenShell v0.1.4 makes the gateway run as a user service by default, simplifying deployment. herdr v0.9.4 introduces a <code>herdr plugin update</code> command that refreshes GitHub-sourced plugins without restarting running panes, and fixes Windows notifications to persist in the Notification Center. context-mode surged on GitHub Trending for its approach to context window optimization — sandboxing tool output for 98% reduction, persisting session memory, and enforcing routing across 17 platforms via MCP and hooks.</p>
-<h3>OpenShell</h3>
-<ul>
-<li><strong>Release</strong>: v0.1.4 runs the gateway as a user service by default and removes the snap reproduction helper from tests. <a href="https://github.com/NVIDIA/OpenShell/releases/tag/v0.1.4">https://github.com/NVIDIA/OpenShell/releases/tag/v0.1.4</a></li>
-</ul>
-<h3>herdr</h3>
-<ul>
-<li><strong>Release</strong>: v0.9.4 adds <code>herdr plugin update</code> to update GitHub-installed plugins in bulk or by name without reloading config; Windows notifications now stay in Notification Center and clicking one focuses its pane. <a href="https://github.com/herdrdev/herdr/releases/tag/v0.9.4">https://github.com/herdrdev/herdr/releases/tag/v0.9.4</a></li>
-</ul>
-<h3>context-mode</h3>
-<ul>
-<li><strong>News</strong>: GitHub Trending highlights context-mode for AI coding agents — it sandboxes tool output (98% reduction), persists session memory, and enforces routing across 17 platforms via MCP + hooks. <a href="https://github.com/mksglu/context-mode">https://github.com/mksglu/context-mode</a></li>
-</ul>
-<p><strong>Quiet today:</strong> <a href="https://github.com/asheshgoplani/agent-deck">Agent Deck</a></p>
 <hr>
 <p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
 ]]></content:encoded>
