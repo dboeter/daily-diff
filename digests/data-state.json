@@ -1,5 +1,6 @@
 {
   "reported": {
+    "574158": "2026-11-13",
     "574541": "2026-11-03",
     "576716": "2026-10-22",
     "577491": "2026-10-31",
@@ -399,7 +400,28 @@
     "calculate across rows in lakeflow designer (public preview)|2026-11-05": "2026-11-12",
     "release:databricks/cli@v1.26.0": "2026-11-12",
     "post:medium.com/snowflake/agents-are-code-too-what-i-learned-shipping-a-cortex-agent-through-azure-devops-fab3adae29e8": "2026-11-12",
-    "post:duckdb.org/2026/11/12/local-analytics-without-a-database-server.html": "2026-11-12"
+    "post:duckdb.org/2026/11/12/local-analytics-without-a-database-server.html": "2026-11-12",
+    "standalone pipelines on serverless general compute are now generally available|2026-11-11": "2026-11-13",
+    "ai functions asynchronous api (beta)|2026-11-09": "2026-11-13",
+    "abac deny policies support ai securables and attachment to individual objects (beta)|2026-11-12": "2026-11-13",
+    "partial schema inference for python lakeflow pipelines|2026-11-11": "2026-11-13",
+    "budget alerts can now trigger webhooks (beta)|2026-11-10": "2026-11-13",
+    "nov 11, 2026: semantic view materializations (general availability)|2026-11-11": "2026-11-13",
+    "nov 13, 2026: many-to-many relationships in semantic views (preview)|2026-11-13": "2026-11-13",
+    "nov 10, 2026: integrations view in account_usage (preview)|2026-11-10": "2026-11-13",
+    "november 10, 2026: geospatial maps in snowflake cowork (preview)|2026-11-10": "2026-11-13",
+    "you can track table-level data lineage in knowledge catalog for bigquery pipelines (ga)|2026-11-12": "2026-11-13",
+    "bigquery generative ai functions now support the gemini-4-hydrogen model|2026-11-12": "2026-11-13",
+    "nov 12, 2026: snowflake data clean rooms updates|2026-11-12": "2026-11-13",
+    "release:snowflakedb/snowpark-python@v1.57.0": "2026-11-13",
+    "release:dagster-io/dagster@1.13.30": "2026-11-13",
+    "release:great-expectations/great_expectations@1.25.0": "2026-11-13",
+    "release:dbt-labs/dbt@v1.12.7": "2026-11-13",
+    "post:medium.com/snowflake/operational-ontology-on-snowflake-from-business-meaning-to-governed-ai-action-6f3ef270d3f2": "2026-11-13",
+    "post:medium.com/snowflake/streamlits-floor-react-s-ceiling-inside-snowflake-c78f90e39dc8": "2026-11-13",
+    "post:pola.rs/posts/polars-nanook-vs-databricks": "2026-11-13",
+    "post:dlthub.com/blog/dlthub-clickhouse-ontology-agents": "2026-11-13",
+    "post:dlthub.com/blog/clickhouse-agent-ontology-walkthrough": "2026-11-13"
   },
   "stages": {
     "snowflake-bcr:2026_08": "2026-10-16 Introduced in the 10.37 release (October 8-16, 2026) as Disabled by Default; account admins can enable for testing."

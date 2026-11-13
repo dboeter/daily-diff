@@ -1,0 +1,18 @@
+{
+  "ai-agents": [
+    "− Claude Code v2.1.323 silently removed `subagentStatusLine` with no replacement, hiding per-subagent context, cost, model, effort, and status",
+    "OpenAI Codex rust-v0.168.0 adds model provider browsing, TUI split view, audio attachments, GIF generation, fullscreen images in tmux, and OSC777 notifications"
+  ],
+  "ai-models": [
+    "Google's Gemini 4 Hydrogen is now available on OpenRouter with 1M context for agentic workflows and coding at lower cost and latency",
+    "Edge0-145B released as open-source 145B-parameter model for local coding, reasoning, and agent tasks with no cloud token fees"
+  ],
+  "ai-policy": [
+    "European Commission published guidelines on implementing transparency obligations for certain AI systems under AI Act Article 50",
+    "Nonprofits sued Anthropic, Google, and other tech giants in San Francisco seeking to block more advanced models and self-improving AI"
+  ],
+  "ai-data": [
+    "Databricks standalone pipelines on serverless general compute are GA, enabling materialized views and streaming tables from notebooks",
+    "Snowflake semantic view materializations are GA, allowing teams to pre-aggregate dimensions and metrics for query performance"
+  ]
+}

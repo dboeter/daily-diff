@@ -47,7 +47,9 @@
     "issue:nousresearch/hermes-agent#152674": "2026-11-11",
     "issue:anthropics/claude-code#108975": "2026-11-12",
     "issue:anthropics/claude-code#108984": "2026-11-12",
-    "issue:nousresearch/hermes-agent#153396": "2026-11-12"
+    "issue:nousresearch/hermes-agent#153396": "2026-11-12",
+    "issue:anthropics/claude-code#84862": "2026-11-13",
+    "issue:anthropics/claude-code#109446": "2026-11-13"
   },
   "stages": {}
 }
