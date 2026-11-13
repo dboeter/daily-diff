@@ -1,6 +1,6 @@
 # Security: a banner for severe incidents, marked rows for the rest
 
-Status: placement decided on 2026-11-11. The decisions under "Decided" are the maintainer's. The spike is done (`spike/results.md`). Nothing is built.
+Status: placement decided on 2026-11-11. The decisions under "Decided" are the maintainer's. The spike is done (`spike/results.md`). Step 3 is built: the story question runs nightly and writes `security-verdicts.json` and `security-trace.json`; nothing is shown.
 
 ## Why
 

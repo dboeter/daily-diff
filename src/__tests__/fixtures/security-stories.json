@@ -1,0 +1,198 @@
+{
+  "_note": "Jev answers (jev-1.14.0) recorded by the security spike of 2026-11-11 (results-stories.json in .scratch/security-section/spike), 'type' fields dropped. Keys are the spike's story ids.",
+  "stories": {
+    "s354": {
+      "title": "Fireworks Cyberattack Exposes Customer Data and AI Models",
+      "url": "https://www.forbes.com/sites/annatong/2026/11/09/fireworks-cyberattack-exposes-customer-data-and-ai-models-as-fallout-widens/",
+      "answers": {
+        "is_security": {
+          "noul": 0.94
+        },
+        "kind": {
+          "choice": "incident",
+          "confidence": 1.0,
+          "probabilities": {
+            "incident": 1.0,
+            "vulnerability": 0.0,
+            "fix": 0.0,
+            "none": 0.0
+          }
+        },
+        "severity": {
+          "score": 1.98,
+          "confidence": 0.98,
+          "probabilities": {
+            "0": 0.0,
+            "1": 0.01,
+            "2": 0.99
+          }
+        },
+        "claim_by": {
+          "choice": "press",
+          "confidence": 0.93,
+          "probabilities": {
+            "vendor_or_researcher": 0.02,
+            "press": 0.95,
+            "individual": 0.0,
+            "unclear": 0.03
+          }
+        }
+      }
+    },
+    "s353": {
+      "title": "Fireworks AI Hacked",
+      "url": "https://www.bloomberg.com/news/articles/2026-11-09/nvidia-backed-fireworks-ai-notifies-customers-of-its-second-hack-in-weeks",
+      "answers": {
+        "is_security": {
+          "noul": 0.75
+        },
+        "kind": {
+          "choice": "incident",
+          "confidence": 0.92,
+          "probabilities": {
+            "incident": 0.94,
+            "vulnerability": 0.05,
+            "fix": 0.0,
+            "none": 0.01
+          }
+        },
+        "severity": {
+          "score": 0.91,
+          "confidence": 0.14,
+          "probabilities": {
+            "0": 0.33,
+            "1": 0.43,
+            "2": 0.24
+          }
+        },
+        "claim_by": {
+          "choice": "press",
+          "confidence": 0.92,
+          "probabilities": {
+            "vendor_or_researcher": 0.01,
+            "press": 0.94,
+            "individual": 0.0,
+            "unclear": 0.05
+          }
+        }
+      }
+    },
+    "s213": {
+      "title": "Claude Code sends your email address to websites",
+      "description": "Bug Description I receive dozens of scam emails per day because claude code divulged my email to arbitrary 3rd parties in the User-Agent request header while conducting web searches without my perm",
+      "url": "https://github.com/anthropics/claude-code/issues/107757",
+      "answers": {
+        "is_security": {
+          "noul": 0.94
+        },
+        "kind": {
+          "choice": "incident",
+          "confidence": 0.92,
+          "probabilities": {
+            "incident": 0.94,
+            "vulnerability": 0.06,
+            "fix": 0.0,
+            "none": 0.0
+          }
+        },
+        "severity": {
+          "score": 1.92,
+          "confidence": 0.86,
+          "probabilities": {
+            "0": 0.01,
+            "1": 0.07,
+            "2": 0.92
+          }
+        },
+        "claim_by": {
+          "choice": "individual",
+          "confidence": 1.0,
+          "probabilities": {
+            "vendor_or_researcher": 0.0,
+            "press": 0.0,
+            "individual": 1.0,
+            "unclear": 0.0
+          }
+        }
+      }
+    },
+    "s006": {
+      "title": "Leak Exposes 41,000 Homeland Security Workers–Including Undercover ICE Agents",
+      "description": "The leaked records include the locations of ICE and CBP facilities, workers’ cell phone numbers, and the members of groups tied to wiretap programs, Palantir software, and xAI’s Grok chatbot.",
+      "url": "https://www.wired.com/story/massive-leak-exposes-41000-homeland-security-workers-including-undercover-ice-agents/",
+      "answers": {
+        "is_security": {
+          "noul": 0.9
+        },
+        "kind": {
+          "choice": "incident",
+          "confidence": 0.85,
+          "probabilities": {
+            "incident": 0.89,
+            "vulnerability": 0.0,
+            "fix": 0.0,
+            "none": 0.11
+          }
+        },
+        "severity": {
+          "score": 1.81,
+          "confidence": 0.73,
+          "probabilities": {
+            "0": 0.06,
+            "1": 0.06,
+            "2": 0.88
+          }
+        },
+        "claim_by": {
+          "choice": "press",
+          "confidence": 0.99,
+          "probabilities": {
+            "vendor_or_researcher": 0.0,
+            "press": 0.99,
+            "individual": 0.0,
+            "unclear": 0.01
+          }
+        }
+      }
+    },
+    "s000": {
+      "title": "Artificial Analysis v5 and the benchmarker's dilemma",
+      "description": "A sort of review of the benchmarking industry and what's missing.",
+      "url": "https://www.interconnects.ai/p/artificial-analysis-v5-and-the-benchmarkers",
+      "answers": {
+        "is_security": {
+          "noul": 0.03
+        },
+        "kind": {
+          "choice": "none",
+          "confidence": 1.0,
+          "probabilities": {
+            "incident": 0.0,
+            "vulnerability": 0.0,
+            "fix": 0.0,
+            "none": 1.0
+          }
+        },
+        "severity": {
+          "score": 0.01,
+          "confidence": 1.0,
+          "probabilities": {
+            "0": 1.0,
+            "1": 0.0,
+            "2": 0.0
+          }
+        },
+        "claim_by": {
+          "choice": "unclear",
+          "confidence": 0.48,
+          "probabilities": {
+            "vendor_or_researcher": 0.21,
+            "press": 0.01,
+            "individual": 0.17,
+            "unclear": 0.61
+          }
+        }
+      }
+    }
+  }
+}

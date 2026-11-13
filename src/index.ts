@@ -130,6 +130,13 @@ import {
   spottedTraceFile,
   PAGE_OF_TOPIC,
 } from "./spotted/topics.ts";
+import {
+  judgeSecurityStories,
+  loadSecurityVerdicts,
+  saveSecurityVerdicts,
+  securityTraceFile,
+  type Placement,
+} from "./security/stories.ts";
 import { DATA_SECTION_KEYS, loadConfig, type SectionKey } from "./core/config.ts";
 import { resolvePagesUrl } from "./cli/notify.ts";
 import { toCstDateStr, toUtcStr, isWeeklyRun, sleep } from "./core/date.ts";
@@ -429,6 +436,13 @@ async function main(): Promise<void> {
     dateStr,
   });
   const fresh = shownRepeats.kept;
+  // Every fresh story, wherever it ends up: the Fireworks breach was lost to cap, threshold and
+  // routing on 2026-11-10. Traced only; nothing is shown yet (.scratch/security-section/spec.md).
+  const security = await judgeSecurityStories(fresh, {
+    apiKey: process.env["TYPESAFE_API_KEY"],
+    cache: loadSecurityVerdicts(),
+    dateStr,
+  });
 
   // Agent news is matched against the other sources' data, so it waits for them.
   // Agents and tooling in one pass: an item naming 3+ of them is a compatibility list.
@@ -718,6 +732,16 @@ async function main(): Promise<void> {
       dateStr,
       "spotted-trace.json",
     )}`,
+  );
+  if (security.nextCache) saveSecurityVerdicts(security.nextCache);
+  const placed = new Map<string, Placement>([
+    ...shownNews.map((s): [string, Placement] => [s.id, "news"]),
+    ...pool.lab.map((s): [string, Placement] => [s.id, "lab"]),
+    ...spottedRows.map((r): [string, Placement] => [r.id, "spotted"]),
+    ...talkedAbout.map((s): [string, Placement] => [s.id, "talked_about"]),
+  ]);
+  console.log(
+    `  Saved ${saveFile(securityTraceFile(fresh, security, placed, dailyShown), dateStr, "security-trace.json")}`,
   );
   // Research: the day's top papers for the weekly Trends page; the arXiv cutoff moves on every run.
   if (arxivData.traceFile) {
