@@ -86,13 +86,9 @@ Four days of `candidates.json` (11-07 to 11-10, the file exists since 11-07), a 
 - Acceptance case: the email leak (story 11-05, shown 11-07) and v2.1.317 (11-03). Replayed over those days, the story shown on 11-07 says it is fixed.
 - Not covered: a later change to a fix. The v2.1.321 line that narrows the email check scores 0.43 as a security line and 0.22 and 0.11 against the leak stories (spike, 2026-11-11), so it is neither flagged nor linked. If such a change must show, it needs a link to the earlier fix line of its project; that is not tested.
 
-## Open decisions
-
-1. **A product of a lab.** Is a security event in a lab's own developer tool (Claude Code, Codex, Gemini CLI) a lab item for the Teams post? The spike's Claude Code email leak and "Don't Ask Again" passwords are such cases.
-
 ## Decided on 2026-11-13
 
-- **Which items the messages carry.** Telegram carries every banner line, added by code. The Teams post carries the banner lines about an AI lab (Anthropic, OpenAI or Google) or a data platform or tool. A marked story or a fix reaches either message only when its page's Highlights pick it. Telling the two apart needs a fifth Jev question, what the event concerns (an AI lab, a data platform or tool, or something else), which the spike did not ask: test it on the spike's flagged stories before the banner step.
+- **Which items the messages carry.** Telegram carries every banner line, added by code. The Teams post carries the banner lines about an AI lab (Anthropic, OpenAI or Google), a lab's own product included (Claude Code, Codex, Gemini CLI: decided 2026-11-14), or a data platform or tool. A marked story or a fix reaches either message only when its page's Highlights pick it. Telling the two apart needs a fifth Jev question, what the event concerns (an AI lab, a data platform or tool, or something else), which the spike did not ask: test it on the spike's flagged stories before the banner step.
 - **A banner on a day without a data report** sends the Teams post on its own, since reaching the colleagues is the reason for the banner. It does not publish a page that was skipped; it shows on the Overview and on the pages that exist.
 - **No points signal, and no allegation shown as fact.** Points say a story is popular, not that it is true. A banner needs a claim by the vendor, a researcher or the press. A flagged story that is one person's claim (`claim_by: individual`) is never written as an incident: its marked row and its summary say who claims it ("one user reports …"). The email leak (1,612 points) stays a marked row.
 
