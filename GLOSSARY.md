@@ -59,7 +59,7 @@ The part of a daily page holding the best community stories (Hacker News, Lobste
 _Avoid_: Discussions, Worth a Look
 
 **Also talked about**:
-The Overview's list of the day's most-discussed community stories that no page shows: those whose topic (`other`) has no page (AI and work, security incidents), and those under the Spotted topic bar, whatever their topic (a story routed to models at 0.3 is listed here, as topic `other`). Policy stories, AI law in the news, have their own list beside it, **Policy talk**, with its own slots. An agents, models, research or data story at or above the bar goes to its page's Spotted instead.
+The Overview's list of the day's most-discussed community stories that no page shows: those whose topic (`other`) has no page (AI and work, security incidents), and those under the Spotted topic bar, whatever their topic (a story routed to models at 0.3 is listed here, with topic `models`). Policy stories, AI law in the news, have their own list beside it, **Policy talk**, with its own slots. An agents, models, research or data story at or above the bar goes to its page's Spotted instead.
 
 **Policy talk**:
 The Overview's list of the day's most-discussed policy-topic community stories, beside Also talked about and not competing with it for slots.

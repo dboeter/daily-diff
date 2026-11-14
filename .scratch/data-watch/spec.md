@@ -102,4 +102,4 @@ Deprecations and breaking changes come first. A day with nothing new produces no
 
 ## Comments
 
-- 2026-11-14: resolved. The data report runs daily as AGENTS.md describes. Open follow-ups are tickets 05 (Teams: no `TEAMS_WEBHOOK_URL` secret yet, no test post) and 15 (six Azure category strings).
+- 2026-11-14: resolved. The data report runs daily as AGENTS.md describes. The open follow-up is ticket 05 (Teams: no `TEAMS_WEBHOOK_URL` secret yet, no test post); ticket 15 was finished later the same day.
