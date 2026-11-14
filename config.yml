@@ -319,10 +319,14 @@ data:
         - Azure Blob Storage
         - Azure Data Lake Storage
         - Azure Cosmos DB
-        # Data Factory, Synapse, Event Hubs, Stream Analytics, Purview and Data
-        # Explorer had no item in the feed's 200-item window on 2026-10-30, so
-        # their category strings could not be read; the match is exact, so an
-        # unverified string would silently match nothing (ticket 15).
+        # The match is exact. These six names come from the product facets of the
+        # site's JSON API (2026-11-14), which the feed's <category> values copy.
+        - Azure Data Factory
+        - Azure Synapse Analytics
+        - Event Hubs
+        - Azure Stream Analytics
+        - Microsoft Purview
+        - Azure Data Explorer
     - name: Snowflake
       vendor: snowflake
       url: https://docs.snowflake.com/en/release-notes/all-release-notes?bundle=false
