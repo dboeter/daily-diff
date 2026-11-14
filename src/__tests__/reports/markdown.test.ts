@@ -1257,6 +1257,8 @@ describe("security marker", () => {
         `- 🔓 ${SECURITY.unconfirmed}**News:** [Claim](https://news.ycombinator.com/item?id=2) says so.\n` +
         "- **News:** [Plain](https://news.ycombinator.com/item?id=3) too.",
     );
+    const once = markSecurityBullets(section, news);
+    expect(markSecurityBullets(once, news)).toBe(once);
   });
 
   it("makes an unconfirmed flagged row no Highlight: a bullet naming it is dropped", () => {

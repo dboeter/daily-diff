@@ -266,7 +266,10 @@ export function markSecurityBullets(
   if (!flagged.size) return section;
   return section.replace(/^(\s*[-*] )(.*)$/gm, (line, bullet: string, rest: string) => {
     const hit = [...rest.matchAll(/\]\(([^)\s]+)\)/g)].map((m) => flagged.get(linkKey(m[1]!))).find(Boolean);
-    return hit ? `${bullet}${SECURITY.marker}${claimLabel(hit)}${rest}` : line;
+    // Idempotent: a section marked once (the page and the Highlights input share it) is left as it is.
+    return hit && !rest.startsWith(SECURITY.marker)
+      ? `${bullet}${SECURITY.marker}${claimLabel(hit)}${rest}`
+      : line;
   });
 }
 
