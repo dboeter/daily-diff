@@ -1,5 +1,7 @@
 # Deepen the report modules
 
+Status: resolved
+
 From the 2026-10-18 architecture review (`/tmp/architecture-review-20261018-213102.html`, not in the repo). This continues the work of `d0c1fd0` (`judgeItems`, shared cached Jev judgment) and `2f6b9a8` (`src/report-state.ts`, shared reported-items state): the rules Policy Watch and the data report share should live in one module, and each report module should own its whole flow.
 
 ## Tickets

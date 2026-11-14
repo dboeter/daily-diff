@@ -4,7 +4,7 @@
 
 **Blocked by:** 01
 
-**Status:** ready-for-agent
+**Status:** resolved
 
 - [ ] Overview reachable at `#YYYY-MM-DD` and as the first sidebar entry of a day
 - [ ] No extra LLM call; built from the existing highlights

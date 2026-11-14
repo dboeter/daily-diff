@@ -4,7 +4,7 @@
 
 **Blocked by:** 01
 
-**Status:** ready-for-agent
+**Status:** resolved
 
 - [ ] Code-rendered under the H1, short names, current report not linked
 - [ ] Links point at the Pages hash routes (`#YYYY-MM-DD/<report>`), so they work from a GitHub Issue

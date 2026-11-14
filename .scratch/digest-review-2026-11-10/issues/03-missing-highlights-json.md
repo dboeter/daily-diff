@@ -1,6 +1,6 @@
 # 03: highlights.json leaves out ai-data and ai-models
 
-Status: needs-triage
+Status: done
 Findings: 5 [medium], see `../review.md`
 
 ## Problem
@@ -19,3 +19,4 @@ Findings: 5 [medium], see `../review.md`
   - `ai-data`, both days: the page's only Highlight was "No item stands out today." (`NO_HIGHLIGHT_NOTE`). The gap is correct and the log line was noise. Fixed: the line now names only a page that has something to restate (`skippedReports`, `src/reports/prompts-pages.ts`).
   - `ai-models`, 11-09: the page had two real Highlights (OpenAI's raise, Anthropic's power deal) under "No lab or model news today.", and the model left the page out. Inferred, not tested: the no-news bullet made the model skip it, since the prompt tells it to omit a report with no news. Issue 12 removes that bullet.
   - Not built: a fallback Highlight for every daily page. The one real gap has its cause removed, and a fallback would end the model's right to skip a page with routine items (`forcedHighlightReports`). Reopen if a page with real Highlights is skipped again; the log line now shows exactly those cases. Hence `needs-triage` for the second checkbox.
+- 2026-11-14: done. The cause is fixed and the log line names only a skipped page with something to restate. Reopen if that line names a page again.

@@ -1,6 +1,6 @@
 # Digest structure: one topic per page
 
-Status: ready-for-agent
+Status: resolved
 
 Evidence: the digests of 2026-10-12 … 2026-10-22 (report files, `highlights.json`, `policy-ranking.json`, `trending-state.json`, `policy-state.json`), `src/core/i18n.ts`, `config.yml`, `gh label list`, and the October round in `.scratch/streamline-digest/spec.md`. The archive lags the code: the 2026-10-22 data report still has `## Data × AI`, which the current code drops. Claims about a page's layout come from the code and its tests.
 
@@ -125,3 +125,7 @@ Riskiest first. Each step is one ticket in `issues/` and one commit on the `dige
 
 - New sources, such as other labs' feeds or data-engineering trends on the weekly page.
 - The internals of the policy and data pages, which already follow the rule.
+
+## Comments
+
+- 2026-11-14: resolved. Tickets 01–05 are built and described in AGENTS.md (Spotted, page anatomy, AI Models & Labs, weekly Trends, Coming up). Ticket 06 waits only on the maintainer deleting the stale GitHub labels.

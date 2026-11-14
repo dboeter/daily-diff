@@ -4,7 +4,7 @@
 
 **Blocked by:** 01
 
-**Status:** ready-for-agent
+**Status:** resolved
 
 - [ ] Agents report renders the infra repos under their own heading, Quiet ones in the Quiet line
 - [ ] No `ai-infra.md` or `infra` issue produced; archive label, report file and close-stale handling kept

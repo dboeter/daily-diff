@@ -1,6 +1,6 @@
 # Security: a banner for severe incidents, marked rows for the rest
 
-Status: placement decided on 2026-11-11. The decisions under "Decided" are the maintainer's. The spike is done (`spike/results.md`). Steps 3 and 4 are built (branch `review-followups`, not yet on `main`): the story question writes `security-verdicts.json` and `security-trace.json`, and a flagged story shows the 🔓 marker (with "One person's claim, not confirmed" when no vendor, researcher or press backs it) and takes its own slot. The banner is not built.
+Status: placement decided on 2026-11-11. The decisions under "Decided" are the maintainer's. The spike is done (`spike/results.md`). Steps 3 and 4 are built and on `main` (PR #240, merged 2026-11-14); step 5, a week of runs checked by hand, is next: the story question writes `security-verdicts.json` and `security-trace.json`, and a flagged story shows the 🔓 marker (with "One person's claim, not confirmed" when no vendor, researcher or press backs it) and takes its own slot. The banner is not built.
 
 ## Why
 

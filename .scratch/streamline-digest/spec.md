@@ -1,6 +1,6 @@
 # Streamline the digest: topics, headings, navigation
 
-Status: needs-triage
+Status: resolved
 
 Evidence: the 2026-10-10 … 2026-10-12 digests, `src/i18n.ts`, `src/prompts-data.ts`, `index.html`.
 
@@ -68,3 +68,7 @@ The sidebar is the only navigation: month → day → report. A report has no li
 1. Headings (§2): small, no structural change, and the merges reuse its skeleton.
 2. Navigation (§3): `index.html` + preamble, independent of the rest.
 3. Merges (§1), one at a time: infra → agents, community → discussions, models.
+
+## Comments
+
+- 2026-11-14: resolved. Tickets 01–10 were built on 2026-10-12 and 10-13; the page structure of `../digest-structure/spec.md` (2026-10-22) has since replaced the report set this spec describes.

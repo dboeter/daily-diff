@@ -1,6 +1,6 @@
 # AI Models & Labs page; Discussions and Lab Announcements retired; promotion stopped
 
-Status: ready-for-agent
+Status: resolved
 Blocked by: 01, 02
 
 Spec: the pages table and the section map in `../spec.md`, decisions 1 and 2.

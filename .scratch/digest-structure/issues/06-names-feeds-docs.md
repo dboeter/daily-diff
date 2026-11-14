@@ -1,6 +1,6 @@
 # Names, per-page feeds, labels and docs
 
-Status: ready-for-agent
+Status: ready-for-human
 Blocked by: 01, 02, 03, 04, 05
 
 Spec: "What changes besides the pages" in `../spec.md`.
@@ -39,3 +39,5 @@ GitHub labels for the maintainer to delete (counted 2026-10-22 with `gh issue li
 | `arxiv` (retired)    | 1    | 16     | `gh label delete arxiv --repo dboeter/daily-diff --yes`        |
 | `trending` (retired) | 1    | 6      | `gh label delete trending --repo dboeter/daily-diff --yes`     |
 | `hf` (retired)       | 1    | 2      | `gh label delete hf --repo dboeter/daily-diff --yes`           |
+
+- 2026-11-14: everything else in this ticket is done; `ready-for-human` for the label deletion. All the labels in the table above still exist on the repo.

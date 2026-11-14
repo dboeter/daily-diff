@@ -1,6 +1,6 @@
 # Page anatomy: Highlights, tracked part, Spotted, Coming up
 
-Status: ready-for-agent
+Status: resolved
 Blocked by: 01
 
 Spec: the anatomy block in `../spec.md`.
