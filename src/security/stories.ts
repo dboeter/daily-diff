@@ -18,7 +18,7 @@ import {
   saveItemsFile,
   type AskJev,
   type ChoiceAnswer,
-  type Judgment,
+  type RankedBy,
   type VerdictCache,
 } from "../core/jev.ts";
 import { siteOf, type Story } from "../spotted/pool.ts";
@@ -124,8 +124,17 @@ export const SECURITY_QUESTIONS = {
 
 type ClaimBy = keyof typeof SECURITY_QUESTIONS.claim_by.criteria;
 
-export interface SecurityAnswers {
+const { is_security: _flagQuestion, ...detailQuestions } = SECURITY_QUESTIONS;
+/** Asked of every story. Alone it costs about 490 tokens a story, all four about 1,370 (2026-11-14). */
+const FLAG_QUESTIONS = { is_security: _flagQuestion };
+/** Asked of a flagged story only. Jev answers each question on its own: the flag asked alone matched the spike's (0.95/0.94, 0.03/0.03). */
+const DETAIL_QUESTIONS = detailQuestions;
+
+export interface FlagAnswers {
   is_security: { noul: number };
+}
+
+export interface DetailAnswers {
   kind: ChoiceAnswer;
   /** Probability-weighted level, 0–2. */
   severity: { score: number; confidence?: number };
@@ -136,7 +145,10 @@ export interface SecurityAnswers {
 export const FLAG_MIN = 0.6;
 /** Spike: with the claim rule, 5 events in 13 days; severity alone does not separate (12 of 15 flagged score ≥ 1.6). */
 export const BANNER_MIN_SEVERITY = 1.5;
-/** One user's report is left out: the Claude Code email leak (severity 1.92) was a GitHub issue. */
+/**
+ * One person's claim is never a banner, however many points it has (maintainer, 2026-11-13: points
+ * say a story is popular, not true). The Claude Code email leak (severity 1.92) was a GitHub issue.
+ */
 const BANNER_CLAIMS: ReadonlySet<ClaimBy> = new Set(["vendor_or_researcher", "press"]);
 
 export interface SecurityDecision {
@@ -146,33 +158,38 @@ export interface SecurityDecision {
 }
 
 const isNumber = (v: unknown): v is number => typeof v === "number" && Number.isFinite(v);
+const unexpected = (a: unknown): never => {
+  throw new Error(`Unexpected Jev answers: ${JSON.stringify(a)}`);
+};
 
 /** Throws on an unexpected shape, so a new call counts as failed and a saved entry is asked again. */
-export function securityDecision(a: SecurityAnswers): SecurityDecision {
+export function flagDecision(a: FlagAnswers): { flagged: boolean } {
+  if (!isNumber(a?.is_security?.noul)) unexpected(a);
+  return { flagged: a.is_security.noul >= FLAG_MIN };
+}
+
+/** Whether a flagged story is banner-grade; throws on an unexpected shape. */
+export function detailDecision(a: DetailAnswers): { banner: boolean } {
   const kind = a?.kind?.choice;
   const claim = a?.claim_by?.choice;
   if (
-    !isNumber(a?.is_security?.noul) ||
     !isNumber(a?.severity?.score) ||
     typeof kind !== "string" ||
     !Object.hasOwn(SECURITY_QUESTIONS.kind.criteria, kind) ||
     typeof claim !== "string" ||
     !Object.hasOwn(SECURITY_QUESTIONS.claim_by.criteria, claim)
   ) {
-    throw new Error(`Unexpected Jev answers: ${JSON.stringify(a)}`);
+    unexpected(a);
   }
-  const flagged = a.is_security.noul >= FLAG_MIN;
-  return {
-    flagged,
-    banner: flagged && a.severity.score >= BANNER_MIN_SEVERITY && BANNER_CLAIMS.has(claim as ClaimBy),
-  };
+  return { banner: a.severity.score >= BANNER_MIN_SEVERITY && BANNER_CLAIMS.has(claim as ClaimBy) };
 }
 
-export type SecurityVerdicts = VerdictCache<SecurityAnswers>;
-export type SecurityJudgment = Judgment<Story, SecurityAnswers, SecurityDecision>;
+/** One file for both stages: a story's flag under its id, its other answers under `<id>#detail`. */
+export type SecurityVerdicts = VerdictCache<FlagAnswers | DetailAnswers>;
 
 export const SECURITY_VERDICTS_FILE = path.join("digests", "security-verdicts.json");
 const SECURITY_UNSEEN_DAYS = 30;
+const detailId = (story: Story): string => `${story.id}#detail`;
 
 /** Missing file → empty cache. Unreadable or malformed → null: every story is asked and nothing is saved. */
 export function loadSecurityVerdicts(file = SECURITY_VERDICTS_FILE): SecurityVerdicts | null {
@@ -192,33 +209,77 @@ function securityState(story: Story): object {
   };
 }
 
+export interface SecurityJudgment {
+  /** Each story Jev decided (saved verdicts included); a flagged story whose detail call failed has `banner: false`. */
+  decisions: Map<string, SecurityDecision>;
+  /** "keywords" when the flag stage fell back: then nothing new is flagged (no keyword rule exists). */
+  rankedBy: RankedBy;
+  nextCache: SecurityVerdicts | null;
+  /** The flag's answers and `decided`, then a flagged story's other answers and their `detail_decided`. */
+  traceFields(story: Story): Record<string, unknown>;
+  traceFile(rows: object[], header: Record<string, unknown>): string;
+}
+
 /**
- * One Jev request per story not in the cache. No fingerprint: a story's text flips between
- * filled and empty when its page fetch fails (11 of 103 stories seen on two days or more,
- * 2026-11-07 to 11-10, none from empty to filled), so a text hash would only ask again. Without a key, or when more than half
- * the new calls fail, nothing is flagged: there is no keyword fallback, since the
- * spike found keywords cannot tell a security event ("60k former agents revealed").
+ * Two stages through `judgeItems`, one cache: the flag question for every story not in the cache,
+ * then the kind, severity and claim questions for each flagged story without them. No fingerprint:
+ * a story's text flips between filled and empty when its page fetch fails (11 of 103 stories seen on
+ * two days or more, 2026-11-07 to 11-10, none from empty to filled), so a text hash would only ask
+ * again. Without a key, or when more than half the new calls fail, nothing new is flagged: there is no
+ * keyword fallback, since the spike found keywords cannot tell a security event ("60k former agents
+ * revealed").
  */
 export async function judgeSecurityStories(
   stories: Story[],
   opts: { apiKey?: string; cache: SecurityVerdicts | null; dateStr: string; ask?: AskJev },
 ): Promise<SecurityJudgment> {
-  const judgment = await judgeItems(stories, {
+  const flag = await judgeItems(stories, {
     ...opts,
+    cache: opts.cache as VerdictCache<FlagAnswers> | null,
     tag: "security",
-    request: (story) => ({ state: securityState(story), questions: SECURITY_QUESTIONS }),
-    decide: (a: SecurityAnswers) => securityDecision(a),
+    request: (story) => ({ state: securityState(story), questions: FLAG_QUESTIONS }),
+    decide: (a: FlagAnswers) => flagDecision(a),
     unseenDays: SECURITY_UNSEEN_DAYS,
   });
-  const decided = [...judgment.verdicts.values()];
+  const flagged = stories.filter((s) => flag.verdicts.get(s.id)?.flagged);
+  const asDetail = (s: Story): Story => ({ ...s, id: detailId(s) });
+  const detail = await judgeItems(flagged.map(asDetail), {
+    ...opts,
+    cache: flag.nextCache as VerdictCache<DetailAnswers> | null,
+    tag: "security",
+    request: (story) => ({ state: securityState(story), questions: DETAIL_QUESTIONS }),
+    decide: (a: DetailAnswers) => detailDecision(a),
+    unseenDays: SECURITY_UNSEEN_DAYS,
+  });
+  const decisions = new Map<string, SecurityDecision>();
+  for (const s of stories) {
+    const f = flag.verdicts.get(s.id);
+    if (f)
+      decisions.set(s.id, {
+        flagged: f.flagged,
+        banner: f.flagged && !!detail.verdicts.get(detailId(s))?.banner,
+      });
+  }
+  const decided = [...decisions.values()];
   console.log(
     `  [security] ${stories.length} stories: ${decided.filter((d) => d.flagged).length} flagged, ` +
       `${decided.filter((d) => d.banner).length} banner-grade` +
-      (judgment.rankedBy === "jev"
+      (flag.rankedBy === "jev"
         ? ""
         : ` from saved verdicts only (${opts.apiKey ? "too many Jev failures" : "no TYPESAFE_API_KEY"})`),
   );
-  return judgment;
+  return {
+    decisions,
+    rankedBy: flag.rankedBy,
+    nextCache: detail.nextCache as SecurityVerdicts | null,
+    traceFields(story) {
+      const { relevance: _r, ...f } = flag.traceFields(story);
+      if (!decisions.get(story.id)?.flagged) return f;
+      const { relevance: _d, decided, ...d } = detail.traceFields(asDetail(story));
+      return { ...f, ...d, detail_decided: decided };
+    },
+    traceFile: (rows, header) => flag.traceFile(rows, header),
+  };
 }
 
 /** Where a story went today: its project's News, a listed lab post, a Spotted row or the Overview's lists. */
@@ -240,7 +301,7 @@ export function securityTraceFile(
   dropped: Map<string, DroppedReason>,
 ): string {
   const rows = stories.map((s) => {
-    const v = judgment.verdicts.get(s.id);
+    const v = judgment.decisions.get(s.id);
     return {
       id: s.id,
       title: s.title,
@@ -253,7 +314,7 @@ export function securityTraceFile(
       ...judgment.traceFields(s),
     };
   });
-  const decided = [...judgment.verdicts.values()];
+  const decided = [...judgment.decisions.values()];
   return judgment.traceFile(rows, {
     flag_min: FLAG_MIN,
     banner_min_severity: BANNER_MIN_SEVERITY,
