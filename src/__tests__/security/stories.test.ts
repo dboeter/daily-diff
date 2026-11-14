@@ -123,13 +123,13 @@ describe("judgeSecurityStories", () => {
     expect(j.decisions.size).toBe(0);
   });
 
-  it("keeps a flagged story without a banner when its detail call fails", async () => {
+  it("keeps a flagged story with an unknown banner when its detail call fails", async () => {
     const ask: AskJev = async (state, questions, key) => {
       if ("kind" in questions) throw new Error("HTTP 500");
       return recorded(state, questions, key);
     };
     const j = await judge(["s354"], ask);
-    expect(j.decisions.get("hn:s354")).toEqual({ flagged: true, banner: false });
+    expect(j.decisions.get("hn:s354")).toEqual({ flagged: true, banner: null });
   });
 });
 

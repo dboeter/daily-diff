@@ -127,7 +127,11 @@ type ClaimBy = keyof typeof SECURITY_QUESTIONS.claim_by.criteria;
 const { is_security: _flagQuestion, ...detailQuestions } = SECURITY_QUESTIONS;
 /** Asked of every story. Alone it costs about 490 tokens a story, all four about 1,370 (2026-11-14). */
 const FLAG_QUESTIONS = { is_security: _flagQuestion };
-/** Asked of a flagged story only. Jev answers each question on its own: the flag asked alone matched the spike's (0.95/0.94, 0.03/0.03). */
+/**
+ * Asked of a flagged story only, about 1,170 tokens. Jev answers each question on its own: asked apart,
+ * the flag (0.95/0.94, 0.03/0.03) and these (severity 1.98/1.98, 0.95/0.91, 1.92/1.92, same kind and
+ * claim) matched the spike's answers to all four (2026-11-14).
+ */
 const DETAIL_QUESTIONS = detailQuestions;
 
 export interface FlagAnswers {
@@ -153,8 +157,11 @@ const BANNER_CLAIMS: ReadonlySet<ClaimBy> = new Set(["vendor_or_researcher", "pr
 
 export interface SecurityDecision {
   flagged: boolean;
-  /** Banner-grade: flagged, severe, and claimed by the vendor, a researcher or the press. */
-  banner: boolean;
+  /**
+   * Banner-grade: flagged, severe, and claimed by the vendor, a researcher or the press. Null when a
+   * flagged story's detail answers are missing (its call failed), so a missed banner reads apart from "no".
+   */
+  banner: boolean | null;
 }
 
 const isNumber = (v: unknown): v is number => typeof v === "number" && Number.isFinite(v);
@@ -210,7 +217,7 @@ function securityState(story: Story): object {
 }
 
 export interface SecurityJudgment {
-  /** Each story Jev decided (saved verdicts included); a flagged story whose detail call failed has `banner: false`. */
+  /** Each story Jev decided (saved verdicts included); a flagged story whose detail call failed has `banner: null`. */
   decisions: Map<string, SecurityDecision>;
   /** "keywords" when the flag stage fell back: then nothing new is flagged (no keyword rule exists). */
   rankedBy: RankedBy;
@@ -257,7 +264,7 @@ export async function judgeSecurityStories(
     if (f)
       decisions.set(s.id, {
         flagged: f.flagged,
-        banner: f.flagged && !!detail.verdicts.get(detailId(s))?.banner,
+        banner: f.flagged ? (detail.verdicts.get(detailId(s))?.banner ?? null) : false,
       });
   }
   const decided = [...decisions.values()];

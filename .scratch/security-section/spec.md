@@ -55,8 +55,10 @@ The digest's Jev key and the local key are on one TypeSafe organization, and the
 | Part                                                       | Jev tokens a day            |
 | ---------------------------------------------------------- | --------------------------- |
 | Stories, all four spike questions                          | about 140,000               |
-| Stories, severity and claim asked only for a flagged story | about 50,000 (not measured) |
+| Stories, severity and claim asked only for a flagged story | about 35,000 at most (built) |
 | Release lines, every line of every release body            | about 200,000               |
+
+Measured on 2026-11-14 for the built two-stage request: the flag alone costs about 490 tokens a story, the kind, severity and claim about 1,170 more for a flagged one, and asked apart they gave the spike's answers. Spotted routed 47 to 61 fresh stories a day (11-05 to 11-10), plus a few news stories, so about 35,000 tokens on the first night; a story seen the day before is cached, so later nights cost less.
 
 So the story feed comes first, with the flag asked for every fresh story and the other answers only for a flagged one. The release-line feed waits until a week of the story feed shows what it costs.
 
