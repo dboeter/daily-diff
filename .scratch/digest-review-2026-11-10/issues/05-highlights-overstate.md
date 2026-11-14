@@ -44,21 +44,25 @@ Data in `../spike/`: `cases.md` (40 confirmed overstatements from the reviews of
 
 ### Spike, part 2: the Jev replay (2026-11-14)
 
-One `noul` question per sentence ("does `source` support everything `claim` states?", `support-check.ts`), over the 94 sentences of `support-cases-nocounts.jsonl`: the counts code appends to a bullet (comments, 👍, points) are stripped from the claims, since the check would run before code adds them. Answers in `cache.json`. 102 calls, about 600 input tokens plus the source each (`usage` in the response), roughly 90,000 tokens in all.
+One `noul` question per sentence ("does `source` support everything `claim` states?", `support-check.ts`), over `support-cases-v2.jsonl`: the 94 sentences with each source rebuilt as the writing model received it (release notes through `releaseNotes()`, every release of a range, full candidate text), and the counts code appends to a bullet (comments, 👍, points) stripped from the claims, since a check would run before code adds them. Answers in `cache.json`. A call costs about 600 input tokens plus the source (`usage` in the response); about 140 calls in all, an estimated 120,000 tokens.
 
 | Bar (supported below) | Flagged caught | Unflagged dropped |
-| --- | --- | --- |
-| 0.2 | 19/39 | 9/55 |
-| 0.3 | 20/39 | 12/55 |
-| 0.4 | 25/39 | 14/55 |
-| 0.5 | 27/39 | 17/55 |
+| --------------------- | -------------- | ----------------- |
+| 0.2                   | 14/39          | 5/55              |
+| 0.3                   | 16/39          | 8/55              |
+| 0.4                   | 21/39          | 10/55             |
+| 0.5                   | 22/39          | 12/55             |
 
-- Medians: flagged 0.25, unflagged 0.71. By section at 0.5: Across platforms 7/7 caught, 0/2 unflagged dropped; repo bullets 9/9 caught but 9/15 unflagged dropped (a bullet over several releases states many changes, and one unsupported clause sinks it); Spotted rows 1/5 caught.
-- It misses the worst class, a claim stated as fact: the government ID (0.74), Goldman Sachs (0.90), Gemini "human annotators" (0.72), TikTok "first time" (0.86). Jev reads "Tell HN: you now need a government ID" as support for "Anthropic now requires a government ID".
-- Verdict: no Jev gate. A quarter of good sentences dropped, and the high-severity misses kept.
+- Medians: flagged 0.35, unflagged 0.79. By section at 0.4: Across platforms 7/7 caught, 0/2 dropped; Highlights 8/16, 5/18; repo bullets 5/9, 5/15; Spotted rows 0/5, 0/12; table rows 1/2, 0/8.
+- The first run, on sources cut raw at 2,000 characters, read 25/39 and 14/55 at 0.4: incomplete sources made both numbers look higher.
+- The 10 unflagged sentences under 0.4, read one by one: 1 real overstatement the reviews missed ("must migrate to Gemini 3.8 Flash", where calls are redirected and 3.8 is "the recommended replacement": the GLM 5.3 case again); 4 hot-issue bullets saying "users report" or "users request" for one reporter; 2 OpenRouter rows citing catalog fields outside the description (context size, availability); 3 borderline additions ("tool calls", "critical for Iceberg adoption", a summary going past a story text the day's file had cut). None is clearly a faithful sentence dropped, so the false-drop rate over genuinely faithful sentences is low, but 55 controls with weak labels cannot put a number on it.
+- What it misses: the question cannot see who is speaking. TikTok's source holds Politico's "first time", so "supported" is the right answer to the question asked; the government ID (0.74) and Goldman Sachs (0.90) are title-only, already dropped by `22ee1f6`; Gemini "human annotators" 0.72. It also misses merged fixes in long release bullets (Oh My Pi 0.63–0.89) and 4 of 5 Spotted rows. A source-kind field in the state (like the security judgment's `claim_by`) is untested.
+- #108122: code places every `anthropics/claude-code` issue under Claude Code, Desktop ones included; the body bullet says "macOS Desktop", and the Highlight took the section's name.
 
 ### Recommendation
 
-1. Remove Across platforms: 7 of 9 bullets flagged, and Jev agrees on all 7. (Decision for Daan.)
-2. Carry the fidelity rules to where 18 of the 40 errors started: `buildProjectDigestPrompt` and `buildSpottedSummariesPrompt`, with the scope rules these cases broke: keep a qualifier ("the default Fable model", "internal benchmarks"), "recommends" or "upcoming" never becomes "must" or "released", separate fixes stay separate, a hot issue with one reporter is "an issue reports", not "users report".
-3. The title-only Highlights are already dropped (`22ee1f6`). No further code rule: the remaining attribution cases carry an attribution.
+1. Remove Across platforms: 7 of 9 bullets flagged, Jev agrees on all 7. (Decision for Daan.)
+2. The hot-issue prompt contradicts `SOURCE_FIDELITY_RULES`: it asks for "users report" on every issue, and 4 unflagged plus 1 flagged bullet (#107390) say "users report" for one reporter. Ask for "an issue reports" (or "N users report" only when the body shows several).
+3. Carry the fidelity rules to where 18 of the 40 errors started, `buildProjectDigestPrompt` and `buildSpottedSummariesPrompt`, with the scope rules these cases broke: keep a qualifier ("the default Fable model", "internal benchmarks"), "recommends" or "upcoming" never becomes "must" or "released", separate fixes stay separate. Unmeasured: the Highlights prompts have had these rules since 11-01 and still produced 17 cases.
+4. A Jev check of Highlights only (about 10 calls a day, under 15,000 tokens), dropping a Highlight below 0.2 to 0.3, is the one gate the replay supports: at 0.4 it caught 8 of 16 flagged Highlights, and of its 5 unflagged drops 1 was real, 1 a one-reporter "users report", 1 borderline, and 2 cited catalog fields a production check would have in its source. Not a gate for repo bullets (a long bullet fails on one clause) or Spotted rows (it catches none).
+5. Still open after 1–4: about 10 Highlights over faithful rows, among them "resulting in spam", TikTok, #108122 and the dbt "must update", and every case where the error is who says it.
