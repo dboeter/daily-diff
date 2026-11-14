@@ -661,13 +661,21 @@ export function titleOnlyStories(rows: StoryRow[], summaries: Map<number, string
 
 /**
  * The Spotted rows and project News stories flagged as a security event whose claim is not confirmed:
- * one person's claim makes no Highlight. Without `story`, so the strict rule applies: a bullet
+ * such a claim makes no Highlight. Its article and discussion links are both listed. Without `story`, so the strict rule applies: a bullet
  * linking, naming or restating it is dropped.
  */
 export function unconfirmedClaims(rows: StoryRow[], groups: ProjectGroup[]): NoHighlightRow[] {
-  return [...rows, ...groups.flatMap((g) => g.activities.flatMap((a) => a.news))]
-    .filter((r) => r.security && !r.security.confirmed)
-    .map((r) => ({ name: r.title, url: r.url }));
+  return (
+    [...rows, ...groups.flatMap((g) => g.activities.flatMap((a) => a.news))]
+      .filter((r) => r.security && !r.security.confirmed)
+      // A Highlight may link the discussion page instead of the article: both are caught.
+      .flatMap((r) => [
+        { name: r.title, url: r.url },
+        ...("discussionUrl" in r && r.discussionUrl && r.discussionUrl !== r.url
+          ? [{ name: r.title, url: r.discussionUrl }]
+          : []),
+      ])
+  );
 }
 
 /**

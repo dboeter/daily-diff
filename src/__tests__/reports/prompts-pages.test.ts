@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { NO_HIGHLIGHT_NOTE, SECTIONS, TRENDS_REPORT } from "../../core/strings.ts";
+import { MSG, NO_HIGHLIGHT_NOTE, SECTIONS, SECURITY, TRENDS_REPORT } from "../../core/strings.ts";
 import type { ReleaseRow } from "../../reports/pages.ts";
 import {
   buildDataProsePrompt,
@@ -22,6 +22,7 @@ import {
   restatesLead,
   dropNoHighlightRows,
   isGroupOrAbsenceBullet,
+  storiesNoHighlightNote,
 } from "../../reports/prompts-pages.ts";
 import { TABLES_MARKER, numberRows, parseRowSummaries } from "../../reports/summarized-table.ts";
 import {
@@ -50,6 +51,24 @@ const story = (id: string, source: StorySource = "hn", points = 10, extra: Parti
   comments: 3,
   published: "2026-10-21T10:00:00Z",
   ...extra,
+});
+
+describe("security claims in highlights.json", () => {
+  it("leaves an unconfirmed claim's lines out of a page sent without its Highlights", () => {
+    const page =
+      `## Highlights\n\n${MSG.summaryFailed}\n\n## Spotted\n\n| Story | Source |\n|---|---|\n` +
+      `| 🔓 [Leak](https://e.com/1) | ${SECURITY.unconfirmed}A user says. |\n| [Other](https://e.com/2) | Fine. |`;
+    const prompt = buildHighlightsPrompt({ "ai-agents": page });
+    expect(prompt).not.toContain("https://e.com/1");
+    expect(prompt).toContain("https://e.com/2");
+  });
+
+  it("gives an unconfirmed claim its own no-Highlight reason", () => {
+    const note = storiesNoHighlightNote(["Title only"], ["Leak claim"])!;
+    expect(note).toMatch(/show only a title[^\n]*"Title only"/);
+    expect(note).toMatch(/not confirmed by the vendor[^\n]*"Leak claim"/);
+    expect(note).not.toMatch(/show only a title[^\n]*"Leak claim"/);
+  });
 });
 
 describe("buildTrendingSummariesPrompt", () => {

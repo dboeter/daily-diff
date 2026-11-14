@@ -1,9 +1,9 @@
 /**
- * The story security question: four Jev answers per fresh community story,
- * through `judgeItems`, cached in `digests/security-verdicts.json`. Nothing is
- * shown yet (`.scratch/security-section/spec.md`, order of work step 3): the
- * decisions go into `security-trace.json` only, so a week of runs can be
- * checked by hand before the marker and the banner are built.
+ * The story security question: whether a fresh community story is a security event,
+ * and for a flagged one its kind, severity and who makes the claim, through `judgeItems`,
+ * cached in `digests/security-verdicts.json` and traced in `security-trace.json`. A flagged
+ * story carries the 🔓 marker on the pages; the banner is not built yet
+ * (`.scratch/security-section/spec.md`).
  *
  * The questions and the bars are the spike's (`spike/results.md`, 2026-11-11):
  * its counts hold only for this wording and this state, so change them together
@@ -164,7 +164,7 @@ export interface SecurityDecision {
   banner: boolean | null;
   /**
    * The claim is the vendor's, a researcher's or the press's. Null when the detail answers are missing
-   * (not flagged, or its call failed); anything but true shows as one person's claim.
+   * (not flagged, or its call failed); anything but true shows as not confirmed (`SECURITY.unconfirmed`).
    */
   confirmed: boolean | null;
 }
@@ -293,7 +293,8 @@ export async function judgeSecurityStories(
       const { relevance: _d, decided, ...d } = detail.traceFields(asDetail(story));
       return { ...f, ...d, detail_decided: decided };
     },
-    traceFile: (rows, header) => flag.traceFile(rows, header),
+    // The flag stage's models and rankedBy head the file; the detail stage's fallback is its own key.
+    traceFile: (rows, header) => flag.traceFile(rows, { detail_rankedBy: detail.rankedBy, ...header }),
   };
 }
 

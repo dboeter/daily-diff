@@ -1264,7 +1264,15 @@ describe("security marker", () => {
   it("makes an unconfirmed flagged row no Highlight: a bullet naming it is dropped", () => {
     const rows = numberRows([{ ...flagged(false), title: "Tool X leaks every API key" }]);
     const noHighlight = unconfirmedClaims(rows, []);
-    expect(noHighlight).toEqual([{ name: "Tool X leaks every API key", url: "https://example.com/9" }]);
+    // The article and the discussion page: a Highlight may link either.
+    expect(noHighlight.map((r) => r.url)).toEqual(["https://example.com/9", rows[0]!.discussionUrl]);
+    expect(
+      dropNoHighlightRows(
+        `## Highlights\n\n- [A leak](${rows[0]!.discussionUrl}) is discussed.`,
+        noHighlight,
+        "test",
+      ),
+    ).not.toContain("A leak");
     const prose = "## Highlights\n\n- Tool X leaks every API key, a user says.\n- Something else shipped.";
     expect(dropNoHighlightRows(prose, noHighlight, "test")).toBe(
       "## Highlights\n\n- Something else shipped.",
