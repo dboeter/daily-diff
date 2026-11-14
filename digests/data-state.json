@@ -421,7 +421,31 @@
     "post:medium.com/snowflake/streamlits-floor-react-s-ceiling-inside-snowflake-c78f90e39dc8": "2026-11-13",
     "post:pola.rs/posts/polars-nanook-vs-databricks": "2026-11-13",
     "post:dlthub.com/blog/dlthub-clickhouse-ontology-agents": "2026-11-13",
-    "post:dlthub.com/blog/clickhouse-agent-ontology-walkthrough": "2026-11-13"
+    "post:dlthub.com/blog/clickhouse-agent-ontology-walkthrough": "2026-11-13",
+    "gemini 3.6 flash will be retired on november 19, 2026|2026-11-12": "2026-11-14",
+    "oauth on-behalf-of for service principals is generally available|2026-11-12": "2026-11-14",
+    "importing power bi and tableau files with genie code will soon be available by default for workspaces with the compliance security profile enabled|2026-11-13": "2026-11-14",
+    "pages will soon be available by default for workspaces with the compliance security profile enabled|2026-11-11": "2026-11-14",
+    "flows are securable objects in unity catalog (beta)|2026-11-12": "2026-11-14",
+    "dashboard enhancements and bug fixes|2026-11-12": "2026-11-14",
+    "onelake external locations support file events (public preview)|2026-11-13": "2026-11-14",
+    "nov 11, 2026: select per-user quota users by role (general availability)|2026-11-11": "2026-11-14",
+    "nov 11, 2026: programmatic notifications for trust center findings (general availability)|2026-11-11": "2026-11-14",
+    "larger application package versions on aws and azure|2026-11-12": "2026-11-14",
+    "bigquery connections to mysql, oracle, and postgresql are now available and can be used to run mysql federated queries, oracle federated queries, and postgresql federated queries (preview)|2026-11-13": "2026-11-14",
+    "https://community.fabric.microsoft.com/t5/Fabric-Updates-Blog/Use-OneLake-as-native-storage-for-Azure-Databricks/ba-p/5377939": "2026-11-14",
+    "ai function task support in declarative automation bundles (beta)|2026-11-13": "2026-11-14",
+    "connectors section in genie agent settings (beta)|2026-11-12": "2026-11-14",
+    "nov 12, 2026: convert tableau workbooks to streamlit in snowflake apps with coco (preview)|2026-11-12": "2026-11-14",
+    "nov 12, 2026: dcm projects plan privilege (preview)|2026-11-12": "2026-11-14",
+    "databricks sql version 2026.45 is rolling out in current|2026-11-10": "2026-11-14",
+    "artifacts and slides in genie one (beta)|2026-11-12": "2026-11-14",
+    "nov 13, 2026: ai_transcribe delivers improved transcription accuracy|2026-11-13": "2026-11-14",
+    "scheduled tasks can email other users in genie one|2026-11-12": "2026-11-14",
+    "release:PrefectHQ/prefect@3.9.3": "2026-11-14",
+    "release:apache/airflow@go-sdk/v1.0.0": "2026-11-14",
+    "release:apache/airflow@ts-sdk/1.0.0": "2026-11-14",
+    "release:apache/airflow@java-sdk/1.0.0": "2026-11-14"
   },
   "stages": {
     "snowflake-bcr:2026_08": "2026-10-16 Introduced in the 10.37 release (October 8-16, 2026) as Disabled by Default; account admins can enable for testing."
@@ -454,6 +478,13 @@
       "link": "https://learn.microsoft.com/azure/databricks/release-notes/whats-coming#all-unity-catalog-managed-tables-will-be-upgraded-to-catalog-commits",
       "source": "Azure Databricks",
       "summary": "After Databricks Runtime 15.4 LTS end of support on August 19, 2027, all Unity Catalog managed tables will be automatically upgraded to `catalog commits`, making Unity Catalog the system of coordination and enabling multi-statement transactions, external engine writes, and consistent governance; clients must plan for this breaking change before the 2027 deadline."
+    },
+    "https://learn.microsoft.com/azure/databricks/release-notes/product/2026/november#gemini-36-flash-will-be-retired-on-november-19-2026": {
+      "date": "2026-11-19",
+      "title": "Gemini 3.6 Flash will be retired on November 19, 2026",
+      "link": "https://learn.microsoft.com/azure/databricks/release-notes/product/2026/november#gemini-36-flash-will-be-retired-on-november-19-2026",
+      "source": "Azure Databricks",
+      "summary": "API calls to `Gemini 3.6 Flash` will be automatically redirected to `Gemini 3.8 Flash` on 2026-11-19; migrate to `Gemini 3.8 Flash` using the Legacy, deprecated, and retired models guide."
     }
   }
 }

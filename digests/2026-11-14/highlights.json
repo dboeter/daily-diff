@@ -1,0 +1,14 @@
+{
+  "ai-agents": [
+    "Hermes Agent issue #62336 reports terminal snapshots write all env vars including Bitwarden secrets to plaintext files readable by any process",
+    "Claude Code v2.1.325 fixes a zstd decoding security issue and subagent bugs in worktrees and session resumption after unclean exits"
+  ],
+  "ai-models": [
+    "inclusionAI's Ling 3.2 Flash is free on OpenRouter with 1M context, hybrid reasoning, and multimodal input",
+    "Anthropic publishes research on building strong safety evaluations to measure a model's propensity to cause harm"
+  ],
+  "ai-data": [
+    "− Azure Databricks workspaces using Gemini 3.6 Flash must migrate to 3.8 Flash by 2026-11-19 as the model will be retired",
+    "Airflow SDKs for TypeScript, Java, and Go reach 1.0.0 stable; data engineers can test and migrate to the stable APIs"
+  ]
+}

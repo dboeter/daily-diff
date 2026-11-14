@@ -28,7 +28,8 @@
     "google/gemini-4-carbon:batch": "2026-11-11",
     "baidu/ernie-5.5-flash-preview:free": "2026-11-12",
     "google/gemini-4-hydrogen": "2026-11-13",
-    "google/gemini-4-hydrogen:batch": "2026-11-13"
+    "google/gemini-4-hydrogen:batch": "2026-11-13",
+    "inclusionai/ling-3.2-flash:free": "2026-11-14"
   },
   "stages": {}
 }
