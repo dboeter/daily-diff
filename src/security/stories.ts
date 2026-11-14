@@ -162,6 +162,11 @@ export interface SecurityDecision {
    * flagged story's detail answers are missing (its call failed), so a missed banner reads apart from "no".
    */
   banner: boolean | null;
+  /**
+   * The claim is the vendor's, a researcher's or the press's. Null when the detail answers are missing
+   * (not flagged, or its call failed); anything but true shows as one person's claim.
+   */
+  confirmed: boolean | null;
 }
 
 const isNumber = (v: unknown): v is number => typeof v === "number" && Number.isFinite(v);
@@ -176,7 +181,7 @@ export function flagDecision(a: FlagAnswers): { flagged: boolean } {
 }
 
 /** Whether a flagged story is banner-grade; throws on an unexpected shape. */
-export function detailDecision(a: DetailAnswers): { banner: boolean } {
+export function detailDecision(a: DetailAnswers): { banner: boolean; confirmed: boolean } {
   const kind = a?.kind?.choice;
   const claim = a?.claim_by?.choice;
   if (
@@ -188,7 +193,8 @@ export function detailDecision(a: DetailAnswers): { banner: boolean } {
   ) {
     unexpected(a);
   }
-  return { banner: a.severity.score >= BANNER_MIN_SEVERITY && BANNER_CLAIMS.has(claim as ClaimBy) };
+  const confirmed = BANNER_CLAIMS.has(claim as ClaimBy);
+  return { banner: a.severity.score >= BANNER_MIN_SEVERITY && confirmed, confirmed };
 }
 
 /** One file for both stages: a story's flag under its id, its other answers under `<id>#detail`. */
@@ -261,11 +267,13 @@ export async function judgeSecurityStories(
   const decisions = new Map<string, SecurityDecision>();
   for (const s of stories) {
     const f = flag.verdicts.get(s.id);
-    if (f)
-      decisions.set(s.id, {
-        flagged: f.flagged,
-        banner: f.flagged ? (detail.verdicts.get(detailId(s))?.banner ?? null) : false,
-      });
+    if (!f) continue;
+    const d = f.flagged ? detail.verdicts.get(detailId(s)) : undefined;
+    decisions.set(s.id, {
+      flagged: f.flagged,
+      banner: f.flagged ? (d?.banner ?? null) : false,
+      confirmed: d?.confirmed ?? null,
+    });
   }
   const decided = [...decisions.values()];
   console.log(
@@ -293,7 +301,7 @@ export async function judgeSecurityStories(
 export type Placement = "news" | "lab" | "spotted" | "talked_about";
 
 /**
- * `digests/YYYY-MM-DD/security-trace.json`: every judged story with `flagged`, `banner`,
+ * `digests/YYYY-MM-DD/security-trace.json`: every judged story with `flagged`, `banner`, `confirmed`,
  * its answers, where today's selection placed it (`placed`) and whether a published page
  * showed it (`shown`). A story placed nowhere gets the reason (`dropped_reason`: Spotted's
  * `cap`, `threshold` or `routing`, or `repeat`; null when it has none), so a flagged story
@@ -315,6 +323,7 @@ export function securityTraceFile(
       source: s.source,
       flagged: v?.flagged ?? null,
       banner: v?.banner ?? null,
+      confirmed: v?.confirmed ?? null,
       placed: placed.get(s.id) ?? null,
       ...(placed.has(s.id) ? {} : { dropped_reason: dropped.get(s.id) ?? null }),
       shown: shownIds.has(s.id),

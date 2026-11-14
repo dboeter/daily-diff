@@ -1,6 +1,6 @@
 # Security: a banner for severe incidents, marked rows for the rest
 
-Status: placement decided on 2026-11-11. The decisions under "Decided" are the maintainer's. The spike is done (`spike/results.md`). Step 3 is built (branch `review-followups`, not yet on `main`): the story question writes `security-verdicts.json` and `security-trace.json`; nothing is shown.
+Status: placement decided on 2026-11-11. The decisions under "Decided" are the maintainer's. The spike is done (`spike/results.md`). Steps 3 and 4 are built (branch `review-followups`, not yet on `main`): the story question writes `security-verdicts.json` and `security-trace.json`, and a flagged story shows the 🔓 marker (with "One person's claim, not confirmed" when no vendor, researcher or press backs it) and takes its own slot. The banner is not built.
 
 ## Why
 
@@ -44,7 +44,7 @@ Proposed; the maintainer has decided the placement, not these details.
 - **Shown once.** A banner line shows on the day its story is first seen. A later fix or postmortem that clears the rule is a new line. It names the earlier line only once the link is built (the last build step).
 - **Messages**: `highlights.json` is keyed by report, so the banner lines are stored once, under a key of their own, not once per report. Telegram shows them once, above the reports. The Teams post today holds only the `ai-data` highlights and is skipped when there are none (`sendTeams`, `src/cli/notify.ts`), so it must take the banner lines too.
 - **Marker**: one emoji before the row's title, defined in `GLOSSARY.md`. Not green or red, and not ⚠️, which the Data page uses for a deprecation.
-- **Own slot**: a flagged story skips the topic bar (`SPOTTED_MIN_TOPIC_PROBABILITY`) and the per-source row cap. It stays in the list it belongs to and takes no other story's row.
+- **Own slot**: a flagged story skips the row caps only: the per-source row cap and the points floor (Spotted), and the per-source cap (the Overview's lists). It still needs the topic bar (`SPOTTED_MIN_TOPIC_PROBABILITY`), since the page of a flagged story is deferred (see Deferred). It stays in the list it belongs to and takes no other story's row.
 - **Without Jev** (no key, or more than half the calls failing) there is no banner and no marker that day. There is no keyword fallback, see the evidence.
 - **A wrong banner is on every page.** The answers are cached like the topic verdicts, so a wrong one is fixed by editing and pinning it, and a trace file lists every flagged story with its three answers.
 

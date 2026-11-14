@@ -22,7 +22,11 @@ import {
   withReportBar,
   renderHfTable,
   unsummarizedRows,
+  markSecurityBullets,
+  unconfirmedClaims,
 } from "../../reports/markdown.ts";
+import { dropNoHighlightRows } from "../../reports/prompts-pages.ts";
+import { SECURITY } from "../../core/strings.ts";
 import { type ProjectActivity, goingAwayRule } from "../../reports/prompts.ts";
 import { numberRows } from "../../reports/summarized-table.ts";
 import type { KeptVendorItem } from "../../data/relevance.ts";
@@ -1199,5 +1203,70 @@ describe("rendering conventions", () => {
     expect(result).toContain("- **Hot issue:** already right.");
     // The meta line ends with when it was generated, as on every page.
     expect(result).toMatch(/\n> Projects: 1 \| .*Prereleases \(not covered\): 0 \| Generated: 04:31 UTC\n/);
+  });
+});
+
+describe("security marker", () => {
+  const flagged = (confirmed: boolean) => ({
+    ...story("9", "hn", 120),
+    page: "agents" as const,
+    security: { confirmed },
+  });
+
+  it("marks a confirmed flagged Spotted row before its link, with no claim label", () => {
+    const md = renderSpottedTable(numberRows([flagged(true)]), new Map([[1, "A breach."]]));
+    expect(md).toContain("| 🔓 [Story 9](https://example.com/9) |");
+    expect(md).toContain("| A breach. |");
+    expect(md).not.toContain(SECURITY.unconfirmed);
+  });
+
+  it("labels an unconfirmed flagged Spotted row at the start of its summary cell", () => {
+    const md = renderSpottedTable(numberRows([flagged(false)]), new Map([[1, "A breach."]]));
+    expect(md).toContain(`| 🔓 [Story 9](https://example.com/9) |`);
+    expect(md).toContain(`| ${SECURITY.unconfirmed}A breach. |`);
+  });
+
+  it("marks a news bullet linking the flagged story, and leaves the other bullets", () => {
+    const news = [
+      {
+        source: "Hacker News",
+        title: "Leak",
+        url: "https://news.ycombinator.com/item?id=1",
+        detail: "",
+        id: "hn:1",
+        security: { confirmed: true },
+      },
+      {
+        source: "Hacker News",
+        title: "Claim",
+        url: "https://news.ycombinator.com/item?id=2",
+        detail: "",
+        id: "hn:2",
+        security: { confirmed: false },
+      },
+      { source: "Hacker News", title: "Plain", url: "https://news.ycombinator.com/item?id=3", detail: "" },
+    ];
+    const section =
+      "## Tool\n\n" +
+      "- **News:** [Leak](https://news.ycombinator.com/item?id=1) is out.\n" +
+      "- **News:** [Claim](https://news.ycombinator.com/item?id=2) says so.\n" +
+      "- **News:** [Plain](https://news.ycombinator.com/item?id=3) too.";
+    expect(markSecurityBullets(section, news)).toBe(
+      "## Tool\n\n" +
+        "- 🔓 **News:** [Leak](https://news.ycombinator.com/item?id=1) is out.\n" +
+        `- 🔓 ${SECURITY.unconfirmed}**News:** [Claim](https://news.ycombinator.com/item?id=2) says so.\n` +
+        "- **News:** [Plain](https://news.ycombinator.com/item?id=3) too.",
+    );
+  });
+
+  it("makes an unconfirmed flagged row no Highlight: a bullet naming it is dropped", () => {
+    const rows = numberRows([{ ...flagged(false), title: "Tool X leaks every API key" }]);
+    const noHighlight = unconfirmedClaims(rows, []);
+    expect(noHighlight).toEqual([{ name: "Tool X leaks every API key", url: "https://example.com/9" }]);
+    const prose = "## Highlights\n\n- Tool X leaks every API key, a user says.\n- Something else shipped.";
+    expect(dropNoHighlightRows(prose, noHighlight, "test")).toBe(
+      "## Highlights\n\n- Something else shipped.",
+    );
+    expect(unconfirmedClaims(numberRows([flagged(true)]), [])).toEqual([]);
   });
 });

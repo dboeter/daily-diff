@@ -697,3 +697,41 @@ describe("cleanStoryDescription", () => {
     expect(cleanStoryDescription(raw)).toBe(clean);
   });
 });
+
+describe("flagged stories take their own slot", () => {
+  const flag = { security: { confirmed: true } };
+
+  it("a flagged story past the per-source cap still makes a row; the others keep theirs", () => {
+    const lobsters = [story("l1", "lobsters", 30), story("l2", "lobsters", 20)];
+    const hit = story("sec", "lobsters", 5, flag);
+    const ids = selectSpotted([...lobsters, hit], () => "agents").map((r) => r.id);
+    expect(ids).toEqual(["lobsters:l1", "lobsters:l2", "lobsters:sec"]);
+  });
+
+  it("a flagged low-point story past the floor makes a row", () => {
+    const top = [story("a", "hn", 100), story("b", "hn", 90), story("c", "hn", 80)];
+    const low = story("low", "hn", 1, flag);
+    const ids = selectSpotted([...top, low], () => "agents").map((r) => r.id);
+    expect(ids).toContain("hn:low");
+  });
+
+  it("a flagged story under the topic bar makes no row", () => {
+    const hit = story("sec", "hn", 300, flag);
+    const rows = selectSpotted([hit], () => "agents", undefined, { probabilityOf: () => 0.4 });
+    expect(rows).toEqual([]);
+  });
+
+  it("a flagged Overview story skips the per-source cap but not the points minimum", () => {
+    const others = Array.from({ length: 3 }, (_, i) => story(`o${i}`, "hn", 100 + i));
+    const hit = story("sec", "hn", 60, flag);
+    const quiet = story("q", "hn", 10, flag);
+    const rows = selectTalkedAbout(
+      [...others, hit, quiet],
+      () => "other",
+      () => null,
+      DATE,
+      new Set(),
+    );
+    expect(rows.map((r) => r.id).sort()).toEqual(["hn:o0", "hn:o1", "hn:o2", "hn:sec"]);
+  });
+});

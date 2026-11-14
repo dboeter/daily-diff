@@ -26,7 +26,7 @@ import type { PolicyItem } from "../policy/items.ts";
 import type { KeptVendorItem } from "../data/relevance.ts";
 import type { VendorAction } from "../data/vendors.ts";
 import type { CommunityRow } from "../data/community.ts";
-import type { StoryRow } from "../spotted/pool.ts";
+import { linkKey, type StoryRow } from "../spotted/pool.ts";
 import type { ResearchPaper } from "../trending/research.ts";
 import type { Category } from "../trending/rank.ts";
 import type { RepoConfig } from "../core/github.ts";
@@ -55,6 +55,7 @@ import {
   POLICY_REPORT,
   DATA_REPORT,
   SPOTTED,
+  SECURITY,
   type ReportId,
 } from "../core/strings.ts";
 
@@ -252,6 +253,23 @@ function withNewsLinks(section: string, g: ProjectGroup): string {
   }, section);
 }
 
+/**
+ * A news bullet linking a story flagged as a security event (by `linkKey`) gets the 🔓 marker after
+ * its `- `, and the claim label when the claim is unconfirmed. A flagged story the model left out
+ * gets nothing.
+ */
+export function markSecurityBullets(
+  section: string,
+  news: readonly Pick<StoryRow, "url" | "security">[],
+): string {
+  const flagged = new Map(news.filter((n) => n.security).map((n) => [linkKey(n.url), n]));
+  if (!flagged.size) return section;
+  return section.replace(/^(\s*[-*] )(.*)$/gm, (line, bullet: string, rest: string) => {
+    const hit = [...rest.matchAll(/\]\(([^)\s]+)\)/g)].map((m) => flagged.get(linkKey(m[1]!))).find(Boolean);
+    return hit ? `${bullet}${SECURITY.marker}${claimLabel(hit)}${rest}` : line;
+  });
+}
+
 /** A model-written project section with its backticked tokens checked against that project's prompt block. */
 function checkProjectTokens(section: string, g: ProjectGroup): string {
   const a = projectOf(section, g);
@@ -305,12 +323,15 @@ function groupProjects(g: ProjectGroup): { body: string; quiet: ProjectActivity[
             !g.activities.some((a) => sectionHeading(a.config.name).test(chunk) && !covers(chunk, a)),
         )
         .map((chunk) =>
-          withNewsLinks(
-            withHotIssueFacts(
-              withReleaseBullet(boldLabelColonInside(checkProjectTokens(blankAfterHeading(chunk), g)), g),
+          markSecurityBullets(
+            withNewsLinks(
+              withHotIssueFacts(
+                withReleaseBullet(boldLabelColonInside(checkProjectTokens(blankAfterHeading(chunk), g)), g),
+                g,
+              ),
               g,
             ),
-            g,
+            projectOf(chunk, g)?.news ?? [],
           ),
         );
   const body = [...kept, ...fallback.map(projectFallbackSection)].filter(Boolean).join("\n\n");
@@ -636,6 +657,17 @@ export function titleOnlyStories(rows: StoryRow[], summaries: Map<number, string
 }
 
 /**
+ * The Spotted rows and project News stories flagged as a security event whose claim is not confirmed:
+ * one person's claim makes no Highlight. Without `story`, so the strict rule applies: a bullet
+ * linking, naming or restating it is dropped.
+ */
+export function unconfirmedClaims(rows: StoryRow[], groups: ProjectGroup[]): NoHighlightRow[] {
+  return [...rows, ...groups.flatMap((g) => g.activities.flatMap((a) => a.news))]
+    .filter((r) => r.security && !r.security.confirmed)
+    .map((r) => ({ name: r.title, url: r.url }));
+}
+
+/**
  * The community stories matched as a project's News that show only a title: the lead agents
  * Highlight of 2026-11-09, "Goldman Sachs is pulling Claude Code from its bankers and traders",
  * was one. A news item without an `id` is the project's own repo on GitHub Trending, whose
@@ -798,10 +830,17 @@ export function renderVendorTables(
  * A story's link: its title, or for a story linking a GitHub repo the title with the repo as the
  * link text, so the link reads what it opens ("Show HN: Agentsh" linked microsoft/Agensh, 2026-10-26).
  */
-function storyLink(r: Pick<StoryRow, "title" | "url">): string {
+function storyLink(r: Pick<StoryRow, "title" | "url" | "security">): string {
   const repo = /^https:\/\/github\.com\/([\w.-]+\/[\w.-]+?)(?:\.git)?\/?$/i.exec(r.url)?.[1];
-  return repo ? `${cell(r.title)} ([${cell(repo)}](${cell(r.url)}))` : `[${cell(r.title)}](${cell(r.url)})`;
+  const marker = r.security ? SECURITY.marker : "";
+  return repo
+    ? `${marker}${cell(r.title)} ([${cell(repo)}](${cell(r.url)}))`
+    : `${marker}[${cell(r.title)}](${cell(r.url)})`;
 }
+
+/** The claim label a flagged story opens with when no vendor, researcher or press backs it; "" otherwise. */
+const claimLabel = (r: Pick<StoryRow, "security">): string =>
+  r.security && !r.security.confirmed ? SECURITY.unconfirmed : "";
 
 /**
  * A page's Spotted section (or Trends' Most discussed, under `heading`): each
@@ -819,7 +858,7 @@ export function renderSpottedTable(
     (r) =>
       `| ${storyLink(r)} | ${SPOTTED.sources[r.source]} | ` +
       `[${SPOTTED.counts(r.source, r.points, r.comments)}](${cell(r.discussionUrl)}) | ` +
-      `${cell(summaryText(summaries, { n: r.n, description: r.description ?? "" }))} |`,
+      `${claimLabel(r)}${cell(summaryText(summaries, { n: r.n, description: r.description ?? "" }))} |`,
   );
   return `## ${heading}\n\n${SPOTTED.tableHeader}\n${lines.join("\n")}`;
 }

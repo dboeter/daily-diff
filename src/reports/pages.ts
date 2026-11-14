@@ -59,6 +59,7 @@ import {
   renderOpenRouterUsage,
   titleOnlyNews,
   titleOnlyStories,
+  unconfirmedClaims,
   unsummarizedRows,
   buildProjectReportContent,
   buildStealthSection,
@@ -351,7 +352,11 @@ export async function buildAgentsReport(
   dateStr: string,
 ): Promise<SavedReport> {
   const spottedMd = renderSpottedTable(spotted.rows, spotted.summaries);
-  const titleOnly = [...titleOnlyStories(spotted.rows, spotted.summaries), ...titleOnlyNews(groups)];
+  const titleOnly = [
+    ...titleOnlyStories(spotted.rows, spotted.summaries),
+    ...titleOnlyNews(groups),
+    ...unconfirmedClaims(spotted.rows, groups),
+  ];
   let highlights = "";
   if (groups.some((g) => g.activities.some(hasActivity)) || spottedMd) {
     const bodyMd = [...groupsMarkdown(groups), spottedMd].filter(Boolean).join("\n\n");
@@ -506,7 +511,10 @@ export async function buildModelsPage(
     ...(empty.length ? [nothingNew(empty)] : []),
   ];
   const spottedMd = renderSpottedTable(spotted.rows, spotted.summaries);
-  const titleOnly = titleOnlyStories(spotted.rows, spotted.summaries);
+  const titleOnly = [
+    ...titleOnlyStories(spotted.rows, spotted.summaries),
+    ...unconfirmedClaims(spotted.rows, []),
+  ];
   // The Highlights call reads everything below Highlights: a 🆕 stealth model is this page's news too.
   const bodyMd = [...tracked, spottedMd].filter(Boolean).join("\n\n");
   const prose = await generateOr(
@@ -895,7 +903,11 @@ export async function buildDataReport(
     .filter(Boolean)
     .join("\n\n");
   const minor = items.filter((i) => i.minor).map((i) => ({ name: i.title, url: i.link }));
-  const titleOnly = [...titleOnlyStories(spotted.rows, spotted.summaries), ...titleOnlyNews(groups)];
+  const titleOnly = [
+    ...titleOnlyStories(spotted.rows, spotted.summaries),
+    ...titleOnlyNews(groups),
+    ...unconfirmedClaims(spotted.rows, groups),
+  ];
   const prose = await generateOr(
     "data-highlights",
     buildDataProsePrompt(

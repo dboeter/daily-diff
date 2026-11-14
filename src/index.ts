@@ -140,7 +140,15 @@ import {
 import { DATA_SECTION_KEYS, loadConfig, type SectionKey } from "./core/config.ts";
 import { resolvePagesUrl } from "./cli/notify.ts";
 import { toCstDateStr, toUtcStr, isWeeklyRun, sleep } from "./core/date.ts";
-import { LIVE_REPORT_IDS, MSG, PROJECT_SCOPE, REPORTS, reportIssueTitle, SPOTTED } from "./core/strings.ts";
+import {
+  LIVE_REPORT_IDS,
+  MSG,
+  PROJECT_SCOPE,
+  REPORTS,
+  reportIssueTitle,
+  SECURITY,
+  SPOTTED,
+} from "./core/strings.ts";
 
 // ---------------------------------------------------------------------------
 // Repo config — loaded from config.yml (throws when a section is missing)
@@ -437,12 +445,17 @@ async function main(): Promise<void> {
   });
   const fresh = shownRepeats.kept;
   // Every fresh story, wherever it ends up: the Fireworks breach was lost to cap, threshold and
-  // routing on 2026-11-10. Traced only; nothing is shown yet (.scratch/security-section/spec.md).
+  // routing on 2026-11-10. A flagged story carries the 🔓 marker wherever it shows; the banner is
+  // not built yet (.scratch/security-section/spec.md).
   const security = await judgeSecurityStories(fresh, {
     apiKey: process.env["TYPESAFE_API_KEY"],
     cache: loadSecurityVerdicts(),
     dateStr,
   });
+  for (const s of fresh) {
+    const d = security.decisions.get(s.id);
+    if (d?.flagged) s.security = { confirmed: d.confirmed === true };
+  }
 
   // Agent news is matched against the other sources' data, so it waits for them.
   // Agents and tooling in one pass: an item naming 3+ of them is a compatibility list.
@@ -773,8 +786,9 @@ async function main(): Promise<void> {
     dateStr,
   );
   console.log(`  Saved ${saveFile(JSON.stringify(comingUp, null, 2), dateStr, "coming-up.json")}`);
-  const talkedFile = talkedAbout.map((t) => ({
+  const talkedFile = talkedAbout.map(({ security: flag, ...t }) => ({
     ...t,
+    title: flag ? `${SECURITY.marker}${t.title}${flag.confirmed ? "" : SECURITY.unconfirmedTitle}` : t.title,
     counts: SPOTTED.counts(t.source, t.points, t.comments),
   }));
   console.log(`  Saved ${saveFile(JSON.stringify(talkedFile, null, 2), dateStr, "talked-about.json")}`);

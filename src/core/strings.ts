@@ -204,6 +204,15 @@ export const TRENDS_REPORT = {
 } as const;
 
 // Community stories routed by topic (src/spotted/), rendered in code on their topic's page.
+/** The 🔓 marker of a story Jev flagged as a security or privacy event (`src/security/stories.ts`). */
+export const SECURITY = {
+  marker: "🔓 ",
+  /** Opens the summary cell or news bullet of a flagged story whose claim no vendor, researcher or press backs. */
+  unconfirmed: "*One person's claim, not confirmed.* ",
+  /** Ends such a story's title in `talked-about.json`. */
+  unconfirmedTitle: " (one person's claim)",
+};
+
 export const SPOTTED = {
   heading: "Spotted",
   tableHeader: "| Story | Source | Discussion | Summary |\n| :--- | :--- | :--- | :--- |",

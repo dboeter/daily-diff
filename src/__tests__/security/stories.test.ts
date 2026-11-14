@@ -56,19 +56,35 @@ const judge = (ids: string[], ask: AskJev = recorded) =>
 
 describe("judgeSecurityStories decisions", () => {
   it("flags the Forbes Fireworks story as a banner: severe, reported by the press", async () => {
-    expect((await judge(["s354"])).decisions.get("hn:s354")).toEqual({ flagged: true, banner: true });
+    expect((await judge(["s354"])).decisions.get("hn:s354")).toEqual({
+      flagged: true,
+      banner: true,
+      confirmed: true,
+    });
   });
 
   it("flags the Bloomberg Fireworks story (no text) without a banner: its severity is under the bar", async () => {
-    expect((await judge(["s353"])).decisions.get("hn:s353")).toEqual({ flagged: true, banner: false });
+    expect((await judge(["s353"])).decisions.get("hn:s353")).toEqual({
+      flagged: true,
+      banner: false,
+      confirmed: true,
+    });
   });
 
   it("flags the email leak without a banner: one user's GitHub issue", async () => {
-    expect((await judge(["s213"])).decisions.get("hn:s213")).toEqual({ flagged: true, banner: false });
+    expect((await judge(["s213"])).decisions.get("hn:s213")).toEqual({
+      flagged: true,
+      banner: false,
+      confirmed: false,
+    });
   });
 
   it("does not flag a story that is no security event", async () => {
-    expect((await judge(["s000"])).decisions.get("hn:s000")).toEqual({ flagged: false, banner: false });
+    expect((await judge(["s000"])).decisions.get("hn:s000")).toEqual({
+      flagged: false,
+      banner: false,
+      confirmed: null,
+    });
   });
 });
 
@@ -114,7 +130,7 @@ describe("judgeSecurityStories", () => {
       RECORDED["s213"]!.title,
       RECORDED["s213"]!.title,
     ]);
-    expect(k.decisions.get("hn:s354")).toEqual({ flagged: true, banner: true });
+    expect(k.decisions.get("hn:s354")).toEqual({ flagged: true, banner: true, confirmed: true });
   });
 
   it("flags nothing without Jev: keywords cannot tell a security event", async () => {
@@ -129,7 +145,7 @@ describe("judgeSecurityStories", () => {
       return recorded(state, questions, key);
     };
     const j = await judge(["s354"], ask);
-    expect(j.decisions.get("hn:s354")).toEqual({ flagged: true, banner: null });
+    expect(j.decisions.get("hn:s354")).toEqual({ flagged: true, banner: null, confirmed: null });
   });
 });
 
@@ -152,6 +168,7 @@ describe("securityTraceFile", () => {
       id: "hn:s354",
       flagged: true,
       banner: true,
+      confirmed: true,
       placed: null,
       dropped_reason: "cap",
       shown: false,
@@ -163,11 +180,17 @@ describe("securityTraceFile", () => {
       id: "hn:s213",
       flagged: true,
       banner: false,
+      confirmed: false,
       placed: "news",
       shown: true,
     });
     expect(trace.items[1]).not.toHaveProperty("dropped_reason");
-    expect(trace.items[2]).toMatchObject({ flagged: false, placed: null, dropped_reason: null });
+    expect(trace.items[2]).toMatchObject({
+      flagged: false,
+      confirmed: null,
+      placed: null,
+      dropped_reason: null,
+    });
     expect(trace.items[2]).toHaveProperty("is_security");
     expect(trace.items[2]).not.toHaveProperty("severity");
   });

@@ -21,6 +21,8 @@ export interface NewsItem {
   id?: string;
   /** A community story's description: matching reads it, so the model must see it too. */
   description?: string;
+  /** A community story Jev flagged as a security event (`Story.security`). */
+  security?: { confirmed: boolean };
 }
 
 export interface NewsSources {
@@ -89,6 +91,7 @@ export function collectNewsItems(sources: NewsSources): { item: NewsItem; text: 
         detail: SPOTTED.counts(s.source, s.points, s.comments),
         id: s.id,
         ...(s.description ? { description: s.description } : {}),
+        ...(s.security ? { security: s.security } : {}),
       },
       // The description too: on 2026-10-25 a Dev.to story about OpenShell named it only there.
       text: `${s.title} ${s.description ?? ""}`,
