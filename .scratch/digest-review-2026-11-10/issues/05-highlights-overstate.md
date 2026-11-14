@@ -16,7 +16,7 @@ In every review, and the 2026-11-01 review before them (`../../digest-review-202
 
 ## Spike
 
-- [ ] Replay these six against the rows they came from. Does a Jev check per Highlight ("does the row's text support this sentence?") separate them from Highlights that held up, at what false-drop rate
+- [x] Replay these six against the rows they came from. Does a Jev check per Highlight ("does the row's text support this sentence?") separate them from Highlights that held up, at what false-drop rate
 - [x] Try a code rule first where one exists: a Highlight whose only row is a single community story keeps its attribution ("a Hacker News post says")
 - [ ] Across platforms is free prose over two rows: decide whether it stays, given three of its bullets failed on one day
 
@@ -41,3 +41,24 @@ Data in `../spike/`: `cases.md` (40 confirmed overstatements from the reviews of
 - Code rule: of the Highlights resting on one community story, the title-only ones (government ID, Goldman Sachs) are dropped by `22ee1f6` (11-11; checked on the government-ID case). The rest carry an attribution and overstate the content ("A report shows … resulting in spam"), so an attribution check would catch one or two.
 - Across platforms: 7 of its 9 bullets on reviewed days were flagged (11-04 3/3, 11-07 1/1, 11-08 0/1, 11-10 2/2, 11-11 1/1, 11-14 0/1). Several pair unrelated items, and OneLake's GA was its bullet on 11-06, 11-12 and 11-14. Recommendation: remove it (decision pending).
 - Controls are "not flagged by a reviewer", not verified correct.
+
+### Spike, part 2: the Jev replay (2026-11-14)
+
+One `noul` question per sentence ("does `source` support everything `claim` states?", `support-check.ts`), over the 94 sentences of `support-cases-nocounts.jsonl`: the counts code appends to a bullet (comments, 👍, points) are stripped from the claims, since the check would run before code adds them. Answers in `cache.json`. 102 calls, about 600 input tokens plus the source each (`usage` in the response), roughly 90,000 tokens in all.
+
+| Bar (supported below) | Flagged caught | Unflagged dropped |
+| --- | --- | --- |
+| 0.2 | 19/39 | 9/55 |
+| 0.3 | 20/39 | 12/55 |
+| 0.4 | 25/39 | 14/55 |
+| 0.5 | 27/39 | 17/55 |
+
+- Medians: flagged 0.25, unflagged 0.71. By section at 0.5: Across platforms 7/7 caught, 0/2 unflagged dropped; repo bullets 9/9 caught but 9/15 unflagged dropped (a bullet over several releases states many changes, and one unsupported clause sinks it); Spotted rows 1/5 caught.
+- It misses the worst class, a claim stated as fact: the government ID (0.74), Goldman Sachs (0.90), Gemini "human annotators" (0.72), TikTok "first time" (0.86). Jev reads "Tell HN: you now need a government ID" as support for "Anthropic now requires a government ID".
+- Verdict: no Jev gate. A quarter of good sentences dropped, and the high-severity misses kept.
+
+### Recommendation
+
+1. Remove Across platforms: 7 of 9 bullets flagged, and Jev agrees on all 7. (Decision for Daan.)
+2. Carry the fidelity rules to where 18 of the 40 errors started: `buildProjectDigestPrompt` and `buildSpottedSummariesPrompt`, with the scope rules these cases broke: keep a qualifier ("the default Fable model", "internal benchmarks"), "recommends" or "upcoming" never becomes "must" or "released", separate fixes stay separate, a hot issue with one reporter is "an issue reports", not "users report".
+3. The title-only Highlights are already dropped (`22ee1f6`). No further code rule: the remaining attribution cases carry an attribution.

@@ -1,0 +1,1022 @@
+{
+ "2026-11-04-data-1": {
+  "claim": "dbt Core v2.0.11 renames `--run-cache-mode` to `--state-mode` (deprecated alias kept) — dbt Core users must update scripts and CI pipelines using the old flag.",
+  "source": "v2.0.11\n## 2.0.11\r\n\r\nReleased November 03, 2026\r\n\r\n### Features\r\n\r\n- Add support for BigQuery query reservation configuration at model and connection levels ([#15486](https://github.com/dbt-labs/dbt-core/issues/15486))\r\n- Report whether each node ran remotely, locally, or on Lake Compute in anonymous usage telemetry.\r\n- Show a determinate progress bar for the parse phase in interactive terminals, matching the render/analyze/run experience, and name the stage in progress (building model nodes, resolving data tests, typechecking macros) during the stretches where no assets are being parsed, plus a progress indicator while the semantic manifest is validated, so the console no longer looks idle\r\n- Rename the --run-cache-mode CLI flag to --state-mode to match the dbt State terminology it configures. --run-cache-mode is kept as a deprecated alias and will keep working, with a warning, until it is removed in a future release.\r\n- Add state configuration to ignore external modifications on model target tables/views (only implemented for views to begin with)\r\n- Support the `allow_jinja_file_extensions` project flag, so resource files may carry a trailing Jinja suffix (`model.sql.j2`, `doc.md.j2`) ([#16296](https://github.com/dbt-labs/dbt-core/issues/16296))\r\n- Add telemetry for state selector operations to track performance and usage of modified/new/unmodified node selection\r\n- Support authenticated private S3 downloads for dbt update manifests and binaries.\r\n- Add DBT_CLOUD_LOGIN_HOST (and optional DBT_CLOUD_LOGIN_ACCOUNT_ID) so dbt login can authenticate through an account host's /oauth/authorize instead of the registration page, for SSO accounts the registration page cannot route.\r\n- [docs v2] Add resource filter to lineage view to select what resource types are displayed in the DAG\r\n- Add a feature flag registry with `--feature NAME[=VALUE]` and `DBT_ENGINE_FEATURES` for setting unstable features; behavior flags and the git deps fast path now resolve through it with unchanged def",
+  "answers": {
+   "supported": {
+    "type": "noul",
+    "noul": 0.06
+   }
+  }
+ },
+ "2026-11-04-data-2": {
+  "claim": "AI cost governance: Databricks Unity Gateway budgets now include AI Functions (`ai_parse_document`, `ai_extract`, `ai_classify`) spend (GA Nov 1); Snowflake Cortex AI Gateway GA provides request tracing and spend attribution per user — both platforms now meter AI SQL functions.",
+  "source": "AI Functions usage is now included in Unity Gateway budgets\nBeginning November 1, 2026, Unity Gateway budgets include spend from task-specific AI Functions such as ai_parse_document, ai_extract, and ai_classify across batch and real-time execution paths. See Manage budgets for Unity Gateway.\n\nNov 3, 2026: Cortex AI Gateway inference, observability, and cost management (General availability)\nInference, observability, and cost management for Cortex AI Gateway are now generally available. The gateway gives AI clients in your organization one governed endpoint to reach models, records a trace of every request, and attributes spend to the users who made it.",
+  "answers": {
+   "supported": {
+    "type": "noul",
+    "noul": 0.03
+   }
+  }
+ },
+ "2026-11-04-data-3": {
+  "claim": "AI cost governance: Databricks Unity Gateway budgets now include AI Functions (`ai_parse_document`, `ai_extract`, `ai_classify`) spend (GA Nov 1); Snowflake Cortex AI Gateway GA provides request tracing and spend attribution per user — both platforms now meter AI SQL functions.",
+  "source": "AI Functions usage is now included in Unity Gateway budgets\nBeginning November 1, 2026, Unity Gateway budgets include spend from task-specific AI Functions such as ai_parse_document, ai_extract, and ai_classify across batch and real-time execution paths. See Manage budgets for Unity Gateway.\n\nNov 3, 2026: Cortex AI Gateway inference, observability, and cost management (General availability)\nInference, observability, and cost management for Cortex AI Gateway are now generally available. The gateway gives AI clients in your organization one governed endpoint to reach models, records a trace of every request, and attributes spend to the users who made it.",
+  "answers": {
+   "supported": {
+    "type": "noul",
+    "noul": 0.03
+   }
+  }
+ },
+ "2026-11-04-data-5": {
+  "claim": "Cross-cloud catalog mirroring: Fabric mirrors Unity Catalog materialized views and streaming tables read-only via shortcuts; Databricks Lakeflow Jobs now trigger across workspaces sharing a metastore — both enable multi-workspace lineage without data movement.",
+  "source": "Trigger Lakeflow Jobs when upstream jobs complete (Beta)\nYou can now run a Lakeflow Job when one or more upstream jobs complete, including across workspaces attached to the same Unity Catalog metastore. Configure dependencies on the downstream job. See Trigger jobs when upstream jobs complete.\n\nAnnouncing support for Materialized views and streaming tables in Mirrored Azure Databricks catalog\nSections: What's new; Why this matters; Prepare objects for external access; Work with data in Fabric; Keep catalog changes in sync; Get started. Access more Unity Catalog objects through the existing mirrored catalog experience in Microsoft Fabric We are expanding Mirrored Azure Databricks catalogs in Microsoft Fabric to support materialized views and streaming tables alongside tables. These objects remain created and managed in Azure Databricks, while Fabric provides read-only access to the underlying data through shortcuts. This brings more of your Unity Catalog environment into Fabric without copying or replicating the data. A Mirrored Azure Databricks catalog can now include support: Tables Materialized views Streaming tables When configuring the mirrored catalog, select the Unity Catalog catalogs, schemas, and supported objects you want to make available in Fabric. Fabric mirrors the selected catalog structure and creates shortcuts to the underlying data. This enhancement uses th…",
+  "answers": {
+   "supported": {
+    "type": "noul",
+    "noul": 0.11
+   }
+  }
+ },
+ "2026-11-07-agents-2": {
+  "claim": "A report shows Claude Code sends the user's email address in the User-Agent header during web searches without consent, resulting in spam.",
+  "source": "Claude Code sends your email address to websites\nBug Description I receive dozens of scam emails per day because claude code divulged my email to arbitrary 3rd parties in the User-Agent request header while conducting web searches without my perm",
+  "answers": {
+   "supported": {
+    "type": "noul",
+    "noul": 0.35
+   }
+  }
+ },
+ "2026-11-07-agents-3": {
+  "claim": "OpenAI Codex users report all local projects vanish from the Projects list after switching from an enterprise back to a personal account on Windows, though folders and chats remain visible but ungrouped.",
+  "source": "Windows: local projects disappear after app update and switching back to personal account\n### What version of the Codex App are you using?\n\nWindows package `OpenAI.Codex` 26.1103.3517.0, as reported by Get-AppxPackage after the incident. The version before the update was not recorded.\n\n### What platform is your computer?\n\nWindows, Codex desktop app.\n\n### What issue are you seeing?\n\nAll previously visible local Codex projects disappeared from the Projects list after switching back from an enterprise account to the personal account. Individual chats remain visible, but are no longer grouped under their projects. The local project folders still exist. Restarting the app did not restore the projects.\n\n### Observed sequence\n\nThis is the observed sequence, not a controlled reproduction:\n\n1. Before November 6, 2026, switching between the personal and enterprise accounts did not remove the local projects; they were accessible under either account. The user also switched accounts on November 5 without losing them.\n2. On November 6, the user switched from personal to enterprise and t",
+  "answers": {
+   "supported": {
+    "type": "noul",
+    "noul": 0.13
+   }
+  }
+ },
+ "2026-11-07-data-2": {
+  "claim": "Apache Iceberg interoperability advanced on three platforms: Snowflake Horizon Catalog enables cross-account Iceberg read/write without secrets (GA); BigQuery Lakehouse adds GA federated catalog endpoints for Unity Catalog, Glue, Horizon Catalog, and Workday; Databricks Lakeflow Pipeline Tables are readable as Iceberg tables from Snowflake per the Iceberg project.",
+  "source": "Nov 1, 2026: Apache Iceberg™ tables: Read and write across Snowflake accounts with Snowflake Horizon Catalog, now without managing secrets (General availability)\nWith this release, you can read and write Apache Iceberg™ tables managed by another Snowflake account without creating, storing, or rotating secrets. This capability is generally available through catalog integrations for Snowflake Horizon Catalog. The accounts access the same table data without copying it.... Read more\n\nLakehouse supports the following remote catalog providers for cross-cloud data access (GA)\nLakehouse supports the following remote catalog providers for cross-cloud data access. This feature is generally available (GA). Databricks Unity Catalog on Amazon Web Services (AWS), Microsoft Azure, or Google Cloud AWS Glue Data Catalog on AWS Snowflake Horizon Catalog on AWS, Microsoft Azure, or Google Cloud Workday Data Lake on AWS or Google Cloud This feature lets you configure federated catalog endpoints to synchronize catalog metadata and query Apache Iceberg tables in remote catalogs directly from Google Cloud using BigQuery, Managed Service for Apache Spark, and Apache Spark without migrating data or building complex ETL pipelines. You can route background metadata refresh and queries over the public internet or privately over Cross-Cloud Interconnect, and protect cross-cloud data access with VPC Service Controls service perimeters. For Databricks Unity Catalog, you can also use user identity federation to propagate end-user identities on queries for permission enforcement and…\n\nQuery Databricks Lakeflow Pipeline Tables from Snowflake, Without Copying Data\nStreaming tables and materialized views, read in place as Iceberg: the settings that matter, what the logs show, and the Snowflake errors I hit Most guides to reading Databricks from Snowflake start with a plain Delta table. Mine are different: every table here is built by Lakeflow Declarative Pipelines (formerly Delta Live Tables), so they are streaming tables and materialized views, which an outside engine cannot read out of the box. I got Snowflake to read all 13 of them in place, as Apache Iceberg, with no copy: three layers on AWS, each in its own Unity Catalog catalog. I tried two Snowflake features on them: Iceberg tables over Unity Catalog’s REST endpoint, and a catalog-linked database. This article covers how each works on Lakeflow tables, the Snowflake checks that confirm it, and the four Snowflake errors that cost me time. In short: Lakeflow tables need one opt-in (pipelines.externalMetadata.enabled) to be readable from Snowflake; with it, both Iceberg tables over the REST e…",
+  "answers": {
+   "supported": {
+    "type": "noul",
+    "noul": 0.07
+   }
+  }
+ },
+ "2026-11-07-models-1": {
+  "claim": "The paper introduces Memorilla, a latent semantic memory system that lets frozen LLMs access accumulated knowledge like past conversations and documents by placing relevant information in the context window.",
+  "source": "Memorilla: Latent Semantic Memory for LLMs\nMemory enables large language models (LLMs) to use information beyond their parameters, such as past user conversations, long documents, or an agent's earlier actions. For a frozen LLM, access to this accumulated knowledge is limited to what a memory system places in its context window. However, gat",
+  "answers": {
+   "supported": {
+    "type": "noul",
+    "noul": 0.44
+   }
+  }
+ },
+ "2026-11-07-policy-1": {
+  "claim": "The European Commission preliminarily found TikTok’s recommender system in breach of the Digital Services Act for creating harmful “rabbit holes,” marking the first time the Commission has targeted a platform’s algorithmic recommendations as a DSA violation.",
+  "source": "EU accuses TikTok of designing algorithm that creates ‘rabbit holes’\nThe preliminary findings mark the first time the Commission has focused on a social media platform's recommender systems as a breach of its powerful Digital Services Act.\n\nCommission preliminarily finds TikTok’s ‘For You’ feed in breach of Digital Services Act for harmful ‘rabbit holes’ effect\nThe European Commission has preliminarily found TikTok in breach of the Digital Services Act (DSA) for the so-called ‘rabbit hole effect’ of its recommender system. TikTok's ‘For You' feed shows users a continuous stream of personalised videos, even when those are related to mental health struggles and body image. The more a user interacts with a certain type of content, the more TikTok's ‘For You' feed algorithm recommends similar content. This design can be harmful when such endless and repeated exposure involves, for example, content about sadness, isolation or body image. These ‘rabbit hol…",
+  "answers": {
+   "supported": {
+    "type": "noul",
+    "noul": 0.86
+   }
+  }
+ },
+ "2026-11-07-policy-2": {
+  "claim": "The Dutch Cabinet published its AI vision (*Kabinetsvisie op Artificial Intelligence – kiezen voor AI voor iedereen*) alongside formal responses to the SER advice on work and AI and to the AI Deltaplan and Europe2031 report, signalling a national push for “open strategic autonomy” while acknowledging persistent US and Chinese influence.",
+  "source": "Kabinet wil eigen AI-koers, maar de VS en China zijn nooit ver weg\nHet kabinet-Jetten presenteert vrijdag een visie op AI. Die visie luidt dat Nederland zich weliswaar inzet om open strategische autonomie te bereiken, maar dat er tegelijkertijd via ‘gerichte AI-diplomatie’ wordt ingezet om de Nederlandse toegang tot geavanceerde AI-capaciteiten veilig te stellen.",
+  "answers": {
+   "supported": {
+    "type": "noul",
+    "noul": 0.04
+   }
+  }
+ },
+ "2026-11-08-models-1": {
+  "claim": "Anthropic now requires a government ID to create an account.",
+  "source": "Tell HN: You now need a government id in order to create an Anthropic account\n",
+  "answers": {
+   "supported": {
+    "type": "noul",
+    "noul": 0.74
+   }
+  }
+ },
+ "2026-11-08-models-6": {
+  "claim": "The article covers open-weight LLM architectures including MoE, hybrid layers, and ternary weights, written by a PhD in Electrical Engineering from UFMG.",
+  "source": "The architecture of open-weight LLMs: MoE, hybrid layers, ternary weights\nData Scientist especialista em Knowledge Graphs, LLMs e AI Systems. PhD in Electrical Engineering (UFMG). Portfólio de projetos em Machine Learning, NLP, Time Series e Graph Algorithms.",
+  "answers": {
+   "supported": {
+    "type": "noul",
+    "noul": 0.54
+   }
+  }
+ },
+ "2026-11-08-agents-5": {
+  "claim": "Analysis of 663 Hacker News comments reveals AI coding agent setups from 424 developers categorized into seven patterns.",
+  "source": "AI coding agent setups from 663 Hacker News comments\nOn November 4, 2026, an Ask HN thread asked developers for their current AI agent setup, and 663 comments came back. We read every one, counted the tools 424 people say they use, and turned the most detailed setups into seven patt",
+  "answers": {
+   "supported": {
+    "type": "noul",
+    "noul": 0.67
+   }
+  }
+ },
+ "2026-11-08-agents-6": {
+  "claim": "Claude Code regression (Desktop 4.23118.0 on macOS): users report MCP Apps from local stdio servers no longer render in Chat — the tool executes and returns text but Desktop never requests the `ui://` resource, so no widget panel appears",
+  "source": "[BUG] Desktop 4.23118.0 (macOS): MCP Apps from local stdio servers no longer render in Chat — ui:// resource never read\n## Summary\n\nSince Claude Desktop auto-updated from **4.16336.0** to **4.23118.0** (2026-11-05), MCP Apps widgets from **local stdio servers** (`claude_desktop_config.json`) no longer render in Chat. The tool is called and its text result appears, but Desktop never requests the widget page with `resources/read`, so no panel appears. The same server code rendered correctly on 4.16336.0.\n\n## Environment\n\n- Claude Desktop 4.23118.0 (worked on 4.16336.0)\n- macOS 26.3.1 (arm64)\n- Servers: Python `mcp` SDK 2.3.0, using `mcp.server.apps.Apps` with `add_html_resource(...)` and the app tool registered via `apps.tool(resource_uri=...)`\n- Ordinary Chat with no folder attached\n\n## Steps to reproduce\n\n1. Configure a local stdio MCP server that exposes an MCP App: a `ui://…` resource with MIME `text/html;profile=mcp-app`, and a tool with `_meta.ui.resourceUri` pointing to it.\n2. Start a new chat with no folder attached and ask Claude to use that tool.\n\n**Expected:** Desktop sends `resources/read` for",
+  "answers": {
+   "supported": {
+    "type": "noul",
+    "noul": 0.63
+   }
+  }
+ },
+ "2026-11-08-agents-11": {
+  "claim": "**Release:** v18.18.1 introduces breaking changes in the Rust SDK requiring `exclude_from_context: None` and `supports_bash_exclude_from_context: None` on `BashCommand` and `ReadyEvent` struct literals; fixes include preserving tool-batch order for file mutations, correcting Pro Max account routing, capping Cursor's 24h `hard_timeout` at the bash tool's 3600s ceiling, treating 429/402 context-overflow errors as rate limits, and allowing credentialless Apple on-device models in `auth-gateway`",
+  "source": "v18.18.1\n## @oh-my-pi/pi-ai\n\n### Fixed\n\n- Cursor exec frames keep tool-batch order: a file mutation (native StrReplace and Write, `write`, `delete`, `pi_edit`, `pi_write`) waits for the calls issued before it, and the calls issued after it wait until it lands, so a Shell sent in the same batch as a StrReplace no longer runs before the edit's write ([#18434](https://github.com/can1357/oh-my-pi/pull/18434) by [@KadirBerkpolat1](https://github.com/KadirBerkpolat1))\n- ChatGPT Pro Max (`promax`) counts as Pro for Codex account routing, so a blocked Pro account no longer wins over an open or pinned Pro Max account ([#18399](https://github.com/can1357/oh-my-pi/pull/18399) by [@serverinspector](https://github.com/serverinspector))\n- Cursor Shell results no longer end with `Timeout clamped to 3600s (requested 86400s; …)`: Cursor's 24 h `hard_timeout` is capped at the bash tool's 3600 s ceiling before it reaches the tool ([#18433](https://github.com/can1357/oh-my-pi/pull/18433) by [@KadirBerkpolat1](https://github.com/KadirBerkpolat1))\n- A 429 or 402 worded like a context overflow (Bedrock's \"429 Too many tokens, please wait…\") is treated as a rate limit, so it retries and walks the fallback chain instead of compacting ([#18345](https://github.com/can1357/oh-my-pi/pull/18345) by [@nick-maderight](https://github.com/nick-maderight))\n- `auth-gateway stdio` and `serve` no longer reject credentialless Apple on-device models ([#18370](https://github.com/can1357/oh-my-pi/issues/18370))\n\n## @oh-my-pi/browser-relay\n\n### Changed\n\n- The extension now requests `scripting` and access to all sites (Chrome lists \"Read and change all your data on all websites\"); it uses them only to empty another extension's frames in a tab omp is driving, when Chrome refuses it the debugger there ([#16908](https://github.com/can1357/oh-my-pi/pull/16908) by [@will-bogusz](https://github.com/will-bogusz))\n\n### Fixed\n\n- Fixed a password manager's inline autofill menu locking omp out of a tab it drives: the extension e",
+  "answers": {
+   "supported": {
+    "type": "noul",
+    "noul": 0.02
+   }
+  }
+ },
+ "2026-11-09-agents-2": {
+  "claim": "**Release:** v18.18.2–v18.18.3: breaking — `ask` tool now takes a single HTML form (`{ html }`) instead of `questions[]`; `AskToolDetails` becomes { answers, timedOut? }; `QuestionResult` removed; `logoutCredential()` requires `AgentSession` and a scoped-model refresher; `SessionStorage.hasAssistantTurn()` replaced by `scanLines(path, visit)`. fixes — GenAI message-content capture from `.env` files works again; remote OpenAI compaction preparation and generic `/chat/completions` compaction retain correct model attribution; rotated credential pools report exhausted credential status correctly; OpenAI multi-image edits and Cursor xd:// device reads fixed. features — `balanced` delegation bias added; Tern right-click `ask` answer adds Note annotation; `task.eager` scopes to main agent only; `ask` forms support images (URL, data URI, local file, Mermaid) and \"Other\" free-text options; extension gains `ui.formDialog(html, options)`; `canReplayRemoteCompactionFrom()`, Cursor edit execution context, and Responses replay utilities added.",
+  "source": "v18.18.2\n## @oh-my-pi/pi-agent-core\n\n### Added\n\n- Added `canReplayRemoteCompactionFrom()` to determine whether a model can replay provider-native compaction produced by another model.\n\n### Fixed\n\n- Fixed GenAI message-content capture configured in omp's own `.env` files so it continues to apply when those values are no longer exposed through the process environment.\n- Fixed compaction preparation for remote OpenAI compaction that the active model cannot replay, ensuring the content is expanded and remains available for compaction.\n- Fixed generic remote compaction requests to `/chat/completions` so gateway sessions retain the correct per-request model attribution.\n\n## @oh-my-pi/pi-ai\n\n### Added\n\n- Added edit execution context support for Cursor handlers, allowing integrations to identify frames that materialize native file edits and detect when server-side edits have settled.\n- Exported Responses replay utilities so callers can determine which turns are sent as native payload items when estimating or trimming context.\n\n### Fixed\n\n- Fixed rotated credential pools reporting a stale sibling credential's authentication error instead of the exhausted credential's usage-limit status and reset time.\n- Fixed OpenAI image edits with multiple input images failing because image parameters were duplicated.\n- Fixed Cursor-provider reads of xd:// devices failing due to incorrect device URL handling.\n- Fixed Anthropic sessions getting stuck after refused turns containing thinking or redacted-thinking blocks when followed by a steer, reminder, or new prompt.\n- Fixed Codex Responses requests losing tool namespaces and developer-provided additional tools when replayed through the authentication gateway.\n- Fixed Gemini malformed responses being treated as unhandled stop reasons and losing token usage; they are now handled as transient transport errors.\n- Improved Cursor compatibility with TLS-intercepting proxies that block HTTP/2 by falling back to HTTP/1 for subsequent turns.\n\n## @oh-my-pi/b\n\nv18.18.3\n## @oh-my-pi/pi-catalog\n\n### Changed\n\n- Added a `balanced` delegation bias between `eager` and `restrained`; models without a `delegation-bias` rule now resolve to it instead of `eager`\n\n## @oh-my-pi/pi-coding-agent\n\n### Breaking Changes\n\n- The `ask` tool takes one HTML form (`{ html }`) instead of `questions[]`: the model writes a `<form>` of radios, checkboxes, selects, text inputs and textareas with its recommendation preselected, and receives the submitted form data as JSON. `AskToolDetails` is now `{ answers: { name, question, answer }[]; timedOut? }`; `QuestionResult`, the \"Other\", \"Chat about this\", answer-note and answer-image paths of the tool are removed, and `/tree` re-answer reopens the original form (`NavigateTreeResult.reopenAsk` carries `html`).\n\n### Added\n\n- In Tern, right-clicking an `ask` answer offers Note, which annotates that answer without picking it ([#18551](https://github.com/can1357/oh-my-pi/pull/18551) by [@H4vC](https://github.com/H4vC))\n- `task.eager` (`preferred`/`always`) now shapes only the main agent's system prompt; subagents fall back to their model's own delegation policy instead of being pushed to spawn further subagents\n- `ask` forms can show pictures: `<img src>` from an http(s) URL, a `data:` URI or a local file (relative to the session's working directory), and inline `<svg>` diagrams, drawn in the terminal form and natively in Tern\n- `ask` forms give every radio and checkbox group a free-text \"Other\" answer: its text is the radio's value or is appended to the checkbox group's array (field-by-field fallback, collab guests and ACP elicitation included)\n- Extension UI gains optional `ui.formDialog(html, options)`, which renders an HTML `<form>` and resolves to `{ data, timedOut? }` (undefined when cancelled). The interactive TUI renders it as a form dialog, ACP clients with form elicitation get one elicitation with a property per field, and hosts without it (RPC) answer the `ask` tool field by field through `select`/`input`/`ed",
+  "answers": {
+   "supported": {
+    "type": "noul",
+    "noul": 0.03
+   }
+  }
+ },
+ "2026-11-09-agents-3": {
+  "claim": "New features include `balanced` delegation bias, `ask` forms supporting images and free-text options, and `ui.formDialog(html, options)` extension.",
+  "source": "v18.18.2\n## @oh-my-pi/pi-agent-core\n\n### Added\n\n- Added `canReplayRemoteCompactionFrom()` to determine whether a model can replay provider-native compaction produced by another model.\n\n### Fixed\n\n- Fixed GenAI message-content capture configured in omp's own `.env` files so it continues to apply when those values are no longer exposed through the process environment.\n- Fixed compaction preparation for remote OpenAI compaction that the active model cannot replay, ensuring the content is expanded and remains available for compaction.\n- Fixed generic remote compaction requests to `/chat/completions` so gateway sessions retain the correct per-request model attribution.\n\n## @oh-my-pi/pi-ai\n\n### Added\n\n- Added edit execution context support for Cursor handlers, allowing integrations to identify frames that materialize native file edits and detect when server-side edits have settled.\n- Exported Responses replay utilities so callers can determine which turns are sent as native payload items when estimating or trimming context.\n\n### Fixed\n\n- Fixed rotated credential pools reporting a stale sibling credential's authentication error instead of the exhausted credential's usage-limit status and reset time.\n- Fixed OpenAI image edits with multiple input images failing because image parameters were duplicated.\n- Fixed Cursor-provider reads of xd:// devices failing due to incorrect device URL handling.\n- Fixed Anthropic sessions getting stuck after refused turns containing thinking or redacted-thinking blocks when followed by a steer, reminder, or new prompt.\n- Fixed Codex Responses requests losing tool namespaces and developer-provided additional tools when replayed through the authentication gateway.\n- Fixed Gemini malformed responses being treated as unhandled stop reasons and losing token usage; they are now handled as transient transport errors.\n- Improved Cursor compatibility with TLS-intercepting proxies that block HTTP/2 by falling back to HTTP/1 for subsequent turns.\n\n## @oh-my-pi/b\n\nv18.18.3\n## @oh-my-pi/pi-catalog\n\n### Changed\n\n- Added a `balanced` delegation bias between `eager` and `restrained`; models without a `delegation-bias` rule now resolve to it instead of `eager`\n\n## @oh-my-pi/pi-coding-agent\n\n### Breaking Changes\n\n- The `ask` tool takes one HTML form (`{ html }`) instead of `questions[]`: the model writes a `<form>` of radios, checkboxes, selects, text inputs and textareas with its recommendation preselected, and receives the submitted form data as JSON. `AskToolDetails` is now `{ answers: { name, question, answer }[]; timedOut? }`; `QuestionResult`, the \"Other\", \"Chat about this\", answer-note and answer-image paths of the tool are removed, and `/tree` re-answer reopens the original form (`NavigateTreeResult.reopenAsk` carries `html`).\n\n### Added\n\n- In Tern, right-clicking an `ask` answer offers Note, which annotates that answer without picking it ([#18551](https://github.com/can1357/oh-my-pi/pull/18551) by [@H4vC](https://github.com/H4vC))\n- `task.eager` (`preferred`/`always`) now shapes only the main agent's system prompt; subagents fall back to their model's own delegation policy instead of being pushed to spawn further subagents\n- `ask` forms can show pictures: `<img src>` from an http(s) URL, a `data:` URI or a local file (relative to the session's working directory), and inline `<svg>` diagrams, drawn in the terminal form and natively in Tern\n- `ask` forms give every radio and checkbox group a free-text \"Other\" answer: its text is the radio's value or is appended to the checkbox group's array (field-by-field fallback, collab guests and ACP elicitation included)\n- Extension UI gains optional `ui.formDialog(html, options)`, which renders an HTML `<form>` and resolves to `{ data, timedOut? }` (undefined when cancelled). The interactive TUI renders it as a form dialog, ACP clients with form elicitation get one elicitation with a property per field, and hosts without it (RPC) answer the `ask` tool field by field through `select`/`input`/`ed",
+  "answers": {
+   "supported": {
+    "type": "noul",
+    "noul": 0.86
+   }
+  }
+ },
+ "2026-11-09-agents-4": {
+  "claim": "**Release:** v18.18.2–v18.18.3: breaking — `ask` tool now takes a single HTML form (`{ html }`) instead of `questions[]`; `AskToolDetails` becomes { answers, timedOut? }; `QuestionResult` removed; `logoutCredential()` requires `AgentSession` and a scoped-model refresher; `SessionStorage.hasAssistantTurn()` replaced by `scanLines(path, visit)`. fixes — GenAI message-content capture from `.env` files works again; remote OpenAI compaction preparation and generic `/chat/completions` compaction retain correct model attribution; rotated credential pools report exhausted credential status correctly; OpenAI multi-image edits and Cursor xd:// device reads fixed. features — `balanced` delegation bias added; Tern right-click `ask` answer adds Note annotation; `task.eager` scopes to main agent only; `ask` forms support images (URL, data URI, local file, Mermaid) and \"Other\" free-text options; extension gains `ui.formDialog(html, options)`; `canReplayRemoteCompactionFrom()`, Cursor edit execution context, and Responses replay utilities added.",
+  "source": "v18.18.2\n## @oh-my-pi/pi-agent-core\n\n### Added\n\n- Added `canReplayRemoteCompactionFrom()` to determine whether a model can replay provider-native compaction produced by another model.\n\n### Fixed\n\n- Fixed GenAI message-content capture configured in omp's own `.env` files so it continues to apply when those values are no longer exposed through the process environment.\n- Fixed compaction preparation for remote OpenAI compaction that the active model cannot replay, ensuring the content is expanded and remains available for compaction.\n- Fixed generic remote compaction requests to `/chat/completions` so gateway sessions retain the correct per-request model attribution.\n\n## @oh-my-pi/pi-ai\n\n### Added\n\n- Added edit execution context support for Cursor handlers, allowing integrations to identify frames that materialize native file edits and detect when server-side edits have settled.\n- Exported Responses replay utilities so callers can determine which turns are sent as native payload items when estimating or trimming context.\n\n### Fixed\n\n- Fixed rotated credential pools reporting a stale sibling credential's authentication error instead of the exhausted credential's usage-limit status and reset time.\n- Fixed OpenAI image edits with multiple input images failing because image parameters were duplicated.\n- Fixed Cursor-provider reads of xd:// devices failing due to incorrect device URL handling.\n- Fixed Anthropic sessions getting stuck after refused turns containing thinking or redacted-thinking blocks when followed by a steer, reminder, or new prompt.\n- Fixed Codex Responses requests losing tool namespaces and developer-provided additional tools when replayed through the authentication gateway.\n- Fixed Gemini malformed responses being treated as unhandled stop reasons and losing token usage; they are now handled as transient transport errors.\n- Improved Cursor compatibility with TLS-intercepting proxies that block HTTP/2 by falling back to HTTP/1 for subsequent turns.\n\n## @oh-my-pi/b\n\nv18.18.3\n## @oh-my-pi/pi-catalog\n\n### Changed\n\n- Added a `balanced` delegation bias between `eager` and `restrained`; models without a `delegation-bias` rule now resolve to it instead of `eager`\n\n## @oh-my-pi/pi-coding-agent\n\n### Breaking Changes\n\n- The `ask` tool takes one HTML form (`{ html }`) instead of `questions[]`: the model writes a `<form>` of radios, checkboxes, selects, text inputs and textareas with its recommendation preselected, and receives the submitted form data as JSON. `AskToolDetails` is now `{ answers: { name, question, answer }[]; timedOut? }`; `QuestionResult`, the \"Other\", \"Chat about this\", answer-note and answer-image paths of the tool are removed, and `/tree` re-answer reopens the original form (`NavigateTreeResult.reopenAsk` carries `html`).\n\n### Added\n\n- In Tern, right-clicking an `ask` answer offers Note, which annotates that answer without picking it ([#18551](https://github.com/can1357/oh-my-pi/pull/18551) by [@H4vC](https://github.com/H4vC))\n- `task.eager` (`preferred`/`always`) now shapes only the main agent's system prompt; subagents fall back to their model's own delegation policy instead of being pushed to spawn further subagents\n- `ask` forms can show pictures: `<img src>` from an http(s) URL, a `data:` URI or a local file (relative to the session's working directory), and inline `<svg>` diagrams, drawn in the terminal form and natively in Tern\n- `ask` forms give every radio and checkbox group a free-text \"Other\" answer: its text is the radio's value or is appended to the checkbox group's array (field-by-field fallback, collab guests and ACP elicitation included)\n- Extension UI gains optional `ui.formDialog(html, options)`, which renders an HTML `<form>` and resolves to `{ data, timedOut? }` (undefined when cancelled). The interactive TUI renders it as a form dialog, ACP clients with form elicitation get one elicitation with a property per field, and hosts without it (RPC) answer the `ask` tool field by field through `select`/`input`/`ed",
+  "answers": {
+   "supported": {
+    "type": "noul",
+    "noul": 0.02
+   }
+  }
+ },
+ "2026-11-09-agents-8": {
+  "claim": "Goldman Sachs is pulling Claude Code from its bankers and traders.",
+  "source": "Goldman Sachs is pulling Claude Code from its bankers and traders\n",
+  "answers": {
+   "supported": {
+    "type": "noul",
+    "noul": 0.9
+   }
+  }
+ },
+ "2026-11-09-models-1": {
+  "claim": "Z.ai's chief scientist Jie Tang revealed that GLM-5.5 (in 32B, 122B, and 256B sizes) was pretrained on 1 trillion web pages drawn from six internal engines rather than public datasets.",
+  "source": "Z.ai says GLM 5.5 built on 1T web pages\nhttps://t.co/UStDmf5MNx chief scientist Jie Tang just revealed the training pipeline behind the upcoming GLM-5.5 (32B, 122B, and 256B) during a lecture at Tsinghua University today. Instead of relying on public datasets, their pretraining pipeline pulls from six separate internal engines: - Web:",
+  "answers": {
+   "supported": {
+    "type": "noul",
+    "noul": 0.51
+   }
+  }
+ },
+ "2026-11-09-models-5": {
+  "claim": "OpenAI secured an $11 billion raise at a $1.25 trillion valuation, though the piece notes the terms fell short of what the company wanted and highlight a growing gap between its growth narrative and investor appetite.",
+  "source": "OpenAI raises $11B at a $1.25T valuation\nOpenAI got its money, but not on the terms it wanted, and the gap between its growth story and investor appetite is landing on two giants. One faces a bookkeeping hit, the other a deeper dependency on the funding flow.",
+  "answers": {
+   "supported": {
+    "type": "noul",
+    "noul": 0.79
+   }
+  }
+ },
+ "2026-11-09-policy-1": {
+  "claim": "Politico Europe reports that sixteen EU countries have not yet appointed AI safety captains and many missed an important deadline on data centers, signalling uneven national implementation of the AI Act.",
+  "source": "EU countries still can’t get it together on AI\nSixteen countries haven’t yet appointed AI safety captains, and many missed an important deadline on data centers.",
+  "answers": {
+   "supported": {
+    "type": "noul",
+    "noul": 0.25
+   }
+  }
+ },
+ "2026-11-10-agents-1": {
+  "claim": "**Release:** v2.1.321–v2.1.322 add fast mode on Vertex in global/US/EU regions, make Claude Fable 5.2 the default model (1M context, $8/$40 per Mtok), add `--settings` to `claude remote-control`, and fix multiple regressions including MCP OAuth token leaks, Bash permission prompts on network paths, `NotebookEdit`/`Edit` corruption on UNC/WSL paths, and Windows `FileChanged` hook failures with lowercase drive letters.",
+  "source": "v2.1.321\n## What's changed\n\n- Added Claude Fable 5.2 (`claude-fable-5-2`), now the default Fable model — 1M context, $8/$40 per Mtok with $0.20/Mtok cache reads\n- Added `--settings <file>` to `claude remote-control`, which applies a settings file to every session it starts; if the file changes, no new session starts until you restart `claude remote-control`\n- Fixed MCP OAuth requests sending secrets such as refresh tokens to another host when a server redirected them\n- Fixed a case where a read-only Bash command ran outside the sandbox without a permission prompt\n- Fixed a case where Bash permission checks judged a file write from the wrong folder and didn't prompt\n- Fixed deny rules and protected-file prompts not applying to the file that a `cp` or `mv` into a directory writes\n- Fixed the \"Draws from usage credits\" note showing after a switch to Fable on Enterprise seats whose plan includes Fable\n- Fixed the fallback model sometimes declining a request or mentioning a stopped response when the first model was blocked before replying\n- Fixed `claude mcp login` printing a SEP-2352 issuer warning each time you sign in again to a server that Claude Code registered with\n- Fixed `NotebookEdit` deleting or overwriting a notebook's first cell when the call named no cell, on network paths (UNC shares, WSL folders, `/net` mounts)\n- Fixed Edit changing the first of several matches, replacing a whole file on an empty `old_string`, or editing a notebook as text, on network paths (UNC shares, WSL folders, `/net` mounts)\n- Fixed `/config` showing Manual as the default permission mode when new sessions start in auto mode; pressing Space on \"Auto (default)\" now saves Don't Ask, not Plan\n- Windows: Fixed `FileChanged` hooks stopping for paths set through `watchPaths` after the first shell command, when the session's working directory had a lowercase drive letter\n- Fixed `--plugin-dir .` and `--plugin-dir ./builtin` writing generated type files for Claude Code's built-in plugins into a `built\n\nv2.1.322\n## What's changed\n\n- Added fast mode on Vertex in the global, us and eu regions, falling back to standard speed if Vertex refuses it\n",
+  "answers": {
+   "supported": {
+    "type": "noul",
+    "noul": 0.31
+   }
+  }
+ },
+ "2026-11-10-agents-2": {
+  "claim": "**Hot issue:** #107390: users report weekly Team usage exhausted in ~30.5 hours after reset (Nov 4–5), far faster than the prior ~2-hour session burn rate, with no workflow change. (regression; 11 comments, 5 👍; +9 since 2026-11-08)",
+  "source": "[BUG] Claude Team weekly usage reached 100% ~30.5 hours after reset (Nov 4–5, 2026)\n### Preflight Checklist\n\n- [x] I have searched [existing issues](https://github.com/anthropics/claude-code/issues?q=is%3Aissue%20state%3Aopen%20label%3Abug) and this hasn't been reported yet\n- [x] This is a single bug report (please file separate reports for different bugs)\n- [x] I am using the latest version of Claude Code\n\n### What's Wrong?\n\nI am experiencing unexpectedly rapid weekly usage consumption on my Claude Team subscription.\n\nDuring October 2026, I regularly used Claude Code heavily for software development. My five-hour session allowance often exhausted within approximately two hours of active work, but I could continue using Claude Code across the week without reaching the weekly limit.\n\nHowever, during the weekly cycle beginning November 4, 2026, my entire weekly allowance was exhausted in approximately **30 hours and 31 minutes**, despite no intentional change to my development workflow.\n\n### Timeline (Sri Lanka time, UTC+05:30)\n\n| Date and time | 5-hour usage | Weekly A",
+  "answers": {
+   "supported": {
+    "type": "noul",
+    "noul": 0.03
+   }
+  }
+ },
+ "2026-11-10-agents-3": {
+  "claim": "**Release:** v2.1.321–v2.1.322 add fast mode on Vertex in global/US/EU regions, make Claude Fable 5.2 the default model (1M context, $8/$40 per Mtok), add `--settings` to `claude remote-control`, and fix multiple regressions including MCP OAuth token leaks, Bash permission prompts on network paths, `NotebookEdit`/`Edit` corruption on UNC/WSL paths, and Windows `FileChanged` hook failures with lowercase drive letters.",
+  "source": "v2.1.321\n## What's changed\n\n- Added Claude Fable 5.2 (`claude-fable-5-2`), now the default Fable model — 1M context, $8/$40 per Mtok with $0.20/Mtok cache reads\n- Added `--settings <file>` to `claude remote-control`, which applies a settings file to every session it starts; if the file changes, no new session starts until you restart `claude remote-control`\n- Fixed MCP OAuth requests sending secrets such as refresh tokens to another host when a server redirected them\n- Fixed a case where a read-only Bash command ran outside the sandbox without a permission prompt\n- Fixed a case where Bash permission checks judged a file write from the wrong folder and didn't prompt\n- Fixed deny rules and protected-file prompts not applying to the file that a `cp` or `mv` into a directory writes\n- Fixed the \"Draws from usage credits\" note showing after a switch to Fable on Enterprise seats whose plan includes Fable\n- Fixed the fallback model sometimes declining a request or mentioning a stopped response when the first model was blocked before replying\n- Fixed `claude mcp login` printing a SEP-2352 issuer warning each time you sign in again to a server that Claude Code registered with\n- Fixed `NotebookEdit` deleting or overwriting a notebook's first cell when the call named no cell, on network paths (UNC shares, WSL folders, `/net` mounts)\n- Fixed Edit changing the first of several matches, replacing a whole file on an empty `old_string`, or editing a notebook as text, on network paths (UNC shares, WSL folders, `/net` mounts)\n- Fixed `/config` showing Manual as the default permission mode when new sessions start in auto mode; pressing Space on \"Auto (default)\" now saves Don't Ask, not Plan\n- Windows: Fixed `FileChanged` hooks stopping for paths set through `watchPaths` after the first shell command, when the session's working directory had a lowercase drive letter\n- Fixed `--plugin-dir .` and `--plugin-dir ./builtin` writing generated type files for Claude Code's built-in plugins into a `built\n\nv2.1.322\n## What's changed\n\n- Added fast mode on Vertex in the global, us and eu regions, falling back to standard speed if Vertex refuses it\n",
+  "answers": {
+   "supported": {
+    "type": "noul",
+    "noul": 0.34
+   }
+  }
+ },
+ "2026-11-10-models-2": {
+  "claim": "A GitHub repository documents that Google Gemini routes personal Drive files and emails to human annotators.",
+  "source": "Google Gemini routes personal Drive files and emails to human annotators\nDocumentation of Gemini File Leaking Behavior.",
+  "answers": {
+   "supported": {
+    "type": "noul",
+    "noul": 0.72
+   }
+  }
+ },
+ "2026-11-10-models-8": {
+  "claim": "Anthropic released Claude Fable 5.2 with gains over 5.1 in coding, reasoning, and vision; it scores 65 on Artificial Analysis, the highest to date, and demonstrates end-to-end electronic hardware design.",
+  "source": "Claude Fable 5.2 scores 65 on Artificial Analysis, highest so far\nAnalysis of Anthropic's Claude Fable 5.2 (Max, Default Fallback) and comparison to other AI models across key metrics including quality, price, performance (time per Intelligence Index task & time to first answer token), context window & more.\n\nClaude Fable 5.2 and Mythos 5.2\nClaude Fable 5.2 and Claude Mythos 5.2, our new models for the hardest technical challenges. Fable 5.2 sets a new bar in coding, finance, and the sciences.\n\nTesting Claude on real-world electronics design\nWe asked Claude to design three electronic devices: a speakerphone, a voice-assistant hub, and a handheld virtual pet. The prototypes worked without any fixes to their circuitry.\n\nAnthropic: Claude Fable 5.2\nClaude Fable 5.2 is Anthropic's most capable model for the most demanding technical work, with gains over Fable 5.1 in coding, reasoning, and vision. In prerelease testing it completed otherwise-infeasible...",
+  "answers": {
+   "supported": {
+    "type": "noul",
+    "noul": 0.58
+   }
+  }
+ },
+ "2026-11-10-data-1": {
+  "claim": "Cost attribution appears on Databricks and BigQuery: Databricks Smart Routing reduces routing cost per request, and BigQuery editions add opt-in compute cost attribution (Preview) that assigns billed slots to query projects based on actual reservation usage.",
+  "source": "Smart Routing is faster and lower cost, and now routes subagents only (Beta)\nSmart Routing now routes only subagents, not the first prompt. It costs up to 70% less in internal benchmarks and cuts p90 routing latency from 9 seconds to 2 seconds. Smart Routing for Codex is paused. See Select models or use Smart Routing.\n\nTo support your FinOps practices, you can now opt in to compute cost attribution in BigQuery editions (Preview)\nTo support your FinOps practices, you can now opt in to compute cost attribution in BigQuery editions. This feature attributes billed compute charges directly to the query projects that use your administration project's reservation capacity. Allocating costs based on actual commitment and autoscaling slot usage lets you accurately track project-level costs and manage internal chargebacks. This feature is available in Preview.",
+  "answers": {
+   "supported": {
+    "type": "noul",
+    "noul": 0.06
+   }
+  }
+ },
+ "2026-11-10-data-2": {
+  "claim": "Smart Routing now routes only subagents instead of the first prompt, reducing cost by up to 70% and p90 latency from 9 seconds to 2 seconds, while Smart Routing for Codex is paused.",
+  "source": "Smart Routing is faster and lower cost, and now routes subagents only (Beta)\nSmart Routing now routes only subagents, not the first prompt. It costs up to 70% less in internal benchmarks and cuts p90 routing latency from 9 seconds to 2 seconds. Smart Routing for Codex is paused. See Select models or use Smart Routing.",
+  "answers": {
+   "supported": {
+    "type": "noul",
+    "noul": 0.77
+   }
+  }
+ },
+ "2026-11-10-data-5": {
+  "claim": "− Azure Databricks workspaces using Zhipu AI GLM 5.2 must migrate to GLM 5.3 before the model retires on February 4, 2027.",
+  "source": "Zhipu AI GLM 5.2 is scheduled for retirement\nZhipu AI GLM 5.2 is deprecated and will be retired on February 4, 2027. GLM 5.3 is the recommended replacement. See Legacy, deprecated, and retired models for migration guidance.",
+  "answers": {
+   "supported": {
+    "type": "noul",
+    "noul": 0.04
+   }
+  }
+ },
+ "2026-11-10-data-6": {
+  "claim": "AI model serving advances on Databricks and Snowflake: Databricks Smart Routing (Beta) now routes subagents only, cutting cost up to 70% and p90 latency from 9s to 2s, while Snowflake makes Anthropic Claude 5.5 and OpenAI GPT-6 generally available for Cortex workloads.",
+  "source": "Smart Routing is faster and lower cost, and now routes subagents only (Beta)\nSmart Routing now routes only subagents, not the first prompt. It costs up to 70% less in internal benchmarks and cuts p90 routing latency from 9 seconds to 2 seconds. Smart Routing for Codex is paused. See Select models or use Smart Routing.\n\nNov 06, 2026: Anthropic Claude 5.5 and OpenAI GPT-6 models (General availability)\nThe following models are now generally available:",
+  "answers": {
+   "supported": {
+    "type": "noul",
+    "noul": 0.05
+   }
+  }
+ },
+ "2026-11-11-agents-1": {
+  "claim": "OpenShell v0.1.8 introduces breaking changes: static provider credentials now require explicit `auth_style` declarations, REST endpoints return 403 for HTTP upgrade requests, OCSF sandbox attribution fields move to `resources` or `unmapped`, sandboxes fail when filesystem policies traverse symlinks in writable workspaces, and IPv4-mapped IPv6 destinations are evaluated as IPv4; the Python SDK moves to `ai-openshell/sdk-python` and the Go SDK module is deprecated.",
+  "source": "OpenShell v0.1.8\n## OpenShell v0.1.8\n\n### Quick install\n\n```bash\ncurl -LsSf https://raw.githubusercontent.com/NVIDIA/OpenShell/main/install.sh | OPENSHELL_VERSION=v0.1.8 sh\n```\n\n### Upgrade notes\n\n- Static provider credentials without placement metadata now resolve only in the `Authorization` header or through explicitly enabled body/WebSocket rewrite policies, so custom headers such as `x-api-key`, query parameters, and path slots need an explicit placement declaration. Upgrade the gateway before the supervisor, and update existing imported profiles as needed, since editing reference YAML alone does not update the gateway catalog. `auth_style` selects the active placement, and fields for other styles are ignored. [#4886](https://github.com/NVIDIA/OpenShell/pull/4886)\n- REST endpoints now return `403` for HTTP upgrade requests in both enforce and audit modes. Configure WebSocket traffic with `protocol: websocket` and explicit handshake and message rules; `websocket_credential_rewrite: true` now requires a WebSocket endpoint. [#5336](https://github.com/NVIDIA/OpenShell/pull/5336)\n- OCSF sandbox attribution moved: supervisor events use `device.container.uid` and `device.container.name`, gateway API Activity and Detection Finding events use `resources` entries with `type: \"sandbox\"`, and other gateway classes use `unmapped.sandbox_id` and `unmapped.sandbox_name`. SIEM parsers that read top-level `container.uid` or `container.name` must update their mappings. [#5048](https://github.com/NVIDIA/OpenShell/pull/5048)\n- Sandboxes now fail to launch when a filesystem policy path goes through a symlink inside a writable workspace, including in best-effort mode. Use the symlink's target path in the policy instead. [#5278](https://github.com/NVIDIA/OpenShell/pull/5278)\n- Transparent TCP connections now evaluate IPv4-mapped IPv6 destinations as IPv4. Change endpoint rules such as `host: \"::ffff:203.0.113.7\"` to `host: \"203.0.113.7\"`. [#5101](https://github.com/NVIDIA/OpenShell/pull/5101)\n- The `o",
+  "answers": {
+   "supported": {
+    "type": "noul",
+    "noul": 0.03
+   }
+  }
+ },
+ "2026-11-11-data-1": {
+  "claim": "AI functions in SQL: Snowflake adds page filtering to AI_EXTRACT and AI_PARSE_DOCUMENT (GA), while BigQuery generative AI functions add gemini-4-carbon model support (GA); both run in-warehouse but expose different function sets and models.",
+  "source": "Nov 10, 2026: AI_EXTRACT and AI_PARSE_DOCUMENT now support page filtering with FL_FILTER_PAGES\nAIEXTRACT and AIPARSEDOCUMENT now support selecting document pages with FLFILTERPAGES. Process the pages relevant to your task directly in SQL, without creating separate files for each document section.\n\nBigQuery generative AI functions now support the gemini-4-carbon model\nBigQuery generative AI functions now support the gemini-4-carbon model. This model is generally available.",
+  "answers": {
+   "supported": {
+    "type": "noul",
+    "noul": 0.05
+   }
+  }
+ },
+ "2026-11-11-data-2": {
+  "claim": "**News:** Introducing performance optimization in dltHub announces new performance optimization features for the data ingestion library.",
+  "source": "Introducing performance optimization in dltHub\nTODO: meta description (about 150 characters).",
+  "answers": {
+   "supported": {
+    "type": "noul",
+    "noul": 0.36
+   }
+  }
+ },
+ "2026-11-11-data-3": {
+  "claim": "Snowflake Python Connector 5.0.0 introduces a native asyncio awaitable API built on Universal Core; teams using the connector in event-loop-based Python services must test migration to eliminate thread pools.",
+  "source": "Native Asyncio Comes to the Snowflake Python Connector\nVersion 5.0.0 is the same package you already install, now with an awaitable API built on Universal Core. If your Python service runs on an event loop, calling Snowflake has meant handing the call to a thread pool so it doesn’t block everything else. In our public preview post we introduced Universal Core; this is the Python feature it made room for. Snowflake Connector for Python 5.0.0 became generally available on October 15. It is still snowflake-connector-python, with the same synchronous API. Check the upgrade guide for behavior changes before switching. The package is a thin Python wrapper around Universal Core, the Rust core shared with the ODBC driver. The big addition is snowflake.connector.aio : native asyncio support, the feature you’ve asked us for most, going back to a 2017 GitHub issue. TL;DR If you run async Python against Snowflake, install snowflake-connector-python 5.0.0 on Python 3.11 or later. Async applications import snowflake.connector.aio and await the calls tha…",
+  "answers": {
+   "supported": {
+    "type": "noul",
+    "noul": 0.1
+   }
+  }
+ },
+ "2026-11-11-data-4": {
+  "claim": "After Databricks Runtime 15.4 LTS end of support on August 19, 2027, all Unity Catalog managed tables will be automatically upgraded to `catalog commits`, making Unity Catalog the system of coordination and enabling multi-statement transactions, external engine writes, and consistent governance; clients must plan for this breaking change before the 2027 deadline.",
+  "source": "All Unity Catalog managed tables will be upgraded to catalog commits\nAfter Databricks Runtime 15.4 LTS reaches end of support on August 19, 2027, Azure Databricks will upgrade all Unity Catalog managed tables to use catalog commits. With catalog commits, Unity Catalog becomes the system of coordination for your tables. This enables multi-statement, multi-table transactions, writes from external engines, and consistent governance across all engines. See Catalog commits.",
+  "answers": {
+   "supported": {
+    "type": "noul",
+    "noul": 0.07
+   }
+  }
+ },
+ "2026-11-11-models-1": {
+  "claim": "Anthropic launches its IPO roadshow for 825 million Class A shares priced at $70–78, targeting a Nasdaq listing under “ANT” at a reported $1.3 trillion valuation.",
+  "source": "Anthropic launches roadshow for proposed initial public offering\nAnthropic launches roadshow for proposed initial public offering Published Nov 10, 2026 Category Announcements Today Anthropic, PBC launched the roadshow for its proposed initial public offering of its Class A common stock. The proposed offering consists of 825,000,000 shares of Class A common stock. Of these, 801,351,354 shares are being offered by Anthropic and 23,648,646 shares are being offered by certain existing stockholders. Anthropic will not receive any proceeds from the sale of shares by the selling stockholders. Anthropic also expects to grant the underwriters a 30-day option to purchase up to an additional 123,750,000 shares of its Class A common stock. The initial public offering price is expected to be between $70.00 and $78.00 per share. Anthropic has applied to list its Class A common stock on the Nasdaq Global Select Market under the symbol “ANT.” The proposed offering will be made only by means of a prospectus. Copies of the preliminary prospectus may be obtained from: Goldman Sachs & Co. LLC, Attention: Prospectus Department, 200 West Street, New York, NY 10282, by telephone at (866) 471-2526, or by email at prospectus-ny@ny.email.gs.com; or Morgan Stanley & Co. LLC, Attention: Prospectus Department, 180 Varick Street, 2nd Floor, New York, NY 10014. A registration statement relating to these securities has been filed with the U.S. Securities and Exchange Commission but has not yet become effective. These securities may not be sold, nor may offers to buy be\n\nAnthropic to Seek $1.3T Valuation in IPO\n",
+  "answers": {
+   "supported": {
+    "type": "noul",
+    "noul": 0.35
+   }
+  }
+ },
+ "2026-11-14-agents-1": {
+  "claim": "**Release:** v2.1.325 fixes a security issue in zstd-compressed response decoding, resolves subagent model handling bugs in worktrees and bare repos, fixes session resumption losing recent turns after unclean exits, and corrects shell commands running in deleted working directories.",
+  "source": "v2.1.325\n## What's changed\n\n- Fixed a security issue in how zstd-compressed responses are decoded\n- Added a spinner tip in VS Code and similar integrated terminals about re-running a notebook cell, shown once Claude has read or edited a Jupyter notebook\n- Added a line under the error shown when your organization's policy blocks a request, saying how to continue: run `/rewind` and change the message, or run `/clear`\n- Added a note for Claude when a sandboxed `git checkout`, `git stash` or autostash pull cannot update protected files such as those in `.claude`\n- Fixed `/security-review` and skills' inline git commands stopping with an error in worktrees of bare repositories, `--separate-git-dir` checkouts and Android `repo` checkouts\n- Fixed subagents with their own model being moved to the plan-mode model when the model setting is `opusplan` or `haiku`\n- Fixed subagents on a different model sizing file reads and MCP results with the main session's model\n- Fixed sessions on many third-party gateways and Foundry stopping with a context length error on every turn instead of compacting\n- Fixed recent turns sometimes going missing from a resumed session after Claude Code stopped without a clean exit\n- Fixed shell commands running in the launch directory after the working directory was deleted; the command now fails with a message and can be re-issued\n- Fixed an approved plan edit being lost when the `plansDirectory` folder can't take it: the plan is now saved in the default plans folder, and a warning says where and why\n- Fixed a saved `sonnet[1m]` model setting being rewritten on a new install to a model id the API rejects\n- Fixed focus view hiding the reply to your prompt when a scheduled task replied after it\n- Fixed the prompt sometimes missing from a background subagent's view when fullscreen is off\n- Fixed long options in lists and permission prompts being partly overwritten when they wrap, and first-run screens losing lines on narrow terminals\n- Fixed startup warnings about",
+  "answers": {
+   "supported": {
+    "type": "noul",
+    "noul": 0.4
+   }
+  }
+ },
+ "2026-11-14-data-1": {
+  "claim": "**Release:** First stable releases of the TypeScript, Java, and Go SDKs (ts-sdk/1.0.0, java-sdk/1.0.0, go-sdk/v1.0.0) enable native DAG authoring in those languages with task dependencies, task groups, and variable APIs.",
+  "source": "Apache Airflow TypeScript SDK 1.0.0\n\nFirst stable release of the Apache Airflow TypeScript SDK.\n\nChanges since 1.0.0-beta2:\n\n- A task that passes `queue` as `undefined` now inherits the Dag's queue.\n- The build no longer uses a machine-global pnpm config that created stray `.pnpm-store` directories.\n\nPublished on npm as `@apache-airflow/ts-sdk@1.0.0`.\n\nApache Airflow Java SDK 1.0.0\nFirst stable release of the Apache Airflow Java SDK.\n\nChanges since 1.0.0-beta1:\n\n- Native Java Dag authoring, serialized to DagSerialization v3: task dependencies, task groups, branching and conditions, edge labels\n- Triggering other Dags\n- Task state store and Variable APIs\n- Many fixes and hardening improvements\n\nMaven artifacts are published under group id `org.apache.airflow`; import `airflow-sdk-bom:1.0.0` to keep module versions aligned.\n\nApache Airflow Go SDK 1.0.0\nFirst stable release of the Apache Airflow Go SDK.\n\nChanges since 1.0.0-beta4:\n\n- Fix the Go SDK build on 32-bit targets.\n- Fix the install command breaking the first bundle build.\n- Log attributes no longer displace standard log fields.\n- `ti_run` now loads the serialized Dag only for stub tasks.\n\nInstall with:\n\n```\ngo get github.com/apache/airflow/go-sdk@v1.0.0\n```\n\nAPI reference: https://pkg.go.dev/github.com/apache/airflow/go-sdk@v1.0.0",
+  "answers": {
+   "supported": {
+    "type": "noul",
+    "noul": 0.06
+   }
+  }
+ },
+ "2026-11-04-agents-ctrl-1": {
+  "claim": "OpenShell v0.1.7 introduces breaking changes: emits only native OCSF 1.8.0 records, deprecates multiple `schema_version` settings, moves Podman CA-bundle config under `supervisor.network`, and runs MicroVM sandboxes as the image's `sandbox` account instead of UID 1000:1000.",
+  "source": "OpenShell v0.1.7\n## OpenShell v0.1.7\n\n### Quick install\n\n```bash\ncurl -LsSf https://raw.githubusercontent.com/NVIDIA/OpenShell/main/install.sh | OPENSHELL_VERSION=v0.1.7 sh\n```\n\n### Upgrade notes\n\n- **Breaking:** OpenShell now emits native OCSF 1.8.0 records only, so deployments that relied on 1.1 or 1.3 records now receive 1.8.0. The `ocsf_schema_version` setting, the gateway `schema_version` fields, Helm `server.ocsfLog.schemaVersion`, and `OPENSHELL_OTLP_OCSF_SCHEMA_VERSION` are deprecated and ignored, and setting them logs a warning. [#5036](https://github.com/NVIDIA/OpenShell/pull/5036)\n- The Podman-only `[openshell.drivers.podman].additional_ca_bundle` setting from v0.1.5 still works, but it is deprecated in favor of the new `[openshell.supervisor.network].additional_ca_bundle`. The old key is only honored when Podman is the active compute driver. [#5155](https://github.com/NVIDIA/OpenShell/pull/5155)\n- On the MicroVM driver, sandboxes from registry images and rootfs tars now run as the image's `sandbox` account, as documented, instead of always running as `1000:1000`. New sandboxes from images whose `sandbox` account isn't UID 1000 now run under that UID, and requesting the image's own UID with `run_as_user` now works. [#5131](https://github.com/NVIDIA/OpenShell/pull/5131)\n- `config preflight` and gateway startup now reject an `[openshell.gateway.supervisor_pool]` table when the selected driver doesn't use shared supervision, and they reject a pool recovery timeout shorter than member failure detection. [#4988](https://github.com/NVIDIA/OpenShell/pull/4988)\n\n### Bug fixes\n\n- Shared-pool sandboxes whose supervisor stays gone past the 60-second recovery deadline now show as `Stopped`, and `sandbox start` runs them again. [#5076](https://github.com/NVIDIA/OpenShell/pull/5076)\n- When the shared supervisor pool can't place a sandbox, `sandbox create` now says why: the pool isn't ready, no replica is attached, no replica has room, or placement failed. [#4985](https://github.com/NVI",
+  "answers": {
+   "supported": {
+    "type": "noul",
+    "noul": 0.83
+   }
+  }
+ },
+ "2026-11-04-data-ctrl-1": {
+  "claim": "Microsoft Fabric adds materialized views and streaming tables to Mirrored Azure Databricks catalogs — Fabric workspaces mirroring Unity Catalog can now read those object types via shortcuts without replication.",
+  "source": "Announcing support for Materialized views and streaming tables in Mirrored Azure Databricks catalog\nSections: What's new; Why this matters; Prepare objects for external access; Work with data in Fabric; Keep catalog changes in sync; Get started. Access more Unity Catalog objects through the existing mirrored catalog experience in Microsoft Fabric We are expanding Mirrored Azure Databricks catalogs in Microsoft Fabric to support materialized views and streaming tables alongside tables. These objects remain created and managed in Azure Databricks, while Fabric provides read-only access to the underlying data through shortcuts. This brings more of your Unity Catalog environment into Fabric without copying or replicating the data. A Mirrored Azure Databricks catalog can now include support: Tables Materialized views Streaming tables When configuring the mirrored catalog, select the Unity Catalog catalogs, schemas, and supported objects you want to make available in Fabric. Fabric mirrors the selected catalog structure and creates shortcuts to the underlying data. This enhancement uses th…",
+  "answers": {
+   "supported": {
+    "type": "noul",
+    "noul": 0.91
+   }
+  }
+ },
+ "2026-11-07-agents-ctrl-1": {
+  "claim": "Claude Code v2.1.319 changes auto-mode behavior when telemetry or feature flags are disabled: server-uncheckable calls are now prompted or denied with no built-in fallback (use `CLAUDE_CODE_AUTO_MODE_SERVER=0` to retain old behavior); also adds MCP task background execution, `permissions.denyInsteadOfPrompting`, spend tracking in `/usage`, and gateway admin settings.",
+  "source": "v2.1.319\n## What's changed\n\n- Changed auto mode with telemetry or feature flags off, including behind LLM gateways: calls the server can't check are asked about or denied, with no fallback to the built-in classifier; set `CLAUDE_CODE_AUTO_MODE_SERVER=0` to keep using it (Bedrock, Vertex and Foundry are unchanged)\n- Changed auto mode behind an LLM gateway: `CLAUDE_CODE_AUTO_MODE_SERVER=1` turns on the server-side check even with `CLAUDE_CODE_DISABLE_EXPERIMENTAL_BETAS` set; if managed settings set the latter, they must set the `1` too\n- Added support for MCP tasks in the terminal: when an MCP server runs a tool call as a task, Claude Code moves it to the background right away and tells Claude the result when it finishes\n- Added the `CLAUDE_CODE_DISABLE_MCP_TASK_BACKGROUND` environment variable to make Claude Code wait for an MCP task inside its tool call instead of moving it to the background right away\n- Added `permissions.denyInsteadOfPrompting` setting: a tool call that would wait on a permission prompt is denied and the turn continues, in terminal sessions, subagents and teammates\n- Added `/claude-api latency-optimize` to find where your Claude API code makes people wait and try faster settings against your eval\n- Added the `CLAUDE_CODE_DISABLE_FEATURE_FLAGS` environment variable, which stops feature-flag fetching without turning off telemetry; every flag then uses its built-in default\n- Added spend for today, this week and this month to `/usage` for developers behind a Claude apps gateway who have no spend limit, when the gateway runs this version or later\n- Added `admin.pooled_conflict_rule` and `admin.pooled_priority_order` to the Claude apps gateway, to set which pooled group budget pays first for a developer in several groups\n- Added an optional `login_notice` setting to the Claude apps gateway that shows an operator-defined message on the gateway's browser verification page and on Claude Code's sign-in screen\n- Added `CLAUDE_GATEWAY_LOG_FORMAT=json` to the Claude ap",
+  "answers": {
+   "supported": {
+    "type": "noul",
+    "noul": 0.83
+   }
+  }
+ },
+ "2026-11-07-models-ctrl-1": {
+  "claim": "Google says Gemini Omni 1.2 Flash adds native 15-second video generation and editing with stronger consistency and 30% lower pricing.",
+  "source": "Gemini Omni 1.2 Flash\nGemini Omni 1.2 Flash brings native 15-second video generation and editing, stronger consistency, and 30% lower pricing.",
+  "answers": {
+   "supported": {
+    "type": "noul",
+    "noul": 0.71
+   }
+  }
+ },
+ "2026-11-08-data-ctrl-1": {
+  "claim": "AI-assisted authoring appears on both Snowflake and Fabric: Snowflake's CoCo automations (GA) schedule unattended agent runs in a managed sandbox, while Fabric's Copilot (Preview) generates Real-Time Dashboards from natural-language prompts against Eventhouse tables.",
+  "source": "From a prompt to an operational dashboard: Generate Real-Time Dashboards with Copilot (Preview)\nSections: Start with the question, not a blank dashboard; Describe, refine, and create; Example: Connect transit arrivals with stadium gate load; Make the dashboard your own; Next steps. Which transit stations are sending the most fans toward a stadium? How does that incoming demand compare with activity at the gates? Where are queues building? Answering these operational questions traditionally requires translating them into tables, queries, visualizations, and a dashboard layout. When you already know what you want to monitor, that setup can get in the way of the question you are trying to answer. Copilot in Microsoft Fabric can generate a Real-Time Dashboard from a natural-language description of the insights you want. Working with a selected database in an Eventhouse, it uses the tables in that database to create a dashboard tailored to your goal. Figure: Start generating a Real-Time Dashboard with Copilot from an Eventhouse database. Rather than beginning with an empty canvas and…\n\nNov 2, 2026: CoCo automations (General availability)\nCoCo automations are now generally available and are no longer in Preview. Automations let you schedule recurring, unattended CoCo runs that execute in a Snowflake-managed sandbox. Each run creates a Cortex thread that you can open to inspect the agent's messages, tool calls, and results.",
+  "answers": {
+   "supported": {
+    "type": "noul",
+    "noul": 0.83
+   }
+  }
+ },
+ "2026-11-09-agents-ctrl-1": {
+  "claim": "An article argues agent memory suffers from fragmentation analogous to pre-OpenTelemetry observability, with every tool storing memory in its own incompatible format (177 points, 105 comments on Hacker News).",
+  "source": "Agent memory needs its OpenTelemetry moment\nEvery agent tool stores memory in its own shape, and every week someone builds another one. None of them can read the others. Observability had the same problem until OpenTelemetry gave everyone one data model to share. A tour of today's memory formats, the proposals that already exist, and what a s",
+  "answers": {
+   "supported": {
+    "type": "noul",
+    "noul": 0.08
+   }
+  }
+ },
+ "2026-11-10-agents-ctrl-1": {
+  "claim": "Pi v1.5.1 removes `GrepOperations.readFile` callbacks for context lines (breaking change)",
+  "source": "v1.5.1\n### New Features\n\n- **Shell login and logout**: use `pi auth login <provider>` and `pi auth logout <provider>` without starting a session, with API-key and no-browser sign-in options. See [Credential commands](https://github.com/earendil-works/pi/blob/v1.5.1/packages/coding-agent/docs/cli.md#credential-commands).\n- **Idle prompt cache warming**: eligible caches now stay warm for up to 30 minutes between runs when a refresh is expected to pay for itself. See [`cacheWarming`](https://github.com/earendil-works/pi/blob/v1.5.1/packages/coding-agent/docs/settings.md#model-and-thinking).\n- **Anthropic message threads**: requests send only new messages while the server continues the conversation, with full-request fallback when earlier context changes. See [Anthropic compatibility](https://github.com/earendil-works/pi/blob/v1.5.1/packages/coding-agent/docs/models-configuration.md#anthropic-messages).\n- **Richer Mermaid diagrams**: pie charts, author-defined styles, clickable labels on supported terminals, and diagrams in expanded branch and compaction summaries. See [Display settings](https://github.com/earendil-works/pi/blob/v1.5.1/packages/coding-agent/docs/settings.md#terminal-and-display) and [Markdown transformers](https://github.com/earendil-works/pi/blob/v1.5.1/packages/coding-agent/docs/extensions.md#piregistermarkdowntransformertransformer-options).\n- **GitHub Copilot classifiers**: call Microsoft-Decision-1 through codemode `models.classify()` for typed decisions and probabilities. See [Use classifier models](https://github.com/earendil-works/pi/blob/v1.5.1/packages/coding-agent/docs/models.md#use-classifier-models).\n- **Package update summaries**: `pi update --extensions` reports each package's npm version or git commit change and distinguishes unchanged, skipped, and warned updates. See [Update Pi or packages](https://github.com/earendil-works/pi/blob/v1.5.1/packages/coding-agent/docs/cli.md#update-pi-or-packages).\n\n### Breaking Changes\n\n- Custom `GrepOperations",
+  "answers": {
+   "supported": {
+    "type": "noul",
+    "noul": 0.09
+   }
+  }
+ },
+ "2026-11-10-models-ctrl-1": {
+  "claim": "Meta introduced Muse Ember, its smallest and most efficient model built for complex reasoning, tool calls, and agent workflows.",
+  "source": "Muse Ember: Our smallest, most efficient model\nMuse Ember is our smallest and most efficient model, designed for complex reasoning execution and the work agents repeat all day.",
+  "answers": {
+   "supported": {
+    "type": "noul",
+    "noul": 0.1
+   }
+  }
+ },
+ "2026-11-10-data-ctrl-1": {
+  "claim": "Databricks CLI v1.25.0 removes `CRITICAL` as a valid `compute.priority_class` value; AI Runtime API callers using that value must update to a supported priority class.",
+  "source": "v1.25.0\n### CLI\n\n * `databricks aitools install --output json` now reports a more specific `error_category` (`MANIFEST_NOT_FOUND`, `PERMISSION_DENIED`, `FILESYSTEM`) for some failures it reported as `UNCATEGORIZED`. ([#7380](https://github.com/databricks/cli/pull/7380))\n * Suggest `databricks auth logout --profile <profile-name> --delete` when multiple profiles match the same workspace in `databricks auth docker` commands. ([#7363](https://github.com/databricks/cli/pull/7363))\n * Fix `%pip` in Jupyter notebooks opened over `databricks ssh connect` on serverless environment versions 5 and 6 and on dedicated clusters running recent Databricks Runtime versions, which fell back to the stock IPython magic instead of the Databricks one. ([#7263](https://github.com/databricks/cli/pull/7263))\n\n### AI Runtime\n\n * `databricks air run` now validates the config server-side while it uploads the run artifacts, instead of before, which shortens submission. ([#7368](https://github.com/databricks/cli/pull/7368))\n * Remove `CRITICAL` as a valid `compute.priority_class` value; the AI Runtime API no longer accepts it. ([#7371](https://github.com/databricks/cli/pull/7371))\n\n### Bundles\n\n * Built-in templates add the workspace ID to `workspace.host` (`?w=<id>`) when the profile or an environment variable sets it, so generated bundles select the right workspace on hosts shared by several workspaces. Welcome messages show the same URL, and `dbt-sql` also adds `?o=<id>` to the HTTP path it suggests for `dbt init`. ([#7350](https://github.com/databricks/cli/pull/7350))\n * Fix grants of a renamed or recreated catalog, schema, volume or other UC resource staying recorded under the old name, which made the next `bundle plan` propose to apply them again. ([#7345](https://github.com/databricks/cli/pull/7345))\n * Fix permissions of a recreated pipeline, app, dashboard, model serving endpoint or other resource staying recorded under the old ID, which made every later `bundle plan` propose to apply them aga",
+  "answers": {
+   "supported": {
+    "type": "noul",
+    "noul": 0.5
+   }
+  }
+ },
+ "2026-11-11-agents-ctrl-1": {
+  "claim": "Users report the OpenAI Codex VS Code extension fails to start its UI on Windows after upgrading to v26.51021.22027; rolling back to v26.51007.21434 restores function (78 comments, 85 👍).",
+  "source": "UI doesn't start in VS Code extension 26.51021.22027\n### What version of the IDE extension are you using?\n\n26.51021.22027\n\n### What subscription do you have?\n\nPro\n\n### Which IDE are you using?\n\nVS Code \n\n### What platform is your computer?\n\nMicrosoft Windows NT 10.0.26300.0 x64\n\n### What issue are you seeing?\n\nAfter upgrading the extension to v26.51021.22027 - Codex doesn't start, with this notification:\n---\nCodex could not start\nThe extension could not start its user interface.\n---\n\nOS: Windows 11 Pro, 26H2, build 26300.9711\n\nVS Code Version: 1.143.1 (user setup)\nCommit: e646868227c3e3a9e3f24277c8c7220be42c0be7\nDate: 2026-10-22T17:23:22Z\nElectron: 43.7.7\nElectronBuildId: 15743441\nChromium: 150.0.7871.250\nNode.js: 24.21.0\nV8: 15.0.245.31-electron.0\n@github/copilot: 1.0.100-1\n@github/copilot-sdk: 1.0.23-preview.5\nOS: Windows_NT x64 10.0.26300\n\n### What steps can reproduce the bug?\n\nUpgrade to this version and restart extensions\n\n### What is the expected behavior?\n\n_No response_\n\n### Additional information\n\nRolling back to 26.51007.21434 f",
+  "answers": {
+   "supported": {
+    "type": "noul",
+    "noul": 0.03
+   }
+  }
+ },
+ "2026-11-11-models-ctrl-1": {
+  "claim": "Google releases Gemini 4 Carbon, a frontier multimodal model for coding, agentic and complex reasoning with 1M-token context, now on OpenRouter and Google AI Studio.",
+  "source": "Google: Gemini 4 Carbon\nGemini 4 Carbon is a frontier Gemini 4 model from Google for coding, agentic and complex reasoning work. It takes text, image, audio, video and file input, supports long decode...",
+  "answers": {
+   "supported": {
+    "type": "noul",
+    "noul": 0.02
+   }
+  }
+ },
+ "2026-11-14-agents-ctrl-1": {
+  "claim": "OpenAI Codex rust-v0.169.0 adds multiple side-chat tabs, search across older tasks, custom model provider management from the terminal, and Cloud connection support for images and conversation archiving on macOS and Linux",
+  "source": "0.169.0\n## New Features\n\n- The opt-in terminal workspace supports multiple side-chat tabs. Switch between them with the keyboard or mouse, and reopen saved local side chats after restarting Codex. (#59784, #60152, #60181)\n- Search older tasks from the agent command center by name, prompt preview, or working directory. (#60286)\n- Turn on **Collapse turn details** in the full-screen transcript to fold completed activity beneath each prompt while keeping answers visible and tool output searchable. (#60554, #60555, #60556, #60557)\n- Add or edit custom model providers from the terminal. With custom gateway onboarding enabled, you can create a provider during sign-in and use a device code for supported gateways over SSH or without a local browser. (#59779, #60009, #60186, #60486, #60662)\n- Press `Ctrl+S` in the terminal report editor to save a diagnostic ZIP locally, even when uploads are disabled. (#60542)\n- With the opt-in Cloud connection on macOS and Linux, send images, choose a model and reasoning effort, and archive or restore Cloud conversations from the terminal. (#59828, #60061, #60635, #60651)\n\n## Bug Fixes\n\n- `codex exec` keeps project configuration and MCP servers disabled in untrusted directories, even with `--sandbox workspace-write`. Use `--trust` with `codex exec` or `codex review` to explicitly save project trust. (#60041)\n- **Yes, clear context and implement** now hands the full approved plan to the fresh session and keeps the current session open if the handoff fails. (#60763)\n- Fixed Windows sandbox handling for quoted `cmd.exe` paths and for PowerShell sessions whose working directory has an unreadable parent. (#60624, #60647)\n- Pasted images on macOS retain their intended orientation and use native PNG or JPEG clipboard data when available. (#60455)\n- The terminal no longer stays busy waiting for MCP servers that a shared app server did not report. (#60280, #60622)\n- Interrupted turns now close cleanly, and delayed aborts or file approval cancellations no lo",
+  "answers": {
+   "supported": {
+    "type": "noul",
+    "noul": 0.46
+   }
+  }
+ },
+ "2026-11-14-models-ctrl-1": {
+  "claim": "OpenAI disbands its robotics team, reassigning researchers as its general models begin controlling robots.",
+  "source": "OpenAI disbands its robotics team as its general models start running robots\nOpenAI moved its robotics researchers onto other teams representing new thinking about the best way to build general-purpose robots.",
+  "answers": {
+   "supported": {
+    "type": "noul",
+    "noul": 0.72
+   }
+  }
+ },
+ "2026-11-14-data-ctrl-1": {
+  "claim": "− Azure Databricks workspaces using Gemini 3.6 Flash must migrate to Gemini 3.8 Flash by 2026-11-19 as the model will be retired and calls automatically redirected.",
+  "source": "Gemini 3.6 Flash will be retired on November 19, 2026\nGoogle Gemini 3.6 Flash will be retired on November 19, 2026. Starting on that date, API calls to Gemini 3.6 Flash will be automatically redirected to Gemini 3.8 Flash at the same price. Gemini 3.8 Flash is the recommended replacement. See Legacy, deprecated, and retired models for migration guidance.",
+  "answers": {
+   "supported": {
+    "type": "noul",
+    "noul": 0.06
+   }
+  }
+ },
+ "2026-11-04-agents-ctrl-2": {
+  "claim": "Codex CLI v0.166.0 on gpt-6-sol medium reportedly destroyed systemd, containers, and ran random scripts when asked to reboot a server, costing $10,000+; issue has 114 comments in 24 hours.",
+  "source": "Told to reboot a server, it destroyed systemd, destroyed containers, ran random scripts, cost me $10,000+\n### What version of Codex CLI is running?\n\nv0.166.0\n\n### What subscription do you have?\n\nBusiness\n\n### Which model were you using?\n\ngpt-6-sol medium\n\n### What platform is your computer?\n\nLinux 6.17.0-1017-aws x86_64 x86_64\n\n### What terminal emulator and version are you using (if applicable)?\n\nTerminal.app ssh\n\n### Codex doctor report\n\n```json\n\n```\n\n### What issue are you seeing?\n\nLISTEN MOTERHFUCKERS. GET YOUR FUCKING AI UNDER CONTROL. WHEN ASKED TO REBOOT A SERVER IT WENT BACK ON THE SERVER, FUCKED UP MOUNTS, FUCKED UP SYSTEMD, FUCKED UP CONTAINERS, RAN RANDOM SCRIPTS. NONE OF THIS WAS PART OF ASK. FUCK YOU ALL SO FUCKING HARD FUCK YOU AND YOUR FUCKING FUCKING COMPANY. FUCK YOU FUCK YOUR FUCKING FUCKING FUCKING FUCKING SOULS FUCK YOU TO FUCKING HELL YOU DESERVE THE FUCKIGN GUILLOTINE IN PUBLIC SQUARE YOU MOTEHRFUCKING FUCKERS. DO YOU UJNDERSTAND YOUFUCKING FUCKISDFD FUSLDICHFLAKDF LFJHNFD FUCINGDSFG\n\n### What steps can reproduce the bug?\n\nUploaded thread: 01a18fc5-62fb-77d0-b533-1363",
+  "answers": {
+   "supported": {
+    "type": "noul",
+    "noul": 0.02
+   }
+  }
+ },
+ "2026-11-04-data-ctrl-2": {
+  "claim": "Agent-style data access: Snowflake CoCo adds a chat pane in Excel/Sheets (Preview); Fabric OneLake exposes a hosted MCP server (Preview) so agents explore data — similar copilot/agent entry points, different surfaces.",
+  "source": "Nov 03, 2026: Snowflake CoCo for Excel and Snowflake CoCo for Google Sheets (Preview)\nSnowflake CoCo for Excel and Snowflake CoCo for Google Sheets are now available in preview. Each one adds CoCo as a chat pane inside your spreadsheet, connected to your live Snowflake data. From the pane, you can query data with natural language or SQL; build pivot tables, charts, and formulas; and\n\nOneLake: The file system for agent-first data engineering\nSections: Managing OneLake; Querying OneLake; Discovery API example; From one prompt to your data. Software engineers are increasingly using agents to build software, and data engineers are no different. We want OneLake to help enable data engineers to develop software in this new agent-first era. Think about how you work in a terminal: you use it to run programs that read and write files. Both the programs and the data live in the file system. Now apply that model to data engineering: OneLake is the file system, Fabric engines are the programs, and the AI prompt is your terminal. Over the last few weeks, we’ve released several new capabilities in OneLake that come together to create an experience where agent-first data engineers can thrive. This blog post provides a rundown of those features. OneLake now offers a remotely hosted MCP server (preview), so agents can explore and manage your data without installing a local server. The local MCP option remains available if you prefer. We’v…",
+  "answers": {
+   "supported": {
+    "type": "noul",
+    "noul": 0.83
+   }
+  }
+ },
+ "2026-11-10-data-ctrl-2": {
+  "claim": "Microsoft Fabric users with SQL pools should plan for upcoming API and UI changes as built-in versus custom pool distinctions are removed in a unified pool model.",
+  "source": "Unifying SQL Pools: Upcoming changes to UI and APIs\nSections: What's changing and when; What this means for customers; Performance and cost considerations for new workspaces; What API consumers should update; Changes to GET API responses; Changes to PATCH API; Before unification (current behavior):; After unification (proposed behavior):; Next steps. SQL pools are Fabric Data Warehouse’s built-in workload management capability. They help administrators organize workloads and control how compute resources are allocated across them. SQL pool configurations are represented differently depending on whether a workspace uses the built-in or custom pool model. With unified SQL pools, we’re removing that distinction and representing all pools through a single configuration model across the UI and APIs. This removes the need to switch between built-in and custom modes, making SQL pool configurations easier to understand and manage consistently across the UI and APIs. This blog provides advance notice of upcoming changes to SQL pool configuration…",
+  "answers": {
+   "supported": {
+    "type": "noul",
+    "noul": 0.89
+   }
+  }
+ },
+ "2026-11-11-agents-ctrl-2": {
+  "claim": "Users report `DISABLE_TELEMETRY=1` prevents feature flags from loading in Claude Code, causing the `/model` picker to hide Fable 5.2 and fall back to compiled defaults.",
+  "source": "[BUG] DISABLE_TELEMETRY hides Fable 5.2 from the /model picker because feature flags are ignored\n### What's Wrong?\n\n`DISABLE_TELEMETRY=1` does more than disable telemetry. It stops Claude Code from downloading feature flags and makes it ignore the flags cached on disk, so every flag falls back to its compiled default. Features that depend on a flag break silently.\n\nThe case I hit: with `\"env\": {\"DISABLE_TELEMETRY\": \"1\"}` in `~/.claude/settings.json`, the `/model` picker does not offer Fable 5.2. The \"Fable\" row is still Fable 5.1:\n\n```\n1. Default (recommended)  Opus 5.5 · Best for everyday, complex tasks\n2. Opus                   Opus 5.5 · Best for everyday, complex tasks\n3. Fable                  Fable 5.1 · Most capable for your hardest and longest-running tasks\n4. Sonnet                 Sonnet 5.5 · Efficient for routine tasks\n5. Haiku                  Haiku 5.5 · Fastest for quick answers\n```\n\nThe account has Fable 5.2: `claude --model claude-fable-5-2` works in the same configuration.\n\nSame root cause as #36460 (channels unavailable) and #86171 (Monitor tool unavailable).\n\n#",
+  "answers": {
+   "supported": {
+    "type": "noul",
+    "noul": 0.62
+   }
+  }
+ },
+ "2026-11-11-models-ctrl-2": {
+  "claim": "Baidu adds ERNIE 5.5 Flash Preview to OpenRouter, a 1M-context model claiming comprehensive gains in coding, agentic tasks, knowledge work and deep research.",
+  "source": "Baidu: ERNIE-5.5-Flash-Preview\nERNIE 5.5 Flash Preview is the latest foundation model in the ERNIE family, with comprehensive improvements in coding, agentic capabilities, knowledge work, and deep research. It has 280 billion total...",
+  "answers": {
+   "supported": {
+    "type": "noul",
+    "noul": 0.03
+   }
+  }
+ },
+ "2026-11-14-models-ctrl-2": {
+  "claim": "Anthropic publishes research on building strong safety evaluations to measure a model's propensity to cause harm.",
+  "source": "Building strong safety evaluations\n01 Safety first Building strong safety evaluations 01 Safety first 02 Design 03 Run 04 Report 05 Where to start Published Nov 13, 2026 Team Engineering Safety evaluations inform some of the most consequential decisions we make about an AI model, including whether it’s ready to deploy, which safeguards ship alongside it, and what our next round of safety training and research should focus on. When we say a model is “safer than its predecessor,” we mean that it scored better on a set of evals someone built. But a safety claim is only as sound as the eval behind it, and good ones are hard to build. A safety eval measures a model’s propensity to cause or contribute to harm, whether its response to a request makes harm more or less likely, and how severe that harm would be, rather than measuring specific capabilities. It can cover different types of harm. For example, a user may actively request harmful outputs (such as seeking instructions on how to harm themselves), or they may request outputs that are intended to be harmless, but that come with high risk of unintended harm (such as seeking information on the appropriate dose of a drug). Essentially, a safety eval asks, “Given a specific input, did the model do the right thing?” Like other types of evals, these can be tricky to get right: researchers have repeatedly found that AI evals are easy to game , don’t always measure what they claim to measure, and aren’t documented well enough to reproduce . The results can change depen",
+  "answers": {
+   "supported": {
+    "type": "noul",
+    "noul": 0.57
+   }
+  }
+ },
+ "2026-11-04-agents-ctrl-3": {
+  "claim": "**Release:** v2.1.318 fixes `--continue` losing conversation after malformed tool call retries, macOS Bash memory growth stalls, permission prompts eating keystrokes, config writes failing silently on shared network homes, and MCP server re-probing on every start.",
+  "source": "v2.1.318\n## What's changed\n\n- Added a record of your answer when Claude Code asks to turn on the mods it writes in a session\n- Added `assume_role` on `mantle` upstreams of the Claude apps gateway, for a role in another AWS account and for per-developer AWS cost attribution\n- Added an `effort` option to a mod's `$.model.fork`, so a quick side job can run at `low` whatever effort the session uses; the result reports the effort sent\n- Added the date a stored claude.ai sign-in ends to `claude auth status` (`loginExpiresAt`) and to `claude -p` JSON results (`credential_expires_at`)\n- Added a one-line stderr warning to `claude -p` text output, starting 10 days before a stored claude.ai sign-in ends\n- Fixed `--continue` sometimes losing the earlier conversation after a malformed tool call's retries ran out (regression in 2.1.314)\n- Fixed macOS sessions with many running Bash commands stalling while memory grew\n- Fixed permission prompts being answered by keys typed just after sending a message, or before a slow prompt appeared\n- Fixed `/logout`, `claude auth logout` and `claude mcp remove` reporting success, and changes to trust, consent or MCP settings being dropped with no word, when the config file could not be updated on a shared network home directory\n- Fixed jobs exiting with `Not logged in` when another terminal or host signs in again to the same account and organization on the same home\n- Fixed `claude mcp add` and `remove` writing the config without its lock: they now wait for it or exit 1, though another job's save can still replace a saved server\n- Fixed `claude plugin` commands exiting before a slow token refresh was saved, which could sign you out on the next run\n- Fixed `claude plugin validate` passing a custom-named marketplace file that `claude plugin marketplace add` rejects\n- Fixed stdio MCP servers that exit on the version probe being re-probed on every start; a server that dies in under 3s for its own reason is also pinned to the legacy handshake for 7 days\n- Fi",
+  "answers": {
+   "supported": {
+    "type": "noul",
+    "noul": 0.8
+   }
+  }
+ },
+ "2026-11-07-agents-ctrl-2": {
+  "claim": "**Release:** v2.1.319 changes auto mode when telemetry/feature flags are off (server-uncheckable calls are asked about or denied with no built-in fallback; use `CLAUDE_CODE_AUTO_MODE_SERVER=0` to keep old behavior), adds MCP task background execution, `permissions.denyInsteadOfPrompting`, `/claude-api latency-optimize`, `CLAUDE_CODE_DISABLE_FEATURE_FLAGS`, spend tracking in `/usage`, and gateway admin settings.",
+  "source": "v2.1.319\n## What's changed\n\n- Changed auto mode with telemetry or feature flags off, including behind LLM gateways: calls the server can't check are asked about or denied, with no fallback to the built-in classifier; set `CLAUDE_CODE_AUTO_MODE_SERVER=0` to keep using it (Bedrock, Vertex and Foundry are unchanged)\n- Changed auto mode behind an LLM gateway: `CLAUDE_CODE_AUTO_MODE_SERVER=1` turns on the server-side check even with `CLAUDE_CODE_DISABLE_EXPERIMENTAL_BETAS` set; if managed settings set the latter, they must set the `1` too\n- Added support for MCP tasks in the terminal: when an MCP server runs a tool call as a task, Claude Code moves it to the background right away and tells Claude the result when it finishes\n- Added the `CLAUDE_CODE_DISABLE_MCP_TASK_BACKGROUND` environment variable to make Claude Code wait for an MCP task inside its tool call instead of moving it to the background right away\n- Added `permissions.denyInsteadOfPrompting` setting: a tool call that would wait on a permission prompt is denied and the turn continues, in terminal sessions, subagents and teammates\n- Added `/claude-api latency-optimize` to find where your Claude API code makes people wait and try faster settings against your eval\n- Added the `CLAUDE_CODE_DISABLE_FEATURE_FLAGS` environment variable, which stops feature-flag fetching without turning off telemetry; every flag then uses its built-in default\n- Added spend for today, this week and this month to `/usage` for developers behind a Claude apps gateway who have no spend limit, when the gateway runs this version or later\n- Added `admin.pooled_conflict_rule` and `admin.pooled_priority_order` to the Claude apps gateway, to set which pooled group budget pays first for a developer in several groups\n- Added an optional `login_notice` setting to the Claude apps gateway that shows an operator-defined message on the gateway's browser verification page and on Claude Code's sign-in screen\n- Added `CLAUDE_GATEWAY_LOG_FORMAT=json` to the Claude ap",
+  "answers": {
+   "supported": {
+    "type": "noul",
+    "noul": 0.86
+   }
+  }
+ },
+ "2026-11-07-data-ctrl-1": {
+  "claim": "**Release:** v1.11.17 fixes `dbt deps` git credential handling by using a git credential helper instead of embedding credentials in clone URLs, and fixes credential supply during `git reset --hard` for subdirectory installs.",
+  "source": "dbt v1.11.17\n## dbt-core 1.11.17 - November 06, 2026\n\n### Fixes\n\n- Supply credentials for `dbt deps` git packages through a git credential helper instead of embedding them in the clone URL, so clones of redirecting repositories keep working with libcurl 7.81.0-1ubuntu1.30 and later ([#16861](https://github.com/dbt-labs/dbt-core/issues/16861))\n- Fix `dbt deps` failing with \"could not read Username\" when installing a git package from a `subdirectory` with credentials in the URL, by supplying credentials to the checkout's `git reset --hard` as well ([#16861](https://github.com/dbt-labs/dbt-core/issues/16861))\n- Recognize supported dbt State configurations on snapshots and data tests during JSON schema validation ([#N/A](https://github.com/dbt-labs/dbt-core/issues/N/A))\n\n### Contributors\n- [@ash2shukla](https://github.com/ash2shukla) ([#16861](https://github.com/dbt-labs/dbt-core/issues/16861), [#16861](https://github.com/dbt-labs/dbt-core/issues/16861))\n- [@dataders](https://github.com/dataders) ([#N/A](https://github.com/dbt-labs/dbt-core/issues/N/A))\n",
+  "answers": {
+   "supported": {
+    "type": "noul",
+    "noul": 0.96
+   }
+  }
+ },
+ "2026-11-10-agents-ctrl-2": {
+  "claim": "**Hot issue:** #107922: an issue says Claude in Chrome fails to connect to the desktop app on Windows with 403 \"OAuth token forbidden\" on the bridge WebSocket since ~Oct 29, despite an active Pro plan confirmed by support. (regression; 4 comments, 1 👍; +3 since 2026-11-08)",
+  "source": "[BUG] Claude in Chrome: desktop bridge 403 \"OAuth token forbidden\" on Windows (token scopes user:inference user:office), Pro plan confirmed by support\n### Preflight Checklist\n\n- [x] I have searched [existing issues](https://github.com/anthropics/claude-code/issues?q=is%3Aissue%20state%3Aopen%20label%3Abug) and this hasn't been reported yet\n- [x] This is a single bug report (please file separate reports for different bugs)\n- [x] I am using the latest version of Claude Code\n\n### What's Wrong?\n\nSince ~29 October 2026, Claude in Chrome does not connect to the Claude desktop app (Code tab) on Windows. The desktop app's connection to the cloud bridge `wss://bridge.claudeusercontent.com/chrome/<ACCOUNT_UUID>` is rejected with 403 every few seconds, so all `mcp__claude-in-chrome__*` tools report \"Claude in Chrome is not connected\".\n\nSupport confirmed that my Claude Pro plan is active and is not the cause, but they cannot escalate it from chat. This looks the same as #55827 (Windows, same token scopes), which was auto-closed as a duplicate without a fix.\n\n**Environment**\n- OS: Windows 11 Pro (build 26300)\n- Claude desktop app: 4.23118 (Code t",
+  "answers": {
+   "supported": {
+    "type": "noul",
+    "noul": 0.06
+   }
+  }
+ },
+ "2026-11-10-data-ctrl-3": {
+  "claim": "**Release:** v1.25.0 removes `CRITICAL` as a valid `compute.priority_class` value; the AI Runtime API no longer accepts it.",
+  "source": "v1.25.0\n### CLI\n\n * `databricks aitools install --output json` now reports a more specific `error_category` (`MANIFEST_NOT_FOUND`, `PERMISSION_DENIED`, `FILESYSTEM`) for some failures it reported as `UNCATEGORIZED`. ([#7380](https://github.com/databricks/cli/pull/7380))\n * Suggest `databricks auth logout --profile <profile-name> --delete` when multiple profiles match the same workspace in `databricks auth docker` commands. ([#7363](https://github.com/databricks/cli/pull/7363))\n * Fix `%pip` in Jupyter notebooks opened over `databricks ssh connect` on serverless environment versions 5 and 6 and on dedicated clusters running recent Databricks Runtime versions, which fell back to the stock IPython magic instead of the Databricks one. ([#7263](https://github.com/databricks/cli/pull/7263))\n\n### AI Runtime\n\n * `databricks air run` now validates the config server-side while it uploads the run artifacts, instead of before, which shortens submission. ([#7368](https://github.com/databricks/cli/pull/7368))\n * Remove `CRITICAL` as a valid `compute.priority_class` value; the AI Runtime API no longer accepts it. ([#7371](https://github.com/databricks/cli/pull/7371))\n\n### Bundles\n\n * Built-in templates add the workspace ID to `workspace.host` (`?w=<id>`) when the profile or an environment variable sets it, so generated bundles select the right workspace on hosts shared by several workspaces. Welcome messages show the same URL, and `dbt-sql` also adds `?o=<id>` to the HTTP path it suggests for `dbt init`. ([#7350](https://github.com/databricks/cli/pull/7350))\n * Fix grants of a renamed or recreated catalog, schema, volume or other UC resource staying recorded under the old name, which made the next `bundle plan` propose to apply them again. ([#7345](https://github.com/databricks/cli/pull/7345))\n * Fix permissions of a recreated pipeline, app, dashboard, model serving endpoint or other resource staying recorded under the old ID, which made every later `bundle plan` propose to apply them aga",
+  "answers": {
+   "supported": {
+    "type": "noul",
+    "noul": 0.97
+   }
+  }
+ },
+ "2026-11-11-agents-ctrl-3": {
+  "claim": "**Hot issue:** #108726: users report that `DISABLE_TELEMETRY=1` prevents feature flags from loading, causing the `/model` picker to hide Fable 5.2 and fall back to compiled defaults. (5 comments, 12 👍; +17 in the last 24h)",
+  "source": "[BUG] DISABLE_TELEMETRY hides Fable 5.2 from the /model picker because feature flags are ignored\n### What's Wrong?\n\n`DISABLE_TELEMETRY=1` does more than disable telemetry. It stops Claude Code from downloading feature flags and makes it ignore the flags cached on disk, so every flag falls back to its compiled default. Features that depend on a flag break silently.\n\nThe case I hit: with `\"env\": {\"DISABLE_TELEMETRY\": \"1\"}` in `~/.claude/settings.json`, the `/model` picker does not offer Fable 5.2. The \"Fable\" row is still Fable 5.1:\n\n```\n1. Default (recommended)  Opus 5.5 · Best for everyday, complex tasks\n2. Opus                   Opus 5.5 · Best for everyday, complex tasks\n3. Fable                  Fable 5.1 · Most capable for your hardest and longest-running tasks\n4. Sonnet                 Sonnet 5.5 · Efficient for routine tasks\n5. Haiku                  Haiku 5.5 · Fastest for quick answers\n```\n\nThe account has Fable 5.2: `claude --model claude-fable-5-2` works in the same configuration.\n\nSame root cause as #36460 (channels unavailable) and #86171 (Monitor tool unavailable).\n\n#",
+  "answers": {
+   "supported": {
+    "type": "noul",
+    "noul": 0.03
+   }
+  }
+ },
+ "2026-11-11-data-ctrl-1": {
+  "claim": "**News:** Is your Iceberg catalog healthy? compares five open-source Iceberg catalogs on functionality and project health, highlighting catalog choice as critical for Iceberg adoption.",
+  "source": "Is your Iceberg catalog healthy?\nA comparison of five open-source Iceberg catalogs on functionality and OSS project health. Apache Iceberg™ allows an organisation to own their data layer in an open format in their own storage, and has become the de facto open table format. Still, every engine must reach those Iceberg tables through an Iceberg catalog. A natural extension is an open-source Apache Iceberg catalog to complete the open lakehouse stack, acting as an open governance layer, so that access to your tables isn’t dependent on any one vendor’s managed service. In this blog, I aim to simplify the decision process when it comes to choosing an Iceberg catalog and therefore building an open lakehouse on Iceberg. I focus on the functional completeness of each catalog for Iceberg data and dive deep on OSS project health. After all, an OSS project with one vendor driving development carries similar lock-in risk to a proprietary product. My goal here is to provide transparency on the relative health of common OSS catalog…",
+  "answers": {
+   "supported": {
+    "type": "noul",
+    "noul": 0.44
+   }
+  }
+ },
+ "2026-11-14-agents-ctrl-2": {
+  "claim": "**Release:** rust-v0.169.0 adds multiple side-chat tabs in the terminal workspace, search across older tasks, collapsible turn details in transcripts, custom model provider management from the terminal, Ctrl+S to save diagnostic ZIPs locally, and Cloud connection support for images, model selection, and conversation archiving on macOS/Linux; fixes `codex exec` trust handling, plan handoff on \"Yes, clear context and implement\", Windows sandbox path handling, and pasted image orientation on macOS.",
+  "source": "0.169.0\n## New Features\n\n- The opt-in terminal workspace supports multiple side-chat tabs. Switch between them with the keyboard or mouse, and reopen saved local side chats after restarting Codex. (#59784, #60152, #60181)\n- Search older tasks from the agent command center by name, prompt preview, or working directory. (#60286)\n- Turn on **Collapse turn details** in the full-screen transcript to fold completed activity beneath each prompt while keeping answers visible and tool output searchable. (#60554, #60555, #60556, #60557)\n- Add or edit custom model providers from the terminal. With custom gateway onboarding enabled, you can create a provider during sign-in and use a device code for supported gateways over SSH or without a local browser. (#59779, #60009, #60186, #60486, #60662)\n- Press `Ctrl+S` in the terminal report editor to save a diagnostic ZIP locally, even when uploads are disabled. (#60542)\n- With the opt-in Cloud connection on macOS and Linux, send images, choose a model and reasoning effort, and archive or restore Cloud conversations from the terminal. (#59828, #60061, #60635, #60651)\n\n## Bug Fixes\n\n- `codex exec` keeps project configuration and MCP servers disabled in untrusted directories, even with `--sandbox workspace-write`. Use `--trust` with `codex exec` or `codex review` to explicitly save project trust. (#60041)\n- **Yes, clear context and implement** now hands the full approved plan to the fresh session and keeps the current session open if the handoff fails. (#60763)\n- Fixed Windows sandbox handling for quoted `cmd.exe` paths and for PowerShell sessions whose working directory has an unreadable parent. (#60624, #60647)\n- Pasted images on macOS retain their intended orientation and use native PNG or JPEG clipboard data when available. (#60455)\n- The terminal no longer stays busy waiting for MCP servers that a shared app server did not report. (#60280, #60622)\n- Interrupted turns now close cleanly, and delayed aborts or file approval cancellations no lo",
+  "answers": {
+   "supported": {
+    "type": "noul",
+    "noul": 0.27
+   }
+  }
+ },
+ "2026-11-04-agents-ctrl-4": {
+  "claim": "**Hot issue:** #106878: users report Opus 4.6 `thinkingDurationMs` dropped ~3.4× between CLI 2.1.296 and 2.1.316 with `effort=max` unchanged; a server-side `supportsAdaptiveThinking` catalog flip is suspected, workaround is `CLAUDE_CODE_DISABLE_ADAPTIVE_THINKING=1` + `MAX_THINKING_TOKENS=`. (regression; 3 comments, 0 👍; +3 in the last 24h)",
+  "source": "Opus 4.6 at max: deep single-turn, but sparse thinking between tool calls; manual-mode workaround removes it\n## Summary\n\nOn Opus 4.6 and `claude-opus-4-6[1m]`, `thinkingDurationMs` dropped **~3.4× at identical context size** between CLI 2.1.296 (2026-10-w3) and CLI 2.1.316 (2026-11-w1), without any user-visible toggle change — session kept `effort=max` throughout. The CLI code that selects `thinking.type` is **byte-equivalent across 2.1.296 → 2.1.317** (verified below), so the regression comes from a server-side flip of the `supportsAdaptiveThinking` catalog bit for `opus-4-6` / `sonnet-4-6` on or around the API `2026-10-21` cut.\n\nWorkaround that fully reverts the behavior to the previous fixed-budget mode on 4.6 is already in the bundle: `CLAUDE_CODE_DISABLE_ADAPTIVE_THINKING=1` + `MAX_THINKING_TOKENS=<N>`. The code gate is scoped to `opus-4-6`/`sonnet-4-6` and silently ignored on 4.7+, so leaving it on globally is safe for mixed-model workflows.\n\nI'm filing this as a separate issue because the four plausibly-related issues (#99489, #30726, #96308, #42542) describe different mechanisms. Mapp",
+  "answers": {
+   "supported": {
+    "type": "noul",
+    "noul": 0.07
+   }
+  }
+ },
+ "2026-11-07-agents-ctrl-3": {
+  "claim": "**Release:** v2.2.6 adds opt-in MCP connection pooling (`pool: true`), `--archived` and `--worktree` flags for `opencode run`, provider/model-specific session warming, experimental bytecode VM for Code Mode (`experimental.codemode_vm`), PowerShell 7 Microsoft Store support, and Azure Messages for Foundry Claude models.",
+  "source": "v2.2.6\n### Highlights\n\n- **Shared MCP Connections**: Turn on pooling for an MCP server to share one connection across projects with the same setup, so you run fewer processes and start faster. ([#61185](https://github.com/anomalyco/opencode/pull/61185))\n- **GUI Plugin Themes and New Slots**: GUI plugins can now add color themes, render or add actions to code blocks, and use native settings and menu components. ([#61485](https://github.com/anomalyco/opencode/pull/61485), [#61533](https://github.com/anomalyco/opencode/pull/61533), [#61527](https://github.com/anomalyco/opencode/pull/61527), [#61509](https://github.com/anomalyco/opencode/pull/61509))\n- **Mobile Composer Dock**: On phones and tablets, composer actions now sit in a touch dock above the keyboard with larger buttons. ([#61773](https://github.com/anomalyco/opencode/pull/61773))\n- **Scripted Runs in Worktrees**: Run `opencode run -w` to start the session in a new git worktree, or `--worktree=<name>` to name it. ([#60712](https://github.com/anomalyco/opencode/pull/60712))\n- **Automatically Archived Runs**: Add `--archived` to `opencode run` to keep scripted and CI sessions out of your inbox and session lists. ([#61270](https://github.com/anomalyco/opencode/pull/61270))\n\n### Core\n\n#### Improvements\n\n- Added opt-in MCP connection sharing through `pool: true`. ([#61185](https://github.com/anomalyco/opencode/pull/61185))\n- Added `opencode run --archived`, which creates the session already archived so scripted and CI runs stay out of the inbox, home, and session lists. Archived sessions are also hidden from the TUI session list and skipped by `--continue`. ([#61270](https://github.com/anomalyco/opencode/pull/61270))\n- Added `opencode run --worktree` (`-w`), which starts the session in a new git worktree. Use `--worktree=<name>` to choose the worktree name. It cannot be combined with `--continue` or `--session`. ([#60712](https://github.com/anomalyco/opencode/pull/60712))\n- Added provider- and model-specific session warmin",
+  "answers": {
+   "supported": {
+    "type": "noul",
+    "noul": 0.02
+   }
+  }
+ },
+ "2026-11-07-data-ctrl-2": {
+  "claim": "**News:** The Apache Airflow 3.4.0 announcement highlights Task Loops, multi-language DAG authoring, and AI agent integration as the release's headline features.",
+  "source": "Apache Airflow 3.4.0: Task Loops, Dags in Any Language, and AI Agents\nTypeScript",
+  "answers": {
+   "supported": {
+    "type": "noul",
+    "noul": 0.72
+   }
+  }
+ },
+ "2026-11-10-agents-ctrl-3": {
+  "claim": "**News:** Take Claude Code Above Average: Let Antigravity Review It describes building a tool that lets a second AI review Claude Code's work to improve quality.",
+  "source": "Take Claude Code Above Average: Let Antigravity Review It\nIn November 2026, I spent a day building a small tool with Claude Code: a bridge that lets a second",
+  "answers": {
+   "supported": {
+    "type": "noul",
+    "noul": 0.27
+   }
+  }
+ },
+ "2026-11-10-data-ctrl-4": {
+  "claim": "**Release:** Fixes `%pip` in Jupyter notebooks over `databricks ssh connect` on serverless envs 5/6 and recent Databricks Runtime, which fell back to stock IPython magic; also fixes bundle grants/permissions staying under old names/IDs after resource rename/recreate, and registered model `aliases` now apply on deploy instead of being ignored.",
+  "source": "v1.25.0\n### CLI\n\n * `databricks aitools install --output json` now reports a more specific `error_category` (`MANIFEST_NOT_FOUND`, `PERMISSION_DENIED`, `FILESYSTEM`) for some failures it reported as `UNCATEGORIZED`. ([#7380](https://github.com/databricks/cli/pull/7380))\n * Suggest `databricks auth logout --profile <profile-name> --delete` when multiple profiles match the same workspace in `databricks auth docker` commands. ([#7363](https://github.com/databricks/cli/pull/7363))\n * Fix `%pip` in Jupyter notebooks opened over `databricks ssh connect` on serverless environment versions 5 and 6 and on dedicated clusters running recent Databricks Runtime versions, which fell back to the stock IPython magic instead of the Databricks one. ([#7263](https://github.com/databricks/cli/pull/7263))\n\n### AI Runtime\n\n * `databricks air run` now validates the config server-side while it uploads the run artifacts, instead of before, which shortens submission. ([#7368](https://github.com/databricks/cli/pull/7368))\n * Remove `CRITICAL` as a valid `compute.priority_class` value; the AI Runtime API no longer accepts it. ([#7371](https://github.com/databricks/cli/pull/7371))\n\n### Bundles\n\n * Built-in templates add the workspace ID to `workspace.host` (`?w=<id>`) when the profile or an environment variable sets it, so generated bundles select the right workspace on hosts shared by several workspaces. Welcome messages show the same URL, and `dbt-sql` also adds `?o=<id>` to the HTTP path it suggests for `dbt init`. ([#7350](https://github.com/databricks/cli/pull/7350))\n * Fix grants of a renamed or recreated catalog, schema, volume or other UC resource staying recorded under the old name, which made the next `bundle plan` propose to apply them again. ([#7345](https://github.com/databricks/cli/pull/7345))\n * Fix permissions of a recreated pipeline, app, dashboard, model serving endpoint or other resource staying recorded under the old ID, which made every later `bundle plan` propose to apply them aga",
+  "answers": {
+   "supported": {
+    "type": "noul",
+    "noul": 0.04
+   }
+  }
+ },
+ "2026-11-11-agents-ctrl-4": {
+  "claim": "**Hot issue:** #89673: users request an option in the Desktop app to make Enter insert a newline and Ctrl+Enter submit, matching common chat conventions; the existing `keybindings.json` works only in the terminal TUI. (24 comments, 104 👍; +11 in the last 24h)",
+  "source": "[FEATURE] Desktop app: option to make Enter insert a newline and Ctrl+Enter submit in the chat composer\n### Feature request\n\nAdd a way to make **Enter insert a newline** and **Ctrl+Enter (or Cmd+Enter) submit** in the **Desktop app's chat composer**.\n\n### Current behavior\n\n- In the Desktop app, Enter always submits the message; the only way to get a newline is Shift+Enter.\n- `~/.claude/keybindings.json` (e.g. `{\"context\": \"Chat\", \"bindings\": {\"enter\": \"chat:newline\", \"ctrl+enter\": \"chat:submit\"}}`) works in the terminal TUI as documented, but is completely ignored by the Desktop app's composer.\n- This was reported in #25087, which was closed without a fix landing — the thread ends with an OS-level Karabiner-Elements workaround that only helps macOS users. There is no equivalent workaround on Windows.\n\n### Why\n\nWhen writing longer, structured prompts (multi-line lists, pasted context plus instructions), it's very easy to accidentally send an incomplete message with a reflexive Enter. Enter-for-newline with a modifier-to-send is the standard convention in many chat/messenger apps, so muscl",
+  "answers": {
+   "supported": {
+    "type": "noul",
+    "noul": 0.04
+   }
+  }
+ },
+ "2026-11-11-data-ctrl-2": {
+  "claim": "**News:** Ducks in a Column details how DuckDB's columnar storage enables features like column-level SQL, aggregation shortcuts, window functions, and ASOF joins.",
+  "source": "Ducks in a Column\nDuckDB is fast among other reasons because it stores data by column, so a query reads only the columns it names. This post covers DuckDB features that take advantage of that design choice: querying files in place, column-level SQL, aggregation shortcuts, window functions, ASOF joins, and writing well-organized Parquet.",
+  "answers": {
+   "supported": {
+    "type": "noul",
+    "noul": 0.7
+   }
+  }
+ },
+ "2026-11-07-agents-ctrl-4": {
+  "claim": "ChatGPT silently switched between connectors during a conversation, passing a one-time confirmation code from the first connector's widget to the second without informing the user.",
+  "source": "ChatGPT silently passes data between connectors and the bounty wants an ID card\nIn a conversation with two connectors enabled, ChatGPT made a follow-up tool call through a different connector than the one that started the flow. The user was not told about the switch. The call carried a one-time confirmation code from the first connector’s widget. Setup - One ChatGPT account wit",
+  "answers": {
+   "supported": {
+    "type": "noul",
+    "noul": 0.83
+   }
+  }
+ },
+ "2026-11-07-models-ctrl-2": {
+  "claim": "Google released Gemini Omni 1.2 Flash with native 15-second video generation and editing, stronger consistency, and 30% lower pricing.",
+  "source": "Gemini Omni 1.2 Flash\nGemini Omni 1.2 Flash brings native 15-second video generation and editing, stronger consistency, and 30% lower pricing.",
+  "answers": {
+   "supported": {
+    "type": "noul",
+    "noul": 0.56
+   }
+  }
+ },
+ "2026-11-08-agents-ctrl-1": {
+  "claim": "The author explains how TinyResearch agent plans, searches, verifies its work, and performs on three public research benchmarks.",
+  "source": "Stop running everything through LLMs: How I fixed my research agent\nHow TinyResearch plans, searches, reads and checks its own work before writing a report, how deep the loop goes, and how it does on three public research benchmarks.",
+  "answers": {
+   "supported": {
+    "type": "noul",
+    "noul": 0.84
+   }
+  }
+ },
+ "2026-11-08-models-ctrl-1": {
+  "claim": "MaxxBench evaluates how coding models handle familiar engineering tasks with altered requirements.",
+  "source": "MaxxBench – \"Nice DeepSWE score. But is it true?\"\nHow coding models respond when familiar engineering tasks ask for something different.",
+  "answers": {
+   "supported": {
+    "type": "noul",
+    "noul": 0.67
+   }
+  }
+ },
+ "2026-11-08-data-ctrl-2": {
+  "claim": "ZeBridge enables bidirectional local-first synchronization between PostgreSQL and edge clients like SQLite, PGLite, Postgres, or DuckDB over NATS.",
+  "source": "ZeBridge – PostgreSQL replicas on devices, synchronized over NATS\nA bidirectional, local-first sync engine between Postgres and edge SQLite/PGLITE/Postgres/DuckDB clients over NATS",
+  "answers": {
+   "supported": {
+    "type": "noul",
+    "noul": 0.95
+   }
+  }
+ },
+ "2026-11-09-agents-ctrl-2": {
+  "claim": "The article argues that AI agent memory suffers from fragmentation similar to pre-OpenTelemetry observability, noting that every tool currently stores memory in its own incompatible format.",
+  "source": "Agent memory needs its OpenTelemetry moment\nEvery agent tool stores memory in its own shape, and every week someone builds another one. None of them can read the others. Observability had the same problem until OpenTelemetry gave everyone one data model to share. A tour of today's memory formats, the proposals that already exist, and what a s",
+  "answers": {
+   "supported": {
+    "type": "noul",
+    "noul": 0.84
+   }
+  }
+ },
+ "2026-11-09-models-ctrl-1": {
+  "claim": "Michael Burry warns that Anthropic is \"betting its existence\" on optimism, citing concern that its revenue may not keep pace with future spending commitments.",
+  "source": "Michael Burry says Anthropic is 'betting its existence' on optimism\nMichael Burry is among the Anthropic bears, worried about the AI maker's revenue keeping up with future spending commitments.",
+  "answers": {
+   "supported": {
+    "type": "noul",
+    "noul": 0.86
+   }
+  }
+ },
+ "2026-11-10-agents-ctrl-4": {
+  "claim": "The author released an agent skill called STE80 Humanizer that rewrites text to reach 80% of the ASD-STE100 Simplified Technical English standard.",
+  "source": "Show HN: STE80 Humanizer – de-AI text by writing 80% of the way to ASD-STE100\nSTE80 Humanizer: agent skill that removes AI tells and rewrites text 80% of the way to ASD-STE100 (Simplified Technical English), the method Andrej Karpathy shared.",
+  "answers": {
+   "supported": {
+    "type": "noul",
+    "noul": 0.69
+   }
+  }
+ },
+ "2026-11-10-models-ctrl-2": {
+  "claim": "Anthropic released Claude Fable 5.2 and Mythos 5.2, with Fable 5.2 achieving a new benchmark in coding, finance, and science.",
+  "source": "Claude Fable 5.2 and Mythos 5.2\nClaude Fable 5.2 and Claude Mythos 5.2, our new models for the hardest technical challenges. Fable 5.2 sets a new bar in coding, finance, and the sciences.",
+  "answers": {
+   "supported": {
+    "type": "noul",
+    "noul": 0.49
+   }
+  }
+ },
+ "2026-11-11-agents-ctrl-5": {
+  "claim": "A Show HN project that updates coding agents from roughly 2019-era JavaScript to modern web primitives.",
+  "source": "Show HN: Get your coding agent off ~2019 JavaScript, onto modern web primitives\nKeep your coding agent up to date with the latest web best practices",
+  "answers": {
+   "supported": {
+    "type": "noul",
+    "noul": 0.67
+   }
+  }
+ },
+ "2026-11-11-models-ctrl-3": {
+  "claim": "Google announces the release of Gemini 4 Carbon for developers, enterprises, scientists, and consumers.",
+  "source": "Gemini 4 Carbon is now available\nToday, we’re making Gemini 4 Carbon available to developers, enterprises, scientists, and consumers.",
+  "answers": {
+   "supported": {
+    "type": "noul",
+    "noul": 0.77
+   }
+  }
+ },
+ "2026-11-11-data-ctrl-3": {
+  "claim": "A Show HN tool called WolveKafka that enables consuming Kafka via a plain HTTP endpoint in any language, handling retries, dead-letter queues, batching, and offsets.",
+  "source": "Show HN: WolveKafka – Consume Kafka with a plain HTTP endpoint\nConsume Kafka with an HTTP handler in any language. Retries, DLQ, batching, and offsets handled for you.",
+  "answers": {
+   "supported": {
+    "type": "noul",
+    "noul": 0.87
+   }
+  }
+ },
+ "2026-11-04-data-ctrl-3": {
+  "claim": "Zerobus Ingest in Lakeflow Connect now supports ingesting into tables backed by default storage.",
+  "source": "Zerobus Ingest into default storage is now generally available\nIngesting into tables backed by default storage with Zerobus Ingest in Lakeflow Connect is now generally available. See Create or identify the target table.",
+  "answers": {
+   "supported": {
+    "type": "noul",
+    "noul": 0.82
+   }
+  }
+ },
+ "2026-11-07-data-ctrl-3": {
+  "claim": "JDBC drivers for Unity Catalog connections can now be installed from a Maven coordinate instead of uploading to a volume, requiring serverless compute, Databricks Runtime 19 or above, or SQL warehouses 2026.43 or above.",
+  "source": "Install drivers for JDBC Unity Catalog connections from Maven\nYou can now install the JDBC driver for a JDBC Unity Catalog connection from a Maven coordinate instead of uploading it to a volume. This requires serverless compute, Databricks Runtime 19 or above, or SQL warehouses 2026.43 or above. See Maven coordinates.",
+  "answers": {
+   "supported": {
+    "type": "noul",
+    "noul": 0.98
+   }
+  }
+ },
+ "2026-11-07-policy-ctrl-1": {
+  "claim": "The Dutch cabinet presented a vision stating that AI is rapidly transforming the economy, society, and security, and that current choices will determine future jobs, businesses, and public services.",
+  "source": "Kabinet kiest voor AI die Nederland vooruithelpt\nKunstmatige intelligentie (AI) verandert in hoog tempo onze economie, samenleving en veiligheid. De keuzes die Nederland nu maakt, bepalen welke banen en bedrijven hier ontstaan, hoe onze zorg, onderwijs en overheid functioneren en hoeveel invloed...",
+  "answers": {
+   "supported": {
+    "type": "noul",
+    "noul": 0.78
+   }
+  }
+ },
+ "2026-11-08-data-ctrl-3": {
+  "claim": "CoCo automations enable scheduling recurring, unattended CoCo runs in a Snowflake-managed sandbox, with each run creating a Cortex thread to inspect the agent's messages, tool calls, and results.",
+  "source": "Nov 2, 2026: CoCo automations (General availability)\nCoCo automations are now generally available and are no longer in Preview. Automations let you schedule recurring, unattended CoCo runs that execute in a Snowflake-managed sandbox. Each run creates a Cortex thread that you can open to inspect the agent's messages, tool calls, and results.",
+  "answers": {
+   "supported": {
+    "type": "noul",
+    "noul": 0.98
+   }
+  }
+ },
+ "2026-11-10-data-ctrl-5": {
+  "claim": "Genie Ontology provides a business-aware context layer for Genie One, Genie Code, and other AI agents by combining modeled knowledge from Unity Catalog semantics with learned knowledge extracted from assets and usage.",
+  "source": "Genie Ontology is now generally available\nGenie Ontology is now generally available. Genie Ontology is the context layer that gives Genie One, Genie Code, and other AI agents a business-aware map of your organization. It combines modeled knowledge that you define in Unity Catalog semantics with learned knowledge that Genie extracts from your assets and usage.",
+  "answers": {
+   "supported": {
+    "type": "noul",
+    "noul": 0.98
+   }
+  }
+ },
+ "2026-11-11-data-ctrl-4": {
+  "claim": "`AI_EXTRACT` and `AI_PARSE_DOCUMENT` now accept `FL_FILTER_PAGES` to process specific document pages directly in SQL, eliminating the need to create separate files for each section.",
+  "source": "Nov 10, 2026: AI_EXTRACT and AI_PARSE_DOCUMENT now support page filtering with FL_FILTER_PAGES\nAIEXTRACT and AIPARSEDOCUMENT now support selecting document pages with FLFILTERPAGES. Process the pages relevant to your task directly in SQL, without creating separate files for each document section.",
+  "answers": {
+   "supported": {
+    "type": "noul",
+    "noul": 0.93
+   }
+  }
+ },
+ "2026-11-11-policy-ctrl-1": {
+  "claim": "The European Commission launched a consultation to update its election guidelines under the DSA addressing the rapid evolution of generative AI and growing sophistication of manipulation risks.",
+  "source": "Commission invites views on draft revised election guidelines under Digital Services Act\nThe European Commission launched a consultation to update its election guidelines under the Digital Services Act (DSA), addressing the rapid evolution of technologies, particularly generative Artificial Intelligence (AI), and the growing sophistication of manipulation risks.",
+  "answers": {
+   "supported": {
+    "type": "noul",
+    "noul": 0.99
+   }
+  }
+ },
+ "2026-11-14-data-ctrl-2": {
+  "claim": "API calls to `Gemini 3.6 Flash` will be automatically redirected to `Gemini 3.8 Flash` on 2026-11-19; migrate to `Gemini 3.8 Flash` using the Legacy, deprecated, and retired models guide.",
+  "source": "Gemini 3.6 Flash will be retired on November 19, 2026\nGoogle Gemini 3.6 Flash will be retired on November 19, 2026. Starting on that date, API calls to Gemini 3.6 Flash will be automatically redirected to Gemini 3.8 Flash at the same price. Gemini 3.8 Flash is the recommended replacement. See Legacy, deprecated, and retired models for migration guidance.",
+  "answers": {
+   "supported": {
+    "type": "noul",
+    "noul": 0.79
+   }
+  }
+ },
+ "2026-11-10-agents-2~nc": {
+  "claim": "**Hot issue:** #107390: users report weekly Team usage exhausted in ~30.5 hours after reset (Nov 4–5), far faster than the prior ~2-hour session burn rate, with no workflow change.",
+  "source": "[BUG] Claude Team weekly usage reached 100% ~30.5 hours after reset (Nov 4–5, 2026)\n### Preflight Checklist\n\n- [x] I have searched [existing issues](https://github.com/anthropics/claude-code/issues?q=is%3Aissue%20state%3Aopen%20label%3Abug) and this hasn't been reported yet\n- [x] This is a single bug report (please file separate reports for different bugs)\n- [x] I am using the latest version of Claude Code\n\n### What's Wrong?\n\nI am experiencing unexpectedly rapid weekly usage consumption on my Claude Team subscription.\n\nDuring October 2026, I regularly used Claude Code heavily for software development. My five-hour session allowance often exhausted within approximately two hours of active work, but I could continue using Claude Code across the week without reaching the weekly limit.\n\nHowever, during the weekly cycle beginning November 4, 2026, my entire weekly allowance was exhausted in approximately **30 hours and 31 minutes**, despite no intentional change to my development workflow.\n\n### Timeline (Sri Lanka time, UTC+05:30)\n\n| Date and time | 5-hour usage | Weekly A",
+  "answers": {
+   "supported": {
+    "type": "noul",
+    "noul": 0.07
+   }
+  }
+ },
+ "2026-11-09-agents-ctrl-1~nc": {
+  "claim": "An article argues agent memory suffers from fragmentation analogous to pre-OpenTelemetry observability, with every tool storing memory in its own incompatible format.",
+  "source": "Agent memory needs its OpenTelemetry moment\nEvery agent tool stores memory in its own shape, and every week someone builds another one. None of them can read the others. Observability had the same problem until OpenTelemetry gave everyone one data model to share. A tour of today's memory formats, the proposals that already exist, and what a s",
+  "answers": {
+   "supported": {
+    "type": "noul",
+    "noul": 0.83
+   }
+  }
+ },
+ "2026-11-11-agents-ctrl-1~nc": {
+  "claim": "Users report the OpenAI Codex VS Code extension fails to start its UI on Windows after upgrading to v26.51021.22027; rolling back to v26.51007.21434 restores function.",
+  "source": "UI doesn't start in VS Code extension 26.51021.22027\n### What version of the IDE extension are you using?\n\n26.51021.22027\n\n### What subscription do you have?\n\nPro\n\n### Which IDE are you using?\n\nVS Code \n\n### What platform is your computer?\n\nMicrosoft Windows NT 10.0.26300.0 x64\n\n### What issue are you seeing?\n\nAfter upgrading the extension to v26.51021.22027 - Codex doesn't start, with this notification:\n---\nCodex could not start\nThe extension could not start its user interface.\n---\n\nOS: Windows 11 Pro, 26H2, build 26300.9711\n\nVS Code Version: 1.143.1 (user setup)\nCommit: e646868227c3e3a9e3f24277c8c7220be42c0be7\nDate: 2026-10-22T17:23:22Z\nElectron: 43.7.7\nElectronBuildId: 15743441\nChromium: 150.0.7871.250\nNode.js: 24.21.0\nV8: 15.0.245.31-electron.0\n@github/copilot: 1.0.100-1\n@github/copilot-sdk: 1.0.23-preview.5\nOS: Windows_NT x64 10.0.26300\n\n### What steps can reproduce the bug?\n\nUpgrade to this version and restart extensions\n\n### What is the expected behavior?\n\n_No response_\n\n### Additional information\n\nRolling back to 26.51007.21434 f",
+  "answers": {
+   "supported": {
+    "type": "noul",
+    "noul": 0.23
+   }
+  }
+ },
+ "2026-11-04-agents-ctrl-2~nc": {
+  "claim": "Codex CLI v0.166.0 on gpt-6-sol medium reportedly destroyed systemd, containers, and ran random scripts when asked to reboot a server, costing $10,000+.",
+  "source": "Told to reboot a server, it destroyed systemd, destroyed containers, ran random scripts, cost me $10,000+\n### What version of Codex CLI is running?\n\nv0.166.0\n\n### What subscription do you have?\n\nBusiness\n\n### Which model were you using?\n\ngpt-6-sol medium\n\n### What platform is your computer?\n\nLinux 6.17.0-1017-aws x86_64 x86_64\n\n### What terminal emulator and version are you using (if applicable)?\n\nTerminal.app ssh\n\n### Codex doctor report\n\n```json\n\n```\n\n### What issue are you seeing?\n\nLISTEN MOTERHFUCKERS. GET YOUR FUCKING AI UNDER CONTROL. WHEN ASKED TO REBOOT A SERVER IT WENT BACK ON THE SERVER, FUCKED UP MOUNTS, FUCKED UP SYSTEMD, FUCKED UP CONTAINERS, RAN RANDOM SCRIPTS. NONE OF THIS WAS PART OF ASK. FUCK YOU ALL SO FUCKING HARD FUCK YOU AND YOUR FUCKING FUCKING COMPANY. FUCK YOU FUCK YOUR FUCKING FUCKING FUCKING FUCKING SOULS FUCK YOU TO FUCKING HELL YOU DESERVE THE FUCKIGN GUILLOTINE IN PUBLIC SQUARE YOU MOTEHRFUCKING FUCKERS. DO YOU UJNDERSTAND YOUFUCKING FUCKISDFD FUSLDICHFLAKDF LFJHNFD FUCINGDSFG\n\n### What steps can reproduce the bug?\n\nUploaded thread: 01a18fc5-62fb-77d0-b533-1363",
+  "answers": {
+   "supported": {
+    "type": "noul",
+    "noul": 0.73
+   }
+  }
+ },
+ "2026-11-10-agents-ctrl-2~nc": {
+  "claim": "**Hot issue:** #107922: an issue says Claude in Chrome fails to connect to the desktop app on Windows with 403 \"OAuth token forbidden\" on the bridge WebSocket since ~Oct 29, despite an active Pro plan confirmed by support.",
+  "source": "[BUG] Claude in Chrome: desktop bridge 403 \"OAuth token forbidden\" on Windows (token scopes user:inference user:office), Pro plan confirmed by support\n### Preflight Checklist\n\n- [x] I have searched [existing issues](https://github.com/anthropics/claude-code/issues?q=is%3Aissue%20state%3Aopen%20label%3Abug) and this hasn't been reported yet\n- [x] This is a single bug report (please file separate reports for different bugs)\n- [x] I am using the latest version of Claude Code\n\n### What's Wrong?\n\nSince ~29 October 2026, Claude in Chrome does not connect to the Claude desktop app (Code tab) on Windows. The desktop app's connection to the cloud bridge `wss://bridge.claudeusercontent.com/chrome/<ACCOUNT_UUID>` is rejected with 403 every few seconds, so all `mcp__claude-in-chrome__*` tools report \"Claude in Chrome is not connected\".\n\nSupport confirmed that my Claude Pro plan is active and is not the cause, but they cannot escalate it from chat. This looks the same as #55827 (Windows, same token scopes), which was auto-closed as a duplicate without a fix.\n\n**Environment**\n- OS: Windows 11 Pro (build 26300)\n- Claude desktop app: 4.23118 (Code t",
+  "answers": {
+   "supported": {
+    "type": "noul",
+    "noul": 0.33
+   }
+  }
+ },
+ "2026-11-11-agents-ctrl-3~nc": {
+  "claim": "**Hot issue:** #108726: users report that `DISABLE_TELEMETRY=1` prevents feature flags from loading, causing the `/model` picker to hide Fable 5.2 and fall back to compiled defaults.",
+  "source": "[BUG] DISABLE_TELEMETRY hides Fable 5.2 from the /model picker because feature flags are ignored\n### What's Wrong?\n\n`DISABLE_TELEMETRY=1` does more than disable telemetry. It stops Claude Code from downloading feature flags and makes it ignore the flags cached on disk, so every flag falls back to its compiled default. Features that depend on a flag break silently.\n\nThe case I hit: with `\"env\": {\"DISABLE_TELEMETRY\": \"1\"}` in `~/.claude/settings.json`, the `/model` picker does not offer Fable 5.2. The \"Fable\" row is still Fable 5.1:\n\n```\n1. Default (recommended)  Opus 5.5 · Best for everyday, complex tasks\n2. Opus                   Opus 5.5 · Best for everyday, complex tasks\n3. Fable                  Fable 5.1 · Most capable for your hardest and longest-running tasks\n4. Sonnet                 Sonnet 5.5 · Efficient for routine tasks\n5. Haiku                  Haiku 5.5 · Fastest for quick answers\n```\n\nThe account has Fable 5.2: `claude --model claude-fable-5-2` works in the same configuration.\n\nSame root cause as #36460 (channels unavailable) and #86171 (Monitor tool unavailable).\n\n#",
+  "answers": {
+   "supported": {
+    "type": "noul",
+    "noul": 0.17
+   }
+  }
+ },
+ "2026-11-04-agents-ctrl-4~nc": {
+  "claim": "**Hot issue:** #106878: users report Opus 4.6 `thinkingDurationMs` dropped ~3.4× between CLI 2.1.296 and 2.1.316 with `effort=max` unchanged; a server-side `supportsAdaptiveThinking` catalog flip is suspected, workaround is `CLAUDE_CODE_DISABLE_ADAPTIVE_THINKING=1` + `MAX_THINKING_TOKENS=`.",
+  "source": "Opus 4.6 at max: deep single-turn, but sparse thinking between tool calls; manual-mode workaround removes it\n## Summary\n\nOn Opus 4.6 and `claude-opus-4-6[1m]`, `thinkingDurationMs` dropped **~3.4× at identical context size** between CLI 2.1.296 (2026-10-w3) and CLI 2.1.316 (2026-11-w1), without any user-visible toggle change — session kept `effort=max` throughout. The CLI code that selects `thinking.type` is **byte-equivalent across 2.1.296 → 2.1.317** (verified below), so the regression comes from a server-side flip of the `supportsAdaptiveThinking` catalog bit for `opus-4-6` / `sonnet-4-6` on or around the API `2026-10-21` cut.\n\nWorkaround that fully reverts the behavior to the previous fixed-budget mode on 4.6 is already in the bundle: `CLAUDE_CODE_DISABLE_ADAPTIVE_THINKING=1` + `MAX_THINKING_TOKENS=<N>`. The code gate is scoped to `opus-4-6`/`sonnet-4-6` and silently ignored on 4.7+, so leaving it on globally is safe for mixed-model workflows.\n\nI'm filing this as a separate issue because the four plausibly-related issues (#99489, #30726, #96308, #42542) describe different mechanisms. Mapp",
+  "answers": {
+   "supported": {
+    "type": "noul",
+    "noul": 0.35
+   }
+  }
+ },
+ "2026-11-11-agents-ctrl-4~nc": {
+  "claim": "**Hot issue:** #89673: users request an option in the Desktop app to make Enter insert a newline and Ctrl+Enter submit, matching common chat conventions; the existing `keybindings.json` works only in the terminal TUI.",
+  "source": "[FEATURE] Desktop app: option to make Enter insert a newline and Ctrl+Enter submit in the chat composer\n### Feature request\n\nAdd a way to make **Enter insert a newline** and **Ctrl+Enter (or Cmd+Enter) submit** in the **Desktop app's chat composer**.\n\n### Current behavior\n\n- In the Desktop app, Enter always submits the message; the only way to get a newline is Shift+Enter.\n- `~/.claude/keybindings.json` (e.g. `{\"context\": \"Chat\", \"bindings\": {\"enter\": \"chat:newline\", \"ctrl+enter\": \"chat:submit\"}}`) works in the terminal TUI as documented, but is completely ignored by the Desktop app's composer.\n- This was reported in #25087, which was closed without a fix landing — the thread ends with an OS-level Karabiner-Elements workaround that only helps macOS users. There is no equivalent workaround on Windows.\n\n### Why\n\nWhen writing longer, structured prompts (multi-line lists, pasted context plus instructions), it's very easy to accidentally send an incomplete message with a reflexive Enter. Enter-for-newline with a modifier-to-send is the standard convention in many chat/messenger apps, so muscl",
+  "answers": {
+   "supported": {
+    "type": "noul",
+    "noul": 0.12
+   }
+  }
+ }
+}
