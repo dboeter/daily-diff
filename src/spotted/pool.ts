@@ -26,11 +26,16 @@ export interface Story {
   comments: number;
   description?: string; // HN page description, Lobste.rs text or page description, Dev.to description
   published: string; // ISO
+  /** Present only when Jev flagged it as a security event (`judgeSecurityStories`); confirmed: the claim is backed. */
+  security?: { confirmed: boolean };
 }
 
 /** What a story table row reads (`renderSpottedTable`): a Spotted row, or a Most discussed row from the log. */
 export type StoryRow = Numbered<
-  Pick<Story, "id" | "source" | "title" | "url" | "discussionUrl" | "points" | "comments" | "description">
+  Pick<
+    Story,
+    "id" | "source" | "title" | "url" | "discussionUrl" | "points" | "comments" | "description" | "security"
+  >
 >;
 
 /** The link's host, which often says what a title does not (arxiv.org, a lab's blog); "" for a bad URL. */
@@ -298,7 +303,8 @@ export type SpottedPage = (typeof SPOTTED_PAGES)[number];
 
 /**
  * Stories per page and source, sources in this order. No combined score:
- * HN points, Lobste.rs scores and Dev.to reactions are not comparable.
+ * HN points, Lobste.rs scores and Dev.to reactions are not comparable. A story flagged as a
+ * security event is not counted (`claimRows`).
  */
 export const SPOTTED_PER_SOURCE: Record<StorySource, number> = { hn: 6, lobsters: 2, devto: 2 };
 
@@ -312,9 +318,10 @@ export interface SpottedSection {
 
 /**
  * Up to `cap` of `stories`, in order, skipping a link in `taken`; each one taken claims its link.
- * `onDrop` hears every story left out and why.
+ * `onDrop` hears every story left out and why. A flagged story (`security`) skips `cap` and
+ * `passes` and is not counted toward them: it takes no other story's row.
  */
-function claimRows<T extends Pick<Story, "url">>(
+function claimRows<T extends Pick<Story, "url" | "security">>(
   stories: T[],
   cap: number,
   taken: Set<string>,
@@ -323,8 +330,10 @@ function claimRows<T extends Pick<Story, "url">>(
   passes?: (story: T, taken: number) => boolean,
 ): T[] {
   const rows: T[] = [];
+  let counted = 0;
   for (const s of stories) {
-    if (passes && !passes(s, rows.length)) {
+    const own = s.security !== undefined;
+    if (!own && passes && !passes(s, counted)) {
       onDrop?.(s, "threshold");
       continue;
     }
@@ -334,12 +343,13 @@ function claimRows<T extends Pick<Story, "url">>(
       continue;
     }
     // Checked last: `cap` means the story would have been a row, which is what carries it to tomorrow.
-    if (rows.length === cap) {
+    if (!own && counted === cap) {
       onDrop?.(s, "cap");
       continue;
     }
     taken.add(key);
     rows.push(s);
+    if (!own) counted++;
   }
   return rows;
 }
@@ -351,7 +361,7 @@ function claimRows<T extends Pick<Story, "url">>(
 export const SPOTTED_MIN_TOPIC_PROBABILITY = 0.6;
 /** A story published longer ago is not news, however late a source surfaces it (a 25-day-old post, 2026-10-26). */
 export const SPOTTED_MAX_AGE_DAYS = 7;
-/** Once a page has this many rows, a further row needs SPOTTED_MIN_POINTS: no 8-point row beside 491. */
+/** Once a page has this many rows, a further row needs SPOTTED_MIN_POINTS: no 8-point row beside 491. A flagged story skips the floor and is not counted. */
 export const SPOTTED_ROWS_BEFORE_FLOOR = 3;
 /** Each source's own scale (HN points, Lobste.rs score, Dev.to reactions); stories are fetched hours old. */
 export const SPOTTED_MIN_POINTS: Record<StorySource, number> = { hn: 5, lobsters: 3, devto: 10 };
@@ -366,6 +376,9 @@ export const isContestEntry = (s: Pick<Story, "title" | "description">): boolean
  * Left out before ranking (`threshold`): a topic probability under SPOTTED_MIN_TOPIC_PROBABILITY,
  * a story over SPOTTED_MAX_AGE_DAYS old (when `dateStr` is given) and a contest entry; while
  * ranking, a story under SPOTTED_MIN_POINTS once its page has SPOTTED_ROWS_BEFORE_FLOOR rows.
+ * A story Jev flagged as a security event (`security`) has its own slot: it skips the per-source cap
+ * and the points floor and counts toward neither, but needs everything else. The topic bar stays on
+ * purpose: the maintainer deferred the page of a flagged story (.scratch/security-section/spec.md).
  * Each link once: a row claims its link in that order, so a copy below its source's cut, or on no
  * page, leaves the link to a copy that makes a row. `pageOf` is null for a story no page takes;
  * `probabilityOf` is undefined without a Jev verdict (the keyword fallback), which passes.
@@ -407,7 +420,8 @@ export function selectSpotted(
           taken,
           (s, reason) => dropped?.set(s.id, reason),
           (s, sourceRows) =>
-            rows.length + sourceRows < SPOTTED_ROWS_BEFORE_FLOOR || s.points >= SPOTTED_MIN_POINTS[source],
+            rows.filter((r) => !r.security).length + sourceRows < SPOTTED_ROWS_BEFORE_FLOOR ||
+            s.points >= SPOTTED_MIN_POINTS[source],
         );
         rows.push(...claimed);
       }
@@ -416,7 +430,7 @@ export function selectSpotted(
   );
 }
 
-/** The Overview's "Also talked about" stories per source, sources in this order. */
+/** The Overview's "Also talked about" stories per source, sources in this order; a flagged story is not counted. */
 export const TALKED_ABOUT_PER_SOURCE: Record<StorySource, number> = { hn: 3, lobsters: 1, devto: 1 };
 /**
  * Points a story routed to no page needs for the Overview, per source: 32 of 45 judged stories were
@@ -427,6 +441,7 @@ export const TALKED_ABOUT_MIN_POINTS: Record<StorySource, number> = { hn: 50, lo
  * The Overview's policy list per source, apart from `other`: on 2026-10-28 three `other` essays
  * (605, 542, 402 points) took HN's slots from Claude's illegally obtained books (323) and police AI (279).
  */
+// A flagged story is not counted (`claimRows`).
 export const POLICY_TALK_PER_SOURCE: Record<StorySource, number> = { hn: 2, lobsters: 1, devto: 1 };
 /** Points a policy story needs for the Overview, per source: the same bar as `other`. */
 export const POLICY_TALK_MIN_POINTS = TALKED_ABOUT_MIN_POINTS;
@@ -437,7 +452,7 @@ const OTHER_TOPIC = "other";
 /** An Overview "Also talked about" row: a story with the topic Jev routed it to. */
 export type TalkedAboutRow = Pick<
   Story,
-  "id" | "source" | "title" | "url" | "discussionUrl" | "points" | "comments"
+  "id" | "source" | "title" | "url" | "discussionUrl" | "points" | "comments" | "security"
 > & {
   topic: string;
 };
@@ -451,7 +466,8 @@ export type TalkedAboutRow = Pick<
  * probability floor: a story split between policy and other goes by its leading topic. A story on a
  * page's topic but under SPOTTED_MIN_TOPIC_PROBABILITY (`probabilityOf`) joins the `other` list,
  * whatever its topic: on 2026-11-01 a 315-point story split between research, other and models
- * landed nowhere.
+ * landed nowhere. A story flagged as a security event skips the per-source cap and does not count
+ * toward it; it still needs the points minimum.
  */
 export function selectTalkedAbout(
   stories: Story[],
@@ -501,6 +517,7 @@ export function selectTalkedAbout(
       discussionUrl: s.discussionUrl,
       points: s.points,
       comments: s.comments,
+      ...(s.security ? { security: s.security } : {}),
       topic: underBar(s) ? OTHER_TOPIC : topicOf(s)!,
     }));
 }

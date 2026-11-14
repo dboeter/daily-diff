@@ -1,6 +1,6 @@
 # Security: a banner for severe incidents, marked rows for the rest
 
-Status: placement decided on 2026-11-11. The decisions under "Decided" are the maintainer's. The spike is done (`spike/results.md`). Nothing is built.
+Status: placement decided on 2026-11-11. The decisions under "Decided" are the maintainer's. The spike is done (`spike/results.md`). Steps 3 and 4 are built (branch `review-followups`, not yet on `main`): the story question writes `security-verdicts.json` and `security-trace.json`, and a flagged story shows the 🔓 marker (with "One person's claim, not confirmed" when no vendor, researcher or press backs it) and takes its own slot. The banner is not built.
 
 ## Why
 
@@ -14,7 +14,7 @@ The nightly reviews of 2026-11-07 to 11-10 found security news that was fetched 
 
 1. **Readers**: the maintainer and the colleagues who read only the Data page.
 2. **Scope**: incidents (a breach, a leak, a vulnerability) and security fixes. A fix that follows an incident an earlier digest reported must point back to it.
-3. **Messages**: security items go into `highlights.json`, so Telegram and the Teams post carry them. Which items, see "Open decisions".
+3. **Messages**: security items go into `highlights.json`, so Telegram and the Teams post carry them. Which items, see "Decided on 2026-11-13"; a banner alone sends the Teams post (decided 2026-11-13).
 4. **Placement**: a banner for the severe incidents, a marker and an own slot for the other security stories, a marked bullet for a fix. No Security page and no Security table on the pages.
 
 ## Placement
@@ -44,7 +44,7 @@ Proposed; the maintainer has decided the placement, not these details.
 - **Shown once.** A banner line shows on the day its story is first seen. A later fix or postmortem that clears the rule is a new line. It names the earlier line only once the link is built (the last build step).
 - **Messages**: `highlights.json` is keyed by report, so the banner lines are stored once, under a key of their own, not once per report. Telegram shows them once, above the reports. The Teams post today holds only the `ai-data` highlights and is skipped when there are none (`sendTeams`, `src/cli/notify.ts`), so it must take the banner lines too.
 - **Marker**: one emoji before the row's title, defined in `GLOSSARY.md`. Not green or red, and not ⚠️, which the Data page uses for a deprecation.
-- **Own slot**: a flagged story skips the topic bar (`SPOTTED_MIN_TOPIC_PROBABILITY`) and the per-source row cap. It stays in the list it belongs to and takes no other story's row.
+- **Own slot**: a flagged story skips the row caps only: the per-source row cap and the points floor (Spotted), and the per-source cap (the Overview's lists). It still needs the topic bar (`SPOTTED_MIN_TOPIC_PROBABILITY`), since the page of a flagged story is deferred (see Deferred). It stays in the list it belongs to and takes no other story's row.
 - **Without Jev** (no key, or more than half the calls failing) there is no banner and no marker that day. There is no keyword fallback, see the evidence.
 - **A wrong banner is on every page.** The answers are cached like the topic verdicts, so a wrong one is fixed by editing and pinning it, and a trace file lists every flagged story with its three answers.
 
@@ -55,8 +55,10 @@ The digest's Jev key and the local key are on one TypeSafe organization, and the
 | Part                                                       | Jev tokens a day            |
 | ---------------------------------------------------------- | --------------------------- |
 | Stories, all four spike questions                          | about 140,000               |
-| Stories, severity and claim asked only for a flagged story | about 50,000 (not measured) |
+| Stories, severity and claim asked only for a flagged story | about 35,000 at most (built) |
 | Release lines, every line of every release body            | about 200,000               |
+
+Measured on 2026-11-14 for the built two-stage request: the flag alone costs about 490 tokens a story, the kind, severity and claim about 1,170 more for a flagged one, and asked apart they gave the spike's answers. Spotted routed 47 to 61 fresh stories a day (11-05 to 11-10), plus a few news stories, so about 35,000 tokens on the first night; a story seen the day before is cached, so later nights cost less.
 
 So the story feed comes first, with the flag asked for every fresh story and the other answers only for a flagged one. The release-line feed waits until a week of the story feed shows what it costs.
 
@@ -86,12 +88,15 @@ Four days of `candidates.json` (11-07 to 11-10, the file exists since 11-07), a 
 - Acceptance case: the email leak (story 11-05, shown 11-07) and v2.1.317 (11-03). Replayed over those days, the story shown on 11-07 says it is fixed.
 - Not covered: a later change to a fix. The v2.1.321 line that narrows the email check scores 0.43 as a security line and 0.22 and 0.11 against the leak stories (spike, 2026-11-11), so it is neither flagged nor linked. If such a change must show, it needs a link to the earlier fix line of its project; that is not tested.
 
-## Open decisions
+## Decided on 2026-11-13
 
-1. **Which items the messages carry.** Decision 3 was made when every item was a row. Proposed: code adds the banner lines to both messages; a marked row or a fix reaches a message only when its page's Highlights pick it.
-2. **A banner on a day without a data report.** Proposed: a banner alone sends the Teams post, since reaching the colleagues is the reason for the banner. It does not publish a page that was skipped; it shows on the Overview and on the pages that exist.
-3. **Page of a flagged story no project took**: proposed is the page of its best page topic, with no bar; a story routed to no page goes to "Also talked about".
-4. **A banner that is one user's report with many points.** The email leak had 1,612 points and is not a banner. Points as a third signal are not tested.
+- **Which items the messages carry.** Telegram carries every banner line, added by code. The Teams post carries the banner lines about an AI lab (Anthropic, OpenAI or Google), a lab's own product included (Claude Code, Codex, Gemini CLI: decided 2026-11-14), or a data platform or tool. A marked story or a fix reaches either message only when its page's Highlights pick it. Telling the two apart needs a fifth Jev question, what the event concerns (an AI lab, a data platform or tool, or something else), which the spike did not ask: test it on the spike's flagged stories before the banner step.
+- **A banner on a day without a data report** sends the Teams post on its own, since reaching the colleagues is the reason for the banner. It does not publish a page that was skipped; it shows on the Overview and on the pages that exist.
+- **No points signal, and no allegation shown as fact.** Points say a story is popular, not that it is true. A banner needs a claim by the vendor, a researcher or the press. A flagged story that is one person's claim (`claim_by: individual`) is never written as an incident: its marked row reads "Not confirmed by the vendor, a researcher or the press", written by code, and it makes no Highlight (built 2026-11-14; the wording is also true when the source is unclear or Jev gave no answer). The email leak (1,612 points) stays a marked row.
+
+## Deferred
+
+- **Page of a flagged story no project took.** Deferred until it happens in a nightly run (the spike's Fireworks stories were such a case, before the marker existed). Until then such a story goes where today's selection puts it, and the security trace shows it (`flagged: true`, `placed: null` with its `dropped_reason`). The step 5 check of a week of traces looks for it. The proposal when it happens: the page of its best page topic, with no topic bar; a story routed to no page goes to "Also talked about".
 
 ## Order of work
 

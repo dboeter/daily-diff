@@ -16,6 +16,7 @@ import {
   MSG,
   NO_HIGHLIGHT_NOTE,
   SECTIONS,
+  SECURITY,
   SPOTTED,
 } from "../core/strings.ts";
 import {
@@ -299,12 +300,24 @@ export function labPostsNoHighlightNote(titles: string[]): string | undefined {
 
 /**
  * A page's Highlights rule for its stories that show only a title (`titleOnlyStories`,
- * `titleOnlyNews`); undefined when every story has text.
+ * `titleOnlyNews`) and its unconfirmed security claims (`unconfirmedClaims`), each with its own
+ * reason; undefined when there are none.
  */
-export function storiesNoHighlightNote(titles: string[]): string | undefined {
-  return titles.length
-    ? `These stories (Spotted rows and News items) show only a title, no description: no Highlight for them. ${titles.map((t) => `"${t}"`).join(", ")}`
-    : undefined;
+export function storiesNoHighlightNote(titles: string[], unconfirmed: string[] = []): string | undefined {
+  const quoted = (ts: string[]) => [...new Set(ts)].map((t) => `"${t}"`).join(", ");
+  const notes = [
+    ...(titles.length
+      ? [
+          `These stories (Spotted rows and News items) show only a title, no description: no Highlight for them. ${quoted(titles)}`,
+        ]
+      : []),
+    ...(unconfirmed.length
+      ? [
+          `These security stories are not confirmed by the vendor, a researcher or the press: no Highlight for them. ${quoted(unconfirmed)}`,
+        ]
+      : []),
+  ];
+  return notes.length ? notes.join("\n") : undefined;
 }
 
 /** The data report's reader, shared by its two vendor calls. */
@@ -379,8 +392,10 @@ export function buildDataProsePrompt(
   minorTitles: string[] = [],
   /** Stories that show only a title (`titleOnlyStories`, `titleOnlyNews`): never a Highlight. */
   titleOnlyTitles: string[] = [],
+  /** Flagged security stories not confirmed by the vendor, a researcher or the press (`unconfirmedClaims`): never a Highlight. */
+  unconfirmedTitles: string[] = [],
 ): string {
-  const storiesNote = storiesNoHighlightNote(titleOnlyTitles);
+  const storiesNote = storiesNoHighlightNote(titleOnlyTitles, unconfirmedTitles);
   const parts = [
     `\`## ${SECTIONS.highlights}\` — 1-3 bullets, the most consequential changes today, deprecations, retirements and breaking changes first. Each bullet says who is affected (which client setup: e.g. Azure Databricks workspaces with the compliance security profile, Snowflake Native App providers, BigQuery users of AI functions), what to do when the row says or its change requires it (enable, migrate, test, plan for) and by when, if the row gives a date.`,
     `The line \`${TABLES_MARKER}\` exactly once, on its own line. The sections are inserted there.`,
@@ -437,7 +452,12 @@ function highlightsInput(md: string): string {
   const section = highlightsSection(md);
   const body = section?.slice(`## ${SECTIONS.highlights}`.length).trim();
   if (section && body && !FAILURE_NOTICES.has(body)) return section;
-  return (section ? md.replace(section, "") : md).trim().slice(0, HIGHLIGHTS_EXCERPT_CHARS);
+  // An unconfirmed security claim never reaches a message, even from the page body.
+  const kept = (section ? md.replace(section, "") : md)
+    .split("\n")
+    .filter((line) => !line.includes(SECURITY.unconfirmed.trim()))
+    .join("\n");
+  return kept.trim().slice(0, HIGHLIGHTS_EXCERPT_CHARS);
 }
 
 /**

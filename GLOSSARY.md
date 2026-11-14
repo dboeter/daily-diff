@@ -130,6 +130,10 @@ _Avoid_: New, trending (for momentum alone)
 An item in the weekly Trends page's agents tables or Hugging Face table two weeks in a row or more, marked 🔥.
 _Avoid_: Hot, popular (for a first appearance or a one-week jump)
 
+**Security Marker**:
+🔓 before a story's title: Jev flagged the story as a security or privacy event in an AI tool, an AI provider or a data tool. When Jev does not find the claim backed by the vendor, a researcher or the press (one person's report, an unclear source, or no answer), the story also reads "Not confirmed by the vendor, a researcher or the press" and makes no Highlight.
+_Avoid_: Alert, warning (the banner for severe incidents is a separate thing)
+
 **Established Repo**:
 A repo that is not New; only Established Repos appear in the category tables.
 
