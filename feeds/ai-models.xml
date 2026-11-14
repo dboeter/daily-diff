@@ -13,7 +13,127 @@
       <height>144</height>
     </image>
     <atom:link href="https://dboeter.github.io/daily-diff/feeds/ai-models.xml" rel="self" type="application/rss+xml"/>
-    <lastBuildDate>Fri, 13 Nov 2026 06:28:33 +0000</lastBuildDate>
+    <lastBuildDate>Sat, 14 Nov 2026 06:08:52 +0000</lastBuildDate>
+    <item>
+      <title>AI Models &amp; Labs 2026-11-14</title>
+      <link>https://dboeter.github.io/daily-diff/#2026-11-14/ai-models</link>
+      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-11-14/ai-models</guid>
+      <pubDate>Sat, 14 Nov 2026 00:00:00 +0000</pubDate>
+      <description>AI Models &amp;amp; Labs 2026-11-14 ⬛ Overview · 🟪 AI Agents · 🟦 AI Models &amp;amp; Labs · 🟨 Data Engineering Lab posts: 2 | New models: 1 | Spotted: 7 | Generated: 2026-11-14 06:05 UTC Highlights inclusionAI&amp;#39;s Ling 3.2 Flash is free on OpenRouter with 1M context, hybrid reasoning, and multimodal input. OpenAI disbands its robotics team, reassigning researchers as its general models begin controlling robots. Anthropic publishes research on building strong safety evaluations to measure a model&amp;#3...</description>
+      <content:encoded><![CDATA[<h1>AI Models &amp; Labs 2026-11-14</h1>
+<p><a href="https://dboeter.github.io/daily-diff/#2026-11-14">⬛ Overview</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-14/ai-agents">🟪 AI Agents</a> · <strong>🟦 AI Models &amp; Labs</strong> · <a href="https://dboeter.github.io/daily-diff/#2026-11-14/ai-data">🟨 Data Engineering</a></p>
+<blockquote>
+<p>Lab posts: 2 | New models: 1 | Spotted: 7 | Generated: 2026-11-14 06:05 UTC</p>
+</blockquote>
+<hr>
+<h2>Highlights</h2>
+<ul>
+<li>inclusionAI&#39;s Ling 3.2 Flash is free on OpenRouter with 1M context, hybrid reasoning, and multimodal input.</li>
+<li>OpenAI disbands its robotics team, reassigning researchers as its general models begin controlling robots.</li>
+<li>Anthropic publishes research on building strong safety evaluations to measure a model&#39;s propensity to cause harm.</li>
+</ul>
+<hr>
+<h2>Lab announcements</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Lab</th>
+<th align="left">Post</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-11-13</td>
+<td align="left">Anthropic</td>
+<td align="left"><a href="https://www.anthropic.com/research/building-strong-safety-evaluations">Building strong safety evaluations</a></td>
+<td align="left">Anthropic published research on building strong safety evaluations to help researchers create sound safety assessments that measure a model&#39;s propensity to cause or contribute to harm.</td>
+</tr>
+<tr>
+<td align="left">2026-11-13</td>
+<td align="left">OpenAI</td>
+<td align="left"><a href="https://openai.com/index/introducing-chatgpt-wallet/">Introducing Chatgpt Wallet</a></td>
+<td align="left">—</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>New on OpenRouter</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Model</th>
+<th align="left">Listed</th>
+<th align="left">Context</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a href="https://openrouter.ai/inclusionai/ling-3.2-flash:free">inclusionAI: Ling 3.2 Flash (free)</a> <code>inclusionai/ling-3.2-flash:free</code></td>
+<td align="left">2026-11-13</td>
+<td align="left">1M</td>
+<td align="left">inclusionAI&#39;s Ling 3.2 Flash is a hybrid reasoning model that accepts text and image input.</td>
+</tr>
+</tbody></table>
+<hr>
+<p>Nothing new from OpenRouter&#39;s stealth models today.</p>
+<hr>
+<h2>Spotted</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Story</th>
+<th align="left">Source</th>
+<th align="left">Discussion</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a href="https://status.claude.com/history">Claude Is Down</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50481220">198 points, 175 comments</a></td>
+<td align="left">The post points to Claude’s status page, which publishes the service’s incident and scheduled maintenance history.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://fortune.com/2026/11/13/openai-disbands-robotics-team-as-its-general-models-start-running-robots/">OpenAI disbands its robotics team as its general models start running robots</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50487184">155 points, 66 comments</a></td>
+<td align="left">OpenAI has disbanded its dedicated robotics team, reassigning its researchers to other groups as its general models begin to control robots.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://www.perplexity.ai/hub/blog/perplexity-decider">Perplexity Decider v1.3: Training, eval, and use cases</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50488464">115 points, 21 comments</a></td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left"><a href="https://unsloth.ai/docs/models/qwen3.8">Unsloth Qwen3.8-27B Quantizations – Dynamic v3.1 Update</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50491980">75 points, 11 comments</a></td>
+<td align="left">The Unsloth guide shows how to run Qwen3.8 quantized models, including the 27‑billion‑parameter version, on a local machine.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://pirateface.co/articles/every-ai-model-should-be-a-torrent">Torrents are perfect for model distribution</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50464055">37 points, 16 comments</a></td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left"><a href="https://techcrunch.com/2026/11/12/hugging-face-ceo-vows-to-keep-fighting-for-open-source-ai-after-jensen-huangs-exit/">Hugging Face CEO vows to keep fighting for open-source AI</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50471673">21 points, 2 comments</a></td>
+<td align="left">Hugging Face’s CEO vowed to continue advocating for open‑source AI after Huang’s departure, amid scrutiny of Nvidia’s $12.9 billion acquisition.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://e-means.github.io/">e-means: 10x faster k-means at equal loss</a></td>
+<td align="left">Lobste.rs</td>
+<td align="left"><a href="https://lobste.rs/s/rnmylu/e_means_10x_faster_k_means_at_equal_loss">4 points, 0 comments</a></td>
+<td align="left">The e‑means project claims a 10× speedup for k‑means clustering while maintaining the same loss.</td>
+</tr>
+</tbody></table>
+<hr>
+<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
+]]></content:encoded>
+    </item>
     <item>
       <title>AI Models &amp; Labs 2026-11-13</title>
       <link>https://dboeter.github.io/daily-diff/#2026-11-13/ai-models</link>
