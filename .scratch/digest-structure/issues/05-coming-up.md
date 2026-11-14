@@ -1,6 +1,6 @@
 # Coming up on the Overview and in Telegram
 
-Status: ready-for-agent
+Status: resolved
 Blocked by: 02, 03
 
 Spec: the Overview paragraph in `../spec.md`.

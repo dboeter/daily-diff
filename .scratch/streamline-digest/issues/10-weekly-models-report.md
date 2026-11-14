@@ -4,7 +4,7 @@
 
 **Blocked by:** 01, 03
 
-**Status:** ready-for-agent
+**Status:** resolved
 
 - [ ] HF report gains the OpenRouter sections; trending no longer has "Model Usage on OpenRouter"
 - [ ] Report id/file unchanged (`ai-hf`) so the archive stays continuous; name is cadence-neutral

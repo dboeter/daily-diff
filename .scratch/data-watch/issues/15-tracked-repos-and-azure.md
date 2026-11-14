@@ -1,6 +1,6 @@
 # More tracked repos and Azure data categories
 
-Status: ready-for-human
+Status: resolved
 Type: task
 Blocked by: none
 
@@ -25,3 +25,7 @@ Done in the same change as ticket 12's spike (PR #180); this ticket records the 
 ## Done when
 
 - The six Azure category strings are either added as read from the feed or recorded here as absent.
+
+## Comments
+
+- 2026-11-14: the six strings are added to `config.yml`: `Azure Data Factory`, `Azure Synapse Analytics`, `Event Hubs`, `Azure Stream Analytics`, `Microsoft Purview`, `Azure Data Explorer`. The feed had no item with any of them that day, so they were read from the product facets of the JSON API behind the Azure updates page (`https://www.microsoft.com/releasecommunications/api/v2/azure?$count=true&includeFacets=true&top=1`; it answers 403 without a browser User-Agent, `Origin` and `Referer`). Three current items had the same `<category>` values in the feed as their products, categories and tags in the API, so the names match exactly. The Prefect 2.x note above stays a "revisit if noisy".

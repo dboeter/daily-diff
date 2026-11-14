@@ -1,6 +1,6 @@
 # Weekly Trends page
 
-Status: ready-for-agent
+Status: resolved
 Blocked by: 01, 03
 
 Spec: the weekly paragraph and the section map in `../spec.md`, decisions 2 and 3.

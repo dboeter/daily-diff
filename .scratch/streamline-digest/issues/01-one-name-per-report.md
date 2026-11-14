@@ -4,7 +4,7 @@
 
 **Blocked by:** None (can start immediately).
 
-**Status:** ready-for-agent
+**Status:** resolved
 
 - [ ] One entry per live report (emoji, name, short name); agents/infra names still come from `config.yml`
 - [ ] H1, issue title, sidebar label (`manifest.json` labels), RSS title and Telegram label all derive from it

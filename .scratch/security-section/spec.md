@@ -1,6 +1,6 @@
 # Security: a banner for severe incidents, marked rows for the rest
 
-Status: placement decided on 2026-11-11. The decisions under "Decided" are the maintainer's. The spike is done (`spike/results.md`). Steps 3 and 4 are built (branch `review-followups`, not yet on `main`): the story question writes `security-verdicts.json` and `security-trace.json`, and a flagged story shows the 🔓 marker (with "One person's claim, not confirmed" when no vendor, researcher or press backs it) and takes its own slot. The banner is not built.
+Status: placement decided on 2026-11-11. The decisions under "Decided" are the maintainer's. The spike is done (`spike/results.md`). Steps 3 and 4 are built and on `main` (PR #240, merged 2026-11-14); step 5, a week of runs checked by hand, is next: the story question writes `security-verdicts.json` and `security-trace.json`, and a flagged story shows the 🔓 marker (with "One person's claim, not confirmed" when no vendor, researcher or press backs it) and takes its own slot. The banner is not built.
 
 ## Why
 
@@ -52,11 +52,11 @@ Proposed; the maintainer has decided the placement, not these details.
 
 The digest's Jev key and the local key are on one TypeSafe organization, and the spike emptied its credits. Estimates from the spike's token counts; the price per token and the digest's daily use today are not known.
 
-| Part                                                       | Jev tokens a day            |
-| ---------------------------------------------------------- | --------------------------- |
-| Stories, all four spike questions                          | about 140,000               |
+| Part                                                       | Jev tokens a day             |
+| ---------------------------------------------------------- | ---------------------------- |
+| Stories, all four spike questions                          | about 140,000                |
 | Stories, severity and claim asked only for a flagged story | about 35,000 at most (built) |
-| Release lines, every line of every release body            | about 200,000               |
+| Release lines, every line of every release body            | about 200,000                |
 
 Measured on 2026-11-14 for the built two-stage request: the flag alone costs about 490 tokens a story, the kind, severity and claim about 1,170 more for a flagged one, and asked apart they gave the spike's answers. Spotted routed 47 to 61 fresh stories a day (11-05 to 11-10), plus a few news stories, so about 35,000 tokens on the first night; a story seen the day before is cached, so later nights cost less.
 

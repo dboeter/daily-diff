@@ -1,6 +1,6 @@
 # Data Engineering Watch
 
-Status: ready-for-agent
+Status: resolved
 
 ## Problem Statement
 
@@ -99,3 +99,7 @@ Deprecations and breaking changes come first. A day with nothing new produces no
 - Daily Diff's documented focus (AI coding and agents plus AI policy) widens with this report. AGENTS.md's overview should say so.
 - Volume risk: Snowflake and Databricks release notes can list dozens of items on release days. The spike should measure a typical and a busy day, and the length cap should be set from those numbers.
 - Suggested ticket order: 01 feed spike → 02 data report skeleton with repo sections → 03 vendor feeds + state + Jev relevance → 04 Data × AI section and news matching → 05 Teams card and sender → 06 policy cross-link.
+
+## Comments
+
+- 2026-11-14: resolved. The data report runs daily as AGENTS.md describes. The open follow-up is ticket 05 (Teams: no `TEAMS_WEBHOOK_URL` secret yet, no test post); ticket 15 was finished later the same day.

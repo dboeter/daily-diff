@@ -608,7 +608,8 @@ describe("selectTalkedAbout", () => {
       new Set(),
       (s) => probability[s.id],
     );
-    expect(rows.map((r) => [r.id, r.topic])).toEqual([[split.id, "other"]]);
+    // The row keeps its routed topic, as the trace does (issue 09 of the 2026-11-10 review).
+    expect(rows.map((r) => [r.id, r.topic])).toEqual([[split.id, "research"]]);
   });
 
   it("ticket 14 replay: the 2026-10-26 pool puts the AI-found PHP RCE on the Overview", () => {

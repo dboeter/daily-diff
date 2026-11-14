@@ -4,7 +4,7 @@
 
 **Blocked by:** None (can start immediately).
 
-**Status:** ready-for-agent
+**Status:** resolved
 
 - [ ] HN, ArXiv, HF, Community, Web prompts reference shared heading constants: `Highlights`, `Signals`, `Worth reading`
 - [ ] Web report drops its numbered section titles

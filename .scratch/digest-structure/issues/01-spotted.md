@@ -1,6 +1,6 @@
 # Spotted: community stories routed by topic, shown once
 
-Status: ready-for-agent
+Status: resolved
 Blocked by: none
 
 Spec: `../spec.md`, placement rules 3 and 4 and decision 1.

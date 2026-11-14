@@ -4,7 +4,7 @@
 
 **Blocked by:** None (can start immediately).
 
-**Status:** ready-for-agent
+**Status:** resolved
 
 - [ ] Any `#` heading the model emits is dropped, and a leading `**Date:**/**Source:**/**Type:**` block with it
 - [ ] Applied to every LLM-written report body

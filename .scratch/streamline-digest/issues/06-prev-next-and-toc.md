@@ -4,7 +4,7 @@
 
 **Blocked by:** None (can start immediately).
 
-**Status:** ready-for-agent
+**Status:** resolved
 
 - [ ] Prev/next day and previous edition derived from `manifest.json`
 - [ ] TOC shown when a report has 4+ `##` headings; entries scroll to the heading

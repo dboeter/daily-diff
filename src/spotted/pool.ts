@@ -465,7 +465,7 @@ export type TalkedAboutRow = Pick<
  * no contest entry, each link once and none a Spotted row took (`taken`, `linkKey`s). No topic
  * probability floor: a story split between policy and other goes by its leading topic. A story on a
  * page's topic but under SPOTTED_MIN_TOPIC_PROBABILITY (`probabilityOf`) joins the `other` list,
- * whatever its topic: on 2026-11-01 a 315-point story split between research, other and models
+ * keeping its routed topic in the row: on 2026-11-01 a 315-point story split between research, other and models
  * landed nowhere. A story flagged as a security event skips the per-source cap and does not count
  * toward it; it still needs the points minimum.
  */
@@ -518,7 +518,7 @@ export function selectTalkedAbout(
       points: s.points,
       comments: s.comments,
       ...(s.security ? { security: s.security } : {}),
-      topic: underBar(s) ? OTHER_TOPIC : topicOf(s)!,
+      topic: topicOf(s)!,
     }));
 }
 

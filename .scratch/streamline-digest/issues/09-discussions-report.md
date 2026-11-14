@@ -4,7 +4,7 @@
 
 **Blocked by:** 01, 03
 
-**Status:** ready-for-agent
+**Status:** resolved
 
 - [ ] HN report includes the Dev.to/Lobste.rs tables on a Weekly Run
 - [ ] Still generated when HN fails but Dev.to/Lobste.rs succeed on a Weekly Run
