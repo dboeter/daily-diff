@@ -379,11 +379,11 @@ ${summaryOutputRule(count)}
 }
 
 /**
- * Data report, vendor call 2 of 2: Highlights before the report's sections
- * (code-rendered vendor tables plus the repo bodies) and Across platforms after
- * them, which buildDataReport splits at TABLES_MARKER. Highlights say what a
- * change means for clients (the tables already say what changed); Across
- * platforms compares one capability across vendors, or is left out.
+ * Data report, vendor call 2 of 2: Highlights over the report's sections
+ * (code-rendered vendor tables plus the repo bodies). Highlights say what a
+ * change means for clients (the tables already say what changed). No section after the tables:
+ * Across platforms (one capability compared on two platforms) was removed in November 2026, as 7
+ * of its 9 reviewed bullets overstated their rows or paired unrelated ones.
  */
 export function buildDataProsePrompt(
   sectionsMd: string,
@@ -396,11 +396,6 @@ export function buildDataProsePrompt(
   unconfirmedTitles: string[] = [],
 ): string {
   const storiesNote = storiesNoHighlightNote(titleOnlyTitles, unconfirmedTitles);
-  const parts = [
-    `\`## ${SECTIONS.highlights}\` — 1-3 bullets, the most consequential changes today, deprecations, retirements and breaking changes first. Each bullet says who is affected (which client setup: e.g. Azure Databricks workspaces with the compliance security profile, Snowflake Native App providers, BigQuery users of AI functions), what to do when the row says or its change requires it (enable, migrate, test, plan for) and by when, if the row gives a date.`,
-    `The line \`${TABLES_MARKER}\` exactly once, on its own line. The sections are inserted there.`,
-    `\`## ${DATA_REPORT.acrossPlatforms}\` — 0-3 bullets, each one capability that moved on two or more platforms in the rows above (e.g. governance tagging on Snowflake and Databricks, AI functions in SQL on BigQuery and Snowflake), saying how they differ: GA or preview, which clouds, what each covers. Only rows in the sections count; say nothing about features they do not show. Leave this heading out when no capability moved on two platforms: no padding.`,
-  ];
   return `You are the editor of a daily data engineering report for ${DATA_READER}.
 
 Below are today's report sections, ${dateStr}: vendor release-note tables (⚠️ marks a deprecation, retirement or breaking change; 🤖 an AI feature in a data platform), the releases and hot issues of tracked open-source projects, under ${DATA_REPORT.communityHeading} posts from engineering blogs and newsletters, and, under Spotted, community stories about data engineering.
@@ -409,19 +404,17 @@ ${sectionsMd}
 
 ---
 
-Write only these parts, in this order:
-
-${parts.map((p, i) => `${i + 1}. ${p}`).join("\n")}
+Write only \`## ${SECTIONS.highlights}\`: 1-3 bullets, the most consequential changes today, deprecations, retirements and breaking changes first. Each bullet says who is affected (which client setup: e.g. Azure Databricks workspaces with the compliance security profile, Snowflake Native App providers, BigQuery users of AI functions), what to do when the row says or its change requires it (enable, migrate, test, plan for) and by when, if the row gives a date.
 
 Rules:
 - ${NO_TITLE_RULE}
 - In ${SECTIONS.highlights}: ${goingAwayRule("bullet")} ${HIGHLIGHTS_PICK_RULE}
 - When no item qualifies, ${SECTIONS.highlights} is the one bullet "- ${NO_HIGHLIGHT_NOTE}". Never a bullet about the rows as a group or about what is absent ("all notes are minor", "no deprecations"): the Action required table above the sections is not shown here.${minorTitles.length ? `\n- These rows are minor: no Highlight for them. ${minorTitles.map((t) => `"${t}"`).join(", ")}` : ""}${storiesNote ? `\n- ${storiesNote}` : ""}
-- Length: at most ~150 words for ${SECTIONS.highlights}, ~120 for ${DATA_REPORT.acrossPlatforms}.
+- Length: at most ~150 words.
 - A major release in ${DATA_REPORT.releasesHeading} (a version x.0.0, or one whose summary names breaking changes) is a Highlights candidate: say who must test or migrate.
 - Never restate a row: the reader sees the tables right below. A bullet that only says what changed, without who is affected and what to do, is left out.
 - Write no links, URLs or other sections; name each item as the sections do. Dates only as the "by when" of a row that gives one.
-- Name each item in at most one bullet of ${SECTIONS.highlights}; ${DATA_REPORT.acrossPlatforms} compares rows, so it may name a row again. Two rows that describe the same change (a release note and its behavior change bundle, a "coming soon" note and its GA note) are one item: mention it once.
+- Name each item in at most one bullet. Two rows that describe the same change (a release note and its behavior change bundle, a "coming soon" note and its GA note) are one item: mention it once.
 - Base every claim on the sections. Do not invent versions, dates or availability.
 ${sourceFidelityRules()}
 - English, professional and concise.

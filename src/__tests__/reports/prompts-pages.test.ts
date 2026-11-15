@@ -301,12 +301,9 @@ describe("buildDataProsePrompt", () => {
     expect(prompt).toContain("describe the same change");
   });
 
-  it("asks for Across platforms: two platforms per bullet, from the rows, none when nothing qualifies", () => {
-    expect(prompt).toContain("## Across platforms");
-    expect(prompt).toContain("two or more platforms");
-    expect(prompt).toContain("how they differ");
-    expect(prompt).toContain("Leave this heading out");
-    expect(prompt.indexOf("<!-- tables -->")).toBeLessThan(prompt.indexOf("`## Across platforms`"));
+  it("asks for Highlights only: no Across platforms section and no tables marker", () => {
+    expect(prompt).not.toContain("Across platforms");
+    expect(prompt).not.toContain("<!-- tables -->");
   });
 
   it("makes a major release a Highlights candidate", () => {
@@ -315,11 +312,11 @@ describe("buildDataProsePrompt", () => {
     expect(prompt).toContain("breaking changes");
   });
 
-  it("asks for no section beyond Highlights and Across platforms", () => {
+  it("asks for no section beyond Highlights", () => {
     expect(prompt).not.toContain("Data × AI");
     expect(prompt).not.toContain("Worth a Look");
     expect(prompt).not.toContain("Signals");
-    expect(prompt).toContain("Write only these parts");
+    expect(prompt).toContain("Write only `## Highlights`");
     expect(prompt).toContain("Write no links, URLs or other sections");
   });
 });

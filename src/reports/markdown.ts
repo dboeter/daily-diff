@@ -38,7 +38,7 @@ import {
   type AgentSectionKey,
   type VendorSection,
 } from "../core/config.ts";
-import { checkCodeTokens, summaryText, type Numbered } from "./summarized-table.ts";
+import { checkCodeTokens, summaryText, TABLES_MARKER, type Numbered } from "./summarized-table.ts";
 import {
   GOING_AWAY,
   HOT_ISSUE,
@@ -528,12 +528,13 @@ export function signHighlight(text: string): string {
 /**
  * A reply that was to write only Highlights, cut to its Highlights under the
  * fixed heading: a section the model adds anyway would land above the page's
- * tables, and a missing heading would leave bare bullets.
+ * tables, and a missing heading would leave bare bullets. It also ends at TABLES_MARKER, which a
+ * model used to the data page's former Highlights-then-tables layout may still write.
  */
 export function highlightsOnly(reply: string): string {
   const lines = stripModelTitle(reply).trim().split("\n");
   const start = lines[0]?.startsWith("## ") ? 1 : 0;
-  const end = lines.findIndex((l, j) => j >= start && l.startsWith("## "));
+  const end = lines.findIndex((l, j) => j >= start && (l.startsWith("## ") || l.trim() === TABLES_MARKER));
   const body = lines
     .slice(start, end === -1 ? undefined : end)
     .join("\n")
