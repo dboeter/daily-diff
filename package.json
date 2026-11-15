@@ -11,6 +11,7 @@
     "format": "prettier --write src scripts",
     "format:check": "prettier --check src scripts",
     "manifest": "tsx src/cli/manifest.ts",
+    "site": "bash scripts/build-site.sh",
     "readme": "tsx src/cli/readme.ts",
     "notify": "tsx src/cli/notify.ts",
     "close-stale": "tsx src/cli/close-stale.ts",

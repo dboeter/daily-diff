@@ -1,4 +1,4 @@
-<img src="banner.png" width="100%" alt="daily diff: what changed overnight in AI and the data stack. A diff hunk: + AI agents and models, + AI policy: EU, NL, US, + Data engineering, − the noise">
+<img src="site/banner.png" width="100%" alt="daily diff: what changed overnight in AI and the data stack. A diff hunk: + AI agents and models, + AI policy: EU, NL, US, + Data engineering, − the noise">
 
 # Daily Diff
 
