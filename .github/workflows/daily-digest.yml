@@ -26,6 +26,7 @@ on:
 permissions:
   contents: write
   issues: write
+  actions: write # starts deploy-site.yml
 
 # A late scheduled run must not overlap a manual catch-up run: both would build
 # the same CST day's digest and open a duplicate set of issues (as happened on
@@ -113,12 +114,11 @@ jobs:
           DIGEST_FORCE_WEEKLY: ${{ inputs.force_weekly && '1' || '' }}
         run: pnpm start
 
-      # One push per run: every push to main starts a Pages build, and when the
-      # digest and the manifest were pushed seconds apart Pages cancelled the
-      # first build on every run. The pull comes before `pnpm manifest`, so the
-      # rebase only replays digests/ (which only this workflow writes) and the
-      # manifest covers whatever landed on main during the run.
+      # One push per run. The pull comes before `pnpm manifest`, so the rebase
+      # only replays digests/ (which only this workflow writes) and the manifest
+      # covers whatever landed on main during the run.
       - name: Commit and push digest, manifest and feed
+        id: push
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
@@ -153,3 +153,11 @@ jobs:
           DIGEST_REPO: ${{ github.repository }}
         run: pnpm close-stale
 
+      # A push made with GITHUB_TOKEN starts no `on: push` workflow, so the site
+      # deploy is started here. Last, and whenever the push succeeded: a failed
+      # start never skips the notifications, nor a failed notification the deploy.
+      - name: Deploy the site
+        if: ${{ !cancelled() && steps.push.outcome == 'success' }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh workflow run deploy-site.yml --ref main
