@@ -314,6 +314,20 @@ describe("callLlm", () => {
     }
   });
 
+  it("captures the doubled budget that produced an answer after a cut-off", async () => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "llm-capture-"));
+    vi.stubEnv("LLM_CAPTURE_DIR", dir);
+    try {
+      mockCall.mockRejectedValueOnce(new TruncatedResponseError("mock", 2048)).mockResolvedValueOnce("full");
+      await callLlm("long prompt", 2048, "trends");
+      const saved = JSON.parse(fs.readFileSync(path.join(dir, "001-trends.json"), "utf8"));
+      expect(saved.maxTokens).toBe(4096);
+    } finally {
+      vi.unstubAllEnvs();
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
   it("saves nothing when LLM_CAPTURE_DIR is unset", async () => {
     vi.stubEnv("LLM_CAPTURE_DIR", "");
     const spy = vi.spyOn(fs, "writeFileSync");

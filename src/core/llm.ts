@@ -113,6 +113,10 @@ function captureCall(label: string, maxTokens: number, prompt: string, output: s
   const name = `${String(capturedCalls).padStart(3, "0")}-${label.replace(/[^\w.-]+/g, "_")}.json`;
   try {
     fs.mkdirSync(dir, { recursive: true });
+    // A shorter local rerun would otherwise leave the earlier run's higher-numbered calls behind.
+    if (capturedCalls === 1) {
+      for (const f of fs.readdirSync(dir)) if (/^\d{3}-.*\.json$/.test(f)) fs.rmSync(path.join(dir, f));
+    }
     fs.writeFileSync(path.join(dir, name), JSON.stringify({ label, maxTokens, prompt, output }, null, 2));
   } catch (err) {
     console.error(`[llm] could not capture ${name}: ${err}`);
@@ -303,7 +307,7 @@ export async function callLlm(
     try {
       const text = await provider.call(prompt, budget);
       llmCalls.push({ label, outcome: "ok", chars: text.length });
-      captureCall(label, maxTokens, prompt, text);
+      captureCall(label, budget, prompt, text);
       return text;
     } catch (err) {
       // A cut-off response gets one retry at double the budget, apart from the

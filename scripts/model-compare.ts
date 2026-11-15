@@ -11,13 +11,14 @@
  *
  * Options: --candidate <id> (default anthropic/claude-sonnet-5.5), --judge <id> (default
  * anthropic/claude-opus-5.5), --out <dir> (default .scratch/model-compare), --dry-run (count calls
- * and estimate tokens only). Needs OPENROUTER_API_KEY. Each answer is cached under <out>/cache, so a
- * rerun resumes; the summary goes to <out>/results.md and every judged claim to <out>/claims.jsonl.
+ * and estimate tokens only). Needs OPENROUTER_API_KEY. Each answer and verdict is cached under <out>/cache
+ * (verdicts per judge), so a rerun resumes; the summary goes to <out>/results.md and every judged claim to <out>/claims.jsonl.
  */
 
 import fs from "node:fs";
 import path from "node:path";
 import { OpenRouterProvider } from "../src/providers/openrouter.ts";
+import { TruncatedResponseError } from "../src/providers/types.ts";
 
 interface Captured {
   label: string;
@@ -36,6 +37,30 @@ interface Verdict {
   candidate: Claim[];
   better: "production" | "candidate" | "tie";
   reason: string;
+  /** Production was answer A, for checking the judge's order bias. */
+  productionFirst: boolean;
+  chars: { production: number; candidate: number };
+}
+
+const slug = (model: string) => model.replace(/\W+/g, "_");
+
+function isClaims(x: unknown): x is Claim[] {
+  return Array.isArray(x) && x.every((c) => typeof c?.quote === "string");
+}
+
+/** Like `callLlm`: a cut-off answer gets one retry at double the budget, so long listing calls
+ *  are compared instead of failing. */
+async function answerLikeCallLlm(
+  provider: OpenRouterProvider,
+  prompt: string,
+  budget: number,
+): Promise<string> {
+  try {
+    return await provider.call(prompt, budget);
+  } catch (err) {
+    if (!(err instanceof TruncatedResponseError)) throw err;
+    return provider.call(prompt, budget * 2);
+  }
 }
 
 const args = process.argv.slice(2);
@@ -137,41 +162,50 @@ async function main() {
 
   const candidate = new OpenRouterProvider({ model: CANDIDATE });
   const judge = new OpenRouterProvider({ model: JUDGE });
-  const cacheDir = path.join(OUT, "cache", CANDIDATE.replace(/\W+/g, "_"));
+  const answerDir = path.join(OUT, "cache", slug(CANDIDATE));
+  const verdictDir = path.join(answerDir, `judge-${slug(JUDGE)}`);
   const rows: Array<{ day: string; file: string; label: string; verdict: Verdict }> = [];
   const failures: string[] = [];
 
   await pool(calls, 3, async (call) => {
-    const key = path.join(cacheDir, call.day, call.file);
+    const name = path.join(call.day, call.file);
     try {
-      const answer = await cached(key.replace(/\.json$/, ".answer.json"), () =>
-        withRetries(`${call.file} answer`, () => candidate.call(call.prompt, call.maxTokens)),
+      const answer = await cached(path.join(answerDir, name), () =>
+        withRetries(`${name} answer`, () => answerLikeCallLlm(candidate, call.prompt, call.maxTokens)),
       );
-      const verdict = await cached(key.replace(/\.json$/, ".verdict.json"), async () => {
-        // Random order per call, so a judge's preference for the first answer averages out.
-        const productionFirst = Math.random() < 0.5;
-        const [a, b] = productionFirst ? [call.output, answer] : [answer, call.output];
-        const raw = await withRetries(`${call.file} judge`, () =>
-          judge.call(JUDGE_PROMPT(call.prompt, a, b), 8192),
-        );
-        const v = parseJson<{ A: Claim[]; B: Claim[]; better: "A" | "B" | "tie"; reason: string }>(raw);
-        const pick = (x: "A" | "B") => ((x === "A") === productionFirst ? "production" : "candidate");
-        return {
-          production: productionFirst ? v.A : v.B,
-          candidate: productionFirst ? v.B : v.A,
-          better: v.better === "tie" ? "tie" : pick(v.better),
-          reason: v.reason,
-        } satisfies Verdict;
-      });
+      const verdict = await cached(path.join(verdictDir, name), () =>
+        withRetries(`${name} judge`, async () => {
+          // Random order per call, so a judge's preference for the first answer averages out.
+          const productionFirst = Math.random() < 0.5;
+          const [a, b] = productionFirst ? [call.output, answer] : [answer, call.output];
+          const v = parseJson<Record<string, unknown>>(
+            await judge.call(JUDGE_PROMPT(call.prompt, a, b), 16384),
+          );
+          // Checked before caching: a malformed verdict is asked again, never saved.
+          if (!isClaims(v["A"]) || !isClaims(v["B"]) || !["A", "B", "tie"].includes(v["better"] as string)) {
+            throw new Error(`malformed verdict: ${JSON.stringify(v).slice(0, 200)}`);
+          }
+          const side = (x: "A" | "B") => ((x === "A") === productionFirst ? "production" : "candidate");
+          return {
+            production: productionFirst ? v["A"] : v["B"],
+            candidate: productionFirst ? v["B"] : v["A"],
+            better: v["better"] === "tie" ? "tie" : side(v["better"] as "A" | "B"),
+            reason: String(v["reason"] ?? ""),
+            productionFirst,
+            chars: { production: call.output.length, candidate: answer.length },
+          } satisfies Verdict;
+        }),
+      );
       rows.push({ day: call.day, file: call.file, label: call.label, verdict });
       console.log(
-        `[compare] ${call.day}/${call.file}: ${verdict.production.length} vs ${verdict.candidate.length}, ${verdict.better}`,
+        `[compare] ${name}: ${verdict.production.length} vs ${verdict.candidate.length}, ${verdict.better}`,
       );
     } catch (err) {
-      failures.push(`${call.day}/${call.file}: ${String(err).slice(0, 200)}`);
+      failures.push(`${name}: ${String(err).slice(0, 200)}`);
     }
   });
 
+  fs.mkdirSync(OUT, { recursive: true });
   rows.sort((x, y) => (x.day + x.file).localeCompare(y.day + y.file));
   fs.writeFileSync(
     path.join(OUT, "claims.jsonl"),
@@ -186,43 +220,55 @@ async function main() {
       .join("\n") + "\n",
   );
 
-  // One row per call site: unsupported claims on each side and the judge's preference.
-  const sites = new Map<
-    string,
-    { n: number; prod: number; cand: number; prodBetter: number; candBetter: number; tie: number }
-  >();
+  // One row per call site. Raw claim totals favour short answers and let one bad answer dominate,
+  // so the table also counts calls won (fewer unsupported claims) and the answers' length.
+  const empty = () => ({
+    n: 0,
+    prod: 0,
+    cand: 0,
+    prodFewer: 0,
+    candFewer: 0,
+    prodChars: 0,
+    candChars: 0,
+    prodBetter: 0,
+    candBetter: 0,
+    tie: 0,
+    prodFirstWins: 0,
+  });
+  type Tally = ReturnType<typeof empty>;
+  const sites = new Map<string, Tally>();
+  const total = empty();
   for (const r of rows) {
     const site = r.label.replace(/[:#].*/, "");
-    const s = sites.get(site) ?? { n: 0, prod: 0, cand: 0, prodBetter: 0, candBetter: 0, tie: 0 };
-    s.n++;
-    s.prod += r.verdict.production.length;
-    s.cand += r.verdict.candidate.length;
-    if (r.verdict.better === "production") s.prodBetter++;
-    else if (r.verdict.better === "candidate") s.candBetter++;
-    else s.tie++;
-    sites.set(site, s);
+    const v = r.verdict;
+    for (const s of [sites.get(site) ?? empty(), total]) {
+      s.n++;
+      s.prod += v.production.length;
+      s.cand += v.candidate.length;
+      if (v.production.length < v.candidate.length) s.prodFewer++;
+      if (v.candidate.length < v.production.length) s.candFewer++;
+      s.prodChars += v.chars.production;
+      s.candChars += v.chars.candidate;
+      if (v.better === "production") s.prodBetter++;
+      else if (v.better === "candidate") s.candBetter++;
+      else s.tie++;
+      if (v.better !== "tie" && (v.better === "production") === v.productionFirst) s.prodFirstWins++;
+      if (s !== total) sites.set(site, s);
+    }
   }
-  const total = [...sites.values()].reduce(
-    (t, s) => ({
-      n: t.n + s.n,
-      prod: t.prod + s.prod,
-      cand: t.cand + s.cand,
-      prodBetter: t.prodBetter + s.prodBetter,
-      candBetter: t.candBetter + s.candBetter,
-      tie: t.tie + s.tie,
-    }),
-    { n: 0, prod: 0, cand: 0, prodBetter: 0, candBetter: 0, tie: 0 },
-  );
-  const line = (name: string, s: typeof total) =>
-    `| ${name} | ${s.n} | ${s.prod} | ${s.cand} | ${s.prodBetter} | ${s.candBetter} | ${s.tie} |`;
+  const line = (name: string, s: Tally) =>
+    `| ${name} | ${s.n} | ${s.prod} / ${s.cand} | ${s.prodFewer} / ${s.candFewer} | ${Math.round(s.prodChars / s.n)} / ${Math.round(s.candChars / s.n)} | ${s.prodBetter} / ${s.candBetter} / ${s.tie} |`;
+  const decided = total.n - total.tie;
   const md = [
     `# Model comparison: production vs ${CANDIDATE}`,
     "",
     `Judge: ${JUDGE}, blind, answers in random order. Runs: ${captureDirs.map((d) => path.basename(d)).join(", ")}.`,
-    "Unsupported = claims the judge found that the prompt's data does not support. Every claim is in `claims.jsonl`.",
+    "Unsupported = claims the judge found that the prompt's data does not support; every claim is in `claims.jsonl`.",
+    "Each pair is production / candidate. Production answers may come from a free fallback model: the capture does not record which model answered.",
+    `Judge picked the first-shown answer in ${total.prodFirstWins} of ${decided} decided calls (about half means no order bias).`,
     "",
-    "| Call site | Calls | Unsupported (production) | Unsupported (candidate) | Production better | Candidate better | Tie |",
-    "| --- | --- | --- | --- | --- | --- | --- |",
+    "| Call site | Calls | Unsupported claims | Calls with fewer claims | Avg chars | Better (prod / cand / tie) |",
+    "| --- | --- | --- | --- | --- | --- |",
     ...[...sites.entries()].sort().map(([k, s]) => line(k, s)),
     line("**All**", total),
     "",
