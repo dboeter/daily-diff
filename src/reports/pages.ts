@@ -681,41 +681,6 @@ export const NO_COMMUNITY: CommunityInput = {
   taken: new Set(),
 };
 
-/** A bullet line: `- `, `* ` or `1. `. */
-const BULLET_RE = /^\s*(?:[-*]|\d+\.)\s/;
-
-/**
- * Split the prose call's reply at TABLES_MARKER (without one, at its first
- * `## ` heading after the first line, so a section the model wrote is still
- * placed or dropped): Highlights before it; after it, only
- * the Across platforms section's bullets (with their wrapped lines), from its
- * heading to the next `## ` heading, so a note the model adds there is dropped
- * (the 2026-10-21 replay ended with one). Any other section it wrote was not
- * asked for and is dropped; a heading without bullets is left out.
- */
-function splitProse(prose: string): { highlights: string; acrossPlatforms: string } {
-  const lines = prose.split("\n");
-  const marker = lines.findIndex((l) => l.trim() === TABLES_MARKER);
-  const heading = lines.findIndex((l, j) => j > 0 && l.startsWith("## "));
-  const i = marker !== -1 ? marker : heading !== -1 ? heading : lines.length;
-  // Past the marker, or from the heading itself when there is none.
-  const after = lines.slice(marker !== -1 ? i + 1 : i);
-  const start = after.findIndex((l) => l.trim() === `## ${DATA_REPORT.acrossPlatforms}`);
-  const end = after.findIndex((l, j) => j > start && l.startsWith("## "));
-  const section = start === -1 ? [] : after.slice(start + 1, end === -1 ? undefined : end);
-  const bullets: string[] = [];
-  let inBullet = false;
-  // signListItems first: bullets opened with the sign instead of a marker would match no BULLET_RE.
-  for (const l of signListItems(section.join("\n")).split("\n")) {
-    inBullet = BULLET_RE.test(l) || (inBullet && /^\s+\S/.test(l));
-    if (inBullet) bullets.push(l.trimEnd());
-  }
-  return {
-    highlights: signListItems(lines.slice(0, i).join("\n").trim()),
-    acrossPlatforms: bullets.length ? `## ${DATA_REPORT.acrossPlatforms}\n\n${bullets.join("\n")}` : "",
-  };
-}
-
 /**
  * The data repos' stable releases of the last 7 days that no earlier report
  * showed (`reported`: the data state, which keeps them as `release:<repo>@<tag>`;
@@ -760,20 +725,19 @@ export function hasDataNews(sections: DataSection[], vendor: VendorData, dateStr
  * deprecations, in the state until they pass) between Highlights and them,
  * the open-source stack, Releases this week (code-rendered: the data repos'
  * stable releases of the last 7 days not shown before, summarized by the vendor
- * summaries call), Across platforms, Spotted and EU data law. A section with neither vendor items
+ * summaries call), News & discussion, Spotted and EU data law. A section with neither vendor items
  * nor repo activity is named in one "Nothing new from …" line instead (`nothingNew`). LLM calls: one per active repo section (as in
  * the agents report) and one for the vendor row summaries, in parallel; then
- * one for Highlights and Across platforms over all of it (Across platforms is
- * left out when the model writes none). A failed summaries call leaves the
+ * one for Highlights over all of it. A failed summaries call leaves the
  * descriptions in the tables; a failed prose call leaves the failure notice in
  * Highlights. Null without news (`hasDataNews`): no kept vendor item, no release
  * of the week to list and no repo activity.
  * EU data law, the last section, is code only: links to `dataLaw` (today's
  * AI Policy items that are EU data law), left out when there are none; it
  * never makes a report on its own. Spotted (code-rendered, summarized by
- * main()'s Spotted call) goes between Across platforms and EU data law, and
+ * main()'s Spotted call) goes between News & discussion and EU data law, and
  * never makes a report on its own either; the prose call sees it. News & discussion (code-rendered,
- * between Across platforms and Spotted) holds the community feed posts Jev kept that named no tracked
+ * after the sections, before Spotted) holds the community feed posts Jev kept that named no tracked
  * project (`community`), and those a project took as news that its section does not link, summarized
  * by the vendor summaries call and recorded in the state as shown (`post:` keys, with every news
  * post); the repo sections are written first for that. Its trace and verdicts are saved
@@ -922,13 +886,8 @@ export async function buildDataReport(
     null,
     LLM_TOKENS_LISTING,
   );
-  const split =
-    prose === null
-      ? { highlights: `## ${SECTIONS.highlights}\n\n${MSG.summaryFailed}`, acrossPlatforms: "" }
-      : splitProse(prose);
-  const { acrossPlatforms } = split;
   const highlights = dropNoHighlightRows(
-    split.highlights,
+    highlightsOnly(prose ?? MSG.summaryFailed),
     [...minor, ...titleOnly, ...claims],
     "data",
     isGroupOrAbsenceBullet,
@@ -939,12 +898,7 @@ export async function buildDataReport(
         `- [${policyTitleLabel(i.title)}](${i.link}) — ${REPORTS["ai-policy"].name}${i.stage ? `, ${i.stage}` : ""}`,
     )
     .join("\n");
-  const epilogue = [
-    acrossPlatforms,
-    communityMd,
-    spottedMd,
-    lawLinks ? `## ${DATA_REPORT.dataLawHeading}\n\n${lawLinks}` : "",
-  ]
+  const epilogue = [communityMd, spottedMd, lawLinks ? `## ${DATA_REPORT.dataLawHeading}\n\n${lawLinks}` : ""]
     .filter(Boolean)
     .join("\n\n---\n\n");
 

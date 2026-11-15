@@ -301,12 +301,9 @@ describe("buildDataProsePrompt", () => {
     expect(prompt).toContain("describe the same change");
   });
 
-  it("asks for Across platforms: two platforms per bullet, from the rows, none when nothing qualifies", () => {
-    expect(prompt).toContain("## Across platforms");
-    expect(prompt).toContain("two or more platforms");
-    expect(prompt).toContain("how they differ");
-    expect(prompt).toContain("Leave this heading out");
-    expect(prompt.indexOf("<!-- tables -->")).toBeLessThan(prompt.indexOf("`## Across platforms`"));
+  it("asks for Highlights only: no Across platforms section and no tables marker", () => {
+    expect(prompt).not.toContain("Across platforms");
+    expect(prompt).not.toContain("<!-- tables -->");
   });
 
   it("makes a major release a Highlights candidate", () => {
@@ -315,11 +312,11 @@ describe("buildDataProsePrompt", () => {
     expect(prompt).toContain("breaking changes");
   });
 
-  it("asks for no section beyond Highlights and Across platforms", () => {
+  it("asks for no section beyond Highlights", () => {
     expect(prompt).not.toContain("Data × AI");
     expect(prompt).not.toContain("Worth a Look");
     expect(prompt).not.toContain("Signals");
-    expect(prompt).toContain("Write only these parts");
+    expect(prompt).toContain("Write only `## Highlights`");
     expect(prompt).toContain("Write no links, URLs or other sections");
   });
 });
@@ -615,7 +612,7 @@ describe("buildSpottedSummariesPrompt", () => {
 });
 
 // ---------------------------------------------------------------------------
-// Source fidelity: every Highlights, Signals and highlights.json prompt
+// Source fidelity: every Highlights, Signals and highlights.json prompt, and the Spotted summaries
 // ---------------------------------------------------------------------------
 
 describe("source fidelity rules", () => {
@@ -625,6 +622,8 @@ describe("source fidelity rules", () => {
     policy: buildPolicyProsePrompt("| Date |", "2026-10-26", "A reader."),
     data: buildDataProsePrompt("## Snowflake", "2026-10-26"),
     highlights: buildHighlightsPrompt({ "ai-data": "## Highlights" }),
+    // Row summaries too: 5 of the issue 05 overstatements were Spotted summaries.
+    spotted: buildSpottedSummariesPrompt([], "2026-10-26"),
   };
 
   it.each(Object.entries(prompts))("the %s prompt carries every rule", (_, prompt) => {
@@ -637,13 +636,25 @@ describe("source fidelity rules", () => {
     expect(rules).toMatch(/No call to action/);
     expect(rules).toMatch(/X says/);
     expect(rules).toMatch(/one person's report never becomes 'users report'/);
+    // The scope rules the issue 05 cases broke (2026-11-04 … 11-14).
+    expect(rules).toMatch(/qualifier/);
+    expect(rules).toMatch(/'recommends'.*never becomes 'must'/);
+    expect(rules).toMatch(/upcoming.*never becomes 'released'/);
+    expect(rules).toMatch(/[Ss]eparate (changes|fixes) stay separate/);
     expect(rules).toMatch(/sample size, a single run, not peer reviewed/);
     expect(rules).toMatch(/Several items on one theme in the same period are not a trend/);
     expect(rules).toMatch(/never titles, descriptions or co-occurrence alone/);
   });
 
-  it("the data Highlights ask for an action only when the row gives or requires one", () => {
-    expect(prompts.data).toContain("what to do when the row says or its change requires it");
+  // "must migrate to GLM 5.3" (a recommendation), "must update" a flag kept as an alias, "must test
+  // migration" and "must migrate to Gemini 3.8 Flash" (calls redirected): issue 05, 2026-11-04 … 11-14.
+  it("the data Highlights give an action only when the row states one, in the row's strength", () => {
+    expect(prompts.data).toContain("what to do only when the row states it, as strongly as the row does");
+    expect(prompts.data).not.toContain("its change requires it");
+    expect(prompts.data).not.toContain("must test or migrate");
+    expect(prompts.data).not.toMatch(/without who is affected and what to do/);
+    // No audience the row does not state (SOURCE_FIDELITY_RULES): the reviewer's finding on this branch.
+    expect(prompts.data).toContain("who is affected, as far as the row names it");
   });
 
   // 2026-10-27 forced weekly run: "DeepSeek's model family dominates", "half the OpenRouter top 20"

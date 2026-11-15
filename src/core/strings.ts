@@ -273,9 +273,7 @@ export const DATA_REPORT = {
   alsoNew: "Also new:",
   /** Marks a deprecation, retirement, breaking or behavior change in the Item cell. */
   deprecationMarker: "⚠️",
-  /** Written by the prose call after the tables: one capability compared across vendors. */
-  acrossPlatforms: "Across platforms",
-  /** Code-rendered after Across platforms: the community feed posts (blogs, newsletters) Jev kept that named no tracked project. */
+  /** Code-rendered after the sections: the community feed posts (blogs, newsletters) Jev kept that named no tracked project. */
   communityHeading: "News & discussion",
   communityTableHeader: "| Date | Post | Source | Summary |\n| :--- | :--- | :--- | :--- |",
   /** Code-rendered after Open-source stack: the data repos' stable releases no earlier report showed. */

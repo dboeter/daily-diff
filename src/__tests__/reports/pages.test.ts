@@ -1234,55 +1234,29 @@ describe("buildDataReport", () => {
     expect(content).not.toContain("Data × AI");
     expect(content).not.toContain("## Worth a Look");
     expect(content).not.toContain("Read this.");
-    expect(content).toContain("## Highlights\n- H.");
+    expect(content).toContain("## Highlights\n\n- H.");
   });
 
-  it("puts Across platforms after the tables and before EU data law, and leaves it out when absent", async () => {
+  it("turns a Highlight the model opened with the sign instead of a marker into a bullet", async () => {
     generateBody.mockReset();
-    const across =
-      "## Highlights\n- H.\n\n<!-- tables -->\n\n## Across platforms\n\n- Governance tagging: Snowflake GA,\n  Databricks GA.\n\n---\n\nNote, outside the report: a row needs checking.\n\n## Data × AI\n- X.";
     generateBody.mockImplementation(async (prompt: string) =>
-      prompt.startsWith("You are the editor") ? across : reply(prompt),
-    );
-    const policy = [policyItem("nis2", "NIS2 implementing act adopted")];
-    const content = (await build(sections(false), await vendorData(), dataLawOf(policy)))!.content;
-    const at = (s: string) => content.indexOf(s);
-    // Only its bullets: on the 2026-10-21 replay the model appended a note to the editor.
-    expect(content).toContain(
-      "## Across platforms\n\n- Governance tagging: Snowflake GA,\n  Databricks GA.\n\n---",
-    );
-    expect(content).not.toContain("Note, outside the report");
-    expect(at("## Open-source stack")).toBeLessThan(at("## Across platforms"));
-    expect(at("## Azure / Fabric & GCP")).toBeLessThan(at("## Across platforms"));
-    expect(at("## Across platforms")).toBeLessThan(at("## EU data law"));
-    expect(content).not.toContain("Data × AI");
-
-    generateBody.mockImplementation(async (prompt: string) => reply(prompt));
-    expect((await build(sections(false), await vendorData()))!.content).not.toContain("Across platforms");
-  });
-
-  it("keeps Across platforms bullets the model opened with the sign instead of a marker", async () => {
-    generateBody.mockReset();
-    const unmarked =
-      "## Highlights\n- H.\n\n<!-- tables -->\n\n## Across platforms\n\n− Tagging: Snowflake GA,\n  Databricks GA.";
-    generateBody.mockImplementation(async (prompt: string) =>
-      prompt.startsWith("You are the editor") ? unmarked : reply(prompt),
+      prompt.startsWith("You are the editor") ? "## Highlights\n\n− Legacy runtime retires." : reply(prompt),
     );
     const content = (await build(sections(false), await vendorData()))!.content;
-    expect(content).toContain("## Across platforms\n\n- Tagging: Snowflake GA,\n  Databricks GA.");
+    expect(content).toContain("## Highlights\n\n- Legacy runtime retires.");
   });
 
-  it("splits a reply without the tables marker at its first heading after Highlights", async () => {
+  it("shows only the Highlights of the prose reply: a section the model adds anyway is dropped", async () => {
     generateBody.mockReset();
-    const noMarker =
-      "## Highlights\n- H.\n\n## Across platforms\n\n- Tagging: Snowflake GA, Databricks preview.\n\n## Data × AI\n- X.";
+    // Across platforms was removed on 2026-11-15 (issue 05): 7 of its 9 reviewed bullets overstated their rows.
+    const extra =
+      "## Highlights\n- H.\n\n## Across platforms\n\n- Governance tagging: Snowflake GA, Databricks GA.\n\n## Data × AI\n- X.";
     generateBody.mockImplementation(async (prompt: string) =>
-      prompt.startsWith("You are the editor") ? noMarker : reply(prompt),
+      prompt.startsWith("You are the editor") ? extra : reply(prompt),
     );
     const content = (await build(sections(false), await vendorData()))!.content;
-    const at = (s: string) => content.indexOf(s);
-    expect(content).toContain("## Highlights\n- H.");
-    expect(at("## Open-source stack")).toBeLessThan(at("## Across platforms"));
+    expect(content).toContain("## Highlights\n\n- H.");
+    expect(content).not.toContain("Across platforms");
     expect(content).not.toContain("Data × AI");
   });
 
@@ -1334,12 +1308,10 @@ describe("buildDataReport", () => {
     expect(JSON.parse(fs.readFileSync(stateFile, "utf-8")).actions["dbx-old"].summary).toBe("Retiring soon.");
   });
 
-  it("reads Highlights, Action required, the vendor and repo sections, Across platforms, Spotted, then EU data law", async () => {
+  it("reads Highlights, Action required, the vendor and repo sections, Spotted, then EU data law", async () => {
     generateBody.mockReset();
     generateBody.mockImplementation(async (prompt: string) =>
-      prompt.startsWith("You are the editor")
-        ? "## Highlights\n- H.\n\n<!-- tables -->\n\n## Across platforms\n\n- Tagging on two platforms."
-        : reply(prompt),
+      prompt.startsWith("You are the editor") ? "## Highlights\n- H." : reply(prompt),
     );
     const data = await vendorData();
     const vendor: VendorData = {
@@ -1374,7 +1346,6 @@ describe("buildDataReport", () => {
       "Azure / Fabric & GCP",
       "Open-source stack",
       "Releases this week",
-      "Across platforms",
       "Spotted",
       "EU data law",
     ]);
@@ -1702,7 +1673,7 @@ describe("buildDataReport", () => {
     const withCommunity = (s: DataSection[], vendor: VendorData, c: CommunityInput) =>
       buildDataReport(s, vendor, [], NO_SPOTTED, "00:00", "2026-10-17", stateFile, verdictsFile, c);
 
-    it("renders the kept posts between Across platforms and Spotted, summarized by the vendor call, and records them as shown", async () => {
+    it("renders the kept posts after the sections and before Spotted, summarized by the vendor call, and records them as shown", async () => {
       generateBody.mockReset();
       saveFile.mockClear();
       generateBody.mockImplementation(async (prompt: string) => {
