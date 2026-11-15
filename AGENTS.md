@@ -232,7 +232,7 @@ Every Jev judgment except ArXiv's goes through `judgeItems` (`src/core/jev.ts`) 
 - The Markdown keeps ISO dates, for GitHub Issues, RSS and the MCP server; `decorateReport` formats them in the web UI and stacks tables of 3+ columns on a phone, with the `PROSE_COLUMNS` at full width.
 - MCP server: `mcp/`, a Cloudflare Worker that reads the reports from GitHub Pages, so new digests need no deploy. `.github/workflows/deploy-mcp.yml` deploys it on pushes to `main` that touch `mcp/`. `mcp/` has its own `package.json`; run `pnpm run deploy` there, not `pnpm deploy` (pnpm's workspace command).
 - RSS: `feed.xml` (the latest 30 items across reports) and one `feeds/<id>.xml` per live report, from `pnpm manifest`.
-- The daily workflow commits the digest, then the manifest and feeds, and pushes once: two pushes seconds apart make Pages cancel the first build.
+- GitHub Pages is deployed by `.github/workflows/deploy-site.yml`, which publishes the folder `scripts/build-site.sh` assembles: the web UI, the manifest, the feeds and `digests/`, at the paths the repo root has. It runs on every push to `main`. The daily workflow commits the digest, then the manifest and feeds, pushes once and, as its last step, starts the deploy itself: a push made with `GITHUB_TOKEN` starts no `on: push` workflow.
 
 ## Adding a new report type
 

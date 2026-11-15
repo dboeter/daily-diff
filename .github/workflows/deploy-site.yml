@@ -1,0 +1,46 @@
+name: Deploy site
+
+# Publishes the web UI to GitHub Pages: the folder scripts/build-site.sh
+# assembles. Pages' own branch publishing serves only / or /docs, so the site is
+# deployed from here. The daily digest starts this workflow itself
+# (daily-digest.yml): a push made with GITHUB_TOKEN starts no `on: push` workflow.
+# Needs the repo's Pages source set to "GitHub Actions" (Settings > Pages):
+# with "Deploy from a branch" the deploy step fails.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# One deployment at a time: a newer one waits, then replaces it.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Assemble the site
+        run: bash scripts/build-site.sh _site
+
+      - name: Upload the site
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: _site
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v5
