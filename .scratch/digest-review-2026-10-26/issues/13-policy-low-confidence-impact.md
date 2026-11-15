@@ -1,6 +1,6 @@
 # 13: Low-confidence impact doesn't drop major policy items
 
-Status: done
+Status: resolved
 Blocked by: 02
 Findings: X2 — see `../review.md`
 

@@ -1,6 +1,6 @@
 # 01: Replay a week of stories and release lines against a Jev security question
 
-Status: done
+Status: resolved
 
 Run on 2026-11-11 after the maintainer's go-ahead. Results: `../spike/results.md`.
 

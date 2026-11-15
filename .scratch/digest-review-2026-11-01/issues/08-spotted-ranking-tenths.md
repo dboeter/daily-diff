@@ -1,6 +1,6 @@
 # 08: Topic probability outranks points too strongly in Spotted
 
-Status: done
+Status: resolved
 Findings: 8 [low], see `../review.md`
 
 ## Problem

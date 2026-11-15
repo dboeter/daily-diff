@@ -1,6 +1,6 @@
 # 11: `data-trace.json` lacks `minor` and the source text
 
-Status: done
+Status: resolved
 Findings: 11 [low], see `../review.md`
 
 ## What to build

@@ -1,6 +1,6 @@
 # 03: A title-only news item gets no inferred impact
 
-Status: done
+Status: resolved
 Findings: 3 [medium], see `../review.md`
 
 ## What to build

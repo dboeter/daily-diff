@@ -1,6 +1,6 @@
 # 09: GLOSSARY says page-topic stories never reach "Also talked about"
 
-Status: done
+Status: resolved
 Findings: 11 [low], see `../review.md`
 
 ## Problem

@@ -1,6 +1,6 @@
 # 11: Trends row summaries say one thing once
 
-Status: done
+Status: resolved
 Blocked by: None (can start immediately)
 Findings: T3 [medium] — see `../review.md`, `../ai-trends.md`
 

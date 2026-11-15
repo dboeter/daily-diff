@@ -11,9 +11,9 @@
  */
 
 import fs from "node:fs";
-import { loadConfig } from "../src/core/config.ts";
-import { fetchOk } from "../src/core/http.ts";
-import { parseFeedItems } from "../src/core/rss.ts";
+import { loadConfig } from "../core/config.ts";
+import { fetchOk } from "../core/http.ts";
+import { parseFeedItems } from "../core/rss.ts";
 
 interface Check {
   list: string;

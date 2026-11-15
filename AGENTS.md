@@ -19,11 +19,11 @@ Use plain words, and write in clear, understandable full sentences. Do not use a
 ```bash
 pnpm start          # run the full digest locally
 pnpm test           # vitest (unit tests)
-pnpm typecheck      # tsc --noEmit
-pnpm lint           # ESLint
+pnpm typecheck      # tsc --noEmit (src and scripts)
+pnpm lint           # ESLint (src and scripts)
 pnpm lint:fix       # ESLint --fix
-pnpm format         # Prettier --write src
-pnpm format:check   # Prettier --check src
+pnpm format         # Prettier --write src scripts
+pnpm format:check   # Prettier --check src scripts
 pnpm readme         # regenerate README's tracked-repo tables from config.yml (--check: fail if stale)
 pnpm feeds:check    # fetch every data.feeds and data.community source and list status and item count (also the "Check feeds" workflow)
 ```
@@ -90,7 +90,7 @@ Every chat-model call goes through `callLlm` (`src/core/llm.ts`), at most 5 conc
 | `src/policy/`                     | AI Policy: fetch and state (`items.ts`), source registry (`sources.ts`), one module per source, relevance (`relevance.ts`), Coming up (`deadlines.ts`)                                                                                                                      |
 | `src/data/`                       | The data report's vendor feeds: fetch and state (`vendors.ts`), `snowflake.ts`, `bigquery.ts`, relevance (`relevance.ts`); its community feeds (blogs, newsletters): fetch, Jev judgment and selection (`community.ts`)                                                     |
 | `src/providers/`                  | One `LlmProvider` per provider, most on `OpenAICompatibleProvider`; `index.ts` is the factory                                                                                                                                                                               |
-| `src/cli/`                        | The `pnpm` entry points other than `start`: `notify` (Telegram, Teams), `close-stale`, `manifest` (manifest and RSS feeds), `readme`                                                                                                                                        |
+| `src/cli/`                        | The `pnpm` entry points other than `start`: `notify` (Telegram, Teams), `close-stale`, `manifest` (manifest and RSS feeds), `readme`, `check-feeds`                                                                                                                         |
 
 ## Report outputs
 
@@ -116,8 +116,7 @@ Weekly = `WEEKLY_REPORT_WEEKDAY` (Monday, CST) or `DIGEST_FORCE_WEEKLY=1` (the w
 - `pnpm tsx scripts/rejudge-research.ts [YYYY-MM-DD] [--dry-run]` re-scores, with `TYPESAFE_API_KEY`, the `digests/research-state.json` entries saved before the date (default 2026-10-28) with the ArXiv relevance questions, the domain penalty included, from their full abstracts (one arXiv API request; the state keeps 600 characters, and a cut abstract scores lower on every question), and rewrites their `relevance` (one-off, for the entries saved before the penalty). It exits 1 and lists the entries whose Jev call failed (the rest are saved): rerun it until it exits 0 (a rerun asks Jev again for every entry before the date).
 - `scripts/jev-lab.ts` is the AI Policy Jev lab (usage in its header). It writes under `.scratch/ai-policy/lab/`, never under `digests/`.
 - `scripts/jev-lab-text.ts` is not run on its own: the lab's `enrich` step uses it to fetch the full text behind each policy item's link, for the `full_text` variants.
-- `node --import tsx scripts/migrate-verdict-fingerprints.ts` is the one-off October 2026 migration of the verdict caches onto `judgeItems` (`trending-classifications.json` → `trending-verdicts.json`, the policy verdicts' `stage` → `fingerprint`); idempotent.
-- `node --env-file=.env --import tsx scripts/spotted-route-check.ts` routes the HN rows of the archived discussions reports (2026-10-13 … 10-22) with the Spotted topic question and prints the share per topic and 30 random routings; its cache goes under `.scratch/digest-structure/`, never under `digests/`.
+- `node --env-file=.env --import tsx .scratch/digest-structure/spotted-route-check.ts` routes the HN rows of the archived discussions reports (2026-10-13 … 10-22) with the Spotted topic question and prints the share per topic and 30 random routings; its cache goes under `.scratch/digest-structure/`, never under `digests/`.
 
 ## Tracked sources
 

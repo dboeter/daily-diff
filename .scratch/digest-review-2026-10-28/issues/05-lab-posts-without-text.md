@@ -1,6 +1,6 @@
 # 05: A lab post without page text is never summarized or highlighted
 
-Status: done
+Status: resolved
 Blocked by: None (can start immediately)
 Findings: M1 [medium] (regression of ticket 03 of the 2026-10-26 round), M2 [medium]; lows L7, L8 — see `../review.md`, `../ai-models-policy.md`
 
