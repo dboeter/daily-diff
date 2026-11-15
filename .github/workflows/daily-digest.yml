@@ -112,7 +112,22 @@ jobs:
           AGENTMAIL_API_KEY: ${{ secrets.AGENTMAIL_API_KEY }}
           DIGEST_REPO: ${{ github.repository }}
           DIGEST_FORCE_WEEKLY: ${{ inputs.force_weekly && '1' || '' }}
+          # Every LLM prompt and answer, uploaded below, for replaying the day on another model
+          # (scripts/model-compare.ts).
+          LLM_CAPTURE_DIR: llm-capture
         run: pnpm start
+
+      # Never blocks publishing: a failed upload only loses that day's comparison data.
+      - name: Upload LLM prompts
+        if: ${{ !cancelled() }}
+        continue-on-error: true
+        uses: actions/upload-artifact@v4
+        with:
+          name: llm-prompts-${{ github.run_id }}
+          path: llm-capture/
+          retention-days: 30
+          if-no-files-found: ignore
+          overwrite: true
 
       # One push per run. The pull comes before `pnpm manifest`, so the rebase
       # only replays digests/ (which only this workflow writes) and the manifest
