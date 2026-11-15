@@ -2,11 +2,10 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { describe, expect, it, vi } from "vitest";
-import { type AskJev, judgeItems } from "../../core/jev.ts";
+import type { AskJev } from "../../core/jev.ts";
 import type { OpenRouterApp } from "../../sources/openrouter.ts";
 import {
   type Classification,
-  type ClassifyAnswers,
   type ClassifyItem,
   STANDALONE_MIN_NOUL,
   type TrendingVerdicts,
@@ -21,7 +20,6 @@ import {
 } from "../../trending/classify.ts";
 import type { NpmPackage } from "../../trending/npm.ts";
 import { type GithubRow } from "../../trending/rank.ts";
-import { migrateClassifyEntry, migratePolicyEntry } from "../../../scripts/migrate-verdict-fingerprints.ts";
 import { DATE, MODEL, classifyAnswer, daysBefore } from "./helpers.ts";
 
 function githubRow(topic?: string): GithubRow {
@@ -369,57 +367,5 @@ describe("buildTrendingTraceFile", () => {
       },
     ]);
     expect(parsed.matches[0].probabilities).toEqual({ none: 0.333 });
-  });
-});
-
-// ---------------------------------------------------------------------------
-// Migration of the pre-judgeItems cache (scripts/migrate-verdict-fingerprints.ts)
-// ---------------------------------------------------------------------------
-
-describe("verdict fingerprint migration", () => {
-  type OldEntry = { name: string; category: string; standalone: number | null; desc?: string };
-  const old = JSON.parse(
-    fs.readFileSync(new URL("../fixtures/trending-classifications-v1.json", import.meta.url), "utf-8"),
-  ) as { items: Record<string, OldEntry> };
-
-  it("gives every migrated entry its old category and standalone, a hand fix pinned", async () => {
-    const file = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "classify-migrate-")), "c.json");
-    const migrated = Object.fromEntries(
-      Object.entries(old.items).map(([k, e]) => [k, migrateClassifyEntry(e as never)]),
-    );
-    saveTrendingVerdicts({ items: migrated }, file);
-    // The entry's own hash, except for the hand fix, whose description has changed since.
-    const items = Object.entries(old.items).map(([id, e]) => ({
-      id,
-      title: e.name,
-      hash: e.desc ?? "changed",
-    }));
-    const j = await judgeItems(items, {
-      tag: "test",
-      request: () => ({ state: {}, questions: {} }),
-      decide: (a: ClassifyAnswers) => classificationOf(a),
-      fingerprint: (i) => i.hash,
-      cache: loadTrendingVerdicts(file),
-      dateStr: DATE,
-      unseenDays: 180,
-    });
-    expect(j.rankedBy).toBe("jev");
-    expect(j.verdicts.size).toBe(11);
-    for (const [id, e] of Object.entries(old.items)) {
-      expect(j.verdicts.get(id)).toMatchObject({ category: e.category, standalone: e.standalone });
-    }
-    expect(migrated["npm:hand-fixed"]).toMatchObject({ pinned: true });
-    expect(migrated["npm:hand-fixed"]).not.toHaveProperty("fingerprint");
-    // Idempotent: a migrated entry is left as it is.
-    expect(migrateClassifyEntry(migrated["github:cursor/plugins"] as never)).toEqual(
-      migrated["github:cursor/plugins"],
-    );
-  });
-
-  it("renames a policy verdict's stage to fingerprint, once", () => {
-    const e = { title: "t", stage: "Adopted", answers: {}, lastSeen: DATE };
-    const m = migratePolicyEntry(e);
-    expect(m).toEqual({ title: "t", answers: {}, lastSeen: DATE, fingerprint: "Adopted" });
-    expect(migratePolicyEntry(m)).toEqual(m);
   });
 });

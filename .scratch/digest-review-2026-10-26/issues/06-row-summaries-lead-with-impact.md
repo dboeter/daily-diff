@@ -1,6 +1,6 @@
 # 06: Release and row summaries lead with impact
 
-Status: done
+Status: resolved
 Blocked by: None (can start immediately)
 Findings: S7, A7, A11, D3, D6, T6, T14 — see `../review.md`
 

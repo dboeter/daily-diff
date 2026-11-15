@@ -1,6 +1,6 @@
 # 06: Near-bar data items lost to hard cut-offs
 
-Status: done
+Status: resolved
 Findings: 6 [medium], see `../review.md`
 
 ## Problem

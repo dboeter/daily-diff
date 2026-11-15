@@ -1,6 +1,6 @@
 # 01: A data page whose rows are all minor gets NO_HIGHLIGHT_NOTE, not a meta bullet
 
-Status: done
+Status: resolved
 Findings: 1 [high], see `../review.md`
 
 ## What to build

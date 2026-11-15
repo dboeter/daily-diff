@@ -1,6 +1,6 @@
 # 03: highlights.json leaves out ai-data and ai-models
 
-Status: done
+Status: resolved
 Findings: 5 [medium], see `../review.md`
 
 ## Problem

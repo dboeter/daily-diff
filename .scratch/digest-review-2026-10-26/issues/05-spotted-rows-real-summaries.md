@@ -1,6 +1,6 @@
 # 05: Spotted and Most discussed rows get real summaries
 
-Status: done
+Status: resolved
 Blocked by: 01
 Findings: S1, A6, M1, T8, A10 — see `../review.md`
 

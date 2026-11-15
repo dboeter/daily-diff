@@ -1,6 +1,6 @@
 # 12: The Research table applies the domain penalty to the whole pool
 
-Status: done
+Status: resolved
 Blocked by: None (can start immediately)
 Findings: T4 [medium] — see `../review.md`, `../ai-trends.md`
 

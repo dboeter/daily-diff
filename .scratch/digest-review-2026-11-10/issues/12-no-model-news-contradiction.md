@@ -1,6 +1,6 @@
 # 12: "No lab or model news today" above Highlights about lab news
 
-Status: done
+Status: resolved
 Findings: 14 [low], see `../review.md`
 
 ## Problem

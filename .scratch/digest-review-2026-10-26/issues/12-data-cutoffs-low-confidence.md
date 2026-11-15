@@ -1,6 +1,6 @@
 # 12: Low confidence counts as unknown at the data report cutoffs
 
-Status: done
+Status: resolved
 Blocked by: 01
 Findings: S6, D4, D13 — see `../review.md`
 

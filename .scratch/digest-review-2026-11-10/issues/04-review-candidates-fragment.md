@@ -1,6 +1,6 @@
 # 04: The review marks BigQuery notes as shown that the report does not link
 
-Status: done
+Status: resolved
 Findings: 8 [medium], see `../review.md`
 
 ## Problem

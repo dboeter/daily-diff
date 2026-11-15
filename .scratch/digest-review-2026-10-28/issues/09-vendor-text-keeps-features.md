@@ -1,6 +1,6 @@
 # 09: Vendor items are judged and summarized on their whole feature list
 
-Status: done
+Status: resolved
 Blocked by: None (can start immediately)
 Findings: D1 [medium] — see `../review.md`, `../ai-data.md`
 

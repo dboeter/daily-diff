@@ -1,6 +1,6 @@
 # 08: Hot issues don't repeat unchanged; closed issues are marked
 
-Status: done
+Status: resolved
 Blocked by: None (can start immediately)
 Findings: A2 — see `../review.md`. Related: `.scratch/hot-issue-age/issues/01-hot-issue-regardless-of-age.md` (its "Repeats" question)
 

@@ -1,6 +1,6 @@
 # 02: Policy feeds: quiet or broken?
 
-Status: done
+Status: resolved
 Blocked by: None (can start immediately)
 Findings: X1, X8 — see `../review.md`
 

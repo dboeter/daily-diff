@@ -1,6 +1,6 @@
 # 02: Release bullets come from the notes that matter, never a cut sentence
 
-Status: done
+Status: resolved
 Blocked by: None (can start immediately)
 Findings: A1 [high], A2 [high], A4 [medium] — see `../review.md`, `../ai-agents.md`
 
