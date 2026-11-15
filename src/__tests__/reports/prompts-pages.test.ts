@@ -653,6 +653,8 @@ describe("source fidelity rules", () => {
     expect(prompts.data).not.toContain("its change requires it");
     expect(prompts.data).not.toContain("must test or migrate");
     expect(prompts.data).not.toMatch(/without who is affected and what to do/);
+    // No audience the row does not state (SOURCE_FIDELITY_RULES): the reviewer's finding on this branch.
+    expect(prompts.data).toContain("who is affected, as far as the row names it");
   });
 
   // 2026-10-27 forced weekly run: "DeepSeek's model family dominates", "half the OpenRouter top 20"

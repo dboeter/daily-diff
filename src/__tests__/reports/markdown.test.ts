@@ -919,6 +919,12 @@ describe("renderPolicyTable", () => {
 // ---------------------------------------------------------------------------
 
 describe("highlightsOnly", () => {
+  it("ends at the tables marker, which the data page's former layout asked for", () => {
+    expect(highlightsOnly("## Highlights\n\n- A.\n\n<!-- tables -->\n\nA note.")).toBe(
+      "## Highlights\n\n- A.",
+    );
+  });
+
   it("keeps Highlights and drops a section the model added", () => {
     expect(highlightsOnly("# Report\n\n## Highlights\n\n- A.\n- B.\n\n## Signals\n\nMore.")).toBe(
       "## Highlights\n\n- A.\n- B.",

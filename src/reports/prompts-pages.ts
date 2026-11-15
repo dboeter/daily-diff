@@ -405,7 +405,7 @@ ${sectionsMd}
 
 ---
 
-Write only \`## ${SECTIONS.highlights}\`: 1-3 bullets, the most consequential changes today, deprecations, retirements and breaking changes first. Each bullet says who is affected (which client setup: e.g. Azure Databricks workspaces with the compliance security profile, Snowflake Native App providers, BigQuery users of AI functions), what to do only when the row states it, as strongly as the row does (a recommended replacement is a recommendation, not a must), and by when, if the row gives a date.
+Write only \`## ${SECTIONS.highlights}\`: 1-3 bullets, the most consequential changes today, deprecations, retirements and breaking changes first. Each bullet says who is affected, as far as the row names it (which client setup: e.g. Azure Databricks workspaces with the compliance security profile, Snowflake Native App providers, BigQuery users of AI functions; the platform's users when the row names no narrower group), what to do only when the row states it, as strongly as the row does (a recommended replacement is a recommendation, not a must), and by when, if the row gives a date.
 
 Rules:
 - ${NO_TITLE_RULE}

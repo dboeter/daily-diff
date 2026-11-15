@@ -1237,6 +1237,15 @@ describe("buildDataReport", () => {
     expect(content).toContain("## Highlights\n\n- H.");
   });
 
+  it("turns a Highlight the model opened with the sign instead of a marker into a bullet", async () => {
+    generateBody.mockReset();
+    generateBody.mockImplementation(async (prompt: string) =>
+      prompt.startsWith("You are the editor") ? "## Highlights\n\n− Legacy runtime retires." : reply(prompt),
+    );
+    const content = (await build(sections(false), await vendorData()))!.content;
+    expect(content).toContain("## Highlights\n\n- Legacy runtime retires.");
+  });
+
   it("shows only the Highlights of the prose reply: a section the model adds anyway is dropped", async () => {
     generateBody.mockReset();
     // Across platforms was removed on 2026-11-15 (issue 05): 7 of its 9 reviewed bullets overstated their rows.

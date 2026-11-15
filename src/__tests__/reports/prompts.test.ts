@@ -271,6 +271,7 @@ describe("buildProjectDigestPrompt", () => {
     // One reporter is not "users": #107390 (2026-11-10) and four more bullets said "users report".
     expect(prompt).toContain('worded as one report ("an issue reports")');
     expect(prompt).not.toContain('"users report"');
+    expect(prompt).toContain("who is affected, as far as the body says");
   });
 
   it("carries the source fidelity rules to the repo bullets (issue 05: 18 of 40 overstatements started there)", () => {
