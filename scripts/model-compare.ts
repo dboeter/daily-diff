@@ -9,16 +9,16 @@
  *   gh run download <run id> -p 'llm-prompts-*' -D .scratch/model-compare/captures   # per run
  *   node --env-file=.env --import tsx scripts/model-compare.ts .scratch/model-compare/captures/llm-prompts-* [--dry-run]
  *
- * Options: --candidate <id> (default anthropic/claude-sonnet-5.5), --judge <id> (default
- * anthropic/claude-opus-5.5), --out <dir> (default .scratch/model-compare), --dry-run (count calls
- * and estimate tokens only). Needs OPENROUTER_API_KEY. Each answer and verdict is cached under <out>/cache
+ * Options: --candidate <id> (default claude-sonnet-5-5), --judge <id> (default
+ * claude-opus-5-5), --out <dir> (default .scratch/model-compare), --dry-run (count calls
+ * and estimate tokens only). Both models are called on the Anthropic API (ANTHROPIC_API_KEY). Each answer and verdict is cached under <out>/cache
  * (verdicts per judge), so a rerun resumes; the summary goes to <out>/results.md and every judged claim to <out>/claims.jsonl.
  */
 
 import fs from "node:fs";
 import path from "node:path";
-import { OpenRouterProvider } from "../src/providers/openrouter.ts";
-import { TruncatedResponseError } from "../src/providers/types.ts";
+import { AnthropicProvider } from "../src/providers/anthropic.ts";
+import { type LlmProvider, TruncatedResponseError } from "../src/providers/types.ts";
 
 interface Captured {
   label: string;
@@ -50,16 +50,14 @@ function isClaims(x: unknown): x is Claim[] {
 
 /** Like `callLlm`: a cut-off answer gets one retry at double the budget, so long listing calls
  *  are compared instead of failing. */
-async function answerLikeCallLlm(
-  provider: OpenRouterProvider,
-  prompt: string,
-  budget: number,
-): Promise<string> {
+async function answerLikeCallLlm(provider: LlmProvider, prompt: string, budget: number): Promise<string> {
   try {
     return await provider.call(prompt, budget);
   } catch (err) {
     if (!(err instanceof TruncatedResponseError)) throw err;
-    return provider.call(prompt, budget * 2);
+    // The Anthropic SDK refuses a non-streaming request it expects to run over 10 minutes (about
+    // 21,000 output tokens), so the doubled budget stays under that.
+    return provider.call(prompt, Math.min(budget * 2, 20000));
   }
 }
 
@@ -68,16 +66,12 @@ function option(name: string, fallback: string): string {
   const i = args.indexOf(name);
   return (i >= 0 ? args[i + 1] : undefined) ?? fallback;
 }
-const CANDIDATE = option("--candidate", "anthropic/claude-sonnet-5.5");
-const JUDGE = option("--judge", "anthropic/claude-opus-5.5");
+const CANDIDATE = option("--candidate", "claude-sonnet-5-5");
+const JUDGE = option("--judge", "claude-opus-5-5");
 const OUT = option("--out", ".scratch/model-compare");
 const DRY_RUN = args.includes("--dry-run");
 const optionValues = new Set(["--candidate", "--judge", "--out"].map((o) => option(o, "")));
 const captureDirs = args.filter((a) => !a.startsWith("--") && !optionValues.has(a));
-
-// The production settings (low effort, free fallbacks) belong to the free model, not to these two.
-delete process.env["OPENROUTER_REASONING_EFFORT"];
-delete process.env["OPENROUTER_FALLBACK_MODELS"];
 
 const JUDGE_PROMPT = (prompt: string, a: string, b: string) => `You check the writing of a daily news digest.
 Below is the exact prompt a writing model received, then two answers to it, A and B, from different models.
@@ -160,8 +154,8 @@ async function main() {
   );
   if (DRY_RUN) return;
 
-  const candidate = new OpenRouterProvider({ model: CANDIDATE });
-  const judge = new OpenRouterProvider({ model: JUDGE });
+  const candidate = new AnthropicProvider(CANDIDATE);
+  const judge = new AnthropicProvider(JUDGE);
   const answerDir = path.join(OUT, "cache", slug(CANDIDATE));
   const verdictDir = path.join(answerDir, `judge-${slug(JUDGE)}`);
   const rows: Array<{ day: string; file: string; label: string; verdict: Verdict }> = [];
