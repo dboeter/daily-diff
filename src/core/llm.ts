@@ -100,6 +100,25 @@ export function llmTraceFile(): string {
   return `{\n"attempted": ${attempted},\n"failed": ${failed},\n"calls": [\n${llmCalls.map((c) => JSON.stringify(c)).join(",\n")}\n]\n}\n`;
 }
 
+/**
+ * With `LLM_CAPTURE_DIR` set, every answered call's prompt and output go to `<dir>/NNN-<label>.json`,
+ * so a later replay can send the same prompts to another model (`scripts/model-compare.ts`).
+ * Off by default; the daily workflow sets it and uploads the folder as an artifact.
+ */
+let capturedCalls = 0;
+function captureCall(label: string, maxTokens: number, prompt: string, output: string): void {
+  const dir = process.env.LLM_CAPTURE_DIR;
+  if (!dir) return;
+  capturedCalls++;
+  const name = `${String(capturedCalls).padStart(3, "0")}-${label.replace(/[^\w.-]+/g, "_")}.json`;
+  try {
+    fs.mkdirSync(dir, { recursive: true });
+    fs.writeFileSync(path.join(dir, name), JSON.stringify({ label, maxTokens, prompt, output }, null, 2));
+  } catch (err) {
+    console.error(`[llm] could not capture ${name}: ${err}`);
+  }
+}
+
 /** Fraction of LLM calls that exhausted their retries. 0 when none were made. */
 export function llmFailureRatio(): number {
   return llmStats.attempted === 0 ? 0 : llmStats.failed / llmStats.attempted;
@@ -110,6 +129,7 @@ export function resetLlmStats(): void {
   llmStats.attempted = 0;
   llmStats.failed = 0;
   llmCalls.length = 0;
+  capturedCalls = 0;
 }
 
 /**
@@ -283,6 +303,7 @@ export async function callLlm(
     try {
       const text = await provider.call(prompt, budget);
       llmCalls.push({ label, outcome: "ok", chars: text.length });
+      captureCall(label, maxTokens, prompt, text);
       return text;
     } catch (err) {
       // A cut-off response gets one retry at double the budget, apart from the

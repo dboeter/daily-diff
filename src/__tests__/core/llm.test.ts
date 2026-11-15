@@ -1,5 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
 import { EmptyResponseError, TruncatedResponseError } from "../../providers/index.ts";
 
 // ---------------------------------------------------------------------------
@@ -288,6 +290,41 @@ describe("callLlm", () => {
 
   afterEach(() => {
     vi.useRealTimers();
+  });
+
+  it("saves each answered call's prompt and output when LLM_CAPTURE_DIR is set", async () => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "llm-capture-"));
+    vi.stubEnv("LLM_CAPTURE_DIR", dir);
+    try {
+      mockCall.mockResolvedValueOnce("first answer").mockResolvedValueOnce("second answer");
+      await callLlm("prompt one", 2048, "agents");
+      await callLlm("prompt two", 4096, "data-highlights");
+
+      const files = fs.readdirSync(dir).sort();
+      expect(files).toEqual(["001-agents.json", "002-data-highlights.json"]);
+      expect(JSON.parse(fs.readFileSync(path.join(dir, "002-data-highlights.json"), "utf8"))).toEqual({
+        label: "data-highlights",
+        maxTokens: 4096,
+        prompt: "prompt two",
+        output: "second answer",
+      });
+    } finally {
+      vi.unstubAllEnvs();
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it("saves nothing when LLM_CAPTURE_DIR is unset", async () => {
+    vi.stubEnv("LLM_CAPTURE_DIR", "");
+    const spy = vi.spyOn(fs, "writeFileSync");
+    try {
+      mockCall.mockResolvedValueOnce("ok");
+      await callLlm("prompt", 2048, "agents");
+      expect(spy).not.toHaveBeenCalled();
+    } finally {
+      spy.mockRestore();
+      vi.unstubAllEnvs();
+    }
   });
 
   it("passes prompt and maxTokens to provider.call()", async () => {
