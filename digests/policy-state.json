@@ -1,19 +1,5 @@
 {
   "reported": {
-    "b7ce37b6-62ea-41f8-a4e6-5d7fb6620d40": "2026-10-15",
-    "celex:32026D2274": "2026-10-15",
-    "hys:14628": "2026-10-15",
-    "hys:19292": "2026-10-15",
-    "000001a1-1db9-d365-a3e9-1fbf7dd90001": "2026-10-15",
-    "https://www.digitaleoverheid.nl/?p=141479": "2026-10-15",
-    "https://www.binnenlandsbestuur.nl/digitaal/handreiking-voor-software-updates-met-ai-toevoegingen": "2026-10-15",
-    "tk:2026Z22040": "2026-10-15",
-    "2b0b500b-8214-4703-adf3-c76a0aa99c19": "2026-10-15",
-    "000001a1-3266-dc9a-a9a3-7f7e79d00000": "2026-10-15",
-    "https://www.binnenlandsbestuur.nl/digitaal/ap-richt-directie-voor-ai-toezicht-op": "2026-10-15",
-    "https://www.transformernews.ai/p/democrats-prepare-to-battle-over-ai-regulation": "2026-10-15",
-    "https://www.politico.eu/?post_type=pro&p=9148589": "2026-10-15",
-    "nl:36875": "2026-10-15",
     "tk:2026Z22439": "2026-10-16",
     "https://www.politico.eu/?post_type=pro&p=9168500": "2026-10-16",
     "000001a1-46ac-d787-a9a1-feed16cb0007": "2026-10-18",
@@ -73,7 +59,8 @@
     "celex:52026XC06005": "2026-11-13",
     "tk:2026Z24997": "2026-11-13",
     "https://cset.georgetown.edu/?p=25781": "2026-11-13",
-    "000001a1-d1dd-d0f3-a5f5-dbfd13b20000": "2026-11-13"
+    "000001a1-d1dd-d0f3-a5f5-dbfd13b20000": "2026-11-13",
+    "https://cset.georgetown.edu/?p=25821": "2026-11-15"
   },
   "stages": {
     "celex:32026D2274": "2026-10-12 Decision adopted",
