@@ -18,6 +18,7 @@ import {
   isMajorRelease,
   NEWS_TITLE_ONLY,
   releaseNotes,
+  SOURCE_FIDELITY_RULES,
   stripLinkNoise,
   topN,
 } from "../../reports/prompts.ts";
@@ -267,7 +268,14 @@ describe("buildProjectDigestPrompt", () => {
     expect(prompt).toContain("Fix: PR #9 open");
     expect(prompt).toContain('"- **Hot issue:** #<number>: <description>"');
     expect(prompt).toContain("Write no link, label, comment or 👍 count, gain or fix status");
-    expect(prompt).toContain('worded as a report ("users report", "an issue says")');
+    // One reporter is not "users": #107390 (2026-11-10) and four more bullets said "users report".
+    expect(prompt).toContain('worded as one report ("an issue reports")');
+    expect(prompt).not.toContain('"users report"');
+  });
+
+  it("carries the source fidelity rules to the repo bullets (issue 05: 18 of 40 overstatements started there)", () => {
+    const prompt = buildProjectDigestPrompt([makeActivity({ releases: [release] })], scope, "d");
+    for (const rule of SOURCE_FIDELITY_RULES) expect(prompt).toContain(rule);
   });
 
   it("sends no prerelease list for a project that has a stable release", () => {

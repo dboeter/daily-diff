@@ -612,7 +612,7 @@ describe("buildSpottedSummariesPrompt", () => {
 });
 
 // ---------------------------------------------------------------------------
-// Source fidelity: every Highlights, Signals and highlights.json prompt
+// Source fidelity: every Highlights, Signals and highlights.json prompt, and the Spotted summaries
 // ---------------------------------------------------------------------------
 
 describe("source fidelity rules", () => {
@@ -622,6 +622,8 @@ describe("source fidelity rules", () => {
     policy: buildPolicyProsePrompt("| Date |", "2026-10-26", "A reader."),
     data: buildDataProsePrompt("## Snowflake", "2026-10-26"),
     highlights: buildHighlightsPrompt({ "ai-data": "## Highlights" }),
+    // Row summaries too: 5 of the issue 05 overstatements were Spotted summaries.
+    spotted: buildSpottedSummariesPrompt([], "2026-10-26"),
   };
 
   it.each(Object.entries(prompts))("the %s prompt carries every rule", (_, prompt) => {
@@ -634,6 +636,11 @@ describe("source fidelity rules", () => {
     expect(rules).toMatch(/No call to action/);
     expect(rules).toMatch(/X says/);
     expect(rules).toMatch(/one person's report never becomes 'users report'/);
+    // The scope rules the issue 05 cases broke (2026-11-04 … 11-14).
+    expect(rules).toMatch(/qualifier/);
+    expect(rules).toMatch(/'recommends'.*never becomes 'must'/);
+    expect(rules).toMatch(/upcoming.*never becomes 'released'/);
+    expect(rules).toMatch(/[Ss]eparate (changes|fixes) stay separate/);
     expect(rules).toMatch(/sample size, a single run, not peer reviewed/);
     expect(rules).toMatch(/Several items on one theme in the same period are not a trend/);
     expect(rules).toMatch(/never titles, descriptions or co-occurrence alone/);

@@ -223,6 +223,7 @@ ${rowList(rows, storyLine)}
 
 ${summaryLine("1-2 sentences")} — what the story is about.
 ${STORY_RULES}
+${sourceFidelityRules()}
 ${summaryOutputRule(rows.length)}
 - English.
 `;

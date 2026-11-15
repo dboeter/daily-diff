@@ -134,14 +134,19 @@ export const goingAwayRule = (item: "bullet" | "highlight") =>
  * What a Highlights, Signals or highlights.json claim may say beyond its source: nothing. On
  * 2026-10-26 the models wrote "GA" for two Snowflake notes that said no such thing, added "audit
  * your invocations immediately", stated a vendor's design target as achieved throughput, dropped
- * the limits of a 200-case self-published study and built a trend from three paper titles.
+ * the limits of a 200-case self-published study and built a trend from three paper titles. The
+ * qualifier, strength and separate-changes rules are the November 2026 reviews' cases (issue 05);
+ * the repo-section and Spotted summary prompts carry the rules too, as most of those started there.
  */
 export const SOURCE_FIDELITY_RULES = [
   "Release-stage words (GA, generally available, preview, beta, deprecated) only when the item's own row or text uses them.",
   "No call to action, audience or conclusion the source does not state: never add advice such as 'audit now' or 'upgrade immediately'.",
-  "A vendor's or a self-published figure is that source's claim: attribute it ('X says', 'according to X'), and never state a target or estimate as achieved. An open issue is a report ('users report'), not an established fact.",
+  "A vendor's or a self-published figure is that source's claim: attribute it ('X says', 'according to X'), and never state a target or estimate as achieved. An open issue is a report ('an issue reports'), not an established fact.",
   "Keep the attribution and scope a row gives: an item it words as a report ('a user reports', 'X reports that') stays a report, and one person's report never becomes 'users report', 'broad' or a company's policy.",
   "A study result keeps its scope when the source gives it: sample size, a single run, not peer reviewed.",
+  "Keep every qualifier the source gives: 'the default Fable model' never becomes 'the default model', and 'in internal benchmarks' stays with its figure.",
+  "Keep the source's strength: 'recommends', 'can' or 'should' never becomes 'must', and 'upcoming' or 'planned' never becomes 'released'.",
+  "Separate changes stay separate: never merge two fixes, or a fix and a feature, into one claim, and a changed default is not a new feature.",
   "Several items on one theme in the same period are not a trend: a trend or causal claim needs rows that show it (a summary that states it, or figures such as gains or ranks), never titles, descriptions or co-occurrence alone.",
 ];
 
@@ -431,7 +436,7 @@ Write the report in English: one section per project above that has something le
 - **Release**: what the stable release(s) change for users, in this order: ${RELEASE_ORDER}. Several releases in a range: summarize the range, do not list each one. Link each release you name as a plain Markdown link, [tag](url), never inside backticks; a range as its oldest and newest, [v1.2.0](url)–[v1.2.5](url). A release with an Announcement: describe it from the announcement, not from its first changelog entries.
 - **Prerelease**: only from a "Prereleases (no stable release yet)" list, and only when it adds notable features or breaking changes; skip routine alpha/rc bumps. Say it is a prerelease and link it.
 - **News**: what the news item says about the project and why it matters. Link it as a plain Markdown link, [<title>](<url>), never a bare URL. An item marked "${NEWS_TITLE_ONLY}": say only what its title says, with no consequence or reason it matters, and never describe a discussion ("discusses", "commenters").
-- **${HOT_ISSUE.label}**: one bullet per issue, written "- **${HOT_ISSUE.label}:** #<number>: <description>". The description says what the issue reports and how serious it is, worded as a report ("users report", "an issue says"), never as an established fact. When the body shows a tracking, announcement or FAQ thread rather than a bug report, say so. For a security issue, say where the problem shows and who is affected. Write no link, label, comment or 👍 count, gain or fix status: code adds them to the bullet.
+- **${HOT_ISSUE.label}**: one bullet per issue, written "- **${HOT_ISSUE.label}:** #<number>: <description>". The description says what the issue reports and how serious it is, worded as one report ("an issue reports"), never as an established fact, however many comments or 👍 it has. When the body shows a tracking, announcement or FAQ thread rather than a bug report, say so. For a security issue, say where the problem shows and who is affected. Write no link, label, comment or 👍 count, gain or fix status: code adds them to the bullet.
 
 Rules:
 - Use only the data above. Omit a bullet type that has no data. Never state what did not happen ("no release today", "no breaking issues were reported").
@@ -439,6 +444,7 @@ Rules:
 - A project with a stable release always gets its section and a **Release** bullet naming its most user-visible changes, even when they are small.
 - If every item of a project without a stable release is skipped, leave out its section entirely; code lists it as quiet.
 - ${IDENTIFIER_RULE}
+${sourceFidelityRules()}
 - Style: concise and concrete, for developers who use these tools.
 `;
 }
