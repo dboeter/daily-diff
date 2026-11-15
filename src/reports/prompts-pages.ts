@@ -405,15 +405,15 @@ ${sectionsMd}
 
 ---
 
-Write only \`## ${SECTIONS.highlights}\`: 1-3 bullets, the most consequential changes today, deprecations, retirements and breaking changes first. Each bullet says who is affected (which client setup: e.g. Azure Databricks workspaces with the compliance security profile, Snowflake Native App providers, BigQuery users of AI functions), what to do when the row says or its change requires it (enable, migrate, test, plan for) and by when, if the row gives a date.
+Write only \`## ${SECTIONS.highlights}\`: 1-3 bullets, the most consequential changes today, deprecations, retirements and breaking changes first. Each bullet says who is affected (which client setup: e.g. Azure Databricks workspaces with the compliance security profile, Snowflake Native App providers, BigQuery users of AI functions), what to do only when the row states it, as strongly as the row does (a recommended replacement is a recommendation, not a must), and by when, if the row gives a date.
 
 Rules:
 - ${NO_TITLE_RULE}
 - In ${SECTIONS.highlights}: ${goingAwayRule("bullet")} ${HIGHLIGHTS_PICK_RULE}
 - When no item qualifies, ${SECTIONS.highlights} is the one bullet "- ${NO_HIGHLIGHT_NOTE}". Never a bullet about the rows as a group or about what is absent ("all notes are minor", "no deprecations"): the Action required table above the sections is not shown here.${minorTitles.length ? `\n- These rows are minor: no Highlight for them. ${minorTitles.map((t) => `"${t}"`).join(", ")}` : ""}${storiesNote ? `\n- ${storiesNote}` : ""}
 - Length: at most ~150 words.
-- A major release in ${DATA_REPORT.releasesHeading} (a version x.0.0, or one whose summary names breaking changes) is a Highlights candidate: say who must test or migrate.
-- Never restate a row: the reader sees the tables right below. A bullet that only says what changed, without who is affected and what to do, is left out.
+- A major release in ${DATA_REPORT.releasesHeading} (a version x.0.0, or one whose summary names breaking changes) is a Highlights candidate: say who it affects, and a test or migration step only when its summary gives one.
+- Never restate a row: the reader sees the tables right below. A bullet that only says what changed, without who is affected, is left out.
 - Write no links, URLs or other sections; name each item as the sections do. Dates only as the "by when" of a row that gives one.
 - Name each item in at most one bullet. Two rows that describe the same change (a release note and its behavior change bundle, a "coming soon" note and its GA note) are one item: mention it once.
 - Base every claim on the sections. Do not invent versions, dates or availability.

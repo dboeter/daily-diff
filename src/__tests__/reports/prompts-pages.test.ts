@@ -646,8 +646,13 @@ describe("source fidelity rules", () => {
     expect(rules).toMatch(/never titles, descriptions or co-occurrence alone/);
   });
 
-  it("the data Highlights ask for an action only when the row gives or requires one", () => {
-    expect(prompts.data).toContain("what to do when the row says or its change requires it");
+  // "must migrate to GLM 5.3" (a recommendation), "must update" a flag kept as an alias, "must test
+  // migration" and "must migrate to Gemini 3.8 Flash" (calls redirected): issue 05, 2026-11-04 … 11-14.
+  it("the data Highlights give an action only when the row states one, in the row's strength", () => {
+    expect(prompts.data).toContain("what to do only when the row states it, as strongly as the row does");
+    expect(prompts.data).not.toContain("its change requires it");
+    expect(prompts.data).not.toContain("must test or migrate");
+    expect(prompts.data).not.toMatch(/without who is affected and what to do/);
   });
 
   // 2026-10-27 forced weekly run: "DeepSeek's model family dominates", "half the OpenRouter top 20"
