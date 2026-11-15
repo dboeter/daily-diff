@@ -13,7 +13,102 @@
       <height>144</height>
     </image>
     <atom:link href="https://dboeter.github.io/daily-diff/feeds/ai-agents.xml" rel="self" type="application/rss+xml"/>
-    <lastBuildDate>Sat, 14 Nov 2026 06:08:52 +0000</lastBuildDate>
+    <lastBuildDate>Sun, 15 Nov 2026 06:14:24 +0000</lastBuildDate>
+    <item>
+      <title>AI Agents 2026-11-15</title>
+      <link>https://dboeter.github.io/daily-diff/#2026-11-15/ai-agents</link>
+      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-11-15/ai-agents</guid>
+      <pubDate>Sun, 15 Nov 2026 00:00:00 +0000</pubDate>
+      <description>AI Agents 2026-11-15 ⬛ Overview · 🟪 AI Agents · 🟦 AI Models &amp;amp; Labs · 🟧 AI Policy · 🟨 Data Engineering Projects: 15 | Active today: 3 | Stable releases: 2 | Prereleases (not covered): 1 | Generated: 2026-11-15 06:12 UTC Highlights Oh My Pi v18.20.1–v18.20.2 changes lsTree() to return { path, mode } objects, a breaking API change. OpenAI Codex issue #61489: users report that with request compression enabled, highly compressible bodies receive HTTP 400 instead of documented 413 and Codex do...</description>
+      <content:encoded><![CDATA[<h1>AI Agents 2026-11-15</h1>
+<p><a href="https://dboeter.github.io/daily-diff/#2026-11-15">⬛ Overview</a> · <strong>🟪 AI Agents</strong> · <a href="https://dboeter.github.io/daily-diff/#2026-11-15/ai-models">🟦 AI Models &amp; Labs</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-15/ai-policy">🟧 AI Policy</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-15/ai-data">🟨 Data Engineering</a></p>
+<blockquote>
+<p>Projects: 15 | Active today: 3 | Stable releases: 2 | Prereleases (not covered): 1 | Generated: 2026-11-15 06:12 UTC</p>
+</blockquote>
+<hr>
+<h2>Highlights</h2>
+<ul>
+<li>Oh My Pi v18.20.1–v18.20.2 changes <code>lsTree()</code> to return <code>{ path, mode }</code> objects, a breaking API change.</li>
+<li>OpenAI Codex issue #61489: users report that with request compression enabled, highly compressible bodies receive HTTP 400 instead of documented 413 and Codex does not fall back to uncompressed requests.</li>
+<li>Shotoku introduces local-first governance for AI agents with budget caps, spending limits, human approval gates, and a tamper-evident audit trail enforced before payment.</li>
+</ul>
+<hr>
+<h2>Coding Agents &amp; Assistants</h2>
+<h3>Claude Code</h3>
+<ul>
+<li><strong>News:</strong> <a href="https://news.ycombinator.com/item?id=50503241">What a task costs on Opus 5.5</a> breaks down per-task token costs on Opus 5.5 and shows which settings affect the bill.</li>
+<li><strong>News:</strong> <a href="https://news.ycombinator.com/item?id=50496642">Show HN: Cyberviber – a $15 touch screen to show which Claude session needs you</a> describes a 2.4″ ESP32 display that lists running Claude Code sessions and focuses a terminal on tap.</li>
+</ul>
+<h3>OpenAI Codex</h3>
+<ul>
+<li><strong>Hot issue:</strong> <a href="https://github.com/openai/codex/issues/61489">#61489</a>: users report that with <code>features.enable_request_compression</code> on, highly compressible request bodies receive a bare HTTP 400 instead of the documented 413, and Codex never falls back to uncompressed requests. (12 comments, 0 👍; +11 in the last 24h)</li>
+</ul>
+<h3>Oh My Pi</h3>
+<ul>
+<li><strong>Release:</strong> <a href="https://github.com/can1357/oh-my-pi/releases/tag/v18.20.1">v18.20.1</a>–<a href="https://github.com/can1357/oh-my-pi/releases/tag/v18.20.2">v18.20.2</a> changes <code>lsTree()</code> to return <code>{ path, mode }</code> objects (breaking), fixes context cost estimates, Vertex AI Gemini v1beta1 support, Amazon Bedrock region selection, Gemini 4 long responses, Cursor conversation context, Bedrock streaming retries, Claude account recovery, OpenRouter reasoning preservation, Xiaomi MiMo auth, and Perplexity sign-in; adds Antigravity CLI ACP provider with managed install, Google sign-in, host tools, and retained conversations, plus Antigravity models for Gemini, Claude, and GPT-OSS with selectable thinking levels.</li>
+</ul>
+<p><strong>Quiet today:</strong> <a href="https://github.com/google-gemini/gemini-cli">Gemini CLI</a>, <a href="https://github.com/Kilo-Org/kilocode">Kilo Code</a>, <a href="https://github.com/anomalyco/opencode">OpenCode</a>, <a href="https://github.com/earendil-works/pi">Pi</a>, <a href="https://github.com/1jehuang/jcode">jcode</a>, <a href="https://github.com/cline/cline">Cline</a>, <a href="https://github.com/CommandCodeAI/command-code">Command Code</a>, <a href="https://github.com/deepseek-ai/deepseek-harness">DeepSeek Harness</a>, <a href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a></p>
+<hr>
+<h2>Agent Tooling</h2>
+<p><strong>Quiet today:</strong> <a href="https://github.com/NVIDIA/OpenShell">OpenShell</a>, <a href="https://github.com/herdrdev/herdr">herdr</a>, <a href="https://github.com/microsoft/conductor">Conductor</a></p>
+<hr>
+<h2>Spotted</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Story</th>
+<th align="left">Source</th>
+<th align="left">Discussion</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">Show HN: Agweb – a browser for agents that stays out of your way (<a href="https://github.com/paul-nameless/agweb">paul-nameless/agweb</a>)</td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50497147">92 points, 27 comments</a></td>
+<td align="left">Agweb is a browser designed for AI agents that avoids focus stealing, has a minimal footprint, and displays all tabs in a single view.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://www.tomshardware.com/tech-industry/artificial-intelligence/rogue-claude-ai-tasked-with-renumbering-pages-accidentally-deletes-law-professors-entire-syllabus-one-year-of-lecture-notes-youre-right-to-be-angry-i-deleted-your-files-through-my-own-carelessness-humbled-agent-admits">Claude asked to renumber pages deletes professor&#39;s syllabus, year of notes</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50499114">45 points, 63 comments</a></td>
+<td align="left">A University of Chicago lecturer reported that a Claude AI agent accidentally deleted his entire syllabus and a year of lecture notes.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://debarshibasak.github.io/readables/blogs/agent-first-development">Agile Manifesto for Agents</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50496562">28 points, 6 comments</a></td>
+<td align="left">The &quot;Agile Manifesto for Agents&quot; proposes twelve commandments for coordinating AI agents in teams, emphasizing scope understanding and bounded work delivery.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://www.shotoku.dev/">Show HN: Shotoku – Local-first action governance and budget caps for AI agents</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50496705">9 points, 1 comment</a></td>
+<td align="left">Shotoku provides local-first governance for AI agents with budget caps, spending limits, human approval requirements, and a tamper-evident audit trail enforced before any payment.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://opencyclone.vercel.app/">Show HN: Open-Source Version of Cyclon: Phone where AI is the interface?</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50493213">8 points, 1 comment</a></td>
+<td align="left">An open-source Cyclon alternative lets users turn their existing phone into an AI interface without purchasing dedicated hardware.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://dev.to/therealmrmumba/composio-vs-nango-vs-scalekit-what-changes-when-your-agent-goes-to-production-4fl2">Composio vs Nango vs Scalekit: What Changes When Your Agent Goes to Production</a></td>
+<td align="left">Dev.to</td>
+<td align="left"><a href="https://dev.to/therealmrmumba/composio-vs-nango-vs-scalekit-what-changes-when-your-agent-goes-to-production-4fl2">29 reactions, 3 comments</a></td>
+<td align="left">The author compares Composio, Nango, and Scalekit for taking AI agents to production, highlighting security review challenges after successful demos.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://dev.to/dailycontext/your-agent-needs-a-schema-not-a-better-prompt-53bm">Your Agent Needs a Schema, Not a Better Prompt</a></td>
+<td align="left">Dev.to</td>
+<td align="left"><a href="https://dev.to/dailycontext/your-agent-needs-a-schema-not-a-better-prompt-53bm">22 reactions, 9 comments</a></td>
+<td align="left">The author argues that AI agents require structured schemas rather than improved prompts to function reliably in production.</td>
+</tr>
+</tbody></table>
+<hr>
+<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
+]]></content:encoded>
+    </item>
     <item>
       <title>AI Agents 2026-11-14</title>
       <link>https://dboeter.github.io/daily-diff/#2026-11-14/ai-agents</link>
@@ -2742,77 +2837,6 @@
 <h3>context-mode</h3>
 <ul>
 <li><strong>News</strong>: GitHub Trending highlighted context-mode as a context‑window optimizer for AI coding agents, noting 98% less sandbox output, persistent session memory, and MCP‑hook routing across 17 platforms; the post drove significant visibility. <a href="https://github.com/mksglu/context-mode">https://github.com/mksglu/context-mode</a></li>
-</ul>
-<p><strong>Quiet today:</strong> <a href="https://github.com/NVIDIA/OpenShell">OpenShell</a>, <a href="https://github.com/herdrdev/herdr">herdr</a>, <a href="https://github.com/asheshgoplani/agent-deck">Agent Deck</a></p>
-<hr>
-<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
-]]></content:encoded>
-    </item>
-    <item>
-      <title>AI Agents 2026-10-16</title>
-      <link>https://dboeter.github.io/daily-diff/#2026-10-16/ai-agents</link>
-      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-10-16/ai-agents</guid>
-      <pubDate>Fri, 16 Oct 2026 00:00:00 +0000</pubDate>
-      <description>AI Agents 2026-10-16 📅 Overview · 🤖 AI Agents · 💬 AI Discussions · 📚 AI Research · 🌐 Lab Announcements · ⚖️ Policy Watch Generated: 2026-10-16 08:53 UTC | Projects: 16 | Active today: 10 | Stable releases: 11 | Prereleases (not covered): 1 🕵️ Stealth Models on OpenRouter No stealth models listed on OpenRouter today. Coding Agents &amp;amp; Assistants Overview Claude Code shipped a stable update adding usage‑limit controls, OpenTelemetry tracing guidance, and a vim motion, while users reported ...</description>
-      <content:encoded><![CDATA[<h1>AI Agents 2026-10-16</h1>
-<p><a href="https://dboeter.github.io/daily-diff/#2026-10-16">📅 Overview</a> · <strong>🤖 AI Agents</strong> · <a href="https://dboeter.github.io/daily-diff/#2026-10-16/ai-hn">💬 AI Discussions</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-16/ai-arxiv">📚 AI Research</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-16/ai-web">🌐 Lab Announcements</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-16/ai-policy">⚖️ Policy Watch</a></p>
-<blockquote>
-<p>Generated: 2026-10-16 08:53 UTC | Projects: 16 | Active today: 10 | Stable releases: 11 | Prereleases (not covered): 1</p>
-</blockquote>
-<hr>
-<h2>🕵️ Stealth Models on OpenRouter</h2>
-<p>No stealth models listed on OpenRouter today.</p>
-<hr>
-<h2>Coding Agents &amp; Assistants</h2>
-<h3>Overview</h3>
-<p>Claude Code shipped a stable update adding usage‑limit controls, OpenTelemetry tracing guidance, and a vim motion, while users reported UI regressions such as the missing “Group by” option and forced‑hidden Routines sidebar. Kilo Code, OpenCode, Pi, Oh My Pi, and Cline all released new stable versions with features like gateway routing, upgrade‑policy fixes, session‑share destination selection, tokenizer improvements, and cloud‑session rollout. DeepSeek Harness issued an alpha prerelease with custom model‑reasoning UI and plugin‑index support, and Hermes Agent faces an open bug where a local session provider override incorrectly reuses a profile’s base URL. News highlighted the growing ecosystem around agent skills, with the scientific‑agent‑skills library trending and gaining traction across Claude Code, Codex, and other agents.</p>
-<h3>Claude Code</h3>
-<ul>
-<li><strong>Release</strong>: v2.1.301 adds <code>CLAUDE_CODE_RETRY_WATCHDOG_MAX_USAGE_LIMIT_WAIT_MS</code> to cap unattended retries, OpenTelemetry tracing guidance for the <code>claude-api</code> skill, and the <code>%</code> vim motion to jump to matching brackets. <a href="https://github.com/anthropics/claude-code/releases/tag/v2.1.301">https://github.com/anthropics/claude-code/releases/tag/v2.1.301</a></li>
-<li><strong>Hot issue</strong>: Windows users report the “Group by” option removed from the Code tab sidebar, leaving sessions grouped only by environment. <a href="https://github.com/anthropics/claude-code/issues/102088">https://github.com/anthropics/claude-code/issues/102088</a></li>
-<li><strong>News</strong>: The scientific‑agent‑skills library (177 validated skills, 100+ scientific databases) is compatible with Claude Code and is gaining traction on GitHub Trending. <a href="https://github.com/K-Dense-AI/scientific-agent-skills">https://github.com/K-Dense-AI/scientific-agent-skills</a></li>
-</ul>
-<h3>OpenAI Codex</h3>
-<ul>
-<li><strong>News</strong>: The scientific‑agent‑skills library, which bills itself as the #1 Agent Skills library for science, lists Codex among its supported agents and has surged in popularity on GitHub Trending. <a href="https://github.com/K-Dense-AI/scientific-agent-skills">https://github.com/K-Dense-AI/scientific-agent-skills</a></li>
-</ul>
-<h3>Kilo Code</h3>
-<ul>
-<li><strong>Release</strong>: v7.8.12 routes Kilo Gateway traffic through <code>https://ai-gateway.kilo.ai/api/v1</code> by default (configurable via <code>KILO_AI_GATEWAY_URL</code>), while the JetBrains v7.1.10 release adds agent‑model editing, transcript preview with live updates, and CLI‑session forking. <a href="https://github.com/Kilo-Org/kilocode/releases/tag/v7.8.12">https://github.com/Kilo-Org/kilocode/releases/tag/v7.8.12</a></li>
-</ul>
-<h3>OpenCode</h3>
-<ul>
-<li><strong>Release</strong>: v1.19.2/1.19.1 locks updates to the 1.x line, improves upgrade handling for Yarn and Homebrew installs, and discontinues session sharing (existing share links no longer work). <a href="https://github.com/anomalyco/opencode/releases/tag/v1.19.2">https://github.com/anomalyco/opencode/releases/tag/v1.19.2</a></li>
-<li><strong>Hot issue</strong>: Closed reports describe the free tier being unusable after reinstall (“Endpoint not available” on ~50 % of requests) and the free model limited to OpenCode‑only usage. <a href="https://github.com/anomalyco/opencode/issues/55443">https://github.com/anomalyco/opencode/issues/55443</a></li>
-</ul>
-<h3>Pi</h3>
-<ul>
-<li><strong>Release</strong>: v1.3.0 introduces a <code>sessionShareDestination</code> setting (<code>auto</code>, <code>gist</code>, or <code>radius</code>) to choose where <code>/share</code> uploads go. <a href="https://github.com/earendil-works/pi/releases/tag/v1.3.0">https://github.com/earendil-works/pi/releases/tag/v1.3.0</a></li>
-</ul>
-<h3>Oh My Pi</h3>
-<ul>
-<li><strong>Release</strong>: v18.11.1 adds <code>Tokenizer.countLatestTurn</code> to count the latest assistant turn and <code>Agent.prioritizeSteering</code> to bring pending steering messages ahead of older ones. <a href="https://github.com/can1357/oh-my-pi/releases/tag/v18.11.1">https://github.com/can1357/oh-my-pi/releases/tag/v18.11.1</a></li>
-</ul>
-<h3>Cline</h3>
-<ul>
-<li><strong>Release</strong>: v4.1.25 rolls out Cline Cloud sessions (hosted sandbox tasks), makes Gemini 4 Argon the default provider when no model is chosen, enforces plugin execution in workers or sandboxes, restores Marketplace plugin loading, removes the Cloud sessions toggle, and adds mid‑stream retry logic (up to 3 attempts). <a href="https://github.com/cline/cline/releases/tag/v4.1.25">https://github.com/cline/cline/releases/tag/v4.1.25</a></li>
-</ul>
-<h3>DeepSeek Harness</h3>
-<ul>
-<li><strong>Prerelease</strong>: dsh‑v0.2.1‑alpha.4 adds UI‑based reasoning‑level configuration for custom API models, enables discovering/installing plugins from custom plugin‑index sources, fixes input glitches between commands and arguments, improves Office file delivery, and reduces Linux startup checks. <a href="https://github.com/deepseek-ai/deepseek-harness/releases/tag/dsh-v0.2.1-alpha.4">https://github.com/deepseek-ai/deepseek-harness/releases/tag/dsh-v0.2.1-alpha.4</a></li>
-</ul>
-<h3>Hermes Agent</h3>
-<ul>
-<li><strong>Hot issue</strong>: An open bug shows that a local <code>session.create</code> with an explicit <code>provider</code> but no <code>base_url</code> incorrectly reuses the profile’s stale <code>model.base_url</code>, sending the new provider’s key to the old endpoint and resulting in 401 errors. <a href="https://github.com/nousresearch/hermes-agent/issues/138843">https://github.com/nousresearch/hermes-agent/issues/138843</a></li>
-</ul>
-<p><strong>Quiet today:</strong> <a href="https://github.com/google-gemini/gemini-cli">Gemini CLI</a>, <a href="https://github.com/1jehuang/jcode">jcode</a>, <a href="https://github.com/CommandCodeAI/command-code">Command Code</a></p>
-<hr>
-<h2>Agent Tooling</h2>
-<h3>Overview</h3>
-<p>Today, context-mode appeared on GitHub Trending, drawing significant attention for its context‑window optimizations aimed at AI coding agents. The project highlighted a 98% reduction in sandbox tool output, persistent session memory, and cross‑platform routing via MCP + hooks. No new stable releases or prereleases were issued, and no hot issues were reported. The surge in stars reflects growing interest in its approach to managing agent context.</p>
-<h3>context-mode</h3>
-<ul>
-<li><strong>News</strong>: The project trended on GitHub, showcasing context‑window optimization for AI coding agents that cuts sandbox tool output by 98%, persists session memory, and enforces routing across 17 platforms via MCP + hooks (<a href="https://github.com/mksglu/context-mode">https://github.com/mksglu/context-mode</a>).</li>
 </ul>
 <p><strong>Quiet today:</strong> <a href="https://github.com/NVIDIA/OpenShell">OpenShell</a>, <a href="https://github.com/herdrdev/herdr">herdr</a>, <a href="https://github.com/asheshgoplani/agent-deck">Agent Deck</a></p>
 <hr>

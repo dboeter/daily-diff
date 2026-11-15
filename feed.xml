@@ -13,7 +13,371 @@
       <height>144</height>
     </image>
     <atom:link href="https://dboeter.github.io/daily-diff/feed.xml" rel="self" type="application/rss+xml"/>
-    <lastBuildDate>Sat, 14 Nov 2026 06:08:52 +0000</lastBuildDate>
+    <lastBuildDate>Sun, 15 Nov 2026 06:14:24 +0000</lastBuildDate>
+    <item>
+      <title>AI Agents 2026-11-15</title>
+      <link>https://dboeter.github.io/daily-diff/#2026-11-15/ai-agents</link>
+      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-11-15/ai-agents</guid>
+      <pubDate>Sun, 15 Nov 2026 00:00:00 +0000</pubDate>
+      <description>AI Agents 2026-11-15 ⬛ Overview · 🟪 AI Agents · 🟦 AI Models &amp;amp; Labs · 🟧 AI Policy · 🟨 Data Engineering Projects: 15 | Active today: 3 | Stable releases: 2 | Prereleases (not covered): 1 | Generated: 2026-11-15 06:12 UTC Highlights Oh My Pi v18.20.1–v18.20.2 changes lsTree() to return { path, mode } objects, a breaking API change. OpenAI Codex issue #61489: users report that with request compression enabled, highly compressible bodies receive HTTP 400 instead of documented 413 and Codex do...</description>
+      <content:encoded><![CDATA[<h1>AI Agents 2026-11-15</h1>
+<p><a href="https://dboeter.github.io/daily-diff/#2026-11-15">⬛ Overview</a> · <strong>🟪 AI Agents</strong> · <a href="https://dboeter.github.io/daily-diff/#2026-11-15/ai-models">🟦 AI Models &amp; Labs</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-15/ai-policy">🟧 AI Policy</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-15/ai-data">🟨 Data Engineering</a></p>
+<blockquote>
+<p>Projects: 15 | Active today: 3 | Stable releases: 2 | Prereleases (not covered): 1 | Generated: 2026-11-15 06:12 UTC</p>
+</blockquote>
+<hr>
+<h2>Highlights</h2>
+<ul>
+<li>Oh My Pi v18.20.1–v18.20.2 changes <code>lsTree()</code> to return <code>{ path, mode }</code> objects, a breaking API change.</li>
+<li>OpenAI Codex issue #61489: users report that with request compression enabled, highly compressible bodies receive HTTP 400 instead of documented 413 and Codex does not fall back to uncompressed requests.</li>
+<li>Shotoku introduces local-first governance for AI agents with budget caps, spending limits, human approval gates, and a tamper-evident audit trail enforced before payment.</li>
+</ul>
+<hr>
+<h2>Coding Agents &amp; Assistants</h2>
+<h3>Claude Code</h3>
+<ul>
+<li><strong>News:</strong> <a href="https://news.ycombinator.com/item?id=50503241">What a task costs on Opus 5.5</a> breaks down per-task token costs on Opus 5.5 and shows which settings affect the bill.</li>
+<li><strong>News:</strong> <a href="https://news.ycombinator.com/item?id=50496642">Show HN: Cyberviber – a $15 touch screen to show which Claude session needs you</a> describes a 2.4″ ESP32 display that lists running Claude Code sessions and focuses a terminal on tap.</li>
+</ul>
+<h3>OpenAI Codex</h3>
+<ul>
+<li><strong>Hot issue:</strong> <a href="https://github.com/openai/codex/issues/61489">#61489</a>: users report that with <code>features.enable_request_compression</code> on, highly compressible request bodies receive a bare HTTP 400 instead of the documented 413, and Codex never falls back to uncompressed requests. (12 comments, 0 👍; +11 in the last 24h)</li>
+</ul>
+<h3>Oh My Pi</h3>
+<ul>
+<li><strong>Release:</strong> <a href="https://github.com/can1357/oh-my-pi/releases/tag/v18.20.1">v18.20.1</a>–<a href="https://github.com/can1357/oh-my-pi/releases/tag/v18.20.2">v18.20.2</a> changes <code>lsTree()</code> to return <code>{ path, mode }</code> objects (breaking), fixes context cost estimates, Vertex AI Gemini v1beta1 support, Amazon Bedrock region selection, Gemini 4 long responses, Cursor conversation context, Bedrock streaming retries, Claude account recovery, OpenRouter reasoning preservation, Xiaomi MiMo auth, and Perplexity sign-in; adds Antigravity CLI ACP provider with managed install, Google sign-in, host tools, and retained conversations, plus Antigravity models for Gemini, Claude, and GPT-OSS with selectable thinking levels.</li>
+</ul>
+<p><strong>Quiet today:</strong> <a href="https://github.com/google-gemini/gemini-cli">Gemini CLI</a>, <a href="https://github.com/Kilo-Org/kilocode">Kilo Code</a>, <a href="https://github.com/anomalyco/opencode">OpenCode</a>, <a href="https://github.com/earendil-works/pi">Pi</a>, <a href="https://github.com/1jehuang/jcode">jcode</a>, <a href="https://github.com/cline/cline">Cline</a>, <a href="https://github.com/CommandCodeAI/command-code">Command Code</a>, <a href="https://github.com/deepseek-ai/deepseek-harness">DeepSeek Harness</a>, <a href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a></p>
+<hr>
+<h2>Agent Tooling</h2>
+<p><strong>Quiet today:</strong> <a href="https://github.com/NVIDIA/OpenShell">OpenShell</a>, <a href="https://github.com/herdrdev/herdr">herdr</a>, <a href="https://github.com/microsoft/conductor">Conductor</a></p>
+<hr>
+<h2>Spotted</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Story</th>
+<th align="left">Source</th>
+<th align="left">Discussion</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">Show HN: Agweb – a browser for agents that stays out of your way (<a href="https://github.com/paul-nameless/agweb">paul-nameless/agweb</a>)</td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50497147">92 points, 27 comments</a></td>
+<td align="left">Agweb is a browser designed for AI agents that avoids focus stealing, has a minimal footprint, and displays all tabs in a single view.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://www.tomshardware.com/tech-industry/artificial-intelligence/rogue-claude-ai-tasked-with-renumbering-pages-accidentally-deletes-law-professors-entire-syllabus-one-year-of-lecture-notes-youre-right-to-be-angry-i-deleted-your-files-through-my-own-carelessness-humbled-agent-admits">Claude asked to renumber pages deletes professor&#39;s syllabus, year of notes</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50499114">45 points, 63 comments</a></td>
+<td align="left">A University of Chicago lecturer reported that a Claude AI agent accidentally deleted his entire syllabus and a year of lecture notes.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://debarshibasak.github.io/readables/blogs/agent-first-development">Agile Manifesto for Agents</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50496562">28 points, 6 comments</a></td>
+<td align="left">The &quot;Agile Manifesto for Agents&quot; proposes twelve commandments for coordinating AI agents in teams, emphasizing scope understanding and bounded work delivery.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://www.shotoku.dev/">Show HN: Shotoku – Local-first action governance and budget caps for AI agents</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50496705">9 points, 1 comment</a></td>
+<td align="left">Shotoku provides local-first governance for AI agents with budget caps, spending limits, human approval requirements, and a tamper-evident audit trail enforced before any payment.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://opencyclone.vercel.app/">Show HN: Open-Source Version of Cyclon: Phone where AI is the interface?</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50493213">8 points, 1 comment</a></td>
+<td align="left">An open-source Cyclon alternative lets users turn their existing phone into an AI interface without purchasing dedicated hardware.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://dev.to/therealmrmumba/composio-vs-nango-vs-scalekit-what-changes-when-your-agent-goes-to-production-4fl2">Composio vs Nango vs Scalekit: What Changes When Your Agent Goes to Production</a></td>
+<td align="left">Dev.to</td>
+<td align="left"><a href="https://dev.to/therealmrmumba/composio-vs-nango-vs-scalekit-what-changes-when-your-agent-goes-to-production-4fl2">29 reactions, 3 comments</a></td>
+<td align="left">The author compares Composio, Nango, and Scalekit for taking AI agents to production, highlighting security review challenges after successful demos.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://dev.to/dailycontext/your-agent-needs-a-schema-not-a-better-prompt-53bm">Your Agent Needs a Schema, Not a Better Prompt</a></td>
+<td align="left">Dev.to</td>
+<td align="left"><a href="https://dev.to/dailycontext/your-agent-needs-a-schema-not-a-better-prompt-53bm">22 reactions, 9 comments</a></td>
+<td align="left">The author argues that AI agents require structured schemas rather than improved prompts to function reliably in production.</td>
+</tr>
+</tbody></table>
+<hr>
+<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
+]]></content:encoded>
+    </item>
+    <item>
+      <title>AI Models &amp; Labs 2026-11-15</title>
+      <link>https://dboeter.github.io/daily-diff/#2026-11-15/ai-models</link>
+      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-11-15/ai-models</guid>
+      <pubDate>Sun, 15 Nov 2026 00:00:00 +0000</pubDate>
+      <description>AI Models &amp;amp; Labs 2026-11-15 ⬛ Overview · 🟪 AI Agents · 🟦 AI Models &amp;amp; Labs · 🟧 AI Policy · 🟨 Data Engineering Lab posts: 0 | New models: 0 | Spotted: 7 | Generated: 2026-11-15 06:12 UTC Highlights DeepSeek V4 Pro 0813, a 1.7 trillion parameter model, is available on Hugging Face End-to-end 4-bit training reduces memory usage and accelerates GPU computation for LLMs, though it increases rounding aggressiveness, per Thinking Machines Nothing new from Anthropic and OpenAI, OpenRouter&amp;#39...</description>
+      <content:encoded><![CDATA[<h1>AI Models &amp; Labs 2026-11-15</h1>
+<p><a href="https://dboeter.github.io/daily-diff/#2026-11-15">⬛ Overview</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-15/ai-agents">🟪 AI Agents</a> · <strong>🟦 AI Models &amp; Labs</strong> · <a href="https://dboeter.github.io/daily-diff/#2026-11-15/ai-policy">🟧 AI Policy</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-15/ai-data">🟨 Data Engineering</a></p>
+<blockquote>
+<p>Lab posts: 0 | New models: 0 | Spotted: 7 | Generated: 2026-11-15 06:12 UTC</p>
+</blockquote>
+<hr>
+<h2>Highlights</h2>
+<ul>
+<li>DeepSeek V4 Pro 0813, a 1.7 trillion parameter model, is available on Hugging Face</li>
+<li>End-to-end 4-bit training reduces memory usage and accelerates GPU computation for LLMs, though it increases rounding aggressiveness, per Thinking Machines</li>
+</ul>
+<hr>
+<p>Nothing new from Anthropic and OpenAI, OpenRouter&#39;s new listings or OpenRouter&#39;s stealth models today.</p>
+<hr>
+<h2>Spotted</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Story</th>
+<th align="left">Source</th>
+<th align="left">Discussion</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a href="https://news.umich.edu/generative-ai-uses-more-energy-on-non-english-text/">Generative AI uses more energy on non-English text</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50441444">196 points, 103 comments</a></td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left"><a href="https://huggingface.co/deepseek-ai/DeepSeek-V4-Pro-0813">DeepSeek V4 Pro 0813</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50492302">25 points, 1 comment</a></td>
+<td align="left">DeepSeek V4 Pro 0813 is a 1.7 trillion parameter text generation model available for download and exploration on Hugging Face.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://thinkingmachines.ai/blog/end-to-end-4-bit-training/">End‑to‑End 4‑Bit Training</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50490618">24 points, 1 comment</a></td>
+<td align="left">End-to-end 4-bit training reduces memory usage and accelerates GPU computation for LLMs, though it increases rounding aggressiveness due to fewer representable values.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://twitter.com/willdepue/status/2120992457630326841">Ex-OpenAI researcher finds Blackwell signatures in open-weight models</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50494668">18 points, 1 comment</a></td>
+<td align="left">An ex-OpenAI researcher claims forensic evidence shows four Chinese AI labs (DeepSeek, Moonshot, MiniMax, Ant Group) built models using export-restricted NVIDIA Blackwell chips.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://aistudio.google.com/docs/decisions-api">Gemini Decision 1 is Free on Google AI Studio</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50457853">15 points, 1 comment</a></td>
+<td align="left">Google AI Studio now offers free access to Gemini Decision 1, marketed as the fastest route from prompt to production.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://finance.yahoo.com/markets/article/anthropic-says-a-key-ai-safety-alarm-has-been-triggered-days-before-its-ipo-171519615.html">Anthropic says a key AI safety alarm has been triggered, days before its IPO</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50456668">15 points, 11 comments</a></td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left"><a href="https://alexwang.ai/posts/associative-memory/">You could have invented transformers from memory</a></td>
+<td align="left">Lobste.rs</td>
+<td align="left"><a href="https://lobste.rs/s/u2h9as/you_could_have_invented_transformers">3 points, 0 comments</a></td>
+<td align="left">The author&#39;s post &quot;You could have invented transformers from memory&quot; posits that every transformer layer functions as a memory store.</td>
+</tr>
+</tbody></table>
+<hr>
+<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
+]]></content:encoded>
+    </item>
+    <item>
+      <title>AI Policy 2026-11-15</title>
+      <link>https://dboeter.github.io/daily-diff/#2026-11-15/ai-policy</link>
+      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-11-15/ai-policy</guid>
+      <pubDate>Sun, 15 Nov 2026 00:00:00 +0000</pubDate>
+      <description>AI Policy 2026-11-15 ⬛ Overview · 🟪 AI Agents · 🟦 AI Models &amp;amp; Labs · 🟧 AI Policy · 🟨 Data Engineering Sources: CSET | 1 new item ranked by Jev relevance | Generated: 2026-11-15 06:12 UTC Highlights CSET analyzes how a convergence of political, commercial, and ideological pressures could impede U.S. AI leadership, noting that public controversies are powerful enough to catalyze shifts in the landscape (Convergent Interests: How America Could Undermine Its Own AI Advantage). News &amp;amp; com...</description>
+      <content:encoded><![CDATA[<h1>AI Policy 2026-11-15</h1>
+<p><a href="https://dboeter.github.io/daily-diff/#2026-11-15">⬛ Overview</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-15/ai-agents">🟪 AI Agents</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-15/ai-models">🟦 AI Models &amp; Labs</a> · <strong>🟧 AI Policy</strong> · <a href="https://dboeter.github.io/daily-diff/#2026-11-15/ai-data">🟨 Data Engineering</a></p>
+<blockquote>
+<p>Sources: CSET | 1 new item ranked by <a href="https://typesafe.ai">Jev</a> relevance | Generated: 2026-11-15 06:12 UTC</p>
+</blockquote>
+<hr>
+<h2>Highlights</h2>
+<p>CSET analyzes how a convergence of political, commercial, and ideological pressures could impede U.S. AI leadership, noting that public controversies are powerful enough to catalyze shifts in the landscape (<a href="https://cset.georgetown.edu/article/convergent-interests-how-america-could-undermine-its-own-ai-advantage/">Convergent Interests: How America Could Undermine Its Own AI Advantage</a>).</p>
+<h2>News &amp; commentary</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Source</th>
+<th align="left">Title</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-11-14</td>
+<td align="left">CSET</td>
+<td align="left"><a href="https://cset.georgetown.edu/article/convergent-interests-how-america-could-undermine-its-own-ai-advantage/">Convergent Interests: How America Could Undermine Its Own AI Advantage</a></td>
+<td align="left">CSET published a piece arguing that convergent political, commercial, and ideological pressures could undermine U.S. AI leadership, urging policymakers to regulate responsibly without stifling innovation.</td>
+</tr>
+</tbody></table>
+<h2>Coming up</h2>
+<p>Deadlines and dates in the next 30 days.</p>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Source</th>
+<th align="left">Item</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-12-02</td>
+<td align="left">Calendar</td>
+<td align="left"><a href="https://ai-act-service-desk.ec.europa.eu/en/ai-act/timeline/timeline-implementation-eu-ai-act">AI Act: bans on sexual deepfakes and CSAM generators; Art. 50(2) transition ends</a></td>
+</tr>
+</tbody></table>
+<hr>
+<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
+]]></content:encoded>
+    </item>
+    <item>
+      <title>Data Engineering 2026-11-15</title>
+      <link>https://dboeter.github.io/daily-diff/#2026-11-15/ai-data</link>
+      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-11-15/ai-data</guid>
+      <pubDate>Sun, 15 Nov 2026 00:00:00 +0000</pubDate>
+      <description>Data Engineering 2026-11-15 ⬛ Overview · 🟪 AI Agents · 🟦 AI Models &amp;amp; Labs · 🟧 AI Policy · 🟨 Data Engineering Vendor items: 3 | Projects: 26 | Active today: 1 | Stable releases: 1 | Prereleases (not covered): 1 | Generated: 2026-11-15 06:12 UTC Highlights No item stands out today. Action required Date Platform Item What to do 2026-11-19 Azure Databricks Gemini 3.6 Flash will be retired on November 19, 2026 API calls to Gemini 3.6 Flash will be automatically redirected to Gemini 3.8 Flash ...</description>
+      <content:encoded><![CDATA[<h1>Data Engineering 2026-11-15</h1>
+<p><a href="https://dboeter.github.io/daily-diff/#2026-11-15">⬛ Overview</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-15/ai-agents">🟪 AI Agents</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-15/ai-models">🟦 AI Models &amp; Labs</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-15/ai-policy">🟧 AI Policy</a> · <strong>🟨 Data Engineering</strong></p>
+<blockquote>
+<p>Vendor items: 3 | Projects: 26 | Active today: 1 | Stable releases: 1 | Prereleases (not covered): 1 | Generated: 2026-11-15 06:12 UTC</p>
+</blockquote>
+<hr>
+<h2>Highlights</h2>
+<ul>
+<li>No item stands out today.</li>
+</ul>
+<hr>
+<h2>Action required</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Platform</th>
+<th align="left">Item</th>
+<th align="left">What to do</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-11-19</td>
+<td align="left">Azure Databricks</td>
+<td align="left"><a href="https://learn.microsoft.com/azure/databricks/release-notes/product/2026/november#gemini-36-flash-will-be-retired-on-november-19-2026">Gemini 3.6 Flash will be retired on November 19, 2026</a></td>
+<td align="left">API calls to <code>Gemini 3.6 Flash</code> will be automatically redirected to <code>Gemini 3.8 Flash</code> on 2026-11-19; migrate to <code>Gemini 3.8 Flash</code> using the Legacy, deprecated, and retired models guide.</td>
+</tr>
+<tr>
+<td align="left">2026-11-30</td>
+<td align="left">Azure Databricks</td>
+<td align="left"><a href="https://learn.microsoft.com/azure/databricks/release-notes/whats-coming#upcoming-end-of-life-for-the-genie-one-mcp-beta-endpoint">Upcoming end of life for the Genie One MCP Beta endpoint</a></td>
+<td align="left">The Genie One MCP Beta endpoint at <code>https://&lt;workspace-hostname&gt;/api/2.0/mcp/genie</code> reaches end of life on November 30, 2026, after which requests fail; migrate all workloads to the <code>system.ai.genie_one_mcp</code> MCP in Unity Gateway.</td>
+</tr>
+<tr>
+<td align="left">2027-01-31</td>
+<td align="left">BigQuery</td>
+<td align="left"><a href="https://docs.cloud.google.com/bigquery/docs/release-notes#November_06_2026">Starting January 31, 2027, the BigQuery Data Transfer Service for Shopify connector will no longer support the following fields</a></td>
+<td align="left">Starting January 31, 2027, the BigQuery Data Transfer Service for Shopify connector will drop support for the <code>legacyMode</code> field in the DeliveryProfile dataset schema and the <code>permitSkuSharing</code> field in the FulfillmentService dataset schema.</td>
+</tr>
+<tr>
+<td align="left">2027-02-04</td>
+<td align="left">Azure Databricks</td>
+<td align="left"><a href="https://learn.microsoft.com/azure/databricks/release-notes/product/2026/november#zhipu-ai-glm-52-is-scheduled-for-retirement">Zhipu AI GLM 5.2 is scheduled for retirement</a></td>
+<td align="left">Zhipu AI GLM 5.2 is deprecated and will be retired on February 4, 2027, requiring migration to GLM 5.3 per the Legacy, deprecated, and retired models guidance.</td>
+</tr>
+<tr>
+<td align="left">2027-08-19</td>
+<td align="left">Azure Databricks</td>
+<td align="left"><a href="https://learn.microsoft.com/azure/databricks/release-notes/whats-coming#all-unity-catalog-managed-tables-will-be-upgraded-to-catalog-commits">All Unity Catalog managed tables will be upgraded to catalog commits</a></td>
+<td align="left">After Databricks Runtime 15.4 LTS end of support on August 19, 2027, all Unity Catalog managed tables will be automatically upgraded to <code>catalog commits</code>, making Unity Catalog the system of coordination and enabling multi-statement transactions, external engine writes, and consistent governance; clients must plan for this breaking change before the 2027 deadline.</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>Databricks</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Item</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-11-09</td>
+<td align="left"><a href="https://learn.microsoft.com/azure/databricks/release-notes/runtime/19#databricks-runtime-19-november-9-2026">Databricks Runtime 19: November 9, 2026</a></td>
+<td align="left">Fixes real-time mode reservation liveness and occupied-slot accounting when tasks execute through Aether.</td>
+</tr>
+</tbody></table>
+<p><strong>Quiet today:</strong> <a href="https://github.com/delta-io/delta">Delta Lake</a>, <a href="https://github.com/delta-io/delta-rs">delta-rs</a>, <a href="https://github.com/unitycatalog/unitycatalog">Unity Catalog</a>, <a href="https://github.com/mlflow/mlflow">MLflow</a>, <a href="https://github.com/databricks/cli">Databricks CLI</a>, <a href="https://github.com/databricks/dbt-databricks">dbt-databricks</a>, <a href="https://github.com/databricks/terraform-provider-databricks">Terraform provider for Databricks</a></p>
+<hr>
+<h2>Snowflake</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Item</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-11-11</td>
+<td align="left"><a href="https://docs.snowflake.com/en/release-notes/2026/other/2026-11-11-per-user-quota-limit-overrides">Override per-user quota limits for specific users (General availability)</a></td>
+<td align="left">Enables setting per-user, per-cycle credit limit overrides on a per-user quota with an optional expiration date.</td>
+</tr>
+</tbody></table>
+<h3>Apache Polaris</h3>
+<ul>
+<li><strong>Release:</strong> <a href="https://github.com/apache/polaris/releases/tag/apache-polaris-1.9.0">apache-polaris-1.9.0</a> publishes signed source and binary distributions, a Helm chart, Docker images (<code>apache/polaris:1.9.0</code> for the server and <code>apache/polaris-admin:1.9.0</code> for the admin tool), and Maven artifacts to Maven Central with SHA-512 checksums.</li>
+</ul>
+<p><strong>Quiet today:</strong> <a href="https://github.com/snowflakedb/snowpark-python">Snowpark Python</a>, <a href="https://github.com/snowflakedb/snowflake-connector-python">Snowflake Connector for Python</a>, <a href="https://github.com/snowflakedb/terraform-provider-snowflake">Terraform provider for Snowflake</a></p>
+<hr>
+<h2>Azure / Fabric &amp; GCP</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Item</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-11-11</td>
+<td align="left"><a href="https://docs.cloud.google.com/bigquery/docs/release-notes#November_11_2026">You can use the JSON_FLATTEN function to extract all non-array values that are either directly in the input JSON value or children of one or more consecutively nested arrays in the input JSON value</a></td>
+<td align="left">Enables using the <code>JSON_FLATTEN</code> function to extract non-array values directly in JSON or from consecutively nested arrays.</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>Releases this week</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Project</th>
+<th align="left">Version</th>
+<th align="left">Date</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a href="https://github.com/open-metadata/OpenMetadata">OpenMetadata</a></td>
+<td align="left"><a href="https://github.com/open-metadata/OpenMetadata/releases/tag/2.0.8-release">2.0.8-release</a></td>
+<td align="left">2026-11-13</td>
+<td align="left">Fixes pipeline deletion to use Airflow&#39;s supported cleanup path, fixes Glue test connection to probe only configured databases and tables, fixes Hex ingestion to build working source links and create data models with SQL-cell column lineage, fixes Hex table and column lineage to terminate at the Hex data model, enables Power BI empty listings to soft-delete stale entities, and enables SSIS connections to accept Azure Data Lake Storage containers.</td>
+</tr>
+</tbody></table>
+<hr>
+<p>Nothing new from Open-source stack (<a href="https://github.com/dbt-labs/dbt">dbt Core</a>, <a href="https://github.com/SQLMesh/sqlmesh">SQLMesh</a>, <a href="https://github.com/apache/airflow">Apache Airflow</a>, <a href="https://github.com/dagster-io/dagster">Dagster</a>, <a href="https://github.com/PrefectHQ/prefect">Prefect</a>, <a href="https://github.com/dlt-hub/dlt">dlt</a>, <a href="https://github.com/apache/iceberg">Apache Iceberg</a>, <a href="https://github.com/apache/iceberg-python">PyIceberg</a>, <a href="https://github.com/duckdb/duckdb">DuckDB</a>, <a href="https://github.com/pola-rs/polars">Polars</a>, <a href="https://github.com/trinodb/trino">Trino</a>, <a href="https://github.com/great-expectations/great_expectations">Great Expectations</a>, <a href="https://github.com/sodadata/soda-core">Soda Core</a>, <a href="https://github.com/OpenLineage/OpenLineage">OpenLineage</a>, <a href="https://github.com/open-metadata/OpenMetadata">OpenMetadata</a>) today.</p>
+<hr>
+<h2>Across platforms</h2>
+<ul>
+<li>No capability moved on two or more platforms this period.</li>
+</ul>
+<hr>
+<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
+]]></content:encoded>
+    </item>
     <item>
       <title>AI Agents 2026-11-14</title>
       <link>https://dboeter.github.io/daily-diff/#2026-11-14/ai-agents</link>
@@ -3884,517 +4248,6 @@
 <td align="left">Dev.to</td>
 <td align="left"><a href="https://dev.to/kendall_codes/where-can-you-run-minimax-h3-cheapest-per-tier-comparison-34e7">57 reactions, 3 comments</a></td>
 <td align="left">The author determines Callirra offers the cheapest MiniMax H3 pricing at one credit per output second for 480P ($0.01) and two credits for 768P.</td>
-</tr>
-</tbody></table>
-<hr>
-<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
-]]></content:encoded>
-    </item>
-    <item>
-      <title>Data Engineering 2026-11-08</title>
-      <link>https://dboeter.github.io/daily-diff/#2026-11-08/ai-data</link>
-      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-11-08/ai-data</guid>
-      <pubDate>Sun, 08 Nov 2026 00:00:00 +0000</pubDate>
-      <description>Data Engineering 2026-11-08 ⬛ Overview · 🟪 AI Agents · 🟦 AI Models &amp;amp; Labs · 🟨 Data Engineering Vendor items: 2 | Projects: 26 | Active today: 0 | Stable releases: 0 | Prereleases (not covered): 0 | Generated: 2026-11-08 05:50 UTC Highlights No item stands out today. Action required Date Platform Item What to do 2026-11-30 Azure Databricks Upcoming end of life for the Genie One MCP Beta endpoint The Genie One MCP Beta endpoint at https://&amp;lt;workspace-hostname&amp;gt;/api/2.0/mcp/genie reaches...</description>
-      <content:encoded><![CDATA[<h1>Data Engineering 2026-11-08</h1>
-<p><a href="https://dboeter.github.io/daily-diff/#2026-11-08">⬛ Overview</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-08/ai-agents">🟪 AI Agents</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-08/ai-models">🟦 AI Models &amp; Labs</a> · <strong>🟨 Data Engineering</strong></p>
-<blockquote>
-<p>Vendor items: 2 | Projects: 26 | Active today: 0 | Stable releases: 0 | Prereleases (not covered): 0 | Generated: 2026-11-08 05:50 UTC</p>
-</blockquote>
-<hr>
-<h2>Highlights</h2>
-<ul>
-<li>No item stands out today.</li>
-</ul>
-<hr>
-<h2>Action required</h2>
-<table>
-<thead>
-<tr>
-<th align="left">Date</th>
-<th align="left">Platform</th>
-<th align="left">Item</th>
-<th align="left">What to do</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left">2026-11-30</td>
-<td align="left">Azure Databricks</td>
-<td align="left"><a href="https://learn.microsoft.com/azure/databricks/release-notes/whats-coming#upcoming-end-of-life-for-the-genie-one-mcp-beta-endpoint">Upcoming end of life for the Genie One MCP Beta endpoint</a></td>
-<td align="left">The Genie One MCP Beta endpoint at <code>https://&lt;workspace-hostname&gt;/api/2.0/mcp/genie</code> reaches end of life on November 30, 2026, after which requests fail; migrate all workloads to the <code>system.ai.genie_one_mcp</code> MCP in Unity Gateway.</td>
-</tr>
-<tr>
-<td align="left">2027-01-31</td>
-<td align="left">BigQuery</td>
-<td align="left"><a href="https://docs.cloud.google.com/bigquery/docs/release-notes#November_06_2026">Starting January 31, 2027, the BigQuery Data Transfer Service for Shopify connector will no longer support the following fields</a></td>
-<td align="left">Starting January 31, 2027, the BigQuery Data Transfer Service for Shopify connector will drop support for the <code>legacyMode</code> field in the DeliveryProfile dataset schema and the <code>permitSkuSharing</code> field in the FulfillmentService dataset schema.</td>
-</tr>
-</tbody></table>
-<hr>
-<h2>Snowflake</h2>
-<table>
-<thead>
-<tr>
-<th align="left">Date</th>
-<th align="left">Item</th>
-<th align="left">Summary</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left">2026-11-02</td>
-<td align="left">🤖 <a href="https://docs.snowflake.com/en/release-notes/2026/other/2026-11-02-cortex-code-automations-ga">CoCo automations (General availability)</a></td>
-<td align="left">CoCo automations enable scheduling recurring, unattended CoCo runs in a Snowflake-managed sandbox, with each run creating a Cortex thread to inspect the agent&#39;s messages, tool calls, and results.</td>
-</tr>
-</tbody></table>
-<p><strong>Quiet today:</strong> <a href="https://github.com/snowflakedb/snowpark-python">Snowpark Python</a>, <a href="https://github.com/snowflakedb/snowflake-connector-python">Snowflake Connector for Python</a>, <a href="https://github.com/apache/polaris">Apache Polaris</a>, <a href="https://github.com/snowflakedb/terraform-provider-snowflake">Terraform provider for Snowflake</a></p>
-<hr>
-<h2>Azure / Fabric &amp; GCP</h2>
-<table>
-<thead>
-<tr>
-<th align="left">Date</th>
-<th align="left">Item</th>
-<th align="left">Summary</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left">2026-11-02</td>
-<td align="left">🤖 <a href="https://community.fabric.microsoft.com/t5/Fabric-Updates-Blog/From-a-prompt-to-an-operational-dashboard-Generate-Real-Time/ba-p/5380258">From a prompt to an operational dashboard: Generate Real-Time Dashboards with Copilot (Preview)</a></td>
-<td align="left">Copilot in Microsoft Fabric can generate a Real-Time Dashboard from a natural-language description using tables from a selected Eventhouse database.</td>
-</tr>
-</tbody></table>
-<hr>
-<p>Nothing new from Databricks (<a href="https://github.com/delta-io/delta">Delta Lake</a>, <a href="https://github.com/delta-io/delta-rs">delta-rs</a>, <a href="https://github.com/unitycatalog/unitycatalog">Unity Catalog</a>, <a href="https://github.com/mlflow/mlflow">MLflow</a>, <a href="https://github.com/databricks/cli">Databricks CLI</a>, <a href="https://github.com/databricks/dbt-databricks">dbt-databricks</a>, <a href="https://github.com/databricks/terraform-provider-databricks">Terraform provider for Databricks</a>) or Open-source stack (<a href="https://github.com/dbt-labs/dbt">dbt Core</a>, <a href="https://github.com/SQLMesh/sqlmesh">SQLMesh</a>, <a href="https://github.com/apache/airflow">Apache Airflow</a>, <a href="https://github.com/dagster-io/dagster">Dagster</a>, <a href="https://github.com/PrefectHQ/prefect">Prefect</a>, <a href="https://github.com/dlt-hub/dlt">dlt</a>, <a href="https://github.com/apache/iceberg">Apache Iceberg</a>, <a href="https://github.com/apache/iceberg-python">PyIceberg</a>, <a href="https://github.com/duckdb/duckdb">DuckDB</a>, <a href="https://github.com/pola-rs/polars">Polars</a>, <a href="https://github.com/trinodb/trino">Trino</a>, <a href="https://github.com/great-expectations/great_expectations">Great Expectations</a>, <a href="https://github.com/sodadata/soda-core">Soda Core</a>, <a href="https://github.com/OpenLineage/OpenLineage">OpenLineage</a>, <a href="https://github.com/open-metadata/OpenMetadata">OpenMetadata</a>) today.</p>
-<hr>
-<h2>Across platforms</h2>
-<ul>
-<li>AI-assisted authoring appears on both Snowflake and Fabric: Snowflake&#39;s CoCo automations (GA) schedule unattended agent runs in a managed sandbox, while Fabric&#39;s Copilot (Preview) generates Real-Time Dashboards from natural-language prompts against Eventhouse tables.</li>
-</ul>
-<hr>
-<h2>Spotted</h2>
-<table>
-<thead>
-<tr>
-<th align="left">Story</th>
-<th align="left">Source</th>
-<th align="left">Discussion</th>
-<th align="left">Summary</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left"><a href="https://edu.postgrespro.com/postgresql_internals-14_en.pdf">PostgreSQL Internals [pdf] (2023)</a></td>
-<td align="left">Hacker News</td>
-<td align="left"><a href="https://news.ycombinator.com/item?id=50361765">87 points, 7 comments</a></td>
-<td align="left">—</td>
-</tr>
-<tr>
-<td align="left">ZeBridge – PostgreSQL replicas on devices, synchronized over NATS (<a href="https://github.com/ndrean/ZeBridge">ndrean/ZeBridge</a>)</td>
-<td align="left">Hacker News</td>
-<td align="left"><a href="https://news.ycombinator.com/item?id=50354763">27 points, 3 comments</a></td>
-<td align="left">ZeBridge enables bidirectional local-first synchronization between PostgreSQL and edge clients like SQLite, PGLite, Postgres, or DuckDB over NATS.</td>
-</tr>
-<tr>
-<td align="left"><a href="https://garbagecollected.io/posts/postgres-task-queue-where-it-breaks/">Just how far can the FOR UPDATE SKIP LOCKED Postgres queue go?</a></td>
-<td align="left">Lobste.rs</td>
-<td align="left"><a href="https://lobste.rs/s/y8i714/just_how_far_can_for_update_skip_locked">1 point, 1 comment</a></td>
-<td align="left">The author analyzes the scaling limits of FOR UPDATE SKIP LOCKED PostgreSQL queues and mitigation strategies.</td>
-</tr>
-</tbody></table>
-<hr>
-<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
-]]></content:encoded>
-    </item>
-    <item>
-      <title>AI Agents 2026-11-07</title>
-      <link>https://dboeter.github.io/daily-diff/#2026-11-07/ai-agents</link>
-      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-11-07/ai-agents</guid>
-      <pubDate>Sat, 07 Nov 2026 00:00:00 +0000</pubDate>
-      <description>AI Agents 2026-11-07 ⬛ Overview · 🟪 AI Agents · 🟦 AI Models &amp;amp; Labs · 🟧 AI Policy · 🟨 Data Engineering Projects: 15 | Active today: 5 | Stable releases: 3 | Prereleases (not covered): 3 | Generated: 2026-11-07 05:47 UTC Highlights Claude Code v2.1.319 changes auto-mode behavior when telemetry or feature flags are disabled: server-uncheckable calls are now prompted or denied with no built-in fallback (use CLAUDE_CODE_AUTO_MODE_SERVER=0 to retain old behavior); also adds MCP task background...</description>
-      <content:encoded><![CDATA[<h1>AI Agents 2026-11-07</h1>
-<p><a href="https://dboeter.github.io/daily-diff/#2026-11-07">⬛ Overview</a> · <strong>🟪 AI Agents</strong> · <a href="https://dboeter.github.io/daily-diff/#2026-11-07/ai-models">🟦 AI Models &amp; Labs</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-07/ai-policy">🟧 AI Policy</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-07/ai-data">🟨 Data Engineering</a></p>
-<blockquote>
-<p>Projects: 15 | Active today: 5 | Stable releases: 3 | Prereleases (not covered): 3 | Generated: 2026-11-07 05:47 UTC</p>
-</blockquote>
-<hr>
-<h2>Highlights</h2>
-<ul>
-<li>Claude Code v2.1.319 changes auto-mode behavior when telemetry or feature flags are disabled: server-uncheckable calls are now prompted or denied with no built-in fallback (use <code>CLAUDE_CODE_AUTO_MODE_SERVER=0</code> to retain old behavior); also adds MCP task background execution, <code>permissions.denyInsteadOfPrompting</code>, spend tracking in <code>/usage</code>, and gateway admin settings.</li>
-<li>A report shows Claude Code sends the user&#39;s email address in the User-Agent header during web searches without consent, resulting in spam.</li>
-<li>OpenAI Codex users report all local projects vanish from the Projects list after switching from an enterprise back to a personal account on Windows, though folders and chats remain visible but ungrouped.</li>
-</ul>
-<hr>
-<h2>Coding Agents &amp; Assistants</h2>
-<h3>Claude Code</h3>
-<ul>
-<li><strong>Release:</strong> <a href="https://github.com/anthropics/claude-code/releases/tag/v2.1.319">v2.1.319</a> changes auto mode when telemetry/feature flags are off (server-uncheckable calls are asked about or denied with no built-in fallback; use <code>CLAUDE_CODE_AUTO_MODE_SERVER=0</code> to keep old behavior), adds MCP task background execution, <code>permissions.denyInsteadOfPrompting</code>, <code>/claude-api latency-optimize</code>, <code>CLAUDE_CODE_DISABLE_FEATURE_FLAGS</code>, spend tracking in <code>/usage</code>, and gateway admin settings.</li>
-<li><strong>News:</strong> <a href="https://news.ycombinator.com/item?id=50385272">Claude Code sends your email address to websites</a> reports the User-Agent header includes the user&#39;s email during web searches without consent, causing spam.</li>
-<li><strong>Hot issue:</strong> <a href="https://github.com/anthropics/claude-code/issues/107454">#107454</a>: users report Remote Control write tools in auto mode stall on a server-side approval card with no &quot;always allow&quot; option since ~4 Nov; <a href="https://github.com/anthropics/claude-code/issues/107467">#107467</a>: users report Artifact.read no longer accepts <code>path</code>/<code>paths</code> in 2.1.318, breaking Migrated Design canvas file reading. (#107454: regression; 6 comments, 0 👍; +6 in the last 24h) (#107467: regression; 2 comments, 1 👍; +3 in the last 24h)</li>
-</ul>
-<h3>OpenAI Codex</h3>
-<ul>
-<li><strong>Hot issue:</strong> <a href="https://github.com/openai/codex/issues/59895">#59895</a>: users report all local projects disappear from the Projects list after switching from enterprise back to personal account on Windows, though folders exist and chats remain visible but ungrouped. (9 comments, 2 👍; +10 in the last 24h)</li>
-</ul>
-<h3>OpenCode</h3>
-<ul>
-<li><strong>Release:</strong> <a href="https://github.com/anomalyco/opencode/releases/tag/v2.2.6">v2.2.6</a> adds opt-in MCP connection pooling (<code>pool: true</code>), <code>--archived</code> and <code>--worktree</code> flags for <code>opencode run</code>, provider/model-specific session warming, experimental bytecode VM for Code Mode (<code>experimental.codemode_vm</code>), PowerShell 7 Microsoft Store support, and Azure Messages for Foundry Claude models.</li>
-</ul>
-<h3>Oh My Pi</h3>
-<ul>
-<li><strong>Release:</strong> <a href="https://github.com/can1357/oh-my-pi/releases/tag/v18.18.0">v18.18.0</a> fixes Mistral discovery listing non-chat models, cached catalog replacement on failed refresh, transcript freezing after provider restarts, bash tool card <code>cd</code> visualization, <code>cd ;</code> working directory handling, task-file approval symlink protection, subagent instruction formatting, hindsight memory persistence, long multi-byte bash command crashes, <code>grep -e</code>/<code>rg -e</code> pattern handling, and non-UTF-8 byte visualization.</li>
-<li><strong>Hot issue:</strong> <a href="https://github.com/can1357/oh-my-pi/issues/18341">#18341</a>: users report the Antigravity provider receives 403 PERMISSION_DENIED from Google Cloud Code Assist API due to ToS violation, possibly from upstream authentication/fingerprint changes. (10 comments, 2 👍; +12 in the last 24h)</li>
-</ul>
-<h3>Hermes Agent</h3>
-<ul>
-<li><strong>Hot issue:</strong> <a href="https://github.com/NousResearch/hermes-agent/issues/138974">#138974</a>: users report upgrade to v0.22.0+119.g0e427d7 breaks inherited ACLs on <code>%LOCALAPPDATA%\hermes\tools\*</code> on Windows, removing user access to tool executables and causing desktop backend spawn failure (&quot;Access is denied&quot;). (type/security; 6 comments, 0 👍; +3 in the last 24h)</li>
-</ul>
-<p><strong>Quiet today:</strong> <a href="https://github.com/google-gemini/gemini-cli">Gemini CLI</a>, <a href="https://github.com/Kilo-Org/kilocode">Kilo Code</a>, <a href="https://github.com/earendil-works/pi">Pi</a>, <a href="https://github.com/1jehuang/jcode">jcode</a>, <a href="https://github.com/cline/cline">Cline</a>, <a href="https://github.com/CommandCodeAI/command-code">Command Code</a>, <a href="https://github.com/deepseek-ai/deepseek-harness">DeepSeek Harness</a></p>
-<hr>
-<h2>Agent Tooling</h2>
-<p><strong>Quiet today:</strong> <a href="https://github.com/NVIDIA/OpenShell">OpenShell</a>, <a href="https://github.com/herdrdev/herdr">herdr</a>, <a href="https://github.com/conductor-oss/conductor">Conductor</a></p>
-<hr>
-<h2>Spotted</h2>
-<table>
-<thead>
-<tr>
-<th align="left">Story</th>
-<th align="left">Source</th>
-<th align="left">Discussion</th>
-<th align="left">Summary</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left"><a href="https://community.openai.com/t/security-follow-up-tool-call-silently-routed-to-a-different-connector/1413053">ChatGPT silently passes data between connectors and the bounty wants an ID card</a></td>
-<td align="left">Hacker News</td>
-<td align="left"><a href="https://news.ycombinator.com/item?id=50399569">83 points, 35 comments</a></td>
-<td align="left">ChatGPT silently switched between connectors during a conversation, passing a one-time confirmation code from the first connector&#39;s widget to the second without informing the user.</td>
-</tr>
-<tr>
-<td align="left"><a href="https://developers.openai.com/api/docs/guides/voice-sip">Outbound SIP calling is now available to all organizations</a></td>
-<td align="left">Hacker News</td>
-<td align="left"><a href="https://news.ycombinator.com/item?id=50399695">62 points, 52 comments</a></td>
-<td align="left">OpenAI has made outbound SIP calling available to all organizations, enabling phone calls to be connected to OpenAI via SIP.</td>
-</tr>
-<tr>
-<td align="left"><a href="https://www.perplexity.ai/en-GB/hub/blog/teammates-are-agents-for-complex-ongoing-work">Perplexity launches AI agents for work</a></td>
-<td align="left">Hacker News</td>
-<td align="left"><a href="https://news.ycombinator.com/item?id=50395866">60 points, 53 comments</a></td>
-<td align="left">Perplexity launched AI agents called teammates that coordinate to manage ongoing projects across operations, marketing, and other functions.</td>
-</tr>
-<tr>
-<td align="left"><a href="https://github.com/anteloc/ldraw-mecha/tree/v0.5.0">Show HN: Agents infer Lego mechanisms from sources, then animate them</a></td>
-<td align="left">Hacker News</td>
-<td align="left"><a href="https://news.ycombinator.com/item?id=50397325">25 points, 1 comment</a></td>
-<td align="left">The author built an agent system that infers Lego mechanisms from sources and animates them in Blender.</td>
-</tr>
-<tr>
-<td align="left">Show HN: Tmux-restore saves tmux windows and agent sessions across reboots (<a href="https://github.com/andrewboldi/tmux-restore">andrewboldi/tmux-restore</a>)</td>
-<td align="left">Hacker News</td>
-<td align="left"><a href="https://news.ycombinator.com/item?id=50355009">22 points, 9 comments</a></td>
-<td align="left">The author created tmux-restore, a tool that restores tmux sessions, layouts, scrollback, and reopens AI agent conversations (including Claude Code, Codex, and Gemini CLI) after a reboot.</td>
-</tr>
-<tr>
-<td align="left">Show HN: Agentic Identity Broker, OAuth Delegation for AI Agents (<a href="https://github.com/zalando-incubator/agentic-identity-broker">zalando-incubator/agentic-identity-broker</a>)</td>
-<td align="left">Hacker News</td>
-<td align="left"><a href="https://news.ycombinator.com/item?id=50393235">21 points, 3 comments</a></td>
-<td align="left">The author developed an identity broker for AI agents that handles OAuth2 delegation and consent management.</td>
-</tr>
-<tr>
-<td align="left"><a href="https://dev.to/dannwaneri/dont-write-markdown-files-for-your-coding-agent-write-scripts-j00">Don&#39;t Write Markdown Files for Your Coding Agent. Write Scripts.</a></td>
-<td align="left">Dev.to</td>
-<td align="left"><a href="https://dev.to/dannwaneri/dont-write-markdown-files-for-your-coding-agent-write-scripts-j00">51 reactions, 33 comments</a></td>
-<td align="left">The author argues that writing scripts, not markdown files, is necessary to box coding agents into deterministic actions.</td>
-</tr>
-<tr>
-<td align="left"><a href="https://dev.to/johnnylemonny/one-markdown-file-can-hijack-your-ai-coding-agent-the-hidden-cost-of-blindly-trusting-agentsmd-167n">One Markdown File Can Hijack Your AI Coding Agent: The Hidden Cost of Blindly Trusting AGENTS.md</a></td>
-<td align="left">Dev.to</td>
-<td align="left"><a href="https://dev.to/johnnylemonny/one-markdown-file-can-hijack-your-ai-coding-agent-the-hidden-cost-of-blindly-trusting-agentsmd-167n">44 reactions, 30 comments</a></td>
-<td align="left">The author demonstrates how a single malicious AGENTS.md or CLAUDE.md file can hijack an AI coding agent to steal OAuth tokens and execute shell commands, and explains how to lock down the workflow.</td>
-</tr>
-</tbody></table>
-<hr>
-<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
-]]></content:encoded>
-    </item>
-    <item>
-      <title>AI Models &amp; Labs 2026-11-07</title>
-      <link>https://dboeter.github.io/daily-diff/#2026-11-07/ai-models</link>
-      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-11-07/ai-models</guid>
-      <pubDate>Sat, 07 Nov 2026 00:00:00 +0000</pubDate>
-      <description>AI Models &amp;amp; Labs 2026-11-07 ⬛ Overview · 🟪 AI Agents · 🟦 AI Models &amp;amp; Labs · 🟧 AI Policy · 🟨 Data Engineering Lab posts: 4 | New models: 2 | Spotted: 7 | Generated: 2026-11-07 05:47 UTC Highlights LiquidAI LFM3-1.7B is listed on OpenRouter: a 1.7B-parameter model post-trained for agents, tool calling, and structured outputs with 262K context and reasoning before answering; a free tier is also available. Google says Gemini Omni 1.2 Flash adds native 15-second video generation and editi...</description>
-      <content:encoded><![CDATA[<h1>AI Models &amp; Labs 2026-11-07</h1>
-<p><a href="https://dboeter.github.io/daily-diff/#2026-11-07">⬛ Overview</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-07/ai-agents">🟪 AI Agents</a> · <strong>🟦 AI Models &amp; Labs</strong> · <a href="https://dboeter.github.io/daily-diff/#2026-11-07/ai-policy">🟧 AI Policy</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-07/ai-data">🟨 Data Engineering</a></p>
-<blockquote>
-<p>Lab posts: 4 | New models: 2 | Spotted: 7 | Generated: 2026-11-07 05:47 UTC</p>
-</blockquote>
-<hr>
-<h2>Highlights</h2>
-<ul>
-<li>LiquidAI LFM3-1.7B is listed on OpenRouter: a 1.7B-parameter model post-trained for agents, tool calling, and structured outputs with 262K context and reasoning before answering; a free tier is also available.</li>
-<li>Google says Gemini Omni 1.2 Flash adds native 15-second video generation and editing with stronger consistency and 30% lower pricing.</li>
-<li>A hybrid Jev + Claude Opus system for identity resolution reached frontier accuracy at over 4× lower cost, per Hightouch testing.</li>
-</ul>
-<hr>
-<h2>Lab announcements</h2>
-<table>
-<thead>
-<tr>
-<th align="left">Date</th>
-<th align="left">Lab</th>
-<th align="left">Post</th>
-<th align="left">Summary</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left">2026-11-07</td>
-<td align="left">OpenAI</td>
-<td align="left"><a href="https://openai.com/index/measuring-how-ai-agents-handle-wet-lab-science/">Measuring How Ai Agents Handle Wet Lab Science</a></td>
-<td align="left">—</td>
-</tr>
-<tr>
-<td align="left">2026-11-06</td>
-<td align="left">Anthropic</td>
-<td align="left"><a href="https://www.anthropic.com/research/components-of-agent-memory">The components of agent memory</a></td>
-<td align="left">Researchers at Letta and UC Berkeley proposed sleep-time compute for models to reorganize context during idle time, and the post explores how dreaming helps agents reflect on logs to fix mistakes and produce new representations for agent memory design.</td>
-</tr>
-<tr>
-<td align="left">2026-11-06</td>
-<td align="left">Anthropic</td>
-<td align="left"><a href="https://www.anthropic.com/research/teaching-ai-to-build-scientific-models">Teaching AI to build scientific models</a></td>
-<td align="left">AI for Science grantees Jakob Macke, Daniel Gedon, and Stefan Wahl discuss a three-step program for teaching AI to build scientific models, exploring how AI tools are changing scientific modeling in neuroscience and beyond.</td>
-</tr>
-<tr>
-<td align="left">2026-11-06</td>
-<td align="left">Anthropic</td>
-<td align="left"><a href="https://www.anthropic.com/research/project-eve-claude-plays-mmorpgs">Project EVE: Claude plays MMORPGs</a></td>
-<td align="left">The Anthropic Fellows Program partnered with Fenris Creations to have Claude play EVE Online and EVE Frontier, exploring how AI models might participate in real companies and markets through complex virtual economies and multiplayer coordination.</td>
-</tr>
-</tbody></table>
-<hr>
-<h2>New on OpenRouter</h2>
-<table>
-<thead>
-<tr>
-<th align="left">Model</th>
-<th align="left">Listed</th>
-<th align="left">Context</th>
-<th align="left">Summary</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left"><a href="https://openrouter.ai/liquid/lfm-3-1.7b">LiquidAI: LFM3-1.7B</a> <code>liquid/lfm-3-1.7b</code></td>
-<td align="left">2026-11-06</td>
-<td align="left">262K</td>
-<td align="left">A compact 1.7B-parameter text model post-trained for agents, tool calling, and structured outputs that reasons before answering.</td>
-</tr>
-<tr>
-<td align="left"><a href="https://openrouter.ai/liquid/lfm-3-1.7b:free">LiquidAI: LFM3-1.7B (free)</a> <code>liquid/lfm-3-1.7b:free</code></td>
-<td align="left">2026-11-06</td>
-<td align="left">262K</td>
-<td align="left">A compact 1.7B-parameter text model post-trained for agents, tool calling, and structured outputs that reasons before answering.</td>
-</tr>
-</tbody></table>
-<hr>
-<h2>Stealth Models on OpenRouter</h2>
-<table>
-<thead>
-<tr>
-<th align="left">Model</th>
-<th align="left">Listed</th>
-<th align="left">Expires</th>
-<th align="left">Status</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left"><a href="https://openrouter.ai/stealth/crouton-alpha">Crouton Alpha</a> <code>stealth/crouton-alpha</code></td>
-<td align="left">2026-11-03</td>
-<td align="left">—</td>
-<td align="left">live</td>
-</tr>
-</tbody></table>
-<hr>
-<h2>Spotted</h2>
-<table>
-<thead>
-<tr>
-<th align="left">Story</th>
-<th align="left">Source</th>
-<th align="left">Discussion</th>
-<th align="left">Summary</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left"><a href="https://hightouch.com/blog/llm-judges-identity-resolution">A Jev that can ask Opus for help gives Opus accuracy at 4x lower cost</a></td>
-<td align="left">Hacker News</td>
-<td align="left"><a href="https://news.ycombinator.com/item?id=50397429">405 points, 91 comments</a></td>
-<td align="left">The authors tested a hybrid of Jev and Claude Opus for identity resolution, achieving frontier accuracy at over 4x lower cost.</td>
-</tr>
-<tr>
-<td align="left"><a href="https://blog.google/innovation-and-ai/technology/developers-tools/introducing-gemini-omni-1-2-flash/">Gemini Omni 1.2 Flash</a></td>
-<td align="left">Hacker News</td>
-<td align="left"><a href="https://news.ycombinator.com/item?id=50392118">311 points, 225 comments</a></td>
-<td align="left">Google released Gemini Omni 1.2 Flash with native 15-second video generation and editing, stronger consistency, and 30% lower pricing.</td>
-</tr>
-<tr>
-<td align="left"><a href="https://www.bloomberg.com/news/articles/2026-11-06/anthropic-ipo-valuation-expectations-pressured-after-ai-rout">Anthropic IPO buyers see valuation as low as $1.1T</a></td>
-<td align="left">Hacker News</td>
-<td align="left"><a href="https://news.ycombinator.com/item?id=50394906">265 points, 529 comments</a></td>
-<td align="left">Anthropic&#39;s IPO plans faced a post-election selloff, prompting investors to reassess the valuation as low as $1.1 trillion.</td>
-</tr>
-<tr>
-<td align="left"><a href="https://arxiv.org/abs/2610.21375">Memorilla: Latent Semantic Memory for LLMs</a></td>
-<td align="left">Hacker News</td>
-<td align="left"><a href="https://news.ycombinator.com/item?id=50395919">101 points, 10 comments</a></td>
-<td align="left">The paper introduces Memorilla, a latent semantic memory system that lets frozen LLMs access accumulated knowledge like past conversations and documents by placing relevant information in the context window.</td>
-</tr>
-<tr>
-<td align="left"><a href="https://www.reuters.com/business/microsoft-is-winding-down-oracle-deal-rent-ai-cloud-capacity-bloomberg-news-2026-11-06/">Microsoft is winding down Oracle deal to rent AI cloud capacity</a></td>
-<td align="left">Hacker News</td>
-<td align="left"><a href="https://news.ycombinator.com/item?id=50395933">88 points, 17 comments</a></td>
-<td align="left">—</td>
-</tr>
-<tr>
-<td align="left"><a href="https://www.sec.gov/Archives/edgar/data/2130357/000162828026068676/anthropicpbc-sx1ax1.htm">Anthropic&#39;s Amended S1 Filing Shows Slowing Q3 Growth</a></td>
-<td align="left">Hacker News</td>
-<td align="left"><a href="https://news.ycombinator.com/item?id=50338510">16 points, 5 comments</a></td>
-<td align="left">—</td>
-</tr>
-<tr>
-<td align="left"><a href="https://dev.to/aws-builders/part-3-your-first-steps-in-computer-vision-on-aws-deploying-models-for-an-asl-recognition-app-14hf">[Part 3] Your first steps in Computer Vision on AWS: deploying models for an ASL recognition app</a></td>
-<td align="left">Dev.to</td>
-<td align="left"><a href="https://dev.to/aws-builders/part-3-your-first-steps-in-computer-vision-on-aws-deploying-models-for-an-asl-recognition-app-14hf">18 reactions, 0 comments</a></td>
-<td align="left">The author presents the third part of a tutorial series on deploying computer vision models on AWS for an American Sign Language recognition app.</td>
-</tr>
-</tbody></table>
-<hr>
-<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
-]]></content:encoded>
-    </item>
-    <item>
-      <title>AI Policy 2026-11-07</title>
-      <link>https://dboeter.github.io/daily-diff/#2026-11-07/ai-policy</link>
-      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-11-07/ai-policy</guid>
-      <pubDate>Sat, 07 Nov 2026 00:00:00 +0000</pubDate>
-      <description>AI Policy 2026-11-07 ⬛ Overview · 🟪 AI Agents · 🟦 AI Models &amp;amp; Labs · 🟧 AI Policy · 🟨 Data Engineering Sources: European Commission + Tweede Kamer + Rijksoverheid + Politico Europe + Binnenlands Bestuur | 8 new items ranked by Jev relevance | Generated: 2026-11-07 05:47 UTC Highlights The Dutch Cabinet published its AI vision (Kabinetsvisie op Artificial Intelligence – kiezen voor AI voor iedereen) alongside formal responses to the SER advice on work and AI and to the AI Deltaplan and Eur...</description>
-      <content:encoded><![CDATA[<h1>AI Policy 2026-11-07</h1>
-<p><a href="https://dboeter.github.io/daily-diff/#2026-11-07">⬛ Overview</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-07/ai-agents">🟪 AI Agents</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-07/ai-models">🟦 AI Models &amp; Labs</a> · <strong>🟧 AI Policy</strong> · <a href="https://dboeter.github.io/daily-diff/#2026-11-07/ai-data">🟨 Data Engineering</a></p>
-<blockquote>
-<p>Sources: European Commission + Tweede Kamer + Rijksoverheid + Politico Europe + Binnenlands Bestuur | 8 new items ranked by <a href="https://typesafe.ai">Jev</a> relevance | Generated: 2026-11-07 05:47 UTC</p>
-</blockquote>
-<hr>
-<h2>Highlights</h2>
-<p>The Dutch Cabinet published its AI vision (<em>Kabinetsvisie op Artificial Intelligence – kiezen voor AI voor iedereen</em>) alongside formal responses to the SER advice on work and AI and to the AI Deltaplan and Europe2031 report, signalling a national push for “open strategic autonomy” while acknowledging persistent US and Chinese influence. The European Commission preliminarily found TikTok’s recommender system in breach of the Digital Services Act for creating harmful “rabbit holes,” marking the first time the Commission has targeted a platform’s algorithmic recommendations as a DSA violation. The Dutch College voor de Rechten van de Mens warns it receives only half the funding needed for fundamental-rights oversight of AI systems, raising questions about supervisory capacity. Two EU consultations close soon: the Articles 75c–75d AI Act Implementing Act (9 November) and the Cloud and AI Development Act (11 November).</p>
-<h2>EU</h2>
-<table>
-<thead>
-<tr>
-<th align="left">Date</th>
-<th align="left">Source</th>
-<th align="left">Title</th>
-<th align="left">Stage</th>
-<th align="left">Summary</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left">2026-11-06</td>
-<td align="left">European Commission</td>
-<td align="left"><a href="https://digital-strategy.ec.europa.eu/en/news/commission-preliminarily-finds-tiktoks-you-feed-breach-digital-services-act-harmful-rabbit-holes">Commission preliminarily finds TikTok’s ‘For You’ feed in breach of Digital Services Act for harmful ‘rabbit holes’ effect</a></td>
-<td align="left">—</td>
-<td align="left">The European Commission preliminarily found TikTok&#39;s &#39;For You&#39; feed in breach of the Digital Services Act for its recommender system&#39;s harmful &#39;rabbit hole&#39; effect.</td>
-</tr>
-</tbody></table>
-<h2>Netherlands</h2>
-<table>
-<thead>
-<tr>
-<th align="left">Date</th>
-<th align="left">Source</th>
-<th align="left">Title</th>
-<th align="left">Stage</th>
-<th align="left">Summary</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left">2026-11-06</td>
-<td align="left">Tweede Kamer</td>
-<td align="left"><a href="https://www.tweedekamer.nl/kamerstukken/detail?id=2026Z24319&did=2026D56155">Kabinetsvisie op Artificial Intelligence – kiezen voor AI voor iedereen</a></td>
-<td align="left">—</td>
-<td align="left">The Dutch government published a policy vision on artificial intelligence titled &quot;Kabinetsvisie op Artificial Intelligence – kiezen voor AI voor iedereen&quot; to the Tweede Kamer.</td>
-</tr>
-<tr>
-<td align="left">2026-11-06</td>
-<td align="left">Rijksoverheid</td>
-<td align="left"><a href="https://www.rijksoverheid.nl/actueel/nieuws/2026/11/06/kabinet-kiest-voor-ai-die-nederland-vooruithelpt">Kabinet kiest voor AI die Nederland vooruithelpt</a></td>
-<td align="left">—</td>
-<td align="left">The Dutch cabinet presented a vision stating that AI is rapidly transforming the economy, society, and security, and that current choices will determine future jobs, businesses, and public services.</td>
-</tr>
-<tr>
-<td align="left">2026-11-06</td>
-<td align="left">Tweede Kamer</td>
-<td align="left"><a href="https://www.tweedekamer.nl/kamerstukken/detail?id=2026Z24325&did=2026D56181">Kabinetsreactie op het SER-advies over werk en AI</a></td>
-<td align="left">—</td>
-<td align="left">The Dutch government sent a response to the SER advice on work and AI to the Tweede Kamer.</td>
-</tr>
-<tr>
-<td align="left">2026-11-06</td>
-<td align="left">Tweede Kamer</td>
-<td align="left"><a href="https://www.tweedekamer.nl/kamerstukken/detail?id=2026Z24324&did=2026D56179">Reactie op het AI Deltaplan en het rapport Europe2031</a></td>
-<td align="left">—</td>
-<td align="left">The Dutch government sent a response to the AI Deltaplan and the Europe2031 report to the Tweede Kamer.</td>
-</tr>
-</tbody></table>
-<h2>News &amp; commentary</h2>
-<table>
-<thead>
-<tr>
-<th align="left">Date</th>
-<th align="left">Source</th>
-<th align="left">Title</th>
-<th align="left">Summary</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left">2026-11-06</td>
-<td align="left">Politico Europe</td>
-<td align="left"><a href="https://www.politico.eu/article/eu-accuses-tiktok-of-breaching-digital-rules-because-algorithm-creates-rabbit-holes/?utm_source=RSS_Feed&utm_medium=RSS&utm_campaign=RSS_Syndication">EU accuses TikTok of designing algorithm that creates ‘rabbit holes’</a></td>
-<td align="left">Politico Europe reported that the EU&#39;s preliminary findings mark the first time the Commission has focused on a social media platform&#39;s recommender systems as a breach of the Digital Services Act.</td>
-</tr>
-<tr>
-<td align="left">2026-11-06</td>
-<td align="left">Binnenlands Bestuur</td>
-<td align="left"><a href="https://www.binnenlandsbestuur.nl/digitaal/kabinet-wil-eigen-ai-koers-maar-de-vs-is-nooit-ver-weg">Kabinet wil eigen AI-koers, maar de VS en China zijn nooit ver weg</a></td>
-<td align="left">The Dutch cabinet presented an AI vision aiming for open strategic autonomy while using targeted AI diplomacy to secure access to advanced AI capabilities.</td>
-</tr>
-<tr>
-<td align="left">2026-11-06</td>
-<td align="left">Binnenlands Bestuur</td>
-<td align="left"><a href="https://www.binnenlandsbestuur.nl/digitaal/mensenrechtencollege-mist-geld-voor-toezicht-op-ai-systemen">College voor de Rechten van de Mens mist geld voor toezicht op AI-systemen</a></td>
-<td align="left">The Dutch College for Human Rights warned that it receives only half the funding needed for AI fundamental rights supervision, leaving it unable to hire more than half the required specialists.</td>
-</tr>
-</tbody></table>
-<h2>Coming up</h2>
-<p>Deadlines and dates in the next 30 days.</p>
-<table>
-<thead>
-<tr>
-<th align="left">Date</th>
-<th align="left">Source</th>
-<th align="left">Item</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left">2026-11-09</td>
-<td align="left">Have your say</td>
-<td align="left"><a href="https://ec.europa.eu/info/law/better-regulation/have-your-say/initiatives/19292_en">Articles 75c – 75d AI Act Implementing Act</a></td>
-</tr>
-<tr>
-<td align="left">2026-11-11</td>
-<td align="left">Have your say</td>
-<td align="left"><a href="https://ec.europa.eu/info/law/better-regulation/have-your-say/initiatives/14628_en">Cloud and AI Development Act</a></td>
-</tr>
-<tr>
-<td align="left">2026-12-02</td>
-<td align="left">Calendar</td>
-<td align="left"><a href="https://ai-act-service-desk.ec.europa.eu/en/ai-act/timeline/timeline-implementation-eu-ai-act">AI Act: bans on sexual deepfakes and CSAM generators; Art. 50(2) transition ends</a></td>
 </tr>
 </tbody></table>
 <hr>

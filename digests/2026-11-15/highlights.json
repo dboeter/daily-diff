@@ -1,0 +1,13 @@
+{
+  "ai-agents": [
+    "Oh My Pi v18.20.1–v18.20.2 changes `lsTree()` to return `{ path, mode }` objects, a breaking API change.",
+    "Shotoku introduces local-first governance for AI agents with budget caps, spending limits, human approval gates, and a tamper-evident audit trail enforced before payment."
+  ],
+  "ai-models": [
+    "DeepSeek V4 Pro 0813, a 1.7 trillion parameter model, is available on Hugging Face.",
+    "End-to-end 4-bit training reduces memory usage and accelerates GPU computation for LLMs, though it increases rounding aggressiveness, per Thinking Machines."
+  ],
+  "ai-policy": [
+    "CSET analyzes how political, commercial, and ideological pressures could impede U.S. AI leadership, noting public controversies can catalyze landscape shifts."
+  ]
+}
