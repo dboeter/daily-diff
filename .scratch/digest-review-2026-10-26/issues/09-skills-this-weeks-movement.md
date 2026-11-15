@@ -1,6 +1,6 @@
 # 09: Skills section shows only this week's movement
 
-Status: done
+Status: resolved
 Blocked by: None (can start immediately)
 Findings: T1 — see `../review.md`
 

@@ -1,6 +1,6 @@
 # 01: EDPB and Congress.gov have returned nothing since 2026-10-28
 
-Status: done
+Status: resolved
 Findings: 4 [medium], see `../review.md`
 
 ## Problem

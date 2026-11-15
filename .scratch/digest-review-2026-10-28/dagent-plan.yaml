@@ -28,7 +28,7 @@ nodes:
       - Do not edit AGENTS.md, GLOSSARY.md, README.md or anything under `digests/`; other nodes run in parallel and a later integration step updates the docs.
       - Put new tests in a `describe` block next to the existing tests of the function you change, not at the end of the file.
       - Do exactly what the ticket asks, existing helper/stdlib first, no unrequested deps, no speculative abstraction. Match the surrounding comment density and naming; a non-obvious constraint gets a comment of under 3 sentences where it lives.
-      - When done: tick the boxes you met (the live-run box stays unticked: no network here), set `Status: done`, and append to the ticket's Comments: cause, what changed (file and function), tests added, and a `Docs:` line naming each AGENTS.md statement that is now wrong and its new wording (for example the worst-case core-call count). A box you could not meet stays unticked with the reason.
+      - When done: tick the boxes you met (the live-run box stays unticked: no network here), set `Status: resolved`, and append to the ticket's Comments: cause, what changed (file and function), tests added, and a `Docs:` line naming each AGENTS.md statement that is now wrong and its new wording (for example the worst-case core-call count). A box you could not meet stays unticked with the reason.
       - Run `pnpm format` before finishing. Batch independent Read/Bash calls. Budget: about 60 tool calls.
 
   - id: t01-review
@@ -58,7 +58,7 @@ nodes:
       - Do not edit AGENTS.md, GLOSSARY.md, README.md or anything under `digests/`; other nodes run in parallel and a later integration step updates the docs.
       - Put new tests in a `describe` block next to the existing tests of the function you change, not at the end of the file.
       - Do exactly what the ticket asks, existing helper/stdlib first, no unrequested deps, no speculative abstraction. Match the surrounding comment density and naming; a non-obvious constraint gets a comment of under 3 sentences where it lives. Keep the total prompt size in mind: 16 agents and 17 data repos each send their releases; say in a comment why the new budget is safe against `callLlm`'s token budgets (`src/core/llm.ts`).
-      - When done: tick the boxes you met, set `Status: done`, and append to the ticket's Comments: cause, what changed (file and function), tests added, and a `Docs:` line naming each AGENTS.md statement that is now wrong and its new wording. A box you could not meet stays unticked with the reason.
+      - When done: tick the boxes you met, set `Status: resolved`, and append to the ticket's Comments: cause, what changed (file and function), tests added, and a `Docs:` line naming each AGENTS.md statement that is now wrong and its new wording. A box you could not meet stays unticked with the reason.
       - Run `pnpm format` before finishing. Batch independent Read/Bash calls. Budget: about 60 tool calls.
 
   - id: t03-skills-merged
@@ -76,7 +76,7 @@ nodes:
       - Do not edit AGENTS.md, GLOSSARY.md, README.md or anything under `digests/`; other nodes run in parallel and a later integration step updates the docs.
       - Put new tests in a `describe` block next to the existing tests of the function you change, not at the end of the file.
       - Do exactly what the ticket asks, existing helper/stdlib first, no unrequested deps, no speculative abstraction. Match the surrounding comment density and naming.
-      - When done: tick the boxes you met, set `Status: done`, and append to the ticket's Comments: cause, what changed (file and function), tests added, and a `Docs:` line naming each AGENTS.md statement that is now wrong and its new wording. A box you could not meet stays unticked with the reason.
+      - When done: tick the boxes you met, set `Status: resolved`, and append to the ticket's Comments: cause, what changed (file and function), tests added, and a `Docs:` line naming each AGENTS.md statement that is now wrong and its new wording. A box you could not meet stays unticked with the reason.
       - Run `pnpm format` before finishing. Batch independent Read/Bash calls. Budget: about 60 tool calls.
 
   - id: t06-hot-issues
@@ -99,7 +99,7 @@ nodes:
       - Do not edit AGENTS.md, GLOSSARY.md, README.md or anything under `digests/`; other nodes run in parallel and a later integration step updates the docs.
       - Put new tests in a `describe` block next to the existing tests of the function you change, not at the end of the file.
       - Do exactly what the ticket asks, existing helper/stdlib first, no unrequested deps, no speculative abstraction. Match the surrounding comment density and naming; a non-obvious constraint gets a comment of under 3 sentences where it lives.
-      - When done: tick the boxes you met, set `Status: done`, and append to the ticket's Comments: cause, what changed (file and function), tests added, and a `Docs:` line naming each AGENTS.md statement that is now wrong and its new wording (the hot-issues paragraph's call counts in particular). A box you could not meet stays unticked with the reason.
+      - When done: tick the boxes you met, set `Status: resolved`, and append to the ticket's Comments: cause, what changed (file and function), tests added, and a `Docs:` line naming each AGENTS.md statement that is now wrong and its new wording (the hot-issues paragraph's call counts in particular). A box you could not meet stays unticked with the reason.
       - Run `pnpm format` before finishing. Batch independent Read/Bash calls. Budget: about 80 tool calls (the largest ticket).
 
   - id: t06-review
@@ -127,7 +127,7 @@ nodes:
       - Do not edit AGENTS.md, GLOSSARY.md, README.md or anything under `digests/`; other nodes run in parallel and a later integration step updates the docs.
       - Put new tests in a `describe` block next to the existing tests of the function you change, not at the end of the file.
       - Do exactly what the ticket asks, existing helper/stdlib first, no unrequested deps, no speculative abstraction. Match the surrounding comment density and naming.
-      - When done: tick the boxes you met, set `Status: done`, and append to the ticket's Comments: cause, what changed (file and function), tests added, and a `Docs:` line naming each AGENTS.md statement that is now wrong and its new wording. A box you could not meet stays unticked with the reason.
+      - When done: tick the boxes you met, set `Status: resolved`, and append to the ticket's Comments: cause, what changed (file and function), tests added, and a `Docs:` line naming each AGENTS.md statement that is now wrong and its new wording. A box you could not meet stays unticked with the reason.
       - Run `pnpm format` before finishing. Batch independent Read/Bash calls. Budget: about 60 tool calls.
 
   - id: t05-lab-posts
@@ -145,7 +145,7 @@ nodes:
       - Do not edit AGENTS.md, GLOSSARY.md, README.md or anything under `digests/`; other nodes run in parallel and a later integration step updates the docs.
       - Put new tests in a `describe` block next to the existing tests of the function you change, not at the end of the file.
       - Do exactly what the ticket asks, existing helper/stdlib first, no unrequested deps, no speculative abstraction. Match the surrounding comment density and naming.
-      - When done: tick the boxes you met, set `Status: done`, and append to the ticket's Comments: cause, what changed (file and function), tests added, and a `Docs:` line naming each AGENTS.md statement that is now wrong and its new wording. A box you could not meet stays unticked with the reason.
+      - When done: tick the boxes you met, set `Status: resolved`, and append to the ticket's Comments: cause, what changed (file and function), tests added, and a `Docs:` line naming each AGENTS.md statement that is now wrong and its new wording. A box you could not meet stays unticked with the reason.
       - Run `pnpm format` before finishing. Batch independent Read/Bash calls. Budget: about 60 tool calls.
 
   - id: t08-policy-summaries
@@ -163,7 +163,7 @@ nodes:
       - Do not edit AGENTS.md, GLOSSARY.md, README.md or anything under `digests/`; other nodes run in parallel and a later integration step updates the docs.
       - Put new tests in a `describe` block next to the existing tests of the function you change, not at the end of the file.
       - Do exactly what the ticket asks, existing helper/stdlib first, no unrequested deps, no speculative abstraction. Match the surrounding comment density and naming.
-      - When done: tick the boxes you met, set `Status: done`, and append to the ticket's Comments: cause, what changed (file and function), tests added, and a `Docs:` line naming each AGENTS.md statement that is now wrong and its new wording. A box you could not meet stays unticked with the reason.
+      - When done: tick the boxes you met, set `Status: resolved`, and append to the ticket's Comments: cause, what changed (file and function), tests added, and a `Docs:` line naming each AGENTS.md statement that is now wrong and its new wording. A box you could not meet stays unticked with the reason.
       - Run `pnpm format` before finishing. Batch independent Read/Bash calls. Budget: about 60 tool calls.
 
   - id: t07-policy-talk
@@ -180,7 +180,7 @@ nodes:
       - Do not edit AGENTS.md, GLOSSARY.md, README.md or anything under `digests/`; other nodes run in parallel and a later integration step updates the docs.
       - Put new tests in a `describe` block next to the existing tests of the function you change, not at the end of the file.
       - Do exactly what the ticket asks, existing helper/stdlib first, no unrequested deps, no speculative abstraction. Match the surrounding comment density and naming, and the existing look in `index.html` (no new colors: green and red mean added and going away only).
-      - When done: tick the boxes you met (leave the AGENTS.md/GLOSSARY.md box for the integration step, noting it), set `Status: done`, and append to the ticket's Comments: what changed (file and function), tests added, and a `Docs:` line naming each AGENTS.md and GLOSSARY.md statement that is now wrong and its new wording. A box you could not meet stays unticked with the reason.
+      - When done: tick the boxes you met (leave the AGENTS.md/GLOSSARY.md box for the integration step, noting it), set `Status: resolved`, and append to the ticket's Comments: what changed (file and function), tests added, and a `Docs:` line naming each AGENTS.md and GLOSSARY.md statement that is now wrong and its new wording. A box you could not meet stays unticked with the reason.
       - Run `pnpm format` before finishing. Batch independent Read/Bash calls. Budget: about 60 tool calls.
 
   - id: t09-vendor-text
@@ -197,7 +197,7 @@ nodes:
       - Do not edit AGENTS.md, GLOSSARY.md, README.md or anything under `digests/`; other nodes run in parallel and a later integration step updates the docs.
       - Put new tests in a `describe` block next to the existing tests of the function you change, not at the end of the file.
       - Do exactly what the ticket asks, existing helper/stdlib first, no unrequested deps, no speculative abstraction. Note that a longer description changes the text Jev judges, so cached verdicts in `digests/data-verdicts.json` may be re-asked: say in the ticket whether that happens (see `judgeItems` in `src/core/jev.ts`).
-      - When done: tick the boxes you met, set `Status: done`, and append to the ticket's Comments: cause, what changed (file and function), tests added, and a `Docs:` line naming each AGENTS.md statement that is now wrong and its new wording. A box you could not meet stays unticked with the reason.
+      - When done: tick the boxes you met, set `Status: resolved`, and append to the ticket's Comments: cause, what changed (file and function), tests added, and a `Docs:` line naming each AGENTS.md statement that is now wrong and its new wording. A box you could not meet stays unticked with the reason.
       - Run `pnpm format` before finishing. Batch independent Read/Bash calls. Budget: about 60 tool calls.
 
   - id: t10-bigquery-stage
@@ -214,7 +214,7 @@ nodes:
       - Do not edit AGENTS.md, GLOSSARY.md, README.md or anything under `digests/`; other nodes run in parallel and a later integration step updates the docs.
       - The item id is built from the title (`id: ${anchor}#${title}`): changing the title changes every BigQuery id, which would make already-reported notes new again. Keep ids stable (build the id from the old form, or another stable key) and test that an existing id is unchanged.
       - Do exactly what the ticket asks, existing helper/stdlib first, no unrequested deps, no speculative abstraction. Match the surrounding comment density and naming.
-      - When done: tick the boxes you met, set `Status: done`, and append to the ticket's Comments: cause, what changed (file and function), tests added, and a `Docs:` line naming each AGENTS.md statement that is now wrong and its new wording. A box you could not meet stays unticked with the reason.
+      - When done: tick the boxes you met, set `Status: resolved`, and append to the ticket's Comments: cause, what changed (file and function), tests added, and a `Docs:` line naming each AGENTS.md statement that is now wrong and its new wording. A box you could not meet stays unticked with the reason.
       - Run `pnpm format` before finishing. Batch independent Read/Bash calls. Budget: about 40 tool calls.
 
   - id: t11-trends-summaries
@@ -231,7 +231,7 @@ nodes:
       - Do not edit AGENTS.md, GLOSSARY.md, README.md or anything under `digests/`; other nodes run in parallel and a later integration step updates the docs.
       - Put new tests in a `describe` block next to the existing tests of the function you change, not at the end of the file.
       - Do exactly what the ticket asks, existing helper/stdlib first, no unrequested deps, no speculative abstraction. Match the surrounding comment density and naming.
-      - When done: tick the boxes you met, set `Status: done`, and append to the ticket's Comments: cause, what changed (file and function), tests added, and a `Docs:` line naming each AGENTS.md statement that is now wrong and its new wording. A box you could not meet stays unticked with the reason.
+      - When done: tick the boxes you met, set `Status: resolved`, and append to the ticket's Comments: cause, what changed (file and function), tests added, and a `Docs:` line naming each AGENTS.md statement that is now wrong and its new wording. A box you could not meet stays unticked with the reason.
       - Run `pnpm format` before finishing. Batch independent Read/Bash calls. Budget: about 50 tool calls.
 
   - id: t12-research-rejudge
@@ -247,7 +247,7 @@ nodes:
       Rules:
       - Do not edit AGENTS.md, GLOSSARY.md, README.md or anything under `digests/`; other nodes run in parallel and a later integration step updates the docs.
       - Do exactly what the ticket asks, existing helper/stdlib first, no unrequested deps, no speculative abstraction. Match the surrounding comment density and naming.
-      - When done: tick the code boxes you met (the 2026-11-02 box needs the maintainer to run the script; leave it unticked and say so), set `Status: done`, and append to the ticket's Comments: what changed, tests added, the exact command the maintainer runs, and a `Docs:` line (AGENTS.md lists the one-off scripts after "Report outputs").
+      - When done: tick the code boxes you met (the 2026-11-02 box needs the maintainer to run the script; leave it unticked and say so), set `Status: resolved`, and append to the ticket's Comments: what changed, tests added, the exact command the maintainer runs, and a `Docs:` line (AGENTS.md lists the one-off scripts after "Report outputs").
       - Run `pnpm format` before finishing. Batch independent Read/Bash calls. Budget: about 50 tool calls.
 
   - id: integrate

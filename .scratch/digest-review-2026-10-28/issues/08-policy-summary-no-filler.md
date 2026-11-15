@@ -1,6 +1,6 @@
 # 08: Policy summaries say only what the source says
 
-Status: done
+Status: resolved
 Blocked by: None (can start immediately)
 Findings: M3 [medium]; lows L4 (regression of ticket 17 of the 2026-10-26 round), L9 — see `../review.md`, `../ai-models-policy.md`
 

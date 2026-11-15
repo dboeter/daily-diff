@@ -1,6 +1,6 @@
 # 12: "Nothing new from" double "or"; heading spacing
 
-Status: done
+Status: resolved
 Findings: 12 [low], see `../review.md`
 
 ## What to build

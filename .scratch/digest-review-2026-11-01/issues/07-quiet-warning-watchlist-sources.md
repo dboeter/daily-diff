@@ -1,6 +1,6 @@
 # 07: Quiet-source warning fires for sources that do fetch
 
-Status: done
+Status: resolved
 Findings: 7 [low], see `../review.md`
 
 ## Problem

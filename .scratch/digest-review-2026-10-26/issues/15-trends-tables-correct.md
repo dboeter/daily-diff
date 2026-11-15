@@ -1,6 +1,6 @@
 # 15: Trends tables are correct and self-explaining
 
-Status: done
+Status: resolved
 Blocked by: 01
 Findings: T3, T4, T5, T11, T12, T13, T15, T19, T20, A8, S8 — see `../review.md`
 

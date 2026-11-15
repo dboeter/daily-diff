@@ -1,6 +1,6 @@
 # 04: highlights.json covers a published Trends page
 
-Status: done
+Status: resolved
 Blocked by: None (can start immediately)
 Findings: T2 [medium], regression of ticket 04 of the 2026-10-26 round — see `../review.md`, `../ai-trends.md`
 

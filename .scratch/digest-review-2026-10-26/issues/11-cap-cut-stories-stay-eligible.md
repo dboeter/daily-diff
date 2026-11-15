@@ -1,6 +1,6 @@
 # 11: Cap-cut stories stay eligible; news matching reads title and description
 
-Status: done
+Status: resolved
 Blocked by: 10
 Findings: X4, S4 — see `../review.md`
 

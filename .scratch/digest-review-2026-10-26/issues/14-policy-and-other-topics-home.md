@@ -1,6 +1,6 @@
 # 14: Policy and "other" topics get a home
 
-Status: done
+Status: resolved
 Blocked by: 10
 Findings: X3, X7 — see `../review.md`
 

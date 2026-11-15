@@ -1,6 +1,6 @@
 # 02: Highlights keep their row's attribution and scope
 
-Status: done
+Status: resolved
 Findings: 2 [medium], see `../review.md`
 
 ## What to build

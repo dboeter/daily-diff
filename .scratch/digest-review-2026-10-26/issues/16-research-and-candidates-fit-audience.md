@@ -1,6 +1,6 @@
 # 16: Research and Candidates fit the audience
 
-Status: done
+Status: resolved
 Blocked by: None (can start immediately)
 Findings: T16, T18 — see `../review.md`
 

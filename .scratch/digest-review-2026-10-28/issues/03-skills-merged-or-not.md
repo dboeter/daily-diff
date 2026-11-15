@@ -1,6 +1,6 @@
 # 03: Skills says whether a closed PR was merged
 
-Status: done
+Status: resolved
 Blocked by: None (can start immediately)
 Findings: T1 [high] — see `../review.md`, `../ai-trends.md`
 

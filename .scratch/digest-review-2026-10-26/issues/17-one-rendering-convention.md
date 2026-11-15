@@ -1,6 +1,6 @@
 # 17: One rendering convention across pages
 
-Status: done
+Status: resolved
 Blocked by: None (can start immediately)
 Findings: S10, X6, M8, D9, D10, D11, D12 — see `../review.md`
 

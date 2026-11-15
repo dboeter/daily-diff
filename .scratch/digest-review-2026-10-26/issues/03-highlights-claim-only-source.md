@@ -1,6 +1,6 @@
 # 03: Page Highlights and Signals claim only what the source says
 
-Status: done
+Status: resolved
 Blocked by: None (can start immediately)
 Findings: S2, D1, A5, M2, M3, M4, D2, T2, T9, T17, D7 — see `../review.md`
 

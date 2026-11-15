@@ -1,6 +1,6 @@
 # 04: One event, one row
 
-Status: done
+Status: resolved
 Findings: 4 [medium], see `../review.md`
 
 ## Problem
