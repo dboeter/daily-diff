@@ -10,15 +10,18 @@ Thanks for helping. Daily Diff is a small project with one maintainer, so a shor
 
 ## Set up
 
-You need Node.js and pnpm (the version is in `package.json` under `packageManager`).
+You need Node.js 22 (the version CI uses) and pnpm (its version is in `package.json` under `packageManager`).
 
 ```bash
 pnpm install
-cp .env.example .env   # add the keys you have; every source degrades without its key
-pnpm start             # run the full digest locally
+export GITHUB_TOKEN=ghp_xxxxx            # required
+export ANTHROPIC_API_KEY=sk-ant-xxxxx    # or another LLM provider's key: see AGENTS.md
+pnpm start                               # run the full digest locally
 ```
 
-`AGENTS.md` explains the pipeline, the state files and the environment variables. Read it before a larger change.
+Nothing loads a `.env` file for you: export the variables in your shell. A run needs `GITHUB_TOKEN` and a key for one LLM provider; without a working LLM, the run stops with an error. The other keys are optional, and each source works in a reduced form without its key. `AGENTS.md` lists them all, and explains the pipeline and the state files. Read it before a larger change.
+
+A local run changes the state files under `digests/` and writes that day's reports there. Leave `DIGEST_REPO` unset, or the run opens GitHub Issues. Run `git restore digests/` and `git clean -fd digests/` afterwards to undo the run.
 
 ## Make a change
 
