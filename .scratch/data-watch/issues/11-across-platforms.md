@@ -24,3 +24,7 @@ The report lists each vendor's changes separately, but the useful view for a con
 ## Verification
 
 Replay of 2026-10-21 (Haiku as the model): two bullets, governance tagging (Snowflake-provided tags GA vs the Databricks Data Classification API GA with auto-tagging in preview) and Iceberg tables (Databricks transactions vs Snowflake Parquet Direct preview). The first replay ended the section with a note to the editor; the section now keeps only its bullets.
+
+## Comments
+
+- 2026-11-15: removed. 7 of its 9 bullets that the nightly reviews checked (11-04 … 11-14) overstated their rows or paired unrelated ones; see `../../digest-review-2026-11-10/issues/05-highlights-overstate.md`.

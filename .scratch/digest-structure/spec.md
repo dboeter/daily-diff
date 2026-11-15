@@ -55,7 +55,7 @@ Every daily page has the same anatomy:
 ## Coming up         this page's dated items; left out when empty
 ```
 
-Signals moves to the weekly page, the one place where a trend claim has a week of data behind it. Worth a Look goes, since it re-listed rows in 47 of 47 cases. Data's Across platforms stays, because it compares rows instead of re-listing them.
+Signals moves to the weekly page, the one place where a trend claim has a week of data behind it. Worth a Look goes, since it re-listed rows in 47 of 47 cases. Data's Across platforms stayed at first, because it compares rows instead of re-listing them; it was removed on 2026-11-15, when 7 of its 9 reviewed bullets overstated their rows (`../digest-review-2026-11-10/issues/05-highlights-overstate.md`).
 
 ## Where every current section goes
 

@@ -1,6 +1,6 @@
 # 05: Highlights and Across platforms overstate their sources
 
-Status: needs-triage
+Status: ready-for-human
 Findings: 1 [high], see `../review.md`
 
 ## Problem
@@ -18,7 +18,7 @@ In every review, and the 2026-11-01 review before them (`../../digest-review-202
 
 - [x] Replay these six against the rows they came from. Does a Jev check per Highlight ("does the row's text support this sentence?") separate them from Highlights that held up, at what false-drop rate
 - [x] Try a code rule first where one exists: a Highlight whose only row is a single community story keeps its attribution ("a Hacker News post says")
-- [ ] Across platforms is free prose over two rows: decide whether it stays, given three of its bullets failed on one day
+- [x] Across platforms is free prose over two rows: decide whether it stays, given three of its bullets failed on one day
 
 ## Comments
 
@@ -66,3 +66,18 @@ One `noul` question per sentence ("does `source` support everything `claim` stat
 3. Carry the fidelity rules to where 18 of the 40 errors started, `buildProjectDigestPrompt` and `buildSpottedSummariesPrompt`, with the scope rules these cases broke: keep a qualifier ("the default Fable model", "internal benchmarks"), "recommends" or "upcoming" never becomes "must" or "released", separate fixes stay separate. Unmeasured: the Highlights prompts have had these rules since 11-01 and still produced 17 cases.
 4. A Jev check of Highlights only (about 10 calls a day, under 15,000 tokens), dropping a Highlight below 0.2 to 0.3, is the one gate the replay supports: at 0.4 it caught 8 of 16 flagged Highlights, and of its 5 unflagged drops 1 was real, 1 a one-reporter "users report", 1 borderline, and 2 cited catalog fields a production check would have in its source. Not a gate for repo bullets (a long bullet fails on one clause) or Spotted rows (it catches none).
 5. Still open after 1–4: about 10 Highlights over faithful rows, among them "resulting in spam", TikTok, #108122 and the dbt "must update", and every case where the error is who says it.
+
+### Decisions and changes (2026-11-15)
+
+Daan: remove Across platforms, and do recommendations 2–4.
+
+- Done: Across platforms removed (`bbc9c77`); the fidelity rules, with three new scope rules (qualifiers, strength, separate changes), in the repo-section and Spotted summary prompts, and a hot issue worded "an issue reports" (`81125b5`); the data Highlights prompt asks for an action only when the row states one, as strongly as the row does, instead of what the change "requires" and who "must test or migrate", which matched four cases: dbt, GLM 5.3, the Snowflake connector and Gemini Flash.
+- Not built: the Jev check on Highlights (recommendation 4). Recomputed for the bullet Highlights it would check (agents, models, data; policy is prose, and the two title-only cases are already dropped), from `cache.json`:
+
+| Bar | Flagged caught | Unflagged dropped |
+| --- | -------------- | ----------------- |
+| 0.2 | 4/11           | 4/18              |
+| 0.3 | 4/11           | 4/18              |
+| 0.4 | 6/11           | 5/18              |
+
+  By page at 0.3: agents 1/5 caught, 0/8 dropped; models 0/3, 3/6; data 3/3, 1/4. The data catches are the "must" cases the prompt change above targets. Three of the four drops are models-page rows, two of them for catalog fields a production source would carry. Unmatched in production too: which rows a Highlight rests on (the data prompt forbids links, so only names). Waiting on Daan: build it anyway, or judge the prompt changes on a week of nightly reviews first.
