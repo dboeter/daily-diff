@@ -1,6 +1,6 @@
 # 06: Hot issues count people, show their label and fix status, and are worded as reports
 
-Status: done
+Status: resolved
 Blocked by: None (can start immediately)
 Findings: A5 [medium] (regression of ticket 03 of the 2026-10-26 round), A6 [medium], A7 [medium]; low A9 — see `../review.md`, `../ai-agents.md`
 

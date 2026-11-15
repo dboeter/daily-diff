@@ -1,6 +1,6 @@
 # 04: Highlights pick, they don't restate
 
-Status: done
+Status: resolved
 Blocked by: 03
 Findings: S3, X5, M6, M7, D5, T10 — see `../review.md`
 

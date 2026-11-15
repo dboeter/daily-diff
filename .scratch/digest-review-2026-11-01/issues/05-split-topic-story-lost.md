@@ -1,6 +1,6 @@
 # 05: A highly discussed story with a split topic lands nowhere
 
-Status: done
+Status: resolved
 Findings: 5 [medium], see `../review.md`
 
 ## Problem

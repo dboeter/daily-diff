@@ -1,6 +1,6 @@
 # 10: BigQuery rows show their release stage
 
-Status: done
+Status: resolved
 Blocked by: None (can start immediately)
 Findings: D2 [medium]; low D3 — see `../review.md`, `../ai-data.md`
 

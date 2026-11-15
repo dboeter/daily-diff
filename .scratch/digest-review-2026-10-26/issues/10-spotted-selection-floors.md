@@ -1,6 +1,6 @@
 # 10: Spotted selection floors
 
-Status: done
+Status: resolved
 Blocked by: None (can start immediately)
 Findings: S5, A3, A9, M5, T7 — see `../review.md`
 

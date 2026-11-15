@@ -1,6 +1,6 @@
 # 07: A much-discussed policy story reaches the Overview
 
-Status: done
+Status: resolved
 Blocked by: None (can start immediately)
 Findings: M4 [medium] (regression of ticket 14 of the 2026-10-26 round); lows L1, L2 — see `../review.md`, `../ai-models-policy.md`
 

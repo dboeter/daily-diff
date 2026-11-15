@@ -1,6 +1,6 @@
 # 13: The data report's "Vendor items" count leaves out the Also new lines
 
-Status: done
+Status: resolved
 Findings: 15 [low], see `../review.md`
 
 ## Problem

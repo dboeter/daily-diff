@@ -1,6 +1,6 @@
 # 01: Traces explain every drop
 
-Status: done
+Status: resolved
 Blocked by: None (can start immediately)
 Findings: S11, X1 (counts), T11 (trace fields), A6/M1 (LLM status) — see `../review.md`
 

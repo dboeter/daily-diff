@@ -1,6 +1,6 @@
 # Hot Issue: drop the "opened in the window" requirement
 
-Status: done
+Status: resolved
 
 ## Problem
 

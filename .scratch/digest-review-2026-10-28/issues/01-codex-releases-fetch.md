@@ -1,6 +1,6 @@
 # 01: Codex's releases reach the agents page
 
-Status: done
+Status: resolved
 Blocked by: None (can start immediately)
 Findings: A3 [high] — see `../review.md`, `../ai-agents.md`
 

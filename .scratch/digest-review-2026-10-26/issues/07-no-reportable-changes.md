@@ -1,6 +1,6 @@
 # 07: No Tracked project shows "no reportable changes"
 
-Status: done
+Status: resolved
 Blocked by: None (can start immediately)
 Findings: A1, S9 (agents) — see `../review.md`
 

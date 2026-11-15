@@ -1,6 +1,6 @@
 # 10: `shippedComingSoon` matches too loosely; its count is inflated
 
-Status: done
+Status: resolved
 Findings: 10 [low], see `../review.md`
 
 ## Problem
