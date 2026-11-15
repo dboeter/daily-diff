@@ -16,6 +16,7 @@ import { pathToFileURL } from "node:url";
 import { COMING_UP, GOING_AWAY, isReportId, REPORT_LABELS, REPORTS, WORDMARK } from "../core/strings.ts";
 import type { ComingUpEntry } from "../reports/coming-up.ts";
 import type { ReportHighlights } from "../reports/prompts-pages.ts";
+import { MANIFEST_FILE } from "./manifest.ts";
 
 const PAGES_URL_DEFAULT = "https://dboeter.github.io/daily-diff";
 
@@ -188,12 +189,12 @@ export async function sendTeams(date: string, highlights: ReportHighlights | nul
 }
 
 async function main(): Promise<void> {
-  if (!fs.existsSync("manifest.json")) {
+  if (!fs.existsSync(MANIFEST_FILE)) {
     console.log("[notify] manifest.json not found — skipping.");
     return;
   }
 
-  const { dates } = JSON.parse(fs.readFileSync("manifest.json", "utf-8")) as {
+  const { dates } = JSON.parse(fs.readFileSync(MANIFEST_FILE, "utf-8")) as {
     dates: { date: string; reports: string[] }[];
   };
 

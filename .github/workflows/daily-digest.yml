@@ -132,7 +132,7 @@ jobs:
           fi
           git pull --rebase
           pnpm manifest
-          git add manifest.json feed.xml feeds/
+          git add site/manifest.json site/feed.xml site/feeds/
           if ! git diff --cached --quiet; then
             git commit -m "chore: update manifest.json"
           fi

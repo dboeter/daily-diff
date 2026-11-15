@@ -15,7 +15,12 @@ import {
 } from "../core/strings.ts";
 
 const DIGESTS_DIR = "digests";
+// The web UI's folder. scripts/build-site.sh publishes its content at the site
+// root, so the paths below are also the files' URLs under SITE_URL.
+const SITE_DIR = "site";
 const MANIFEST_PATH = "manifest.json";
+/** Where `pnpm manifest` writes the manifest (`pnpm notify` reads it). */
+export const MANIFEST_FILE = path.join(SITE_DIR, MANIFEST_PATH);
 const FEED_PATH = "feed.xml";
 // One feed per live report next to feed.xml, so a reader can follow one page.
 const FEEDS_DIR = "feeds";
@@ -204,20 +209,23 @@ async function main(): Promise<void> {
     dates: entries,
   };
 
-  fs.writeFileSync(MANIFEST_PATH, JSON.stringify(manifest, null, 2) + "\n");
+  fs.writeFileSync(MANIFEST_FILE, JSON.stringify(manifest, null, 2) + "\n");
   console.log(`manifest.json updated: ${entries.length} dates`);
 
   // ── RSS Feed ──────────────────────────────────────────────────────────────────
 
   const feedItems = selectFeedItems(entries);
-  fs.writeFileSync(FEED_PATH, await buildFeedXml(feedItems, "Daily Diff", FEED_PATH));
+  fs.writeFileSync(path.join(SITE_DIR, FEED_PATH), await buildFeedXml(feedItems, "Daily Diff", FEED_PATH));
   console.log(`feed.xml updated: ${feedItems.length} items`);
 
-  fs.mkdirSync(FEEDS_DIR, { recursive: true });
+  fs.mkdirSync(path.join(SITE_DIR, FEEDS_DIR), { recursive: true });
   for (const id of LIVE_REPORT_IDS) {
     const feedPath = `${FEEDS_DIR}/${id}.xml`;
     const items = selectFeedItems(entries, id);
-    fs.writeFileSync(feedPath, await buildFeedXml(items, `Daily Diff: ${REPORT_LABELS[id]}`, feedPath));
+    fs.writeFileSync(
+      path.join(SITE_DIR, feedPath),
+      await buildFeedXml(items, `Daily Diff: ${REPORT_LABELS[id]}`, feedPath),
+    );
     console.log(`${feedPath} updated: ${items.length} items`);
   }
 }

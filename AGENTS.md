@@ -25,6 +25,7 @@ pnpm lint:fix       # ESLint --fix
 pnpm format         # Prettier --write src
 pnpm format:check   # Prettier --check src
 pnpm readme         # regenerate README's tracked-repo tables from config.yml (--check: fail if stale)
+pnpm site           # assemble the published site (site/ + digests/) in dist/site, for a local preview
 pnpm feeds:check    # fetch every data.feeds and data.community source and list status and item count (also the "Check feeds" workflow)
 ```
 
@@ -226,14 +227,14 @@ Every Jev judgment except ArXiv's goes through `judgeItems` (`src/core/jev.ts`) 
 
 ## Web UI & RSS Feed
 
-- `index.html` reads `manifest.json` (`pnpm manifest`, `src/cli/manifest.ts`) to build the sidebar and fetches `digests/YYYY-MM-DD/<report>.md` on demand. `#YYYY-MM-DD` is the day's overview (each report's highlights, then Policy talk and Also talked about from `talked-about.json`, then Coming up from `coming-up.json`); `#YYYY-MM-DD/<report>` is a report. The sidebar pins the latest weekly reports under "This week" (manifest `weekly`) and tags the newest day `today` (`latest` when it is not the viewer's own date).
+- The web UI is `site/`: `site/index.html` reads `manifest.json` (`pnpm manifest`, `src/cli/manifest.ts`, which writes it into `site/`) to build the sidebar and fetches `digests/YYYY-MM-DD/<report>.md` on demand. `#YYYY-MM-DD` is the day's overview (each report's highlights, then Policy talk and Also talked about from `talked-about.json`, then Coming up from `coming-up.json`); `#YYYY-MM-DD/<report>` is a report. The sidebar pins the latest weekly reports under "This week" (manifest `weekly`) and tags the newest day `today` (`latest` when it is not the viewer's own date).
 - Each report's bar is rendered in code with absolute Pages URLs, so its links work in GitHub Issues too.
 - The Markdown carries no `+`: Highlights are plain bullets, and a bullet about something going away opens with `GOING_AWAY` (−). From `SIGNED_SINCE` on, the web UI alone renders Highlights as a diff hunk (`gutterList`): − for a bullet that opens with `GOING_AWAY` (the sign removed from its text), + for the rest. No code checks the model's sign: a keyword rule would sign a release with breaking changes as going away. AI Policy's Highlights are prose, so its page has no gutter.
-- The look is "Gutter": the mark is a diff gutter (+ over −), drawn into `favicon.svg`, `favicon-16.svg` and the PNGs (`apple-touch-icon.png`, `feed-icon.png`, `og-image.png`, `banner.png`). IBM Plex Sans, Plex Mono for dates, counts and code. Green and red mean added and going away, and nothing else.
+- The look is "Gutter": the mark is a diff gutter (+ over −), drawn into `favicon.svg`, `favicon-16.svg` and the PNGs (`apple-touch-icon.png`, `feed-icon.png`, `og-image.png`, `banner.png`), all in `site/`. IBM Plex Sans, Plex Mono for dates, counts and code. Green and red mean added and going away, and nothing else.
 - The Markdown keeps ISO dates, for GitHub Issues, RSS and the MCP server; `decorateReport` formats them in the web UI and stacks tables of 3+ columns on a phone, with the `PROSE_COLUMNS` at full width.
 - MCP server: `mcp/`, a Cloudflare Worker that reads the reports from GitHub Pages, so new digests need no deploy. `.github/workflows/deploy-mcp.yml` deploys it on pushes to `main` that touch `mcp/`. `mcp/` has its own `package.json`; run `pnpm run deploy` there, not `pnpm deploy` (pnpm's workspace command).
-- RSS: `feed.xml` (the latest 30 items across reports) and one `feeds/<id>.xml` per live report, from `pnpm manifest`.
-- GitHub Pages is deployed by `.github/workflows/deploy-site.yml`, which publishes the folder `scripts/build-site.sh` assembles: the web UI, the manifest, the feeds and `digests/`, at the paths the repo root has. It runs on every push to `main`. The daily workflow commits the digest, then the manifest and feeds, pushes once and, as its last step, starts the deploy itself: a push made with `GITHUB_TOKEN` starts no `on: push` workflow.
+- RSS: `site/feed.xml` (the latest 30 items across reports) and one `site/feeds/<id>.xml` per live report, from `pnpm manifest`.
+- GitHub Pages is deployed by `.github/workflows/deploy-site.yml`, which publishes the folder `scripts/build-site.sh` assembles: the content of `site/` at the site root and `digests/` next to it, so `index.html` is not servable from the repo as it is. `pnpm site` assembles the same folder in `dist/site` for a local preview. It runs on every push to `main`. The daily workflow commits the digest, then the manifest and feeds, pushes once and, as its last step, starts the deploy itself: a push made with `GITHUB_TOKEN` starts no `on: push` workflow.
 
 ## Adding a new report type
 
