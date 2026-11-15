@@ -4,22 +4,22 @@
  * print the share per topic and 30 random routings. The cache goes under
  * `.scratch/digest-structure/`, nothing under `digests/`.
  *
- *   node --env-file=.env --import tsx scripts/spotted-route-check.ts
+ *   node --env-file=.env --import tsx .scratch/digest-structure/spotted-route-check.ts
  *
  * Without TYPESAFE_API_KEY the keyword fallback routes every story.
  */
 
 import fs from "node:fs";
 import path from "node:path";
-import { daysBefore } from "../src/core/date.ts";
+import { daysBefore } from "../../src/core/date.ts";
 import {
   loadSpottedVerdicts,
   routeStories,
   saveSpottedVerdicts,
   PAGE_OF_TOPIC,
   type Topic,
-} from "../src/spotted/topics.ts";
-import type { Story } from "../src/spotted/pool.ts";
+} from "../../src/spotted/topics.ts";
+import type { Story } from "../../src/spotted/pool.ts";
 
 const FIRST = "2026-10-13";
 const LAST = "2026-10-22";
