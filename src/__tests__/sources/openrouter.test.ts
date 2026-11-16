@@ -157,6 +157,27 @@ describe("parseOpenRouterModels", () => {
       ],
     });
   });
+
+  it("skips an earlier data array without token rows (2026-11-16: a model list came first)", () => {
+    const payload =
+      JSON.stringify({ state: { data: [{ id: "x/list-model", slug: "x/list-model" }] } }) +
+      JSON.stringify({
+        state: {
+          data: [
+            {
+              date: "2026-11-15 00:00:00",
+              model_permaslug: "a/m",
+              total_prompt_tokens: 7,
+              total_completion_tokens: 3,
+            },
+          ],
+        },
+      });
+    expect(parseOpenRouterModels(rscHtml(payload))).toEqual({
+      date: "2026-11-15",
+      models: [{ slug: "a/m", tokens: 10 }],
+    });
+  });
 });
 
 describe("isStealthModel", () => {

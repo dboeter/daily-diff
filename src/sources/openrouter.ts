@@ -137,16 +137,26 @@ export function extractRscPayload(html: string): string {
 }
 
 /**
- * Find the first `"key":[` in `text` and parse the JSON array that follows,
- * bracket-matching while skipping string contents. Returns null when the key
- * is missing or the slice is not valid JSON.
+ * Find the first `"key":[` in `text` whose JSON array passes `accept`, parsing
+ * each candidate by bracket-matching while skipping string contents. Returns
+ * null when no occurrence is valid JSON that passes. `accept` matters for a
+ * generic key: the rankings page has several `"data"` arrays.
  */
-export function extractJsonArray(text: string, key: string): unknown[] | null {
+export function extractJsonArray(
+  text: string,
+  key: string,
+  accept: (array: unknown[]) => boolean = () => true,
+): unknown[] | null {
   const marker = `"${key}":[`;
-  const start = text.indexOf(marker);
-  if (start === -1) return null;
+  for (let start = text.indexOf(marker); start !== -1; start = text.indexOf(marker, start + 1)) {
+    const array = parseArrayAt(text, start + marker.length - 1);
+    if (array && accept(array)) return array;
+  }
+  return null;
+}
 
-  const from = start + marker.length - 1;
+/** The JSON array opening at `from`, or null when it is truncated or not valid JSON. */
+function parseArrayAt(text: string, from: number): unknown[] | null {
   let depth = 0;
   let inString = false;
   for (let i = from; i < text.length; i++) {
@@ -274,9 +284,8 @@ interface RawModelRow {
 
 /** Top models by tokens from the `/rankings` page's daily snapshot. */
 export function parseOpenRouterModels(html: string): { models: OpenRouterModel[]; date: string } {
-  const rows = (extractJsonArray(extractRscPayload(html), "data") ?? []).filter(
-    (r): r is RawModelRow => typeof (r as RawModelRow)?.model_permaslug === "string",
-  );
+  const isRow = (r: unknown): r is RawModelRow => typeof (r as RawModelRow)?.model_permaslug === "string";
+  const rows = (extractJsonArray(extractRscPayload(html), "data", (a) => a.some(isRow)) ?? []).filter(isRow);
   const date =
     rows
       .map((r) => r.date.slice(0, 10))
