@@ -20,8 +20,9 @@ A personal daily digest of AI coding agents, AI models, AI policy and the data e
 | `ai-policy.md` | AI Policy        | daily   | New AI legislation, regulation and guidance for the EU, the Netherlands and the US, news & commentary, upcoming deadlines                                                                                        |
 | `ai-data.md`   | Data Engineering | daily   | Action required (deprecations with an end date), vendor release notes and repo releases for Databricks, Snowflake, Azure / Fabric & GCP and the open-source data stack, News & discussion from engineering blogs |
 | `ai-trends.md` | Trends           | Mondays | Trending agents & coding tools, the week's Claude Code Skills PRs and requests, candidates to track, OpenRouter and Hugging Face models, the week's top papers and most discussed stories, Signals               |
+| `ai-weekly.md` | Weekly Diff      | Mondays | One article on what changed in the week and what it means, written by Claude Opus from the items the week's pages showed; its interpretation is in italics                                                       |
 
-Every report opens with **Highlights**, then its tracked sections. AI Agents, AI Models & Labs and Data Engineering add **Spotted**: community stories on their topic that named no tracked project; Trends ends with **Signals**. A daily report with nothing new is skipped (AI Agents is always written). Each day also writes `highlights.json` (up to 2 highlights per report) and `coming-up.json` (dated items of the next 30 days from every page), which the Web UI's day overview and the notifications show, and `talked-about.json` (the day's best stories on topics without a page, the overview's "Policy talk" and "Also talked about" lists).
+Every report but Weekly Diff opens with **Highlights**, then its tracked sections. AI Agents, AI Models & Labs and Data Engineering add **Spotted**: community stories on their topic that named no tracked project; Trends ends with **Signals**. Weekly Diff is one article, without Highlights or tables: it needs `ANTHROPIC_API_KEY` whatever the run's provider is, and is skipped without it. A daily report with nothing new is skipped (AI Agents is always written). Each day also writes `highlights.json` (up to 2 highlights per report) and `coming-up.json` (dated items of the next 30 days from every page), which the Web UI's day overview and the notifications show, and `talked-about.json` (the day's best stories on topics without a page, the overview's "Policy talk" and "Also talked about" lists).
 
 Code decides what is new and renders the tables; the LLM writes the prose: the per-project sections, row summaries, Highlights and Signals. Relevance, topic and category judgments come from [Jev](https://typesafe.ai) (TypeSafe), with keyword rules as the fallback without `TYPESAFE_API_KEY`. Each verdict is cached in a committed file under `digests/` and asked once.
 
@@ -29,7 +30,7 @@ Code decides what is new and renders the tables; the LLM writes the prose: the p
 
 ### Web UI
 
-**[dboeter.github.io/daily-diff](https://dboeter.github.io/daily-diff)** renders the Markdown files through GitHub Pages, in dark or light. Each day opens on an overview of every report's highlights and what is coming up; the latest Trends page stays pinned under **This week**.
+**[dboeter.github.io/daily-diff](https://dboeter.github.io/daily-diff)** renders the Markdown files through GitHub Pages, in dark or light. Each day opens on an overview of every report's highlights and what is coming up; the latest Weekly Diff and Trends pages stay pinned under **This week**.
 
 ### RSS feed
 
@@ -187,15 +188,16 @@ agents:
 
 Repository secrets (**Settings → Secrets and variables → Actions**); `GITHUB_TOKEN` is provided by Actions.
 
-| Secret                                   | Description                                                                                                                                              |
-| ---------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `OPENROUTER_API_KEY`                     | The scheduled run's LLM key (the workflow sets `LLM_PROVIDER: openrouter`; for another provider, edit the workflow, see [LLM providers](#llm-providers)) |
-| `TYPESAFE_API_KEY`                       | Jev judgments (without it: keyword rules, search-topic labels, and no Research section in Trends)                                                        |
-| `USA_GOV_API_KEY`                        | [api.data.gov](https://api.data.gov/signup/) key for Congress.gov and Regulations.gov                                                                    |
-| `PLURAL_API_KEY`                         | [Open States](https://open.pluralpolicy.com) key for US state bills                                                                                      |
-| `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID` | Telegram notifications (bot from [@BotFather](https://t.me/BotFather))                                                                                   |
-| `TEAMS_WEBHOOK_URL`                      | Power Automate Workflows webhook for the Teams card                                                                                                      |
-| `CLOUDFLARE_API_TOKEN`                   | The `Deploy MCP` workflow only                                                                                                                           |
+| Secret                                   | Description                                                                                                                                                |
+| ---------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `OPENROUTER_API_KEY`                     | The scheduled run's LLM key (the workflow sets `LLM_PROVIDER: openrouter`; for another provider, edit the workflow, see [LLM providers](#llm-providers))   |
+| `ANTHROPIC_API_KEY`                      | Weekly Diff's writer, Claude Opus on the Anthropic API, one call a week of about $0.80 (without it: no Weekly Diff page; the rest of the run is unchanged) |
+| `TYPESAFE_API_KEY`                       | Jev judgments (without it: keyword rules, search-topic labels, and no Research section in Trends)                                                          |
+| `USA_GOV_API_KEY`                        | [api.data.gov](https://api.data.gov/signup/) key for Congress.gov and Regulations.gov                                                                      |
+| `PLURAL_API_KEY`                         | [Open States](https://open.pluralpolicy.com) key for US state bills                                                                                        |
+| `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID` | Telegram notifications (bot from [@BotFather](https://t.me/BotFather))                                                                                     |
+| `TEAMS_WEBHOOK_URL`                      | Power Automate Workflows webhook for the Teams card                                                                                                        |
+| `CLOUDFLARE_API_TOKEN`                   | The `Deploy MCP` workflow only                                                                                                                             |
 
 A source whose key is unset is skipped; the rest of the run goes on.
 
@@ -219,7 +221,8 @@ pnpm install
 export GITHUB_TOKEN=ghp_xxxxx
 export ANTHROPIC_API_KEY=sk-ant-xxxxx   # or LLM_PROVIDER + its key
 # export DIGEST_REPO=dboeter/daily-diff  # open GitHub Issues; omit to only write files
-# export DIGEST_FORCE_WEEKLY=1           # also build the Trends page on a non-Monday
+# export DIGEST_FORCE_WEEKLY=1           # also build the weekly pages (Trends, Weekly Diff) on a non-Monday;
+#                                        # Weekly Diff needs ANTHROPIC_API_KEY (one Opus call, about $0.80)
 pnpm start
 ```
 
@@ -227,10 +230,10 @@ pnpm start
 
 The workflow's cron is `7 1 * * *` in `Europe/Amsterdam`. GitHub starts scheduled runs 2.5–4 hours late, so the cron sits about 4 hours before the digest is wanted; if the delay changes, move it in `.github/workflows/daily-digest.yml`. Report dates and the Monday Trends run use CST (UTC+8), the same calendar day as Amsterdam at that hour.
 
-**Actions → Daily Diff → Run workflow** starts a run by hand, e.g. to regenerate a day; tick **force_weekly** to build Trends too. A scheduled run skips a day whose `digests/YYYY-MM-DD` folder is already committed, so a late cron after a manual catch-up opens no duplicate issues.
+**Actions → Daily Diff → Run workflow** starts a run by hand, e.g. to regenerate a day; tick **force_weekly** to build Trends and Weekly Diff too. A scheduled run skips a day whose `digests/YYYY-MM-DD` folder is already committed, so a late cron after a manual catch-up opens no duplicate issues.
 
 ## Archive
 
-Every day is kept under [`digests/`](./digests/) and in the Web UI. Issues are labelled by report: [`agents`](../../issues?q=is%3Aissue+label%3Aagents) · [`models`](../../issues?q=is%3Aissue+label%3Amodels) · [`policy`](../../issues?q=is%3Aissue+label%3Apolicy) · [`data`](../../issues?q=is%3Aissue+label%3Adata) · [`trends`](../../issues?q=is%3Aissue+label%3Atrends). Each run closes the issues of earlier days (Trends stays open until the next Monday); issues without a digest label and pull requests are never touched.
+Every day is kept under [`digests/`](./digests/) and in the Web UI. Issues are labelled by report: [`agents`](../../issues?q=is%3Aissue+label%3Aagents) · [`models`](../../issues?q=is%3Aissue+label%3Amodels) · [`policy`](../../issues?q=is%3Aissue+label%3Apolicy) · [`data`](../../issues?q=is%3Aissue+label%3Adata) · [`trends`](../../issues?q=is%3Aissue+label%3Atrends) · [`weekly`](../../issues?q=is%3Aissue+label%3Aweekly). Each run closes the issues of earlier days (Trends and Weekly Diff stay open until the next Monday); issues without a digest label and pull requests are never touched.
 
 Older days also hold reports retired or merged in October 2026 (`ai-cli`, `ai-ph`, `ai-infra`, `ai-community`, `ai-hn`, `ai-web`, `ai-trending`, `ai-hf`, `ai-arxiv`) and, until July 2026, weekly and monthly rollups.

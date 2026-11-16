@@ -370,7 +370,7 @@ describe("closeSupersededIssues", () => {
 
   it("closes discontinued rollup issues, which carry a legacy label", async () => {
     const { closed } = mockIssues([
-      { number: 1, created_at: "2026-05-19T23:10:00Z", labels: ["weekly"] },
+      { number: 1, created_at: "2026-05-19T23:10:00Z", labels: ["monthly"] },
       { number: 2, created_at: "2026-08-27T23:10:00Z" },
     ]);
 

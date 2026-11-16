@@ -100,6 +100,11 @@ jobs:
           OPENROUTER_FALLBACK_MODELS: nvidia/nemotron-3-ultra-550b-a55b:free,nvidia/nemotron-3.5-super-vl:free
           # Without this the reasoning model spends the whole token budget thinking and returns empty content.
           OPENROUTER_REASONING_EFFORT: low
+          # Weekly Diff's article alone is written by Claude Opus on the Anthropic API (src/weekly/writer.ts);
+          # unset, the weekly run publishes no Weekly Diff page. The base URL is for a key that works
+          # through a gateway only; unset, the SDK uses the Anthropic API.
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          ANTHROPIC_BASE_URL: ${{ secrets.ANTHROPIC_BASE_URL }}
           # Jev: arXiv ranking for Trends' Research, Spotted topics, AI Policy and vendor relevance,
           # trending scope. Unset: no Research papers; Spotted, AI Policy and vendor items fall back to
           # keyword rules, trending scope to search topic labels.

@@ -341,6 +341,16 @@ describe("callLlm", () => {
     }
   });
 
+  it("sends the call through another provider when given one, with the same tally and trace", async () => {
+    const other = { name: "writer", call: vi.fn(() => Promise.resolve("the article")) };
+
+    expect(await callLlm("write it", 32000, "weekly", other)).toBe("the article");
+
+    expect(other.call).toHaveBeenCalledWith("write it", 32000);
+    expect(mockCall).not.toHaveBeenCalled();
+    expect(llmStats).toEqual({ attempted: 1, failed: 0 });
+  });
+
   it("passes prompt and maxTokens to provider.call()", async () => {
     mockCall.mockResolvedValueOnce("response text");
 

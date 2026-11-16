@@ -70,7 +70,7 @@ export interface CandidateSources {
 }
 
 /** Plain cut, no ellipsis: the reviewer reads at most this many characters of an item. */
-const MAX_TEXT_CHARS = 1500;
+export const MAX_TEXT_CHARS = 1500;
 
 const textOf = (text: string | null | undefined): string =>
   (text ?? "").replace(/\s+/g, " ").trim().slice(0, MAX_TEXT_CHARS);
