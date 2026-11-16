@@ -40,7 +40,7 @@ import {
 import { generateOr, saveFile, autoGenFooter, LLM_TOKENS_LISTING, warnStep } from "../core/llm.ts";
 import type { LlmProvider } from "../providers/index.ts";
 import type { Candidate } from "./candidates.ts";
-import { buildWeekSource, type GitHubFetch, type WeekDay } from "../weekly/source.ts";
+import { buildWeekSource, type GitHubFetch, type WeekDay, type WeekSource } from "../weekly/source.ts";
 import { fetchGitHubObject } from "../weekly/week.ts";
 import { LLM_TOKENS_ARTICLE, WEEKLY_WRITER, weeklyWriter } from "../weekly/writer.ts";
 import { saveLabsState, type LabsFetchResult, type LabPost, type LabsState } from "../sources/labs.ts";
@@ -364,19 +364,34 @@ export function linksOutside(article: string, source: string): string[] {
 /**
  * Weekly Diff: one article on the week, the model's own text from the lede to the last section.
  * It is built after the LLM health gate and by another provider, so no outcome of it fails the
- * run: without a key, without an item or with a failed call there is no page.
+ * run: without a key, without an item, with a failed call, or when `week` or the source builder
+ * throws (logged), there is no page.
  */
 export async function buildWeeklyReport(
-  input: WeeklyInput,
+  week: () => WeeklyInput,
   utcStr: string,
   dateStr: string,
 ): Promise<SavedReport | null> {
-  const writer = input.writer === undefined ? weeklyWriter() : input.writer;
-  if (!writer) {
+  let writer: LlmProvider | null;
+  let source: WeekSource | null = null;
+  let from = dateStr;
+  try {
+    const input = week();
+    writer = input.writer === undefined ? weeklyWriter() : input.writer;
+    from = input.days[0]?.date ?? dateStr;
+    if (writer) {
+      source = await buildWeekSource(input.days, input.vendorNotes, input.fetchGitHub ?? fetchGitHubObject);
+    }
+  } catch (err) {
+    // Every other page is built and not yet written: an unreadable day folder or a GitHub answer
+    // of another shape costs this page only.
+    warnStep(`[weekly] No Weekly Diff page: ${String(err).split("\n")[0]}`);
+    return null;
+  }
+  if (!writer || !source) {
     warnStep("[weekly] ANTHROPIC_API_KEY is not set: no Weekly Diff page.");
     return null;
   }
-  const source = await buildWeekSource(input.days, input.vendorNotes, input.fetchGitHub ?? fetchGitHubObject);
   if (!source.items) {
     console.log("  [weekly] The week's pages showed no item, skipping report.");
     return null;
@@ -395,7 +410,7 @@ export async function buildWeeklyReport(
   const W = WEEKLY_REPORT;
   const meta = REPORT_META.line(
     [
-      REPORT_META.sources(W.sources(source.items, input.days[0]?.date ?? dateStr, dateStr)),
+      REPORT_META.sources(W.sources(source.items, from, dateStr)),
       W.writtenBy(WEEKLY_WRITER.model),
       W.italics,
     ],

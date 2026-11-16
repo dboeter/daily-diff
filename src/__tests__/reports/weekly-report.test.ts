@@ -68,7 +68,7 @@ describe("buildWeeklyReport", () => {
   it("has the writer write the article from the week's source, and frames it as a page", async () => {
     const w = writer(() => Promise.resolve(ARTICLE));
 
-    const report = await buildWeeklyReport({ ...week([story]), writer: w }, "05:00", "2026-11-16");
+    const report = await buildWeeklyReport(() => ({ ...week([story]), writer: w }), "05:00", "2026-11-16");
 
     expect(report?.id).toBe("ai-weekly");
     expect(report?.content.split("\n\n---\n\n")[0]).toBe(
@@ -90,7 +90,7 @@ describe("buildWeeklyReport", () => {
   });
 
   it("makes no page without a writer: the key is not set", async () => {
-    const report = await buildWeeklyReport({ ...week([story]), writer: null }, "05:00", "2026-11-16");
+    const report = await buildWeeklyReport(() => ({ ...week([story]), writer: null }), "05:00", "2026-11-16");
 
     expect(report).toBeNull();
     expect(console.warn).toHaveBeenCalledWith(expect.stringContaining("ANTHROPIC_API_KEY is not set"));
@@ -100,22 +100,61 @@ describe("buildWeeklyReport", () => {
   it("makes no page, and no call, when the week's pages showed no item", async () => {
     const w = writer(() => Promise.resolve(ARTICLE));
 
-    expect(await buildWeeklyReport({ ...week([]), writer: w }, "05:00", "2026-11-16")).toBeNull();
+    expect(await buildWeeklyReport(() => ({ ...week([]), writer: w }), "05:00", "2026-11-16")).toBeNull();
     expect(w.call).not.toHaveBeenCalled();
   });
 
   it("makes no page when the writer's call fails, and does not throw", async () => {
     const w = writer(() => Promise.reject(new Error("401 invalid x-api-key")));
 
-    expect(await buildWeeklyReport({ ...week([story]), writer: w }, "05:00", "2026-11-16")).toBeNull();
+    expect(
+      await buildWeeklyReport(() => ({ ...week([story]), writer: w }), "05:00", "2026-11-16"),
+    ).toBeNull();
     // The trace records the lost call as one the caller covered: here, with no page.
     expect(llmCalls.map((c) => c.outcome)).toEqual(["fallback"]);
+  });
+
+  it("makes no page, and does not throw, when the week cannot be read or its source not built", async () => {
+    const w = writer(() => Promise.resolve(ARTICLE));
+    const unreadable = () => {
+      throw new Error("EACCES: digests/2026-11-10");
+    };
+    expect(await buildWeeklyReport(unreadable, "05:00", "2026-11-16")).toBeNull();
+
+    // GitHub answered with something that is no issue: the body cleaner throws on it.
+    const issue: Candidate = {
+      ...story,
+      kind: "hot-issue",
+      source: "owner/repo",
+      url: "https://github.com/owner/repo/issues/5",
+    };
+    const input: WeeklyInput = {
+      days: [
+        {
+          date: "2026-11-16",
+          candidates: [issue],
+          pages: {
+            "ai-agents": "## Coding Agents\n\n- [#5](https://github.com/owner/repo/issues/5): A bug.",
+          },
+        },
+      ],
+      vendorNotes: [],
+      fetchGitHub: () => Promise.resolve({ message: "Moved Permanently" }),
+      writer: w,
+    };
+    expect(await buildWeeklyReport(() => input, "05:00", "2026-11-16")).toBeNull();
+
+    expect(w.call).not.toHaveBeenCalled();
+    expect(console.warn).toHaveBeenCalledTimes(2);
+    expect(console.warn).toHaveBeenCalledWith(
+      expect.stringContaining("[weekly] No Weekly Diff page: Error: EACCES"),
+    );
   });
 
   it("drops the title the model put above its lede", async () => {
     const w = writer(() => Promise.resolve(`# Weekly Diff\n\n${ARTICLE}`));
 
-    const report = await buildWeeklyReport({ ...week([story]), writer: w }, "05:00", "2026-11-16");
+    const report = await buildWeeklyReport(() => ({ ...week([story]), writer: w }), "05:00", "2026-11-16");
 
     expect(report?.content.match(/^# /gm)).toHaveLength(1);
   });
@@ -123,7 +162,7 @@ describe("buildWeeklyReport", () => {
   it("warns about a link the article did not take from the source", async () => {
     const w = writer(() => Promise.resolve(`${ARTICLE}\n\nSee [this](https://elsewhere.example/page).`));
 
-    await buildWeeklyReport({ ...week([story]), writer: w }, "05:00", "2026-11-16");
+    await buildWeeklyReport(() => ({ ...week([story]), writer: w }), "05:00", "2026-11-16");
 
     expect(console.warn).toHaveBeenCalledWith(
       expect.stringContaining("1 link(s) not in the source: https://elsewhere.example/page"),

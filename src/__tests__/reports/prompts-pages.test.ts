@@ -347,6 +347,12 @@ describe("Weekly Diff's highlight", () => {
     expect(ledeHighlight("# Weekly Diff 2026-11-16\n\n> meta")).toBeNull();
   });
 
+  it("is still the lede's when the model put a heading above it", () => {
+    const page =
+      "# Weekly Diff 2026-11-16\n\n> meta\n\n---\n\n## This week\n\nA lede sentence. And more.\n\n## Next\n\nBody.";
+    expect(ledeHighlight(page)).toBe("A lede sentence.");
+  });
+
   it("never reaches the highlights call: a second model restating a reading states it as fact", () => {
     const prompt = buildHighlightsPrompt({ "ai-agents": AGENTS, "ai-weekly": ARTICLE });
     expect(prompt).toContain("## [ai-agents]");

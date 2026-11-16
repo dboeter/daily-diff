@@ -789,6 +789,7 @@ export function firstHighlight(md: string): string | null {
 /**
  * The first sentence of an article's lede: the paragraph under the rule that closes the page's
  * head (H1, report bar, meta line), as plain text; null when the page has no such paragraph.
+ * A heading the model put above its lede, against the prompt, is passed over.
  */
 export function ledeHighlight(md: string): string | null {
   const lines = md.split("\n");
@@ -797,6 +798,7 @@ export function ledeHighlight(md: string): string | null {
   const block: string[] = [];
   for (const raw of lines.slice(rule + 1)) {
     const line = raw.trim();
+    if (line.startsWith("#") && !block.length) continue;
     if (line.startsWith("#") || line === "---") break;
     if (!line) {
       if (block.length) break;

@@ -815,11 +815,12 @@ async function main(): Promise<void> {
   // fails the run or holds back the other pages.
   const weeklyDiff = weekly
     ? await buildWeeklyReport(
-        loadWeek({
-          date: dateStr,
-          candidates,
-          pages: Object.fromEntries(saved.map((r) => [r.id, r.content])),
-        }),
+        () =>
+          loadWeek({
+            date: dateStr,
+            candidates,
+            pages: Object.fromEntries(saved.map((r) => [r.id, r.content])),
+          }),
         utcStr,
         dateStr,
       )
