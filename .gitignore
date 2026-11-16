@@ -12,3 +12,7 @@ mcp/.dev.vars
 .scratch/ai-policy/lab/
 .zed/
 llm-capture/
+# The Weekly Diff lab's rebuildable files: the GitHub cache, the full prompts (the source is saved once), run logs
+.scratch/weekly-diff/*/github-cache.json
+.scratch/weekly-diff/*/prompt-*.txt
+.scratch/weekly-diff/*/log-*.txt

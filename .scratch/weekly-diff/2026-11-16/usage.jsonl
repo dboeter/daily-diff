@@ -1,0 +1,31 @@
+{"label":"judge claude_opus_5_5-low-v1","model":"claude-opus-5-5","effort":"high","input":3227,"cache_write":148248,"cache_read":0,"output":16855,"thinking_blocks":1,"answer_chars":15808,"stop":"end_turn","seconds":131}
+{"label":"write claude_opus_5_5-low-v3-raw2-r1","model":"claude-opus-5-5","effort":"low","input":4,"cache_write":148965,"cache_read":0,"output":4037,"thinking_blocks":1,"answer_chars":8505,"stop":"end_turn","seconds":34}
+{"label":"judge claude_opus_5_5-low-v1 (codex)","model":"codex","answer_chars":16663,"seconds":186}
+{"label":"judge claude_opus_5_5-low-v3-raw2-r1","model":"claude-opus-5-5","effort":"high","input":3437,"cache_write":0,"cache_read":148248,"output":17005,"thinking_blocks":1,"answer_chars":16153,"stop":"end_turn","seconds":128}
+{"label":"write claude_opus_5_5-high-v3-raw2-r1","model":"claude-opus-5-5","effort":"high","input":4,"cache_write":0,"cache_read":148965,"output":12379,"thinking_blocks":1,"answer_chars":8555,"stop":"end_turn","seconds":106}
+{"label":"judge claude_opus_5_5-high-v3-raw2-r1","model":"claude-opus-5-5","effort":"high","input":3422,"cache_write":0,"cache_read":148248,"output":17246,"thinking_blocks":1,"answer_chars":14995,"stop":"end_turn","seconds":128}
+{"label":"write claude_haiku_5_5-xhigh-v3-raw2-r1","model":"claude-haiku-5-5","effort":"xhigh","input":4,"cache_write":148965,"cache_read":0,"output":100000,"thinking_blocks":1,"answer_chars":0,"stop":"max_tokens","seconds":376}
+{"label":"write claude_opus_5_5-low-v3-raw2-r2","model":"claude-opus-5-5","effort":"low","input":4,"cache_write":0,"cache_read":148965,"output":4025,"thinking_blocks":1,"answer_chars":8314,"stop":"end_turn","seconds":34}
+{"label":"write claude_opus_5_5-high-v3-raw2-r2","model":"claude-opus-5-5","effort":"high","input":4,"cache_write":0,"cache_read":148965,"output":12212,"thinking_blocks":1,"answer_chars":9174,"stop":"end_turn","seconds":103}
+{"label":"judge claude_opus_5_5-low-v3-raw2-r2","model":"claude-opus-5-5","effort":"high","input":3327,"cache_write":0,"cache_read":148248,"output":14649,"thinking_blocks":1,"answer_chars":13961,"stop":"end_turn","seconds":111}
+{"label":"write claude_opus_5_5-low-v3-raw2-r3","model":"claude-opus-5-5","effort":"low","input":4,"cache_write":0,"cache_read":148965,"output":4942,"thinking_blocks":1,"answer_chars":8493,"stop":"end_turn","seconds":41}
+{"label":"judge claude_opus_5_5-high-v3-raw2-r2","model":"claude-opus-5-5","effort":"high","input":3799,"cache_write":0,"cache_read":148248,"output":16748,"thinking_blocks":1,"answer_chars":15518,"stop":"end_turn","seconds":122}
+{"label":"write claude_opus_5_5-high-v3-raw2-r3","model":"claude-opus-5-5","effort":"high","input":4,"cache_write":0,"cache_read":148965,"output":9764,"thinking_blocks":1,"answer_chars":8356,"stop":"end_turn","seconds":83}
+{"label":"judge claude_opus_5_5-low-v3-raw2-r3","model":"claude-opus-5-5","effort":"high","input":3467,"cache_write":0,"cache_read":148248,"output":17557,"thinking_blocks":1,"answer_chars":15368,"stop":"end_turn","seconds":132}
+{"label":"write claude_haiku_5_5-xhigh-v3-raw2-r1","model":"claude-haiku-5-5","effort":"xhigh","input":4,"cache_write":0,"cache_read":148965,"output":86110,"thinking_blocks":1,"answer_chars":8417,"stop":"end_turn","seconds":322}
+{"label":"judge claude_opus_5_5-high-v3-raw2-r3","model":"claude-opus-5-5","effort":"high","input":3429,"cache_write":0,"cache_read":148248,"output":13969,"thinking_blocks":1,"answer_chars":14992,"stop":"end_turn","seconds":102}
+{"label":"judge claude_haiku_5_5-xhigh-v3-raw2-r1","model":"claude-opus-5-5","effort":"high","input":3370,"cache_write":0,"cache_read":148248,"output":12366,"thinking_blocks":1,"answer_chars":11541,"stop":"end_turn","seconds":89}
+{"label":"write claude_haiku_5_5-xhigh-v3-raw2-r2","model":"claude-haiku-5-5","effort":"xhigh","input":4,"cache_write":0,"cache_read":148965,"output":99850,"thinking_blocks":1,"answer_chars":9003,"stop":"end_turn","seconds":372}
+{"label":"write claude_haiku_5_5-xhigh-v3-raw2-r3","model":"claude-haiku-5-5","effort":"xhigh","input":4,"cache_write":0,"cache_read":148965,"output":99419,"thinking_blocks":1,"answer_chars":8147,"stop":"end_turn","seconds":374}
+{"label":"judge claude_haiku_5_5-xhigh-v3-raw2-r3","model":"claude-opus-5-5","effort":"high","input":3206,"cache_write":0,"cache_read":148248,"output":10110,"thinking_blocks":1,"answer_chars":11050,"stop":"end_turn","seconds":74}
+{"label":"judge claude_haiku_5_5-xhigh-v3-raw2-r2","model":"claude-opus-5-5","effort":"high","input":3637,"cache_write":0,"cache_read":148248,"output":12061,"thinking_blocks":1,"answer_chars":12942,"stop":"end_turn","seconds":88}
+{"label":"judge claude_opus_5_5-low-v1 (codex)","model":"codex gpt-6-astra medium","answer_chars":17088,"seconds":101}
+{"label":"judge claude_haiku_5_5-xhigh-v3-raw2-r1 (codex)","model":"codex gpt-6-astra medium","answer_chars":12534,"seconds":79}
+{"label":"judge claude_opus_5_5-low-v3-raw2-r1 (codex)","model":"codex gpt-6-astra medium","answer_chars":16215,"seconds":89}
+{"label":"judge claude_opus_5_5-high-v3-raw2-r1 (codex)","model":"codex gpt-6-astra medium","answer_chars":15345,"seconds":93}
+{"label":"judge claude_haiku_5_5-xhigh-v3-raw2-r2 (codex)","model":"codex gpt-6-astra medium","answer_chars":13513,"seconds":84}
+{"label":"judge claude_opus_5_5-low-v3-raw2-r2 (codex)","model":"codex gpt-6-astra medium","answer_chars":14046,"seconds":84}
+{"label":"judge claude_opus_5_5-high-v3-raw2-r2 (codex)","model":"codex gpt-6-astra medium","answer_chars":15937,"seconds":99}
+{"label":"judge claude_haiku_5_5-xhigh-v3-raw2-r3 (codex)","model":"codex gpt-6-astra medium","answer_chars":13033,"seconds":81}
+{"label":"judge claude_opus_5_5-low-v3-raw2-r3 (codex)","model":"codex gpt-6-astra medium","answer_chars":15559,"seconds":87}
+{"label":"judge claude_opus_5_5-high-v3-raw2-r3 (codex)","model":"codex gpt-6-astra medium","answer_chars":14946,"seconds":91}
