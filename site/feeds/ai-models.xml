@@ -13,15 +13,15 @@
       <height>144</height>
     </image>
     <atom:link href="https://dboeter.github.io/daily-diff/feeds/ai-models.xml" rel="self" type="application/rss+xml"/>
-    <lastBuildDate>Mon, 16 Nov 2026 09:29:47 +0000</lastBuildDate>
+    <lastBuildDate>Mon, 16 Nov 2026 23:57:05 +0000</lastBuildDate>
     <item>
       <title>AI Models &amp; Labs 2026-11-16</title>
       <link>https://dboeter.github.io/daily-diff/#2026-11-16/ai-models</link>
       <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-11-16/ai-models</guid>
       <pubDate>Mon, 16 Nov 2026 00:00:00 +0000</pubDate>
-      <description>AI Models &amp;amp; Labs 2026-11-16 ⬛ Overview · 🟪 AI Agents · 🟦 AI Models &amp;amp; Labs · 🟧 AI Policy · 🟨 Data Engineering · 🟫 Trends Lab posts: 1 | New models: 1 | Spotted: 6 | Generated: 2026-11-16 09:26 UTC Highlights Qwen4 Max is now listed on OpenRouter with a 1 M-token context window and native text, image, and video input with text output. The accompanying Hacker News discussion reports Qwen4-Max also supports image generation, document processing, web search, tool use, and artifact creati...</description>
+      <description>AI Models &amp;amp; Labs 2026-11-16 ⬛ Overview · 🟪 AI Agents · 🟦 AI Models &amp;amp; Labs · 🟧 AI Policy · 🟨 Data Engineering · ⬜ Weekly Diff · 🟫 Trends Lab posts: 1 | New models: 1 | Spotted: 6 | Generated: 2026-11-16 09:26 UTC Highlights Qwen4 Max is now listed on OpenRouter with a 1 M-token context window and native text, image, and video input with text output. The accompanying Hacker News discussion reports Qwen4-Max also supports image generation, document processing, web search, tool use, and...</description>
       <content:encoded><![CDATA[<h1>AI Models &amp; Labs 2026-11-16</h1>
-<p><a href="https://dboeter.github.io/daily-diff/#2026-11-16">⬛ Overview</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-16/ai-agents">🟪 AI Agents</a> · <strong>🟦 AI Models &amp; Labs</strong> · <a href="https://dboeter.github.io/daily-diff/#2026-11-16/ai-policy">🟧 AI Policy</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-16/ai-data">🟨 Data Engineering</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-16/ai-trends">🟫 Trends</a></p>
+<p><a href="https://dboeter.github.io/daily-diff/#2026-11-16">⬛ Overview</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-16/ai-agents">🟪 AI Agents</a> · <strong>🟦 AI Models &amp; Labs</strong> · <a href="https://dboeter.github.io/daily-diff/#2026-11-16/ai-policy">🟧 AI Policy</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-16/ai-data">🟨 Data Engineering</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-16/ai-weekly">⬜ Weekly Diff</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-16/ai-trends">🟫 Trends</a></p>
 <blockquote>
 <p>Lab posts: 1 | New models: 1 | Spotted: 6 | Generated: 2026-11-16 09:26 UTC</p>
 </blockquote>
