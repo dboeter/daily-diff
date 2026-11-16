@@ -13,24 +13,42 @@
       <height>144</height>
     </image>
     <atom:link href="https://dboeter.github.io/daily-diff/feeds/ai-models.xml" rel="self" type="application/rss+xml"/>
-    <lastBuildDate>Mon, 16 Nov 2026 06:13:20 +0000</lastBuildDate>
+    <lastBuildDate>Mon, 16 Nov 2026 09:29:47 +0000</lastBuildDate>
     <item>
       <title>AI Models &amp; Labs 2026-11-16</title>
       <link>https://dboeter.github.io/daily-diff/#2026-11-16/ai-models</link>
       <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-11-16/ai-models</guid>
       <pubDate>Mon, 16 Nov 2026 00:00:00 +0000</pubDate>
-      <description>AI Models &amp;amp; Labs 2026-11-16 ⬛ Overview · 🟪 AI Agents · 🟦 AI Models &amp;amp; Labs · 🟨 Data Engineering · 🟫 Trends Lab posts: 0 | New models: 1 | Spotted: 6 | Generated: 2026-11-16 06:09 UTC Highlights Qwen4 Max is now available on OpenRouter with a 1M-token context window, accepting text, image, and video inputs and returning text. The Access to Justice benchmark evaluated 23 models on 252 simulated legal-aid conversations; no model reached the 80% threshold, indicating leading models miss c...</description>
+      <description>AI Models &amp;amp; Labs 2026-11-16 ⬛ Overview · 🟪 AI Agents · 🟦 AI Models &amp;amp; Labs · 🟧 AI Policy · 🟨 Data Engineering · 🟫 Trends Lab posts: 1 | New models: 1 | Spotted: 6 | Generated: 2026-11-16 09:26 UTC Highlights Qwen4 Max is now listed on OpenRouter with a 1 M-token context window and native text, image, and video input with text output. The accompanying Hacker News discussion reports Qwen4-Max also supports image generation, document processing, web search, tool use, and artifact creati...</description>
       <content:encoded><![CDATA[<h1>AI Models &amp; Labs 2026-11-16</h1>
-<p><a href="https://dboeter.github.io/daily-diff/#2026-11-16">⬛ Overview</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-16/ai-agents">🟪 AI Agents</a> · <strong>🟦 AI Models &amp; Labs</strong> · <a href="https://dboeter.github.io/daily-diff/#2026-11-16/ai-data">🟨 Data Engineering</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-16/ai-trends">🟫 Trends</a></p>
+<p><a href="https://dboeter.github.io/daily-diff/#2026-11-16">⬛ Overview</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-16/ai-agents">🟪 AI Agents</a> · <strong>🟦 AI Models &amp; Labs</strong> · <a href="https://dboeter.github.io/daily-diff/#2026-11-16/ai-policy">🟧 AI Policy</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-16/ai-data">🟨 Data Engineering</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-16/ai-trends">🟫 Trends</a></p>
 <blockquote>
-<p>Lab posts: 0 | New models: 1 | Spotted: 6 | Generated: 2026-11-16 06:09 UTC</p>
+<p>Lab posts: 1 | New models: 1 | Spotted: 6 | Generated: 2026-11-16 09:26 UTC</p>
 </blockquote>
 <hr>
 <h2>Highlights</h2>
 <ul>
-<li>Qwen4 Max is now available on OpenRouter with a 1M-token context window, accepting text, image, and video inputs and returning text.</li>
-<li>The Access to Justice benchmark evaluated 23 models on 252 simulated legal-aid conversations; no model reached the 80% threshold, indicating leading models miss critical legal details.</li>
+<li>Qwen4 Max is now listed on OpenRouter with a 1 M-token context window and native text, image, and video input with text output.  </li>
+<li>The accompanying Hacker News discussion reports Qwen4-Max also supports image generation, document processing, web search, tool use, and artifact creation.</li>
 </ul>
+<hr>
+<h2>Lab announcements</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Lab</th>
+<th align="left">Post</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-11-16</td>
+<td align="left">OpenAI</td>
+<td align="left"><a href="https://openai.com/index/lvmh-media-division-partnership/">Lvmh Media Division Partnership</a></td>
+<td align="left">—</td>
+</tr>
+</tbody></table>
 <hr>
 <h2>New on OpenRouter</h2>
 <table>
@@ -50,7 +68,7 @@
 </tr>
 </tbody></table>
 <hr>
-<p>Nothing new from Anthropic and OpenAI or OpenRouter&#39;s stealth models today.</p>
+<p>Nothing new from OpenRouter&#39;s stealth models today.</p>
 <hr>
 <h2>Spotted</h2>
 <table>
@@ -65,38 +83,38 @@
 <tbody><tr>
 <td align="left"><a href="https://qwen.ai/blog?id=qwen4-max">Qwen4-Max</a></td>
 <td align="left">Hacker News</td>
-<td align="left"><a href="https://news.ycombinator.com/item?id=50513215">314 points, 106 comments</a></td>
-<td align="left">Qwen4-Max is released with capabilities including chatbot, image/video understanding, image generation, document processing, web search, tool use, and artifacts.</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50513215">480 points, 191 comments</a></td>
+<td align="left">Qwen4-Max provides a broad suite of capabilities including chat, image and video understanding, image generation, document processing, web search, tool use, and artifacts.</td>
 </tr>
 <tr>
 <td align="left"><a href="https://magazine.sebastianraschka.com/p/understanding-positional-embeddings">Understanding Positional Embeddings in Modern LLMs</a></td>
 <td align="left">Hacker News</td>
-<td align="left"><a href="https://news.ycombinator.com/item?id=50506376">225 points, 27 comments</a></td>
-<td align="left">An article explains the methods modern LLMs use to represent token positions through positional embeddings.</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50506376">227 points, 27 comments</a></td>
+<td align="left">The article explains the methods modern LLMs use to represent token positions through positional embeddings.</td>
 </tr>
 <tr>
 <td align="left"><a href="https://operator0x.com/field-notes/qwen-conversation-state-space/">What thousands of conversations look like inside a language model</a></td>
 <td align="left">Hacker News</td>
-<td align="left"><a href="https://news.ycombinator.com/item?id=50481321">119 points, 29 comments</a></td>
-<td align="left">The author mapped thousands of conversations inside Qwen to visualize how language structures emerge in the model.</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50481321">123 points, 29 comments</a></td>
+<td align="left">The author mapped thousands of conversations within Qwen to visualize how language structures emerge inside the model.</td>
 </tr>
 <tr>
 <td align="left"><a href="https://fortune.com/2026/11/14/alpha-school-ai-students-tuition-learning-goals/">Parents pay $75k for Alpha&#39;s AI school. Half of its students missed math target</a></td>
 <td align="left">Hacker News</td>
-<td align="left"><a href="https://news.ycombinator.com/item?id=50509953">64 points, 62 comments</a></td>
-<td align="left">Fortune reports that only 42% of Alpha School students met the 2x learning target in math and reading, while parents pay $75k tuition and 2,600 public school students use the software.</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50509953">65 points, 64 comments</a></td>
+<td align="left">According to internal data, only 42% of students at Alpha&#39;s AI school achieved its 2x learning goal in math and reading, while 2,600 public school students now use its software.</td>
 </tr>
 <tr>
-<td align="left"><a href="https://epyhia.com/new-access-to-justice-benchmark-finds-leading-ai-models-miss-critical">New &#39;Access to Justice&#39; Benchmark: Leading AI Models Miss Critical Legal Details</a></td>
+<td align="left"><a href="https://www.reddit.com/r/google_antigravity/comments/1xx9nl3/google_ai_ultra_subscription_not_worth_it/">Google AI Ultra Subscription Not Worth It</a></td>
 <td align="left">Hacker News</td>
-<td align="left"><a href="https://news.ycombinator.com/item?id=50497161">10 points, 1 comment</a></td>
-<td align="left">Vals AI and NextLadder Ventures released a benchmark evaluating 23 models on 252 simulated legal-aid conversations, with no model reaching the 80% threshold.</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50514224">9 points, 0 comments</a></td>
+<td align="left">—</td>
 </tr>
 <tr>
-<td align="left"><a href="https://www.404media.co/reverse-engineer-anything-ai-companies-crack-down-on-the-coolest-thing-people-were-doing-with-ai/">AI Companies Crack Down on the Coolest Thing People Were Doing with AI</a></td>
+<td align="left"><a href="https://www.baseten.co/blog/the-efficient-frontier-of-llm-inference/#quantization">The efficient frontier of LLM inference</a></td>
 <td align="left">Hacker News</td>
-<td align="left"><a href="https://news.ycombinator.com/item?id=50441618">10 points, 4 comments</a></td>
-<td align="left">404 Media reports that AI companies are restricting user modifications, pushing the future of device hacking toward local and open-weight models.</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50512233">9 points, 0 comments</a></td>
+<td align="left">The article maps how techniques like batch sizing, parallelism, quantization, kernels, speculative decoding, and disaggregation affect the latency-throughput frontier in LLM inference.</td>
 </tr>
 </tbody></table>
 <hr>

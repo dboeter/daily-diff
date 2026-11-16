@@ -13,43 +13,41 @@
       <height>144</height>
     </image>
     <atom:link href="https://dboeter.github.io/daily-diff/feeds/ai-agents.xml" rel="self" type="application/rss+xml"/>
-    <lastBuildDate>Mon, 16 Nov 2026 06:13:20 +0000</lastBuildDate>
+    <lastBuildDate>Mon, 16 Nov 2026 09:29:47 +0000</lastBuildDate>
     <item>
       <title>AI Agents 2026-11-16</title>
       <link>https://dboeter.github.io/daily-diff/#2026-11-16/ai-agents</link>
       <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-11-16/ai-agents</guid>
       <pubDate>Mon, 16 Nov 2026 00:00:00 +0000</pubDate>
-      <description>AI Agents 2026-11-16 ⬛ Overview · 🟪 AI Agents · 🟦 AI Models &amp;amp; Labs · 🟨 Data Engineering · 🟫 Trends Projects: 15 | Active today: 3 | Stable releases: 1 | Prereleases (not covered): 4 | Generated: 2026-11-16 06:09 UTC Highlights Oh My Pi v18.20.3 removes the public isXdDevicePath export, renames tab.clickAt()&amp;#39;s clickCount to count, changes screenshot coordinates to displayed image pixels (opt in to CSS pixels with css: true), and drops the seance agent, /seance command, and sourceSessi...</description>
+      <description>AI Agents 2026-11-16 ⬛ Overview · 🟪 AI Agents · 🟦 AI Models &amp;amp; Labs · 🟧 AI Policy · 🟨 Data Engineering · 🟫 Trends Projects: 15 | Active today: 3 | Stable releases: 1 | Prereleases (not covered): 4 | Generated: 2026-11-16 09:26 UTC Highlights Oh My Pi v18.20.3 ships breaking changes: removed public isXdDevicePath export, renamed clickCount to count, and viewport screenshot coordinates now use displayed image coordinates by default (use css: true for CSS pixels). A 27-byte unread telemetry...</description>
       <content:encoded><![CDATA[<h1>AI Agents 2026-11-16</h1>
-<p><a href="https://dboeter.github.io/daily-diff/#2026-11-16">⬛ Overview</a> · <strong>🟪 AI Agents</strong> · <a href="https://dboeter.github.io/daily-diff/#2026-11-16/ai-models">🟦 AI Models &amp; Labs</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-16/ai-data">🟨 Data Engineering</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-16/ai-trends">🟫 Trends</a></p>
+<p><a href="https://dboeter.github.io/daily-diff/#2026-11-16">⬛ Overview</a> · <strong>🟪 AI Agents</strong> · <a href="https://dboeter.github.io/daily-diff/#2026-11-16/ai-models">🟦 AI Models &amp; Labs</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-16/ai-policy">🟧 AI Policy</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-16/ai-data">🟨 Data Engineering</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-16/ai-trends">🟫 Trends</a></p>
 <blockquote>
-<p>Projects: 15 | Active today: 3 | Stable releases: 1 | Prereleases (not covered): 4 | Generated: 2026-11-16 06:09 UTC</p>
+<p>Projects: 15 | Active today: 3 | Stable releases: 1 | Prereleases (not covered): 4 | Generated: 2026-11-16 09:26 UTC</p>
 </blockquote>
 <hr>
 <h2>Highlights</h2>
 <ul>
-<li>Oh My Pi v18.20.3 removes the public <code>isXdDevicePath</code> export, renames <code>tab.clickAt()</code>&#39;s <code>clickCount</code> to <code>count</code>, changes screenshot coordinates to displayed image pixels (opt in to CSS pixels with <code>css: true</code>), and drops the <code>seance</code> agent, <code>/seance</code> command, and <code>sourceSession</code> parameter.</li>
-<li>Attest framework introduced: tests AI agents by verifying tool calls and state changes, with recorded model response replay for CI.</li>
-<li>A 27-byte unread telemetry response caused Chromium to leak file descriptors, freezing Claude Desktop on Linux every two days until debugged via a 1.5 TiB core dump.</li>
+<li>Oh My Pi v18.20.3 ships breaking changes: removed public <code>isXdDevicePath</code> export, renamed <code>clickCount</code> to <code>count</code>, and viewport screenshot coordinates now use displayed image coordinates by default (use <code>css: true</code> for CSS pixels).</li>
+<li>A 27-byte unread telemetry response causes Claude Desktop on Linux to leak file descriptors until the renderer freezes every few days, discovered after a 1.5 TiB core dump.</li>
+<li>Attest framework introduces testing of AI agent behavior by verifying tool calls and state changes, with replay of recorded model responses and CI enforcement of checks.</li>
 </ul>
 <hr>
 <h2>Coding Agents &amp; Assistants</h2>
 <h3>Claude Code</h3>
 <ul>
-<li><strong>News:</strong> <a href="https://news.ycombinator.com/item?id=50506993">I run multiple Claude Code accounts on one Mac</a> describes how to run multiple Claude Code accounts on a single Mac.</li>
+<li><strong>News:</strong> <a href="https://news.ycombinator.com/item?id=50506993">I run multiple Claude Code accounts on one Mac</a> — A user describes how they run multiple Claude Code accounts on a single Mac.</li>
 </ul>
 <h3>Oh My Pi</h3>
 <ul>
-<li><strong>Release:</strong> <a href="https://github.com/can1357/oh-my-pi/releases/tag/v18.20.3">v18.20.3</a> removes the public <code>isXdDevicePath</code> export from <code>providers/cursor-pi-args</code> and renames <code>tab.clickAt()</code>&#39;s <code>clickCount</code> option to <code>count</code> to match <code>tab.click()</code>. Browser viewport screenshot coordinates now use displayed image coordinates when scaled; pass <code>css: true</code> to provide viewport CSS pixels explicitly.</li>
-<li><strong>Release:</strong> The release adds opt-in <code>mnemopi.recallRelevance</code> (<code>off</code>, <code>auto</code>, or <code>on</code>; default <code>off</code>) to filter automatic memory recall for task relevance, path-scoped entries for <code>bash.patterns</code> and <code>bashInterceptor.patterns</code> resolved per working directory, and <code>bash.allowedEnvVars</code> with per-rule <code>env</code> lists for explicitly named environment-variable prefixes. Subagents now preserve <code>@upstream</code> provider pinning on inherited models, and new <code>--no-judge</code>, <code>--no-spotlight</code>, and <code>--offline</code> options restrict auxiliary services to the active model&#39;s provider or disable cross-provider services.</li>
-<li><strong>Release:</strong> Compound bash approval prompts now show each command segment separately, distinguishing allowed segments from those requiring approval, and per-rule TTSR <code>repeatMode</code> frontmatter (<code>once</code>, <code>after-gap</code>, or <code>always</code>) overrides the global repeat policy. The <code>seance</code> agent, <code>/seance</code> command, and the task tool&#39;s <code>sourceSession</code> parameter are removed. Rate-limit handling for Mistral and other OpenAI-compatible providers is fixed so requests with no available allowance fail immediately with an actionable error suggesting a model or plan change.</li>
+<li><strong>Release:</strong> <a href="https://github.com/can1357/oh-my-pi/releases/tag/v18.20.3">v18.20.3</a> — Breaking changes: removed public <code>isXdDevicePath</code> export from <code>providers/cursor-pi-args</code>; renamed browser <code>tab.clickAt()</code> option <code>clickCount</code> to <code>count</code>; viewport screenshot coordinates now use displayed image coordinates when scaled (use <code>css: true</code> for CSS pixels). Fixes: rate-limit handling for Mistral and other OpenAI-compatible providers now fails immediately with actionable error. Features: added <code>mnemopi.recallRelevance</code> (<code>off</code>, <code>auto</code>, <code>on</code>) to filter automatic memory recall; path-scoped entries for <code>bash.patterns</code> and <code>bashInterceptor.patterns</code> resolved per working directory; added <code>bash.allowedEnvVars</code> and per-rule <code>env</code> lists; subagents preserve <code>@upstream</code> provider pinning; added <code>--no-judge</code>, <code>--no-spotlight</code>, <code>--offline</code> options; per-rule TTSR <code>repeatMode</code> frontmatter (<code>once</code>, <code>after-gap</code>, <code>always</code>); compound bash approval prompts show each command segment separately; removed <code>seance</code> agent, <code>/seance</code> command, and task tool&#39;s <code>sourceSession</code> parameter.</li>
 </ul>
 <p><strong>Quiet today:</strong> <a href="https://github.com/openai/codex">OpenAI Codex</a>, <a href="https://github.com/google-gemini/gemini-cli">Gemini CLI</a>, <a href="https://github.com/Kilo-Org/kilocode">Kilo Code</a>, <a href="https://github.com/anomalyco/opencode">OpenCode</a>, <a href="https://github.com/earendil-works/pi">Pi</a>, <a href="https://github.com/1jehuang/jcode">jcode</a>, <a href="https://github.com/cline/cline">Cline</a>, <a href="https://github.com/CommandCodeAI/command-code">Command Code</a>, <a href="https://github.com/deepseek-ai/deepseek-harness">DeepSeek Harness</a>, <a href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a></p>
 <hr>
 <h2>Agent Tooling</h2>
 <h3>herdr</h3>
 <ul>
-<li><strong>News:</strong> <a href="https://news.ycombinator.com/item?id=50508535">Show HN: Canban – Kanban and Workflow and Herdr Workbench for CLI Agents</a> introduces Canban as a combination of Kanban and the herdr workbench for CLI agents.</li>
+<li><strong>News:</strong> <a href="https://news.ycombinator.com/item?id=50508535">Show HN: Canban – Kanban and Workflow and Herdr Workbench for CLI Agents</a> describes Canban as combining Kanban with the herdr workbench for CLI agents.</li>
 </ul>
 <p><strong>Quiet today:</strong> <a href="https://github.com/NVIDIA/OpenShell">OpenShell</a>, <a href="https://github.com/microsoft/conductor">Conductor</a></p>
 <hr>
@@ -66,32 +64,44 @@
 <tbody><tr>
 <td align="left"><a href="https://cpldcpu.github.io/2026/11/14/touchsynth/">Agentic AI Designs an Analog Synthesizer</a></td>
 <td align="left">Hacker News</td>
-<td align="left"><a href="https://news.ycombinator.com/item?id=50512933">12 points, 1 comment</a></td>
-<td align="left">An analog monophonic synthesizer with ~200 components and a transistor ladder filter was largely designed by Claude Opus 5.5.</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50512933">14 points, 2 comments</a></td>
+<td align="left">An analog monophonic synthesizer built from around 200 components with a transistor ladder filter and touch keys had its circuit, simulation, PCB, firmware, and most bring-up completed by Claude Opus 5.5.</td>
 </tr>
 <tr>
 <td align="left"><a href="https://blog.dfb.sh/blog/claude-desktop-freeze/">A 27-byte telemetry response nobody reads freezes Claude Desktop every two days</a></td>
 <td align="left">Hacker News</td>
 <td align="left"><a href="https://news.ycombinator.com/item?id=50499446">9 points, 1 comment</a></td>
-<td align="left">The author debugged a 1.5 TiB core dump over two months to find that an unread 27-byte telemetry response caused Chromium to leak file descriptors, freezing Claude Desktop on Linux every couple of days.</td>
+<td align="left">Claude Desktop on Linux froze every few days because an unread 27-byte telemetry response caused Chromium to leak file descriptors until the renderer exhausted them, discovered after two months and a 1.5 TiB core dump.</td>
 </tr>
 <tr>
 <td align="left"><a href="https://attest-framework.github.io/">Show HN: Attest – Test what AI agents do, not just what they say</a></td>
 <td align="left">Hacker News</td>
-<td align="left"><a href="https://news.ycombinator.com/item?id=50509107">6 points, 0 comments</a></td>
-<td align="left">Attest is a framework that tests AI agents by verifying tool calls and state changes, supporting replay of recorded model responses in CI.</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50509107">7 points, 0 comments</a></td>
+<td align="left">Attest is a framework that tests AI agent behavior by verifying tool calls and state changes, allowing replay of recorded model responses and enforcement of checks in CI.</td>
+</tr>
+<tr>
+<td align="left">Show HN: Skillset: Easily curate and install agent skills collection (<a href="https://github.com/itsmeyaw/skillset">itsmeyaw/skillset</a>)</td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50511761">5 points, 0 comments</a></td>
+<td align="left">Skillset provides a CLI for curating and installing only necessary agent skills to reduce token consumption.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://sunshowers.io/posts/nextest-install-scripts/">Designing nextest&#39;s install scripts</a></td>
+<td align="left">Lobste.rs</td>
+<td align="left"><a href="https://lobste.rs/s/tbpfcn/designing_nextest_s_install_scripts">3 points, 0 comments</a></td>
+<td align="left">The author describes building nextest&#39;s install scripts carefully with the assistance of coding agents.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://dev.to/therealmrmumba/give-your-voice-agent-hands-let-it-act-across-sales-and-marketing-fn2">Give Your Voice Agent Hands: Let It Act Across Sales and Marketing</a></td>
+<td align="left">Dev.to</td>
+<td align="left"><a href="https://dev.to/therealmrmumba/give-your-voice-agent-hands-let-it-act-across-sales-and-marketing-fn2">39 reactions, 0 comments</a></td>
+<td align="left">The article illustrates how a voice agent named Maya can perform post-call administrative tasks across sales and marketing workflows.</td>
 </tr>
 <tr>
 <td align="left"><a href="https://dev.to/kenielzep97/i-told-my-agent-who-sent-the-message-it-mostly-stopped-saying-we-were-talking-12o8">I Told My Agent Who Sent the Message. It Mostly Stopped Saying We Were Talking.</a></td>
 <td align="left">Dev.to</td>
-<td align="left"><a href="https://dev.to/kenielzep97/i-told-my-agent-who-sent-the-message-it-mostly-stopped-saying-we-were-talking-12o8">22 reactions, 11 comments</a></td>
-<td align="left">The author found that adding a sender identifier line to messages largely stopped their AI agent from incorrectly claiming it was conversing with the user.</td>
-</tr>
-<tr>
-<td align="left"><a href="https://dev.to/debashish_ghosal/your-ai-coding-agent-wrote-a-600-word-summary-what-it-skipped-is-in-the-fine-print-1h7d">Your AI Coding Agent Wrote a 600-Word Summary. What It Skipped Is in the Fine Print.</a></td>
-<td align="left">Dev.to</td>
-<td align="left"><a href="https://dev.to/debashish_ghosal/your-ai-coding-agent-wrote-a-600-word-summary-what-it-skipped-is-in-the-fine-print-1h7d">20 reactions, 9 comments</a></td>
-<td align="left">The author examines how AI coding agents produce lengthy summaries while omitting critical details in the fine print.</td>
+<td align="left"><a href="https://dev.to/kenielzep97/i-told-my-agent-who-sent-the-message-it-mostly-stopped-saying-we-were-talking-12o8">22 reactions, 12 comments</a></td>
+<td align="left">The author found that informing their AI agent about the message sender (e.g., &quot;sender=scheduler, not Keniel&quot;) largely stopped the agent from incorrectly claiming they were conversing.</td>
 </tr>
 </tbody></table>
 <hr>

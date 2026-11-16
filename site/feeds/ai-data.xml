@@ -13,22 +13,22 @@
       <height>144</height>
     </image>
     <atom:link href="https://dboeter.github.io/daily-diff/feeds/ai-data.xml" rel="self" type="application/rss+xml"/>
-    <lastBuildDate>Mon, 16 Nov 2026 06:13:21 +0000</lastBuildDate>
+    <lastBuildDate>Mon, 16 Nov 2026 09:29:47 +0000</lastBuildDate>
     <item>
       <title>Data Engineering 2026-11-16</title>
       <link>https://dboeter.github.io/daily-diff/#2026-11-16/ai-data</link>
       <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-11-16/ai-data</guid>
       <pubDate>Mon, 16 Nov 2026 00:00:00 +0000</pubDate>
-      <description>Data Engineering 2026-11-16 ⬛ Overview · 🟪 AI Agents · 🟦 AI Models &amp;amp; Labs · 🟨 Data Engineering · 🟫 Trends Vendor items: 1 | Projects: 26 | Active today: 0 | Stable releases: 0 | Prereleases (not covered): 1 | Generated: 2026-11-16 06:09 UTC Highlights No item stands out today. Action required Date Platform Item What to do 2026-11-19 Azure Databricks Gemini 3.6 Flash will be retired on November 19, 2026 API calls to Gemini 3.6 Flash will be automatically redirected to Gemini 3.8 Flash on ...</description>
+      <description>Data Engineering 2026-11-16 ⬛ Overview · 🟪 AI Agents · 🟦 AI Models &amp;amp; Labs · 🟧 AI Policy · 🟨 Data Engineering · 🟫 Trends Vendor items: 1 | Projects: 26 | Active today: 1 | Stable releases: 1 | Prereleases (not covered): 1 | Generated: 2026-11-16 09:26 UTC Highlights Terraform provider for Databricks v1.143.0 introduces a breaking change for users managing databricks_app resources: updates now use the asynchronous API and omitted fields are cleared (compute size resets to MEDIUM, autoscal...</description>
       <content:encoded><![CDATA[<h1>Data Engineering 2026-11-16</h1>
-<p><a href="https://dboeter.github.io/daily-diff/#2026-11-16">⬛ Overview</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-16/ai-agents">🟪 AI Agents</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-16/ai-models">🟦 AI Models &amp; Labs</a> · <strong>🟨 Data Engineering</strong> · <a href="https://dboeter.github.io/daily-diff/#2026-11-16/ai-trends">🟫 Trends</a></p>
+<p><a href="https://dboeter.github.io/daily-diff/#2026-11-16">⬛ Overview</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-16/ai-agents">🟪 AI Agents</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-16/ai-models">🟦 AI Models &amp; Labs</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-16/ai-policy">🟧 AI Policy</a> · <strong>🟨 Data Engineering</strong> · <a href="https://dboeter.github.io/daily-diff/#2026-11-16/ai-trends">🟫 Trends</a></p>
 <blockquote>
-<p>Vendor items: 1 | Projects: 26 | Active today: 0 | Stable releases: 0 | Prereleases (not covered): 1 | Generated: 2026-11-16 06:09 UTC</p>
+<p>Vendor items: 1 | Projects: 26 | Active today: 1 | Stable releases: 1 | Prereleases (not covered): 1 | Generated: 2026-11-16 09:26 UTC</p>
 </blockquote>
 <hr>
 <h2>Highlights</h2>
 <ul>
-<li>No item stands out today.</li>
+<li>Terraform provider for Databricks v1.143.0 introduces a breaking change for users managing <code>databricks_app</code> resources: updates now use the asynchronous API and omitted fields are cleared (compute size resets to <code>MEDIUM</code>, autoscaling disabled, git source cleared), whereas the previous synchronous API ignored those changes.</li>
 </ul>
 <hr>
 <h2>Action required</h2>
@@ -85,10 +85,14 @@
 <tbody><tr>
 <td align="left">2026-11-12</td>
 <td align="left">🤖 <a href="https://learn.microsoft.com/azure/databricks/ai-bi/release-notes/2026#use-genie-one-as-your-chrome-new-tab-page-beta">Use Genie One as your Chrome new tab page (Beta)</a></td>
-<td align="left">The Genie One Chrome extension lets users open Genie One from their Azure Databricks workspace directly in new Chrome tabs, using existing sign-in and permissions for a single chosen workspace to ask questions, search tools, or open dashboards without navigating to the workspace first.</td>
+<td align="left">The Genie One Chrome extension replaces the Chrome new tab page with Genie One from your Azure Databricks workspace, using your existing Azure Databricks sign-in and permissions and working with one chosen workspace when the extension is turned on.</td>
 </tr>
 </tbody></table>
-<p><strong>Quiet today:</strong> <a href="https://github.com/delta-io/delta">Delta Lake</a>, <a href="https://github.com/delta-io/delta-rs">delta-rs</a>, <a href="https://github.com/unitycatalog/unitycatalog">Unity Catalog</a>, <a href="https://github.com/mlflow/mlflow">MLflow</a>, <a href="https://github.com/databricks/cli">Databricks CLI</a>, <a href="https://github.com/databricks/dbt-databricks">dbt-databricks</a>, <a href="https://github.com/databricks/terraform-provider-databricks">Terraform provider for Databricks</a></p>
+<h3>Terraform provider for Databricks</h3>
+<ul>
+<li><strong>Release:</strong> <a href="https://github.com/databricks/terraform-provider-databricks/releases/tag/v1.143.0">v1.143.0</a> switches <code>databricks_app</code> updates to the asynchronous API, now applying <code>compute_size</code>, <code>compute_min_instances</code>, and <code>compute_max_instances</code> changes that the synchronous API ignored; omitted fields are cleared (size resets to <code>MEDIUM</code>, scaling disabled, git source cleared). Fixes perpetual diffs by preserving sensitive connection options (<code>pem_key_passphrase</code>, <code>ssl_keystore_key</code>, <code>ssl_key_password</code>, <code>schema_registry_api_secret</code>) and ignoring whitespace-only PEM differences. Adds <code>databricks_assume_group_restricted_sharing_group</code> resource and data source, plus write-only attributes for <code>databricks_git_credential</code> and <code>databricks_connection</code>.</li>
+</ul>
+<p><strong>Quiet today:</strong> <a href="https://github.com/delta-io/delta">Delta Lake</a>, <a href="https://github.com/delta-io/delta-rs">delta-rs</a>, <a href="https://github.com/unitycatalog/unitycatalog">Unity Catalog</a>, <a href="https://github.com/mlflow/mlflow">MLflow</a>, <a href="https://github.com/databricks/cli">Databricks CLI</a>, <a href="https://github.com/databricks/dbt-databricks">dbt-databricks</a></p>
 <hr>
 <p>Nothing new from Snowflake (<a href="https://github.com/snowflakedb/snowpark-python">Snowpark Python</a>, <a href="https://github.com/snowflakedb/snowflake-connector-python">Snowflake Connector for Python</a>, <a href="https://github.com/apache/polaris">Apache Polaris</a>, <a href="https://github.com/snowflakedb/terraform-provider-snowflake">Terraform provider for Snowflake</a>), Azure / Fabric &amp; GCP or Open-source stack (<a href="https://github.com/dbt-labs/dbt">dbt Core</a>, <a href="https://github.com/SQLMesh/sqlmesh">SQLMesh</a>, <a href="https://github.com/apache/airflow">Apache Airflow</a>, <a href="https://github.com/dagster-io/dagster">Dagster</a>, <a href="https://github.com/PrefectHQ/prefect">Prefect</a>, <a href="https://github.com/dlt-hub/dlt">dlt</a>, <a href="https://github.com/apache/iceberg">Apache Iceberg</a>, <a href="https://github.com/apache/iceberg-python">PyIceberg</a>, <a href="https://github.com/duckdb/duckdb">DuckDB</a>, <a href="https://github.com/pola-rs/polars">Polars</a>, <a href="https://github.com/trinodb/trino">Trino</a>, <a href="https://github.com/great-expectations/great_expectations">Great Expectations</a>, <a href="https://github.com/sodadata/soda-core">Soda Core</a>, <a href="https://github.com/OpenLineage/OpenLineage">OpenLineage</a>, <a href="https://github.com/open-metadata/OpenMetadata">OpenMetadata</a>) today.</p>
 <hr>
@@ -105,14 +109,14 @@
 <tbody><tr>
 <td align="left">Show HN: db-branch – database branches in seconds for AI agents and CI, via ZFS (<a href="https://github.com/db-branch/db-branch">db-branch/db-branch</a>)</td>
 <td align="left">Hacker News</td>
-<td align="left"><a href="https://news.ycombinator.com/item?id=50506940">39 points, 10 comments</a></td>
-<td align="left">db-branch provides instant MySQL database branching using ZFS clones with ProxySQL routing across VMs for AI agents and CI.</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50506940">42 points, 11 comments</a></td>
+<td align="left">db-branch enables instant MySQL database branching using ZFS clones, clustered across VMs with ProxySQL routing for AI agents and CI.</td>
 </tr>
 <tr>
 <td align="left"><a href="https://transactional.blog/talk/please-implement-a-quorum-database">Please Implement A Quorum Database</a></td>
 <td align="left">Lobste.rs</td>
-<td align="left"><a href="https://lobste.rs/s/hgicaq/please_implement_quorum_database">10 points, 0 comments</a></td>
-<td align="left">The author argues that leaderless replication for quorum databases is both fun and practical to implement.</td>
+<td align="left"><a href="https://lobste.rs/s/hgicaq/please_implement_quorum_database">11 points, 0 comments</a></td>
+<td align="left">The post argues that leaderless replication is both enjoyable and practical, advocating for a quorum database implementation.</td>
 </tr>
 </tbody></table>
 <hr>

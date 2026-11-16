@@ -1,5 +1,5 @@
 {
-  "generated": "2026-11-16T06:13:20.907Z",
+  "generated": "2026-11-16T09:29:47.345Z",
   "labels": {
     "ai-agents": "AI Agents",
     "ai-models": "AI Models & Labs",
@@ -50,6 +50,7 @@
       "reports": [
         "ai-agents",
         "ai-models",
+        "ai-policy",
         "ai-data",
         "ai-trends"
       ]
