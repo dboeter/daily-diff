@@ -1,0 +1,14 @@
+{
+  "ai-agents": [
+    "− Oh My Pi v18.20.3 removes `isXdDevicePath` export, renames `clickCount` to `count`, changes screenshot coordinates to displayed pixels, and drops `seance` agent and command.",
+    "Attest framework introduced for testing AI agents by verifying tool calls and state changes with recorded model response replay for CI."
+  ],
+  "ai-models": [
+    "Qwen4 Max now on OpenRouter with 1M-token context window, accepting text, image, and video inputs, returning text.",
+    "Access to Justice benchmark of 23 models on 252 legal-aid conversations shows no model reached 80% threshold, missing critical legal details."
+  ],
+  "ai-trends": [
+    "pingdotgg/t3code gained most GitHub stars this week (+8,984, +17%); Tencent/LoopForge had largest relative increase (+989%) in Multi-Agent table.",
+    "Hermes Agent led OpenRouter usage with 13.02T tokens in last 7 days; @earendil-works/pi-coding-agent topped npm with 6.3M downloads in same window."
+  ]
+}
