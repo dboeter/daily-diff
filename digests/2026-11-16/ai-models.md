@@ -1,15 +1,23 @@
 # AI Models & Labs 2026-11-16
 
-[⬛ Overview](https://dboeter.github.io/daily-diff/#2026-11-16) · [🟪 AI Agents](https://dboeter.github.io/daily-diff/#2026-11-16/ai-agents) · **🟦 AI Models & Labs** · [🟨 Data Engineering](https://dboeter.github.io/daily-diff/#2026-11-16/ai-data) · [🟫 Trends](https://dboeter.github.io/daily-diff/#2026-11-16/ai-trends)
+[⬛ Overview](https://dboeter.github.io/daily-diff/#2026-11-16) · [🟪 AI Agents](https://dboeter.github.io/daily-diff/#2026-11-16/ai-agents) · **🟦 AI Models & Labs** · [🟧 AI Policy](https://dboeter.github.io/daily-diff/#2026-11-16/ai-policy) · [🟨 Data Engineering](https://dboeter.github.io/daily-diff/#2026-11-16/ai-data) · [🟫 Trends](https://dboeter.github.io/daily-diff/#2026-11-16/ai-trends)
 
-> Lab posts: 0 | New models: 1 | Spotted: 6 | Generated: 2026-11-16 06:09 UTC
+> Lab posts: 1 | New models: 1 | Spotted: 6 | Generated: 2026-11-16 09:26 UTC
 
 ---
 
 ## Highlights
 
-- Qwen4 Max is now available on OpenRouter with a 1M-token context window, accepting text, image, and video inputs and returning text.
-- The Access to Justice benchmark evaluated 23 models on 252 simulated legal-aid conversations; no model reached the 80% threshold, indicating leading models miss critical legal details.
+- Qwen4 Max is now listed on OpenRouter with a 1 M-token context window and native text, image, and video input with text output.  
+- The accompanying Hacker News discussion reports Qwen4-Max also supports image generation, document processing, web search, tool use, and artifact creation.
+
+---
+
+## Lab announcements
+
+| Date | Lab | Post | Summary |
+| :--- | :--- | :--- | :--- |
+| 2026-11-16 | OpenAI | [Lvmh Media Division Partnership](https://openai.com/index/lvmh-media-division-partnership/) | — |
 
 ---
 
@@ -21,7 +29,7 @@
 
 ---
 
-Nothing new from Anthropic and OpenAI or OpenRouter's stealth models today.
+Nothing new from OpenRouter's stealth models today.
 
 ---
 
@@ -29,12 +37,12 @@ Nothing new from Anthropic and OpenAI or OpenRouter's stealth models today.
 
 | Story | Source | Discussion | Summary |
 | :--- | :--- | :--- | :--- |
-| [Qwen4-Max](https://qwen.ai/blog?id=qwen4-max) | Hacker News | [314 points, 106 comments](https://news.ycombinator.com/item?id=50513215) | Qwen4-Max is released with capabilities including chatbot, image/video understanding, image generation, document processing, web search, tool use, and artifacts. |
-| [Understanding Positional Embeddings in Modern LLMs](https://magazine.sebastianraschka.com/p/understanding-positional-embeddings) | Hacker News | [225 points, 27 comments](https://news.ycombinator.com/item?id=50506376) | An article explains the methods modern LLMs use to represent token positions through positional embeddings. |
-| [What thousands of conversations look like inside a language model](https://operator0x.com/field-notes/qwen-conversation-state-space/) | Hacker News | [119 points, 29 comments](https://news.ycombinator.com/item?id=50481321) | The author mapped thousands of conversations inside Qwen to visualize how language structures emerge in the model. |
-| [Parents pay $75k for Alpha's AI school. Half of its students missed math target](https://fortune.com/2026/11/14/alpha-school-ai-students-tuition-learning-goals/) | Hacker News | [64 points, 62 comments](https://news.ycombinator.com/item?id=50509953) | Fortune reports that only 42% of Alpha School students met the 2x learning target in math and reading, while parents pay $75k tuition and 2,600 public school students use the software. |
-| [New 'Access to Justice' Benchmark: Leading AI Models Miss Critical Legal Details](https://epyhia.com/new-access-to-justice-benchmark-finds-leading-ai-models-miss-critical) | Hacker News | [10 points, 1 comment](https://news.ycombinator.com/item?id=50497161) | Vals AI and NextLadder Ventures released a benchmark evaluating 23 models on 252 simulated legal-aid conversations, with no model reaching the 80% threshold. |
-| [AI Companies Crack Down on the Coolest Thing People Were Doing with AI](https://www.404media.co/reverse-engineer-anything-ai-companies-crack-down-on-the-coolest-thing-people-were-doing-with-ai/) | Hacker News | [10 points, 4 comments](https://news.ycombinator.com/item?id=50441618) | 404 Media reports that AI companies are restricting user modifications, pushing the future of device hacking toward local and open-weight models. |
+| [Qwen4-Max](https://qwen.ai/blog?id=qwen4-max) | Hacker News | [480 points, 191 comments](https://news.ycombinator.com/item?id=50513215) | Qwen4-Max provides a broad suite of capabilities including chat, image and video understanding, image generation, document processing, web search, tool use, and artifacts. |
+| [Understanding Positional Embeddings in Modern LLMs](https://magazine.sebastianraschka.com/p/understanding-positional-embeddings) | Hacker News | [227 points, 27 comments](https://news.ycombinator.com/item?id=50506376) | The article explains the methods modern LLMs use to represent token positions through positional embeddings. |
+| [What thousands of conversations look like inside a language model](https://operator0x.com/field-notes/qwen-conversation-state-space/) | Hacker News | [123 points, 29 comments](https://news.ycombinator.com/item?id=50481321) | The author mapped thousands of conversations within Qwen to visualize how language structures emerge inside the model. |
+| [Parents pay $75k for Alpha's AI school. Half of its students missed math target](https://fortune.com/2026/11/14/alpha-school-ai-students-tuition-learning-goals/) | Hacker News | [65 points, 64 comments](https://news.ycombinator.com/item?id=50509953) | According to internal data, only 42% of students at Alpha's AI school achieved its 2x learning goal in math and reading, while 2,600 public school students now use its software. |
+| [Google AI Ultra Subscription Not Worth It](https://www.reddit.com/r/google_antigravity/comments/1xx9nl3/google_ai_ultra_subscription_not_worth_it/) | Hacker News | [9 points, 0 comments](https://news.ycombinator.com/item?id=50514224) | — |
+| [The efficient frontier of LLM inference](https://www.baseten.co/blog/the-efficient-frontier-of-llm-inference/#quantization) | Hacker News | [9 points, 0 comments](https://news.ycombinator.com/item?id=50512233) | The article maps how techniques like batch sizing, parallelism, quantization, kernels, speculative decoding, and disaggregation affect the latency-throughput frontier in LLM inference. |
 
 ---
 *This digest is auto-generated by [Daily Diff](https://github.com/dboeter/daily-diff).*

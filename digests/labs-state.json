@@ -1,6 +1,6 @@
 {
   "anthropic": {
-    "lastChecked": "2026-11-16T06:09:19.523Z",
+    "lastChecked": "2026-11-16T09:26:04.585Z",
     "seenUrls": {
       "https://www.anthropic.com/news/responsible-scaling-policy-v3": "2026-11-13T22:37:05.591Z",
       "https://www.anthropic.com/research/deprecation-updates-opus-3": "2026-09-09T21:14:42.000Z",
@@ -563,7 +563,7 @@
     }
   },
   "openai": {
-    "lastChecked": "2026-11-16T06:09:20.749Z",
+    "lastChecked": "2026-11-16T09:26:05.860Z",
     "seenUrls": {
       "https://openai.com/index/arvind-kc-chief-people-officer/": "2026-11-03T13:34:40.079Z",
       "https://openai.com/index/put-ai-to-work-for-your-product-team/": "2026-11-10T09:52:35.698Z",
@@ -1499,8 +1499,8 @@
       "https://openai.com/index/openai-to-acquire-pierre/": "2026-11-13T22:12:50.296Z",
       "https://openai.com/index/daybreak-red-aws-govcloud/": "2026-11-15T10:05:47.787Z",
       "https://openai.com/index/a-thousand-fewer-paths-to-root/": "2026-11-15T10:05:47.574Z",
-      "https://openai.com/index/introducing-images-2-6/": "2026-11-16T03:47:46.198Z",
-      "https://openai.com/index/introducing-gpt-6-cyber/": "2026-11-16T04:18:36.505Z",
+      "https://openai.com/index/introducing-images-2-6/": "2026-11-16T09:21:21.910Z",
+      "https://openai.com/index/introducing-gpt-6-cyber/": "2026-11-16T08:14:42.863Z",
       "https://openai.com/index/australian-universities-ai-native-graduates/": "2026-11-13T22:12:41.596Z",
       "https://openai.com/index/measuring-how-ai-agents-handle-wet-lab-science/": "2026-11-13T22:14:05.945Z",
       "https://openai.com/index/control-room/": "2026-11-14T12:44:20.478Z",
@@ -1514,11 +1514,14 @@
       "https://openai.com/business/learn/identifying-and-scaling-ai-use-cases/": "2026-11-10T21:24:23.149Z",
       "https://openai.com/business/learn/how-openai-uses-codex/": "2026-11-10T21:24:20.344Z",
       "https://openai.com/business/learn/fine-tuning-gpt-4o-webinar/": "2026-11-10T21:09:49.430Z",
-      "https://openai.com/index/introducing-chatgpt-wallet/": "2026-11-13T22:14:13.813Z"
+      "https://openai.com/index/introducing-chatgpt-wallet/": "2026-11-13T22:14:13.813Z",
+      "https://openai.com/index/lvmh-media-division-partnership/": "2026-11-16T09:06:33.075Z"
     },
     "newOn": {
       "date": "2026-11-16",
-      "urls": []
+      "urls": [
+        "https://openai.com/index/lvmh-media-division-partnership/"
+      ]
     }
   }
 }

@@ -1,14 +1,14 @@
 # Data Engineering 2026-11-16
 
-[⬛ Overview](https://dboeter.github.io/daily-diff/#2026-11-16) · [🟪 AI Agents](https://dboeter.github.io/daily-diff/#2026-11-16/ai-agents) · [🟦 AI Models & Labs](https://dboeter.github.io/daily-diff/#2026-11-16/ai-models) · **🟨 Data Engineering** · [🟫 Trends](https://dboeter.github.io/daily-diff/#2026-11-16/ai-trends)
+[⬛ Overview](https://dboeter.github.io/daily-diff/#2026-11-16) · [🟪 AI Agents](https://dboeter.github.io/daily-diff/#2026-11-16/ai-agents) · [🟦 AI Models & Labs](https://dboeter.github.io/daily-diff/#2026-11-16/ai-models) · [🟧 AI Policy](https://dboeter.github.io/daily-diff/#2026-11-16/ai-policy) · **🟨 Data Engineering** · [🟫 Trends](https://dboeter.github.io/daily-diff/#2026-11-16/ai-trends)
 
-> Vendor items: 1 | Projects: 26 | Active today: 0 | Stable releases: 0 | Prereleases (not covered): 1 | Generated: 2026-11-16 06:09 UTC
+> Vendor items: 1 | Projects: 26 | Active today: 1 | Stable releases: 1 | Prereleases (not covered): 1 | Generated: 2026-11-16 09:26 UTC
 
 ---
 
 ## Highlights
 
-- No item stands out today.
+- Terraform provider for Databricks v1.143.0 introduces a breaking change for users managing `databricks_app` resources: updates now use the asynchronous API and omitted fields are cleared (compute size resets to `MEDIUM`, autoscaling disabled, git source cleared), whereas the previous synchronous API ignored those changes.
 
 ---
 
@@ -28,9 +28,13 @@
 
 | Date | Item | Summary |
 | :--- | :--- | :--- |
-| 2026-11-12 | 🤖 [Use Genie One as your Chrome new tab page (Beta)](https://learn.microsoft.com/azure/databricks/ai-bi/release-notes/2026#use-genie-one-as-your-chrome-new-tab-page-beta) | The Genie One Chrome extension lets users open Genie One from their Azure Databricks workspace directly in new Chrome tabs, using existing sign-in and permissions for a single chosen workspace to ask questions, search tools, or open dashboards without navigating to the workspace first. |
+| 2026-11-12 | 🤖 [Use Genie One as your Chrome new tab page (Beta)](https://learn.microsoft.com/azure/databricks/ai-bi/release-notes/2026#use-genie-one-as-your-chrome-new-tab-page-beta) | The Genie One Chrome extension replaces the Chrome new tab page with Genie One from your Azure Databricks workspace, using your existing Azure Databricks sign-in and permissions and working with one chosen workspace when the extension is turned on. |
 
-**Quiet today:** [Delta Lake](https://github.com/delta-io/delta), [delta-rs](https://github.com/delta-io/delta-rs), [Unity Catalog](https://github.com/unitycatalog/unitycatalog), [MLflow](https://github.com/mlflow/mlflow), [Databricks CLI](https://github.com/databricks/cli), [dbt-databricks](https://github.com/databricks/dbt-databricks), [Terraform provider for Databricks](https://github.com/databricks/terraform-provider-databricks)
+### Terraform provider for Databricks
+
+- **Release:** [v1.143.0](https://github.com/databricks/terraform-provider-databricks/releases/tag/v1.143.0) switches `databricks_app` updates to the asynchronous API, now applying `compute_size`, `compute_min_instances`, and `compute_max_instances` changes that the synchronous API ignored; omitted fields are cleared (size resets to `MEDIUM`, scaling disabled, git source cleared). Fixes perpetual diffs by preserving sensitive connection options (`pem_key_passphrase`, `ssl_keystore_key`, `ssl_key_password`, `schema_registry_api_secret`) and ignoring whitespace-only PEM differences. Adds `databricks_assume_group_restricted_sharing_group` resource and data source, plus write-only attributes for `databricks_git_credential` and `databricks_connection`.
+
+**Quiet today:** [Delta Lake](https://github.com/delta-io/delta), [delta-rs](https://github.com/delta-io/delta-rs), [Unity Catalog](https://github.com/unitycatalog/unitycatalog), [MLflow](https://github.com/mlflow/mlflow), [Databricks CLI](https://github.com/databricks/cli), [dbt-databricks](https://github.com/databricks/dbt-databricks)
 
 ---
 
@@ -42,8 +46,8 @@ Nothing new from Snowflake ([Snowpark Python](https://github.com/snowflakedb/sno
 
 | Story | Source | Discussion | Summary |
 | :--- | :--- | :--- | :--- |
-| Show HN: db-branch – database branches in seconds for AI agents and CI, via ZFS ([db-branch/db-branch](https://github.com/db-branch/db-branch)) | Hacker News | [39 points, 10 comments](https://news.ycombinator.com/item?id=50506940) | db-branch provides instant MySQL database branching using ZFS clones with ProxySQL routing across VMs for AI agents and CI. |
-| [Please Implement A Quorum Database](https://transactional.blog/talk/please-implement-a-quorum-database) | Lobste.rs | [10 points, 0 comments](https://lobste.rs/s/hgicaq/please_implement_quorum_database) | The author argues that leaderless replication for quorum databases is both fun and practical to implement. |
+| Show HN: db-branch – database branches in seconds for AI agents and CI, via ZFS ([db-branch/db-branch](https://github.com/db-branch/db-branch)) | Hacker News | [42 points, 11 comments](https://news.ycombinator.com/item?id=50506940) | db-branch enables instant MySQL database branching using ZFS clones, clustered across VMs with ProxySQL routing for AI agents and CI. |
+| [Please Implement A Quorum Database](https://transactional.blog/talk/please-implement-a-quorum-database) | Lobste.rs | [11 points, 0 comments](https://lobste.rs/s/hgicaq/please_implement_quorum_database) | The post argues that leaderless replication is both enjoyable and practical, advocating for a quorum database implementation. |
 
 ---
 *This digest is auto-generated by [Daily Diff](https://github.com/dboeter/daily-diff).*

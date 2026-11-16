@@ -1,20 +1,23 @@
 {
-"attempted": 14,
+"attempted": 17,
 "failed": 0,
 "calls": [
-{"label":"infra","outcome":"ok","chars":227},
-{"label":"agents","outcome":"ok","chars":1754},
-{"label":"spotted-summaries","outcome":"ok","chars":2438},
-{"label":"agents-highlights","outcome":"ok","chars":608},
-{"label":"models-summaries","outcome":"ok","chars":109},
-{"label":"claude-code-skills","outcome":"ok","chars":1920},
+{"label":"agents","outcome":"ok","chars":1284},
+{"label":"infra","outcome":"ok","chars":221},
+{"label":"spotted-summaries","outcome":"ok","chars":2757},
+{"label":"policy","outcome":"ok","chars":602},
+{"label":"policy-summaries","outcome":"ok","chars":196},
+{"label":"models-summaries","outcome":"ok","chars":114},
+{"label":"agents-highlights","outcome":"ok","chars":594},
+{"label":"data-databricks","outcome":"ok","chars":794},
+{"label":"models-highlights","outcome":"ok","chars":303},
 {"label":"trends-hf-summaries","outcome":"ok","chars":549},
-{"label":"data-vendor-summaries","outcome":"ok","chars":289},
-{"label":"trending-summaries","outcome":"ok","chars":7481},
-{"label":"models-highlights","outcome":"ok","chars":335},
-{"label":"data-highlights","outcome":"ok","chars":41},
-{"label":"trends-summaries","outcome":"ok","chars":1827},
-{"label":"trends","outcome":"ok","chars":2814},
-{"label":"highlights","outcome":"ok","chars":918}
+{"label":"trends-summaries","outcome":"ok","chars":2424},
+{"label":"data-vendor-summaries","outcome":"ok","chars":251},
+{"label":"claude-code-skills","outcome":"ok","chars":1803},
+{"label":"data-highlights","outcome":"ok","chars":325},
+{"label":"trending-summaries","outcome":"ok","chars":7284},
+{"label":"trends","outcome":"ok","chars":2668},
+{"label":"highlights","outcome":"ok","chars":620}
 ]
 }

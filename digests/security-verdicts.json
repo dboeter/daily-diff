@@ -131,6 +131,12 @@
     "devto:5039243": {"title":"I Told My Agent Who Sent the Message. It Mostly Stopped Saying We Were Talking.","answers":{"is_security":{"type":"noul","noul":0.13}},"decided":"2026-11-16","model":"jev-1.14.0","lastSeen":"2026-11-16"},
     "devto:5042533": {"title":"How I Made a Markov Chain Model from Scratch in C++ During a Global Online Teen Hackathon","answers":{"is_security":{"type":"noul","noul":0.01}},"decided":"2026-11-16","model":"jev-1.14.0","lastSeen":"2026-11-16"},
     "devto:5038118": {"title":"Your AI Coding Agent Wrote a 600-Word Summary. What It Skipped Is in the Fine Print.","answers":{"is_security":{"type":"noul","noul":0.13}},"decided":"2026-11-16","model":"jev-1.14.0","lastSeen":"2026-11-16"},
-    "devto:5037379": {"title":"Code Is Cheap Now. Judgment Isn't: The Review Bottleneck and the Vanishing Apprenticeship","answers":{"is_security":{"type":"noul","noul":0.02}},"decided":"2026-11-16","model":"jev-1.14.0","lastSeen":"2026-11-16"}
+    "devto:5037379": {"title":"Code Is Cheap Now. Judgment Isn't: The Review Bottleneck and the Vanishing Apprenticeship","answers":{"is_security":{"type":"noul","noul":0.02}},"decided":"2026-11-16","model":"jev-1.14.0","lastSeen":"2026-11-16"},
+    "hn:50512685": {"title":"Show HN: gavel: guided code review with your coding agent","answers":{"is_security":{"type":"noul","noul":0.02}},"decided":"2026-11-16","model":"jev-1.14.0","lastSeen":"2026-11-16"},
+    "hn:50504236": {"title":"Confessions of an AI Skeptic","answers":{"is_security":{"type":"noul","noul":0.03}},"decided":"2026-11-16","model":"jev-1.14.0","lastSeen":"2026-11-16"},
+    "hn:50509807": {"title":"In 19 Minutes, You will understand 10 years of LLMs [video]","answers":{"is_security":{"type":"noul","noul":0.04}},"decided":"2026-11-16","model":"jev-1.14.0","lastSeen":"2026-11-16"},
+    "devto:5042424": {"title":"Give Your Voice Agent Hands: Let It Act Across Sales and Marketing","answers":{"is_security":{"type":"noul","noul":0.03}},"decided":"2026-11-16","model":"jev-1.14.0","lastSeen":"2026-11-16"},
+    "devto:5004164": {"title":"AI Avatar v28 (Security Support, Voxel Avatar)🛡️","answers":{"is_security":{"type":"noul","noul":0.05}},"decided":"2026-11-16","model":"jev-1.14.0","lastSeen":"2026-11-16"},
+    "devto:5043779": {"title":"How I Built AI-Native Products as a One-Person Software Factory","answers":{"is_security":{"type":"noul","noul":0.02}},"decided":"2026-11-16","model":"jev-1.14.0","lastSeen":"2026-11-16"}
   }
 }
