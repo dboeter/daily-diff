@@ -35,6 +35,8 @@ export interface MatchEntry {
   decided?: string;
   /** Jev model that made it. */
   model?: string;
+  /** Set by hand: the entry is never pruned, so a hand-added rejection or forced match outlives the pool. */
+  pinned?: boolean;
 }
 
 export interface Candidate {
@@ -211,13 +213,18 @@ export function applyMatchAnswers(
 /**
  * Mark pool apps seen, drop `rejected` keys outside this run's pool (a returning
  * candidate is asked again, which keeps the file bounded), and drop apps unseen
- * for MATCH_UNSEEN_DAYS. Saved matches are otherwise kept.
+ * for MATCH_UNSEEN_DAYS. Saved matches are otherwise kept. A pinned entry is
+ * never pruned: only its lastSeen moves.
  */
 export function pruneMatchState(state: MatchState, poolKeys: Set<string>, dateStr: string): MatchState {
   const pool = new Set([...poolKeys].map(normKey));
   const apps: Record<string, MatchEntry> = {};
   for (const [id, e] of Object.entries(state.apps)) {
     const lastSeen = pool.has(`${OPENROUTER_PREFIX}${id}`) ? dateStr : e.lastSeen;
+    if (e.pinned) {
+      apps[id] = { ...e, lastSeen };
+      continue;
+    }
     if ((Date.parse(dateStr) - Date.parse(lastSeen)) / DAY_MS > MATCH_UNSEEN_DAYS) continue;
     apps[id] = { ...e, lastSeen, rejected: (e.rejected ?? []).filter((k) => pool.has(normKey(k))) };
   }
