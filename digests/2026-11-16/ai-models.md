@@ -1,6 +1,6 @@
 # AI Models & Labs 2026-11-16
 
-[⬛ Overview](https://dboeter.github.io/daily-diff/#2026-11-16) · [🟪 AI Agents](https://dboeter.github.io/daily-diff/#2026-11-16/ai-agents) · **🟦 AI Models & Labs** · [🟧 AI Policy](https://dboeter.github.io/daily-diff/#2026-11-16/ai-policy) · [🟨 Data Engineering](https://dboeter.github.io/daily-diff/#2026-11-16/ai-data) · [🟫 Trends](https://dboeter.github.io/daily-diff/#2026-11-16/ai-trends)
+[⬛ Overview](https://dboeter.github.io/daily-diff/#2026-11-16) · [🟪 AI Agents](https://dboeter.github.io/daily-diff/#2026-11-16/ai-agents) · **🟦 AI Models & Labs** · [🟧 AI Policy](https://dboeter.github.io/daily-diff/#2026-11-16/ai-policy) · [🟨 Data Engineering](https://dboeter.github.io/daily-diff/#2026-11-16/ai-data) · [⬜ Weekly Diff](https://dboeter.github.io/daily-diff/#2026-11-16/ai-weekly) · [🟫 Trends](https://dboeter.github.io/daily-diff/#2026-11-16/ai-trends)
 
 > Lab posts: 1 | New models: 1 | Spotted: 6 | Generated: 2026-11-16 09:26 UTC
 

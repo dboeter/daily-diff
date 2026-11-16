@@ -1,6 +1,6 @@
 # Data Engineering 2026-11-16
 
-[⬛ Overview](https://dboeter.github.io/daily-diff/#2026-11-16) · [🟪 AI Agents](https://dboeter.github.io/daily-diff/#2026-11-16/ai-agents) · [🟦 AI Models & Labs](https://dboeter.github.io/daily-diff/#2026-11-16/ai-models) · [🟧 AI Policy](https://dboeter.github.io/daily-diff/#2026-11-16/ai-policy) · **🟨 Data Engineering** · [🟫 Trends](https://dboeter.github.io/daily-diff/#2026-11-16/ai-trends)
+[⬛ Overview](https://dboeter.github.io/daily-diff/#2026-11-16) · [🟪 AI Agents](https://dboeter.github.io/daily-diff/#2026-11-16/ai-agents) · [🟦 AI Models & Labs](https://dboeter.github.io/daily-diff/#2026-11-16/ai-models) · [🟧 AI Policy](https://dboeter.github.io/daily-diff/#2026-11-16/ai-policy) · **🟨 Data Engineering** · [⬜ Weekly Diff](https://dboeter.github.io/daily-diff/#2026-11-16/ai-weekly) · [🟫 Trends](https://dboeter.github.io/daily-diff/#2026-11-16/ai-trends)
 
 > Vendor items: 1 | Projects: 26 | Active today: 1 | Stable releases: 1 | Prereleases (not covered): 1 | Generated: 2026-11-16 09:26 UTC
 
