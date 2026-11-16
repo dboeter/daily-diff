@@ -213,6 +213,12 @@ describe("pruneMatchState", () => {
     expect(next.apps["2"]).toBeUndefined();
     expect(next.apps["3"]).toBeDefined();
   });
+
+  it("keeps a pinned entry whole: its rejected keys outside the pool, and the entry however long unseen", () => {
+    const pinned = entry({ lastSeen: daysBefore(400), rejected: ["npm:hand-rejected"], pinned: true });
+    const next = pruneMatchState({ apps: { "1": pinned } }, new Set(["npm:other"]), DATE);
+    expect(next.apps["1"]).toEqual(pinned);
+  });
 });
 
 describe("loadMatchState", () => {
