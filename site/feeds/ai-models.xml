@@ -13,7 +13,96 @@
       <height>144</height>
     </image>
     <atom:link href="https://dboeter.github.io/daily-diff/feeds/ai-models.xml" rel="self" type="application/rss+xml"/>
-    <lastBuildDate>Sun, 15 Nov 2026 06:14:24 +0000</lastBuildDate>
+    <lastBuildDate>Mon, 16 Nov 2026 06:13:20 +0000</lastBuildDate>
+    <item>
+      <title>AI Models &amp; Labs 2026-11-16</title>
+      <link>https://dboeter.github.io/daily-diff/#2026-11-16/ai-models</link>
+      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-11-16/ai-models</guid>
+      <pubDate>Mon, 16 Nov 2026 00:00:00 +0000</pubDate>
+      <description>AI Models &amp;amp; Labs 2026-11-16 ⬛ Overview · 🟪 AI Agents · 🟦 AI Models &amp;amp; Labs · 🟨 Data Engineering · 🟫 Trends Lab posts: 0 | New models: 1 | Spotted: 6 | Generated: 2026-11-16 06:09 UTC Highlights Qwen4 Max is now available on OpenRouter with a 1M-token context window, accepting text, image, and video inputs and returning text. The Access to Justice benchmark evaluated 23 models on 252 simulated legal-aid conversations; no model reached the 80% threshold, indicating leading models miss c...</description>
+      <content:encoded><![CDATA[<h1>AI Models &amp; Labs 2026-11-16</h1>
+<p><a href="https://dboeter.github.io/daily-diff/#2026-11-16">⬛ Overview</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-16/ai-agents">🟪 AI Agents</a> · <strong>🟦 AI Models &amp; Labs</strong> · <a href="https://dboeter.github.io/daily-diff/#2026-11-16/ai-data">🟨 Data Engineering</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-16/ai-trends">🟫 Trends</a></p>
+<blockquote>
+<p>Lab posts: 0 | New models: 1 | Spotted: 6 | Generated: 2026-11-16 06:09 UTC</p>
+</blockquote>
+<hr>
+<h2>Highlights</h2>
+<ul>
+<li>Qwen4 Max is now available on OpenRouter with a 1M-token context window, accepting text, image, and video inputs and returning text.</li>
+<li>The Access to Justice benchmark evaluated 23 models on 252 simulated legal-aid conversations; no model reached the 80% threshold, indicating leading models miss critical legal details.</li>
+</ul>
+<hr>
+<h2>New on OpenRouter</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Model</th>
+<th align="left">Listed</th>
+<th align="left">Context</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a href="https://openrouter.ai/qwen/qwen4-max">Qwen: Qwen4 Max</a> <code>qwen/qwen4-max</code></td>
+<td align="left">2026-11-16</td>
+<td align="left">1M</td>
+<td align="left">Qwen4 Max is a model in Alibaba&#39;s Qwen4 series that accepts text, image, and video input and returns text.</td>
+</tr>
+</tbody></table>
+<hr>
+<p>Nothing new from Anthropic and OpenAI or OpenRouter&#39;s stealth models today.</p>
+<hr>
+<h2>Spotted</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Story</th>
+<th align="left">Source</th>
+<th align="left">Discussion</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a href="https://qwen.ai/blog?id=qwen4-max">Qwen4-Max</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50513215">314 points, 106 comments</a></td>
+<td align="left">Qwen4-Max is released with capabilities including chatbot, image/video understanding, image generation, document processing, web search, tool use, and artifacts.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://magazine.sebastianraschka.com/p/understanding-positional-embeddings">Understanding Positional Embeddings in Modern LLMs</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50506376">225 points, 27 comments</a></td>
+<td align="left">An article explains the methods modern LLMs use to represent token positions through positional embeddings.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://operator0x.com/field-notes/qwen-conversation-state-space/">What thousands of conversations look like inside a language model</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50481321">119 points, 29 comments</a></td>
+<td align="left">The author mapped thousands of conversations inside Qwen to visualize how language structures emerge in the model.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://fortune.com/2026/11/14/alpha-school-ai-students-tuition-learning-goals/">Parents pay $75k for Alpha&#39;s AI school. Half of its students missed math target</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50509953">64 points, 62 comments</a></td>
+<td align="left">Fortune reports that only 42% of Alpha School students met the 2x learning target in math and reading, while parents pay $75k tuition and 2,600 public school students use the software.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://epyhia.com/new-access-to-justice-benchmark-finds-leading-ai-models-miss-critical">New &#39;Access to Justice&#39; Benchmark: Leading AI Models Miss Critical Legal Details</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50497161">10 points, 1 comment</a></td>
+<td align="left">Vals AI and NextLadder Ventures released a benchmark evaluating 23 models on 252 simulated legal-aid conversations, with no model reaching the 80% threshold.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://www.404media.co/reverse-engineer-anything-ai-companies-crack-down-on-the-coolest-thing-people-were-doing-with-ai/">AI Companies Crack Down on the Coolest Thing People Were Doing with AI</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50441618">10 points, 4 comments</a></td>
+<td align="left">404 Media reports that AI companies are restricting user modifications, pushing the future of device hacking toward local and open-weight models.</td>
+</tr>
+</tbody></table>
+<hr>
+<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
+]]></content:encoded>
+    </item>
     <item>
       <title>AI Models &amp; Labs 2026-11-15</title>
       <link>https://dboeter.github.io/daily-diff/#2026-11-15/ai-models</link>

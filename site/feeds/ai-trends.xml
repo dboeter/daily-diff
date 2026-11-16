@@ -13,7 +13,629 @@
       <height>144</height>
     </image>
     <atom:link href="https://dboeter.github.io/daily-diff/feeds/ai-trends.xml" rel="self" type="application/rss+xml"/>
-    <lastBuildDate>Sun, 15 Nov 2026 06:14:24 +0000</lastBuildDate>
+    <lastBuildDate>Mon, 16 Nov 2026 06:13:21 +0000</lastBuildDate>
+    <item>
+      <title>Trends 2026-11-16</title>
+      <link>https://dboeter.github.io/daily-diff/#2026-11-16/ai-trends</link>
+      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-11-16/ai-trends</guid>
+      <pubDate>Mon, 16 Nov 2026 00:00:00 +0000</pubDate>
+      <description>Trends 2026-11-16 ⬛ Overview · 🟪 AI Agents · 🟦 AI Models &amp;amp; Labs · 🟨 Data Engineering · 🟫 Trends Sources: GitHub Trending + GitHub Search API + OpenRouter + npm + Hugging Face + arXiv + Hacker News + Lobste.rs + Dev.to | Generated: 2026-11-16 06:09 UTC Highlights pingdotgg/t3code gained the most stars of any repository across all GitHub categories this week (+8,984, +17%), while Tencent/LoopForge posted the largest relative increase (+989%) in the Multi-Agent &amp;amp; Orchestration table. He...</description>
+      <content:encoded><![CDATA[<h1>Trends 2026-11-16</h1>
+<p><a href="https://dboeter.github.io/daily-diff/#2026-11-16">⬛ Overview</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-16/ai-agents">🟪 AI Agents</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-16/ai-models">🟦 AI Models &amp; Labs</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-16/ai-data">🟨 Data Engineering</a> · <strong>🟫 Trends</strong></p>
+<blockquote>
+<p>Sources: GitHub Trending + GitHub Search API + OpenRouter + npm + Hugging Face + arXiv + Hacker News + Lobste.rs + Dev.to | Generated: 2026-11-16 06:09 UTC</p>
+</blockquote>
+<hr>
+<h2>Highlights</h2>
+<ul>
+<li><a href="https://github.com/pingdotgg/t3code">pingdotgg/t3code</a> gained the most stars of any repository across all GitHub categories this week (+8,984, +17%), while <a href="https://github.com/Tencent/LoopForge">Tencent/LoopForge</a> posted the largest relative increase (+989%) in the Multi-Agent &amp; Orchestration table.</li>
+<li><a href="https://hermes-agent.nousresearch.com/">Hermes Agent</a> led OpenRouter usage with 13.02T tokens in the last 7 days, and <a href="https://www.npmjs.com/package/@earendil-works/pi-coding-agent">@earendil-works/pi-coding-agent</a> topped npm with 6.3M downloads in the same window.</li>
+<li><a href="https://huggingface.co/MiniMaxAI/MiniMax-H3-Image">MiniMaxAI/MiniMax-H3-Image</a> ranked #1 on Hugging Face trending by likes gained in the last 7 days; <a href="https://huggingface.co/Qwen/Qwen3.8-27B">Qwen/Qwen3.8-27B</a> holds the most total likes (20,144) and 30-day downloads (6.5M) among the trending models.</li>
+</ul>
+<hr>
+<h2>Agents &amp; coding tools</h2>
+<h3>🚀 Agent &amp; Coding Tool Radar</h3>
+<p><em>New tools (🆕: created or listed in the last 14 days) first, then each source&#39;s top movers; 🔥 also on last week&#39;s Trends page. OpenRouter: the app&#39;s rank this week / this month among OpenRouter apps, its tokens in the last 7 days. npm: downloads in the last 7 days. OpenRouter and npm &quot;vs previous week&quot;: against the row&#39;s figure on last week&#39;s page, none when it was not there. GitHub: total stars (stars gained in the last 7 days, % on a week ago).</em></p>
+<table>
+<thead>
+<tr>
+<th align="left">Tool</th>
+<th align="left">Source</th>
+<th align="left">Signal</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a href="https://bitbison.io/">Bitbison triage</a></td>
+<td align="left">OpenRouter</td>
+<td align="left">🆕 week #100 / month —, 44.7B tokens/week</td>
+<td align="left">Bitbison triage analyzes build activity to catch supply chain attacks before release and lets you block releases that fail your security checks.</td>
+</tr>
+<tr>
+<td align="left">🔥 <a href="https://kilocode.ai/">Kilo Code</a></td>
+<td align="left">OpenRouter</td>
+<td align="left">week #5 / month #5, 7.03T tokens/week (+46% vs previous week)</td>
+<td align="left">Kilo Code is an open-source AI coding agent working across VS Code, JetBrains, and CLI with agentic workflows to help developers ship code faster.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://www.npmjs.com/package/@sma1lboy/rove">@sma1lboy/rove</a></td>
+<td align="left">npm</td>
+<td align="left">28,686 downloads/week</td>
+<td align="left">@sma1lboy/rove is an agentic development environment (ADE) for your terminal that runs Claude Code, Codex, Copilot and more side by side in isolated worktrees, handing tasks to each other.</td>
+</tr>
+<tr>
+<td align="left">🔥 <a href="https://strix.ai/">Strix</a></td>
+<td align="left">OpenRouter</td>
+<td align="left">week #9 / month #12, 2.56T tokens/week (+45% vs previous week)</td>
+<td align="left">Strix are open-source AI hackers that find and validate vulnerabilities in your code, APIs, and infrastructure, and open fix PRs.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://docs.all-hands.dev/">OpenHands</a></td>
+<td align="left">OpenRouter</td>
+<td align="left">week #14 / month #18, 1.00T tokens/week</td>
+<td align="left">OpenHands is an AI coding agent that can run commands, browse the web, and call APIs.</td>
+</tr>
+<tr>
+<td align="left">🔥 <a href="https://hermes-agent.nousresearch.com/">Hermes Agent</a></td>
+<td align="left">OpenRouter</td>
+<td align="left">week #3 / month #4, 13.02T tokens/week (+5.1% vs previous week)</td>
+<td align="left">Hermes Agent is an open-source, self-improving AI agent by Nous Research that runs persistently with memory across sessions and builds reusable skills from experience, with 40+ built-in tools including web search, browser automation, and vision.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://www.npmjs.com/package/@earendil-works/pi-coding-agent">@earendil-works/pi-coding-agent</a></td>
+<td align="left">npm</td>
+<td align="left">6,307,903 downloads/week</td>
+<td align="left">@earendil-works/pi-coding-agent is a coding agent CLI with read, bash, edit, write tools and session management.</td>
+</tr>
+<tr>
+<td align="left">🔥 <a href="https://claude.ai/code">Claude Code</a></td>
+<td align="left">OpenRouter</td>
+<td align="left">week #4 / month #3, 10.80T tokens/week (+7.5% vs previous week)</td>
+<td align="left">Claude Code is Anthropic&#39;s agentic coding tool that reads your entire codebase, plans and executes changes across files, runs tests, and iterates on failures from natural language prompts.</td>
+</tr>
+<tr>
+<td align="left">🔥 <a href="https://pi.dev/">pi</a></td>
+<td align="left">OpenRouter</td>
+<td align="left">week #6 / month #6, 4.00T tokens/week (-4.8% vs previous week)</td>
+<td align="left">pi is described as a coding agent that is yours among many coding agents.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://openai.com/codex/">Codex</a></td>
+<td align="left">OpenRouter</td>
+<td align="left">week #7 / month #7, 3.42T tokens/week</td>
+<td align="left">Codex is a coding agent that helps you build and ship with AI.</td>
+</tr>
+<tr>
+<td align="left">🔥 <a href="https://openclaw.ai/">OpenClaw</a></td>
+<td align="left">OpenRouter</td>
+<td align="left">week #8 / month #8, 2.69T tokens/week (-46% vs previous week)</td>
+<td align="left">OpenClaw is an open-source AI agent that connects to your messaging apps and takes real actions on your behalf, from running commands and browsing the web to managing files and sending emails.</td>
+</tr>
+<tr>
+<td align="left">🔥 <a href="https://omp.sh/">omp</a></td>
+<td align="left">OpenRouter; npm</td>
+<td align="left">week #11 / month #10, 2.13T tokens/week (-36% vs previous week); 295,519 downloads/week (+34% vs previous week)</td>
+<td align="left">omp is a coding agent CLI with read, bash, edit, write tools and session management.</td>
+</tr>
+</tbody></table>
+<h3>🧑‍💻 Coding Agents</h3>
+<table>
+<thead>
+<tr>
+<th align="left">Project</th>
+<th align="left">Lang</th>
+<th align="right">Stars (total / this week, %)</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a href="https://github.com/google/elephant-goldfish-model">google/elephant-goldfish-model</a></td>
+<td align="left">Python</td>
+<td align="right">19,934 (+5,060, +34%)</td>
+<td align="left">google/elephant-goldfish-model is an open-source plugin for designing and reviewing software with agents.</td>
+</tr>
+<tr>
+<td align="left">🔥 <a href="https://github.com/QwenLM/qwen-code">QwenLM/qwen-code</a></td>
+<td align="left">TypeScript</td>
+<td align="right">30,560 (+1,446, +5%)</td>
+<td align="left">QwenLM/qwen-code is an open-source AI coding agent that lives in your terminal.</td>
+</tr>
+<tr>
+<td align="left">🔥 <a href="https://github.com/superplanehq/superplane">superplanehq/superplane</a></td>
+<td align="left">Go</td>
+<td align="right">10,058 (+826, +8.9%)</td>
+<td align="left">superplanehq/superplane is an open source factory for one-shot engineering.</td>
+</tr>
+<tr>
+<td align="left">🔥 <a href="https://github.com/PurpleDoubleD/locally-uncensored">PurpleDoubleD/locally-uncensored</a></td>
+<td align="left">TypeScript</td>
+<td align="right">4,290 (+678, +19%)</td>
+<td align="left">PurpleDoubleD/locally-uncensored is an all-in-one local AI studio for desktop with chat, image and video generation, and a coding agent in one free, open source app for Windows and Linux requiring no Docker, no terminal, no cloud.</td>
+</tr>
+<tr>
+<td align="left">🔥 <a href="https://github.com/Gentleman-Programming/gentle-shell">Gentleman-Programming/gentle-shell</a></td>
+<td align="left">TypeScript</td>
+<td align="right">2,680 (+597, +29%)</td>
+<td align="left">Gentleman-Programming/gentle-shell is a Pi-native workspace for AI-assisted development bringing parallel coding agents, live tasks, Git diffs, persistent memory, and permission controls into one terminal interface powered by Gentle AI and Organic Driven Development (ODD).</td>
+</tr>
+<tr>
+<td align="left">🔥 <a href="https://github.com/WhiteTowerAI/ohmygame">WhiteTowerAI/ohmygame</a></td>
+<td align="left">TypeScript</td>
+<td align="right">2,252 (+483, +27%)</td>
+<td align="left">WhiteTowerAI/ohmygame is an open-source studio for making games with AI providing a game canvas and bring-your-own-key model in one app.</td>
+</tr>
+<tr>
+<td align="left">🔥 <a href="https://github.com/JetBrains/thinkrail">JetBrains/thinkrail</a></td>
+<td align="left">TypeScript</td>
+<td align="right">8,286 (+281, +3.5%)</td>
+<td align="left">JetBrains/thinkrail is an agentic IDE that gets better every time you use it.</td>
+</tr>
+<tr>
+<td align="left">🔥 <a href="https://github.com/unstablebuild/rune">unstablebuild/rune</a></td>
+<td align="left">Go</td>
+<td align="right">1,795 (+206, +13%)</td>
+<td align="left">unstablebuild/rune is a fast, GPU-accelerated, full-featured IDE and terminal multiplexer suitable for both automatic and manual programming.</td>
+</tr>
+</tbody></table>
+<h3>🧰 Agent Harnesses &amp; Frameworks</h3>
+<table>
+<thead>
+<tr>
+<th align="left">Project</th>
+<th align="left">Lang</th>
+<th align="right">Stars (total / this week, %)</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">🔥 <a href="https://github.com/ccch1mneyyy/dsh-Go">ccch1mneyyy/dsh-Go</a></td>
+<td align="left">Dart</td>
+<td align="right">24,052 (+7,483, +45%)</td>
+<td align="left">ccch1mneyyy/dsh-Go is dsh-go — DeepSeek Harness that runs on your phone and can remote control your computer.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://github.com/alibaba/open-code-review">alibaba/open-code-review</a></td>
+<td align="left">Go</td>
+<td align="right">52,353 (+2,682, +5.4%)</td>
+<td align="left">alibaba/open-code-review is a secure, fast, efficient hybrid architecture code review tool battle-tested at Alibaba&#39;s scale with deterministic pipelines + LLM Agent, precise line-level comments, and built-in multi-language ruleset for NPE, thread-safety, XSS, SQL injection.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://github.com/dataelement/dsh-desktop">dataelement/dsh-desktop</a></td>
+<td align="left">JavaScript</td>
+<td align="right">19,231 (+1,612, +9.1%)</td>
+<td align="left">dataelement/dsh-desktop is DSHDesktop — DeepSeek Harness Desktop version.</td>
+</tr>
+<tr>
+<td align="left">🔥 <a href="https://github.com/lobehub/lobehub">lobehub/lobehub</a></td>
+<td align="left">TypeScript</td>
+<td align="right">85,598 (+1,119, +1.3%)</td>
+<td align="left">lobehub/lobehub is LobeHub — Super-Agents on Your Team that add super-agents to the chats your team already uses, taking on work by themselves and getting better every week.</td>
+</tr>
+<tr>
+<td align="left">🔥 <a href="https://github.com/FailproofAI/failproofai">FailproofAI/failproofai</a></td>
+<td align="left">TypeScript</td>
+<td align="right">9,087 (+843, +10%)</td>
+<td align="left">FailproofAI/failproofai provides observability and enforcement for AI agent harnesses, capturing every run and runtime reliability with policy enforcement.</td>
+</tr>
+<tr>
+<td align="left">🔥 <a href="https://github.com/ruvnet/ruflo">ruvnet/ruflo</a></td>
+<td align="left">TypeScript</td>
+<td align="right">81,835 (+537, +0.7%)</td>
+<td align="left">ruvnet/ruflo is the original agent harness for deploying intelligent multi-player swarms, coordinating autonomous workflows, and building conversational AI systems with adaptive memory, self-learning intelligence, federation, vector RAG integration, and native Claude Code / Codex / Hermes integration.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://github.com/converge-ai-labs/agent-foundation">converge-ai-labs/agent-foundation</a></td>
+<td align="left">Python</td>
+<td align="right">1,290 (+382, +42%)</td>
+<td align="left">converge-ai-labs/agent-foundation is a13n for building, running, and managing AI agents at scale on your own infrastructure with a built-in harness, durable execution, multi-provider support, and a management console.</td>
+</tr>
+<tr>
+<td align="left">🔥 <a href="https://github.com/heymrun/heym">heymrun/heym</a></td>
+<td align="left">Python</td>
+<td align="right">1,684 (+149, +9.7%)</td>
+<td align="left">heymrun/heym builds agentic systems to run with confidence, orchestrating agents, automating business processes, inspecting every execution, and keeping humans in control, deployable on your own infrastructure.</td>
+</tr>
+</tbody></table>
+<h3>🕸️ Multi-Agent &amp; Orchestration</h3>
+<table>
+<thead>
+<tr>
+<th align="left">Project</th>
+<th align="left">Lang</th>
+<th align="right">Stars (total / this week, %)</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a href="https://github.com/pingdotgg/t3code">pingdotgg/t3code</a></td>
+<td align="left">TypeScript</td>
+<td align="right">61,812 (+8,984, +17%)</td>
+<td align="left">pingdotgg/t3code is the best way to control Claude Code, Codex and more from any computer or phone.</td>
+</tr>
+<tr>
+<td align="left">🔥 <a href="https://github.com/paperclipai/paperclip">paperclipai/paperclip</a></td>
+<td align="left">TypeScript</td>
+<td align="right">114,185 (+1,787, +1.6%)</td>
+<td align="left">paperclipai/paperclip is the open-source app everyone uses to manage agents at work.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://github.com/Tencent/LoopForge">Tencent/LoopForge</a></td>
+<td align="left">Go</td>
+<td align="right">1,797 (+1,632, +989%)</td>
+<td align="left">Tencent/LoopForge provides self-hosted workflows for coding-agent delivery orchestrating CodeBuddy, Codex and Claude Code with scripts and human approval gates, including local workflows for coding assistants.</td>
+</tr>
+<tr>
+<td align="left">🔥 <a href="https://github.com/agent-of-empires/agent-of-empires">agent-of-empires/agent-of-empires</a></td>
+<td align="left">Rust</td>
+<td align="right">4,549 (+658, +17%)</td>
+<td align="left">agent-of-empires/agent-of-empires manages multiple Claude Code, OpenCode agents from either TUI or Web for easy mobile access, also supporting Mistral Vibe, Codex CLI, Gemini CLI, Pi.dev, Copilot CLI, Factory Droid Coding.</td>
+</tr>
+<tr>
+<td align="left">🔥 <a href="https://github.com/OrchestratorInc/agent-orchestrator">OrchestratorInc/agent-orchestrator</a></td>
+<td align="left">TypeScript</td>
+<td align="right">14,771 (+471, +3.3%)</td>
+<td align="left">OrchestratorInc/agent-orchestrator plans, runs and supervises fleets of agents from task to merged PR with desktop (macOS, Windows, Linux) + iPhone &amp; Android apps supporting Claude Code, Codex &amp; 35+ coding agents.</td>
+</tr>
+<tr>
+<td align="left">🔥 <a href="https://github.com/sandbox-quantum/switch">sandbox-quantum/switch</a></td>
+<td align="left">Python</td>
+<td align="right">4,537 (+283, +6.7%)</td>
+<td align="left">sandbox-quantum/switch provides open-source AI teammates in Slack, Teams, Discord, Telegram and Mattermost, self-hosted with any agent harness and any model.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://github.com/zeronsh/zeron">zeronsh/zeron</a></td>
+<td align="left">Rust</td>
+<td align="right">3,689 (+209, +6%)</td>
+<td align="left">zeronsh/zeron is a native control plane for Claude Code, Codex, Cursor, Devin and other coding agents.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://github.com/open-mercato/cezar">open-mercato/cezar</a></td>
+<td align="left">TypeScript</td>
+<td align="right">1,062 (+96, +9.9%)</td>
+<td align="left">open-mercato/cezar is an open-source orchestrator and ADE for running Claude Code, Codex, OpenCode, Pi and other AI coding agents in parallel locally or 24/7 on your own server.</td>
+</tr>
+</tbody></table>
+<h3>🔌 Agent Tooling</h3>
+<table>
+<thead>
+<tr>
+<th align="left">Project</th>
+<th align="left">Lang</th>
+<th align="right">Stars (total / this week, %)</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a href="https://github.com/anthropics/skills">anthropics/skills</a></td>
+<td align="left">Python</td>
+<td align="right">195,496 (+6,077, +3.2%)</td>
+<td align="left">anthropics/skills is a public repository for Agent Skills.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://github.com/vercel-labs/agent-browser">vercel-labs/agent-browser</a></td>
+<td align="left">Rust</td>
+<td align="right">51,734 (+4,217, +8.9%)</td>
+<td align="left">vercel-labs/agent-browser is a browser automation CLI for AI agents.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://github.com/addyosmani/agent-skills">addyosmani/agent-skills</a></td>
+<td align="left">JavaScript</td>
+<td align="right">118,033 (+3,889, +3.4%)</td>
+<td align="left">addyosmani/agent-skills provides production-grade engineering skills for AI coding agents.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://github.com/backnotprop/plannotator">backnotprop/plannotator</a></td>
+<td align="left">TypeScript</td>
+<td align="right">12,030 (+1,719, +17%)</td>
+<td align="left">backnotprop/plannotator is the workspace to stay in the loop and on top of agents — shape, decide, plan, annotate, review code, share with team, and send all feedback to agents with one click.</td>
+</tr>
+<tr>
+<td align="left">🔥 <a href="https://github.com/microsoft/TokenEconomizer">microsoft/TokenEconomizer</a></td>
+<td align="left">Python</td>
+<td align="right">6,704 (+1,375, +26%)</td>
+<td align="left">microsoft/TokenEconomizer provides experience-driven black-box cost control for coding agents.</td>
+</tr>
+<tr>
+<td align="left">🔥 <a href="https://github.com/haydenschmitty/floorplan">haydenschmitty/floorplan</a></td>
+<td align="left">JavaScript</td>
+<td align="right">4,553 (+1,280, +39%)</td>
+<td align="left">haydenschmitty/floorplan provides an interactive, plain-English map of your codebase drawn by Claude or Codex to see how your app actually fits together.</td>
+</tr>
+<tr>
+<td align="left">🔥 <a href="https://github.com/kajisho5/ffmpeg-skill">kajisho5/ffmpeg-skill</a></td>
+<td align="left">Python</td>
+<td align="right">6,051 (+1,213, +25%)</td>
+<td align="left">kajisho5/ffmpeg-skill is a local video editor for coding agents with 42 FFmpeg tools, a machine-readable contract, and an MCP server for Claude Code, Cursor and Codex supporting cut, captions, reframe, loudness, platform exports with no cloud and no API keys.</td>
+</tr>
+<tr>
+<td align="left">🔥 <a href="https://github.com/ZiChuanLan/agent-purge">ZiChuanLan/agent-purge</a></td>
+<td align="left">JavaScript</td>
+<td align="right">1,850 (+363, +24%)</td>
+<td align="left">ZiChuanLan/agent-purge enables one persona across many coding agents by replacing or injecting system prompts across codex, claude, opencode, grok, omp, hermes, pi, zcode with a local web console.</td>
+</tr>
+</tbody></table>
+<h3>🤖 Other Agents</h3>
+<table>
+<thead>
+<tr>
+<th align="left">Project</th>
+<th align="left">Lang</th>
+<th align="right">Stars (total / this week, %)</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a href="https://github.com/milind-soni/OpenMausBot">milind-soni/OpenMausBot</a></td>
+<td align="left">TypeScript</td>
+<td align="right">23,639 (+5,463, +30%)</td>
+<td align="left">milind-soni/OpenMausBot is an open-source Grok Bot alternative with a virtual machine that bots can use.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://github.com/ZhuLinsen/daily_stock_analysis">ZhuLinsen/daily_stock_analysis</a></td>
+<td align="left">Python</td>
+<td align="right">72,593 (+4,548, +6.7%)</td>
+<td align="left">ZhuLinsen/daily_stock_analysis is an LLM-powered multi-market stock analysis system with multi-source market data, real-time news, decision dashboard, automated notifications, and cost-free scheduled runs.</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>Skills: PRs and requests this week</h2>
+<blockquote>
+<p>Source: <a href="https://github.com/anthropics/skills">anthropics/skills</a></p>
+</blockquote>
+<h3>Open PRs worth watching</h3>
+<ul>
+<li><strong>#2223</strong> – Fixes <code>skill-creator</code> packaging to return a clean error (and <code>None</code>) when the output path is a file or nests under a file, instead of a Python traceback. <a href="https://github.com/anthropics/skills/pull/2223">PR #2223</a></li>
+<li><strong>#2219</strong> – Adds Origin/Host/Content-Type checks to the eval-viewer feedback endpoint, preventing cross-origin overwrites of review data (part 2 of #1982). <a href="https://github.com/anthropics/skills/pull/2219">PR #2219</a></li>
+<li><strong>#2211</strong> – Makes <code>mcp-builder</code> evaluation report incomplete runs (max_tokens, refusal, etc.) instead of scoring truncated output or crashing. <a href="https://github.com/anthropics/skills/pull/2211">PR #2211</a></li>
+<li><strong>#2199</strong> – Enforces the spec rule that a skill&#39;s <code>name</code> must match its parent directory name; previously a mismatch produced a spec-violating <code>.skill</code> archive silently. <a href="https://github.com/anthropics/skills/pull/2199">PR #2199</a></li>
+<li><strong>#1903</strong> – Streams PDF-to-image conversion page-by-page to bound memory; previously <code>convert_from_path</code> loaded all rendered pages at once. <a href="https://github.com/anthropics/skills/pull/1903">PR #1903</a></li>
+</ul>
+<h3>Requests</h3>
+<ul>
+<li><strong>#2220</strong> – Reduce the 33 KB <code>skill-creator/SKILL.md</code> entrypoint so it fits within ~15 KiB agent context budgets. <a href="https://github.com/anthropics/skills/issues/2220">Issue #2220</a></li>
+<li><strong>#2207</strong> – Bring Agent SDK into <code>claude-api</code> scope or provide a fetchable reference; the current linked page is too large to read in one call. <a href="https://github.com/anthropics/skills/issues/2207">Issue #2207</a></li>
+<li><strong>#2201</strong> – Fix <code>mcp-builder</code> agent loop to handle parallel <code>tool_use</code> blocks and distinguish stop reasons (max_tokens, refusal) from final answers. <a href="https://github.com/anthropics/skills/issues/2201">Issue #2201</a></li>
+</ul>
+<h3>Takeaway</h3>
+<p>The week&#39;s activity centers on hardening skill packaging, evaluation correctness, and endpoint security while trimming oversized entrypoints and updating deprecated MCP integrations.</p>
+<hr>
+<h2>Candidates to track</h2>
+<p>These repos trended two weeks in a row (🔥) and are not tracked, by the config.yml section they fit.</p>
+<ul>
+<li><code>agents.repos</code>: <a href="https://github.com/QwenLM/qwen-code">QwenLM/qwen-code</a>, <a href="https://github.com/superplanehq/superplane">superplanehq/superplane</a>, <a href="https://github.com/PurpleDoubleD/locally-uncensored">PurpleDoubleD/locally-uncensored</a>, <a href="https://github.com/Gentleman-Programming/gentle-shell">Gentleman-Programming/gentle-shell</a>, <a href="https://github.com/WhiteTowerAI/ohmygame">WhiteTowerAI/ohmygame</a>, <a href="https://github.com/JetBrains/thinkrail">JetBrains/thinkrail</a>, <a href="https://github.com/unstablebuild/rune">unstablebuild/rune</a></li>
+<li><code>infra.repos</code>: <a href="https://github.com/microsoft/TokenEconomizer">microsoft/TokenEconomizer</a>, <a href="https://github.com/haydenschmitty/floorplan">haydenschmitty/floorplan</a>, <a href="https://github.com/kajisho5/ffmpeg-skill">kajisho5/ffmpeg-skill</a>, <a href="https://github.com/ZiChuanLan/agent-purge">ZiChuanLan/agent-purge</a></li>
+<li>No matching section: <a href="https://github.com/ccch1mneyyy/dsh-Go">ccch1mneyyy/dsh-Go</a>, <a href="https://github.com/lobehub/lobehub">lobehub/lobehub</a>, <a href="https://github.com/FailproofAI/failproofai">FailproofAI/failproofai</a>, <a href="https://github.com/ruvnet/ruflo">ruvnet/ruflo</a>, <a href="https://github.com/heymrun/heym">heymrun/heym</a>, <a href="https://github.com/paperclipai/paperclip">paperclipai/paperclip</a>, <a href="https://github.com/agent-of-empires/agent-of-empires">agent-of-empires/agent-of-empires</a>, <a href="https://github.com/OrchestratorInc/agent-orchestrator">OrchestratorInc/agent-orchestrator</a>, <a href="https://github.com/sandbox-quantum/switch">sandbox-quantum/switch</a></li>
+</ul>
+<details><summary>config.yml lines to track one</summary>
+
+<p><code>agents.repos</code>:</p>
+<pre><code class="language-yaml">    - id: qwen-code
+      repo: QwenLM/qwen-code
+      name: qwen-code
+    - id: superplane
+      repo: superplanehq/superplane
+      name: superplane
+    - id: locally-uncensored
+      repo: PurpleDoubleD/locally-uncensored
+      name: locally-uncensored
+    - id: gentle-shell
+      repo: Gentleman-Programming/gentle-shell
+      name: gentle-shell
+    - id: ohmygame
+      repo: WhiteTowerAI/ohmygame
+      name: ohmygame
+    - id: thinkrail
+      repo: JetBrains/thinkrail
+      name: thinkrail
+    - id: rune
+      repo: unstablebuild/rune
+      name: rune
+</code></pre>
+<p><code>infra.repos</code>:</p>
+<pre><code class="language-yaml">    - id: tokeneconomizer
+      repo: microsoft/TokenEconomizer
+      name: TokenEconomizer
+    - id: floorplan
+      repo: haydenschmitty/floorplan
+      name: floorplan
+    - id: ffmpeg-skill
+      repo: kajisho5/ffmpeg-skill
+      name: ffmpeg-skill
+    - id: agent-purge
+      repo: ZiChuanLan/agent-purge
+      name: agent-purge
+</code></pre>
+</details>
+
+<hr>
+<h2>Models</h2>
+<h3>Hugging Face trending</h3>
+<p><em>Ranked by likes gained in the last 7 days; 🔥 also on last week&#39;s Trends page; quantised copies of a release share its row.</em></p>
+<table>
+<thead>
+<tr>
+<th align="right">#</th>
+<th align="left">Model</th>
+<th align="right">Likes (total)</th>
+<th align="right">Downloads (30 days)</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="right">1</td>
+<td align="left"><a href="https://huggingface.co/MiniMaxAI/MiniMax-H3-Image">MiniMaxAI/MiniMax-H3-Image</a></td>
+<td align="right">1,207</td>
+<td align="right">571,067</td>
+<td align="left">Text-to-image model, other license.</td>
+</tr>
+<tr>
+<td align="right">2</td>
+<td align="left">🔥 <a href="https://huggingface.co/Qwen/Qwen3.8-27B">Qwen/Qwen3.8-27B</a> (+ <a href="https://huggingface.co/unsloth/Qwen3.8-27B-GGUF">unsloth/Qwen3.8-27B-GGUF</a>)</td>
+<td align="right">20,144</td>
+<td align="right">6,547,772</td>
+<td align="left">27B image-text-to-text model, Apache-2.0 license.</td>
+</tr>
+<tr>
+<td align="right">3</td>
+<td align="left">🔥 <a href="https://huggingface.co/Lightricks/LTX-2.5">Lightricks/LTX-2.5</a></td>
+<td align="right">12,091</td>
+<td align="right">2,754,355</td>
+<td align="left">Image-to-video model, other license.</td>
+</tr>
+<tr>
+<td align="right">4</td>
+<td align="left"><a href="https://huggingface.co/Comfy-Org/MiniMax-H3-Image">Comfy-Org/MiniMax-H3-Image</a></td>
+<td align="right">420</td>
+<td align="right">1,973,388</td>
+<td align="left">Text-to-image model, other license.</td>
+</tr>
+<tr>
+<td align="right">5</td>
+<td align="left"><a href="https://huggingface.co/Zyphra/ZONOS3-Mini">Zyphra/ZONOS3-Mini</a></td>
+<td align="right">409</td>
+<td align="right">39,862</td>
+<td align="left">Text-to-speech model, Apache-2.0 license.</td>
+</tr>
+<tr>
+<td align="right">6</td>
+<td align="left"><a href="https://huggingface.co/thinkingmachines/Inkling-2-Small">thinkingmachines/Inkling-2-Small</a></td>
+<td align="right">349</td>
+<td align="right">7,329</td>
+<td align="left">594B image-text-to-text model, Apache-2.0 license.</td>
+</tr>
+<tr>
+<td align="right">7</td>
+<td align="left"><a href="https://huggingface.co/higurashi-ai/Haru-4B">higurashi-ai/Haru-4B</a></td>
+<td align="right">329</td>
+<td align="right">2,098</td>
+<td align="left">5.2B audio-to-audio model, Apache-2.0 license.</td>
+</tr>
+<tr>
+<td align="right">8</td>
+<td align="left">🔥 <a href="https://huggingface.co/speridlabs/idol">speridlabs/idol</a></td>
+<td align="right">2,372</td>
+<td align="right">33,423</td>
+<td align="left">Image-to-3d model, Apache-2.0 license.</td>
+</tr>
+<tr>
+<td align="right">9</td>
+<td align="left">🔥 <a href="https://huggingface.co/moonshotai/Kimi-K3.1-Pro">moonshotai/Kimi-K3.1-Pro</a></td>
+<td align="right">2,112</td>
+<td align="right">46,766</td>
+<td align="left">2.7T image-text-to-text model, other license.</td>
+</tr>
+<tr>
+<td align="right">10</td>
+<td align="left">🔥 <a href="https://huggingface.co/NousResearch/Arete-27B">NousResearch/Arete-27B</a></td>
+<td align="right">615</td>
+<td align="right">7,497</td>
+<td align="left">27B text-generation model, Apache-2.0 license.</td>
+</tr>
+<tr>
+<td align="right">11</td>
+<td align="left"><a href="https://huggingface.co/Edge0/Edge0-145B-NVFP4">Edge0/Edge0-145B-NVFP4</a></td>
+<td align="right">301</td>
+<td align="right">41,606</td>
+<td align="left">145B text-generation model, other license.</td>
+</tr>
+<tr>
+<td align="right">12</td>
+<td align="left">🔥 <a href="https://huggingface.co/black-forest-labs/flux-3-image-klein-comfy">black-forest-labs/flux-3-image-klein-comfy</a></td>
+<td align="right">3,261</td>
+<td align="right">1,182,267</td>
+<td align="left">Image-to-image model, other license.</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>Research</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Paper</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a href="http://arxiv.org/abs/2611.10469v1">Hibana: Fast Agentic Inference on Unified-Memory Devices</a></td>
+<td align="left">Hibana is an inference engine for unified-memory devices that co-optimizes model representation, memory management, and decoding strategy for fast agentic inference.</td>
+</tr>
+<tr>
+<td align="left"><a href="http://arxiv.org/abs/2611.14704v1">Code as Explanations: Executable and Verifiable LLM Explanations</a></td>
+<td align="left">Code as Explanations proposes executable code explanations that explain LLM behavior across datasets and enable automatic verification.</td>
+</tr>
+<tr>
+<td align="left"><a href="http://arxiv.org/abs/2611.14320v1">Don&#39;t Just Trust Your Memory: Evidence-Linked Memory Reduces Memory-Induced Degradation in LLM Agents</a></td>
+<td align="left">Don&#39;t Just Trust Your Memory introduces WikiTrace, an evidence-linked memory framework that reduces memory-induced degradation by linking lessons to their source trajectories.</td>
+</tr>
+<tr>
+<td align="left"><a href="http://arxiv.org/abs/2611.12835v1">Mitigating Agentic Deception via Evaluation-Side Partially Observable Games</a></td>
+<td align="left">Mitigating Agentic Deception via Evaluation-Side Partially Observable Games addresses agentic deception by mitigating evaluation-side partial observability in free-form language space.</td>
+</tr>
+<tr>
+<td align="left"><a href="http://arxiv.org/abs/2611.17167v1">Actor, Judge, or Teacher? Understanding Decision Models in Long-Horizon Agents</a></td>
+<td align="left">Actor, Judge, or Teacher? Understanding Decision Models in Long-Horizon Agents compares decision models and LLMs as actors, judges, and teachers on ALFWorld and WebShop to assess whether poor actors can still teach well.</td>
+</tr>
+<tr>
+<td align="left"><a href="http://arxiv.org/abs/2611.11560v1">LiveAsset: Learning Intent Assets from Corrective Interactions for Agent Runtime Control</a></td>
+<td align="left">LiveAsset learns intent assets from corrective interactions to enable runtime control of LLM agents aligning with user preferences.</td>
+</tr>
+<tr>
+<td align="left"><a href="http://arxiv.org/abs/2611.10542v1">When Experience Becomes a Backdoor: Poisoning Self-Evolving LLM Agents via Failure-Aware Task Optimization</a></td>
+<td align="left">When Experience Becomes a Backdoor: Poisoning Self-Evolving LLM Agents via Failure-Aware Task Optimization studies task-level backdoor attacks where poisoned evolution tasks compromise self-evolving LLM agents.</td>
+</tr>
+<tr>
+<td align="left"><a href="http://arxiv.org/abs/2611.14808v1">OverServe: Resource Amplification Attacks on SaaS Agents via Tool--Prompt Co-Design</a></td>
+<td align="left">OverServe presents a multi-agent framework that constructs resource amplification attacks on SaaS agents by co-designing tool prompts.</td>
+</tr>
+<tr>
+<td align="left"><a href="http://arxiv.org/abs/2611.11929v1">Can LLM Agents Organize Their Own Memory?</a></td>
+<td align="left">Can LLM Agents Organize Their Own Memory? introduces SoMem, a self-organized memory framework where agents autonomously summarize, group, and revise linked documents.</td>
+</tr>
+<tr>
+<td align="left"><a href="http://arxiv.org/abs/2611.10240v1">PACE: Keeping the Right Tokens in the KV Cache Is Not Enough for Long-Horizon LLM Agents</a></td>
+<td align="left">PACE demonstrates that keeping needed tokens in the KV cache is insufficient for long-horizon agents, showing accuracy drops from 93% to 64% in 100K-token coding sessions on Qwen3-8B with a 2,048-token budget despite over 99% needed tokens retained.</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>Most discussed</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Story</th>
+<th align="left">Source</th>
+<th align="left">Discussion</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a href="https://dev.to/gnomeman4201/what-unshare-n-leaves-behind-building-a-boundary-for-an-ai-recon-agent-75b">What unshare -n leaves behind: building a boundary for an AI recon agent</a></td>
+<td align="left">Dev.to</td>
+<td align="left"><a href="https://dev.to/gnomeman4201/what-unshare-n-leaves-behind-building-a-boundary-for-an-ai-recon-agent-75b">15 reactions, 22 comments</a></td>
+<td align="left">The author investigates what Linux&#39;s unshare -n leaves exposed while building a sandbox boundary for an AI reconnaissance agent that passed 13 isolation tests.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://dev.to/gde/stop-asking-llms-to-do-math-client-side-functions-in-flutter-genui-with-blocsignals-23bh">Stop Asking LLMs to Do Math: Client-Side Functions in Flutter GenUI with bloc_signals</a></td>
+<td align="left">Dev.to</td>
+<td align="left"><a href="https://dev.to/gde/stop-asking-llms-to-do-math-client-side-functions-in-flutter-genui-with-blocsignals-23bh">16 reactions, 16 comments</a></td>
+<td align="left">The author explains why client-side functions are critical for Generative UI, showing how bloc_signals_genui converts catalog functions into 0ms synchronous reactive signals in Flutter.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://dev.to/gde/cant-beat-free-gemma-4-31b-on-amd-token-lab-with-a-local-chat-page-and-an-adk-agent-c5b">Can&#39;t Beat Free: Gemma 4 31B on AMD Token Lab, with a Local Chat Page and an ADK Agent</a></td>
+<td align="left">Dev.to</td>
+<td align="left"><a href="https://dev.to/gde/cant-beat-free-gemma-4-31b-on-amd-token-lab-with-a-local-chat-page-and-an-adk-agent-c5b">36 reactions, 13 comments</a></td>
+<td align="left">The author demonstrates running Gemma 4 31B via AMD Token Lab, a free OpenAI-compatible API on AMD GPUs, with a local chat page, terminal client, and ADK agent.</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>Signals</h2>
+<p>OpenRouter&#39;s token leaderboard shows <a href="https://hermes-agent.nousresearch.com/">Hermes Agent</a> at 13.02T tokens/week, well ahead of <a href="https://claude.ai/code">Claude Code</a> at 10.80T and <a href="https://kilocode.ai/">Kilo Code</a> at 7.03T; Kilo Code also recorded the largest week-over-week increase on the platform at +46%. On npm, <a href="https://www.npmjs.com/package/@earendil-works/pi-coding-agent">@earendil-works/pi-coding-agent</a> leads with 6.3M downloads/week, far above <a href="https://omp.sh/">omp</a> at 295K and <a href="https://www.npmjs.com/package/@sma1lboy/rove">@sma1lboy/rove</a> at 28.7K.</p>
+<p>GitHub star gains concentrate in a few repositories: <a href="https://github.com/pingdotgg/t3code">pingdotgg/t3code</a> added 8,984 stars (+17%) for the largest absolute gain across all five category tables, while <a href="https://github.com/Tencent/LoopForge">Tencent/LoopForge</a> surged 1,632 stars (+989%) for the largest relative gain. In the Coding Agents table, <a href="https://github.com/google/elephant-goldfish-model">google/elephant-goldfish-model</a> gained 5,060 stars (+34%), and in Agent Harnesses, <a href="https://github.com/ccch1mneyyy/dsh-Go">ccch1mneyyy/dsh-Go</a> added 7,483 stars (+45%), each the largest absolute and relative gain in its table.</p>
+<p>Agent Tooling saw <a href="https://github.com/anthropics/skills">anthropics/skills</a> add 6,077 stars (+3.2%) for the largest absolute gain, while <a href="https://github.com/haydenschmitty/floorplan">haydenschmitty/floorplan</a> grew 1,280 stars (+39%) for the largest relative gain. In Other Agents, <a href="https://github.com/milind-soni/OpenMausBot">milind-soni/OpenMausBot</a> led with 5,463 new stars (+30%).</p>
+<p>Hugging Face trending places <a href="https://huggingface.co/MiniMaxAI/MiniMax-H3-Image">MiniMaxAI/MiniMax-H3-Image</a> at #1 by likes gained in the last 7 days (1,207), while <a href="https://huggingface.co/Qwen/Qwen3.8-27B">Qwen/Qwen3.8-27B</a> holds the highest total likes (20,144) and 30-day downloads (6.5M) among the listed models.</p>
+<hr>
+<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
+]]></content:encoded>
+    </item>
     <item>
       <title>Trends 2026-11-09</title>
       <link>https://dboeter.github.io/daily-diff/#2026-11-09/ai-trends</link>
