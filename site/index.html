@@ -44,6 +44,8 @@
        else uses them: the selected day, tab and search hit are ink or the link color.
        --dim is for rules and scrollbars only: it fails contrast as text. */
     :root {
+      /* Native controls (the search field's clear button, scrollbars) follow the theme. */
+      color-scheme: dark;
       --bg:             #0E1110;
       --surface:        #131716;
       --raised:         #1A1F1C;
@@ -81,10 +83,12 @@
       --text:           #151917;
       --muted:          #59625C;
       --dim:            #C4C8C0;
-      --added:          #1A7F4E;
+      color-scheme: light;
+      /* The signs are darker than the mark's green and red: 4.5:1 on their gutter tints. */
+      --added:          #146C42;
       --added-bg:       #EDF7F1;
       --added-gutter:   #D6EEDF;
-      --removed:        #BF3A31;
+      --removed:        #A83028;
       --removed-bg:     #FCEFED;
       --removed-gutter: #F7DAD6;
       --link:           #1F5FBF;
@@ -108,6 +112,14 @@
     a { color: inherit; }
     button { font: inherit; color: inherit; }
     :focus-visible { outline: 2px solid var(--link); outline-offset: 2px; border-radius: 3px; }
+    /* A heading that code moved the focus to (a new page, a contents jump) shows no ring. */
+    h1[tabindex="-1"]:focus, h2[tabindex="-1"]:focus, h3[tabindex="-1"]:focus { outline: none; }
+    /* The first Tab stop: past the bar and the tabs, to the page. Shown only while focused. */
+    #skipBtn {
+      position: fixed; left: 12px; top: -60px; z-index: 20; height: 36px; padding: 0 12px;
+      border: 1px solid var(--rule); border-radius: 6px; background: var(--surface); cursor: pointer;
+    }
+    #skipBtn:focus { top: 8px; }
     ::selection { background: var(--found); }
     /* A report's square (REPORTS color in src/core/strings.ts, manifest `colors`); set as --tile. */
     .tile {
@@ -163,8 +175,10 @@
       overflow-x: auto; scrollbar-width: none; font-size: 14px;
     }
     .tabs-in::-webkit-scrollbar { display: none; }
-    /* More tabs to the right than fit (a phone, an archive day of eight reports): the edge fades. */
-    .tabs-in.more { mask-image: linear-gradient(to right, #000 calc(100% - 56px), transparent calc(100% - 8px)); }
+    /* More tabs than fit (a phone, an archive day of eight reports): the edge with more fades. */
+    .tabs-in { --fade-l: 0px; --fade-r: 0px; mask-image: linear-gradient(to right, transparent, #000 var(--fade-l), #000 calc(100% - var(--fade-r)), transparent); }
+    .tabs-in.more-left { --fade-l: 48px; }
+    .tabs-in.more-right { --fade-r: 48px; }
     .tab {
       display: inline-flex; align-items: center; gap: 8px; flex-shrink: 0;
       padding-top: 2px; border-bottom: 2px solid transparent;
@@ -241,14 +255,12 @@
     .stories { list-style: none; }
     .stories li { padding: 9px 0; border-top: 1px solid var(--rule); }
     .stories li:last-child { border-bottom: 1px solid var(--rule); }
-    .stories a { text-decoration: none; }
-    .stories a:hover { text-decoration: underline; text-underline-offset: 3px; }
+    .stories a, .upcoming a { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; text-decoration-color: var(--dim); }
+    .stories a:hover, .upcoming a:hover { text-decoration-color: currentColor; }
     .stories .counts { display: block; font-size: 13px; color: var(--muted); }
     .upcoming { list-style: none; font-size: 14px; line-height: 1.45; }
     .upcoming li { display: grid; grid-template-columns: 3.75rem 1fr; gap: 0 10px; padding: 8px 0; border-top: 1px solid var(--rule); }
     .upcoming time, .upcoming .when { font-family: var(--mono); font-size: 13px; color: var(--muted); white-space: nowrap; }
-    .upcoming a { text-decoration: none; }
-    .upcoming a:hover { text-decoration: underline; text-underline-offset: 3px; }
     .upcoming .src { display: block; font-size: 13px; color: var(--muted); }
 
     /* ── Markdown (a report) ── */
@@ -267,8 +279,12 @@
     /* Text keeps a readable measure; tables and the Highlights take the column's full width. */
     .md > p, .md > ul:not(.gutter), .md > ol, .md > blockquote { max-width: 41rem; }
     .md p { margin-bottom: 12px; }
-    .md a { color: var(--link); text-decoration: none; }
-    .md a:hover { text-decoration: underline; text-underline-offset: 3px; }
+    /* Underlined, faintly: a link in a sentence must not depend on its color alone. */
+    .md a {
+      color: var(--link); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px;
+      text-decoration-color: color-mix(in srgb, var(--link) 40%, transparent);
+    }
+    .md a:hover { text-decoration-color: currentColor; }
     .md strong { font-weight: 600; }
     /* The Markdown's rules sit before headings, whose spacing already separates the sections. */
     .md hr { display: none; }
@@ -284,7 +300,7 @@
       font-variant-numeric: tabular-nums;
     }
     .md blockquote.report-meta p { display: flex; flex-wrap: wrap; gap: 2px 20px; margin: 0; }
-    .md blockquote.report-meta a { color: inherit; text-decoration: underline; text-underline-offset: 3px; }
+    .md blockquote.report-meta a { color: inherit; text-decoration-color: currentColor; }
     .md blockquote.report-meta a:hover { color: var(--text); }
     .md code {
       font-family: var(--mono); font-size: 0.875em;
@@ -350,6 +366,10 @@
       padding-top: 9px; text-align: center;
       font-family: var(--mono); font-weight: 600; background: var(--raised);
     }
+    /* No signs, so no gutter: plain lines with a rule between them. */
+    ul.highlights:not(.gutter) > li { padding-left: 16px; }
+    ul.highlights:not(.gutter) > li + li { border-top-color: var(--rule); }
+    ul.highlights:not(.gutter) > li::before { content: none; }
     ul.gutter > li { background: var(--added-bg); }
     ul.gutter > li::before { content: '+'; color: var(--added); background: var(--added-gutter); }
     ul.gutter > li.gone { background: var(--removed-bg); }
@@ -372,7 +392,8 @@
     .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; font-family: var(--mono); font-size: 13px; text-align: center; }
     .cal-grid .dow { color: var(--muted); font-family: var(--sans); font-size: 12px; padding-bottom: 2px; }
     .cal-day { position: relative; line-height: 36px; border-radius: 6px; text-decoration: none; }
-    .cal-day.off { color: var(--dim); }
+    /* A past day without a digest. A day after the newest digest is an empty cell. */
+    .cal-day.off { color: var(--muted); }
     a.cal-day { font-weight: 500; }
     a.cal-day:hover { background: var(--raised); }
     a.cal-day[aria-current] { background: var(--text); color: var(--bg); font-weight: 600; }
@@ -393,8 +414,8 @@
       font-family: inherit; font-size: 16px;
     }
     #searchInput:focus-visible { outline-offset: -1px; }
-    #searchStatus { font-size: 13px; color: var(--muted); }
-    #searchStatus:not(:empty) { margin-bottom: 8px; }
+    #searchStatus, #searchProgress { font-size: 13px; color: var(--muted); }
+    #searchStatus:not(:empty), #searchProgress:not(:empty) { margin-bottom: 8px; }
     #searchResults { list-style: none; }
     .hit a { display: block; padding: 10px 0; border-top: 1px solid var(--rule); text-decoration: none; }
     .hit a:hover .hit-name { text-decoration: underline; text-underline-offset: 3px; }
@@ -437,10 +458,21 @@
       .md table.stack tr { display: block; padding: 10px 0; border-bottom: 1px solid var(--rule); }
       /* Inline, so a long title wraps as text and its separator stays on the line before it. */
       .md table.stack td { display: inline; padding: 0; border: 0; font-size: 13px; color: var(--muted); }
-      .md table.stack td:not(:empty):not(.prose) ~ td:not(:empty):not(.prose)::before { content: '·'; margin: 0 6px; }
+      .md table.stack td:not(:empty):not(.prose):not(.blank) ~ td:not(:empty):not(.prose):not(.blank)::before { content: '·'; margin: 0 6px; }
       .md table.stack td.prose { display: block; margin-top: 4px; font-size: 14px; color: var(--text); }
-      .md table.stack td:empty { display: none; }
+      .md table.stack td:empty, .md table.stack td.blank { display: none; }
       dialog { margin-top: 8px; max-height: calc(100vh - 16px); }
+    }
+    /* Most phones: the bar is tighter, and fits from 363 px. Narrower ones (to 320 px) drop the
+       newest day's tag. */
+    @media (max-width: 420px) {
+      .wrap { padding: 0 12px; }
+      .bar-in { gap: 4px; }
+      .step, .act { min-width: 30px; }
+      #dayBtn { padding: 0 6px; }
+    }
+    @media (max-width: 365px) {
+      .run-tag { display: none; }
     }
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
@@ -459,6 +491,8 @@
     </symbol>
   </svg>
 
+  <!-- A button, not a link to an anchor: the hash holds the route. -->
+  <button id="skipBtn" type="button">Skip to the page</button>
   <div id="top">
     <header id="bar">
       <div class="wrap bar-in">
@@ -474,7 +508,7 @@
           <button id="dayBtn" type="button" aria-haspopup="dialog" title="Open the archive">
             <span id="dayLabel">…</span>
             <span id="runTag" class="run-tag" hidden></span>
-            <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 3.5 5 6.5l3-3"/></svg>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="3.5" width="11" height="10" rx="2"/><path d="M2.5 7h11M5.5 1.5v3M10.5 1.5v3"/></svg>
           </button>
           <a id="nextDay" class="step" aria-disabled="true">
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 3 5 5-5 5"/></svg>
@@ -534,6 +568,8 @@
       </button>
     </div>
     <div class="dlg-body">
+      <!-- The reading progress changes once per report, so it is not announced; the outcome is. -->
+      <div id="searchProgress"></div>
       <div id="searchStatus" role="status"></div>
       <ol id="searchResults"></ol>
     </div>
@@ -580,7 +616,19 @@ function applyTheme(t, store) {
   try { localStorage.setItem('dd-theme', t); } catch { /* storage blocked: the choice lasts for this visit */ }
 }
 applyTheme(theme, false);
-themeBtn.onclick = () => applyTheme(theme === 'dark' ? 'light' : 'dark', true);
+// One flag for the reader's own choice: a click now, or one stored on an earlier visit.
+let themeChosen = false;
+try {
+  themeChosen = localStorage.getItem('dd-theme') !== null || localStorage.getItem('ar-theme') === 'light';
+} catch { /* storage blocked: no stored choice */ }
+themeBtn.onclick = () => {
+  themeChosen = true;
+  applyTheme(theme === 'dark' ? 'light' : 'dark', true);
+};
+// Without a choice, an open page follows the system when it changes (sunset, a settings switch).
+matchMedia('(prefers-color-scheme: light)').addEventListener('change', (e) => {
+  if (!themeChosen) applyTheme(e.matches ? 'light' : 'dark', false);
+});
 
 // ── Routing ──
 // #YYYY-MM-DD/report is a report, #YYYY-MM-DD the day's overview. Every published report bar,
@@ -660,6 +708,7 @@ document.getElementById('dayBtn').onclick = () => {
 // ── Search ──
 const searchInput = document.getElementById('searchInput');
 const searchStatus = document.getElementById('searchStatus');
+const searchProgress = document.getElementById('searchProgress');
 const searchResults = document.getElementById('searchResults');
 // Results are one per report, newest first; more than this many and the reader should narrow the search.
 const MAX_HITS = 40;
@@ -701,11 +750,11 @@ function snippetHtml(text, at, length) {
 function applySearch(query) {
   const needle = query.trim().toLowerCase();
   searchResults.innerHTML = '';
-  if (!needle) {
-    setSearchStatus(searchReady ? '' : 'Reading the reports…');
+  if (!needle || !searchReady) {
+    // Before the first reading ends, the progress line shows; the query is applied when it does.
+    setSearchStatus('');
     return;
   }
-  if (!searchReady) return; // the progress line stays; the index applies the query when it is ready
   const hits = [];
   let days = new Set();
   for (const { date, reports } of DATES) {
@@ -734,55 +783,60 @@ function applySearch(query) {
   ).join('');
 }
 
-async function buildSearchIndex(dates) {
-  // Flatten into a single task list and drain with a small worker pool so we
-  // never flood the browser's connection pool (a fetch storm here was starving
-  // the primary content fetch and causing "Failed to fetch" on initial load).
-  const tasks = [];
-  dates.forEach(({ date, reports }) => {
-    reports.forEach((report) => tasks.push({ date, report }));
-  });
-
-  const index = new Map();
+/** Reads the reports of `tasks` into the index; returns the ones whose fetch failed. */
+async function readReports(tasks, index) {
+  // Drain one task list with a small worker pool so we never flood the
+  // browser's connection pool (a fetch storm here was starving the primary
+  // content fetch and causing "Failed to fetch" on initial load).
+  const failed = [];
   let cursor = 0;
   let read = 0;
   const worker = async () => {
     while (cursor < tasks.length) {
-      const { date, report } = tasks[cursor++];
+      const task = tasks[cursor++];
       try {
-        const res = await fetch(`./digests/${date}/${report}.md`);
-        if (res.ok) index.set(pageKey(date, report), searchLines(await res.text()));
+        const res = await fetch(`./digests/${task.date}/${task.report}.md`);
+        if (res.ok) index.set(pageKey(task.date, task.report), searchLines(await res.text()));
+        // A 4xx report is missing for good (manifest and digests differ); the rest may recover.
+        else if (res.status >= 500 || res.status === 429) failed.push(task);
       } catch {
-        /* ignore — missing report just won't be searchable */
+        failed.push(task);
       }
       read += 1;
-      setSearchStatus(`Reading the reports: ${read} of ${tasks.length}`);
+      searchProgress.textContent = `Reading the reports: ${read} of ${tasks.length}`;
     }
   };
   const POOL = 6;
   await Promise.all(Array.from({ length: POOL }, worker));
-  return index;
-}
-
-function initSearch(dates) {
-  searchReady = false;
-  setSearchStatus('Reading the reports…');
-
-  buildSearchIndex(dates).then((index) => {
-    searchIndex = index;
-    searchReady = true;
-    setSearchStatus('');
-    applySearch(searchQuery);
-  });
+  return failed;
 }
 
 let allDates = null;
-let searchInitialized = false;
+let searchReading = false;
+// The reports still to read: all of them at first, then the ones whose fetch failed, which the
+// next opening of search reads again.
+let unread = null;
 
 function ensureSearchIndex() {
-  if (searchInitialized || !allDates) return;
-  searchInitialized = true;
-  initSearch(allDates);
+  if (searchReading || !allDates) return;
+  if (!unread) {
+    unread = [];
+    allDates.forEach(({ date, reports }) => reports.forEach((report) => unread.push({ date, report })));
+    searchIndex = new Map();
+  }
+  if (!unread.length) return;
+  searchReading = true;
+  searchProgress.textContent = 'Reading the reports…';
+  readReports(unread, searchIndex).then((failed) => {
+    unread = failed;
+    searchReading = false;
+    searchReady = true;
+    // Stays while reports are missing, so "no report has it" is not read as the whole archive.
+    searchProgress.textContent = failed.length
+      ? `${failed.length} report${failed.length === 1 ? '' : 's'} did not load and ${failed.length === 1 ? 'is' : 'are'} not searched. Close and open search to read ${failed.length === 1 ? 'it' : 'them'} again.`
+      : '';
+    applySearch(searchQuery);
+  });
 }
 
 function openSearch() {
@@ -795,16 +849,23 @@ function openSearch() {
 document.getElementById('searchBtn').onclick = openSearch;
 
 searchInput.addEventListener('input', () => {
-  ensureSearchIndex();
   searchQuery = searchInput.value;
   clearTimeout(searchDebounce);
   searchDebounce = setTimeout(() => applySearch(searchQuery), 120);
 });
-// Esc closes search. Left to the browser, the first Esc only empties a search field.
+// Esc closes search (left to the browser, the first Esc only empties a search field); Enter
+// opens the first result.
 searchInput.addEventListener('keydown', (e) => {
-  if (e.key !== 'Escape') return;
-  e.preventDefault();
-  searchDlg.close();
+  if (e.key === 'Escape') {
+    e.preventDefault();
+    searchDlg.close();
+  } else if (e.key === 'Enter') {
+    e.preventDefault();
+    // Typed and pressed Enter within the debounce: apply the query first.
+    clearTimeout(searchDebounce);
+    applySearch(searchQuery);
+    searchResults.querySelector('a[href]')?.click();
+  }
 });
 // A result opens its report at the first match. The click also closes the dialog (above).
 searchResults.addEventListener('click', (e) => {
@@ -815,27 +876,52 @@ searchResults.addEventListener('click', (e) => {
   if (a.getAttribute('href') === `#${currentKey}`) findOnPage();
 });
 
-/** Marks the first match of the search a result came from, and scrolls to it. */
+/**
+ * Marks the first match of the search a result came from, and scrolls to it. The search index is
+ * the Markdown without its markup, so a match may run through a link, bold or code on the page:
+ * it is looked for in each block's whole text, and marked in every text node it runs through.
+ * A date the page shows as "16 Nov" is found by its ISO form in the <time> element.
+ */
 function findOnPage() {
   const needle = pendingFind;
   pendingFind = null;
   const root = document.querySelector('#content .md');
   if (!needle || !root) return;
   root.querySelectorAll('mark.found').forEach((m) => m.replaceWith(...m.childNodes));
-  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
-  for (let node = walker.nextNode(); node; node = walker.nextNode()) {
-    const at = node.textContent.toLowerCase().indexOf(needle);
-    if (at === -1 || node.parentElement.closest('.toc, .report-meta')) continue;
+  root.normalize();
+  const show = (el) => {
+    for (let d = el.closest('details'); d; d = d.parentElement.closest('details')) d.open = true;
+    el.scrollIntoView({ block: 'center' });
+  };
+  const wrap = (node, from, to) => {
     const range = document.createRange();
-    range.setStart(node, at);
-    range.setEnd(node, at + needle.length);
+    range.setStart(node, from);
+    range.setEnd(node, to);
     const mark = document.createElement('mark');
     mark.className = 'found';
     range.surroundContents(mark);
-    for (let d = mark.closest('details'); d; d = d.parentElement.closest('details')) d.open = true;
-    mark.scrollIntoView({ block: 'center' });
+    return mark;
+  };
+  for (const block of root.querySelectorAll('h1, h2, h3, h4, p, li, td, th, summary, pre')) {
+    if (block.closest('.toc, .report-meta')) continue;
+    const at = block.textContent.toLowerCase().indexOf(needle);
+    if (at === -1) continue;
+    // The text nodes the match runs through, each with the part of it that is the match.
+    const parts = [];
+    const walker = document.createTreeWalker(block, NodeFilter.SHOW_TEXT);
+    let pos = 0;
+    for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+      const from = Math.max(at, pos);
+      const to = Math.min(at + needle.length, pos + node.length);
+      if (from < to) parts.push([node, from - pos, to - pos]);
+      pos += node.length;
+    }
+    const marks = parts.map(([node, from, to]) => wrap(node, from, to));
+    if (marks.length) show(marks[0]);
     return;
   }
+  const time = [...root.querySelectorAll('time[datetime]')].find((t) => t.getAttribute('datetime').includes(needle));
+  if (time?.firstChild?.nodeType === Node.TEXT_NODE) show(wrap(time.firstChild, 0, time.firstChild.length));
 }
 
 function setContent(html) {
@@ -898,13 +984,23 @@ function neighbours(date, report) {
   };
 }
 
-/** Marks the tab row when tabs remain to its right, for the fade at its edge. */
+/** Marks the tab row's edges that have more tabs beyond them, for the fade there. */
 function fadeTabs() {
   const tabList = document.getElementById('tabList');
-  tabList.classList.toggle('more', tabList.scrollWidth - tabList.clientWidth - tabList.scrollLeft > 4);
+  tabList.classList.toggle('more-left', tabList.scrollLeft > 4);
+  tabList.classList.toggle('more-right', tabList.scrollWidth - tabList.clientWidth - tabList.scrollLeft > 4);
+}
+/** Brings the current tab into the row. Only the row scrolls, sideways: scrollIntoView would move the page too. */
+function showCurrentTab() {
+  const tabList = document.getElementById('tabList');
+  const current = tabList.querySelector('[aria-current]');
+  if (current) tabList.scrollLeft += current.getBoundingClientRect().left - tabList.getBoundingClientRect().left - 32;
+  fadeTabs();
 }
 document.getElementById('tabList').addEventListener('scroll', fadeTabs, { passive: true });
 window.addEventListener('resize', fadeTabs);
+// The tabs are narrower once IBM Plex replaces the fallback font, so the first position is off.
+document.fonts.ready.then(showCurrentTab);
 
 /** The bar's day, its arrows, the day's tabs and the calendar's selected day, for the page shown. */
 function syncShell(date, report) {
@@ -934,10 +1030,7 @@ function syncShell(date, report) {
   const pinned = latestWeekly().filter((x) => x.entry.date !== date).map((x) => tab(x.entry.date, x.id, true));
   const tabList = document.getElementById('tabList');
   tabList.innerHTML = own.join('') + (pinned.length ? `<div class="tabs-pin"><span>This week</span>${pinned.join('')}</div>` : '');
-  // Only the tab row scrolls, sideways: scrollIntoView would move the page too.
-  const current = tabList.querySelector('[aria-current]');
-  if (current) tabList.scrollLeft += current.getBoundingClientRect().left - tabList.getBoundingClientRect().left - 32;
-  fadeTabs();
+  showCurrentTab();
 
   calDlg.querySelectorAll('a.cal-day').forEach((a) => {
     if (a.dataset.date === date) a.setAttribute('aria-current', 'date'); else a.removeAttribute('aria-current');
@@ -960,7 +1053,7 @@ function buildCalendar(dates) {
       const iso = `${month}-${String(d).padStart(2, '0')}`;
       const entry = byDate.get(iso);
       if (!entry) {
-        cells.push(`<span class="cal-day off">${d}</span>`);
+        cells.push(iso > dates[0].date ? '<span></span>' : `<span class="cal-day off">${d}</span>`);
         continue;
       }
       const weekly = entry.reports.some((r) => WEEKLY.includes(r));
@@ -981,13 +1074,19 @@ function buildCalendar(dates) {
 async function renderOverview(date) {
   const entry = DATES.find((d) => d.date === date);
   if (!entry) throw new Error('unknown date');
-  let highlights = null;
-  try {
-    const res = await fetch(`./digests/${date}/highlights.json`);
-    if (res.ok) highlights = await res.json();
-  } catch {
-    /* older days have no highlights.json: the overview is then a list of links */
-  }
+  // The day's three files at once. A missing or unreadable one is null: older days have no
+  // highlights.json (the overview is then a list of links), talked-about.json or coming-up.json.
+  const dayFile = async (name) => {
+    try {
+      const res = await fetch(`./digests/${date}/${name}`);
+      return res.ok ? await res.json() : null;
+    } catch {
+      return null;
+    }
+  };
+  const [highlights, talkedFile, comingUp] = await Promise.all(
+    ['highlights.json', 'talked-about.json', 'coming-up.json'].map(dayFile),
+  );
   const { older } = neighbours(date, null);
   const parts = [
     '<header class="hero">' +
@@ -1003,14 +1102,7 @@ async function renderOverview(date) {
     return `<section class="file"><h2 class="file-hdr"><a href="#${pageKey(date, id)}">${tileHtml(id)}<span>${escapeHtml(LABELS[id] || id)}</span></a></h2>${lines}</section>`;
   });
   parts.push(`<div class="diff">${files.join('')}</div>`);
-  let talked = [];
-  try {
-    const res = await fetch(`./digests/${date}/talked-about.json`);
-    if (res.ok) talked = await res.json();
-  } catch {
-    /* days before talked-about.json have no Also talked about section */
-  }
-  if (!Array.isArray(talked)) talked = [];
+  const talked = Array.isArray(talkedFile) ? talkedFile : [];
   // Story links reach this HTML without DOMPurify: only http(s) becomes a link.
   const link = (url, text) => /^https?:\/\//i.test(url) ? `<a href="${escapeHtml(url)}">${escapeHtml(text)}</a>` : escapeHtml(text);
   // Policy stories have their own list; every row carries `topic`, so older days split the same way.
@@ -1023,13 +1115,6 @@ async function renderOverview(date) {
     parts.push(`<ul class="stories">${rows.map((t) =>
       `<li>${link(t.url, t.title)} <span class="counts">${link(t.discussionUrl, t.counts ?? `${t.points} points, ${t.comments} comments`)}</span></li>`,
     ).join('')}</ul>`);
-  }
-  let comingUp = [];
-  try {
-    const res = await fetch(`./digests/${date}/coming-up.json`);
-    if (res.ok) comingUp = await res.json();
-  } catch {
-    /* days before coming-up.json have no Coming up section */
   }
   let rail = '';
   if (Array.isArray(comingUp) && comingUp.length) {
@@ -1122,8 +1207,13 @@ function decorateReport(root, date, report) {
     table.replaceWith(wrap);
     wrap.appendChild(table);
     const headers = [...table.querySelectorAll('thead th')].map((th) => th.textContent.trim());
-    if (headers.length < 3) continue;
+    // Two columns stack too when one is prose (Paper, Summary): side by side it gets half a phone.
+    if (headers.length < 3 && !headers.some((h) => PROSE_COLUMNS.includes(h))) continue;
     table.classList.add('stack');
+    // A cell that holds only the "nothing" dash says nothing once the columns are gone.
+    for (const td of table.querySelectorAll('tbody td')) {
+      if (td.textContent.trim() === '—') td.classList.add('blank');
+    }
     headers.forEach((h, i) => {
       if (!PROSE_COLUMNS.includes(h)) return;
       for (const td of table.querySelectorAll(`tbody td:nth-child(${i + 1})`)) td.classList.add('prose');
@@ -1162,17 +1252,17 @@ function decorateReport(root, date, report) {
 let tocSpy = null;
 
 /**
- * The contents of a long report: 4+ `##` sections, or 4+ `##` and `###` together. The agents
- * report has only 3 `##` (stealth models and its two groups); its projects are `###`. Twice:
- * a list in the rail (with every `###`: the projects are what a reader looks for) and, for the
+ * The contents of a long report: its `##` sections and the `###` under them (a repo section's
+ * projects are what a reader looks for), when there are 4 or more. A heading inside a collapsed
+ * block is not a section of the page and is left out. Twice: a list in the rail and, for the
  * widths without the rail, a collapsible one before the first section.
  */
 function addToc(root) {
-  const all = [...root.querySelectorAll('h2, h3')];
-  let heads = all.filter((h) => h.tagName === 'H2');
-  if (heads.length < 4) heads = all;
+  const all = [...root.querySelectorAll('h2, h3')].filter((h) => !h.closest('details'));
+  const heads = all;
   if (heads.length < 4) return;
-  // The hash holds the route, so scroll instead of linking to an anchor.
+  // The hash holds the route, so scroll instead of linking to an anchor. The focus goes with
+  // the reader: Tab then continues in the section, not in the list.
   const entry = (h) => {
     const a = document.createElement('a');
     a.href = '#';
@@ -1180,6 +1270,7 @@ function addToc(root) {
     a.onclick = (e) => {
       e.preventDefault();
       h.scrollIntoView({ behavior: reducedMotion.matches ? 'auto' : 'smooth' });
+      focusHeading(h);
     };
     const li = document.createElement('li');
     if (h.tagName === 'H3') li.className = 'sub';
@@ -1219,13 +1310,23 @@ function addToc(root) {
       if (h.getBoundingClientRect().top > 160) break;
       here = h;
     }
-    if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 2) here = all.at(-1);
+    if (window.scrollY > 0 && window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 2) here = all.at(-1);
     links.forEach((a, h) => a.classList.toggle('here', h === here));
   };
   tocSpy = spy;
   spy();
 }
 window.addEventListener('scroll', () => tocSpy?.(), { passive: true });
+
+let loadCount = 0;
+
+/** Moves the keyboard focus to a heading without scrolling, so Tab goes on from there. */
+function focusHeading(h) {
+  if (!h) return;
+  h.tabIndex = -1;
+  h.focus({ preventScroll: true });
+}
+document.getElementById('skipBtn').onclick = () => focusHeading(document.querySelector('#content h1'));
 
 async function loadReport(date, report, push = true) {
   const key = pageKey(date, report);
@@ -1236,11 +1337,16 @@ async function loadReport(date, report, push = true) {
   // hash in session history — pushing again would need a second back-press.
   if (push && location.hash !== `#${key}`) history.pushState(null, '', `#${key}`);
 
+  // This load's number. A reply is used only while it is the newest load: the key alone cannot
+  // tell two loads of one page apart (open A, open B, open A again while the first A is slow).
+  const load = ++loadCount;
+  // After the first page, the focus follows the reader to the new page's heading.
+  const moveFocus = load > 1;
   syncShell(date, report);
   window.scrollTo(0, 0);
   // The page before stays until this one arrives; a slow one gets a notice instead.
   const slow = setTimeout(() => {
-    if (currentKey === key) setContent('<p class="note">Loading…</p>');
+    if (load === loadCount) setContent('<p class="note">Loading…</p>');
   }, 300);
 
   try {
@@ -1250,7 +1356,7 @@ async function loadReport(date, report, push = true) {
     clearTimeout(slow);
     // Drop the response if the user has navigated to another page while
     // this fetch was in flight, so a slow stale reply can't overwrite it.
-    if (currentKey !== key) return;
+    if (load !== loadCount) return;
     tocSpy = null;
     setContent(`<div class="${report ? 'md' : 'overview'} fade">${page.html}</div>`);
     document.getElementById('rail').innerHTML = page.rail;
@@ -1258,16 +1364,17 @@ async function loadReport(date, report, push = true) {
       const md = document.querySelector('#content .md');
       decorateReport(md, date, report);
       addToc(md);
-      findOnPage();
     } else if (date >= SIGNED_SINCE) {
       document.querySelectorAll('#content ul.highlights').forEach(gutterList);
     }
+    if (moveFocus) focusHeading(document.querySelector('#content h1'));
+    if (report) findOnPage();
     pendingFind = null;
   } catch (e) {
     clearTimeout(slow);
     // The user has already switched to another report — don't overwrite its
     // content with this stale request's error.
-    if (currentKey !== key) return;
+    if (load !== loadCount) return;
     // Reset the guard so clicking the same report again retries; otherwise
     // the early-return above turns every further click into a silent no-op
     // and the only way out is loading a different report first.
@@ -1287,9 +1394,24 @@ async function loadReport(date, report, push = true) {
 // Back/forward, and every link to a page (tabs, day arrows, calendar, search, report bar):
 // a same-page hash link fires hashchange. loadReport ignores the repeat.
 const followHash = () => {
-  const h = getHash();
-  if (h) loadReport(h.date, h.report, false);
+  // A hash that is no route (a contents link's "#") is not a page change.
+  const hash = getHash();
+  const page = hash && knownPage(hash);
+  if (page) loadReport(page.date, page.report, false);
 };
+
+/**
+ * The page a hash names, when the manifest has it. A day it has without that report gives the
+ * day's overview, and a day it lacks (or no hash) the latest day; the address is corrected.
+ */
+function knownPage(hash) {
+  if (!DATES.length) return null;
+  const day = hash && DATES.find((d) => d.date === hash.date);
+  if (day && (!hash.report || day.reports.includes(hash.report))) return hash;
+  const page = { date: day ? day.date : DATES[0].date, report: null };
+  history.replaceState(null, '', `#${page.date}`);
+  return page;
+}
 window.addEventListener('popstate', followHash);
 window.addEventListener('hashchange', followHash);
 
@@ -1332,15 +1454,9 @@ document.addEventListener('keydown', (e) => {
     buildCalendar(dates);
     document.getElementById('brand').href = `#${dates[0].date}`;
 
-    // A known report or day from the hash, else the latest day's overview.
-    const hash = getHash();
-    const day = hash && dates.find(d => d.date === hash.date);
-    if (day && (!hash.report || day.reports.includes(hash.report))) {
-      await loadReport(hash.date, hash.report, false);
-    } else {
-      history.replaceState(null, '', `#${dates[0].date}`);
-      await loadReport(dates[0].date, null, false);
-    }
+    // A known report or day from the hash, else that day's or the latest day's overview.
+    const page = knownPage(getHash());
+    await loadReport(page.date, page.report, false);
   } catch (e) {
     setContent(
       `<div class="note"><p>The list of reports did not load (${escapeHtml(e.message)}).</p>` +
