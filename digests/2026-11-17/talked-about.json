@@ -1,0 +1,35 @@
+[
+  {
+    "id": "hn:50520148",
+    "source": "hn",
+    "title": "How Billions in Safe Insurance Money Is Being Bet on A.I. Debt",
+    "url": "https://www.nytimes.com/2026/11/16/business/insurance-ai-debt.html",
+    "discussionUrl": "https://news.ycombinator.com/item?id=50520148",
+    "points": 85,
+    "comments": 45,
+    "topic": "other",
+    "counts": "85 points, 45 comments"
+  },
+  {
+    "id": "lobsters:ki1l5r",
+    "source": "lobsters",
+    "title": "\"Proof of use\" as a requirement for open source contributions?",
+    "url": "https://lobste.rs/s/ki1l5r/proof_use_as_requirement_for_open_source",
+    "discussionUrl": "https://lobste.rs/s/ki1l5r/proof_use_as_requirement_for_open_source",
+    "points": 17,
+    "comments": 6,
+    "topic": "other",
+    "counts": "17 points, 6 comments"
+  },
+  {
+    "id": "devto:5042533",
+    "source": "devto",
+    "title": "How I Made a Markov Chain Model from Scratch in C++ During a Global Online Teen Hackathon",
+    "url": "https://dev.to/necoz/how-i-made-a-markov-chain-model-from-scratch-in-c-during-a-global-online-teen-hackathon-3gd7",
+    "discussionUrl": "https://dev.to/necoz/how-i-made-a-markov-chain-model-from-scratch-in-c-during-a-global-online-teen-hackathon-3gd7",
+    "points": 43,
+    "comments": 13,
+    "topic": "other",
+    "counts": "43 reactions, 13 comments"
+  }
+]

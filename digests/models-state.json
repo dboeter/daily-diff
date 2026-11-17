@@ -30,7 +30,8 @@
     "google/gemini-4-hydrogen": "2026-11-13",
     "google/gemini-4-hydrogen:batch": "2026-11-13",
     "inclusionai/ling-3.2-flash:free": "2026-11-14",
-    "qwen/qwen4-max": "2026-11-16"
+    "qwen/qwen4-max": "2026-11-16",
+    "tencent/hy4-flash": "2026-11-17"
   },
   "stages": {}
 }

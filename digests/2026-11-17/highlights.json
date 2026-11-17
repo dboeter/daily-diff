@@ -1,0 +1,18 @@
+{
+  "ai-agents": [
+    "Oh My Pi reworks AgentSession run lifecycle with new events/methods (agent_end, agent_pause, isRunActive, waitForRunEnd).",
+    "Claude Code issue reports premium seat usage limits (Team/Enterprise) draining ~3–5× faster on non-Fable models since Nov 9."
+  ],
+  "ai-models": [
+    "Tencent's hy4-flash is now on OpenRouter with 1M context, a cheaper variant with ~1/4 the Hy4 flagship's parameters.",
+    "A report says Revolut made self-hosted Chinese open-weight models its coding default, cutting AI coding costs 90% across 2,000 engineers."
+  ],
+  "ai-policy": [
+    "European Commission seeks feedback on a draft questionnaire for some high-risk AI deployers' AI Act fundamental rights impact assessment.",
+    "California sued OpenAI, alleging it tested advanced AI models without adequate safeguards and misled the public about safety."
+  ],
+  "ai-data": [
+    "Databricks real-time streaming on Runtime 19 now filters late events against the live watermark and evicts state sooner by default.",
+    "Azure Databricks adds a PostgreSQL integrated CDC pipeline (Beta) for ingesting PostgreSQL change data with no separate ingestion gateway."
+  ]
+}

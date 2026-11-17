@@ -452,7 +452,25 @@
     "release:apache/polaris@apache-polaris-1.9.0": "2026-11-15",
     "release:open-metadata/OpenMetadata@2.0.8-release": "2026-11-15",
     "use genie one as your chrome new tab page (beta)|2026-11-12": "2026-11-16",
-    "release:databricks/terraform-provider-databricks@v1.143.0": "2026-11-16"
+    "release:databricks/terraform-provider-databricks@v1.143.0": "2026-11-16",
+    "databricks runtime 19: november 16, 2026|2026-11-16": "2026-11-17",
+    "genie code cli is now generally available|2026-11-18": "2026-11-17",
+    "ip functions will soon be available by default for workspaces with the compliance security profile enabled|2026-11-16": "2026-11-17",
+    "serverless rate limits are now in beta|2026-11-11": "2026-11-17",
+    "governed tag propagation supports classic compute (beta)|2026-11-16": "2026-11-17",
+    "postgresql integrated cdc pipeline is now in beta|2026-11-15": "2026-11-17",
+    "budgets now support daily thresholds in addition to monthly thresholds|2026-11-12": "2026-11-17",
+    "external access to views through the iceberg rest catalog is in beta|2026-11-13": "2026-11-17",
+    "share unity catalog agent skills with opensharing and azure databricks marketplace (beta)|2026-11-16": "2026-11-17",
+    "nov 16, 2026: create, evaluate, and optimize cortex ai functions with cortex ai function studio (general availability)|2026-11-16": "2026-11-17",
+    "nov 16, 2026: cortex ai function optimization for more efficient ai implementations (general availability)|2026-11-16": "2026-11-17",
+    "nov 16, 2026: show grants to ... include hierarchy (general availability)|2026-11-16": "2026-11-17",
+    "nov 16, 2026: scim provisioning for organization users and organization user groups (private preview)|2026-11-16": "2026-11-17",
+    "nov 12, 2026: google gemini 4 carbon and hydrogen models (preview)|2026-11-12": "2026-11-17",
+    "nov 16, 2026: ai_complete adds support for twelve labs pegasus 1.5 (general availability)|2026-11-16": "2026-11-17",
+    "submit databricks support cases from your workspace with the get support form|2026-11-13": "2026-11-17",
+    "post:medium.com/snowflake/from-streamlit-to-snowflake-app-runtime-a-demo-migration-19e6e81d9873": "2026-11-17",
+    "post:medium.com/snowflake/i-benchmarked-snowflake-postgres-mirroring-for-two-days-here-are-the-numbers-b50eba22b8de": "2026-11-17"
   },
   "stages": {
     "snowflake-bcr:2026_08": "2026-10-16 Introduced in the 10.37 release (October 8-16, 2026) as Disabled by Default; account admins can enable for testing."
