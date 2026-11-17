@@ -212,7 +212,7 @@ A source whose key is unset is skipped; the rest of the run goes on.
 | DeepSeek       | `deepseek`            | `DEEPSEEK_API_KEY`   | `deepseek-v4-flash`           | `DEEPSEEK_MODEL`       |
 | Qwen           | `qwen`                | `DASHSCOPE_API_KEY`  | `qwen-flash`                  | `QWEN_MODEL`           |
 
-`ANTHROPIC_BASE_URL`, `OPENAI_BASE_URL` and `DASHSCOPE_BASE_URL` override the endpoints. The scheduled run uses OpenRouter's free `nvidia/nemotron-3-super-120b-a12b:free` with `OPENROUTER_REASONING_EFFORT=low` (so reasoning does not eat the output budget) and `OPENROUTER_FALLBACK_MODELS` tried in order when it is down. When half the LLM calls fail, the run aborts before publishing anything.
+`ANTHROPIC_BASE_URL`, `OPENAI_BASE_URL` and `DASHSCOPE_BASE_URL` override the endpoints. The scheduled run uses OpenRouter's free `baidu/ernie-5.5-flash-preview:free` with `OPENROUTER_REASONING_EFFORT=high` (reasoning counts against a call's output budget; a call it uses up is retried once at double budget) and `OPENROUTER_FALLBACK_MODELS` tried in order when it is down. When half the LLM calls fail, the run aborts before publishing anything.
 
 ### Running locally
 
