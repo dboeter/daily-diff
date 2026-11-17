@@ -13,7 +13,119 @@
       <height>144</height>
     </image>
     <atom:link href="https://dboeter.github.io/daily-diff/feeds/ai-agents.xml" rel="self" type="application/rss+xml"/>
-    <lastBuildDate>Mon, 16 Nov 2026 23:57:05 +0000</lastBuildDate>
+    <lastBuildDate>Tue, 17 Nov 2026 07:49:08 +0000</lastBuildDate>
+    <item>
+      <title>AI Agents 2026-11-17</title>
+      <link>https://dboeter.github.io/daily-diff/#2026-11-17/ai-agents</link>
+      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-11-17/ai-agents</guid>
+      <pubDate>Tue, 17 Nov 2026 00:00:00 +0000</pubDate>
+      <description>AI Agents 2026-11-17 ⬛ Overview · 🟪 AI Agents · 🟦 AI Models &amp;amp; Labs · 🟧 AI Policy · 🟨 Data Engineering Projects: 15 | Active today: 5 | Stable releases: 7 | Prereleases (not covered): 7 | Generated: 2026-11-17 07:44 UTC Highlights Oh My Pi v18.21.0–v18.22.0 introduces breaking changes: binary analysis moves to the dsm namespace, ida.* settings are replaced by disassembler.*, legacy standalone disassembler tools and PlanReviewOverlay options are removed, and the AgentSession run lifecycle ...</description>
+      <content:encoded><![CDATA[<h1>AI Agents 2026-11-17</h1>
+<p><a href="https://dboeter.github.io/daily-diff/#2026-11-17">⬛ Overview</a> · <strong>🟪 AI Agents</strong> · <a href="https://dboeter.github.io/daily-diff/#2026-11-17/ai-models">🟦 AI Models &amp; Labs</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-17/ai-policy">🟧 AI Policy</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-17/ai-data">🟨 Data Engineering</a></p>
+<blockquote>
+<p>Projects: 15 | Active today: 5 | Stable releases: 7 | Prereleases (not covered): 7 | Generated: 2026-11-17 07:44 UTC</p>
+</blockquote>
+<hr>
+<h2>Highlights</h2>
+<ul>
+<li>Oh My Pi v18.21.0–v18.22.0 introduces breaking changes: binary analysis moves to the <code>dsm</code> namespace, <code>ida.*</code> settings are replaced by <code>disassembler.*</code>, legacy standalone disassembler tools and <code>PlanReviewOverlay</code> options are removed, and the <code>AgentSession</code> run lifecycle is reworked with new events and methods (<code>agent_end</code>, <code>agent_pause</code>, <code>isRunActive</code>, <code>wakeSources</code>, <code>waitForRunEnd()</code>).</li>
+<li>Claude Code hot issue #110480 reports premium seat usage limits (Team/Enterprise) are being exhausted roughly 3–5× faster on non-Fable models (Opus/Sonnet) since the week of November 9, 2026, which the reporter attributes to a metering change rather than workload shifts.</li>
+<li>jcode v1.0.0 launches jcode Cloud (<code>/cloud</code> moves a session or swarm to a VM, <code>/local</code> brings it back), reworks swarms to plan in phases and parallel lanes with a pinned team progress view, and claims 25% less CPU, idle wakeups down from 2.68 to 1.51/sec, and rendered-span memory in a large conversation down from 20.4 MB to 14.6 MB.</li>
+</ul>
+<hr>
+<h2>Coding Agents &amp; Assistants</h2>
+<h3>Claude Code</h3>
+<ul>
+<li><strong>Release:</strong> <a href="https://github.com/anthropics/claude-code/releases/tag/v2.1.326">v2.1.326</a> fixes <code>cp</code> being refused when only the file&#39;s source was covered by an <code>Edit</code> deny rule, fixes Bash commands that delete or overwrite files (<code>find -delete</code>, <code>cat a &gt; b</code>, <code>sort -o</code>) being summed up in the transcript as a search or a read, fixes a misleading &quot;Dangerous rm operation&quot; warning in the Bash permission prompt on commands with no <code>rm</code>, and fixes background sessions losing the LLM gateway their shell exported — after a crash, a reopen from another folder, or when the background service lacks it — so they now stop before any model request, plus the background service ending the user&#39;s own processes, such as an SSH login, when a process number on its list had been reused by another user&#39;s process. It also starts sessions with agent teams enabled in Code Mode, warns at startup when a <code>--allowedTools</code>, <code>--disallowedTools</code> or <code>--tools</code> value has an entry that doesn&#39;t look like a complete rule, adds a <code>/status</code> row saying when your provider or an environment variable such as <code>DISABLE_TELEMETRY</code> turns features off, and adds <code>OTEL_RESOURCE_INCLUDE_HOST</code> (off by default) to include <code>host.name</code> and <code>host.id</code> in OpenTelemetry resource attributes.</li>
+<li><strong>News:</strong> <a href="https://news.ycombinator.com/item?id=50526584">Tokendoctor – the same Claude Code for up to 38% less</a> — the Hacker News post presents a Claude Code plugin that shows what your use overpays, fixes it with a diff you approve, and puts any change back; it runs on your machine, and the post claims up to 38% lower cost.</li>
+<li><strong>Hot issue:</strong> <a href="https://github.com/anthropics/claude-code/issues/110480">#110480</a>: an issue reports that premium seat usage limits (Team/Enterprise) are being exhausted roughly 3–5x faster on non-Fable models (Opus / Sonnet) since the week of November 9, 2026, and says everyone in the reporter&#39;s organization on premium seats sees the same drop at the same time, which the reporter attributes to a change in how non-Fable usage is metered rather than to any change in workloads, prompts, repositories or plugins. (regression; 2 comments, 2 👍; +4 in the last 24h)</li>
+</ul>
+<h3>OpenCode</h3>
+<ul>
+<li><strong>Release:</strong> <a href="https://github.com/anomalyco/opencode/releases/tag/v1.19.6">v1.19.6</a> makes OpenCode 1 offer the upgrade to OpenCode 2.0 in the desktop app, which downloads in the background and installs only when you choose Restart to upgrade, Upgrade on quit, or Later, keeping your sessions, projects and settings; the release notes say plugins made for OpenCode 1 need an update. In the core, sessions with many images no longer send oversized requests — when a session&#39;s image history passes 25 MiB, the oldest images are replaced with a placeholder — and a provider error for a request body that is too large now starts compaction and a retry instead of failing the turn.</li>
+<li><strong>Release:</strong> Alongside it, <a href="https://github.com/anomalyco/opencode/releases/tag/process-daemon-v0.6.0">process-daemon-v0.6.0</a> publishes <code>opencode-pty</code> 0.6.0 (protocol 9) from <code>packages/process-daemon</code> to npm as <code>@opencode/pty@0.6.0</code>.</li>
+<li><strong>News:</strong> <a href="https://news.ycombinator.com/item?id=50523459">OpenCode Browse</a> — the Hacker News post describes Browse as letting OpenCode and other MCP clients use your real browser, where agents read, click, type, take screenshots, record tabs, and hand logins and 2FA back to you.</li>
+</ul>
+<h3>Oh My Pi</h3>
+<ul>
+<li><strong>Release:</strong> Across <a href="https://github.com/can1357/oh-my-pi/releases/tag/v18.21.0">v18.21.0</a>–<a href="https://github.com/can1357/oh-my-pi/releases/tag/v18.22.0">v18.22.0</a>, binary analysis moves out of the standalone <code>ida</code> and <code>ghidra</code> tools into the backend-neutral <code>dsm</code> namespace (<code>xd://eval/dsm</code>), the <code>ida.enabled</code>, <code>ida.maxOpen</code> and <code>ida.idleCloseSec</code> settings are replaced by <code>disassembler.backend</code>, <code>disassembler.maxOpen</code> and <code>disassembler.idleCloseSec</code>, and the legacy standalone disassembler tools, the Copy and Edit-in-editor buttons in the Tern plan review sheet, plus <code>PlanReviewOverlay</code> options in their old form are removed — options now take <code>PlanReviewOverlayChoice</code> objects. The same range makes <code>TtyWriter</code> require a drain threshold and callback and only support independently reopenable TTYs, requires terminals with output backpressure to implement <code>onOutputDrain(callback)</code> returning an unsubscribe function, and reworks the <code>AgentSession</code> run lifecycle: <code>agent_end</code> is emitted once when a run can no longer resume, <code>agent_pause</code> reports runs stopped while awaiting work, <code>hasPendingAsyncWork()</code>, <code>settleAsyncWork()</code> and <code>suppressAutoResumeUntilPrompt()</code> are replaced by <code>isRunActive</code>, <code>wakeSources</code> and <code>waitForRunEnd()</code>, and <code>abort()</code> now also ends runs paused on background work.</li>
+<li><strong>Release:</strong> It fixes slow streaming of Gemma tool calls with large arguments, and fixes the xAI Grok OAuth model <code>grok-composer-2.5-fast</code> being identified as non-reasoning, so it now supports thinking levels from minimal through xhigh.</li>
+<li><strong>Release:</strong> It adds Tern plan review editing and comments — double-click a plan to edit it, select text to add Google Docs-style comments, and send comments to Refine — Ghidra support with automatic setup of Ghidra, JDK and PyGhidra when analysis is explicitly requested, with Auto mode using an installed IDA Pro when available and falling back to Ghidra otherwise, and sharing of live analysis databases with child agents through <code>db.handle()</code> and <code>dsm.open(handle)</code>. Also added are configurable automatic subagent prewalk via <code>task.agentPrewalkAuto</code>, automatic reasoning-capability detection with remembered effort levels for unknown models, inline image and web-page replies with interactive embedded pages in Tern replies (<code>tui.renderEmbeds</code> to disable the rendering), and Modal as a hosted inference provider, while the local speech model changes from Kokoro to Phonon 31M.</li>
+</ul>
+<h3>jcode</h3>
+<ul>
+<li><strong>Release:</strong> <a href="https://github.com/1jehuang/jcode/releases/tag/v1.0.0">v1.0.0</a> reworks swarms to plan jobs in phases and parallel lanes, start workers automatically as dependencies finish, and show the whole team&#39;s progress in one pinned view, and it launches jcode Cloud, where <code>/cloud</code> moves a session or coordinated swarm to a VM, keeps it working after disconnecting, and <code>/local</code> brings the conversation and repository back.</li>
+<li><strong>Release:</strong> It adds full-conversation search in <code>/resume</code> with typo tolerance, live previews, and local and cloud sessions in the same picker; account priority tiers with hot-swap on Ctrl+Alt+J/K and refreshed <code>/usage</code> cards; per-session context limits; bounded JavaScript previews of live and completed codemode calls that survive status changes and transcript compaction; worker lane progress and final reports in completion messages; and live voice input with a waveform and streaming draft transcript.</li>
+<li><strong>Release:</strong> jcode says the terminal is lighter, with lower CPU usage, fewer background wakeups, faster transcript rendering and less rendered-text memory, citing a profiled release client at 25% less CPU, idle client wakeups down from 2.68 to 1.51 per second, and rendered-span memory in a large conversation down from 20.4 MB to 14.6 MB; it also says spinner-frame processing became 3.5 times faster and append-frame processing on a 4,000-message transcript 8.3 times faster, and that cloud sessions load recent history first and fetch older messages on demand, shrinking a 7,000-message session&#39;s initial history payload from 14.3 MB to 261 KB.</li>
+</ul>
+<h3>Hermes Agent</h3>
+<ul>
+<li><strong>Release:</strong> <a href="https://github.com/nousresearch/hermes-agent/releases/tag/v0.23.2">v0.23.2</a> is described as a patch release rolling up the work since v0.23.1 into a stable release for the GitHub release (CLI and installers), the Microsoft Store app, Docker and Hermes Cloud, with full curated notes for the window deferred to v0.24.0. It fixes desktop chats created by an August build with a bare <code>custom</code> provider so they can send again after updating, makes a Desktop or TUI reply that streamed beside a todo or memory call settle instead of leaving the Stop button up, and stops a crash mid-stream on Telegram and other edit-streaming chats from showing a duplicate &quot;Recovered reply&quot;.</li>
+<li><strong>Release:</strong> Hermes lists as included in this window, but undocumented here on purpose, durable subagents that survive a gateway restart or crash and can be continued on their own conversation, one prompt-cache clock per session, <code>hermes fallback check</code> for fallback-chain readiness, <code>hermes update --force</code> to stop gateways at once instead of draining, one-time <code>browser_vault</code> codes entered from Telegram and Discord, opt-in shared Telegram DM threads, the Gemini Interactions API by default for Gemini 3 and later plus Gemini 4 Carbon, fast mode for Claude Mythos 5.2, per-job cron options (<code>wrap_response</code>, a fresh thread per run), the plugin APIs <code>ctx.fork_session</code>, <code>ctx.redact_text()</code> and <code>ctx.register_idle_task</code>, and a slimmer macOS bundle that installs Chromium on first use.</li>
+<li><strong>Hot issue:</strong> <a href="https://github.com/NousResearch/hermes-agent/issues/156670">#156670</a>: an issue, filed as a feature request and tagged security, reports that on a multi-monitor Mac <code>computer_use</code> can still disrupt the human sharing the machine, because foreground fallback (<code>delivery_mode: &quot;foreground&quot;</code> / <code>raise_window</code>) brings the app to the front on whatever display it is on and posts real system-wide input that collides with the user&#39;s own mouse and keyboard — in <code>--yolo</code> / no-approval sessions with no prompt at all, about 30 foreground calls over two weeks in the reporter&#39;s local history — and because the agent works in whichever window is there, often on the display the user is actively using; it asks for <code>foreground: ask</code> as the default that survives <code>--yolo</code> and for an <code>avoid_active_display</code> setting that moves windows with AX. (type/security; 3 comments, 0 👍; +3 in the last 24h)</li>
+</ul>
+<p><strong>Quiet today:</strong> <a href="https://github.com/openai/codex">OpenAI Codex</a>, <a href="https://github.com/google-gemini/gemini-cli">Gemini CLI</a>, <a href="https://github.com/Kilo-Org/kilocode">Kilo Code</a>, <a href="https://github.com/earendil-works/pi">Pi</a>, <a href="https://github.com/cline/cline">Cline</a>, <a href="https://github.com/CommandCodeAI/command-code">Command Code</a>, <a href="https://github.com/deepseek-ai/deepseek-harness">DeepSeek Harness</a></p>
+<hr>
+<h2>Agent Tooling</h2>
+<p><strong>Quiet today:</strong> <a href="https://github.com/NVIDIA/OpenShell">OpenShell</a>, <a href="https://github.com/herdrdev/herdr">herdr</a>, <a href="https://github.com/microsoft/conductor">Conductor</a></p>
+<hr>
+<h2>Spotted</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Story</th>
+<th align="left">Source</th>
+<th align="left">Discussion</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a href="https://xusheng.dev/posts/windows-coding-agent-telemetry/">Windows 11 Is Collecting Data on Which Coding Agents and Developer Tools You Use</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50524736">524 points, 359 comments</a></td>
+<td align="left">A reverse-engineering writeup finds that Windows 11&#39;s MissionControlAggregator tracks which coding agents and developer tools are in use, with the data appearing in a diagnostic ETW report.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://blog.antonio.cx/running-agents-with-lend">Running coding agents without handing them my credentials</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50526152">99 points, 55 comments</a></td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left"><a href="https://leastsquared.substack.com/p/designing-a-multi-agent-architecture">Designing a Multi-Agent Architecture Guided by Advanced Type Systems</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50520692">12 points, 0 comments</a></td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left">🔓 <a href="https://www.theregister.com/research/2026/11/16/google-ai-agent-turned-a-security-patch-into-a-working-exploit-with-no-human-help/5309926">Google: AI agent turned a security patch into a exploit with no human help</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50517797">12 points, 3 comments</a></td>
+<td align="left">Google reports that an AI agent turned a security patch into an exploit with no human help.</td>
+</tr>
+<tr>
+<td align="left">Show HN: Pulsar – cross-harness agent to agent communication and messaging (<a href="https://github.com/yocontra/pulsar">yocontra/pulsar</a>)</td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50526967">8 points, 0 comments</a></td>
+<td align="left">The author presents Pulsar, an MCP server that lets AI coding agents across any harness find and message one another, using one shared list, tags, and multicast.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://dev.to/webdeveloperhyper/ai-avatar-v28-security-support-voxel-avatar-2i5i">AI Avatar v28 (Security Support, Voxel Avatar)🛡️</a></td>
+<td align="left">Dev.to</td>
+<td align="left"><a href="https://dev.to/webdeveloperhyper/ai-avatar-v28-security-support-voxel-avatar-2i5i">51 reactions, 10 comments</a></td>
+<td align="left">The author introduces AI Avatar, a free app where your VRoid (VRM) avatar cheers you.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://dev.to/gde/one-model-gateway-across-clouds-litellm-on-cloud-run-and-azure-with-zero-api-keys-3ma7">One model gateway across clouds: LiteLLM on Cloud Run and Azure with zero API keys</a></td>
+<td align="left">Dev.to</td>
+<td align="left"><a href="https://dev.to/gde/one-model-gateway-across-clouds-litellm-on-cloud-run-and-azure-with-zero-api-keys-3ma7">22 reactions, 9 comments</a></td>
+<td align="left">The author sets up one LiteLLM gateway per cloud, on Cloud Run and Azure Container Apps, letting agents reach Gemini and Azure OpenAI with their own identity and no API keys, virtual keys, or database password.</td>
+</tr>
+</tbody></table>
+<hr>
+<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
+]]></content:encoded>
+    </item>
     <item>
       <title>AI Agents 2026-11-16</title>
       <link>https://dboeter.github.io/daily-diff/#2026-11-16/ai-agents</link>
@@ -2797,69 +2909,6 @@
 <li><strong>News</strong>: GitHub Trending highlighted context-mode as a context‑window optimization tool for AI coding agents that sandboxes tool output (98% reduction), persists session memory, and enforces routing across 17 platforms via MCP + hooks, earning it +4 138 stars: <a href="https://github.com/mksglu/context-mode">https://github.com/mksglu/context-mode</a></li>
 </ul>
 <p><strong>Quiet today:</strong> <a href="https://github.com/NVIDIA/OpenShell">OpenShell</a>, <a href="https://github.com/herdrdev/herdr">herdr</a></p>
-<hr>
-<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
-]]></content:encoded>
-    </item>
-    <item>
-      <title>AI Agents 2026-10-18</title>
-      <link>https://dboeter.github.io/daily-diff/#2026-10-18/ai-agents</link>
-      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-10-18/ai-agents</guid>
-      <pubDate>Sun, 18 Oct 2026 00:00:00 +0000</pubDate>
-      <description>AI Agents 2026-10-18 📅 Overview · 🤖 AI Agents · 💬 AI Discussions · 🌐 Lab Announcements · ⚖️ Policy Watch Generated: 2026-10-18 00:52 UTC | Projects: 16 | Active today: 8 | Stable releases: 5 | Prereleases (not covered): 1 🕵️ Stealth Models on OpenRouter No stealth models listed on OpenRouter today. Coding Agents &amp;amp; Assistants Overview Over the past day, Claude Code faced regressions in Linux permissions and macOS UI while its plugin ecosystem gained traction; OpenAI Codex users reported ...</description>
-      <content:encoded><![CDATA[<h1>AI Agents 2026-10-18</h1>
-<p><a href="https://dboeter.github.io/daily-diff/#2026-10-18">📅 Overview</a> · <strong>🤖 AI Agents</strong> · <a href="https://dboeter.github.io/daily-diff/#2026-10-18/ai-hn">💬 AI Discussions</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-18/ai-web">🌐 Lab Announcements</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-18/ai-policy">⚖️ Policy Watch</a></p>
-<blockquote>
-<p>Generated: 2026-10-18 00:52 UTC | Projects: 16 | Active today: 8 | Stable releases: 5 | Prereleases (not covered): 1</p>
-</blockquote>
-<hr>
-<h2>🕵️ Stealth Models on OpenRouter</h2>
-<p>No stealth models listed on OpenRouter today.</p>
-<hr>
-<h2>Coding Agents &amp; Assistants</h2>
-<h3>Overview</h3>
-<p>Over the past day, Claude Code faced regressions in Linux permissions and macOS UI while its plugin ecosystem gained traction; OpenAI Codex users reported persistent crash dumps; OpenCode struggled with free‑model access on Windows and login issues; Pi attracted interest with a new local‑first desktop front‑end; Oh My Pi released v18.12.1 fixing proxy‑upload bugs and v18.12.0 addressing Cursor‑turn crashes; Cline updated its SDK, desktop and CLI to support GPT‑6 models and switched to Claude Sonnet 5.5 as default; DeepSeek Harness shipped a release candidate adding DeepSeek‑V4.1‑Flash and Search/Fetch API support and saw a desktop wrapper surge in stars; Hermes Agent users on Android/Termux reported ongoing stability problems after extended use.</p>
-<h3>Claude Code</h3>
-<ul>
-<li><strong>Hot issue</strong>: In Claude Code 2.1.301 on Linux, the auto‑mode classifier refuses routine user‑approved file deletions that were allowed in 2.1.300, causing a regression in permissions handling. (<a href="https://github.com/anthropics/claude-code/issues/102732">https://github.com/anthropics/claude-code/issues/102732</a>)</li>
-<li><strong>News</strong>: Hacker News highlighted how the Claude Code team conducts code review, shedding light on their internal practices and quality processes. (<a href="https://news.ycombinator.com/item?id=50122951">https://news.ycombinator.com/item?id=50122951</a>)</li>
-</ul>
-<h3>OpenAI Codex</h3>
-<ul>
-<li><strong>News</strong>: Users reported that Codex Desktop continuously generates Crashpad pending dumps, indicating a stability issue that requires investigation. (<a href="https://news.ycombinator.com/item?id=50133231">https://news.ycombinator.com/item?id=50133231</a>)</li>
-</ul>
-<h3>OpenCode</h3>
-<ul>
-<li><strong>Hot issue</strong>: On Windows v2.0.32, free models fail inside the official OpenCode TUI with the error “free tier can only be used from within OpenCode”, blocking access to complimentary models. (<a href="https://github.com/anomalyco/opencode/issues/56324">https://github.com/anomalyco/opencode/issues/56324</a>)</li>
-<li><strong>News</strong>: The OpenCode repository trended on GitHub, gaining 438 stars as the open‑source coding agent continues to attract community attention. (<a href="https://github.com/anomalyco/opencode">https://github.com/anomalyco/opencode</a>)</li>
-</ul>
-<h3>Pi</h3>
-<ul>
-<li><strong>News</strong>: A new local‑first AI coding agent desktop for Pi surfaced on GitHub, combining Electron, Rust, and the Pi agent harness with user‑installable plugins (<a href="https://github.com/vastsa/PI-Desktop">https://github.com/vastsa/PI-Desktop</a>).</li>
-</ul>
-<h3>Oh My Pi</h3>
-<ul>
-<li><strong>Release</strong>: Versions v18.12.1 and v18.12.0 fix TLS‑inspecting proxy upload failures, resolve Cursor‑turn PROVIDER_ERROR crashes, and replace the PI_CODEX_ZSTD environment variable with a new setting (<a href="https://github.com/can1357/oh-my-pi/releases/tag/v18.12.1">https://github.com/can1357/oh-my-pi/releases/tag/v18.12.1</a>).</li>
-<li><strong>Hot issue</strong>: A concurrent subagent session triggered a 40 GiB allocation crash in pi‑natives on the tokio‑rt‑worker thread, though the issue has been closed (<a href="https://github.com/can1357/oh-my-pi/issues/16067">https://github.com/can1357/oh-my-pi/issues/16067</a>).</li>
-</ul>
-<h3>Cline</h3>
-<ul>
-<li><strong>Release</strong>: The SDK v0.0.95, desktop v0.0.48 and CLI v3.0.73 updates enable GPT‑6 models on OpenAI/Azure by sending max_completion_tokens, refresh the model catalog, and reset the default model to Claude Sonnet 5.5 (<a href="https://github.com/cline/cline/releases/tag/sdk/sdk/v0.0.95">https://github.com/cline/cline/releases/tag/sdk/sdk/v0.0.95</a>).</li>
-</ul>
-<h3>DeepSeek Harness</h3>
-<ul>
-<li><strong>Prerelease</strong>: Release candidate dsh‑v0.2.1‑rc.2 adds support for the DeepSeek‑V4.1‑Flash‑1017 model and enables DeepSeek Search and Fetch APIs via the Web Search settings (<a href="https://github.com/deepseek-ai/deepseek-harness/releases/tag/dsh-v0.2.1-rc.2">https://github.com/deepseek-ai/deepseek-harness/releases/tag/dsh-v0.2.1-rc.2</a>).</li>
-<li><strong>News</strong>: A desktop wrapper for DeepSeek Harness (DSHDesktop) appeared on GitHub, quickly accumulating nearly 15 k stars as users seek a native client for the harness (<a href="https://github.com/dataelement/dsh-desktop">https://github.com/dataelement/dsh-desktop</a>).</li>
-</ul>
-<h3>Hermes Agent</h3>
-<ul>
-<li><strong>Hot issue</strong>: After several days of daily use on Android/Termux, Hermes Agent users encounter various stability problems, with upstream bugs surfacing in the agent’s memory, skills, and TTS tools (<a href="https://github.com/NousResearch/hermes-agent/issues/140004">https://github.com/NousResearch/hermes-agent/issues/140004</a>).</li>
-</ul>
-<p><strong>Quiet today:</strong> <a href="https://github.com/google-gemini/gemini-cli">Gemini CLI</a>, <a href="https://github.com/Kilo-Org/kilocode">Kilo Code</a>, <a href="https://github.com/1jehuang/jcode">jcode</a>, <a href="https://github.com/CommandCodeAI/command-code">Command Code</a></p>
-<hr>
-<h2>Agent Tooling</h2>
-<p>No stable releases, hot issues or news items today.</p>
-<p><strong>Quiet today:</strong> <a href="https://github.com/NVIDIA/OpenShell">OpenShell</a>, <a href="https://github.com/herdrdev/herdr">herdr</a>, <a href="https://github.com/mksglu/context-mode">context-mode</a>, <a href="https://github.com/asheshgoplani/agent-deck">Agent Deck</a></p>
 <hr>
 <p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
 ]]></content:encoded>

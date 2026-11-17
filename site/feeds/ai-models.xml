@@ -13,7 +13,160 @@
       <height>144</height>
     </image>
     <atom:link href="https://dboeter.github.io/daily-diff/feeds/ai-models.xml" rel="self" type="application/rss+xml"/>
-    <lastBuildDate>Mon, 16 Nov 2026 23:57:05 +0000</lastBuildDate>
+    <lastBuildDate>Tue, 17 Nov 2026 07:49:08 +0000</lastBuildDate>
+    <item>
+      <title>AI Models &amp; Labs 2026-11-17</title>
+      <link>https://dboeter.github.io/daily-diff/#2026-11-17/ai-models</link>
+      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-11-17/ai-models</guid>
+      <pubDate>Tue, 17 Nov 2026 00:00:00 +0000</pubDate>
+      <description>AI Models &amp;amp; Labs 2026-11-17 ⬛ Overview · 🟪 AI Agents · 🟦 AI Models &amp;amp; Labs · 🟧 AI Policy · 🟨 Data Engineering Lab posts: 7 | New models: 1 | Spotted: 7 | Generated: 2026-11-17 07:44 UTC Highlights Tencent&amp;#39;s Hy4 flash (tencent/hy4-flash) is now listed on OpenRouter with a 1M context — a cost-efficient variant with roughly a quarter of the Hy4 flagship&amp;#39;s parameter count for lower latency and cost, targeting code assistance and agent tasks. Anthropic says Claude Mythos Preview br...</description>
+      <content:encoded><![CDATA[<h1>AI Models &amp; Labs 2026-11-17</h1>
+<p><a href="https://dboeter.github.io/daily-diff/#2026-11-17">⬛ Overview</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-17/ai-agents">🟪 AI Agents</a> · <strong>🟦 AI Models &amp; Labs</strong> · <a href="https://dboeter.github.io/daily-diff/#2026-11-17/ai-policy">🟧 AI Policy</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-17/ai-data">🟨 Data Engineering</a></p>
+<blockquote>
+<p>Lab posts: 7 | New models: 1 | Spotted: 7 | Generated: 2026-11-17 07:44 UTC</p>
+</blockquote>
+<hr>
+<h2>Highlights</h2>
+<ul>
+<li><p>Tencent&#39;s Hy4 flash (<code>tencent/hy4-flash</code>) is now listed on OpenRouter with a 1M context — a cost-efficient variant with roughly a quarter of the Hy4 flagship&#39;s parameter count for lower latency and cost, targeting code assistance and agent tasks.</p>
+</li>
+<li><p>Anthropic says Claude Mythos Preview brought up prompt processing for one model on AMD Instinct MI355X GPUs in about three days.</p>
+</li>
+<li><p>A report says Revolut made self-hosted Chinese open-weight models its coding default, cutting AI coding costs 90% across 2,000 engineers.</p>
+</li>
+</ul>
+<hr>
+<h2>Lab announcements</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Lab</th>
+<th align="left">Post</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-11-17</td>
+<td align="left">OpenAI</td>
+<td align="left"><a href="https://openai.com/index/science-at-the-frontier/">Science At The Frontier</a></td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left">2026-11-17</td>
+<td align="left">OpenAI</td>
+<td align="left"><a href="https://openai.com/index/our-first-phase-of-embedded-assessments/">Our First Phase Of Embedded Assessments</a></td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left">2026-11-17</td>
+<td align="left">OpenAI</td>
+<td align="left"><a href="https://openai.com/index/more-ways-to-move-care-forward-with-chatgpt-for-healthcare/">More Ways To Move Care Forward With Chatgpt For Healthcare</a></td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left">2026-11-17</td>
+<td align="left">OpenAI</td>
+<td align="left"><a href="https://openai.com/index/advancing-computer-use-for-healthcare-teams/">Advancing Computer Use For Healthcare Teams</a></td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left">2026-11-17</td>
+<td align="left">OpenAI</td>
+<td align="left"><a href="https://openai.com/index/strengthening-online-child-safety/">Strengthening Online Child Safety</a></td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left">2026-11-17</td>
+<td align="left">OpenAI</td>
+<td align="left"><a href="https://openai.com/index/expanding-chatgpt-for-academic-researchers/">Expanding Chatgpt For Academic Researchers</a></td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left">2026-11-16</td>
+<td align="left">Anthropic</td>
+<td align="left"><a href="https://www.anthropic.com/research/coordinated-vulnerability-disclosure-timelines">Updating our coordinated vulnerability disclosure policy timelines</a></td>
+<td align="left">Anthropic is shortening its coordinated vulnerability disclosure window from 90 days to 30 days for high- and critical-severity issues and to 45 days for all other issues, effective for reports on or after January 1, 2027, and will escalate to an external coordinator after 15 days instead of 30 if a maintainer does not respond.</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>New on OpenRouter</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Model</th>
+<th align="left">Listed</th>
+<th align="left">Context</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a href="https://openrouter.ai/tencent/hy4-flash">Tencent: Hy4 flash</a> <code>tencent/hy4-flash</code></td>
+<td align="left">2026-11-16</td>
+<td align="left">1M</td>
+<td align="left">Hy4 flash is a cost-efficient variant of Hy4 from Tencent with roughly a quarter of the flagship&#39;s parameter count for lower latency and cost, targeting code assistance and agent tasks.</td>
+</tr>
+</tbody></table>
+<hr>
+<p>Nothing new from OpenRouter&#39;s stealth models today.</p>
+<hr>
+<h2>Spotted</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Story</th>
+<th align="left">Source</th>
+<th align="left">Discussion</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a href="https://get.mem.ai/blog/mem-is-shutting-down">Mem Is Shutting Down</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50526537">48 points, 62 comments</a></td>
+<td align="left">Mem is shutting down, with the service closing on January 15, 2027.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://www.tomshardware.com/tech-industry/artificial-intelligence/anthropic-says-claude-mythos-slashed-software-work-to-onboard-amd-gpus-from-up-to-12-months-to-around-three-days-writing-almost-100-percent-of-kernels-autonomously-chips-away-at-nvidias-cuda-moat">Claude Mythos slashed software work to onboard AMD GPUs to around three days</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50526264">43 points, 14 comments</a></td>
+<td align="left">Anthropic says Claude Mythos Preview brought up prompt processing for one model on AMD Instinct MI355X GPUs in about three days.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://www.withbeaker.ai/blog/weight-space-programming">Adventures in Weight Space Programming</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50459411">9 points, 1 comment</a></td>
+<td align="left">The author describes a weight-space programming experiment in Beaker, testing whether one model can fix another by editing its weights without ever running the model.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://www.ft.com/content/0ef40ac9-6d01-428f-98c8-a52bf5b9a787">Sam Bankman-Fried would have made nearly $40B in Anthropic IPO</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50493079">8 points, 4 comments</a></td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left"><a href="https://finance.biggo.com/news/71888475bad974d6">GLM Models Cut AI Coding Costs 90% for 2k Engineers</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50512000">8 points, 0 comments</a></td>
+<td align="left">According to the report, Revolut—described as Europe&#39;s most valuable private company—made self-hosted Chinese open-weight models its coding default, which the report says cut AI coding costs 90% across 2,000 engineers.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://www.cmpnd.ai/blog/weight-space-programming-dspy.html">Beating benchmarks by weight-space optimizing decision models with DSPy</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50486999">8 points, 0 comments</a></td>
+<td align="left">The author presents dspy-wsp, a prototype DSPy optimizer that lets a frontier model edit a small model&#39;s weights directly, and reports it improved every decision model they tested.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://dev.to/gde/high-or-low-thinking-gemini-4-and-gemma-4-on-hard-math-cost-first-3091">High or Low Thinking? Gemini 4 and Gemma 4 on Hard Math, Cost First</a></td>
+<td align="left">Dev.to</td>
+<td align="left"><a href="https://dev.to/gde/high-or-low-thinking-gemini-4-and-gemma-4-on-hard-math-cost-first-3091">24 reactions, 5 comments</a></td>
+<td align="left">The author benchmarks seven models on the 15 problems of AIME 2025 I at their lowest and highest thinking settings under a hard budget, finding that the top setting cost 2.6 to 4.8 times as much on every paid model and that no score change was large enough to rule out chance on 15 problems.</td>
+</tr>
+</tbody></table>
+<hr>
+<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
+]]></content:encoded>
+    </item>
     <item>
       <title>AI Models &amp; Labs 2026-11-16</title>
       <link>https://dboeter.github.io/daily-diff/#2026-11-16/ai-models</link>

@@ -13,7 +13,204 @@
       <height>144</height>
     </image>
     <atom:link href="https://dboeter.github.io/daily-diff/feeds/ai-data.xml" rel="self" type="application/rss+xml"/>
-    <lastBuildDate>Mon, 16 Nov 2026 23:57:05 +0000</lastBuildDate>
+    <lastBuildDate>Tue, 17 Nov 2026 07:49:09 +0000</lastBuildDate>
+    <item>
+      <title>Data Engineering 2026-11-17</title>
+      <link>https://dboeter.github.io/daily-diff/#2026-11-17/ai-data</link>
+      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-11-17/ai-data</guid>
+      <pubDate>Tue, 17 Nov 2026 00:00:00 +0000</pubDate>
+      <description>Data Engineering 2026-11-17 ⬛ Overview · 🟪 AI Agents · 🟦 AI Models &amp;amp; Labs · 🟧 AI Policy · 🟨 Data Engineering Vendor items: 12 | Also new: 4 | Projects: 26 | Active today: 1 | Stable releases: 1 | Prereleases (not covered): 1 | Generated: 2026-11-17 07:44 UTC Highlights Databricks users starting new streaming queries in real-time mode on Runtime 19 now filter late events against the live watermark and evict state sooner by default; to keep the previous behavior, set spark.databricks.strea...</description>
+      <content:encoded><![CDATA[<h1>Data Engineering 2026-11-17</h1>
+<p><a href="https://dboeter.github.io/daily-diff/#2026-11-17">⬛ Overview</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-17/ai-agents">🟪 AI Agents</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-17/ai-models">🟦 AI Models &amp; Labs</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-17/ai-policy">🟧 AI Policy</a> · <strong>🟨 Data Engineering</strong></p>
+<blockquote>
+<p>Vendor items: 12 | Also new: 4 | Projects: 26 | Active today: 1 | Stable releases: 1 | Prereleases (not covered): 1 | Generated: 2026-11-17 07:44 UTC</p>
+</blockquote>
+<hr>
+<h2>Highlights</h2>
+<ul>
+<li>Databricks users starting new streaming queries in real-time mode on Runtime 19 now filter late events against the live watermark and evict state sooner by default; to keep the previous behavior, set <code>spark.databricks.streaming.realTimeMode.realTimeWatermark.enabled</code> to false before starting the query (checkpoint restarts are unaffected).</li>
+<li>Azure Databricks users ingesting PostgreSQL change data can now do so with the PostgreSQL integrated CDC pipeline (Beta), which needs no separate ingestion gateway.</li>
+</ul>
+<hr>
+<h2>Action required</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Platform</th>
+<th align="left">Item</th>
+<th align="left">What to do</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-11-19</td>
+<td align="left">Azure Databricks</td>
+<td align="left"><a href="https://learn.microsoft.com/azure/databricks/release-notes/product/2026/november#gemini-36-flash-will-be-retired-on-november-19-2026">Gemini 3.6 Flash will be retired on November 19, 2026</a></td>
+<td align="left">API calls to <code>Gemini 3.6 Flash</code> will be automatically redirected to <code>Gemini 3.8 Flash</code> on 2026-11-19; migrate to <code>Gemini 3.8 Flash</code> using the Legacy, deprecated, and retired models guide.</td>
+</tr>
+<tr>
+<td align="left">2026-11-30</td>
+<td align="left">Azure Databricks</td>
+<td align="left"><a href="https://learn.microsoft.com/azure/databricks/release-notes/whats-coming#upcoming-end-of-life-for-the-genie-one-mcp-beta-endpoint">Upcoming end of life for the Genie One MCP Beta endpoint</a></td>
+<td align="left">The Genie One MCP Beta endpoint at <code>https://&lt;workspace-hostname&gt;/api/2.0/mcp/genie</code> reaches end of life on November 30, 2026, after which requests fail; migrate all workloads to the <code>system.ai.genie_one_mcp</code> MCP in Unity Gateway.</td>
+</tr>
+<tr>
+<td align="left">2027-01-31</td>
+<td align="left">BigQuery</td>
+<td align="left"><a href="https://docs.cloud.google.com/bigquery/docs/release-notes#November_06_2026">Starting January 31, 2027, the BigQuery Data Transfer Service for Shopify connector will no longer support the following fields</a></td>
+<td align="left">Starting January 31, 2027, the BigQuery Data Transfer Service for Shopify connector will drop support for the <code>legacyMode</code> field in the DeliveryProfile dataset schema and the <code>permitSkuSharing</code> field in the FulfillmentService dataset schema.</td>
+</tr>
+<tr>
+<td align="left">2027-02-04</td>
+<td align="left">Azure Databricks</td>
+<td align="left"><a href="https://learn.microsoft.com/azure/databricks/release-notes/product/2026/november#zhipu-ai-glm-52-is-scheduled-for-retirement">Zhipu AI GLM 5.2 is scheduled for retirement</a></td>
+<td align="left">Zhipu AI GLM 5.2 is deprecated and will be retired on February 4, 2027, requiring migration to GLM 5.3 per the Legacy, deprecated, and retired models guidance.</td>
+</tr>
+<tr>
+<td align="left">2027-08-19</td>
+<td align="left">Azure Databricks</td>
+<td align="left"><a href="https://learn.microsoft.com/azure/databricks/release-notes/whats-coming#all-unity-catalog-managed-tables-will-be-upgraded-to-catalog-commits">All Unity Catalog managed tables will be upgraded to catalog commits</a></td>
+<td align="left">After Databricks Runtime 15.4 LTS end of support on August 19, 2027, all Unity Catalog managed tables will be automatically upgraded to <code>catalog commits</code>, making Unity Catalog the system of coordination and enabling multi-statement transactions, external engine writes, and consistent governance; clients must plan for this breaking change before the 2027 deadline.</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>Databricks</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Item</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-11-16</td>
+<td align="left">⚠️ <a href="https://learn.microsoft.com/azure/databricks/release-notes/runtime/19#databricks-runtime-19-november-16-2026">Databricks Runtime 19: November 16, 2026</a></td>
+<td align="left">New streaming queries in real-time mode use real-time watermark propagation by default; stateful operators advance the event-time watermark within a batch, so late events are filtered against the live watermark and state is evicted sooner. Queries restarted from an existing checkpoint keep their original behavior, and to keep the previous behavior for a new query, set <code>spark.databricks.streaming.realTimeMode.realTimeWatermark.enabled</code> to false before starting it.</td>
+</tr>
+<tr>
+<td align="left">2026-11-18</td>
+<td align="left">🤖 <a href="https://learn.microsoft.com/azure/databricks/release-notes/product/2026/november#genie-code-cli-is-now-generally-available">Genie Code CLI is now generally available</a></td>
+<td align="left">Genie Code CLI is managed the same way as Genie Code in the workspace; admins manage one Genie Code budget across the CLI and workspace, and users can apply their free monthly Genie usage in the CLI.</td>
+</tr>
+<tr>
+<td align="left">2026-11-16</td>
+<td align="left"><a href="https://learn.microsoft.com/azure/databricks/release-notes/whats-coming#ip-functions-will-soon-be-available-by-default-for-workspaces-with-the-compliance-security-profile-enabled">IP functions will soon be available by default for workspaces with the compliance security profile enabled</a></td>
+<td align="left">IP functions will be available by default for workspaces with the compliance security profile enabled, letting users work with IP addresses and CIDR blocks, including joins on them.</td>
+</tr>
+<tr>
+<td align="left">2026-11-16</td>
+<td align="left"><a href="https://learn.microsoft.com/azure/databricks/release-notes/product/2026/november#governed-tag-propagation-supports-classic-compute-beta">Governed tag propagation supports classic compute (Beta)</a></td>
+<td align="left">Governed tag propagation supports classic compute running Databricks Runtime 19 or above, in addition to serverless compute; governed tags on a source propagate to the tables and views derived from it on either compute type.</td>
+</tr>
+<tr>
+<td align="left">2026-11-16</td>
+<td align="left">🤖 <a href="https://learn.microsoft.com/azure/databricks/release-notes/product/2026/november#share-unity-catalog-agent-skills-with-opensharing-and-azure-databricks-marketplace-beta">Share Unity Catalog agent skills with OpenSharing and Azure Databricks Marketplace (Beta)</a></td>
+<td align="left">Providers can add Unity Catalog agent skills to OpenSharing shares and Azure Databricks Marketplace listings; Databricks-to-Databricks recipients get read-only access to each shared skill in the catalog they create from the share, and provider changes reach recipients asynchronously.</td>
+</tr>
+<tr>
+<td align="left">2026-11-15</td>
+<td align="left"><a href="https://learn.microsoft.com/azure/databricks/release-notes/product/2026/november#postgresql-integrated-cdc-pipeline-is-now-in-beta">PostgreSQL integrated CDC pipeline is now in Beta</a></td>
+<td align="left">The PostgreSQL integrated CDC pipeline lets you ingest change data from PostgreSQL into Azure Databricks using a single integrated CDC pipeline with no separate ingestion gateway.</td>
+</tr>
+<tr>
+<td align="left">2026-11-13</td>
+<td align="left"><a href="https://learn.microsoft.com/azure/databricks/release-notes/product/2026/november#external-access-to-views-through-the-iceberg-rest-catalog-is-in-beta">External access to views through the Iceberg REST catalog is in Beta</a></td>
+<td align="left">External Iceberg engines can query Unity Catalog views over Iceberg-compatible tables through the Iceberg REST catalog.</td>
+</tr>
+<tr>
+<td align="left">2026-11-12</td>
+<td align="left"><a href="https://learn.microsoft.com/azure/databricks/release-notes/product/2026/november#budgets-now-support-daily-thresholds-in-addition-to-monthly-thresholds">Budgets now support daily thresholds in addition to monthly thresholds</a></td>
+<td align="left">Budgets scoped to Unity Gateway, including budgets for Genie, support daily per-user thresholds in addition to monthly per-user thresholds; you can set a daily threshold, a monthly threshold, or both, with separate alert, webhook, and block usage actions for each period, and daily thresholds reset at 00:00 UTC.</td>
+</tr>
+<tr>
+<td align="left">2026-11-11</td>
+<td align="left"><a href="https://learn.microsoft.com/azure/databricks/release-notes/product/2026/november#serverless-rate-limits-are-now-in-beta">Serverless rate limits are now in Beta</a></td>
+<td align="left">Serverless rate limits let you limit Spark executor autoscaling for serverless jobs and pipelines by setting a size on an automated compute object.</td>
+</tr>
+</tbody></table>
+<p><em>Also new:</em> <a href="https://learn.microsoft.com/azure/databricks/release-notes/product/2026/november#submit-databricks-support-cases-from-your-workspace-with-the-get-support-form">Submit Databricks support cases from your workspace with the Get support form</a></p>
+<h3>Terraform provider for Databricks</h3>
+<ul>
+<li><strong>Release:</strong> <a href="https://github.com/databricks/terraform-provider-databricks/releases/tag/v1.143.0">v1.143.0</a> switches <code>databricks_app</code> to the asynchronous Apps update API, now applying <code>compute_size</code>, <code>compute_min_instances</code>, and <code>compute_max_instances</code> changes that were previously ignored; omitted fields are cleared or reset to defaults. Fixes perpetual diffs by retaining configured secret values (<code>pem_key_passphrase</code>, <code>ssl_keystore_key</code>, <code>ssl_key_password</code>, <code>schema_registry_api_secret</code>) and ignoring whitespace-only differences in PEM-encoded options for <code>databricks_connection</code>. Adds <code>databricks_assume_group_restricted_sharing_group</code> resource and data source, plus write-only attributes <code>personal_access_token_wo</code>/<code>personal_access_token_wo_version</code> for <code>databricks_git_credential</code> and <code>options_wo</code>/<code>options_wo_version</code> for <code>databricks_connection</code>.</li>
+</ul>
+<p><strong>Quiet today:</strong> <a href="https://github.com/delta-io/delta">Delta Lake</a>, <a href="https://github.com/delta-io/delta-rs">delta-rs</a>, <a href="https://github.com/unitycatalog/unitycatalog">Unity Catalog</a>, <a href="https://github.com/mlflow/mlflow">MLflow</a>, <a href="https://github.com/databricks/cli">Databricks CLI</a>, <a href="https://github.com/databricks/dbt-databricks">dbt-databricks</a></p>
+<hr>
+<h2>Snowflake</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Item</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-11-16</td>
+<td align="left">🤖 <a href="https://docs.snowflake.com/en/release-notes/2026/other/2026-11-16-cortex-ai-function-studio-ga">Create, evaluate, and optimize Cortex AI Functions with Cortex AI Function Studio (General availability)</a></td>
+<td align="left">Cortex AI Function Studio enables organizations to create, evaluate, and optimize production-ready Cortex AI Functions for unstructured and multimodal data workflows, automating prompt engineering, model selection, benchmarking, and optimization.</td>
+</tr>
+<tr>
+<td align="left">2026-11-16</td>
+<td align="left">🤖 <a href="https://docs.snowflake.com/en/release-notes/2026/other/2026-11-16-ai-function-optimization-ga">Cortex AI Function Optimization for more efficient AI implementations (General availability)</a></td>
+<td align="left">Cortex AI Function Optimization automatically searches across prompts and models for improved implementations of custom AI Functions; using the <code>AIFUNCTIONOPTIMIZATION</code> experiment type, customers can evaluate multiple model candidates.</td>
+</tr>
+<tr>
+<td align="left">2026-11-16</td>
+<td align="left"><a href="https://docs.snowflake.com/en/release-notes/2026/other/2026-11-16-show-grants-include-hierarchy">SHOW GRANTS TO ... INCLUDE HIERARCHY (General availability)</a></td>
+<td align="left">You can add <code>INCLUDE HIERARCHY</code> to <code>SHOW GRANTS TO</code> statements to list the grants held by every role in a grantee&#39;s role hierarchy, not only the grants made directly to that role or user.</td>
+</tr>
+</tbody></table>
+<p><em>Also new:</em> <a href="https://docs.snowflake.com/en/release-notes/2026/other/2026-11-16-organization-scim-private-preview">SCIM provisioning for organization users and organization user groups (Private preview)</a> · <a href="https://docs.snowflake.com/en/release-notes/2026/other/2026-11-12-gemini-4-carbon-hydrogen-preview">Google Gemini 4 Carbon and Hydrogen models (Preview)</a> · <a href="https://docs.snowflake.com/en/release-notes/2026/other/2026-11-16-ai-complete-pegasus-1-5-preview">AI_COMPLETE adds support for Twelve Labs Pegasus 1.5 (General availability)</a></p>
+<p><strong>Quiet today:</strong> <a href="https://github.com/snowflakedb/snowpark-python">Snowpark Python</a>, <a href="https://github.com/snowflakedb/snowflake-connector-python">Snowflake Connector for Python</a>, <a href="https://github.com/apache/polaris">Apache Polaris</a>, <a href="https://github.com/snowflakedb/terraform-provider-snowflake">Terraform provider for Snowflake</a></p>
+<hr>
+<p>Nothing new from Azure / Fabric &amp; GCP or Open-source stack (<a href="https://github.com/dbt-labs/dbt">dbt Core</a>, <a href="https://github.com/SQLMesh/sqlmesh">SQLMesh</a>, <a href="https://github.com/apache/airflow">Apache Airflow</a>, <a href="https://github.com/dagster-io/dagster">Dagster</a>, <a href="https://github.com/PrefectHQ/prefect">Prefect</a>, <a href="https://github.com/dlt-hub/dlt">dlt</a>, <a href="https://github.com/apache/iceberg">Apache Iceberg</a>, <a href="https://github.com/apache/iceberg-python">PyIceberg</a>, <a href="https://github.com/duckdb/duckdb">DuckDB</a>, <a href="https://github.com/pola-rs/polars">Polars</a>, <a href="https://github.com/trinodb/trino">Trino</a>, <a href="https://github.com/great-expectations/great_expectations">Great Expectations</a>, <a href="https://github.com/sodadata/soda-core">Soda Core</a>, <a href="https://github.com/OpenLineage/OpenLineage">OpenLineage</a>, <a href="https://github.com/open-metadata/OpenMetadata">OpenMetadata</a>) today.</p>
+<hr>
+<h2>News &amp; discussion</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Post</th>
+<th align="left">Source</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-11-17</td>
+<td align="left"><a href="https://medium.com/snowflake/from-streamlit-to-snowflake-app-runtime-a-demo-migration-19e6e81d9873">From Streamlit to Snowflake App Runtime: A Demo Migration</a></td>
+<td align="left">Snowflake on Medium</td>
+<td align="left">The author migrated the Apache Ossie demo from Streamlit in Snowflake to Snowflake App Runtime as a Next.js app; the Ossie YAML and a Snowflake semantic view kept metric definitions outside the interface, and the demo answered one question with 115,550 without a semantic view versus 103,200 with it.</td>
+</tr>
+<tr>
+<td align="left">2026-11-17</td>
+<td align="left"><a href="https://medium.com/snowflake/i-benchmarked-snowflake-postgres-mirroring-for-two-days-here-are-the-numbers-b50eba22b8de">I benchmarked Snowflake Postgres mirroring for two days. Here are the numbers.</a></td>
+<td align="left">Snowflake on Medium</td>
+<td align="left">The author benchmarked Snowflake Postgres mirroring for two days on the smallest instance that supports mirroring; new rows show up in <code>TABLE$live</code> after ~26 s median and ~37 s p90, regardless of whether the refresh interval is 30 seconds or 10 minutes, and the table lags behind <code>$live</code> by up to one refresh interval.</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>Spotted</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Story</th>
+<th align="left">Source</th>
+<th align="left">Discussion</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a href="https://tanelpoder.com/posts/generate-qr-code-with-pure-sql-in-postgres/">Generate QR Codes with Pure SQL in PostgreSQL - Tanel Poder Blog</a></td>
+<td align="left">Lobste.rs</td>
+<td align="left"><a href="https://lobste.rs/s/0ficdv/generate_qr_codes_with_pure_sql">1 point, 0 comments</a></td>
+<td align="left">The author describes building a QR-code generator for PostgreSQL as a single pure SQL statement, requiring no external libraries or Postgres extension.</td>
+</tr>
+</tbody></table>
+<hr>
+<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
+]]></content:encoded>
+    </item>
     <item>
       <title>Data Engineering 2026-11-16</title>
       <link>https://dboeter.github.io/daily-diff/#2026-11-16/ai-data</link>

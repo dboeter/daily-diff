@@ -13,7 +13,96 @@
       <height>144</height>
     </image>
     <atom:link href="https://dboeter.github.io/daily-diff/feeds/ai-policy.xml" rel="self" type="application/rss+xml"/>
-    <lastBuildDate>Mon, 16 Nov 2026 23:57:05 +0000</lastBuildDate>
+    <lastBuildDate>Tue, 17 Nov 2026 07:49:09 +0000</lastBuildDate>
+    <item>
+      <title>AI Policy 2026-11-17</title>
+      <link>https://dboeter.github.io/daily-diff/#2026-11-17/ai-policy</link>
+      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-11-17/ai-policy</guid>
+      <pubDate>Tue, 17 Nov 2026 00:00:00 +0000</pubDate>
+      <description>AI Policy 2026-11-17 ⬛ Overview · 🟪 AI Agents · 🟦 AI Models &amp;amp; Labs · 🟧 AI Policy · 🟨 Data Engineering Sources: European Commission + Digitale Overheid + Politico US | 3 new items ranked by Jev relevance | Generated: 2026-11-17 07:44 UTC Highlights The European Commission is collecting feedback on a draft questionnaire template to help certain deployers of high-risk AI systems conduct the fundamental rights impact assessment required by the AI Act. In the Netherlands, municipalities and p...</description>
+      <content:encoded><![CDATA[<h1>AI Policy 2026-11-17</h1>
+<p><a href="https://dboeter.github.io/daily-diff/#2026-11-17">⬛ Overview</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-17/ai-agents">🟪 AI Agents</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-17/ai-models">🟦 AI Models &amp; Labs</a> · <strong>🟧 AI Policy</strong> · <a href="https://dboeter.github.io/daily-diff/#2026-11-17/ai-data">🟨 Data Engineering</a></p>
+<blockquote>
+<p>Sources: European Commission + Digitale Overheid + Politico US | 3 new items ranked by <a href="https://typesafe.ai">Jev</a> relevance | Generated: 2026-11-17 07:44 UTC</p>
+</blockquote>
+<hr>
+<h2>Highlights</h2>
+<p>The European Commission is collecting feedback on a draft questionnaire template to help certain deployers of high-risk AI systems conduct the fundamental rights impact assessment required by the AI Act. In the Netherlands, municipalities and provinces have expressed support for European digital autonomy plans and see room to shape the legislative proposal for the Cloud and AI Development Act. Meanwhile, California has sued OpenAI, alleging the company tested advanced AI models without adequate safeguards and misled the public about safety following a reported hack of Hugging Face.</p>
+<h2>EU</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Source</th>
+<th align="left">Title</th>
+<th align="left">Stage</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-11-16</td>
+<td align="left">European Commission</td>
+<td align="left"><a href="https://digital-strategy.ec.europa.eu/news-redirect/965945">Commission seeks feedback on draft template for the fundamental rights impact assessment under the AI Act</a></td>
+<td align="left">—</td>
+<td align="left">The European Commission is collecting feedback on a draft template for a questionnaire to facilitate certain deployers of high-risk AI systems in complying with their obligations to prepare a fundamental rights impact assessment under Article 27 of the AI Act. The template aims to help deployers meet their fundamental rights impact assessment requirements.</td>
+</tr>
+</tbody></table>
+<h2>Netherlands</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Source</th>
+<th align="left">Title</th>
+<th align="left">Stage</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-11-11</td>
+<td align="left">Digitale Overheid</td>
+<td align="left"><a href="https://www.digitaleoverheid.nl/nieuws-nds/positie-van-gemeenten-en-provincies-rondom-cada/">Positie van gemeenten en provincies rondom CADA</a></td>
+<td align="left">—</td>
+<td align="left">Dutch municipalities and provinces support European plans for greater digital autonomy and see room to strengthen the legislative proposal for the Cloud and AI Development Act.</td>
+</tr>
+</tbody></table>
+<h2>News &amp; commentary</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Source</th>
+<th align="left">Title</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-11-16</td>
+<td align="left">Politico US</td>
+<td align="left"><a href="https://www.politico.com/news/2026/11/16/bonta-sues-openai-over-rogue-ai-hack-of-hugging-face-01166953">California sues OpenAI over rogue AI hack of Hugging Face</a></td>
+<td align="left">California has sued OpenAI, alleging the company tested advanced AI models without adequate safeguards and misled the public about safety.</td>
+</tr>
+</tbody></table>
+<h2>Coming up</h2>
+<p>Deadlines and dates in the next 30 days.</p>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Source</th>
+<th align="left">Item</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-12-02</td>
+<td align="left">Calendar</td>
+<td align="left"><a href="https://ai-act-service-desk.ec.europa.eu/en/ai-act/timeline/timeline-implementation-eu-ai-act">AI Act: bans on sexual deepfakes and CSAM generators; Art. 50(2) transition ends</a></td>
+</tr>
+</tbody></table>
+<hr>
+<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
+]]></content:encoded>
+    </item>
     <item>
       <title>AI Policy 2026-11-16</title>
       <link>https://dboeter.github.io/daily-diff/#2026-11-16/ai-policy</link>
