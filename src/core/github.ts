@@ -256,19 +256,24 @@ export const STAR_GAIN_DAYS = 7;
 export const DAY_S = 24 * 60 * 60;
 
 /**
- * Stars in the STAR_GAIN_DAYS complete days before `now`'s UTC day; today is
- * still running. The series starts at the repo's creation week, so a repo
- * created this week has one bucket, and missing days count 0.
+ * Stars in the last STAR_GAIN_DAYS days: from the bucket dated STAR_GAIN_DAYS − 1
+ * days before `now`'s UTC date, through every later bucket, the running one
+ * included. The caller subtracts this gain from the live total to get the base
+ * of the relative gain, so it must count every star after its window start.
+ * The buckets are labelled at UTC midnight but end near 08:00 UTC (Pacific
+ * time, inferred from Tencent/LoopForge on 2026-11-16), so at the run's hour
+ * the bucket of the day before is still filling. A window of complete UTC days
+ * missed part of that day and put the next bucket's stars in the base.
+ * The series starts at the repo's creation week, and missing days count 0.
  */
 export function gainFromHistory(weeks: StarHistoryWeek[], now: Date): number {
-  const today = Math.floor(now.getTime() / 1000 / DAY_S);
+  const firstDay = Math.floor(now.getTime() / 1000 / DAY_S) - (STAR_GAIN_DAYS - 1);
   let gain = 0;
   for (const w of weeks) {
     // Rounded, not floored: the docs say week starts need not be UTC midnight.
     const start = Math.round(w.week / DAY_S);
     w.days.forEach((stars, i) => {
-      const day = start + i;
-      if (day >= today - STAR_GAIN_DAYS && day < today) gain += stars;
+      if (start + i >= firstDay) gain += stars;
     });
   }
   return gain;
@@ -277,8 +282,9 @@ export function gainFromHistory(weeks: StarHistoryWeek[], now: Date): number {
 /**
  * Stars `repo` gained in the last week, from one core-API request: the two
  * newest buckets cover STAR_GAIN_DAYS from any weekday. The bucket totals sum
- * to `stargazers_count` (cli/cli on 2026-10-08), so the gain is exact. The
- * endpoint answers 422 when "spammed": callers make these calls one at a time.
+ * to `stargazers_count` (cli/cli on 2026-10-08), so the live total minus this
+ * gain is the stars before the window. The endpoint answers 422 when
+ * "spammed": callers make these calls one at a time.
  */
 export async function fetchWeeklyStarGain(repo: string, now = new Date()): Promise<number> {
   const weeks = await githubGet<StarHistoryWeek[]>(
