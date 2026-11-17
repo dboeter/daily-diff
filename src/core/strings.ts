@@ -26,12 +26,12 @@ export const NO_HIGHLIGHT_NOTE = "No item stands out today.";
 
 /**
  * Report names and GitHub issue labels. Each live report has one name: its H1, its GitHub issue title,
- * its sidebar and RSS label and its Telegram label all derive from it. Until
+ * its web UI tab and RSS label and its Telegram label all derive from it. Until
  * October 2026 a report could carry four different ones ("Agent Tooling
  * Weekly" in the H1, "AI Infrastructure Digest" in the sidebar). Names stay
  * cadence-neutral: the archive holds daily and weekly issues of a report.
  */
-// In reading order: the report bar and the sidebar list them this way. A report's mark is a
+// In reading order: the report bar and the web UI's tabs list them this way. A report's mark is a
 // square: `emoji` where only text goes (issue titles, the report bar, Telegram, Teams), `color` in
 // the web UI (manifest.json `colors`), so every channel shows the same one. Green and red squares
 // are left out: those colors mean added and going away (the diff gutter), and the black square is
@@ -55,7 +55,7 @@ export const LIVE_REPORT_IDS = Object.keys(REPORTS) as ReportId[];
 /**
  * The reports that run weekly (see WEEKLY_REPORT_WEEKDAY in date.ts); the
  * rest are daily. The one list: the issue retention groups (github.ts) and the
- * sidebar's "This week" group (manifest.json `weekly`) derive from it.
+ * web UI's "This week" tabs (manifest.json `weekly`) derive from it.
  */
 export const WEEKLY_REPORT_IDS: ReportId[] = ["ai-weekly", "ai-trends"];
 
@@ -352,14 +352,14 @@ export const FOOTER = {
 
 // ---------------------------------------------------------------------------
 // Report labels: RSS item titles, the Telegram message, and published in
-// manifest.json (`labels`) for the sidebar (index.html) and the MCP server
+// manifest.json (`labels`) for the web UI (site/index.html) and the MCP server
 // (mcp/src/index.ts). The live reports' names plus the retired ones.
 // ---------------------------------------------------------------------------
 
 export const REPORT_LABELS: Record<string, string> = {
   ...Object.fromEntries(LIVE_REPORT_IDS.map((id) => [id, REPORTS[id].name])),
   // No longer generated: listed so archived reports stay reachable from the
-  // sidebar and RSS feed (REPORT_FILES) with a title. October 2026: ai-hn
+  // web UI and RSS feed (REPORT_FILES) with a title. October 2026: ai-hn
   // (the daily Hacker News, Dev.to and Lobste.rs stories) moved to each page's
   // Spotted section and ai-web to ai-models; ai-trending, ai-hf and ai-arxiv
   // became sections of the weekly Trends page; ai-infra (weekly, its older

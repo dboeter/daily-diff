@@ -26,7 +26,7 @@ const FEED_PATH = "feed.xml";
 const FEEDS_DIR = "feeds";
 const SITE_URL = "https://dboeter.github.io/daily-diff";
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
-// Live reports in REPORTS (reading) order, then the archive: the sidebar lists them this way.
+// Live reports in REPORTS (reading) order, then the archive: the web UI's tabs list them this way.
 const REPORT_FILES = Object.keys(REPORT_LABELS);
 const MAX_FEED_ITEMS = 30;
 
@@ -37,15 +37,15 @@ interface DateEntry {
 
 interface Manifest {
   generated: string;
-  /** Report id → label, so the sidebar and the MCP server need no copy of REPORT_LABELS. */
+  /** Report id → label, so the web UI and the MCP server need no copy of REPORT_LABELS. */
   labels: Record<string, string>;
-  /** The weekly report ids, for the sidebar's "This week" group. */
+  /** The weekly report ids, for the web UI's "This week" tabs. */
   weekly: string[];
   /** Report id → its own feed's path, for the web UI's per-page feed link. */
   feeds: Record<string, string>;
   /** Live report id → its square's color in the web UI; a retired report has none. */
   colors: Record<string, string>;
-  /** The sidebar label of a day's overview (the report bar's first link). */
+  /** The tab label of a day's overview (the report bar's first link). */
   overview: string;
   /** The heading of the overview's Coming up list (coming-up.json). */
   comingUp: string;
