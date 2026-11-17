@@ -256,18 +256,17 @@ export const STAR_GAIN_DAYS = 7;
 export const DAY_S = 24 * 60 * 60;
 
 /**
- * Stars in the last STAR_GAIN_DAYS days: from the bucket dated STAR_GAIN_DAYS − 1
- * days before `now`'s UTC date, through every later bucket, the running one
- * included. The caller subtracts this gain from the live total to get the base
- * of the relative gain, so it must count every star after its window start.
- * The buckets are labelled at UTC midnight but end near 08:00 UTC (Pacific
- * time, inferred from Tencent/LoopForge on 2026-11-16), so at the run's hour
- * the bucket of the day before is still filling. A window of complete UTC days
- * missed part of that day and put the next bucket's stars in the base.
+ * Stars from the bucket dated STAR_GAIN_DAYS days before `now`'s UTC date
+ * through every later bucket, the running one included. The caller subtracts
+ * this gain from the live total to get the base of the relative gain, so it
+ * must count every star after its window start. The buckets are labelled at
+ * UTC midnight but end near 08:00 UTC (Pacific days, inferred from
+ * Tencent/LoopForge on 2026-11-16), so the window is about 6.9 days at the
+ * run's hour and a little over 7 after 08:00 UTC.
  * The series starts at the repo's creation week, and missing days count 0.
  */
 export function gainFromHistory(weeks: StarHistoryWeek[], now: Date): number {
-  const firstDay = Math.floor(now.getTime() / 1000 / DAY_S) - (STAR_GAIN_DAYS - 1);
+  const firstDay = Math.floor(now.getTime() / 1000 / DAY_S) - STAR_GAIN_DAYS;
   let gain = 0;
   for (const w of weeks) {
     // Rounded, not floored: the docs say week starts need not be UTC midnight.

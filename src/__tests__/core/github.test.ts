@@ -204,15 +204,15 @@ describe("fetchSkillsData", () => {
 });
 
 describe("gainFromHistory", () => {
-  // Sunday 2026-10-11 22:37 UTC, the weekly run: the window is Mon 10-05 .. today, Sun 10-11.
+  // Sunday 2026-10-11 22:37 UTC, the weekly run: the window is Sun 10-04 .. today, Sun 10-11.
   const NOW = new Date("2026-10-11T22:37:00Z");
 
-  it("sums the last 7 days, today's running day included, across the week boundary", () => {
+  it("sums the 7 days before today and today's running day, across the week boundary", () => {
     const weeks = [
       { week: weekOf("2026-10-11"), total: 50, days: [50, 0, 0, 0, 0, 0, 0] },
       { week: weekOf("2026-10-04"), total: 28, days: [1, 2, 3, 4, 5, 6, 7] },
     ];
-    expect(gainFromHistory(weeks, NOW)).toBe(27 + 50);
+    expect(gainFromHistory(weeks, NOW)).toBe(28 + 50);
   });
 
   it("takes the tail of last week when run mid-week", () => {
@@ -220,8 +220,8 @@ describe("gainFromHistory", () => {
       { week: weekOf("2026-10-11"), total: 16, days: [1, 2, 3, 10, 0, 0, 0] },
       { week: weekOf("2026-10-04"), total: 28, days: [1, 2, 3, 4, 5, 6, 7] },
     ];
-    // Wednesday 10-14: Thu 10-08 .. Wed 10-14 = 5+6+7 + 1+2+3+10.
-    expect(gainFromHistory(weeks, new Date("2026-10-14T12:00:00Z"))).toBe(34);
+    // Wednesday 10-14: Wed 10-07 .. Wed 10-14 = 4+5+6+7 + 1+2+3+10.
+    expect(gainFromHistory(weeks, new Date("2026-10-14T12:00:00Z"))).toBe(38);
   });
 
   it("handles a repo created this week, with a single bucket", () => {
@@ -234,20 +234,19 @@ describe("gainFromHistory", () => {
     expect(gainFromHistory(weeks, NOW)).toBe(7);
   });
 
-  // Tencent/LoopForge's history as the 2026-11-16 run (06:13 UTC) saw it. The
-  // buckets end near 08:00 UTC, so "Nov 15" was still filling: 768 of 903. The
-  // live total was 1,797 and 165 of those stars came before Nov 9. A window of
-  // complete UTC days gave 1,632 over a base of 165 (+989%); the 09:29 rerun
-  // gave 1,767 over 279 (+633%), its base inflated by the next bucket's stars.
+  // Tencent/LoopForge on 2026-11-16, 165 stars before Nov 9. The buckets end
+  // near 08:00 UTC: at 06:13 "Nov 15" was still filling (768 of 903) and the
+  // live total was 1,797; at the 09:29 rerun "Nov 15" was whole, "Nov 16" held
+  // 114 and the live total was 2,046. Counting the running bucket keeps total
+  // minus gain at the stars before Nov 9 on both runs.
   it("counts every star after the window start, so total minus gain is the stars before it", () => {
-    const run = new Date("2026-11-16T06:13:00Z");
-    const weeks = [
-      { week: weekOf("2026-11-15"), total: 768, days: [768, 0, 0, 0, 0, 0, 0] },
-      { week: weekOf("2026-11-08"), total: 881, days: [18, 32, 60, 128, 244, 49, 350] },
-    ];
-    // Nov 10 .. Nov 16 (an empty bucket yet): 60+128+244+49+350+768.
-    expect(gainFromHistory(weeks, run)).toBe(1599);
-    // A bucket dated after today's UTC date still counts: its stars are in the live total.
+    const lastWeek = { week: weekOf("2026-11-08"), total: 881, days: [18, 32, 60, 128, 244, 49, 350] };
+    const first = [{ week: weekOf("2026-11-15"), total: 768, days: [768, 0, 0, 0, 0, 0, 0] }, lastWeek];
+    const rerun = [{ week: weekOf("2026-11-15"), total: 1017, days: [903, 114, 0, 0, 0, 0, 0] }, lastWeek];
+    expect(1797 - gainFromHistory(first, new Date("2026-11-16T06:13:00Z"))).toBe(166);
+    expect(2046 - gainFromHistory(rerun, new Date("2026-11-16T09:29:00Z"))).toBe(166);
+    // Defensive: Pacific-labelled buckets are never dated after today's UTC
+    // date, but a later bucket's stars would be in the live total too.
     const ahead = [{ week: weekOf("2026-11-15"), total: 13, days: [10, 3, 0, 0, 0, 0, 0] }];
     expect(gainFromHistory(ahead, new Date("2026-11-15T23:00:00Z"))).toBe(13);
   });
@@ -257,7 +256,7 @@ describe("fetchWeeklyStarGain", () => {
   it("asks for the two newest buckets and sums the window", async () => {
     const fetchSpy = vi.spyOn(globalThis, "fetch").mockResolvedValue({
       ok: true,
-      json: () => Promise.resolve([{ week: weekOf("2026-10-04"), total: 3, days: [0, 1, 1, 1, 0, 0, 0] }]),
+      json: () => Promise.resolve([{ week: weekOf("2026-10-04"), total: 3, days: [1, 1, 1, 0, 0, 0, 0] }]),
     } as Response);
 
     expect(await fetchWeeklyStarGain("org/repo", new Date("2026-10-11T22:37:00Z"))).toBe(3);
