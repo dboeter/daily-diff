@@ -121,7 +121,7 @@ describe("buildWeeklyReport", () => {
     };
     expect(await buildWeeklyReport(unreadable, "05:00", "2026-11-16")).toBeNull();
 
-    // GitHub answered with something that is no issue: the body cleaner throws on it.
+    // The source builder throws: here, a GitHub fetch that rejects, which the pipeline's own never does.
     const issue: Candidate = {
       ...story,
       kind: "hot-issue",
@@ -139,7 +139,7 @@ describe("buildWeeklyReport", () => {
         },
       ],
       vendorNotes: [],
-      fetchGitHub: () => Promise.resolve({ message: "Moved Permanently" }),
+      fetchGitHub: () => Promise.reject(new Error("socket hang up")),
       writer: w,
     };
     expect(await buildWeeklyReport(() => input, "05:00", "2026-11-16")).toBeNull();

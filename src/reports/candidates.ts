@@ -44,6 +44,18 @@ export interface Candidate {
   text: string;
 }
 
+const CANDIDATE_TEXT_FIELDS = ["page", "kind", "source", "title", "url", "published", "text"];
+
+/**
+ * Whether an entry of a parsed `candidates.json` has a candidate's required fields, each a
+ * string: the boundary check of the file's readers. It does not check the page or kind names.
+ */
+export function isCandidate(value: unknown): value is Candidate {
+  if (typeof value !== "object" || value === null) return false;
+  const fields: Record<string, unknown> = { ...value };
+  return CANDIDATE_TEXT_FIELDS.every((field) => typeof fields[field] === "string");
+}
+
 export type ProjectItems = Pick<
   ProjectActivity,
   "config" | "releases" | "previews" | "hotIssues" | "weekReleases"

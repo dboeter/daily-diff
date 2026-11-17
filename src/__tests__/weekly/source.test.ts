@@ -225,6 +225,62 @@ describe("buildWeekSource", () => {
     expect(failed.text).toContain("text: Saved, cut notes.");
   });
 
+  it("keeps the saved text when GitHub answers with something that is no release or issue", async () => {
+    const release = candidate({
+      kind: "release",
+      source: "owner/repo",
+      title: "repo v1.2.0",
+      url: "https://github.com/owner/repo/releases/tag/v1.2.0",
+      text: "Saved notes.",
+    });
+    const issue = candidate({
+      kind: "hot-issue",
+      source: "owner/repo",
+      title: "A bug",
+      url: "https://github.com/owner/repo/issues/5",
+      text: "Saved body.",
+    });
+    const page = [
+      "## Coding Agents",
+      "",
+      "- **Release:** [v1.2.0](https://github.com/owner/repo/releases/tag/v1.2.0)",
+      "- [#5](https://github.com/owner/repo/issues/5): A bug.",
+    ].join("\n");
+    const week = [day("2026-11-10", [release, issue], { "ai-agents": page })];
+
+    for (const answer of [{ message: "Moved Permanently" }, { body: 5 }, "text", null, []]) {
+      const { text } = await buildWeekSource(week, [], () => Promise.resolve(answer));
+      expect(text).toContain("text: Saved notes.");
+      expect(text).toContain("text: Saved body.");
+    }
+  });
+
+  it("takes a hot issue's body whole from GitHub, without its template lines", async () => {
+    const issue = candidate({
+      kind: "hot-issue",
+      source: "owner/repo",
+      title: "A bug",
+      url: "https://github.com/owner/repo/issues/5",
+      text: "Saved body.",
+    });
+    const page =
+      "## Coding Agents\n\n- [#5](https://github.com/owner/repo/issues/5): A bug. (12 comments, 3 👍)";
+    const asked: string[] = [];
+
+    const { text } = await buildWeekSource(
+      [day("2026-11-10", [issue], { "ai-agents": page })],
+      [],
+      (apiPath) => {
+        asked.push(apiPath);
+        return Promise.resolve({ body: "<!-- template -->\nThe agent loops.\n\nSummary: it never stops." });
+      },
+    );
+
+    expect(asked).toEqual(["repos/owner/repo/issues/5"]);
+    expect(text).toMatch(/\ntext: The agent loops\. Summary: it never stops\.$/);
+    expect(text).toContain("digest: shown under AI Agents › Coding Agents · 12 comments, 3 👍");
+  });
+
   it("marks a saved text of the cap's length as cut, and an empty one as no text", async () => {
     const full = candidate({ text: "x".repeat(MAX_TEXT_CHARS) });
     const empty = candidate({ title: "No text", url: "https://example.com/none", text: "" });

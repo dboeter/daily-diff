@@ -12,6 +12,9 @@ import { AnthropicProvider, type LlmProvider } from "../providers/index.ts";
 
 export const WEEKLY_WRITER = { model: "claude-opus-5-5", effort: "high" } as const;
 
+/** The article call's label in `llm-trace.json` and the prompt capture, where the replay script skips it. */
+export const WEEKLY_CALL_LABEL = "weekly";
+
 /**
  * The article's budget. Reasoning counts against it: at high effort an article took 9,800 to
  * 12,400 output tokens. `callLlm` doubles a cut answer's budget once, to 64,000.

@@ -37,6 +37,7 @@ import {
   releaseNotes,
   sourceFidelityRules,
   SOURCE_FIDELITY_RULES,
+  NO_TREND_RULE,
 } from "./prompts.ts";
 import type { ReleaseRow } from "./pages.ts";
 import type { CommunityRow } from "../data/community.ts";
@@ -48,7 +49,7 @@ import type { PolicyItem } from "../policy/items.ts";
 import type { KeptVendorItem } from "../data/relevance.ts";
 import { signHighlight } from "./markdown.ts";
 import { escapeRegex } from "../core/regex.ts";
-import { daysBefore } from "../core/date.ts";
+import { daysBefore, WEEK_DAYS } from "../core/date.ts";
 import { siteOf, type StoryRow } from "../spotted/pool.ts";
 
 /** Which sources Trends' Models section covers: no call when neither has data. */
@@ -842,9 +843,9 @@ function firstSentence(block: string): string | null {
 /** How the article's source (`buildWeekSource`, src/weekly/source.ts) is laid out. */
 export const WEEK_SOURCE_NOTE = `Each item has its kind, source, date and link, a "digest:" line, and a "text:" line with what its source gave: release notes, an issue's body, a feed entry, a page's description. The "digest:" line is written by the digest's code, not by a model: the section that showed the item, 🔓 for a security event, ⚠️ for a deprecation, retirement or behavior change, 🤖 for an AI feature in a data platform, a story's points and comments, a hot issue's totals and gain. A text that ends with "[…cut]" is incomplete.`;
 
-// The last fidelity rule forbids a trend claim over co-occurring items. The article may make
-// one as a marked reading, so its Analysis rules replace it.
-const articleFidelityRules = SOURCE_FIDELITY_RULES.slice(0, -1)
+// One fidelity rule forbids a trend claim over co-occurring items. The article may make one as
+// a marked reading, so its Analysis rules replace it.
+const articleFidelityRules = SOURCE_FIDELITY_RULES.filter((rule) => rule !== NO_TREND_RULE)
   .map((r) => `- ${r}`)
   .join("\n");
 
@@ -861,7 +862,7 @@ export const buildWeeklyArticlePrompt = (
   dateStr: string,
 ): string => `You write "Weekly Diff", the weekly article of Daily Diff, a digest for AI practitioners and data engineers at a Dutch data consultancy. The reader works with coding agents, LLM APIs, Databricks, Snowflake and the open-source data stack, has clients in the EU and the Netherlands, and did not read every daily page.
 
-Below are the items the digest showed from ${daysBefore(dateStr, 6)} to ${dateStr}, by day and page. ${WEEK_SOURCE_NOTE} After the items come the weekly Trends tables and the open AI Policy dates. They are your only source. A "row" in the rules below is one such item or one table row. State nothing about the part of a text that was cut. An issue's body is its reporter's account, and a story's text is its page's own description.
+Below are the items the digest showed from ${daysBefore(dateStr, WEEK_DAYS - 1)} to ${dateStr}, by day and page. ${WEEK_SOURCE_NOTE} After the items come the weekly Trends tables and the open AI Policy dates. They are your only source. A "row" in the rules below is one such item or one table row. State nothing about the part of a text that was cut. An issue's body is its reporter's account, and a story's text is its page's own description.
 
 Write one article of 700–1000 words on what changed this week and what it means for this reader.
 

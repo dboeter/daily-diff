@@ -9,7 +9,6 @@
  * summaries, which stand next to code-written figures.
  */
 
-import type { GitHubItem } from "../core/github.ts";
 import {
   DATA_REPORT,
   FOOTER,
@@ -21,7 +20,7 @@ import {
   TRENDS_REPORT,
 } from "../core/strings.ts";
 import { type Candidate, MAX_TEXT_CHARS } from "../reports/candidates.ts";
-import { formatItem, releaseNotes } from "../reports/prompts.ts";
+import { issueBody, releaseNotes } from "../reports/prompts.ts";
 
 /** One day of the week: what it fetched and the pages it published, by report id. */
 export interface WeekDay {
@@ -45,13 +44,25 @@ const ISSUE_CHARS = 3000;
 /** Closes a text that is not whole, so the writer states nothing about the missing part. */
 export const CUT_MARK = " […cut]";
 
+/**
+ * How many letters of a title tell apart two notes that share a link: BigQuery's notes of one
+ * day differ in their first sentence, well within them.
+ */
+const TITLE_KEY_CHARS = 30;
+/** An AI Policy jurisdiction row: Date, Source, Title, Stage, Summary. Its other tables have fewer cells and no stage. */
+const POLICY_ROW_CELLS = 5;
+const POLICY_STAGE_CELL = 3;
+/** A row's markers stand right before its link text: two markers with their spaces take 6 characters. */
+const MARKER_LEAD_CHARS = 8;
+
+const TRENDS_TABLES = `${REPORTS["ai-trends"].name} (weekly tables)`;
 /** The pages whose rows show the week's items, with the name each has in the source. */
 const PAGES: Record<string, string> = {
   "ai-agents": REPORTS["ai-agents"].name,
   "ai-models": REPORTS["ai-models"].name,
   "ai-policy": REPORTS["ai-policy"].name,
   "ai-data": REPORTS["ai-data"].name,
-  "ai-trends": `${REPORTS["ai-trends"].name} (weekly tables)`,
+  "ai-trends": TRENDS_TABLES,
 };
 /** The reports the source is read from. */
 export const WEEK_PAGE_IDS = Object.keys(PAGES);
@@ -82,10 +93,10 @@ export function pageRows(markdown: string): string {
   let cut = false;
   let cutSub = false;
   for (const line of markdown.split("\n")) {
-    const heading = /^## (.+)$/.exec(line);
-    const subheading = /^### (.+)$/.exec(line);
-    if (heading) [cut, cutSub] = [CUT_SECTIONS.has(heading[1]!.trim()), false];
-    if (subheading) cutSub = CUT_SUBSECTIONS.has(subheading[1]!.trim());
+    const heading = /^## (.+)$/.exec(line)?.[1];
+    const subheading = /^### (.+)$/.exec(line)?.[1];
+    if (heading !== undefined) [cut, cutSub] = [CUT_SECTIONS.has(heading.trim()), false];
+    if (subheading !== undefined) cutSub = CUT_SUBSECTIONS.has(subheading.trim());
     if (cut || cutSub) continue;
     if (
       /^# /.test(line) ||
@@ -111,9 +122,10 @@ function pageLines(day: WeekDay): PageLine[] {
     let h2 = "";
     let h3 = "";
     for (const line of markdown.split("\n")) {
-      const heading = /^(##|###) (.+)$/.exec(line);
-      if (heading?.[1] === "##") [h2, h3] = [heading[2]!.trim(), ""];
-      else if (heading) h3 = heading[2]!.trim();
+      const heading = /^## (.+)$/.exec(line)?.[1];
+      const subheading = /^### (.+)$/.exec(line)?.[1];
+      if (heading !== undefined) [h2, h3] = [heading.trim(), ""];
+      else if (subheading !== undefined) h3 = subheading.trim();
       else if (!CUT_SECTIONS.has(h2)) lines.push({ page: id, h2, h3, line });
     }
   }
@@ -121,6 +133,14 @@ function pageLines(day: WeekDay): PageLine[] {
 }
 
 const letters = (text: string): string => text.toLowerCase().replace(/[^a-z0-9]+/g, "");
+
+/** A candidate's kind and link: the candidates of one day that share them are told apart by title. */
+const kindAndLink = (c: Candidate): string => `${c.kind} ${c.url}`;
+const titleKey = (c: Candidate): string => letters(c.title).slice(0, TITLE_KEY_CHARS);
+/** One item per kind, link and title: BigQuery's notes of one day share a link. */
+const itemKey = (c: Candidate): string => `${kindAndLink(c)} ${titleKey(c)}`;
+/** The key of the vendor note an open Action required row came from. */
+const noteKey = (action: Candidate): string => itemKey({ ...action, kind: "vendor-note" });
 
 /**
  * The line that shows a candidate: it links the candidate (or its discussion page). BigQuery's
@@ -131,7 +151,7 @@ function shownOn(lines: PageLine[], c: Candidate, byTitle: boolean): PageLine | 
   const links = [c.url, c.discussion]
     .filter((url): url is string => url !== undefined)
     .map((url) => `](${url})`);
-  const title = letters(c.title).slice(0, 30);
+  const title = titleKey(c);
   return lines.find(
     (l) => links.some((link) => l.line.includes(link)) && (!byTitle || letters(l.line).includes(title)),
   );
@@ -140,7 +160,7 @@ function shownOn(lines: PageLine[], c: Candidate, byTitle: boolean): PageLine | 
 /** The Stage cell of an AI Policy row: code-rendered, and not in `candidates.json`. */
 function policyStage(row: string): string {
   const cells = row.replace(/^\|\s*|\s*\|$/g, "").split(/\s+\|\s+/);
-  const stage = cells.length === 5 ? cells[3]! : "";
+  const stage = (cells.length === POLICY_ROW_CELLS ? cells[POLICY_STAGE_CELL] : undefined) ?? "";
   return stage === "—" ? "" : stage;
 }
 
@@ -154,7 +174,8 @@ function digestFacts(shown: PageLine, c: Candidate): string {
     ),
   );
   const before = line.slice(0, at);
-  const lead = before.slice(Math.max(0, before.lastIndexOf("[") - 8), before.lastIndexOf("["));
+  const linkText = before.lastIndexOf("[");
+  const lead = before.slice(Math.max(0, linkText - MARKER_LEAD_CHARS), linkText);
   const stage = c.kind === "policy-item" ? policyStage(line) : "";
   const facts = [
     `shown under ${[PAGES[shown.page], shown.h2, shown.h3].filter(Boolean).join(" › ")}`,
@@ -182,40 +203,125 @@ function section(markdown: string, heading: string): string {
 const marked = (text: string, cut: boolean): string =>
   text.replace(/\s+/g, " ").trim() + (cut ? CUT_MARK : "");
 
-/** One item per kind, link and title: BigQuery's notes of one day share a link. */
-const itemKey = (c: Candidate): string => `${c.kind} ${c.url} ${letters(c.title).slice(0, 30)}`;
+/**
+ * The `body` of a GitHub release or issue: null when it has none, undefined when the answer is
+ * neither (a failed call, an error object), and the item then keeps its saved text.
+ */
+function bodyOf(answer: unknown): string | null | undefined {
+  if (typeof answer !== "object" || answer === null || !("body" in answer)) return undefined;
+  const { body } = answer;
+  return typeof body === "string" || body === null ? body : undefined;
+}
+
+/** A GitHub body through the pipeline's cleaner, cut at `maxChars` and marked when the whole text is longer. */
+function cleaned(
+  body: string | null,
+  maxChars: number,
+  clean: (body: string | null, maxChars: number) => string,
+): string {
+  const text = clean(body, maxChars);
+  return marked(text, clean(body, Number.MAX_SAFE_INTEGER).length > text.length);
+}
 
 /** The item's source text: a release's notes and a hot issue's body whole from GitHub, else the saved text. */
 async function sourceText(
   c: Candidate,
-  originals: Map<string, Candidate>,
+  notes: Map<string, Candidate>,
   fetchGitHub: GitHubFetch,
 ): Promise<string> {
   const tag = /\/releases\/tag\/(.+)$/.exec(c.url)?.[1];
   if (c.kind === "release" && tag) {
-    const release = (await fetchGitHub(`repos/${c.source}/releases/tags/${tag}`)) as
-      { body: string | null } | undefined;
-    if (release) {
-      const notes = releaseNotes(release.body, RELEASE_CHARS);
-      return marked(notes, releaseNotes(release.body, Number.MAX_SAFE_INTEGER).length > notes.length);
-    }
+    const body = bodyOf(await fetchGitHub(`repos/${c.source}/releases/tags/${tag}`));
+    if (body !== undefined) return cleaned(body, RELEASE_CHARS, releaseNotes);
   }
   const issue = /\/issues\/(\d+)$/.exec(c.url)?.[1];
   if (c.kind === "hot-issue" && issue) {
-    const item = (await fetchGitHub(`repos/${c.source}/issues/${issue}`)) as GitHubItem | undefined;
-    if (item) {
-      // `formatItem` is the pipeline's only door to its issue-body cleaner; the body follows its last label.
-      const body = (chars: number) => formatItem(item, chars).split("Summary: ").slice(1).join("Summary: ");
-      return marked(body(ISSUE_CHARS), body(Number.MAX_SAFE_INTEGER).length > body(ISSUE_CHARS).length);
-    }
+    const body = bodyOf(await fetchGitHub(`repos/${c.source}/issues/${issue}`));
+    if (body !== undefined) return cleaned(body, ISSUE_CHARS, issueBody);
   }
   if (c.kind === "open-action") {
     // An open Action required row carries the digest's own summary; the note it came from has the vendor's text.
-    const original = originals.get(itemKey({ ...c, kind: "vendor-note" }));
-    if (!original) return `(the digest's own summary of this note; the vendor's text is not saved) ${c.text}`;
-    return marked(original.text, original.text.length >= MAX_TEXT_CHARS);
+    const note = notes.get(noteKey(c));
+    if (!note) return `(the digest's own summary of this note; the vendor's text is not saved) ${c.text}`;
+    return marked(note.text, note.text.length >= MAX_TEXT_CHARS);
   }
   return marked(c.text.trim() || "(the source gave no text)", c.text.length >= MAX_TEXT_CHARS);
+}
+
+/** An item a page showed: the candidate, the first day that showed it and the line it stands on. */
+interface ShownItem {
+  day: string;
+  c: Candidate;
+  on: PageLine;
+}
+
+/** A shown item as the source lists it, with its end date: its own, or its Action required row's. */
+interface ListedItem extends ShownItem {
+  end: string | undefined;
+}
+
+/** The candidates the week's pages showed, each once, on the first day shown. */
+function shownItems(days: WeekDay[]): ShownItem[] {
+  const shown: ShownItem[] = [];
+  const seen = new Set<string>();
+  for (const day of days) {
+    const lines = pageLines(day);
+    const sharing = new Map<string, number>();
+    for (const c of day.candidates) sharing.set(kindAndLink(c), (sharing.get(kindAndLink(c)) ?? 0) + 1);
+    for (const c of day.candidates) {
+      const on = shownOn(lines, c, (sharing.get(kindAndLink(c)) ?? 0) > 1);
+      if (!on || seen.has(itemKey(c))) continue;
+      seen.add(itemKey(c));
+      shown.push({ day: day.date, c, on });
+    }
+  }
+  return shown;
+}
+
+/**
+ * The shown items without an open Action required row whose vendor note is shown too: that
+ * note is listed once, with the row's end date.
+ */
+function listedItems(shown: ShownItem[]): ListedItem[] {
+  const actionEnds = new Map(
+    shown.filter((s) => s.c.kind === "open-action").map((s) => [noteKey(s.c), s.c.ends]),
+  );
+  const notes = new Set(shown.filter((s) => s.c.kind === "vendor-note").map((s) => itemKey(s.c)));
+  return shown
+    .filter((s) => s.c.kind !== "open-action" || !notes.has(noteKey(s.c)))
+    .map((s) => ({ ...s, end: s.c.ends ?? actionEnds.get(itemKey(s.c)) }));
+}
+
+/** One item as the writer reads it: its title, its facts, the digest's code-written line and its source text. */
+async function itemBlock(
+  { c, on, end }: ListedItem,
+  notes: Map<string, Candidate>,
+  fetchGitHub: GitHubFetch,
+): Promise<string> {
+  const facts = [
+    `kind: ${c.kind}`,
+    `source: ${c.source}`,
+    c.published && `published: ${c.published.slice(0, 10)}`,
+    end && `ends: ${end}`,
+    `link: ${c.url}`,
+    c.discussion && `discussion: ${c.discussion}`,
+  ].filter(Boolean);
+  const text = await sourceText(c, notes, fetchGitHub);
+  return `### ${c.title.trim()}\n\n${facts.join(" · ")}\ndigest: ${digestFacts(on, c)}\ntext: ${text}`;
+}
+
+/** A block of the source under its day and name. */
+const dayBlock = (date: string, name: string, body: string): string =>
+  `===== ${date} · ${name} =====\n\n${body}`;
+
+/** AI Policy's Coming up table of the last day that has one; "" when no day does. */
+function latestComingUp(days: WeekDay[]): string {
+  let block = "";
+  for (const day of days) {
+    const upcoming = section(day.pages["ai-policy"] ?? "", POLICY_REPORT.deadlinesHeading);
+    if (upcoming) block = dayBlock(day.date, "AI Policy: dates (code-rendered)", upcoming);
+  }
+  return block;
 }
 
 /**
@@ -232,64 +338,29 @@ export async function buildWeekSource(
   vendorNotes: Candidate[],
   fetchGitHub: GitHubFetch,
 ): Promise<WeekSource> {
-  const originals = new Map<string, Candidate>();
+  // The oldest copy of each note: the text the vendor first gave.
+  const notes = new Map<string, Candidate>();
   for (const c of vendorNotes) {
-    if (c.kind === "vendor-note" && !originals.has(itemKey(c))) originals.set(itemKey(c), c);
+    if (c.kind === "vendor-note" && !notes.has(itemKey(c))) notes.set(itemKey(c), c);
   }
+  const listed = listedItems(shownItems(days));
 
-  const shown: { day: string; c: Candidate; on: PageLine }[] = [];
-  const seen = new Set<string>();
-  for (const day of days) {
-    const lines = pageLines(day);
-    const perLink = new Map<string, number>();
-    for (const c of day.candidates)
-      perLink.set(`${c.kind} ${c.url}`, (perLink.get(`${c.kind} ${c.url}`) ?? 0) + 1);
-    for (const c of day.candidates) {
-      const on = shownOn(lines, c, perLink.get(`${c.kind} ${c.url}`)! > 1);
-      if (!on || seen.has(itemKey(c))) continue;
-      seen.add(itemKey(c));
-      shown.push({ day: day.date, c, on });
-    }
-  }
-
-  const ends = new Map(
-    shown
-      .filter((s) => s.c.kind === "open-action")
-      .map((s) => [itemKey({ ...s.c, kind: "vendor-note" }), s.c.ends]),
-  );
-  const notes = new Set(shown.filter((s) => s.c.kind === "vendor-note").map((s) => itemKey(s.c)));
   const blocks: string[] = [];
   let items = 0;
-  let comingUp = "";
   for (const day of days) {
     for (const [id, name] of Object.entries(CANDIDATE_PAGES)) {
-      const listed = shown
-        .filter((s) => s.day === day.date && s.c.page === id)
-        .filter((s) => s.c.kind !== "open-action" || !notes.has(itemKey({ ...s.c, kind: "vendor-note" })));
       const texts: string[] = [];
       // One GitHub call at a time: the weekly run is the one closest to the hourly API limit.
-      for (const { c, on } of listed) {
-        const end = c.ends ?? ends.get(itemKey(c));
-        const facts = [
-          `kind: ${c.kind}`,
-          `source: ${c.source}`,
-          c.published && `published: ${c.published.slice(0, 10)}`,
-          end && `ends: ${end}`,
-          `link: ${c.url}`,
-          c.discussion && `discussion: ${c.discussion}`,
-        ].filter(Boolean);
-        texts.push(
-          `### ${c.title.trim()}\n\n${facts.join(" · ")}\ndigest: ${digestFacts(on, c)}\ntext: ${await sourceText(c, originals, fetchGitHub)}`,
-        );
+      for (const item of listed.filter((s) => s.day === day.date && s.c.page === id)) {
+        texts.push(await itemBlock(item, notes, fetchGitHub));
       }
       items += texts.length;
-      if (texts.length) blocks.push(`===== ${day.date} · ${name} =====\n\n${texts.join("\n\n")}`);
+      if (texts.length) blocks.push(dayBlock(day.date, name, texts.join("\n\n")));
     }
     const trends = day.pages["ai-trends"];
-    if (trends) blocks.push(`===== ${day.date} · ${PAGES["ai-trends"]} =====\n\n${pageRows(trends)}`);
-    const upcoming = section(day.pages["ai-policy"] ?? "", POLICY_REPORT.deadlinesHeading);
-    if (upcoming) comingUp = `===== ${day.date} · AI Policy: dates (code-rendered) =====\n\n${upcoming}`;
+    if (trends) blocks.push(dayBlock(day.date, TRENDS_TABLES, pageRows(trends)));
   }
+  const comingUp = latestComingUp(days);
   if (comingUp) blocks.push(comingUp);
   return { text: blocks.join("\n\n"), items };
 }

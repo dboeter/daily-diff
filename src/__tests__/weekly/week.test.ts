@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
@@ -27,6 +27,7 @@ beforeEach(() => {
 });
 afterEach(() => {
   fs.rmSync(dir, { recursive: true, force: true });
+  vi.restoreAllMocks();
 });
 
 describe("loadWeek", () => {
@@ -80,5 +81,22 @@ describe("loadWeek", () => {
     );
 
     expect(vendorNotes.map((c) => c.title)).toEqual(["october", "this-week", "today"]);
+  });
+
+  it("logs a candidates.json it cannot use, and stays silent about a day without one", () => {
+    const logged = vi.spyOn(console, "error").mockImplementation(() => {});
+    save("2026-11-12", "candidates.json", "{ not json");
+    save("2026-11-13", "candidates.json", JSON.stringify({ items: [story] }));
+    // An entry of another shape (an older or a hand-edited file) is left out; the rest is read.
+    save("2026-11-14", "candidates.json", JSON.stringify([story, { title: "No link" }, "text"]));
+
+    const { days } = loadWeek({ date: "2026-11-16", candidates: [], pages: {} }, dir);
+
+    expect(days.map((d) => d.candidates)).toEqual([[], [], [], [], [story], [], []]);
+    const lines = logged.mock.calls.map((call) => String(call[0]));
+    expect(lines).toHaveLength(3);
+    expect(lines[0]).toContain("[weekly] 2026-11-12/candidates.json");
+    expect(lines[1]).toContain("[weekly] 2026-11-13/candidates.json: not a list");
+    expect(lines[2]).toContain("[weekly] 2026-11-14/candidates.json: 2 entries of another shape left out");
   });
 });
