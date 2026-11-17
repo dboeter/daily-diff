@@ -19,11 +19,15 @@
   <meta property="og:image:alt" content="daily diff: a plus over a minus in a diff gutter, beside the wordmark">
   <meta name="twitter:card" content="summary_large_image">
   <!-- Before the stylesheet, so the page never paints in the other theme. The reader's own
-       choice (the theme button) is stored; without one the page follows the system. -->
+       choice (the theme button) is stored in dd-theme; without one the page follows the system.
+       The page before this one stored ar-theme on every visit, "dark" by default, so there
+       only "light" was a choice: it is kept, a stored "dark" is not. -->
   <script>
     (() => {
       let stored = null;
-      try { stored = localStorage.getItem('ar-theme'); } catch { /* storage blocked: follow the system */ }
+      try {
+        stored = localStorage.getItem('dd-theme') ?? (localStorage.getItem('ar-theme') === 'light' ? 'light' : null);
+      } catch { /* storage blocked: follow the system */ }
       const system = matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
       document.documentElement.dataset.theme = stored === 'light' || stored === 'dark' ? stored : system;
     })();
@@ -91,7 +95,8 @@
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     [hidden] { display: none !important; }
-    html { scroll-padding-top: calc(var(--top-h) + 20px); }
+    /* The scrollbar's width stays reserved, so the page does not shift when a dialog locks scrolling. */
+    html { scroll-padding-top: calc(var(--top-h) + 20px); scrollbar-gutter: stable; }
     html:has(dialog[open]) { overflow: hidden; }
     body {
       font-family: var(--sans);
@@ -296,8 +301,10 @@
     }
     .md th {
       padding: 8px 14px 8px 0; border-bottom: 1px solid var(--rule);
-      font-size: 13px; font-weight: 600; color: var(--muted); text-align: left; white-space: nowrap;
+      font-size: 13px; font-weight: 600; color: var(--muted); white-space: nowrap;
     }
+    /* A number column's header keeps the alignment its Markdown gives it (`---:`). */
+    .md th:not([align]) { text-align: left; }
     .md td { padding: 10px 14px 10px 0; border-bottom: 1px solid var(--rule); vertical-align: top; }
     .md th:last-child, .md td:last-child { padding-right: 0; }
     .md td.date { font-family: var(--mono); font-size: 13px; color: var(--muted); white-space: nowrap; }
@@ -570,7 +577,7 @@ function applyTheme(t, store) {
   themeBtn.setAttribute('aria-label', label);
   document.querySelector('meta[name="theme-color"]').content = t === 'dark' ? '#0E1110' : '#F5F7F5';
   if (!store) return;
-  try { localStorage.setItem('ar-theme', t); } catch { /* storage blocked: the choice lasts for this visit */ }
+  try { localStorage.setItem('dd-theme', t); } catch { /* storage blocked: the choice lasts for this visit */ }
 }
 applyTheme(theme, false);
 themeBtn.onclick = () => applyTheme(theme === 'dark' ? 'light' : 'dark', true);
@@ -1295,6 +1302,8 @@ document.addEventListener('keydown', (e) => {
     openSearch();
     return;
   }
+  // Shift with an arrow extends a text selection ("/" itself needs Shift on some layouts).
+  if (e.shiftKey) return;
   const step = e.key === 'ArrowLeft' ? 'prevDay' : e.key === 'ArrowRight' ? 'nextDay' : null;
   const href = step && document.getElementById(step).getAttribute('href');
   if (href) location.hash = href;
