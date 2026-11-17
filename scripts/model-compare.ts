@@ -19,6 +19,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { AnthropicProvider } from "../src/providers/anthropic.ts";
 import { type LlmProvider, TruncatedResponseError } from "../src/providers/types.ts";
+import { WEEKLY_CALL_LABEL } from "../src/weekly/writer.ts";
 
 interface Captured {
   label: string;
@@ -55,9 +56,7 @@ async function answerLikeCallLlm(provider: LlmProvider, prompt: string, budget: 
     return await provider.call(prompt, budget);
   } catch (err) {
     if (!(err instanceof TruncatedResponseError)) throw err;
-    // The Anthropic SDK refuses a non-streaming request it expects to run over 10 minutes (about
-    // 21,000 output tokens), so the doubled budget stays under that.
-    return provider.call(prompt, Math.min(budget * 2, 20000));
+    return provider.call(prompt, budget * 2);
   }
 }
 
@@ -145,7 +144,10 @@ async function main() {
         day: path.basename(dir),
         file: f,
         ...(JSON.parse(fs.readFileSync(path.join(dir, f), "utf8")) as Captured),
-      })),
+      }))
+      // Weekly Diff's article is not the production model's: Opus writes it from a prompt of
+      // about 150,000 tokens, which a replay would send to the candidate and again to the judge.
+      .filter((c) => c.label !== WEEKLY_CALL_LABEL),
   );
   const promptTokens = calls.reduce((n, c) => n + c.prompt.length / 4, 0);
   console.log(

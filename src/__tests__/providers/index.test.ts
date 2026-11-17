@@ -17,8 +17,9 @@ import {
 
 vi.mock("@anthropic-ai/sdk", () => {
   const create = vi.fn();
+  // The provider streams every call; the mock's `create` stands for the finished message.
   class MockAnthropic {
-    messages = { create };
+    messages = { stream: (params: unknown) => ({ finalMessage: () => create(params) as unknown }) };
   }
   return {
     default: MockAnthropic,
@@ -204,6 +205,32 @@ describe("AnthropicProvider", () => {
     const err = await new AnthropicProvider().call("prompt", 100).catch((e: unknown) => e);
     expect(err).toBeInstanceOf(TruncatedResponseError);
     expect((err as TruncatedResponseError).maxTokens).toBe(100);
+  });
+
+  it("sends the effort it was made with, and none by default", async () => {
+    const mockCreate = await getAnthropicMockCreate();
+    mockCreate.mockResolvedValue({ content: [{ type: "text", text: "ok" }] });
+
+    await new AnthropicProvider("writer-model", "high").call("prompt", 100);
+    expect(mockCreate).toHaveBeenLastCalledWith(
+      expect.objectContaining({ model: "writer-model", output_config: { effort: "high" } }),
+    );
+    await new AnthropicProvider("plain-model").call("prompt", 100);
+    expect(mockCreate).toHaveBeenLastCalledWith(
+      expect.not.objectContaining({ output_config: expect.anything() }),
+    );
+  });
+
+  it("returns the text after a reasoning model's thinking block", async () => {
+    const mockCreate = await getAnthropicMockCreate();
+    mockCreate.mockResolvedValueOnce({
+      content: [
+        { type: "thinking", thinking: "weighing the rows" },
+        { type: "text", text: "The article." },
+      ],
+    });
+
+    expect(await new AnthropicProvider().call("prompt", 100)).toBe("The article.");
   });
 });
 

@@ -1,6 +1,6 @@
 # AI Agents 2026-11-16
 
-[⬛ Overview](https://dboeter.github.io/daily-diff/#2026-11-16) · **🟪 AI Agents** · [🟦 AI Models & Labs](https://dboeter.github.io/daily-diff/#2026-11-16/ai-models) · [🟧 AI Policy](https://dboeter.github.io/daily-diff/#2026-11-16/ai-policy) · [🟨 Data Engineering](https://dboeter.github.io/daily-diff/#2026-11-16/ai-data) · [🟫 Trends](https://dboeter.github.io/daily-diff/#2026-11-16/ai-trends)
+[⬛ Overview](https://dboeter.github.io/daily-diff/#2026-11-16) · **🟪 AI Agents** · [🟦 AI Models & Labs](https://dboeter.github.io/daily-diff/#2026-11-16/ai-models) · [🟧 AI Policy](https://dboeter.github.io/daily-diff/#2026-11-16/ai-policy) · [🟨 Data Engineering](https://dboeter.github.io/daily-diff/#2026-11-16/ai-data) · [⬜ Weekly Diff](https://dboeter.github.io/daily-diff/#2026-11-16/ai-weekly) · [🟫 Trends](https://dboeter.github.io/daily-diff/#2026-11-16/ai-trends)
 
 > Projects: 15 | Active today: 3 | Stable releases: 1 | Prereleases (not covered): 4 | Generated: 2026-11-16 09:26 UTC
 

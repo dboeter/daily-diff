@@ -11,6 +11,9 @@
   "ai-data": [
     "Databricks Terraform provider v1.143.0 breaks databricks_app updates: async API clears omitted fields like compute size and git source"
   ],
+  "ai-weekly": [
+    "Anthropic released Claude Fable 5.2 and Claude Mythos 5.2."
+  ],
   "ai-trends": [
     "Tencent/LoopForge gains 1,767 stars (+633%) in Multi-Agent category",
     "Hermes Agent leads OpenRouter at 13.02T tokens/week"

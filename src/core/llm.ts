@@ -294,10 +294,15 @@ export function isRetryable(err: unknown): boolean {
   return is429(err) || isProviderUnavailable(err) || isConnectionError(err);
 }
 
+/**
+ * `via`: another provider than the run's own, for the one call that needs a stronger model
+ * (Weekly Diff's article). It shares the limiter, the retries, the tally and the trace.
+ */
 export async function callLlm(
   prompt: string,
   maxTokens = LLM_TOKENS_DEFAULT,
   label = "unlabelled",
+  via: LlmProvider = provider,
 ): Promise<string> {
   llmStats.attempted++;
   let budget = maxTokens;
@@ -305,7 +310,7 @@ export async function callLlm(
     await acquireSlot();
     let released = false;
     try {
-      const text = await provider.call(prompt, budget);
+      const text = await via.call(prompt, budget);
       llmCalls.push({ label, outcome: "ok", chars: text.length });
       captureCall(label, budget, prompt, text);
       return text;
@@ -353,8 +358,13 @@ export async function callLlm(
 }
 
 /** An LLM-written report body, without the H1 the model sometimes adds above the report's own, its links out of backticks. */
-export async function generateBody(prompt: string, maxTokens?: number, label?: string): Promise<string> {
-  return unwrapCodeLinks(stripModelTitle(await callLlm(prompt, maxTokens, label)));
+export async function generateBody(
+  prompt: string,
+  maxTokens?: number,
+  label?: string,
+  via?: LlmProvider,
+): Promise<string> {
+  return unwrapCodeLinks(stripModelTitle(await callLlm(prompt, maxTokens, label, via)));
 }
 
 /** `generateBody` with logging; a failed call is logged and returns `fallback`. */
@@ -363,9 +373,10 @@ export function generateOr<T>(
   prompt: string,
   fallback: T,
   maxTokens?: number,
+  via?: LlmProvider,
 ): Promise<string | T> {
   console.log(`  [${tag}] Calling LLM...`);
-  return generateBody(prompt, maxTokens, tag).catch((err) => {
+  return generateBody(prompt, maxTokens, tag, via).catch((err) => {
     console.error(`  [${tag}] LLM call failed: ${err}`);
     markLlmFallback(tag);
     return fallback;

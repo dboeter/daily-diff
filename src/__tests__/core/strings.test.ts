@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import {
+  OVERVIEW,
   POLICY_REPORT,
   REPORT_META,
   REPORTS,
@@ -26,7 +27,14 @@ describe("report names", () => {
   });
 
   it("keeps cadence words out of the names: the archive holds daily and weekly editions", () => {
-    for (const id of LIVE_REPORT_IDS) expect(REPORTS[id].name).not.toMatch(/daily|weekly|today/i);
+    // Weekly Diff is the article's own name, on a page with no daily edition.
+    for (const id of LIVE_REPORT_IDS.filter((id) => id !== "ai-weekly"))
+      expect(REPORTS[id].name).not.toMatch(/daily|weekly|today/i);
+  });
+
+  it("gives every report its own square, none the Overview's", () => {
+    const marks = [OVERVIEW.emoji, ...LIVE_REPORT_IDS.map((id) => REPORTS[id].emoji)];
+    expect(new Set(marks).size).toBe(marks.length);
   });
 });
 
@@ -53,7 +61,7 @@ describe("POLICY_REPORT.newItems", () => {
 
 describe("REPORT_LABELS", () => {
   it("keeps the retired reports for archived days", () => {
-    for (const id of ["ai-cli", "ai-ph", "ai-weekly", "ai-monthly", "ai-trending", "ai-hf", "ai-arxiv"])
+    for (const id of ["ai-cli", "ai-ph", "ai-monthly", "ai-trending", "ai-hf", "ai-arxiv"])
       expect(REPORT_LABELS[id]).toBeTruthy();
   });
 });

@@ -58,7 +58,7 @@ const ISSUE_TEMPLATE_LINE_RE = /^[ \t]*(?:_No response_|[-*][ \t]+\[[ xX]\][ \t]
  * An issue or PR body on one line, without template comments and lines, code blocks (logs, stack
  * traces), HTML tags and link noise (`stripLinkNoise`), cut at `maxChars`.
  */
-function issueBody(body: string | null | undefined, maxChars: number): string {
+export function issueBody(body: string | null | undefined, maxChars: number): string {
   const text = stripLinkNoise(
     withoutCodeAndTags((body ?? "").replace(/<!--[\s\S]*?(?:-->|$)/g, " "), " ").replace(
       ISSUE_TEMPLATE_LINE_RE,
@@ -131,6 +131,13 @@ export const goingAwayRule = (item: "bullet" | "highlight") =>
   `a breaking change or a call that now raises an error is not going away. Give every other ${item} no sign.`;
 
 /**
+ * No trend from co-occurrence. Weekly Diff's article leaves this one rule out: it may state a
+ * trend as a marked reading (`buildWeeklyArticlePrompt`).
+ */
+export const NO_TREND_RULE =
+  "Several items on one theme in the same period are not a trend: a trend or causal claim needs rows that show it (a summary that states it, or figures such as gains or ranks), never titles, descriptions or co-occurrence alone.";
+
+/**
  * What a Highlights, Signals or highlights.json claim may say beyond its source: nothing. On
  * 2026-10-26 the models wrote "GA" for two Snowflake notes that said no such thing, added "audit
  * your invocations immediately", stated a vendor's design target as achieved throughput, dropped
@@ -147,7 +154,7 @@ export const SOURCE_FIDELITY_RULES = [
   "Keep every qualifier the source gives: 'the default Fable model' never becomes 'the default model', and 'in internal benchmarks' stays with its figure.",
   "Keep the source's strength: 'recommends', 'can' or 'should' never becomes 'must', and 'upcoming' or 'planned' never becomes 'released'.",
   "Separate changes stay separate: never merge two fixes, or a fix and a feature, into one claim, and a changed default is not a new feature.",
-  "Several items on one theme in the same period are not a trend: a trend or causal claim needs rows that show it (a summary that states it, or figures such as gains or ranks), never titles, descriptions or co-occurrence alone.",
+  NO_TREND_RULE,
 ];
 
 /** SOURCE_FIDELITY_RULES as prompt rule lines. */

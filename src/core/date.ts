@@ -46,6 +46,9 @@ export function weekdayOf(dateStr: string): number {
  */
 export const WEEKLY_REPORT_WEEKDAY = 1;
 
+/** The days a weekly report covers, the run's own day included. */
+export const WEEK_DAYS = 7;
+
 /**
  * Set DIGEST_FORCE_WEEKLY=1 to run the weekly reports on any day — for testing
  * the weekly path, or regenerating a missed Monday via workflow_dispatch.

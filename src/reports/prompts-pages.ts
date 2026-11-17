@@ -36,6 +36,8 @@ import {
   RELEASE_BODY_CHARS,
   releaseNotes,
   sourceFidelityRules,
+  SOURCE_FIDELITY_RULES,
+  NO_TREND_RULE,
 } from "./prompts.ts";
 import type { ReleaseRow } from "./pages.ts";
 import type { CommunityRow } from "../data/community.ts";
@@ -47,6 +49,7 @@ import type { PolicyItem } from "../policy/items.ts";
 import type { KeptVendorItem } from "../data/relevance.ts";
 import { signHighlight } from "./markdown.ts";
 import { escapeRegex } from "../core/regex.ts";
+import { daysBefore, WEEK_DAYS } from "../core/date.ts";
 import { siteOf, type StoryRow } from "../spotted/pool.ts";
 
 /** Which sources Trends' Models section covers: no call when neither has data. */
@@ -489,6 +492,7 @@ export function buildHighlightsPrompt(
     .join("");
 
   const sections = Object.entries(reportContents)
+    .filter(([id]) => !LEDE_HIGHLIGHT_REPORTS.has(id))
     .map(([id, content]) => `## [${id}]\n\n${highlightsInput(content)}`)
     .join("\n\n---\n\n");
 
@@ -547,6 +551,13 @@ const HIGHLIGHT_RULES: Record<
     leadFirst: true,
   },
 };
+
+/**
+ * The reports whose highlight is their own first sentence, taken by code: Weekly Diff. Its page is
+ * an article with readings in italics, and a second model restating it is how a reading becomes
+ * a stated fact. So the highlights call never sees it.
+ */
+const LEDE_HIGHLIGHT_REPORTS = new Set<string>(["ai-weekly"]);
 
 /**
  * The reports that always get a highlight when published: AI Policy, whose
@@ -669,7 +680,9 @@ export function withFallbackHighlights(
   forced: readonly string[],
 ): ReportHighlights {
   const out = Object.fromEntries(
-    Object.entries(highlights).map(([id, items]) => [id, items.map(signHighlight)]),
+    Object.entries(highlights)
+      .filter(([id]) => !LEDE_HIGHLIGHT_REPORTS.has(id))
+      .map(([id, items]) => [id, items.map(signHighlight)]),
   );
   // A lead signed going away keeps its sign on the highlight that restates it: the model dropped it
   // on the Polars lead (regen of 2026-10-26). Only on a match: the first highlight may be another item.
@@ -700,6 +713,10 @@ export function withFallbackHighlights(
     // A page whose every Highlight code dropped has nothing to restate.
     if (line && line !== NO_HIGHLIGHT_NOTE) out[id] = [line];
   }
+  for (const id of LEDE_HIGHLIGHT_REPORTS) {
+    const lede = reportContents[id] ? ledeHighlight(reportContents[id]) : null;
+    if (lede) out[id] = [lede];
+  }
   return out;
 }
 
@@ -711,7 +728,7 @@ export function withFallbackHighlights(
 export function skippedReports(reportContents: Record<string, string>, reply: ReportHighlights): string[] {
   return Object.entries(reportContents)
     .filter(([id, content]) => {
-      if (reply[id]?.length) return false;
+      if (reply[id]?.length || LEDE_HIGHLIGHT_REPORTS.has(id)) return false;
       // A page without the section was sent whole.
       if (!highlightsSection(content)) return true;
       const lead = firstHighlight(content);
@@ -767,8 +784,35 @@ export function firstHighlight(md: string): string | null {
     if (block.length && /^([-*]|\d+[.)])\s/.test(line)) break;
     block.push(line);
   }
+  return firstSentence(block.join(" "));
+}
+
+/**
+ * The first sentence of an article's lede: the paragraph under the rule that closes the page's
+ * head (H1, report bar, meta line), as plain text; null when the page has no such paragraph.
+ * A heading the model put above its lede, against the prompt, is passed over.
+ */
+export function ledeHighlight(md: string): string | null {
+  const lines = md.split("\n");
+  const rule = lines.findIndex((l) => l.trim() === "---");
+  if (rule < 0) return null;
+  const block: string[] = [];
+  for (const raw of lines.slice(rule + 1)) {
+    const line = raw.trim();
+    if (line.startsWith("#") && !block.length) continue;
+    if (line.startsWith("#") || line === "---") break;
+    if (!line) {
+      if (block.length) break;
+      continue;
+    }
+    block.push(line);
+  }
+  return firstSentence(block.join(" "));
+}
+
+/** A bullet's or paragraph's first sentence as plain text, cut to HIGHLIGHT_MAX_CHARS; null for none or a failure notice. */
+function firstSentence(block: string): string | null {
   const text = block
-    .join(" ")
     .replace(/^([-*]|\d+[.)])\s+/, "")
     .replace(/\[([^\]]*)\]\((?:[^()]|\([^)]*\))*\)/g, "$1")
     .replace(/\*\*|__|`/g, "")
@@ -791,6 +835,68 @@ export function firstHighlight(md: string): string | null {
   const space = cut.lastIndexOf(" ");
   return `${(space > 0 ? cut.slice(0, space) : cut).replace(/[,;:]$/, "")}…`;
 }
+
+// ---------------------------------------------------------------------------
+// Weekly Diff: the week's article
+// ---------------------------------------------------------------------------
+
+/** How the article's source (`buildWeekSource`, src/weekly/source.ts) is laid out. */
+export const WEEK_SOURCE_NOTE = `Each item has its kind, source, date and link, a "digest:" line, and a "text:" line with what its source gave: release notes, an issue's body, a feed entry, a page's description. The "digest:" line is written by the digest's code, not by a model: the section that showed the item, 🔓 for a security event, ⚠️ for a deprecation, retirement or behavior change, 🤖 for an AI feature in a data platform, a story's points and comments, a hot issue's totals and gain. A text that ends with "[…cut]" is incomplete.`;
+
+// One fidelity rule forbids a trend claim over co-occurring items. The article may make one as
+// a marked reading, so its Analysis rules replace it.
+const articleFidelityRules = SOURCE_FIDELITY_RULES.filter((rule) => rule !== NO_TREND_RULE)
+  .map((r) => `- ${r}`)
+  .join("\n");
+
+/**
+ * Weekly Diff: one article on the week, written from the source texts of the shown items by a
+ * stronger model than the rest of the pipeline uses (src/weekly/writer.ts). Facts rest on rows
+ * and link them; the writer's reading is set in italics, and only that. This is the prompt the
+ * experiment of 2026-11-16 measured (`.scratch/weekly-diff/`, prompt v3): at high effort three
+ * articles drew 0 to 2 major flags each from two judges. A change here is not measured until
+ * the lab runs it again.
+ */
+export const buildWeeklyArticlePrompt = (
+  source: string,
+  dateStr: string,
+): string => `You write "Weekly Diff", the weekly article of Daily Diff, a digest for AI practitioners and data engineers at a Dutch data consultancy. The reader works with coding agents, LLM APIs, Databricks, Snowflake and the open-source data stack, has clients in the EU and the Netherlands, and did not read every daily page.
+
+Below are the items the digest showed from ${daysBefore(dateStr, WEEK_DAYS - 1)} to ${dateStr}, by day and page. ${WEEK_SOURCE_NOTE} After the items come the weekly Trends tables and the open AI Policy dates. They are your only source. A "row" in the rules below is one such item or one table row. State nothing about the part of a text that was cut. An issue's body is its reporter's account, and a story's text is its page's own description.
+
+Write one article of 700–1000 words on what changed this week and what it means for this reader.
+
+Shape:
+- No title. Open with a lede of 2–3 sentences that names the week's main developments. The lede only reports: it links two developments ("followed", "after", "ahead of", "in response to") only when a row states that link.
+- Then 3–5 sections, each under a \`## \` heading that names its subject in a plain noun phrase. Choose the sections by what mattered this week, not one per page: a section may draw on several pages and days, and a page with nothing that matters is left out.
+- Paragraphs of prose only. No bullet or numbered list anywhere, no bold labels, no tables, no closing summary.
+- Select. Most rows do not belong in the article. Prefer what changes what the reader does or decides (breaking changes, deprecations with a date, deadlines, changed prices or defaults, security events), a development with rows on several days, and the movements the Trends tables show in figures.
+
+Facts:
+- Every factual statement rests on a row of the source and links it once, with that row's own link, on the name of the thing.
+- Nothing from your own knowledge: state nothing about a company, product, model or law that the source does not say, however well known.
+- Copy figures exactly, with their unit and their window ("in the last 7 days", "on 2026-11-15"). A rank or a change keeps the basis its row gives ("week #3", "+46% vs previous week").
+- Make a comparison ("the largest", "more than") only when one table of the source shows it. Before you state a count ("3 of the top 20", "four releases"), go through every row you count.
+- Give an event's date only when its row states one, and write every date as an ISO date (2026-11-30), also when the source spells it out. The date of a page is the day the digest reported the item, not the day it happened.
+- Describe a model, product, company or document in the source's words only: no "low-cost", "frontier", "flagship" or "draft" that its row does not use.
+- A description belongs to the page it comes from: a listing's or a story's text is that page's wording, not the statement of the company it describes.
+- Two rows are about the same thing only when the source says so: never join a write-up, a CVE, an issue or a release that the source lists apart.
+${articleFidelityRules}
+
+Analysis:
+- The article interprets: what a development means for this reader, how items connect, where a market moves. End each section with 1–3 sentences of interpretation.
+- Set every sentence of interpretation in *italics*, and nothing else in italics. The reader tells your reading from the reported facts by the italics alone.
+- An interpretation rests on facts stated in its own section. Word it as a reading ("this suggests", "a likely reason", "worth watching"), no stronger than its facts: one week of figures shows a movement in that week, not a lasting shift.
+- Check each premise against its row before you write the reading: its date (an event dated before a change does not follow from it, and a date months away is not "this month"), its count, and its scope (a few items in two projects are not a whole market).
+- No forecast stated as certain, no advice the facts do not support, and no interpretation that needs a fact from outside the source to hold.
+
+Style:
+- Plain words, short sentences, active voice. No hype, no scene-setting ("In a week where …"), no rhetorical questions.
+- Write about the developments, never about the digest, its pages or what they lack.
+
+SOURCE
+
+${source}`;
 
 // ---------------------------------------------------------------------------
 // Trends: Models

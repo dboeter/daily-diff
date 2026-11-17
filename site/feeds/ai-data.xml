@@ -13,15 +13,15 @@
       <height>144</height>
     </image>
     <atom:link href="https://dboeter.github.io/daily-diff/feeds/ai-data.xml" rel="self" type="application/rss+xml"/>
-    <lastBuildDate>Mon, 16 Nov 2026 09:29:47 +0000</lastBuildDate>
+    <lastBuildDate>Mon, 16 Nov 2026 23:57:05 +0000</lastBuildDate>
     <item>
       <title>Data Engineering 2026-11-16</title>
       <link>https://dboeter.github.io/daily-diff/#2026-11-16/ai-data</link>
       <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-11-16/ai-data</guid>
       <pubDate>Mon, 16 Nov 2026 00:00:00 +0000</pubDate>
-      <description>Data Engineering 2026-11-16 ⬛ Overview · 🟪 AI Agents · 🟦 AI Models &amp;amp; Labs · 🟧 AI Policy · 🟨 Data Engineering · 🟫 Trends Vendor items: 1 | Projects: 26 | Active today: 1 | Stable releases: 1 | Prereleases (not covered): 1 | Generated: 2026-11-16 09:26 UTC Highlights Terraform provider for Databricks v1.143.0 introduces a breaking change for users managing databricks_app resources: updates now use the asynchronous API and omitted fields are cleared (compute size resets to MEDIUM, autoscal...</description>
+      <description>Data Engineering 2026-11-16 ⬛ Overview · 🟪 AI Agents · 🟦 AI Models &amp;amp; Labs · 🟧 AI Policy · 🟨 Data Engineering · ⬜ Weekly Diff · 🟫 Trends Vendor items: 1 | Projects: 26 | Active today: 1 | Stable releases: 1 | Prereleases (not covered): 1 | Generated: 2026-11-16 09:26 UTC Highlights Terraform provider for Databricks v1.143.0 introduces a breaking change for users managing databricks_app resources: updates now use the asynchronous API and omitted fields are cleared (compute size resets to ...</description>
       <content:encoded><![CDATA[<h1>Data Engineering 2026-11-16</h1>
-<p><a href="https://dboeter.github.io/daily-diff/#2026-11-16">⬛ Overview</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-16/ai-agents">🟪 AI Agents</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-16/ai-models">🟦 AI Models &amp; Labs</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-16/ai-policy">🟧 AI Policy</a> · <strong>🟨 Data Engineering</strong> · <a href="https://dboeter.github.io/daily-diff/#2026-11-16/ai-trends">🟫 Trends</a></p>
+<p><a href="https://dboeter.github.io/daily-diff/#2026-11-16">⬛ Overview</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-16/ai-agents">🟪 AI Agents</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-16/ai-models">🟦 AI Models &amp; Labs</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-16/ai-policy">🟧 AI Policy</a> · <strong>🟨 Data Engineering</strong> · <a href="https://dboeter.github.io/daily-diff/#2026-11-16/ai-weekly">⬜ Weekly Diff</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-16/ai-trends">🟫 Trends</a></p>
 <blockquote>
 <p>Vendor items: 1 | Projects: 26 | Active today: 1 | Stable releases: 1 | Prereleases (not covered): 1 | Generated: 2026-11-16 09:26 UTC</p>
 </blockquote>

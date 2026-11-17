@@ -356,6 +356,7 @@ const LABEL_COLORS: Record<string, string> = {
   policy: "1d4ed8",
   data: "0d9488",
   trends: "f9a825",
+  weekly: "6b7280",
 };
 
 /**
@@ -417,8 +418,6 @@ const DIGEST_ISSUE_LABELS = new Set([
   "hf-en",
   "arxiv",
   "arxiv-en",
-  "weekly",
-  "weekly-en",
   "monthly",
   "monthly-en",
 ]);

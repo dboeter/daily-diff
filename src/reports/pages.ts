@@ -16,6 +16,7 @@ import {
   SECTIONS,
   MODELS_PAGE,
   TRENDS_REPORT,
+  WEEKLY_REPORT,
   reportHeading,
   type ReportId,
 } from "../core/strings.ts";
@@ -34,8 +35,14 @@ import {
   modelSources,
   dropNoHighlightRows,
   isGroupOrAbsenceBullet,
+  buildWeeklyArticlePrompt,
 } from "./prompts-pages.ts";
-import { generateOr, saveFile, autoGenFooter, LLM_TOKENS_LISTING } from "../core/llm.ts";
+import { generateOr, saveFile, autoGenFooter, LLM_TOKENS_LISTING, warnStep } from "../core/llm.ts";
+import type { LlmProvider } from "../providers/index.ts";
+import type { Candidate } from "./candidates.ts";
+import { buildWeekSource, type GitHubFetch, type WeekDay, type WeekSource } from "../weekly/source.ts";
+import { fetchGitHubObject } from "../weekly/week.ts";
+import { LLM_TOKENS_ARTICLE, WEEKLY_CALL_LABEL, WEEKLY_WRITER, weeklyWriter } from "../weekly/writer.ts";
 import { saveLabsState, type LabsFetchResult, type LabPost, type LabsState } from "../sources/labs.ts";
 import { loadReportedState, newItems, nextReportedState, saveReportedState } from "../core/report-state.ts";
 import type { TrendingData } from "../trending/compose.ts";
@@ -332,6 +339,83 @@ export async function buildTrendsReport(
   }
 
   return { id: "ai-trends", content };
+}
+
+// ---------------------------------------------------------------------------
+// Weekly Diff — weekly, the week's article (src/weekly/)
+// ---------------------------------------------------------------------------
+
+/** What the article is built from (`loadWeek`). A test passes its own `writer` and `fetchGitHub`. */
+export interface WeeklyInput {
+  /** The week's days, oldest first; the last is the run's own. */
+  days: WeekDay[];
+  vendorNotes: Candidate[];
+  /** null: no key, so no article. */
+  writer?: LlmProvider | null;
+  fetchGitHub?: GitHubFetch;
+}
+
+/** The links of `article` that `source` does not hold: a link the writer did not take from a row. */
+export function linksOutside(article: string, source: string): string[] {
+  const links = [...article.matchAll(/\]\((https?:[^)\s]+)\)/g)].flatMap((m) => m[1] ?? []);
+  return [...new Set(links)].filter((url) => !source.includes(url));
+}
+
+/**
+ * Weekly Diff: one article on the week, the model's own text from the lede to the last section.
+ * It is built after the LLM health gate and by another provider, so no outcome of it fails the
+ * run: without a key, without an item, with a failed call, or when `week` or the source builder
+ * throws (logged), there is no page.
+ */
+export async function buildWeeklyReport(
+  week: () => WeeklyInput,
+  utcStr: string,
+  dateStr: string,
+): Promise<SavedReport | null> {
+  let writer: LlmProvider;
+  let source: WeekSource;
+  let from: string;
+  try {
+    const input = week();
+    const chosen = input.writer === undefined ? weeklyWriter() : input.writer;
+    if (!chosen) {
+      warnStep("[weekly] ANTHROPIC_API_KEY is not set: no Weekly Diff page.");
+      return null;
+    }
+    writer = chosen;
+    from = input.days[0]?.date ?? dateStr;
+    source = await buildWeekSource(input.days, input.vendorNotes, input.fetchGitHub ?? fetchGitHubObject);
+  } catch (err) {
+    // Every other page is built and not yet written: an unreadable day folder or a fetch that
+    // throws costs this page only.
+    warnStep(`[weekly] No Weekly Diff page: ${String(err).split("\n")[0]}`);
+    return null;
+  }
+  if (!source.items) {
+    console.log("  [weekly] The week's pages showed no item, skipping report.");
+    return null;
+  }
+  console.log(`  [weekly] ${source.items} items, ${source.text.length} characters of source.`);
+  const article = await generateOr(
+    WEEKLY_CALL_LABEL,
+    buildWeeklyArticlePrompt(source.text, dateStr),
+    null,
+    LLM_TOKENS_ARTICLE,
+    writer,
+  );
+  if (article === null) return null;
+  const outside = linksOutside(article, source.text);
+  if (outside.length) warnStep(`[weekly] ${outside.length} link(s) not in the source: ${outside.join(", ")}`);
+  const W = WEEKLY_REPORT;
+  const meta = REPORT_META.line(
+    [
+      REPORT_META.sources(W.sources(source.items, from, dateStr)),
+      W.writtenBy(WEEKLY_WRITER.model),
+      W.italics,
+    ],
+    utcStr,
+  );
+  return { id: "ai-weekly", content: assembleReport("ai-weekly", dateStr, meta, article.trim()) };
 }
 
 // ---------------------------------------------------------------------------

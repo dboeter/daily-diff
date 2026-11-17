@@ -74,6 +74,7 @@ import { numberRows, parseRowSummaries } from "./reports/summarized-table.ts";
 import {
   buildModelsPage,
   buildTrendsReport,
+  buildWeeklyReport,
   buildPolicyReport,
   buildDataReport,
   buildAgentsReport,
@@ -102,6 +103,7 @@ import {
 } from "./data/community.ts";
 import { buildComingUp } from "./reports/coming-up.ts";
 import { buildCandidates, candidatesFile } from "./reports/candidates.ts";
+import { loadWeek } from "./weekly/week.ts";
 import { fetchHfData, type HfData } from "./sources/huggingface.ts";
 import { fetchDevtoData, type DevtoData } from "./sources/devto.ts";
 import { fetchLobstersData, type LobstersData } from "./sources/lobsters.ts";
@@ -808,13 +810,32 @@ async function main(): Promise<void> {
   });
   console.log(`  Saved ${saveFile(candidatesFile(candidates), dateStr, "candidates.json")}`);
 
+  // Weekly Diff: the week's article, from the six saved days and today's pages and candidates,
+  // which are in memory only. After the health gate and by another provider: no outcome of it
+  // fails the run or holds back the other pages.
+  const weeklyDiff = weekly
+    ? await buildWeeklyReport(
+        () =>
+          loadWeek({
+            date: dateStr,
+            candidates,
+            pages: Object.fromEntries(saved.map((r) => [r.id, r.content])),
+          }),
+        utcStr,
+        dateStr,
+      )
+    : null;
+  const pages = [...saved, ...(weeklyDiff ? [weeklyDiff] : [])].sort(
+    (a, b) => LIVE_REPORT_IDS.indexOf(a.id) - LIVE_REPORT_IDS.indexOf(b.id),
+  );
+
   // The highlights pass reads the bodies, not the link bars.
-  const reports: Record<string, string> = Object.fromEntries(saved.map((r) => [r.id, r.content]));
+  const reports: Record<string, string> = Object.fromEntries(pages.map((r) => [r.id, r.content]));
 
   // Each report links the others the day produced, so the bar waits for all of them.
   const pagesUrl = resolvePagesUrl();
-  const ids = saved.map((r) => r.id);
-  const published: SavedReport[] = saved.map((r) => ({
+  const ids = pages.map((r) => r.id);
+  const published: SavedReport[] = pages.map((r) => ({
     ...r,
     content: withReportBar(r.content, renderReportBar(r.id, ids, dateStr, pagesUrl)),
   }));

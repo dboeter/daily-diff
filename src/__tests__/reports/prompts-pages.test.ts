@@ -16,6 +16,7 @@ import {
   buildTrendsProsePrompt,
   buildTrendsSummariesPrompt,
   firstHighlight,
+  ledeHighlight,
   forcedHighlightReports,
   withFallbackHighlights,
   skippedReports,
@@ -318,6 +319,65 @@ describe("buildDataProsePrompt", () => {
     expect(prompt).not.toContain("Signals");
     expect(prompt).toContain("Write only `## Highlights`");
     expect(prompt).toContain("Write no links, URLs or other sections");
+  });
+});
+
+describe("Weekly Diff's highlight", () => {
+  const ARTICLE = [
+    "# Weekly Diff 2026-11-16",
+    "",
+    "[⬛ Overview](https://example.com/#2026-11-16) · **⬜ Weekly Diff** · [🟫 Trends](https://example.com/t)",
+    "",
+    "> Sources: 330 items | Generated: 05:00 UTC",
+    "",
+    "---",
+    "",
+    "Anthropic released [Claude Fable 5.2](https://example.com/fable), and Claude Code made it the default Fable model. Databricks set two dates.",
+    "",
+    "## Claude Fable 5.2",
+    "",
+    "*This suggests a reading.*",
+  ].join("\n");
+  const AGENTS = "## Highlights\n\n- An agents highlight.\n\n## Spotted";
+
+  it("is the lede's first sentence, as plain text, with or without the report bar", () => {
+    const lede = "Anthropic released Claude Fable 5.2, and Claude Code made it the default Fable model.";
+    expect(ledeHighlight(ARTICLE)).toBe(lede);
+    expect(ledeHighlight(ARTICLE.replace(/\n\[⬛[^\n]*\n/, ""))).toBe(lede);
+    expect(ledeHighlight("# Weekly Diff 2026-11-16\n\n> meta")).toBeNull();
+  });
+
+  it("is still the lede's when the model put a heading above it", () => {
+    const page =
+      "# Weekly Diff 2026-11-16\n\n> meta\n\n---\n\n## This week\n\nA lede sentence. And more.\n\n## Next\n\nBody.";
+    expect(ledeHighlight(page)).toBe("A lede sentence.");
+  });
+
+  it("never reaches the highlights call: a second model restating a reading states it as fact", () => {
+    const prompt = buildHighlightsPrompt({ "ai-agents": AGENTS, "ai-weekly": ARTICLE });
+    expect(prompt).toContain("## [ai-agents]");
+    expect(prompt).not.toContain("ai-weekly");
+    expect(prompt).not.toContain("This suggests a reading");
+  });
+
+  it("comes from code, whatever the model returned for the page", () => {
+    const out = withFallbackHighlights(
+      { "ai-agents": ["H."], "ai-weekly": ["A model's own restatement."] },
+      { "ai-agents": AGENTS, "ai-weekly": ARTICLE },
+      [],
+    );
+    expect(out).toEqual({
+      "ai-agents": ["H."],
+      "ai-weekly": ["Anthropic released Claude Fable 5.2, and Claude Code made it the default Fable model."],
+    });
+    // A daily run has no article, and gets no key for it.
+    expect(withFallbackHighlights({ "ai-agents": ["H."] }, { "ai-agents": AGENTS }, [])).toEqual({
+      "ai-agents": ["H."],
+    });
+  });
+
+  it("is not reported as a page the model skipped", () => {
+    expect(skippedReports({ "ai-weekly": ARTICLE }, {})).toEqual([]);
   });
 });
 

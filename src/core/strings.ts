@@ -34,12 +34,16 @@ export const NO_HIGHLIGHT_NOTE = "No item stands out today.";
 // In reading order: the report bar and the sidebar list them this way. A report's mark is a
 // square: `emoji` where only text goes (issue titles, the report bar, Telegram, Teams), `color` in
 // the web UI (manifest.json `colors`), so every channel shows the same one. Green and red squares
-// are left out: those colors mean added and going away (the diff gutter).
+// are left out: those colors mean added and going away (the diff gutter), and the black square is
+// the Overview's.
 export const REPORTS = {
   "ai-agents": { emoji: "🟪", color: "#9D7BDB", name: "AI Agents", label: "agents" },
   "ai-models": { emoji: "🟦", color: "#55ACEE", name: "AI Models & Labs", label: "models" },
   "ai-policy": { emoji: "🟧", color: "#F4900C", name: "AI Policy", label: "policy" },
   "ai-data": { emoji: "🟨", color: "#FDCB58", name: "Data Engineering", label: "data" },
+  // Weekly Diff is the article's own name, the maintainer's choice of 2026-11-16: the one name
+  // with a cadence word, on a page that has no daily edition.
+  "ai-weekly": { emoji: "⬜", color: "#B0B7BF", name: "Weekly Diff", label: "weekly" },
   "ai-trends": { emoji: "🟫", color: "#C1694F", name: "Trends", label: "trends" },
 } as const satisfies Record<string, { emoji: string; color: string; name: string; label: string }>;
 
@@ -53,7 +57,7 @@ export const LIVE_REPORT_IDS = Object.keys(REPORTS) as ReportId[];
  * rest are daily. The one list: the issue retention groups (github.ts) and the
  * sidebar's "This week" group (manifest.json `weekly`) derive from it.
  */
-export const WEEKLY_REPORT_IDS: ReportId[] = ["ai-trends"];
+export const WEEKLY_REPORT_IDS: ReportId[] = ["ai-weekly", "ai-trends"];
 
 /** A report file's H1. */
 export const reportHeading = (id: ReportId, dateStr: string) => `# ${REPORTS[id].name} ${dateStr}`;
@@ -148,6 +152,15 @@ export const COMING_UP = {
 export const SECTIONS = {
   highlights: "Highlights",
   signals: "Signals",
+} as const;
+
+// Weekly: the week's article (src/weekly/). The model writes the whole body; these are its meta line.
+export const WEEKLY_REPORT = {
+  sources: (items: number, from: string, to: string) =>
+    `${items} item${items === 1 ? "" : "s"} the pages showed from ${from} to ${to}`,
+  writtenBy: (model: string) => `Written by ${model}`,
+  /** The reader's one key to the page: the writer sets its own reading in italics, and only that. */
+  italics: "Text in italics is interpretation",
 } as const;
 
 // Weekly: what is moving. The prose call writes Highlights and Signals around the rest.
@@ -351,8 +364,8 @@ export const REPORT_LABELS: Record<string, string> = {
   // Spotted section and ai-web to ai-models; ai-trending, ai-hf and ai-arxiv
   // became sections of the weekly Trends page; ai-infra (weekly, its older
   // files cover inference engines, hence the label) and ai-cli were folded into
-  // ai-agents, ai-community into ai-hn, and ai-ph dropped. The weekly and
-  // monthly rollups were removed earlier.
+  // ai-agents, ai-community into ai-hn, and ai-ph dropped. The monthly
+  // rollup was removed earlier.
   "ai-hn": "AI Discussions",
   "ai-web": "Lab Announcements",
   "ai-trending": "Agent & AI Coding Trends",
@@ -362,7 +375,6 @@ export const REPORT_LABELS: Record<string, string> = {
   "ai-community": "Tech Community AI Digest",
   "ai-cli": "AI CLI Tools Digest",
   "ai-ph": "Product Hunt AI Products Digest",
-  "ai-weekly": "AI Tools Weekly Digest",
   "ai-monthly": "AI Tools Monthly Digest",
 };
 

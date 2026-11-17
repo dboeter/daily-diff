@@ -1,10 +1,11 @@
 {
-  "generated": "2026-11-16T09:29:47.345Z",
+  "generated": "2026-11-16T23:57:05.150Z",
   "labels": {
     "ai-agents": "AI Agents",
     "ai-models": "AI Models & Labs",
     "ai-policy": "AI Policy",
     "ai-data": "Data Engineering",
+    "ai-weekly": "Weekly Diff",
     "ai-trends": "Trends",
     "ai-hn": "AI Discussions",
     "ai-web": "Lab Announcements",
@@ -15,10 +16,10 @@
     "ai-community": "Tech Community AI Digest",
     "ai-cli": "AI CLI Tools Digest",
     "ai-ph": "Product Hunt AI Products Digest",
-    "ai-weekly": "AI Tools Weekly Digest",
     "ai-monthly": "AI Tools Monthly Digest"
   },
   "weekly": [
+    "ai-weekly",
     "ai-trends"
   ],
   "feeds": {
@@ -26,6 +27,7 @@
     "ai-models": "feeds/ai-models.xml",
     "ai-policy": "feeds/ai-policy.xml",
     "ai-data": "feeds/ai-data.xml",
+    "ai-weekly": "feeds/ai-weekly.xml",
     "ai-trends": "feeds/ai-trends.xml"
   },
   "colors": {
@@ -33,6 +35,7 @@
     "ai-models": "#55ACEE",
     "ai-policy": "#F4900C",
     "ai-data": "#FDCB58",
+    "ai-weekly": "#B0B7BF",
     "ai-trends": "#C1694F"
   },
   "overview": "Overview",
@@ -52,6 +55,7 @@
         "ai-models",
         "ai-policy",
         "ai-data",
+        "ai-weekly",
         "ai-trends"
       ]
     },
