@@ -19,6 +19,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { AnthropicProvider } from "../src/providers/anthropic.ts";
 import { type LlmProvider, TruncatedResponseError } from "../src/providers/types.ts";
+import { WEEKLY_CALL_LABEL } from "../src/weekly/writer.ts";
 
 interface Captured {
   label: string;
@@ -148,7 +149,8 @@ async function main() {
       }))
       // A call the writer answered (Weekly Diff's article, Trends' calls) is Opus's, not the production
       // model's; the article's prompt alone is about 150,000 tokens, sent to the candidate and the judge.
-      .filter((c) => !c.via),
+      // The article also by its label: a capture from before 2026-11-17 has no `via`.
+      .filter((c) => !c.via && c.label !== WEEKLY_CALL_LABEL),
   );
   const promptTokens = calls.reduce((n, c) => n + c.prompt.length / 4, 0);
   console.log(
