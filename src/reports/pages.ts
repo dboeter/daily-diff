@@ -37,12 +37,20 @@ import {
   isGroupOrAbsenceBullet,
   buildWeeklyArticlePrompt,
 } from "./prompts-pages.ts";
-import { generateOr, saveFile, autoGenFooter, LLM_TOKENS_LISTING, warnStep } from "../core/llm.ts";
+import {
+  generateBody,
+  generateOr,
+  markLlmRerouted,
+  saveFile,
+  autoGenFooter,
+  LLM_TOKENS_LISTING,
+  warnStep,
+} from "../core/llm.ts";
 import type { LlmProvider } from "../providers/index.ts";
 import type { Candidate } from "./candidates.ts";
 import { buildWeekSource, type GitHubFetch, type WeekDay, type WeekSource } from "../weekly/source.ts";
 import { fetchGitHubObject } from "../weekly/week.ts";
-import { LLM_TOKENS_ARTICLE, WEEKLY_CALL_LABEL, WEEKLY_WRITER, weeklyWriter } from "../weekly/writer.ts";
+import { LLM_TOKENS_WRITER, WEEKLY_CALL_LABEL, WEEKLY_WRITER, weeklyWriter } from "../weekly/writer.ts";
 import { saveLabsState, type LabsFetchResult, type LabPost, type LabsState } from "../sources/labs.ts";
 import { loadReportedState, newItems, nextReportedState, saveReportedState } from "../core/report-state.ts";
 import type { TrendingData } from "../trending/compose.ts";
@@ -154,6 +162,35 @@ export interface TrendsInput {
   stories: { rows: StoryRow[]; summaries: Map<number, string> };
   /** Every config.yml repo: Candidates to track leaves them out. */
   tracked: RepoConfig[];
+  /** null: no key, so the run's own model writes the page. A test passes its own. */
+  writer?: LlmProvider | null;
+}
+
+/**
+ * One of Trends' calls, by the writer. Trends is built before the LLM health gate and was a page
+ * before the writer wrote it, so a call the writer fails (after `callLlm`'s retries) goes to the
+ * run's own model at that model's budget, as every call does without a writer. That failure is
+ * no lost call: it is `rerouted` in the trace and a warning on the run page.
+ */
+async function writtenOr<T>(
+  writer: LlmProvider | null,
+  tag: string,
+  prompt: string,
+  fallback: T,
+  maxTokens?: number,
+): Promise<string | T> {
+  if (writer) {
+    console.log(`  [${tag}] Calling the writer...`);
+    try {
+      return await generateBody(prompt, LLM_TOKENS_WRITER, tag, writer);
+    } catch (err) {
+      markLlmRerouted(tag);
+      warnStep(
+        `[${tag}] The writer's call failed, the run's own model writes it: ${String(err).split("\n")[0]}`,
+      );
+    }
+  }
+  return generateOr(tag, prompt, fallback, maxTokens);
 }
 
 /**
@@ -234,17 +271,26 @@ export async function buildTrendsReport(
     console.log("  [trends] No trending rows, models, Skills activity, papers or stories, skipping report.");
     return null;
   }
+  const writer = input.writer === undefined ? weeklyWriter() : input.writer;
+  if (!writer) console.log("  [trends] ANTHROPIC_API_KEY is not set: the run's own model writes the page.");
 
   const [summaries, models, skillsSummary, rowSummaries] = await Promise.all([
     rows.length
-      ? generateOr("trending-summaries", buildTrendingSummariesPrompt(rows, dateStr), "", LLM_TOKENS_LISTING)
+      ? writtenOr(
+          writer,
+          "trending-summaries",
+          buildTrendingSummariesPrompt(rows, dateStr),
+          "",
+          LLM_TOKENS_LISTING,
+        )
       : "",
     hfTableRows.length
-      ? generateOr("trends-hf-summaries", buildHfSummariesPrompt(hfTableRows, dateStr), "")
+      ? writtenOr(writer, "trends-hf-summaries", buildHfSummariesPrompt(hfTableRows, dateStr), "")
       : "",
     // No item, no call: the notice only when the fetch failed, else no section.
     hasSkills
-      ? generateOr(
+      ? writtenOr(
+          writer,
           "claude-code-skills",
           buildSkillsPrompt(skills.prs, skills.issues, dateStr),
           MSG.skillsFailed,
@@ -253,7 +299,13 @@ export async function buildTrendsReport(
         ? ""
         : MSG.skillsFailed,
     papers.length
-      ? generateOr("trends-summaries", buildTrendsSummariesPrompt(papers, dateStr), "", LLM_TOKENS_LISTING)
+      ? writtenOr(
+          writer,
+          "trends-summaries",
+          buildTrendsSummariesPrompt(papers, dateStr),
+          "",
+          LLM_TOKENS_LISTING,
+        )
       : "",
   ]);
 
@@ -293,7 +345,8 @@ export async function buildTrendsReport(
     .filter(Boolean)
     .join("\n\n---\n\n");
   const noHighlight = unsummarizedRows(report, trendingSummaries, hfTableRows, hfSummaries);
-  const prose = await generateOr(
+  const prose = await writtenOr(
+    writer,
     "trends",
     buildTrendsProsePrompt(
       page,
@@ -400,7 +453,7 @@ export async function buildWeeklyReport(
     WEEKLY_CALL_LABEL,
     buildWeeklyArticlePrompt(source.text, dateStr),
     null,
-    LLM_TOKENS_ARTICLE,
+    LLM_TOKENS_WRITER,
     writer,
   );
   if (article === null) return null;

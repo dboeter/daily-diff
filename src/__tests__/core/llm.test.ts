@@ -314,6 +314,28 @@ describe("callLlm", () => {
     }
   });
 
+  it("names the other provider on a captured call that did not go to the run's own", async () => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "llm-capture-"));
+    vi.stubEnv("LLM_CAPTURE_DIR", dir);
+    try {
+      await callLlm("the week", 2048, "weekly", {
+        name: "writer",
+        call: () => Promise.resolve("an article"),
+      });
+      const saved = JSON.parse(fs.readFileSync(path.join(dir, "001-weekly.json"), "utf8"));
+      expect(saved).toEqual({
+        label: "weekly",
+        maxTokens: 2048,
+        prompt: "the week",
+        output: "an article",
+        via: "writer",
+      });
+    } finally {
+      vi.unstubAllEnvs();
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
   it("captures the doubled budget that produced an answer after a cut-off", async () => {
     const dir = fs.mkdtempSync(path.join(os.tmpdir(), "llm-capture-"));
     vi.stubEnv("LLM_CAPTURE_DIR", dir);

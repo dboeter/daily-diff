@@ -177,6 +177,8 @@ describe("buildTrendsReport", () => {
       summaries: new Map([[9, "An essay on Y."]]),
     },
     tracked: [],
+    // No writer: these tests count the calls, whatever the shell's ANTHROPIC_API_KEY is.
+    writer: null,
   };
   const isTrendingSummaries = (p: string) => p.includes("one fact from the description that sets it apart");
   const isRowSummaries = (p: string) => p.includes("You summarize research papers");

@@ -94,15 +94,21 @@ jobs:
           LLM_PROVIDER: openrouter
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
           # Free model; if OpenRouter retires it, runs abort at the LLM health gate — swap the id here.
-          # Nemotron 3 Ultra's free endpoint was down on 2026-10-16 (16% uptime that day), so Super leads.
-          OPENROUTER_MODEL: nvidia/nemotron-3-super-120b-a12b:free
+          OPENROUTER_MODEL: baidu/ernie-5.5-flash-preview:free
           # Tried in order when the model above errors or is down; one free endpoint is no guarantee.
-          OPENROUTER_FALLBACK_MODELS: nvidia/nemotron-3-ultra-550b-a55b:free,nvidia/nemotron-3.5-super-vl:free
-          # Without this the reasoning model spends the whole token budget thinking and returns empty content.
-          OPENROUTER_REASONING_EFFORT: low
-          # Weekly Diff's article alone is written by Claude Opus on the Anthropic API (src/weekly/writer.ts);
-          # unset, the weekly run publishes no Weekly Diff page. The base URL is for a key that works
-          # through a gateway only; unset, the SDK uses the Anthropic API.
+          # Nemotron 3 Super led until 2026-11-17. Ultra's free endpoint was down on 2026-10-16 (16%
+          # uptime that day), so Super comes first.
+          OPENROUTER_FALLBACK_MODELS: nvidia/nemotron-3-super-120b-a12b:free,nvidia/nemotron-3-ultra-550b-a55b:free
+          # Reasoning counts against a call's token budget. ERNIE at high effort, on five prompts of
+          # 2026-11-16: the daily calls answered within budget; Trends' two largest, which this model
+          # makes only when Claude Opus is missing or fails, spent all 16,384 tokens on reasoning and
+          # answered on callLlm's one retry at double budget. The fallbacks get this effort too, and
+          # Nemotron without a low effort returned empty content.
+          OPENROUTER_REASONING_EFFORT: high
+          # Claude Opus on the Anthropic API writes Weekly Diff's article and Trends' own calls
+          # (src/weekly/writer.ts); unset, the weekly run publishes no Weekly Diff page and the model
+          # above writes Trends. The base URL is for a key that works through a gateway only; unset,
+          # the SDK uses the Anthropic API.
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           ANTHROPIC_BASE_URL: ${{ secrets.ANTHROPIC_BASE_URL }}
           # Jev: arXiv ranking for Trends' Research, Spotted topics, AI Policy and vendor relevance,

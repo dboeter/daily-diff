@@ -13,7 +13,7 @@ vi.mock("../../providers/index.ts", async (importOriginal) => {
 
 import { llmCalls, resetLlmStats } from "../../core/llm.ts";
 import { buildWeeklyReport, linksOutside, type WeeklyInput } from "../../reports/pages.ts";
-import { LLM_TOKENS_ARTICLE } from "../../weekly/writer.ts";
+import { LLM_TOKENS_WRITER } from "../../weekly/writer.ts";
 
 const story: Candidate = {
   page: "ai-agents",
@@ -85,7 +85,7 @@ describe("buildWeeklyReport", () => {
     const [prompt, maxTokens] = w.call.mock.calls[0]!;
     expect(prompt).toContain("text: The story's own description.");
     expect(prompt).toContain("from 2026-11-10 to 2026-11-16");
-    expect(maxTokens).toBe(LLM_TOKENS_ARTICLE);
+    expect(maxTokens).toBe(LLM_TOKENS_WRITER);
     expect(llmCalls).toEqual([{ label: "weekly", outcome: "ok", chars: ARTICLE.length }]);
   });
 

@@ -26,6 +26,8 @@ interface Captured {
   maxTokens: number;
   prompt: string;
   output: string;
+  /** The provider of a call that did not go to the run's own (the writer). */
+  via?: string;
 }
 
 interface Claim {
@@ -145,9 +147,10 @@ async function main() {
         file: f,
         ...(JSON.parse(fs.readFileSync(path.join(dir, f), "utf8")) as Captured),
       }))
-      // Weekly Diff's article is not the production model's: Opus writes it from a prompt of
-      // about 150,000 tokens, which a replay would send to the candidate and again to the judge.
-      .filter((c) => c.label !== WEEKLY_CALL_LABEL),
+      // A call the writer answered (Weekly Diff's article, Trends' calls) is Opus's, not the production
+      // model's; the article's prompt alone is about 150,000 tokens, sent to the candidate and the judge.
+      // The article also by its label: a capture from before 2026-11-17 has no `via`.
+      .filter((c) => !c.via && c.label !== WEEKLY_CALL_LABEL),
   );
   const promptTokens = calls.reduce((n, c) => n + c.prompt.length / 4, 0);
   console.log(
