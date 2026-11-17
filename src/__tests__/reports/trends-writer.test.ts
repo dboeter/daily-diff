@@ -10,7 +10,7 @@ vi.mock("../../providers/index.ts", async (importOriginal) => {
   return { ...orig, createProvider: () => ({ name: "run", call: runProvider }) };
 });
 
-import { LLM_TOKENS_DEFAULT, LLM_TOKENS_LISTING, llmCalls, resetLlmStats } from "../../core/llm.ts";
+import { LLM_TOKENS_DEFAULT, LLM_TOKENS_LISTING, llmCalls, llmStats, resetLlmStats } from "../../core/llm.ts";
 import { buildTrendsReport, type TrendsInput } from "../../reports/pages.ts";
 import { EMPTY_TRENDING } from "../../trending/compose.ts";
 import { LLM_TOKENS_WRITER } from "../../weekly/writer.ts";
@@ -93,7 +93,7 @@ describe("buildTrendsReport's writer", () => {
     expect(report?.content).toContain("Skills by the run's model.");
   });
 
-  it("gives a call the writer fails to the run's own model, and the trace shows both", async () => {
+  it("gives a call the writer fails to the run's own model: in the trace, not in the tally of lost calls", async () => {
     const w = writer((prompt) =>
       isProse(prompt) ? Promise.reject(new Error("401 invalid x-api-key")) : answers("the writer")(prompt),
     );
@@ -106,8 +106,9 @@ describe("buildTrendsReport's writer", () => {
     expect(report?.content).toContain("Skills by the writer.");
     expect(llmCalls.map((c) => [c.label, c.outcome])).toEqual([
       ["claude-code-skills", "ok"],
-      ["trends", "failed"],
+      ["trends", "rerouted"],
       ["trends", "ok"],
     ]);
+    expect(llmStats).toEqual({ attempted: 2, failed: 0 });
   });
 });

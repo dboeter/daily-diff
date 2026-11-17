@@ -40,6 +40,7 @@ import {
 import {
   generateBody,
   generateOr,
+  markLlmRerouted,
   saveFile,
   autoGenFooter,
   LLM_TOKENS_LISTING,
@@ -167,8 +168,9 @@ export interface TrendsInput {
 
 /**
  * One of Trends' calls, by the writer. Trends is built before the LLM health gate and was a page
- * before the writer wrote it, so a call the writer fails goes to the run's own model at that
- * model's budget, as every call does without a writer.
+ * before the writer wrote it, so a call the writer fails (after `callLlm`'s retries) goes to the
+ * run's own model at that model's budget, as every call does without a writer. That failure is
+ * no lost call: it is `rerouted` in the trace and a warning on the run page.
  */
 async function writtenOr<T>(
   writer: LlmProvider | null,
@@ -182,7 +184,10 @@ async function writtenOr<T>(
     try {
       return await generateBody(prompt, LLM_TOKENS_WRITER, tag, writer);
     } catch (err) {
-      console.error(`  [${tag}] The writer's call failed, the run's own model writes it: ${err}`);
+      markLlmRerouted(tag);
+      warnStep(
+        `[${tag}] The writer's call failed, the run's own model writes it: ${String(err).split("\n")[0]}`,
+      );
     }
   }
   return generateOr(tag, prompt, fallback, maxTokens);

@@ -82,7 +82,7 @@ export const llmStats = { attempted: 0, failed: 0 };
  */
 export interface LlmCallRecord {
   label: string;
-  outcome: "ok" | "failed" | "fallback";
+  outcome: "ok" | "failed" | "fallback" | "rerouted";
   chars?: number;
   error?: string;
 }
@@ -90,11 +90,23 @@ export const llmCalls: LlmCallRecord[] = [];
 
 /**
  * The last failed call at `label` used its fallback. Labels are one call site each per run; a
- * Trends call the writer failed has a second entry, the run's own model's, after it.
+ * Trends call the writer failed has a `rerouted` entry before the run's own model's.
  */
 export function markLlmFallback(label: string): void {
   const call = [...llmCalls].reverse().find((c) => c.label === label && c.outcome === "failed");
   if (call) call.outcome = "fallback";
+}
+
+/**
+ * The last failed call at `label` goes to another provider next. It leaves the tally, which
+ * counts that next call: the health gate and the degraded-output note are about lost calls.
+ */
+export function markLlmRerouted(label: string): void {
+  const call = [...llmCalls].reverse().find((c) => c.label === label && c.outcome === "failed");
+  if (!call) return;
+  call.outcome = "rerouted";
+  llmStats.attempted--;
+  llmStats.failed--;
 }
 
 /** `llm-trace.json`: the run's tally, then one call per line in completion order. */
