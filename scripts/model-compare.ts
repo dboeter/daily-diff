@@ -19,13 +19,14 @@ import fs from "node:fs";
 import path from "node:path";
 import { AnthropicProvider } from "../src/providers/anthropic.ts";
 import { type LlmProvider, TruncatedResponseError } from "../src/providers/types.ts";
-import { WEEKLY_CALL_LABEL } from "../src/weekly/writer.ts";
 
 interface Captured {
   label: string;
   maxTokens: number;
   prompt: string;
   output: string;
+  /** The provider of a call that did not go to the run's own (the writer). */
+  via?: string;
 }
 
 interface Claim {
@@ -145,9 +146,9 @@ async function main() {
         file: f,
         ...(JSON.parse(fs.readFileSync(path.join(dir, f), "utf8")) as Captured),
       }))
-      // Weekly Diff's article is not the production model's: Opus writes it from a prompt of
-      // about 150,000 tokens, which a replay would send to the candidate and again to the judge.
-      .filter((c) => c.label !== WEEKLY_CALL_LABEL),
+      // A call the writer answered (Weekly Diff's article, Trends' calls) is Opus's, not the production
+      // model's; the article's prompt alone is about 150,000 tokens, sent to the candidate and the judge.
+      .filter((c) => !c.via),
   );
   const promptTokens = calls.reduce((n, c) => n + c.prompt.length / 4, 0);
   console.log(

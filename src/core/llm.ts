@@ -88,7 +88,10 @@ export interface LlmCallRecord {
 }
 export const llmCalls: LlmCallRecord[] = [];
 
-/** The last failed call at `label` used its fallback. Labels are one call site each per run. */
+/**
+ * The last failed call at `label` used its fallback. Labels are one call site each per run; a
+ * Trends call the writer failed has a second entry, the run's own model's, after it.
+ */
 export function markLlmFallback(label: string): void {
   const call = [...llmCalls].reverse().find((c) => c.label === label && c.outcome === "failed");
   if (call) call.outcome = "fallback";
@@ -103,10 +106,11 @@ export function llmTraceFile(): string {
 /**
  * With `LLM_CAPTURE_DIR` set, every answered call's prompt and output go to `<dir>/NNN-<label>.json`,
  * so a later replay can send the same prompts to another model (`scripts/model-compare.ts`).
+ * `via` names the provider of a call that did not go to the run's own, which the replay skips.
  * Off by default; the daily workflow sets it and uploads the folder as an artifact.
  */
 let capturedCalls = 0;
-function captureCall(label: string, maxTokens: number, prompt: string, output: string): void {
+function captureCall(label: string, maxTokens: number, prompt: string, output: string, via?: string): void {
   const dir = process.env.LLM_CAPTURE_DIR;
   if (!dir) return;
   capturedCalls++;
@@ -117,7 +121,10 @@ function captureCall(label: string, maxTokens: number, prompt: string, output: s
     if (capturedCalls === 1) {
       for (const f of fs.readdirSync(dir)) if (/^\d{3}-.*\.json$/.test(f)) fs.rmSync(path.join(dir, f));
     }
-    fs.writeFileSync(path.join(dir, name), JSON.stringify({ label, maxTokens, prompt, output }, null, 2));
+    fs.writeFileSync(
+      path.join(dir, name),
+      JSON.stringify({ label, maxTokens, prompt, output, via }, null, 2),
+    );
   } catch (err) {
     console.error(`[llm] could not capture ${name}: ${err}`);
   }
@@ -295,8 +302,8 @@ export function isRetryable(err: unknown): boolean {
 }
 
 /**
- * `via`: another provider than the run's own, for the one call that needs a stronger model
- * (Weekly Diff's article). It shares the limiter, the retries, the tally and the trace.
+ * `via`: another provider than the run's own, for the calls a stronger model makes (the writer,
+ * `src/weekly/writer.ts`). They share the limiter, the retries, the tally and the trace.
  */
 export async function callLlm(
   prompt: string,
@@ -312,7 +319,7 @@ export async function callLlm(
     try {
       const text = await via.call(prompt, budget);
       llmCalls.push({ label, outcome: "ok", chars: text.length });
-      captureCall(label, budget, prompt, text);
+      captureCall(label, budget, prompt, text, via === provider ? undefined : via.name);
       return text;
     } catch (err) {
       // A cut-off response gets one retry at double the budget, apart from the

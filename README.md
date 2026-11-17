@@ -188,16 +188,16 @@ agents:
 
 Repository secrets (**Settings → Secrets and variables → Actions**); `GITHUB_TOKEN` is provided by Actions.
 
-| Secret                                   | Description                                                                                                                                                |
-| ---------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `OPENROUTER_API_KEY`                     | The scheduled run's LLM key (the workflow sets `LLM_PROVIDER: openrouter`; for another provider, edit the workflow, see [LLM providers](#llm-providers))   |
-| `ANTHROPIC_API_KEY`                      | Weekly Diff's writer, Claude Opus on the Anthropic API, one call a week of about $0.80 (without it: no Weekly Diff page; the rest of the run is unchanged) |
-| `TYPESAFE_API_KEY`                       | Jev judgments (without it: keyword rules, search-topic labels, and no Research section in Trends)                                                          |
-| `USA_GOV_API_KEY`                        | [api.data.gov](https://api.data.gov/signup/) key for Congress.gov and Regulations.gov                                                                      |
-| `PLURAL_API_KEY`                         | [Open States](https://open.pluralpolicy.com) key for US state bills                                                                                        |
-| `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID` | Telegram notifications (bot from [@BotFather](https://t.me/BotFather))                                                                                     |
-| `TEAMS_WEBHOOK_URL`                      | Power Automate Workflows webhook for the Teams card                                                                                                        |
-| `CLOUDFLARE_API_TOKEN`                   | The `Deploy MCP` workflow only                                                                                                                             |
+| Secret                                   | Description                                                                                                                                                                                                                |
+| ---------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `OPENROUTER_API_KEY`                     | The scheduled run's LLM key (the workflow sets `LLM_PROVIDER: openrouter`; for another provider, edit the workflow, see [LLM providers](#llm-providers))                                                                   |
+| `ANTHROPIC_API_KEY`                      | The weekly pages' writer, Claude Opus on the Anthropic API: Weekly Diff's article (one call of about $0.80) and Trends' five calls (cost not measured). Without it: no Weekly Diff page, and the run's model writes Trends |
+| `TYPESAFE_API_KEY`                       | Jev judgments (without it: keyword rules, search-topic labels, and no Research section in Trends)                                                                                                                          |
+| `USA_GOV_API_KEY`                        | [api.data.gov](https://api.data.gov/signup/) key for Congress.gov and Regulations.gov                                                                                                                                      |
+| `PLURAL_API_KEY`                         | [Open States](https://open.pluralpolicy.com) key for US state bills                                                                                                                                                        |
+| `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID` | Telegram notifications (bot from [@BotFather](https://t.me/BotFather))                                                                                                                                                     |
+| `TEAMS_WEBHOOK_URL`                      | Power Automate Workflows webhook for the Teams card                                                                                                                                                                        |
+| `CLOUDFLARE_API_TOKEN`                   | The `Deploy MCP` workflow only                                                                                                                                                                                             |
 
 A source whose key is unset is skipped; the rest of the run goes on.
 
@@ -222,7 +222,8 @@ export GITHUB_TOKEN=ghp_xxxxx
 export ANTHROPIC_API_KEY=sk-ant-xxxxx   # or LLM_PROVIDER + its key
 # export DIGEST_REPO=dboeter/daily-diff  # open GitHub Issues; omit to only write files
 # export DIGEST_FORCE_WEEKLY=1           # also build the weekly pages (Trends, Weekly Diff) on a non-Monday;
-#                                        # Weekly Diff needs ANTHROPIC_API_KEY (one Opus call, about $0.80)
+#                                        # Claude Opus writes them with ANTHROPIC_API_KEY (the article about $0.80;
+#                                        # Trends' five calls not measured); without it, no Weekly Diff page
 pnpm start
 ```
 
