@@ -1,0 +1,4 @@
+1: Starting January 31, 2027, the BigQuery Data Transfer Service for Shopify connector will no longer support `legacyMode` from `DeliveryProfile` and `permitSkuSharing` from `FulfillmentService`.
+2: Azure Databricks will retire Zhipu AI `GLM 5.2` on February 4, 2027; `GLM 5.3` is the recommended replacement.
+3: After `Databricks Runtime 15.4 LTS` reaches end of support on August 19, 2027, Azure Databricks will upgrade all Unity Catalog managed tables to use `catalog commits`, enabling multi-statement, multi-table transactions, writes from external engines, and consistent governance across all engines.
+4: Azure Databricks will retire Google `Gemini 3.6 Flash` on November 19, 2026; API calls will be automatically redirected to `Gemini 3.8 Flash` at the same price.
