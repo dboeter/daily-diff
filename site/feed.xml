@@ -13,7 +13,623 @@
       <height>144</height>
     </image>
     <atom:link href="https://dboeter.github.io/daily-diff/feed.xml" rel="self" type="application/rss+xml"/>
-    <lastBuildDate>Tue, 17 Nov 2026 07:49:08 +0000</lastBuildDate>
+    <lastBuildDate>Wed, 18 Nov 2026 07:14:50 +0000</lastBuildDate>
+    <item>
+      <title>AI Agents 2026-11-18</title>
+      <link>https://dboeter.github.io/daily-diff/#2026-11-18/ai-agents</link>
+      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-11-18/ai-agents</guid>
+      <pubDate>Wed, 18 Nov 2026 00:00:00 +0000</pubDate>
+      <description>AI Agents 2026-11-18 ⬛ Overview · 🟪 AI Agents · 🟦 AI Models &amp;amp; Labs · 🟧 AI Policy · 🟨 Data Engineering Projects: 15 | Active today: 5 | Stable releases: 9 | Prereleases (not covered): 5 | Generated: 2026-11-18 07:08 UTC Highlights socket.dev reports that compromised versions 1.26.1 and 1.26.2 of Microsoft&amp;#39;s agent-framework PyPI package use .pth startup hooks to exfiltrate Azure, GitHub Actions, and CI/CD credentials. Oh My Pi v18.22.1–v18.22.2 carries a breaking change: the JavaScript...</description>
+      <content:encoded><![CDATA[<h1>AI Agents 2026-11-18</h1>
+<p><a href="https://dboeter.github.io/daily-diff/#2026-11-18">⬛ Overview</a> · <strong>🟪 AI Agents</strong> · <a href="https://dboeter.github.io/daily-diff/#2026-11-18/ai-models">🟦 AI Models &amp; Labs</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-18/ai-policy">🟧 AI Policy</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-18/ai-data">🟨 Data Engineering</a></p>
+<blockquote>
+<p>Projects: 15 | Active today: 5 | Stable releases: 9 | Prereleases (not covered): 5 | Generated: 2026-11-18 07:08 UTC</p>
+</blockquote>
+<hr>
+<h2>Highlights</h2>
+<ul>
+<li>socket.dev reports that compromised versions 1.26.1 and 1.26.2 of Microsoft&#39;s agent-framework PyPI package use <code>.pth</code> startup hooks to exfiltrate Azure, GitHub Actions, and CI/CD credentials.</li>
+<li>Oh My Pi v18.22.1–v18.22.2 carries a breaking change: the JavaScript eval <code>commit</code> helper now validates its arguments strictly, throwing a <code>TypeError</code> on unknown option names or non-object options.</li>
+<li>A Harvard study says AI coding agents increased code production by 30%, while completed work did not measurably rise and review time grew by 49%.</li>
+</ul>
+<hr>
+<h2>Coding Agents &amp; Assistants</h2>
+<h3>Claude Code</h3>
+<ul>
+<li><strong>Release:</strong> <a href="https://github.com/anthropics/claude-code/releases/tag/v2.1.327">v2.1.327</a> fixes several data-loss and safety bugs: stopping a Remote Control server in worktree mode no longer deletes a running session&#39;s git-ignored files such as <code>.env</code>, self-hosted runners using <code>--use-anthropic-git-proxy</code> no longer delete a non-empty directory named by <code>GIT_CONFIG_GLOBAL</code>, and <code>claude mcp add</code>/<code>claude mcp remove</code> with project scope no longer drop other top-level keys from <code>.mcp.json</code>. It adds a confirmation before <code>/install-github-app</code> changes a repository, a <code>/status</code> listing of broken agent, skill, command and output-style files and other misconfigurations, and <code>/tui classic</code> as the name for the non-fullscreen renderer.</li>
+<li><strong>News:</strong> <a href="https://news.ycombinator.com/item?id=50529612">How the Claude Code team thinks about verification</a> describes how end-to-end, property and differential tests let coding agents verify their work with evidence, and what the Claude Code team does to keep its verifiers honest.</li>
+</ul>
+<h3>OpenAI Codex</h3>
+<ul>
+<li><strong>Release:</strong> <a href="https://github.com/openai/codex/releases/tag/rust-v0.169.1">rust-v0.169.1</a>–<a href="https://github.com/openai/codex/releases/tag/rust-v0.170.0">rust-v0.170.0</a> fixes MCP OAuth credential races during cancellation, login, and logout, keeps child threads and permission updates from losing existing sandbox restrictions, and removes duplicate file search results. It adds WebRTC negotiation for realtime voice calls in the TUI and experimental support for using identically named MCP servers across environments.</li>
+<li><strong>Hot issue:</strong> <a href="https://github.com/openai/codex/issues/57101">#57101</a>: An issue reports that on Windows the Codex Computer Use helper and its capture-access record stay open — leaving a gold/yellow border around the display — roughly five hours after a screenshot-producing turn completes, and asks that capture resources be released when their owning work ends. (57 comments, 9 👍; +15 in the last 24h)</li>
+</ul>
+<h3>OpenCode</h3>
+<ul>
+<li><strong>Release:</strong> <a href="https://github.com/anomalyco/opencode/releases/tag/v1.19.6">v1.19.6</a>–<a href="https://github.com/anomalyco/opencode/releases/tag/v2.3.2">v2.3.2</a> fixes GPT-6.2 models re-billing the system prompt as uncached input on every step and stops sessions with many images from sending oversized requests. Headline additions include timed-out shell commands moving to the background instead of being killed, background compaction now on by default, GPT 6.2 models showing up in the model picker when signing in with ChatGPT, and OpenCode 1 offering an in-app upgrade to OpenCode 2.0.</li>
+<li><strong>Hot issue:</strong> <a href="https://github.com/anomalyco/opencode/issues/37216">#37216</a>: A feature request asks for i18n support in the TUI, whose strings are hardcoded in English while the app, desktop and console packages already support 17+ locales. (21 comments, 0 👍; +11 in the last 24h)</li>
+</ul>
+<h3>Oh My Pi</h3>
+<ul>
+<li><strong>Release:</strong> <a href="https://github.com/can1357/oh-my-pi/releases/tag/v18.22.1">v18.22.1</a>–<a href="https://github.com/can1357/oh-my-pi/releases/tag/v18.22.2">v18.22.2</a> has a breaking change: the JavaScript eval <code>commit</code> helper now validates its arguments strictly, throwing a <code>TypeError</code> on unknown option names or non-object options, and the obsolete <code>wayland-pipewire</code> Cargo feature and <code>OMP_NATIVE_FEATURES</code> variable are removed. Fixes include no longer feeding failed tool calls back to the model as refusal explanations and OAuth accounts refreshed through an auth broker keeping their stored routing metadata; it also adds a native Kiro provider that signs in with AWS IAM Identity Center, AWS Builder ID, Google, GitHub, or a Kiro API key and reports Kiro credits in <code>/usage</code>.</li>
+<li><strong>Hot issue:</strong> <a href="https://github.com/can1357/oh-my-pi/issues/19578">#19578</a>: An issue reports that <code>openai-codex/gpt-6.2-sol</code> and <code>gpt-6.2-astra</code> are missing from OMP&#39;s Codex model list after <code>omp models refresh</code> and that a direct request for Sol fails model resolution while the native Codex CLI lists both and completes a Sol request, though the reporter notes the workspace and OMP credential used were not verified. (9 comments, 2 👍; +11 in the last 24h)</li>
+</ul>
+<p><strong>Quiet today:</strong> <a href="https://github.com/google-gemini/gemini-cli">Gemini CLI</a>, <a href="https://github.com/Kilo-Org/kilocode">Kilo Code</a>, <a href="https://github.com/earendil-works/pi">Pi</a>, <a href="https://github.com/1jehuang/jcode">jcode</a>, <a href="https://github.com/cline/cline">Cline</a>, <a href="https://github.com/CommandCodeAI/command-code">Command Code</a>, <a href="https://github.com/deepseek-ai/deepseek-harness">DeepSeek Harness</a>, <a href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a></p>
+<hr>
+<h2>Agent Tooling</h2>
+<h3>OpenShell</h3>
+<ul>
+<li><strong>Release:</strong> <a href="https://github.com/NVIDIA/OpenShell/releases/tag/v0.1.9">v0.1.9</a> moves the Go SDK to <code>github.com/ai-openshell/sdk-go</code> and deprecates <code>github.com/NVIDIA/OpenShell/sdk/go</code>; wildcard network policy endpoints no longer accept private IP literals alone unless an exact endpoint or <code>allowed_ips</code> grant is present, middleware selectors cannot include a port, and Helm charts with <code>service.metricsPort</code> set to <code>0</code> or <code>false</code> fail to render, with <code>metrics.enabled</code> replacing the port value. It also says Postgres gateway migration <code>010</code> builds indexes on <code>objects</code> with <code>CREATE INDEX</code> and blocks writes, fixes write-method authorization denial events to report Create, Update, or Delete by <code>class_uid: 6003</code> and <code>status_id: 2</code>, and includes opt-in HTTP streaming hooks plus <code>mutation_admission_limit_per_caller</code> and <code>mutation_replay_window_seconds</code> controls.</li>
+</ul>
+<p><strong>Quiet today:</strong> <a href="https://github.com/herdrdev/herdr">herdr</a>, <a href="https://github.com/microsoft/conductor">Conductor</a></p>
+<hr>
+<h2>Spotted</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Story</th>
+<th align="left">Source</th>
+<th align="left">Discussion</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a href="https://complexdiscovery.com/harvard-researchers-find-ai-coding-agents-shifted-the-bottleneck-to-code-review/">Harvard researchers find AI coding agents shifted the bottleneck to code review</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50538303">149 points, 194 comments</a></td>
+<td align="left">A Harvard study says AI coding agents increased code production by 30%, while completed work did not measurably rise and review time grew by 49%.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://starsling.dev">Launch HN: StarSling (YC P25) – Self-improving CI for agent-volume repos</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50536468">64 points, 37 comments</a></td>
+<td align="left">StarSling, a YC P25 startup, says its GitHub Actions runners are a drop-in replacement for ubuntu-latest, up to 10x faster, and include AI agents that open CI optimization pull requests.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://openai.com/index/advancing-computer-use-for-healthcare-teams/">Advancing computer-use agents for healthcare teams</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50535898">47 points, 30 comments</a></td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left"><a href="https://rachsmith.com/how-long-until-agent-output-turns-to-shit">How long have we got before the agent output is enshittified?</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50531129">15 points, 16 comments</a></td>
+<td align="left">The author asks how long before the output of AI agents begins inevitable enshittification.</td>
+</tr>
+<tr>
+<td align="left">🔓 <a href="https://socket.dev/blog/agent-framework-pypi-package-compromised-with-credential-stealer">Microsoft&#39;s agent-framework PyPI package Compromised with Credential Stealer</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50542084">14 points, 2 comments</a></td>
+<td align="left">A socket.dev report says compromised versions 1.26.1 and 1.26.2 of Microsoft&#39;s agent-framework PyPI package use .pth startup hooks to exfiltrate Azure, GitHub Actions, and CI/CD credentials.</td>
+</tr>
+<tr>
+<td align="left">Spaceship IDE – Realtime Steering with Cerebras Ultra-Low Latency LLM (<a href="https://github.com/chuanqisun/spaceship">chuanqisun/spaceship</a>)</td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50536955">5 points, 0 comments</a></td>
+<td align="left">Spaceship IDE advertises realtime steering of ideas using a Cerebras ultra-low-latency LLM.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://arstechnica.com/gadgets/2026/11/microsoft-calls-copilot-the-new-os-for-work-at-ignite-keynote/">Ignite 2026: Copilot is &quot;the new OS for work,&quot; and now Office runs inside of it</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50542314">5 points, 1 comment</a></td>
+<td align="left">The Ars Technica report says Copilot is the new OS for work, with Word, Excel, and PowerPoint running inside it and always-on agents are next.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://dev.to/aws-builders/ai-agents-open-17-million-pull-requests-a-month-i-built-a-gate-that-rejects-the-ones-that-lie-46n7">AI agents open 17 million pull requests a month. I built a gate that rejects the ones that lie.</a></td>
+<td align="left">Dev.to</td>
+<td align="left"><a href="https://dev.to/aws-builders/ai-agents-open-17-million-pull-requests-a-month-i-built-a-gate-that-rejects-the-ones-that-lie-46n7">30 reactions, 18 comments</a></td>
+<td align="left">The author writes that AI agents open 17 million pull requests a month and built a deterministic Python gate that rejects Amazon Nova Pro fixes when the fix cannot be proven.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://dev.to/aws/once-upon-agentic-ai-part-2-develop-your-own-mcp-server-and-cast-its-tools-from-strands-agents-9ob">Once Upon Agentic AI (Part 2): Develop your own MCP server and cast its tools from Strands Agents</a></td>
+<td align="left">Dev.to</td>
+<td align="left"><a href="https://dev.to/aws/once-upon-agentic-ai-part-2-develop-your-own-mcp-server-and-cast-its-tools-from-strands-agents-9ob">29 reactions, 7 comments</a></td>
+<td align="left">The author&#39;s Part 2 entry in Once Upon Agentic AI describes developing an MCP server and casting its tools from Strands Agents.</td>
+</tr>
+<tr>
+<td align="left">🔓 <a href="https://dev.to/debashish_ghosal/my-agent-scrubbed-a-leaked-api-key-by-force-pushing-main-it-made-everything-worse-57a">My Agent Scrubbed a Leaked API Key by Force-Pushing main. It Made Everything Worse.</a></td>
+<td align="left">Dev.to</td>
+<td align="left"><a href="https://dev.to/debashish_ghosal/my-agent-scrubbed-a-leaked-api-key-by-force-pushing-main-it-made-everything-worse-57a">24 reactions, 7 comments</a></td>
+<td align="left"><em>Not confirmed by the vendor, a researcher or the press.</em> The author recounts how their agent removed a leaked API key by force-pushing main and made everything worse.</td>
+</tr>
+</tbody></table>
+<hr>
+<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
+]]></content:encoded>
+    </item>
+    <item>
+      <title>AI Models &amp; Labs 2026-11-18</title>
+      <link>https://dboeter.github.io/daily-diff/#2026-11-18/ai-models</link>
+      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-11-18/ai-models</guid>
+      <pubDate>Wed, 18 Nov 2026 00:00:00 +0000</pubDate>
+      <description>AI Models &amp;amp; Labs 2026-11-18 ⬛ Overview · 🟪 AI Agents · 🟦 AI Models &amp;amp; Labs · 🟧 AI Policy · 🟨 Data Engineering Lab posts: 3 | New models: 8 | Spotted: 7 | Generated: 2026-11-18 07:08 UTC Highlights Cerebras says its disaggregated inference pairs AMD GPUs for prefill with wafer-scale decode to deliver 5× more tokens per megawatt without slowing token generation. Authors of one analysis say they traced Gemini 4 Carbon runs that spent close to an hour on tasks Opus and Astra finished in m...</description>
+      <content:encoded><![CDATA[<h1>AI Models &amp; Labs 2026-11-18</h1>
+<p><a href="https://dboeter.github.io/daily-diff/#2026-11-18">⬛ Overview</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-18/ai-agents">🟪 AI Agents</a> · <strong>🟦 AI Models &amp; Labs</strong> · <a href="https://dboeter.github.io/daily-diff/#2026-11-18/ai-policy">🟧 AI Policy</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-18/ai-data">🟨 Data Engineering</a></p>
+<blockquote>
+<p>Lab posts: 3 | New models: 8 | Spotted: 7 | Generated: 2026-11-18 07:08 UTC</p>
+</blockquote>
+<hr>
+<h2>Highlights</h2>
+<ul>
+<li>Cerebras says its disaggregated inference pairs AMD GPUs for prefill with wafer-scale decode to deliver 5× more tokens per megawatt without slowing token generation.</li>
+<li>Authors of one analysis say they traced Gemini 4 Carbon runs that spent close to an hour on tasks Opus and Astra finished in minutes.</li>
+</ul>
+<hr>
+<h2>Lab announcements</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Lab</th>
+<th align="left">Post</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-11-18</td>
+<td align="left">OpenAI</td>
+<td align="left"><a href="https://openai.com/index/astra-law-6-2/">Astra Law 6 2</a></td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left">2026-11-18</td>
+<td align="left">OpenAI</td>
+<td align="left"><a href="https://openai.com/index/introducing-chatgpt-for-sales/">Introducing Chatgpt For Sales</a></td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left">—</td>
+<td align="left">OpenAI</td>
+<td align="left"><a href="https://openai.com/index/introducing-gpt-6-2-astra-sol/">Introducing Gpt 6 2 Astra Sol</a></td>
+<td align="left">—</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>New on OpenRouter</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Model</th>
+<th align="left">Listed</th>
+<th align="left">Context</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a href="https://openrouter.ai/openai/gpt-6.2-astra-pro">OpenAI: GPT-6.2 Astra Pro</a> <code>openai/gpt-6.2-astra-pro</code></td>
+<td align="left">2026-11-17</td>
+<td align="left">1.1M</td>
+<td align="left">GPT-6.2 Astra Pro is the same underlying model as GPT-6.2 Astra, served with <code>reasoning.mode</code> set to <code>pro</code> for higher-quality responses on complex tasks.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://openrouter.ai/openai/gpt-6.2-astra-pro:batch">OpenAI: GPT-6.2 Astra Pro (batch)</a> <code>openai/gpt-6.2-astra-pro:batch</code></td>
+<td align="left">2026-11-17</td>
+<td align="left">1.1M</td>
+<td align="left">GPT-6.2 Astra Pro (batch) is the same underlying model as GPT-6.2 Astra, served with <code>reasoning.mode</code> set to <code>pro</code> for higher-quality responses on complex tasks.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://openrouter.ai/openai/gpt-6.2-astra">OpenAI: GPT-6.2 Astra</a> <code>openai/gpt-6.2-astra</code></td>
+<td align="left">2026-11-17</td>
+<td align="left">1.1M</td>
+<td align="left">GPT-6.2 Astra is the flagship model in the GPT-6.2 series, built for the hardest projects and suited for real-world engineering, professional work and scientific research.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://openrouter.ai/openai/gpt-6.2-astra:batch">OpenAI: GPT-6.2 Astra (batch)</a> <code>openai/gpt-6.2-astra:batch</code></td>
+<td align="left">2026-11-17</td>
+<td align="left">1.1M</td>
+<td align="left">GPT-6.2 Astra (batch) is the flagship model in the GPT-6.2 series, built for the hardest projects and suited for real-world engineering, professional work and scientific research.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://openrouter.ai/openai/gpt-6.2-sol-pro">OpenAI: GPT-6.2 Sol Pro</a> <code>openai/gpt-6.2-sol-pro</code></td>
+<td align="left">2026-11-17</td>
+<td align="left">1.1M</td>
+<td align="left">GPT-6.2 Sol Pro is the same underlying model as GPT-6.2 Sol, served with <code>reasoning.mode</code> set to <code>pro</code> for higher-quality responses on complex tasks.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://openrouter.ai/openai/gpt-6.2-sol-pro:batch">OpenAI: GPT-6.2 Sol Pro (batch)</a> <code>openai/gpt-6.2-sol-pro:batch</code></td>
+<td align="left">2026-11-17</td>
+<td align="left">1.1M</td>
+<td align="left">GPT-6.2 Sol Pro (batch) is the same underlying model as GPT-6.2 Sol, served with <code>reasoning.mode</code> set to <code>pro</code> for higher-quality responses on complex tasks.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://openrouter.ai/openai/gpt-6.2-sol">OpenAI: GPT-6.2 Sol</a> <code>openai/gpt-6.2-sol</code></td>
+<td align="left">2026-11-17</td>
+<td align="left">1.1M</td>
+<td align="left">GPT-6.2 Sol is an upgrade to GPT-6.1 Sol, positioned below the flagship GPT-6.2 Astra in the GPT-6.2 series and suited as an efficient, versatile model for everyday work.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://openrouter.ai/openai/gpt-6.2-sol:batch">OpenAI: GPT-6.2 Sol (batch)</a> <code>openai/gpt-6.2-sol:batch</code></td>
+<td align="left">2026-11-17</td>
+<td align="left">1.1M</td>
+<td align="left">GPT-6.2 Sol (batch) is an upgrade to GPT-6.1 Sol, positioned below the flagship GPT-6.2 Astra in the GPT-6.2 series and suited as an efficient, versatile model for everyday work.</td>
+</tr>
+</tbody></table>
+<hr>
+<p>Nothing new from OpenRouter&#39;s stealth models today.</p>
+<hr>
+<h2>Spotted</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Story</th>
+<th align="left">Source</th>
+<th align="left">Discussion</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a href="https://microsoft.ai/news/introducing-mai-code-2-and-mai-code-2-flash/">MAI Code 2 and Code 2 Flash</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50535885">334 points, 149 comments</a></td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left"><a href="https://hy.tencent.ai/research/hy4-flash">Tencent Hy4 Flash</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50538184">104 points, 14 comments</a></td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left"><a href="https://www.cerebras.ai/blog/cerebras-launches-disaggregated-inference">Cerebras Disaggregated Inference</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50540472">63 points, 16 comments</a></td>
+<td align="left">Cerebras claims its disaggregated inference setup pairs AMD GPUs for prefill with wafer-scale decode to deliver 5× more tokens per megawatt without slowing token generation.</td>
+</tr>
+<tr>
+<td align="left">Show HN: TrnRT – An open-source LLM inference engine for AWS Trainium (<a href="https://github.com/RunanywhereAI/trnrt">RunanywhereAI/trnrt</a>)</td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50533270">48 points, 7 comments</a></td>
+<td align="left">RunAnywhere says TrnRT is an open-source LLM inference engine for AWS Trainium with NKI megakernels, 1M-token context, and an OpenAI-compatible API.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://shivamduggal4.github.io/latent-lattice-language-models/">Latent Lattice Language Models</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50539039">46 points, 5 comments</a></td>
+<td align="left">The author introduces Latent Lattice Language Models, adding horizontal latent streams at each layer that carry across tokens next to the vertical residual stream.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://kernel.dev/blog/why-is-gemini-4-carbon-taking-so-long/">Why is Gemini 4 Carbon taking so long?</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50541790">42 points, 25 comments</a></td>
+<td align="left">The authors say they traced Gemini 4 Carbon runs to explain why it spent close to an hour on tasks that Opus and Astra finished in minutes.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://arxiv.org/abs/2607.02512">Program-as-Weights: A Programming Paradigm for Fuzzy Functions</a></td>
+<td align="left">Lobste.rs</td>
+<td align="left"><a href="https://lobste.rs/s/qkalae/program_as_weights_programming_paradigm">12 points, 6 comments</a></td>
+<td align="left">The authors propose Program-as-Weights as a programming paradigm for fuzzy functions, citing examples such as important-log alerting, malformed JSON repair, and intent-based search ranking, and arguing that using LLM APIs for them comes at the expense of locality, reproducibility, and price.</td>
+</tr>
+</tbody></table>
+<hr>
+<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
+]]></content:encoded>
+    </item>
+    <item>
+      <title>AI Policy 2026-11-18</title>
+      <link>https://dboeter.github.io/daily-diff/#2026-11-18/ai-policy</link>
+      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-11-18/ai-policy</guid>
+      <pubDate>Wed, 18 Nov 2026 00:00:00 +0000</pubDate>
+      <description>AI Policy 2026-11-18 ⬛ Overview · 🟪 AI Agents · 🟦 AI Models &amp;amp; Labs · 🟧 AI Policy · 🟨 Data Engineering Sources: EUR-Lex + Tweede Kamer + Politico Europe | 3 new items ranked by Jev relevance | Generated: 2026-11-18 07:08 UTC Highlights The Irish regulator says it has stopped X training AI with data gathered by agents, citing significant concerns about the use of personal data collected by AI agents (Politico Europe). The European Commission published guidance on applying the Cyber Resilie...</description>
+      <content:encoded><![CDATA[<h1>AI Policy 2026-11-18</h1>
+<p><a href="https://dboeter.github.io/daily-diff/#2026-11-18">⬛ Overview</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-18/ai-agents">🟪 AI Agents</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-18/ai-models">🟦 AI Models &amp; Labs</a> · <strong>🟧 AI Policy</strong> · <a href="https://dboeter.github.io/daily-diff/#2026-11-18/ai-data">🟨 Data Engineering</a></p>
+<blockquote>
+<p>Sources: EUR-Lex + Tweede Kamer + Politico Europe | 3 new items ranked by <a href="https://typesafe.ai">Jev</a> relevance | Generated: 2026-11-18 07:08 UTC</p>
+</blockquote>
+<hr>
+<h2>Highlights</h2>
+<p>The Irish regulator says it has stopped X training AI with data gathered by agents, citing significant concerns about the use of personal data collected by AI agents (<a href="https://www.politico.eu/article/x-stops-training-ai-with-agents-data-after-ireland-intervened/?utm_source=RSS_Feed&utm_medium=RSS&utm_campaign=RSS_Syndication">Politico Europe</a>). The European Commission published guidance on applying the Cyber Resilience Act (Regulation (EU) 2024/2847), listed as a preparatory document (<a href="https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:52026XC06013">EUR-Lex</a>). A Tweede Kamer motion concerns inventorying what is needed for supervision of the AI Act (<a href="https://www.tweedekamer.nl/kamerstukken/detail?id=2026Z25300&did=2026D58461">Tweede Kamer</a>).</p>
+<h2>EU</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Source</th>
+<th align="left">Title</th>
+<th align="left">Stage</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-11-17</td>
+<td align="left">EUR-Lex</td>
+<td align="left"><a href="https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:52026XC06013">Communication from the Commission – Commission guidance on the application of Regulation (EU) 2024/2847 (Cyber Resilience Act)</a></td>
+<td align="left">Preparatory document</td>
+<td align="left">The Commission published a Communication providing guidance on the application of Regulation (EU) 2024/2847 (Cyber Resilience Act), issued as a preparatory document.</td>
+</tr>
+</tbody></table>
+<h2>Netherlands</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Source</th>
+<th align="left">Title</th>
+<th align="left">Stage</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-11-17</td>
+<td align="left">Tweede Kamer</td>
+<td align="left"><a href="https://www.tweedekamer.nl/kamerstukken/detail?id=2026Z25300&did=2026D58461">Gewijzigde motie van het lid El Boujdaini c.s. over inventariseren wat nodig is voor het toezicht op de AI-Verordening (t.v.v. 37020-XIII-13)</a></td>
+<td align="left">—</td>
+<td align="left">MP El Boujdaini and others submitted an amended motion on inventorying what is needed for the supervision of the AI Regulation, in connection with the 2027 budget of the Ministry of Economic Affairs and Climate.</td>
+</tr>
+</tbody></table>
+<h2>News &amp; commentary</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Source</th>
+<th align="left">Title</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-11-17</td>
+<td align="left">Politico Europe</td>
+<td align="left"><a href="https://www.politico.eu/article/x-stops-training-ai-with-agents-data-after-ireland-intervened/?utm_source=RSS_Feed&utm_medium=RSS&utm_campaign=RSS_Syndication">Irish regulator stops X training AI with data gathered by agents</a></td>
+<td align="left">An Irish regulator stopped X from training AI with data gathered by AI agents, stating it has significant concerns about the use of personal data collected by AI agents.</td>
+</tr>
+</tbody></table>
+<h2>Coming up</h2>
+<p>Deadlines and dates in the next 30 days.</p>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Source</th>
+<th align="left">Item</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-12-02</td>
+<td align="left">Calendar</td>
+<td align="left"><a href="https://ai-act-service-desk.ec.europa.eu/en/ai-act/timeline/timeline-implementation-eu-ai-act">AI Act: bans on sexual deepfakes and CSAM generators; Art. 50(2) transition ends</a></td>
+</tr>
+</tbody></table>
+<hr>
+<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
+]]></content:encoded>
+    </item>
+    <item>
+      <title>Data Engineering 2026-11-18</title>
+      <link>https://dboeter.github.io/daily-diff/#2026-11-18/ai-data</link>
+      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-11-18/ai-data</guid>
+      <pubDate>Wed, 18 Nov 2026 00:00:00 +0000</pubDate>
+      <description>Data Engineering 2026-11-18 ⬛ Overview · 🟪 AI Agents · 🟦 AI Models &amp;amp; Labs · 🟧 AI Policy · 🟨 Data Engineering Vendor items: 12 | Also new: 67 | Projects: 26 | Active today: 3 | Stable releases: 1 | Prereleases (not covered): 1 | Generated: 2026-11-18 07:08 UTC Highlights − Fabric users of the Domains REST APIs preview: preview versions are no longer available per the November 2026 Feature Summary. Azure Databricks workspaces with the compliance security profile: Files API 3.0 for Unity Ca...</description>
+      <content:encoded><![CDATA[<h1>Data Engineering 2026-11-18</h1>
+<p><a href="https://dboeter.github.io/daily-diff/#2026-11-18">⬛ Overview</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-18/ai-agents">🟪 AI Agents</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-18/ai-models">🟦 AI Models &amp; Labs</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-18/ai-policy">🟧 AI Policy</a> · <strong>🟨 Data Engineering</strong></p>
+<blockquote>
+<p>Vendor items: 12 | Also new: 67 | Projects: 26 | Active today: 3 | Stable releases: 1 | Prereleases (not covered): 1 | Generated: 2026-11-18 07:08 UTC</p>
+</blockquote>
+<hr>
+<h2>Highlights</h2>
+<ul>
+<li>− Fabric users of the Domains REST APIs preview: preview versions are no longer available per the November 2026 Feature Summary.</li>
+<li>Azure Databricks workspaces with the compliance security profile: Files API 3.0 for Unity Catalog volumes will be enabled by default starting December 2026.</li>
+<li>Snowflake users of Snowpark Connect for Spark: the Spark Monitoring UI in Snowsight is now generally available.</li>
+</ul>
+<hr>
+<h2>Action required</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Platform</th>
+<th align="left">Item</th>
+<th align="left">What to do</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-11-19</td>
+<td align="left">Azure Databricks</td>
+<td align="left"><a href="https://learn.microsoft.com/azure/databricks/release-notes/product/2026/november#gemini-36-flash-will-be-retired-on-november-19-2026">Gemini 3.6 Flash will be retired on November 19, 2026</a></td>
+<td align="left">API calls to <code>Gemini 3.6 Flash</code> will be automatically redirected to <code>Gemini 3.8 Flash</code> on 2026-11-19; migrate to <code>Gemini 3.8 Flash</code> using the Legacy, deprecated, and retired models guide.</td>
+</tr>
+<tr>
+<td align="left">2026-11-30</td>
+<td align="left">Azure Databricks</td>
+<td align="left"><a href="https://learn.microsoft.com/azure/databricks/release-notes/whats-coming#upcoming-end-of-life-for-the-genie-one-mcp-beta-endpoint">Upcoming end of life for the Genie One MCP Beta endpoint</a></td>
+<td align="left">The Genie One MCP Beta endpoint at <code>https://&lt;workspace-hostname&gt;/api/2.0/mcp/genie</code> reaches end of life on November 30, 2026, after which requests fail; migrate all workloads to the <code>system.ai.genie_one_mcp</code> MCP in Unity Gateway.</td>
+</tr>
+<tr>
+<td align="left">2027-01-31</td>
+<td align="left">BigQuery</td>
+<td align="left"><a href="https://docs.cloud.google.com/bigquery/docs/release-notes#November_06_2026">Starting January 31, 2027, the BigQuery Data Transfer Service for Shopify connector will no longer support the following fields</a></td>
+<td align="left">Starting January 31, 2027, the BigQuery Data Transfer Service for Shopify connector will drop support for the <code>legacyMode</code> field in the DeliveryProfile dataset schema and the <code>permitSkuSharing</code> field in the FulfillmentService dataset schema.</td>
+</tr>
+<tr>
+<td align="left">2027-02-04</td>
+<td align="left">Azure Databricks</td>
+<td align="left"><a href="https://learn.microsoft.com/azure/databricks/release-notes/product/2026/november#zhipu-ai-glm-52-is-scheduled-for-retirement">Zhipu AI GLM 5.2 is scheduled for retirement</a></td>
+<td align="left">Zhipu AI GLM 5.2 is deprecated and will be retired on February 4, 2027, requiring migration to GLM 5.3 per the Legacy, deprecated, and retired models guidance.</td>
+</tr>
+<tr>
+<td align="left">2027-08-19</td>
+<td align="left">Azure Databricks</td>
+<td align="left"><a href="https://learn.microsoft.com/azure/databricks/release-notes/whats-coming#all-unity-catalog-managed-tables-will-be-upgraded-to-catalog-commits">All Unity Catalog managed tables will be upgraded to catalog commits</a></td>
+<td align="left">After Databricks Runtime 15.4 LTS end of support on August 19, 2027, all Unity Catalog managed tables will be automatically upgraded to <code>catalog commits</code>, making Unity Catalog the system of coordination and enabling multi-statement transactions, external engine writes, and consistent governance; clients must plan for this breaking change before the 2027 deadline.</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>Databricks</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Item</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-11-18</td>
+<td align="left">🤖 <a href="https://learn.microsoft.com/azure/databricks/release-notes/product/2026/november#smart-routing-now-supports-external-models-for-coding-agents-beta">Smart Routing now supports external models for coding agents (Beta)</a></td>
+<td align="left">In the Unity Gateway Managed Configuration beta, Smart Routing can route coding-agent subagents to external models behind a model provider service by adding them to <code>models.sources</code> alongside <code>system.ai</code> models.</td>
+</tr>
+<tr>
+<td align="left">2026-11-17</td>
+<td align="left">🤖 <a href="https://learn.microsoft.com/azure/databricks/release-notes/product/2026/november#analyze-agent-usage-and-find-wasted-tokens-with-unity-gateway-insights-beta">Analyze agent usage and find wasted tokens with Unity Gateway Insights (Beta)</a></td>
+<td align="left">Unity Gateway Insights generates reports from a sample of sessions in the <code>unified trace table</code> showing what people use agents for and where tokens go to waste, built by <code>Genie Code</code>.</td>
+</tr>
+<tr>
+<td align="left">2026-11-13</td>
+<td align="left"><a href="https://learn.microsoft.com/azure/databricks/release-notes/whats-coming#files-api-30-will-soon-be-generally-available">Files API 3.0 will soon be generally available</a></td>
+<td align="left">Files API 3.0 for Unity Catalog volumes will be enabled by default for workspaces with the <code>compliance security profile</code> starting December 2026, adding multipart uploads for files larger than 5 GB and conditional operations that check the current file version before upload, download, or deletion.</td>
+</tr>
+<tr>
+<td align="left">2026-11-13</td>
+<td align="left"><a href="https://learn.microsoft.com/azure/databricks/release-notes/product/2026/november#efficient-column-updates-beta">Efficient column updates (Beta)</a></td>
+<td align="left">Efficient Column Updates lets you add and backfill columns without rewriting unchanged columns, and workspace admins enable it from the <code>Previews</code> page.</td>
+</tr>
+<tr>
+<td align="left">2026-11-13</td>
+<td align="left"><a href="https://learn.microsoft.com/azure/databricks/release-notes/product/2026/november#genie-migrate-can-convert-t-sql-to-lakeflow-pipelines-beta">Genie Migrate can convert T-SQL to Lakeflow pipelines (Beta)</a></td>
+<td align="left">Genie Migrate converts T-SQL scripts from SQL Server and Azure Synapse dedicated SQL pools into Lakeflow pipelines using the <code>Spark Declarative Pipelines</code> target framework, where each file group becomes a serverless pipeline validated by a dry run, and requires a workspace admin to enable <code>Migration Projects Experimental Features</code> from the <code>Previews</code> page.</td>
+</tr>
+<tr>
+<td align="left">2026-11-12</td>
+<td align="left">🤖 <a href="https://learn.microsoft.com/azure/databricks/ai-bi/release-notes/2026#genie-one-enhancements">Genie One enhancements</a></td>
+<td align="left">Scheduled tasks in Genie One can now send emails to other users in your organization, not only to the task owner.</td>
+</tr>
+</tbody></table>
+<p><em>Also new:</em> <a href="https://learn.microsoft.com/azure/databricks/ai-bi/release-notes/2026#genie-agents-enhancements">Genie Agents enhancements</a></p>
+<p><strong>Quiet today:</strong> <a href="https://github.com/delta-io/delta">Delta Lake</a>, <a href="https://github.com/delta-io/delta-rs">delta-rs</a>, <a href="https://github.com/unitycatalog/unitycatalog">Unity Catalog</a>, <a href="https://github.com/mlflow/mlflow">MLflow</a>, <a href="https://github.com/databricks/cli">Databricks CLI</a>, <a href="https://github.com/databricks/dbt-databricks">dbt-databricks</a>, <a href="https://github.com/databricks/terraform-provider-databricks">Terraform provider for Databricks</a></p>
+<hr>
+<h2>Snowflake</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Item</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-11-18</td>
+<td align="left"><a href="https://docs.snowflake.com/en/release-notes/2026/other/2026-11-18-spark-monitoring-ui-ga">Spark Monitoring UI (General availability)</a></td>
+<td align="left">The Spark Monitoring UI in Snowsight monitors and troubleshoots Snowpark Connect for Spark batch jobs and sessions, listing <code>snowpark-submit</code> and <code>EXECUTE CODE BUNDLE</code> runs under Batch Jobs and Snowpark Connect sessions under Spark Sessions.</td>
+</tr>
+<tr>
+<td align="left">2026-11-17</td>
+<td align="left"><a href="https://docs.snowflake.com/en/release-notes/2026/other/2026-11-17-coco-desktop-v2-0-0">CoCo Desktop v2.0.0</a></td>
+<td align="left">—</td>
+</tr>
+</tbody></table>
+<p><strong>Quiet today:</strong> <a href="https://github.com/snowflakedb/snowpark-python">Snowpark Python</a>, <a href="https://github.com/snowflakedb/snowflake-connector-python">Snowflake Connector for Python</a>, <a href="https://github.com/apache/polaris">Apache Polaris</a>, <a href="https://github.com/snowflakedb/terraform-provider-snowflake">Terraform provider for Snowflake</a></p>
+<hr>
+<h2>Azure / Fabric &amp; GCP</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Source</th>
+<th align="left">Item</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-11-17</td>
+<td align="left">Microsoft Fabric</td>
+<td align="left">⚠️ 🤖 <a href="https://community.fabric.microsoft.com/t5/Fabric-Updates-Blog/Fabric-November-2026-Feature-Summary/ba-p/5414311">Fabric November 2026 Feature Summary</a></td>
+<td align="left">Preview versions of <code>Domains REST APIs</code> are no longer available; new previews include accessing data with <code>Power Query</code> in Fabric notebooks, retrieving Fabric environment publishing logs through the public API, using <code>JFrog Artifactory</code> with Fabric environment items, optimal refresh for deletes and updates in <code>Materialized Lake Views</code> with broader SQL clause support, email alerts for Materialized Lake view run failures, and file data ingestion with Materialized Lake Views, while New Metadata Sync for <code>SQL Analytics Endpoints</code> with an upgrade path for existing endpoints is released, and <code>Advanced NL2SQL</code> gains improved datetime reasoning plus <code>Data Agents</code> support adding multiple topics for SQL sources.</td>
+</tr>
+<tr>
+<td align="left">2026-11-17</td>
+<td align="left">Microsoft Fabric</td>
+<td align="left">🤖 <a href="https://community.fabric.microsoft.com/t5/Fabric-Updates-Blog/OneLake-The-unified-foundation-for-data-context-governance-and/ba-p/5423035">OneLake: The unified foundation for data, context, governance, and AI</a></td>
+<td align="left">OneLake adds the <code>OneLake Catalog</code> for governance where data lives, a strategic partnership with <code>Atlan</code>, <code>IQ sharing</code> in OneLake and Fabric, <code>AI Search (Microsoft Foundry)</code> support with OneLake security, read and write with credential vending in <code>OneLake Table APIs</code>, semantic views, catalog federation, and <code>Azure Databricks native storage</code>.</td>
+</tr>
+<tr>
+<td align="left">2026-11-17</td>
+<td align="left">Azure updates</td>
+<td align="left">🤖 <a href="https://azure.microsoft.com/updates?id=579388">[Launched] Generally Available: Azure HorizonDB</a></td>
+<td align="left">Azure HorizonDB is a fully-managed, cloud-native PostgreSQL service designed for high-performance, AI-driven, and large-scale workloads requiring ultra-low latency and high scalability.</td>
+</tr>
+<tr>
+<td align="left">2026-11-17</td>
+<td align="left">Azure updates</td>
+<td align="left"><a href="https://azure.microsoft.com/updates?id=578998">[Launched] Generally Available: Fuzzy string match is available across Microsoft SQL offerings</a></td>
+<td align="left">Fuzzy string match is available across Microsoft SQL offerings including <code>Azure SQL Database</code>, <code>Azure SQL Managed Instance</code>, <code>SQL database in Microsoft Fabric</code>, and <code>SQL Server 2025</code>, enabling string comparison based on similarity or difference.</td>
+</tr>
+</tbody></table>
+<p><em>Also new:</em> <a href="https://azure.microsoft.com/updates?id=579531">[Launched] Generally Available: Transparent data encryption (TDE) in Azure SQL Database AES keys</a> · <a href="https://azure.microsoft.com/updates?id=578471">[Launched] Generally Available: Azure SQL updates for mid-November 2026</a> · <a href="https://azure.microsoft.com/updates?id=579590">[Launched] Generally Available: Intel and AMD v6 with temp disk for Azure Database for PostgreSQL</a> · <a href="https://azure.microsoft.com/updates?id=577531">[Launched] Generally Available: Azure Cosmos DB full-text search BM25 score projection</a> · <a href="https://azure.microsoft.com/updates?id=578465">[Launched] Generally Available: Azure SQL Managed Instance updates for mid-November 2026</a> · <a href="https://azure.microsoft.com/updates?id=579585">[Launched] Generally Available: Cobalt 200 compute for Azure Database for PostgreSQL</a> · <a href="https://docs.cloud.google.com/bigquery/docs/release-notes#November_17_2026">To reduce LLM token consumption and query latency when processing large datasets, enable optimized mode using the following managed AI functions (GA)</a> · <a href="https://docs.cloud.google.com/bigquery/docs/release-notes#November_17_2026">You can now use the rerank option in the AI.SEARCH function to reorder the results of your search by how well the text in the column to search answers the search query (GA)</a> · <a href="https://azure.microsoft.com/updates?id=578028">[Launched] Generally Available: Azure SQL Managed Instance link support for availability groups with multiple databases</a> · <a href="https://azure.microsoft.com/updates?id=579359">[In preview] Public Preview: Azure SQL updates for mid-November 2026</a> · <a href="https://docs.cloud.google.com/bigquery/docs/release-notes#November_17_2026">You can now use the AI.RANK function to reorder the rows of a table by how well the text in a specified column answers a search query</a> · <a href="https://community.fabric.microsoft.com/t5/Fabric-Updates-Blog/Run-proactive-operations-with-Real-Time-Intelligence-in/ba-p/5414256">Run proactive operations with Real-Time Intelligence in Microsoft Fabric</a> · <a href="https://community.fabric.microsoft.com/t5/Fabric-Updates-Blog/Bringing-trusted-Fabric-IQ-context-to-wherever-people-and-agents/ba-p/5423049">Bringing trusted Fabric IQ context to wherever people and agents work</a> · <a href="https://azure.microsoft.com/updates?id=574163">[In preview] Generally Available: Customize backup retention from 1 to 35 days in Azure HorizonDB</a> · <a href="https://azure.microsoft.com/updates?id=579928">[Launched] Generally Available: Azure HorizonDB Auditing</a> · <a href="https://azure.microsoft.com/updates?id=579574">[Launched] Generally Available: Azure HorizonDB Generic Log Analytics Integration</a> · <a href="https://azure.microsoft.com/updates?id=579031">[In preview] Public Preview: Azure Blob Storage turbo tier</a> · <a href="https://azure.microsoft.com/updates?id=571488">[Launched] Generally Available: Throughput buckets in Azure Cosmos DB</a> · <a href="https://azure.microsoft.com/updates?id=577520">[Launched] Generally Available: Semantic Reranker in Azure Cosmos DB</a> · <a href="https://azure.microsoft.com/updates?id=574153">[In preview] Generally Available: Private endpoint support for Azure HorizonDB clusters</a> · <a href="https://azure.microsoft.com/updates?id=581170">[Launched] Generally Available: Azure HorizonDB System Managed Maintenance Window</a> · <a href="https://azure.microsoft.com/updates?id=581140">[Launched] Generally Available: Rename Server in Azure Database for MySQL</a> · <a href="https://azure.microsoft.com/updates?id=580306">[In preview] Public Preview: Session-based authentication for Azure Blob and Data Lake Storage</a> · <a href="https://azure.microsoft.com/updates?id=579354">[Launched] Generally Available: Azure DocumentDB elasticity—query from any node</a> · <a href="https://azure.microsoft.com/updates?id=578049">[In preview] Public Preview: Embedding generation in Azure Cosmos DB</a> · <a href="https://azure.microsoft.com/updates?id=578033">[Launched] Generally Available: Zone-redundant Next-gen GP tier in Azure SQL Managed Instance</a> · <a href="https://azure.microsoft.com/updates?id=575111">[Launched] Generally Available: Microsoft Entra authentication for Azure HorizonDB</a> · <a href="https://azure.microsoft.com/updates?id=574168">[Launched] Generally Available: Geo-redundant backup and restore for Azure HorizonDB</a> · <a href="https://azure.microsoft.com/updates?id=579221">[In preview] Public Preview: Azure SQL DB Hyperscale Cross Database Querying</a> · <a href="https://azure.microsoft.com/updates?id=579040">[Launched] Generally Available: Smart Tier (Azure Blob and Data Lake Storage) in Azure Government and China regions</a> · <a href="https://azure.microsoft.com/updates?id=577515">[In preview] Public Preview: Azure Database for MySQL on Premium SSD v2</a> · <a href="https://docs.cloud.google.com/bigquery/docs/release-notes#November_17_2026">You can now use the BigQuery REST API ( datasets.insert, datasets.patch, datasets.update, and datasets.get ) to configure and monitor cross-region dataset replication and to attach or detach failover …</a> · <a href="https://azure.microsoft.com/updates?id=579595">[Launched] Generally Available: Intel and AMD v5 diskless tier for Azure Database for PostgreSQL</a> · <a href="https://azure.microsoft.com/updates?id=579349">[Launched] Generally Available: Near-instant provisioning for Azure DocumentDB clusters</a> · <a href="https://azure.microsoft.com/updates?id=579216">[Launched] Generally Available: Database Hub in Microsoft Fabric</a> · <a href="https://azure.microsoft.com/updates?id=579147">[Launched] Generally Available: Azure Backup for Azure Cosmos DB</a> · <a href="https://azure.microsoft.com/updates?id=579660">[Launched] Generally Available: Improved Apache AGE graph query and ingestion performance on Azure HorizonDB</a> · <a href="https://azure.microsoft.com/updates?id=579607">[In preview] Public Preview: Migrate Oracle databases to Azure Database for PostgreSQL using Azure Database Migration Service</a> · <a href="https://azure.microsoft.com/updates?id=579540">[In preview] Public Preview: Encryption at rest with customer-managed keys in Azure HorizonDB</a> · <a href="https://azure.microsoft.com/updates?id=575069">[Launched] Generally Available: User-assigned managed identity for Azure HorizonDB</a> · <a href="https://azure.microsoft.com/updates?id=579644">[Launched] Generally Available: Database Hub real-time performance dashboards</a> · <a href="https://azure.microsoft.com/updates?id=579602">[In preview] Public Preview: Build Knowledge Graphs with AI pipeline in Azure HorizonDB</a> · <a href="https://azure.microsoft.com/updates?id=579226">[In preview] Public Preview: Migrate Oracle databases to Azure HorizonDB using Azure Database Migration Service</a> · <a href="https://azure.microsoft.com/updates?id=578054">[Launched] Generally Available: Azure Cosmos DB SDK for Rust</a> · <a href="https://community.fabric.microsoft.com/t5/Fabric-Updates-Blog/Build-governed-data-apps-with-Microsoft-Fabric-Apps-Generally/ba-p/5423011">Build governed data apps with Microsoft Fabric Apps (Generally Available)</a> · <a href="https://azure.microsoft.com/updates?id=563097">[In preview] Limited Preview: AI model management in Azure HorizonDB</a> · <a href="https://azure.microsoft.com/updates?id=579612">[In preview] Public Preview: Migrate Azure Database for PostgreSQL to Azure HorizonDB with Azure Database Migration Service (DMS)</a> · <a href="https://azure.microsoft.com/updates?id=578434">[In preview] Public Preview: Managed MCP Server in Azure Cosmos DB</a> · <a href="https://azure.microsoft.com/updates?id=579564">[In preview] Public Preview: Migrate PostgreSQL servers to Azure HorizonDB</a> · <a href="https://azure.microsoft.com/updates?id=581180">[Launched] Generally Available: Azure Policy support for Azure HorizonDB</a> · <a href="https://azure.microsoft.com/updates?id=578237">[Launched] Generally Available: DocumentDB extension for VS Code</a> · <a href="https://azure.microsoft.com/updates?id=578232">[In preview] Public Preview: Full-text search in Azure DocumentDB</a> · <a href="https://azure.microsoft.com/updates?id=578262">[In preview] Public Preview: Fine-grained role-based access control for databases and collections in Azure DocumentDB</a> · <a href="https://azure.microsoft.com/updates?id=578255">[In preview] Public Preview: DocumentDB on Azure Local</a> · <a href="https://azure.microsoft.com/updates?id=579525">[In preview] Public Preview: Build with Azure SQL Database container locally without an Azure subscription or credit card</a> · <a href="https://azure.microsoft.com/updates?id=578444">[In preview] Public Preview:  AI-assisted data modeler and other updates in Azure Cosmos DB extension for VS Code</a> · <a href="https://azure.microsoft.com/updates?id=579933">[Launched] Generally Available: Azure HorizonDB Monitoring via Alerts</a> · <a href="https://azure.microsoft.com/updates?id=579665">[In preview] Public Preview: Azure SQL Database container provisioning in SQL Server Management Studio</a> · <a href="https://azure.microsoft.com/updates?id=578439">[Launched] Generally Available: Azure Cosmos DB Shell</a> · <a href="https://azure.microsoft.com/updates?id=578242">[In preview] Public Preview: DocumentDB enabled by Azure Arc</a> · <a href="https://azure.microsoft.com/updates?id=579938">[Launched] Generally Available:  Azure HorizonDB now integrates with Azure Advisor</a> · <a href="https://community.fabric.microsoft.com/t5/Fabric-Updates-Blog/Fabric-Data-Warehouse-at-Ignite-Built-for-AI-era-analytics/ba-p/5414274">Fabric Data Warehouse at Ignite: Built for AI-era analytics</a> · <a href="https://azure.microsoft.com/updates?id=579014">[In preview] Public Preview: MSSQL extension for Visual Studio Code - local-to-cloud deployment wizard</a> · <a href="https://community.fabric.microsoft.com/t5/Fabric-Updates-Blog/Build-and-operate-intelligent-apps-with-Microsoft-Fabric-New/ba-p/5423020">Build and operate intelligent apps with Microsoft Fabric: New capabilities at Ignite 2026</a> · <a href="https://azure.microsoft.com/updates?id=579009">[In preview] Public Preview: MSSQL extension for Visual Studio Code- Azure SQL Database container provisioning</a> · <a href="https://azure.microsoft.com/updates?id=579231">[In preview] Public Preview: AI Assisted Oracle-to-PostgreSQL Application Code Migration</a></p>
+<hr>
+<h2>Open-source stack</h2>
+<h3>dbt Core</h3>
+<ul>
+<li><strong>News:</strong> <a href="https://www.getdbt.com/blog/whats-new-in-dbt-november-2026">What&#39;s new in dbt: November 2026</a> — dbt Labs says the November roundup covers local unit tests, a free dbt State plan, Wizard Desktop in Public Beta, and dbt Charts in Claude and ChatGPT.</li>
+</ul>
+<h3>Soda Core</h3>
+<ul>
+<li><strong>Release:</strong> <a href="https://github.com/sodadata/soda-core/releases/tag/v4.31.0">v4.31.0</a> fixes BigQuery table listing when the region&#39;s <code>INFORMATION_SCHEMA</code> view is denied, and makes SQL Server and Fabric retry statements that hit a snapshot isolation DDL conflict. It also reports <code>NOT_EVALUATED</code> for freshness when the max timestamp was not measured, and exits with 3 when Soda Cloud rejects results for a customer-caused reason.</li>
+<li><strong>Release:</strong> <a href="https://github.com/sodadata/soda-core/releases/tag/v4.31.0">v4.31.0</a> also exports <code>CheckSelector</code> from <code>soda_core.contracts</code> and carries each column&#39;s soda data type on <code>ColumnMetadata</code>. Telemetry now counts Python API calls, with one root span per call.</li>
+</ul>
+<h3>OpenMetadata</h3>
+<ul>
+<li><strong>News:</strong> <a href="https://blog.open-metadata.org/announcing-openmetadata-2-1-your-business-definitions-in-the-context-graph-54c65a6c6749">Announcing OpenMetadata 2.1: Your Business Definitions in the Context Graph</a> — OpenMetadata says that without business context an AI agent asked for last quarter&#39;s revenue can&#39;t tell which revenue figure Finance recognizes or how to apply the fiscal calendar, and may return a plausible but wrong answer. It presents 2.1 as putting business definitions into its context graph.</li>
+</ul>
+<p><strong>Quiet today:</strong> <a href="https://github.com/SQLMesh/sqlmesh">SQLMesh</a>, <a href="https://github.com/apache/airflow">Apache Airflow</a>, <a href="https://github.com/dagster-io/dagster">Dagster</a>, <a href="https://github.com/PrefectHQ/prefect">Prefect</a>, <a href="https://github.com/dlt-hub/dlt">dlt</a>, <a href="https://github.com/apache/iceberg">Apache Iceberg</a>, <a href="https://github.com/apache/iceberg-python">PyIceberg</a>, <a href="https://github.com/duckdb/duckdb">DuckDB</a>, <a href="https://github.com/pola-rs/polars">Polars</a>, <a href="https://github.com/trinodb/trino">Trino</a>, <a href="https://github.com/great-expectations/great_expectations">Great Expectations</a>, <a href="https://github.com/OpenLineage/OpenLineage">OpenLineage</a></p>
+<hr>
+<h2>News &amp; discussion</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Post</th>
+<th align="left">Source</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-11-17</td>
+<td align="left"><a href="https://medium.com/snowflake/building-an-agent-factory-for-data-migrations-a-small-test-with-snowflake-9d4622c8f2c7">Building an Agent Factory for Data Migrations: a Small Test with Snowflake</a></td>
+<td align="left">Snowflake on Medium</td>
+<td align="left">The author built a proof-of-concept &quot;agent factory&quot; for SQL migration using parallel AI translators, scripted checks against real data, and an independent AI reviewer to migrate the <code>Pagila</code> PostgreSQL database&#39;s views and functions to Snowflake, demonstrating an architecture that migrates logic at scale without letting an AI grade its own work.</td>
+</tr>
+<tr>
+<td align="left">2026-11-17</td>
+<td align="left"><a href="https://medium.com/snowflake/treat-llm-output-as-evidence-not-truth-a-production-pattern-for-sentiment-and-ner-43bdbd4bed6e">Treat LLM Output as Evidence, Not Truth: A Production Pattern for Sentiment and NER</a></td>
+<td align="left">Snowflake on Medium</td>
+<td align="left">The author shows how to turn customer comments into validated, graph-ready data using <code>Snowflake Cortex</code>, treating LLM output as evidence rather than truth, and highlights what demos leave out.</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>Spotted</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Story</th>
+<th align="left">Source</th>
+<th align="left">Discussion</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a href="https://spreadsheettoapp.ai">Show HN: Your Spreadsheet Is Your Database</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50534235">3 points, 2 comments</a></td>
+<td align="left">The submitter presents a tool that turns uploaded Excel or CSV files or connected Google Sheets into apps, uses Sheets as the database, and offers a free start without a credit card.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://redict.io/posts/2026-11-17-redict-deprecated/">Redict is deprecated</a></td>
+<td align="left">Lobste.rs</td>
+<td align="left"><a href="https://lobste.rs/s/z4rhlt/redict_is_deprecated">70 points, 9 comments</a></td>
+<td align="left">The author announces that Redict is officially deprecated, with Redict 7.3.6 as the final release, after creating it to rally the Redis diaspora around a copyleft initiative.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://blogs.oracle.com/mysql/mysql-development-as-it-happens-part-2-vector-indexes">MySQL Development as it Happens, Part 2 -Vector Indexes</a></td>
+<td align="left">Lobste.rs</td>
+<td align="left"><a href="https://lobste.rs/s/kxoqww/mysql_development_as_it_happens_part_2">2 points, 0 comments</a></td>
+<td align="left">—</td>
+</tr>
+</tbody></table>
+<hr>
+<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
+]]></content:encoded>
+    </item>
     <item>
       <title>AI Agents 2026-11-17</title>
       <link>https://dboeter.github.io/daily-diff/#2026-11-17/ai-agents</link>
@@ -3658,608 +4274,6 @@
 <td align="left">Dev.to</td>
 <td align="left"><a href="https://dev.to/aws/once-upon-agentic-ai-part-1-create-your-own-agent-and-forge-its-tools-with-strands-agents-22mo">23 reactions, 3 comments</a></td>
 <td align="left">A tutorial (Part 1) on building a custom agent and its tools with the Strands Agents framework.</td>
-</tr>
-</tbody></table>
-<hr>
-<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
-]]></content:encoded>
-    </item>
-    <item>
-      <title>AI Models &amp; Labs 2026-11-11</title>
-      <link>https://dboeter.github.io/daily-diff/#2026-11-11/ai-models</link>
-      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-11-11/ai-models</guid>
-      <pubDate>Wed, 11 Nov 2026 00:00:00 +0000</pubDate>
-      <description>AI Models &amp;amp; Labs 2026-11-11 ⬛ Overview · 🟪 AI Agents · 🟦 AI Models &amp;amp; Labs · 🟧 AI Policy · 🟨 Data Engineering Lab posts: 10 | New models: 4 | Spotted: 6 | Generated: 2026-11-11 05:56 UTC Highlights Google releases Gemini 4 Carbon, a frontier multimodal model for coding, agentic and complex reasoning with 1M-token context, now on OpenRouter and Google AI Studio. Anthropic launches its IPO roadshow for 825 million Class A shares priced at $70–78, targeting a Nasdaq listing under “ANT” a...</description>
-      <content:encoded><![CDATA[<h1>AI Models &amp; Labs 2026-11-11</h1>
-<p><a href="https://dboeter.github.io/daily-diff/#2026-11-11">⬛ Overview</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-11/ai-agents">🟪 AI Agents</a> · <strong>🟦 AI Models &amp; Labs</strong> · <a href="https://dboeter.github.io/daily-diff/#2026-11-11/ai-policy">🟧 AI Policy</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-11/ai-data">🟨 Data Engineering</a></p>
-<blockquote>
-<p>Lab posts: 10 | New models: 4 | Spotted: 6 | Generated: 2026-11-11 05:56 UTC</p>
-</blockquote>
-<hr>
-<h2>Highlights</h2>
-<ul>
-<li>Google releases Gemini 4 Carbon, a frontier multimodal model for coding, agentic and complex reasoning with 1M-token context, now on OpenRouter and Google AI Studio.</li>
-<li>Anthropic launches its IPO roadshow for 825 million Class A shares priced at $70–78, targeting a Nasdaq listing under “ANT” at a reported $1.3 trillion valuation.</li>
-<li>Baidu adds ERNIE 5.5 Flash Preview to OpenRouter, a 1M-context model claiming comprehensive gains in coding, agentic tasks, knowledge work and deep research.</li>
-</ul>
-<hr>
-<h2>Lab announcements</h2>
-<table>
-<thead>
-<tr>
-<th align="left">Date</th>
-<th align="left">Lab</th>
-<th align="left">Post</th>
-<th align="left">Summary</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left">2026-11-11</td>
-<td align="left">OpenAI</td>
-<td align="left"><a href="https://openai.com/index/ai-effect-on-freelance-work/">Ai Effect On Freelance Work</a></td>
-<td align="left">—</td>
-</tr>
-<tr>
-<td align="left">2026-11-11</td>
-<td align="left">OpenAI</td>
-<td align="left"><a href="https://openai.com/index/chatgpt-plus-for-veterans/">Chatgpt Plus For Veterans</a></td>
-<td align="left">—</td>
-</tr>
-<tr>
-<td align="left">2026-11-11</td>
-<td align="left">OpenAI</td>
-<td align="left"><a href="https://openai.com/index/helping-caregivers-use-ai-in-everyday-life/">Helping Caregivers Use Ai In Everyday Life</a></td>
-<td align="left">—</td>
-</tr>
-<tr>
-<td align="left">2026-11-11</td>
-<td align="left">OpenAI</td>
-<td align="left"><a href="https://openai.com/index/introducing-businesses-chatgpt/">Introducing Businesses Chatgpt</a></td>
-<td align="left">—</td>
-</tr>
-<tr>
-<td align="left">2026-11-10</td>
-<td align="left">OpenAI</td>
-<td align="left"><a href="https://openai.com/index/closing-ai-guidance-gap-education/">Closing Ai Guidance Gap Education</a></td>
-<td align="left">—</td>
-</tr>
-<tr>
-<td align="left">2026-11-10</td>
-<td align="left">OpenAI</td>
-<td align="left"><a href="https://openai.com/business/learn/enabling-a-data-driven-workforce-webinar/">Enabling A Data Driven Workforce Webinar</a></td>
-<td align="left">—</td>
-</tr>
-<tr>
-<td align="left">2026-11-10</td>
-<td align="left">OpenAI</td>
-<td align="left"><a href="https://openai.com/business/learn/identifying-and-scaling-ai-use-cases/">Identifying And Scaling Ai Use Cases</a></td>
-<td align="left">—</td>
-</tr>
-<tr>
-<td align="left">2026-11-10</td>
-<td align="left">OpenAI</td>
-<td align="left"><a href="https://openai.com/business/learn/how-openai-uses-codex/">How Openai Uses Codex</a></td>
-<td align="left">—</td>
-</tr>
-<tr>
-<td align="left">2026-11-10</td>
-<td align="left">OpenAI</td>
-<td align="left"><a href="https://openai.com/business/learn/fine-tuning-gpt-4o-webinar/">Fine Tuning Gpt 4o Webinar</a></td>
-<td align="left">—</td>
-</tr>
-<tr>
-<td align="left">2026-11-10</td>
-<td align="left">Anthropic</td>
-<td align="left"><a href="https://www.anthropic.com/news/roadshow-launch">Anthropic launches roadshow for proposed initial public offering</a></td>
-<td align="left">Anthropic launched a roadshow for its proposed initial public offering of 825,000,000 shares of Class A common stock, with an expected price between $70.00 and $78.00 per share and plans to list on the Nasdaq Global Select Market under the symbol “ANT.”</td>
-</tr>
-</tbody></table>
-<hr>
-<h2>New on OpenRouter</h2>
-<table>
-<thead>
-<tr>
-<th align="left">Model</th>
-<th align="left">Listed</th>
-<th align="left">Context</th>
-<th align="left">Summary</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left"><a href="https://openrouter.ai/baidu/ernie-5.5-flash-preview">Baidu: ERNIE-5.5-Flash-Preview</a> <code>baidu/ernie-5.5-flash-preview</code></td>
-<td align="left">2026-11-10</td>
-<td align="left">1M</td>
-<td align="left">ERNIE 5.5 Flash Preview is the latest foundation model in the ERNIE family with comprehensive improvements in coding, agentic capabilities, knowledge work, and deep research.</td>
-</tr>
-<tr>
-<td align="left"><a href="https://openrouter.ai/baidu/ernie-light-dt-1.0-intl">Baidu: ERNIE-Light-DT-1.0</a> <code>baidu/ernie-light-dt-1.0-intl</code></td>
-<td align="left">2026-11-10</td>
-<td align="left">1M</td>
-<td align="left">ERNIE-Light-DT-1.0 is based on open-source GLM models and includes research findings from Baidu Search&#39;s Lightning large model, featuring Baidu Sparse Attention (BSA).</td>
-</tr>
-<tr>
-<td align="left"><a href="https://openrouter.ai/google/gemini-4-carbon">Google: Gemini 4 Carbon</a> <code>google/gemini-4-carbon</code></td>
-<td align="left">2026-11-10</td>
-<td align="left">1M</td>
-<td align="left">Gemini 4 Carbon is a frontier Gemini 4 model for coding, agentic and complex reasoning work that takes text, image, audio, video and file input.</td>
-</tr>
-<tr>
-<td align="left"><a href="https://openrouter.ai/google/gemini-4-carbon:batch">Google: Gemini 4 Carbon (batch)</a> <code>google/gemini-4-carbon:batch</code></td>
-<td align="left">2026-11-10</td>
-<td align="left">1M</td>
-<td align="left">Gemini 4 Carbon is a frontier Gemini 4 model for coding, agentic and complex reasoning work that takes text, image, audio, video and file input.</td>
-</tr>
-</tbody></table>
-<hr>
-<p>Nothing new from OpenRouter&#39;s stealth models today.</p>
-<hr>
-<h2>Spotted</h2>
-<table>
-<thead>
-<tr>
-<th align="left">Story</th>
-<th align="left">Source</th>
-<th align="left">Discussion</th>
-<th align="left">Summary</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left"><a href="https://blog.google/innovation-and-ai/models-and-research/gemini-models/gemini-4-carbon-now-available/">Gemini 4 Carbon is now available</a></td>
-<td align="left">Hacker News</td>
-<td align="left"><a href="https://news.ycombinator.com/item?id=50442303">281 points, 154 comments</a></td>
-<td align="left">Google announces the release of Gemini 4 Carbon for developers, enterprises, scientists, and consumers.</td>
-</tr>
-<tr>
-<td align="left"><a href="https://alexwang.ai/posts/reasoning-as-pathfinding/">What objective is reasoning solving?</a></td>
-<td align="left">Hacker News</td>
-<td align="left"><a href="https://news.ycombinator.com/item?id=50445013">136 points, 63 comments</a></td>
-<td align="left">An essay framing reasoning as a pathfinding problem within token space.</td>
-</tr>
-<tr>
-<td align="left"><a href="https://docs.modelplane.ai/guides/inference-guide">An Open Field Guide to Inference Engineering</a></td>
-<td align="left">Hacker News</td>
-<td align="left"><a href="https://news.ycombinator.com/item?id=50443714">80 points, 8 comments</a></td>
-<td align="left">An open field guide covering inference engineering concepts, production operations, tooling, and career paths for platform engineers.</td>
-</tr>
-<tr>
-<td align="left"><a href="https://www.wsj.com/finance/stocks/anthropic-to-seek-1-3-trillion-valuation-in-ipo-8337b669">Anthropic to Seek $1.3T Valuation in IPO</a></td>
-<td align="left">Hacker News</td>
-<td align="left"><a href="https://news.ycombinator.com/item?id=50439616">59 points, 83 comments</a></td>
-<td align="left">—</td>
-</tr>
-<tr>
-<td align="left"><a href="https://tis-100.wincon.dev/">LLMs Play Zachtronics&#39; TIS-100</a></td>
-<td align="left">Hacker News</td>
-<td align="left"><a href="https://news.ycombinator.com/item?id=50448340">34 points, 4 comments</a></td>
-<td align="left">Sixteen LLMs were evaluated on Zachtronics&#39; TIS-100 puzzles, discovering 133 new frontier points across 18 of 55 puzzles and three cycle records.</td>
-</tr>
-<tr>
-<td align="left"><a href="https://support.claude.com/en/articles/17506494-claude-fable-5-2-launch-offers">Claude Fable 5.2 launch offers</a></td>
-<td align="left">Hacker News</td>
-<td align="left"><a href="https://news.ycombinator.com/item?id=50430176">29 points, 5 comments</a></td>
-<td align="left">—</td>
-</tr>
-</tbody></table>
-<hr>
-<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
-]]></content:encoded>
-    </item>
-    <item>
-      <title>AI Policy 2026-11-11</title>
-      <link>https://dboeter.github.io/daily-diff/#2026-11-11/ai-policy</link>
-      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-11-11/ai-policy</guid>
-      <pubDate>Wed, 11 Nov 2026 00:00:00 +0000</pubDate>
-      <description>AI Policy 2026-11-11 ⬛ Overview · 🟪 AI Agents · 🟦 AI Models &amp;amp; Labs · 🟧 AI Policy · 🟨 Data Engineering Sources: European Commission + Digitale Overheid + Tweede Kamer + Binnenlands Bestuur + Politico US | 10 new items ranked by Jev relevance | Generated: 2026-11-11 05:56 UTC Highlights The Tweede Kamer tabled motions urging the government to equip supervisors for AI Act enforcement (El Boujdaini) and to develop a liability framework for AI model damage (Dassen), signaling stricter oversig...</description>
-      <content:encoded><![CDATA[<h1>AI Policy 2026-11-11</h1>
-<p><a href="https://dboeter.github.io/daily-diff/#2026-11-11">⬛ Overview</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-11/ai-agents">🟪 AI Agents</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-11/ai-models">🟦 AI Models &amp; Labs</a> · <strong>🟧 AI Policy</strong> · <a href="https://dboeter.github.io/daily-diff/#2026-11-11/ai-data">🟨 Data Engineering</a></p>
-<blockquote>
-<p>Sources: European Commission + Digitale Overheid + Tweede Kamer + Binnenlands Bestuur + Politico US | 10 new items ranked by <a href="https://typesafe.ai">Jev</a> relevance | Generated: 2026-11-11 05:56 UTC</p>
-</blockquote>
-<hr>
-<h2>Highlights</h2>
-<p>The Tweede Kamer tabled motions urging the government to equip supervisors for AI Act enforcement (<a href="https://www.tweedekamer.nl/kamerstukken/detail?id=2026Z24543&did=2026D56682">El Boujdaini</a>) and to develop a liability framework for AI model damage (<a href="https://www.tweedekamer.nl/kamerstukken/detail?id=2026Z24563&did=2026D56703">Dassen</a>), signaling stricter oversight and clearer accountability for deployers. The European Commission opened a targeted consultation on revised DSA election guidelines addressing generative AI risks for very large platforms (<a href="https://digital-strategy.ec.europa.eu/news-redirect/964768">European Commission</a>), which may shape emerging governance standards for GenAI integrations. Today is the deadline for the consultation on the Cloud and AI Development Act (<a href="https://ec.europa.eu/info/law/better-regulation/have-your-say/initiatives/14628_en">Have your say</a>), a proposed regulation affecting the cloud infrastructure underpinning many AI deployments. The Dutch cabinet published its strategic vision for AI aimed at economic strength and public service improvement (<a href="https://www.digitaleoverheid.nl/nieuws/kabinet-kiest-voor-ai-die-nederland-vooruithelpt/">Digitale Overheid</a>), while Binnenlands Bestuur reports the government is preparing a legal basis for facial recognition scanners in identity verification (<a href="https://www.binnenlandsbestuur.nl/digitaal/gezichtsscanner-rukt-op-omvang-fraude-onbekend">Binnenlands Bestuur</a>).</p>
-<h2>EU</h2>
-<table>
-<thead>
-<tr>
-<th align="left">Date</th>
-<th align="left">Source</th>
-<th align="left">Title</th>
-<th align="left">Stage</th>
-<th align="left">Summary</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left">2026-11-10</td>
-<td align="left">European Commission</td>
-<td align="left"><a href="https://digital-strategy.ec.europa.eu/news-redirect/964768">Targeted consultation on the draft revised election guidelines under the Digital Services Act (DSA)</a></td>
-<td align="left">—</td>
-<td align="left">The European Commission launched a targeted consultation on draft revised election guidelines under the DSA focusing on measures VLOPs and VLOSEs should adopt to address generative AI and information manipulation risks to electoral processes.</td>
-</tr>
-<tr>
-<td align="left">2026-11-10</td>
-<td align="left">European Commission</td>
-<td align="left"><a href="https://digital-strategy.ec.europa.eu/news-redirect/964805">Commission invites views on draft revised election guidelines under Digital Services Act</a></td>
-<td align="left">—</td>
-<td align="left">The European Commission launched a consultation to update its election guidelines under the DSA addressing the rapid evolution of generative AI and growing sophistication of manipulation risks.</td>
-</tr>
-<tr>
-<td align="left">2026-11-05</td>
-<td align="left">European Commission</td>
-<td align="left"><a href="https://digital-strategy.ec.europa.eu/news-redirect/964507">AI toolbox supports public administrations to put the Apply AI Strategy into practice</a></td>
-<td align="left">—</td>
-<td align="left">The European Commission published an AI toolbox on the Interoperable Europe portal to support public administrations in implementing the Apply AI Strategy with practical tools, guidance and examples.</td>
-</tr>
-</tbody></table>
-<h2>Netherlands</h2>
-<table>
-<thead>
-<tr>
-<th align="left">Date</th>
-<th align="left">Source</th>
-<th align="left">Title</th>
-<th align="left">Stage</th>
-<th align="left">Summary</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left">2026-11-10</td>
-<td align="left">Digitale Overheid</td>
-<td align="left"><a href="https://www.digitaleoverheid.nl/nieuws/kabinet-kiest-voor-ai-die-nederland-vooruithelpt/">Kabinet kiest voor AI die Nederland vooruithelpt</a></td>
-<td align="left">—</td>
-<td align="left">The Dutch cabinet adopted a vision for AI aimed at contributing to a strong economy, good public service delivery and solutions for societal challenges.</td>
-</tr>
-<tr>
-<td align="left">2026-11-09</td>
-<td align="left">Tweede Kamer</td>
-<td align="left"><a href="https://www.tweedekamer.nl/kamerstukken/detail?id=2026Z24543&did=2026D56682">Motie van het lid El Boujdaini c.s. over autoriteiten voldoende toerusten voor het toezicht op de AI-verordening</a></td>
-<td align="left">—</td>
-<td align="left">The Dutch House of Representatives received a motion by El Boujdaini and others calling for authorities to be sufficiently equipped for supervision of the AI Regulation.</td>
-</tr>
-<tr>
-<td align="left">2026-11-09</td>
-<td align="left">Tweede Kamer</td>
-<td align="left"><a href="https://www.tweedekamer.nl/kamerstukken/detail?id=2026Z24563&did=2026D56703">Motie van het lid Dassen over een juridisch kader voor de aansprakelijkheid bij schade van AI-modellen</a></td>
-<td align="left">—</td>
-<td align="left">The Dutch House of Representatives received a motion by Dassen calling for a legal framework for liability for damage caused by AI models.</td>
-</tr>
-<tr>
-<td align="left">2026-11-09</td>
-<td align="left">Tweede Kamer</td>
-<td align="left"><a href="https://www.tweedekamer.nl/kamerstukken/detail?id=2026Z24559&did=2026D56699">Motie van het lid Beckerman over onderzoeken hoe kunstenaars en makers beter beschermd kunnen worden tegen AI</a></td>
-<td align="left">—</td>
-<td align="left">The Dutch House of Representatives received a motion by Beckerman calling for an investigation into how artists and creators can be better protected against AI.</td>
-</tr>
-</tbody></table>
-<h2>News &amp; commentary</h2>
-<table>
-<thead>
-<tr>
-<th align="left">Date</th>
-<th align="left">Source</th>
-<th align="left">Title</th>
-<th align="left">Summary</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left">2026-11-10</td>
-<td align="left">Binnenlands Bestuur</td>
-<td align="left"><a href="https://www.binnenlandsbestuur.nl/digitaal/gezichtsscanner-rukt-op-omvang-fraude-onbekend">Gezichtsscanner rukt op, maar cijfers over omvang fraude ontbreken</a></td>
-<td align="left">The Dutch cabinet is working on a legal basis for using facial scanners for passport and ID applications while more than half of municipalities already use automatic facial comparison, though the scale of fraud remains unknown.</td>
-</tr>
-<tr>
-<td align="left">2026-11-10</td>
-<td align="left">Politico US</td>
-<td align="left"><a href="https://www.politico.com/live-updates/2026/11/10/congress/trahan-crafting-ai-safety-bill-with-narrower-state-law-preemption-01158965">Trahan crafting AI safety bill with narrower state preemption</a></td>
-<td align="left">US Representative Trahan is crafting an AI safety bill with narrower state preemption as a Democrat-controlled Congress may be less likely to supersede state AI laws.</td>
-</tr>
-<tr>
-<td align="left">2026-11-11</td>
-<td align="left">Politico US</td>
-<td align="left"><a href="https://www.politico.com/news/2026/11/10/nvidia-ceos-spy-scandal-tilts-capitol-hills-chip-fight-01160548">Nvidia loses ground in Washington chip fight after CEO spy scandal</a></td>
-<td align="left">Nvidia&#39;s influence in Washington has weakened amid a CEO spy scandal as it tries to block new curbs on AI chips.</td>
-</tr>
-</tbody></table>
-<h2>Coming up</h2>
-<p>Deadlines and dates in the next 30 days.</p>
-<table>
-<thead>
-<tr>
-<th align="left">Date</th>
-<th align="left">Source</th>
-<th align="left">Item</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left">2026-11-11</td>
-<td align="left">Have your say</td>
-<td align="left"><a href="https://ec.europa.eu/info/law/better-regulation/have-your-say/initiatives/14628_en">Cloud and AI Development Act</a></td>
-</tr>
-<tr>
-<td align="left">2026-12-02</td>
-<td align="left">Calendar</td>
-<td align="left"><a href="https://ai-act-service-desk.ec.europa.eu/en/ai-act/timeline/timeline-implementation-eu-ai-act">AI Act: bans on sexual deepfakes and CSAM generators; Art. 50(2) transition ends</a></td>
-</tr>
-</tbody></table>
-<hr>
-<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
-]]></content:encoded>
-    </item>
-    <item>
-      <title>Data Engineering 2026-11-11</title>
-      <link>https://dboeter.github.io/daily-diff/#2026-11-11/ai-data</link>
-      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-11-11/ai-data</guid>
-      <pubDate>Wed, 11 Nov 2026 00:00:00 +0000</pubDate>
-      <description>Data Engineering 2026-11-11 ⬛ Overview · 🟪 AI Agents · 🟦 AI Models &amp;amp; Labs · 🟧 AI Policy · 🟨 Data Engineering Vendor items: 5 | Projects: 26 | Active today: 4 | Stable releases: 0 | Prereleases (not covered): 1 | Generated: 2026-11-11 05:56 UTC Highlights − Azure Databricks workspaces with Unity Catalog managed tables must plan for automatic upgrade to catalog commits after Databricks Runtime 15.4 LTS end of support on August 19, 2027, enabling multi-statement transactions, external engin...</description>
-      <content:encoded><![CDATA[<h1>Data Engineering 2026-11-11</h1>
-<p><a href="https://dboeter.github.io/daily-diff/#2026-11-11">⬛ Overview</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-11/ai-agents">🟪 AI Agents</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-11/ai-models">🟦 AI Models &amp; Labs</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-11/ai-policy">🟧 AI Policy</a> · <strong>🟨 Data Engineering</strong></p>
-<blockquote>
-<p>Vendor items: 5 | Projects: 26 | Active today: 4 | Stable releases: 0 | Prereleases (not covered): 1 | Generated: 2026-11-11 05:56 UTC</p>
-</blockquote>
-<hr>
-<h2>Highlights</h2>
-<ul>
-<li>− Azure Databricks workspaces with Unity Catalog managed tables must plan for automatic upgrade to catalog commits after Databricks Runtime 15.4 LTS end of support on August 19, 2027, enabling multi-statement transactions, external engine writes, and consistent governance.</li>
-<li>Snowflake Python Connector 5.0.0 introduces a native asyncio awaitable API built on Universal Core; teams using the connector in event-loop-based Python services must test migration to eliminate thread pools.</li>
-<li>BigQuery generative AI functions now support the gemini-4-carbon model (GA), and graph measures for locking aggregations to a key to prevent overcounting are GA with GRAPH_EXPAND TVF supporting multi-fact-table queries.</li>
-</ul>
-<hr>
-<h2>Action required</h2>
-<table>
-<thead>
-<tr>
-<th align="left">Date</th>
-<th align="left">Platform</th>
-<th align="left">Item</th>
-<th align="left">What to do</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left">2026-11-30</td>
-<td align="left">Azure Databricks</td>
-<td align="left"><a href="https://learn.microsoft.com/azure/databricks/release-notes/whats-coming#upcoming-end-of-life-for-the-genie-one-mcp-beta-endpoint">Upcoming end of life for the Genie One MCP Beta endpoint</a></td>
-<td align="left">The Genie One MCP Beta endpoint at <code>https://&lt;workspace-hostname&gt;/api/2.0/mcp/genie</code> reaches end of life on November 30, 2026, after which requests fail; migrate all workloads to the <code>system.ai.genie_one_mcp</code> MCP in Unity Gateway.</td>
-</tr>
-<tr>
-<td align="left">2027-01-31</td>
-<td align="left">BigQuery</td>
-<td align="left"><a href="https://docs.cloud.google.com/bigquery/docs/release-notes#November_06_2026">Starting January 31, 2027, the BigQuery Data Transfer Service for Shopify connector will no longer support the following fields</a></td>
-<td align="left">Starting January 31, 2027, the BigQuery Data Transfer Service for Shopify connector will drop support for the <code>legacyMode</code> field in the DeliveryProfile dataset schema and the <code>permitSkuSharing</code> field in the FulfillmentService dataset schema.</td>
-</tr>
-<tr>
-<td align="left">2027-02-04</td>
-<td align="left">Azure Databricks</td>
-<td align="left"><a href="https://learn.microsoft.com/azure/databricks/release-notes/product/2026/november#zhipu-ai-glm-52-is-scheduled-for-retirement">Zhipu AI GLM 5.2 is scheduled for retirement</a></td>
-<td align="left">Zhipu AI GLM 5.2 is deprecated and will be retired on February 4, 2027, requiring migration to GLM 5.3 per the Legacy, deprecated, and retired models guidance.</td>
-</tr>
-<tr>
-<td align="left">2027-08-19</td>
-<td align="left">Azure Databricks</td>
-<td align="left"><a href="https://learn.microsoft.com/azure/databricks/release-notes/whats-coming#all-unity-catalog-managed-tables-will-be-upgraded-to-catalog-commits">All Unity Catalog managed tables will be upgraded to catalog commits</a></td>
-<td align="left">After Databricks Runtime 15.4 LTS end of support on August 19, 2027, all Unity Catalog managed tables will be automatically upgraded to <code>catalog commits</code>, making Unity Catalog the system of coordination and enabling multi-statement transactions, external engine writes, and consistent governance; clients must plan for this breaking change before the 2027 deadline.</td>
-</tr>
-</tbody></table>
-<hr>
-<h2>Databricks</h2>
-<table>
-<thead>
-<tr>
-<th align="left">Date</th>
-<th align="left">Item</th>
-<th align="left">Summary</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left">2026-11-06</td>
-<td align="left">⚠️ <a href="https://learn.microsoft.com/azure/databricks/release-notes/whats-coming#all-unity-catalog-managed-tables-will-be-upgraded-to-catalog-commits">All Unity Catalog managed tables will be upgraded to catalog commits</a></td>
-<td align="left">After Databricks Runtime 15.4 LTS end of support on August 19, 2027, all Unity Catalog managed tables will be automatically upgraded to <code>catalog commits</code>, making Unity Catalog the system of coordination and enabling multi-statement transactions, external engine writes, and consistent governance; clients must plan for this breaking change before the 2027 deadline.</td>
-</tr>
-</tbody></table>
-<p><strong>Quiet today:</strong> <a href="https://github.com/delta-io/delta">Delta Lake</a>, <a href="https://github.com/delta-io/delta-rs">delta-rs</a>, <a href="https://github.com/unitycatalog/unitycatalog">Unity Catalog</a>, <a href="https://github.com/mlflow/mlflow">MLflow</a>, <a href="https://github.com/databricks/cli">Databricks CLI</a>, <a href="https://github.com/databricks/dbt-databricks">dbt-databricks</a>, <a href="https://github.com/databricks/terraform-provider-databricks">Terraform provider for Databricks</a></p>
-<hr>
-<h2>Snowflake</h2>
-<table>
-<thead>
-<tr>
-<th align="left">Date</th>
-<th align="left">Item</th>
-<th align="left">Summary</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left">2026-11-10</td>
-<td align="left">🤖 <a href="https://docs.snowflake.com/en/release-notes/2026/other/2026-11-10-fl-filter-pages">AI_EXTRACT and AI_PARSE_DOCUMENT now support page filtering with FL_FILTER_PAGES</a></td>
-<td align="left"><code>AI_EXTRACT</code> and <code>AI_PARSE_DOCUMENT</code> now accept <code>FL_FILTER_PAGES</code> to process specific document pages directly in SQL, eliminating the need to create separate files for each section.</td>
-</tr>
-<tr>
-<td align="left">2026-11-10</td>
-<td align="left"><a href="https://docs.snowflake.com/en/release-notes/2026/other/2026-11-10-temporary-role-grants-preview">Temporary role grants to users (Preview)</a></td>
-<td align="left">Account roles can be granted to users temporarily using <code>FOR INTERVAL</code> or <code>UNTIL</code> clauses in GRANT ROLE, with automatic revocation when the grant expires.</td>
-</tr>
-</tbody></table>
-<h3>Snowflake Connector for Python</h3>
-<ul>
-<li><strong>News:</strong> <a href="https://medium.com/snowflake/native-asyncio-comes-to-the-snowflake-python-connector-5941385ac80e">Native Asyncio Comes to the Snowflake Python Connector</a> announces version 5.0.0 with a native awaitable API built on Universal Core, eliminating the need for thread pools when calling Snowflake from event-loop-based Python services.</li>
-</ul>
-<p><strong>Quiet today:</strong> <a href="https://github.com/snowflakedb/snowpark-python">Snowpark Python</a>, <a href="https://github.com/apache/polaris">Apache Polaris</a>, <a href="https://github.com/snowflakedb/terraform-provider-snowflake">Terraform provider for Snowflake</a></p>
-<hr>
-<h2>Azure / Fabric &amp; GCP</h2>
-<table>
-<thead>
-<tr>
-<th align="left">Date</th>
-<th align="left">Item</th>
-<th align="left">Summary</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left">2026-11-10</td>
-<td align="left"><a href="https://docs.cloud.google.com/bigquery/docs/release-notes#November_10_2026">You can use graph measures to lock an aggregation to a key in order to perform complex aggregations without overcounting (GA)</a></td>
-<td align="left"><code>graph measures</code> lock aggregations to a key to prevent overcounting, supporting expressions including <code>AGG</code>-wrapped combinations, queried via <code>GRAPH_EXPAND</code> TVF (now multi-fact-table) and <code>AGG</code> function, with schema inspection via <code>BQ.SHOW_GRAPH_EXPAND_SCHEMA</code> and custom metadata via <code>OPTIONS</code> clause extensions.</td>
-</tr>
-<tr>
-<td align="left">2026-11-10</td>
-<td align="left">🤖 <a href="https://docs.cloud.google.com/bigquery/docs/release-notes#November_10_2026">BigQuery generative AI functions now support the gemini-4-carbon model</a></td>
-<td align="left">BigQuery generative AI functions now support the <code>gemini-4-carbon</code> model for generally available use.</td>
-</tr>
-</tbody></table>
-<hr>
-<h2>Open-source stack</h2>
-<h3>dlt</h3>
-<ul>
-<li><strong>News:</strong> <a href="https://dlthub.com/blog/introducing-performance-optimization">Introducing performance optimization in dltHub</a> announces new performance optimization features for the data ingestion library.</li>
-</ul>
-<h3>Apache Iceberg</h3>
-<ul>
-<li><strong>News:</strong> <a href="https://medium.com/snowflake/is-your-iceberg-catalog-healthy-939dc7817154">Is your Iceberg catalog healthy?</a> compares five open-source Iceberg catalogs on functionality and project health, highlighting catalog choice as critical for Iceberg adoption.</li>
-</ul>
-<h3>DuckDB</h3>
-<ul>
-<li><strong>News:</strong> <a href="https://news.ycombinator.com/item?id=50444907">Measuring Quack: DuckDB&#39;s New Client-Server Protocol</a> — title only, no description.</li>
-<li><strong>News:</strong> <a href="https://duckdb.org/2026/11/10/ducks-in-a-column.html">Ducks in a Column</a> details how DuckDB&#39;s columnar storage enables features like column-level SQL, aggregation shortcuts, window functions, and ASOF joins.</li>
-</ul>
-<p><strong>Quiet today:</strong> <a href="https://github.com/dbt-labs/dbt">dbt Core</a>, <a href="https://github.com/SQLMesh/sqlmesh">SQLMesh</a>, <a href="https://github.com/apache/airflow">Apache Airflow</a>, <a href="https://github.com/dagster-io/dagster">Dagster</a>, <a href="https://github.com/PrefectHQ/prefect">Prefect</a>, <a href="https://github.com/apache/iceberg-python">PyIceberg</a>, <a href="https://github.com/pola-rs/polars">Polars</a>, <a href="https://github.com/trinodb/trino">Trino</a>, <a href="https://github.com/great-expectations/great_expectations">Great Expectations</a>, <a href="https://github.com/sodadata/soda-core">Soda Core</a>, <a href="https://github.com/OpenLineage/OpenLineage">OpenLineage</a>, <a href="https://github.com/open-metadata/OpenMetadata">OpenMetadata</a></p>
-<hr>
-<h2>Across platforms</h2>
-<ul>
-<li>AI functions in SQL: Snowflake adds page filtering to AI_EXTRACT and AI_PARSE_DOCUMENT (GA), while BigQuery generative AI functions add gemini-4-carbon model support (GA); both run in-warehouse but expose different function sets and models.</li>
-</ul>
-<hr>
-<h2>Spotted</h2>
-<table>
-<thead>
-<tr>
-<th align="left">Story</th>
-<th align="left">Source</th>
-<th align="left">Discussion</th>
-<th align="left">Summary</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left"><a href="https://xata.io/blog/xata-is-joining-clickhouse">ClickHouse Acquires Xata</a></td>
-<td align="left">Hacker News</td>
-<td align="left"><a href="https://news.ycombinator.com/item?id=50436706">99 points, 10 comments</a></td>
-<td align="left">—</td>
-</tr>
-<tr>
-<td align="left">Show HN: WolveKafka – Consume Kafka with a plain HTTP endpoint (<a href="https://github.com/wolveflake/wolvekafka">wolveflake/wolvekafka</a>)</td>
-<td align="left">Hacker News</td>
-<td align="left"><a href="https://news.ycombinator.com/item?id=50443596">11 points, 2 comments</a></td>
-<td align="left">A Show HN tool called WolveKafka that enables consuming Kafka via a plain HTTP endpoint in any language, handling retries, dead-letter queues, batching, and offsets.</td>
-</tr>
-<tr>
-<td align="left"><a href="http://databasearchitects.blogspot.com/2026/11/next-level-benchmarking-overfitting.html">Next-Level Benchmarking Overfitting</a></td>
-<td align="left">Lobste.rs</td>
-<td align="left"><a href="https://lobste.rs/s/nuoce5/next_level_benchmarking_overfitting">18 points, 3 comments</a></td>
-<td align="left">A blog post by and for database architects examining overfitting in benchmarking practices.</td>
-</tr>
-</tbody></table>
-<hr>
-<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
-]]></content:encoded>
-    </item>
-    <item>
-      <title>AI Agents 2026-11-10</title>
-      <link>https://dboeter.github.io/daily-diff/#2026-11-10/ai-agents</link>
-      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-11-10/ai-agents</guid>
-      <pubDate>Tue, 10 Nov 2026 00:00:00 +0000</pubDate>
-      <description>AI Agents 2026-11-10 ⬛ Overview · 🟪 AI Agents · 🟦 AI Models &amp;amp; Labs · 🟧 AI Policy · 🟨 Data Engineering Projects: 15 | Active today: 4 | Stable releases: 7 | Prereleases (not covered): 3 | Generated: 2026-11-10 07:03 UTC Highlights Pi v1.5.1 removes GrepOperations.readFile callbacks for context lines (breaking change) Claude Code users report Team usage exhausted in ~30.5 hours after reset, far faster than prior burn rate (regression) Hermes Agent v0.23.1 raises plugin catalog cap to 16 Mi...</description>
-      <content:encoded><![CDATA[<h1>AI Agents 2026-11-10</h1>
-<p><a href="https://dboeter.github.io/daily-diff/#2026-11-10">⬛ Overview</a> · <strong>🟪 AI Agents</strong> · <a href="https://dboeter.github.io/daily-diff/#2026-11-10/ai-models">🟦 AI Models &amp; Labs</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-10/ai-policy">🟧 AI Policy</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-10/ai-data">🟨 Data Engineering</a></p>
-<blockquote>
-<p>Projects: 15 | Active today: 4 | Stable releases: 7 | Prereleases (not covered): 3 | Generated: 2026-11-10 07:03 UTC</p>
-</blockquote>
-<hr>
-<h2>Highlights</h2>
-<ul>
-<li>Pi v1.5.1 removes <code>GrepOperations.readFile</code> callbacks for context lines (breaking change)</li>
-<li>Claude Code users report Team usage exhausted in ~30.5 hours after reset, far faster than prior burn rate (regression)</li>
-<li>Hermes Agent v0.23.1 raises plugin catalog cap to 16 MiB, fixing silent install failures for plugins added since last update</li>
-</ul>
-<hr>
-<h2>Coding Agents &amp; Assistants</h2>
-<h3>Claude Code</h3>
-<ul>
-<li><strong>Release:</strong> <a href="https://github.com/anthropics/claude-code/releases/tag/v2.1.321">v2.1.321</a>–<a href="https://github.com/anthropics/claude-code/releases/tag/v2.1.322">v2.1.322</a> add fast mode on Vertex in global/US/EU regions, make Claude Fable 5.2 the default model (1M context, $8/$40 per Mtok), add <code>--settings</code> to <code>claude remote-control</code>, and fix multiple regressions including MCP OAuth token leaks, Bash permission prompts on network paths, <code>NotebookEdit</code>/<code>Edit</code> corruption on UNC/WSL paths, and Windows <code>FileChanged</code> hook failures with lowercase drive letters.</li>
-<li><strong>Hot issue:</strong> <a href="https://github.com/anthropics/claude-code/issues/107390">#107390</a>: users report weekly Team usage exhausted in ~30.5 hours after reset (Nov 4–5), far faster than the prior ~2-hour session burn rate, with no workflow change. (regression; 11 comments, 5 👍; +9 since 2026-11-08)</li>
-<li><strong>Hot issue:</strong> <a href="https://github.com/anthropics/claude-code/issues/107922">#107922</a>: an issue says Claude in Chrome fails to connect to the desktop app on Windows with 403 &quot;OAuth token forbidden&quot; on the bridge WebSocket since ~Oct 29, despite an active Pro plan confirmed by support. (regression; 4 comments, 1 👍; +3 since 2026-11-08)</li>
-<li><strong>News:</strong> <a href="https://news.ycombinator.com/item?id=50433799">Why Is AI Slop So Frustrating to Read?</a> analyzes unclear writing in AI output, measuring 78% of Claude Code reply sentences as unclear versus 11% on Stack Overflow.</li>
-<li><strong>News:</strong> <a href="https://dev.to/gde/take-claude-code-above-average-let-antigravity-review-it-1f3g">Take Claude Code Above Average: Let Antigravity Review It</a> describes building a tool that lets a second AI review Claude Code&#39;s work to improve quality.</li>
-</ul>
-<h3>Pi</h3>
-<ul>
-<li><strong>Release:</strong> <a href="https://github.com/earendil-works/pi/releases/tag/v1.5.1">v1.5.1</a> removes <code>GrepOperations.readFile</code> callbacks for context lines (breaking), stops sending empty <code>tools</code> for OpenAI-compatible models to fix vLLM 0.20+ 400 errors, adds pi auth login/logout without starting a session, enables idle prompt cache warming up to 30 minutes, implements Anthropic message threads sending only new messages, enriches Mermaid diagrams with pie charts and clickable labels, adds GitHub Copilot classifiers via <code>models.classify()</code>, and shows package update summaries with <code>pi update --extensions</code>.</li>
-</ul>
-<h3>Oh My Pi</h3>
-<ul>
-<li><strong>Release:</strong> <a href="https://github.com/can1357/oh-my-pi/releases/tag/v18.18.4">v18.18.4</a>–<a href="https://github.com/can1357/oh-my-pi/releases/tag/v18.18.6">v18.18.6</a> add Claude Fable 5.2 and Mythos 5.2 models, introduce Otari gateway provider (<code>/login otari</code>), pause Google Antigravity via a <code>disabled</code> auth rule, add <code>base64SkipThoughtSignature</code> compat flag for Gemini gateways, fix MCP <code>headers</code>/stdio <code>env</code> with <code>!command</code> retrying on 401/403, fix exclusive MCP tools keeping batch position, add Tern long-press menu to edit/resend/fork turns, fix multi-question ask forms showing Submit on last tab, and raise plugin catalog cap to 16 MiB so live catalog works again.</li>
-</ul>
-<h3>Hermes Agent</h3>
-<ul>
-<li><strong>Release:</strong> <a href="https://github.com/nousresearch/hermes-agent/releases/tag/v0.23.1">v0.23.1</a> raises the plugin catalog size cap from 2 MiB to 16 MiB so the live catalog is used instead of falling back to the bundled one, fixing silent install failures for plugins added since the last update; the patch rolls up ~618 PRs since v0.23.0 including Esc backtrack in TUI/CLI, group chats on gateways without Desktop, shared gateway connections, in-app browser sign-in with real browser profile, <code>hermes gateway attach</code>, new plugin API (session-scoped env, JSON-RPC, <code>llm.oneshot</code>, stable <code>conversation_id</code>, hooks), and faster transcript/handoff reads.</li>
-</ul>
-<p><strong>Quiet today:</strong> <a href="https://github.com/openai/codex">OpenAI Codex</a>, <a href="https://github.com/google-gemini/gemini-cli">Gemini CLI</a>, <a href="https://github.com/Kilo-Org/kilocode">Kilo Code</a>, <a href="https://github.com/anomalyco/opencode">OpenCode</a>, <a href="https://github.com/1jehuang/jcode">jcode</a>, <a href="https://github.com/cline/cline">Cline</a>, <a href="https://github.com/CommandCodeAI/command-code">Command Code</a>, <a href="https://github.com/deepseek-ai/deepseek-harness">DeepSeek Harness</a></p>
-<hr>
-<h2>Agent Tooling</h2>
-<p><strong>Quiet today:</strong> <a href="https://github.com/NVIDIA/OpenShell">OpenShell</a>, <a href="https://github.com/herdrdev/herdr">herdr</a>, <a href="https://github.com/conductor-oss/conductor">Conductor</a></p>
-<hr>
-<h2>Spotted</h2>
-<table>
-<thead>
-<tr>
-<th align="left">Story</th>
-<th align="left">Source</th>
-<th align="left">Discussion</th>
-<th align="left">Summary</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left"><a href="https://news.ycombinator.com/item?id=50422628">ChatGPT Desktop forwards your SSH agent to remote machines</a></td>
-<td align="left">Hacker News</td>
-<td align="left"><a href="https://news.ycombinator.com/item?id=50422628">208 points, 73 comments</a></td>
-<td align="left">—</td>
-</tr>
-<tr>
-<td align="left">Show HN: STE80 Humanizer – de-AI text by writing 80% of the way to ASD-STE100 (<a href="https://github.com/Dodaios/ste80-humanizer">Dodaios/ste80-humanizer</a>)</td>
-<td align="left">Hacker News</td>
-<td align="left"><a href="https://news.ycombinator.com/item?id=50429144">83 points, 24 comments</a></td>
-<td align="left">The author released an agent skill called STE80 Humanizer that rewrites text to reach 80% of the ASD-STE100 Simplified Technical English standard.</td>
-</tr>
-<tr>
-<td align="left"><a href="https://news.ycombinator.com/item?id=50426070">Ask HN: How do you evaluate the skills your AI agents use?</a></td>
-<td align="left">Hacker News</td>
-<td align="left"><a href="https://news.ycombinator.com/item?id=50426070">18 points, 4 comments</a></td>
-<td align="left">—</td>
-</tr>
-<tr>
-<td align="left">USB: A trust layer for AI skills and MCP servers (<a href="https://github.com/PeepSick/usbplus">PeepSick/usbplus</a>)</td>
-<td align="left">Hacker News</td>
-<td align="left"><a href="https://news.ycombinator.com/item?id=50432661">11 points, 2 comments</a></td>
-<td align="left">USB+ provides a universal skill format with 529 skills and 16 target formats, including a trust layer with secscan and mcprobe.</td>
-</tr>
-<tr>
-<td align="left">Show HN: Airgap-check – find what your AI app silently downloads offline (<a href="https://github.com/humanethq/airgap-check">humanethq/airgap-check</a>)</td>
-<td align="left">Hacker News</td>
-<td align="left"><a href="https://news.ycombinator.com/item?id=50431705">9 points, 0 comments</a></td>
-<td align="left">Airgap-check audits AI repositories for offline crashes, silent telemetry, and .env secret routing when run with --network none.</td>
-</tr>
-<tr>
-<td align="left">Show HN: Glassbrain – Read your agent&#39;s brain, know what your agent knows (<a href="https://github.com/voidixyn/glassbrain">voidixyn/glassbrain</a>)</td>
-<td align="left">Hacker News</td>
-<td align="left"><a href="https://news.ycombinator.com/item?id=50423154">6 points, 1 comment</a></td>
-<td align="left">Glassbrain lets you inspect agents&#39; knowledge graphs by converting plain JSON into a single HTML file for review.</td>
-</tr>
-<tr>
-<td align="left"><a href="https://dev.to/varshithvhegde/top-7-best-agent-gateways-lhi">Top 7 Best Agent Gateways</a></td>
-<td align="left">Dev.to</td>
-<td align="left"><a href="https://dev.to/varshithvhegde/top-7-best-agent-gateways-lhi">21 reactions, 3 comments</a></td>
-<td align="left">The author reviews seven agent gateways, highlighting that agents can call a model five times and search.</td>
-</tr>
-<tr>
-<td align="left"><a href="https://dev.to/taqui/dont-write-more-prompts-install-these-10-trending-skills-instead-3lpc">Don&#39;t Write More Prompts. Install These 10 Trending &#39;Skills&#39; Instead</a></td>
-<td align="left">Dev.to</td>
-<td align="left"><a href="https://dev.to/taqui/dont-write-more-prompts-install-these-10-trending-skills-instead-3lpc">20 reactions, 7 comments</a></td>
-<td align="left">The author tested 10 trending GitHub skills that enhance agent capabilities.</td>
 </tr>
 </tbody></table>
 <hr>

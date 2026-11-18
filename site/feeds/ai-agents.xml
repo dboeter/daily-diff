@@ -13,7 +13,131 @@
       <height>144</height>
     </image>
     <atom:link href="https://dboeter.github.io/daily-diff/feeds/ai-agents.xml" rel="self" type="application/rss+xml"/>
-    <lastBuildDate>Tue, 17 Nov 2026 07:49:08 +0000</lastBuildDate>
+    <lastBuildDate>Wed, 18 Nov 2026 07:14:50 +0000</lastBuildDate>
+    <item>
+      <title>AI Agents 2026-11-18</title>
+      <link>https://dboeter.github.io/daily-diff/#2026-11-18/ai-agents</link>
+      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-11-18/ai-agents</guid>
+      <pubDate>Wed, 18 Nov 2026 00:00:00 +0000</pubDate>
+      <description>AI Agents 2026-11-18 ⬛ Overview · 🟪 AI Agents · 🟦 AI Models &amp;amp; Labs · 🟧 AI Policy · 🟨 Data Engineering Projects: 15 | Active today: 5 | Stable releases: 9 | Prereleases (not covered): 5 | Generated: 2026-11-18 07:08 UTC Highlights socket.dev reports that compromised versions 1.26.1 and 1.26.2 of Microsoft&amp;#39;s agent-framework PyPI package use .pth startup hooks to exfiltrate Azure, GitHub Actions, and CI/CD credentials. Oh My Pi v18.22.1–v18.22.2 carries a breaking change: the JavaScript...</description>
+      <content:encoded><![CDATA[<h1>AI Agents 2026-11-18</h1>
+<p><a href="https://dboeter.github.io/daily-diff/#2026-11-18">⬛ Overview</a> · <strong>🟪 AI Agents</strong> · <a href="https://dboeter.github.io/daily-diff/#2026-11-18/ai-models">🟦 AI Models &amp; Labs</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-18/ai-policy">🟧 AI Policy</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-18/ai-data">🟨 Data Engineering</a></p>
+<blockquote>
+<p>Projects: 15 | Active today: 5 | Stable releases: 9 | Prereleases (not covered): 5 | Generated: 2026-11-18 07:08 UTC</p>
+</blockquote>
+<hr>
+<h2>Highlights</h2>
+<ul>
+<li>socket.dev reports that compromised versions 1.26.1 and 1.26.2 of Microsoft&#39;s agent-framework PyPI package use <code>.pth</code> startup hooks to exfiltrate Azure, GitHub Actions, and CI/CD credentials.</li>
+<li>Oh My Pi v18.22.1–v18.22.2 carries a breaking change: the JavaScript eval <code>commit</code> helper now validates its arguments strictly, throwing a <code>TypeError</code> on unknown option names or non-object options.</li>
+<li>A Harvard study says AI coding agents increased code production by 30%, while completed work did not measurably rise and review time grew by 49%.</li>
+</ul>
+<hr>
+<h2>Coding Agents &amp; Assistants</h2>
+<h3>Claude Code</h3>
+<ul>
+<li><strong>Release:</strong> <a href="https://github.com/anthropics/claude-code/releases/tag/v2.1.327">v2.1.327</a> fixes several data-loss and safety bugs: stopping a Remote Control server in worktree mode no longer deletes a running session&#39;s git-ignored files such as <code>.env</code>, self-hosted runners using <code>--use-anthropic-git-proxy</code> no longer delete a non-empty directory named by <code>GIT_CONFIG_GLOBAL</code>, and <code>claude mcp add</code>/<code>claude mcp remove</code> with project scope no longer drop other top-level keys from <code>.mcp.json</code>. It adds a confirmation before <code>/install-github-app</code> changes a repository, a <code>/status</code> listing of broken agent, skill, command and output-style files and other misconfigurations, and <code>/tui classic</code> as the name for the non-fullscreen renderer.</li>
+<li><strong>News:</strong> <a href="https://news.ycombinator.com/item?id=50529612">How the Claude Code team thinks about verification</a> describes how end-to-end, property and differential tests let coding agents verify their work with evidence, and what the Claude Code team does to keep its verifiers honest.</li>
+</ul>
+<h3>OpenAI Codex</h3>
+<ul>
+<li><strong>Release:</strong> <a href="https://github.com/openai/codex/releases/tag/rust-v0.169.1">rust-v0.169.1</a>–<a href="https://github.com/openai/codex/releases/tag/rust-v0.170.0">rust-v0.170.0</a> fixes MCP OAuth credential races during cancellation, login, and logout, keeps child threads and permission updates from losing existing sandbox restrictions, and removes duplicate file search results. It adds WebRTC negotiation for realtime voice calls in the TUI and experimental support for using identically named MCP servers across environments.</li>
+<li><strong>Hot issue:</strong> <a href="https://github.com/openai/codex/issues/57101">#57101</a>: An issue reports that on Windows the Codex Computer Use helper and its capture-access record stay open — leaving a gold/yellow border around the display — roughly five hours after a screenshot-producing turn completes, and asks that capture resources be released when their owning work ends. (57 comments, 9 👍; +15 in the last 24h)</li>
+</ul>
+<h3>OpenCode</h3>
+<ul>
+<li><strong>Release:</strong> <a href="https://github.com/anomalyco/opencode/releases/tag/v1.19.6">v1.19.6</a>–<a href="https://github.com/anomalyco/opencode/releases/tag/v2.3.2">v2.3.2</a> fixes GPT-6.2 models re-billing the system prompt as uncached input on every step and stops sessions with many images from sending oversized requests. Headline additions include timed-out shell commands moving to the background instead of being killed, background compaction now on by default, GPT 6.2 models showing up in the model picker when signing in with ChatGPT, and OpenCode 1 offering an in-app upgrade to OpenCode 2.0.</li>
+<li><strong>Hot issue:</strong> <a href="https://github.com/anomalyco/opencode/issues/37216">#37216</a>: A feature request asks for i18n support in the TUI, whose strings are hardcoded in English while the app, desktop and console packages already support 17+ locales. (21 comments, 0 👍; +11 in the last 24h)</li>
+</ul>
+<h3>Oh My Pi</h3>
+<ul>
+<li><strong>Release:</strong> <a href="https://github.com/can1357/oh-my-pi/releases/tag/v18.22.1">v18.22.1</a>–<a href="https://github.com/can1357/oh-my-pi/releases/tag/v18.22.2">v18.22.2</a> has a breaking change: the JavaScript eval <code>commit</code> helper now validates its arguments strictly, throwing a <code>TypeError</code> on unknown option names or non-object options, and the obsolete <code>wayland-pipewire</code> Cargo feature and <code>OMP_NATIVE_FEATURES</code> variable are removed. Fixes include no longer feeding failed tool calls back to the model as refusal explanations and OAuth accounts refreshed through an auth broker keeping their stored routing metadata; it also adds a native Kiro provider that signs in with AWS IAM Identity Center, AWS Builder ID, Google, GitHub, or a Kiro API key and reports Kiro credits in <code>/usage</code>.</li>
+<li><strong>Hot issue:</strong> <a href="https://github.com/can1357/oh-my-pi/issues/19578">#19578</a>: An issue reports that <code>openai-codex/gpt-6.2-sol</code> and <code>gpt-6.2-astra</code> are missing from OMP&#39;s Codex model list after <code>omp models refresh</code> and that a direct request for Sol fails model resolution while the native Codex CLI lists both and completes a Sol request, though the reporter notes the workspace and OMP credential used were not verified. (9 comments, 2 👍; +11 in the last 24h)</li>
+</ul>
+<p><strong>Quiet today:</strong> <a href="https://github.com/google-gemini/gemini-cli">Gemini CLI</a>, <a href="https://github.com/Kilo-Org/kilocode">Kilo Code</a>, <a href="https://github.com/earendil-works/pi">Pi</a>, <a href="https://github.com/1jehuang/jcode">jcode</a>, <a href="https://github.com/cline/cline">Cline</a>, <a href="https://github.com/CommandCodeAI/command-code">Command Code</a>, <a href="https://github.com/deepseek-ai/deepseek-harness">DeepSeek Harness</a>, <a href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a></p>
+<hr>
+<h2>Agent Tooling</h2>
+<h3>OpenShell</h3>
+<ul>
+<li><strong>Release:</strong> <a href="https://github.com/NVIDIA/OpenShell/releases/tag/v0.1.9">v0.1.9</a> moves the Go SDK to <code>github.com/ai-openshell/sdk-go</code> and deprecates <code>github.com/NVIDIA/OpenShell/sdk/go</code>; wildcard network policy endpoints no longer accept private IP literals alone unless an exact endpoint or <code>allowed_ips</code> grant is present, middleware selectors cannot include a port, and Helm charts with <code>service.metricsPort</code> set to <code>0</code> or <code>false</code> fail to render, with <code>metrics.enabled</code> replacing the port value. It also says Postgres gateway migration <code>010</code> builds indexes on <code>objects</code> with <code>CREATE INDEX</code> and blocks writes, fixes write-method authorization denial events to report Create, Update, or Delete by <code>class_uid: 6003</code> and <code>status_id: 2</code>, and includes opt-in HTTP streaming hooks plus <code>mutation_admission_limit_per_caller</code> and <code>mutation_replay_window_seconds</code> controls.</li>
+</ul>
+<p><strong>Quiet today:</strong> <a href="https://github.com/herdrdev/herdr">herdr</a>, <a href="https://github.com/microsoft/conductor">Conductor</a></p>
+<hr>
+<h2>Spotted</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Story</th>
+<th align="left">Source</th>
+<th align="left">Discussion</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a href="https://complexdiscovery.com/harvard-researchers-find-ai-coding-agents-shifted-the-bottleneck-to-code-review/">Harvard researchers find AI coding agents shifted the bottleneck to code review</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50538303">149 points, 194 comments</a></td>
+<td align="left">A Harvard study says AI coding agents increased code production by 30%, while completed work did not measurably rise and review time grew by 49%.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://starsling.dev">Launch HN: StarSling (YC P25) – Self-improving CI for agent-volume repos</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50536468">64 points, 37 comments</a></td>
+<td align="left">StarSling, a YC P25 startup, says its GitHub Actions runners are a drop-in replacement for ubuntu-latest, up to 10x faster, and include AI agents that open CI optimization pull requests.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://openai.com/index/advancing-computer-use-for-healthcare-teams/">Advancing computer-use agents for healthcare teams</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50535898">47 points, 30 comments</a></td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left"><a href="https://rachsmith.com/how-long-until-agent-output-turns-to-shit">How long have we got before the agent output is enshittified?</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50531129">15 points, 16 comments</a></td>
+<td align="left">The author asks how long before the output of AI agents begins inevitable enshittification.</td>
+</tr>
+<tr>
+<td align="left">🔓 <a href="https://socket.dev/blog/agent-framework-pypi-package-compromised-with-credential-stealer">Microsoft&#39;s agent-framework PyPI package Compromised with Credential Stealer</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50542084">14 points, 2 comments</a></td>
+<td align="left">A socket.dev report says compromised versions 1.26.1 and 1.26.2 of Microsoft&#39;s agent-framework PyPI package use .pth startup hooks to exfiltrate Azure, GitHub Actions, and CI/CD credentials.</td>
+</tr>
+<tr>
+<td align="left">Spaceship IDE – Realtime Steering with Cerebras Ultra-Low Latency LLM (<a href="https://github.com/chuanqisun/spaceship">chuanqisun/spaceship</a>)</td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50536955">5 points, 0 comments</a></td>
+<td align="left">Spaceship IDE advertises realtime steering of ideas using a Cerebras ultra-low-latency LLM.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://arstechnica.com/gadgets/2026/11/microsoft-calls-copilot-the-new-os-for-work-at-ignite-keynote/">Ignite 2026: Copilot is &quot;the new OS for work,&quot; and now Office runs inside of it</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50542314">5 points, 1 comment</a></td>
+<td align="left">The Ars Technica report says Copilot is the new OS for work, with Word, Excel, and PowerPoint running inside it and always-on agents are next.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://dev.to/aws-builders/ai-agents-open-17-million-pull-requests-a-month-i-built-a-gate-that-rejects-the-ones-that-lie-46n7">AI agents open 17 million pull requests a month. I built a gate that rejects the ones that lie.</a></td>
+<td align="left">Dev.to</td>
+<td align="left"><a href="https://dev.to/aws-builders/ai-agents-open-17-million-pull-requests-a-month-i-built-a-gate-that-rejects-the-ones-that-lie-46n7">30 reactions, 18 comments</a></td>
+<td align="left">The author writes that AI agents open 17 million pull requests a month and built a deterministic Python gate that rejects Amazon Nova Pro fixes when the fix cannot be proven.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://dev.to/aws/once-upon-agentic-ai-part-2-develop-your-own-mcp-server-and-cast-its-tools-from-strands-agents-9ob">Once Upon Agentic AI (Part 2): Develop your own MCP server and cast its tools from Strands Agents</a></td>
+<td align="left">Dev.to</td>
+<td align="left"><a href="https://dev.to/aws/once-upon-agentic-ai-part-2-develop-your-own-mcp-server-and-cast-its-tools-from-strands-agents-9ob">29 reactions, 7 comments</a></td>
+<td align="left">The author&#39;s Part 2 entry in Once Upon Agentic AI describes developing an MCP server and casting its tools from Strands Agents.</td>
+</tr>
+<tr>
+<td align="left">🔓 <a href="https://dev.to/debashish_ghosal/my-agent-scrubbed-a-leaked-api-key-by-force-pushing-main-it-made-everything-worse-57a">My Agent Scrubbed a Leaked API Key by Force-Pushing main. It Made Everything Worse.</a></td>
+<td align="left">Dev.to</td>
+<td align="left"><a href="https://dev.to/debashish_ghosal/my-agent-scrubbed-a-leaked-api-key-by-force-pushing-main-it-made-everything-worse-57a">24 reactions, 7 comments</a></td>
+<td align="left"><em>Not confirmed by the vendor, a researcher or the press.</em> The author recounts how their agent removed a leaked API key by force-pushing main and made everything worse.</td>
+</tr>
+</tbody></table>
+<hr>
+<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
+]]></content:encoded>
+    </item>
     <item>
       <title>AI Agents 2026-11-17</title>
       <link>https://dboeter.github.io/daily-diff/#2026-11-17/ai-agents</link>
@@ -2836,79 +2960,6 @@
 <h2>Agent Tooling</h2>
 <p>No stable releases, hot issues or news items today.</p>
 <p><strong>Quiet today:</strong> <a href="https://github.com/NVIDIA/OpenShell">OpenShell</a>, <a href="https://github.com/herdrdev/herdr">herdr</a>, <a href="https://github.com/mksglu/context-mode">context-mode</a>, <a href="https://github.com/asheshgoplani/agent-deck">Agent Deck</a></p>
-<hr>
-<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
-]]></content:encoded>
-    </item>
-    <item>
-      <title>AI Agents 2026-10-19</title>
-      <link>https://dboeter.github.io/daily-diff/#2026-10-19/ai-agents</link>
-      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-10-19/ai-agents</guid>
-      <pubDate>Mon, 19 Oct 2026 00:00:00 +0000</pubDate>
-      <description>AI Agents 2026-10-19 📅 Overview · 🤖 AI Agents · 💬 AI Discussions · 📚 AI Research · 🌐 Lab Announcements · 🗄️ Data Engineering Watch · 📈 Agent &amp;amp; AI Coding Trends · 🧠 AI Models Generated: 2026-10-19 01:04 UTC | Projects: 16 | Active today: 10 | Stable releases: 5 | Prereleases (not covered): 1 🕵️ Stealth Models on OpenRouter No stealth models listed on OpenRouter today. Coding Agents &amp;amp; Assistants Overview Claude Code shipped v2.1.303 with bug‑fix and reliability improvements, Oh My...</description>
-      <content:encoded><![CDATA[<h1>AI Agents 2026-10-19</h1>
-<p><a href="https://dboeter.github.io/daily-diff/#2026-10-19">📅 Overview</a> · <strong>🤖 AI Agents</strong> · <a href="https://dboeter.github.io/daily-diff/#2026-10-19/ai-hn">💬 AI Discussions</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-19/ai-arxiv">📚 AI Research</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-19/ai-web">🌐 Lab Announcements</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-19/ai-data">🗄️ Data Engineering Watch</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-19/ai-trending">📈 Agent &amp; AI Coding Trends</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-19/ai-hf">🧠 AI Models</a></p>
-<blockquote>
-<p>Generated: 2026-10-19 01:04 UTC | Projects: 16 | Active today: 10 | Stable releases: 5 | Prereleases (not covered): 1</p>
-</blockquote>
-<hr>
-<h2>🕵️ Stealth Models on OpenRouter</h2>
-<p>No stealth models listed on OpenRouter today.</p>
-<hr>
-<h2>Coding Agents &amp; Assistants</h2>
-<h3>Overview</h3>
-<p>Claude Code shipped v2.1.303 with bug‑fix and reliability improvements, Oh My Pi released v18.12.2 fixing failed‑tool‑call handling, and jcode hit v0.99.0 adding account failover, hibernation and faster reloads. OpenAI Codex users encountered a BYOK Work‑mode bug that blocks message submission when local browser tools are enabled, while OpenCode saw high‑severity free‑model failures in its Windows TUI and abuse‑detected gateway errors. Community attention turned to plugin ecosystems and cross‑agent tooling: Claude Code’s official plugin directory and ai‑job‑search framework trended, a Codex‑Claude bridge and OpenCode Rust harness gained stars, and Pi‑desktop, Pi‑mcp‑adapter and various DeepSeek Harness mobile clients attracted notice.</p>
-<h3>Claude Code</h3>
-<ul>
-<li><strong>Release</strong>: v2.1.303 brings bug fixes and reliability improvements. <a href="https://github.com/anthropics/claude-code/releases/tag/v2.1.303">https://github.com/anthropics/claude-code/releases/tag/v2.1.303</a></li>
-<li><strong>News</strong>: The Claude Code team’s code‑review process was highlighted on Hacker News. <a href="https://news.ycombinator.com/item?id=50122951">https://news.ycombinator.com/item?id=50122951</a></li>
-</ul>
-<h3>OpenAI Codex</h3>
-<ul>
-<li><strong>News</strong>: Codex Desktop continuously generates Crashpad pending dumps, according to a Hacker News post. <a href="https://news.ycombinator.com/item?id=50133231">https://news.ycombinator.com/item?id=50133231</a></li>
-<li><strong>Hot issue</strong>: Work mode blocks message submission in BYOK mode when local browser/computer tools are enabled. <a href="https://github.com/openai/codex/issues/54841">https://github.com/openai/codex/issues/54841</a></li>
-</ul>
-<h3>OpenCode</h3>
-<ul>
-<li><strong>News</strong>: vakandi/opencode-rust provides an open‑source Rust implementation of the OpenCode agent. <a href="https://github.com/vakandi/opencode-rust">https://github.com/vakandi/opencode-rust</a></li>
-<li><strong>Hot issue</strong>: Free models fail inside the official Windows TUI (issue #56324) and the free‑model gateway flags abuse traffic (issue #56762). <a href="https://github.com/anomalyco/opencode/issues/56324">https://github.com/anomalyco/opencode/issues/56324</a> <a href="https://github.com/anomalyco/opencode/issues/56762">https://github.com/anomalyco/opencode/issues/56762</a></li>
-</ul>
-<h3>Pi</h3>
-<ul>
-<li><strong>News</strong>: vastsa/PI-Desktop offers a local‑first AI coding agent desktop built with Electron + Rust and the Pi Agent Harness. <a href="https://github.com/vastsa/PI-Desktop">https://github.com/vastsa/PI-Desktop</a></li>
-</ul>
-<h3>Oh My Pi</h3>
-<ul>
-<li><strong>Release</strong>: v18.12.2 updates the pi‑agent‑core with improved failed‑tool‑call correction for DeepSeek models and other fixes. <a href="https://github.com/can1357/oh-my-pi/releases/tag/v18.12.2">https://github.com/can1357/oh-my-pi/releases/tag/v18.12.2</a></li>
-<li><strong>News</strong>: FaqFirebase/pi-desktop delivers a free, open‑source GUI for the Pi coding agent and oh‑my‑pi. <a href="https://github.com/FaqFirebase/pi-desktop">https://github.com/FaqFirebase/pi-desktop</a></li>
-<li><strong>Hot issue</strong>: A tokio‑rt‑worker alloc crash (≈40 GiB) occurred during heavy concurrent subagent use. <a href="https://github.com/can1357/oh-my-pi/issues/16067">https://github.com/can1357/oh-my-pi/issues/16067</a></li>
-</ul>
-<h3>jcode</h3>
-<ul>
-<li><strong>Release</strong>: v0.99.0 adds automatic account failover, hibernation of idle sessions, and faster reload of large transcripts. <a href="https://github.com/1jehuang/jcode/releases/tag/v0.99.0">https://github.com/1jehuang/jcode/releases/tag/v0.99.0</a></li>
-</ul>
-<h3>DeepSeek Harness</h3>
-<ul>
-<li><strong>News</strong>: DSH-APP/DSHA lets you run DeepSeek Harness on Android without root or Termux, with a full Ubuntu environment. <a href="https://github.com/DSH-APP/DSHA">https://github.com/DSH-APP/DSHA</a></li>
-</ul>
-<h3>Hermes Agent</h3>
-<ul>
-<li><strong>News</strong>: BkashJEE/hermes-bot-forge is a Hermes Agent plugin that builds a complete bot from a role prompt. <a href="https://github.com/BkashJEE/hermes-bot-forge">https://github.com/BkashJEE/hermes-bot-forge</a></li>
-</ul>
-<p><strong>Quiet today:</strong> <a href="https://github.com/google-gemini/gemini-cli">Gemini CLI</a>, <a href="https://github.com/Kilo-Org/kilocode">Kilo Code</a>, <a href="https://github.com/cline/cline">Cline</a>, <a href="https://github.com/CommandCodeAI/command-code">Command Code</a></p>
-<hr>
-<h2>Agent Tooling</h2>
-<h3>Overview</h3>
-<p>Agent Deck shipped stable updates (v1.16.29 and v1.16.30) to its terminal session manager for AI coding agents. No breaking issues were reported for any of the projects today. Context‑mode attracted significant attention after appearing on GitHub Trending, noting a large star gain and its features for optimizing agent context windows.</p>
-<h3>Agent Deck</h3>
-<ul>
-<li><strong>Release</strong>: v1.16.29‑v1.16.30 are stable releases of the Agent Deck terminal session manager for AI coding agents, offering installation via Homebrew (<code>brewinstallasheshgoplani/tap/agent-deck</code>), a quick‑install script, and Go install (<code>goinstallgithub.com/asheshgoplani/agent-deck/cmd/agent-deck@&lt;version&gt;</code>). See the v1.16.30 release: <a href="https://github.com/asheshgoplani/agent-deck/releases/tag/v1.16.30">https://github.com/asheshgoplani/agent-deck/releases/tag/v1.16.30</a></li>
-</ul>
-<h3>context-mode</h3>
-<ul>
-<li><strong>News</strong>: GitHub Trending highlighted context-mode as a context‑window optimization tool for AI coding agents that sandboxes tool output (98% reduction), persists session memory, and enforces routing across 17 platforms via MCP + hooks, earning it +4 138 stars: <a href="https://github.com/mksglu/context-mode">https://github.com/mksglu/context-mode</a></li>
-</ul>
-<p><strong>Quiet today:</strong> <a href="https://github.com/NVIDIA/OpenShell">OpenShell</a>, <a href="https://github.com/herdrdev/herdr">herdr</a></p>
 <hr>
 <p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
 ]]></content:encoded>
