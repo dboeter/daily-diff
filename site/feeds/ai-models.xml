@@ -13,7 +13,174 @@
       <height>144</height>
     </image>
     <atom:link href="https://dboeter.github.io/daily-diff/feeds/ai-models.xml" rel="self" type="application/rss+xml"/>
-    <lastBuildDate>Tue, 17 Nov 2026 07:49:08 +0000</lastBuildDate>
+    <lastBuildDate>Wed, 18 Nov 2026 07:14:50 +0000</lastBuildDate>
+    <item>
+      <title>AI Models &amp; Labs 2026-11-18</title>
+      <link>https://dboeter.github.io/daily-diff/#2026-11-18/ai-models</link>
+      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-11-18/ai-models</guid>
+      <pubDate>Wed, 18 Nov 2026 00:00:00 +0000</pubDate>
+      <description>AI Models &amp;amp; Labs 2026-11-18 ⬛ Overview · 🟪 AI Agents · 🟦 AI Models &amp;amp; Labs · 🟧 AI Policy · 🟨 Data Engineering Lab posts: 3 | New models: 8 | Spotted: 7 | Generated: 2026-11-18 07:08 UTC Highlights Cerebras says its disaggregated inference pairs AMD GPUs for prefill with wafer-scale decode to deliver 5× more tokens per megawatt without slowing token generation. Authors of one analysis say they traced Gemini 4 Carbon runs that spent close to an hour on tasks Opus and Astra finished in m...</description>
+      <content:encoded><![CDATA[<h1>AI Models &amp; Labs 2026-11-18</h1>
+<p><a href="https://dboeter.github.io/daily-diff/#2026-11-18">⬛ Overview</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-18/ai-agents">🟪 AI Agents</a> · <strong>🟦 AI Models &amp; Labs</strong> · <a href="https://dboeter.github.io/daily-diff/#2026-11-18/ai-policy">🟧 AI Policy</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-18/ai-data">🟨 Data Engineering</a></p>
+<blockquote>
+<p>Lab posts: 3 | New models: 8 | Spotted: 7 | Generated: 2026-11-18 07:08 UTC</p>
+</blockquote>
+<hr>
+<h2>Highlights</h2>
+<ul>
+<li>Cerebras says its disaggregated inference pairs AMD GPUs for prefill with wafer-scale decode to deliver 5× more tokens per megawatt without slowing token generation.</li>
+<li>Authors of one analysis say they traced Gemini 4 Carbon runs that spent close to an hour on tasks Opus and Astra finished in minutes.</li>
+</ul>
+<hr>
+<h2>Lab announcements</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Lab</th>
+<th align="left">Post</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-11-18</td>
+<td align="left">OpenAI</td>
+<td align="left"><a href="https://openai.com/index/astra-law-6-2/">Astra Law 6 2</a></td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left">2026-11-18</td>
+<td align="left">OpenAI</td>
+<td align="left"><a href="https://openai.com/index/introducing-chatgpt-for-sales/">Introducing Chatgpt For Sales</a></td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left">—</td>
+<td align="left">OpenAI</td>
+<td align="left"><a href="https://openai.com/index/introducing-gpt-6-2-astra-sol/">Introducing Gpt 6 2 Astra Sol</a></td>
+<td align="left">—</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>New on OpenRouter</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Model</th>
+<th align="left">Listed</th>
+<th align="left">Context</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a href="https://openrouter.ai/openai/gpt-6.2-astra-pro">OpenAI: GPT-6.2 Astra Pro</a> <code>openai/gpt-6.2-astra-pro</code></td>
+<td align="left">2026-11-17</td>
+<td align="left">1.1M</td>
+<td align="left">GPT-6.2 Astra Pro is the same underlying model as GPT-6.2 Astra, served with <code>reasoning.mode</code> set to <code>pro</code> for higher-quality responses on complex tasks.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://openrouter.ai/openai/gpt-6.2-astra-pro:batch">OpenAI: GPT-6.2 Astra Pro (batch)</a> <code>openai/gpt-6.2-astra-pro:batch</code></td>
+<td align="left">2026-11-17</td>
+<td align="left">1.1M</td>
+<td align="left">GPT-6.2 Astra Pro (batch) is the same underlying model as GPT-6.2 Astra, served with <code>reasoning.mode</code> set to <code>pro</code> for higher-quality responses on complex tasks.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://openrouter.ai/openai/gpt-6.2-astra">OpenAI: GPT-6.2 Astra</a> <code>openai/gpt-6.2-astra</code></td>
+<td align="left">2026-11-17</td>
+<td align="left">1.1M</td>
+<td align="left">GPT-6.2 Astra is the flagship model in the GPT-6.2 series, built for the hardest projects and suited for real-world engineering, professional work and scientific research.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://openrouter.ai/openai/gpt-6.2-astra:batch">OpenAI: GPT-6.2 Astra (batch)</a> <code>openai/gpt-6.2-astra:batch</code></td>
+<td align="left">2026-11-17</td>
+<td align="left">1.1M</td>
+<td align="left">GPT-6.2 Astra (batch) is the flagship model in the GPT-6.2 series, built for the hardest projects and suited for real-world engineering, professional work and scientific research.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://openrouter.ai/openai/gpt-6.2-sol-pro">OpenAI: GPT-6.2 Sol Pro</a> <code>openai/gpt-6.2-sol-pro</code></td>
+<td align="left">2026-11-17</td>
+<td align="left">1.1M</td>
+<td align="left">GPT-6.2 Sol Pro is the same underlying model as GPT-6.2 Sol, served with <code>reasoning.mode</code> set to <code>pro</code> for higher-quality responses on complex tasks.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://openrouter.ai/openai/gpt-6.2-sol-pro:batch">OpenAI: GPT-6.2 Sol Pro (batch)</a> <code>openai/gpt-6.2-sol-pro:batch</code></td>
+<td align="left">2026-11-17</td>
+<td align="left">1.1M</td>
+<td align="left">GPT-6.2 Sol Pro (batch) is the same underlying model as GPT-6.2 Sol, served with <code>reasoning.mode</code> set to <code>pro</code> for higher-quality responses on complex tasks.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://openrouter.ai/openai/gpt-6.2-sol">OpenAI: GPT-6.2 Sol</a> <code>openai/gpt-6.2-sol</code></td>
+<td align="left">2026-11-17</td>
+<td align="left">1.1M</td>
+<td align="left">GPT-6.2 Sol is an upgrade to GPT-6.1 Sol, positioned below the flagship GPT-6.2 Astra in the GPT-6.2 series and suited as an efficient, versatile model for everyday work.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://openrouter.ai/openai/gpt-6.2-sol:batch">OpenAI: GPT-6.2 Sol (batch)</a> <code>openai/gpt-6.2-sol:batch</code></td>
+<td align="left">2026-11-17</td>
+<td align="left">1.1M</td>
+<td align="left">GPT-6.2 Sol (batch) is an upgrade to GPT-6.1 Sol, positioned below the flagship GPT-6.2 Astra in the GPT-6.2 series and suited as an efficient, versatile model for everyday work.</td>
+</tr>
+</tbody></table>
+<hr>
+<p>Nothing new from OpenRouter&#39;s stealth models today.</p>
+<hr>
+<h2>Spotted</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Story</th>
+<th align="left">Source</th>
+<th align="left">Discussion</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a href="https://microsoft.ai/news/introducing-mai-code-2-and-mai-code-2-flash/">MAI Code 2 and Code 2 Flash</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50535885">334 points, 149 comments</a></td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left"><a href="https://hy.tencent.ai/research/hy4-flash">Tencent Hy4 Flash</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50538184">104 points, 14 comments</a></td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left"><a href="https://www.cerebras.ai/blog/cerebras-launches-disaggregated-inference">Cerebras Disaggregated Inference</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50540472">63 points, 16 comments</a></td>
+<td align="left">Cerebras claims its disaggregated inference setup pairs AMD GPUs for prefill with wafer-scale decode to deliver 5× more tokens per megawatt without slowing token generation.</td>
+</tr>
+<tr>
+<td align="left">Show HN: TrnRT – An open-source LLM inference engine for AWS Trainium (<a href="https://github.com/RunanywhereAI/trnrt">RunanywhereAI/trnrt</a>)</td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50533270">48 points, 7 comments</a></td>
+<td align="left">RunAnywhere says TrnRT is an open-source LLM inference engine for AWS Trainium with NKI megakernels, 1M-token context, and an OpenAI-compatible API.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://shivamduggal4.github.io/latent-lattice-language-models/">Latent Lattice Language Models</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50539039">46 points, 5 comments</a></td>
+<td align="left">The author introduces Latent Lattice Language Models, adding horizontal latent streams at each layer that carry across tokens next to the vertical residual stream.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://kernel.dev/blog/why-is-gemini-4-carbon-taking-so-long/">Why is Gemini 4 Carbon taking so long?</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50541790">42 points, 25 comments</a></td>
+<td align="left">The authors say they traced Gemini 4 Carbon runs to explain why it spent close to an hour on tasks that Opus and Astra finished in minutes.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://arxiv.org/abs/2607.02512">Program-as-Weights: A Programming Paradigm for Fuzzy Functions</a></td>
+<td align="left">Lobste.rs</td>
+<td align="left"><a href="https://lobste.rs/s/qkalae/program_as_weights_programming_paradigm">12 points, 6 comments</a></td>
+<td align="left">The authors propose Program-as-Weights as a programming paradigm for fuzzy functions, citing examples such as important-log alerting, malformed JSON repair, and intent-based search ranking, and arguing that using LLM APIs for them comes at the expense of locality, reproducibility, and price.</td>
+</tr>
+</tbody></table>
+<hr>
+<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
+]]></content:encoded>
+    </item>
     <item>
       <title>AI Models &amp; Labs 2026-11-17</title>
       <link>https://dboeter.github.io/daily-diff/#2026-11-17/ai-models</link>

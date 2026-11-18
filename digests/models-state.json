@@ -31,7 +31,15 @@
     "google/gemini-4-hydrogen:batch": "2026-11-13",
     "inclusionai/ling-3.2-flash:free": "2026-11-14",
     "qwen/qwen4-max": "2026-11-16",
-    "tencent/hy4-flash": "2026-11-17"
+    "tencent/hy4-flash": "2026-11-17",
+    "openai/gpt-6.2-astra-pro": "2026-11-18",
+    "openai/gpt-6.2-astra-pro:batch": "2026-11-18",
+    "openai/gpt-6.2-astra": "2026-11-18",
+    "openai/gpt-6.2-astra:batch": "2026-11-18",
+    "openai/gpt-6.2-sol-pro": "2026-11-18",
+    "openai/gpt-6.2-sol-pro:batch": "2026-11-18",
+    "openai/gpt-6.2-sol": "2026-11-18",
+    "openai/gpt-6.2-sol:batch": "2026-11-18"
   },
   "stages": {}
 }

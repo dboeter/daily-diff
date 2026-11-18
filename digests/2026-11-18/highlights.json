@@ -1,0 +1,17 @@
+{
+  "ai-agents": [
+    "socket.dev reports compromised Microsoft agent-framework PyPI versions 1.26.1–1.26.2 exfiltrate Azure, GitHub Actions, and CI/CD credentials via .pth hooks",
+    "Oh My Pi v18.22.1–v18.22.2 breaking change: JavaScript eval `commit` helper now strictly validates arguments, throwing TypeError on unknown options"
+  ],
+  "ai-models": [
+    "Cerebras says disaggregated inference pairing AMD GPUs for prefill with wafer-scale decode delivers 5× more tokens per megawatt without slowing generation"
+  ],
+  "ai-policy": [
+    "Irish regulator stopped X from training AI with agent-gathered data over personal-data concerns",
+    "European Commission published guidance on applying the Cyber Resilience Act (EU 2024/2847) as a preparatory document"
+  ],
+  "ai-data": [
+    "− Fabric Domains REST APIs preview versions no longer available per November 2026 Feature Summary",
+    "Azure Databricks compliance-security-profile workspaces will enable Files API 3.0 for Unity Catalog volumes by default starting December 2026"
+  ]
+}
