@@ -456,9 +456,11 @@
       .md table.stack, .md table.stack tbody { display: block; }
       .md table.stack thead { display: none; }
       .md table.stack tr { display: block; padding: 10px 0; border-bottom: 1px solid var(--rule); }
-      /* Inline, so a long title wraps as text and its separator stays on the line before it. */
+      /* Inline, so a long title wraps as text. The separator opens with a no-break space and
+         decorateReport removes the white space between the cells, so a line can break only
+         after the separator: it stays on the line of the cell before it. */
       .md table.stack td { display: inline; padding: 0; border: 0; font-size: 13px; color: var(--muted); }
-      .md table.stack td:not(:empty):not(.prose):not(.blank) ~ td:not(:empty):not(.prose):not(.blank)::before { content: '·'; margin: 0 6px; }
+      .md table.stack td:not(:empty):not(.prose):not(.blank) ~ td:not(:empty):not(.prose):not(.blank)::before { content: '\00a0\00a0·  '; white-space: pre-wrap; }
       .md table.stack td.prose { display: block; margin-top: 4px; font-size: 14px; color: var(--text); }
       .md table.stack td:empty, .md table.stack td.blank { display: none; }
       dialog { margin-top: 8px; max-height: calc(100vh - 16px); }
@@ -702,7 +704,10 @@ document.getElementById('dayBtn').onclick = () => {
   // The day shown, in the middle of the list. Not scrollIntoView: it scrolls the page behind too.
   const body = document.getElementById('calBody');
   const day = calDlg.querySelector('[aria-current]');
-  if (day) body.scrollTop += day.getBoundingClientRect().top - body.getBoundingClientRect().top - body.clientHeight / 2;
+  if (!day) return;
+  body.scrollTop += day.getBoundingClientRect().top - body.getBoundingClientRect().top - body.clientHeight / 2;
+  // Tab and the arrow keys start from the day shown, not from the first day of the newest month.
+  day.focus({ preventScroll: true });
 };
 
 // ── Search ──
@@ -720,23 +725,29 @@ function setSearchStatus(text) {
 /**
  * A report's Markdown as plain lines to search and to quote: without its header (H1, report
  * bar, meta line), link targets and markup, so "github" finds the word and not every link.
+ * A line is what the page shows as one block, so a match can be marked there (findOnPage): a
+ * table row is one line per cell, and a table's header row, which a phone hides, is left out.
  */
 function searchLines(md) {
   const lines = md.split('\n');
   const rule = lines.slice(0, 8).indexOf('---');
+  const body = lines.slice(rule === -1 ? 1 : rule + 1);
+  const isRow = (line) => /^\s*\|/.test(line);
+  const isHeaderRule = (line) => isRow(line) && /^[\s|:-]+$/.test(line) && line.includes('-');
   const out = [];
-  for (const raw of lines.slice(rule === -1 ? 1 : rule + 1)) {
-    const text = raw
-      .replace(/<[^>]+>/g, '')
-      .replace(/!?\[([^\]]*)\]\([^)]*\)/g, '$1')
-      .replace(/^\s*(#{1,6}|[-*>]|\d+\.)\s+/, '')
-      .replace(/^\s*\|\s*|\s*\|\s*$/g, '')
-      .replace(/\s*\|\s*/g, ' · ')
-      .replace(/\*\*|`/g, '')
-      .trim();
-    if (!text || /^[\s:·|-]+$/.test(text)) continue;
-    out.push({ text, lower: text.toLowerCase() });
-  }
+  body.forEach((raw, i) => {
+    if (isRow(raw) && (isHeaderRule(raw) || isHeaderRule(body[i + 1] ?? ''))) return;
+    for (const part of isRow(raw) ? raw.split('|') : [raw]) {
+      const text = part
+        .replace(/<[^>]+>/g, '')
+        .replace(/!?\[([^\]]*)\]\([^)]*\)/g, '$1')
+        .replace(/^\s*(#{1,6}|[-*>]|\d+\.)\s+/, '')
+        .replace(/\*\*|`/g, '')
+        .trim();
+      if (!text || /^[\s:—-]+$/.test(text)) continue;
+      out.push({ text, lower: text.toLowerCase() });
+    }
+  });
   return out;
 }
 
@@ -767,12 +778,14 @@ function applySearch(query) {
       hits.push({ date, report, count: matched.length, line: matched[0] });
     }
   }
+  // The announced outcome names the reports that did not load too: the line above it is not announced.
+  const missing = unread?.length ? ` (${unread.length} report${unread.length === 1 ? '' : 's'} not searched)` : '';
   if (!hits.length) {
-    setSearchStatus(`No report has “${query.trim()}”. Try a shorter word or another spelling.`);
+    setSearchStatus(`No report has “${query.trim()}”${missing}. Try a shorter word or another spelling.`);
     return;
   }
   const reportsText = `${hits.length} report${hits.length === 1 ? '' : 's'} on ${days.size} day${days.size === 1 ? '' : 's'}`;
-  setSearchStatus(hits.length > MAX_HITS ? `${reportsText}; the newest ${MAX_HITS} are listed.` : reportsText);
+  setSearchStatus(`${reportsText}${hits.length > MAX_HITS ? `; the newest ${MAX_HITS} are listed` : ''}${missing}`);
   searchResults.innerHTML = hits.slice(0, MAX_HITS).map(({ date, report, count, line }) =>
     `<li class="hit"><a href="#${pageKey(date, report)}">` +
       `<span class="hit-head">${tileHtml(report)}<span class="hit-name">${escapeHtml(LABELS[report] || report)}</span>` +
@@ -796,9 +809,10 @@ async function readReports(tasks, index) {
       const task = tasks[cursor++];
       try {
         const res = await fetch(`./digests/${task.date}/${task.report}.md`);
+        // Whatever the status, a report not read is counted and tried again: a 404 can be a
+        // deploy in progress, and a reader must know the search is not the whole archive.
         if (res.ok) index.set(pageKey(task.date, task.report), searchLines(await res.text()));
-        // A 4xx report is missing for good (manifest and digests differ); the rest may recover.
-        else if (res.status >= 500 || res.status === 429) failed.push(task);
+        else failed.push(task);
       } catch {
         failed.push(task);
       }
@@ -902,8 +916,10 @@ function findOnPage() {
     range.surroundContents(mark);
     return mark;
   };
-  for (const block of root.querySelectorAll('h1, h2, h3, h4, p, li, td, th, summary, pre')) {
+  for (const block of root.querySelectorAll('h1, h2, h3, h4, p, li, td, summary, pre')) {
     if (block.closest('.toc, .report-meta')) continue;
+    // Not shown at this width (a stacked table's empty cell), unless a collapsed block holds it.
+    if (!block.getClientRects().length && !block.closest('details:not([open])')) continue;
     const at = block.textContent.toLowerCase().indexOf(needle);
     if (at === -1) continue;
     // The text nodes the match runs through, each with the part of it that is the match.
@@ -998,7 +1014,14 @@ function showCurrentTab() {
   fadeTabs();
 }
 document.getElementById('tabList').addEventListener('scroll', fadeTabs, { passive: true });
-window.addEventListener('resize', fadeTabs);
+// A new width can leave the current tab outside the row. A new height alone (a phone's address
+// bar) must not move a row the reader scrolled.
+let tabsWidth = window.innerWidth;
+window.addEventListener('resize', () => {
+  if (window.innerWidth === tabsWidth) return fadeTabs();
+  tabsWidth = window.innerWidth;
+  showCurrentTab();
+});
 // The tabs are narrower once IBM Plex replaces the fallback font, so the first position is off.
 document.fonts.ready.then(showCurrentTab);
 
@@ -1044,6 +1067,10 @@ function buildCalendar(dates) {
   const byDate = new Map(dates.map((d) => [d.date, d]));
   const months = [...new Set(dates.map((d) => d.date.slice(0, 7)))];
   const heads = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'].map((d) => `<span class="dow">${d}</span>`).join('');
+  // A day without a digest is a missed day between the first digest and the reader's today
+  // ('sv' formats as YYYY-MM-DD); before and after those it is an empty cell.
+  const today = new Date().toLocaleDateString('sv');
+  const lastDay = today > dates[0].date ? today : dates[0].date;
   const html = months.map((month) => {
     const [y, m] = month.split('-').map(Number);
     const blanks = (new Date(Date.UTC(y, m - 1, 1)).getUTCDay() + 6) % 7;
@@ -1053,7 +1080,7 @@ function buildCalendar(dates) {
       const iso = `${month}-${String(d).padStart(2, '0')}`;
       const entry = byDate.get(iso);
       if (!entry) {
-        cells.push(iso > dates[0].date ? '<span></span>' : `<span class="cal-day off">${d}</span>`);
+        cells.push(iso > lastDay || iso < dates.at(-1).date ? '<span></span>' : `<span class="cal-day off">${d}</span>`);
         continue;
       }
       const weekly = entry.reports.some((r) => WEEKLY.includes(r));
@@ -1214,6 +1241,13 @@ function decorateReport(root, date, report) {
     for (const td of table.querySelectorAll('tbody td')) {
       if (td.textContent.trim() === '—') td.classList.add('blank');
     }
+    // The white space the Markdown renderer leaves between cells would let a stacked row break
+    // before a separator (the stacked rule in the stylesheet).
+    for (const tr of table.querySelectorAll('tbody tr')) {
+      for (const node of [...tr.childNodes]) {
+        if (node.nodeType === Node.TEXT_NODE && !node.textContent.trim()) node.remove();
+      }
+    }
     headers.forEach((h, i) => {
       if (!PROSE_COLUMNS.includes(h)) return;
       for (const td of table.querySelectorAll(`tbody td:nth-child(${i + 1})`)) td.classList.add('prose');
@@ -1259,8 +1293,7 @@ let tocSpy = null;
  */
 function addToc(root) {
   const all = [...root.querySelectorAll('h2, h3')].filter((h) => !h.closest('details'));
-  const heads = all;
-  if (heads.length < 4) return;
+  if (all.length < 4) return;
   // The hash holds the route, so scroll instead of linking to an anchor. The focus goes with
   // the reader: Tab then continues in the section, not in the list.
   const entry = (h) => {
@@ -1281,11 +1314,11 @@ function addToc(root) {
   const toc = document.createElement('details');
   toc.className = 'toc';
   const summary = document.createElement('summary');
-  summary.textContent = `Contents (${heads.length})`;
+  summary.textContent = `Contents (${all.length})`;
   const list = document.createElement('ol');
-  heads.forEach((h) => list.appendChild(entry(h).li));
+  all.forEach((h) => list.appendChild(entry(h).li));
   toc.append(summary, list);
-  heads[0].before(toc);
+  all[0].before(toc);
 
   const nav = document.createElement('nav');
   nav.className = 'toc-rail';
@@ -1326,7 +1359,11 @@ function focusHeading(h) {
   h.tabIndex = -1;
   h.focus({ preventScroll: true });
 }
-document.getElementById('skipBtn').onclick = () => focusHeading(document.querySelector('#content h1'));
+// The heading is at the top of the page: go there, so the focus is not on something out of view.
+document.getElementById('skipBtn').onclick = () => {
+  window.scrollTo(0, 0);
+  focusHeading(document.querySelector('#content h1'));
+};
 
 async function loadReport(date, report, push = true) {
   const key = pageKey(date, report);
@@ -1394,9 +1431,13 @@ async function loadReport(date, report, push = true) {
 // Back/forward, and every link to a page (tabs, day arrows, calendar, search, report bar):
 // a same-page hash link fires hashchange. loadReport ignores the repeat.
 const followHash = () => {
-  // A hash that is no route (a contents link's "#") is not a page change.
   const hash = getHash();
-  const page = hash && knownPage(hash);
+  if (!hash) {
+    // No route, so no page change: the address goes back to the page shown.
+    if (currentKey) history.replaceState(null, '', `#${currentKey}`);
+    return;
+  }
+  const page = knownPage(hash);
   if (page) loadReport(page.date, page.report, false);
 };
 
@@ -1407,9 +1448,12 @@ const followHash = () => {
 function knownPage(hash) {
   if (!DATES.length) return null;
   const day = hash && DATES.find((d) => d.date === hash.date);
-  if (day && (!hash.report || day.reports.includes(hash.report))) return hash;
-  const page = { date: day ? day.date : DATES[0].date, report: null };
-  history.replaceState(null, '', `#${page.date}`);
+  const page = day && (!hash.report || day.reports.includes(hash.report))
+    ? { date: hash.date, report: hash.report }
+    : { date: day ? day.date : DATES[0].date, report: null };
+  // Also a route with something after it (#date/report/more): the address is the page's own.
+  const own = `#${pageKey(page.date, page.report)}`;
+  if (location.hash !== own) history.replaceState(null, '', own);
   return page;
 }
 window.addEventListener('popstate', followHash);
