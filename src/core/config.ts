@@ -49,7 +49,7 @@ type RawConfig = Partial<Record<SectionKey, RawSection>> & {
 
 /** A group of tracked repos: a section of the agents or the data report. */
 export interface SectionConfig {
-  /** The section's heading in its report, e.g. "Agent Tooling". */
+  /** The section's heading in its report, e.g. "Agent tooling". */
   title: string;
   /** What the projects are, for the LLM prompt and README.md. */
   subject: string;

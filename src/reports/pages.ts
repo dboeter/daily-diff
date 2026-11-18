@@ -80,6 +80,8 @@ import {
   buildStealthSection,
   groupsMarkdown,
   highlightsOnly,
+  tidyHighlights,
+  dropEmptySections,
   signListItems,
   isNewStealthModel,
   renderCandidates,
@@ -323,7 +325,7 @@ export async function buildTrendsReport(
     tables && `## ${T.agentsHeading}\n\n${nestHeadings(tables, 3)}`,
     // Code renders the section heading; the body's own sections go below it.
     skillsSummary &&
-      `## ${T.skillsHeading}\n\n${T.skillsSource(skills.repo)}\n\n${nestHeadings(skillsSummary, 3)}`,
+      `## ${T.skillsHeading}\n\n${T.skillsSource(skills.repo)}\n\n${nestHeadings(dropEmptySections(skillsSummary), 3)}`,
     report ? renderCandidates(report.onFire, input.tracked) : "",
     (hasOpenRouter || hfTable) &&
       `## ${T.modelsHeading}\n\n${nestHeadings(
@@ -509,9 +511,8 @@ export async function buildAgentsReport(
       null,
       LLM_TOKENS_LISTING,
     );
-    highlights = dropNoHighlightRows(
-      highlightsOnly(prose ?? MSG.summaryFailed),
-      [...titleOnly, ...claims],
+    highlights = tidyHighlights(
+      dropNoHighlightRows(highlightsOnly(prose ?? MSG.summaryFailed), [...titleOnly, ...claims], "agents"),
       "agents",
     );
   }
@@ -521,6 +522,7 @@ export async function buildAgentsReport(
     groups,
     period: PROJECT_SCOPE.period,
     ...(highlights ? { preamble: `${highlights}\n\n---\n\n` } : {}),
+    trailingCounts: REPORT_META.spotted(spotted.rows.length),
     ...(spottedMd ? { epilogue: `\n\n---\n\n${spottedMd}` } : {}),
     footer: autoGenFooter(),
   });
@@ -679,13 +681,19 @@ export async function buildModelsPage(
     null,
     LLM_TOKENS_LISTING,
   );
-  const highlights = dropNoHighlightRows(
-    highlightsOnly(prose ?? MSG.summaryFailed),
-    [...noText.map((p) => ({ name: p.title, url: p.url })), ...titleOnly, ...claims],
+  const highlights = tidyHighlights(
+    dropNoHighlightRows(
+      highlightsOnly(prose ?? MSG.summaryFailed),
+      [...noText.map((p) => ({ name: p.title, url: p.url })), ...titleOnly, ...claims],
+      "models",
+    ),
     "models",
   );
 
-  const meta = REPORT_META.line([P.counts(posts.length, models.length, spotted.rows.length)], utcStr);
+  const meta = REPORT_META.line(
+    [P.counts(posts.length, models.length), REPORT_META.spotted(spotted.rows.length)],
+    utcStr,
+  );
   const body = `${[highlights, ...tracked].map((s) => `${s}\n\n---\n\n`).join("")}${spottedMd}`;
   saveReportedState(nextReportedState(state, fresh, dateStr), stateFile);
   return {
@@ -745,20 +753,20 @@ export async function buildPolicyReport(
   if (prose === null) return null;
 
   const sources = [...new Set(items.map((i) => i.source))].join(" + ");
-  const ranked = policyData.rankedBy === "jev" ? REPORT_META.jevRanked : "";
   const meta = REPORT_META.line(
-    [REPORT_META.sources(sources), `${POLICY_REPORT.newItems(items.length)}${ranked}`],
+    [POLICY_REPORT.newItemsCount(items.length), REPORT_META.sources(sources)],
     utcStr,
   );
   const body = spliceTables(
     highlightsOnly(prose),
-    tables(
-      checkCodeTokens(
-        dropInputTalk(parseRowSummaries(summaries), "policy-summaries"),
-        new Map(items.map((i) => [i.n, `${i.title} ${i.description}`])),
-        "policy-summaries",
+    "---\n\n" +
+      tables(
+        checkCodeTokens(
+          dropInputTalk(parseRowSummaries(summaries), "policy-summaries"),
+          new Map(items.map((i) => [i.n, `${i.title} ${i.description}`])),
+          "policy-summaries",
+        ),
       ),
-    ),
   );
   // Only once the report exists.
   commitWrites(writes.onReported, files, dateStr);
@@ -989,15 +997,16 @@ export async function buildDataReport(
   };
   // Report order; Azure and GCP have no repo section.
   const groupsWith = (tables: ReturnType<typeof renderVendorTables>): ProjectGroup[] => [
-    { title: H.databricks, ...repo("databricks"), preamble: tables.databricks, namedWhenEmpty: true },
-    { title: H.snowflake, ...repo("snowflake"), preamble: tables.snowflake, namedWhenEmpty: true },
-    { title: H.cloud, activities: [], summary: "", preamble: tables.cloud, namedWhenEmpty: true },
-    { title: H.data_stack, ...repo("data_stack"), namedWhenEmpty: true },
+    { title: H.databricks, ...repo("databricks"), preamble: tables.databricks },
+    { title: H.snowflake, ...repo("snowflake"), preamble: tables.snowflake },
+    { title: H.cloud, activities: [], summary: "", preamble: tables.cloud },
+    { title: H.data_stack, ...repo("data_stack") },
     {
       title: DATA_REPORT.releasesHeading,
       activities: [],
       summary: "",
       preamble: renderReleaseTable(releases, summaries),
+      listing: true,
     },
   ];
   const groups = groupsWith(tables);
@@ -1023,11 +1032,14 @@ export async function buildDataReport(
     null,
     LLM_TOKENS_LISTING,
   );
-  const highlights = dropNoHighlightRows(
-    highlightsOnly(prose ?? MSG.summaryFailed),
-    [...minor, ...titleOnly, ...claims],
+  const highlights = tidyHighlights(
+    dropNoHighlightRows(
+      highlightsOnly(prose ?? MSG.summaryFailed),
+      [...minor, ...titleOnly, ...claims],
+      "data",
+      isGroupOrAbsenceBullet,
+    ),
     "data",
-    isGroupOrAbsenceBullet,
   );
   const lawLinks = dataLaw
     .map(
@@ -1050,6 +1062,7 @@ export async function buildDataReport(
       .join(""),
     // On 2026-10-19 "Projects: 17 | Active today: 0" was all the header said above 16 vendor rows.
     leadingCounts: DATA_REPORT.vendorCount(items.length, vendor.alsoNew?.length),
+    trailingCounts: REPORT_META.spotted(spotted.rows.length),
     ...(epilogue ? { epilogue: `\n\n---\n\n${epilogue}` } : {}),
     footer: autoGenFooter(),
   });

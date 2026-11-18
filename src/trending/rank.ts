@@ -5,7 +5,7 @@
  * Code decides which items appear, in which order, with which 🆕 and 🔥 flags
  * and which numbers; the LLM only writes the per-row summaries
  * (`buildTrendingSummariesPrompt`) and the page's prose (`buildTrendsProsePrompt`). Two tables:
- * the Agent & Coding Tool Radar (OpenRouter, npm and new GitHub repos) and the
+ * the Agent & coding tool radar (OpenRouter, npm and new GitHub repos) and the
  * GitHub category tables. Scope and category come from a `Classification` per
  * item (`trending/classify.ts`).
  */

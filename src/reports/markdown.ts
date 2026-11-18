@@ -72,11 +72,11 @@ export interface ProjectGroup {
   /** LLM output: one `## <Project>` section per active project. */
   summary: string;
   /**
-   * A tracked source of the data report: with nothing to show (no preamble, no project section, no
-   * unavailable project) it is named, with its quiet projects, in the page's one "Nothing new from …"
-   * line instead of a heading. Without it an empty group shows its quiet line, or nothing.
+   * A code-rendered listing under a group heading (the data report's Releases this week), not a
+   * tracked source: empty, it is left out, where a tracked group is named in the page's one
+   * "Nothing new from …" line with its quiet projects.
    */
-  namedWhenEmpty?: boolean;
+  listing?: boolean;
   /** Markdown under the heading, before the projects (the data report's vendor table). Shown even when every project is quiet. */
   preamble?: string;
 }
@@ -92,6 +92,8 @@ export interface ProjectReportInput {
   preamble?: string;
   /** Counts shown before the project counts, e.g. the data report's "Vendor items: 16". */
   leadingCounts?: string;
+  /** Meta-line counts after the project counts (the page's Spotted rows). */
+  trailingCounts?: string;
   /** Markdown after the last group, before the footer (Spotted, the data report's EU data law), with its own separator. */
   epilogue?: string;
   footer: string;
@@ -375,14 +377,13 @@ export function buildProjectReportContent(r: ProjectReportInput): string {
     // A project whose release fetch failed was not checked: "Quiet" would claim it shipped nothing.
     const unavailable = g.activities.filter((a) => a.fetchFailed);
     inactiveCount += quiet.length + unavailable.length;
-    if (g.namedWhenEmpty && !body && !g.preamble && !unavailable.length) {
+    if (!body && !g.preamble && !unavailable.length) {
+      // Not a tracked source: nothing to name.
+      if (g.listing) return [];
       // The quiet repos stay named: the line is the only sign they are tracked.
       nothingNewFrom.push(quiet.length ? `${g.title} (${quiet.map(link).join(", ")})` : g.title);
       return [];
     }
-    // A group with neither projects nor a preamble (the data report's Azure / Fabric & GCP on a day
-    // without its vendor rows) has nothing to show. An all-quiet group shows its quiet line.
-    if (!g.activities.length && !g.preamble) return [];
     const projects = [
       // The data report passes an empty summary for a group with no active project.
       nestHeadings(body, 3),
@@ -403,7 +404,8 @@ export function buildProjectReportContent(r: ProjectReportInput): string {
         `Projects: ${all.length}`,
         `Active ${r.period}: ${all.length - inactiveCount}`,
         `Stable releases: ${releases}`,
-        `Prereleases (not covered): ${prereleases}`,
+        REPORT_META.prereleasesSkipped(prereleases),
+        r.trailingCounts ?? "",
       ],
       r.utcStr,
     ) +
@@ -542,6 +544,62 @@ export function highlightsOnly(reply: string): string {
   return `## ${SECTIONS.highlights}\n\n${signListItems(body)}`;
 }
 
+/** The most Highlights a page shows; its prompt asks for 1–3, and the data page of 2026-11-13 had 7. */
+export const MAX_HIGHLIGHTS = 3;
+
+/**
+ * A Highlights section as every page shows it: its bullets on consecutive lines (a model may put a
+ * blank line between them, which renders as a loose list) and at most MAX_HIGHLIGHTS of them, the
+ * first ones (each cut is logged). A section without bullets (AI Policy's prose) is returned as it is.
+ */
+export function tidyHighlights(section: string, tag: string): string {
+  const out: string[] = [];
+  let blanks: string[] = [];
+  let bullets = 0;
+  let inList = false;
+  let cut = false;
+  for (const line of section.split("\n")) {
+    const bullet = /^[-*]\s/.test(line);
+    const continuation = inList && /^\s+\S/.test(line);
+    if (inList && line.trim() === "") {
+      blanks.push(line);
+      continue;
+    }
+    if (bullet) {
+      bullets++;
+      inList = true;
+      cut = bullets > MAX_HIGHLIGHTS;
+      if (cut)
+        console.log(`  [${tag}] Highlight over the limit of ${MAX_HIGHLIGHTS} dropped: ${line.slice(0, 80)}`);
+    } else if (!continuation) {
+      // Text after the list keeps its blank line.
+      out.push(...blanks);
+      inList = false;
+      cut = false;
+    }
+    blanks = [];
+    if (!cut) out.push(line);
+  }
+  return out.join("\n");
+}
+
+/** A heading's body that says only that there is nothing: "None", "*None.*", "N/A", "—". */
+const NOTHING_BODY = /^[*_]*(?:none|n\/a|nothing|—|-)[*_.]*$/i;
+
+/**
+ * A model-written body (Trends' Skills section) without the sections that say only that they are
+ * empty ("## Merged this week" over "*None.*"): a page names nothing it does not show.
+ */
+export function dropEmptySections(md: string): string {
+  return md
+    .split(/^(?=#{1,6}\s)/m)
+    .filter((chunk) => {
+      const [heading, ...body] = chunk.split("\n");
+      return !/^#{1,6}\s/.test(heading ?? "") || !NOTHING_BODY.test(body.join(" ").trim() || "—");
+    })
+    .join("");
+}
+
 /** Lines with their heading level (0 = not a heading), ignoring code fences. */
 function headingLevels(lines: string[]): number[] {
   let inFence = false;
@@ -607,7 +665,7 @@ export function buildStealthSection(models: OpenRouterStealthModel[] | null, now
         if (days <= STEALTH_EXPIRING_DAYS) status.push(S.expiring(days));
       }
       const link = `[${m.name}](https://openrouter.ai/${m.id})`;
-      return `| ${link} \`${m.id}\` | ${m.created} | ${m.expires ?? "—"} | ${status.join(", ") || S.live} |`;
+      return `| ${m.created} | ${link} \`${m.id}\` | ${m.expires ?? "—"} | ${status.join(", ") || S.live} |`;
     });
     body = `${S.header}\n${rows.join("\n")}`;
   }
@@ -735,7 +793,7 @@ export function renderPolicyTable(
   deadlines = "",
 ): string {
   const lead = (it: PolicyItem) =>
-    `| ${it.published.slice(0, 10)} | ${cell(it.source)} | [${policyTitleLabel(it.title)}](${cell(it.link)}) | `;
+    `| ${it.published.slice(0, 10)} | [${policyTitleLabel(it.title)}](${cell(it.link)}) | ${cell(it.source)} | `;
   const sections = Object.entries(POLICY_REPORT.headings).map(([jurisdiction, heading]) => {
     const rows = items
       .filter((it) => !it.news && it.jurisdiction === jurisdiction)
@@ -751,7 +809,8 @@ export function renderPolicyTable(
     );
   }
   sections.push(deadlines);
-  return sections.filter(Boolean).join("\n\n");
+  // A rule between sections, as on every page.
+  return sections.filter(Boolean).join("\n\n---\n\n");
 }
 
 /**
@@ -775,9 +834,9 @@ export function renderReleaseTable(rows: Numbered<ReleaseRow>[], summaries: Map<
       description: releaseNotes(release.body, RELEASE_BODY_CHARS),
     });
     return (
-      `| [${cell(project.name)}](https://github.com/${project.repo}) | ` +
+      `| ${release.published_at.slice(0, 10)} | [${cell(project.name)}](https://github.com/${project.repo}) | ` +
       `[${cell(release.tag_name)}](https://github.com/${project.repo}/releases/tag/${encodeURIComponent(release.tag_name)}) | ` +
-      `${release.published_at.slice(0, 10)} | ${cell(summary)} |`
+      `${cell(summary)} |`
     );
   });
   return `${DATA_REPORT.releasesTableHeader}\n${lines.join("\n")}`;
@@ -793,7 +852,7 @@ export function renderVendorActions(actions: Record<string, VendorAction>, dateS
     .sort((a, b) => a.date.localeCompare(b.date) || a.title.localeCompare(b.title))
     .map(
       (a) =>
-        `| ${a.date} | ${cell(a.source)} | [${vendorTitleLabel(a.title)}](${cell(a.link)}) | ${cell(a.summary ?? "—")} |`,
+        `| ${a.date} | [${vendorTitleLabel(a.title)}](${cell(a.link)}) | ${cell(a.source)} | ${cell(a.summary ?? "—")} |`,
     );
   return rows.length
     ? `## ${DATA_REPORT.actionHeading}\n\n${DATA_REPORT.actionTableHeader}\n${rows.join("\n")}`
@@ -826,9 +885,9 @@ export function renderVendorTables(
     const oneSource = new Set(sectionItems.map((it) => it.source)).size === 1;
     const rows = sectionItems.map(
       (it) =>
-        `| ${it.date || "—"} | ${oneSource ? "" : `${cell(it.source)} | `}` +
+        `| ${it.date || "—"} | ` +
         `${it.deprecation ? `${DATA_REPORT.deprecationMarker} ` : ""}${it.aiInData ? `${DATA_REPORT.aiMarker} ` : ""}` +
-        `[${vendorTitleLabel(it.title)}](${cell(it.link)}) | ` +
+        `[${vendorTitleLabel(it.title)}](${cell(it.link)}) | ${oneSource ? "" : `${cell(it.source)} | `}` +
         `${cell(summaryText(summaries, it))} |`,
     );
     const header = oneSource ? DATA_REPORT.vendorTableHeaderOneSource : DATA_REPORT.vendorTableHeader;
@@ -1019,7 +1078,7 @@ export function renderHfTable(
 export function renderLabPostsTable(posts: Numbered<LabPost>[], summaries: Map<number, string>): string {
   const lines = posts.map(
     (p) =>
-      `| ${p.lastmod.slice(0, 10) || "—"} | ${MODELS_PAGE.labs[p.site]} | [${policyTitleLabel(p.title || p.url)}](${cell(p.url)}) | ` +
+      `| ${p.lastmod.slice(0, 10) || "—"} | [${policyTitleLabel(p.title || p.url)}](${cell(p.url)}) | ${MODELS_PAGE.labs[p.site]} | ` +
       `${cell(summaryText(summaries, { n: p.n, description: p.content }))} |`,
   );
   return `${MODELS_PAGE.labTableHeader}\n${lines.join("\n")}`;
@@ -1038,7 +1097,7 @@ export function renderNewModelsTable(
 ): string {
   const lines = models.map(
     (m) =>
-      `| [${cell(m.name)}](https://openrouter.ai/${m.id}) \`${m.id}\` | ${m.created} | ${contextCell(m.contextLength)} | ` +
+      `| ${m.created} | [${cell(m.name)}](https://openrouter.ai/${m.id}) \`${m.id}\` | ${contextCell(m.contextLength)} | ` +
       `${cell(summaryText(summaries, m))} |`,
   );
   return `${MODELS_PAGE.modelsTableHeader}\n${lines.join("\n")}`;

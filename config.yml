@@ -23,7 +23,7 @@
 # name is a common word.
 
 agents:
-  title: Coding Agents & Assistants
+  title: Coding agents & assistants
   subject: AI coding agents and personal AI assistants
   repos:
     - id: claude-code
@@ -82,7 +82,7 @@ skills_repo: anthropics/skills
 # 2026-10-10 this section tracked inference engines (vLLM, llama.cpp, Ollama…).
 
 infra:
-  title: Agent Tooling
+  title: Agent tooling
   subject: AI agent tooling — agent sandboxes, terminal session multiplexers and context-management tools
   repos:
     - id: openshell

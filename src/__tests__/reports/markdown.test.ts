@@ -7,6 +7,9 @@ import {
   buildProjectReportContent,
   buildStealthSection,
   highlightsOnly,
+  tidyHighlights,
+  MAX_HIGHLIGHTS,
+  dropEmptySections,
   nestHeadings,
   renderCandidates,
   renderOpenRouterUsage,
@@ -147,9 +150,7 @@ describe("buildProjectReportContent", () => {
   it("renders title, counts, the group heading, the LLM body and the footer", () => {
     const result = buildProjectReportContent(input);
     expect(result).toContain("# AI Agents 2026-10-04");
-    expect(result).toContain(
-      "Projects: 3 | Active today: 1 | Stable releases: 1 | Prereleases (not covered): 7",
-    );
+    expect(result).toContain("Projects: 3 | Active today: 1 | Stable releases: 1 | Prereleases skipped: 7");
     expect(result).toContain("## Coding Agents\n\n### Overview\n\nLLM_BODY");
     expect(result.endsWith("FOOTER")).toBe(true);
   });
@@ -376,7 +377,7 @@ describe("buildProjectReportContent", () => {
     const result = buildProjectReportContent(withAgents({ summary: "", activities: [beta] }));
     expect(result).not.toContain("**Release:**");
     expect(result).toContain("Stable releases: 0 |");
-    expect(result).toContain("**Quiet today:** [BETA](https://github.com/org/beta)");
+    expect(result).toContain("Nothing new from Coding Agents ([BETA](https://github.com/org/beta)) today.");
   });
 
   it("drops a project section without a bullet; a project without a release then goes quiet", () => {
@@ -416,7 +417,7 @@ describe("buildProjectReportContent", () => {
     expect(result).toContain("## Stack\n\n**Unavailable today:** [DELTA](https://github.com/org/delta)");
   });
 
-  it("leaves out a group with neither projects nor a preamble, and shows one with only a preamble", () => {
+  it("names a group with neither projects nor a preamble in the Nothing new line, and shows one with only a preamble", () => {
     const result = buildProjectReportContent({
       ...input,
       groups: [
@@ -425,13 +426,14 @@ describe("buildProjectReportContent", () => {
       ],
     });
     expect(result).not.toContain("## Empty");
+    expect(result).toContain("Nothing new from Empty today.");
     expect(result).toContain("## Table\n\n| t |");
   });
 
   it("renders the preamble between the header and the groups", () => {
     const result = buildProjectReportContent({ ...input, preamble: "PREAMBLE\n\n---\n\n" });
     expect(result).toMatch(
-      /Prereleases \(not covered\): 7 \| Generated: [^\n]+ UTC\n\n---\n\nPREAMBLE\n\n---\n\n## Coding Agents\n/,
+      /Prereleases skipped: 7 \| Generated: [^\n]+ UTC\n\n---\n\nPREAMBLE\n\n---\n\n## Coding Agents\n/,
     );
   });
 
@@ -573,14 +575,16 @@ describe("buildStealthSection", () => {
 
   it("flags new and soon-expiring models", () => {
     const out = buildStealthSection([model("2026-10-03", "2026-10-05")], now);
-    expect(out).toContain("## Stealth Models on OpenRouter");
+    expect(out).toContain("## Stealth models on OpenRouter");
     expect(out).toContain(
-      "| [Space Bunny Alpha](https://openrouter.ai/stealth/space-bunny-alpha) `stealth/space-bunny-alpha` | 2026-10-03 | 2026-10-05 | 🆕 new, ⏳ expires in 1d |",
+      "| 2026-10-03 | [Space Bunny Alpha](https://openrouter.ai/stealth/space-bunny-alpha) `stealth/space-bunny-alpha` | 2026-10-05 | 🆕 new, ⏳ expires in 1d |",
     );
   });
 
   it("marks an established model without a near expiry as live", () => {
-    expect(buildStealthSection([model("2026-09-23", null)], now)).toContain("| 2026-09-23 | — | live |");
+    expect(buildStealthSection([model("2026-09-23", null)], now)).toContain(
+      "`stealth/space-bunny-alpha` | — | live |",
+    );
   });
 
   it("says so when no stealth model is listed or the catalog failed", () => {
@@ -873,26 +877,26 @@ describe("renderPolicyTable", () => {
     stage: "Stemmen - aangenomen",
   };
 
-  it("renders one section per jurisdiction, date, source, title and stage (— without one) from the data, the summary from the model", () => {
+  it("renders one section per jurisdiction, date, linked title, source and stage (— without one) from the data, the summary from the model", () => {
     const summaries = new Map([
       [1, "Guidelines for providers."],
       [3, "A motion passed."],
     ]);
     expect(renderPolicyTable(numberRows([...items, motion]), summaries)).toBe(
       "## EU\n\n" +
-        "| Date | Source | Title | Stage | Summary |\n| :--- | :--- | :--- | :--- | :--- |\n" +
-        "| 2026-10-09 | European Commission | [AI Act \\| guidelines](https://example.eu/a) | — | Guidelines for providers. |\n" +
-        "| 2026-10-08 | European Commission | [Scientific panel](https://example.eu/b) | — | — |\n\n" +
+        "| Date | Item | Source | Stage | Summary |\n| :--- | :--- | :--- | :--- | :--- |\n" +
+        "| 2026-10-09 | [AI Act \\| guidelines](https://example.eu/a) | European Commission | — | Guidelines for providers. |\n" +
+        "| 2026-10-08 | [Scientific panel](https://example.eu/b) | European Commission | — | — |\n\n---\n\n" +
         "## Netherlands\n\n" +
-        "| Date | Source | Title | Stage | Summary |\n| :--- | :--- | :--- | :--- | :--- |\n" +
-        "| 2026-10-08 | Tweede Kamer | [Motie AI](https://example.nl/m) | Stemmen - aangenomen | A motion passed. |",
+        "| Date | Item | Source | Stage | Summary |\n| :--- | :--- | :--- | :--- | :--- |\n" +
+        "| 2026-10-08 | [Motie AI](https://example.nl/m) | Tweede Kamer | Stemmen - aangenomen | A motion passed. |",
     );
   });
 
   it("renders news items in their own section after every jurisdiction, without a stage column", () => {
     const news = { ...items[0]!, id: "4", source: "Politico Europe", news: true };
     expect(renderPolicyTable(numberRows([items[1]!, motion, news]), new Map([[3, "A report."]]))).toMatch(
-      /## Netherlands\n[\s\S]*\n\n## News & commentary\n\n\| Date \| Source \| Title \| Summary \|\n\| :--- \| :--- \| :--- \| :--- \|\n\| 2026-10-09 \| Politico Europe \| \[AI Act \\\| guidelines\]\(https:\/\/example\.eu\/a\) \| A report\. \|$/,
+      /## Netherlands\n[\s\S]*\n\n---\n\n## News & commentary\n\n\| Date \| Item \| Source \| Summary \|\n\| :--- \| :--- \| :--- \| :--- \|\n\| 2026-10-09 \| \[AI Act \\\| guidelines\]\(https:\/\/example\.eu\/a\) \| Politico Europe \| A report\. \|$/,
     );
   });
 
@@ -1185,7 +1189,7 @@ describe("rendering conventions", () => {
       vendorRow(3, { vendor: "azure", source: "Microsoft Fabric", date: "2026-10-01", deprecation: true }),
     ];
     const table = renderVendorTables(rows, new Map()).cloud!;
-    expect(table.split("\n")[0]).toBe("| Date | Source | Item | Summary |");
+    expect(table.split("\n")[0]).toBe("| Date | Item | Source | Summary |");
     const at = (s: string) => table.indexOf(s);
     expect(at("example.com/3")).toBeLessThan(at("example.com/2"));
     expect(at("example.com/2")).toBeLessThan(at("example.com/1"));
@@ -1208,7 +1212,7 @@ describe("rendering conventions", () => {
     expect(result).toContain("- **Release:** [v1](https://x) does a thing.");
     expect(result).toContain("- **Hot issue:** already right.");
     // The meta line ends with when it was generated, as on every page.
-    expect(result).toMatch(/\n> Projects: 1 \| .*Prereleases \(not covered\): 0 \| Generated: 04:31 UTC\n/);
+    expect(result).toMatch(/\n> Projects: 1 \| .*Prereleases skipped: 0 \| Generated: 04:31 UTC\n/);
   });
 });
 
@@ -1284,5 +1288,48 @@ describe("security marker", () => {
       "## Highlights\n\n- Something else shipped.",
     );
     expect(unconfirmedClaims(numberRows([flagged(true)]), [])).toEqual([]);
+  });
+});
+
+describe("tidyHighlights", () => {
+  it("makes a loose list tight", () => {
+    expect(tidyHighlights("## Highlights\n\n- One.\n\n- Two.", "t")).toBe("## Highlights\n\n- One.\n- Two.");
+  });
+
+  it("keeps the first MAX_HIGHLIGHTS bullets, each cut with its continuation lines", () => {
+    expect(MAX_HIGHLIGHTS).toBe(3);
+    expect(tidyHighlights("## Highlights\n\n- A.\n- B.\n- C.\n- D.\n  more of D.\n- E.", "t")).toBe(
+      "## Highlights\n\n- A.\n- B.\n- C.",
+    );
+  });
+
+  it("keeps a kept bullet's continuation line and the blank line before text after the list", () => {
+    expect(tidyHighlights("## Highlights\n\n- A.\n  more of A.\n\nAfter.", "t")).toBe(
+      "## Highlights\n\n- A.\n  more of A.\n\nAfter.",
+    );
+  });
+
+  it("returns prose unchanged", () => {
+    const prose = "## Highlights\n\nThe Commission published guidelines.\n\nA second paragraph.";
+    expect(tidyHighlights(prose, "t")).toBe(prose);
+  });
+});
+
+describe("dropEmptySections", () => {
+  it("drops a section whose body only says None", () => {
+    expect(dropEmptySections("## Merged this week\n*None.*\n\n## Requests\n- x")).toBe("## Requests\n- x");
+  });
+
+  it("drops N/A, — and empty bodies", () => {
+    expect(dropEmptySections("## A\nN/A\n## B\n—\n## C\n\n## D\n- y")).toBe("## D\n- y");
+  });
+
+  it("keeps a section with real text and the text before the first heading", () => {
+    const md = "Intro.\n\n## Requests\nNone of these merged yet, but two are close.";
+    expect(dropEmptySections(md)).toBe(md);
+  });
+
+  it("keeps text without headings", () => {
+    expect(dropEmptySections("None")).toBe("None");
   });
 });

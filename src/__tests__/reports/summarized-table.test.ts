@@ -59,10 +59,10 @@ describe("row numbers", () => {
   it("puts a policy summary on the row with its number, under its jurisdiction, whatever the input order", () => {
     const md = renderPolicyTable(shuffle(policy), reply);
     const nl = md.slice(md.indexOf("## Netherlands"), md.indexOf("## US federal"));
-    expect(nl).toContain("[Title nl-1](https://example.eu/nl-1) | — | S3. |");
-    expect(md).toContain("[Title us-1](https://example.eu/us-1) | — | S4. |");
+    expect(nl).toContain("[Title nl-1](https://example.eu/nl-1) | Source | — | S3. |");
+    expect(md).toContain("[Title us-1](https://example.eu/us-1) | Source | — | S4. |");
     expect(md.slice(md.indexOf("## News & commentary"))).toContain(
-      "[Title news-1](https://example.eu/news-1) | S5. |",
+      "[Title news-1](https://example.eu/news-1) | Source | S5. |",
     );
   });
 
