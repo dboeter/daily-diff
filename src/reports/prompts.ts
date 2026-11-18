@@ -425,6 +425,9 @@ export const NEWS_TITLE_ONLY = "Title only: no description";
  * its prereleases), hot issues and news.
  * Issue and PR churn is deliberately absent — it produced most of the filler
  * in the old per-repo reports ("X remains focused on…").
+ * One Release bullet per project, worded as a selection of one or two changes, not a list of the release: asked only for "one or
+ * two sentences", the model split a release over three bullets ("It fixes …", "It adds …") and
+ * wrote one of 1,294 characters (2026-11-17). Replay: `.scratch/page-grammar/`.
  */
 export function buildProjectDigestPrompt(
   active: ProjectActivity[],
@@ -440,7 +443,7 @@ ${sections}
 ---
 
 Write the report in English: one section per project above that has something left to report, in the order given, headed \`## <Project name>\`, with at most 3 bullets, one or two sentences each. Write no other sections:
-- **Release**: what the stable release(s) change for users, in this order: ${RELEASE_ORDER}. Several releases in a range: summarize the range, do not list each one. Link each release you name as a plain Markdown link, [tag](url), never inside backticks; a range as its oldest and newest, [v1.2.0](url)–[v1.2.5](url). A release with an Announcement: describe it from the announcement, not from its first changelog entries.
+- **Release**: exactly one bullet per project, however many releases or changes it has. It names the one or two changes that matter most to the reader, picked in this order: ${RELEASE_ORDER}. Leave the other changes out: the release link shows them. Never continue a release in a second bullet ("It also fixes …"). Several releases in a range: one bullet for the range, do not list each one. Link each release you name as a plain Markdown link, [tag](url), never inside backticks; a range as its oldest and newest, [v1.2.0](url)–[v1.2.5](url). A release with an Announcement: describe it from the announcement, not from its first changelog entries.
 - **Prerelease**: only from a "Prereleases (no stable release yet)" list, and only when it adds notable features or breaking changes; skip routine alpha/rc bumps. Say it is a prerelease and link it.
 - **News**: what the news item says about the project and why it matters. Link it as a plain Markdown link, [<title>](<url>), never a bare URL. An item marked "${NEWS_TITLE_ONLY}": say only what its title says, with no consequence or reason it matters, and never describe a discussion ("discusses", "commenters").
 - **${HOT_ISSUE.label}**: one bullet per issue, written "- **${HOT_ISSUE.label}:** #<number>: <description>". The description says what the issue reports and how serious it is, worded as one report ("an issue reports"), never as an established fact, however many comments or 👍 it has. When the body shows a tracking, announcement or FAQ thread rather than a bug report, say so. For a security issue, say where the problem shows and who is affected, as far as the body says. Write no link, label, comment or 👍 count, gain or fix status: code adds them to the bullet.
@@ -455,6 +458,22 @@ ${sourceFidelityRules()}
 - Style: concise and concrete, for developers who use these tools.
 `;
 }
+
+/**
+ * One rule for the Highlights of the agents, models and policy pages: a bullet (policy: a sentence
+ * per item) says one fact in the model's own words. The models page's Highlights repeated their
+ * row summaries almost word for word (2026-11-17). "State the fact itself" is for the policy call:
+ * asked which items matter, it wrote "is the day's only EU item, so it is the EU reference point
+ * today" (replay of 2026-11-18, `.scratch/page-grammar/`).
+ */
+export const ownWordsRule = (unit: "bullet" | "item") => {
+  // The agents page's sections are project bullets, not table rows: "the sections" covers both.
+  const [copied, shown, states] =
+    unit === "bullet"
+      ? ["sentence of the sections", "them", "the sections state"]
+      : ["Summary cell", "the table", "the table states"];
+  return `One sentence per ${unit}: the item and the one fact about it that matters most to the reader, in your own words. State the fact itself: never write that or why an item matters, and nothing about the page ("the day's only EU item"). Never copy a ${copied}: the reader sees ${shown} right below. Add a consequence only when ${states} one.`;
+};
 
 /** How every page's Highlights bullets are cut: one subject each, with its window. */
 export const HIGHLIGHTS_PICK_RULE =
@@ -501,6 +520,7 @@ Rules:
 - ${NO_TITLE_RULE}
 - ${goingAwayRule("bullet")}
 - ${HIGHLIGHTS_PICK_RULE}${note ? `\n- ${note}` : ""}
+- ${ownWordsRule("bullet")}
 - About 100 words in total. Write no other sections.
 - Name each item in at most one bullet. Write no links or URLs: the sections below link every item.
 - Base every claim on the sections. Do not invent versions, dates or features.

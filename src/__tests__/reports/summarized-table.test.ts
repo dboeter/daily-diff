@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import {
+  dropTitleRestatements,
   checkCodeTokens,
   dropInputTalk,
   numberRows,
@@ -59,10 +60,10 @@ describe("row numbers", () => {
   it("puts a policy summary on the row with its number, under its jurisdiction, whatever the input order", () => {
     const md = renderPolicyTable(shuffle(policy), reply);
     const nl = md.slice(md.indexOf("## Netherlands"), md.indexOf("## US federal"));
-    expect(nl).toContain("[Title nl-1](https://example.eu/nl-1) | — | S3. |");
-    expect(md).toContain("[Title us-1](https://example.eu/us-1) | — | S4. |");
+    expect(nl).toContain("[Title nl-1](https://example.eu/nl-1) | Source | — | S3. |");
+    expect(md).toContain("[Title us-1](https://example.eu/us-1) | Source | — | S4. |");
     expect(md.slice(md.indexOf("## News & commentary"))).toContain(
-      "[Title news-1](https://example.eu/news-1) | S5. |",
+      "[Title news-1](https://example.eu/news-1) | Source | S5. |",
     );
   });
 
@@ -254,6 +255,48 @@ describe("dropInputTalk", () => {
 
   it("drops a summary with nothing left, so its row shows the description", () => {
     expect(dropInputTalk(new Map([[1, "The given description is empty."]]), "test").has(1)).toBe(false);
+  });
+});
+
+describe("dropTitleRestatements", () => {
+  const rows = [
+    { n: 1, title: "Google: AI agent turned a security patch into a exploit with no human help" },
+    { n: 2, title: "How To Review Pull Requests with Kiro CLI and GitHub Actions" },
+    { n: 3, title: "Show HN: Foo" },
+  ];
+  it("shows — for a summary that only restates its title, and keeps one that adds a fact", () => {
+    const out = dropTitleRestatements(
+      new Map([
+        [1, "Google reports that an AI agent turned a security patch into an exploit with no human help."],
+        [
+          2,
+          "The article explains how to review pull requests using Kiro CLI’s headless mode together with GitHub Actions.",
+        ],
+        [3, "Foo is a 300-line Rust parser for TOML that the author benchmarks against toml-rs."],
+      ]),
+      rows,
+      "t",
+    );
+    expect(out.get(1)).toBe("—");
+    expect(out.get(2)).toContain("headless mode");
+    expect(out.get(3)).toContain("300-line");
+  });
+  it("keeps a — summary, a summary under an empty title, and takes a row numbered after the Spotted rows", () => {
+    const out = dropTitleRestatements(
+      new Map([
+        [1, "—"],
+        [4, "Anything at all."],
+        [16, "PostgreSQL released 18.7 and 17.12."],
+      ]),
+      [...rows, { n: 4, title: "" }, { n: 16, title: "PostgreSQL 18.7 and 17.12 released" }],
+      "t",
+    );
+    expect(out.get(1)).toBe("—");
+    expect(out.get(4)).toBe("Anything at all.");
+    expect(out.get(16)).toBe("—");
+  });
+  it("leaves a row without a summary alone", () => {
+    expect(dropTitleRestatements(new Map(), rows, "t").size).toBe(0);
   });
 });
 

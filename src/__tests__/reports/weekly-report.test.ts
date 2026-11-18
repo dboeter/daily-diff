@@ -75,7 +75,7 @@ describe("buildWeeklyReport", () => {
       [
         "# Weekly Diff 2026-11-16",
         "",
-        "> Sources: 1 item the pages showed from 2026-11-10 to 2026-11-16 | Written by claude-opus-5-5 | Text in italics is interpretation | Generated: 05:00 UTC",
+        "> Items: 1 | Sources: the pages of 2026-11-10 to 2026-11-16 | Written by claude-opus-5-5 | Text in italics is interpretation | Generated: 05:00 UTC",
       ].join("\n"),
     );
     expect(report?.content).toContain(`\n\n---\n\n${ARTICLE}`);

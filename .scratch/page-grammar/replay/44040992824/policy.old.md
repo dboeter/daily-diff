@@ -1,0 +1,3 @@
+## Highlights
+
+The European Commission is collecting feedback on a draft questionnaire template to help certain deployers of high-risk AI systems conduct the fundamental rights impact assessment required by the AI Act. In the Netherlands, municipalities and provinces have expressed support for European digital autonomy plans and see room to shape the legislative proposal for the Cloud and AI Development Act. Meanwhile, California has sued OpenAI, alleging the company tested advanced AI models without adequate safeguards and misled the public about safety following a reported hack of Hugging Face.

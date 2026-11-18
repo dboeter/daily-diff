@@ -1,0 +1,1 @@
+1: The Genie One Chrome extension replaces the Chrome new tab page with Genie One from your Azure Databricks workspace, using your existing Azure Databricks sign-in and permissions and working with one chosen workspace when the extension is turned on.

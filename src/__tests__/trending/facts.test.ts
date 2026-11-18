@@ -158,7 +158,7 @@ describe("trendsFacts", () => {
       }),
     );
     expect(facts).not.toContain("largest");
-    expect(facts).toContain("Agent & Coding Tool Radar: no row rose against last week's page");
+    expect(facts).toContain("Agent & coding tool radar: no row rose against last week's page");
     expect(facts).not.toContain("🚀");
   });
 

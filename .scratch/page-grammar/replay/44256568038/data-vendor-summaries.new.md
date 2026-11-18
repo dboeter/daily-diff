@@ -1,0 +1,14 @@
+1: `Files API 3.0` adds multipart uploads for files larger than 5 GB and conditional operations that check the current file version before upload, download, or deletion; from December 2026 it becomes the default for workspaces with the compliance security profile enabled.
+2: Efficient Column Updates lets you add and backfill columns without rewriting unchanged columns, and a workspace admin must enable access from the Previews page.
+3: Genie Migrate converts T-SQL scripts from SQL Server and Azure Synapse dedicated SQL pools into Lakeflow pipelines via the `Spark Declarative Pipelines` target framework, which requires a workspace admin to turn on `Migration Projects Experimental Features` from the Previews page.
+4: Scheduled tasks in Genie One can send emails to other users in your organization, not just to you.
+5: Unity Gateway Insights generates reports showing what people use agents for and where tokens go to waste, with Genie Code building each report from a sample of sessions in the unified trace table.
+6: Within the Unity Gateway Managed Configuration beta, Smart Routing can route coding-agent subagents to external models behind a model provider service, added to `models.sources` alongside `system.ai` models.
+7: The Spark Monitoring UI lets you monitor and troubleshoot Snowpark Connect for Spark batch jobs and sessions in Snowsight, listing `snowpark-submit` and `EXECUTE CODE BUNDLE` runs under Batch Jobs and Snowpark Connect sessions under Spark Sessions.
+8: —
+9: Preview versions of the Domains REST APIs are no longer available; this November 2026 summary otherwise bundles Fabric updates across OneLake, Data Engineering, Data Warehouse, Materialized Lake Views, and Conversational Analytics.
+10: OneLake is positioned as a unified foundation for data, context, governance and AI, adding a OneLake Catalog with an Atlan governance partnership, plus Catalog federation, Azure Databricks native storage and credential vending in OneLake Table APIs (GA), and semantic views, IQ sharing and AI Search support (preview).
+11: Azure HorizonDB is a fully-managed, cloud-native PostgreSQL service targeting high-performance, AI-driven, large-scale workloads that need ultra-low latency.
+12: Fuzzy string match lets you compare strings by how similar or different they are across Azure SQL Database, Azure SQL Managed Instance, SQL database in Microsoft Fabric, and SQL Server 2025.
+13: The author built a proof-of-concept "agent factory" for SQL migration that runs AI translators in parallel, tests every translation against the real data with scripts, and uses a separate AI reviewer so no AI grades its own work, trialing it by migrating the Pagila PostgreSQL sample database to Snowflake.
+14: The post presents a production pattern for turning customer comments into validated, graph-ready data using Snowflake Cortex for sentiment and named-entity recognition (NER), and notes what the demos leave out.

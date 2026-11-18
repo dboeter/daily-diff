@@ -59,7 +59,7 @@ export function nearPolicyDeadlines(
 export function renderDeadlines(deadlines: Deadline[]): string {
   if (deadlines.length === 0) return "";
   const rows = deadlines.map(
-    (d) => `| ${d.date} | ${cell(d.source)} | [${policyTitleLabel(d.title)}](${cell(d.link)}) |`,
+    (d) => `| ${d.date} | [${policyTitleLabel(d.title)}](${cell(d.link)}) | ${cell(d.source)} |`,
   );
   return `## ${POLICY_REPORT.deadlinesHeading}\n\n${POLICY_REPORT.deadlinesWindow}\n\n${POLICY_REPORT.deadlinesHeader}\n${rows.join("\n")}`;
 }

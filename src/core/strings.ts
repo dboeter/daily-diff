@@ -100,10 +100,15 @@ const generated = (utcStr: string) => `Generated: ${utcStr} UTC`;
 /** The meta line under every report's H1. */
 export const REPORT_META = {
   sources: (list: string) => `${SOURCES} ${list}`,
-  /** The meta line itself, one template on every page: the page's counts, then when it was generated. */
+  /**
+   * The meta line itself, one template on every page: the page's counts (each `Name: n`), then its
+   * sources where the list says something (policy, Trends, Weekly Diff), then when it was generated.
+   */
   line: (parts: string[], utcStr: string) => `> ${[...parts, generated(utcStr)].filter(Boolean).join(" | ")}`,
-  /** After a listing's item count when Jev ordered it (policy). */
-  jevRanked: " ranked by [Jev](https://typesafe.ai) relevance",
+  /** A repo page's count of prereleases its sections left out (stable releases only). */
+  prereleasesSkipped: (n: number) => `Prereleases skipped: ${n}`,
+  /** The count of a page's Spotted rows, last of its counts. */
+  spotted: (n: number) => `Spotted: ${n}`,
 } as const;
 
 /** "1 comment", "2 comments". */
@@ -133,6 +138,9 @@ export const GOING_AWAY = "−";
  */
 export const PROSE_COLUMNS = ["Summary", "What to do"];
 
+// Every table of dated items has one column order: the date, the linked item, its source (or lab,
+// platform), the table's own columns, the prose column last. Headings are in sentence case.
+
 /** The Overview's lists of stories routed to no page (talked-about.json): `policy`, then the rest. */
 export const TALKED_ABOUT = { heading: "Also talked about", policyHeading: "Policy talk" } as const;
 
@@ -156,8 +164,9 @@ export const SECTIONS = {
 
 // Weekly: the week's article (src/weekly/). The model writes the whole body; these are its meta line.
 export const WEEKLY_REPORT = {
-  sources: (items: number, from: string, to: string) =>
-    `${items} item${items === 1 ? "" : "s"} the pages showed from ${from} to ${to}`,
+  /** The items the week's pages showed, which the article was written from. */
+  items: (n: number) => `Items: ${n}`,
+  sources: (from: string, to: string) => `the pages of ${from} to ${to}`,
   writtenBy: (model: string) => `Written by ${model}`,
   /** The reader's one key to the page: the writer sets its own reading in italics, and only that. */
   italics: "Text in italics is interpretation",
@@ -165,6 +174,9 @@ export const WEEKLY_REPORT = {
 
 // Weekly: what is moving. The prose call writes Highlights and Signals around the rest.
 export const TRENDS_REPORT = {
+  /** The meta line's counts: the rows of each table section the page shows. */
+  counts: (tools: number, models: number, papers: number, discussed: number) =>
+    `Agents & tools: ${tools} | Models: ${models} | Papers: ${papers} | Most discussed: ${discussed}`,
   sources:
     "GitHub Trending + GitHub Search API + OpenRouter + npm + Hugging Face + arXiv + Hacker News + Lobste.rs + Dev.to",
   agentsHeading: "Agents & coding tools",
@@ -197,7 +209,7 @@ export const TRENDS_REPORT = {
   researchTableHeader: "| Paper | Summary |\n| :--- | :--- |",
   mostDiscussedHeading: "Most discussed",
   // Tables rendered in code (renderTrendingTables), one `##` per table, nested under agentsHeading.
-  radarHeading: "🚀 Agent & Coding Tool Radar",
+  radarHeading: "🚀 Agent & coding tool radar",
   radarHeader: "| Tool | Source | Signal | Summary |\n| :--- | :--- | :--- | :--- |",
   radarLegend:
     "*New tools (🆕: created or listed in the last 14 days) first, then each source's top movers; 🔥 also on last week's Trends page. " +
@@ -208,11 +220,11 @@ export const TRENDS_REPORT = {
   categoryHeader:
     "| Project | Lang | Stars (total / this week, %) | Summary |\n| :--- | :--- | ---: | :--- |",
   categoryTitles: {
-    coding_agent: "🧑‍💻 Coding Agents",
-    harness_framework: "🧰 Agent Harnesses & Frameworks",
-    multi_agent: "🕸️ Multi-Agent & Orchestration",
-    agent_tooling: "🔌 Agent Tooling",
-    other_agent: "🤖 Other Agents",
+    coding_agent: "🧑‍💻 Coding agents",
+    harness_framework: "🧰 Agent harnesses & frameworks",
+    multi_agent: "🕸️ Multi-agent & orchestration",
+    agent_tooling: "🔌 Agent tooling",
+    other_agent: "🤖 Other agents",
   },
 } as const;
 
@@ -251,18 +263,20 @@ export const POLICY_REPORT = {
     other: "Elsewhere",
   } satisfies Record<Jurisdiction, string>,
   // Stage is "—" for items without one (most feed items).
-  tableHeader: "| Date | Source | Title | Stage | Summary |\n| :--- | :--- | :--- | :--- | :--- |",
+  tableHeader: "| Date | Item | Source | Stage | Summary |\n| :--- | :--- | :--- | :--- | :--- |",
   /** The last section: open deadlines and calendar dates of the next 30 days (src/policy/deadlines.ts). */
   deadlinesHeading: "Coming up",
   deadlinesWindow: "Deadlines and dates in the next 30 days.",
-  deadlinesHeader: "| Date | Source | Item |\n| :--- | :--- | :--- |",
+  deadlinesHeader: "| Date | Item | Source |\n| :--- | :--- | :--- |",
   /** The source column of a config.yml `policy.calendar` date. */
   calendarSource: "Calendar",
   /** After the jurisdiction sections: items from `kind: news` feeds (news and commentary outlets). */
   newsHeading: "News & commentary",
-  newsTableHeader: "| Date | Source | Title | Summary |\n| :--- | :--- | :--- | :--- |",
+  newsTableHeader: "| Date | Item | Source | Summary |\n| :--- | :--- | :--- | :--- |",
   /** The meta line's count, and the log's. */
   newItems: (n: number) => plural(n, "new item"),
+  /** The meta line's count, in the `Name: n` form every page's counts have. */
+  newItemsCount: (n: number) => `New items: ${n}`,
   noNewItems: "No new items, skipping report.",
   noData: "No data available, skipping report.",
 } as const;
@@ -279,7 +293,7 @@ export const DATA_REPORT = {
   /** The table rows, and apart the links of the `alsoNew` lines: on 2026-11-10 "15" stood above 20 linked notes. */
   vendorCount: (count: number, alsoNew = 0) =>
     `Vendor items: ${count}${alsoNew ? ` | Also new: ${alsoNew}` : ""}`,
-  vendorTableHeader: "| Date | Source | Item | Summary |\n| :--- | :--- | :--- | :--- |",
+  vendorTableHeader: "| Date | Item | Source | Summary |\n| :--- | :--- | :--- | :--- |",
   /** A section whose rows all share one source: the Source column would repeat it in every row. */
   vendorTableHeaderOneSource: "| Date | Item | Summary |\n| :--- | :--- | :--- |",
   /** Leads the line of links under a vendor table: today's kept items over the cap. */
@@ -291,10 +305,10 @@ export const DATA_REPORT = {
   communityTableHeader: "| Date | Post | Source | Summary |\n| :--- | :--- | :--- | :--- |",
   /** Code-rendered after Open-source stack: the data repos' stable releases no earlier report showed. */
   releasesHeading: "Releases this week",
-  releasesTableHeader: "| Project | Version | Date | Summary |\n| :--- | :--- | :--- | :--- |",
+  releasesTableHeader: "| Date | Project | Version | Summary |\n| :--- | :--- | :--- | :--- |",
   /** Code-rendered after Highlights: the open end dates of reported deprecations. */
   actionHeading: "Action required",
-  actionTableHeader: "| Date | Platform | Item | What to do |\n| :--- | :--- | :--- | :--- |",
+  actionTableHeader: "| Date | Item | Platform | What to do |\n| :--- | :--- | :--- | :--- |",
   /** Marks an AI feature in a data platform (`aiInData`) in the Item cell. */
   aiMarker: "🤖",
   /** The last section, code only: links to today's AI Policy items that are EU data law. */
@@ -305,7 +319,7 @@ export const DATA_REPORT = {
 // Daily: Anthropic and OpenAI posts, models newly listed on OpenRouter, stealth models, Spotted.
 export const MODELS_PAGE = {
   labHeading: "Lab announcements",
-  labTableHeader: "| Date | Lab | Post | Summary |\n| :--- | :--- | :--- | :--- |",
+  labTableHeader: "| Date | Post | Lab | Summary |\n| :--- | :--- | :--- | :--- |",
   /** The Lab column. */
   labs: { anthropic: "Anthropic", openai: "OpenAI" },
   /** Below the table when more new posts came in than it shows. */
@@ -316,7 +330,7 @@ export const MODELS_PAGE = {
   noPosts: "No new posts today.",
   siteFailed: (lab: string) => `⚠️ ${lab}: sitemap fetch failed.`,
   modelsHeading: "New on OpenRouter",
-  modelsTableHeader: "| Model | Listed | Context | Summary |\n| :--- | :--- | :--- | :--- |",
+  modelsTableHeader: "| Listed | Model | Context | Summary |\n| :--- | :--- | :--- | :--- |",
   noModels: "No new models listed today.",
   catalogUnavailable: "⚠️ OpenRouter model catalog unavailable.",
   /** One line in place of the tracked sections with nothing to show, named by `emptyNames`. */
@@ -326,17 +340,16 @@ export const MODELS_PAGE = {
     models: "OpenRouter's new listings",
     stealth: "OpenRouter's stealth models",
   },
-  counts: (posts: number, models: number, spotted: number) =>
-    `Lab posts: ${posts} | New models: ${models} | Spotted: ${spotted}`,
+  counts: (posts: number, models: number) => `Lab posts: ${posts} | New models: ${models}`,
   noContent: "No lab posts, new models, new stealth models or Spotted stories, skipping report.",
 } as const;
 
 // Rendered daily on the models page (buildStealthSection).
 export const STEALTH_SECTION = {
-  title: "Stealth Models on OpenRouter",
+  title: "Stealth models on OpenRouter",
   none: "No stealth models listed on OpenRouter today.",
   unavailable: "⚠️ OpenRouter model catalog unavailable — stealth model status unknown.",
-  header: "| Model | Listed | Expires | Status |\n| :--- | :--- | :--- | :--- |",
+  header: "| Listed | Model | Expires | Status |\n| :--- | :--- | :--- | :--- |",
   isNew: "🆕 new",
   expiring: (days: number) => (days <= 0 ? "⏳ expires today" : `⏳ expires in ${days}d`),
   live: "live",

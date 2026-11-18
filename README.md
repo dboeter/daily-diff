@@ -79,7 +79,7 @@ Each tracked repo is covered by its stable releases of the last 24h (prereleases
 <!-- tracked:agents -->
 <!-- generated from config.yml: edit config.yml, then run pnpm readme -->
 
-**Coding Agents & Assistants**: AI coding agents and personal AI assistants.
+**Coding agents & assistants**: AI coding agents and personal AI assistants.
 
 | Project          | Repository                                                                      |
 | ---------------- | ------------------------------------------------------------------------------- |
@@ -101,7 +101,7 @@ Each tracked repo is covered by its stable releases of the last 24h (prereleases
 <!-- tracked:infra -->
 <!-- generated from config.yml: edit config.yml, then run pnpm readme -->
 
-**Agent Tooling**: AI agent tooling — agent sandboxes, terminal session multiplexers and context-management tools.
+**Agent tooling**: AI agent tooling — agent sandboxes, terminal session multiplexers and context-management tools.
 
 | Project   | Repository                                                    |
 | --------- | ------------------------------------------------------------- |

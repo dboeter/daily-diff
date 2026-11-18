@@ -200,6 +200,43 @@ function descriptionFallback(description: string): string {
   return `${(space > 0 ? cut.slice(0, space) : cut).trimEnd()}…`;
 }
 
+// A summary restates its title when this share of its content words are the title's and this
+// share of the title's are in it. Measured on the 102 story summaries of 2026-11-10 … 11-18: the
+// 3 it takes add no fact; at 0.5 both ways, 2 of 7 lost one (a named mode, a promotion).
+const RESTATED_SUMMARY_SHARE = 0.6;
+const RESTATED_TITLE_SHARE = 0.8;
+
+/**
+ * The story summaries with "—" for one that only restates its row's title ("Google reports that
+ * an AI agent turned a security patch into an exploit with no human help", under that title,
+ * 2026-11-17): the row shows the title already, and a "—" row makes no Highlight
+ * (`titleOnlyStories`). Each one is logged. Only a model summary is checked: a row without one
+ * shows its description as before.
+ */
+export function dropTitleRestatements(
+  summaries: Map<number, string>,
+  rows: readonly { n: number; title: string }[],
+  tag: string,
+): Map<number, string> {
+  const share = (text: string, of: Set<string>) => {
+    const words = [...new Set(contentWords(text))];
+    return words.length ? words.filter((w) => of.has(w)).length / words.length : 0;
+  };
+  const out = new Map(summaries);
+  for (const { n, title } of rows) {
+    const text = summaries.get(n);
+    if (!text || text === "—") continue;
+    if (
+      share(text, new Set(contentWords(title))) >= RESTATED_SUMMARY_SHARE &&
+      share(title, new Set(contentWords(text))) >= RESTATED_TITLE_SHARE
+    ) {
+      console.log(`  [${tag}] row ${n}: summary only restates its title, shown as —: "${text.slice(0, 80)}"`);
+      out.set(n, "—");
+    }
+  }
+  return out;
+}
+
 /** A row's summary cell text (not yet cell-escaped): the model's line for its number, else its description. */
 export const summaryText = (
   summaries: Map<number, string>,

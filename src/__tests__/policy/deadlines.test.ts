@@ -40,8 +40,8 @@ describe("renderDeadlines", () => {
       },
     ]);
     expect(md).toBe(
-      "## Coming up\n\nDeadlines and dates in the next 30 days.\n\n| Date | Source | Item |\n| :--- | :--- | :--- |\n" +
-        "| 2026-11-09 | Have your say | [AI Act \\| implementing act](https://x.eu) |",
+      "## Coming up\n\nDeadlines and dates in the next 30 days.\n\n| Date | Item | Source |\n| :--- | :--- | :--- |\n" +
+        "| 2026-11-09 | [AI Act \\| implementing act](https://x.eu) | Have your say |",
     );
   });
 

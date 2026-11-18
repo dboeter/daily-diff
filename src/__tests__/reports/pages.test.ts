@@ -222,6 +222,27 @@ describe("buildTrendsReport", () => {
     expect(content).not.toContain("<!-- tables -->");
   });
 
+  it("opens its meta line with the row counts of its table sections, then the sources", async () => {
+    generateBody.mockReset();
+    generateBody.mockImplementation(async (p: string) => reply(p));
+    const content = (await build())!.content;
+    const meta = content.split("\n").find((l) => l.startsWith("> "))!;
+    expect(meta).toBe(
+      `> ${TRENDS_REPORT.counts(2, 2, 1, 1)} | Sources: ${TRENDS_REPORT.sources} | Generated: 00:00 UTC`,
+    );
+  });
+
+  it("puts the Highlights on consecutive lines and keeps more than three", async () => {
+    generateBody.mockReset();
+    generateBody.mockImplementation(async (p: string) =>
+      isProse(p)
+        ? "## Highlights\n\n- A.\n\n- B.\n\n- C.\n\n- D.\n\n<!-- tables -->\n\n## Signals\n\nS."
+        : reply(p),
+    );
+    const content = (await build())!.content;
+    expect(content).toContain("## Highlights\n\n- A.\n- B.\n- C.\n- D.\n\n---");
+  });
+
   it("renders Most discussed from the Spotted call's summaries; its own call has the papers only", async () => {
     generateBody.mockReset();
     generateBody.mockImplementation(async (p: string) => reply(p));
@@ -531,13 +552,16 @@ describe("buildAgentsReport", () => {
   const build = (g = groups(true), s: typeof spotted = spotted) =>
     buildAgentsReport(g, s, "00:00", "2026-10-22");
 
-  it("reads Highlights, the two groups, then Spotted", async () => {
+  it("reads Highlights, the active group, then Spotted, and names the quiet group in one line", async () => {
     generateBody.mockReset();
     generateBody.mockImplementation(async () => "## Highlights\n\n- Codex shipped v1.");
     const report = await build();
     expect(report.id).toBe("ai-agents");
     expect(report.content).toMatch(/^# AI Agents 2026-10-22\n/);
-    expect(headings(report.content)).toEqual(["Highlights", "Coding Agents", "Agent Tooling", "Spotted"]);
+    expect(headings(report.content)).toEqual(["Highlights", "Coding Agents", "Spotted"]);
+    expect(report.content).toContain(
+      "Nothing new from Agent Tooling ([Agent Deck](https://github.com/org/agent deck)) today.",
+    );
     expect(report.content).toContain("### Codex");
     // The Highlights call reads the rendered groups and the Spotted table.
     const prompt = generateBody.mock.calls[0]![0] as string;
@@ -545,6 +569,17 @@ describe("buildAgentsReport", () => {
     expect(prompt).toContain("## Coding Agents\n\n### Codex\n\n- Released v1.");
     expect(prompt).toContain("| [Story 1](https://example.com/1) |");
     expect(generateBody).toHaveBeenCalledTimes(1);
+  });
+
+  it("publishes the first 3 of 5 Highlights, as a tight list", async () => {
+    generateBody.mockReset();
+    generateBody.mockImplementation(
+      async () => "## Highlights\n\n- One.\n\n- Two.\n- Three.\n- Four.\n- Five.",
+    );
+    const report = await build();
+    expect(report.content).toContain("## Highlights\n\n- One.\n- Two.\n- Three.\n");
+    expect(report.content).not.toContain("- Four.");
+    expect(report.content).not.toContain("- Five.");
   });
 
   it("writes Highlights for Spotted alone", async () => {
@@ -558,7 +593,8 @@ describe("buildAgentsReport", () => {
     generateBody.mockReset();
     const report = await build(groups(false), NO_SPOTTED);
     expect(generateBody).not.toHaveBeenCalled();
-    expect(headings(report.content)).toEqual(["Coding Agents", "Agent Tooling"]);
+    expect(headings(report.content)).toEqual(["Coding Agents"]);
+    expect(report.content).toContain("Nothing new from Agent Tooling");
   });
 
   it("leaves the failure notice under Highlights when the call fails", async () => {
@@ -693,11 +729,11 @@ describe("buildModelsPage", () => {
     // No stealth model in the catalog: named in one line, no heading over a placeholder.
     expect(report?.content).toContain("Nothing new from OpenRouter's stealth models today.");
     expect(report?.content).toContain(
-      "| 2026-10-11 | Anthropic | [Post 1](https://www.anthropic.com/news/p1) | Summary one. |",
+      "| 2026-10-11 | [Post 1](https://www.anthropic.com/news/p1) | Anthropic | Summary one. |",
     );
     // The model is numbered after the post; without its summary line it shows its description.
     expect(report?.content).toContain(
-      "| [M](https://openrouter.ai/x/m) `x/m` | 2026-10-21 | 262K | A coding model. |",
+      "| 2026-10-21 | [M](https://openrouter.ai/x/m) `x/m` | 262K | A coding model. |",
     );
     // Two calls: the summaries, then Highlights over the rendered sections.
     expect(generateBody).toHaveBeenCalledTimes(2);
@@ -717,8 +753,8 @@ describe("buildModelsPage", () => {
     );
     const report = await build([site([post(1, "openai"), post(2)])], catalog());
     const content = report!.content;
-    expect(content).toContain("| OpenAI | [Post 1](https://www.openai.com/news/p1) | — |");
-    expect(content).toContain("| Anthropic | [Post 2](https://www.anthropic.com/news/p2) | Summary two. |");
+    expect(content).toContain("[Post 1](https://www.openai.com/news/p1) | OpenAI | — |");
+    expect(content).toContain("[Post 2](https://www.anthropic.com/news/p2) | Anthropic | Summary two. |");
     const highlightsPrompt = generateBody.mock.calls[1]![0] as string;
     expect(highlightsPrompt).toContain('only a title: no Highlight for them. "Post 1"');
     expect(content).not.toContain("Post 1 ships a guess.");
@@ -784,7 +820,7 @@ describe("buildModelsPage", () => {
     expect(report?.content).toContain(
       "## Lab announcements\n\nFirst crawl of Anthropic: 400 posts recorded; new posts are listed from the next run.",
     );
-    expect(report?.content).not.toContain("| Date | Lab |");
+    expect(report?.content).not.toContain("| Date | Post | Lab |");
     expect(generateBody).toHaveBeenCalledTimes(1);
   });
 
@@ -798,7 +834,7 @@ describe("buildModelsPage", () => {
       catalog(),
     );
     const content = report!.content;
-    expect(content).toContain("| Date | Lab |");
+    expect(content).toContain("| Date | Post | Lab |");
     expect(content.split("\n").filter((l) => /^\| 2026-/.test(l))).toHaveLength(1);
     expect(content).toContain(
       "First crawl of Anthropic: 400 posts recorded; new posts are listed from the next run.",
@@ -936,8 +972,8 @@ describe("buildPolicyReport", () => {
     expect(report?.id).toBe("ai-policy");
     expect(report?.content).toContain("# AI Policy 2026-10-14");
     expect(report?.content).toContain(
-      "H.\n\n## EU\n\n| Date | Source | Title | Stage | Summary |\n| :--- | :--- | :--- | :--- | :--- |\n" +
-        "| 2026-10-09 | European Commission | [AI Act guidelines](https://example.eu/a) | — | The AI Office published guidelines. |",
+      "H.\n\n---\n\n## EU\n\n| Date | Item | Source | Stage | Summary |\n| :--- | :--- | :--- | :--- | :--- |\n" +
+        "| 2026-10-09 | [AI Act guidelines](https://example.eu/a) | European Commission | — | The AI Office published guidelines. |",
     );
     expect(JSON.parse(fs.readFileSync(file, "utf-8"))).toEqual({ reported: { g1: "2026-10-14" } });
   });
@@ -962,8 +998,8 @@ describe("buildPolicyReport", () => {
       "Coming up",
     ]);
     expect(report?.content).toContain(
-      "## Coming up\n\nDeadlines and dates in the next 30 days.\n\n| Date | Source | Item |\n| :--- | :--- | :--- |\n" +
-        "| 2026-11-09 | Have your say | [AI Act implementing act](https://x.eu) |",
+      "## Coming up\n\nDeadlines and dates in the next 30 days.\n\n| Date | Item | Source |\n| :--- | :--- | :--- |\n" +
+        "| 2026-11-09 | [AI Act implementing act](https://x.eu) | Have your say |",
     );
   });
 
@@ -997,8 +1033,8 @@ describe("buildPolicyReport", () => {
     const news = { ...item, id: "n1", source: "Politico Europe", news: true };
     const report = await buildPolicyReport(data([news]), "00:00", "2026-10-14", path.join(dir, "news.json"));
     expect(report?.content).toContain(
-      "H.\n\n## News & commentary\n\n| Date | Source | Title | Summary |\n| :--- | :--- | :--- | :--- |\n" +
-        "| 2026-10-09 | Politico Europe | [AI Act guidelines](https://example.eu/a) | Politico reports. |",
+      "H.\n\n---\n\n## News & commentary\n\n| Date | Item | Source | Summary |\n| :--- | :--- | :--- | :--- |\n" +
+        "| 2026-10-09 | [AI Act guidelines](https://example.eu/a) | Politico Europe | Politico reports. |",
     );
     expect(report?.content).not.toContain("## EU");
   });
@@ -1171,7 +1207,7 @@ describe("buildDataReport", () => {
     // Snowflake: the bundle (row 3: a deprecation, no date) before the feature (row 4).
     expect(at("## Databricks")).toBeLessThan(at("## Snowflake"));
     expect(content).toContain(
-      "| — | Snowflake BCR | ⚠️ [2026_08 bundle](https://example.com/bundle) | Snowflake note. |",
+      "| — | ⚠️ [2026_08 bundle](https://example.com/bundle) | Snowflake BCR | Snowflake note. |",
     );
     expect(at("bundle)")).toBeLessThan(at("sf)"));
     // Snowflake's repos are quiet: its table, then the quiet line.
@@ -1301,9 +1337,9 @@ describe("buildDataReport", () => {
     expect(at("## Highlights")).toBeLessThan(at("## Action required"));
     expect(at("## Action required")).toBeLessThan(at("## Databricks"));
     const table = content.slice(at("## Action required"), at("## Databricks"));
-    expect(table).toContain("| Date | Platform | Item | What to do |");
+    expect(table).toContain("| Date | Item | Platform | What to do |");
     expect(table).toContain(
-      "| 2026-11-19 | Azure Databricks | [Retirement: legacy runtime](https://example.com/dbx-old) | Retiring soon. |\n| 2026-12-01 | Microsoft Fabric | [Old retirement](https://example.com/saved) | Move to Fabric IQ. |",
+      "| 2026-11-19 | [Retirement: legacy runtime](https://example.com/dbx-old) | Azure Databricks | Retiring soon. |\n| 2026-12-01 | [Old retirement](https://example.com/saved) | Microsoft Fabric | Move to Fabric IQ. |",
     );
     expect(table).not.toContain("Gone");
     // Today's summary is saved with the end date, for the later report days.
@@ -1426,7 +1462,7 @@ describe("buildDataReport", () => {
       },
     };
     const content = (await build(sections(false), vendor))!.content;
-    expect(content).toContain("(https://example.com/dbx-old) | Description dbx-old. |");
+    expect(content).toContain("(https://example.com/dbx-old) | Azure Databricks | Description dbx-old. |");
   });
 
   it("is still skipped when only open end dates are left", async () => {
@@ -1473,7 +1509,7 @@ describe("buildDataReport", () => {
     const content = (await build(releasedThisWeek(), vendor))!.content;
     const at = (s: string) => content.indexOf(s);
     expect(content).toContain(
-      "## Releases this week\n\n| Project | Version | Date | Summary |\n| :--- | :--- | :--- | :--- |\n| [DuckDB](https://github.com/org/duckdb) | [v2.0.0](https://github.com/org/duckdb/releases/tag/v2.0.0) | 2026-10-14 | Major release: drops Python 3.9. |",
+      "## Releases this week\n\n| Date | Project | Version | Summary |\n| :--- | :--- | :--- | :--- |\n| 2026-10-14 | [DuckDB](https://github.com/org/duckdb) | [v2.0.0](https://github.com/org/duckdb/releases/tag/v2.0.0) | Major release: drops Python 3.9. |",
     );
     expect(at("## Open-source stack")).toBeLessThan(at("## Releases this week"));
     // The summaries call lists the release after the (here: no) vendor rows.
