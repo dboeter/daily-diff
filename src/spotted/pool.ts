@@ -361,10 +361,13 @@ function claimRows<T extends Pick<Story, "url" | "security">>(
 export const SPOTTED_MIN_TOPIC_PROBABILITY = 0.6;
 /** A story published longer ago is not news, however late a source surfaces it (a 25-day-old post, 2026-10-26). */
 export const SPOTTED_MAX_AGE_DAYS = 7;
-/** Once a page has this many rows, a further row needs SPOTTED_MIN_POINTS: no 8-point row beside 491. A flagged story skips the floor and is not counted. */
-export const SPOTTED_ROWS_BEFORE_FLOOR = 3;
-/** Each source's own scale (HN points, Lobste.rs score, Dev.to reactions); stories are fetched hours old. */
-export const SPOTTED_MIN_POINTS: Record<StorySource, number> = { hn: 5, lobsters: 3, devto: 10 };
+/**
+ * Every row needs this, the first of a page too, so a quiet day has fewer rows or none. Each source's
+ * own scale (HN points, Lobste.rs score, Dev.to reactions), counted at fetch, hours after posting.
+ * Raised on 2026-11-18 from 5/3/10, with no exemption for a page's first 3 rows: 30% of the HN rows
+ * of 2026-10-23 … 11-18 had under 20 points, and the maintainer judged them noise. A flagged story skips it.
+ */
+export const SPOTTED_MIN_POINTS: Record<StorySource, number> = { hn: 30, lobsters: 15, devto: 25 };
 
 /** Dev.to challenge entries open with this line: three Hacktoberfest entries in two days on 2026-10-25/26. */
 export const isContestEntry = (s: Pick<Story, "title" | "description">): boolean =>
@@ -375,7 +378,7 @@ export const isContestEntry = (s: Pick<Story, "title" | "description">): boolean
  * ranked by points, topic probability breaking ties; numbered across pages in SPOTTED_PAGES order.
  * Left out before ranking (`threshold`): a topic probability under SPOTTED_MIN_TOPIC_PROBABILITY,
  * a story over SPOTTED_MAX_AGE_DAYS old (when `dateStr` is given) and a contest entry; while
- * ranking, a story under SPOTTED_MIN_POINTS once its page has SPOTTED_ROWS_BEFORE_FLOOR rows.
+ * ranking, a story under SPOTTED_MIN_POINTS.
  * A story Jev flagged as a security event (`security`) has its own slot: it skips the per-source cap
  * and the points floor and counts toward neither, but needs everything else. The topic bar stays on
  * purpose: the maintainer deferred the page of a flagged story (.scratch/security-section/spec.md).
@@ -419,9 +422,7 @@ export function selectSpotted(
           SPOTTED_PER_SOURCE[source],
           taken,
           (s, reason) => dropped?.set(s.id, reason),
-          (s, sourceRows) =>
-            rows.filter((r) => !r.security).length + sourceRows < SPOTTED_ROWS_BEFORE_FLOOR ||
-            s.points >= SPOTTED_MIN_POINTS[source],
+          (s) => s.points >= SPOTTED_MIN_POINTS[source],
         );
         rows.push(...claimed);
       }
