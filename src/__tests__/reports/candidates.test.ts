@@ -140,6 +140,7 @@ const sources: CandidateSources = {
   policy: [policyItem],
   vendor: [vendorItem],
   actions: {},
+  modelsState: null,
   dateStr: "2026-11-05",
 };
 
@@ -154,6 +155,7 @@ const nothing: CandidateSources = {
   policy: [],
   vendor: [],
   actions: {},
+  modelsState: null,
   dateStr: "2026-11-05",
 };
 
@@ -270,6 +272,32 @@ describe("buildCandidates", () => {
         text: "Upload a file.",
       },
     ]);
+  });
+
+  it("lists the models the page shows: a variant on its base's row, a Pro mode of a reported base alone", () => {
+    const model = (id: string, base: string | null) => ({
+      id,
+      name: id,
+      description: "",
+      created: "2026-11-05",
+      contextLength: 1,
+      base,
+    });
+    const newModels = [
+      model("o/a", null),
+      model("o/a-pro", "o/a"),
+      model("o/a:batch", "o/a"),
+      model("o/b", null),
+      model("o/b-pro", "o/b"),
+      model("o/b:batch", "o/b"),
+    ];
+    const out = buildCandidates({
+      ...nothing,
+      catalog: { newModels, stealth: [] },
+      // o/a was shown yesterday; o/b today, so a same-day re-run lists it again.
+      modelsState: { reported: { "o/a": "2026-11-04", "o/b": "2026-11-05" } },
+    });
+    expect(out.map((c) => c.url)).toEqual(["https://openrouter.ai/o/a-pro", "https://openrouter.ai/o/b"]);
   });
 
   it("collapses whitespace and cuts the text to 1500 characters", () => {

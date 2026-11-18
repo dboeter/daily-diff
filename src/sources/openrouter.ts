@@ -14,6 +14,8 @@
  * page (`fetchModelCatalogDaily`).
  */
 
+import { newItems, type ReportedState } from "../core/report-state.ts";
+
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
@@ -400,6 +402,26 @@ export function selectNewModels(data: ApiModel[], days: number, now = Date.now()
         base: base === m.id ? null : base,
       };
     });
+}
+
+/**
+ * The New on OpenRouter rows: the entries no earlier page listed (today's count as new, for a
+ * same-day re-run), folded. The page and `candidates.json` both use it, so Weekly Diff's source
+ * finds every row the page shows.
+ */
+export function newModelRows(
+  entries: OpenRouterListedModel[],
+  state: ReportedState | null,
+  dateStr: string,
+): OpenRouterNewModel[] {
+  // Folded after the state filter, so a variant whose base an earlier page listed is its own row.
+  return foldVariants(
+    newItems(
+      entries.map((m) => ({ ...m, published: m.created })),
+      state,
+      dateStr,
+    ),
+  );
 }
 
 /**
