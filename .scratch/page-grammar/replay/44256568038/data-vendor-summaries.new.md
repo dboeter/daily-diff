@@ -1,0 +1,14 @@
+1: Adds multipart uploads for files larger than 5 GB and conditional operations that check the current file version before upload, download, or deletion in Unity Catalog volumes; starting December 2026 it is available by default for workspaces with the compliance security profile.
+2: Lets you add and backfill columns without rewriting unchanged columns; workspace admins enable access from the Previews page.
+3: Converts T-SQL scripts from SQL Server and Azure Synapse dedicated SQL pools into Lakeflow pipelines, where each group of files becomes one serverless pipeline using the `Spark Declarative Pipelines` target and validated by a dry run; a workspace admin must enable `Migration Projects Experimental Features` from the Previews page.
+4: Scheduled tasks in Genie One can now send emails to other users in your organization, not just to you.
+5: Generates reports showing what people use agents for and where tokens go to waste, with each report built by Genie Code from a sample of sessions in the unified trace table.
+6: In the Unity Gateway Managed Configuration beta, Smart Routing can route coding-agent subagents to external models behind a model provider service, added to `models.sources` alongside `system.ai` models if needed.
+7: Lets you monitor and troubleshoot Snowpark Connect for Spark batch jobs and sessions in Snowsight, listing `snowpark-submit` and `EXECUTE CODE BUNDLE` runs under Batch Jobs and Snowpark Connect sessions under Spark Sessions.
+8: —
+9: Preview versions of the Domains REST APIs are no longer available, so integrations built against them stop working; the summary otherwise lists OneLake, Data Engineering, Data Warehouse, and Materialized Lake Views updates.
+10: Makes credential vending for read and write in the OneLake Table APIs, Catalog federation, and Azure Databricks native storage generally available, and previews IQ sharing, AI Search (Microsoft Foundry) support for OneLake with OneLake security, and semantic views.
+11: A fully-managed, cloud-native PostgreSQL service for high-performance, AI-driven, and large-scale workloads targeting scenarios that require ultra-low latency and high scale.
+12: Brings fuzzy string matching to Azure SQL Database, Azure SQL Managed Instance, SQL database in Microsoft Fabric, and SQL Server 2025, letting you compare strings based on how similar or different they are.
+13: The author built a proof-of-concept "agent factory" that migrated the Pagila PostgreSQL sample database's views and functions to Snowflake using parallel AI translators, scripted checks against the real data, and a separate AI reviewer whose only job is to find what the tests missed.
+14: The author presents a production pattern using Snowflake Cortex to turn customer comments into validated, graph-ready sentiment and NER data by treating LLM output as evidence to check rather than truth, and points out what the demos leave out.

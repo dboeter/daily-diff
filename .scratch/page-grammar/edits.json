@@ -1,0 +1,24 @@
+{
+  "digest": [
+    [
+      "- **Release**: what the stable release(s) change for users, in this order: ",
+      "- **Release**: exactly one bullet per project, however many releases or changes it has. It names the 2 or 3 changes that matter most to users, picked in this order: "
+    ],
+    [
+      ". Several releases in a range: summarize the range, do not list each one.",
+      ". Leave the other changes out: the release link shows them. Never continue a release in a second bullet (\"It also fixes …\"). Several releases in a range: one bullet for the range, do not list each one."
+    ]
+  ],
+  "highlights": [
+    [
+      "- About 100 words in total. Write no other sections.",
+      "- One sentence per bullet: the item and the one fact about it that matters most to the reader, in your own words. Never copy a row's summary sentence: the reader sees the row right below. Add a consequence only when the row states one.\n- About 100 words in total. Write no other sections."
+    ]
+  ],
+  "vendor": [
+    [
+      "(for a deprecation or breaking change: what stops working or must be migrated, and by when).",
+      "(for a deprecation or breaking change: what stops working, and by when).\n- A deprecation or breaking change whose text states an action (migrate, update, switch, turn a setting on): open its summary with that action, verb first (\"Migrate to X by <date>: …\"). Keep the text's strength: when it only recommends, write \"Recommended: migrate to X …\". When the text states no action, open with what stops working and when, and never invent an action. Every other row is described, never instructed: no summary of a feature note opens with an action."
+    ]
+  ]
+}

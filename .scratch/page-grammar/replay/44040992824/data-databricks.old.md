@@ -1,0 +1,4 @@
+## Terraform provider for Databricks
+- **Release:** [v1.143.0](https://github.com/databricks/terraform-provider-databricks/releases/tag/v1.143.0) fixes `databricks_app` updates by using the asynchronous Apps update API and waiting for `SUCCEEDED`, so changes to `compute_size`, `compute_min_instances`, and `compute_max_instances` now take effect. Omitted `compute_size` resets to `MEDIUM`, omitted `compute_min_instances` and `compute_max_instances` disable horizontal scaling, and omitted `git_source` clears the app's default git source.
+- **Release:** Fixes a `databricks_connection` perpetual diff by keeping configured values for `pem_key_passphrase`, `ssl_keystore_key`, `ssl_key_password`, and `schema_registry_api_secret`, which the API does not return.
+- **Release:** Adds resource and data sources for `databricks_assume_group_restricted_sharing_group`.
