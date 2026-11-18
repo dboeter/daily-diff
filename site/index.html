@@ -688,6 +688,8 @@ let searchDebounce = null;
 // The search words to find on the page a result opens, with that page's key: the reader may
 // open another page before it arrives, and that one must not get the match.
 let pendingFind = null;
+// The page whose content is on screen; currentKey is already the next one while it loads.
+let shownKey = null;
 let manifestFailed = false;
 
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
@@ -758,20 +760,17 @@ function searchLines(md) {
     if (isTitle(raw)) return;
     if (isRow(raw) && (isHeaderRule(raw) || isHeaderRule(body[i + 1] ?? ''))) return;
     for (const part of isRow(raw) ? raw.split('|') : [raw]) {
-      // The page shows inline code as written (`https://<host>/api` keeps its <host>), so tags
-      // and emphasis marks are removed outside code only: the odd parts of a split on backticks.
+      // The page shows inline code as written (`https://<host>/api` keeps its <host>), so each
+      // code span is set aside while link targets, tags and emphasis marks are removed. A tag
+      // opens with a letter: "<20% to >85%" is text.
+      const codes = [];
       const text = part
+        .replace(/`([^`]*)`/g, (_, code) => `\u0000${codes.push(code) - 1}\u0000`)
         .replace(/!?\[((?:[^[\]]|\[[^\]]*\])*)\]\([^)]*\)/g, '$1')
-        .split('`')
-        .map((piece, n) =>
-          n % 2
-            ? piece
-            : piece
-                .replace(/<[^>]+>/g, '')
-                .replace(/(\*{1,3})(?=\S)([^*]*?\S)\1/g, '$2')
-                .replace(/\*\*/g, ''),
-        )
-        .join('')
+        .replace(/<\/?[a-zA-Z][^>]*>/g, '')
+        .replace(/(\*{1,3})(?=\S)([^*]*?\S)\1/g, '$2')
+        .replace(/\*\*/g, '')
+        .replace(/\u0000(\d+)\u0000/g, (_, n) => codes[n])
         // The list marker, and the going-away sign the page moves into the gutter.
         .replace(/^\s*(#{1,6}|[-*>]|\d+\.)\s+(− )?/, '')
         .trim();
@@ -923,8 +922,9 @@ searchResults.addEventListener('click', (e) => {
   if (!a) return;
   pendingFind = { needle: searchQuery.trim().toLowerCase(), key: a.getAttribute('href').slice(1) };
   // The page already shown fires no hashchange: find the match in it, once the dialog has
-  // closed and given the focus back, so the focus then moves to the match.
-  if (a.getAttribute('href') === `#${currentKey}`) setTimeout(findOnPage);
+  // closed and given the focus back, so the focus then moves to the match. While a page is
+  // loading, the match waits for the load this click starts or joins (loadReport).
+  if (pendingFind.key === shownKey && shownKey === currentKey) setTimeout(findOnPage);
 });
 
 /**
@@ -934,7 +934,7 @@ searchResults.addEventListener('click', (e) => {
  * A date the page shows as "16 Nov" is found by its ISO form in the <time> element.
  */
 function findOnPage() {
-  const needle = pendingFind?.key === currentKey ? pendingFind.needle : null;
+  const needle = pendingFind?.key === shownKey ? pendingFind.needle : null;
   pendingFind = null;
   const root = document.querySelector('#content .md');
   if (!needle || !root) return;
@@ -979,6 +979,8 @@ function findOnPage() {
       if (from < to) parts.push([node, from - pos, to - pos]);
       pos += node.length;
     }
+    // "nov" inside the label "19 Nov" is no match: the index has that cell as its ISO date.
+    if (parts.some(([node]) => node.parentElement.closest('time'))) continue;
     const marks = parts.map(([node, from, to]) => wrap(node, from, to));
     if (marks.length) show(marks[0]);
     return;
@@ -1059,6 +1061,17 @@ function showCurrentTab() {
   fadeTabs();
 }
 document.getElementById('tabList').addEventListener('scroll', fadeTabs, { passive: true });
+// The row has no scrollbar, and a mouse wheel scrolls only up and down: over the row it moves
+// the tabs sideways while there are more that way, then the page again.
+document.getElementById('tabList').addEventListener('wheel', (e) => {
+  const row = e.currentTarget;
+  if (e.deltaX || !e.deltaY || e.ctrlKey || e.shiftKey) return;
+  const room = e.deltaY > 0 ? row.scrollWidth - row.clientWidth - row.scrollLeft : row.scrollLeft;
+  // Under 2 px is the end: scrollLeft is fractional, the two widths are whole numbers.
+  if (room < 2) return;
+  e.preventDefault();
+  row.scrollLeft += e.deltaMode === 1 ? e.deltaY * 40 : e.deltaY;
+});
 // A new width can leave the current tab outside the row. A new height alone (a phone's address
 // bar) must not move a row the reader scrolled.
 let tabsWidth = window.innerWidth;
@@ -1451,6 +1464,7 @@ async function loadReport(date, report, push = true) {
     if (load !== loadCount) return;
     tocSpy = null;
     setContent(`<div class="${report ? 'md' : 'overview'} fade">${page.html}</div>`);
+    shownKey = key;
     document.getElementById('rail').innerHTML = page.rail;
     if (report) {
       const md = document.querySelector('#content .md');
@@ -1471,6 +1485,7 @@ async function loadReport(date, report, push = true) {
     // the early-return above turns every further click into a silent no-op
     // and the only way out is loading a different report first.
     currentKey = null;
+    shownKey = null;
     tocSpy = null;
     pendingFind = null;
     document.getElementById('rail').innerHTML = '';
