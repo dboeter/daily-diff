@@ -388,10 +388,12 @@ export function selectNewModels(data: ApiModel[], days: number, now = Date.now()
   const ids = new Set(byId.keys());
   const freshIds = new Set(data.filter((m) => m.created >= cutoff).map((m) => m.id));
   // The row a new entry belongs on: its base's when the base is new too, else its own for a
-  // Pro mode, none for a :batch or :free copy of an older model. `seen` stops a link cycle.
+  // Pro mode, none for a :batch or :free copy of an older model.
   const rowOf = (m: ApiModel, seen = new Set<string>()): ApiModel | null => {
     const baseId = variantBase(m, ids);
-    if (baseId === m.id || seen.has(baseId)) return m;
+    if (baseId === m.id) return m;
+    // Entries that link each other all go on the one with the smallest id.
+    if (seen.has(baseId)) return byId.get([...seen, m.id].sort()[0]!)!;
     if (freshIds.has(baseId)) return rowOf(byId.get(baseId)!, seen.add(m.id));
     return m.id.includes(":") ? null : m;
   };

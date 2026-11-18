@@ -348,3 +348,19 @@ describe("selectNewModels", () => {
     expect(rows[3]?.variants).toEqual([{ id: "openai/gpt-7-pro:batch", label: "batch" }]);
   });
 });
+
+describe("selectNewModels link cycle", () => {
+  it("keeps one row when two new entries name each other as their base", () => {
+    const desc = (base: string) => `Same underlying model as [X](https://openrouter.ai/${base}).`;
+    const created = Date.parse("2026-11-17T12:00:00Z") / 1000;
+    const rows = selectNewModels(
+      [
+        { id: "a/b", name: "B", description: desc("a/c"), created, context_length: 1 },
+        { id: "a/c", name: "C", description: desc("a/b"), created, context_length: 1 },
+      ],
+      2,
+      Date.parse("2026-11-18T03:00:00Z"),
+    );
+    expect(rows.map((r) => [r.id, r.variants.map((v) => v.id)])).toEqual([["a/b", ["a/c"]]]);
+  });
+});
