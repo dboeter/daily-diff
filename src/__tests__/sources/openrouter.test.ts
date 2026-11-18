@@ -8,6 +8,7 @@ import {
   parseOpenRouterModels,
   publicUrl,
   selectAgentApps,
+  foldVariants,
   selectNewModels,
   selectStealthModels,
   type OpenRouterApp,
@@ -329,7 +330,7 @@ describe("selectNewModels", () => {
   ];
 
   it("lists a model once, its Pro mode and batch copies as variants of its row", () => {
-    const rows = selectNewModels(catalog, 2, T);
+    const rows = foldVariants(selectNewModels(catalog, 2, T));
     expect(rows.map((r) => r.id)).toEqual([
       "openai/gpt-6.2-astra",
       "openai/gpt-6.2-sol",
@@ -349,18 +350,27 @@ describe("selectNewModels", () => {
   });
 });
 
-describe("selectNewModels link cycle", () => {
-  it("keeps one row when two new entries name each other as their base", () => {
-    const desc = (base: string) => `Same underlying model as [X](https://openrouter.ai/${base}).`;
-    const created = Date.parse("2026-11-17T12:00:00Z") / 1000;
-    const rows = selectNewModels(
-      [
-        { id: "a/b", name: "B", description: desc("a/c"), created, context_length: 1 },
-        { id: "a/c", name: "C", description: desc("a/b"), created, context_length: 1 },
-      ],
-      2,
-      Date.parse("2026-11-18T03:00:00Z"),
-    );
-    expect(rows.map((r) => [r.id, r.variants.map((v) => v.id)])).toEqual([["a/b", ["a/c"]]]);
+describe("foldVariants", () => {
+  const entry = (id: string, base: string | null = null) => ({
+    id,
+    name: id,
+    description: "",
+    created: "2026-11-17",
+    contextLength: 1,
+    base,
+  });
+
+  it("makes a Pro mode its own row when its base is not among the entries (listed on an earlier day)", () => {
+    const rows = foldVariants([
+      entry("o/m-pro", "o/m"),
+      entry("o/m-pro:batch", "o/m-pro"),
+      entry("o/m:batch", "o/m"),
+    ]);
+    expect(rows.map((r) => [r.id, r.variants.map((v) => v.id)])).toEqual([["o/m-pro", ["o/m-pro:batch"]]]);
+  });
+
+  it("keeps one row for entries that name each other as their base", () => {
+    const rows = foldVariants([entry("x/0", "x/a"), entry("x/a", "x/b"), entry("x/b", "x/a")]);
+    expect(rows.map((r) => [r.id, r.variants.map((v) => v.id)])).toEqual([["x/a", ["x/0", "x/b"]]]);
   });
 });

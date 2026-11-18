@@ -115,7 +115,7 @@ import type { ResearchPaper } from "../trending/research.ts";
 import { POLICY_STATE_FILE, type PolicyData, type PolicyItem } from "../policy/items.ts";
 import { POLICY_VERDICTS_FILE } from "../policy/relevance.ts";
 import { nearPolicyDeadlines, renderDeadlines } from "../policy/deadlines.ts";
-import type { ModelCatalog } from "../sources/openrouter.ts";
+import { foldVariants, type ModelCatalog } from "../sources/openrouter.ts";
 import { DATA_STATE_FILE, type DataState, type VendorData } from "../data/vendors.ts";
 import { DATA_VERDICTS_FILE } from "../data/relevance.ts";
 import {
@@ -613,7 +613,8 @@ export async function buildModelsPage(
     state,
     dateStr,
   );
-  const models = numberRows(fresh, shownPosts.length);
+  // Folded after the state filter, so a variant whose base an earlier page listed is its own row.
+  const models = numberRows(foldVariants(fresh), shownPosts.length);
   const newStealth = (catalog?.stealth ?? []).some((m) => isNewStealthModel(m, now));
   const firstCrawls = labs
     .filter((r) => r.isFirstRun && r.totalDiscovered)

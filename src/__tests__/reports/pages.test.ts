@@ -688,7 +688,7 @@ describe("buildModelsPage", () => {
     description: "A coding model.",
     created: "2026-10-21",
     contextLength: 262144,
-    variants: [],
+    base: null,
   };
   const catalog = (extra: Partial<ModelCatalog> = {}): ModelCatalog => ({
     stealth: [],

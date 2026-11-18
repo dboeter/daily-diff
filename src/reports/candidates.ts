@@ -9,7 +9,7 @@ import type { PolicyItem } from "../policy/items.ts";
 import type { VendorAction, VendorItem } from "../data/vendors.ts";
 import type { CommunityPost } from "../data/community.ts";
 import type { LabsFetchResult } from "../sources/labs.ts";
-import type { ModelCatalog } from "../sources/openrouter.ts";
+import { foldVariants, type ModelCatalog } from "../sources/openrouter.ts";
 import type { TrendingRepo } from "../trending/compose.ts";
 import type { Story } from "../spotted/pool.ts";
 import { SPOTTED } from "../core/strings.ts";
@@ -158,7 +158,8 @@ export function buildCandidates(s: CandidateSources): Candidate[] {
         text: textOf(post.content),
       })),
     ),
-    ...(s.catalog?.newModels ?? []).map((m) => modelCandidate(m, textOf(m.description))),
+    // Folded, so a variant the page links in its base's row is not a shown item of its own.
+    ...foldVariants(s.catalog?.newModels ?? []).map((m) => modelCandidate(m, textOf(m.description))),
     ...(s.catalog?.stealth ?? []).map((m) => modelCandidate(m, "")),
     ...s.trending.map((r): Candidate => ({
       page: "ai-agents",

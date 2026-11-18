@@ -54,13 +54,19 @@ export interface OpenRouterModel {
   tokens: number;
 }
 
-export interface OpenRouterNewModel {
+/** A catalog entry created in the models page's window, variants included (`selectNewModels`). */
+export interface OpenRouterListedModel {
   id: string;
   name: string;
   description: string;
   created: string;
   contextLength: number;
-  /** Other catalog entries of this model listed in the same window (Pro mode, batch copy), by `foldVariants`. */
+  /** The catalog model this entry is a variant of (a batch copy, a Pro mode), else null (`variantBase`). */
+  base: string | null;
+}
+
+/** A New on OpenRouter row: one model, its other new entries as variants (`foldVariants`). */
+export interface OpenRouterNewModel extends Omit<OpenRouterListedModel, "base"> {
   variants: { id: string; label: string }[];
 }
 
@@ -371,48 +377,61 @@ function variantBase(m: ApiModel, catalogIds: Set<string>): string {
 }
 
 /** A variant's label: its name after its base's ("Pro (batch)" → "Pro batch"), else its id. */
-function variantLabel(variant: ApiModel, base: ApiModel): string {
+function variantLabel(variant: OpenRouterListedModel, base: OpenRouterListedModel): string {
   if (!variant.name.startsWith(base.name)) return variant.id;
   return variant.name.slice(base.name.length).replace(/[()]/g, "").replace(/\s+/g, " ").trim() || variant.id;
 }
 
-/**
- * Models created in the last `days`, one row per model: OpenRouter lists GPT-6.2 Astra four
- * times (its Pro mode and a batch copy of each, 2026-11-17). A variant whose base is new too
- * is a variant of the base's row; one whose base is older is dropped, except a Pro mode, which
- * is new to the reader (a batch or free copy of a known model is not).
- */
-export function selectNewModels(data: ApiModel[], days: number, now = Date.now()): OpenRouterNewModel[] {
+/** Catalog entries created in the last `days`, newest first, each with the model it is a variant of. */
+export function selectNewModels(data: ApiModel[], days: number, now = Date.now()): OpenRouterListedModel[] {
   const cutoff = now / 1000 - days * 24 * 60 * 60;
-  const byId = new Map(data.map((m) => [m.id, m]));
-  const ids = new Set(byId.keys());
-  const freshIds = new Set(data.filter((m) => m.created >= cutoff).map((m) => m.id));
-  // The row a new entry belongs on: its base's when the base is new too, else its own for a
-  // Pro mode, none for a :batch or :free copy of an older model.
-  const rowOf = (m: ApiModel, seen = new Set<string>()): ApiModel | null => {
-    const baseId = variantBase(m, ids);
-    if (baseId === m.id) return m;
-    // Entries that link each other all go on the one with the smallest id.
-    if (seen.has(baseId)) return byId.get([...seen, m.id].sort()[0]!)!;
-    if (freshIds.has(baseId)) return rowOf(byId.get(baseId)!, seen.add(m.id));
+  const ids = new Set(data.map((m) => m.id));
+  return data
+    .filter((m) => m.created >= cutoff)
+    .sort((a, b) => b.created - a.created)
+    .map((m) => {
+      const base = variantBase(m, ids);
+      return {
+        id: m.id,
+        name: m.name,
+        description: m.description,
+        created: new Date(m.created * 1000).toISOString().slice(0, 10),
+        contextLength: m.context_length,
+        base: base === m.id ? null : base,
+      };
+    });
+}
+
+/**
+ * One row per model: OpenRouter lists GPT-6.2 Astra four times (its Pro mode and a batch copy
+ * of each, 2026-11-17). An entry goes on its base's row when the base is in `entries`, else it
+ * is a row of its own if it is a Pro mode (new to the reader) and dropped if it is a batch or
+ * free copy (a known model). The models page passes only the entries no earlier page listed,
+ * so a Pro mode listed a day after its base gets its own row instead of the reported base's.
+ */
+export function foldVariants(entries: OpenRouterListedModel[]): OpenRouterNewModel[] {
+  const byId = new Map(entries.map((m) => [m.id, m]));
+  const rowOf = (m: OpenRouterListedModel, path: string[] = []): OpenRouterListedModel | null => {
+    if (!m.base) return m;
+    // Entries that name each other as their base go on the cycle's smallest id.
+    const loop = path.indexOf(m.base);
+    if (loop >= 0) return byId.get([...path.slice(loop), m.id].sort()[0]!)!;
+    const base = byId.get(m.base);
+    if (base) return rowOf(base, [...path, m.id]);
     return m.id.includes(":") ? null : m;
   };
-  const variants = new Map<string, ApiModel[]>();
-  const rows: ApiModel[] = [];
-  for (const m of data.filter((m) => freshIds.has(m.id)).sort((a, b) => b.created - a.created)) {
+  const variants = new Map<string, OpenRouterListedModel[]>();
+  const rows: OpenRouterListedModel[] = [];
+  for (const m of entries) {
     const row = rowOf(m);
     if (row === m) rows.push(m);
     else if (row) variants.set(row.id, [...(variants.get(row.id) ?? []), m]);
   }
-  return rows.map((m) => ({
-    id: m.id,
-    name: m.name,
-    description: m.description,
-    created: new Date(m.created * 1000).toISOString().slice(0, 10),
-    contextLength: m.context_length,
+  return rows.map(({ base: _, ...m }) => ({
+    ...m,
     variants: (variants.get(m.id) ?? [])
       .sort((a, b) => a.id.localeCompare(b.id))
-      .map((v) => ({ id: v.id, label: variantLabel(v, m) })),
+      .map((v) => ({ id: v.id, label: variantLabel(v, { ...m, base: null }) })),
   }));
 }
 
@@ -448,8 +467,8 @@ export async function fetchOpenRouterData(): Promise<OpenRouterData> {
 /** The daily catalog's two lists for the models page. */
 export interface ModelCatalog {
   stealth: OpenRouterStealthModel[];
-  /** Listed in the last LISTED_MODEL_DAYS, stealth models left out. */
-  newModels: OpenRouterNewModel[];
+  /** Listed in the last LISTED_MODEL_DAYS, stealth models left out; variants unfolded (`foldVariants`). */
+  newModels: OpenRouterListedModel[];
 }
 
 /**

@@ -73,7 +73,7 @@ const catalog: ModelCatalog = {
       description: "A model.",
       created: "2026-11-04",
       contextLength: 128000,
-      variants: [],
+      base: null,
     },
   ],
   stealth: [{ id: "openrouter/bunny", name: "Bunny Alpha", created: "2026-11-03", expires: "2026-11-20" }],
