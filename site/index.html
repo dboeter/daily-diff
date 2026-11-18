@@ -685,8 +685,10 @@ let searchIndex = null;
 let searchReady = false;
 let searchQuery = '';
 let searchDebounce = null;
-// The search words to find on the page a result opens.
+// The search words to find on the page a result opens, with that page's key: the reader may
+// open another page before it arrives, and that one must not get the match.
 let pendingFind = null;
+let manifestFailed = false;
 
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
 
@@ -864,7 +866,7 @@ function ensureSearchIndex() {
   if (searchReading) return;
   if (!allDates) {
     // The manifest is still loading: it starts the reading when it arrives.
-    searchProgress.textContent = 'Reading the reports…';
+    searchProgress.textContent = manifestFailed ? 'The list of reports did not load. Reload the page to search.' : 'Reading the reports…';
     return;
   }
   if (!unread) {
@@ -919,7 +921,7 @@ searchInput.addEventListener('keydown', (e) => {
 searchResults.addEventListener('click', (e) => {
   const a = e.target.closest('a[href]');
   if (!a) return;
-  pendingFind = searchQuery.trim().toLowerCase();
+  pendingFind = { needle: searchQuery.trim().toLowerCase(), key: a.getAttribute('href').slice(1) };
   // The page already shown fires no hashchange: find the match in it, once the dialog has
   // closed and given the focus back, so the focus then moves to the match.
   if (a.getAttribute('href') === `#${currentKey}`) setTimeout(findOnPage);
@@ -932,7 +934,7 @@ searchResults.addEventListener('click', (e) => {
  * A date the page shows as "16 Nov" is found by its ISO form in the <time> element.
  */
 function findOnPage() {
-  const needle = pendingFind;
+  const needle = pendingFind?.key === currentKey ? pendingFind.needle : null;
   pendingFind = null;
   const root = document.querySelector('#content .md');
   if (!needle || !root) return;
@@ -1557,6 +1559,8 @@ document.addEventListener('keydown', (e) => {
     const page = knownPage(getHash());
     await loadReport(page.date, page.report, false);
   } catch (e) {
+    manifestFailed = true;
+    if (searchDlg.open) ensureSearchIndex();
     setContent(
       `<div class="note"><p>The list of reports did not load (${escapeHtml(e.message)}).</p>` +
       '<p>Reload the page to try again.</p></div>',
