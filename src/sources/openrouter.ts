@@ -60,6 +60,8 @@ export interface OpenRouterNewModel {
   description: string;
   created: string;
   contextLength: number;
+  /** Other catalog entries of this model listed in the same window (Pro mode, batch copy), by `foldVariants`. */
+  variants: { id: string; label: string }[];
 }
 
 /** An anonymous pre-release model, usually free for a limited window. */
@@ -352,18 +354,64 @@ async function fetchModelCatalog(): Promise<ApiModel[]> {
   return data;
 }
 
+/** A Pro entry's link to the model it serves: "the same underlying model as [GPT-6.2 Astra](https://openrouter.ai/openai/gpt-6.2-astra)". */
+const SAME_MODEL_RE = /same underlying model as \[[^\]]*\]\(https:\/\/openrouter\.ai\/([^)\s?#]+)\)/i;
+
+/**
+ * The id of the model an entry is a variant of, else its own id. A `:batch` or `:free` id is
+ * its base's copy when the catalog has the base. A Pro entry is its base's variant only when
+ * its description says so (OpenAI's "same underlying model as" link): a `-pro` name alone is
+ * no proof (Sonar Pro, MiMo-V2.5-Pro are models of their own).
+ */
+function variantBase(m: ApiModel, catalogIds: Set<string>): string {
+  const colon = m.id.indexOf(":");
+  if (colon > 0 && catalogIds.has(m.id.slice(0, colon))) return m.id.slice(0, colon);
+  const linked = SAME_MODEL_RE.exec(m.description ?? "")?.[1];
+  return linked && linked !== m.id && catalogIds.has(linked) ? linked : m.id;
+}
+
+/** A variant's label: its name after its base's ("Pro (batch)" → "Pro batch"), else its id. */
+function variantLabel(variant: ApiModel, base: ApiModel): string {
+  if (!variant.name.startsWith(base.name)) return variant.id;
+  return variant.name.slice(base.name.length).replace(/[()]/g, "").replace(/\s+/g, " ").trim() || variant.id;
+}
+
+/**
+ * Models created in the last `days`, one row per model: OpenRouter lists GPT-6.2 Astra four
+ * times (its Pro mode and a batch copy of each, 2026-11-17). A variant whose base is new too
+ * is a variant of the base's row; one whose base is older is dropped, except a Pro mode, which
+ * is new to the reader (a batch or free copy of a known model is not).
+ */
 export function selectNewModels(data: ApiModel[], days: number, now = Date.now()): OpenRouterNewModel[] {
   const cutoff = now / 1000 - days * 24 * 60 * 60;
-  return data
-    .filter((m) => m.created >= cutoff)
-    .sort((a, b) => b.created - a.created)
-    .map((m) => ({
-      id: m.id,
-      name: m.name,
-      description: m.description,
-      created: new Date(m.created * 1000).toISOString().slice(0, 10),
-      contextLength: m.context_length,
-    }));
+  const byId = new Map(data.map((m) => [m.id, m]));
+  const ids = new Set(byId.keys());
+  const freshIds = new Set(data.filter((m) => m.created >= cutoff).map((m) => m.id));
+  // The row a new entry belongs on: its base's when the base is new too, else its own for a
+  // Pro mode, none for a :batch or :free copy of an older model. `seen` stops a link cycle.
+  const rowOf = (m: ApiModel, seen = new Set<string>()): ApiModel | null => {
+    const baseId = variantBase(m, ids);
+    if (baseId === m.id || seen.has(baseId)) return m;
+    if (freshIds.has(baseId)) return rowOf(byId.get(baseId)!, seen.add(m.id));
+    return m.id.includes(":") ? null : m;
+  };
+  const variants = new Map<string, ApiModel[]>();
+  const rows: ApiModel[] = [];
+  for (const m of data.filter((m) => freshIds.has(m.id)).sort((a, b) => b.created - a.created)) {
+    const row = rowOf(m);
+    if (row === m) rows.push(m);
+    else if (row) variants.set(row.id, [...(variants.get(row.id) ?? []), m]);
+  }
+  return rows.map((m) => ({
+    id: m.id,
+    name: m.name,
+    description: m.description,
+    created: new Date(m.created * 1000).toISOString().slice(0, 10),
+    contextLength: m.context_length,
+    variants: (variants.get(m.id) ?? [])
+      .sort((a, b) => a.id.localeCompare(b.id))
+      .map((v) => ({ id: v.id, label: variantLabel(v, m) })),
+  }));
 }
 
 export async function fetchOpenRouterData(): Promise<OpenRouterData> {

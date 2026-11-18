@@ -636,7 +636,10 @@ export async function buildModelsPage(
     ),
     new Map([
       ...shownPosts.map((p): [number, string] => [p.n, `${p.title} ${p.url} ${p.content ?? ""}`]),
-      ...models.map((m): [number, string] => [m.n, `${m.name} ${m.id} ${m.description ?? ""}`]),
+      ...models.map((m): [number, string] => [
+        m.n,
+        `${m.name} ${m.id} ${m.variants.map((v) => v.id).join(" ")} ${m.description ?? ""}`,
+      ]),
     ]),
     "models-summaries",
   );

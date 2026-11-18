@@ -266,6 +266,7 @@ describe("buildModelsSummariesPrompt", () => {
         description: "A coding model.",
         created: "2026-10-22",
         contextLength: 262144,
+        variants: [],
       },
     ],
     "2026-10-22",
