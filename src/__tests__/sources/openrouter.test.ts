@@ -8,6 +8,7 @@ import {
   parseOpenRouterModels,
   publicUrl,
   selectAgentApps,
+  selectNewModels,
   selectStealthModels,
   type OpenRouterApp,
 } from "../../sources/openrouter.ts";
@@ -260,5 +261,90 @@ describe("fetchModelCatalogDaily", () => {
       vi.fn(async () => new Response("", { status: 503 })),
     );
     expect(await fetchModelCatalogDaily(NOW)).toBeNull();
+  });
+});
+
+describe("selectNewModels", () => {
+  const T = Date.parse("2026-11-18T03:00:00Z");
+  const at = (iso: string) => Date.parse(iso) / 1000;
+  const model = (id: string, name: string, created: string, description = "A model.") => ({
+    id,
+    name,
+    description,
+    created: at(created),
+    context_length: 1_050_000,
+  });
+  const sameAs = (name: string, base: string) =>
+    `${name} Pro is the same underlying model as [${name}](https://openrouter.ai/${base}), served with reasoning.mode set to pro.`;
+  // The catalog of 2026-11-18: GPT-6.2 Astra and Sol, each listed four times (Pro mode, batch copies).
+  const catalog = [
+    model(
+      "openai/gpt-6.2-astra-pro",
+      "OpenAI: GPT-6.2 Astra Pro",
+      "2026-11-17T18:00:05Z",
+      sameAs("GPT-6.2 Astra", "openai/gpt-6.2-astra"),
+    ),
+    model(
+      "openai/gpt-6.2-astra-pro:batch",
+      "OpenAI: GPT-6.2 Astra Pro (batch)",
+      "2026-11-17T18:00:04Z",
+      sameAs("GPT-6.2 Astra", "openai/gpt-6.2-astra"),
+    ),
+    model("openai/gpt-6.2-astra", "OpenAI: GPT-6.2 Astra", "2026-11-17T18:00:03Z", "The flagship model."),
+    model(
+      "openai/gpt-6.2-astra:batch",
+      "OpenAI: GPT-6.2 Astra (batch)",
+      "2026-11-17T18:00:02Z",
+      "The flagship model.",
+    ),
+    model(
+      "openai/gpt-6.2-sol-pro",
+      "OpenAI: GPT-6.2 Sol Pro",
+      "2026-11-17T18:00:01Z",
+      sameAs("GPT-6.2 Sol", "openai/gpt-6.2-sol"),
+    ),
+    model(
+      "openai/gpt-6.2-sol-pro:batch",
+      "OpenAI: GPT-6.2 Sol Pro (batch)",
+      "2026-11-17T18:00:00Z",
+      sameAs("GPT-6.2 Sol", "openai/gpt-6.2-sol"),
+    ),
+    model("openai/gpt-6.2-sol", "OpenAI: GPT-6.2 Sol", "2026-11-17T17:59:59Z"),
+    model("openai/gpt-6.2-sol:batch", "OpenAI: GPT-6.2 Sol (batch)", "2026-11-17T17:59:58Z"),
+    model("tencent/hy4-flash", "Tencent: Hy4 flash", "2026-11-16T14:18:00Z"),
+    model("qwen/qwen4-max", "Qwen: Qwen4 Max", "2026-11-16T05:00:00Z"),
+    // Controls: a :free model with no base, a Pro whose base is older than the window,
+    // a batch copy of an older model.
+    model("cohere/north-mini-code:free", "Cohere: North Mini Code (free)", "2026-11-17T10:00:00Z"),
+    model("openai/gpt-7-pro", "OpenAI: GPT-7 Pro", "2026-11-17T09:00:00Z", sameAs("GPT-7", "openai/gpt-7")),
+    model("openai/gpt-7", "OpenAI: GPT-7", "2026-10-01T09:00:00Z"),
+    model("anthropic/claude-fable-5.2:batch", "Anthropic: Claude Fable 5.2 (batch)", "2026-11-17T08:00:00Z"),
+    model("anthropic/claude-fable-5.2", "Anthropic: Claude Fable 5.2", "2026-09-01T08:00:00Z"),
+    model(
+      "openai/gpt-7-pro:batch",
+      "OpenAI: GPT-7 Pro (batch)",
+      "2026-11-17T08:59:00Z",
+      sameAs("GPT-7", "openai/gpt-7"),
+    ),
+  ];
+
+  it("lists a model once, its Pro mode and batch copies as variants of its row", () => {
+    const rows = selectNewModels(catalog, 2, T);
+    expect(rows.map((r) => r.id)).toEqual([
+      "openai/gpt-6.2-astra",
+      "openai/gpt-6.2-sol",
+      "cohere/north-mini-code:free",
+      "openai/gpt-7-pro",
+      "tencent/hy4-flash",
+      "qwen/qwen4-max",
+    ]);
+    expect(rows[0]?.variants).toEqual([
+      { id: "openai/gpt-6.2-astra-pro", label: "Pro" },
+      { id: "openai/gpt-6.2-astra-pro:batch", label: "Pro batch" },
+      { id: "openai/gpt-6.2-astra:batch", label: "batch" },
+    ]);
+    expect(rows[0]?.description).toBe("The flagship model.");
+    expect(rows[2]?.variants).toEqual([]);
+    expect(rows[3]?.variants).toEqual([{ id: "openai/gpt-7-pro:batch", label: "batch" }]);
   });
 });
