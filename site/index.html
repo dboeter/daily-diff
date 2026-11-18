@@ -727,11 +727,17 @@ function setSearchStatus(text) {
  * bar, meta line), link targets and markup, so "github" finds the word and not every link.
  * A line is what the page shows as one block, so a match can be marked there (findOnPage): a
  * table row is one line per cell, and a table's header row, which a phone hides, is left out.
+ * The two must agree, or a result opens a page with no match marked, or with another one.
  */
 function searchLines(md) {
   const lines = md.split('\n');
-  const rule = lines.slice(0, 8).indexOf('---');
-  const body = lines.slice(rule === -1 ? 1 : rule + 1);
+  // The header ends at the first line that is no title, report bar (links, the report's own
+  // name in bold), meta line (a quote) or rule. findOnPage looks in none of those, nor in a later h1.
+  const isTitle = (line) => /^# /.test(line);
+  const isBar = (line) => /^\s*\[/.test(line) && !line.replace(/\[[^\]]*\]\([^)]*\)|\*\*[^*]*\*\*|[\s·|]/g, '');
+  let start = 0;
+  while (start < lines.length && (!lines[start].trim() || isTitle(lines[start]) || isBar(lines[start]) || /^(>|---\s*$)/.test(lines[start]))) start++;
+  const body = lines.slice(start);
   const isRow = (line) => /^\s*\|/.test(line);
   const isHeaderRule = (line) => isRow(line) && /^[\s|:-]+$/.test(line) && line.includes('-');
   const out = [];
@@ -747,13 +753,25 @@ function searchLines(md) {
       if (text) out.push({ text, lower: text.toLowerCase() });
       return;
     }
+    if (isTitle(raw)) return;
     if (isRow(raw) && (isHeaderRule(raw) || isHeaderRule(body[i + 1] ?? ''))) return;
     for (const part of isRow(raw) ? raw.split('|') : [raw]) {
+      // The page shows inline code as written (`https://<host>/api` keeps its <host>), so tags
+      // and emphasis marks are removed outside code only: the odd parts of a split on backticks.
       const text = part
-        .replace(/<[^>]+>/g, '')
-        .replace(/!?\[([^\]]*)\]\([^)]*\)/g, '$1')
-        .replace(/^\s*(#{1,6}|[-*>]|\d+\.)\s+/, '')
-        .replace(/\*\*|`/g, '')
+        .replace(/!?\[((?:[^[\]]|\[[^\]]*\])*)\]\([^)]*\)/g, '$1')
+        .split('`')
+        .map((piece, n) =>
+          n % 2
+            ? piece
+            : piece
+                .replace(/<[^>]+>/g, '')
+                .replace(/(\*{1,3})(?=\S)([^*]*?\S)\1/g, '$2')
+                .replace(/\*\*/g, ''),
+        )
+        .join('')
+        // The list marker, and the going-away sign the page moves into the gutter.
+        .replace(/^\s*(#{1,6}|[-*>]|\d+\.)\s+(− )?/, '')
         .trim();
       if (!text || /^[\s:—-]+$/.test(text)) continue;
       out.push({ text, lower: text.toLowerCase() });
@@ -931,7 +949,8 @@ function findOnPage() {
     range.surroundContents(mark);
     return mark;
   };
-  for (const block of root.querySelectorAll('h1, h2, h3, h4, p, li, td, summary, pre')) {
+  // No h1: the search index leaves the report's title out, so a match there is never the one listed.
+  for (const block of root.querySelectorAll('h2, h3, h4, p, li, td, summary, pre')) {
     if (block.closest('.toc, .report-meta')) continue;
     // Not shown at this width (a stacked table's empty cell), unless a collapsed block holds it.
     if (!block.getClientRects().length && !block.closest('details:not([open])')) continue;
