@@ -711,11 +711,21 @@ describe("flagged stories take their own slot", () => {
     expect(ids).toEqual(["lobsters:l1", "lobsters:l2", "lobsters:sec"]);
   });
 
-  it("a flagged low-point story past the floor makes a row", () => {
-    const top = [story("a", "hn", 100), story("b", "hn", 90), story("c", "hn", 80)];
-    const low = story("low", "hn", 1, flag);
-    const ids = selectSpotted([...top, low], () => "agents").map((r) => r.id);
-    expect(ids).toContain("hn:low");
+  it("a flagged story needs SECURITY_MIN_POINTS, not SPOTTED_MIN_POINTS", () => {
+    const stories = [
+      story("hn10", "hn", 10, flag),
+      story("hn9", "hn", 9, flag),
+      story("lob5", "lobsters", 5, flag),
+      story("lob4", "lobsters", 4, flag),
+      story("dev25", "devto", 25, flag),
+      story("dev24", "devto", 24, flag),
+    ];
+    const dropped = new Map<string, DroppedReason>();
+    const ids = selectSpotted(stories, () => "agents", dropped).map((r) => r.id);
+    expect(ids).toEqual(["hn:hn10", "lobsters:lob5", "devto:dev25"]);
+    expect(dropped.get("hn:hn9")).toBe("threshold");
+    expect(dropped.get("lobsters:lob4")).toBe("threshold");
+    expect(dropped.get("devto:dev24")).toBe("threshold");
   });
 
   it("a flagged story under the topic bar makes no row", () => {

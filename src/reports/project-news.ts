@@ -7,7 +7,7 @@
 import type { RepoConfig } from "../core/github.ts";
 import { escapeRegex } from "../core/regex.ts";
 import { SPOTTED } from "../core/strings.ts";
-import { linkKey, type Story } from "../spotted/pool.ts";
+import { linkKey, type Story, type StorySource } from "../spotted/pool.ts";
 import type { TrendingData } from "../trending/compose.ts";
 import type { CommunityPost } from "../data/community.ts";
 
@@ -36,6 +36,13 @@ export interface NewsSources {
 /** A community post's detail line: its feed and date; a post has no counts. */
 export const postDetail = (p: Pick<CommunityPost, "kind" | "date">): string =>
   `${p.kind === "newsletter" ? "newsletter issue" : "blog post"}, ${p.date}`;
+
+/**
+ * A community story needs this to be a project's News; a story under it stays in the pool, where
+ * Spotted's higher floor drops it. On 2026-11-15 three Show HN posts with 3 or 4 points were News.
+ * Dev.to's equals its fetch minimum (`DEVTO_MIN_REACTIONS`). Posts and trending repos have no points.
+ */
+export const NEWS_MIN_POINTS: Record<StorySource, number> = { hn: 10, lobsters: 5, devto: 15 };
 
 /** News items per agent, so one viral thread cannot crowd out the rest. */
 export const NEWS_PER_AGENT = 5;
@@ -83,6 +90,7 @@ export function collectNewsItems(sources: NewsSources): { item: NewsItem; text: 
   const out: { item: NewsItem; text: string; key: string }[] = [];
 
   for (const s of sources.stories ?? []) {
+    if (s.points < NEWS_MIN_POINTS[s.source]) continue;
     out.push({
       item: {
         source: SPOTTED.sources[s.source],
