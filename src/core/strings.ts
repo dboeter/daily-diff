@@ -164,8 +164,9 @@ export const SECTIONS = {
 
 // Weekly: the week's article (src/weekly/). The model writes the whole body; these are its meta line.
 export const WEEKLY_REPORT = {
-  sources: (items: number, from: string, to: string) =>
-    `${items} item${items === 1 ? "" : "s"} the pages showed from ${from} to ${to}`,
+  /** The items the week's pages showed, which the article was written from. */
+  items: (n: number) => `Items: ${n}`,
+  sources: (from: string, to: string) => `the pages of ${from} to ${to}`,
   writtenBy: (model: string) => `Written by ${model}`,
   /** The reader's one key to the page: the writer sets its own reading in italics, and only that. */
   italics: "Text in italics is interpretation",

@@ -499,7 +499,8 @@ export async function buildWeeklyReport(
   const W = WEEKLY_REPORT;
   const meta = REPORT_META.line(
     [
-      REPORT_META.sources(W.sources(source.items, from, dateStr)),
+      W.items(source.items),
+      REPORT_META.sources(W.sources(from, dateStr)),
       W.writtenBy(WEEKLY_WRITER.model),
       W.italics,
     ],
