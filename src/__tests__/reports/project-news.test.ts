@@ -135,6 +135,22 @@ describe("matchProjectNews", () => {
     expect(ids).toEqual(["hn:hn10", "lobsters:lob5", "devto:dev15"]);
   });
 
+  it("leaves the link of a story under NEWS_MIN_POINTS to a post that shares it", () => {
+    const low: Story = { ...story("Claude Code memory", "low"), points: 3 };
+    const post: CommunityPost = {
+      id: "post:low",
+      source: "Some blog",
+      kind: "blog",
+      title: "Claude Code memory",
+      url: low.url,
+      published: "2026-10-04T00:00:00Z",
+      date: "2026-10-04",
+      description: "",
+    };
+    const [item] = matchProjectNews([claudeCode], { stories: [low], posts: [post] }).get("claude-code")!;
+    expect(item!.id).toBe("post:low");
+  });
+
   it("links HN items to the discussion and carries their score and story id", () => {
     const [item] = matchProjectNews([openclaw], { stories: hn("OpenClaw 2.0") }).get("openclaw")!;
     expect(item!.source).toBe("Hacker News");
