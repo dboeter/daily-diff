@@ -9,7 +9,8 @@ import type { PolicyItem } from "../policy/items.ts";
 import type { VendorAction, VendorItem } from "../data/vendors.ts";
 import type { CommunityPost } from "../data/community.ts";
 import type { LabsFetchResult } from "../sources/labs.ts";
-import type { ModelCatalog } from "../sources/openrouter.ts";
+import { newModelRows, type ModelCatalog } from "../sources/openrouter.ts";
+import type { ReportedState } from "../core/report-state.ts";
 import type { TrendingRepo } from "../trending/compose.ts";
 import type { Story } from "../spotted/pool.ts";
 import { SPOTTED } from "../core/strings.ts";
@@ -69,6 +70,8 @@ export interface CandidateSources {
   stories: Story[];
   labs: LabsFetchResult[];
   catalog: ModelCatalog | null;
+  /** The models page's state after its run (today's ids included): models an earlier page listed are left out. */
+  modelsState: ReportedState | null;
   trending: TrendingRepo[];
   posts: CommunityPost[];
   /** Every new policy item before selection (`NewItems.candidates`). */
@@ -158,7 +161,10 @@ export function buildCandidates(s: CandidateSources): Candidate[] {
         text: textOf(post.content),
       })),
     ),
-    ...(s.catalog?.newModels ?? []).map((m) => modelCandidate(m, textOf(m.description))),
+    // The page's rows: a variant it links in its base's row is not a shown item of its own.
+    ...newModelRows(s.catalog?.newModels ?? [], s.modelsState, s.dateStr).map((m) =>
+      modelCandidate(m, textOf(m.description)),
+    ),
     ...(s.catalog?.stealth ?? []).map((m) => modelCandidate(m, "")),
     ...s.trending.map((r): Candidate => ({
       page: "ai-agents",

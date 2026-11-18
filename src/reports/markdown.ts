@@ -1090,6 +1090,13 @@ function contextCell(tokens: number): string {
   return tokens >= 1e6 ? `${Number((tokens / 1e6).toFixed(1))}M` : `${Math.round(tokens / 1e3)}K`;
 }
 
+/** A new model's other catalog entries, linked: " · also: [Pro](…), [batch](…)". */
+function variantsText(variants: OpenRouterNewModel["variants"]): string {
+  if (!variants.length) return "";
+  const links = variants.map((v) => `[${cell(v.label)}](https://openrouter.ai/${v.id})`);
+  return ` · ${MODELS_PAGE.variantsLead} ${links.join(", ")}`;
+}
+
 /** The models page's New on OpenRouter rows, each summary by its own number (else the description, truncated). */
 export function renderNewModelsTable(
   models: Numbered<OpenRouterNewModel>[],
@@ -1097,7 +1104,8 @@ export function renderNewModelsTable(
 ): string {
   const lines = models.map(
     (m) =>
-      `| ${m.created} | [${cell(m.name)}](https://openrouter.ai/${m.id}) \`${m.id}\` | ${contextCell(m.contextLength)} | ` +
+      `| ${m.created} | [${cell(m.name)}](https://openrouter.ai/${m.id}) \`${m.id}\`${variantsText(m.variants)} | ` +
+      `${contextCell(m.contextLength)} | ` +
       `${cell(summaryText(summaries, m))} |`,
   );
   return `${MODELS_PAGE.modelsTableHeader}\n${lines.join("\n")}`;

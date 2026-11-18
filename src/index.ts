@@ -81,6 +81,7 @@ import {
   hasDataNews,
   labPosts,
   LAB_POSTS_MAX,
+  MODELS_STATE_FILE,
   type SavedReport,
 } from "./reports/pages.ts";
 import { loadLabsState, fetchSiteContent, type LabsFetchResult, type LabsState } from "./sources/labs.ts";
@@ -801,6 +802,8 @@ async function main(): Promise<void> {
     stories: [...stories, ...carried],
     labs: labsResults,
     catalog: modelCatalog,
+    // Read after buildModelsPage saved it, so today's rows count as new.
+    modelsState: loadReportedState(MODELS_STATE_FILE),
     trending: trendingData.trendingRepos,
     posts: communityData.posts,
     policy: policyData.candidates ?? [],

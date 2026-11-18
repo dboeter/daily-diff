@@ -24,6 +24,7 @@ import {
   unwrapCodeLinks,
   withReportBar,
   renderHfTable,
+  renderNewModelsTable,
   unsummarizedRows,
   markSecurityBullets,
   unconfirmedClaims,
@@ -1335,5 +1336,31 @@ describe("dropEmptySections", () => {
 
   it("keeps text without headings", () => {
     expect(dropEmptySections("None")).toBe("None");
+  });
+});
+
+describe("renderNewModelsTable", () => {
+  it("links a model's variants in its Model cell", () => {
+    const md = renderNewModelsTable(
+      [
+        {
+          n: 1,
+          id: "openai/gpt-6.2-astra",
+          name: "OpenAI: GPT-6.2 Astra",
+          description: "The flagship model.",
+          created: "2026-11-17",
+          contextLength: 1_050_000,
+          variants: [
+            { id: "openai/gpt-6.2-astra-pro", label: "Pro" },
+            { id: "openai/gpt-6.2-astra:batch", label: "batch" },
+          ],
+        },
+      ],
+      new Map([[1, "The flagship model."]]),
+    );
+    expect(md).toContain(
+      "| 2026-11-17 | [OpenAI: GPT-6.2 Astra](https://openrouter.ai/openai/gpt-6.2-astra) `openai/gpt-6.2-astra` · also: " +
+        "[Pro](https://openrouter.ai/openai/gpt-6.2-astra-pro), [batch](https://openrouter.ai/openai/gpt-6.2-astra:batch) | 1.1M |",
+    );
   });
 });

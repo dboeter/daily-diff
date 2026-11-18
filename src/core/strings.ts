@@ -331,6 +331,8 @@ export const MODELS_PAGE = {
   siteFailed: (lab: string) => `⚠️ ${lab}: sitemap fetch failed.`,
   modelsHeading: "New on OpenRouter",
   modelsTableHeader: "| Listed | Model | Context | Summary |\n| :--- | :--- | :--- | :--- |",
+  /** Before a new model's variants in its Model cell: "also: Pro, batch". */
+  variantsLead: "also:",
   noModels: "No new models listed today.",
   catalogUnavailable: "⚠️ OpenRouter model catalog unavailable.",
   /** One line in place of the tracked sections with nothing to show, named by `emptyNames`. */

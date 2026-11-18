@@ -115,7 +115,7 @@ import type { ResearchPaper } from "../trending/research.ts";
 import { POLICY_STATE_FILE, type PolicyData, type PolicyItem } from "../policy/items.ts";
 import { POLICY_VERDICTS_FILE } from "../policy/relevance.ts";
 import { nearPolicyDeadlines, renderDeadlines } from "../policy/deadlines.ts";
-import type { ModelCatalog } from "../sources/openrouter.ts";
+import { newModelRows, type ModelCatalog } from "../sources/openrouter.ts";
 import { DATA_STATE_FILE, type DataState, type VendorData } from "../data/vendors.ts";
 import { DATA_VERDICTS_FILE } from "../data/relevance.ts";
 import {
@@ -608,12 +608,14 @@ export async function buildModelsPage(
   const posts = labPosts(labs);
   const shownPosts = numberRows(posts.slice(0, LAB_POSTS_MAX));
   const state = loadReportedState(stateFile);
+  const listed = catalog?.newModels ?? [];
+  // Every new entry is saved, variants included, so none comes back as a row of its own.
   const fresh = newItems(
-    (catalog?.newModels ?? []).map((m) => ({ ...m, published: m.created })),
+    listed.map((m) => ({ ...m, published: m.created })),
     state,
     dateStr,
   );
-  const models = numberRows(fresh, shownPosts.length);
+  const models = numberRows(newModelRows(listed, state, dateStr), shownPosts.length);
   const newStealth = (catalog?.stealth ?? []).some((m) => isNewStealthModel(m, now));
   const firstCrawls = labs
     .filter((r) => r.isFirstRun && r.totalDiscovered)
@@ -636,7 +638,10 @@ export async function buildModelsPage(
     ),
     new Map([
       ...shownPosts.map((p): [number, string] => [p.n, `${p.title} ${p.url} ${p.content ?? ""}`]),
-      ...models.map((m): [number, string] => [m.n, `${m.name} ${m.id} ${m.description ?? ""}`]),
+      ...models.map((m): [number, string] => [
+        m.n,
+        `${m.name} ${m.id} ${m.variants.map((v) => v.id).join(" ")} ${m.description ?? ""}`,
+      ]),
     ]),
     "models-summaries",
   );
