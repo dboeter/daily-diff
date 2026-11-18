@@ -113,7 +113,7 @@
     button { font: inherit; color: inherit; }
     :focus-visible { outline: 2px solid var(--link); outline-offset: 2px; border-radius: 3px; }
     /* A heading that code moved the focus to (a new page, a contents jump) shows no ring. */
-    h1[tabindex="-1"]:focus, h2[tabindex="-1"]:focus, h3[tabindex="-1"]:focus { outline: none; }
+    h1[tabindex="-1"]:focus, h2[tabindex="-1"]:focus, h3[tabindex="-1"]:focus, mark.found:focus { outline: none; }
     /* The first Tab stop: past the bar and the tabs, to the page. Shown only while focused. */
     #skipBtn {
       position: fixed; left: 12px; top: -60px; z-index: 20; height: 36px; padding: 0 12px;
@@ -735,7 +735,18 @@ function searchLines(md) {
   const isRow = (line) => /^\s*\|/.test(line);
   const isHeaderRule = (line) => isRow(line) && /^[\s|:-]+$/.test(line) && line.includes('-');
   const out = [];
+  let fenced = false;
   body.forEach((raw, i) => {
+    // A code fence's own line (``` and its language) is not on the page; the code inside is, as written.
+    if (/^\s*(```|~~~)/.test(raw)) {
+      fenced = !fenced;
+      return;
+    }
+    if (fenced) {
+      const text = raw.trim();
+      if (text) out.push({ text, lower: text.toLowerCase() });
+      return;
+    }
     if (isRow(raw) && (isHeaderRule(raw) || isHeaderRule(body[i + 1] ?? ''))) return;
     for (const part of isRow(raw) ? raw.split('|') : [raw]) {
       const text = part
@@ -886,8 +897,9 @@ searchResults.addEventListener('click', (e) => {
   const a = e.target.closest('a[href]');
   if (!a) return;
   pendingFind = searchQuery.trim().toLowerCase();
-  // The page already shown fires no hashchange: find the match in it now.
-  if (a.getAttribute('href') === `#${currentKey}`) findOnPage();
+  // The page already shown fires no hashchange: find the match in it, once the dialog has
+  // closed and given the focus back, so the focus then moves to the match.
+  if (a.getAttribute('href') === `#${currentKey}`) setTimeout(findOnPage);
 });
 
 /**
@@ -906,6 +918,9 @@ function findOnPage() {
   const show = (el) => {
     for (let d = el.closest('details'); d; d = d.parentElement.closest('details')) d.open = true;
     el.scrollIntoView({ block: 'center' });
+    // The keyboard goes on from the match, not from the page title.
+    el.tabIndex = -1;
+    el.focus({ preventScroll: true });
   };
   const wrap = (node, from, to) => {
     const range = document.createRange();
@@ -1062,15 +1077,25 @@ function syncShell(date, report) {
   document.title = ISO_DATE.test(date) ? `${name}, ${dayLabel(date, true)} | Daily Diff` : 'Daily Diff';
 }
 
-/** The archive: a month grid per month with a digest, newest first; a day with a digest links its overview. */
+/**
+ * The archive: a month grid per month from the reader's today back to the first digest, newest
+ * first; a day with a digest links its overview.
+ */
 function buildCalendar(dates) {
   const byDate = new Map(dates.map((d) => [d.date, d]));
-  const months = [...new Set(dates.map((d) => d.date.slice(0, 7)))];
   const heads = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'].map((d) => `<span class="dow">${d}</span>`).join('');
   // A day without a digest is a missed day between the first digest and the reader's today
   // ('sv' formats as YYYY-MM-DD); before and after those it is an empty cell.
   const today = new Date().toLocaleDateString('sv');
   const lastDay = today > dates[0].date ? today : dates[0].date;
+  const firstMonth = dates.at(-1).date.slice(0, 7);
+  const months = [];
+  for (let [y, m] = lastDay.split('-').map(Number); ; m--) {
+    if (m === 0) [y, m] = [y - 1, 12];
+    const month = `${y}-${String(m).padStart(2, '0')}`;
+    months.push(month);
+    if (month <= firstMonth) break;
+  }
   const html = months.map((month) => {
     const [y, m] = month.split('-').map(Number);
     const blanks = (new Date(Date.UTC(y, m - 1, 1)).getUTCDay() + 6) % 7;
