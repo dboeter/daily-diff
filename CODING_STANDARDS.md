@@ -92,5 +92,5 @@ The pre-commit hook runs every check except the tests. Don't skip it with `--no-
 ## Changes and docs
 
 - Keep each change small and on one topic. Don't mix refactors into a behavior change.
-- When a change alters behavior that `AGENTS.md`, `README.md`, `GLOSSARY.md` or a comment describes, update that text in the same change. Docs describe the current state, never a changelog.
+- When a change alters behavior that `AGENTS.md`, `README.md`, `GLOSSARY.md`, a file under `docs/` or a comment describes, update that text in the same change. Docs describe the current state, never a changelog.
 - Commit messages: `<area>: <what changed>`, lower case, in the present tense (`data report: gate community posts on Jev's post kind`).
