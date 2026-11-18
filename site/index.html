@@ -861,7 +861,12 @@ let searchReading = false;
 let unread = null;
 
 function ensureSearchIndex() {
-  if (searchReading || !allDates) return;
+  if (searchReading) return;
+  if (!allDates) {
+    // The manifest is still loading: it starts the reading when it arrives.
+    searchProgress.textContent = 'Reading the reports…';
+    return;
+  }
   if (!unread) {
     unread = [];
     allDates.forEach(({ date, reports }) => reports.forEach((report) => unread.push({ date, report })));
@@ -955,7 +960,13 @@ function findOnPage() {
     // Not shown at this width (a stacked table's empty cell), unless a collapsed block holds it.
     if (!block.getClientRects().length && !block.closest('details:not([open])')) continue;
     const at = block.textContent.toLowerCase().indexOf(needle);
-    if (at === -1) continue;
+    if (at === -1) {
+      // A date cell shows "16 Nov": its ISO form, which the index has, is in the <time> element.
+      const time = block.querySelector('time[datetime]');
+      if (!time?.getAttribute('datetime').includes(needle) || time.firstChild?.nodeType !== Node.TEXT_NODE) continue;
+      show(wrap(time.firstChild, 0, time.firstChild.length));
+      return;
+    }
     // The text nodes the match runs through, each with the part of it that is the match.
     const parts = [];
     const walker = document.createTreeWalker(block, NodeFilter.SHOW_TEXT);
@@ -970,8 +981,6 @@ function findOnPage() {
     if (marks.length) show(marks[0]);
     return;
   }
-  const time = [...root.querySelectorAll('time[datetime]')].find((t) => t.getAttribute('datetime').includes(needle));
-  if (time?.firstChild?.nodeType === Node.TEXT_NODE) show(wrap(time.firstChild, 0, time.firstChild.length));
 }
 
 function setContent(html) {
@@ -1539,6 +1548,8 @@ document.addEventListener('keydown', (e) => {
     PROSE_COLUMNS = proseColumns ?? PROSE_COLUMNS;
 
     allDates = dates;
+    // Search opened before the manifest arrived: it had nothing to read yet.
+    if (searchDlg.open) ensureSearchIndex();
     buildCalendar(dates);
     document.getElementById('brand').href = `#${dates[0].date}`;
 
