@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import {
+  dropTitleRestatements,
   checkCodeTokens,
   dropInputTalk,
   numberRows,
@@ -254,6 +255,34 @@ describe("dropInputTalk", () => {
 
   it("drops a summary with nothing left, so its row shows the description", () => {
     expect(dropInputTalk(new Map([[1, "The given description is empty."]]), "test").has(1)).toBe(false);
+  });
+});
+
+describe("dropTitleRestatements", () => {
+  const rows = [
+    { n: 1, title: "Google: AI agent turned a security patch into a exploit with no human help" },
+    { n: 2, title: "How To Review Pull Requests with Kiro CLI and GitHub Actions" },
+    { n: 3, title: "Show HN: Foo" },
+  ];
+  it("shows — for a summary that only restates its title, and keeps one that adds a fact", () => {
+    const out = dropTitleRestatements(
+      new Map([
+        [1, "Google reports that an AI agent turned a security patch into an exploit with no human help."],
+        [
+          2,
+          "The article explains how to review pull requests using Kiro CLI’s headless mode together with GitHub Actions.",
+        ],
+        [3, "Foo is a 300-line Rust parser for TOML that the author benchmarks against toml-rs."],
+      ]),
+      rows,
+      "t",
+    );
+    expect(out.get(1)).toBe("—");
+    expect(out.get(2)).toContain("headless mode");
+    expect(out.get(3)).toContain("300-line");
+  });
+  it("leaves a row without a summary alone", () => {
+    expect(dropTitleRestatements(new Map(), rows, "t").size).toBe(0);
   });
 });
 

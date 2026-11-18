@@ -70,7 +70,7 @@ import {
   isConnectionError,
 } from "./core/llm.ts";
 import { renderReportBar, withReportBar } from "./reports/markdown.ts";
-import { numberRows, parseRowSummaries } from "./reports/summarized-table.ts";
+import { dropTitleRestatements, numberRows, parseRowSummaries } from "./reports/summarized-table.ts";
 import {
   buildModelsPage,
   buildTrendsReport,
@@ -612,7 +612,7 @@ async function main(): Promise<void> {
         )
       : "",
   ]);
-  const spottedSummaryMap = parseRowSummaries(spottedSummaries);
+  const spottedSummaryMap = dropTitleRestatements(parseRowSummaries(spottedSummaries), storyRows, "spotted");
 
   // 3. Build every report
   if (!weekly) console.log("  [weekly] Trends page — not scheduled today, skipping.");
