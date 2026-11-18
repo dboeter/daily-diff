@@ -377,7 +377,7 @@ Below are ${count} numbered release notes and updates, new as of ${dateStr}, eac
 
 ${list}
 
-${summaryLine("1-2 sentences")} — what the change enables, breaks or requires for client data platforms: a setting to turn on, a migration, a cloud, region or edition limit (for a deprecation or breaking change: what stops working, and by when).
+${summaryLine("1-2 sentences")} — what the change enables, breaks or requires for client data platforms: a setting that must be on, a migration, a cloud, region or edition limit (for a deprecation or breaking change: what stops working, and by when).
 - A deprecation or breaking change whose text states an action (migrate, update, switch, turn a setting on): open its summary with that action, verb first ("Migrate to X by <date>: …"). Keep the text's strength: when it only recommends, write "Recommended: migrate to X …". When the text states no action, open with what stops working and when, and never invent an action. Every other row is described, never instructed: no summary of a feature note opens with an action.
 - Do not repeat the title or its status words (generally available, preview, now available): the title is shown next to the summary.
 - Ground every sentence only in the given text. Do not invent dates, versions, regions or availability.

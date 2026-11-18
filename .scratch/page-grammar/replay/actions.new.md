@@ -1,4 +1,4 @@
-1: Starting January 31, 2027, the BigQuery Data Transfer Service for Shopify connector stops supporting the `legacyMode` field from the DeliveryProfile dataset schema and the `permitSkuSharing` field from the FulfillmentService dataset schema.
-2: Recommended: migrate from Zhipu AI GLM 5.2 to GLM 5.3, as GLM 5.2 retires on February 4, 2027.
+1: Starting January 31, 2027, the BigQuery Data Transfer Service for Shopify connector stops supporting the `legacyMode` field in the DeliveryProfile dataset schema and the `permitSkuSharing` field in the FulfillmentService dataset schema.
+2: Recommended: migrate to GLM 5.3 before GLM 5.2 is retired on February 4, 2027.
 3: After Databricks Runtime 15.4 LTS reaches end of support on August 19, 2027, all Unity Catalog managed tables are automatically upgraded to catalog commits, enabling multi-statement, multi-table transactions, writes from external engines, and consistent governance across all engines.
-4: Recommended: migrate from Google Gemini 3.6 Flash to Gemini 3.8 Flash before its retirement on November 19, 2026, after which API calls are automatically redirected to Gemini 3.8 Flash at the same price.
+4: Recommended: migrate to Gemini 3.8 Flash before Gemini 3.6 Flash is retired on November 19, 2026, after which API calls to Gemini 3.6 Flash are automatically redirected to Gemini 3.8 Flash at the same price.

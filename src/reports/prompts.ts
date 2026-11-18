@@ -467,8 +467,12 @@ ${sourceFidelityRules()}
  * today" (replay of 2026-11-18, `.scratch/page-grammar/`).
  */
 export const ownWordsRule = (unit: "bullet" | "item") => {
-  const [cell, rows] = unit === "bullet" ? ["row's summary sentence", "row"] : ["Summary cell", "table"];
-  return `One sentence per ${unit}: the item and the one fact about it that matters most to the reader, in your own words. State the fact itself: never write that or why an item matters, and nothing about the page ("the day's only EU item"). Never copy a ${cell}: the reader sees the ${rows} right below. Add a consequence only when the ${rows} states one.`;
+  // The agents page's sections are project bullets, not table rows: "the sections" covers both.
+  const [copied, shown, states] =
+    unit === "bullet"
+      ? ["sentence of the sections", "them", "the sections state"]
+      : ["Summary cell", "the table", "the table states"];
+  return `One sentence per ${unit}: the item and the one fact about it that matters most to the reader, in your own words. State the fact itself: never write that or why an item matters, and nothing about the page ("the day's only EU item"). Never copy a ${copied}: the reader sees ${shown} right below. Add a consequence only when ${states} one.`;
 };
 
 /** How every page's Highlights bullets are cut: one subject each, with its window. */

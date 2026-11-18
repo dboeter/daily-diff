@@ -12,13 +12,17 @@
   "highlights": [
     [
       "- About 100 words in total. Write no other sections.",
-      "- One sentence per bullet: the item and the one fact about it that matters most to the reader, in your own words. State the fact itself: never write that or why an item matters, and nothing about the page (\"the day's only EU item\"). Never copy a row's summary sentence: the reader sees the row right below. Add a consequence only when the row states one.\n- About 100 words in total. Write no other sections."
+      "- One sentence per bullet: the item and the one fact about it that matters most to the reader, in your own words. State the fact itself: never write that or why an item matters, and nothing about the page (\"the day's only EU item\"). Never copy a sentence of the sections: the reader sees them right below. Add a consequence only when the sections state one.\n- About 100 words in total. Write no other sections."
     ]
   ],
   "vendor": [
     [
       "(for a deprecation or breaking change: what stops working or must be migrated, and by when).",
       "(for a deprecation or breaking change: what stops working, and by when).\n- A deprecation or breaking change whose text states an action (migrate, update, switch, turn a setting on): open its summary with that action, verb first (\"Migrate to X by <date>: …\"). Keep the text's strength: when it only recommends, write \"Recommended: migrate to X …\". When the text states no action, open with what stops working and when, and never invent an action. Every other row is described, never instructed: no summary of a feature note opens with an action."
+    ],
+    [
+      "a setting to turn on, a migration,",
+      "a setting that must be on, a migration,"
     ]
   ],
   "policy": [

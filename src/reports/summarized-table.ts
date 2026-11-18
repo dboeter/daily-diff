@@ -210,7 +210,8 @@ const RESTATED_TITLE_SHARE = 0.8;
  * The story summaries with "—" for one that only restates its row's title ("Google reports that
  * an AI agent turned a security patch into an exploit with no human help", under that title,
  * 2026-11-17): the row shows the title already, and a "—" row makes no Highlight
- * (`titleOnlyStories`). Each one is logged.
+ * (`titleOnlyStories`). Each one is logged. Only a model summary is checked: a row without one
+ * shows its description as before.
  */
 export function dropTitleRestatements(
   summaries: Map<number, string>,

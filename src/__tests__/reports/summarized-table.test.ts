@@ -281,6 +281,20 @@ describe("dropTitleRestatements", () => {
     expect(out.get(2)).toContain("headless mode");
     expect(out.get(3)).toContain("300-line");
   });
+  it("keeps a — summary, a summary under an empty title, and takes a row numbered after the Spotted rows", () => {
+    const out = dropTitleRestatements(
+      new Map([
+        [1, "—"],
+        [4, "Anything at all."],
+        [16, "PostgreSQL released 18.7 and 17.12."],
+      ]),
+      [...rows, { n: 4, title: "" }, { n: 16, title: "PostgreSQL 18.7 and 17.12 released" }],
+      "t",
+    );
+    expect(out.get(1)).toBe("—");
+    expect(out.get(4)).toBe("Anything at all.");
+    expect(out.get(16)).toBe("—");
+  });
   it("leaves a row without a summary alone", () => {
     expect(dropTitleRestatements(new Map(), rows, "t").size).toBe(0);
   });
