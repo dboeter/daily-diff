@@ -318,22 +318,22 @@ export interface SpottedSection {
 
 /**
  * Up to `cap` of `stories`, in order, skipping a link in `taken`; each one taken claims its link.
- * `onDrop` hears every story left out and why. A flagged story (`security`) skips `cap` and
- * `passes` and is not counted toward them: it takes no other story's row.
+ * `onDrop` hears every story left out and why. A flagged story (`security`) skips `cap` and is not
+ * counted toward it: it takes no other story's row.
  */
 function claimRows<T extends Pick<Story, "url" | "security">>(
   stories: T[],
   cap: number,
   taken: Set<string>,
   onDrop?: (story: T, reason: DroppedReason) => void,
-  /** A floor on the next row, given the rows taken so far: a story under it is dropped as `threshold`. */
-  passes?: (story: T, taken: number) => boolean,
+  /** A floor on each row: a story under it is dropped as `threshold`. */
+  passes?: (story: T) => boolean,
 ): T[] {
   const rows: T[] = [];
   let counted = 0;
   for (const s of stories) {
     const own = s.security !== undefined;
-    if (!own && passes && !passes(s, counted)) {
+    if (passes && !passes(s)) {
       onDrop?.(s, "threshold");
       continue;
     }
@@ -361,10 +361,19 @@ function claimRows<T extends Pick<Story, "url" | "security">>(
 export const SPOTTED_MIN_TOPIC_PROBABILITY = 0.6;
 /** A story published longer ago is not news, however late a source surfaces it (a 25-day-old post, 2026-10-26). */
 export const SPOTTED_MAX_AGE_DAYS = 7;
-/** Once a page has this many rows, a further row needs SPOTTED_MIN_POINTS: no 8-point row beside 491. A flagged story skips the floor and is not counted. */
-export const SPOTTED_ROWS_BEFORE_FLOOR = 3;
-/** Each source's own scale (HN points, Lobste.rs score, Dev.to reactions); stories are fetched hours old. */
-export const SPOTTED_MIN_POINTS: Record<StorySource, number> = { hn: 5, lobsters: 3, devto: 10 };
+/**
+ * Every row needs this, the first of a page too, so a quiet day has fewer rows or none. Each source's
+ * own scale (HN points, Lobste.rs score, Dev.to reactions), counted at fetch, hours after posting.
+ * Raised on 2026-11-18 from 5/3/10, with no exemption for a page's first 3 rows: 30% of the HN rows
+ * of 2026-10-23 … 11-18 had under 20 points, and the maintainer judged them noise. A flagged story skips it.
+ */
+export const SPOTTED_MIN_POINTS: Record<StorySource, number> = { hn: 30, lobsters: 15, devto: 25 };
+/**
+ * A story flagged as a security event needs this instead of SPOTTED_MIN_POINTS: a confirmed advisory
+ * is news before it draws votes (a Postgres CVE at 12 points, a compromised PyPI package at 14, both
+ * 2026-11). Dev.to keeps the Spotted floor: its flagged rows are personal accounts, not advisories.
+ */
+export const SECURITY_MIN_POINTS: Record<StorySource, number> = { hn: 10, lobsters: 5, devto: 25 };
 
 /** Dev.to challenge entries open with this line: three Hacktoberfest entries in two days on 2026-10-25/26. */
 export const isContestEntry = (s: Pick<Story, "title" | "description">): boolean =>
@@ -375,9 +384,9 @@ export const isContestEntry = (s: Pick<Story, "title" | "description">): boolean
  * ranked by points, topic probability breaking ties; numbered across pages in SPOTTED_PAGES order.
  * Left out before ranking (`threshold`): a topic probability under SPOTTED_MIN_TOPIC_PROBABILITY,
  * a story over SPOTTED_MAX_AGE_DAYS old (when `dateStr` is given) and a contest entry; while
- * ranking, a story under SPOTTED_MIN_POINTS once its page has SPOTTED_ROWS_BEFORE_FLOOR rows.
+ * ranking, a story under SPOTTED_MIN_POINTS.
  * A story Jev flagged as a security event (`security`) has its own slot: it skips the per-source cap
- * and the points floor and counts toward neither, but needs everything else. The topic bar stays on
+ * and does not count toward it, and needs SECURITY_MIN_POINTS instead of SPOTTED_MIN_POINTS. The topic bar stays on
  * purpose: the maintainer deferred the page of a flagged story (.scratch/security-section/spec.md).
  * Each link once: a row claims its link in that order, so a copy below its source's cut, or on no
  * page, leaves the link to a copy that makes a row. `pageOf` is null for a story no page takes;
@@ -419,9 +428,7 @@ export function selectSpotted(
           SPOTTED_PER_SOURCE[source],
           taken,
           (s, reason) => dropped?.set(s.id, reason),
-          (s, sourceRows) =>
-            rows.filter((r) => !r.security).length + sourceRows < SPOTTED_ROWS_BEFORE_FLOOR ||
-            s.points >= SPOTTED_MIN_POINTS[source],
+          (s) => s.points >= (s.security ? SECURITY_MIN_POINTS : SPOTTED_MIN_POINTS)[source],
         );
         rows.push(...claimed);
       }

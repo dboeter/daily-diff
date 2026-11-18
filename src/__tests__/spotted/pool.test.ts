@@ -352,11 +352,11 @@ describe("splitPool", () => {
 describe("selectSpotted", () => {
   it("caps each page at 6 HN, 2 Lobste.rs and 2 Dev.to by points, numbered agents, models, data", () => {
     const stories = [
-      ...Array.from({ length: 8 }, (_, i) => story(`h${i}`, "hn", 10 + i)),
-      ...Array.from({ length: 3 }, (_, i) => story(`l${i}`, "lobsters", 10 + i)),
-      ...Array.from({ length: 3 }, (_, i) => story(`d${i}`, "devto", 10 + i)),
-      story("data1", "hn", 1),
-      story("models1", "devto", 1),
+      ...Array.from({ length: 8 }, (_, i) => story(`h${i}`, "hn", 100 + i)),
+      ...Array.from({ length: 3 }, (_, i) => story(`l${i}`, "lobsters", 100 + i)),
+      ...Array.from({ length: 3 }, (_, i) => story(`d${i}`, "devto", 100 + i)),
+      story("data1", "hn", 30),
+      story("models1", "devto", 25),
       story("dropped", "hn", 1000),
     ];
     const pageOf = (s: Story): SpottedPage | null =>
@@ -383,9 +383,9 @@ describe("selectSpotted", () => {
 describe("selectSpotted by link", () => {
   it("leaves a link to another copy when one is routed nowhere or misses its source's cut", () => {
     const routedNowhere = story("1", "hn", 500, { url: "https://example.com/a" });
-    const copyA = story("x", "lobsters", 5, { url: "https://www.example.com/a/" });
+    const copyA = story("x", "lobsters", 15, { url: "https://www.example.com/a/" });
     const top = Array.from({ length: 6 }, (_, i) => story(`t${i}`, "hn", 100 + i));
-    const belowCut = story("low", "hn", 1, { url: "https://example.com/b" });
+    const belowCut = story("low", "hn", 50, { url: "https://example.com/b" });
     const copyB = story("d", "devto", 50, { url: "https://example.com/b" });
     const pageOf = (s: Story): SpottedPage | null => (s === routedNowhere ? null : "agents");
     const ids = selectSpotted([routedNowhere, copyA, ...top, belowCut, copyB], pageOf).map((r) => r.id);
@@ -411,8 +411,8 @@ describe("selectSpotted by link", () => {
   it("takes each link once across pages in numbering order, and a skipped copy takes no slot", () => {
     const first = story("1", "hn", 100, { url: "https://example.com/a" });
     const sameSource = story("l1", "lobsters", 50, { url: "https://example.com/a" });
-    const [l2, l3] = [story("l2", "lobsters", 20), story("l3", "lobsters", 10)];
-    const otherPage = story("m", "hn", 5, { url: "https://example.com/a" });
+    const [l2, l3] = [story("l2", "lobsters", 20), story("l3", "lobsters", 15)];
+    const otherPage = story("m", "hn", 30, { url: "https://example.com/a" });
     const pageOf = (s: Story): SpottedPage => (s === otherPage ? "models" : "agents");
     const rows = selectSpotted([first, sameSource, l2, l3, otherPage], pageOf);
     expect(rows.map((r) => [r.n, r.page, r.id])).toEqual([
@@ -449,34 +449,35 @@ describe("selectSpotted floors", () => {
 
   it("ranks by points over the topic bar; topic probability breaks ties only", () => {
     // 2026-11-01: a 7-point finance story at 0.81 outranked a 75-point one at 0.62.
-    const sure = story("sure", "hn", 7);
+    const sure = story("sure", "hn", 40);
     const loud = story("loud", "hn", 75);
-    const tieSure = story("tieSure", "hn", 7);
+    const tieSure = story("tieSure", "hn", 40);
     const rows = selectSpotted([sure, loud, tieSure], agents, undefined, {
       probabilityOf: (s) => (s === loud ? 0.62 : s === sure ? 0.81 : 0.95),
     });
     expect(rows.map((r) => r.id)).toEqual([loud.id, tieSure.id, sure.id]);
   });
 
-  it("needs SPOTTED_MIN_POINTS once a page has 3 rows", () => {
-    const hn = [story("a", "hn", 400), story("b", "hn", 300), story("c", "hn", 2), story("d", "hn", 200)];
-    const lob = story("l", "lobsters", 1);
+  it("needs SPOTTED_MIN_POINTS from the first row", () => {
+    const hn = [story("a", "hn", 400), story("b", "hn", 29), story("c", "hn", 30)];
+    const lob = [story("l1", "lobsters", 15), story("l2", "lobsters", 14)];
+    const dev = [story("d1", "devto", 25), story("d2", "devto", 24)];
     const dropped = new Map<string, DroppedReason>();
-    const rows = selectSpotted([...hn, lob], agents, dropped);
-    // By points c comes fourth, past the first 3 rows, and has 2 points: dropped, as is the lobsters story.
-    expect(rows.map((r) => r.id)).toEqual(["hn:a", "hn:b", "hn:d"]);
-    expect(dropped.get("hn:c")).toBe("threshold");
-    expect(dropped.get(lob.id)).toBe("threshold");
-    // Under 3 rows no floor applies: a 1-point story still makes a row.
-    expect(selectSpotted([lob], agents).map((r) => r.id)).toEqual([lob.id]);
+    const rows = selectSpotted([...hn, ...lob, ...dev], agents, dropped);
+    expect(rows.map((r) => r.id)).toEqual(["hn:a", "hn:c", "lobsters:l1", "devto:d1"]);
+    expect(dropped.get("hn:b")).toBe("threshold");
+    expect(dropped.get("lobsters:l2")).toBe("threshold");
+    expect(dropped.get("devto:d2")).toBe("threshold");
+    // An empty page has no exemption: a lone story under its floor makes no row.
+    expect(selectSpotted([story("q", "lobsters", 1)], agents)).toEqual([]);
   });
 
   it("labels a story cap only when it would otherwise have made a row", () => {
     const top = [story("l1", "lobsters", 30), story("l2", "lobsters", 20)];
     const fill = [story("a", "hn", 400), story("b", "hn", 300)];
     const underFloor = story("l3", "lobsters", 1);
-    const copy = story("l4", "lobsters", 10, { url: top[0]!.url });
-    const capped = story("l5", "lobsters", 5);
+    const copy = story("l4", "lobsters", 25, { url: top[0]!.url });
+    const capped = story("l5", "lobsters", 18);
     const dropped = new Map<string, DroppedReason>();
     selectSpotted([...fill, ...top, underFloor, copy, capped], agents, dropped);
     expect(Object.fromEntries(dropped)).toEqual({
@@ -504,7 +505,7 @@ describe("ticket 10 replay: the 2026-10-26 pool", () => {
   };
   const titled = (part: string) => day.pool.find((s) => s.title.includes(part))!.id;
 
-  it("drops DetectorScope and the AI graveyard and keeps AgentTrust", () => {
+  it("drops DetectorScope and the AI graveyard, and AgentTrust under the points floor", () => {
     const rows = selectSpotted(
       day.pool,
       (s) => PAGE[(s as (typeof day.pool)[number]).topic ?? ""] ?? null,
@@ -520,7 +521,8 @@ describe("ticket 10 replay: the 2026-10-26 pool", () => {
     const ids = rows.map((r) => r.id);
     expect(ids).not.toContain(titled("DetectorScope"));
     expect(ids).not.toContain(titled("The AI graveyard"));
-    expect(ids).toContain(titled("AgentTrust"));
+    // Ticket 10 kept AgentTrust (7 points at fetch); the floors of 2026-11-18 drop it on purpose.
+    expect(ids).not.toContain(titled("AgentTrust"));
   });
 
   it("Most discussed drops the 0-point, 0-comment Lobste.rs row", () => {
@@ -709,11 +711,21 @@ describe("flagged stories take their own slot", () => {
     expect(ids).toEqual(["lobsters:l1", "lobsters:l2", "lobsters:sec"]);
   });
 
-  it("a flagged low-point story past the floor makes a row", () => {
-    const top = [story("a", "hn", 100), story("b", "hn", 90), story("c", "hn", 80)];
-    const low = story("low", "hn", 1, flag);
-    const ids = selectSpotted([...top, low], () => "agents").map((r) => r.id);
-    expect(ids).toContain("hn:low");
+  it("a flagged story needs SECURITY_MIN_POINTS, not SPOTTED_MIN_POINTS", () => {
+    const stories = [
+      story("hn10", "hn", 10, flag),
+      story("hn9", "hn", 9, flag),
+      story("lob5", "lobsters", 5, flag),
+      story("lob4", "lobsters", 4, flag),
+      story("dev25", "devto", 25, flag),
+      story("dev24", "devto", 24, flag),
+    ];
+    const dropped = new Map<string, DroppedReason>();
+    const ids = selectSpotted(stories, () => "agents", dropped).map((r) => r.id);
+    expect(ids).toEqual(["hn:hn10", "lobsters:lob5", "devto:dev25"]);
+    expect(dropped.get("hn:hn9")).toBe("threshold");
+    expect(dropped.get("lobsters:lob4")).toBe("threshold");
+    expect(dropped.get("devto:dev24")).toBe("threshold");
   });
 
   it("a flagged story under the topic bar makes no row", () => {
