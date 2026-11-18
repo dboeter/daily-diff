@@ -8,22 +8,32 @@ import { readFileSync, readdirSync, writeFileSync, mkdirSync, existsSync } from 
 import { basename, join } from "node:path";
 import { callLlm } from "../../src/core/llm.ts";
 
-const edits = JSON.parse(readFileSync(new URL("./edits.json", import.meta.url), "utf8")) as Record<string, [string, string][]>;
+const edits = JSON.parse(readFileSync(new URL("./edits.json", import.meta.url), "utf8")) as Record<
+  string,
+  [string, string][]
+>;
 const kindOf = (label: string): string | null =>
   label === "agents" || label === "infra" || /^data-(?!vendor|highlights)/.test(label)
     ? "digest"
     : label === "agents-highlights" || label === "models-highlights"
       ? "highlights"
-      : label === "data-vendor-summaries"
-        ? "vendor"
-        : null;
+      : label === "policy"
+        ? "policy"
+        : label === "data-vendor-summaries"
+          ? "vendor"
+          : null;
 
 const jobs: Promise<void>[] = [];
 for (const dir of process.argv.slice(2)) {
   const out = join(new URL("./replay/", import.meta.url).pathname, basename(dir));
   mkdirSync(out, { recursive: true });
   for (const f of readdirSync(dir).sort()) {
-    const cap = JSON.parse(readFileSync(join(dir, f), "utf8")) as { label: string; maxTokens: number; prompt: string; output?: string };
+    const cap = JSON.parse(readFileSync(join(dir, f), "utf8")) as {
+      label: string;
+      maxTokens: number;
+      prompt: string;
+      output?: string;
+    };
     const kind = kindOf(cap.label);
     if (!kind) continue;
     let next = cap.prompt;

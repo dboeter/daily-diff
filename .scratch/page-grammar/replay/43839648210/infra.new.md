@@ -1,3 +1,3 @@
-The only item for herdr is a Show HN whose subject is Canban, not herdr — herdr appears just as a component ("Canban = Kanban + herdr workbench"). That's a passing mention, so it's skipped. With no stable release and no hot issues, herdr has nothing left to report.
+## herdr
 
-No sections to output.
+- **News:** [Show HN: Canban – Kanban and Workflow and Herdr Workbench for CLI Agents](https://news.ycombinator.com/item?id=50508535) describes Canban as Kanban plus herdr workbench for CLI agents.

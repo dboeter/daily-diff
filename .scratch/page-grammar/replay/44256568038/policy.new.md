@@ -1,0 +1,2 @@
+## Highlights
+The European Commission issued a communication with guidance on applying Regulation (EU) 2024/2847, the Cyber Resilience Act. The Tweede Kamer has an amended motion on inventorying what is needed for supervision of the AI Regulation. Ireland’s regulator said it stopped X from training AI with data gathered by AI agents and expressed significant concerns about personal data.

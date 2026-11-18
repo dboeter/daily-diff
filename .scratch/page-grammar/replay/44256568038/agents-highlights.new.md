@@ -1,4 +1,5 @@
 ## Highlights
-- socket.dev reports that compromised versions 1.26.1 and 1.26.2 of Microsoft's agent-framework PyPI package use .pth startup hooks to exfiltrate Azure, GitHub Actions, and CI/CD credentials.
-- A Harvard study reports that AI coding agents raised code output 30% while completed work didn't measurably rise and review time grew 49%, shifting the bottleneck to code review.
-- Claude Code v2.1.327 fixes a data-loss bug in which stopping a Remote Control server in worktree mode deleted a running session's git-ignored files such as `.env`.
+
+- According to socket.dev, compromised releases 1.26.1 and 1.26.2 of Microsoft's agent-framework on PyPI use .pth startup hooks to steal Azure, GitHub Actions and CI/CD credentials.
+- Oh My Pi v18.22.1–v18.22.2 makes the JavaScript eval `commit` helper validate its arguments strictly, throwing a `TypeError` on unknown option names or non-object options.
+- StarSling (YC P25) says its drop-in GitHub Actions runner includes AI agents that open pull requests optimizing a repository's own CI.

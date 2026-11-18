@@ -1,2 +1,2 @@
-## OpenShell (github.com/NVIDIA/OpenShell)
-- **Release**: [v0.1.9](https://github.com/NVIDIA/OpenShell/releases/tag/v0.1.9) moves the Go SDK to `github.com/ai-openshell/sdk-go` and deprecates `github.com/NVIDIA/OpenShell/sdk/go`. Wildcard network policy endpoints no longer allow private IP literals on their own, requiring an exact endpoint or `allowed_ips` grant, and the Helm chart now enables gateway metrics with `metrics.enabled` instead of `service.metricsPort`.
+## OpenShell
+- **Release:** [v0.1.9](https://github.com/NVIDIA/OpenShell/releases/tag/v0.1.9): the Go SDK now lives at `github.com/ai-openshell/sdk-go` and `github.com/NVIDIA/OpenShell/sdk/go` is deprecated; wildcard network policy endpoints no longer allow private IP literals on their own, requiring an exact endpoint or an `allowed_ips` grant.

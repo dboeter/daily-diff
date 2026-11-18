@@ -1,4 +1,4 @@
 ## Highlights
-
-- Alibaba's Qwen4 Max is now listed on OpenRouter with a 1M-token context and text/image/video input; Qwen's own post describes capabilities ranging from image generation and document processing to tool use and web search.
-- Fortune reports that, per Alpha's internal data, only 42% of students at its $75,000-a-year AI school reached its 2x learning goal in math and reading.
+- Qwen4 Max, from Alibaba's Qwen4 series, is now on OpenRouter with a 1M-token context, taking text, image, and video input while adding image generation, web search, tool use, and document processing.
+- Internal data show 42% of students at Alpha's AI school reached its 2x learning goal in math and reading.
+- Baseten maps how batch sizing, parallelism, quantization, speculative decoding, and other techniques trade off latency against throughput at the efficient frontier of LLM inference.

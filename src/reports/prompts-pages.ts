@@ -30,6 +30,7 @@ import {
 import {
   goingAwayRule,
   HIGHLIGHTS_PICK_RULE,
+  ownWordsRule,
   IDENTIFIER_RULE,
   RELEASE_ORDER,
   NO_TITLE_RULE,
@@ -184,11 +185,12 @@ ${tableMd}
 ${deadlineBlock}
 ---
 
-Write only \`## ${SECTIONS.highlights}\`: 2-4 sentences on the most consequential items today. The table goes below it.
+Write only \`## ${SECTIONS.highlights}\`: 2-4 sentences in one paragraph on the most consequential items today. The table goes below it.
 
 Rules:
 - ${NO_TITLE_RULE}
 - Do not reproduce or alter the table.
+- ${ownWordsRule("item")}
 - Base every claim on the table${nearDeadlines.length ? " or the open deadlines" : ""}. Do not invent obligations, dates, stages or legal status: a wrong legal status is worse than none.
 - Mention only items that appear in the table${nearDeadlines.length ? " or the open deadlines" : ""}, and link every item you mention.
 ${sourceFidelityRules()}
