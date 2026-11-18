@@ -1,2 +1,3 @@
 ## Terraform provider for Databricks
+
 - **Release:** [v1.143.0](https://github.com/databricks/terraform-provider-databricks/releases/tag/v1.143.0) changes `databricks_app` updates to use the asynchronous Apps update API, so omitted `compute_size` resets to `MEDIUM`, omitted `compute_min_instances` and `compute_max_instances` disable horizontal scaling, and omitted `git_source` is cleared; the update waits for `SUCCEEDED`. It fixes perpetual diffs for `databricks_connection` options that the API does not return, such as `pem_key_passphrase` and `schema_registry_api_secret`.
