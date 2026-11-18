@@ -961,14 +961,16 @@ function findOnPage() {
     if (block.closest('.toc, .report-meta')) continue;
     // Not shown at this width (a stacked table's empty cell), unless a collapsed block holds it.
     if (!block.getClientRects().length && !block.closest('details:not([open])')) continue;
-    const at = block.textContent.toLowerCase().indexOf(needle);
-    if (at === -1) {
-      // A date cell shows "16 Nov": its ISO form, which the index has, is in the <time> element.
-      const time = block.querySelector('time[datetime]');
-      if (!time?.getAttribute('datetime').includes(needle) || time.firstChild?.nodeType !== Node.TEXT_NODE) continue;
+    // A date cell shows "16 Nov", and the index has its ISO form, which is in the <time>
+    // element: that form decides ("17" and "11-16" match, "nov" does not), and the label is marked.
+    const time = block.querySelector('time[datetime]');
+    if (time) {
+      if (!time.getAttribute('datetime').includes(needle) || time.firstChild?.nodeType !== Node.TEXT_NODE) continue;
       show(wrap(time.firstChild, 0, time.firstChild.length));
       return;
     }
+    const at = block.textContent.toLowerCase().indexOf(needle);
+    if (at === -1) continue;
     // The text nodes the match runs through, each with the part of it that is the match.
     const parts = [];
     const walker = document.createTreeWalker(block, NodeFilter.SHOW_TEXT);
@@ -979,8 +981,6 @@ function findOnPage() {
       if (from < to) parts.push([node, from - pos, to - pos]);
       pos += node.length;
     }
-    // "nov" inside the label "19 Nov" is no match: the index has that cell as its ISO date.
-    if (parts.some(([node]) => node.parentElement.closest('time'))) continue;
     const marks = parts.map(([node, from, to]) => wrap(node, from, to));
     if (marks.length) show(marks[0]);
     return;
