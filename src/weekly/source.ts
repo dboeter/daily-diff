@@ -49,7 +49,7 @@ export const CUT_MARK = " […cut]";
  * day differ in their first sentence, well within them.
  */
 const TITLE_KEY_CHARS = 30;
-/** An AI Policy jurisdiction row: Date, Item, Source, Stage, Summary (before 2026-11-18: Date, Source, Title, Stage, Summary; the stage cell did not move). Its other tables have fewer cells and no stage. */
+/** An AI Policy jurisdiction row: Date, Item, Source, Stage, Summary (an archived page: Date, Source, Title, Stage, Summary, the stage in the same cell). Its other tables have fewer cells and no stage. */
 const POLICY_ROW_CELLS = 5;
 const POLICY_STAGE_CELL = 3;
 /** A row's markers stand right before its link text: two markers with their spaces take 6 characters. */

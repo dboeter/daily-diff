@@ -173,6 +173,9 @@ export const WEEKLY_REPORT = {
 
 // Weekly: what is moving. The prose call writes Highlights and Signals around the rest.
 export const TRENDS_REPORT = {
+  /** The meta line's counts: the rows of each table section the page shows. */
+  counts: (tools: number, models: number, papers: number, discussed: number) =>
+    `Agents & tools: ${tools} | Models: ${models} | Papers: ${papers} | Most discussed: ${discussed}`,
   sources:
     "GitHub Trending + GitHub Search API + OpenRouter + npm + Hugging Face + arXiv + Hacker News + Lobste.rs + Dev.to",
   agentsHeading: "Agents & coding tools",

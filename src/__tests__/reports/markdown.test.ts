@@ -1292,6 +1292,10 @@ describe("security marker", () => {
 });
 
 describe("tidyHighlights", () => {
+  it("keeps every bullet when the caller sets no cap", () => {
+    expect(tidyHighlights("- A.\n\n- B.\n\n- C.\n\n- D.", "t", Infinity)).toBe("- A.\n- B.\n- C.\n- D.");
+  });
+
   it("makes a loose list tight", () => {
     expect(tidyHighlights("## Highlights\n\n- One.\n\n- Two.", "t")).toBe("## Highlights\n\n- One.\n- Two.");
   });

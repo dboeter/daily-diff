@@ -72,11 +72,11 @@ export interface ProjectGroup {
   /** LLM output: one `## <Project>` section per active project. */
   summary: string;
   /**
-   * A code-rendered listing under a group heading (the data report's Releases this week), not a
-   * tracked source: empty, it is left out, where a tracked group is named in the page's one
-   * "Nothing new from …" line with its quiet projects.
+   * For a code-rendered listing under a group heading (the data report's Releases this week), which
+   * is not a tracked source: empty, it is left out, where a tracked group is named in the page's
+   * one "Nothing new from …" line with its quiet projects.
    */
-  listing?: boolean;
+  hideWhenEmpty?: boolean;
   /** Markdown under the heading, before the projects (the data report's vendor table). Shown even when every project is quiet. */
   preamble?: string;
 }
@@ -379,7 +379,7 @@ export function buildProjectReportContent(r: ProjectReportInput): string {
     inactiveCount += quiet.length + unavailable.length;
     if (!body && !g.preamble && !unavailable.length) {
       // Not a tracked source: nothing to name.
-      if (g.listing) return [];
+      if (g.hideWhenEmpty) return [];
       // The quiet repos stay named: the line is the only sign they are tracked.
       nothingNewFrom.push(quiet.length ? `${g.title} (${quiet.map(link).join(", ")})` : g.title);
       return [];
@@ -549,10 +549,11 @@ export const MAX_HIGHLIGHTS = 3;
 
 /**
  * A Highlights section as every page shows it: its bullets on consecutive lines (a model may put a
- * blank line between them, which renders as a loose list) and at most MAX_HIGHLIGHTS of them, the
- * first ones (each cut is logged). A section without bullets (AI Policy's prose) is returned as it is.
+ * blank line between them, which renders as a loose list) and at most `max` of them, the first
+ * ones (each cut is logged). A section without bullets (AI Policy's prose) is returned as it is.
+ * Trends passes its whole prose with no cap: its Signals lists are tightened too.
  */
-export function tidyHighlights(section: string, tag: string): string {
+export function tidyHighlights(section: string, tag: string, max: number = MAX_HIGHLIGHTS): string {
   const out: string[] = [];
   let blanks: string[] = [];
   let bullets = 0;
@@ -568,9 +569,8 @@ export function tidyHighlights(section: string, tag: string): string {
     if (bullet) {
       bullets++;
       inList = true;
-      cut = bullets > MAX_HIGHLIGHTS;
-      if (cut)
-        console.log(`  [${tag}] Highlight over the limit of ${MAX_HIGHLIGHTS} dropped: ${line.slice(0, 80)}`);
+      cut = bullets > max;
+      if (cut) console.log(`  [${tag}] Highlight over the limit of ${max} dropped: ${line.slice(0, 80)}`);
     } else if (!continuation) {
       // Text after the list keeps its blank line.
       out.push(...blanks);

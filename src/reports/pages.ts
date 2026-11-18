@@ -34,6 +34,7 @@ import {
   storiesNoHighlightNote,
   modelSources,
   dropNoHighlightRows,
+  type NoHighlightRow,
   isGroupOrAbsenceBullet,
   buildWeeklyArticlePrompt,
 } from "./prompts-pages.ts";
@@ -166,6 +167,22 @@ export interface TrendsInput {
   tracked: RepoConfig[];
   /** null: no key, so the run's own model writes the page. A test passes its own. */
   writer?: LlmProvider | null;
+}
+
+/**
+ * A daily page's Highlights section from its prose call: only that section, without the bullets
+ * about rows that make no Highlight, tidied (tidyHighlights). A failed call leaves the failure notice.
+ */
+function pageHighlights(
+  prose: string | null,
+  noHighlight: readonly NoHighlightRow[],
+  tag: string,
+  alsoDrop?: (bullet: string) => boolean,
+): string {
+  return tidyHighlights(
+    dropNoHighlightRows(highlightsOnly(prose ?? MSG.summaryFailed), noHighlight, tag, alsoDrop),
+    tag,
+  );
 }
 
 /**
@@ -371,13 +388,31 @@ export async function buildTrendsReport(
     prose === null
       ? `## ${SECTIONS.highlights}\n\n${MSG.summaryFailed}`
       : // Signed first: a Highlight opened with the sign but no marker is a bullet only after it.
-        checkTrendsLinks(dropNoHighlightRows(signListItems(prose), noHighlight, "trends")),
+        // Tightened, not capped: the prompt's own limit stands for Trends.
+        checkTrendsLinks(
+          dropNoHighlightRows(
+            tidyHighlights(signListItems(prose), "trends", Infinity),
+            noHighlight,
+            "trends",
+          ),
+        ),
     `---\n\n${page}\n\n---`,
   );
   const content = assembleReport(
     "ai-trends",
     dateStr,
-    REPORT_META.line([REPORT_META.sources(T.sources)], utcStr),
+    REPORT_META.line(
+      [
+        T.counts(
+          (report?.radar.length ?? 0) + (report?.categories ?? []).reduce((n, c) => n + c.rows.length, 0),
+          trending.openrouter.topModels.length + hfTableRows.length,
+          papers.length,
+          stories.length,
+        ),
+        REPORT_META.sources(T.sources),
+      ],
+      utcStr,
+    ),
     body,
   );
 
@@ -511,10 +546,7 @@ export async function buildAgentsReport(
       null,
       LLM_TOKENS_LISTING,
     );
-    highlights = tidyHighlights(
-      dropNoHighlightRows(highlightsOnly(prose ?? MSG.summaryFailed), [...titleOnly, ...claims], "agents"),
-      "agents",
-    );
+    highlights = pageHighlights(prose, [...titleOnly, ...claims], "agents");
   }
   const content = buildProjectReportContent({
     heading: reportHeading("ai-agents", dateStr),
@@ -681,12 +713,9 @@ export async function buildModelsPage(
     null,
     LLM_TOKENS_LISTING,
   );
-  const highlights = tidyHighlights(
-    dropNoHighlightRows(
-      highlightsOnly(prose ?? MSG.summaryFailed),
-      [...noText.map((p) => ({ name: p.title, url: p.url })), ...titleOnly, ...claims],
-      "models",
-    ),
+  const highlights = pageHighlights(
+    prose,
+    [...noText.map((p) => ({ name: p.title, url: p.url })), ...titleOnly, ...claims],
     "models",
   );
 
@@ -1006,7 +1035,7 @@ export async function buildDataReport(
       activities: [],
       summary: "",
       preamble: renderReleaseTable(releases, summaries),
-      listing: true,
+      hideWhenEmpty: true,
     },
   ];
   const groups = groupsWith(tables);
@@ -1032,14 +1061,11 @@ export async function buildDataReport(
     null,
     LLM_TOKENS_LISTING,
   );
-  const highlights = tidyHighlights(
-    dropNoHighlightRows(
-      highlightsOnly(prose ?? MSG.summaryFailed),
-      [...minor, ...titleOnly, ...claims],
-      "data",
-      isGroupOrAbsenceBullet,
-    ),
+  const highlights = pageHighlights(
+    prose,
+    [...minor, ...titleOnly, ...claims],
     "data",
+    isGroupOrAbsenceBullet,
   );
   const lawLinks = dataLaw
     .map(

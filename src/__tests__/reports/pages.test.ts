@@ -222,6 +222,27 @@ describe("buildTrendsReport", () => {
     expect(content).not.toContain("<!-- tables -->");
   });
 
+  it("opens its meta line with the row counts of its table sections, then the sources", async () => {
+    generateBody.mockReset();
+    generateBody.mockImplementation(async (p: string) => reply(p));
+    const content = (await build())!.content;
+    const meta = content.split("\n").find((l) => l.startsWith("> "))!;
+    expect(meta).toBe(
+      `> ${TRENDS_REPORT.counts(2, 2, 1, 1)} | Sources: ${TRENDS_REPORT.sources} | Generated: 00:00 UTC`,
+    );
+  });
+
+  it("puts the Highlights on consecutive lines and keeps more than three", async () => {
+    generateBody.mockReset();
+    generateBody.mockImplementation(async (p: string) =>
+      isProse(p)
+        ? "## Highlights\n\n- A.\n\n- B.\n\n- C.\n\n- D.\n\n<!-- tables -->\n\n## Signals\n\nS."
+        : reply(p),
+    );
+    const content = (await build())!.content;
+    expect(content).toContain("## Highlights\n\n- A.\n- B.\n- C.\n- D.\n\n---");
+  });
+
   it("renders Most discussed from the Spotted call's summaries; its own call has the papers only", async () => {
     generateBody.mockReset();
     generateBody.mockImplementation(async (p: string) => reply(p));
