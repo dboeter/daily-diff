@@ -13,7 +13,151 @@
       <height>144</height>
     </image>
     <atom:link href="https://dboeter.github.io/daily-diff/feeds/ai-models.xml" rel="self" type="application/rss+xml"/>
-    <lastBuildDate>Wed, 18 Nov 2026 07:14:50 +0000</lastBuildDate>
+    <lastBuildDate>Thu, 19 Nov 2026 07:16:34 +0000</lastBuildDate>
+    <item>
+      <title>AI Models &amp; Labs 2026-11-19</title>
+      <link>https://dboeter.github.io/daily-diff/#2026-11-19/ai-models</link>
+      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-11-19/ai-models</guid>
+      <pubDate>Thu, 19 Nov 2026 00:00:00 +0000</pubDate>
+      <description>AI Models &amp;amp; Labs 2026-11-19 ⬛ Overview · 🟪 AI Agents · 🟦 AI Models &amp;amp; Labs · 🟧 AI Policy · 🟨 Data Engineering Lab posts: 7 | New models: 1 | Spotted: 6 | Generated: 2026-11-19 07:10 UTC Highlights Google&amp;#39;s Gemini 4 Neon is now listed on OpenRouter with a 1M-token context, built for coding and agentic work and suited to repository and terminal coding. A next-amino-acid test on little-studied proteins reports that the latest Claude models were trained on protein sequences at scale, ...</description>
+      <content:encoded><![CDATA[<h1>AI Models &amp; Labs 2026-11-19</h1>
+<p><a href="https://dboeter.github.io/daily-diff/#2026-11-19">⬛ Overview</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-19/ai-agents">🟪 AI Agents</a> · <strong>🟦 AI Models &amp; Labs</strong> · <a href="https://dboeter.github.io/daily-diff/#2026-11-19/ai-policy">🟧 AI Policy</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-19/ai-data">🟨 Data Engineering</a></p>
+<blockquote>
+<p>Lab posts: 7 | New models: 1 | Spotted: 6 | Generated: 2026-11-19 07:10 UTC</p>
+</blockquote>
+<hr>
+<h2>Highlights</h2>
+<ul>
+<li>Google&#39;s Gemini 4 Neon is now listed on OpenRouter with a 1M-token context, built for coding and agentic work and suited to repository and terminal coding.</li>
+<li>A next-amino-acid test on little-studied proteins reports that the latest Claude models were trained on protein sequences at scale, while other frontier models show no sign of it.</li>
+<li>Google says it is rolling out its Genie 4 world model to eligible Google AI Ultra subscribers through a new Project Genie experience.</li>
+</ul>
+<hr>
+<h2>Lab announcements</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Post</th>
+<th align="left">Lab</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-11-19</td>
+<td align="left"><a href="https://openai.com/index/advancing-chip-design-with-our-models/">Advancing Chip Design With Our Models</a></td>
+<td align="left">OpenAI</td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left">2026-11-19</td>
+<td align="left"><a href="https://openai.com/index/managing-frontier-ai-risk/">Managing Frontier Ai Risk</a></td>
+<td align="left">OpenAI</td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left">2026-11-19</td>
+<td align="left"><a href="https://openai.com/index/le-groupe-figaro-and-openai-announce-partnership/">Le Groupe Figaro And Openai Announce Partnership</a></td>
+<td align="left">OpenAI</td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left">2026-11-18</td>
+<td align="left"><a href="https://www.anthropic.com/news/anthropic-prices-initial-public-offering">Anthropic prices initial public offering</a></td>
+<td align="left">Anthropic</td>
+<td align="left">Anthropic, PBC priced its initial public offering of its Class A common stock at $83.00 per share. The shares are expected to begin trading on the Nasdaq Global Select Market on November 19, 2026 under the symbol “ANT.”</td>
+</tr>
+<tr>
+<td align="left">2026-11-18</td>
+<td align="left"><a href="https://www.anthropic.com/research/claude-black-hole-physics">Claude Fable 5.2 solves two open problems in the physics of black holes</a></td>
+<td align="left">Anthropic</td>
+<td align="left">Claude has solved two open problems in theoretical physics, both concerning black holes and the search for a theory of quantum gravity. This post explains both findings, first in plain terms and then in more technical detail.</td>
+</tr>
+<tr>
+<td align="left">2026-11-18</td>
+<td align="left"><a href="https://openai.com/index/inside-the-codex-sandbox/">Inside The Codex Sandbox</a></td>
+<td align="left">OpenAI</td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left">—</td>
+<td align="left"><a href="https://openai.com/index/research-acceleration-jagged-frontier/">Research Acceleration Jagged Frontier</a></td>
+<td align="left">OpenAI</td>
+<td align="left">—</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>New on OpenRouter</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Listed</th>
+<th align="left">Model</th>
+<th align="left">Context</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-11-18</td>
+<td align="left"><a href="https://openrouter.ai/google/gemini-4-neon">Google: Gemini 4 Neon</a> <code>google/gemini-4-neon</code> · also: <a href="https://openrouter.ai/google/gemini-4-neon:batch">batch</a></td>
+<td align="left">1M</td>
+<td align="left">Gemini 4 Neon is a model in the Gemini 4 family from Google, built for coding and agentic work and suited for repository and terminal coding.</td>
+</tr>
+</tbody></table>
+<hr>
+<p>Nothing new from OpenRouter&#39;s stealth models today.</p>
+<hr>
+<h2>Spotted</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Story</th>
+<th align="left">Source</th>
+<th align="left">Discussion</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a href="https://blog.google/innovation-and-ai/models-and-research/gemini-models/introducing-gemini-4-neon/">Gemini 4 Neon</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50552424">708 points, 598 comments</a></td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left"><a href="https://microsoft.ai/news/microsoft-ignite-2026/">Seven new models at scalable price-performance</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50548021">513 points, 338 comments</a></td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left"><a href="https://blog.google/innovation-and-ai/models-and-research/google-deepmind/genie-4-now-available-project-genie/">Genie 4 is now available</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50550415">231 points, 156 comments</a></td>
+<td align="left">Google says it is rolling out a new Project Genie experience to eligible Google AI Ultra subscribers and opening access to its Genie 4 world model.</td>
+</tr>
+<tr>
+<td align="left"><a href="http://xinmingtu.cn/blog/2026/claude-opus-5-5-protein-sequences/">Claude was trained on protein sequences at scale</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50541619">173 points, 74 comments</a></td>
+<td align="left">A next-amino-acid test on little-studied proteins finds that the latest Claude models were trained on protein sequences at scale, while other frontier models show no sign of it.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://techcrunch.com/2026/11/17/amazon-and-google-will-together-own-nearly-30-of-anthropic-after-its-ipo/">Amazon and Google will together own nearly 30% of Anthropic after its IPO</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50547901">48 points, 0 comments</a></td>
+<td align="left">According to TechCrunch, Amazon will own just under 15% of Anthropic after its IPO, with Google holding nearly 14%, for a combined stake of nearly 30%.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://www.ft.com/content/418ca885-fbcf-4b9f-a8b9-2bd60b543fc5">Jensen Huang&#39;s fall hits &#39;open&#39; models in boost to Anthropic and OpenAI</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50547223">45 points, 22 comments</a></td>
+<td align="left">—</td>
+</tr>
+</tbody></table>
+<hr>
+<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
+]]></content:encoded>
+    </item>
     <item>
       <title>AI Models &amp; Labs 2026-11-18</title>
       <link>https://dboeter.github.io/daily-diff/#2026-11-18/ai-models</link>
