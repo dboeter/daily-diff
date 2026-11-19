@@ -9,42 +9,42 @@
 [![MCP server](https://img.shields.io/badge/MCP-server-3A423D?style=flat-square&labelColor=151917)](docs/reading.md#mcp-server)
 [![License: MIT](https://img.shields.io/github/license/dboeter/daily-diff?style=flat-square&labelColor=151917&color=3A423D)](LICENSE)
 
-Daily Diff is a morning digest of what changed overnight in AI and the data stack. Every night it reads the release notes, lab announcements, legislative registers and community threads, and by about 05:00 Amsterdam time one page per topic is ready to read.
+Daily Diff is a morning digest of what changed overnight in AI and the data stack. Every night it reads the release notes, lab announcements, legislative registers and community threads, and by about 05:00 Amsterdam time the day's pages are ready to read, one per topic.
 
-Each page answers three questions: what changed since yesterday, what is coming up, and what is rising.
+The digest answers three questions: what changed since yesterday, what is coming up, and what is rising.
 
 **[Read today's digest →](https://dboeter.github.io/daily-diff)**
 
 ## Why it exists
 
-I'm a Dutch data engineer with an interest in AI: the coding agents, the models, and AI policy in the EU, the Netherlands and the US. These fields change every day, across dozens of changelogs, feeds and registers. Daily Diff reads them all, so a person can read one report and know what matters for their work today.
+I'm a Dutch data engineer with an interest in AI: the coding agents, the models, and AI policy in the EU, the Netherlands and the US. These fields change every day, across dozens of changelogs, feeds and registers. Daily Diff reads them, so a person can read one report and know what matters for their work today.
 
 A diff shows what changed and leaves the rest alone. The digest does the same: a page lists what is new since the last one, and a quiet day gives a short page.
 
 ## How it thinks
 
-**A page is a topic.** Agents, models, policy and data engineering each have a page. A story has one home, whether it surfaced in a changelog, on Hacker News or in a government register.
+**A page is a topic.** Agents, models, policy and data engineering each have a page. A story goes to the page of its topic, whether it surfaced in a changelog, on Hacker News or in a government register.
 
-**Tracked first, then Spotted.** A daily page starts with the projects and sources it follows by name: their releases, their most active issues, the news about them. The agents, models and data pages then add Spotted, the best community stories on their topic. The tracked list is a deliberate choice. The weekly Trends page suggests candidates, and a person adds them.
+**Tracked first, then Spotted.** A daily page starts with what it follows by name. For a project that is its releases, the issues that drew the most reactions that day and the news about it. For a lab, a vendor or a legislature it is what they published. The agents, models and data pages then add Spotted, the best community stories on their topic. The tracked list is a deliberate choice. The weekly Trends page suggests candidates, and a person adds them.
 
-**Every item is news once.** An item a page showed is settled. It returns when something new happens to it, such as a bill that reaches its next stage.
+**Every item is news once.** An item a page showed is settled. A bill or a vendor note returns when it reaches its next stage.
 
 **Code states the facts, the model writes the prose.** Code decides what is new, ranks it and renders every table, so a date, a star count or a legal stage in a table comes straight from its source. The language model writes the summaries and the Highlights on top.
 
-**Interpretation is marked.** The daily pages report. The reading of what a week means lives in two places: the Weekly Diff article, where every sentence of interpretation is in italics, and the Signals section of Trends.
+**Interpretation is marked.** The daily pages report. Interpretation of the week has two places: the Weekly Diff article, where every sentence of interpretation is in italics, and the Signals section of Trends.
 
 **Every choice can be traced.** Each relevance judgment is saved next to the day's reports, with the answers behind it. When a story is on a page, or missing from it, the reason is on file, and a wrong verdict can be corrected by hand.
 
-**It publishes when the run is sound.** The run checks its own language model before it publishes anything. On a bad night yesterday's digest stays up, and the day can be run again by hand.
+**It publishes when the run is sound.** The run builds every page first and publishes only when the language model answered well enough. On a bad night yesterday's digest stays up, and the day can be run again by hand.
 
-**Plain Markdown, open archive.** Every day is a folder of Markdown files in this repository. The web UI, the RSS feeds, the GitHub Issues and the MCP server all serve those same files, and the daily run works on GitHub Actions with a free model.
+**Plain Markdown, open archive.** Every day is a folder of Markdown files in this repository. The web UI, the RSS feeds, the GitHub Issues and the MCP server all serve those same files, and the daily run works on GitHub Actions, its prose written by a free model.
 
 ## What you get
 
 | Page             | Cadence | In one line                                                                                   |
 | ---------------- | ------- | --------------------------------------------------------------------------------------------- |
 | AI Agents        | daily   | Releases, hot issues and news of the coding agents and agent tooling it tracks                |
-| AI Models & Labs | daily   | New posts from Anthropic and OpenAI, and newly listed models                                  |
+| AI Models & Labs | daily   | New posts from Anthropic and OpenAI, newly listed models and stealth models                   |
 | AI Policy        | daily   | New AI legislation, regulation and guidance in the EU, the Netherlands and the US, with dates |
 | Data Engineering | daily   | Vendor changes that need action, release notes and the open-source data stack                 |
 | Trends           | Mondays | What is rising: tools, models, papers and the week's most discussed stories                   |
@@ -79,7 +79,7 @@ export ANTHROPIC_API_KEY=sk-ant-xxxxx   # or another provider: see docs/configur
 pnpm start
 ```
 
-The run writes today's reports under `digests/` and updates the state files there; [`CONTRIBUTING.md`](CONTRIBUTING.md#set-up) has the commands that undo it. To make it your own digest, edit `config.yml`: it lists every tracked project, feed and watchlist. [Configuration and running](docs/configuration.md) covers the providers, the optional keys and the nightly schedule.
+The run writes today's reports under `digests/` and updates the state files there; [`CONTRIBUTING.md`](CONTRIBUTING.md#set-up) has the commands that undo it. To make it your own digest, edit `config.yml`: it lists the tracked projects, feeds and watchlists. [Configuration and running](docs/configuration.md) covers the providers, the optional keys and the nightly schedule.
 
 ## What it tracks
 
