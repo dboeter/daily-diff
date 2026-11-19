@@ -1,0 +1,17 @@
+{
+  "ai-agents": [
+    "Oh My Pi v19.0.0 breaks `session.handoff(focus)`, replacing it with cancellable `session.compact(focus, { mode: \"handoff\" })` and `abortCompaction()`.",
+    "Claude Code v2.1.328 adds auto mode for Opus 4.6 and Sonnet 4.6 on Bedrock, Google Cloud Agent Platform, Microsoft Foundry, and Claude apps."
+  ],
+  "ai-models": [
+    "Google's Gemini 4 Neon appears on OpenRouter with 1M-token context, built for coding and agentic repository work.",
+    "Google says it is rolling out Genie 4 world model to eligible AI Ultra subscribers via a new Project Genie experience."
+  ],
+  "ai-policy": [
+    "The Dutch AP advises against buying AI camera glasses for general use, citing serious risks for users and bystanders from its study of six models."
+  ],
+  "ai-data": [
+    "− Databricks retires Gemini 3.6 Flash on November 19, 2026, auto-redirecting API calls to Gemini 3.8 Flash at the same price.",
+    "Databricks account admins can now set a 30–3,650-day account-wide retention for system tables, with storage charges for data beyond 395 days."
+  ]
+}

@@ -59,7 +59,9 @@
     "issue:nousresearch/hermes-agent#156670": "2026-11-17",
     "issue:openai/codex#57101": "2026-11-18",
     "issue:anomalyco/opencode#37216": "2026-11-18",
-    "issue:can1357/oh-my-pi#19578": "2026-11-18"
+    "issue:can1357/oh-my-pi#19578": "2026-11-18",
+    "issue:openai/codex#62212": "2026-11-19",
+    "issue:can1357/oh-my-pi#18937": "2026-11-19"
   },
   "stages": {}
 }

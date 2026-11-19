@@ -39,7 +39,9 @@
     "openai/gpt-6.2-sol-pro": "2026-11-18",
     "openai/gpt-6.2-sol-pro:batch": "2026-11-18",
     "openai/gpt-6.2-sol": "2026-11-18",
-    "openai/gpt-6.2-sol:batch": "2026-11-18"
+    "openai/gpt-6.2-sol:batch": "2026-11-18",
+    "google/gemini-4-neon": "2026-11-19",
+    "google/gemini-4-neon:batch": "2026-11-19"
   },
   "stages": {}
 }
