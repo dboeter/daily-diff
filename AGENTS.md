@@ -266,7 +266,7 @@ Every Jev judgment except ArXiv's goes through `judgeItems` (`src/core/jev.ts`) 
 5. Wire it into `fetchAllData` and the save phase in `src/index.ts`. The fetcher never throws: it catches its own failure and returns its empty value (`fetchSuccess: false`).
 6. Add a label color entry in `LABEL_COLORS` in `src/core/github.ts`.
 7. When retiring a report, move its id and label into the archive part of `REPORT_LABELS` (`src/core/strings.ts`; `REPORT_FILES` in `src/cli/manifest.ts` is its keys), add its issue label to `DIGEST_ISSUE_LABELS` (`src/core/github.ts`), and add its id to the archive list in `get_report`'s type description in `mcp/src/index.ts`.
-8. Update README.md and this file.
+8. Update README.md (its page table), `docs/reports.md` (the reports and data sources tables) and this file. README.md holds the project's intent and quickstart; the reference tables are in `docs/` (`reports.md`, `reading.md`, `configuration.md`).
 
 ## Agent skills
 

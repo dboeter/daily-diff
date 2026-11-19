@@ -6,75 +6,87 @@
 [![CI](https://img.shields.io/github/actions/workflow/status/dboeter/daily-diff/ci.yml?style=flat-square&labelColor=151917&label=CI)](https://github.com/dboeter/daily-diff/actions/workflows/ci.yml)
 [![Web UI](https://img.shields.io/badge/read-web%20UI-3A423D?style=flat-square&labelColor=151917)](https://dboeter.github.io/daily-diff/)
 [![RSS](https://img.shields.io/badge/feed-RSS-3A423D?style=flat-square&labelColor=151917&logo=rss&logoColor=DCE3DE)](https://dboeter.github.io/daily-diff/feed.xml)
-[![MCP server](https://img.shields.io/badge/MCP-server-3A423D?style=flat-square&labelColor=151917)](#mcp-server)
+[![MCP server](https://img.shields.io/badge/MCP-server-3A423D?style=flat-square&labelColor=151917)](docs/reading.md#mcp-server)
 [![License: MIT](https://img.shields.io/github/license/dboeter/daily-diff?style=flat-square&labelColor=151917&color=3A423D)](LICENSE)
 
-A personal daily digest of AI coding agents, AI models, AI policy and the data engineering stack. A GitHub Actions workflow runs every night, collects from the [data sources](#data-sources) below and publishes English reports as GitHub Issues and Markdown files in [`digests/`](./digests/), by about 05:00 Amsterdam time. Read them in the [Web UI](#web-ui), the [RSS feed](#rss-feed) or the [MCP server](#mcp-server).
+Daily Diff is a morning digest of what changed overnight in AI and the data stack. Every night it reads the release notes, lab announcements, legislative registers and community threads, and by about 05:00 Amsterdam time the day's pages are ready to read, one per topic.
 
-## Reports
+The digest answers three questions: what changed since yesterday, what is coming up, and what is rising.
 
-| File           | Report           | Cadence | Content                                                                                                                                                                                                          |
-| -------------- | ---------------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `ai-agents.md` | AI Agents        | daily   | Releases, hot issues and news of the tracked agents and agent tooling, then Spotted                                                                                                                              |
-| `ai-models.md` | AI Models & Labs | daily   | New Anthropic and OpenAI posts, models newly listed on OpenRouter, stealth models, Spotted                                                                                                                       |
-| `ai-policy.md` | AI Policy        | daily   | New AI legislation, regulation and guidance for the EU, the Netherlands and the US, news & commentary, upcoming deadlines                                                                                        |
-| `ai-data.md`   | Data Engineering | daily   | Action required (deprecations with an end date), vendor release notes and repo releases for Databricks, Snowflake, Azure / Fabric & GCP and the open-source data stack, News & discussion from engineering blogs |
-| `ai-trends.md` | Trends           | Mondays | Trending agents & coding tools, the week's Claude Code Skills PRs and requests, candidates to track, OpenRouter and Hugging Face models, the week's top papers and most discussed stories, Signals               |
-| `ai-weekly.md` | Weekly Diff      | Mondays | One article on what changed in the week and what it means, written by Claude Opus from the items the week's pages showed; its interpretation is in italics                                                       |
+**[Read today's digest →](https://dboeter.github.io/daily-diff)**
 
-Every report but Weekly Diff opens with **Highlights**, then its tracked sections. AI Agents, AI Models & Labs and Data Engineering add **Spotted**: community stories on their topic that named no tracked project; Trends ends with **Signals**. Weekly Diff is one article, without Highlights or tables: it needs `ANTHROPIC_API_KEY` whatever the run's provider is, and is skipped without it. A daily report with nothing new is skipped (AI Agents is always written). Each day also writes `highlights.json` (up to 2 highlights per report) and `coming-up.json` (dated items of the next 30 days from every page), which the Web UI's day overview and the notifications show, and `talked-about.json` (the day's best stories on topics without a page, the overview's "Policy talk" and "Also talked about" lists).
+## Why it exists
 
-Code decides what is new and renders the tables; the LLM writes the prose: the per-project sections, row summaries, Highlights and Signals. Relevance, topic and category judgments come from [Jev](https://typesafe.ai) (TypeSafe), with keyword rules as the fallback without `TYPESAFE_API_KEY`. Each verdict is cached in a committed file under `digests/` and asked once.
+I'm a Dutch data engineer with an interest in AI: the coding agents, the models, and AI policy in the EU, the Netherlands and the US. These fields change every day, across dozens of changelogs, feeds and registers. Daily Diff reads them, so a person can read one report and know what matters for their work today.
 
-## Reading
+A diff shows what changed and leaves the rest alone. The digest does the same: a page lists what is new since the last one, and a quiet day gives a short page.
 
-### Web UI
+## How it thinks
 
-**[dboeter.github.io/daily-diff](https://dboeter.github.io/daily-diff)** renders the Markdown files through GitHub Pages, in dark or light. Each day opens on an overview of every report's highlights and what is coming up; the latest Weekly Diff and Trends pages stay pinned under **This week**.
+**A page is a topic.** Agents, models, policy and data engineering each have a page. A story goes to the page of its topic, whether it surfaced in a changelog, on Hacker News or in a government register.
 
-### RSS feed
+**Tracked first, then Spotted.** A daily page starts with what it follows by name. For a project that is its releases, the issues that drew the most reactions that day and the news about it. For a lab, a vendor or a legislature it is what they published. The agents, models and data pages then add Spotted, the best community stories on their topic. The tracked list is a deliberate choice. The weekly Trends page suggests candidates, and a person adds them.
 
-**[feed.xml](https://dboeter.github.io/daily-diff/feed.xml)** carries the latest 30 reports of every type. Each report also has its own feed, `feeds/<id>.xml` (e.g. [`feeds/ai-data.xml`](https://dboeter.github.io/daily-diff/feeds/ai-data.xml) for Data Engineering alone).
+**Every item is news once.** An item a page showed is settled. A bill or a vendor note returns when it reaches its next stage.
 
-### MCP server
+**Code states the facts, the model writes the prose.** Code decides what is new, ranks it and renders every table, so a date, a star count or a legal stage in a table comes straight from its source. The language model writes the summaries and the Highlights on top.
 
-**`https://daily-diff-mcp.dboeter.workers.dev`** is a [Model Context Protocol](https://modelcontextprotocol.io) server (a Cloudflare Worker in `mcp/`) that reads the reports from GitHub Pages. Add it to any client as an HTTP MCP server, e.g. `claude mcp add --transport http daily-diff https://daily-diff-mcp.dboeter.workers.dev`.
+**Interpretation is marked.** The daily pages report. Interpretation of the week has two places: the Weekly Diff article, where every sentence of interpretation is in italics, and the Signals section of Trends.
 
-| Tool           | Description                                         |
-| -------------- | --------------------------------------------------- |
-| `list_reports` | List available dates and report types (last N days) |
-| `get_latest`   | Fetch the most recent report of a given type        |
-| `get_report`   | Fetch a specific report by date and type            |
-| `search`       | Keyword search across recent reports                |
+**Every choice can be traced.** Each relevance judgment is saved next to the day's reports, with the answers behind it. When a story is on a page, or missing from it, the reason is on file, and a wrong verdict can be corrected by hand.
 
-The `Deploy MCP` workflow deploys it on pushes to `main` that touch `mcp/`; new digests need no deploy. By hand: `cd mcp && pnpm install && pnpm run deploy` (not `pnpm deploy`, which is pnpm's workspace command).
+**It publishes when the run is sound.** The run builds every page first and publishes only when the language model answered well enough. On a bad night yesterday's digest stays up, and the day can be run again by hand.
 
-### Telegram and Teams
+**Plain Markdown, open archive.** Every day is a folder of Markdown files in this repository. The web UI, the RSS feeds, the GitHub Issues and the MCP server all serve those same files, and the daily run works on GitHub Actions, its prose written by a free model.
 
-With `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID` set, each run sends a Telegram message linking every report with its highlights, then up to 5 Coming up items. With `TEAMS_WEBHOOK_URL` set, the Data Engineering highlights go to a Teams channel as an Adaptive Card. Either one unset is skipped silently.
+## What you get
 
-## Data sources
+| Page             | Cadence | In one line                                                                                   |
+| ---------------- | ------- | --------------------------------------------------------------------------------------------- |
+| AI Agents        | daily   | Releases, hot issues and news of the coding agents and agent tooling it tracks                |
+| AI Models & Labs | daily   | New posts from Anthropic and OpenAI, newly listed models and stealth models                   |
+| AI Policy        | daily   | New AI legislation, regulation and guidance in the EU, the Netherlands and the US, with dates |
+| Data Engineering | daily   | Vendor changes that need action, release notes and the open-source data stack                 |
+| Trends           | Mondays | What is rising: tools, models, papers and the week's most discussed stories                   |
+| Weekly Diff      | Mondays | One article on what changed in the week and what it means                                     |
 
-| Source                                                                                                                                                                                                                                                                                                                                                           | Used for                                                                                                                                  |
-| ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| [GitHub](https://github.com) API                                                                                                                                                                                                                                                                                                                                 | Stable releases and hot issues of the [tracked repos](#tracked-repos); [anthropics/skills](https://github.com/anthropics/skills) (weekly) |
-| [GitHub Trending](https://github.com/trending) + Search API, [OpenRouter](https://openrouter.ai/apps) apps, [npm](https://www.npmjs.com) registry                                                                                                                                                                                                                | Trends' agents & coding tools (weekly); github.com/trending is also fetched daily for project news                                        |
-| [Hacker News](https://github.com/HackerNews/API), [Lobste.rs](https://lobste.rs) (`ai`, `vibecoding`, `databases`), [Dev.to](https://dev.to) (15+ reactions)                                                                                                                                                                                                     | Project news and Spotted, each story shown once; Trends' Most discussed                                                                   |
-| [Anthropic](https://www.anthropic.com) and [OpenAI](https://openai.com) sitemaps                                                                                                                                                                                                                                                                                 | Lab announcements: a post is new when its URL is                                                                                          |
-| [OpenRouter](https://openrouter.ai) models API and rankings, [Hugging Face](https://huggingface.co) Hub API                                                                                                                                                                                                                                                      | New and stealth models (daily); token usage and trending models (weekly)                                                                  |
-| [ArXiv](https://arxiv.org) API (cs.AI, cs.CL, cs.LG)                                                                                                                                                                                                                                                                                                             | Papers ranked daily by Jev; the week's top 10 in Trends                                                                                   |
-| EU: [Commission](https://digital-strategy.ec.europa.eu) and [EDPB](https://www.edpb.europa.eu) RSS, the Commission's digital-strategy mailing (via [AgentMail](https://agentmail.to)), [EUR-Lex](https://eur-lex.europa.eu) SPARQL, [European Parliament](https://data.europarl.europa.eu) API, [Have your say](https://ec.europa.eu/info/law/better-regulation) | AI Policy: acts, procedures and consultations, with their stage                                                                           |
-| NL: [Tweede Kamer](https://opendata.tweedekamer.nl) OData + KOOP SRU, [Internetconsultatie](https://www.internetconsultatie.nl), AP, Rijksoverheid, RDI and Digitale Overheid RSS                                                                                                                                                                                | AI Policy: motions, letters, watchlisted bills, consultations, government news                                                            |
-| US: [Federal Register](https://www.federalregister.gov/developers/documentation/api/v1), [Regulations.gov](https://open.gsa.gov/api/regulationsgov/) and [Congress.gov](https://api.congress.gov) (`USA_GOV_API_KEY`), [Open States](https://v3.openstates.org/docs) (`PLURAL_API_KEY`)                                                                          | AI Policy: rules, notices, federal and state bills from passing a chamber onward                                                          |
-| Policy news RSS (`kind: news` in `config.yml`): Politico Europe and US, Transformer, CSET, Covington, Binnenlands Bestuur                                                                                                                                                                                                                                        | AI Policy's News & commentary                                                                                                             |
-| Vendor release notes (`data.feeds` in `config.yml`): Azure Databricks, Microsoft Fabric, Azure updates, Snowflake release notes and behavior changes, BigQuery                                                                                                                                                                                                   | Data Engineering's vendor tables and Action required                                                                                      |
-| Engineering blogs and newsletters (`data.community` in `config.yml`): DuckDB, Polars, Apache Airflow, dbt Developer, dbt Labs, dltHub, Dagster, Confluent, OpenMetadata, Snowflake on Medium                                                                                                                                                                     | Data Engineering's project news and News & discussion, each post shown once                                                               |
+Each day also has an overview with every page's highlights and the dated items of the next 30 days. [Reports and sources](docs/reports.md) describes every page and where its data comes from.
 
-## Tracked repos
+## Quickstart
 
-Each tracked repo is covered by its stable releases of the last 24h (prereleases are only counted, unless the project has never shipped a stable release), hot issues (open, however old, that gained 10+ comments and 👍 from people since the previous day, 3+ when labelled regression or security; at most 2; each is shown once, with its fix PR when one is open or merged) and news (a community story or its own GitHub Trending entry naming it; a story naming three or more agents is a compatibility list and skipped). Projects with none of these are listed in one "Quiet today" line. Only the repos below are tracked: trending repos are suggested under the Trends page's Candidates to track, never added automatically.
+### Read it
 
-### AI Agents
+- **Web**: [dboeter.github.io/daily-diff](https://dboeter.github.io/daily-diff)
+- **RSS**: [feed.xml](https://dboeter.github.io/daily-diff/feed.xml), or one feed per page
+- **In your AI client**, through the MCP server:
+
+  ```bash
+  claude mcp add --transport http daily-diff https://daily-diff-mcp.dboeter.workers.dev
+  ```
+
+[Reading the digest](docs/reading.md) has the details, and the Telegram and Teams notifications.
+
+### Run your own
+
+You need Node.js 22 and pnpm.
+
+```bash
+git clone https://github.com/dboeter/daily-diff.git
+cd daily-diff
+pnpm install
+export GITHUB_TOKEN=ghp_xxxxx
+export ANTHROPIC_API_KEY=sk-ant-xxxxx   # or another provider: see docs/configuration.md
+pnpm start
+```
+
+The run writes today's reports under `digests/` and updates the state files there; [`CONTRIBUTING.md`](CONTRIBUTING.md#set-up) has the commands that undo it. To make it your own digest, edit `config.yml`: it lists the tracked projects, feeds and watchlists. [Configuration and running](docs/configuration.md) covers the providers, the optional keys and the nightly schedule.
+
+## What it tracks
+
+The projects Daily Diff follows by name. The lists live in `config.yml`, and a pull request that proposes a project is welcome.
+
+<details>
+<summary>AI agents and agent tooling</summary>
 
 <!-- tracked:agents -->
 <!-- generated from config.yml: edit config.yml, then run pnpm readme -->
@@ -111,9 +123,10 @@ Each tracked repo is covered by its stable releases of the last 24h (prereleases
 
 <!-- /tracked:infra -->
 
-### Data Engineering
+</details>
 
-The data repos are covered the same way, plus a **Releases this week** table of their stable releases of the last 7 days, each shown once.
+<details>
+<summary>Data engineering</summary>
 
 <!-- tracked:databricks -->
 <!-- generated from config.yml: edit config.yml, then run pnpm readme -->
@@ -171,70 +184,21 @@ The data repos are covered the same way, plus a **Releases this week** table of 
 
 <!-- /tracked:data_stack -->
 
-## Configuration
+</details>
 
-`config.yml` (fully commented) holds the tracked repos, the AI Policy sources, watchlists and calendar, and the vendor feeds; the pipeline stops with an error when a section is missing. After editing it, run `pnpm readme` to refresh the tables above; pre-commit and CI fail while they are stale.
+## Documentation
 
-```yaml
-agents:
-  repos:
-    - id: my-agent
-      repo: owner/my-agent
-      name: My Agent
-      keywords: [my agent] # optional: news match terms; defaults to name + repo name
-```
+- [Reports and sources](docs/reports.md): every page, how a project is covered, the data sources, the archive
+- [Reading the digest](docs/reading.md): web UI, RSS, MCP server, Telegram and Teams
+- [Configuration and running](docs/configuration.md): `config.yml`, keys, LLM providers, local runs, the schedule
+- [`AGENTS.md`](AGENTS.md): the pipeline, the state files and the reasons behind the design
+- [`GLOSSARY.md`](GLOSSARY.md): the project's terms
+- [`CODING_STANDARDS.md`](CODING_STANDARDS.md): how the code is written
 
-### Secrets
+## Contributing
 
-Repository secrets (**Settings → Secrets and variables → Actions**); `GITHUB_TOKEN` is provided by Actions.
+Contributions are welcome: a project worth tracking, a source the digest should read, a fix. Daily Diff has one maintainer, so a short pull request with a clear reason is the easiest to review. [`CONTRIBUTING.md`](CONTRIBUTING.md) has the setup and the checks. Everyone who takes part follows the [code of conduct](CODE_OF_CONDUCT.md), and security problems go through the [security policy](SECURITY.md).
 
-| Secret                                   | Description                                                                                                                                                                                                                |
-| ---------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `OPENROUTER_API_KEY`                     | The scheduled run's LLM key (the workflow sets `LLM_PROVIDER: openrouter`; for another provider, edit the workflow, see [LLM providers](#llm-providers))                                                                   |
-| `ANTHROPIC_API_KEY`                      | The weekly pages' writer, Claude Opus on the Anthropic API: Weekly Diff's article (one call of about $0.80) and Trends' five calls (cost not measured). Without it: no Weekly Diff page, and the run's model writes Trends |
-| `TYPESAFE_API_KEY`                       | Jev judgments (without it: keyword rules, search-topic labels, and no Research section in Trends)                                                                                                                          |
-| `USA_GOV_API_KEY`                        | [api.data.gov](https://api.data.gov/signup/) key for Congress.gov and Regulations.gov                                                                                                                                      |
-| `PLURAL_API_KEY`                         | [Open States](https://open.pluralpolicy.com) key for US state bills                                                                                                                                                        |
-| `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID` | Telegram notifications (bot from [@BotFather](https://t.me/BotFather))                                                                                                                                                     |
-| `TEAMS_WEBHOOK_URL`                      | Power Automate Workflows webhook for the Teams card                                                                                                                                                                        |
-| `CLOUDFLARE_API_TOKEN`                   | The `Deploy MCP` workflow only                                                                                                                                                                                             |
+## License
 
-A source whose key is unset is skipped; the rest of the run goes on.
-
-### LLM providers
-
-| Provider       | `LLM_PROVIDER`        | Key                  | Default model                 | Model override         |
-| -------------- | --------------------- | -------------------- | ----------------------------- | ---------------------- |
-| Anthropic      | `anthropic` (default) | `ANTHROPIC_API_KEY`  | `claude-sonnet-5-5`           | `ANTHROPIC_MODEL`      |
-| OpenAI         | `openai`              | `OPENAI_API_KEY`     | `gpt-4o`                      | `OPENAI_MODEL`         |
-| GitHub Copilot | `github-copilot`      | `GITHUB_TOKEN`       | `gpt-4o`                      | `GITHUB_COPILOT_MODEL` |
-| OpenRouter     | `openrouter`          | `OPENROUTER_API_KEY` | `anthropic/claude-sonnet-5.5` | `OPENROUTER_MODEL`     |
-| DeepSeek       | `deepseek`            | `DEEPSEEK_API_KEY`   | `deepseek-v4-flash`           | `DEEPSEEK_MODEL`       |
-| Qwen           | `qwen`                | `DASHSCOPE_API_KEY`  | `qwen-flash`                  | `QWEN_MODEL`           |
-
-`ANTHROPIC_BASE_URL`, `OPENAI_BASE_URL` and `DASHSCOPE_BASE_URL` override the endpoints. The scheduled run uses OpenRouter's free `baidu/ernie-5.5-flash-preview:free` with `OPENROUTER_REASONING_EFFORT=high` (reasoning counts against a call's output budget; a call it uses up is retried once at double budget) and `OPENROUTER_FALLBACK_MODELS` tried in order when it is down. When half the LLM calls fail, the run aborts before publishing anything.
-
-### Running locally
-
-```bash
-pnpm install
-export GITHUB_TOKEN=ghp_xxxxx
-export ANTHROPIC_API_KEY=sk-ant-xxxxx   # or LLM_PROVIDER + its key
-# export DIGEST_REPO=dboeter/daily-diff  # open GitHub Issues; omit to only write files
-# export DIGEST_FORCE_WEEKLY=1           # also build the weekly pages (Trends, Weekly Diff) on a non-Monday;
-#                                        # Claude Opus writes them with ANTHROPIC_API_KEY (the article about $0.80;
-#                                        # Trends' five calls not measured); without it, no Weekly Diff page
-pnpm start
-```
-
-## Schedule
-
-The workflow's cron is `7 1 * * *` in `Europe/Amsterdam`. GitHub starts scheduled runs 2.5–4 hours late, so the cron sits about 4 hours before the digest is wanted; if the delay changes, move it in `.github/workflows/daily-digest.yml`. Report dates and the Monday Trends run use CST (UTC+8), the same calendar day as Amsterdam at that hour.
-
-**Actions → Daily Diff → Run workflow** starts a run by hand, e.g. to regenerate a day; tick **force_weekly** to build Trends and Weekly Diff too. A scheduled run skips a day whose `digests/YYYY-MM-DD` folder is already committed, so a late cron after a manual catch-up opens no duplicate issues.
-
-## Archive
-
-Every day is kept under [`digests/`](./digests/) and in the Web UI. Issues are labelled by report: [`agents`](../../issues?q=is%3Aissue+label%3Aagents) · [`models`](../../issues?q=is%3Aissue+label%3Amodels) · [`policy`](../../issues?q=is%3Aissue+label%3Apolicy) · [`data`](../../issues?q=is%3Aissue+label%3Adata) · [`trends`](../../issues?q=is%3Aissue+label%3Atrends) · [`weekly`](../../issues?q=is%3Aissue+label%3Aweekly). Each run closes the issues of earlier days (Trends and Weekly Diff stay open until the next Monday); issues without a digest label and pull requests are never touched.
-
-Older days also hold reports retired or merged in October 2026 (`ai-cli`, `ai-ph`, `ai-infra`, `ai-community`, `ai-hn`, `ai-web`, `ai-trending`, `ai-hf`, `ai-arxiv`) and, until July 2026, weekly and monthly rollups.
+[MIT](LICENSE)

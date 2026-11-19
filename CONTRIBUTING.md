@@ -15,7 +15,7 @@ You need Node.js 22 (the version CI uses) and pnpm (its version is in `package.j
 ```bash
 pnpm install
 export GITHUB_TOKEN=ghp_xxxxx            # required
-export ANTHROPIC_API_KEY=sk-ant-xxxxx    # or another LLM provider's key: see AGENTS.md
+export ANTHROPIC_API_KEY=sk-ant-xxxxx    # or another LLM provider's key: see docs/configuration.md
 pnpm start                               # run the full digest locally
 ```
 
@@ -28,7 +28,7 @@ A local run changes the state files under `digests/` and writes that day's repor
 1. Branch from `main`.
 2. Follow `CODING_STANDARDS.md`.
 3. Add or update tests for a behavior change. Tests mirror `src/` under `src/__tests__/`.
-4. If your change alters behavior that `AGENTS.md`, `README.md` or a comment describes, update that text in the same change.
+4. If your change alters behavior that `AGENTS.md`, `README.md`, a file under `docs/` or a comment describes, update that text in the same change.
 5. Run the checks. The pre-commit hook runs most of them:
 
    ```bash
