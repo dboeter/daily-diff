@@ -17,7 +17,7 @@ Each page answers three questions: what changed since yesterday, what is coming 
 
 ## Why it exists
 
-I follow AI coding agents and AI policy in the EU, the Netherlands and the US, and my colleagues are data engineers on Databricks, Snowflake and the open-source data stack. These fields change every day, across dozens of changelogs, feeds and registers. Daily Diff reads them all, so a person can read one report and know what matters for their work today.
+I'm a Dutch data engineer with an interest in AI: the coding agents, the models, and AI policy in the EU, the Netherlands and the US. These fields change every day, across dozens of changelogs, feeds and registers. Daily Diff reads them all, so a person can read one report and know what matters for their work today.
 
 A diff shows what changed and leaves the rest alone. The digest does the same: a page lists what is new since the last one, and a quiet day gives a short page.
 
