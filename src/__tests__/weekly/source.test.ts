@@ -278,7 +278,8 @@ describe("buildWeekSource", () => {
 
     expect(asked).toEqual(["repos/owner/repo/issues/5"]);
     expect(text).toMatch(/\ntext: The agent loops\. Summary: it never stops\.$/);
-    expect(text).toContain("digest: shown under AI Agents › Coding Agents · 12 comments, 3 👍");
+    // Pages before 2026-11-21 carry the totals; the article gets no hot-issue counts.
+    expect(text).toMatch(/\ndigest: shown under AI Agents › Coding Agents\n/);
   });
 
   it("marks a saved text of the cap's length as cut, and an empty one as no text", async () => {
