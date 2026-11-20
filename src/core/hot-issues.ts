@@ -11,18 +11,17 @@ import { escapeRegex } from "./regex.ts";
 
 /**
  * Minimum comments + 👍 gained in the window for an issue to count as hot.
- * Measured 2026-10-04 on the totals of the issues opened in the previous week:
- * the ones worth reporting (Claude Code auto-mode classifier failures, Codex
- * Remote pairing loops, OpenCode free-tier errors) sat at 11–98, routine bug
- * reports at 0–9. A one-day-old issue's total is its gain, so the bar carried over.
+ * Raised from 10 on 2026-11-20 (the maintainer's call): of the 32 unlabelled hot
+ * issues shown 2026-10-29 to 11-20, 21 had gained 10–14 (median 13); at 20, 5 stay.
  */
-export const HOT_ISSUE_MIN_ENGAGEMENT = 10;
+export const HOT_ISSUE_MIN_ENGAGEMENT = 20;
 /**
  * Lower bar for an issue labelled as a regression or security problem — the
- * label is a maintainer's severity signal, but an issue nobody has reacted to
- * is still not news.
+ * label is a maintainer's severity signal, but an issue few people react to is
+ * still not news. Raised from 3 on 2026-11-20: 20 of the 21 labelled hot issues
+ * shown 2026-10-29 to 11-20 had gained under 10 (median 3).
  */
-export const HOT_ISSUE_MIN_ENGAGEMENT_LABELLED = 3;
+export const HOT_ISSUE_MIN_ENGAGEMENT_LABELLED = 10;
 /** Hot issues reported per repo, so one noisy tracker cannot flood the report. */
 export const HOT_ISSUES_PER_REPO = 2;
 /**
