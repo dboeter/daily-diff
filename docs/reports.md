@@ -21,7 +21,7 @@ Code decides what is new and renders the tables; the LLM writes the prose: the p
 
 The tracked repos are listed in the [README](../README.md#what-it-tracks), generated from `config.yml`.
 
-Each tracked repo is covered by its stable releases of the last 24h (prereleases are only counted, unless the project has never shipped a stable release), hot issues (open, however old, that gained 10+ comments and 👍 from people since the previous day, 3+ when labelled regression or security; at most 2; each is shown once, with its fix PR when one is open or merged) and news (a community story or its own GitHub Trending entry naming it; a story naming three or more agents is a compatibility list and skipped). Projects with none of these are listed in one "Quiet today" line. Only the listed repos are tracked: trending repos are suggested under the Trends page's Candidates to track, never added automatically.
+Each tracked repo is covered by its stable releases of the last 24h (prereleases are only counted, unless the project has never shipped a stable release), hot issues (open, however old, that gained 20+ comments and 👍 from people since the previous day, 10+ when labelled regression or security; at most 2; each is shown once, with no counts) and news (a community story or its own GitHub Trending entry naming it; a story naming three or more agents is a compatibility list and skipped). Projects with none of these are listed in one "Quiet today" line. Only the listed repos are tracked: trending repos are suggested under the Trends page's Candidates to track, never added automatically.
 
 The data repos are covered the same way, plus a **Releases this week** table of their stable releases of the last 7 days, each shown once.
 

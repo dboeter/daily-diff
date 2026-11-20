@@ -164,7 +164,7 @@ function policyStage(row: string): string {
   return stage === "—" ? "" : stage;
 }
 
-/** What the digest's code put on the item's row: its section, markers, a story's counts, a hot issue's totals. */
+/** What the digest's code put on the item's row: its section, markers, a story's counts. */
 function digestFacts(shown: PageLine, c: Candidate): string {
   const { line } = shown;
   // The first of the item's links on the row: a story's title link comes before its counts link.
@@ -181,7 +181,6 @@ function digestFacts(shown: PageLine, c: Candidate): string {
     `shown under ${[PAGES[shown.page], shown.h2, shown.h3].filter(Boolean).join(" › ")}`,
     ...MARKERS.filter((m) => lead.includes(m)),
     /\[(\d[^\]]*?(?:comments?|points?|reactions?))\]/.exec(line)?.[1],
-    c.kind === "hot-issue" && /\(([^()]*(?:comments?|👍)[^()]*)\)\s*$/.exec(line)?.[1],
     stage && `stage: ${stage}`,
   ];
   return facts.filter(Boolean).join(" · ");

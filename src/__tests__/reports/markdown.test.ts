@@ -473,16 +473,17 @@ describe("buildProjectReportContent", () => {
     const render = (summary: string, hotIssues: HotIssue[]) =>
       buildProjectReportContent(withAgents({ summary, activities: [makeActivity("alpha", { hotIssues })] }));
 
-    it("links the issue and appends its label, counts and gain in code (Gemini #15404, 2026-10-28)", () => {
+    it("links the issue and drops the counts the model wrote; code appends no label, count, gain or fix status", () => {
       const gemini = hot(15404, { labels: [{ name: "priority/p2" }, { name: "area/security" }] });
       const result = render(
         "## ALPHA\n- **Hot issue**: #15404: users report temp files flagged by antivirus (16 comments, +3 in 24h)",
         [gemini],
       );
       expect(result).toContain(
-        "- **Hot issue:** [#15404](https://github.com/org/alpha/issues/15404): users report temp files flagged by antivirus" +
-          " (area/security; 16 comments, 2 👍; +3 in the last 24h)",
+        "- **Hot issue:** [#15404](https://github.com/org/alpha/issues/15404): users report temp files flagged by antivirus",
       );
+      expect(result).not.toContain("area/security");
+      expect(result).not.toMatch(/👍|\bcomments?\b/);
     });
 
     it("takes a Hot Issue label in any case, so the issue gets no second bullet", () => {
@@ -495,7 +496,7 @@ describe("buildProjectReportContent", () => {
       expect(result.match(/#15404\]/g)).toHaveLength(1);
     });
 
-    it("keeps the model's link, names the gain's date and shows the fix PR, per issue when a bullet names two", () => {
+    it("keeps the model's link and links a second issue the bullet names", () => {
       const result = render(
         "## ALPHA\n- **Hot issue:** [#1](https://github.com/org/alpha/issues/1) and #2: an issue says logins fail",
         [
@@ -512,10 +513,10 @@ describe("buildProjectReportContent", () => {
         ],
       );
       expect(result).toContain(
-        "- **Hot issue:** [#1](https://github.com/org/alpha/issues/1) and [#2](https://github.com/org/alpha/issues/2): an issue says logins fail" +
-          " (#1: 16 comments, 2 👍; +3 since 2026-10-02; fix PR [#5](https://github.com/org/alpha/pull/5) open)" +
-          " (#2: 9 comments, 1 👍; +10 in the last 24h; fix [#6](u6) merged)",
+        "- **Hot issue:** [#1](https://github.com/org/alpha/issues/1) and [#2](https://github.com/org/alpha/issues/2): an issue says logins fail",
       );
+      expect(result).not.toContain("pull/5");
+      expect(result).not.toMatch(/👍|\bcomments?\b/);
     });
 
     it("leaves a bullet that names no hot issue as written", () => {
@@ -529,8 +530,8 @@ describe("buildProjectReportContent", () => {
         hot(2, { title: "Login loops after update", comments: 1, reactions: { "+1": 9 }, gain: 10 }),
       ]);
       expect(result).toContain(
-        "- **Hot issue:** [#1](https://github.com/org/alpha/issues/1): users report a crash (16 comments, 2 👍; +3 in the last 24h)\n" +
-          "- **Hot issue:** [#2](https://github.com/org/alpha/issues/2): Login loops after update (1 comment, 9 👍; +10 in the last 24h)",
+        "- **Hot issue:** [#1](https://github.com/org/alpha/issues/1): users report a crash\n" +
+          "- **Hot issue:** [#2](https://github.com/org/alpha/issues/2): Login loops after update",
       );
     });
 
@@ -540,7 +541,7 @@ describe("buildProjectReportContent", () => {
         [hot(1)],
       );
       expect(result).toContain(
-        "### ALPHA\n\n- **Hot issue:** [#1](https://github.com/org/alpha/issues/1): users report a crash (16 comments, 2 👍; +3 in the last 24h)",
+        "### ALPHA\n\n- **Hot issue:** [#1](https://github.com/org/alpha/issues/1): users report a crash",
       );
       expect(result.match(/^### ALPHA/gm)).toHaveLength(1);
       expect(result.match(/#1\]/g)).toHaveLength(1);
@@ -554,7 +555,7 @@ describe("buildProjectReportContent", () => {
         }),
       );
       expect(result).toContain(
-        "### ALPHA\n\n- **Hot issue:** [#1](https://github.com/org/alpha/issues/1): Issue 1 (16 comments, 2 👍; +3 in the last 24h)",
+        "### ALPHA\n\n- **Hot issue:** [#1](https://github.com/org/alpha/issues/1): Issue 1",
       );
       expect(result).not.toContain("[ALPHA](https://github.com/org/alpha)");
     });

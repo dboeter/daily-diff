@@ -30,7 +30,7 @@ import { linkKey, type StoryRow } from "../spotted/pool.ts";
 import type { ResearchPaper } from "../trending/research.ts";
 import type { Category } from "../trending/rank.ts";
 import type { RepoConfig } from "../core/github.ts";
-import { hotIssueLabel, type HotIssue } from "../core/hot-issues.ts";
+import { type HotIssue } from "../core/hot-issues.ts";
 import {
   AGENT_SECTION_KEYS,
   VENDOR_SECTIONS,
@@ -183,26 +183,9 @@ function withReleaseBullet(section: string, g: ProjectGroup): string {
 export const boldLabelColonInside = (md: string): string =>
   md.replace(/^(\s*[-*]\s+)\*\*([^*\n]+?)\*\*:/gm, "$1**$2:**");
 
-/**
- * A hot issue's facts in one form, written by code: the regression or security label it qualified
- * on, its totals, its gain and its fix PR. On 2026-10-28 the model wrote a different count
- * parenthetical on every row and left out Gemini #15404's `area/security`.
- */
-function hotIssueFacts(i: HotIssue): string {
-  const fix = i.fix && HOT_ISSUE.fix(i.fix.state, `[#${i.fix.number}](${i.fix.url})`);
-  return [
-    hotIssueLabel(i),
-    HOT_ISSUE.totals(i.comments, i.reactions?.["+1"] ?? 0),
-    HOT_ISSUE.gain(i.gain, i.gainSince),
-    fix,
-  ]
-    .filter(Boolean)
-    .join("; ");
-}
-
 /** The code-written Hot issue bullet of a hot issue the model left out: its title as the description. */
 const hotIssueBullet = (i: HotIssue): string =>
-  `- **${HOT_ISSUE.label}:** [#${i.number}](${i.html_url}): ${i.title} (${hotIssueFacts(i)})`;
+  `- **${HOT_ISSUE.label}:** [#${i.number}](${i.html_url}): ${i.title}`;
 
 /** A Hot issue bullet, its label normalized by `boldLabelColonInside`, in any case ("Hot Issue"). */
 const HOT_ISSUE_BULLET = new RegExp(`^\\s*[-*]\\s+\\*\\*${escapeRegex(HOT_ISSUE.label)}:\\*\\*`, "i");
@@ -211,12 +194,13 @@ const HOT_ISSUE_BULLET = new RegExp(`^\\s*[-*]\\s+\\*\\*${escapeRegex(HOT_ISSUE.
 const MODEL_COUNTS = /\s*\((?=[^()\n]*(?:\bcomments?\b|👍|\breactions?\b|\+\d+\s+(?:in|since)\b))[^()\n]*\)/g;
 
 /**
- * A section's Hot issue bullets with code's facts: each bullet naming one of the project's hot
- * issues (`#N` or its URL) gets the issue linked where the model left it bare, any counts the model
- * wrote dropped, and `hotIssueFacts` appended, prefixed by the number when the bullet names several.
- * A hot issue no bullet names gets a code-written one (`hotIssueBullet`).
+ * A section's Hot issue bullets in code's form: each bullet naming one of the project's hot issues
+ * (`#N` or its URL) gets the issue linked where the model left it bare and any counts the model
+ * wrote dropped. A hot issue no bullet names gets a code-written one (`hotIssueBullet`). No label,
+ * count, gain or fix status is appended (removed 2026-11-20): the gain, shown as "+10 in the last
+ * 24h", was copied into Highlights as a raw count, and the maintainer wants no counts on the bullet.
  */
-function withHotIssueFacts(section: string, g: ProjectGroup): string {
+function withHotIssueLinks(section: string, g: ProjectGroup): string {
   const a = projectOf(section, g);
   if (!a?.hotIssues.length) return section;
   const shown = new Set<HotIssue>();
@@ -231,8 +215,7 @@ function withHotIssueFacts(section: string, g: ProjectGroup): string {
         text = text.replace(new RegExp(`#${i.number}(?!\\d)`), `[#${i.number}](${i.html_url})`);
       }
     }
-    const facts = named.map((i) => `(${named.length > 1 ? `#${i.number}: ` : ""}${hotIssueFacts(i)})`);
-    return `${text} ${facts.join(" ")}`;
+    return text;
   });
   const missing = a.hotIssues.filter((i) => !shown.has(i)).map(hotIssueBullet);
   return [...lines, ...missing].join("\n");
@@ -305,7 +288,7 @@ const splitGluedHeadings = (summary: string, g: ProjectGroup): string =>
  * without a project section that has no bullet (both are absence notes the prompt forbids), plus a
  * code section for each project with a stable release or a hot issue the model did not cover, and a
  * code Release bullet appended to a covered section that does not show its release, and each Hot
- * issue bullet with its facts in code, a missing one code-written (`withHotIssueFacts`), and each
+ * issue bullet in code's form, a missing one code-written (`withHotIssueLinks`), and each
  * bare news URL linked with its title (`withNewsLinks`). Each project
  * section's backticked tokens are checked against the project's block in the prompt
  * (`checkCodeTokens`). `quiet` is every other checked project without a section; after a failed
@@ -330,7 +313,7 @@ function groupProjects(g: ProjectGroup): { body: string; quiet: ProjectActivity[
         .map((chunk) =>
           markSecurityBullets(
             withNewsLinks(
-              withHotIssueFacts(
+              withHotIssueLinks(
                 withReleaseBullet(boldLabelColonInside(checkProjectTokens(blankAfterHeading(chunk), g)), g),
                 g,
               ),

@@ -75,23 +75,12 @@ export const reportIssueTitle = (id: ReportId, dateStr: string) =>
  */
 export const PROJECT_SCOPE = { window: "last 24h", period: "today" } as const;
 
-/** A hot issue's gain period: since `since` when its snapshot baseline is older than yesterday, else the window. */
-const gainPeriod = (since?: string) => (since ? `since ${since}` : `in the ${PROJECT_SCOPE.window}`);
-
-/** A hot issue's engagement gained (`selectHotIssues`), next to its totals in the prompt. */
-export const hotIssueGain = (gain: number, since?: string) =>
-  `Gained: +${gain} comments and 👍 ${gainPeriod(since)}`;
-
 /**
- * A hot issue's row, written by code (`withHotIssueFacts`): `label` is the bullet's bold label, in
- * the prompt's bullet form and matched in the rendered section; the rest are the facts' parts.
+ * A hot issue's row, written by code (`withHotIssueLinks`): `label` is the bullet's bold label, in
+ * the prompt's bullet form and matched in the rendered section.
  */
 export const HOT_ISSUE = {
   label: "Hot issue",
-  totals: (comments: number, thumbs: number) => `${plural(comments, "comment")}, ${thumbs} 👍`,
-  gain: (gain: number, since?: string) => `+${gain} ${gainPeriod(since)}`,
-  fix: (state: "open" | "merged", link: string) =>
-    state === "merged" ? `fix ${link} merged` : `fix PR ${link} open`,
 } as const;
 
 const SOURCES = "Sources:";
