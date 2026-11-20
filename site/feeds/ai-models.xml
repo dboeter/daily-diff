@@ -13,7 +13,121 @@
       <height>144</height>
     </image>
     <atom:link href="https://dboeter.github.io/daily-diff/feeds/ai-models.xml" rel="self" type="application/rss+xml"/>
-    <lastBuildDate>Thu, 19 Nov 2026 07:16:34 +0000</lastBuildDate>
+    <lastBuildDate>Fri, 20 Nov 2026 07:05:10 +0000</lastBuildDate>
+    <item>
+      <title>AI Models &amp; Labs 2026-11-20</title>
+      <link>https://dboeter.github.io/daily-diff/#2026-11-20/ai-models</link>
+      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-11-20/ai-models</guid>
+      <pubDate>Fri, 20 Nov 2026 00:00:00 +0000</pubDate>
+      <description>AI Models &amp;amp; Labs 2026-11-20 ⬛ Overview · 🟪 AI Agents · 🟦 AI Models &amp;amp; Labs · 🟧 AI Policy · 🟨 Data Engineering Lab posts: 2 | New models: 1 | Spotted: 6 | Generated: 2026-11-20 06:58 UTC Highlights Mistral&amp;#39;s Pixtral Large 2502 is now listed on OpenRouter with a 128K context, handling text alongside images such as documents, charts, and natural photos. Anthropic says Claude Fable 5.2 has resolved two open theoretical-physics problems related to black holes and quantum gravity. Accor...</description>
+      <content:encoded><![CDATA[<h1>AI Models &amp; Labs 2026-11-20</h1>
+<p><a href="https://dboeter.github.io/daily-diff/#2026-11-20">⬛ Overview</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-20/ai-agents">🟪 AI Agents</a> · <strong>🟦 AI Models &amp; Labs</strong> · <a href="https://dboeter.github.io/daily-diff/#2026-11-20/ai-policy">🟧 AI Policy</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-20/ai-data">🟨 Data Engineering</a></p>
+<blockquote>
+<p>Lab posts: 2 | New models: 1 | Spotted: 6 | Generated: 2026-11-20 06:58 UTC</p>
+</blockquote>
+<hr>
+<h2>Highlights</h2>
+<ul>
+<li>Mistral&#39;s Pixtral Large 2502 is now listed on OpenRouter with a 128K context, handling text alongside images such as documents, charts, and natural photos.</li>
+<li>Anthropic says Claude Fable 5.2 has resolved two open theoretical-physics problems related to black holes and quantum gravity.</li>
+<li>According to the site&#39;s Mei calculation, Gemini 4 Neon ranks first on the Models Engineering Index for practical engineering-task performance.</li>
+</ul>
+<hr>
+<h2>Lab announcements</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Post</th>
+<th align="left">Lab</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-11-20</td>
+<td align="left"><a href="https://openai.com/index/how-openai-performance-factory-keeps-chatgpt-fast/">How Openai Performance Factory Keeps Chatgpt Fast</a></td>
+<td align="left">OpenAI</td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left">2026-11-20</td>
+<td align="left"><a href="https://openai.com/business/learn/deploying-daybreak-red/">Deploying Daybreak Red</a></td>
+<td align="left">OpenAI</td>
+<td align="left">—</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>New on OpenRouter</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Listed</th>
+<th align="left">Model</th>
+<th align="left">Context</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-11-20</td>
+<td align="left"><a href="https://openrouter.ai/mistralai/pixtral-large-2502">Mistral: Pixtral Large 2502</a> <code>mistralai/pixtral-large-2502</code></td>
+<td align="left">128K</td>
+<td align="left">Pixtral Large 2502 is the February 2025 version of Mistral AI&#39;s large multimodal model, and it accepts text and image input, including documents, charts, and natural images.</td>
+</tr>
+</tbody></table>
+<hr>
+<p>Nothing new from OpenRouter&#39;s stealth models today.</p>
+<hr>
+<h2>Spotted</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Story</th>
+<th align="left">Source</th>
+<th align="left">Discussion</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a href="https://www.anthropic.com/research/claude-black-hole-physics">Claude solves two open problems in the physics of black holes</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50563148">459 points, 218 comments</a></td>
+<td align="left">Anthropic says Claude Fable 5.2 has solved two open theoretical-physics problems tied to black holes and quantum gravity.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://git-aarvin.github.io/mei/">Gemini 4 Neon is the new #1 on the Models Engineering Index</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50568130">333 points, 203 comments</a></td>
+<td align="left">According to the linked site’s Mei calculation, Gemini 4 Neon is first on the Models Engineering Index for practical performance on engineering tasks.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://thedataexchange.media/pete-warden-moonshine/">Pete warden on local AI, open models, voice interfaces, the future of hardware</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50561508">226 points, 210 comments</a></td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left"><a href="https://notesbylex.com/weight-space-programming-1990s">Weight-Space Programming builds neural networks like a 1990s researcher</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50538977">57 points, 4 comments</a></td>
+<td align="left">The linked article says the writing aspect of Weight-Space Programming turns into a history lesson, with the neural-network building framed like 1990s research.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://www.bxfoundry.com/chatgpt_snes/">ChatGPT for SNES</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50568548">50 points, 15 comments</a></td>
+<td align="left">The post describes an unofficial experiment placing a small language model on the Super FX chip of a Super NES cartridge and says it has no OpenAI involvement.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://arxiv.org/abs/2607.29378">Previous-Token Prediction Based LLM Inversion for Prompt Reconstruction</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50554908">47 points, 10 comments</a></td>
+<td align="left">The arXiv paper examines previous-token-prediction-based LLM inversion for prompt reconstruction, noting that next-token generation makes prompt-output mappings many-to-many.</td>
+</tr>
+</tbody></table>
+<hr>
+<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
+]]></content:encoded>
+    </item>
     <item>
       <title>AI Models &amp; Labs 2026-11-19</title>
       <link>https://dboeter.github.io/daily-diff/#2026-11-19/ai-models</link>

@@ -13,7 +13,85 @@
       <height>144</height>
     </image>
     <atom:link href="https://dboeter.github.io/daily-diff/feeds/ai-agents.xml" rel="self" type="application/rss+xml"/>
-    <lastBuildDate>Thu, 19 Nov 2026 07:16:34 +0000</lastBuildDate>
+    <lastBuildDate>Fri, 20 Nov 2026 07:05:10 +0000</lastBuildDate>
+    <item>
+      <title>AI Agents 2026-11-20</title>
+      <link>https://dboeter.github.io/daily-diff/#2026-11-20/ai-agents</link>
+      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-11-20/ai-agents</guid>
+      <pubDate>Fri, 20 Nov 2026 00:00:00 +0000</pubDate>
+      <description>AI Agents 2026-11-20 ⬛ Overview · 🟪 AI Agents · 🟦 AI Models &amp;amp; Labs · 🟧 AI Policy · 🟨 Data Engineering Projects: 15 | Active today: 6 | Stable releases: 6 | Prereleases skipped: 9 | Spotted: 2 | Generated: 2026-11-20 06:58 UTC Highlights An issue reports that Codex App 26.1117.31558 crashes on launch on macOS when a dynamic wallpaper is active, repeatedly hitting EXC_BREAKPOINT (SIGTRAP) on CrBrowserMain (+10 in the last 24h). An issue reports that Claude Code Desktop 1.44121.4 and later ...</description>
+      <content:encoded><![CDATA[<h1>AI Agents 2026-11-20</h1>
+<p><a href="https://dboeter.github.io/daily-diff/#2026-11-20">⬛ Overview</a> · <strong>🟪 AI Agents</strong> · <a href="https://dboeter.github.io/daily-diff/#2026-11-20/ai-models">🟦 AI Models &amp; Labs</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-20/ai-policy">🟧 AI Policy</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-20/ai-data">🟨 Data Engineering</a></p>
+<blockquote>
+<p>Projects: 15 | Active today: 6 | Stable releases: 6 | Prereleases skipped: 9 | Spotted: 2 | Generated: 2026-11-20 06:58 UTC</p>
+</blockquote>
+<hr>
+<h2>Highlights</h2>
+<ul>
+<li>An issue reports that Codex App 26.1117.31558 crashes on launch on macOS when a dynamic wallpaper is active, repeatedly hitting <code>EXC_BREAKPOINT (SIGTRAP)</code> on <code>CrBrowserMain</code> (+10 in the last 24h).</li>
+<li>An issue reports that Claude Code Desktop 1.44121.4 and later on Windows fail to bridge scheduled-task sessions to Remote Control, a regression from 1.40609.0 still seen in 1.46388.3 that keeps them out of the mobile app and claude.ai/code.</li>
+<li>Hermes Agent v0.23.3 adds GPT-6.2 Astra and Sol (plus Pro) to OpenRouter and Nous Portal.</li>
+</ul>
+<hr>
+<h2>Coding agents &amp; assistants</h2>
+<h3>Claude Code</h3>
+<ul>
+<li><strong>Release:</strong> <a href="https://github.com/anthropics/claude-code/releases/tag/v2.1.329">v2.1.329</a> fixed <code>~/.claude.json</code> sometimes being reset to defaults when a network stall or file lock made it unreadable and cleared during a save.</li>
+<li><strong>Hot issue:</strong> <a href="https://github.com/anthropics/claude-code/issues/92276">#92276</a>: An issue reports that scheduled-task sessions spawned by Claude Code Desktop <code>1.44121.4</code> and later on Windows are not bridged to Remote Control, a regression from <code>1.40609.0</code> still seen in <code>1.46388.3</code>, so they do not appear in the mobile app or on claude.ai/code. (regression; 15 comments, 12 👍; +4 since 2026-11-18)</li>
+</ul>
+<h3>OpenAI Codex</h3>
+<ul>
+<li><strong>Release:</strong> <a href="https://github.com/openai/codex/releases/tag/rust-v0.171.0">rust-v0.171.0</a> fixed session switching and resuming to preserve drafts, queued follow-ups, and interrupted input with their original threads.</li>
+<li><strong>Hot issue:</strong> <a href="https://github.com/openai/codex/issues/62650">#62650</a>: An issue reports that Codex App <code>26.1117.31558</code> crashes on launch on macOS when a dynamic wallpaper is active, with repeated <code>EXC_BREAKPOINT (SIGTRAP)</code> crashes on <code>CrBrowserMain</code>. (7 comments, 3 👍; +10 in the last 24h)</li>
+</ul>
+<h3>Gemini CLI</h3>
+<ul>
+<li><strong>Release:</strong> <a href="https://github.com/google-gemini/gemini-cli/releases/tag/v0.70.0">v0.70.0</a> fixed the selected worktree being lost across authentication restarts.</li>
+</ul>
+<h3>Oh My Pi</h3>
+<ul>
+<li><strong>Release:</strong> <a href="https://github.com/can1357/oh-my-pi/releases/tag/v19.0.1">v19.0.1</a> fixed the browser relay extension crashing before it connects when a browser&#39;s loaded permission set predates the <code>downloads</code> permission.</li>
+</ul>
+<h3>Hermes Agent</h3>
+<ul>
+<li><strong>Release:</strong> <a href="https://github.com/nousresearch/hermes-agent/releases/tag/v0.23.3">v0.23.3</a> is a patch release that includes GPT-6.2 Astra and Sol (+ Pro) on OpenRouter and Nous Portal.</li>
+</ul>
+<p><strong>Quiet today:</strong> <a href="https://github.com/Kilo-Org/kilocode">Kilo Code</a>, <a href="https://github.com/anomalyco/opencode">OpenCode</a>, <a href="https://github.com/earendil-works/pi">Pi</a>, <a href="https://github.com/1jehuang/jcode">jcode</a>, <a href="https://github.com/cline/cline">Cline</a>, <a href="https://github.com/CommandCodeAI/command-code">Command Code</a>, <a href="https://github.com/deepseek-ai/deepseek-harness">DeepSeek Harness</a></p>
+<hr>
+<h2>Agent tooling</h2>
+<h3>Conductor</h3>
+<ul>
+<li><a href="https://github.com/microsoft/conductor/releases/tag/v0.1.46">v0.1.46</a> adds <code>reasoning.effort</code> support to the <code>claude-agent-sdk</code> provider and Copilot <code>fusion_tier</code>/<code>auto_tier</code> routing controls.</li>
+</ul>
+<p><strong>Quiet today:</strong> <a href="https://github.com/NVIDIA/OpenShell">OpenShell</a>, <a href="https://github.com/herdrdev/herdr">herdr</a></p>
+<hr>
+<h2>Spotted</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Story</th>
+<th align="left">Source</th>
+<th align="left">Discussion</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a href="https://www.tisonkun.io/posts/ai-repair-program/">Reverse-Engineering Kevin J. Lang&#39;s Lost OCaml Code in Apache DataSketches</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50517657">40 points, 3 comments</a></td>
+<td align="left">The author credits Gemini 4 Carbon Orchestrator + Swarm with helping rebuild CpcSketch’s lookup-table generation logic in Apache DataSketches after two OCaml-file commands were found in a source comment.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://dev.to/peter/what-team-wide-ai-adoption-actually-takes-1gbh">What team-wide AI adoption actually takes</a></td>
+<td align="left">Dev.to</td>
+<td align="left"><a href="https://dev.to/peter/what-team-wide-ai-adoption-actually-takes-1gbh">29 reactions, 3 comments</a></td>
+<td align="left">The author discusses team-wide AI adoption and says their attempts to make AI practical at work have included new models, routers, and agent frameworks.</td>
+</tr>
+</tbody></table>
+<hr>
+<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
+]]></content:encoded>
+    </item>
     <item>
       <title>AI Agents 2026-11-19</title>
       <link>https://dboeter.github.io/daily-diff/#2026-11-19/ai-agents</link>
@@ -2904,90 +2982,6 @@
 <li><strong>Release</strong>: v0.6.14 (final 0.6 release) fixes agents that stop receiving messages after an upgrade with in-place repair guidance, makes manual compaction wait at approvals, reduces refocus overhead on busy machines, and corrects inventory reads. <a href="https://github.com/mvschwarz/openrig/releases/tag/v0.6.14">https://github.com/mvschwarz/openrig/releases/tag/v0.6.14</a></li>
 </ul>
 <p><strong>Quiet today:</strong> <a href="https://github.com/NVIDIA/OpenShell">OpenShell</a>, <a href="https://github.com/herdrdev/herdr">herdr</a>, <a href="https://github.com/mksglu/context-mode">context-mode</a>, <a href="https://github.com/asheshgoplani/agent-deck">Agent Deck</a>, <a href="https://github.com/paperclipai/paperclip">paperclipai/paperclip</a></p>
-<hr>
-<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
-]]></content:encoded>
-    </item>
-    <item>
-      <title>AI Agents 2026-10-21</title>
-      <link>https://dboeter.github.io/daily-diff/#2026-10-21/ai-agents</link>
-      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-10-21/ai-agents</guid>
-      <pubDate>Wed, 21 Oct 2026 00:00:00 +0000</pubDate>
-      <description>AI Agents 2026-10-21 📅 Overview · 🤖 AI Agents · 💬 AI Discussions · 📚 AI Research · 🌐 Lab Announcements · ⚖️ Policy Watch · 🗄️ Data Engineering Watch Generated: 2026-10-21 01:27 UTC | Projects: 25 | Active today: 12 | Stable releases: 15 | Prereleases (not covered): 2 🕵️ Stealth Models on OpenRouter No stealth models listed on OpenRouter today. Coding Agents &amp;amp; Assistants Overview Claude Code shipped v2.1.305 with sandbox improvements for Linux nested namespaces and a retry watchdog fix...</description>
-      <content:encoded><![CDATA[<h1>AI Agents 2026-10-21</h1>
-<p><a href="https://dboeter.github.io/daily-diff/#2026-10-21">📅 Overview</a> · <strong>🤖 AI Agents</strong> · <a href="https://dboeter.github.io/daily-diff/#2026-10-21/ai-hn">💬 AI Discussions</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-21/ai-arxiv">📚 AI Research</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-21/ai-web">🌐 Lab Announcements</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-21/ai-policy">⚖️ Policy Watch</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-21/ai-data">🗄️ Data Engineering Watch</a></p>
-<blockquote>
-<p>Generated: 2026-10-21 01:27 UTC | Projects: 25 | Active today: 12 | Stable releases: 15 | Prereleases (not covered): 2</p>
-</blockquote>
-<hr>
-<h2>🕵️ Stealth Models on OpenRouter</h2>
-<p>No stealth models listed on OpenRouter today.</p>
-<hr>
-<h2>Coding Agents &amp; Assistants</h2>
-<h3>Overview</h3>
-<p>Claude Code shipped v2.1.305 with sandbox improvements for Linux nested namespaces and a retry watchdog fix, but a regression on Windows Bedrock broke custom CA handling. Gemini CLI v0.65.0 enforces read-only workspaces in untrusted folders and fixes session resume bugs. Hermes Agent faces two serious issues: smart approval auto-executing destructive <code>osascript</code> commands on macOS, and a protocol mismatch sending chat/completions to a Codex Responses endpoint. OpenCode hit GitHub Trending while users report free-tier IP blocks on Windows. Oh My Pi added Bedrock native compaction and account policy reclaim logic. Pstack-claude released two builds adding Muse plugin support and unified effort fields across runtimes. Autoloom published its seventh beta with task fidelity and UI recovery fixes.</p>
-<h3>Claude Code</h3>
-<ul>
-<li><strong>Release</strong>: v2.1.305 adds <code>sandbox.allowNestedUserNamespaces</code> so sandboxed Linux commands can create user namespaces (Chromium, rootless podman), and <code>CLAUDE_CODE_RETRY_WATCHDOG_USAGE_LIMIT_RECHECK_MS</code> lets unattended retry mode notice lifted usage limits before reset. <a href="https://github.com/anthropics/claude-code/releases/tag/v2.1.305">https://github.com/anthropics/claude-code/releases/tag/v2.1.305</a></li>
-<li><strong>Hot issue</strong>: Windows Bedrock users on v2.1.304 hit <code>UNABLE_TO_GET_ISSUER_CERT</code> despite custom CAs being loaded; regression from v2.1.303. <a href="https://github.com/anthropics/claude-code/issues/103680">https://github.com/anthropics/claude-code/issues/103680</a></li>
-<li><strong>News</strong>: Anthropic published research on Claude Code&#39;s sandboxing architecture and auto-mode implementation, plus a postmortem on April quality reports. <a href="https://www.anthropic.com/research/claude-code-sandboxing">https://www.anthropic.com/research/claude-code-sandboxing</a> <a href="https://www.anthropic.com/research/claude-code-auto-mode">https://www.anthropic.com/research/claude-code-auto-mode</a> <a href="https://www.anthropic.com/research/april-23-postmortem">https://www.anthropic.com/research/april-23-postmortem</a></li>
-</ul>
-<h3>Gemini CLI</h3>
-<ul>
-<li><strong>Release</strong>: v0.65.0 enforces read-only workspace settings in untrusted folders, prevents duplicate tool response turns when resuming sessions, and stops deletion of resumed session history on quick exit. <a href="https://github.com/google-gemini/gemini-cli/releases/tag/v0.65.0">https://github.com/google-gemini/gemini-cli/releases/tag/v0.65.0</a></li>
-</ul>
-<h3>OpenCode</h3>
-<ul>
-<li><strong>Hot issue</strong>: Windows users report free models blocked by alleged IP abuse detection with no VPN; error claims free tier only works within OpenCode desktop. Issue closed but user impact unclear. <a href="https://github.com/anomalyco/opencode/issues/56965">https://github.com/anomalyco/opencode/issues/56965</a></li>
-<li><strong>News</strong>: Project trending on GitHub with +1,240 stars, described as &quot;the open source coding agent.&quot; <a href="https://github.com/anomalyco/opencode">https://github.com/anomalyco/opencode</a></li>
-</ul>
-<h3>Oh My Pi</h3>
-<ul>
-<li><strong>Release</strong>: v18.12.4 enables native compaction for supported Bedrock Claude models and adds opt-in <code>reclaimAbovePct</code> to account policies so sessions auto-return to preferred accounts after priority drops. <a href="https://github.com/can1357/oh-my-pi/releases/tag/v18.12.4">https://github.com/can1357/oh-my-pi/releases/tag/v18.12.4</a></li>
-</ul>
-<h3>Hermes Agent</h3>
-<ul>
-<li><strong>Hot issue</strong>: Smart approval mode auto-approved <code>osascript</code> commands that closed a user&#39;s unsaved PowerPoint deck and deleted its export — unrecoverable data loss on macOS. <a href="https://github.com/NousResearch/hermes-agent/issues/141346">https://github.com/NousResearch/hermes-agent/issues/141346</a></li>
-<li><strong>Hot issue</strong>: Kanban worker posts to chat/completions endpoint despite <code>api_mode=codex_responses</code>, getting 400 <code>ModelProtocolUnsupported</code> for <code>muse-spark</code> on opencode-go. <a href="https://github.com/NousResearch/hermes-agent/issues/141861">https://github.com/NousResearch/hermes-agent/issues/141861</a></li>
-</ul>
-<h3>michael-denyer/pstack-claude</h3>
-<ul>
-<li><strong>Release</strong>: v0.9.96 ships a Muse build with native plugin manifest, shared skills as slash commands, and a <code>SessionStart</code> hook injecting poteto-mode mandate. v0.9.95 unifies <code>@level</code> effort fields across Claude Code, Codex, Copilot, and Pi runtimes, removing generated effort-specific agents. <a href="https://github.com/michael-denyer/pstack-claude/releases/tag/v0.9.96">https://github.com/michael-denyer/pstack-claude/releases/tag/v0.9.96</a> <a href="https://github.com/michael-denyer/pstack-claude/releases/tag/v0.9.95">https://github.com/michael-denyer/pstack-claude/releases/tag/v0.9.95</a></li>
-</ul>
-<h3>GanyuanRan/Autoloom</h3>
-<ul>
-<li><strong>Prerelease</strong>: v0.1.0-beta.7 strengthens task fidelity across understanding, transformation, and delivery; improves bidirectional review with conservative fixes reusing governance checkpoints; fixes UI drawing stalls and session restore failures after updates. <a href="https://github.com/GanyuanRan/Autoloom/releases/tag/v0.1.0-beta.7">https://github.com/GanyuanRan/Autoloom/releases/tag/v0.1.0-beta.7</a></li>
-</ul>
-<p><strong>Quiet today:</strong> <a href="https://github.com/Kilo-Org/kilocode">Kilo Code</a>, <a href="https://github.com/earendil-works/pi">Pi</a>, <a href="https://github.com/1jehuang/jcode">jcode</a>, <a href="https://github.com/cline/cline">Cline</a>, <a href="https://github.com/CommandCodeAI/command-code">Command Code</a>, <a href="https://github.com/deepseek-ai/deepseek-harness">DeepSeek Harness</a>, <a href="https://github.com/cursor/plugins">cursor/plugins</a>, <a href="https://github.com/GCWing/OpenBitFun">GCWing/OpenBitFun</a></p>
-<p><strong>Unavailable today:</strong> <a href="https://github.com/openai/codex">OpenAI Codex</a></p>
-<hr>
-<h2>Agent Tooling</h2>
-<h3>Overview</h3>
-<p>OpenShell v0.1.5 renames OCSF log files from <code>.log</code> to <code>.jsonl</code>, requiring collector pattern updates. Ruflo shipped five releases in two days fixing task cancel/status correctness, enabling TUI mouse interaction by default, wiring real AgentDB HNSW vector search, patching a CWE-22 path-traversal vulnerability, and resolving a critical install break caused by an unpublished memory package — also landing on GitHub Trending. HyperFrames resolved timeouts on long phone-video exports and stabilized distributed rendering with frame sub-ranges. Pi-harness added verified update downloads with progress, cancellation, resume, and retry. OpenRig delivered a rapid follow-up with daily-drive fixes including Claude seat handover waits and Slack missed-message recovery across mapped channels.</p>
-<h3>OpenShell</h3>
-<ul>
-<li><strong>Release</strong>: <a href="https://github.com/NVIDIA/OpenShell/releases/tag/v0.1.5">v0.1.5</a> renames Supervisor OCSF log files to <code>openshell-ocsf.YYYY-MM-DD.jsonl</code>; update any collector patterns from <code>*.log</code> to <code>*.jsonl</code>. Old <code>.log</code> files are not migrated and may be cleaned up.</li>
-</ul>
-<h3>ruvnet/ruflo</h3>
-<ul>
-<li><strong>Release</strong>: <a href="https://github.com/ruvnet/ruflo/releases/tag/v3.59.2">v3.59.2</a> fixes <code>task cancel</code> to return <code>previousStatus</code>, refuse to touch finished tasks, and exit 1 on failure; <code>task status</code> now shows correct status box titles.</li>
-<li><strong>Release</strong>: <a href="https://github.com/ruvnet/ruflo/releases/tag/v3.59.0">v3.59.0–v3.58.0</a> adds real AgentDB HNSW vector search with staleness rejection and exact-cosine fallback, enables TUI mouse clicking by default (<code>--no-mouse</code> to disable), patches CWE-22 path-traversal in <code>hooks_codemod</code>, and fixes a critical install break from an unpublished <code>@claude-flow/memory</code> pin.</li>
-<li><strong>News</strong>: <a href="https://github.com/ruvnet/ruflo">GitHub Trending</a> highlights ruflo as &quot;the original agent harness&quot; for deploying multi-player swarms with adaptive memory, self-learning intelligence, federation, vector RAG, and native Claude Code/Codex/Hermes integration (+684 stars).</li>
-</ul>
-<h3>heygen-com/hyperframes</h3>
-<ul>
-<li><strong>Release</strong>: <a href="https://github.com/heygen-com/hyperframes/releases/tag/v0.8.181">v0.8.181</a> eliminates timeouts and stalls on long phone-video exports; cloud render plans now check audio peaks faster; studio keeps edit preview waiting while window draws no frames.</li>
-<li><strong>Release</strong>: <a href="https://github.com/heygen-com/hyperframes/releases/tag/v0.8.180">v0.8.180</a> fixes intermittent empty-frame failures in multi-worker renders, adds distributed chunk rendering as frame sub-ranges, restores previews to playhead on video reload, and speeds up phone-video snapshot decoding.</li>
-</ul>
-<h3>wangmiaozero/pi-harness</h3>
-<ul>
-<li><strong>Release</strong>: <a href="https://github.com/wangmiaozero/pi-harness/releases/tag/v2.2.4">v2.2.4</a> adds verified update downloads with progress, cancellation, resume, and retry; blocks unverified or incompatible packages; improves manual install guidance; fixes update status after restart into a newly applied update.</li>
-</ul>
-<h3>mvschwarz/openrig</h3>
-<ul>
-<li><strong>Release</strong>: <a href="https://github.com/mvschwarz/openrig/releases/tag/v0.6.13">v0.6.13</a> delivers daily-drive fixes: Claude seat handover now waits for the new Claude before typing packets; Slack missed-message recovery reaches mapped channels, recent threads, and relayed channels; 15 of 46 changes from 10 outside contributors.</li>
-</ul>
-<p><strong>Quiet today:</strong> <a href="https://github.com/herdrdev/herdr">herdr</a>, <a href="https://github.com/mksglu/context-mode">context-mode</a>, <a href="https://github.com/asheshgoplani/agent-deck">Agent Deck</a>, <a href="https://github.com/paperclipai/paperclip">paperclipai/paperclip</a></p>
 <hr>
 <p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
 ]]></content:encoded>
