@@ -1,0 +1,68 @@
+[
+  {
+    "id": "hn:50564366",
+    "source": "hn",
+    "title": "Should governments slow frontier AI? Jacob Coxon and Robin Hanson debate [video]",
+    "url": "https://www.youtube.com/watch?v=lwfewYL7X0o",
+    "discussionUrl": "https://news.ycombinator.com/item?id=50564366",
+    "points": 97,
+    "comments": 192,
+    "topic": "policy",
+    "counts": "97 points, 192 comments"
+  },
+  {
+    "id": "hn:50567735",
+    "source": "hn",
+    "title": "Court: 4th Amendment Disallows Use Of AI-Generated 'Probable Cause'",
+    "url": "https://www.techdirt.com/2026/11/19/court-tells-cops-that-the-4th-amendment-doesnt-cover-ai-generated-probable-cause/",
+    "discussionUrl": "https://news.ycombinator.com/item?id=50567735",
+    "points": 61,
+    "comments": 18,
+    "topic": "policy",
+    "counts": "61 points, 18 comments"
+  },
+  {
+    "id": "hn:50562262",
+    "source": "hn",
+    "title": "Fuck Your AI Safeguards",
+    "url": "https://ounapuu.ee/posts/2026/11/19/unsafeguards/",
+    "discussionUrl": "https://news.ycombinator.com/item?id=50562262",
+    "points": 524,
+    "comments": 209,
+    "topic": "other",
+    "counts": "524 points, 209 comments"
+  },
+  {
+    "id": "hn:50562500",
+    "source": "hn",
+    "title": "AI isn't replacing your job. It's turning it into low-paid gig work",
+    "url": "https://restofworld.org/2026/ai-jobs-skills-gig-work/",
+    "discussionUrl": "https://news.ycombinator.com/item?id=50562500",
+    "points": 132,
+    "comments": 66,
+    "topic": "other",
+    "counts": "132 points, 66 comments"
+  },
+  {
+    "id": "hn:50562636",
+    "source": "hn",
+    "title": "Chrome AI features wasting much bandwidth",
+    "url": "https://perishablepress.com/chrome-ai-wasting-much-bandwidth/",
+    "discussionUrl": "https://news.ycombinator.com/item?id=50562636",
+    "points": 128,
+    "comments": 49,
+    "topic": "other",
+    "counts": "128 points, 49 comments"
+  },
+  {
+    "id": "devto:5069884",
+    "source": "devto",
+    "title": "Stratagems #36: They Finished Their Coffee. The AI Still Has No Answer.",
+    "url": "https://dev.to/xulingfeng/stratagems-36-they-finished-their-coffee-the-ai-still-has-no-answer-4igh",
+    "discussionUrl": "https://dev.to/xulingfeng/stratagems-36-they-finished-their-coffee-the-ai-still-has-no-answer-4igh",
+    "points": 101,
+    "comments": 51,
+    "topic": "other",
+    "counts": "101 reactions, 51 comments"
+  }
+]

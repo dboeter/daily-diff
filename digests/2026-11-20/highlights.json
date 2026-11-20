@@ -1,0 +1,14 @@
+{
+  "ai-models": [
+    "Mistral's Pixtral Large 2502 is now on OpenRouter with 128K context, handling text and images like documents and charts.",
+    "Gemini 4 Neon ranks first on the Models Engineering Index for practical engineering tasks per Mei calculation."
+  ],
+  "ai-policy": [
+    "The US Commerce Department issued an interim final rule restricting remote access to advanced semiconductors for certain foreign actors.",
+    "Dutch parliament submitted written questions on Germany's AI copyright protection proposal."
+  ],
+  "ai-data": [
+    "Snowflake dynamic tables on AUTO refresh now default to ADAPTIVE instead of INCREMENTAL when incremental refresh is supported.",
+    "Databricks CLI v1.27.0 requires uninstalling the legacy databricks-cli package before installing the new databricks package from PyPI."
+  ]
+}

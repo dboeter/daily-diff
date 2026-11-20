@@ -61,7 +61,9 @@
     "issue:anomalyco/opencode#37216": "2026-11-18",
     "issue:can1357/oh-my-pi#19578": "2026-11-18",
     "issue:openai/codex#62212": "2026-11-19",
-    "issue:can1357/oh-my-pi#18937": "2026-11-19"
+    "issue:can1357/oh-my-pi#18937": "2026-11-19",
+    "issue:anthropics/claude-code#92276": "2026-11-20",
+    "issue:openai/codex#62650": "2026-11-20"
   },
   "stages": {}
 }
