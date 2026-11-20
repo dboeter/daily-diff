@@ -249,7 +249,8 @@ describe("buildProjectDigestPrompt", () => {
     expect(prompt).toContain("https://github.com/org/test/releases/tag/v1.0.0");
     expect(prompt).toContain("Release notes");
     expect(prompt).toContain("Crash on start");
-    expect(prompt).toContain("Gained: +14 comments and 👍 in the last 24h");
+    // The gain picks the hot issues; the model writes only the description, and no page shows it.
+    expect(prompt).not.toContain("+14");
     expect(prompt).toContain("[Hacker News] TestTool 1.0 — https://hn/1 (9 points)");
     expect(prompt).toContain("2026-10-04 (last 24h)");
     expect(prompt).toContain("AI coding agents");

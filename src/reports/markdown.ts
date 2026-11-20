@@ -185,17 +185,13 @@ export const boldLabelColonInside = (md: string): string =>
 
 /**
  * A hot issue's facts in one form, written by code: the regression or security label it qualified
- * on, its totals, its gain and its fix PR. On 2026-10-28 the model wrote a different count
- * parenthetical on every row and left out Gemini #15404's `area/security`.
+ * on, its totals and its fix PR. On 2026-10-28 the model wrote a different count parenthetical on
+ * every row and left out Gemini #15404's `area/security`. The gain only picks the hot issues: shown
+ * as "+N in the last 24h", it was copied into Highlights as a raw count (removed 2026-11-20).
  */
 function hotIssueFacts(i: HotIssue): string {
   const fix = i.fix && HOT_ISSUE.fix(i.fix.state, `[#${i.fix.number}](${i.fix.url})`);
-  return [
-    hotIssueLabel(i),
-    HOT_ISSUE.totals(i.comments, i.reactions?.["+1"] ?? 0),
-    HOT_ISSUE.gain(i.gain, i.gainSince),
-    fix,
-  ]
+  return [hotIssueLabel(i), HOT_ISSUE.totals(i.comments, i.reactions?.["+1"] ?? 0), fix]
     .filter(Boolean)
     .join("; ");
 }

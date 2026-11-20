@@ -5,7 +5,7 @@
 import type { RepoConfig, GitHubItem, GitHubRelease } from "../core/github.ts";
 import type { HotIssue } from "../core/hot-issues.ts";
 import type { NewsItem } from "./project-news.ts";
-import { GOING_AWAY, HOT_ISSUE, hotIssueGain, SECTIONS } from "../core/strings.ts";
+import { GOING_AWAY, HOT_ISSUE, SECTIONS } from "../core/strings.ts";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -390,8 +390,7 @@ export function formatProject(a: ProjectActivity): string {
     a.hotIssues
       .map(
         (i) =>
-          `${formatItem(i, HOT_ISSUE_BODY_CHARS)}\n  ${hotIssueGain(i.gain, i.gainSince)}` +
-          (i.fix ? `\n  Fix: PR #${i.fix.number} ${i.fix.state}` : ""),
+          formatItem(i, HOT_ISSUE_BODY_CHARS) + (i.fix ? `\n  Fix: PR #${i.fix.number} ${i.fix.state}` : ""),
       )
       .join("\n") || "None";
   const news =
@@ -446,7 +445,7 @@ Write the report in English: one section per project above that has something le
 - **Release**: exactly one bullet per project, however many releases or changes it has. It names the one or two changes that matter most to the reader, picked in this order: ${RELEASE_ORDER}. Leave the other changes out: the release link shows them. Never continue a release in a second bullet ("It also fixes …"). Several releases in a range: one bullet for the range, do not list each one. Link each release you name as a plain Markdown link, [tag](url), never inside backticks; a range as its oldest and newest, [v1.2.0](url)–[v1.2.5](url). A release with an Announcement: describe it from the announcement, not from its first changelog entries.
 - **Prerelease**: only from a "Prereleases (no stable release yet)" list, and only when it adds notable features or breaking changes; skip routine alpha/rc bumps. Say it is a prerelease and link it.
 - **News**: what the news item says about the project and why it matters. Link it as a plain Markdown link, [<title>](<url>), never a bare URL. An item marked "${NEWS_TITLE_ONLY}": say only what its title says, with no consequence or reason it matters, and never describe a discussion ("discusses", "commenters").
-- **${HOT_ISSUE.label}**: one bullet per issue, written "- **${HOT_ISSUE.label}:** #<number>: <description>". The description says what the issue reports and how serious it is, worded as one report ("an issue reports"), never as an established fact, however many comments or 👍 it has. When the body shows a tracking, announcement or FAQ thread rather than a bug report, say so. For a security issue, say where the problem shows and who is affected, as far as the body says. Write no link, label, comment or 👍 count, gain or fix status: code adds them to the bullet.
+- **${HOT_ISSUE.label}**: one bullet per issue, written "- **${HOT_ISSUE.label}:** #<number>: <description>". The description says what the issue reports and how serious it is, worded as one report ("an issue reports"), never as an established fact, however many comments or 👍 it has. When the body shows a tracking, announcement or FAQ thread rather than a bug report, say so. For a security issue, say where the problem shows and who is affected, as far as the body says. Write no link, label, comment or 👍 count, gain or fix status: code adds the link, label, counts and fix status to the bullet.
 
 Rules:
 - Use only the data above. Omit a bullet type that has no data. Never state what did not happen ("no release today", "no breaking issues were reported").
