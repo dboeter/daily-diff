@@ -16,7 +16,7 @@ export const MSG = {
 
 /**
  * A page's only Highlight when code dropped every bullet the model wrote (`dropNoHighlightRows`).
- * Not in MSG: highlights.json reads a MSG notice as a failed call and falls back to the page body.
+ * Not in MSG: MSG notices mark a failed call. highlights.json leaves both out.
  */
 export const NO_HIGHLIGHT_NOTE = "No item stands out today.";
 

@@ -1,24 +1,17 @@
 /**
- * One-off script: regenerate highlights.json from existing reports
- * and optionally resend Telegram notification.
+ * Rebuild a day's highlights.json from its saved reports' Highlights (no LLM call)
+ * and optionally resend the Telegram notification.
  *
  * Usage:
  *   npx tsx scripts/regen-highlights.ts [YYYY-MM-DD] [--notify]
  *
  * Env vars:
- *   ANTHROPIC_API_KEY (or LLM_PROVIDER + matching key)
  *   TELEGRAM_BOT_TOKEN + TELEGRAM_CHAT_ID (only if --notify)
  */
 
 import fs from "node:fs";
 import path from "node:path";
-import { callLlm, parseLlmJson } from "../src/core/llm.ts";
-import {
-  buildHighlightsPrompt,
-  forcedHighlightReports,
-  withFallbackHighlights,
-  type ReportHighlights,
-} from "../src/reports/prompts-pages.ts";
+import { pageHighlights } from "../src/reports/prompts-pages.ts";
 import { buildMessage } from "../src/cli/notify.ts";
 import { REPORT_LABELS } from "../src/core/strings.ts";
 
@@ -44,7 +37,8 @@ async function main() {
   console.log(`Regenerating highlights for ${dateStr}...`);
 
   // Every known report the date has: live ones first in main()'s order, then retired ones
-  // (ai-hn, ai-web…). highlights.json is overwritten whole, so an old date keeps theirs.
+  // (ai-hn, ai-web…). highlights.json is overwritten whole; a report without a Highlights section
+  // (the archive before October 2026) gets no entry.
   const reportIds = Object.keys(REPORT_LABELS);
 
   // Read reports
@@ -56,16 +50,7 @@ async function main() {
 
   console.log(`  Reports: ${Object.keys(reports).length}`);
 
-  // Generate highlights. The saved data report does not say whether Jev kept a
-  // vendor item that day, so only AI Policy and Trends are forced here.
-  const forced = forcedHighlightReports(false);
-  let highlights: ReportHighlights = {};
-  try {
-    highlights = parseLlmJson<ReportHighlights>(await callLlm(buildHighlightsPrompt(reports, forced), 2048));
-  } catch (err) {
-    console.error(`  [highlights] parse failed: ${err}`);
-  }
-  highlights = withFallbackHighlights(highlights, reports, forced);
+  const highlights = pageHighlights(reports);
 
   const outPath = path.join(digestsDir, dateStr, "highlights.json");
   fs.writeFileSync(outPath, JSON.stringify(highlights, null, 2) + "\n");

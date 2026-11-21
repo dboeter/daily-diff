@@ -1,7 +1,7 @@
 /**
  * Page prompts: the row summaries of Trends (its Hugging Face table included),
  * the models page, AI Policy, the data report and Spotted; the prose of Trends,
- * AI Policy and the data report; and the highlights.json prompt. The agents and
+ * AI Policy and the data report; and highlights.json from the pages. The agents and
  * models pages' Highlights, the repo sections and the shared prompt rules are in
  * prompts.ts.
  */
@@ -11,7 +11,6 @@ import type { summaryRows } from "../trending/rank.ts";
 import type { OpenRouterData, OpenRouterNewModel } from "../sources/openrouter.ts";
 import {
   DATA_REPORT,
-  GOING_AWAY,
   MODELS_PAGE,
   MSG,
   NO_HIGHLIGHT_NOTE,
@@ -432,42 +431,21 @@ ${sourceFidelityRules()}
 }
 
 // ---------------------------------------------------------------------------
-// Highlights prompt — extracts structured highlights from finished reports
-// for use in Telegram notifications.
+// highlights.json: each page's own Highlights, for Telegram, Teams and the Overview
 // ---------------------------------------------------------------------------
 
 export interface ReportHighlights {
   [reportId: string]: string[];
 }
 
-// Telegram rejects messages over 4096 chars (after HTML entity parsing). Up to
-// 10 reports × HIGHLIGHTS_MAX_PER_REPORT × HIGHLIGHT_MAX_CHARS ≈ 2.8k, plus
-// section labels, keeps the worst case under that limit.
 const HIGHLIGHTS_MAX_PER_REPORT = 2;
-const HIGHLIGHT_MAX_CHARS = 140;
-// A report saved before its page had a Highlights section (the archive before October 2026), or
-// whose Highlights are a failure notice (a failed prose call), is sent as its first 8000 chars, so
-// scripts/regen-highlights.ts still covers an old date and a forced report still gets a highlight.
-const HIGHLIGHTS_EXCERPT_CHARS = 8000;
 
-/** What highlights.json's prompt sees of a report: its Highlights section, else its page without the failed section. */
-function highlightsInput(md: string): string {
-  const section = highlightsSection(md);
-  const body = section?.slice(`## ${SECTIONS.highlights}`.length).trim();
-  if (section && body && !FAILURE_NOTICES.has(body)) return section;
-  // An unconfirmed security claim never reaches a message, even from the page body.
-  const kept = (section ? md.replace(section, "") : md)
-    .split("\n")
-    .filter((line) => !line.includes(SECURITY.unconfirmed.trim()))
-    .join("\n");
-  return kept.trim().slice(0, HIGHLIGHTS_EXCERPT_CHARS);
-}
+/** The reports whose highlight is their lede's first sentence: Weekly Diff, an article with no Highlights section. */
+const LEDE_HIGHLIGHT_REPORTS = new Set<string>(["ai-weekly"]);
 
 /**
  * A report's `## Highlights` section (heading included), up to the next heading, `---` rule or
- * TABLES_MARKER; null when the report has none. highlights.json sees only this, so it can restate
- * only what the page picked: on 2026-10-26 it read the whole page and led with a Snowflake note
- * the data page had left out as minor.
+ * TABLES_MARKER; null when the report has none. highlights.json is made from it (`pageHighlights`).
  */
 export function highlightsSection(md: string): string | null {
   const lines = md.split("\n");
@@ -480,103 +458,6 @@ export function highlightsSection(md: string): string | null {
     .slice(start, end === -1 ? undefined : end)
     .join("\n")
     .trim();
-}
-
-export function buildHighlightsPrompt(
-  reportContents: Record<string, string>,
-  forced: readonly string[] = [],
-  maxPerReport: number = HIGHLIGHTS_MAX_PER_REPORT,
-): string {
-  // Only the published ones: on a daily run the prompt asked for a highlight of the absent Trends page.
-  const published = forced.filter((id) => id in reportContents);
-  const forcedRule = published.length
-    ? `\n- ${published.map((id) => HIGHLIGHT_RULES[id]?.forced ?? id).join(" and ")} ${published.length === 1 ? "was" : "were"} already judged relevant to this reader: give ${published.length === 1 ? "that report" : "each of those reports"} at least 1 highlight`
-    : "";
-  const figures = Object.entries(HIGHLIGHT_RULES)
-    .filter(([id, rule]) => rule.figures && id in reportContents)
-    .map(([id, rule]) => ` (except in ${id}: ${rule.figures})`)
-    .join("");
-
-  const sections = Object.entries(reportContents)
-    .filter(([id]) => !LEDE_HIGHLIGHT_REPORTS.has(id))
-    .map(([id, content]) => `## [${id}]\n\n${highlightsInput(content)}`)
-    .join("\n\n---\n\n");
-
-  // The count is a maximum, not a quota, and the exclusion list is explicit: a
-  // fixed 6-per-report quota padded every section with routine noise
-  // ("2 nightly builds", "200 commits", star counts). No "why it matters" ask:
-  // on 2026-10-26 it made the model add consequences no page stated.
-  return `You are a selective news editor. The following are the Highlights of today's AI ecosystem reports, each labeled with a report ID. Each report's editor already picked them from the report's rows. The reader is a developer who wants to know what actually changed in the AI tooling world today, who follows AI policy for work (the ai-policy report), and who passes data-platform changes on to data-engineering colleagues working on Databricks, Snowflake and the open-source data stack (the ai-data report).
-
-${sections}
-
----
-
-For each report, pick AT MOST ${maxPerReport} of its Highlights that this reader would genuinely care about, and restate or shorten each as one sentence of at most ${HIGHLIGHT_MAX_CHARS} characters. Fewer is better than filler: return 1 or 0 when only 1 or 0 items qualify.
-
-Say the concrete change, capability or consequence the Highlight states; add no consequence, audience or benefit it does not state.
-Good: "Claude Code adds background subagents that keep running while you chat"
-Bad: "Claude Code v2.1.288 released" (no content)  ·  "Copilot CLI ships three prereleases" (routine)
-
-Never include:
-- Routine releases: nightlies, alphas, prereleases, build-number ranges, or a version number without saying what it changes
-- Raw counts: commits, issues, PRs, open items, stars, comments, points${figures}
-- CI status, flaky tests, pending upgrades, "in progress" or "targets" items with no shipped result
-- Generic trend statements ("X dominates", "Y remains active", "Z gains attention")
-
-Return ONLY valid JSON, no markdown fences, no explanation. Format:
-{"ai-agents":["highlight 1",...],"ai-models":["highlight 1",...],...}
-
-Rules:
-- Use the exact report IDs from the [brackets] above as keys
-- Omit a report's key entirely when nothing in it qualifies, or when it contains only failure messages
-- At most ${maxPerReport} highlights per report, each at most ${HIGHLIGHT_MAX_CHARS} characters
-- A report's first highlight covers the first bullet of its \`## ${SECTIONS.highlights}\` (the page's lead), unless that bullet says there is no news
-- Each highlight restates one item of its report's Highlights above, never another subject; one subject per highlight, and keep its window ("this week") as the report gives it
-${sourceFidelityRules()}
-- ${goingAwayRule("highlight")}${forcedRule}`;
-}
-
-/**
- * The reports highlights.json treats apart from the rest. `forced`: how the prompt names a report
- * that always gets a highlight when published, `onlyWithVendorItems` when that holds only on a day
- * Jev kept a vendor item. `figures`: the exception to the raw-counts ban, and `leadFirst`: its first
- * highlight is always its page's lead (`withFallbackHighlights`).
- */
-const HIGHLIGHT_RULES: Record<
-  string,
-  { forced: string; onlyWithVendorItems?: true; figures?: string; leadFirst?: true }
-> = {
-  "ai-policy": { forced: "Every item in ai-policy" },
-  "ai-data": { forced: "every vendor release-note row in ai-data", onlyWithVendorItems: true },
-  // Trends' Highlights lead with figures its code computed (tokens, stars gained): banning
-  // them left the page out of highlights.json on 2026-10-28.
-  "ai-trends": {
-    forced: "the weekly ai-trends page",
-    figures: `restate a figure its Highlights state with its window, e.g. "35.37T tokens on 2026-10-27", "+16,593 stars in 7 days"`,
-    leadFirst: true,
-  },
-};
-
-/**
- * The reports whose highlight is their own first sentence, taken by code: Weekly Diff. Its page is
- * an article with readings in italics, and a second model restating it is how a reading becomes
- * a stated fact. So the highlights call never sees it.
- */
-const LEDE_HIGHLIGHT_REPORTS = new Set<string>(["ai-weekly"]);
-
-/**
- * The reports that always get a highlight when published: AI Policy, whose
- * every item Jev kept, the weekly Trends page, and the data report only on a day Jev kept a vendor
- * item (a day of repo activity alone holds routine releases and hot issues,
- * which the model may rightly skip). On 2026-10-20 the model left AI Policy
- * out though it carried the AI Act's first harmonised standard in the OJ, and on 2026-10-28 Trends.
- * The prompt and the fallback skip one not published in the run (Trends on a daily run).
- */
-export function forcedHighlightReports(hasVendorItems: boolean): string[] {
-  return Object.keys(HIGHLIGHT_RULES).filter(
-    (id) => hasVendorItems || !HIGHLIGHT_RULES[id]!.onlyWithVendorItems,
-  );
 }
 
 // A highlight restates the lead when at least this share of its content words are in the lead.
@@ -625,7 +506,7 @@ const RESTATED_NAME_MIN_WORDS = 3;
  * `rows` entry: one linking its URL, naming it (word-bounded), or restating most of a longer
  * name's words (`restatesLead`). The prompt names these rows as no Highlight; this is the net for
  * a model that writes one anyway. Each drop is logged; when every bullet goes, NO_HIGHLIGHT_NOTE
- * stands in, as an empty section would send highlights.json to the page body. `alsoDrop` drops a
+ * stands in, so the section never reads empty. `alsoDrop` drops a
  * bullet for its own text (the data page's `isGroupOrAbsenceBullet`).
  */
 export function dropNoHighlightRows(
@@ -674,75 +555,6 @@ export function dropNoHighlightRows(
   return `${kept.join("\n")}${at === -1 ? "" : prose.slice(at)}`;
 }
 
-/**
- * The highlights as saved: each one's going-away sign normalized (`signHighlight`), the one
- * entry that restates a signed page lead signed too, with a
- * fallback for each `forced` report the model left out: the first sentence of that report's own
- * Highlights section.
- */
-export function withFallbackHighlights(
-  highlights: ReportHighlights,
-  reportContents: Record<string, string>,
-  forced: readonly string[],
-): ReportHighlights {
-  const out = Object.fromEntries(
-    Object.entries(highlights)
-      .filter(([id]) => !LEDE_HIGHLIGHT_REPORTS.has(id))
-      .map(([id, items]) => [id, items.map(signHighlight)]),
-  );
-  // A lead signed going away keeps its sign on the highlight that restates it: the model dropped it
-  // on the Polars lead (regen of 2026-10-26). Only on a match: the first highlight may be another item.
-  for (const [id, items] of Object.entries(out)) {
-    const lead = reportContents[id] ? firstHighlight(reportContents[id]) : null;
-    if (!lead?.startsWith(`${GOING_AWAY} `)) continue;
-    if (items.some((h) => h.startsWith(`${GOING_AWAY} `) && restatesLead(h, lead))) continue;
-    const k = items.findIndex((h) => !h.startsWith(`${GOING_AWAY} `) && restatesLead(h, lead));
-    if (k >= 0) items[k] = `${GOING_AWAY} ${items[k]}`;
-  }
-  // A `leadFirst` report (Trends) leads with its page's lead, whatever the model returned: the
-  // highlight restating it moves first, else the lead's first sentence goes in front.
-  for (const [id, rule] of Object.entries(HIGHLIGHT_RULES)) {
-    const lead = rule.leadFirst && reportContents[id] ? firstHighlight(reportContents[id]) : null;
-    if (!lead || lead === NO_HIGHLIGHT_NOTE) continue;
-    const items = out[id] ?? [];
-    const k = items.findIndex((h) => restatesLead(h, lead));
-    if (k !== 0)
-      out[id] = [k > 0 ? items[k]! : lead, ...items.filter((_, i) => i !== k)].slice(
-        0,
-        HIGHLIGHTS_MAX_PER_REPORT,
-      );
-  }
-  for (const id of forced) {
-    const content = reportContents[id];
-    if (out[id]?.length || !content) continue;
-    const line = firstHighlight(content);
-    // A page whose every Highlight code dropped has nothing to restate.
-    if (line && line !== NO_HIGHLIGHT_NOTE) out[id] = [line];
-  }
-  for (const id of LEDE_HIGHLIGHT_REPORTS) {
-    const lede = reportContents[id] ? ledeHighlight(reportContents[id]) : null;
-    if (lede) out[id] = [lede];
-  }
-  return out;
-}
-
-/**
- * The published reports the highlights reply left out though their page has something to restate.
- * A page whose only Highlight is NO_HIGHLIGHT_NOTE or a failure notice is rightly absent: on
- * 2026-11-08 and 11-09 the log named ai-data for it.
- */
-export function skippedReports(reportContents: Record<string, string>, reply: ReportHighlights): string[] {
-  return Object.entries(reportContents)
-    .filter(([id, content]) => {
-      if (reply[id]?.length || LEDE_HIGHLIGHT_REPORTS.has(id)) return false;
-      // A page without the section was sent whole.
-      if (!highlightsSection(content)) return true;
-      const lead = firstHighlight(content);
-      return lead !== null && lead !== NO_HIGHLIGHT_NOTE;
-    })
-    .map(([id]) => id);
-}
-
 // A period after one of these, or inside a dotted abbreviation (U.S., E.U.), ends no
 // sentence: AI Policy prose cites "Art. 50", "the U.S. Senate" and
 // deadlines such as "closes Nov. 9". A sentence that really ends on "Dec." runs
@@ -770,30 +582,6 @@ const ABBREVIATIONS = new Set([
 const FAILURE_NOTICES = new Set<string>(Object.values(MSG));
 
 /**
- * The first sentence under a report's `## Highlights`, as plain text (the
- * first bullet or paragraph, hard-wrapped lines joined, Markdown and ⚠️
- * removed); null when there is none or only a failure notice.
- */
-export function firstHighlight(md: string): string | null {
-  const lines = md.split("\n");
-  const start = lines.findIndex((l) => l.trim() === `## ${SECTIONS.highlights}`);
-  if (start < 0) return null;
-  const block: string[] = [];
-  for (const raw of lines.slice(start + 1)) {
-    const line = raw.trim();
-    // The saved report has the tables spliced in, each opening with a heading.
-    if (line.startsWith("#") || line === TABLES_MARKER) break;
-    if (!line) {
-      if (block.length) break;
-      continue;
-    }
-    if (block.length && /^([-*]|\d+[.)])\s/.test(line)) break;
-    block.push(line);
-  }
-  return firstSentence(block.join(" "));
-}
-
-/**
  * The first sentence of an article's lede: the paragraph under the rule that closes the page's
  * head (H1, report bar, meta line), as plain text; null when the page has no such paragraph.
  * A heading the model put above its lede, against the prompt, is passed over.
@@ -816,30 +604,72 @@ export function ledeHighlight(md: string): string | null {
   return firstSentence(block.join(" "));
 }
 
-/** A bullet's or paragraph's first sentence as plain text, cut to HIGHLIGHT_MAX_CHARS; null for none or a failure notice. */
-function firstSentence(block: string): string | null {
-  const text = block
+/** Markdown text as plain text: list marker, links, bold, code, italics and ⚠️ removed. */
+function plainText(block: string): string {
+  return block
     .replace(/^([-*]|\d+[.)])\s+/, "")
     .replace(/\[([^\]]*)\]\((?:[^()]|\([^)]*\))*\)/g, "$1")
     .replace(/\*\*|__|`/g, "")
     .replace(/(^|[\s(])[*_]([^*_]+)[*_](?=[\s.,;:!?)]|$)/g, "$1$2")
+    .replace(/⚠️\s*/g, "")
     .trim();
-  if (!text || FAILURE_NOTICES.has(text)) return null;
-  const plain = text.replace(/⚠️\s*/g, "").trim();
-  let end = plain.length;
+}
+
+/** A paragraph's first sentence as plain text; null for none or a failure notice. */
+function firstSentence(block: string): string | null {
+  const plain = plainText(block);
+  if (!plain || FAILURE_NOTICES.has(plain)) return null;
   for (const m of plain.matchAll(/[.!?](?=\s|$)/g)) {
     const word = plain.slice(0, m.index).split(/\s/).pop() ?? "";
     if (m[0] === "." && (/\.[A-Za-z]$/.test(word) || ABBREVIATIONS.has(word.toLowerCase()))) continue;
-    end = m.index + 1;
-    break;
+    return plain.slice(0, m.index + 1);
   }
-  const sentence = plain.slice(0, end);
-  if (sentence.length <= HIGHLIGHT_MAX_CHARS) return sentence;
-  const cut = Array.from(sentence)
-    .slice(0, HIGHLIGHT_MAX_CHARS - 1)
-    .join("");
-  const space = cut.lastIndexOf(" ");
-  return `${(space > 0 ? cut.slice(0, space) : cut).replace(/[,;:]$/, "")}…`;
+  return plain;
+}
+
+/**
+ * The items of a report's `## Highlights` as plain text: each bullet, or each paragraph of a prose
+ * section (AI Policy), whole and with its going-away sign. NO_HIGHLIGHT_NOTE, a failure notice and
+ * an unconfirmed security claim are no items.
+ */
+function highlightItems(md: string): string[] {
+  const section = highlightsSection(md);
+  if (!section) return [];
+  const items: string[][] = [];
+  let open: string[] | null = null;
+  for (const raw of section.split("\n").slice(1)) {
+    const line = raw.trim();
+    if (!line) open = null;
+    else if (/^([-*]|\d+[.)])\s/.test(line) || !open) items.push((open = [line]));
+    else open.push(line);
+  }
+  // Checked on the Markdown: the notices and the claim's marker carry ⚠️ and emphasis.
+  return items
+    .map((lines) => lines.join(" ").replace(/^([-*]|\d+[.)])\s+/, ""))
+    .filter(
+      (md) =>
+        md !== NO_HIGHLIGHT_NOTE && !FAILURE_NOTICES.has(md) && !md.includes(SECURITY.unconfirmed.trim()),
+    )
+    .map((md) => signHighlight(plainText(md)))
+    .filter((text) => text !== "");
+}
+
+/**
+ * highlights.json: each page's first HIGHLIGHTS_MAX_PER_REPORT Highlights as the page wrote them,
+ * and Weekly Diff's lede sentence (`ledeHighlight`). No model restates them: on 2026-11-21 that
+ * call reasoned past its budget twice and two pages went out without highlights, and a restatement
+ * could state what the page did not. A page without a Highlights section (the archive before
+ * October 2026) gets no entry.
+ */
+export function pageHighlights(reportContents: Record<string, string>): ReportHighlights {
+  const out: ReportHighlights = {};
+  for (const [id, content] of Object.entries(reportContents)) {
+    const items = LEDE_HIGHLIGHT_REPORTS.has(id)
+      ? [ledeHighlight(content)].filter((h): h is string => h !== null)
+      : highlightItems(content).slice(0, HIGHLIGHTS_MAX_PER_REPORT);
+    if (items.length) out[id] = items;
+  }
+  return out;
 }
 
 // ---------------------------------------------------------------------------

@@ -48,26 +48,15 @@ import {
   loadSameEventVerdicts,
   saveSameEventVerdicts,
 } from "./spotted/same-event.ts";
+import { buildSpottedSummariesPrompt, pageHighlights } from "./reports/prompts-pages.ts";
 import {
-  buildHighlightsPrompt,
-  buildSpottedSummariesPrompt,
-  forcedHighlightReports,
-  skippedReports,
-  withFallbackHighlights,
-  type ReportHighlights,
-} from "./reports/prompts-pages.ts";
-import {
-  callLlm,
   generateOr,
   llmTraceFile,
-  markLlmFallback,
-  parseLlmJson,
   saveFile,
   LLM_TOKENS_LISTING,
   assertLlmHealthy,
   reportLlmHealth,
   llmHealthLine,
-  isConnectionError,
 } from "./core/llm.ts";
 import { renderReportBar, withReportBar } from "./reports/markdown.ts";
 import { dropTitleRestatements, numberRows, parseRowSummaries } from "./reports/summarized-table.ts";
@@ -142,7 +131,7 @@ import {
 } from "./security/stories.ts";
 import { DATA_SECTION_KEYS, loadConfig, type SectionKey } from "./core/config.ts";
 import { resolvePagesUrl } from "./cli/notify.ts";
-import { toCstDateStr, toUtcStr, isWeeklyRun, sleep } from "./core/date.ts";
+import { toCstDateStr, toUtcStr, isWeeklyRun } from "./core/date.ts";
 import {
   LIVE_REPORT_IDS,
   MSG,
@@ -370,14 +359,6 @@ function summarizeProjects(id: SectionKey, activities: ProjectActivity[], dateSt
 // ---------------------------------------------------------------------------
 // Main
 // ---------------------------------------------------------------------------
-
-/**
- * Pause between the two highlights attempts when the first one died on a
- * connection failure. Long enough that attempt 2 lands outside the outage that
- * just consumed callLlm's retry ladder, short enough that a healthy provider
- * hiccup still costs the run a single minute.
- */
-const HIGHLIGHTS_COOLDOWN_MS = 60_000;
 
 async function main(): Promise<void> {
   requireEnv("GITHUB_TOKEN");
@@ -832,7 +813,7 @@ async function main(): Promise<void> {
     (a, b) => LIVE_REPORT_IDS.indexOf(a.id) - LIVE_REPORT_IDS.indexOf(b.id),
   );
 
-  // The highlights pass reads the bodies, not the link bars.
+  // highlights.json reads the bodies, not the link bars.
   const reports: Record<string, string> = Object.fromEntries(pages.map((r) => [r.id, r.content]));
 
   // Each report links the others the day produced, so the bar waits for all of them.
@@ -844,53 +825,8 @@ async function main(): Promise<void> {
   }));
   for (const r of published) console.log(`  Saved ${saveFile(r.content, dateStr, `${r.id}.md`)}`);
 
-  // 4. Generate highlights for Telegram notification
-  console.log("  Generating highlights for Telegram...");
-  // The highlights pass parses JSON and retries once: the LLM occasionally
-  // emits slightly malformed JSON that repairJson can't fix (seen 2026-07-13:
-  // "Expected ',' or ']' after array element"); a fresh generation usually
-  // returns valid JSON.
-  //
-  // A connection failure is a different animal: attempt 1 has already burned
-  // callLlm's full ~3 min connection ladder, so firing attempt 2 immediately
-  // re-enters an outage that is demonstrably still going. On 2026-09-19 both
-  // attempts failed back to back inside the same DashScope outage and the day
-  // shipped with an empty highlights.json — Telegram rendered section links
-  // and no bullets. Wait out a cooldown first; a malformed-JSON retry still
-  // goes straight through.
-  const attemptJson = async (prompt: string): Promise<ReportHighlights> => {
-    for (let attempt = 1; attempt <= 2; attempt++) {
-      try {
-        const raw = await callLlm(prompt, undefined, "highlights");
-        const parsed = parseLlmJson<ReportHighlights>(raw);
-        // A published report without a key may be a rightful skip or a misread rule (Trends on
-        // 2026-10-28): the reply in the log tells which.
-        const missing = skippedReports(reports, parsed);
-        if (missing.length)
-          console.log(`  [highlights] no highlight for ${missing.join(", ")}; reply: ${raw}`);
-        return parsed;
-      } catch (err) {
-        const tag = attempt < 2 ? "retrying" : "giving up";
-        console.error(`  [highlights] attempt ${attempt} failed (${tag}): ${err}`);
-        if (attempt < 2 && isConnectionError(err)) {
-          console.error(
-            `  [highlights] connection down — cooling down ${HIGHLIGHTS_COOLDOWN_MS / 1000}s before retry`,
-          );
-          await sleep(HIGHLIGHTS_COOLDOWN_MS);
-        }
-      }
-    }
-    // withFallbackHighlights then writes them from the reports' own Highlights.
-    markLlmFallback("highlights");
-    return {};
-  };
-
-  const forced = forcedHighlightReports(vendorData.items.length > 0);
-  const highlights = withFallbackHighlights(
-    await attemptJson(buildHighlightsPrompt(reports, forced)),
-    reports,
-    forced,
-  );
+  // 4. highlights.json: each page's own Highlights, for Telegram, Teams and the Overview
+  const highlights = pageHighlights(reports);
 
   const highlightsPath = saveFile(JSON.stringify(highlights, null, 2), dateStr, "highlights.json");
   console.log(`  Saved ${highlightsPath}`);

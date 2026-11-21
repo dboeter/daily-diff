@@ -4,7 +4,6 @@ import type { ReleaseRow } from "../../reports/pages.ts";
 import {
   buildDataProsePrompt,
   buildDataSummariesPrompt,
-  buildHighlightsPrompt,
   highlightsSection,
   buildModelsSummariesPrompt,
   labPostsNoHighlightNote,
@@ -15,11 +14,8 @@ import {
   buildHfSummariesPrompt,
   buildTrendsProsePrompt,
   buildTrendsSummariesPrompt,
-  firstHighlight,
   ledeHighlight,
-  forcedHighlightReports,
-  withFallbackHighlights,
-  skippedReports,
+  pageHighlights,
   restatesLead,
   dropNoHighlightRows,
   isGroupOrAbsenceBullet,
@@ -55,15 +51,6 @@ const story = (id: string, source: StorySource = "hn", points = 10, extra: Parti
 });
 
 describe("security claims in highlights.json", () => {
-  it("leaves an unconfirmed claim's lines out of a page sent without its Highlights", () => {
-    const page =
-      `## Highlights\n\n${MSG.summaryFailed}\n\n## Spotted\n\n| Story | Source |\n|---|---|\n` +
-      `| 🔓 [Leak](https://e.com/1) | ${SECURITY.unconfirmed}A user says. |\n| [Other](https://e.com/2) | Fine. |`;
-    const prompt = buildHighlightsPrompt({ "ai-agents": page });
-    expect(prompt).not.toContain("https://e.com/1");
-    expect(prompt).toContain("https://e.com/2");
-  });
-
   it("gives an unconfirmed claim its own no-Highlight reason", () => {
     const note = storiesNoHighlightNote(["Title only"], ["Leak claim"])!;
     expect(note).toMatch(/show only a title[^\n]*"Title only"/);
@@ -354,195 +341,88 @@ describe("Weekly Diff's highlight", () => {
     expect(ledeHighlight(page)).toBe("A lede sentence.");
   });
 
-  it("never reaches the highlights call: a second model restating a reading states it as fact", () => {
-    const prompt = buildHighlightsPrompt({ "ai-agents": AGENTS, "ai-weekly": ARTICLE });
-    expect(prompt).toContain("## [ai-agents]");
-    expect(prompt).not.toContain("ai-weekly");
-    expect(prompt).not.toContain("This suggests a reading");
-  });
-
-  it("comes from code, whatever the model returned for the page", () => {
-    const out = withFallbackHighlights(
-      { "ai-agents": ["H."], "ai-weekly": ["A model's own restatement."] },
-      { "ai-agents": AGENTS, "ai-weekly": ARTICLE },
-      [],
-    );
-    expect(out).toEqual({
-      "ai-agents": ["H."],
+  it("comes from its lede, by code", () => {
+    expect(pageHighlights({ "ai-agents": AGENTS, "ai-weekly": ARTICLE })).toEqual({
+      "ai-agents": ["An agents highlight."],
       "ai-weekly": ["Anthropic released Claude Fable 5.2, and Claude Code made it the default Fable model."],
     });
-    // A daily run has no article, and gets no key for it.
-    expect(withFallbackHighlights({ "ai-agents": ["H."] }, { "ai-agents": AGENTS }, [])).toEqual({
-      "ai-agents": ["H."],
-    });
   });
 
-  it("is not reported as a page the model skipped", () => {
-    expect(skippedReports({ "ai-weekly": ARTICLE }, {})).toEqual([]);
+  it("does not end the lede's sentence at an abbreviation, nor cut a long one", () => {
+    const at = (lede: string) => ledeHighlight(`# W\n\n---\n\n${lede}`);
+    expect(at("The U.S. Senate passed the bill. More.")).toBe("The U.S. Senate passed the bill.");
+    expect(at("The consultation closes Nov. 9 for comments. More.")).toBe(
+      "The consultation closes Nov. 9 for comments.",
+    );
+    expect(at("See [Art. 50 guidance](https://x.eu) e.g. for providers. More.")).toBe(
+      "See Art. 50 guidance e.g. for providers.",
+    );
+    const long = `${"word ".repeat(60)}end.`;
+    expect(at(long)).toBe(long);
   });
 });
 
-describe("withFallbackHighlights", () => {
-  const POLICY =
-    "## Highlights\nThe Commission published the first [harmonised standard](https://x.eu) for the AI Act. Consultations close in November.\n\n<!-- tables -->";
+describe("pageHighlights", () => {
+  const page = (body: string) =>
+    `# P\n\n> meta\n\n---\n\n## Highlights\n\n${body}\n\n---\n\n## Spotted\n\n| a |`;
 
-  it("fills a published policy or data report the model left out with its first Highlights sentence", () => {
-    const out = withFallbackHighlights({ "ai-agents": ["H."] }, { "ai-agents": "x", "ai-policy": POLICY }, [
-      "ai-policy",
-    ]);
-    expect(out).toEqual({
-      "ai-agents": ["H."],
-      "ai-policy": ["The Commission published the first harmonised standard for the AI Act."],
-    });
-  });
-
-  it("keeps the model's highlights, and adds none for other or absent reports", () => {
-    const out = withFallbackHighlights(
-      { "ai-policy": ["Mine."] },
-      { "ai-policy": POLICY, "ai-models": POLICY },
-      ["ai-policy"],
-    );
-    expect(out).toEqual({ "ai-policy": ["Mine."] });
-  });
-
-  it("reads a bullet, skips a failure notice and cuts a long sentence at a word", () => {
-    expect(firstHighlight("## Highlights\n\n- **Snowflake** retires X. More.")).toBe("Snowflake retires X.");
-    expect(firstHighlight("## Highlights\n\n⚠️ Summary generation failed.")).toBeNull();
-    expect(firstHighlight("## Signals\nNo highlights here.")).toBeNull();
-    const long = firstHighlight(`## Highlights\n${"word ".repeat(60)}end.`)!;
-    expect(long.length).toBeLessThanOrEqual(140);
-    expect(long.endsWith("word…")).toBe(true);
-  });
-
-  it("saves a going-away highlight with the minus sign, however the model wrote it", () => {
-    const out = withFallbackHighlights(
-      { "ai-data": ["- Snowflake retires X", "– Fabric ends Y", "DuckDB 2.0 ships", "-dash inside"] },
-      { "ai-policy": "## Highlights\n\n- − **EUR-Lex** drops a form. More." },
-      ["ai-policy"],
-    );
-    expect(out).toEqual({
-      "ai-data": ["− Snowflake retires X", "− Fabric ends Y", "DuckDB 2.0 ships", "-dash inside"],
-      "ai-policy": ["− EUR-Lex drops a form."],
-    });
-  });
-
-  it("keeps the going-away sign of a page's signed lead on the report's first highlight", () => {
-    const data = "## Highlights\n\n- − **Polars** py-2.1.0 disallows mixed arithmetic. More.\n- Other.";
-    const out = withFallbackHighlights(
-      {
-        "ai-data": ["Polars py-2.1.0 breaks mixed arithmetic", "Snowflake ships X"],
-        "ai-models": ["− Y ends", "Z"],
-      },
-      {
-        "ai-data": data,
-        "ai-models": "## Highlights\n\n- − Y ends.",
-        "ai-agents": "## Highlights\n\n- A ships.",
-      },
-      [],
-    );
-    expect(out["ai-data"]).toEqual(["− Polars py-2.1.0 breaks mixed arithmetic", "Snowflake ships X"]);
-    expect(out["ai-models"]).toEqual(["− Y ends", "Z"]);
+  it("gives every published page its first two Highlights, whole, as plain text (2026-11-21)", () => {
+    const long =
+      "Pi v1.6.0 makes render() return readonly string[] and makes Container return the same cached array while children are unchanged, so extensions that modify render output in place must copy it first.";
     expect(
-      withFallbackHighlights(
-        { "ai-agents": ["A ships"] },
-        { "ai-agents": "## Highlights\n\n- A ships." },
-        [],
-      ),
-    ).toEqual({ "ai-agents": ["A ships"] });
+      pageHighlights({
+        "ai-agents": page(
+          `- ${long}\n- **Cline** CLI v3.0.75 starts in [yolo mode](https://x.dev). More.\n- Third.`,
+        ),
+        "ai-models": page("- Thinking Machines released `Inkling 2 Mini`."),
+      }),
+    ).toEqual({
+      "ai-agents": [long, "Cline CLI v3.0.75 starts in yolo mode. More."],
+      "ai-models": ["Thinking Machines released Inkling 2 Mini."],
+    });
   });
 
-  it("signs only the highlight that restates a signed lead, and none when none does", () => {
-    const data = "## Highlights\n\n- − **Polars** py-2.1.0 disallows mixed arithmetic. More.";
-    const sign = (items: string[]) =>
-      withFallbackHighlights({ "ai-data": items }, { "ai-data": data }, [])["ai-data"];
-    expect(sign(["Snowflake ships dynamic tables", "Polars py-2.1.0 disallows mixed arithmetic"])).toEqual([
-      "Snowflake ships dynamic tables",
-      "− Polars py-2.1.0 disallows mixed arithmetic",
-    ]);
-    expect(sign(["Snowflake ships dynamic tables", "dbt Core 1.11 ships"])).toEqual([
-      "Snowflake ships dynamic tables",
-      "dbt Core 1.11 ships",
-    ]);
-    expect(sign(["− Polars drops mixed arithmetic", "Polars mixed arithmetic"])).toEqual([
-      "− Polars drops mixed arithmetic",
-      "Polars mixed arithmetic",
-    ]);
-    expect(restatesLead("Snowflake ships X", "− Polars py-2.1.0 disallows mixed arithmetic.")).toBe(false);
+  it("reads prose paragraphs, wrapped lines, numbered bullets, ⚠️ markers and italics", () => {
+    expect(
+      pageHighlights({
+        "ai-policy": page(
+          "The Commission published\na [standard](https://x.eu). More.\n\nSecond item.\n\nThird.",
+        ),
+        "ai-data": page("1. ⚠️ **Snowflake** retires X.\n2. *Delta Lake* 4.0 adds `variant` type."),
+      }),
+    ).toEqual({
+      "ai-policy": ["The Commission published a standard. More.", "Second item."],
+      "ai-data": ["Snowflake retires X.", "Delta Lake 4.0 adds variant type."],
+    });
+  });
+
+  it("keeps a going-away bullet's minus sign, however the page wrote the dash", () => {
+    expect(pageHighlights({ "ai-data": page("- − Snowflake retires X.\n- – Fabric ends Y.") })).toEqual({
+      "ai-data": ["− Snowflake retires X.", "− Fabric ends Y."],
+    });
+  });
+
+  it("gives no entry for a page with nothing to restate", () => {
+    expect(
+      pageHighlights({
+        "ai-data": page(`- ${NO_HIGHLIGHT_NOTE}`),
+        "ai-policy": page(MSG.summaryFailed),
+        "ai-trends": "# P\n\n## Radar\n\n| a |",
+      }),
+    ).toEqual({});
+  });
+
+  it("leaves out a Highlight that carries an unconfirmed security claim", () => {
+    expect(
+      pageHighlights({ "ai-agents": page(`- 🔓 Leak. ${SECURITY.unconfirmed}A user says.\n- Codex ships.`) }),
+    ).toEqual({ "ai-agents": ["Codex ships."] });
   });
 
   it("matches a lead's possessive and hyphenated words to their bare forms", () => {
     expect(
       restatesLead("OpenAI open source Codex agent", "OpenAI's open-source Codex agent ships today"),
     ).toBe(true);
-  });
-
-  it("sends a report whose Highlights failed as its page, so a forced report can still get one", () => {
-    const page =
-      "## Highlights\n\n⚠️ Summary generation failed.\n\n## Databricks\n\n| Item | Summary |\n| --- | --- |\n| [Lakebase GA](https://x) | Lakebase is generally available. |";
-    const prompt = buildHighlightsPrompt({ "ai-data": page }, ["ai-data"]);
-    const section = prompt.slice(prompt.indexOf("## [ai-data]"));
-    expect(section).toContain("Lakebase is generally available.");
-    expect(section).not.toContain("Summary generation failed");
-    expect(
-      buildHighlightsPrompt({ "ai-data": "## Highlights\n\n- A ships.\n\n## Databricks\n\n| row |" }),
-    ).not.toContain("| row |");
-  });
-
-  it("forces ai-data only on a day with kept vendor items", () => {
-    expect(forcedHighlightReports(false)).toEqual(["ai-policy", "ai-trends"]);
-    expect(forcedHighlightReports(true)).toEqual(["ai-policy", "ai-data", "ai-trends"]);
-    const reports = { "ai-data": "## Highlights\n- dbt Core 1.11 ships." };
-    expect(withFallbackHighlights({}, reports, forcedHighlightReports(false))).toEqual({});
-    expect(withFallbackHighlights({}, reports, forcedHighlightReports(true))).toEqual({
-      "ai-data": ["dbt Core 1.11 ships."],
-    });
-  });
-
-  it("asks the model for a forced report's highlight only when forced and published", () => {
-    const policy = { "ai-policy": "## Highlights\n- The AI Act's standard is in the OJ." };
-    expect(buildHighlightsPrompt(policy, ["ai-policy"])).toContain("give that report at least 1 highlight");
-    expect(
-      buildHighlightsPrompt(
-        { ...policy, "ai-data": "## Highlights\n- A ships." },
-        forcedHighlightReports(true),
-      ),
-    ).toContain("vendor release-note row in ai-data");
-    expect(buildHighlightsPrompt(policy)).not.toContain("at least 1 highlight");
-    expect(buildHighlightsPrompt({}, ["ai-policy"])).not.toContain("at least 1 highlight");
-  });
-
-  it("does not mention ai-trends on a daily run", () => {
-    const daily = {
-      "ai-agents": "## Highlights\n- Codex ships hooks.",
-      "ai-policy": "## Highlights\n- The AI Act's standard is in the OJ.",
-    };
-    const prompt = buildHighlightsPrompt(daily, forcedHighlightReports(false));
-    expect(prompt).toContain("Every item in ai-policy was already judged relevant");
-    expect(prompt).not.toContain("ai-trends");
-  });
-
-  it("does not end the sentence at an abbreviation", () => {
-    expect(firstHighlight("## Highlights\nThe U.S. Senate passed the bill. More.")).toBe(
-      "The U.S. Senate passed the bill.",
-    );
-    expect(firstHighlight("## Highlights\nThe consultation closes Nov. 9 for comments. More.")).toBe(
-      "The consultation closes Nov. 9 for comments.",
-    );
-    expect(
-      firstHighlight("## Highlights\n- See [Art. 50 guidance](https://x.eu) e.g. for providers. More."),
-    ).toBe("See Art. 50 guidance e.g. for providers.");
-  });
-
-  it("handles numbered bullets, sub-headings, wrapped lines, ⚠️ markers and italics", () => {
-    expect(firstHighlight("## Highlights\n1. Snowflake retires X. More.")).toBe("Snowflake retires X.");
-    expect(firstHighlight("## Highlights\n### Sub\n- A.")).toBeNull();
-    expect(firstHighlight("## Highlights\nThe Commission published\na standard. More.\n\nNext.")).toBe(
-      "The Commission published a standard.",
-    );
-    expect(firstHighlight("## Highlights\n- ⚠️ **Snowflake** retires X.\n- B.")).toBe("Snowflake retires X.");
-    expect(firstHighlight("## Highlights\n- *Delta Lake* 4.0 adds `variant` type.")).toBe(
-      "Delta Lake 4.0 adds variant type.",
-    );
+    expect(restatesLead("Snowflake ships X", "− Polars py-2.1.0 disallows mixed arithmetic.")).toBe(false);
   });
 });
 
@@ -590,66 +470,16 @@ describe("dropNoHighlightRows with a title-only story", () => {
   });
 });
 
-describe("skippedReports", () => {
-  const page = (bullets: string) => `# P\n\n## Highlights\n\n${bullets}\n\n---\n\n## Spotted`;
-  it("names a published page the model gave no highlight, but not one with nothing to restate (ai-data, 2026-11-08)", () => {
-    const reports = {
-      "ai-agents": page("- Codex shipped v1."),
-      "ai-models": page("- OpenAI raised $11 B."),
-      "ai-data": page(`- ${NO_HIGHLIGHT_NOTE}`),
-      "ai-policy": page("⚠️ Summary generation failed."),
-      // No Highlights section: the page was sent whole.
-      "ai-trends": "# P\n\n## Radar\n\n| a |",
-    };
-    expect(skippedReports(reports, { "ai-agents": ["Codex shipped v1."], "ai-models": [] })).toEqual([
-      "ai-models",
-      "ai-trends",
-    ]);
-    expect(
-      skippedReports(reports, { "ai-agents": ["A."], "ai-models": ["B."], "ai-trends": ["C."] }),
-    ).toEqual([]);
-  });
-});
-
 describe("highlights.json for Trends", () => {
-  const TRENDS =
-    "## Highlights\n\n- **DeepSeek V4.1 Flash** leads OpenRouter with **35.37T tokens** on 2026-10-27. More.\n- **owner/repo** gains **+16,593 stars** in 7 days.\n\n## Models";
-  const LEAD = "DeepSeek V4.1 Flash leads OpenRouter with 35.37T tokens on 2026-10-27.";
-  const forced = forcedHighlightReports(false);
-
-  it("gives a figure-led Trends page an entry restating its first bullet when the model left it out", () => {
-    expect(
-      withFallbackHighlights({ "ai-agents": ["A."] }, { "ai-agents": "x", "ai-trends": TRENDS }, forced),
-    ).toEqual({ "ai-agents": ["A."], "ai-trends": [LEAD] });
-  });
-
-  it("puts the lead first: moves the model's restatement, else adds the lead in front", () => {
-    const run = (items: string[]) =>
-      withFallbackHighlights({ "ai-trends": items }, { "ai-trends": TRENDS }, forced)["ai-trends"];
-    expect(
-      run(["owner/repo gains 16,593 stars", "DeepSeek V4.1 Flash leads OpenRouter at 35.37T tokens"]),
-    ).toEqual(["DeepSeek V4.1 Flash leads OpenRouter at 35.37T tokens", "owner/repo gains 16,593 stars"]);
-    expect(run(["owner/repo gains 16,593 stars", "Other thing"])).toEqual([
-      LEAD,
-      "owner/repo gains 16,593 stars",
-    ]);
-    expect(run(["DeepSeek V4.1 Flash leads OpenRouter"])).toEqual(["DeepSeek V4.1 Flash leads OpenRouter"]);
-  });
-
-  it("adds nothing for an unpublished Trends page or one whose Highlights code dropped", () => {
-    expect(withFallbackHighlights({}, {}, forced)).toEqual({});
-    expect(
-      withFallbackHighlights({}, { "ai-trends": `## Highlights\n\n- ${NO_HIGHLIGHT_NOTE}` }, forced),
-    ).toEqual({});
-  });
-
-  it("lets the prompt restate Trends figures with their window, and keeps raw counts banned elsewhere", () => {
-    const withTrends = buildHighlightsPrompt({ "ai-trends": TRENDS }, forced);
-    expect(withTrends).toContain("except in ai-trends: restate a figure");
-    expect(withTrends).toContain("the weekly ai-trends page");
-    const daily = buildHighlightsPrompt({ "ai-agents": "## Highlights\n\n- A ships." }, forced);
-    expect(daily).toContain("Raw counts: commits, issues, PRs, open items, stars, comments, points\n");
-    expect(daily).not.toContain("except in ai-trends");
+  it("leads with the page's lead and keeps its figures", () => {
+    const trends =
+      "## Highlights\n\n- **DeepSeek V4.1 Flash** leads OpenRouter with **35.37T tokens** on 2026-10-27.\n- **owner/repo** gains **+16,593 stars** in 7 days.\n- Third.\n\n## Models";
+    expect(pageHighlights({ "ai-trends": trends })).toEqual({
+      "ai-trends": [
+        "DeepSeek V4.1 Flash leads OpenRouter with 35.37T tokens on 2026-10-27.",
+        "owner/repo gains +16,593 stars in 7 days.",
+      ],
+    });
   });
 });
 
@@ -682,7 +512,6 @@ describe("source fidelity rules", () => {
     trends: buildTrendsProsePrompt("## Research", "2026-10-26"),
     policy: buildPolicyProsePrompt("| Date |", "2026-10-26", "A reader."),
     data: buildDataProsePrompt("## Snowflake", "2026-10-26"),
-    highlights: buildHighlightsPrompt({ "ai-data": "## Highlights" }),
     // Row summaries too: 5 of the issue 05 overstatements were Spotted summaries.
     spotted: buildSpottedSummariesPrompt([], "2026-10-26"),
   };
@@ -772,32 +601,19 @@ describe("Highlights pick, they don't restate", () => {
     expect(p).toContain("One subject per bullet");
   });
 
-  it("highlights.json leads each report with its page's first bullet", () => {
-    const p = buildHighlightsPrompt({ "ai-data": "## Highlights\n\n- lead" });
-    expect(p).toContain("A report's first highlight covers the first bullet of its `## Highlights`");
-    expect(p).toContain("one subject per highlight");
-  });
-
   it("highlights.json sees each page's Highlights only, never a table row below them", () => {
     const data =
       "# Data\n\n## Highlights\n\n- − **Polars** py-2.1.0 disallows mixed arithmetic.\n\n---\n\n## Snowflake\n\n| 1 | Coding agent MCP tool | minor note |";
     const policy =
       "## Highlights\n\nThe Commission published a standard.\n\n<!-- tables -->\n\n## EU\n\n| Draft guidance row |";
-    const p = buildHighlightsPrompt({ "ai-data": data, "ai-policy": policy });
-    expect(p).toContain("- − **Polars** py-2.1.0 disallows mixed arithmetic.");
-    expect(p).toContain("The Commission published a standard.");
-    expect(p).not.toContain("Coding agent MCP tool");
-    expect(p).not.toContain("Draft guidance row");
+    expect(pageHighlights({ "ai-data": data, "ai-policy": policy })).toEqual({
+      "ai-data": ["− Polars py-2.1.0 disallows mixed arithmetic."],
+      "ai-policy": ["The Commission published a standard."],
+    });
     expect(highlightsSection(data)).toBe(
       "## Highlights\n\n- − **Polars** py-2.1.0 disallows mixed arithmetic.",
     );
     expect(highlightsSection("## Agents\n\n- x")).toBeNull();
-  });
-
-  it("highlights.json asks for no consequence the Highlights do not state", () => {
-    const p = buildHighlightsPrompt({ "ai-agents": "## Highlights\n\n- A ships." });
-    expect(p).not.toMatch(/why it matters/i);
-    expect(p).toContain("add no consequence, audience or benefit it does not state");
   });
 });
 
@@ -903,7 +719,7 @@ describe("dropNoHighlightRows", () => {
   it("leaves NO_HIGHLIGHT_NOTE when every bullet goes, which highlights.json does not restate", () => {
     const page = dropNoHighlightRows("## Highlights\n\n- Strix is up 40%.", [strix], "test");
     expect(page).toBe(`## Highlights\n\n- ${NO_HIGHLIGHT_NOTE}`);
-    expect(withFallbackHighlights({}, { "ai-data": page }, ["ai-data"])).toEqual({});
+    expect(pageHighlights({ "ai-data": page })).toEqual({});
   });
 
   it("on the data page, drops a bullet stating an absence or calling the rows minor (2026-11-01)", () => {

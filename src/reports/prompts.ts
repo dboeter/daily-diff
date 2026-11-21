@@ -138,7 +138,7 @@ export const NO_TREND_RULE =
   "Several items on one theme in the same period are not a trend: a trend or causal claim needs rows that show it (a summary that states it, or figures such as gains or ranks), never titles, descriptions or co-occurrence alone.";
 
 /**
- * What a Highlights, Signals or highlights.json claim may say beyond its source: nothing. On
+ * What a Highlights or Signals claim may say beyond its source: nothing. On
  * 2026-10-26 the models wrote "GA" for two Snowflake notes that said no such thing, added "audit
  * your invocations immediately", stated a vendor's design target as achieved throughput, dropped
  * the limits of a 200-case self-published study and built a trend from three paper titles. The
@@ -481,7 +481,7 @@ export const HIGHLIGHTS_PICK_RULE =
 /**
  * The models page's Highlights note on a day without a lab post or new model. No absence bullet:
  * "No lab or model news today." stood above Highlights on OpenAI's raise and Anthropic's power
- * deal (2026-11-09), and highlights.json then left the page out.
+ * deal (2026-11-09).
  */
 export const NO_MODEL_NEWS_NOTE =
   "The page has no lab post and no new model today: write at most 2 bullets and state no absence; the sections already say what is missing.";

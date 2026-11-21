@@ -417,8 +417,7 @@ const CONTROL_CHARS = new RegExp("[\\u0000-\\u001F]", "g");
  *
  * If the strict parse still fails, the payload is repaired once (drop any prose
  * wrapper around the JSON, strip trailing commas) and retried — a single stray
- * character (e.g. a trailing comma before `}`) used to wipe an entire
- * highlights.json.
+ * character (e.g. a trailing comma before `}`) used to wipe a whole reply.
  */
 export function parseLlmJson<T = unknown>(raw: string): T {
   const cleaned = raw
