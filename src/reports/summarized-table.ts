@@ -125,7 +125,7 @@ const STOPWORDS = new Set(
 /**
  * Lowercased words minus stopwords, a plural "s" cut so "agents" matches "agent", a possessive
  * dropped and hyphenated words split, so "OpenAI's open-source" matches "OpenAI open source": the
- * words two texts are compared by, here and for a highlight restating its page's lead (`restatesLead`).
+ * words two texts are compared by, here and for a Highlight about a no-Highlight row (`restatesLead`).
  */
 export function contentWords(text: string): string[] {
   return (
