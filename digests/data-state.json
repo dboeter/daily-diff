@@ -72,22 +72,6 @@
     "581140": "2026-11-18",
     "581170": "2026-11-18",
     "581180": "2026-11-18",
-    "deepseek v4.1 flash is scheduled for retirement|2026-10-19": "2026-10-21",
-    "redesigned mlflow logs tab for ai runtime runs|2026-10-15": "2026-10-21",
-    "databricks runtime 19: october 19, 2026|2026-10-19": "2026-10-21",
-    "asynchronous processing with transformwithstate is now generally available|2026-10-19": "2026-10-21",
-    "transactions support both managed delta lake and apache iceberg tables|2026-10-14": "2026-10-21",
-    "data classification api is now generally available|2026-10-14": "2026-10-21",
-    "file upload in genie one and genie agents is now generally available|2026-10-16": "2026-10-21",
-    "read metadata privilege support for compliance security profile standards|2026-10-16": "2026-10-21",
-    "workspace-level package repositories for databricks apps are generally available|2026-10-14": "2026-10-21",
-    "oct 19, 2026: schema variables (general availability)|2026-10-19": "2026-10-21",
-    "oct 20, 2026: snowflake-provided tags (general availability)|2026-10-20": "2026-10-21",
-    "october 14, 2026: centralized event sharing for snowflake native apps — general availability|2026-10-14": "2026-10-21",
-    "retiring the fabric data agent custom tool in microsoft foundry: move to fabric iq|2026-10-20": "2026-10-21",
-    "feature: you can now use reusable column aliases in googlesql.|2026-10-15": "2026-10-21",
-    "feature: conversational analytics now lets you create a conversation with all of the data sources in multiple projects, or create a conversation with a dataset.|2026-10-14": "2026-10-21",
-    "feature: the ai.agg function now supports the output_schema argument, which lets you specify the schema of the function output as a comma-separated list of fields.|2026-10-14": "2026-10-21",
     "file upload in genie one and genie agents will soon be available by default for compliance security profile workspaces with supported compliance standards|2026-10-16": "2026-10-22",
     "replicate data in and out of lakebase with postgres logical replication|2026-10-15": "2026-10-22",
     "saving an unchanged job no longer adds rows to the jobs system tables|2026-10-19": "2026-10-22",
@@ -101,7 +85,6 @@
     "new analytical functions in microsoft fabric data warehouse (preview)|2026-10-20": "2026-10-22",
     "[launched] generally available: azure cosmos db safe key rotation|2026-10-21": "2026-10-22",
     "https://community.fabric.microsoft.com/t5/Fabric-Updates-Blog/New-analytical-functions-in-Microsoft-Fabric-Data-Warehouse/ba-p/5375432": "2026-10-22",
-    "https://community.fabric.microsoft.com/t5/Fabric-Updates-Blog/Retiring-the-Fabric-data-agent-custom-tool-in-Microsoft-Foundry/ba-p/5374418": "2026-10-21",
     "genie code tasks in lakeflow jobs are now generally available|2026-10-21": "2026-10-23",
     "genie code tasks in lakeflow jobs are available by default for workspaces with the compliance security profile enabled starting in november 2026|2026-10-21": "2026-10-23",
     "lakeflow pipelines system tables are now generally available (ga)|2026-10-21": "2026-10-23",
@@ -577,7 +560,22 @@
     "release:databricks/dbt-databricks@v1.13.1": "2026-11-20",
     "release:databricks/cli@v1.27.0": "2026-11-20",
     "post:pola.rs/posts/polars-bigquery": "2026-11-20",
-    "post:medium.com/snowflake/do-you-still-need-airflow-for-snowflake-pipelines-an-honest-answer-from-someone-whos-run-both-0e8d4a5a9036": "2026-11-20"
+    "post:medium.com/snowflake/do-you-still-need-airflow-for-snowflake-pipelines-an-honest-answer-from-someone-whos-run-both-0e8d4a5a9036": "2026-11-20",
+    "gpt-5 and gpt-5 mini will be retired on december 11, 2026|2026-11-19": "2026-11-21",
+    "upcoming breaking change: array_contains with a constant empty array will return null for a null value|2026-11-16": "2026-11-21",
+    "warehouse-level statement timeouts are now generally available|2026-11-20": "2026-11-21",
+    "databricks-to-databricks delta sharing across regulatory domains is now generally available|2026-11-19": "2026-11-21",
+    "mcp tools in genie agents are generally available|2026-11-20": "2026-11-21",
+    "manage lakewatch with the databricks cli (beta)|2026-11-19": "2026-11-21",
+    "the azure databricks github app will request permission to create and manage pull requests|2026-11-20": "2026-11-21",
+    "nov 20, 2026: postgres access roles for token authentication (general availability)|2026-11-20": "2026-11-21",
+    "nov 20, 2026: ai_complete adds support for snowflake decision (preview)|2026-11-20": "2026-11-21",
+    "nov 20, 2026: ai_extract accuracy improvements (preview)|2026-11-20": "2026-11-21",
+    "https://community.fabric.microsoft.com/t5/Fabric-Updates-Blog/On-premises-data-gateway-November-2026-release/ba-p/5430005": "2026-11-21",
+    "release:duckdb/duckdb@v2.0.1": "2026-11-21",
+    "release:open-metadata/OpenMetadata@2.0.9-release": "2026-11-21",
+    "post:duckdb.org/2026/11/20/announcing-duckdb-201.html": "2026-11-21",
+    "post:medium.com/snowflake/build-a-real-time-kinesis-to-snowflake-iceberg-pipeline-with-snowpipe-streaming-high-performance-dd44dc9b7ce5": "2026-11-21"
   },
   "stages": {
     "snowflake-bcr:2026_08": "2026-10-16 Introduced in the 10.37 release (October 8-16, 2026) as Disabled by Default; account admins can enable for testing."
@@ -610,6 +608,20 @@
       "link": "https://learn.microsoft.com/azure/databricks/release-notes/whats-coming#all-unity-catalog-managed-tables-will-be-upgraded-to-catalog-commits",
       "source": "Azure Databricks",
       "summary": "After Databricks Runtime 15.4 LTS end of support on August 19, 2027, all Unity Catalog managed tables will be automatically upgraded to `catalog commits`, making Unity Catalog the system of coordination and enabling multi-statement transactions, external engine writes, and consistent governance; clients must plan for this breaking change before the 2027 deadline."
+    },
+    "https://learn.microsoft.com/azure/databricks/release-notes/product/2026/november#gpt-5-and-gpt-5-mini-will-be-retired-on-december-11-2026": {
+      "date": "2026-12-11",
+      "title": "GPT-5 and GPT-5 mini will be retired on December 11, 2026",
+      "link": "https://learn.microsoft.com/azure/databricks/release-notes/product/2026/november#gpt-5-and-gpt-5-mini-will-be-retired-on-december-11-2026",
+      "source": "Azure Databricks",
+      "summary": "Recommended: migrate GPT-5 to OpenAI GPT-6.1 Sol and GPT-5 mini to OpenAI GPT-6.1 Terra by December 11, 2026, when both models are retired."
+    },
+    "https://learn.microsoft.com/azure/databricks/release-notes/whats-coming#upcoming-breaking-change-array_contains-with-a-constant-empty-array-will-return-null-for-a-null-value": {
+      "date": "2027-01-15",
+      "title": "Upcoming breaking change: array_contains with a constant empty array will return NULL for a NULL value",
+      "link": "https://learn.microsoft.com/azure/databricks/release-notes/whats-coming#upcoming-breaking-change-array_contains-with-a-constant-empty-array-will-return-null-for-a-null-value",
+      "source": "Azure Databricks",
+      "summary": "Use `size(arr) > 0 AND array_contains(arr, value)` to keep prior results: starting on or after January 15, 2027, with ANSI mode enabled in Databricks Runtime 19 and above, `array_contains(arr, value)` returns NULL instead of false when arr is a constant empty array and value is NULL. `map_contains_key(map, key)` with a constant empty map changes the same way, so `NOT array_contains(arr, value)` no longer matches rows where value is NULL."
     }
   }
 }

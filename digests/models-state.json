@@ -42,7 +42,9 @@
     "openai/gpt-6.2-sol:batch": "2026-11-18",
     "google/gemini-4-neon": "2026-11-19",
     "google/gemini-4-neon:batch": "2026-11-19",
-    "mistralai/pixtral-large-2502": "2026-11-20"
+    "mistralai/pixtral-large-2502": "2026-11-20",
+    "thinkingmachines/inkling-2-mini": "2026-11-21",
+    "radixark/daisyrose-27b": "2026-11-21"
   },
   "stages": {}
 }

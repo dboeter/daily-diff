@@ -1,0 +1,19 @@
+{
+"attempted": 13,
+"failed": 2,
+"calls": [
+{"label":"infra","outcome":"ok","chars":511},
+{"label":"spotted-summaries","outcome":"ok","chars":1354},
+{"label":"agents","outcome":"ok","chars":1301},
+{"label":"policy-summaries","outcome":"ok","chars":148},
+{"label":"policy","outcome":"ok","chars":271},
+{"label":"agents-highlights","outcome":"ok","chars":548},
+{"label":"data-data_stack","outcome":"ok","chars":480},
+{"label":"data-vendor-summaries","outcome":"ok","chars":3035},
+{"label":"models-summaries","outcome":"ok","chars":693},
+{"label":"data-highlights","outcome":"ok","chars":490},
+{"label":"models-highlights","outcome":"ok","chars":656},
+{"label":"highlights","outcome":"failed","error":"TruncatedResponseError: openrouter response cut off at max_tokens=16384 (usage: {\"prompt_tokens\":1463,\"completion_tokens\":16384,\"total_tokens\":17847,\"cost\":0,\"is_byok\":false,\"prompt_tokens_details\":{\"cached_tokens\":1280,\"cache_write_tokens\":0,\"audio_tokens\":0,\"video_tokens\":0},\"cost_details\":{\"upstr"},
+{"label":"highlights","outcome":"fallback","error":"TruncatedResponseError: openrouter response cut off at max_tokens=16384 (usage: {\"prompt_tokens\":1463,\"completion_tokens\":16384,\"total_tokens\":17847,\"cost\":0,\"is_byok\":false,\"prompt_tokens_details\":{\"cached_tokens\":1280,\"cache_write_tokens\":0,\"audio_tokens\":0,\"video_tokens\":0},\"cost_details\":{\"upstr"}
+]
+}
