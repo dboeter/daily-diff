@@ -557,8 +557,7 @@ export function dropNoHighlightRows(
 
 // A period after one of these, or inside a dotted abbreviation (U.S., E.U.), ends no
 // sentence: AI Policy prose cites "Art. 50", "the U.S. Senate" and
-// deadlines such as "closes Nov. 9". A sentence that really ends on "Dec." runs
-// on, and is cut at HIGHLIGHT_MAX_CHARS.
+// deadlines such as "closes Nov. 9". A sentence that really ends on "Dec." runs on.
 const ABBREVIATIONS = new Set([
   ...["jan", "feb", "mar", "apr", "jun", "jul", "aug", "sep", "sept", "oct", "nov", "dec"],
   "sec",
@@ -604,14 +603,24 @@ export function ledeHighlight(md: string): string | null {
   return firstSentence(block.join(" "));
 }
 
-/** Markdown text as plain text: list marker, links, bold, code, italics and ⚠️ removed. */
+/**
+ * Markdown text as plain text: list marker, links, bold, italics, ⚠️ and backticks removed. Emphasis
+ * is stripped outside code spans only, so `__init__.py` and `*.py` keep their underscores and stars.
+ */
 function plainText(block: string): string {
   return block
     .replace(/^([-*]|\d+[.)])\s+/, "")
     .replace(/\[([^\]]*)\]\((?:[^()]|\([^)]*\))*\)/g, "$1")
-    .replace(/\*\*|__|`/g, "")
-    .replace(/(^|[\s(])[*_]([^*_]+)[*_](?=[\s.,;:!?)]|$)/g, "$1$2")
-    .replace(/⚠️\s*/g, "")
+    .split(/(`[^`]*`)/)
+    .map((part, i) =>
+      i % 2
+        ? part.slice(1, -1)
+        : part
+            .replace(/\*\*|__/g, "")
+            .replace(/(^|[\s(])[*_]([^*_]+)[*_](?=[\s.,;:!?)]|$)/g, "$1$2")
+            .replace(/⚠️\s*/g, ""),
+    )
+    .join("")
     .trim();
 }
 
@@ -627,6 +636,8 @@ function firstSentence(block: string): string | null {
   return plain;
 }
 
+const UNCONFIRMED = plainText(SECURITY.unconfirmed);
+
 /**
  * The items of a report's `## Highlights` as plain text: each bullet, or each paragraph of a prose
  * section (AI Policy), whole and with its going-away sign. NO_HIGHLIGHT_NOTE, a failure notice and
@@ -639,16 +650,17 @@ function highlightItems(md: string): string[] {
   let open: string[] | null = null;
   for (const raw of section.split("\n").slice(1)) {
     const line = raw.trim();
+    // An indented line, a nested bullet too, continues the item above it.
     if (!line) open = null;
-    else if (/^([-*]|\d+[.)])\s/.test(line) || !open) items.push((open = [line]));
-    else open.push(line);
+    else if (open && (/^\s/.test(raw) || !/^([-*]|\d+[.)])\s/.test(line)))
+      open.push(line.replace(/^([-*]|\d+[.)])\s+/, ""));
+    else items.push((open = [line]));
   }
   // Checked on the Markdown: the notices and the claim's marker carry ⚠️ and emphasis.
   return items
     .map((lines) => lines.join(" ").replace(/^([-*]|\d+[.)])\s+/, ""))
     .filter(
-      (md) =>
-        md !== NO_HIGHLIGHT_NOTE && !FAILURE_NOTICES.has(md) && !md.includes(SECURITY.unconfirmed.trim()),
+      (md) => md !== NO_HIGHLIGHT_NOTE && !FAILURE_NOTICES.has(md) && !plainText(md).includes(UNCONFIRMED),
     )
     .map((md) => signHighlight(plainText(md)))
     .filter((text) => text !== "");

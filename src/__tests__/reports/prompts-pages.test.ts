@@ -418,6 +418,29 @@ describe("pageHighlights", () => {
     ).toEqual({ "ai-agents": ["Codex ships."] });
   });
 
+  it("keeps code spans as written: no emphasis is stripped inside them", () => {
+    expect(
+      pageHighlights({
+        "ai-agents": page("- Drops `__init__.py` scanning and `**kwargs`; globs `*.pth` and `*.py`."),
+      }),
+    ).toEqual({ "ai-agents": ["Drops __init__.py scanning and **kwargs; globs *.pth and *.py."] });
+  });
+
+  it("reads a nested bullet as part of its parent, so the second Highlight keeps its slot", () => {
+    expect(pageHighlights({ "ai-agents": page("- Main item.\n  - nested detail\n- Second.") })).toEqual({
+      "ai-agents": ["Main item. nested detail", "Second."],
+    });
+  });
+
+  it("leaves out an unconfirmed claim written without the italics", () => {
+    const plain = SECURITY.unconfirmed.replace(/\*/g, "").trim();
+    expect(pageHighlights({ "ai-agents": page(`- 🔓 Leak. ${plain} A user says.\n- Codex ships.`) })).toEqual(
+      {
+        "ai-agents": ["Codex ships."],
+      },
+    );
+  });
+
   it("matches a lead's possessive and hyphenated words to their bare forms", () => {
     expect(
       restatesLead("OpenAI open source Codex agent", "OpenAI's open-source Codex agent ships today"),
