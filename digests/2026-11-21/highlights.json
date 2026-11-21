@@ -1,8 +1,17 @@
 {
+  "ai-agents": [
+    "Pi v1.6.0 makes render() return readonly string[] and makes Container return the same cached array while children are unchanged, so extensions that modify render output in place must copy it first.",
+    "Cline CLI v3.0.75 starts one-shot runs in yolo mode rather than act mode unless auto-approve is disabled, a mode flag is supplied, plan mode is saved, or the prompt is a /team prompt."
+  ],
+  "ai-models": [
+    "Thinking Machines released Inkling 2 Mini, an open-weight multimodal MoE model with 3.4B active of 26.4B total parameters and a 1M-token context that, it says, loops its middle layers to reason more per token.",
+    "RadixArk released DaisyRose 27B, an open-weight multimodal reasoning model with a 262K-token context, trained from Qwen3.8 27B using reinforcement learning only on long-horizon agent tasks without supervised fine-tuning or distillation."
+  ],
   "ai-policy": [
-    "Transformer Weekly’s Policy can still work on short timelines reports California’s bid to regulate AI, a new FRONTIER ACT, and Anthropic’s…"
+    "Transformer Weekly’s Policy can still work on short timelines reports California’s bid to regulate AI, a new FRONTIER ACT, and Anthropic’s record-breaking IPO."
   ],
   "ai-data": [
-    "− Databricks users of GPT-5 and GPT-5 mini: both models retire December 11, 2026; Databricks recommends migrating GPT-5 to OpenAI GPT-6.1…"
+    "− Databricks users of GPT-5 and GPT-5 mini: both models retire December 11, 2026; Databricks recommends migrating GPT-5 to OpenAI GPT-6.1 Sol and GPT-5 mini to OpenAI GPT-6.1 Terra by that date.",
+    "Databricks users with ANSI mode enabled in Databricks Runtime 19 and above: starting January 15, 2027, array_contains with a constant empty array returns NULL instead of false when the value is NULL; to keep prior results, use size(arr) > 0 AND array_contains(arr, value)."
   ]
 }
