@@ -13,7 +13,79 @@
       <height>144</height>
     </image>
     <atom:link href="https://dboeter.github.io/daily-diff/feeds/ai-agents.xml" rel="self" type="application/rss+xml"/>
-    <lastBuildDate>Fri, 20 Nov 2026 07:05:10 +0000</lastBuildDate>
+    <lastBuildDate>Sat, 21 Nov 2026 07:02:12 +0000</lastBuildDate>
+    <item>
+      <title>AI Agents 2026-11-21</title>
+      <link>https://dboeter.github.io/daily-diff/#2026-11-21/ai-agents</link>
+      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-11-21/ai-agents</guid>
+      <pubDate>Sat, 21 Nov 2026 00:00:00 +0000</pubDate>
+      <description>AI Agents 2026-11-21 ⬛ Overview · 🟪 AI Agents · 🟦 AI Models &amp;amp; Labs · 🟧 AI Policy · 🟨 Data Engineering Projects: 15 | Active today: 5 | Stable releases: 8 | Prereleases skipped: 5 | Spotted: 2 | Generated: 2026-11-21 06:55 UTC Highlights Pi v1.6.0 makes render() return readonly string[] and makes Container return the same cached array while children are unchanged, so extensions that modify render output in place must copy it first. Cline CLI v3.0.75 starts one-shot runs in yolo mode rathe...</description>
+      <content:encoded><![CDATA[<h1>AI Agents 2026-11-21</h1>
+<p><a href="https://dboeter.github.io/daily-diff/#2026-11-21">⬛ Overview</a> · <strong>🟪 AI Agents</strong> · <a href="https://dboeter.github.io/daily-diff/#2026-11-21/ai-models">🟦 AI Models &amp; Labs</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-21/ai-policy">🟧 AI Policy</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-21/ai-data">🟨 Data Engineering</a></p>
+<blockquote>
+<p>Projects: 15 | Active today: 5 | Stable releases: 8 | Prereleases skipped: 5 | Spotted: 2 | Generated: 2026-11-21 06:55 UTC</p>
+</blockquote>
+<hr>
+<h2>Highlights</h2>
+<ul>
+<li>Pi v1.6.0 makes render() return readonly string[] and makes Container return the same cached array while children are unchanged, so extensions that modify render output in place must copy it first.</li>
+<li>Cline CLI v3.0.75 starts one-shot runs in yolo mode rather than act mode unless auto-approve is disabled, a mode flag is supplied, plan mode is saved, or the prompt is a /team prompt.</li>
+<li>Conductor v0.1.47 returns a non-retryable error when COPILOT_CLI_PATH or runtime_url points at a protocol-3 Copilot CLI, naming the CLI to update.</li>
+</ul>
+<hr>
+<h2>Coding agents &amp; assistants</h2>
+<h3>Claude Code</h3>
+<ul>
+<li><strong>Release:</strong> <a href="https://github.com/anthropics/claude-code/releases/tag/v2.1.330">v2.1.330</a> fixes <code>ExitWorktree</code> and the worktree exit dialog deleting a worktree that another running Claude Code session was working in.</li>
+</ul>
+<h3>Kilo Code</h3>
+<ul>
+<li><strong>Release:</strong> <a href="https://github.com/Kilo-Org/kilocode/releases/tag/v7.8.32">v7.8.32</a> fixes worktree deletion confirmation in Agent Manager so held keys and repeated close commands do not confirm it.</li>
+</ul>
+<h3>Pi</h3>
+<ul>
+<li><strong>Release:</strong> <a href="https://github.com/earendil-works/pi/releases/tag/v1.6.0">v1.6.0</a> breaks extension components: <code>render()</code> now returns <code>readonly string[]</code>, and <code>Container</code> returns the same cached array while its children are unchanged, so extensions that modify render output in place must copy it first.</li>
+</ul>
+<h3>Cline</h3>
+<ul>
+<li><strong>Release:</strong> <a href="https://github.com/cline/cline/releases/tag/v4.1.27">v4.1.27</a> fixes <code>read_files</code> results being cut to 8k characters on the way to the model; reads now arrive in full up to the tool&#39;s own limit of 2000 lines or about 48k characters. <a href="https://github.com/cline/cline/releases/tag/cli-v3.0.75">cli-v3.0.75</a> changes one-shot runs to start in yolo mode instead of act mode, unless auto-approve is off (<code>--auto-approve false</code> or the saved setting), a mode flag is passed, plan mode is saved, or the prompt is a <code>/team</code> prompt.</li>
+</ul>
+<p><strong>Quiet today:</strong> <a href="https://github.com/openai/codex">OpenAI Codex</a>, <a href="https://github.com/google-gemini/gemini-cli">Gemini CLI</a>, <a href="https://github.com/anomalyco/opencode">OpenCode</a>, <a href="https://github.com/can1357/oh-my-pi">Oh My Pi</a>, <a href="https://github.com/1jehuang/jcode">jcode</a>, <a href="https://github.com/CommandCodeAI/command-code">Command Code</a>, <a href="https://github.com/deepseek-ai/deepseek-harness">DeepSeek Harness</a>, <a href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a></p>
+<hr>
+<h2>Agent tooling</h2>
+<h3>Conductor</h3>
+<ul>
+<li><strong>Release:</strong> <a href="https://github.com/microsoft/conductor/releases/tag/v0.1.47">v0.1.47</a> fixes Copilot agents failing at startup on Copilot CLI 1.0.113 and later by switching to <code>microsoft-copilot-sdk&gt;=2.0.1,&lt;3</code>, which speaks protocol 4. That SDK cannot talk to protocol-3 CLIs (Copilot CLI 1.0.112 and earlier): <code>COPILOT_CLI_PATH</code> or <code>runtime_url</code> pointing at one now stops with a non-retryable error naming the CLI to update, and self-managed upgrades need <code>pip uninstall github-copilot-sdk</code> first.</li>
+</ul>
+<p><strong>Quiet today:</strong> <a href="https://github.com/NVIDIA/OpenShell">OpenShell</a>, <a href="https://github.com/herdrdev/herdr">herdr</a></p>
+<hr>
+<h2>Spotted</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Story</th>
+<th align="left">Source</th>
+<th align="left">Discussion</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a href="https://spectrum.ieee.org/epic-games-unreal-engine-ai">Epic Games Turns to AI Coding for the Unreal Engine</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50573681">58 points, 60 comments</a></td>
+<td align="left">Epic Games, the maker of the Unreal Engine, is turning to AI coding for the engine to keep pace with standalone AI coding tools.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://hubspot.engineering/blog/aviator-hubspots-agent-harness/">Aviator: HubSpot&#39;s Agent Harness</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50562442">30 points, 3 comments</a></td>
+<td align="left">HubSpot describes Aviator, the Java agent harness behind its Breeze Assistant, as running the agent loop, supporting any model, scaling to thousands of tools, and giving agents a sandboxed computer.</td>
+</tr>
+</tbody></table>
+<hr>
+<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
+]]></content:encoded>
+    </item>
     <item>
       <title>AI Agents 2026-11-20</title>
       <link>https://dboeter.github.io/daily-diff/#2026-11-20/ai-agents</link>
@@ -2906,82 +2978,6 @@
 <td align="left">Every time I connect an application to a new LLM provider, I run into the same problem: how much...</td>
 </tr>
 </tbody></table>
-<hr>
-<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
-]]></content:encoded>
-    </item>
-    <item>
-      <title>AI Agents 2026-10-22</title>
-      <link>https://dboeter.github.io/daily-diff/#2026-10-22/ai-agents</link>
-      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-10-22/ai-agents</guid>
-      <pubDate>Thu, 22 Oct 2026 00:00:00 +0000</pubDate>
-      <description>AI Agents 2026-10-22 📅 Overview · 🤖 AI Agents · 💬 AI Discussions · 📚 AI Research · 🌐 Lab Announcements · ⚖️ Policy Watch · 🗄️ Data Engineering Watch Generated: 2026-10-22 01:26 UTC | Projects: 25 | Active today: 11 | Stable releases: 29 | Prereleases (not covered): 6 🕵️ Stealth Models on OpenRouter No stealth models listed on OpenRouter today. Coding Agents &amp;amp; Assistants Overview Claude Code shipped two patch releases adding API version control and OpenTelemetry safety events while a W...</description>
-      <content:encoded><![CDATA[<h1>AI Agents 2026-10-22</h1>
-<p><a href="https://dboeter.github.io/daily-diff/#2026-10-22">📅 Overview</a> · <strong>🤖 AI Agents</strong> · <a href="https://dboeter.github.io/daily-diff/#2026-10-22/ai-hn">💬 AI Discussions</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-22/ai-arxiv">📚 AI Research</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-22/ai-web">🌐 Lab Announcements</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-22/ai-policy">⚖️ Policy Watch</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-22/ai-data">🗄️ Data Engineering Watch</a></p>
-<blockquote>
-<p>Generated: 2026-10-22 01:26 UTC | Projects: 25 | Active today: 11 | Stable releases: 29 | Prereleases (not covered): 6</p>
-</blockquote>
-<hr>
-<h2>🕵️ Stealth Models on OpenRouter</h2>
-<p>No stealth models listed on OpenRouter today.</p>
-<hr>
-<h2>Coding Agents &amp; Assistants</h2>
-<h3>Overview</h3>
-<p>Claude Code shipped two patch releases adding API version control and OpenTelemetry safety events while a Windows Bedrock regression blocks custom CA certificates. OpenAI Codex&#39;s macOS desktop app breaks first-message sends in new chats and Windows users lose the Dots entry after updating. Pi 1.4.0 introduces image input for classifier models across multiple providers. Oh My Pi updated its catalog with persistent prompt caching for OpenAI Codex and refreshed bundled Yolo-Auto models. Hermes Agent removed intrusive suggestion pills and fixed a Kanban worker protocol mismatch alongside a terminal paging crash. pstack-claude released a series of fixes aligning transcript and plugin discovery with Claude Code&#39;s <code>CLAUDE_CONFIG_DIR</code>. OpenBitFun added offline session recovery and hardened Windows icon handling.</p>
-<h3>Claude Code</h3>
-<ul>
-<li><strong>Release</strong>: v2.1.307 adds <code>/claude-api api-version</code> to pin the API to <code>2026-10-21</code> and emits <code>claude_code.safety_event</code> OpenTelemetry events for every tool call blocked by permissions, auto-mode, safety checks, hooks, or the sandbox; v2.1.306 fixes <code>claude -p</code> authentication inside cloud sessions and stops spurious &quot;prompt too long&quot; errors in MCP-heavy sessions. <a href="https://github.com/anthropics/claude-code/releases/tag/v2.1.307">v2.1.307</a>, <a href="https://github.com/anthropics/claude-code/releases/tag/v2.1.306">v2.1.306</a></li>
-<li><strong>Hot issue</strong>: Windows users on Bedrock hit <code>UNABLE_TO_GET_ISSUER_CERT</code> in 2.1.304; custom CAs load but aren&#39;t used, a regression from 2.1.303. <a href="https://github.com/anthropics/claude-code/issues/103680">#103680</a></li>
-</ul>
-<h3>OpenAI Codex</h3>
-<ul>
-<li><strong>Hot issue</strong>: macOS desktop app 26.1016.51333 fails the first message in any new chat with &quot;Cannot serialize value (couldn&#39;t stringify value)&quot;. <a href="https://github.com/openai/codex/issues/55744">#55744</a></li>
-<li><strong>Hot issue</strong>: Windows Dots entry vanishes after updating to 26.1016.51333; reinstall and <code>Ctrl+.</code> don&#39;t restore it. <a href="https://github.com/openai/codex/issues/55795">#55795</a></li>
-</ul>
-<h3>Pi</h3>
-<ul>
-<li><strong>Release</strong>: v1.4.0 enables image input for <code>codemode models.classify()</code> with TypeSafe&#39;s Jev and Cloudflare&#39;s Clef models on <code>typesafe</code>, <code>cloudflare-workers-ai</code>, and OpenRouter. <a href="https://github.com/earendil-works/pi/releases/tag/v1.4.0">v1.4.0</a></li>
-</ul>
-<h3>Oh My Pi</h3>
-<ul>
-<li><strong>Release</strong>: v18.12.6 adds a <code>prompt-cache-persistent</code> catalog axis for providers with non-expiring prompt caches (logged-in OpenAI Codex) and updates the bundled Yolo-Auto catalog to <code>qwen3.8-27b</code> (new default), <code>yolo</code>, <code>yolo-small</code>, <code>yolo-128k</code>; v18.12.5 implements OpenAI 12-hour prompt caching for GPT-5.6+ via <code>cacheRetention: &quot;long&quot;</code> and fixes 404 errors on personal ChatGPT accounts. <a href="https://github.com/can1357/oh-my-pi/releases/tag/v18.12.6">v18.12.6</a>, <a href="https://github.com/can1357/oh-my-pi/releases/tag/v18.12.5">v18.12.5</a></li>
-</ul>
-<h3>Hermes Agent</h3>
-<ul>
-<li><strong>Release</strong>: v0.22.4 removes suggestion pills that appeared above the composer without clear purpose; v0.22.3 rolls up ~620 PRs since v0.22.2 into a stable release across CLI, installer, Microsoft Store, Docker, and Hermes Cloud. <a href="https://github.com/nousresearch/hermes-agent/releases/tag/v0.22.4">v0.22.4</a>, <a href="https://github.com/nousresearch/hermes-agent/releases/tag/v0.22.3">v0.22.3</a></li>
-<li><strong>Hot issue</strong>: Kanban worker posts to <code>chat/completions</code> despite <code>api_mode=codex_responses</code>, causing HTTP 400 <code>ModelProtocolUnsupported</code> for <code>muse-spark</code> on <code>opencode-go</code>. <a href="https://github.com/NousResearch/hermes-agent/issues/141861">#141861</a></li>
-<li><strong>Hot issue</strong>: <code>process_manage</code> throws <code>TypeError: slice indices must be integers</code> when paging background process output, blocking log retrieval. <a href="https://github.com/NousResearch/hermes-agent/issues/141988">#141988</a></li>
-</ul>
-<h3>michael-denyer/pstack-claude</h3>
-<ul>
-<li><strong>Release</strong>: v0.9.97–v0.9.101 fix transcript and plugin directory discovery to respect <code>CLAUDE_CONFIG_DIR</code>, switch hook argument passing from <code>awk -v</code> to environment variables to avoid backslash escape issues on Windows paths, and align skills with Claude Code&#39;s session ID and project layout. <a href="https://github.com/michael-denyer/pstack-claude/releases/tag/v0.9.101">v0.9.101</a>, <a href="https://github.com/michael-denyer/pstack-claude/releases/tag/v0.9.100">v0.9.100</a>, <a href="https://github.com/michael-denyer/pstack-claude/releases/tag/v0.9.99">v0.9.99</a>, <a href="https://github.com/michael-denyer/pstack-claude/releases/tag/v0.9.98">v0.9.98</a>, <a href="https://github.com/michael-denyer/pstack-claude/releases/tag/v0.9.97">v0.9.97</a></li>
-</ul>
-<h3>GCWing/OpenBitFun</h3>
-<ul>
-<li><strong>Release</strong>: v1.0.7 preserves icon source bytes on Windows, keeps official and LAN relay connections independent, and adds offline session recovery for data tools. <a href="https://github.com/GCWing/OpenBitFun/releases/tag/v1.0.7">v1.0.7</a></li>
-</ul>
-<p><strong>Quiet today:</strong> <a href="https://github.com/google-gemini/gemini-cli">Gemini CLI</a>, <a href="https://github.com/Kilo-Org/kilocode">Kilo Code</a>, <a href="https://github.com/anomalyco/opencode">OpenCode</a>, <a href="https://github.com/1jehuang/jcode">jcode</a>, <a href="https://github.com/cline/cline">Cline</a>, <a href="https://github.com/CommandCodeAI/command-code">Command Code</a>, <a href="https://github.com/deepseek-ai/deepseek-harness">DeepSeek Harness</a>, <a href="https://github.com/cursor/plugins">cursor/plugins</a>, <a href="https://github.com/GanyuanRan/Autoloom">GanyuanRan/Autoloom</a></p>
-<hr>
-<h2>Agent Tooling</h2>
-<h3>Overview</h3>
-<p>ruvnet/ruflo shipped eight rapid-fire patch releases (v3.59.3–v3.59.12) restoring the <code>pair</code> command, fixing Windows path handling, securing memory tombstones, and hardening policy locks. heygen-com/hyperframes released three versions (v0.8.183–v0.8.185) enabling 4K transparent renders, larger project uploads, and faster cold starts. wangmiaozero/pi-harness v2.2.5–v2.2.6 added local plugin support with trust approval, model verification, and refreshed skills. mvschwarz/openrig v0.6.14 delivered final 0.6-line stability fixes including in-place agent repair after upgrades.</p>
-<h3>ruvnet/ruflo</h3>
-<ul>
-<li><strong>Release</strong>: v3.59.3–v3.59.12 restore the <code>pair</code> command for the Claude Code skill, fix Windows ADR indexing and console path bugs, remove unused <code>toml</code> dependency with high-severity CVEs, scrub memory tombstone payloads on delete, harden policy lock acquisition, add <code>--path</code> to <code>memory export</code>, distill both memory stores, and honor <code>hive-mind_init</code> persistence flags. <a href="https://github.com/ruvnet/ruflo/releases/tag/v3.59.12">https://github.com/ruvnet/ruflo/releases/tag/v3.59.12</a></li>
-</ul>
-<h3>heygen-com/hyperframes</h3>
-<ul>
-<li><strong>Release</strong>: v0.8.183–v0.8.185 add 4K transparent MOV/WebM cloud rendering, support projects exceeding upload limits via chunked capture, start encoding during multi-worker MP4 capture, keep transparency in Studio previews, handle post-cookie-banner page reloads, and accelerate CLI cold starts with cached Chrome. <a href="https://github.com/heygen-com/hyperframes/releases/tag/v0.8.185">https://github.com/heygen-com/hyperframes/releases/tag/v0.8.185</a></li>
-</ul>
-<h3>wangmiaozero/pi-harness</h3>
-<ul>
-<li><strong>Release</strong>: v2.2.5–v2.2.6 introduce local Harness plugins for run metrics, custom evaluations, JSON trace exports, and team templates with explicit trust approval and permission diagnostics; add shared OpenCode Zen/Go setup with named API keys, individual and batch model verification, and model enablement controls. <a href="https://github.com/wangmiaozero/pi-harness/releases/tag/v2.2.6">https://github.com/wangmiaozero/pi-harness/releases/tag/v2.2.6</a></li>
-</ul>
-<h3>mvschwarz/openrig</h3>
-<ul>
-<li><strong>Release</strong>: v0.6.14 (final 0.6 release) fixes agents that stop receiving messages after an upgrade with in-place repair guidance, makes manual compaction wait at approvals, reduces refocus overhead on busy machines, and corrects inventory reads. <a href="https://github.com/mvschwarz/openrig/releases/tag/v0.6.14">https://github.com/mvschwarz/openrig/releases/tag/v0.6.14</a></li>
-</ul>
-<p><strong>Quiet today:</strong> <a href="https://github.com/NVIDIA/OpenShell">OpenShell</a>, <a href="https://github.com/herdrdev/herdr">herdr</a>, <a href="https://github.com/mksglu/context-mode">context-mode</a>, <a href="https://github.com/asheshgoplani/agent-deck">Agent Deck</a>, <a href="https://github.com/paperclipai/paperclip">paperclipai/paperclip</a></p>
 <hr>
 <p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
 ]]></content:encoded>

@@ -13,7 +13,127 @@
       <height>144</height>
     </image>
     <atom:link href="https://dboeter.github.io/daily-diff/feeds/ai-models.xml" rel="self" type="application/rss+xml"/>
-    <lastBuildDate>Fri, 20 Nov 2026 07:05:10 +0000</lastBuildDate>
+    <lastBuildDate>Sat, 21 Nov 2026 07:02:12 +0000</lastBuildDate>
+    <item>
+      <title>AI Models &amp; Labs 2026-11-21</title>
+      <link>https://dboeter.github.io/daily-diff/#2026-11-21/ai-models</link>
+      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-11-21/ai-models</guid>
+      <pubDate>Sat, 21 Nov 2026 00:00:00 +0000</pubDate>
+      <description>AI Models &amp;amp; Labs 2026-11-21 ⬛ Overview · 🟪 AI Agents · 🟦 AI Models &amp;amp; Labs · 🟧 AI Policy · 🟨 Data Engineering Lab posts: 2 | New models: 2 | Spotted: 6 | Generated: 2026-11-21 06:55 UTC Highlights Thinking Machines released Inkling 2 Mini, an open-weight multimodal MoE model with 3.4B active of 26.4B total parameters and a 1M-token context that, it says, loops its middle layers to reason more per token. RadixArk released DaisyRose 27B, an open-weight multimodal reasoning model with a ...</description>
+      <content:encoded><![CDATA[<h1>AI Models &amp; Labs 2026-11-21</h1>
+<p><a href="https://dboeter.github.io/daily-diff/#2026-11-21">⬛ Overview</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-21/ai-agents">🟪 AI Agents</a> · <strong>🟦 AI Models &amp; Labs</strong> · <a href="https://dboeter.github.io/daily-diff/#2026-11-21/ai-policy">🟧 AI Policy</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-21/ai-data">🟨 Data Engineering</a></p>
+<blockquote>
+<p>Lab posts: 2 | New models: 2 | Spotted: 6 | Generated: 2026-11-21 06:55 UTC</p>
+</blockquote>
+<hr>
+<h2>Highlights</h2>
+<ul>
+<li>Thinking Machines released Inkling 2 Mini, an open-weight multimodal MoE model with 3.4B active of 26.4B total parameters and a 1M-token context that, it says, loops its middle layers to reason more per token.</li>
+<li>RadixArk released DaisyRose 27B, an open-weight multimodal reasoning model with a 262K-token context, trained from Qwen3.8 27B using reinforcement learning only on long-horizon agent tasks without supervised fine-tuning or distillation.</li>
+<li>In a paper, authors report what they describe, to their knowledge, as the first time a language model rewrites its own weights through its own reasoning rather than a separate training run.</li>
+</ul>
+<hr>
+<h2>Lab announcements</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Post</th>
+<th align="left">Lab</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-11-21</td>
+<td align="left"><a href="https://openai.com/index/introducing-medchembench/">Introducing Medchembench</a></td>
+<td align="left">OpenAI</td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left">2026-11-20</td>
+<td align="left"><a href="https://www.anthropic.com/news/ipo-close">Anthropic announces closing of initial public offering, including full exercise of underwriters’ option to purchase additional shares, and closing of concurrent private placement</a></td>
+<td align="left">Anthropic</td>
+<td align="left">Anthropic announced the closing of its initial public offering of 1,127,000,000 Class A common shares at $83.00 per share, raising approximately $93.5 billion in gross proceeds with its stock trading on Nasdaq under the symbol &quot;ANT&quot; since November 19, 2026, and also closed a concurrent private placement of 313,253,007 shares.</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>New on OpenRouter</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Listed</th>
+<th align="left">Model</th>
+<th align="left">Context</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-11-21</td>
+<td align="left"><a href="https://openrouter.ai/thinkingmachines/inkling-2-mini">Thinking Machines: Inkling 2 Mini</a> <code>thinkingmachines/inkling-2-mini</code></td>
+<td align="left">1M</td>
+<td align="left">Inkling 2 Mini is an open-weight multimodal looped transformer from Thinking Machines Lab with 3.4B active parameters out of 26.4B total (MoE).</td>
+</tr>
+<tr>
+<td align="left">2026-11-21</td>
+<td align="left"><a href="https://openrouter.ai/radixark/daisyrose-27b">RadixArk: DaisyRose 27B</a> <code>radixark/daisyrose-27b</code></td>
+<td align="left">262K</td>
+<td align="left">DaisyRose 27B is an open-weight multimodal reasoning model from RadixArk trained from Qwen3.8 27B using reinforcement learning only on long-horizon agent tasks with no supervised fine-tuning or distillation.</td>
+</tr>
+</tbody></table>
+<hr>
+<p>Nothing new from OpenRouter&#39;s stealth models today.</p>
+<hr>
+<h2>Spotted</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Story</th>
+<th align="left">Source</th>
+<th align="left">Discussion</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a href="https://thinkingmachines.ai/news/inkling-2-mini/">Inkling 2 Mini</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50581260">889 points, 164 comments</a></td>
+<td align="left">Thinking Machines presents Inkling 2 Mini, an open-weights model small enough to run on a laptop that, it says, loops its middle layers to reason more per token and reach answers in fewer tokens.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://architectlabs.com/blog/frostbite">Frostbite: A new CPU architecture discovered, designed and verified by AI</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50572503">640 points, 332 comments</a></td>
+<td align="left">Architect Labs says Frostbite is a general-purpose CPU built on interaction nets that its AI systems discovered, designed, and verified end-to-end, reaching 4.59x the performance-per-watt of a modern dual-issue, in-order CPU core.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://arxiv.org/abs/2611.21885">Language Models Can Rewrite Their Own Weights</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50577265">385 points, 116 comments</a></td>
+<td align="left">The authors show what they describe, to their knowledge, as the first time a language model rewrites its own weights through its own reasoning, rather than relying on another training run or inference-time computation.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://www.theguardian.com/business/2026/nov/20/global-stock-markets-slump-anthropic-ipo-ai-sell-off">Nasdaq erases all 2026 gains as AI sell-off dampens Anthropic’s second day</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50574383">244 points, 515 comments</a></td>
+<td align="left">According to the Guardian, the Nasdaq erased all of its 2026 gains in a sell-off that wiped out trillions in value, as Anthropic&#39;s IPO failed to lift the market amid investors questioning the sums poured into AI buildout.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://www.wsj.com/finance/stocks/anthropics-ipo-bust-punctuates-4-trillion-ai-wipeout-on-wall-street-f1f1ec90">Anthropic&#39;s IPO Bust Deepens $4T AI Wipeout on Wall Street</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50582280">53 points, 5 comments</a></td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left"><a href="https://www.techpolicy.press/no-bailout-for-the-ai-bubble-anthropic-ipo-protesters-say/">No Bailout for the AI Bubble, Anthropic IPO Protesters Say</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50564282">51 points, 36 comments</a></td>
+<td align="left">Protesters assembled outside the Nasdaq in New York City as Anthropic CEO Dario Amodei and company executives rang the opening bell.</td>
+</tr>
+</tbody></table>
+<hr>
+<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
+]]></content:encoded>
+    </item>
     <item>
       <title>AI Models &amp; Labs 2026-11-20</title>
       <link>https://dboeter.github.io/daily-diff/#2026-11-20/ai-models</link>
