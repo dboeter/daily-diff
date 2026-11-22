@@ -13,7 +13,102 @@
       <height>144</height>
     </image>
     <atom:link href="https://dboeter.github.io/daily-diff/feeds/ai-models.xml" rel="self" type="application/rss+xml"/>
-    <lastBuildDate>Sat, 21 Nov 2026 07:02:12 +0000</lastBuildDate>
+    <lastBuildDate>Sun, 22 Nov 2026 06:34:30 +0000</lastBuildDate>
+    <item>
+      <title>AI Models &amp; Labs 2026-11-22</title>
+      <link>https://dboeter.github.io/daily-diff/#2026-11-22/ai-models</link>
+      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-11-22/ai-models</guid>
+      <pubDate>Sun, 22 Nov 2026 00:00:00 +0000</pubDate>
+      <description>AI Models &amp;amp; Labs 2026-11-22 ⬛ Overview · 🟪 AI Agents · 🟦 AI Models &amp;amp; Labs · 🟧 AI Policy · 🟨 Data Engineering Lab posts: 0 | New models: 0 | Spotted: 10 | Generated: 2026-11-22 06:30 UTC Highlights According to a blog post, a frontier LLM — handed only a hex dump, with no tools and one reply — can explain compiled programs, patch bytes to add features, and produce working executables from scratch. OpenRouter says it off-boarded three providers, dropped 125 endpoints from Zero Data Ret...</description>
+      <content:encoded><![CDATA[<h1>AI Models &amp; Labs 2026-11-22</h1>
+<p><a href="https://dboeter.github.io/daily-diff/#2026-11-22">⬛ Overview</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-22/ai-agents">🟪 AI Agents</a> · <strong>🟦 AI Models &amp; Labs</strong> · <a href="https://dboeter.github.io/daily-diff/#2026-11-22/ai-policy">🟧 AI Policy</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-22/ai-data">🟨 Data Engineering</a></p>
+<blockquote>
+<p>Lab posts: 0 | New models: 0 | Spotted: 10 | Generated: 2026-11-22 06:30 UTC</p>
+</blockquote>
+<hr>
+<h2>Highlights</h2>
+<ul>
+<li>According to a blog post, a frontier LLM — handed only a hex dump, with no tools and one reply — can explain compiled programs, patch bytes to add features, and produce working executables from scratch.</li>
+<li>OpenRouter says it off-boarded three providers, dropped 125 endpoints from Zero Data Retention eligibility, and notified potentially affected customers after canary-token research on inference providers.</li>
+</ul>
+<hr>
+<p>Nothing new from Anthropic and OpenAI, OpenRouter&#39;s new listings or OpenRouter&#39;s stealth models today.</p>
+<hr>
+<h2>Spotted</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Story</th>
+<th align="left">Source</th>
+<th align="left">Discussion</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a href="https://www.reuters.com/business/finance/anthropics-historic-debut-put-ais-promise-peril-wall-st-test-2026-11-19/">Anthropic’s Nasdaq debut</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50562754">1139 points, 2320 comments</a></td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left"><a href="https://sgiannopoulos.github.io/blog/machine-code-programming/">LLMs can read and write executables byte by byte from a hex dump</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50546587">225 points, 146 comments</a></td>
+<td align="left">According to the post, a frontier LLM can explain compiled programs, edit bytes to add features, and write working executables from scratch when given only a hex dump, no tools, and one reply.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://www.nbcnews.com/business/markets/anthropic-shares-markets-selloff-nasdaq-rcna610394">Markets plunge: Nasdaq erases 2026 gains, S&amp;P, Dow in corrections</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50578794">198 points, 1 comment</a></td>
+<td align="left">The article describes a market plunge in which the Nasdaq gave up its 2026 gains and the S&amp;P and Dow were in corrections. It says Anthropic&#39;s record-setting Thursday IPO failed to restore investor confidence in the AI market.</td>
+</tr>
+<tr>
+<td align="left">🔓 <a href="https://openrouter.ai/blog/announcements/data-processing-incidents-on-inference-providers/">Data Processing Incidents on Inference Providers</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50595554">87 points, 32 comments</a></td>
+<td align="left">OpenRouter says it off-boarded three providers, removed 125 endpoints from Zero Data Retention eligibility, and notified potentially affected customers after canary token research on inference providers.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://www.researchgate.net/publication/418143113_The_Hungry_Butler_Effect_Concealed_Commercial_Incentives_and_the_Erosion_of_Epistemic_Rigour_in_Large_Language_Models">The Hungry Butler Effect: Concealed Commercial Incentives in LLMs</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50583117">53 points, 20 comments</a></td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left"><a href="https://www.economist.com/science-and-technology/2026/11/20/ai-may-have-solved-the-most-important-problem-in-mathematics">AI may have solved the most important problem in mathematics</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50583445">40 points, 7 comments</a></td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left"><a href="https://www.reuters.com/markets/us/anthropics-ipo-bank-closed-position-meant-stabilize-stock-removing-source-2026-11-20">Anthropic&#39;s IPO bank closed position meant to stabilize stock</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50588647">32 points, 1 comment</a></td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left">🔓 <a href="https://www.together.ai/blog/security-event-prompt-leakage-for-requests-in-june-and-july-of-2026">Together.ai: Prompt Leakage for Requests</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50595816">17 points, 7 comments</a></td>
+<td align="left">Together AI says it is notifying customers about a security incident involving prompt leakage for a subset of prompts submitted to its serverless inference service in June and July 2026.</td>
+</tr>
+<tr>
+<td align="left">🔓 <a href="https://www.dragos.com/blog/ai-supply-chain-security-canary-tokens">Prompt Canaries Detect Prompt Leaks at AI Providers</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50582734">11 points, 0 comments</a></td>
+<td align="left">The authors say they seeded two million AI prompts with canary tokens and found three provider breaches, prompt theft, and ignored Zero Data Retention settings.</td>
+</tr>
+<tr>
+<td align="left">🔓 <a href="https://arstechnica.com/security/2026/11/a-leaky-ai-supply-chain-is-exposing-secret-user-data-at-an-alarming-rate/">Researcher plants 2m canaries into the AI supply chain. A privacy disaster surfaced</a></td>
+<td align="left">Lobste.rs</td>
+<td align="left"><a href="https://lobste.rs/s/32rhzb/researcher_plants_2m_canaries_into_ai">8 points, 3 comments</a></td>
+<td align="left">The article describes a test using prompts with unique, trackable secrets and says it proves that data does not stay private.</td>
+</tr>
+</tbody></table>
+<hr>
+<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
+]]></content:encoded>
+    </item>
     <item>
       <title>AI Models &amp; Labs 2026-11-21</title>
       <link>https://dboeter.github.io/daily-diff/#2026-11-21/ai-models</link>
@@ -3471,159 +3566,6 @@
 <td align="left">Lobste.rs</td>
 <td align="left"><a href="https://lobste.rs/s/d1snfg/next_concept_modeling_fast_parallel">3 points, 0 comments</a></td>
 <td align="left">Diffusion language models (DLMs) offer parallel sampling for faster generation than autoregressive models, an increasingly important advantage as inference becomes a dominant computational workload. However, DLMs degrade quickly with fewer sampling steps, process the full sequence at every step, and…</td>
-</tr>
-</tbody></table>
-<hr>
-<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
-]]></content:encoded>
-    </item>
-    <item>
-      <title>AI Models &amp; Labs 2026-10-23</title>
-      <link>https://dboeter.github.io/daily-diff/#2026-10-23/ai-models</link>
-      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-10-23/ai-models</guid>
-      <pubDate>Fri, 23 Oct 2026 00:00:00 +0000</pubDate>
-      <description>AI Models &amp;amp; Labs 2026-10-23 📅 Overview · 🤖 AI Agents · 🧠 AI Models &amp;amp; Labs · ⚖️ AI Policy · 🗄️ Data Engineering Lab posts: 5 | New models: 1 | Spotted: 9 | Generated: 2026-10-22 23:49 UTC Highlights Anthropic demonstrates LLMs can produce formal proofs at scale, using Claude to verify security properties at the RISC-V assembly level across over 100 open-source libraries and discovering previously undetected bugs. OpenAI models become available on Google Cloud, expanding distribution t...</description>
-      <content:encoded><![CDATA[<h1>AI Models &amp; Labs 2026-10-23</h1>
-<p><a href="https://dboeter.github.io/daily-diff/#2026-10-23">📅 Overview</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-23/ai-agents">🤖 AI Agents</a> · <strong>🧠 AI Models &amp; Labs</strong> · <a href="https://dboeter.github.io/daily-diff/#2026-10-23/ai-policy">⚖️ AI Policy</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-23/ai-data">🗄️ Data Engineering</a></p>
-<blockquote>
-<p>Lab posts: 5 | New models: 1 | Spotted: 9 | Generated: 2026-10-22 23:49 UTC</p>
-</blockquote>
-<hr>
-<h2>Highlights</h2>
-<ul>
-<li>Anthropic demonstrates LLMs can produce formal proofs at scale, using Claude to verify security properties at the RISC-V assembly level across over 100 open-source libraries and discovering previously undetected bugs.</li>
-<li>OpenAI models become available on Google Cloud, expanding distribution through a major cloud provider partnership.</li>
-<li>Recursive releases Flint, a free open-weight mixture-of-experts model with 2.5B active parameters out of 40B total, built by an autoresearch system for coding agents.</li>
-<li>DeepSeek open-sources DeepInfer, a high-performance large-scale inference framework optimized for its models.</li>
-<li>Anthropic launches Claude for Google Workspace beta, adding connectors for Docs, Sheets, and Slides.</li>
-</ul>
-<hr>
-<h2>Lab announcements</h2>
-<table>
-<thead>
-<tr>
-<th align="left">Date</th>
-<th align="left">Lab</th>
-<th align="left">Post</th>
-<th align="left">Summary</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left">2026-10-22</td>
-<td align="left">OpenAI</td>
-<td align="left"><a href="https://openai.com/index/decisions-api/">Decisions Api</a></td>
-<td align="left">—</td>
-</tr>
-<tr>
-<td align="left">2026-10-22</td>
-<td align="left">OpenAI</td>
-<td align="left"><a href="https://openai.com/index/uber-chatgpt-work-rollout/">Uber Chatgpt Work Rollout</a></td>
-<td align="left">—</td>
-</tr>
-<tr>
-<td align="left">2026-10-22</td>
-<td align="left">Anthropic</td>
-<td align="left"><a href="https://www.anthropic.com/research/formal-verification">LLMs are making formal software verification feasible at a much larger scale</a></td>
-<td align="left">Anthropic, in collaboration with Theorem, demonstrates that LLMs can now produce formal proofs at large scale, using Claude to verify security properties at the RISC-V assembly level across over 100 open-source libraries and discovering previously undetected bugs.</td>
-</tr>
-<tr>
-<td align="left">2026-10-22</td>
-<td align="left">Anthropic</td>
-<td align="left"><a href="https://www.anthropic.com/news/open-call-guest-investigators-life-sciences">Open call for guest investigators in the life sciences</a></td>
-<td align="left">Anthropic invites principal investigators at academic institutions, nonprofits, or government labs to apply for an 8–12 week collaboration using Claude on research in causal human biology, molecular biology, medicinal chemistry, drug discovery, and clinical science.</td>
-</tr>
-<tr>
-<td align="left">2026-10-22</td>
-<td align="left">Anthropic</td>
-<td align="left"><a href="https://www.anthropic.com/news/donating-agent-skills-to-the-agentic-ai-foundation">Donating Agent Skills to the Agentic AI Foundation</a></td>
-<td align="left">Anthropic donates the Agent Skills open standard — a folder-based format giving AI agents specialized knowledge and workflows — to the Agentic AI Foundation under the Linux Foundation for neutral, community-driven governance.</td>
-</tr>
-</tbody></table>
-<hr>
-<h2>New on OpenRouter</h2>
-<table>
-<thead>
-<tr>
-<th align="left">Model</th>
-<th align="left">Listed</th>
-<th align="left">Context</th>
-<th align="left">Summary</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left"><a href="https://openrouter.ai/recursive/flint-v1.0:free">Recursive: Flint (free)</a> <code>recursive/flint-v1.0:free</code></td>
-<td align="left">2026-10-21</td>
-<td align="left">262K</td>
-<td align="left">Recursive&#39;s Flint is an open-weight mixture-of-experts model with 2.5B active parameters out of 40B total, built by the Eureka Machine autoresearch system for coding agents.</td>
-</tr>
-</tbody></table>
-<hr>
-<h2>🕵️ Stealth Models on OpenRouter</h2>
-<p>No stealth models listed on OpenRouter today.</p>
-<hr>
-<h2>Spotted</h2>
-<table>
-<thead>
-<tr>
-<th align="left">Story</th>
-<th align="left">Source</th>
-<th align="left">Discussion</th>
-<th align="left">Summary</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left"><a href="https://github.com/deepseek-ai/DeepInfer">DeepInfer: High-performance inference framework for DeepSeek models</a></td>
-<td align="left">Hacker News</td>
-<td align="left"><a href="https://news.ycombinator.com/item?id=50163277">2331 points, 887 comments</a></td>
-<td align="left">DeepInfer: High-performance, large-scale inference framework for DeepSeek models - deepseek-ai/DeepInfer</td>
-</tr>
-<tr>
-<td align="left"><a href="https://openai.com/index/openai-models-google-cloud/">OpenAI models are coming to Google Cloud</a></td>
-<td align="left">Hacker News</td>
-<td align="left"><a href="https://news.ycombinator.com/item?id=50180079">322 points, 144 comments</a></td>
-<td align="left">—</td>
-</tr>
-<tr>
-<td align="left"><a href="https://www.modelcompare.ai/blog/ai-models-controversial-take-on-humans">Every AI model has the same &quot;controversial&quot; take on humans</a></td>
-<td align="left">Hacker News</td>
-<td align="left"><a href="https://news.ycombinator.com/item?id=50197313">195 points, 232 comments</a></td>
-<td align="left">We asked 12 AI models for their most controversial opinion of humans, three times each. 29 of 35 answers were the same one: we care more about belonging than about the truth.</td>
-</tr>
-<tr>
-<td align="left"><a href="https://claude.com/resources/articles/claude-now-works-in-google-docs-sheets-and-slides">Claude Now Works with Google Docs, Sheets, and Slides</a></td>
-<td align="left">Hacker News</td>
-<td align="left"><a href="https://news.ycombinator.com/item?id=50190357">84 points, 10 comments</a></td>
-<td align="left">With our new Claude for Google Workspace add-on and connectors (in beta), bring Claude into your Google files or work on your files directly from Claude.</td>
-</tr>
-<tr>
-<td align="left"><a href="https://www.biograph.com/newsroom/biograph-completes-first-u.s.-study-with-caristo-diagnostics%E2%80%99-ai-powered-coronary-inflammation-detection-finding-risk-in-over-42-of-asymptomatic-patients">AI analysis of CT scans finds 42.9% of patients have coronary inflammation</a></td>
-<td align="left">Hacker News</td>
-<td align="left"><a href="https://news.ycombinator.com/item?id=50198940">72 points, 38 comments</a></td>
-<td align="left">The study evaluated whether AI analysis of coronary inflammation in cardiac CT scans can help identify early cardiovascular risk before symptoms or obstructive plaque appear</td>
-</tr>
-<tr>
-<td align="left"><a href="https://news.ycombinator.com/item?id=50200997">Ask HN: If the models are so good, why doesn&#39;t OpenAI just start 100 companies?</a></td>
-<td align="left">Hacker News</td>
-<td align="left"><a href="https://news.ycombinator.com/item?id=50200997">54 points, 59 comments</a></td>
-<td align="left">—</td>
-</tr>
-<tr>
-<td align="left"><a href="https://elonlit.com/scrivings/how-to-run-turing-complete-malware-in-pytorchs-backward-pass/">How to Run Turing-Complete Malware in PyTorch&#39;s Backward Pass</a></td>
-<td align="left">Lobste.rs</td>
-<td align="left"><a href="https://lobste.rs/s/urfgc9/how_run_turing_complete_malware_pytorch_s">5 points, 1 comments</a></td>
-<td align="left">Turning PyTorch&#39;s backward pass into a Turing-complete virtual machine using a floating-point exploit.</td>
-</tr>
-<tr>
-<td align="left"><a href="https://dev.to/thomasbnt/stuck-in-the-same-devto-topics-an-open-model-fixed-it-4mbc">Stuck in the same dev.to topics? An open model fixed it.</a></td>
-<td align="left">Dev.to</td>
-<td align="left"><a href="https://dev.to/thomasbnt/stuck-in-the-same-devto-topics-an-open-model-fixed-it-4mbc">44 reactions, 23 comments</a></td>
-<td align="left">This is a submission for the Hacktoberfest Open-Source AI Challenge Week 3: Slow and Steady          ...</td>
-</tr>
-<tr>
-<td align="left"><a href="https://dev.to/cyclopt_dimitrisk/im-93-confident-is-a-string-not-a-probability-2ndc">&quot;I&#39;m 93% confident&quot; is a string, not a probability</a></td>
-<td align="left">Dev.to</td>
-<td align="left"><a href="https://dev.to/cyclopt_dimitrisk/im-93-confident-is-a-string-not-a-probability-2ndc">22 reactions, 9 comments</a></td>
-<td align="left">The gap between the demo and the pipeline. In the demo, you ask the model to return a...</td>
 </tr>
 </tbody></table>
 <hr>

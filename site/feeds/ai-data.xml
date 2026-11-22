@@ -13,7 +13,111 @@
       <height>144</height>
     </image>
     <atom:link href="https://dboeter.github.io/daily-diff/feeds/ai-data.xml" rel="self" type="application/rss+xml"/>
-    <lastBuildDate>Sat, 21 Nov 2026 07:02:12 +0000</lastBuildDate>
+    <lastBuildDate>Sun, 22 Nov 2026 06:34:30 +0000</lastBuildDate>
+    <item>
+      <title>Data Engineering 2026-11-22</title>
+      <link>https://dboeter.github.io/daily-diff/#2026-11-22/ai-data</link>
+      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-11-22/ai-data</guid>
+      <pubDate>Sun, 22 Nov 2026 00:00:00 +0000</pubDate>
+      <description>Data Engineering 2026-11-22 ⬛ Overview · 🟪 AI Agents · 🟦 AI Models &amp;amp; Labs · 🟧 AI Policy · 🟨 Data Engineering Vendor items: 1 | Projects: 26 | Active today: 0 | Stable releases: 0 | Prereleases skipped: 1 | Spotted: 1 | Generated: 2026-11-22 06:30 UTC Highlights No item stands out today. Action required Date Item Platform What to do 2026-11-30 Upcoming end of life for the Genie One MCP Beta endpoint Azure Databricks The Genie One MCP Beta endpoint at https://&amp;lt;workspace-hostname&amp;gt;/api...</description>
+      <content:encoded><![CDATA[<h1>Data Engineering 2026-11-22</h1>
+<p><a href="https://dboeter.github.io/daily-diff/#2026-11-22">⬛ Overview</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-22/ai-agents">🟪 AI Agents</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-22/ai-models">🟦 AI Models &amp; Labs</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-22/ai-policy">🟧 AI Policy</a> · <strong>🟨 Data Engineering</strong></p>
+<blockquote>
+<p>Vendor items: 1 | Projects: 26 | Active today: 0 | Stable releases: 0 | Prereleases skipped: 1 | Spotted: 1 | Generated: 2026-11-22 06:30 UTC</p>
+</blockquote>
+<hr>
+<h2>Highlights</h2>
+<ul>
+<li>No item stands out today.</li>
+</ul>
+<hr>
+<h2>Action required</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Item</th>
+<th align="left">Platform</th>
+<th align="left">What to do</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-11-30</td>
+<td align="left"><a href="https://learn.microsoft.com/azure/databricks/release-notes/whats-coming#upcoming-end-of-life-for-the-genie-one-mcp-beta-endpoint">Upcoming end of life for the Genie One MCP Beta endpoint</a></td>
+<td align="left">Azure Databricks</td>
+<td align="left">The Genie One MCP Beta endpoint at <code>https://&lt;workspace-hostname&gt;/api/2.0/mcp/genie</code> reaches end of life on November 30, 2026, after which requests fail; migrate all workloads to the <code>system.ai.genie_one_mcp</code> MCP in Unity Gateway.</td>
+</tr>
+<tr>
+<td align="left">2026-12-11</td>
+<td align="left"><a href="https://learn.microsoft.com/azure/databricks/release-notes/product/2026/november#gpt-5-and-gpt-5-mini-will-be-retired-on-december-11-2026">GPT-5 and GPT-5 mini will be retired on December 11, 2026</a></td>
+<td align="left">Azure Databricks</td>
+<td align="left">Recommended: migrate GPT-5 to OpenAI GPT-6.1 Sol and GPT-5 mini to OpenAI GPT-6.1 Terra by December 11, 2026, when both models are retired.</td>
+</tr>
+<tr>
+<td align="left">2027-01-15</td>
+<td align="left"><a href="https://learn.microsoft.com/azure/databricks/release-notes/whats-coming#upcoming-breaking-change-array_contains-with-a-constant-empty-array-will-return-null-for-a-null-value">Upcoming breaking change: array_contains with a constant empty array will return NULL for a NULL value</a></td>
+<td align="left">Azure Databricks</td>
+<td align="left">Use <code>size(arr) &gt; 0 AND array_contains(arr, value)</code> to keep prior results: starting on or after January 15, 2027, with ANSI mode enabled in Databricks Runtime 19 and above, <code>array_contains(arr, value)</code> returns NULL instead of false when arr is a constant empty array and value is NULL. <code>map_contains_key(map, key)</code> with a constant empty map changes the same way, so <code>NOT array_contains(arr, value)</code> no longer matches rows where value is NULL.</td>
+</tr>
+<tr>
+<td align="left">2027-01-31</td>
+<td align="left"><a href="https://docs.cloud.google.com/bigquery/docs/release-notes#November_06_2026">Starting January 31, 2027, the BigQuery Data Transfer Service for Shopify connector will no longer support the following fields</a></td>
+<td align="left">BigQuery</td>
+<td align="left">Starting January 31, 2027, the BigQuery Data Transfer Service for Shopify connector will drop support for the <code>legacyMode</code> field in the DeliveryProfile dataset schema and the <code>permitSkuSharing</code> field in the FulfillmentService dataset schema.</td>
+</tr>
+<tr>
+<td align="left">2027-02-04</td>
+<td align="left"><a href="https://learn.microsoft.com/azure/databricks/release-notes/product/2026/november#zhipu-ai-glm-52-is-scheduled-for-retirement">Zhipu AI GLM 5.2 is scheduled for retirement</a></td>
+<td align="left">Azure Databricks</td>
+<td align="left">Zhipu AI GLM 5.2 is deprecated and will be retired on February 4, 2027, requiring migration to GLM 5.3 per the Legacy, deprecated, and retired models guidance.</td>
+</tr>
+<tr>
+<td align="left">2027-08-19</td>
+<td align="left"><a href="https://learn.microsoft.com/azure/databricks/release-notes/whats-coming#all-unity-catalog-managed-tables-will-be-upgraded-to-catalog-commits">All Unity Catalog managed tables will be upgraded to catalog commits</a></td>
+<td align="left">Azure Databricks</td>
+<td align="left">After Databricks Runtime 15.4 LTS end of support on August 19, 2027, all Unity Catalog managed tables will be automatically upgraded to <code>catalog commits</code>, making Unity Catalog the system of coordination and enabling multi-statement transactions, external engine writes, and consistent governance; clients must plan for this breaking change before the 2027 deadline.</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>Azure / Fabric &amp; GCP</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Item</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-11-17</td>
+<td align="left">🤖 <a href="https://azure.microsoft.com/updates?id=579004">[In preview] Public Preview: MSSQL extension for Visual Studio Code performance dashboard</a></td>
+<td align="left">Adds a query performance dashboard to the <code>MSSQL</code> extension for VS Code that uses <code>Query Store</code> to surface performance insights, analyze trends, investigate execution plans, and optimize queries with <code>GitHub Copilot</code>.</td>
+</tr>
+</tbody></table>
+<hr>
+<p>Nothing new from Databricks (<a href="https://github.com/delta-io/delta">Delta Lake</a>, <a href="https://github.com/delta-io/delta-rs">delta-rs</a>, <a href="https://github.com/unitycatalog/unitycatalog">Unity Catalog</a>, <a href="https://github.com/mlflow/mlflow">MLflow</a>, <a href="https://github.com/databricks/cli">Databricks CLI</a>, <a href="https://github.com/databricks/dbt-databricks">dbt-databricks</a>, <a href="https://github.com/databricks/terraform-provider-databricks">Terraform provider for Databricks</a>), Snowflake (<a href="https://github.com/snowflakedb/snowpark-python">Snowpark Python</a>, <a href="https://github.com/snowflakedb/snowflake-connector-python">Snowflake Connector for Python</a>, <a href="https://github.com/apache/polaris">Apache Polaris</a>, <a href="https://github.com/snowflakedb/terraform-provider-snowflake">Terraform provider for Snowflake</a>) or Open-source stack (<a href="https://github.com/dbt-labs/dbt">dbt Core</a>, <a href="https://github.com/SQLMesh/sqlmesh">SQLMesh</a>, <a href="https://github.com/apache/airflow">Apache Airflow</a>, <a href="https://github.com/dagster-io/dagster">Dagster</a>, <a href="https://github.com/PrefectHQ/prefect">Prefect</a>, <a href="https://github.com/dlt-hub/dlt">dlt</a>, <a href="https://github.com/apache/iceberg">Apache Iceberg</a>, <a href="https://github.com/apache/iceberg-python">PyIceberg</a>, <a href="https://github.com/duckdb/duckdb">DuckDB</a>, <a href="https://github.com/pola-rs/polars">Polars</a>, <a href="https://github.com/trinodb/trino">Trino</a>, <a href="https://github.com/great-expectations/great_expectations">Great Expectations</a>, <a href="https://github.com/sodadata/soda-core">Soda Core</a>, <a href="https://github.com/OpenLineage/OpenLineage">OpenLineage</a>, <a href="https://github.com/open-metadata/OpenMetadata">OpenMetadata</a>) today.</p>
+<hr>
+<h2>Spotted</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Story</th>
+<th align="left">Source</th>
+<th align="left">Discussion</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a href="https://jespino.github.io/gopgext/">PostgreSQL Extensions in Go</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50591260">134 points, 23 comments</a></td>
+<td align="left">The item explains how to build PostgreSQL extensions from plain Go code using TinyGo, noting that functions marked with //gopgext:function become SQL functions.</td>
+</tr>
+</tbody></table>
+<hr>
+<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
+]]></content:encoded>
+    </item>
     <item>
       <title>Data Engineering 2026-11-21</title>
       <link>https://dboeter.github.io/daily-diff/#2026-11-21/ai-data</link>
@@ -5019,237 +5123,6 @@
 <td align="left">Lobste.rs</td>
 <td align="left"><a href="https://lobste.rs/s/ydmw6s/hibernate_origin_story_outsider_edition">10 points, 3 comments</a></td>
 <td align="left">I had nothing to do with the development of Hibernate, except that I happened to be in the room at the time holding a beer. But it is still a fun story.</td>
-</tr>
-</tbody></table>
-<hr>
-<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
-]]></content:encoded>
-    </item>
-    <item>
-      <title>Data Engineering 2026-10-23</title>
-      <link>https://dboeter.github.io/daily-diff/#2026-10-23/ai-data</link>
-      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-10-23/ai-data</guid>
-      <pubDate>Fri, 23 Oct 2026 00:00:00 +0000</pubDate>
-      <description>Data Engineering 2026-10-23 📅 Overview · 🤖 AI Agents · 🧠 AI Models &amp;amp; Labs · ⚖️ AI Policy · 🗄️ Data Engineering Generated: 2026-10-22 23:49 UTC | Vendor items: 13 | Projects: 17 | Active today: 5 | Stable releases: 4 | Prereleases (not covered): 0 Highlights Snowflake accounts in AWS US East 1 using Cortex fine-tuning — migrate new model training workloads to other regions; creation stopped October 20, 2026. DuckDB production users — test and migrate to 2.0.0 LTS “Cinnamon Teal” (breaking...</description>
-      <content:encoded><![CDATA[<h1>Data Engineering 2026-10-23</h1>
-<p><a href="https://dboeter.github.io/daily-diff/#2026-10-23">📅 Overview</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-23/ai-agents">🤖 AI Agents</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-23/ai-models">🧠 AI Models &amp; Labs</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-23/ai-policy">⚖️ AI Policy</a> · <strong>🗄️ Data Engineering</strong></p>
-<blockquote>
-<p>Generated: 2026-10-22 23:49 UTC | Vendor items: 13 | Projects: 17 | Active today: 5 | Stable releases: 4 | Prereleases (not covered): 0</p>
-</blockquote>
-<hr>
-<h2>Highlights</h2>
-<ul>
-<li><strong>Snowflake accounts in AWS US East 1 using Cortex fine-tuning</strong> — migrate new model training workloads to other regions; creation stopped October 20, 2026.</li>
-<li><strong>DuckDB production users</strong> — test and migrate to 2.0.0 LTS “Cinnamon Teal” (breaking changes: Quack protocol, async I/O, <code>VARIANT</code> type, extensible parser); released October 21, 2026.</li>
-<li><strong>Azure Databricks workspaces with the compliance security profile</strong> — plan for Genie Code tasks in Lakeflow Jobs to be enabled by default starting November 2026.</li>
-<li><strong>Snowpark Python users calling <code>DataFrame.to_polars()</code></strong> — upgrade to v1.55.3; method is now GA with Parquet default transport (performance shift) and JDBC lazy execution fix.</li>
-<li><strong>Azure Databricks users on serverless compute (env v5+, Connect Python 18.1.8+/Scala 18.1.5+)</strong> — validate <code>df.cache()</code>/<code>persist()</code> in Public Preview (on by default; admins can disable).</li>
-</ul>
-<hr>
-<h2>Databricks</h2>
-<table>
-<thead>
-<tr>
-<th align="left">Date</th>
-<th align="left">Source</th>
-<th align="left">Item</th>
-<th align="left">Summary</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left">2026-10-21</td>
-<td align="left">Azure Databricks</td>
-<td align="left">🤖 <a href="https://learn.microsoft.com/azure/databricks/release-notes/product/2026/october#genie-code-tasks-in-lakeflow-jobs-are-now-generally-available">Genie Code tasks in Lakeflow Jobs are now generally available</a></td>
-<td align="left">Enables running prompts autonomously in Lakeflow Jobs with access to upstream task outputs and tool calls, returning a link to the Genie Code chat response.</td>
-</tr>
-<tr>
-<td align="left">2026-10-21</td>
-<td align="left">Azure Databricks</td>
-<td align="left">🤖 <a href="https://learn.microsoft.com/azure/databricks/release-notes/whats-coming#genie-code-tasks-in-lakeflow-jobs-are-available-by-default-for-workspaces-with-the-compliance-security-profile-enabled-starting-in-november-2026">Genie Code tasks in Lakeflow Jobs are available by default for workspaces with the compliance security profile enabled starting in November 2026</a></td>
-<td align="left">Enables Genie Code tasks by default for workspaces with the compliance security profile starting November 2026.</td>
-</tr>
-<tr>
-<td align="left">2026-10-21</td>
-<td align="left">Azure Databricks</td>
-<td align="left"><a href="https://learn.microsoft.com/azure/databricks/release-notes/product/2026/october#lakeflow-pipelines-system-tables-are-now-generally-available-ga">Lakeflow pipelines system tables are now generally available (GA)</a></td>
-<td align="left">Enables querying the <code>lakeflow.pipelines</code> and <code>lakeflow.pipeline_update_timeline</code> system tables to audit pipeline runs across the account.</td>
-</tr>
-<tr>
-<td align="left">2026-10-23</td>
-<td align="left">Azure Databricks</td>
-<td align="left"><a href="https://learn.microsoft.com/azure/databricks/release-notes/serverless#dataframe-caching-on-serverless-compute-is-now-in-public-preview">DataFrame caching on serverless compute is now in Public Preview</a></td>
-<td align="left">Enables <code>df.cache()</code> and <code>df.persist()</code> on serverless compute (requires serverless environment version 5+, Databricks Connect Python 18.1.8+ or Scala 18.1.5+); preview is on by default but admins can disable it.</td>
-</tr>
-<tr>
-<td align="left">2026-10-22</td>
-<td align="left">Azure Databricks</td>
-<td align="left"><a href="https://learn.microsoft.com/azure/databricks/release-notes/product/2026/october#microsoft-entra-id-connector-is-available-in-beta">Microsoft Entra ID connector is available in Beta</a></td>
-<td align="left">Enables ingesting Microsoft Entra ID users, groups, applications, service principals, directory roles, identity configuration, and audit/sign-in logs via OAuth machine-to-machine auth with incremental ingestion for logs.</td>
-</tr>
-<tr>
-<td align="left">2026-10-20</td>
-<td align="left">Azure Databricks</td>
-<td align="left"><a href="https://learn.microsoft.com/azure/databricks/release-notes/product/2026/october#surveymonkey-connector-is-available-in-beta">SurveyMonkey connector is available in Beta</a></td>
-<td align="left">Enables ingesting SurveyMonkey surveys, structure, collectors, responses, and contacts via OAuth user-to-machine auth with incremental ingestion and multiple authoring options; workspace admins control access via the Previews page.</td>
-</tr>
-</tbody></table>
-<p><em>Also new:</em> <a href="https://learn.microsoft.com/azure/databricks/release-notes/product/2026/october#oracle-eloqua-connector-is-available-in-beta">Oracle Eloqua connector is available in Beta</a> · <a href="https://learn.microsoft.com/azure/databricks/release-notes/product/2026/october#asana-connector-is-available-in-beta">Asana connector is available in Beta</a> · <a href="https://learn.microsoft.com/azure/databricks/release-notes/lakebase#lakebase-insights-moves-to-per-project-settings-with-on-demand-runs-beta">Lakebase Insights moves to per-project settings, with on-demand runs (Beta)</a> · <a href="https://learn.microsoft.com/azure/databricks/release-notes/product/2026/october#box-audit-logs-managed-ingestion-connector-beta">Box Audit Logs managed ingestion connector (Beta)</a> · <a href="https://learn.microsoft.com/azure/databricks/release-notes/unity-gateway#screen-mcp-tool-calls-and-results-for-jailbreaks-beta">Screen MCP tool calls and results for jailbreaks (Beta)</a></p>
-<h3>Databricks CLI</h3>
-<ul>
-<li><strong>Release</strong>: <a href="https://github.com/databricks/cli/releases/tag/v1.22.0">v1.22.0</a>–<a href="https://github.com/databricks/cli/releases/tag/v1.22.1">v1.22.1</a> fix <code>aitools</code> skill installation to prevent downgrades and resolve GitHub API rate limits, and ensure <code>auth login --timeout</code> applies to browser-based OAuth.</li>
-</ul>
-<p><strong>Quiet today:</strong> <a href="https://github.com/delta-io/delta">Delta Lake</a>, <a href="https://github.com/unitycatalog/unitycatalog">Unity Catalog</a>, <a href="https://github.com/mlflow/mlflow">MLflow</a>, <a href="https://github.com/databricks/dbt-databricks">dbt-databricks</a></p>
-<hr>
-<h2>Snowflake</h2>
-<table>
-<thead>
-<tr>
-<th align="left">Date</th>
-<th align="left">Source</th>
-<th align="left">Item</th>
-<th align="left">Summary</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left">2026-10-20</td>
-<td align="left">Snowflake</td>
-<td align="left">⚠️ 🤖 <a href="https://docs.snowflake.com/en/release-notes/2026/other/2026-10-20-cortex-finetuning-aws-us-east-1">Oct 20, 2026: Cortex Fine-tuning: New model training no longer available in AWS US East 1</a></td>
-<td align="left">Stops creation of new Cortex fine-tuned models in AWS US East 1 (N. Virginia) as of October 20, 2026; workloads must move to other regions.</td>
-</tr>
-<tr>
-<td align="left">2026-10-22</td>
-<td align="left">Snowflake</td>
-<td align="left"><a href="https://docs.snowflake.com/en/release-notes/2026/other/2026-10-22-quiesce-primary-failover-group-ga">Oct 22, 2026: Quiesce a primary failover group (General availability)</a></td>
-<td align="left">Enables placing a primary failover group into read-only mode (quiesce) for maintenance or failover testing.</td>
-</tr>
-<tr>
-<td align="left">2026-10-22</td>
-<td align="left">Snowflake</td>
-<td align="left"><a href="https://docs.snowflake.com/en/release-notes/2026/other/2026-10-22-dcr">Oct 22, 2026: Snowflake Data Clean Rooms updates</a></td>
-<td align="left">Enables collaboration edits with approver workflow for role changes, fixes <code>REMOVE_TEMPLATE</code> to clean up orphaned code specs preventing security scan timeouts, and upgrades the Clean Rooms Python runtime to 3.13.</td>
-</tr>
-<tr>
-<td align="left">2026-10-22</td>
-<td align="left">Snowflake</td>
-<td align="left"><a href="https://docs.snowflake.com/en/release-notes/2026/10_38">IPADDRESS data type (Preview)</a></td>
-<td align="left">Enables storing IPv4 or IPv6 addresses as a validated, canonical 128-bit native type with numeric comparison semantics.</td>
-</tr>
-</tbody></table>
-<p><em>Also new:</em> <a href="https://docs.snowflake.com/en/release-notes/2026/other/2026-10-16-grok-4-7-glm-5-3-preview">Oct 16, 2026: Grok 4.7 and GLM 5.3 models (Preview)</a> · <a href="https://docs.snowflake.com/en/release-notes/2026/other/2026-10-20-dbt-projects-on-snowflake-updates">Oct 20, 2026: dbt Projects on Snowflake updates</a> · <a href="https://docs.snowflake.com/en/release-notes/2026/other/2026-10-19-cortex-ai-gateway-tools">Oct 19, 2026: Tools for Cortex AI Gateway (Preview)</a></p>
-<h3>Snowpark Python</h3>
-<ul>
-<li><strong>Release</strong>: v1.55.3 removes the experimental tag from <code>DataFrame.to_polars()</code> and switches its default transport to Parquet for better performance; it also fixes a timeout in <code>DataFrameReader.jdbc</code> on slow sources by lazy query execution. <a href="https://github.com/snowflakedb/snowpark-python/releases/tag/v1.55.3">v1.55.3</a></li>
-</ul>
-<p><strong>Quiet today:</strong> <a href="https://github.com/snowflakedb/snowflake-connector-python">Snowflake Connector for Python</a>, <a href="https://github.com/apache/polaris">Apache Polaris</a></p>
-<hr>
-<h2>Azure / Fabric &amp; GCP</h2>
-<table>
-<thead>
-<tr>
-<th align="left">Date</th>
-<th align="left">Source</th>
-<th align="left">Item</th>
-<th align="left">Summary</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left">2026-10-22</td>
-<td align="left">Azure updates</td>
-<td align="left"><a href="https://azure.microsoft.com/updates?id=577618">[Launched] Generally Available: ABFS Vectored Read for Azure Data Lake Storage</a></td>
-<td align="left">Enables compatible analytics engines to reduce request overhead for selective reads on Azure Data Lake Storage by combining nearby file ranges into fewer asynchronous storage requests.</td>
-</tr>
-<tr>
-<td align="left">2026-10-22</td>
-<td align="left">BigQuery</td>
-<td align="left">🤖 <a href="https://docs.cloud.google.com/bigquery/docs/release-notes#October_22_2026">Feature: The AI.TRANSLATE function lets you translate text strings between languages.</a></td>
-<td align="left">Enables translating text strings between languages using standard Neural Machine Translation or Translation LLM capabilities via the <code>AI.TRANSLATE</code> function.</td>
-</tr>
-<tr>
-<td align="left">2026-10-20</td>
-<td align="left">Microsoft Fabric</td>
-<td align="left"><a href="https://community.fabric.microsoft.com/t5/Fabric-Updates-Blog/T-SQL-language-enhancements-in-Microsoft-Fabric-Data-Warehouse/ba-p/5375433">T-SQL language enhancements in Microsoft Fabric Data Warehouse (Preview)</a></td>
-<td align="left">Enables <code>GROUP BY ALL</code>, <code>ORDER BY ALL</code>, <code>QUALIFY</code>, and <code>FROM ... SELECT</code> syntax to reduce repetitive SQL and simplify analytical queries in Microsoft Fabric Data Warehouse.</td>
-</tr>
-</tbody></table>
-<p><em>Also new:</em> <a href="https://community.fabric.microsoft.com/t5/Fabric-Updates-Blog/Advanced-NL2SQL-and-advanced-DAX-generation-in-Fabric-data/ba-p/5374654">Advanced NL2SQL and advanced DAX generation in Fabric data agents (Generally Available)</a> · <a href="https://community.fabric.microsoft.com/t5/Fabric-Updates-Blog/Explore-and-process-multiple-event-types-with-Schema-aware/ba-p/5376384">Explore and process multiple event types with Schema-aware Fabric Eventstreams (Preview)</a> · <a href="https://community.fabric.microsoft.com/t5/Fabric-Updates-Blog/Incrementally-migrate-and-re-migrate-database-objects-with/ba-p/5376060">Incrementally migrate and re-migrate database objects with Migration Assistant for Fabric Warehouse (Preview)</a> · <a href="https://community.fabric.microsoft.com/t5/Fabric-Updates-Blog/Create-purpose-built-custom-visuals-in-Real-Time-Dashboards-with/ba-p/5376359">Create purpose-built custom visuals in Real-Time Dashboards with Copilot (Preview)</a> · <a href="https://community.fabric.microsoft.com/t5/Fabric-Updates-Blog/From-mixed-events-to-real-time-action-Fabric-Eventstreams-Q3/ba-p/5375736">From mixed events to real-time action: Fabric Eventstreams Q3 2026</a></p>
-<hr>
-<h2>Open-source stack</h2>
-<h3>SQLMesh</h3>
-<ul>
-<li><strong>Release</strong>: <a href="https://github.com/SQLMesh/sqlmesh/releases/tag/v0.236.4">v0.236.4</a> fixes virtual catalog handling for ClickHouse, prevents cascading drops in DuckLake catalogs, adds no-op warehouse create for Fabric, improves Snowflake timestamp lookups, and updates Databricks PyArrow dependency.</li>
-</ul>
-<h3>Apache Airflow</h3>
-<ul>
-<li><strong>Hot issue</strong>: <a href="https://github.com/apache/airflow/issues/75332">#75332</a> requests contributor testing of provider release candidates prepared on October 20, 2026, to verify stability before final distribution.</li>
-</ul>
-<h3>DuckDB</h3>
-<ul>
-<li><strong>News</strong>: <a href="https://news.ycombinator.com/item?id=50181136">Hacker News</a> and <a href="https://lobste.rs/s/dcvs3u/announcing_duckdb_2_0_0_lts_cinnamon_teal">Lobste.rs</a> announce DuckDB 2.0.0 LTS &quot;Cinnamon Teal&quot;, a long-term support release emphasizing stability for production analytics workloads.</li>
-</ul>
-<p><strong>Quiet today:</strong> <a href="https://github.com/dbt-labs/dbt">dbt Core</a>, <a href="https://github.com/dagster-io/dagster">Dagster</a>, <a href="https://github.com/dlt-hub/dlt">dlt</a>, <a href="https://github.com/apache/iceberg">Apache Iceberg</a>, <a href="https://github.com/pola-rs/polars">Polars</a>, <a href="https://github.com/trinodb/trino">Trino</a></p>
-<hr>
-<h2>Releases this week</h2>
-<table>
-<thead>
-<tr>
-<th align="left">Project</th>
-<th align="left">Version</th>
-<th align="left">Date</th>
-<th align="left">Summary</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left"><a href="https://github.com/duckdb/duckdb">DuckDB</a></td>
-<td align="left"><a href="https://github.com/duckdb/duckdb/releases/tag/v2.0.0">v2.0.0</a></td>
-<td align="left">2026-10-21</td>
-<td align="left">Major release 2.0.0 introduces the Quack protocol, asynchronous I/O, a first-class <code>VARIANT</code> type, agent mode, triggers, and an extensible SQL parser.</td>
-</tr>
-<tr>
-<td align="left"><a href="https://github.com/mlflow/mlflow">MLflow</a></td>
-<td align="left"><a href="https://github.com/mlflow/mlflow/releases/tag/v3.17.2">v3.17.2</a></td>
-<td align="left">2026-10-21</td>
-<td align="left">Patch release adds lineage recording for dataset, scorer, and agent on <code>mlflow.genai.evaluate</code> runs and fixes Optuna trial tracking and sampler reseeding bugs.</td>
-</tr>
-<tr>
-<td align="left"><a href="https://github.com/trinodb/trino">Trino</a></td>
-<td align="left"><a href="https://github.com/trinodb/trino/releases/tag/484">484</a></td>
-<td align="left">2026-10-16</td>
-<td align="left">—</td>
-</tr>
-</tbody></table>
-<hr>
-<h2>Across platforms</h2>
-<ul>
-<li><strong>AI-assisted SQL authoring</strong>: BigQuery ships <code>AI.TRANSLATE</code> (GA, standard NMT or LLM); Databricks offers Genie Code tasks in Lakeflow Jobs (GA, agentic prompts with tool calls); Snowflake Cortex fine-tuning retracts in AWS us-east-1 only. All three platforms surface AI inside the warehouse, but(BigQuery, Databricks) add net-new functions while Snowflake restricts a training capability in one region.</li>
-</ul>
-<hr>
-<h2>Spotted</h2>
-<table>
-<thead>
-<tr>
-<th align="left">Story</th>
-<th align="left">Source</th>
-<th align="left">Discussion</th>
-<th align="left">Summary</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left"><a href="https://github.blog/engineering/architecture-optimization/the-bridge-to-agent-scale-git-infrastructure/">The bridge to agent-scale Git infrastructure</a></td>
-<td align="left">Hacker News</td>
-<td align="left"><a href="https://news.ycombinator.com/item?id=50183344">67 points, 20 comments</a></td>
-<td align="left">We moved a copy of 99.99999% of GitHub&#39;s repositories to Azure. Here&#39;s how per-reference quorums will bring over the rest.</td>
-</tr>
-<tr>
-<td align="left"><a href="https://ardentperf.com/2026/10/20/postgres-recovery_prefetch-considered-harmful-and-causing-outages/">Postgres recovery_prefetch can cause outages</a></td>
-<td align="left">Hacker News</td>
-<td align="left"><a href="https://news.ycombinator.com/item?id=50188614">28 points, 0 comments</a></td>
-<td align="left">Another story of something I saw in the field which surprised me. Turns out recovery_prefetch can cause outages.</td>
-</tr>
-<tr>
-<td align="left"><a href="https://www.pingcap.com/trust-hub/security/security-update-october-2026/">Unauthorized Access to PingCAP Cloud Resources</a></td>
-<td align="left">Lobste.rs</td>
-<td align="left"><a href="https://lobste.rs/s/x7codz/unauthorized_access_pingcap_cloud">5 points, 3 comments</a></td>
-<td align="left">PingCAP powers your digital transformation with a single source of truth at scale. Developed to be an open, unified, distributed SQL database solution.</td>
 </tr>
 </tbody></table>
 <hr>
