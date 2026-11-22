@@ -1,0 +1,13 @@
+{
+  "ai-agents": [
+    "Oh My Pi v19.1.0 is a breaking release: the omp extension now uses a pinned Chrome extension ID and native host, requiring reinstall via Chrome's \"Load unpacked\" flow.",
+    "DeepSeek Harness dsh-v0.2.3-alpha.1 is a prerelease adding a code review page for GitHub PRs with GitLab review and merge support."
+  ],
+  "ai-models": [
+    "According to a blog post, a frontier LLM — handed only a hex dump, with no tools and one reply — can explain compiled programs, patch bytes to add features, and produce working executables from scratch.",
+    "OpenRouter says it off-boarded three providers, dropped 125 endpoints from Zero Data Retention eligibility, and notified potentially affected customers after canary-token research on inference providers."
+  ],
+  "ai-policy": [
+    "According to AI’s blue state reckoning is growing, lawmakers in states with a new Democratic trifecta are preparing tighter rules for AI and data centers. According to Effort to regulate ‘killer robots’ delayed to 2028, Russia blocked the talks, other countries were also opposed, and the effort has been delayed to 2028."
+  ]
+}

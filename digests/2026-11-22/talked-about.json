@@ -1,0 +1,79 @@
+[
+  {
+    "id": "hn:50593481",
+    "source": "hn",
+    "title": "Pandex – Official European Law for AI Agents, over MCP",
+    "url": "https://www.pandex.io",
+    "discussionUrl": "https://news.ycombinator.com/item?id=50593481",
+    "points": 60,
+    "comments": 11,
+    "topic": "policy",
+    "counts": "60 points, 11 comments"
+  },
+  {
+    "id": "hn:50587859",
+    "source": "hn",
+    "title": "🔓 FBI reportedly investigating apparent hack of its criminal database",
+    "url": "https://www.bbc.com/news/articles/cvze7de86pk3o",
+    "discussionUrl": "https://news.ycombinator.com/item?id=50587859",
+    "points": 178,
+    "comments": 88,
+    "topic": "other",
+    "counts": "178 points, 88 comments"
+  },
+  {
+    "id": "hn:50577872",
+    "source": "hn",
+    "title": "AI is giving everyone the same advice",
+    "url": "https://a90.com/experiments/same-advice/",
+    "discussionUrl": "https://news.ycombinator.com/item?id=50577872",
+    "points": 122,
+    "comments": 50,
+    "topic": "other",
+    "counts": "122 points, 50 comments"
+  },
+  {
+    "id": "hn:50592097",
+    "source": "hn",
+    "title": "🔓 Upload2Shell (CVE-2026-125396) (not confirmed)",
+    "url": "https://pwn.ai/upload2shell",
+    "discussionUrl": "https://news.ycombinator.com/item?id=50592097",
+    "points": 104,
+    "comments": 47,
+    "topic": "other",
+    "counts": "104 points, 47 comments"
+  },
+  {
+    "id": "hn:50560461",
+    "source": "hn",
+    "title": "OpenAI still has a WebRTC Problem",
+    "url": "https://moq.dev/blog/webrtc-is-still-the-problem/",
+    "discussionUrl": "https://news.ycombinator.com/item?id=50560461",
+    "points": 100,
+    "comments": 32,
+    "topic": "other",
+    "counts": "100 points, 32 comments"
+  },
+  {
+    "id": "hn:50563328",
+    "source": "hn",
+    "title": "AI came for the coders. Understanding why tells us who's next",
+    "url": "https://www.robertpeake.com/archives/104254-ai-came-for-the-coders-understanding-why-tells-us-whos-next.html",
+    "discussionUrl": "https://news.ycombinator.com/item?id=50563328",
+    "points": 68,
+    "comments": 82,
+    "topic": "other",
+    "counts": "68 points, 82 comments"
+  },
+  {
+    "id": "devto:5080715",
+    "source": "devto",
+    "title": "The Chairs Are Back. The Coffee Is On. ☕",
+    "url": "https://dev.to/thethirdcup/the-chairs-are-back-the-coffee-is-on-243p",
+    "discussionUrl": "https://dev.to/thethirdcup/the-chairs-are-back-the-coffee-is-on-243p",
+    "points": 94,
+    "comments": 38,
+    "topic": "other",
+    "counts": "94 reactions, 38 comments"
+  }
+]
