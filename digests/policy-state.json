@@ -1,8 +1,5 @@
 {
   "reported": {
-    "https://www.insideprivacy.com/?p=16483": "2026-10-23",
-    "https://www.politico.eu/?post_type=pro&p=9204851": "2026-10-23",
-    "000001a1-65ad-d3ca-afa1-77fd7bb40000": "2026-10-23",
     "https://www.digitaleoverheid.nl/?p=142049": "2026-10-24",
     "000001a1-6a7c-d679-a5a5-6affc6490000": "2026-10-24",
     "tk:2026Z23028": "2026-10-27",
@@ -65,7 +62,8 @@
     "us-fr:2026-23529": "2026-11-20",
     "https://www.transformernews.ai/p/policy-can-still-work-on-short-timelines-california-states-ai": "2026-11-21",
     "000001a1-fafa-d4f2-aded-fafb338a0000": "2026-11-22",
-    "https://www.politico.eu/?post_type=pro&p=9367200": "2026-11-22"
+    "https://www.politico.eu/?post_type=pro&p=9367200": "2026-11-22",
+    "17728 at https://digital-strategy.ec.europa.eu": "2026-11-23"
   },
   "stages": {
     "celex:32026D2274": "2026-10-12 Decision adopted",

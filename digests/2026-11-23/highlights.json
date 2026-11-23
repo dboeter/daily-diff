@@ -1,0 +1,23 @@
+{
+  "ai-agents": [
+    "Oh My Pi v19.1.1 breaks the native shell Rust API, switching stored indexed variables to IndexedArray from Vec.",
+    "DeepSeek Harness's dsh-v0.2.3-alpha.2 prerelease now requires Node.js 24.22.3+ on 24.x or 26.13.1+."
+  ],
+  "ai-models": [
+    "A beginner's guide covers running a private, ChatGPT-like model on a personal PC using Unsloth, Inkling, and Qwen.",
+    "A study tests whether LLMs apply consistent moral standards to identical negative behaviors when an actor's gender is swapped between male and female conditions."
+  ],
+  "ai-policy": [
+    "The European Commission is seeking feedback on a draft template for a questionnaire intended to help certain deployers of high-risk AI systems with their fundamental rights impact assessment under the AI Act. The template is a draft questionnaire, and the Commission’s request is for feedback on that draft."
+  ],
+  "ai-data": [
+    "Databricks users of delta-rs python-v1.7.0 are affected by breaking changes: DeltaTable.history() now returns an iterator, so replace dt.history(1)[0] with next(dt.history(1)), and writes that previously truncated lossy float-to-integer casts (for example, 2.9 to 2) are now rejected."
+  ],
+  "ai-weekly": [
+    "OpenAI's GPT-6.2 Astra and Sol reached coding agents this week, and two agents made Sol their default selection."
+  ],
+  "ai-trends": [
+    "tencent/hy4-flash-20261116 is new to the OpenRouter usage table at #4, with 10.21T tokens on 2026-11-22. Its Hugging Face repo, tencent/Hy4-flash, is #3 on Hugging Face trending and is listed as a 220B image-text-to-text model under a custom (\"other\") license.",
+    "The NariQ paper reports that existing ≤3-bit quantizations of Qwen/Qwen3.8-27B match BF16 on AIME but solve at most 72% as many DeepSWE tasks. NariQ is a trellis-coded post-training quantization method that calibrates on tokens the BF16 model generates during agent sessions. The truncated abstract gives no NariQ result."
+  ]
+}

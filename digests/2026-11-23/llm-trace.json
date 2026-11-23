@@ -1,0 +1,21 @@
+{
+"attempted": 15,
+"failed": 0,
+"calls": [
+{"label":"agents","outcome":"ok","chars":808},
+{"label":"spotted-summaries","outcome":"ok","chars":1523},
+{"label":"models-summaries","outcome":"ok","chars":4},
+{"label":"policy-summaries","outcome":"ok","chars":286},
+{"label":"trends-hf-summaries","outcome":"ok","chars":647},
+{"label":"data-databricks","outcome":"ok","chars":359},
+{"label":"agents-highlights","outcome":"ok","chars":343},
+{"label":"models-highlights","outcome":"ok","chars":295},
+{"label":"claude-code-skills","outcome":"ok","chars":2121},
+{"label":"policy","outcome":"ok","chars":461},
+{"label":"trends-summaries","outcome":"ok","chars":3181},
+{"label":"trending-summaries","outcome":"ok","chars":7598},
+{"label":"data-highlights","outcome":"ok","chars":310},
+{"label":"trends","outcome":"ok","chars":2640},
+{"label":"weekly","outcome":"ok","chars":9357}
+]
+}
