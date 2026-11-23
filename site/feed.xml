@@ -13,7 +13,1082 @@
       <height>144</height>
     </image>
     <atom:link href="https://dboeter.github.io/daily-diff/feed.xml" rel="self" type="application/rss+xml"/>
-    <lastBuildDate>Sun, 22 Nov 2026 06:34:30 +0000</lastBuildDate>
+    <lastBuildDate>Mon, 23 Nov 2026 07:26:02 +0000</lastBuildDate>
+    <item>
+      <title>AI Agents 2026-11-23</title>
+      <link>https://dboeter.github.io/daily-diff/#2026-11-23/ai-agents</link>
+      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-11-23/ai-agents</guid>
+      <pubDate>Mon, 23 Nov 2026 00:00:00 +0000</pubDate>
+      <description>AI Agents 2026-11-23 ⬛ Overview · 🟪 AI Agents · 🟦 AI Models &amp;amp; Labs · 🟧 AI Policy · 🟨 Data Engineering · ⬜ Weekly Diff · 🟫 Trends Projects: 15 | Active today: 3 | Stable releases: 2 | Prereleases skipped: 3 | Spotted: 3 | Generated: 2026-11-23 07:21 UTC Highlights Oh My Pi v19.1.1 breaks the native shell Rust API, switching stored indexed variables to IndexedArray from Vec. DeepSeek Harness&amp;#39;s dsh-v0.2.3-alpha.2 prerelease now requires Node.js 24.22.3+ on 24.x or 26.13.1+. A dev.to au...</description>
+      <content:encoded><![CDATA[<h1>AI Agents 2026-11-23</h1>
+<p><a href="https://dboeter.github.io/daily-diff/#2026-11-23">⬛ Overview</a> · <strong>🟪 AI Agents</strong> · <a href="https://dboeter.github.io/daily-diff/#2026-11-23/ai-models">🟦 AI Models &amp; Labs</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-23/ai-policy">🟧 AI Policy</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-23/ai-data">🟨 Data Engineering</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-23/ai-weekly">⬜ Weekly Diff</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-23/ai-trends">🟫 Trends</a></p>
+<blockquote>
+<p>Projects: 15 | Active today: 3 | Stable releases: 2 | Prereleases skipped: 3 | Spotted: 3 | Generated: 2026-11-23 07:21 UTC</p>
+</blockquote>
+<hr>
+<h2>Highlights</h2>
+<ul>
+<li>Oh My Pi v19.1.1 breaks the native shell Rust API, switching stored indexed variables to IndexedArray from Vec.</li>
+<li>DeepSeek Harness&#39;s dsh-v0.2.3-alpha.2 prerelease now requires Node.js 24.22.3+ on 24.x or 26.13.1+.</li>
+<li>A dev.to author reports that adding per-sentence verification to a RAG system degraded performance under load.</li>
+</ul>
+<hr>
+<h2>Coding agents &amp; assistants</h2>
+<h3>Oh My Pi</h3>
+<ul>
+<li><strong>Release:</strong> <a href="https://github.com/can1357/oh-my-pi/releases/tag/v19.1.1">v19.1.1</a> breaks the native shell Rust API by storing indexed variables as <code>IndexedArray</code> instead of <code>Vec</code>; fixes include preserving trailing messages in ttsr discard mode, preventing speculative read deadlocks, and restoring macOS key window after takeover.</li>
+</ul>
+<h3>jcode</h3>
+<ul>
+<li><strong>Release:</strong> <a href="https://github.com/1jehuang/jcode/releases/tag/v1.1.1">v1.1.1</a> doubles token plan inference credits from 2x to 4x, publishes Linux self-dev builds as semver releases, and fixes redundant effort suffix on effort-named Gemini models.</li>
+</ul>
+<h3>DeepSeek Harness</h3>
+<ul>
+<li><strong>Prerelease:</strong> <a href="https://github.com/deepseek-ai/deepseek-harness/releases/tag/dsh-v0.2.3-alpha.2">dsh-v0.2.3-alpha.2</a> raises the Node.js requirement to 24.22.3+ (24.x) or 26.13.1+.</li>
+</ul>
+<p><strong>Quiet today:</strong> <a href="https://github.com/anthropics/claude-code">Claude Code</a>, <a href="https://github.com/openai/codex">OpenAI Codex</a>, <a href="https://github.com/google-gemini/gemini-cli">Gemini CLI</a>, <a href="https://github.com/Kilo-Org/kilocode">Kilo Code</a>, <a href="https://github.com/anomalyco/opencode">OpenCode</a>, <a href="https://github.com/earendil-works/pi">Pi</a>, <a href="https://github.com/cline/cline">Cline</a>, <a href="https://github.com/CommandCodeAI/command-code">Command Code</a>, <a href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a></p>
+<hr>
+<p>Nothing new from Agent tooling (<a href="https://github.com/NVIDIA/OpenShell">OpenShell</a>, <a href="https://github.com/herdrdev/herdr">herdr</a>, <a href="https://github.com/microsoft/conductor">Conductor</a>) today.</p>
+<hr>
+<h2>Spotted</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Story</th>
+<th align="left">Source</th>
+<th align="left">Discussion</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">Show HN: I built a game where you are an LLM&#39;s subagent (<a href="https://github.com/gulivan/worker755">gulivan/worker755</a>)</td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50599762">309 points, 74 comments</a></td>
+<td align="left">A browser game at worker755.com lets you play as an LLM&#39;s subagent under an AI manager.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://pequalnp.com/">Agent swarm trying to solve P vs. NP</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50604314">142 points, 118 comments</a></td>
+<td align="left">A coordinated AI agent fleet attempts to solve P vs. NP openly, with every step and refutation recorded live.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://dev.to/ayush_singh_9b0d83152be5b/i-made-my-rag-safer-it-got-worse-under-load-3olm">I Made My RAG Safer. It Got Worse Under Load</a></td>
+<td align="left">Dev.to</td>
+<td align="left"><a href="https://dev.to/ayush_singh_9b0d83152be5b/i-made-my-rag-safer-it-got-worse-under-load-3olm">35 reactions, 46 comments</a></td>
+<td align="left">The author tested verifying every sentence in a RAG system and found it degraded performance under load.</td>
+</tr>
+</tbody></table>
+<hr>
+<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
+]]></content:encoded>
+    </item>
+    <item>
+      <title>AI Models &amp; Labs 2026-11-23</title>
+      <link>https://dboeter.github.io/daily-diff/#2026-11-23/ai-models</link>
+      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-11-23/ai-models</guid>
+      <pubDate>Mon, 23 Nov 2026 00:00:00 +0000</pubDate>
+      <description>AI Models &amp;amp; Labs 2026-11-23 ⬛ Overview · 🟪 AI Agents · 🟦 AI Models &amp;amp; Labs · 🟧 AI Policy · 🟨 Data Engineering · ⬜ Weekly Diff · 🟫 Trends Lab posts: 1 | New models: 0 | Spotted: 2 | Generated: 2026-11-23 07:21 UTC Highlights A beginner&amp;#39;s guide covers running a private, ChatGPT-like model on a personal PC using Unsloth, Inkling, and Qwen. A study tests whether LLMs apply consistent moral standards to identical negative behaviors when an actor&amp;#39;s gender is swapped between male an...</description>
+      <content:encoded><![CDATA[<h1>AI Models &amp; Labs 2026-11-23</h1>
+<p><a href="https://dboeter.github.io/daily-diff/#2026-11-23">⬛ Overview</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-23/ai-agents">🟪 AI Agents</a> · <strong>🟦 AI Models &amp; Labs</strong> · <a href="https://dboeter.github.io/daily-diff/#2026-11-23/ai-policy">🟧 AI Policy</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-23/ai-data">🟨 Data Engineering</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-23/ai-weekly">⬜ Weekly Diff</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-23/ai-trends">🟫 Trends</a></p>
+<blockquote>
+<p>Lab posts: 1 | New models: 0 | Spotted: 2 | Generated: 2026-11-23 07:21 UTC</p>
+</blockquote>
+<hr>
+<h2>Highlights</h2>
+<ul>
+<li>A beginner&#39;s guide covers running a private, ChatGPT-like model on a personal PC using Unsloth, Inkling, and Qwen.</li>
+<li>A study tests whether LLMs apply consistent moral standards to identical negative behaviors when an actor&#39;s gender is swapped between male and female conditions.</li>
+</ul>
+<hr>
+<h2>Lab announcements</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Post</th>
+<th align="left">Lab</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-11-22</td>
+<td align="left"><a href="https://openai.com/index/perplexity-and-intelligence/">Perplexity And Intelligence</a></td>
+<td align="left">OpenAI</td>
+<td align="left">—</td>
+</tr>
+</tbody></table>
+<hr>
+<p>Nothing new from OpenRouter&#39;s new listings or OpenRouter&#39;s stealth models today.</p>
+<hr>
+<h2>Spotted</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Story</th>
+<th align="left">Source</th>
+<th align="left">Discussion</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a href="https://www.gpupartner.com/blog/beginners-guide-local-ai-inkling-qwen-unsloth">A Beginner&#39;s Guide to Local AI with Inkling, Qwen, and Unsloth</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50603845">421 points, 173 comments</a></td>
+<td align="left">The author shows how to run a private ChatGPT-like model locally using Unsloth, Inkling, and Qwen on a personal PC.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://arxiv.org/abs/2606.14068">Harsher on Male? Evaluating LLMs on Gender-Asymmetric Moral Framing in Conflicts</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50597743">93 points, 78 comments</a></td>
+<td align="left">A study evaluates whether LLMs apply consistent moral standards to identical negative behaviors when actor gender is swapped between male and female conditions.</td>
+</tr>
+</tbody></table>
+<hr>
+<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
+]]></content:encoded>
+    </item>
+    <item>
+      <title>AI Policy 2026-11-23</title>
+      <link>https://dboeter.github.io/daily-diff/#2026-11-23/ai-policy</link>
+      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-11-23/ai-policy</guid>
+      <pubDate>Mon, 23 Nov 2026 00:00:00 +0000</pubDate>
+      <description>AI Policy 2026-11-23 ⬛ Overview · 🟪 AI Agents · 🟦 AI Models &amp;amp; Labs · 🟧 AI Policy · 🟨 Data Engineering · ⬜ Weekly Diff · 🟫 Trends New items: 1 | Sources: European Commission | Generated: 2026-11-23 07:21 UTC Highlights The European Commission is seeking feedback on a draft template for a questionnaire intended to help certain deployers of high-risk AI systems with their fundamental rights impact assessment under the AI Act. The template is a draft questionnaire, and the Commission’s requ...</description>
+      <content:encoded><![CDATA[<h1>AI Policy 2026-11-23</h1>
+<p><a href="https://dboeter.github.io/daily-diff/#2026-11-23">⬛ Overview</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-23/ai-agents">🟪 AI Agents</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-23/ai-models">🟦 AI Models &amp; Labs</a> · <strong>🟧 AI Policy</strong> · <a href="https://dboeter.github.io/daily-diff/#2026-11-23/ai-data">🟨 Data Engineering</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-23/ai-weekly">⬜ Weekly Diff</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-23/ai-trends">🟫 Trends</a></p>
+<blockquote>
+<p>New items: 1 | Sources: European Commission | Generated: 2026-11-23 07:21 UTC</p>
+</blockquote>
+<hr>
+<h2>Highlights</h2>
+<p>The <a href="https://digital-strategy.ec.europa.eu/en/news/commission-seeks-feedback-draft-template-fundamental-rights-impact-assessment-under-ai-act">European Commission is seeking feedback</a> on a draft template for a questionnaire intended to help certain deployers of high-risk AI systems with their fundamental rights impact assessment under the AI Act. The template is a draft questionnaire, and the Commission’s request is for feedback on that draft.</p>
+<hr>
+<h2>EU</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Item</th>
+<th align="left">Source</th>
+<th align="left">Stage</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-11-16</td>
+<td align="left"><a href="https://digital-strategy.ec.europa.eu/en/news/commission-seeks-feedback-draft-template-fundamental-rights-impact-assessment-under-ai-act">Commission seeks feedback on draft template for the fundamental rights impact assessment under the AI Act</a></td>
+<td align="left">European Commission</td>
+<td align="left">—</td>
+<td align="left">The European Commission has opened a feedback process on a draft template for a questionnaire under the AI Act. The template is intended to help certain deployers of high-risk AI systems meet their obligation to prepare a fundamental rights impact assessment under Article 27 AI Act.</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>Coming up</h2>
+<p>Deadlines and dates in the next 30 days.</p>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Item</th>
+<th align="left">Source</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-12-02</td>
+<td align="left"><a href="https://ai-act-service-desk.ec.europa.eu/en/ai-act/timeline/timeline-implementation-eu-ai-act">AI Act: bans on sexual deepfakes and CSAM generators; Art. 50(2) transition ends</a></td>
+<td align="left">Calendar</td>
+</tr>
+</tbody></table>
+<hr>
+<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
+]]></content:encoded>
+    </item>
+    <item>
+      <title>Data Engineering 2026-11-23</title>
+      <link>https://dboeter.github.io/daily-diff/#2026-11-23/ai-data</link>
+      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-11-23/ai-data</guid>
+      <pubDate>Mon, 23 Nov 2026 00:00:00 +0000</pubDate>
+      <description>Data Engineering 2026-11-23 ⬛ Overview · 🟪 AI Agents · 🟦 AI Models &amp;amp; Labs · 🟧 AI Policy · 🟨 Data Engineering · ⬜ Weekly Diff · 🟫 Trends Vendor items: 0 | Projects: 26 | Active today: 1 | Stable releases: 1 | Prereleases skipped: 1 | Spotted: 1 | Generated: 2026-11-23 07:21 UTC Highlights Databricks users of delta-rs python-v1.7.0 are affected by breaking changes: DeltaTable.history() now returns an iterator, so replace dt.history(1)[0] with next(dt.history(1)), and writes that previousl...</description>
+      <content:encoded><![CDATA[<h1>Data Engineering 2026-11-23</h1>
+<p><a href="https://dboeter.github.io/daily-diff/#2026-11-23">⬛ Overview</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-23/ai-agents">🟪 AI Agents</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-23/ai-models">🟦 AI Models &amp; Labs</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-23/ai-policy">🟧 AI Policy</a> · <strong>🟨 Data Engineering</strong> · <a href="https://dboeter.github.io/daily-diff/#2026-11-23/ai-weekly">⬜ Weekly Diff</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-23/ai-trends">🟫 Trends</a></p>
+<blockquote>
+<p>Vendor items: 0 | Projects: 26 | Active today: 1 | Stable releases: 1 | Prereleases skipped: 1 | Spotted: 1 | Generated: 2026-11-23 07:21 UTC</p>
+</blockquote>
+<hr>
+<h2>Highlights</h2>
+<ul>
+<li>Databricks users of delta-rs python-v1.7.0 are affected by breaking changes: <code>DeltaTable.history()</code> now returns an iterator, so replace <code>dt.history(1)[0]</code> with <code>next(dt.history(1))</code>, and writes that previously truncated lossy float-to-integer casts (for example, <code>2.9</code> to <code>2</code>) are now rejected.</li>
+</ul>
+<hr>
+<h2>Action required</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Item</th>
+<th align="left">Platform</th>
+<th align="left">What to do</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-11-30</td>
+<td align="left"><a href="https://learn.microsoft.com/azure/databricks/release-notes/whats-coming#upcoming-end-of-life-for-the-genie-one-mcp-beta-endpoint">Upcoming end of life for the Genie One MCP Beta endpoint</a></td>
+<td align="left">Azure Databricks</td>
+<td align="left">The Genie One MCP Beta endpoint at <code>https://&lt;workspace-hostname&gt;/api/2.0/mcp/genie</code> reaches end of life on November 30, 2026, after which requests fail; migrate all workloads to the <code>system.ai.genie_one_mcp</code> MCP in Unity Gateway.</td>
+</tr>
+<tr>
+<td align="left">2026-12-11</td>
+<td align="left"><a href="https://learn.microsoft.com/azure/databricks/release-notes/product/2026/november#gpt-5-and-gpt-5-mini-will-be-retired-on-december-11-2026">GPT-5 and GPT-5 mini will be retired on December 11, 2026</a></td>
+<td align="left">Azure Databricks</td>
+<td align="left">Recommended: migrate GPT-5 to OpenAI GPT-6.1 Sol and GPT-5 mini to OpenAI GPT-6.1 Terra by December 11, 2026, when both models are retired.</td>
+</tr>
+<tr>
+<td align="left">2027-01-15</td>
+<td align="left"><a href="https://learn.microsoft.com/azure/databricks/release-notes/whats-coming#upcoming-breaking-change-array_contains-with-a-constant-empty-array-will-return-null-for-a-null-value">Upcoming breaking change: array_contains with a constant empty array will return NULL for a NULL value</a></td>
+<td align="left">Azure Databricks</td>
+<td align="left">Use <code>size(arr) &gt; 0 AND array_contains(arr, value)</code> to keep prior results: starting on or after January 15, 2027, with ANSI mode enabled in Databricks Runtime 19 and above, <code>array_contains(arr, value)</code> returns NULL instead of false when arr is a constant empty array and value is NULL. <code>map_contains_key(map, key)</code> with a constant empty map changes the same way, so <code>NOT array_contains(arr, value)</code> no longer matches rows where value is NULL.</td>
+</tr>
+<tr>
+<td align="left">2027-01-31</td>
+<td align="left"><a href="https://docs.cloud.google.com/bigquery/docs/release-notes#November_06_2026">Starting January 31, 2027, the BigQuery Data Transfer Service for Shopify connector will no longer support the following fields</a></td>
+<td align="left">BigQuery</td>
+<td align="left">Starting January 31, 2027, the BigQuery Data Transfer Service for Shopify connector will drop support for the <code>legacyMode</code> field in the DeliveryProfile dataset schema and the <code>permitSkuSharing</code> field in the FulfillmentService dataset schema.</td>
+</tr>
+<tr>
+<td align="left">2027-02-04</td>
+<td align="left"><a href="https://learn.microsoft.com/azure/databricks/release-notes/product/2026/november#zhipu-ai-glm-52-is-scheduled-for-retirement">Zhipu AI GLM 5.2 is scheduled for retirement</a></td>
+<td align="left">Azure Databricks</td>
+<td align="left">Zhipu AI GLM 5.2 is deprecated and will be retired on February 4, 2027, requiring migration to GLM 5.3 per the Legacy, deprecated, and retired models guidance.</td>
+</tr>
+<tr>
+<td align="left">2027-08-19</td>
+<td align="left"><a href="https://learn.microsoft.com/azure/databricks/release-notes/whats-coming#all-unity-catalog-managed-tables-will-be-upgraded-to-catalog-commits">All Unity Catalog managed tables will be upgraded to catalog commits</a></td>
+<td align="left">Azure Databricks</td>
+<td align="left">After Databricks Runtime 15.4 LTS end of support on August 19, 2027, all Unity Catalog managed tables will be automatically upgraded to <code>catalog commits</code>, making Unity Catalog the system of coordination and enabling multi-statement transactions, external engine writes, and consistent governance; clients must plan for this breaking change before the 2027 deadline.</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>Databricks</h2>
+<h3>delta-rs</h3>
+<ul>
+<li><strong>Release:</strong> <a href="https://github.com/delta-io/delta-rs/releases/tag/python-v1.7.0">python-v1.7.0</a> is a breaking release: <code>DeltaTable.history()</code> now returns an iterator rather than a list (replace <code>dt.history(1)[0]</code> with <code>next(dt.history(1))</code>), and writes now reject lossy float-to-integer casts that were previously silently truncated (<code>2.9</code> → <code>2</code>).</li>
+</ul>
+<p><strong>Quiet today:</strong> <a href="https://github.com/delta-io/delta">Delta Lake</a>, <a href="https://github.com/unitycatalog/unitycatalog">Unity Catalog</a>, <a href="https://github.com/mlflow/mlflow">MLflow</a>, <a href="https://github.com/databricks/cli">Databricks CLI</a>, <a href="https://github.com/databricks/dbt-databricks">dbt-databricks</a>, <a href="https://github.com/databricks/terraform-provider-databricks">Terraform provider for Databricks</a></p>
+<hr>
+<p>Nothing new from Snowflake (<a href="https://github.com/snowflakedb/snowpark-python">Snowpark Python</a>, <a href="https://github.com/snowflakedb/snowflake-connector-python">Snowflake Connector for Python</a>, <a href="https://github.com/apache/polaris">Apache Polaris</a>, <a href="https://github.com/snowflakedb/terraform-provider-snowflake">Terraform provider for Snowflake</a>), Azure / Fabric &amp; GCP or Open-source stack (<a href="https://github.com/dbt-labs/dbt">dbt Core</a>, <a href="https://github.com/SQLMesh/sqlmesh">SQLMesh</a>, <a href="https://github.com/apache/airflow">Apache Airflow</a>, <a href="https://github.com/dagster-io/dagster">Dagster</a>, <a href="https://github.com/PrefectHQ/prefect">Prefect</a>, <a href="https://github.com/dlt-hub/dlt">dlt</a>, <a href="https://github.com/apache/iceberg">Apache Iceberg</a>, <a href="https://github.com/apache/iceberg-python">PyIceberg</a>, <a href="https://github.com/duckdb/duckdb">DuckDB</a>, <a href="https://github.com/pola-rs/polars">Polars</a>, <a href="https://github.com/trinodb/trino">Trino</a>, <a href="https://github.com/great-expectations/great_expectations">Great Expectations</a>, <a href="https://github.com/sodadata/soda-core">Soda Core</a>, <a href="https://github.com/OpenLineage/OpenLineage">OpenLineage</a>, <a href="https://github.com/open-metadata/OpenMetadata">OpenMetadata</a>) today.</p>
+<hr>
+<h2>Spotted</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Story</th>
+<th align="left">Source</th>
+<th align="left">Discussion</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a href="https://progrium.xyz/articles/2026/single-binary-postgres">How I Got Postgres into a Single Binary</a></td>
+<td align="left">Lobste.rs</td>
+<td align="left"><a href="https://lobste.rs/s/pvylnk/how_i_got_postgres_into_single_binary">27 points, 4 comments</a></td>
+<td align="left">The author describes packaging full PostgreSQL into a single binary, similar to SQLite.</td>
+</tr>
+</tbody></table>
+<hr>
+<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
+]]></content:encoded>
+    </item>
+    <item>
+      <title>Weekly Diff 2026-11-23</title>
+      <link>https://dboeter.github.io/daily-diff/#2026-11-23/ai-weekly</link>
+      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-11-23/ai-weekly</guid>
+      <pubDate>Mon, 23 Nov 2026 00:00:00 +0000</pubDate>
+      <description>Weekly Diff 2026-11-23 ⬛ Overview · 🟪 AI Agents · 🟦 AI Models &amp;amp; Labs · 🟧 AI Policy · 🟨 Data Engineering · ⬜ Weekly Diff · 🟫 Trends Items: 376 | Sources: the pages of 2026-11-17 to 2026-11-23 | Written by claude-opus-5-5 | Text in italics is interpretation | Generated: 2026-11-23 07:21 UTC OpenAI&amp;#39;s GPT-6.2 Astra and Sol reached coding agents this week, and two agents made Sol their default selection. Several reports this week concerned prompts leaking from inference providers, includ...</description>
+      <content:encoded><![CDATA[<h1>Weekly Diff 2026-11-23</h1>
+<p><a href="https://dboeter.github.io/daily-diff/#2026-11-23">⬛ Overview</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-23/ai-agents">🟪 AI Agents</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-23/ai-models">🟦 AI Models &amp; Labs</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-23/ai-policy">🟧 AI Policy</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-23/ai-data">🟨 Data Engineering</a> · <strong>⬜ Weekly Diff</strong> · <a href="https://dboeter.github.io/daily-diff/#2026-11-23/ai-trends">🟫 Trends</a></p>
+<blockquote>
+<p>Items: 376 | Sources: the pages of 2026-11-17 to 2026-11-23 | Written by claude-opus-5-5 | Text in italics is interpretation | Generated: 2026-11-23 07:21 UTC</p>
+</blockquote>
+<hr>
+<p>OpenAI&#39;s <a href="https://openrouter.ai/openai/gpt-6.2-astra">GPT-6.2 Astra</a> and Sol reached coding agents this week, and two agents made Sol their default selection. Several reports this week concerned prompts leaking from inference providers, including a <a href="https://www.together.ai/blog/security-event-prompt-leakage-for-requests-in-june-and-july-of-2026">Together AI</a> notice to customers about prompts sent to its serverless inference service in June and July 2026. On the data side, Azure Databricks <a href="https://learn.microsoft.com/azure/databricks/release-notes/product/2026/november#gemini-36-flash-is-retired">retired Gemini 3.6 Flash</a> on 2026-11-19 and set further retirement dates, while Databricks and Snowflake changed several defaults.</p>
+<h2>GPT-6.2 in the coding agents</h2>
+<p>OpenRouter&#39;s listing calls <a href="https://openrouter.ai/openai/gpt-6.2-sol">GPT-6.2 Sol</a> an upgrade to GPT-6.1 Sol, positioned below GPT-6.2 Astra in the series. <a href="https://github.com/openai/codex/releases/tag/rust-v0.171.0">Codex 0.171.0</a> added both models to its catalogs, with Sol as the default catalog selection. <a href="https://github.com/earendil-works/pi/releases/tag/v1.6.0">Pi v1.6.0</a> made GPT-6.2 Sol the default for its <code>openai</code>, <code>azure</code> and <code>openai-codex</code> providers instead of GPT-6.1 Sol, at the same price. It also notes that both models reject reasoning effort <code>none</code> and <code>minimal</code>, so thinking level <code>off</code> is unavailable.</p>
+<p>Caching needed a fix. <a href="https://github.com/anomalyco/opencode/releases/tag/v2.3.2">OpenCode v2.3.2</a> says GPT-6.2 models don&#39;t cache a system prompt sent in the Responses <code>instructions</code> field, so every step re-billed it as uncached input. OpenCode now sends that prompt as a leading developer message. By its own figure, uncached input per step on GitHub Copilot <code>gpt-6.2-sol</code> dropped from about 14,000 tokens to 3. <a href="https://github.com/can1357/oh-my-pi/releases/tag/v19.1.0">Oh My Pi v19.1.0</a> now sends GPT-6.2 system prompts as leading developer messages through third-party Responses proxies.</p>
+<p>Not every path works yet. An <a href="https://github.com/can1357/oh-my-pi/issues/19578">Oh My Pi issue</a> reports GPT-6.2 Sol missing from its Codex model list and rejected with <code>model_not_found</code>, while the native Codex CLI works. The reporter writes that the cause is not established.</p>
+<p>In OpenRouter&#39;s one-day snapshot of top models on 2026-11-22, <a href="https://openrouter.ai/openai/gpt-6.1-sol-20260929">openai/gpt-6.1-sol-20260929</a> fell to #19 from #10 the week before. <a href="https://openrouter.ai/tencent/hy4-flash-20261116">tencent/hy4-flash-20261116</a> entered the table at #4 with 10.21T tokens.</p>
+<p>Separately, an <a href="https://github.com/anthropics/claude-code/issues/110480">issue on Claude Code</a> reports premium Team and Enterprise seats using up their limits about 3–5x faster on non-Fable models since roughly the week of 2026-11-09. The reporter says everyone in their organization on premium seats sees the same drop.</p>
+<p><em>The OpenCode figure suggests that, for GPT-6.2, where a harness places the system prompt can decide most of the per-step input bill. Harnesses that pass it in <code>instructions</code> are worth checking. The GPT-6.1 Sol drop is a single day&#39;s figure, and whether GPT-6.2 takes over that traffic is worth watching.</em></p>
+<h2>Prompts leaking from inference providers</h2>
+<p>OpenRouter <a href="https://openrouter.ai/blog/announcements/data-processing-incidents-on-inference-providers/">says it off-boarded three providers</a>. It also removed 125 endpoints from Zero Data Retention eligibility and notified potentially affected customers, after canary token research on inference providers. In a separate write-up, <a href="https://www.dragos.com/blog/ai-supply-chain-security-canary-tokens">Dragos</a> says it seeded two million AI prompts with canary tokens. It reports finding three provider breaches, prompt theft and ignored Zero Data Retention settings.</p>
+<p>The package supply chain also had an incident. Socket&#39;s <a href="https://socket.dev/blog/agent-framework-pypi-package-compromised-with-credential-stealer">write-up on agent-framework</a> says compromised versions 1.26.1 and 1.26.2 on PyPI use <code>.pth</code> startup hooks to exfiltrate Azure, GitHub Actions and CI/CD credentials.</p>
+<p>Disclosure timelines are also changing. <a href="https://www.anthropic.com/research/coordinated-vulnerability-disclosure-timelines">Anthropic</a> says frontier models have become much better at discovering vulnerabilities. It is shortening its disclosure window from 90 days to 30 days for high- and critical-severity issues, and to 45 days for all others. The new timelines apply to vulnerabilities reported on or after 2027-01-01.</p>
+<p><em>This suggests Zero Data Retention eligibility is a per-endpoint status that can change while a client relies on it. For EU work built on it, the list of eligible endpoints is worth watching. From 2027, Anthropic&#39;s shorter windows would also leave maintainers less time between a report and its disclosure.</em></p>
+<h2>Retirements and changed defaults in data platforms</h2>
+<p>The <a href="https://learn.microsoft.com/azure/databricks/release-notes/whats-coming#upcoming-end-of-life-for-the-genie-one-mcp-beta-endpoint">Genie One MCP Beta endpoint</a> at <code>/api/2.0/mcp/genie</code> reaches end of life on 2026-11-30, after which requests fail. Its replacement is the <code>system.ai.genie_one_mcp</code> MCP in Unity Gateway. Azure Databricks retires <a href="https://learn.microsoft.com/azure/databricks/release-notes/product/2026/november#gpt-5-and-gpt-5-mini-will-be-retired-on-december-11-2026">GPT-5 and GPT-5 mini</a> on 2026-12-11 and recommends GPT-6.1 Sol and GPT-6.1 Terra as replacements.</p>
+<p>Several query and streaming results will change:</p>
+<ul>
+<li><strong><code>array_contains</code>:</strong> Starting on or after 2027-01-15, with ANSI mode enabled in Databricks Runtime 19 and above, <a href="https://learn.microsoft.com/azure/databricks/release-notes/whats-coming#upcoming-breaking-change-array_contains-with-a-constant-empty-array-will-return-null-for-a-null-value"><code>array_contains</code></a> will return NULL instead of false for a constant empty array and a NULL value. As a result, <code>NOT array_contains</code> will no longer match those rows.</li>
+<li><strong>Streaming watermarks:</strong> In <a href="https://learn.microsoft.com/azure/databricks/release-notes/runtime/19#databricks-runtime-19-november-16-2026">Databricks Runtime 19</a>, new streaming queries in real-time mode use real-time watermark propagation by default, so state is evicted sooner. Queries restarted from an existing checkpoint keep their original behavior.</li>
+<li><strong>Output policies:</strong> <a href="https://learn.microsoft.com/azure/databricks/release-notes/product/2026/november#evaluate-streaming-responses-incrementally-with-service-policies-beta">Model output policies</a> now default to streaming evaluation, including existing policies, and released text can&#39;t be recalled. This feature is in Beta.</li>
+<li><strong>Snowflake dynamic tables:</strong> Snowflake&#39;s <a href="https://docs.snowflake.com/en/release-notes/2026/other/2026-11-20-dynamic-tables-auto-resolves-to-adaptive">AUTO refresh mode for dynamic tables</a> now resolves to ADAPTIVE instead of INCREMENTAL when the definition supports incremental refresh.</li>
+</ul>
+<p><a href="https://github.com/dagster-io/dagster/releases/tag/1.13.31">Dagster 1.13.31</a> also has a breaking change: its Claude Code plugin no longer reads <code>DAGSTER_CLOUD_MCP_URL</code>. Organizations in the EU region must add the EU server directly, or the plugin connects to the US server and authentication fails.</p>
+<p><em>Several of these changes alter results without raising an error: a NULL in place of false, earlier state eviction, and streamed text that can&#39;t be recalled. Those are the changes a test suite is least likely to flag. The Dagster change is the one that directly affects EU-region setups.</em></p>
+<h2>EU and Dutch regulators</h2>
+<p>The Commission <a href="https://digital-strategy.ec.europa.eu/en/news/commission-seeks-feedback-draft-template-fundamental-rights-impact-assessment-under-ai-act">is collecting feedback</a> on a draft template for a questionnaire. The template is meant to help certain deployers of high-risk AI systems prepare a fundamental rights impact assessment under Article 27 of the AI Act. For 2026-12-02, the <a href="https://ai-act-service-desk.ec.europa.eu/en/ai-act/timeline/timeline-implementation-eu-ai-act">AI Act timeline</a> lists bans on sexual deepfakes and CSAM generators, and the end of the Art. 50(2) transition.</p>
+<p>The <a href="https://autoriteitpersoonsgegevens.nl/actueel/ap-raadt-aankoop-ai-camerabrillen-af-ernstige-risicos-voor-gebruikers-en-omstanders">Autoriteit Persoonsgegevens</a> advises consumers against buying AI camera glasses for general use. In its own study of six such glasses, one wrongly said an ambulance was on its way during a simulated resuscitation. The AP also found security problems in the software.</p>
+<p>Politico Europe reports that an <a href="https://www.politico.eu/article/x-stops-training-ai-with-agents-data-after-ireland-intervened/?utm_source=RSS_Feed&utm_medium=RSS&utm_campaign=RSS_Syndication">Irish regulator stopped X</a> from training AI with data gathered by agents. The regulator says it has significant concerns about personal data being collected by AI agents. In the Tweede Kamer, an amended <a href="https://www.tweedekamer.nl/kamerstukken/detail?id=2026Z25300&did=2026D58461">motion</a> asks for an inventory of what is needed to supervise the AI Act.</p>
+<p><em>The Irish case and the AP study both concern data that agents or devices collect about people other than the user. This suggests that is where regulator attention fell this week for agent projects at EU clients.</em></p>
+<hr>
+<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
+]]></content:encoded>
+    </item>
+    <item>
+      <title>Trends 2026-11-23</title>
+      <link>https://dboeter.github.io/daily-diff/#2026-11-23/ai-trends</link>
+      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-11-23/ai-trends</guid>
+      <pubDate>Mon, 23 Nov 2026 00:00:00 +0000</pubDate>
+      <description>Trends 2026-11-23 ⬛ Overview · 🟪 AI Agents · 🟦 AI Models &amp;amp; Labs · 🟧 AI Policy · 🟨 Data Engineering · ⬜ Weekly Diff · 🟫 Trends Agents &amp;amp; tools: 44 | Models: 32 | Papers: 10 | Most discussed: 8 | Sources: GitHub Trending + GitHub Search API + OpenRouter + npm + Hugging Face + arXiv + Hacker News + Lobste.rs + Dev.to | Generated: 2026-11-23 07:21 UTC Highlights tencent/hy4-flash-20261116 is new to the OpenRouter usage table at #4, with 10.21T tokens on 2026-11-22. Its Hugging Face repo,...</description>
+      <content:encoded><![CDATA[<h1>Trends 2026-11-23</h1>
+<p><a href="https://dboeter.github.io/daily-diff/#2026-11-23">⬛ Overview</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-23/ai-agents">🟪 AI Agents</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-23/ai-models">🟦 AI Models &amp; Labs</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-23/ai-policy">🟧 AI Policy</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-23/ai-data">🟨 Data Engineering</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-23/ai-weekly">⬜ Weekly Diff</a> · <strong>🟫 Trends</strong></p>
+<blockquote>
+<p>Agents &amp; tools: 44 | Models: 32 | Papers: 10 | Most discussed: 8 | Sources: GitHub Trending + GitHub Search API + OpenRouter + npm + Hugging Face + arXiv + Hacker News + Lobste.rs + Dev.to | Generated: 2026-11-23 07:21 UTC</p>
+</blockquote>
+<hr>
+<h2>Highlights</h2>
+<ul>
+<li><a href="https://openrouter.ai/tencent/hy4-flash-20261116">tencent/hy4-flash-20261116</a> is new to the OpenRouter usage table at #4, with 10.21T tokens on 2026-11-22. Its Hugging Face repo, <a href="https://huggingface.co/tencent/Hy4-flash">tencent/Hy4-flash</a>, is #3 on Hugging Face trending and is listed as a 220B image-text-to-text model under a custom (&quot;other&quot;) license.</li>
+<li>The <a href="http://arxiv.org/abs/2611.26157v1">NariQ</a> paper reports that existing ≤3-bit quantizations of <a href="https://huggingface.co/Qwen/Qwen3.8-27B">Qwen/Qwen3.8-27B</a> match BF16 on AIME but solve at most 72% as many DeepSWE tasks. NariQ is a trellis-coded post-training quantization method that calibrates on tokens the BF16 model generates during agent sessions. The truncated abstract gives no NariQ result.</li>
+<li>In <a href="https://github.com/anthropics/skills">anthropics/skills</a>, <a href="https://github.com/anthropics/skills/issues/2246">#2246</a> reports that mcp-builder&#39;s v1 Node streamable HTTP example listens on every interface with no Host validation. Unmerged PR <a href="https://github.com/anthropics/skills/pull/2247">#2247</a> would bind it to loopback only and validate the Host header. Separately, unmerged PR <a href="https://github.com/anthropics/skills/pull/1640">#1640</a> would add a path-traversal guard to the Python <code>get_document</code> resource example.</li>
+</ul>
+<hr>
+<h2>Agents &amp; coding tools</h2>
+<h3>🚀 Agent &amp; coding tool radar</h3>
+<p><em>New tools (🆕: created or listed in the last 14 days) first, then each source&#39;s top movers; 🔥 also on last week&#39;s Trends page. OpenRouter: the app&#39;s rank this week / this month among OpenRouter apps, its tokens in the last 7 days. npm: downloads in the last 7 days. OpenRouter and npm &quot;vs previous week&quot;: against the row&#39;s figure on last week&#39;s page, none when it was not there. GitHub: total stars (stars gained in the last 7 days, % on a week ago).</em></p>
+<table>
+<thead>
+<tr>
+<th align="left">Tool</th>
+<th align="left">Source</th>
+<th align="left">Signal</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">🔥 <a href="https://hermes-agent.nousresearch.com/">Hermes Agent</a></td>
+<td align="left">OpenRouter</td>
+<td align="left">week #3 / month #3, 14.15T tokens/week (+8.7% vs previous week)</td>
+<td align="left">Hermes Agent is an open-source, self-improving AI agent by Nous Research that runs persistently with memory across sessions. It builds reusable skills from experience and comes with 40+ built-in tools, including web search, browser automation and vision.</td>
+</tr>
+<tr>
+<td align="left">🔥 <a href="https://claude.ai/code">Claude Code</a></td>
+<td align="left">OpenRouter</td>
+<td align="left">week #4 / month #4, 11.47T tokens/week (+6.2% vs previous week)</td>
+<td align="left">Claude Code is Anthropic&#39;s agentic coding tool that plans and executes changes across files from natural language prompts. It reads your entire codebase, runs tests and iterates on failures.</td>
+</tr>
+<tr>
+<td align="left">🔥 <a href="https://kilocode.ai/">Kilo Code</a></td>
+<td align="left">OpenRouter</td>
+<td align="left">week #5 / month #5, 8.71T tokens/week (+24% vs previous week)</td>
+<td align="left">Kilo Code is an open-source AI coding agent for shipping code with agentic workflows. It works across VS Code, JetBrains and the CLI.</td>
+</tr>
+<tr>
+<td align="left">🔥 <a href="https://pi.dev/">pi</a></td>
+<td align="left">OpenRouter</td>
+<td align="left">week #6 / month #6, 5.84T tokens/week (+46% vs previous week)</td>
+<td align="left">pi is a coding agent pitched on ownership, with a description saying that among many coding agents, &quot;this one is yours.&quot;</td>
+</tr>
+<tr>
+<td align="left">🔥 <a href="https://strix.ai/">Strix</a></td>
+<td align="left">OpenRouter</td>
+<td align="left">week #7 / month #11, 3.29T tokens/week (+29% vs previous week)</td>
+<td align="left">Strix is a set of open-source AI hackers that find and validate vulnerabilities in your code, APIs and infrastructure. Beyond finding issues, it opens fix PRs.</td>
+</tr>
+<tr>
+<td align="left">🔥 <a href="https://docs.all-hands.dev/">OpenHands</a></td>
+<td align="left">OpenRouter</td>
+<td align="left">week #14 / month #17, 986.0B tokens/week (-1.8% vs previous week)</td>
+<td align="left">OpenHands is an AI coding agent that can run commands, browse the web and call APIs.</td>
+</tr>
+<tr>
+<td align="left">🔥 <a href="https://openai.com/codex/">Codex</a></td>
+<td align="left">OpenRouter</td>
+<td align="left">week #9 / month #7, 3.22T tokens/week (-5.9% vs previous week)</td>
+<td align="left">Codex is a coding agent that helps you build and ship with AI.</td>
+</tr>
+<tr>
+<td align="left">🔥 <a href="https://omp.sh/">omp</a></td>
+<td align="left">OpenRouter; npm</td>
+<td align="left">week #12 / month #10, 2.19T tokens/week (+3% vs previous week); 290,900 downloads/week (-1.6% vs previous week)</td>
+<td align="left">omp is a coding agent CLI with <code>read</code>, <code>bash</code>, <code>edit</code> and <code>write</code> tools. It also provides session management.</td>
+</tr>
+<tr>
+<td align="left">🔥 <a href="https://openclaw.ai/">OpenClaw</a></td>
+<td align="left">OpenRouter</td>
+<td align="left">week #13 / month #8, 1.76T tokens/week (-34% vs previous week)</td>
+<td align="left">OpenClaw is an open-source AI agent that takes real actions on your behalf, from running commands and browsing the web to managing files and sending emails. It connects to your messaging apps.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://www.hellominds.ai/">Hello Minds, powered by Ethoswarm</a></td>
+<td align="left">OpenRouter</td>
+<td align="left">week #22 / month #21, 538.6B tokens/week</td>
+<td align="left">Hello Minds, powered by Ethoswarm, is a personal AI agent that handles bookings, research and everyday tasks. It works through email and the messaging channels you already use, with no coding required.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://www.npmjs.com/package/oonacode">oonacode</a></td>
+<td align="left">npm</td>
+<td align="left">11,392 downloads/week</td>
+<td align="left">oonacode is a multi-provider coding agent made up of the <code>oona</code> CLI, a headless host service and a local web UI. Its npm package is a wrapper, and the native binary is installed through a per-platform optional dependency.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://cline.bot/">Cline</a></td>
+<td align="left">OpenRouter</td>
+<td align="left">week #27 / month #20, 381.2B tokens/week</td>
+<td align="left">Cline is an open-source AI coding agent that lives inside your IDE and autonomously explores your codebase, edits files and runs terminal commands. It also uses browser automation.</td>
+</tr>
+</tbody></table>
+<h3>🧑‍💻 Coding agents</h3>
+<table>
+<thead>
+<tr>
+<th align="left">Project</th>
+<th align="left">Lang</th>
+<th align="right">Stars (total / this week, %)</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">🔥 <a href="https://github.com/WhiteTowerAI/ohmygame">WhiteTowerAI/ohmygame</a></td>
+<td align="left">TypeScript</td>
+<td align="right">3,170 (+907, +40%)</td>
+<td align="left">WhiteTowerAI/ohmygame is an open-source app for making games with AI, pitched as your own one-person game studio. It includes a game canvas and lets you bring your own key.</td>
+</tr>
+<tr>
+<td align="left">🔥 <a href="https://github.com/PurpleDoubleD/locally-uncensored">PurpleDoubleD/locally-uncensored</a></td>
+<td align="left">TypeScript</td>
+<td align="right">4,606 (+313, +7.3%)</td>
+<td align="left">PurpleDoubleD/locally-uncensored is a free, open-source local AI desktop studio that combines chat, image and video generation and a coding agent. It runs on Windows and Linux with no Docker, terminal or cloud required.</td>
+</tr>
+<tr>
+<td align="left">🔥 <a href="https://github.com/QwenLM/qwen-code">QwenLM/qwen-code</a></td>
+<td align="left">TypeScript</td>
+<td align="right">30,881 (+305, +1%)</td>
+<td align="left">QwenLM/qwen-code is an open-source AI coding agent that lives in your terminal.</td>
+</tr>
+<tr>
+<td align="left">🔥 <a href="https://github.com/Gentleman-Programming/gentle-shell">Gentleman-Programming/gentle-shell</a></td>
+<td align="left">TypeScript</td>
+<td align="right">2,895 (+214, +8%)</td>
+<td align="left">Gentleman-Programming/gentle-shell is a Pi-native terminal workspace for AI-assisted development with parallel coding agents, live tasks, Git diffs, persistent memory and permission controls. It is powered by Gentle AI and Organic Driven Development (ODD).</td>
+</tr>
+<tr>
+<td align="left"><a href="https://github.com/vastsa/PI-Desktop">vastsa/PI-Desktop</a></td>
+<td align="left">TypeScript</td>
+<td align="right">8,157 (+146, +1.8%)</td>
+<td align="left">vastsa/PI-Desktop is a local-first AI coding agent desktop app built on Electron with a Rust host core and the pi Agent Harness. It supports user-installable plugins.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://github.com/chaitin/MonkeyCode">chaitin/MonkeyCode</a></td>
+<td align="left">TypeScript</td>
+<td align="right">5,350 (+134, +2.6%)</td>
+<td align="left">chaitin/MonkeyCode is described, in Chinese, as an enterprise-grade AI office workbench.</td>
+</tr>
+<tr>
+<td align="left">🔥 <a href="https://github.com/JetBrains/thinkrail">JetBrains/thinkrail</a></td>
+<td align="left">TypeScript</td>
+<td align="right">8,407 (+112, +1.4%)</td>
+<td align="left">JetBrains/thinkrail is ThinkRail, an agentic IDE. It is pitched as getting better every time you use it.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://github.com/openBitFun/OpenBitFun">openBitFun/OpenBitFun</a></td>
+<td align="left">Rust</td>
+<td align="right">4,106 (+74, +1.8%)</td>
+<td align="left">openBitFun/OpenBitFun pairs a high-performance agent runtime written in Rust with a desktop application. It combines the depth of a Code Agent with general-purpose capabilities for work beyond software development.</td>
+</tr>
+</tbody></table>
+<h3>🧰 Agent harnesses &amp; frameworks</h3>
+<table>
+<thead>
+<tr>
+<th align="left">Project</th>
+<th align="left">Lang</th>
+<th align="right">Stars (total / this week, %)</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">🔥 <a href="https://github.com/ccch1mneyyy/dsh-Go">ccch1mneyyy/dsh-Go</a></td>
+<td align="left">Dart</td>
+<td align="right">30,398 (+6,142, +25%)</td>
+<td align="left">ccch1mneyyy/dsh-Go is a Dart app that puts a DeepSeek Harness in your pocket. It runs natively on a phone and can also remotely control your computer.</td>
+</tr>
+<tr>
+<td align="left">🔥 <a href="https://github.com/mdiri-ai/SoduWork">mdiri-ai/SoduWork</a></td>
+<td align="left">JavaScript</td>
+<td align="right">6,852 (+5,838, +576%)</td>
+<td align="left">mdiri-ai/SoduWork is a self-hosted, AI-native engine for teams and their agents. It is multi-harness and multi-agent.</td>
+</tr>
+<tr>
+<td align="left">🔥 <a href="https://github.com/alibaba/open-code-review">alibaba/open-code-review</a></td>
+<td align="left">Go</td>
+<td align="right">55,505 (+3,700, +7.1%)</td>
+<td align="left">alibaba/open-code-review is a code review tool with a hybrid architecture of deterministic pipelines plus an LLM agent that produces precise line-level comments. It includes a built-in multi-language ruleset covering NPE, thread-safety, XSS and SQL injection, and is OpenAI and Anthropic compatible.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://github.com/ag-ui-protocol/ag-ui">ag-ui-protocol/ag-ui</a></td>
+<td align="left">TypeScript</td>
+<td align="right">21,255 (+3,620, +21%)</td>
+<td align="left">ag-ui-protocol/ag-ui defines AG-UI, the Agent-User Interaction Protocol. It is aimed at bringing agents into frontend applications.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://github.com/NVIDIA/SkillEvaluator">NVIDIA/SkillEvaluator</a></td>
+<td align="left">Python</td>
+<td align="right">4,419 (+2,409, +120%)</td>
+<td align="left">NVIDIA/SkillEvaluator is a multi-tier framework for evaluating AI agent skills and plugins with quality gates, security scanning and harness compatibility checks. It includes live agent evaluation that measures how skills affect agent behavior, plus reusable CI templates for any repository.</td>
+</tr>
+<tr>
+<td align="left">🔥 <a href="https://github.com/dataelement/dsh-desktop">dataelement/dsh-desktop</a></td>
+<td align="left">JavaScript</td>
+<td align="right">20,850 (+1,555, +8.1%)</td>
+<td align="left">dataelement/dsh-desktop is DSHDesktop, a desktop version of DeepSeek Harness.</td>
+</tr>
+<tr>
+<td align="left">🔥 <a href="https://github.com/FailproofAI/failproofai">FailproofAI/failproofai</a></td>
+<td align="left">TypeScript</td>
+<td align="right">10,111 (+1,011, +11%)</td>
+<td align="left">FailproofAI/failproofai provides observability and enforcement for AI agent harnesses. It captures every run and applies policy enforcement for runtime reliability.</td>
+</tr>
+<tr>
+<td align="left">🔥 <a href="https://github.com/converge-ai-labs/agent-foundation">converge-ai-labs/agent-foundation</a></td>
+<td align="left">Python</td>
+<td align="right">1,511 (+213, +16%)</td>
+<td align="left">converge-ai-labs/agent-foundation (a13n) is an open-source platform for building, running and managing AI agents at scale on your own infrastructure. It includes a built-in harness, durable execution, multi-provider support and a management console.</td>
+</tr>
+</tbody></table>
+<h3>🕸️ Multi-agent &amp; orchestration</h3>
+<table>
+<thead>
+<tr>
+<th align="left">Project</th>
+<th align="left">Lang</th>
+<th align="right">Stars (total / this week, %)</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">🔥 <a href="https://github.com/pingdotgg/t3code">pingdotgg/t3code</a></td>
+<td align="left">TypeScript</td>
+<td align="right">72,704 (+10,681, +17%)</td>
+<td align="left">pingdotgg/t3code is a tool for controlling Claude Code, Codex and more. It works from any computer or phone.</td>
+</tr>
+<tr>
+<td align="left">🔥 <a href="https://github.com/Tencent/LoopForge">Tencent/LoopForge</a></td>
+<td align="left">Go</td>
+<td align="right">5,766 (+3,720, +182%)</td>
+<td align="left">Tencent/LoopForge provides self-hosted workflows for coding-agent delivery that orchestrate CodeBuddy, Codex and Claude Code. It uses scripts and human approval gates.</td>
+</tr>
+<tr>
+<td align="left">🔥 <a href="https://github.com/paperclipai/paperclip">paperclipai/paperclip</a></td>
+<td align="left">TypeScript</td>
+<td align="right">116,072 (+1,852, +1.6%)</td>
+<td align="left">paperclipai/paperclip is an open-source app for managing agents at work.</td>
+</tr>
+<tr>
+<td align="left">🔥 <a href="https://github.com/OrchestratorInc/agent-orchestrator">OrchestratorInc/agent-orchestrator</a></td>
+<td align="left">TypeScript</td>
+<td align="right">15,032 (+248, +1.7%)</td>
+<td align="left">OrchestratorInc/agent-orchestrator plans, runs and supervises fleets of agents from task to merged PR, supporting Claude Code, Codex and 35+ coding agents. It ships desktop apps for macOS, Windows and Linux, plus iPhone and Android apps.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://github.com/ParadevAI/Paradev">ParadevAI/Paradev</a></td>
+<td align="left">TypeScript</td>
+<td align="right">16,496 (+173, +1.1%)</td>
+<td align="left">ParadevAI/Paradev is an open-source alternative to the Codex App and Conductor for orchestrating coding agents in parallel. It runs on your own subscriptions.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://github.com/zqiren/Orbital">zqiren/Orbital</a></td>
+<td align="left">Python</td>
+<td align="right">1,122 (+139, +14%)</td>
+<td align="left">zqiren/Orbital is a Python project described only by the line &quot;Context is yours. Agents are replaceable.&quot;</td>
+</tr>
+<tr>
+<td align="left"><a href="https://github.com/awslabs/cli-agent-orchestrator">awslabs/cli-agent-orchestrator</a></td>
+<td align="left">Python</td>
+<td align="right">1,638 (+75, +4.8%)</td>
+<td align="left">awslabs/cli-agent-orchestrator provides multi-agent orchestration for AI coding CLIs such as Claude Code, Kiro and Codex. It coordinates them in isolated tmux sessions.</td>
+</tr>
+<tr>
+<td align="left">🔥 <a href="https://github.com/open-mercato/cezar">open-mercato/cezar</a></td>
+<td align="left">TypeScript</td>
+<td align="right">1,136 (+71, +6.7%)</td>
+<td align="left">open-mercato/cezar is an open-source orchestrator and ADE for running Claude Code, Codex, OpenCode, Pi and other AI coding agents in parallel. It can run locally or 24/7 on your own server.</td>
+</tr>
+</tbody></table>
+<h3>🔌 Agent tooling</h3>
+<table>
+<thead>
+<tr>
+<th align="left">Project</th>
+<th align="left">Lang</th>
+<th align="right">Stars (total / this week, %)</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a href="https://github.com/mvanhorn/last30days-skill">mvanhorn/last30days-skill</a></td>
+<td align="left">Python</td>
+<td align="right">72,972 (+4,731, +6.9%)</td>
+<td align="left">mvanhorn/last30days-skill is an AI agent skill that researches any topic across Reddit, X, YouTube, HN, Polymarket and the web. It then synthesizes a grounded summary.</td>
+</tr>
+<tr>
+<td align="left">🔥 <a href="https://github.com/kajisho5/ffmpeg-skill">kajisho5/ffmpeg-skill</a></td>
+<td align="left">Python</td>
+<td align="right">9,894 (+3,748, +61%)</td>
+<td align="left">kajisho5/ffmpeg-skill is a local video editor for coding agents with 42 FFmpeg tools for Claude Code, Cursor and Codex. It exposes a machine-readable contract and an MCP server, with no cloud or API keys needed.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://github.com/GoogleChrome/modern-web-guidance-src">GoogleChrome/modern-web-guidance-src</a></td>
+<td align="left">TypeScript</td>
+<td align="right">10,300 (+3,575, +53%)</td>
+<td align="left">GoogleChrome/modern-web-guidance-src keeps your coding agent up to date with the latest web best practices.</td>
+</tr>
+<tr>
+<td align="left">🔥 <a href="https://github.com/backnotprop/plannotator">backnotprop/plannotator</a></td>
+<td align="left">TypeScript</td>
+<td align="right">14,515 (+2,815, +24%)</td>
+<td align="left">backnotprop/plannotator is a workspace for staying on top of agents by shaping, planning, annotating and reviewing code and sharing it with your team. It sends all feedback to agents with one click.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://github.com/google-labs-code/stitch-skills">google-labs-code/stitch-skills</a></td>
+<td align="left">TypeScript</td>
+<td align="right">12,039 (+2,683, +29%)</td>
+<td align="left">google-labs-code/stitch-skills is a library of Agent Skills designed to work with the Stitch MCP server. Each skill follows the Agent Skills open standard for compatibility with coding agents such as Antigravity, Gemini CLI, Claude Code and Cursor.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://github.com/tradermonty/claude-trading-skills">tradermonty/claude-trading-skills</a></td>
+<td align="left">Python</td>
+<td align="right">7,841 (+2,616, +50%)</td>
+<td align="left">tradermonty/claude-trading-skills is a set of Claude Code skills for equity investors and traders. It covers market analysis, technical charting, economic calendars, screeners and trading strategy development.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://github.com/aoci-spec/aoci-code">aoci-spec/aoci-code</a></td>
+<td align="left">Go</td>
+<td align="right">2,941 (+1,013, +53%)</td>
+<td align="left">aoci-spec/aoci-code is a persistent, Git-versioned map of your whole codebase and database schema that coding agents read before they touch anything. It is a local-first MCP server and CLI in Go that gives Claude Code, Codex, Cursor and opencode long-term context, memory and code intelligence.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://github.com/Get-Concord-AI/concord-mcp">Get-Concord-AI/concord-mcp</a></td>
+<td align="left">TypeScript</td>
+<td align="right">1,484 (+326, +28%)</td>
+<td align="left">Get-Concord-AI/concord-mcp provides live messaging for coding agents.</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>Skills: PRs and requests this week</h2>
+<blockquote>
+<p>Source: <a href="https://github.com/anthropics/skills">anthropics/skills</a></p>
+</blockquote>
+<h3>Open PRs worth watching</h3>
+<ul>
+<li><strong>mcp-builder security examples (unmerged):</strong> <a href="https://github.com/anthropics/skills/pull/2247">#2247</a> would make the v1 Node streamable HTTP example bind to loopback only and validate the Host header, matching the skill&#39;s own best-practices guide. <a href="https://github.com/anthropics/skills/pull/1640">#1640</a> would add a guard so the Python <code>get_document</code> resource example rejects path-traversal names such as <code>../../etc/passwd</code>.</li>
+<li><strong>claude-api description length (unmerged):</strong> <a href="https://github.com/anthropics/skills/pull/2242">#2242</a> and <a href="https://github.com/anthropics/skills/pull/2250">#2250</a> both shorten the skill&#39;s frontmatter description to fit the Agent Skills spec&#39;s 1,024-character cap. It was 1,068 characters, which can fail validation or prevent loading. The two PRs overlap, so at most one is likely to land.</li>
+<li><strong>skill-creator eval tooling (unmerged):</strong> <a href="https://github.com/anthropics/skills/pull/1453">#1453</a> and <a href="https://github.com/anthropics/skills/pull/2245">#2245</a> fix <code>aggregate_benchmark.py</code>, which currently reports 0% for flat single-run layouts and ignores eval directories that don&#39;t use the <code>eval-*</code> prefix. <a href="https://github.com/anthropics/skills/pull/2260">#2260</a> moves eval workspaces out of the skills directory so they are no longer mistaken for skills.</li>
+</ul>
+<h3>Requests</h3>
+<ul>
+<li><a href="https://github.com/anthropics/skills/issues/2246">#2246</a> reports that mcp-builder&#39;s v1 Node streamable HTTP example listens on every interface with no Host validation. This contradicts the skill&#39;s own advice to bind <code>127.0.0.1</code> and enable DNS rebinding protection. The fix is proposed in #2247.</li>
+<li><a href="https://github.com/anthropics/skills/issues/2261">#2261</a> comes from a third-party static-audit service. It flags a credentials-related signal in the <code>claude-api</code> skill and includes an invitation to partner with the service.</li>
+</ul>
+<h3>Takeaway</h3>
+<p>This week&#39;s activity hardens existing skills rather than adding new ones: aligning example code with the skills&#39; own security guidance, keeping metadata within spec limits, and making skill-creator&#39;s evaluation tooling report correct results. Nothing was merged.</p>
+<hr>
+<h2>Candidates to track</h2>
+<p>These repos trended two weeks in a row (🔥) and are not tracked, by the config.yml section they fit.</p>
+<ul>
+<li><code>agents.repos</code>: <a href="https://github.com/WhiteTowerAI/ohmygame">WhiteTowerAI/ohmygame</a>, <a href="https://github.com/PurpleDoubleD/locally-uncensored">PurpleDoubleD/locally-uncensored</a>, <a href="https://github.com/QwenLM/qwen-code">QwenLM/qwen-code</a>, <a href="https://github.com/Gentleman-Programming/gentle-shell">Gentleman-Programming/gentle-shell</a>, <a href="https://github.com/JetBrains/thinkrail">JetBrains/thinkrail</a></li>
+<li><code>infra.repos</code>: <a href="https://github.com/kajisho5/ffmpeg-skill">kajisho5/ffmpeg-skill</a>, <a href="https://github.com/backnotprop/plannotator">backnotprop/plannotator</a></li>
+<li>No matching section: <a href="https://github.com/ccch1mneyyy/dsh-Go">ccch1mneyyy/dsh-Go</a>, <a href="https://github.com/mdiri-ai/SoduWork">mdiri-ai/SoduWork</a>, <a href="https://github.com/alibaba/open-code-review">alibaba/open-code-review</a>, <a href="https://github.com/dataelement/dsh-desktop">dataelement/dsh-desktop</a>, <a href="https://github.com/FailproofAI/failproofai">FailproofAI/failproofai</a>, <a href="https://github.com/converge-ai-labs/agent-foundation">converge-ai-labs/agent-foundation</a>, <a href="https://github.com/pingdotgg/t3code">pingdotgg/t3code</a>, <a href="https://github.com/Tencent/LoopForge">Tencent/LoopForge</a>, <a href="https://github.com/paperclipai/paperclip">paperclipai/paperclip</a>, <a href="https://github.com/OrchestratorInc/agent-orchestrator">OrchestratorInc/agent-orchestrator</a>, <a href="https://github.com/open-mercato/cezar">open-mercato/cezar</a></li>
+</ul>
+<details><summary>config.yml lines to track one</summary>
+
+<p><code>agents.repos</code>:</p>
+<pre><code class="language-yaml">    - id: ohmygame
+      repo: WhiteTowerAI/ohmygame
+      name: ohmygame
+    - id: locally-uncensored
+      repo: PurpleDoubleD/locally-uncensored
+      name: locally-uncensored
+    - id: qwen-code
+      repo: QwenLM/qwen-code
+      name: qwen-code
+    - id: gentle-shell
+      repo: Gentleman-Programming/gentle-shell
+      name: gentle-shell
+    - id: thinkrail
+      repo: JetBrains/thinkrail
+      name: thinkrail
+</code></pre>
+<p><code>infra.repos</code>:</p>
+<pre><code class="language-yaml">    - id: ffmpeg-skill
+      repo: kajisho5/ffmpeg-skill
+      name: ffmpeg-skill
+    - id: plannotator
+      repo: backnotprop/plannotator
+      name: plannotator
+</code></pre>
+</details>
+
+<hr>
+<h2>Models</h2>
+<h3>OpenRouter usage</h3>
+<p>Top models by tokens (prompt + completion) on OpenRouter on 2026-11-22, one day&#39;s snapshot. Last week: the model&#39;s rank on last week&#39;s page, new when it was not ranked there.</p>
+<table>
+<thead>
+<tr>
+<th align="right">#</th>
+<th align="left">Model</th>
+<th align="right">Tokens</th>
+<th align="center">Last week</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="right">1</td>
+<td align="left"><a href="https://openrouter.ai/deepseek/deepseek-v4.1-flash-20261017">deepseek/deepseek-v4.1-flash-20261017</a></td>
+<td align="right">65.04T</td>
+<td align="center">1</td>
+</tr>
+<tr>
+<td align="right">2</td>
+<td align="left"><a href="https://openrouter.ai/deepseek/deepseek-v4.1-flash-20260910">deepseek/deepseek-v4.1-flash-20260910</a></td>
+<td align="right">15.35T</td>
+<td align="center">3</td>
+</tr>
+<tr>
+<td align="right">3</td>
+<td align="left"><a href="https://openrouter.ai/z-ai/glm-5.3-flash-20260826">z-ai/glm-5.3-flash-20260826</a></td>
+<td align="right">12.23T</td>
+<td align="center">4</td>
+</tr>
+<tr>
+<td align="right">4</td>
+<td align="left"><a href="https://openrouter.ai/tencent/hy4-flash-20261116">tencent/hy4-flash-20261116</a></td>
+<td align="right">10.21T</td>
+<td align="center">new</td>
+</tr>
+<tr>
+<td align="right">5</td>
+<td align="left"><a href="https://openrouter.ai/openai/gpt-6-luna-20260922">openai/gpt-6-luna-20260922</a></td>
+<td align="right">8.31T</td>
+<td align="center">5</td>
+</tr>
+<tr>
+<td align="right">6</td>
+<td align="left"><a href="https://openrouter.ai/anthropic/claude-opus-5.5-20260921">anthropic/claude-opus-5.5-20260921</a></td>
+<td align="right">6.97T</td>
+<td align="center">6</td>
+</tr>
+<tr>
+<td align="right">7</td>
+<td align="left"><a href="https://openrouter.ai/minimax/minimax-m3.1-flash-20261019">minimax/minimax-m3.1-flash-20261019</a></td>
+<td align="right">4.29T</td>
+<td align="center">12</td>
+</tr>
+<tr>
+<td align="right">8</td>
+<td align="left"><a href="https://openrouter.ai/moonshotai/kimi-k3.1-pro-20261023">moonshotai/kimi-k3.1-pro-20261023</a></td>
+<td align="right">4.07T</td>
+<td align="center">11</td>
+</tr>
+<tr>
+<td align="right">9</td>
+<td align="left"><a href="https://openrouter.ai/nvidia/nemotron-3-ultra-550b-a55b-20260604">nvidia/nemotron-3-ultra-550b-a55b-20260604</a></td>
+<td align="right">3.93T</td>
+<td align="center">14</td>
+</tr>
+<tr>
+<td align="right">10</td>
+<td align="left"><a href="https://openrouter.ai/xiaomi/mimo-v2.6-flash-20260921">xiaomi/mimo-v2.6-flash-20260921</a></td>
+<td align="right">3.70T</td>
+<td align="center">8</td>
+</tr>
+<tr>
+<td align="right">11</td>
+<td align="left"><a href="https://openrouter.ai/baidu/ernie-5.5-flash-preview-20261110">baidu/ernie-5.5-flash-preview-20261110</a></td>
+<td align="right">3.47T</td>
+<td align="center">new</td>
+</tr>
+<tr>
+<td align="right">12</td>
+<td align="left"><a href="https://openrouter.ai/z-ai/glm-5.3-20260816">z-ai/glm-5.3-20260816</a></td>
+<td align="right">3.45T</td>
+<td align="center">9</td>
+</tr>
+<tr>
+<td align="right">13</td>
+<td align="left"><a href="https://openrouter.ai/stepfun/step-5-preview-20261008">stepfun/step-5-preview-20261008</a></td>
+<td align="right">3.23T</td>
+<td align="center">7</td>
+</tr>
+<tr>
+<td align="right">14</td>
+<td align="left"><a href="https://openrouter.ai/meta/muse-spark-1.3-contributor-20260902">meta/muse-spark-1.3-contributor-20260902</a></td>
+<td align="right">3.12T</td>
+<td align="center">16</td>
+</tr>
+<tr>
+<td align="right">15</td>
+<td align="left"><a href="https://openrouter.ai/nvidia/nemotron-3.5-super-vl-20261015">nvidia/nemotron-3.5-super-vl-20261015</a></td>
+<td align="right">2.91T</td>
+<td align="center">15</td>
+</tr>
+<tr>
+<td align="right">16</td>
+<td align="left"><a href="https://openrouter.ai/anthropic/claude-haiku-5.5-20261007">anthropic/claude-haiku-5.5-20261007</a></td>
+<td align="right">2.89T</td>
+<td align="center">18</td>
+</tr>
+<tr>
+<td align="right">17</td>
+<td align="left"><a href="https://openrouter.ai/typesafe/jev-1.13-20260917">typesafe/jev-1.13-20260917</a></td>
+<td align="right">2.86T</td>
+<td align="center">17</td>
+</tr>
+<tr>
+<td align="right">18</td>
+<td align="left"><a href="https://openrouter.ai/anthropic/claude-sonnet-5.5-20260928">anthropic/claude-sonnet-5.5-20260928</a></td>
+<td align="right">2.79T</td>
+<td align="center">19</td>
+</tr>
+<tr>
+<td align="right">19</td>
+<td align="left"><a href="https://openrouter.ai/openai/gpt-6.1-sol-20260929">openai/gpt-6.1-sol-20260929</a></td>
+<td align="right">2.52T</td>
+<td align="center">10</td>
+</tr>
+<tr>
+<td align="right">20</td>
+<td align="left"><a href="https://openrouter.ai/deepseek/deepseek-v4-flash-20260731">deepseek/deepseek-v4-flash-20260731</a></td>
+<td align="right">2.51T</td>
+<td align="center">13</td>
+</tr>
+</tbody></table>
+<h3>Hugging Face trending</h3>
+<p><em>Ranked by likes gained in the last 7 days; 🔥 also on last week&#39;s Trends page; quantised copies of a release share its row.</em></p>
+<table>
+<thead>
+<tr>
+<th align="right">#</th>
+<th align="left">Model</th>
+<th align="right">Likes (total)</th>
+<th align="right">Downloads (30 days)</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="right">1</td>
+<td align="left"><a href="https://huggingface.co/thinkingmachines/Inkling-2-Mini">thinkingmachines/Inkling-2-Mini</a> (+ <a href="https://huggingface.co/unsloth/Inkling-2-Mini-GGUF">unsloth/Inkling-2-Mini-GGUF</a>)</td>
+<td align="right">5,131</td>
+<td align="right">23,543</td>
+<td align="left">26B image-text-to-text model, Apache-2.0 license.</td>
+</tr>
+<tr>
+<td align="right">2</td>
+<td align="left"><a href="https://huggingface.co/inworld/voice-isolator">inworld/voice-isolator</a></td>
+<td align="right">659</td>
+<td align="right">0</td>
+<td align="left">Audio-to-audio voice isolation model, Apache-2.0 license.</td>
+</tr>
+<tr>
+<td align="right">3</td>
+<td align="left"><a href="https://huggingface.co/tencent/Hy4-flash">tencent/Hy4-flash</a></td>
+<td align="right">629</td>
+<td align="right">6,617</td>
+<td align="left">220B image-text-to-text model, custom (&quot;other&quot;) license.</td>
+</tr>
+<tr>
+<td align="right">4</td>
+<td align="left"><a href="https://huggingface.co/harness-hub/Qwen3.8-27B-pi-adapted">harness-hub/Qwen3.8-27B-pi-adapted</a></td>
+<td align="right">998</td>
+<td align="right">2,831</td>
+<td align="left">Image-text-to-text model, a pi-adapted variant of Qwen3.8-27B per its name, Apache-2.0 license.</td>
+</tr>
+<tr>
+<td align="right">5</td>
+<td align="left">🔥 <a href="https://huggingface.co/higurashi-ai/Haru-4B">higurashi-ai/Haru-4B</a></td>
+<td align="right">906</td>
+<td align="right">8,608</td>
+<td align="left">5.2B audio-to-audio model, Apache-2.0 license.</td>
+</tr>
+<tr>
+<td align="right">6</td>
+<td align="left"><a href="https://huggingface.co/apple/DepthPro2">apple/DepthPro2</a></td>
+<td align="right">369</td>
+<td align="right">0</td>
+<td align="left">Depth-estimation model, custom (&quot;other&quot;) license.</td>
+</tr>
+<tr>
+<td align="right">7</td>
+<td align="left">🔥 <a href="https://huggingface.co/Qwen/Qwen3.8-27B">Qwen/Qwen3.8-27B</a></td>
+<td align="right">20,954</td>
+<td align="right">6,297,396</td>
+<td align="left">27B image-text-to-text model, Apache-2.0 license.</td>
+</tr>
+<tr>
+<td align="right">8</td>
+<td align="left"><a href="https://huggingface.co/sensenova/SenseNova-Loop-9B">sensenova/SenseNova-Loop-9B</a></td>
+<td align="right">574</td>
+<td align="right">1,863</td>
+<td align="left">9B image-text-to-text model, Apache-2.0 license.</td>
+</tr>
+<tr>
+<td align="right">9</td>
+<td align="left"><a href="https://huggingface.co/apple/FastFrames-L">apple/FastFrames-L</a></td>
+<td align="right">545</td>
+<td align="right">0</td>
+<td align="left">Text-to-video model, Apple AMLR license.</td>
+</tr>
+<tr>
+<td align="right">10</td>
+<td align="left"><a href="https://huggingface.co/SulphurAI/Sulphur-3">SulphurAI/Sulphur-3</a></td>
+<td align="right">810</td>
+<td align="right">78,931</td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="right">11</td>
+<td align="left">🔥 <a href="https://huggingface.co/Lightricks/LTX-2.5">Lightricks/LTX-2.5</a></td>
+<td align="right">13,096</td>
+<td align="right">2,993,088</td>
+<td align="left">Image-to-video model, custom (&quot;other&quot;) license.</td>
+</tr>
+<tr>
+<td align="right">12</td>
+<td align="left"><a href="https://huggingface.co/meituan-longcat/LongCat-Video-Avatar-1.6">meituan-longcat/LongCat-Video-Avatar-1.6</a></td>
+<td align="right">446</td>
+<td align="right">3,483</td>
+<td align="left">Video-avatar model per its name, untagged task, MIT license.</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>Research</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Paper</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a href="http://arxiv.org/abs/2611.26157v1">NariQ: Sub-3-Bit Quantization for Long-Horizon Agentic Tasks</a></td>
+<td align="left">NariQ is a trellis-coded post-training quantization method that calibrates on tokens the BF16 model generates during agent sessions; it targets the finding that existing ≤3-bit quantizations of Qwen3.8-27B match BF16 on AIME but solve at most 72% as many DeepSWE tasks, though the truncated abstract gives no NariQ result.</td>
+</tr>
+<tr>
+<td align="left"><a href="http://arxiv.org/abs/2611.17780v1">LuthorSQL: A One-Pass Text-to-SQL Model as System 1 for a Slower LLM Agent</a></td>
+<td align="left">LuthorSQL is a non-autoregressive 7B text-to-SQL model that runs on local hardware as a fast &quot;System 1&quot; gate and escalates to a slower LLM agent (System 2), offloading work from hosted agents such as a Claude Opus 5.5 agent that costs over $70,000 a year at 10,000 queries a day, though the truncated abstract reports no accuracy or savings results.</td>
+</tr>
+<tr>
+<td align="left"><a href="http://arxiv.org/abs/2611.21129v1">Linglong Agent Service: A Runtime for Centralized Agent Reasoning and Distributed Execution</a></td>
+<td align="left">Linglong Agent Service (agentsvc) is a self-hosted HTTP service and embeddable Python runtime where a parent service keeps inference orchestration, tool descriptions and conversation history, while each inference request picks one child environment for file, shell, terminal and MCP operations, though the truncated abstract reports no evaluation results.</td>
+</tr>
+<tr>
+<td align="left"><a href="http://arxiv.org/abs/2611.24294v1">KnowledgeClaw: Towards Agentic Knowledge Engineering via Omnimodal Hypergraphs</a></td>
+<td align="left">KnowledgeClaw formalizes Omnimodal Knowledge Engineering (OmniKE) for turning raw files into reasoning-ready knowledge bases via omnimodal hypergraphs and releases OmniKE-Bench, with six tasks and 1,829 model-free items over 3,960 real files in five modalities, though the truncated abstract gives no system results.</td>
+</tr>
+<tr>
+<td align="left"><a href="http://arxiv.org/abs/2611.22971v1">SEAM: Computer-Use Agents Know the Harm Between Screens, and Commit It Anyway</a></td>
+<td align="left">SEAM (Safety Execution Across Multiple screens) is a benchmark that tests whether computer-use agents commit harm that only emerges by combining facts seen on different screens under a legitimate task, and its title claims agents recognize this harm yet commit it anyway, though the truncated abstract gives no numbers.</td>
+</tr>
+<tr>
+<td align="left"><a href="http://arxiv.org/abs/2611.20983v1">GRACE: Parallel Best-of-N Multi-Agent Analysis of Closed-Form Questions over Dataframes with Guardrail Selection and Adaptive Retry</a></td>
+<td align="left">GRACE (Generative, Ranked, Adaptive Code Ensemble) is a production-oriented pipeline that answers closed-form questions over dataframes by running N code-writing agents concurrently, with guardrail-based best-of-N selection and adaptive retry instead of answer-agreement voting, though the truncated abstract reports no results.</td>
+</tr>
+<tr>
+<td align="left"><a href="http://arxiv.org/abs/2611.26553v1">Replication of Agentic Security Events: Audit and Investigation (ROGUE-AI)</a></td>
+<td align="left">ROGUE-AI is a framework for replicating media-reported security incidents involving LLM agents (e.g., Replit&#39;s coding agent deleting a production database) in order to validate them and test their root causes, though the truncated abstract reports no findings.</td>
+</tr>
+<tr>
+<td align="left"><a href="http://arxiv.org/abs/2611.24491v1">Probing agent overeagerness in realistic settings with continuation audits</a></td>
+<td align="left">Continuation Audits is a pipeline that probes frontier coding agents for overeagerness (reckless actions beyond the user&#39;s mandate) by grounding the auditor on a prefix from realistic interactions, meant to avoid models recognizing synthetic audits, though the truncated abstract reports no results.</td>
+</tr>
+<tr>
+<td align="left"><a href="http://arxiv.org/abs/2611.22583v1">Evolution Under Fire: Evolving Agent Safety Harnesses with Adaptive Injection Stressors</a></td>
+<td align="left">Evolution Under Fire is a staged framework that co-evolves executable safety harnesses for tool-using agents, via utility-constrained, Pareto-scheduled tree search, alongside adaptive prompt-injection stressors, though the truncated abstract reports no results.</td>
+</tr>
+<tr>
+<td align="left"><a href="http://arxiv.org/abs/2611.18890v1">Benchmark Factory: Agentic Benchmark Creation via Dataset Curation and Label-Free Quality Anchors</a></td>
+<td align="left">Benchmark Factory is an autonomous meta-agent loop with human checkpoints that builds coding-agent benchmarks from landed production code changes, running models of known relative strength and diagnosing and repairing candidates until they clear label-free quality anchors, though the truncated abstract cuts off before its results.</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>Most discussed</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Story</th>
+<th align="left">Source</th>
+<th align="left">Discussion</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a href="https://openai.com/index/combatting-adversarial-distillation/">Combatting adversarial distillation</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50581242">34 points, 50 comments</a></td>
+<td align="left">OpenAI outlines a layered defense against adversarial distillation combining training, safeguards, detection, and enforcement.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://www.theguardian.com/technology/2026/nov/16/ai-related-child-sexual-abuse-material-rise-exploitation-deepfakes">Reports of AI-related child sexual abuse material rise 8,400% in two years</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50513713">18 points, 25 comments</a></td>
+<td align="left">Reports of AI-generated child sexual abuse material have risen 8,400% over two years, prompting calls for government action.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://www.theguardian.com/technology/2026/nov/21/international-talks-control-ai-autonomous-weapons-collapse">International UN talks on controlling use of autonomous weapons collapse</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50594564">41 points, 25 comments</a></td>
+<td align="left">UN talks on regulating autonomous weapons collapsed after a week without a negotiating mandate, attributed to Russian obstruction.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://austinpatrick.substack.com/p/when-should-ai-labs-alert-police">An FBI agent called a Claude user about his chats</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50567485">28 points, 24 comments</a></td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left"><a href="https://apnews.com/article/anthropic-ipo-pricing-70b660ddf900d90bbf484ecdf1fb441c">Anthropic reportedly prices its IPO at $83 per share, valuing at $1.5T</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50553581">17 points, 23 comments</a></td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left"><a href="https://dev.to/edbrdi/can-a-plain-table-hijack-an-ai-agent-2pde">Can a plain table hijack an AI agent?</a></td>
+<td align="left">Dev.to</td>
+<td align="left"><a href="https://dev.to/edbrdi/can-a-plain-table-hijack-an-ai-agent-2pde">24 reactions, 50 comments</a></td>
+<td align="left">The article explores whether a plain table can hijack an AI agent, with all cases documented in the agent-redteam repository.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://dev.to/rudratosh/your-ai-agent-retried-the-tool-call-the-first-one-had-already-succeeded-3pke">Your AI Agent Retried the Tool Call. The First One Had Already Succeeded.</a></td>
+<td align="left">Dev.to</td>
+<td align="left"><a href="https://dev.to/rudratosh/your-ai-agent-retried-the-tool-call-the-first-one-had-already-succeeded-3pke">16 reactions, 33 comments</a></td>
+<td align="left">The author explains how AI agent retries cause duplicate charges and proposes retry-safe designs using stable operation IDs, idempotency keys, and reconciliation.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://dev.to/amananandrai/stop-paying-llm-prices-for-an-if-statement-a-field-guide-to-decision-models-in-late-2026-4d24">Stop Paying LLM Prices for an if Statement: A Field Guide to Decision Models in Late 2026</a></td>
+<td align="left">Dev.to</td>
+<td align="left"><a href="https://dev.to/amananandrai/stop-paying-llm-prices-for-an-if-statement-a-field-guide-to-decision-models-in-late-2026-4d24">25 reactions, 16 comments</a></td>
+<td align="left">The author argues against using LLMs for simple conditional logic, advocating for decision models instead.</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>Signals</h2>
+<p>OpenRouter usage (one day&#39;s snapshot, on 2026-11-22): #1 is <a href="https://openrouter.ai/deepseek/deepseek-v4.1-flash-20261017">deepseek/deepseek-v4.1-flash-20261017</a> with 65.04T tokens; #2 is <a href="https://openrouter.ai/deepseek/deepseek-v4.1-flash-20260910">deepseek/deepseek-v4.1-flash-20260910</a> with 15.35T (#1 has 4.2× #2&#39;s tokens). The first was also #1 on last week&#39;s page, and the second was #3 there.</p>
+<p>Across the 4 GitHub category tables (32 rows), stars gained in the last 7 days: the largest absolute gain is <a href="https://github.com/pingdotgg/t3code">pingdotgg/t3code</a> (🕸️ Multi-agent &amp; orchestration, row 1), 72,704 (+10,681, +17%). The largest relative gain is <a href="https://github.com/mdiri-ai/SoduWork">mdiri-ai/SoduWork</a> (🧰 Agent harnesses &amp; frameworks, row 2), 6,852 (+5,838, +576%). Both rows also appeared on last week&#39;s page.</p>
+<p>In the Agent &amp; coding tool radar&#39;s OpenRouter rows, the most tokens in the last 7 days went to <a href="https://hermes-agent.nousresearch.com/">Hermes Agent</a> (row 1), with 14.15T tokens/week. It ranks week #3 / month #3 among OpenRouter apps, at +8.7% vs previous week.</p>
+<p>The Agent &amp; coding tool radar&#39;s largest rise against last week&#39;s page is <a href="https://pi.dev/">pi</a> (row 4, OpenRouter), at +46% vs previous week. It sits at week #6 / month #6 among OpenRouter apps, with 5.84T tokens/week.</p>
+<hr>
+<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
+]]></content:encoded>
+    </item>
     <item>
       <title>AI Agents 2026-11-22</title>
       <link>https://dboeter.github.io/daily-diff/#2026-11-22/ai-agents</link>
@@ -2927,1162 +4002,6 @@
 <td align="left">The author describes building a QR-code generator for PostgreSQL as a single pure SQL statement, requiring no external libraries or Postgres extension.</td>
 </tr>
 </tbody></table>
-<hr>
-<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
-]]></content:encoded>
-    </item>
-    <item>
-      <title>AI Agents 2026-11-16</title>
-      <link>https://dboeter.github.io/daily-diff/#2026-11-16/ai-agents</link>
-      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-11-16/ai-agents</guid>
-      <pubDate>Mon, 16 Nov 2026 00:00:00 +0000</pubDate>
-      <description>AI Agents 2026-11-16 ⬛ Overview · 🟪 AI Agents · 🟦 AI Models &amp;amp; Labs · 🟧 AI Policy · 🟨 Data Engineering · ⬜ Weekly Diff · 🟫 Trends Projects: 15 | Active today: 3 | Stable releases: 1 | Prereleases (not covered): 4 | Generated: 2026-11-16 09:26 UTC Highlights Oh My Pi v18.20.3 ships breaking changes: removed public isXdDevicePath export, renamed clickCount to count, and viewport screenshot coordinates now use displayed image coordinates by default (use css: true for CSS pixels). A 27-byte ...</description>
-      <content:encoded><![CDATA[<h1>AI Agents 2026-11-16</h1>
-<p><a href="https://dboeter.github.io/daily-diff/#2026-11-16">⬛ Overview</a> · <strong>🟪 AI Agents</strong> · <a href="https://dboeter.github.io/daily-diff/#2026-11-16/ai-models">🟦 AI Models &amp; Labs</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-16/ai-policy">🟧 AI Policy</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-16/ai-data">🟨 Data Engineering</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-16/ai-weekly">⬜ Weekly Diff</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-16/ai-trends">🟫 Trends</a></p>
-<blockquote>
-<p>Projects: 15 | Active today: 3 | Stable releases: 1 | Prereleases (not covered): 4 | Generated: 2026-11-16 09:26 UTC</p>
-</blockquote>
-<hr>
-<h2>Highlights</h2>
-<ul>
-<li>Oh My Pi v18.20.3 ships breaking changes: removed public <code>isXdDevicePath</code> export, renamed <code>clickCount</code> to <code>count</code>, and viewport screenshot coordinates now use displayed image coordinates by default (use <code>css: true</code> for CSS pixels).</li>
-<li>A 27-byte unread telemetry response causes Claude Desktop on Linux to leak file descriptors until the renderer freezes every few days, discovered after a 1.5 TiB core dump.</li>
-<li>Attest framework introduces testing of AI agent behavior by verifying tool calls and state changes, with replay of recorded model responses and CI enforcement of checks.</li>
-</ul>
-<hr>
-<h2>Coding Agents &amp; Assistants</h2>
-<h3>Claude Code</h3>
-<ul>
-<li><strong>News:</strong> <a href="https://news.ycombinator.com/item?id=50506993">I run multiple Claude Code accounts on one Mac</a> — A user describes how they run multiple Claude Code accounts on a single Mac.</li>
-</ul>
-<h3>Oh My Pi</h3>
-<ul>
-<li><strong>Release:</strong> <a href="https://github.com/can1357/oh-my-pi/releases/tag/v18.20.3">v18.20.3</a> — Breaking changes: removed public <code>isXdDevicePath</code> export from <code>providers/cursor-pi-args</code>; renamed browser <code>tab.clickAt()</code> option <code>clickCount</code> to <code>count</code>; viewport screenshot coordinates now use displayed image coordinates when scaled (use <code>css: true</code> for CSS pixels). Fixes: rate-limit handling for Mistral and other OpenAI-compatible providers now fails immediately with actionable error. Features: added <code>mnemopi.recallRelevance</code> (<code>off</code>, <code>auto</code>, <code>on</code>) to filter automatic memory recall; path-scoped entries for <code>bash.patterns</code> and <code>bashInterceptor.patterns</code> resolved per working directory; added <code>bash.allowedEnvVars</code> and per-rule <code>env</code> lists; subagents preserve <code>@upstream</code> provider pinning; added <code>--no-judge</code>, <code>--no-spotlight</code>, <code>--offline</code> options; per-rule TTSR <code>repeatMode</code> frontmatter (<code>once</code>, <code>after-gap</code>, <code>always</code>); compound bash approval prompts show each command segment separately; removed <code>seance</code> agent, <code>/seance</code> command, and task tool&#39;s <code>sourceSession</code> parameter.</li>
-</ul>
-<p><strong>Quiet today:</strong> <a href="https://github.com/openai/codex">OpenAI Codex</a>, <a href="https://github.com/google-gemini/gemini-cli">Gemini CLI</a>, <a href="https://github.com/Kilo-Org/kilocode">Kilo Code</a>, <a href="https://github.com/anomalyco/opencode">OpenCode</a>, <a href="https://github.com/earendil-works/pi">Pi</a>, <a href="https://github.com/1jehuang/jcode">jcode</a>, <a href="https://github.com/cline/cline">Cline</a>, <a href="https://github.com/CommandCodeAI/command-code">Command Code</a>, <a href="https://github.com/deepseek-ai/deepseek-harness">DeepSeek Harness</a>, <a href="https://github.com/nousresearch/hermes-agent">Hermes Agent</a></p>
-<hr>
-<h2>Agent Tooling</h2>
-<h3>herdr</h3>
-<ul>
-<li><strong>News:</strong> <a href="https://news.ycombinator.com/item?id=50508535">Show HN: Canban – Kanban and Workflow and Herdr Workbench for CLI Agents</a> describes Canban as combining Kanban with the herdr workbench for CLI agents.</li>
-</ul>
-<p><strong>Quiet today:</strong> <a href="https://github.com/NVIDIA/OpenShell">OpenShell</a>, <a href="https://github.com/microsoft/conductor">Conductor</a></p>
-<hr>
-<h2>Spotted</h2>
-<table>
-<thead>
-<tr>
-<th align="left">Story</th>
-<th align="left">Source</th>
-<th align="left">Discussion</th>
-<th align="left">Summary</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left"><a href="https://cpldcpu.github.io/2026/11/14/touchsynth/">Agentic AI Designs an Analog Synthesizer</a></td>
-<td align="left">Hacker News</td>
-<td align="left"><a href="https://news.ycombinator.com/item?id=50512933">14 points, 2 comments</a></td>
-<td align="left">An analog monophonic synthesizer built from around 200 components with a transistor ladder filter and touch keys had its circuit, simulation, PCB, firmware, and most bring-up completed by Claude Opus 5.5.</td>
-</tr>
-<tr>
-<td align="left"><a href="https://blog.dfb.sh/blog/claude-desktop-freeze/">A 27-byte telemetry response nobody reads freezes Claude Desktop every two days</a></td>
-<td align="left">Hacker News</td>
-<td align="left"><a href="https://news.ycombinator.com/item?id=50499446">9 points, 1 comment</a></td>
-<td align="left">Claude Desktop on Linux froze every few days because an unread 27-byte telemetry response caused Chromium to leak file descriptors until the renderer exhausted them, discovered after two months and a 1.5 TiB core dump.</td>
-</tr>
-<tr>
-<td align="left"><a href="https://attest-framework.github.io/">Show HN: Attest – Test what AI agents do, not just what they say</a></td>
-<td align="left">Hacker News</td>
-<td align="left"><a href="https://news.ycombinator.com/item?id=50509107">7 points, 0 comments</a></td>
-<td align="left">Attest is a framework that tests AI agent behavior by verifying tool calls and state changes, allowing replay of recorded model responses and enforcement of checks in CI.</td>
-</tr>
-<tr>
-<td align="left">Show HN: Skillset: Easily curate and install agent skills collection (<a href="https://github.com/itsmeyaw/skillset">itsmeyaw/skillset</a>)</td>
-<td align="left">Hacker News</td>
-<td align="left"><a href="https://news.ycombinator.com/item?id=50511761">5 points, 0 comments</a></td>
-<td align="left">Skillset provides a CLI for curating and installing only necessary agent skills to reduce token consumption.</td>
-</tr>
-<tr>
-<td align="left"><a href="https://sunshowers.io/posts/nextest-install-scripts/">Designing nextest&#39;s install scripts</a></td>
-<td align="left">Lobste.rs</td>
-<td align="left"><a href="https://lobste.rs/s/tbpfcn/designing_nextest_s_install_scripts">3 points, 0 comments</a></td>
-<td align="left">The author describes building nextest&#39;s install scripts carefully with the assistance of coding agents.</td>
-</tr>
-<tr>
-<td align="left"><a href="https://dev.to/therealmrmumba/give-your-voice-agent-hands-let-it-act-across-sales-and-marketing-fn2">Give Your Voice Agent Hands: Let It Act Across Sales and Marketing</a></td>
-<td align="left">Dev.to</td>
-<td align="left"><a href="https://dev.to/therealmrmumba/give-your-voice-agent-hands-let-it-act-across-sales-and-marketing-fn2">39 reactions, 0 comments</a></td>
-<td align="left">The article illustrates how a voice agent named Maya can perform post-call administrative tasks across sales and marketing workflows.</td>
-</tr>
-<tr>
-<td align="left"><a href="https://dev.to/kenielzep97/i-told-my-agent-who-sent-the-message-it-mostly-stopped-saying-we-were-talking-12o8">I Told My Agent Who Sent the Message. It Mostly Stopped Saying We Were Talking.</a></td>
-<td align="left">Dev.to</td>
-<td align="left"><a href="https://dev.to/kenielzep97/i-told-my-agent-who-sent-the-message-it-mostly-stopped-saying-we-were-talking-12o8">22 reactions, 12 comments</a></td>
-<td align="left">The author found that informing their AI agent about the message sender (e.g., &quot;sender=scheduler, not Keniel&quot;) largely stopped the agent from incorrectly claiming they were conversing.</td>
-</tr>
-</tbody></table>
-<hr>
-<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
-]]></content:encoded>
-    </item>
-    <item>
-      <title>AI Models &amp; Labs 2026-11-16</title>
-      <link>https://dboeter.github.io/daily-diff/#2026-11-16/ai-models</link>
-      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-11-16/ai-models</guid>
-      <pubDate>Mon, 16 Nov 2026 00:00:00 +0000</pubDate>
-      <description>AI Models &amp;amp; Labs 2026-11-16 ⬛ Overview · 🟪 AI Agents · 🟦 AI Models &amp;amp; Labs · 🟧 AI Policy · 🟨 Data Engineering · ⬜ Weekly Diff · 🟫 Trends Lab posts: 1 | New models: 1 | Spotted: 6 | Generated: 2026-11-16 09:26 UTC Highlights Qwen4 Max is now listed on OpenRouter with a 1 M-token context window and native text, image, and video input with text output. The accompanying Hacker News discussion reports Qwen4-Max also supports image generation, document processing, web search, tool use, and...</description>
-      <content:encoded><![CDATA[<h1>AI Models &amp; Labs 2026-11-16</h1>
-<p><a href="https://dboeter.github.io/daily-diff/#2026-11-16">⬛ Overview</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-16/ai-agents">🟪 AI Agents</a> · <strong>🟦 AI Models &amp; Labs</strong> · <a href="https://dboeter.github.io/daily-diff/#2026-11-16/ai-policy">🟧 AI Policy</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-16/ai-data">🟨 Data Engineering</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-16/ai-weekly">⬜ Weekly Diff</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-16/ai-trends">🟫 Trends</a></p>
-<blockquote>
-<p>Lab posts: 1 | New models: 1 | Spotted: 6 | Generated: 2026-11-16 09:26 UTC</p>
-</blockquote>
-<hr>
-<h2>Highlights</h2>
-<ul>
-<li>Qwen4 Max is now listed on OpenRouter with a 1 M-token context window and native text, image, and video input with text output.  </li>
-<li>The accompanying Hacker News discussion reports Qwen4-Max also supports image generation, document processing, web search, tool use, and artifact creation.</li>
-</ul>
-<hr>
-<h2>Lab announcements</h2>
-<table>
-<thead>
-<tr>
-<th align="left">Date</th>
-<th align="left">Lab</th>
-<th align="left">Post</th>
-<th align="left">Summary</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left">2026-11-16</td>
-<td align="left">OpenAI</td>
-<td align="left"><a href="https://openai.com/index/lvmh-media-division-partnership/">Lvmh Media Division Partnership</a></td>
-<td align="left">—</td>
-</tr>
-</tbody></table>
-<hr>
-<h2>New on OpenRouter</h2>
-<table>
-<thead>
-<tr>
-<th align="left">Model</th>
-<th align="left">Listed</th>
-<th align="left">Context</th>
-<th align="left">Summary</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left"><a href="https://openrouter.ai/qwen/qwen4-max">Qwen: Qwen4 Max</a> <code>qwen/qwen4-max</code></td>
-<td align="left">2026-11-16</td>
-<td align="left">1M</td>
-<td align="left">Qwen4 Max is a model in Alibaba&#39;s Qwen4 series that accepts text, image, and video input and returns text.</td>
-</tr>
-</tbody></table>
-<hr>
-<p>Nothing new from OpenRouter&#39;s stealth models today.</p>
-<hr>
-<h2>Spotted</h2>
-<table>
-<thead>
-<tr>
-<th align="left">Story</th>
-<th align="left">Source</th>
-<th align="left">Discussion</th>
-<th align="left">Summary</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left"><a href="https://qwen.ai/blog?id=qwen4-max">Qwen4-Max</a></td>
-<td align="left">Hacker News</td>
-<td align="left"><a href="https://news.ycombinator.com/item?id=50513215">480 points, 191 comments</a></td>
-<td align="left">Qwen4-Max provides a broad suite of capabilities including chat, image and video understanding, image generation, document processing, web search, tool use, and artifacts.</td>
-</tr>
-<tr>
-<td align="left"><a href="https://magazine.sebastianraschka.com/p/understanding-positional-embeddings">Understanding Positional Embeddings in Modern LLMs</a></td>
-<td align="left">Hacker News</td>
-<td align="left"><a href="https://news.ycombinator.com/item?id=50506376">227 points, 27 comments</a></td>
-<td align="left">The article explains the methods modern LLMs use to represent token positions through positional embeddings.</td>
-</tr>
-<tr>
-<td align="left"><a href="https://operator0x.com/field-notes/qwen-conversation-state-space/">What thousands of conversations look like inside a language model</a></td>
-<td align="left">Hacker News</td>
-<td align="left"><a href="https://news.ycombinator.com/item?id=50481321">123 points, 29 comments</a></td>
-<td align="left">The author mapped thousands of conversations within Qwen to visualize how language structures emerge inside the model.</td>
-</tr>
-<tr>
-<td align="left"><a href="https://fortune.com/2026/11/14/alpha-school-ai-students-tuition-learning-goals/">Parents pay $75k for Alpha&#39;s AI school. Half of its students missed math target</a></td>
-<td align="left">Hacker News</td>
-<td align="left"><a href="https://news.ycombinator.com/item?id=50509953">65 points, 64 comments</a></td>
-<td align="left">According to internal data, only 42% of students at Alpha&#39;s AI school achieved its 2x learning goal in math and reading, while 2,600 public school students now use its software.</td>
-</tr>
-<tr>
-<td align="left"><a href="https://www.reddit.com/r/google_antigravity/comments/1xx9nl3/google_ai_ultra_subscription_not_worth_it/">Google AI Ultra Subscription Not Worth It</a></td>
-<td align="left">Hacker News</td>
-<td align="left"><a href="https://news.ycombinator.com/item?id=50514224">9 points, 0 comments</a></td>
-<td align="left">—</td>
-</tr>
-<tr>
-<td align="left"><a href="https://www.baseten.co/blog/the-efficient-frontier-of-llm-inference/#quantization">The efficient frontier of LLM inference</a></td>
-<td align="left">Hacker News</td>
-<td align="left"><a href="https://news.ycombinator.com/item?id=50512233">9 points, 0 comments</a></td>
-<td align="left">The article maps how techniques like batch sizing, parallelism, quantization, kernels, speculative decoding, and disaggregation affect the latency-throughput frontier in LLM inference.</td>
-</tr>
-</tbody></table>
-<hr>
-<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
-]]></content:encoded>
-    </item>
-    <item>
-      <title>AI Policy 2026-11-16</title>
-      <link>https://dboeter.github.io/daily-diff/#2026-11-16/ai-policy</link>
-      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-11-16/ai-policy</guid>
-      <pubDate>Mon, 16 Nov 2026 00:00:00 +0000</pubDate>
-      <description>AI Policy 2026-11-16 ⬛ Overview · 🟪 AI Agents · 🟦 AI Models &amp;amp; Labs · 🟧 AI Policy · 🟨 Data Engineering · ⬜ Weekly Diff · 🟫 Trends Sources: European Commission | 1 new item ranked by Jev relevance | Generated: 2026-11-16 09:26 UTC Highlights The European Commission opened a consultation on draft revised election guidelines under the Digital Services Act (Commission invites views on draft revised election guidelines under Digital Services Act), aiming to address the rapid evolution of onli...</description>
-      <content:encoded><![CDATA[<h1>AI Policy 2026-11-16</h1>
-<p><a href="https://dboeter.github.io/daily-diff/#2026-11-16">⬛ Overview</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-16/ai-agents">🟪 AI Agents</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-16/ai-models">🟦 AI Models &amp; Labs</a> · <strong>🟧 AI Policy</strong> · <a href="https://dboeter.github.io/daily-diff/#2026-11-16/ai-data">🟨 Data Engineering</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-16/ai-weekly">⬜ Weekly Diff</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-16/ai-trends">🟫 Trends</a></p>
-<blockquote>
-<p>Sources: European Commission | 1 new item ranked by <a href="https://typesafe.ai">Jev</a> relevance | Generated: 2026-11-16 09:26 UTC</p>
-</blockquote>
-<hr>
-<h2>Highlights</h2>
-<p>The European Commission opened a consultation on draft revised election guidelines under the Digital Services Act (<a href="https://digital-strategy.ec.europa.eu/en/news/commission-invites-views-draft-revised-election-guidelines-under-digital-services-act">Commission invites views on draft revised election guidelines under Digital Services Act</a>), aiming to address the rapid evolution of online electoral processes. The initiative targets very large online platforms and search engines, seeking stakeholder input on updated mitigation measures for systemic risks related to electoral integrity.</p>
-<h2>EU</h2>
-<table>
-<thead>
-<tr>
-<th align="left">Date</th>
-<th align="left">Source</th>
-<th align="left">Title</th>
-<th align="left">Stage</th>
-<th align="left">Summary</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left">2026-11-10</td>
-<td align="left">European Commission</td>
-<td align="left"><a href="https://digital-strategy.ec.europa.eu/en/news/commission-invites-views-draft-revised-election-guidelines-under-digital-services-act">Commission invites views on draft revised election guidelines under Digital Services Act</a></td>
-<td align="left">—</td>
-<td align="left">The European Commission launched a consultation to update its election guidelines under the Digital Services Act, addressing the rapid evolution of generative AI and growing manipulation risks.</td>
-</tr>
-</tbody></table>
-<h2>Coming up</h2>
-<p>Deadlines and dates in the next 30 days.</p>
-<table>
-<thead>
-<tr>
-<th align="left">Date</th>
-<th align="left">Source</th>
-<th align="left">Item</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left">2026-12-02</td>
-<td align="left">Calendar</td>
-<td align="left"><a href="https://ai-act-service-desk.ec.europa.eu/en/ai-act/timeline/timeline-implementation-eu-ai-act">AI Act: bans on sexual deepfakes and CSAM generators; Art. 50(2) transition ends</a></td>
-</tr>
-</tbody></table>
-<hr>
-<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
-]]></content:encoded>
-    </item>
-    <item>
-      <title>Data Engineering 2026-11-16</title>
-      <link>https://dboeter.github.io/daily-diff/#2026-11-16/ai-data</link>
-      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-11-16/ai-data</guid>
-      <pubDate>Mon, 16 Nov 2026 00:00:00 +0000</pubDate>
-      <description>Data Engineering 2026-11-16 ⬛ Overview · 🟪 AI Agents · 🟦 AI Models &amp;amp; Labs · 🟧 AI Policy · 🟨 Data Engineering · ⬜ Weekly Diff · 🟫 Trends Vendor items: 1 | Projects: 26 | Active today: 1 | Stable releases: 1 | Prereleases (not covered): 1 | Generated: 2026-11-16 09:26 UTC Highlights Terraform provider for Databricks v1.143.0 introduces a breaking change for users managing databricks_app resources: updates now use the asynchronous API and omitted fields are cleared (compute size resets to ...</description>
-      <content:encoded><![CDATA[<h1>Data Engineering 2026-11-16</h1>
-<p><a href="https://dboeter.github.io/daily-diff/#2026-11-16">⬛ Overview</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-16/ai-agents">🟪 AI Agents</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-16/ai-models">🟦 AI Models &amp; Labs</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-16/ai-policy">🟧 AI Policy</a> · <strong>🟨 Data Engineering</strong> · <a href="https://dboeter.github.io/daily-diff/#2026-11-16/ai-weekly">⬜ Weekly Diff</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-16/ai-trends">🟫 Trends</a></p>
-<blockquote>
-<p>Vendor items: 1 | Projects: 26 | Active today: 1 | Stable releases: 1 | Prereleases (not covered): 1 | Generated: 2026-11-16 09:26 UTC</p>
-</blockquote>
-<hr>
-<h2>Highlights</h2>
-<ul>
-<li>Terraform provider for Databricks v1.143.0 introduces a breaking change for users managing <code>databricks_app</code> resources: updates now use the asynchronous API and omitted fields are cleared (compute size resets to <code>MEDIUM</code>, autoscaling disabled, git source cleared), whereas the previous synchronous API ignored those changes.</li>
-</ul>
-<hr>
-<h2>Action required</h2>
-<table>
-<thead>
-<tr>
-<th align="left">Date</th>
-<th align="left">Platform</th>
-<th align="left">Item</th>
-<th align="left">What to do</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left">2026-11-19</td>
-<td align="left">Azure Databricks</td>
-<td align="left"><a href="https://learn.microsoft.com/azure/databricks/release-notes/product/2026/november#gemini-36-flash-will-be-retired-on-november-19-2026">Gemini 3.6 Flash will be retired on November 19, 2026</a></td>
-<td align="left">API calls to <code>Gemini 3.6 Flash</code> will be automatically redirected to <code>Gemini 3.8 Flash</code> on 2026-11-19; migrate to <code>Gemini 3.8 Flash</code> using the Legacy, deprecated, and retired models guide.</td>
-</tr>
-<tr>
-<td align="left">2026-11-30</td>
-<td align="left">Azure Databricks</td>
-<td align="left"><a href="https://learn.microsoft.com/azure/databricks/release-notes/whats-coming#upcoming-end-of-life-for-the-genie-one-mcp-beta-endpoint">Upcoming end of life for the Genie One MCP Beta endpoint</a></td>
-<td align="left">The Genie One MCP Beta endpoint at <code>https://&lt;workspace-hostname&gt;/api/2.0/mcp/genie</code> reaches end of life on November 30, 2026, after which requests fail; migrate all workloads to the <code>system.ai.genie_one_mcp</code> MCP in Unity Gateway.</td>
-</tr>
-<tr>
-<td align="left">2027-01-31</td>
-<td align="left">BigQuery</td>
-<td align="left"><a href="https://docs.cloud.google.com/bigquery/docs/release-notes#November_06_2026">Starting January 31, 2027, the BigQuery Data Transfer Service for Shopify connector will no longer support the following fields</a></td>
-<td align="left">Starting January 31, 2027, the BigQuery Data Transfer Service for Shopify connector will drop support for the <code>legacyMode</code> field in the DeliveryProfile dataset schema and the <code>permitSkuSharing</code> field in the FulfillmentService dataset schema.</td>
-</tr>
-<tr>
-<td align="left">2027-02-04</td>
-<td align="left">Azure Databricks</td>
-<td align="left"><a href="https://learn.microsoft.com/azure/databricks/release-notes/product/2026/november#zhipu-ai-glm-52-is-scheduled-for-retirement">Zhipu AI GLM 5.2 is scheduled for retirement</a></td>
-<td align="left">Zhipu AI GLM 5.2 is deprecated and will be retired on February 4, 2027, requiring migration to GLM 5.3 per the Legacy, deprecated, and retired models guidance.</td>
-</tr>
-<tr>
-<td align="left">2027-08-19</td>
-<td align="left">Azure Databricks</td>
-<td align="left"><a href="https://learn.microsoft.com/azure/databricks/release-notes/whats-coming#all-unity-catalog-managed-tables-will-be-upgraded-to-catalog-commits">All Unity Catalog managed tables will be upgraded to catalog commits</a></td>
-<td align="left">After Databricks Runtime 15.4 LTS end of support on August 19, 2027, all Unity Catalog managed tables will be automatically upgraded to <code>catalog commits</code>, making Unity Catalog the system of coordination and enabling multi-statement transactions, external engine writes, and consistent governance; clients must plan for this breaking change before the 2027 deadline.</td>
-</tr>
-</tbody></table>
-<hr>
-<h2>Databricks</h2>
-<table>
-<thead>
-<tr>
-<th align="left">Date</th>
-<th align="left">Item</th>
-<th align="left">Summary</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left">2026-11-12</td>
-<td align="left">🤖 <a href="https://learn.microsoft.com/azure/databricks/ai-bi/release-notes/2026#use-genie-one-as-your-chrome-new-tab-page-beta">Use Genie One as your Chrome new tab page (Beta)</a></td>
-<td align="left">The Genie One Chrome extension replaces the Chrome new tab page with Genie One from your Azure Databricks workspace, using your existing Azure Databricks sign-in and permissions and working with one chosen workspace when the extension is turned on.</td>
-</tr>
-</tbody></table>
-<h3>Terraform provider for Databricks</h3>
-<ul>
-<li><strong>Release:</strong> <a href="https://github.com/databricks/terraform-provider-databricks/releases/tag/v1.143.0">v1.143.0</a> switches <code>databricks_app</code> updates to the asynchronous API, now applying <code>compute_size</code>, <code>compute_min_instances</code>, and <code>compute_max_instances</code> changes that the synchronous API ignored; omitted fields are cleared (size resets to <code>MEDIUM</code>, scaling disabled, git source cleared). Fixes perpetual diffs by preserving sensitive connection options (<code>pem_key_passphrase</code>, <code>ssl_keystore_key</code>, <code>ssl_key_password</code>, <code>schema_registry_api_secret</code>) and ignoring whitespace-only PEM differences. Adds <code>databricks_assume_group_restricted_sharing_group</code> resource and data source, plus write-only attributes for <code>databricks_git_credential</code> and <code>databricks_connection</code>.</li>
-</ul>
-<p><strong>Quiet today:</strong> <a href="https://github.com/delta-io/delta">Delta Lake</a>, <a href="https://github.com/delta-io/delta-rs">delta-rs</a>, <a href="https://github.com/unitycatalog/unitycatalog">Unity Catalog</a>, <a href="https://github.com/mlflow/mlflow">MLflow</a>, <a href="https://github.com/databricks/cli">Databricks CLI</a>, <a href="https://github.com/databricks/dbt-databricks">dbt-databricks</a></p>
-<hr>
-<p>Nothing new from Snowflake (<a href="https://github.com/snowflakedb/snowpark-python">Snowpark Python</a>, <a href="https://github.com/snowflakedb/snowflake-connector-python">Snowflake Connector for Python</a>, <a href="https://github.com/apache/polaris">Apache Polaris</a>, <a href="https://github.com/snowflakedb/terraform-provider-snowflake">Terraform provider for Snowflake</a>), Azure / Fabric &amp; GCP or Open-source stack (<a href="https://github.com/dbt-labs/dbt">dbt Core</a>, <a href="https://github.com/SQLMesh/sqlmesh">SQLMesh</a>, <a href="https://github.com/apache/airflow">Apache Airflow</a>, <a href="https://github.com/dagster-io/dagster">Dagster</a>, <a href="https://github.com/PrefectHQ/prefect">Prefect</a>, <a href="https://github.com/dlt-hub/dlt">dlt</a>, <a href="https://github.com/apache/iceberg">Apache Iceberg</a>, <a href="https://github.com/apache/iceberg-python">PyIceberg</a>, <a href="https://github.com/duckdb/duckdb">DuckDB</a>, <a href="https://github.com/pola-rs/polars">Polars</a>, <a href="https://github.com/trinodb/trino">Trino</a>, <a href="https://github.com/great-expectations/great_expectations">Great Expectations</a>, <a href="https://github.com/sodadata/soda-core">Soda Core</a>, <a href="https://github.com/OpenLineage/OpenLineage">OpenLineage</a>, <a href="https://github.com/open-metadata/OpenMetadata">OpenMetadata</a>) today.</p>
-<hr>
-<h2>Spotted</h2>
-<table>
-<thead>
-<tr>
-<th align="left">Story</th>
-<th align="left">Source</th>
-<th align="left">Discussion</th>
-<th align="left">Summary</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left">Show HN: db-branch – database branches in seconds for AI agents and CI, via ZFS (<a href="https://github.com/db-branch/db-branch">db-branch/db-branch</a>)</td>
-<td align="left">Hacker News</td>
-<td align="left"><a href="https://news.ycombinator.com/item?id=50506940">42 points, 11 comments</a></td>
-<td align="left">db-branch enables instant MySQL database branching using ZFS clones, clustered across VMs with ProxySQL routing for AI agents and CI.</td>
-</tr>
-<tr>
-<td align="left"><a href="https://transactional.blog/talk/please-implement-a-quorum-database">Please Implement A Quorum Database</a></td>
-<td align="left">Lobste.rs</td>
-<td align="left"><a href="https://lobste.rs/s/hgicaq/please_implement_quorum_database">11 points, 0 comments</a></td>
-<td align="left">The post argues that leaderless replication is both enjoyable and practical, advocating for a quorum database implementation.</td>
-</tr>
-</tbody></table>
-<hr>
-<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
-]]></content:encoded>
-    </item>
-    <item>
-      <title>Weekly Diff 2026-11-16</title>
-      <link>https://dboeter.github.io/daily-diff/#2026-11-16/ai-weekly</link>
-      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-11-16/ai-weekly</guid>
-      <pubDate>Mon, 16 Nov 2026 00:00:00 +0000</pubDate>
-      <description>Weekly Diff 2026-11-16 ⬛ Overview · 🟪 AI Agents · 🟦 AI Models &amp;amp; Labs · 🟧 AI Policy · 🟨 Data Engineering · ⬜ Weekly Diff · 🟫 Trends Sources: 330 items the pages showed from 2026-11-10 to 2026-11-16 | Written by claude-opus-5-5 | Text in italics is interpretation | Generated: 22:30 UTC Anthropic released Claude Fable 5.2 and Claude Mythos 5.2. Google made Gemini 4 Carbon available and introduced Gemini 4 Hydrogen. Azure Databricks set dates for model retirements and an MCP endpoint, and t...</description>
-      <content:encoded><![CDATA[<h1>Weekly Diff 2026-11-16</h1>
-<p><a href="https://dboeter.github.io/daily-diff/#2026-11-16">⬛ Overview</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-16/ai-agents">🟪 AI Agents</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-16/ai-models">🟦 AI Models &amp; Labs</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-16/ai-policy">🟧 AI Policy</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-16/ai-data">🟨 Data Engineering</a> · <strong>⬜ Weekly Diff</strong> · <a href="https://dboeter.github.io/daily-diff/#2026-11-16/ai-trends">🟫 Trends</a></p>
-<blockquote>
-<p>Sources: 330 items the pages showed from 2026-11-10 to 2026-11-16 | Written by claude-opus-5-5 | Text in italics is interpretation | Generated: 22:30 UTC</p>
-</blockquote>
-<hr>
-<p>Anthropic released <a href="https://www.anthropic.com/claude-fable-and-mythos-5-2">Claude Fable 5.2 and Claude Mythos 5.2</a>. Google made <a href="https://blog.google/innovation-and-ai/models-and-research/gemini-models/gemini-4-carbon-now-available/">Gemini 4 Carbon</a> available and introduced <a href="https://blog.google/innovation-and-ai/models-and-research/gemini-models/introducing-gemini-4-hydrogen/">Gemini 4 Hydrogen</a>. Azure Databricks set dates for model retirements and an MCP endpoint, and the European Commission adopted <a href="https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32026R2487">an implementing regulation on AI regulatory sandboxes</a>.</p>
-<h2>Claude Fable 5.2 in coding agents</h2>
-<p><a href="https://github.com/anthropics/claude-code/releases/tag/v2.1.321">Claude Code v2.1.321</a> added Claude Fable 5.2 (<code>claude-fable-5-2</code>) as the default Fable model. It has 1M context and costs $8/$40 per Mtok, with $0.20/Mtok for cache reads. The same release fixed MCP OAuth requests that sent secrets such as refresh tokens to another host when a server redirected them. It separately fixed a case where a read-only Bash command ran outside the sandbox without a permission prompt.</p>
-<p><a href="https://github.com/earendil-works/pi/releases/tag/v1.5.1">Pi v1.5.1</a> also added Fable 5.2 to its <code>anthropic</code> provider. Its notes say that requests Fable 5.2&#39;s safety classifiers refuse before any output are answered by Claude Opus 5 through server-side fallback, and are billed at Opus 5&#39;s price. The same release changed the default model of that provider to Claude Opus 5.5.</p>
-<p>Two issues describe friction with the new model and with later releases. One <a href="https://github.com/anthropics/claude-code/issues/108726">issue reports</a> that <code>DISABLE_TELEMETRY=1</code> stops Claude Code from downloading feature flags, so the <code>/model</code> picker offers Fable 5.1 instead of 5.2. Another <a href="https://github.com/anthropics/claude-code/issues/109446">issue reports</a> that 2.1.323 removed the <code>subagentStatusLine</code> setting. Its reporter calls the setting the only place to see each subagent&#39;s context, cost, model and effort. A Team subscriber <a href="https://github.com/anthropics/claude-code/issues/107390">reports</a> that weekly usage reached 100% about 30 hours and 31 minutes after the reset on 2026-11-04. Later in the week, <a href="https://github.com/anthropics/claude-code/releases/tag/v2.1.325">Claude Code v2.1.325</a> fixed a security issue in how zstd-compressed responses are decoded.</p>
-<p><em>For teams whose clients require telemetry to be off, the reported link between <code>DISABLE_TELEMETRY</code> and the model picker is worth watching, because a privacy setting may hide the new default Fable model. Pi&#39;s note suggests that the cost of a Fable request can depend on whether the request is refused.</em></p>
-<h2>Azure Databricks dates and defaults</h2>
-<p>The <a href="https://learn.microsoft.com/azure/databricks/release-notes/whats-coming#upcoming-end-of-life-for-the-genie-one-mcp-beta-endpoint">Genie One MCP Beta endpoint</a> reaches end of life on 2026-11-30, after which requests fail. The note points workloads to the <code>system.ai.genie_one_mcp</code> MCP in Unity Gateway. <a href="https://learn.microsoft.com/azure/databricks/release-notes/product/2026/november#gemini-36-flash-will-be-retired-on-november-19-2026">Gemini 3.6 Flash</a> retires on 2026-11-19. From that date, calls are redirected to Gemini 3.8 Flash at the same price. <a href="https://learn.microsoft.com/azure/databricks/release-notes/product/2026/november#zhipu-ai-glm-52-is-scheduled-for-retirement">Zhipu AI GLM 5.2</a> is deprecated and retires on 2027-02-04, with GLM 5.3 as the recommended replacement.</p>
-<p>Starting on or after 2026-12-10, <a href="https://learn.microsoft.com/azure/databricks/release-notes/whats-coming#external-access-to-unity-catalog-managed-delta-tables-will-soon-be-available-by-default-for-workspaces-with-the-compliance-security-profile-enabled">external access to Unity Catalog managed Delta tables</a> will be available by default for eligible workspaces with the compliance security profile enabled. <a href="https://learn.microsoft.com/azure/databricks/release-notes/unity-gateway#smart-routing-is-faster-and-lower-cost-and-now-routes-subagents-only-beta">Smart Routing</a>, which is in Beta, now routes only subagents. Databricks says it costs up to 70% less in internal benchmarks and cuts p90 routing latency from 9 seconds to 2 seconds. Smart Routing for Codex is paused.</p>
-<p>Two tools changed how they handle an app&#39;s compute size. <a href="https://github.com/databricks/terraform-provider-databricks/releases/tag/v1.143.0">Terraform provider v1.143.0</a> now updates <code>databricks_app</code> through the asynchronous API. As a result, an omitted <code>compute_size</code> resets to <code>MEDIUM</code>, and an omitted <code>git_source</code> clears the app&#39;s default git source. <a href="https://github.com/databricks/cli/releases/tag/v1.26.0">Databricks CLI v1.26.0</a> no longer sends <code>compute_size</code> when a bundle does not declare it. A deploy therefore no longer resets a manually resized app to the default size.</p>
-<p><em>The two tools now treat an undeclared app size in opposite ways, so apps managed with both may end up at different sizes depending on which tool deployed last. The compliance-profile change is worth watching, since access will then depend on metastore external data access settings and Unity Catalog privileges.</em></p>
-<h2>Gemini 4 models in BigQuery and agent catalogs</h2>
-<p>BigQuery generative AI functions now support <a href="https://docs.cloud.google.com/bigquery/docs/release-notes#November_10_2026">gemini-4-carbon</a> and <a href="https://docs.cloud.google.com/bigquery/docs/release-notes#November_12_2026">gemini-4-hydrogen</a>. The notes call each model generally available.</p>
-<p>Oh My Pi&#39;s <a href="https://github.com/can1357/oh-my-pi/releases/tag/v18.18.8">v18.18.8</a> catalog lists Gemini 4 Carbon at $2 input, $0.10 cached and $10 output per 1M tokens through 2026-11-30, then $4, $0.20 and $20. Its <a href="https://github.com/can1357/oh-my-pi/releases/tag/v18.20.1">v18.20.1</a> lists Gemini 4 Hydrogen on Google Antigravity at $1.50/$7.50 per million tokens. The same release paused Google Antigravity again and points users to <code>GEMINI_API_KEY</code> with Google AI Studio or to the <code>google-vertex</code> provider. An earlier <a href="https://github.com/can1357/oh-my-pi/releases/tag/v18.18.4">v18.18.4</a> had paused Antigravity because Google may restrict accounts that use it outside its own apps.</p>
-<p><em>If that catalog&#39;s dates hold, Carbon&#39;s per-token prices double after 2026-11-30, so cost estimates made this month may not carry over to December. The repeated pausing in one tool suggests that Antigravity access through third-party agents is less settled than access through API keys or Vertex.</em></p>
-<h2>EU AI Act implementation</h2>
-<p>The Commission also published <a href="https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:52026XC06005">guidelines on the transparency obligations for certain AI systems under Article 50</a> of the AI Act on 2026-11-12. The <a href="https://ai-act-service-desk.ec.europa.eu/en/ai-act/timeline/timeline-implementation-eu-ai-act">AI Act timeline</a> lists 2026-12-02 for two milestones: bans on sexual deepfakes and CSAM generators, and the end of the Article 50(2) transition. In the Netherlands, <a href="https://www.tweedekamer.nl/kamerstukken/detail?id=2026Z24543&did=2026D56682">a motion by El Boujdaini and others</a> concerns equipping authorities sufficiently for supervision of the AI Act.</p>
-<p><em>The Article 50 guidelines appeared 20 days before the Article 50(2) transition ends, which leaves a short window for clients whose AI systems fall under that article to compare their practice with them.</em></p>
-<h2>Agent tool usage</h2>
-<p>Several agent tools moved sharply in OpenRouter&#39;s app ranking. <a href="https://kilocode.ai/">Kilo Code</a> was week #5 with 7.03T tokens/week, +46% vs previous week. <a href="https://strix.ai/">Strix</a> was week #9 with 2.56T tokens/week, +45% vs previous week. <a href="https://openclaw.ai/">OpenClaw</a> was week #8 with 2.69T tokens/week, -46% vs previous week. <a href="https://omp.sh/">omp</a> was week #11 with 2.13T tokens/week, -36% vs previous week, while its npm package had 295,519 downloads/week, +34% vs previous week. <a href="https://hermes-agent.nousresearch.com/">Hermes Agent</a> was week #3 with 13.02T tokens/week (+5.1% vs previous week), and <a href="https://claude.ai/code">Claude Code</a> was week #4 with 10.80T tokens/week (+7.5% vs previous week).</p>
-<p>Among models on 2026-11-15, <a href="https://openrouter.ai/deepseek/deepseek-v4.1-flash-20261017">deepseek-v4.1-flash-20261017</a> led OpenRouter tokens with 59.23T. <a href="https://openrouter.ai/tencent/hy4-20261104">tencent/hy4-20261104</a> was #2 with 18.12T, after ranking #4 last week.</p>
-<p><em>omp&#39;s OpenRouter tokens and npm downloads moved in opposite directions, which suggests OpenRouter tokens alone may not track how much a tool is used. Swings near 46% in both directions show one week&#39;s movement, not a lasting shift.</em></p>
-<hr>
-<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
-]]></content:encoded>
-    </item>
-    <item>
-      <title>Trends 2026-11-16</title>
-      <link>https://dboeter.github.io/daily-diff/#2026-11-16/ai-trends</link>
-      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-11-16/ai-trends</guid>
-      <pubDate>Mon, 16 Nov 2026 00:00:00 +0000</pubDate>
-      <description>Trends 2026-11-16 ⬛ Overview · 🟪 AI Agents · 🟦 AI Models &amp;amp; Labs · 🟧 AI Policy · 🟨 Data Engineering · ⬜ Weekly Diff · 🟫 Trends Sources: GitHub Trending + GitHub Search API + OpenRouter + npm + Hugging Face + arXiv + Hacker News + Lobste.rs + Dev.to | Generated: 2026-11-16 09:26 UTC Highlights Tencent/LoopForge gained 1,767 stars (+633%) in Multi-Agent &amp;amp; Orchestration, the largest relative gain across all GitHub category tables. Hermes Agent leads OpenRouter token usage at 13.02T toke...</description>
-      <content:encoded><![CDATA[<h1>Trends 2026-11-16</h1>
-<p><a href="https://dboeter.github.io/daily-diff/#2026-11-16">⬛ Overview</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-16/ai-agents">🟪 AI Agents</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-16/ai-models">🟦 AI Models &amp; Labs</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-16/ai-policy">🟧 AI Policy</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-16/ai-data">🟨 Data Engineering</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-16/ai-weekly">⬜ Weekly Diff</a> · <strong>🟫 Trends</strong></p>
-<blockquote>
-<p>Sources: GitHub Trending + GitHub Search API + OpenRouter + npm + Hugging Face + arXiv + Hacker News + Lobste.rs + Dev.to | Generated: 2026-11-16 09:26 UTC</p>
-</blockquote>
-<hr>
-<h2>Highlights</h2>
-<ul>
-<li><a href="https://github.com/Tencent/LoopForge">Tencent/LoopForge</a> gained 1,767 stars (+633%) in Multi-Agent &amp; Orchestration, the largest relative gain across all GitHub category tables.</li>
-<li><a href="https://hermes-agent.nousresearch.com/">Hermes Agent</a> leads OpenRouter token usage at 13.02T tokens/week, ahead of <a href="https://claude.ai/code">Claude Code</a> at 10.80T and <a href="https://kilocode.ai/">Kilo Code</a> at 7.03T.</li>
-<li><a href="https://github.com/google/elephant-goldfish-model">google/elephant-goldfish-model</a> added 5,060 stars (+34%) in Coding Agents, the largest absolute and relative gain in that table.</li>
-</ul>
-<hr>
-<h2>Agents &amp; coding tools</h2>
-<h3>🚀 Agent &amp; Coding Tool Radar</h3>
-<p><em>New tools (🆕: created or listed in the last 14 days) first, then each source&#39;s top movers; 🔥 also on last week&#39;s Trends page. OpenRouter: the app&#39;s rank this week / this month among OpenRouter apps, its tokens in the last 7 days. npm: downloads in the last 7 days. OpenRouter and npm &quot;vs previous week&quot;: against the row&#39;s figure on last week&#39;s page, none when it was not there. GitHub: total stars (stars gained in the last 7 days, % on a week ago).</em></p>
-<table>
-<thead>
-<tr>
-<th align="left">Tool</th>
-<th align="left">Source</th>
-<th align="left">Signal</th>
-<th align="left">Summary</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left"><a href="https://bitbison.io/">Bitbison triage</a></td>
-<td align="left">OpenRouter</td>
-<td align="left">🆕 week #100 / month —, 44.7B tokens/week</td>
-<td align="left">Bitbison triage analyzes build activity to catch supply chain attacks before release and lets you block releases that fail your security checks.</td>
-</tr>
-<tr>
-<td align="left">🔥 <a href="https://kilocode.ai/">Kilo Code</a></td>
-<td align="left">OpenRouter</td>
-<td align="left">week #5 / month #5, 7.03T tokens/week (+46% vs previous week)</td>
-<td align="left">Kilo Code is an open-source AI coding agent that works across VS Code, JetBrains, and CLI to help developers ship code faster with agentic workflows.</td>
-</tr>
-<tr>
-<td align="left"><a href="https://www.npmjs.com/package/@sma1lboy/rove">@sma1lboy/rove</a></td>
-<td align="left">npm</td>
-<td align="left">28,686 downloads/week</td>
-<td align="left">@sma1lboy/rove is an agentic development environment (ADE) for your terminal that runs Claude Code, Codex, Copilot and more side by side in isolated worktrees, handing tasks to each other.</td>
-</tr>
-<tr>
-<td align="left">🔥 <a href="https://strix.ai/">Strix</a></td>
-<td align="left">OpenRouter</td>
-<td align="left">week #9 / month #12, 2.56T tokens/week (+45% vs previous week)</td>
-<td align="left">Strix are open-source AI hackers that find and validate vulnerabilities in your code, APIs, and infrastructure and open fix PRs.</td>
-</tr>
-<tr>
-<td align="left"><a href="https://docs.all-hands.dev/">OpenHands</a></td>
-<td align="left">OpenRouter</td>
-<td align="left">week #14 / month #18, 1.00T tokens/week</td>
-<td align="left">OpenHands is an AI coding agent that can run commands, browse the web, and call APIs.</td>
-</tr>
-<tr>
-<td align="left">🔥 <a href="https://hermes-agent.nousresearch.com/">Hermes Agent</a></td>
-<td align="left">OpenRouter</td>
-<td align="left">week #3 / month #4, 13.02T tokens/week (+5.1% vs previous week)</td>
-<td align="left">Hermes Agent is an open-source, self-improving AI agent by Nous Research that runs persistently with memory across sessions, builds reusable skills from experience, and comes with 40+ built-in tools including web search, browser automation, and vision plus scheduled automations and subagents.</td>
-</tr>
-<tr>
-<td align="left"><a href="https://www.npmjs.com/package/@earendil-works/pi-coding-agent">@earendil-works/pi-coding-agent</a></td>
-<td align="left">npm</td>
-<td align="left">6,307,903 downloads/week</td>
-<td align="left">@earendil-works/pi-coding-agent is a coding agent CLI with read, bash, edit, write tools and session management.</td>
-</tr>
-<tr>
-<td align="left">🔥 <a href="https://claude.ai/code">Claude Code</a></td>
-<td align="left">OpenRouter</td>
-<td align="left">week #4 / month #3, 10.80T tokens/week (+7.5% vs previous week)</td>
-<td align="left">Claude Code is Anthropic&#39;s agentic coding tool that reads your entire codebase, plans and executes changes across files, runs tests, and iterates on failures from natural language prompts.</td>
-</tr>
-<tr>
-<td align="left">🔥 <a href="https://pi.dev/">pi</a></td>
-<td align="left">OpenRouter</td>
-<td align="left">week #6 / month #6, 4.00T tokens/week (-4.8% vs previous week)</td>
-<td align="left">pi is a coding agent described as &quot;yours&quot; among many coding agents.</td>
-</tr>
-<tr>
-<td align="left"><a href="https://openai.com/codex/">Codex</a></td>
-<td align="left">OpenRouter</td>
-<td align="left">week #7 / month #7, 3.42T tokens/week</td>
-<td align="left">Codex is a coding agent that helps you build and ship with AI.</td>
-</tr>
-<tr>
-<td align="left">🔥 <a href="https://openclaw.ai/">OpenClaw</a></td>
-<td align="left">OpenRouter</td>
-<td align="left">week #8 / month #8, 2.69T tokens/week (-46% vs previous week)</td>
-<td align="left">OpenClaw is an open-source AI agent that connects to your messaging apps and takes real actions on your behalf, from running commands and browsing the web to managing files and sending emails.</td>
-</tr>
-<tr>
-<td align="left">🔥 <a href="https://omp.sh/">omp</a></td>
-<td align="left">OpenRouter; npm</td>
-<td align="left">week #11 / month #10, 2.13T tokens/week (-36% vs previous week); 295,519 downloads/week (+34% vs previous week)</td>
-<td align="left">omp is a coding agent CLI with read, bash, edit, write tools and session management.</td>
-</tr>
-</tbody></table>
-<h3>🧑‍💻 Coding Agents</h3>
-<table>
-<thead>
-<tr>
-<th align="left">Project</th>
-<th align="left">Lang</th>
-<th align="right">Stars (total / this week, %)</th>
-<th align="left">Summary</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left"><a href="https://github.com/google/elephant-goldfish-model">google/elephant-goldfish-model</a></td>
-<td align="left">Python</td>
-<td align="right">20,026 (+5,060, +34%)</td>
-<td align="left">google/elephant-goldfish-model is an open-source plugin for designing and reviewing software with agents.</td>
-</tr>
-<tr>
-<td align="left">🔥 <a href="https://github.com/QwenLM/qwen-code">QwenLM/qwen-code</a></td>
-<td align="left">TypeScript</td>
-<td align="right">30,576 (+1,462, +5%)</td>
-<td align="left">QwenLM/qwen-code is an open-source AI coding agent that lives in your terminal.</td>
-</tr>
-<tr>
-<td align="left">🔥 <a href="https://github.com/superplanehq/superplane">superplanehq/superplane</a></td>
-<td align="left">Go</td>
-<td align="right">10,060 (+828, +9%)</td>
-<td align="left">superplanehq/superplane is an open source factory for one-shot engineering.</td>
-</tr>
-<tr>
-<td align="left">🔥 <a href="https://github.com/PurpleDoubleD/locally-uncensored">PurpleDoubleD/locally-uncensored</a></td>
-<td align="left">TypeScript</td>
-<td align="right">4,293 (+681, +19%)</td>
-<td align="left">PurpleDoubleD/locally-uncensored is an all-in-one local AI studio for desktop with chat, image and video generation, and a coding agent in one free, open source app that runs on Windows and Linux with no Docker, no terminal, no cloud required.</td>
-</tr>
-<tr>
-<td align="left">🔥 <a href="https://github.com/Gentleman-Programming/gentle-shell">Gentleman-Programming/gentle-shell</a></td>
-<td align="left">TypeScript</td>
-<td align="right">2,681 (+598, +29%)</td>
-<td align="left">Gentleman-Programming/gentle-shell is a Pi-native workspace for AI-assisted development bringing parallel coding agents, live tasks, Git diffs, persistent memory, and permission controls into one terminal interface powered by Gentle AI and Organic Driven Development (ODD).</td>
-</tr>
-<tr>
-<td align="left">🔥 <a href="https://github.com/WhiteTowerAI/ohmygame">WhiteTowerAI/ohmygame</a></td>
-<td align="left">TypeScript</td>
-<td align="right">2,263 (+494, +28%)</td>
-<td align="left">WhiteTowerAI/ohmygame is an open-source studio for making games with AI, your own one-person game studio with game canvas and bring your own key.</td>
-</tr>
-<tr>
-<td align="left">🔥 <a href="https://github.com/JetBrains/thinkrail">JetBrains/thinkrail</a></td>
-<td align="left">TypeScript</td>
-<td align="right">8,295 (+290, +3.6%)</td>
-<td align="left">JetBrains/thinkrail is an agentic IDE that gets better every time you use it.</td>
-</tr>
-<tr>
-<td align="left">🔥 <a href="https://github.com/unstablebuild/rune">unstablebuild/rune</a></td>
-<td align="left">Go</td>
-<td align="right">1,795 (+206, +13%)</td>
-<td align="left">unstablebuild/rune is a fast, GPU-accelerated, full-featured IDE and terminal multiplexer suitable for both automatic and manual programming.</td>
-</tr>
-</tbody></table>
-<h3>🧰 Agent Harnesses &amp; Frameworks</h3>
-<table>
-<thead>
-<tr>
-<th align="left">Project</th>
-<th align="left">Lang</th>
-<th align="right">Stars (total / this week, %)</th>
-<th align="left">Summary</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left">🔥 <a href="https://github.com/ccch1mneyyy/dsh-Go">ccch1mneyyy/dsh-Go</a></td>
-<td align="left">Dart</td>
-<td align="right">24,256 (+7,687, +46%)</td>
-<td align="left">ccch1mneyyy/dsh-Go is dsh-go, a DeepSeek Harness that runs natively on mobile and can remote control your computer.</td>
-</tr>
-<tr>
-<td align="left"><a href="https://github.com/alibaba/open-code-review">alibaba/open-code-review</a></td>
-<td align="left">Go</td>
-<td align="right">52,520 (+2,849, +5.7%)</td>
-<td align="left">alibaba/open-code-review is a hybrid architecture code review tool with deterministic pipelines + LLM Agent, precise line-level comments, and a built-in multi-language ruleset covering NPE, thread-safety, XSS, and SQL injection, compatible with OpenAI and Anthropic.</td>
-</tr>
-<tr>
-<td align="left"><a href="https://github.com/dataelement/dsh-desktop">dataelement/dsh-desktop</a></td>
-<td align="left">JavaScript</td>
-<td align="right">19,295 (+1,676, +9.5%)</td>
-<td align="left">dataelement/dsh-desktop is DSHDesktop, the DeepSeek Harness desktop version.</td>
-</tr>
-<tr>
-<td align="left">🔥 <a href="https://github.com/lobehub/lobehub">lobehub/lobehub</a></td>
-<td align="left">TypeScript</td>
-<td align="right">85,610 (+1,131, +1.3%)</td>
-<td align="left">lobehub/lobehub is LobeHub, a platform to add super-agents to your team&#39;s existing chats that take on work by themselves and get better every week.</td>
-</tr>
-<tr>
-<td align="left"><a href="https://github.com/mdiri-ai/SoduWork">mdiri-ai/SoduWork</a></td>
-<td align="left">JavaScript</td>
-<td align="right">1,014 (+1,001)</td>
-<td align="left">mdiri-ai/SoduWork is an AI-native engine for teams and their agents that is multi-harness, multi-agent, and self-hosted.</td>
-</tr>
-<tr>
-<td align="left">🔥 <a href="https://github.com/FailproofAI/failproofai">FailproofAI/failproofai</a></td>
-<td align="left">TypeScript</td>
-<td align="right">9,100 (+856, +10%)</td>
-<td align="left">FailproofAI/failproofai provides observability and enforcement for AI agent harnesses, capturing every run and ensuring runtime reliability with policy enforcement.</td>
-</tr>
-<tr>
-<td align="left"><a href="https://github.com/converge-ai-labs/agent-foundation">converge-ai-labs/agent-foundation</a></td>
-<td align="left">Python</td>
-<td align="right">1,298 (+386, +42%)</td>
-<td align="left">converge-ai-labs/agent-foundation is a13n, a platform to build, run, and manage AI agents at scale on your own infrastructure with a built-in harness, durable execution, multi-provider support, and a management console.</td>
-</tr>
-<tr>
-<td align="left">🔥 <a href="https://github.com/heymrun/heym">heymrun/heym</a></td>
-<td align="left">Python</td>
-<td align="right">1,685 (+150, +9.8%)</td>
-<td align="left">heymrun/heym lets you build agentic systems, orchestrate agents, automate business processes, inspect every execution, and keep humans in control, deployable on your own infrastructure.</td>
-</tr>
-</tbody></table>
-<h3>🕸️ Multi-Agent &amp; Orchestration</h3>
-<table>
-<thead>
-<tr>
-<th align="left">Project</th>
-<th align="left">Lang</th>
-<th align="right">Stars (total / this week, %)</th>
-<th align="left">Summary</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left"><a href="https://github.com/pingdotgg/t3code">pingdotgg/t3code</a></td>
-<td align="left">TypeScript</td>
-<td align="right">62,023 (+9,091, +17%)</td>
-<td align="left">pingdotgg/t3code is the best way to control Claude Code, Codex and more from any computer or phone.</td>
-</tr>
-<tr>
-<td align="left">🔥 <a href="https://github.com/paperclipai/paperclip">paperclipai/paperclip</a></td>
-<td align="left">TypeScript</td>
-<td align="right">114,220 (+1,822, +1.6%)</td>
-<td align="left">paperclipai/paperclip is the open-source app everyone uses to manage agents at work.</td>
-</tr>
-<tr>
-<td align="left"><a href="https://github.com/Tencent/LoopForge">Tencent/LoopForge</a></td>
-<td align="left">Go</td>
-<td align="right">2,046 (+1,767, +633%)</td>
-<td align="left">Tencent/LoopForge provides self-hosted workflows for coding-agent delivery, orchestrating CodeBuddy, Codex, and Claude Code with scripts and human approval gates, including local workflows for coding assistants.</td>
-</tr>
-<tr>
-<td align="left">🔥 <a href="https://github.com/agent-of-empires/agent-of-empires">agent-of-empires/agent-of-empires</a></td>
-<td align="left">Rust</td>
-<td align="right">4,559 (+668, +17%)</td>
-<td align="left">agent-of-empires/agent-of-empires manages multiple Claude Code and OpenCode agents from TUI or Web for mobile access, also supporting Mistral Vibe, Codex CLI, Gemini CLI, Pi.dev, Copilot CLI, and Factory Droid Coding.</td>
-</tr>
-<tr>
-<td align="left">🔥 <a href="https://github.com/OrchestratorInc/agent-orchestrator">OrchestratorInc/agent-orchestrator</a></td>
-<td align="left">TypeScript</td>
-<td align="right">14,784 (+484, +3.4%)</td>
-<td align="left">OrchestratorInc/agent-orchestrator plans, runs, and supervises fleets of agents from task to merged PR with desktop (macOS, Windows, Linux) and iPhone &amp; Android apps, supporting Claude Code, Codex, and 35+ coding agents.</td>
-</tr>
-<tr>
-<td align="left">🔥 <a href="https://github.com/sandbox-quantum/switch">sandbox-quantum/switch</a></td>
-<td align="left">Python</td>
-<td align="right">4,538 (+284, +6.7%)</td>
-<td align="left">sandbox-quantum/switch provides open-source AI teammates in Slack, Teams, Discord, Telegram, and Mattermost, self-hostable with any agent harness and any model.</td>
-</tr>
-<tr>
-<td align="left"><a href="https://github.com/zeronsh/zeron">zeronsh/zeron</a></td>
-<td align="left">Rust</td>
-<td align="right">3,690 (+210, +6%)</td>
-<td align="left">zeronsh/zeron is a native control plane for Claude Code, Codex, Cursor, Devin and other coding agents.</td>
-</tr>
-<tr>
-<td align="left"><a href="https://github.com/open-mercato/cezar">open-mercato/cezar</a></td>
-<td align="left">TypeScript</td>
-<td align="right">1,065 (+96, +9.9%)</td>
-<td align="left">open-mercato/cezar is an open-source orchestrator and ADE for running Claude Code, Codex, OpenCode, Pi and other AI coding agents in parallel locally or 24/7 on your own server.</td>
-</tr>
-</tbody></table>
-<h3>🔌 Agent Tooling</h3>
-<table>
-<thead>
-<tr>
-<th align="left">Project</th>
-<th align="left">Lang</th>
-<th align="right">Stars (total / this week, %)</th>
-<th align="left">Summary</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left"><a href="https://github.com/anthropics/skills">anthropics/skills</a></td>
-<td align="left">Python</td>
-<td align="right">195,587 (+6,077, +3.2%)</td>
-<td align="left">anthropics/skills is a public repository for Agent Skills.</td>
-</tr>
-<tr>
-<td align="left"><a href="https://github.com/vercel-labs/agent-browser">vercel-labs/agent-browser</a></td>
-<td align="left">Rust</td>
-<td align="right">51,798 (+4,217, +8.9%)</td>
-<td align="left">vercel-labs/agent-browser is a browser automation CLI for AI agents.</td>
-</tr>
-<tr>
-<td align="left"><a href="https://github.com/addyosmani/agent-skills">addyosmani/agent-skills</a></td>
-<td align="left">JavaScript</td>
-<td align="right">118,095 (+3,889, +3.4%)</td>
-<td align="left">addyosmani/agent-skills provides production-grade engineering skills for AI coding agents.</td>
-</tr>
-<tr>
-<td align="left"><a href="https://github.com/backnotprop/plannotator">backnotprop/plannotator</a></td>
-<td align="left">TypeScript</td>
-<td align="right">12,134 (+1,719, +17%)</td>
-<td align="left">backnotprop/plannotator is a workspace to stay in the loop and on top of agents to shape, decide, plan, annotate, review code, share with team, and send all feedback to agents with one click.</td>
-</tr>
-<tr>
-<td align="left">🔥 <a href="https://github.com/microsoft/TokenEconomizer">microsoft/TokenEconomizer</a></td>
-<td align="left">Python</td>
-<td align="right">6,821 (+1,492, +28%)</td>
-<td align="left">microsoft/TokenEconomizer provides experience-driven black-box cost control for coding agents.</td>
-</tr>
-<tr>
-<td align="left">🔥 <a href="https://github.com/haydenschmitty/floorplan">haydenschmitty/floorplan</a></td>
-<td align="left">JavaScript</td>
-<td align="right">4,574 (+1,301, +40%)</td>
-<td align="left">haydenschmitty/floorplan is an interactive, plain-English map of your codebase drawn by Claude or Codex.</td>
-</tr>
-<tr>
-<td align="left">🔥 <a href="https://github.com/kajisho5/ffmpeg-skill">kajisho5/ffmpeg-skill</a></td>
-<td align="left">Python</td>
-<td align="right">6,096 (+1,258, +26%)</td>
-<td align="left">kajisho5/ffmpeg-skill is a local video editor for coding agents with 42 FFmpeg tools, a machine-readable contract, and an MCP server for Claude Code, Cursor, and Codex, supporting cut, captions, reframe, loudness, and platform exports with no cloud or API keys.</td>
-</tr>
-<tr>
-<td align="left">🔥 <a href="https://github.com/ZiChuanLan/agent-purge">ZiChuanLan/agent-purge</a></td>
-<td align="left">JavaScript</td>
-<td align="right">1,857 (+370, +25%)</td>
-<td align="left">ZiChuanLan/agent-purge lets you replace or inject system prompts across codex, claude, opencode, grok, omp, hermes, pi, zcode with a local web console.</td>
-</tr>
-</tbody></table>
-<h3>🤖 Other Agents</h3>
-<table>
-<thead>
-<tr>
-<th align="left">Project</th>
-<th align="left">Lang</th>
-<th align="right">Stars (total / this week, %)</th>
-<th align="left">Summary</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left"><a href="https://github.com/milind-soni/OpenMausBot">milind-soni/OpenMausBot</a></td>
-<td align="left">TypeScript</td>
-<td align="right">23,796 (+5,463, +30%)</td>
-<td align="left">milind-soni/OpenMausBot is an open-source Grok Bot alternative with a virtual machine that bots can use.</td>
-</tr>
-<tr>
-<td align="left"><a href="https://github.com/ZhuLinsen/daily_stock_analysis">ZhuLinsen/daily_stock_analysis</a></td>
-<td align="left">Python</td>
-<td align="right">72,659 (+4,548, +6.7%)</td>
-<td align="left">ZhuLinsen/daily_stock_analysis is an LLM-powered multi-market stock analysis system with multi-source market data, real-time news, decision dashboard, automated notifications, and cost-free scheduled runs.</td>
-</tr>
-</tbody></table>
-<hr>
-<h2>Skills: PRs and requests this week</h2>
-<blockquote>
-<p>Source: <a href="https://github.com/anthropics/skills">anthropics/skills</a></p>
-</blockquote>
-<h3>Open PRs worth watching</h3>
-<ul>
-<li><strong>#2211</strong> – mcp-builder: reports incomplete evaluation runs instead of crashing or scoring partial output; handles <code>max_tokens</code> and refusal stops correctly. <a href="https://github.com/anthropics/skills/pull/2211">PR #2211</a></li>
-<li><strong>#2219</strong> – skill-creator: adds Origin/Host/Content-Type checks to the eval viewer feedback endpoint, closing a CSRF vector. <a href="https://github.com/anthropics/skills/pull/2219">PR #2219</a></li>
-<li><strong>#2216</strong> – claude-api: adds Agent SDK row to routing table and points to a fetchable local reference, fixing scope/docs mismatch. <a href="https://github.com/anthropics/skills/pull/2216">PR #2216</a></li>
-<li><strong>#1903</strong> – pdf: streams PDF-to-image conversion page-by-page to bound memory on long documents. <a href="https://github.com/anthropics/skills/pull/1903">PR #1903</a></li>
-<li><strong>#2198</strong> – skill-creator: isolates each <code>run_eval</code> probe in its own temp project and accepts documented frontmatter keys. <a href="https://github.com/anthropics/skills/pull/2198">PR #2198</a></li>
-</ul>
-<h3>Merged this week</h3>
-<p><em>None.</em></p>
-<h3>Requests</h3>
-<ul>
-<li><strong>#2220</strong> – Skill-creator entrypoint (33 KB) exceeds some agent environments’ ~15 KiB budget; asks for a bounded entrypoint. <a href="https://github.com/anthropics/skills/issues/2220">Issue #2220</a></li>
-<li><strong>#2201</strong> – mcp-builder evaluation loop answers only the first <code>tool_use</code> block and misclassifies <code>max_tokens</code>/refusal stops as final answers. <a href="https://github.com/anthropics/skills/issues/2201">Issue #2201</a></li>
-<li><strong>#2207</strong> – claude-api skill excludes Agent SDK but links to an oversized docs page agents can’t fetch in one read. <a href="https://github.com/anthropics/skills/issues/2207">Issue #2207</a></li>
-</ul>
-<h3>Takeaway</h3>
-<p>Open PRs and issues converge on hardening skill-creator tooling, fixing evaluation correctness in mcp-builder, and aligning claude-api docs with current SDK endpoints and agent environment constraints.</p>
-<hr>
-<h2>Candidates to track</h2>
-<p>These repos trended two weeks in a row (🔥) and are not tracked, by the config.yml section they fit.</p>
-<ul>
-<li><code>agents.repos</code>: <a href="https://github.com/QwenLM/qwen-code">QwenLM/qwen-code</a>, <a href="https://github.com/superplanehq/superplane">superplanehq/superplane</a>, <a href="https://github.com/PurpleDoubleD/locally-uncensored">PurpleDoubleD/locally-uncensored</a>, <a href="https://github.com/Gentleman-Programming/gentle-shell">Gentleman-Programming/gentle-shell</a>, <a href="https://github.com/WhiteTowerAI/ohmygame">WhiteTowerAI/ohmygame</a>, <a href="https://github.com/JetBrains/thinkrail">JetBrains/thinkrail</a>, <a href="https://github.com/unstablebuild/rune">unstablebuild/rune</a></li>
-<li><code>infra.repos</code>: <a href="https://github.com/microsoft/TokenEconomizer">microsoft/TokenEconomizer</a>, <a href="https://github.com/haydenschmitty/floorplan">haydenschmitty/floorplan</a>, <a href="https://github.com/kajisho5/ffmpeg-skill">kajisho5/ffmpeg-skill</a>, <a href="https://github.com/ZiChuanLan/agent-purge">ZiChuanLan/agent-purge</a></li>
-<li>No matching section: <a href="https://github.com/ccch1mneyyy/dsh-Go">ccch1mneyyy/dsh-Go</a>, <a href="https://github.com/lobehub/lobehub">lobehub/lobehub</a>, <a href="https://github.com/FailproofAI/failproofai">FailproofAI/failproofai</a>, <a href="https://github.com/heymrun/heym">heymrun/heym</a>, <a href="https://github.com/paperclipai/paperclip">paperclipai/paperclip</a>, <a href="https://github.com/agent-of-empires/agent-of-empires">agent-of-empires/agent-of-empires</a>, <a href="https://github.com/OrchestratorInc/agent-orchestrator">OrchestratorInc/agent-orchestrator</a>, <a href="https://github.com/sandbox-quantum/switch">sandbox-quantum/switch</a></li>
-</ul>
-<details><summary>config.yml lines to track one</summary>
-
-<p><code>agents.repos</code>:</p>
-<pre><code class="language-yaml">    - id: qwen-code
-      repo: QwenLM/qwen-code
-      name: qwen-code
-    - id: superplane
-      repo: superplanehq/superplane
-      name: superplane
-    - id: locally-uncensored
-      repo: PurpleDoubleD/locally-uncensored
-      name: locally-uncensored
-    - id: gentle-shell
-      repo: Gentleman-Programming/gentle-shell
-      name: gentle-shell
-    - id: ohmygame
-      repo: WhiteTowerAI/ohmygame
-      name: ohmygame
-    - id: thinkrail
-      repo: JetBrains/thinkrail
-      name: thinkrail
-    - id: rune
-      repo: unstablebuild/rune
-      name: rune
-</code></pre>
-<p><code>infra.repos</code>:</p>
-<pre><code class="language-yaml">    - id: tokeneconomizer
-      repo: microsoft/TokenEconomizer
-      name: TokenEconomizer
-    - id: floorplan
-      repo: haydenschmitty/floorplan
-      name: floorplan
-    - id: ffmpeg-skill
-      repo: kajisho5/ffmpeg-skill
-      name: ffmpeg-skill
-    - id: agent-purge
-      repo: ZiChuanLan/agent-purge
-      name: agent-purge
-</code></pre>
-</details>
-
-<hr>
-<h2>Models</h2>
-<h3>OpenRouter usage</h3>
-<p>Top models by tokens (prompt + completion) on OpenRouter on 2026-11-15, one day&#39;s snapshot. Last week: the model&#39;s rank on last week&#39;s page, new when it was not ranked there.</p>
-<table>
-<thead>
-<tr>
-<th align="right">#</th>
-<th align="left">Model</th>
-<th align="right">Tokens</th>
-<th align="center">Last week</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="right">1</td>
-<td align="left"><a href="https://openrouter.ai/deepseek/deepseek-v4.1-flash-20261017">deepseek/deepseek-v4.1-flash-20261017</a></td>
-<td align="right">59.23T</td>
-<td align="center">1</td>
-</tr>
-<tr>
-<td align="right">2</td>
-<td align="left"><a href="https://openrouter.ai/tencent/hy4-20261104">tencent/hy4-20261104</a></td>
-<td align="right">18.12T</td>
-<td align="center">4</td>
-</tr>
-<tr>
-<td align="right">3</td>
-<td align="left"><a href="https://openrouter.ai/deepseek/deepseek-v4.1-flash-20260910">deepseek/deepseek-v4.1-flash-20260910</a></td>
-<td align="right">15.55T</td>
-<td align="center">2</td>
-</tr>
-<tr>
-<td align="right">4</td>
-<td align="left"><a href="https://openrouter.ai/z-ai/glm-5.3-flash-20260826">z-ai/glm-5.3-flash-20260826</a></td>
-<td align="right">11.90T</td>
-<td align="center">3</td>
-</tr>
-<tr>
-<td align="right">5</td>
-<td align="left"><a href="https://openrouter.ai/openai/gpt-6-luna-20260922">openai/gpt-6-luna-20260922</a></td>
-<td align="right">7.85T</td>
-<td align="center">5</td>
-</tr>
-<tr>
-<td align="right">6</td>
-<td align="left"><a href="https://openrouter.ai/anthropic/claude-opus-5.5-20260921">anthropic/claude-opus-5.5-20260921</a></td>
-<td align="right">6.98T</td>
-<td align="center">7</td>
-</tr>
-<tr>
-<td align="right">7</td>
-<td align="left"><a href="https://openrouter.ai/stepfun/step-5-preview-20261008">stepfun/step-5-preview-20261008</a></td>
-<td align="right">6.41T</td>
-<td align="center">6</td>
-</tr>
-<tr>
-<td align="right">8</td>
-<td align="left"><a href="https://openrouter.ai/xiaomi/mimo-v2.6-flash-20260921">xiaomi/mimo-v2.6-flash-20260921</a></td>
-<td align="right">4.23T</td>
-<td align="center">new</td>
-</tr>
-<tr>
-<td align="right">9</td>
-<td align="left"><a href="https://openrouter.ai/z-ai/glm-5.3-20260816">z-ai/glm-5.3-20260816</a></td>
-<td align="right">3.76T</td>
-<td align="center">12</td>
-</tr>
-<tr>
-<td align="right">10</td>
-<td align="left"><a href="https://openrouter.ai/openai/gpt-6.1-sol-20260929">openai/gpt-6.1-sol-20260929</a></td>
-<td align="right">3.71T</td>
-<td align="center">11</td>
-</tr>
-<tr>
-<td align="right">11</td>
-<td align="left"><a href="https://openrouter.ai/moonshotai/kimi-k3.1-pro-20261023">moonshotai/kimi-k3.1-pro-20261023</a></td>
-<td align="right">3.47T</td>
-<td align="center">9</td>
-</tr>
-<tr>
-<td align="right">12</td>
-<td align="left"><a href="https://openrouter.ai/minimax/minimax-m3.1-flash-20261019">minimax/minimax-m3.1-flash-20261019</a></td>
-<td align="right">3.38T</td>
-<td align="center">8</td>
-</tr>
-<tr>
-<td align="right">13</td>
-<td align="left"><a href="https://openrouter.ai/deepseek/deepseek-v4-flash-20260731">deepseek/deepseek-v4-flash-20260731</a></td>
-<td align="right">3.28T</td>
-<td align="center">14</td>
-</tr>
-<tr>
-<td align="right">14</td>
-<td align="left"><a href="https://openrouter.ai/nvidia/nemotron-3-ultra-550b-a55b-20260604">nvidia/nemotron-3-ultra-550b-a55b-20260604</a></td>
-<td align="right">3.19T</td>
-<td align="center">16</td>
-</tr>
-<tr>
-<td align="right">15</td>
-<td align="left"><a href="https://openrouter.ai/nvidia/nemotron-3.5-super-vl-20261015">nvidia/nemotron-3.5-super-vl-20261015</a></td>
-<td align="right">3.00T</td>
-<td align="center">17</td>
-</tr>
-<tr>
-<td align="right">16</td>
-<td align="left"><a href="https://openrouter.ai/meta/muse-spark-1.3-contributor-20260902">meta/muse-spark-1.3-contributor-20260902</a></td>
-<td align="right">2.99T</td>
-<td align="center">18</td>
-</tr>
-<tr>
-<td align="right">17</td>
-<td align="left"><a href="https://openrouter.ai/typesafe/jev-1.13-20260917">typesafe/jev-1.13-20260917</a></td>
-<td align="right">2.81T</td>
-<td align="center">15</td>
-</tr>
-<tr>
-<td align="right">18</td>
-<td align="left"><a href="https://openrouter.ai/anthropic/claude-haiku-5.5-20261007">anthropic/claude-haiku-5.5-20261007</a></td>
-<td align="right">2.76T</td>
-<td align="center">20</td>
-</tr>
-<tr>
-<td align="right">19</td>
-<td align="left"><a href="https://openrouter.ai/anthropic/claude-sonnet-5.5-20260928">anthropic/claude-sonnet-5.5-20260928</a></td>
-<td align="right">2.55T</td>
-<td align="center">new</td>
-</tr>
-<tr>
-<td align="right">20</td>
-<td align="left"><a href="https://openrouter.ai/deepseek/deepseek-v4-flash-20260423">deepseek/deepseek-v4-flash-20260423</a></td>
-<td align="right">2.17T</td>
-<td align="center">new</td>
-</tr>
-</tbody></table>
-<h3>Hugging Face trending</h3>
-<p><em>Ranked by likes gained in the last 7 days; 🔥 also on last week&#39;s Trends page; quantised copies of a release share its row.</em></p>
-<table>
-<thead>
-<tr>
-<th align="right">#</th>
-<th align="left">Model</th>
-<th align="right">Likes (total)</th>
-<th align="right">Downloads (30 days)</th>
-<th align="left">Summary</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="right">1</td>
-<td align="left"><a href="https://huggingface.co/MiniMaxAI/MiniMax-H3-Image">MiniMaxAI/MiniMax-H3-Image</a></td>
-<td align="right">1,228</td>
-<td align="right">571,067</td>
-<td align="left">text-to-image model, other license.</td>
-</tr>
-<tr>
-<td align="right">2</td>
-<td align="left">🔥 <a href="https://huggingface.co/Qwen/Qwen3.8-27B">Qwen/Qwen3.8-27B</a> (+ <a href="https://huggingface.co/unsloth/Qwen3.8-27B-GGUF">unsloth/Qwen3.8-27B-GGUF</a>)</td>
-<td align="right">20,162</td>
-<td align="right">6,547,772</td>
-<td align="left">27B image-text-to-text model, Apache-2.0 license.</td>
-</tr>
-<tr>
-<td align="right">3</td>
-<td align="left">🔥 <a href="https://huggingface.co/Lightricks/LTX-2.5">Lightricks/LTX-2.5</a></td>
-<td align="right">12,120</td>
-<td align="right">2,754,355</td>
-<td align="left">image-to-video model, other license.</td>
-</tr>
-<tr>
-<td align="right">4</td>
-<td align="left"><a href="https://huggingface.co/Comfy-Org/MiniMax-H3-Image">Comfy-Org/MiniMax-H3-Image</a></td>
-<td align="right">434</td>
-<td align="right">1,973,388</td>
-<td align="left">text-to-image model, other license.</td>
-</tr>
-<tr>
-<td align="right">5</td>
-<td align="left"><a href="https://huggingface.co/Zyphra/ZONOS3-Mini">Zyphra/ZONOS3-Mini</a></td>
-<td align="right">419</td>
-<td align="right">39,862</td>
-<td align="left">text-to-speech model, Apache-2.0 license.</td>
-</tr>
-<tr>
-<td align="right">6</td>
-<td align="left"><a href="https://huggingface.co/thinkingmachines/Inkling-2-Small">thinkingmachines/Inkling-2-Small</a></td>
-<td align="right">363</td>
-<td align="right">7,329</td>
-<td align="left">594B image-text-to-text model, Apache-2.0 license.</td>
-</tr>
-<tr>
-<td align="right">7</td>
-<td align="left"><a href="https://huggingface.co/higurashi-ai/Haru-4B">higurashi-ai/Haru-4B</a></td>
-<td align="right">348</td>
-<td align="right">2,098</td>
-<td align="left">5.2B audio-to-audio model, Apache-2.0 license.</td>
-</tr>
-<tr>
-<td align="right">8</td>
-<td align="left">🔥 <a href="https://huggingface.co/speridlabs/idol">speridlabs/idol</a></td>
-<td align="right">2,380</td>
-<td align="right">33,423</td>
-<td align="left">image-to-3d model, Apache-2.0 license.</td>
-</tr>
-<tr>
-<td align="right">9</td>
-<td align="left"><a href="https://huggingface.co/Edge0/Edge0-145B-NVFP4">Edge0/Edge0-145B-NVFP4</a></td>
-<td align="right">328</td>
-<td align="right">41,606</td>
-<td align="left">145B text-generation model, other license.</td>
-</tr>
-<tr>
-<td align="right">10</td>
-<td align="left">🔥 <a href="https://huggingface.co/moonshotai/Kimi-K3.1-Pro">moonshotai/Kimi-K3.1-Pro</a></td>
-<td align="right">2,118</td>
-<td align="right">46,766</td>
-<td align="left">2.7T image-text-to-text model, other license.</td>
-</tr>
-<tr>
-<td align="right">11</td>
-<td align="left">🔥 <a href="https://huggingface.co/NousResearch/Arete-27B">NousResearch/Arete-27B</a></td>
-<td align="right">621</td>
-<td align="right">7,497</td>
-<td align="left">27B text-generation model, Apache-2.0 license.</td>
-</tr>
-<tr>
-<td align="right">12</td>
-<td align="left">🔥 <a href="https://huggingface.co/black-forest-labs/flux-3-image-klein-comfy">black-forest-labs/flux-3-image-klein-comfy</a></td>
-<td align="right">3,268</td>
-<td align="right">1,182,267</td>
-<td align="left">image-to-image model, other license.</td>
-</tr>
-</tbody></table>
-<hr>
-<h2>Research</h2>
-<table>
-<thead>
-<tr>
-<th align="left">Paper</th>
-<th align="left">Summary</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left"><a href="http://arxiv.org/abs/2611.10469v1">Hibana: Fast Agentic Inference on Unified-Memory Devices</a></td>
-<td align="left">Hibana: Fast Agentic Inference on Unified-Memory Devices — an inference engine for unified-memory devices that co-optimizes model representation, memory management, and decoding strategy.</td>
-</tr>
-<tr>
-<td align="left"><a href="http://arxiv.org/abs/2611.14704v1">Code as Explanations: Executable and Verifiable LLM Explanations</a></td>
-<td align="left">Code as Explanations: Executable and Verifiable LLM Explanations — proposes code explanations, programs that explain LLM behavior across a dataset and enable automatic verification by execution.</td>
-</tr>
-<tr>
-<td align="left"><a href="http://arxiv.org/abs/2611.14320v1">Don&#39;t Just Trust Your Memory: Evidence-Linked Memory Reduces Memory-Induced Degradation in LLM Agents</a></td>
-<td align="left">Don&#39;t Just Trust Your Memory: Evidence-Linked Memory Reduces Memory-Induced Degradation in LLM Agents — introduces WikiTrace, evidence-linked memory that reduces memory-induced degradation by providing agents with trajectories to verify lessons.</td>
-</tr>
-<tr>
-<td align="left"><a href="http://arxiv.org/abs/2611.12835v1">Mitigating Agentic Deception via Evaluation-Side Partially Observable Games</a></td>
-<td align="left">Mitigating Agentic Deception via Evaluation-Side Partially Observable Games — addresses agentic deception by modeling evaluation as partially observable games to check faithfulness of reasoning and tool use beyond final outcomes.</td>
-</tr>
-<tr>
-<td align="left"><a href="http://arxiv.org/abs/2611.17167v1">Actor, Judge, or Teacher? Understanding Decision Models in Long-Horizon Agents</a></td>
-<td align="left">Actor, Judge, or Teacher? Understanding Decision Models in Long-Horizon Agents — compares decision models and LLMs as actors, judges, and teachers on ALFWorld and WebShop, finding all six models are pulled toward similar actor performance.</td>
-</tr>
-<tr>
-<td align="left"><a href="http://arxiv.org/abs/2611.11560v1">LiveAsset: Learning Intent Assets from Corrective Interactions for Agent Runtime Control</a></td>
-<td align="left">LiveAsset: Learning Intent Assets from Corrective Interactions for Agent Runtime Control — proposes LiveAsset to learn intent assets from multi-turn corrections by interpreting each correction against preceding and revised outcomes for runtime control.</td>
-</tr>
-<tr>
-<td align="left"><a href="http://arxiv.org/abs/2611.10542v1">When Experience Becomes a Backdoor: Poisoning Self-Evolving LLM Agents via Failure-Aware Task Optimization</a></td>
-<td align="left">When Experience Becomes a Backdoor: Poisoning Self-Evolving LLM Agents via Failure-Aware Task Optimization — studies task-level backdoor attacks where poisoned evolution tasks implant malicious rules into skills constructed by a trusted evolver.</td>
-</tr>
-<tr>
-<td align="left"><a href="http://arxiv.org/abs/2611.14808v1">OverServe: Resource Amplification Attacks on SaaS Agents via Tool--Prompt Co-Design</a></td>
-<td align="left">OverServe: Resource Amplification Attacks on SaaS Agents via Tool--Prompt Co-Design — presents OverServe, a multi-agent framework that co-designs tool prompts to exploit agent completion decisions and amplify resource consumption in SaaS deployments.</td>
-</tr>
-<tr>
-<td align="left"><a href="http://arxiv.org/abs/2611.11929v1">Can LLM Agents Organize Their Own Memory?</a></td>
-<td align="left">Can LLM Agents Organize Their Own Memory? — introduces self-organized memory (SoMem), a framework where agents store memory in linked documents and autonomously decide what to summarize, how to group, and when to revise topics.</td>
-</tr>
-<tr>
-<td align="left"><a href="http://arxiv.org/abs/2611.10240v1">PACE: Keeping the Right Tokens in the KV Cache Is Not Enough for Long-Horizon LLM Agents</a></td>
-<td align="left">PACE: Keeping the Right Tokens in the KV Cache Is Not Enough for Long-Horizon LLM Agents — shows that in 100K-token coding sessions on Qwen3-8B with a 2,048-token budget, a planner-guided policy keeping over 99% of needed tokens still sees accuracy fall from 93% to 64% as definition-use gaps grow.</td>
-</tr>
-</tbody></table>
-<hr>
-<h2>Most discussed</h2>
-<table>
-<thead>
-<tr>
-<th align="left">Story</th>
-<th align="left">Source</th>
-<th align="left">Discussion</th>
-<th align="left">Summary</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left"><a href="https://dev.to/gnomeman4201/what-unshare-n-leaves-behind-building-a-boundary-for-an-ai-recon-agent-75b">What unshare -n leaves behind: building a boundary for an AI recon agent</a></td>
-<td align="left">Dev.to</td>
-<td align="left"><a href="https://dev.to/gnomeman4201/what-unshare-n-leaves-behind-building-a-boundary-for-an-ai-recon-agent-75b">15 reactions, 22 comments</a></td>
-<td align="left">The author examines what Linux&#39;s unshare -n leaves exposed while building a network isolation boundary for an AI reconnaissance agent, noting the sandbox passed 13 isolation tests.</td>
-</tr>
-<tr>
-<td align="left"><a href="https://dev.to/gde/stop-asking-llms-to-do-math-client-side-functions-in-flutter-genui-with-blocsignals-23bh">Stop Asking LLMs to Do Math: Client-Side Functions in Flutter GenUI with bloc_signals</a></td>
-<td align="left">Dev.to</td>
-<td align="left"><a href="https://dev.to/gde/stop-asking-llms-to-do-math-client-side-functions-in-flutter-genui-with-blocsignals-23bh">16 reactions, 16 comments</a></td>
-<td align="left">The article explains why client-side functions are critical for Generative UI, showing how bloc_signals_genui converts catalog functions into 0ms synchronous reactive signals in Flutter.</td>
-</tr>
-<tr>
-<td align="left"><a href="https://dev.to/gde/cant-beat-free-gemma-4-31b-on-amd-token-lab-with-a-local-chat-page-and-an-adk-agent-c5b">Can&#39;t Beat Free: Gemma 4 31B on AMD Token Lab, with a Local Chat Page and an ADK Agent</a></td>
-<td align="left">Dev.to</td>
-<td align="left"><a href="https://dev.to/gde/cant-beat-free-gemma-4-31b-on-amd-token-lab-with-a-local-chat-page-and-an-adk-agent-c5b">36 reactions, 13 comments</a></td>
-<td align="left">AMD Token Lab offers a free OpenAI-compatible API on AMD GPUs via the AMD AI Developer Program, enabling a local chat page, terminal client, and ADK agent to run Gemma 4 31B.</td>
-</tr>
-</tbody></table>
-<hr>
-<h2>Signals</h2>
-<p>Across the five GitHub category tables, <a href="https://github.com/Tencent/LoopForge">Tencent/LoopForge</a> posted the largest relative star gain at +633% (1,767 stars), while <a href="https://github.com/pingdotgg/t3code">pingdotgg/t3code</a> led in absolute gains with +9,091 stars (+17%). In Coding Agents, <a href="https://github.com/google/elephant-goldfish-model">google/elephant-goldfish-model</a> topped both absolute (+5,060) and relative (+34%) gains. Agent Harnesses saw <a href="https://github.com/ccch1mneyyy/dsh-Go">ccch1mneyyy/dsh-Go</a> lead with +7,687 stars (+46%), and Agent Tooling showed <a href="https://github.com/haydenschmitty/floorplan">haydenschmitty/floorplan</a> with the highest relative gain at +40% (+1,301 stars), though <a href="https://github.com/anthropics/skills">anthropics/skills</a> added the most stars in absolute terms (+6,077, +3.2%). <a href="https://github.com/milind-soni/OpenMausBot">milind-soni/OpenMausBot</a> led Other Agents with +5,463 stars (+30%).</p>
-<p>On OpenRouter&#39;s 2026-11-15 snapshot, <a href="https://openrouter.ai/deepseek/deepseek-v4.1-flash-20261017">deepseek/deepseek-v4.1-flash-20261017</a> ranked #1 with 59.23T tokens, 3.3× the 18.12T of #2 <a href="https://openrouter.ai/tencent/hy4-20261104">tencent/hy4-20261104</a>. The top 10 comprised two models each from deepseek, openai, and z-ai, plus one each from anthropic, stepfun, tencent, and xiaomi. Among tools, <a href="https://hermes-agent.nousresearch.com/">Hermes Agent</a> led token consumption at 13.02T/week, while <a href="https://kilocode.ai/">Kilo Code</a> showed the largest week-over-week increase at +46%. On npm, <a href="https://www.npmjs.com/package/@earendil-works/pi-coding-agent">@earendil-works/pi-coding-agent</a> led downloads at 6.3M/week.</p>
-<p>Hugging Face trending placed <a href="https://huggingface.co/MiniMaxAI/MiniMax-H3-Image">MiniMaxAI/MiniMax-H3-Image</a> first in the Hub&#39;s likes-gained order, while <a href="https://huggingface.co/Qwen/Qwen3.8-27B">Qwen/Qwen3.8-27B</a> held the highest total likes (20,162) and 30-day downloads (6.5M). Three models in the top 12 also appeared on last week&#39;s page: Qwen/Qwen3.8-27B, Lightricks/LTX-2.5, and speridlabs/idol.</p>
 <hr>
 <p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
 ]]></content:encoded>
