@@ -13,7 +13,91 @@
       <height>144</height>
     </image>
     <atom:link href="https://dboeter.github.io/daily-diff/feeds/ai-models.xml" rel="self" type="application/rss+xml"/>
-    <lastBuildDate>Mon, 23 Nov 2026 07:26:02 +0000</lastBuildDate>
+    <lastBuildDate>Tue, 24 Nov 2026 09:45:01 +0000</lastBuildDate>
+    <item>
+      <title>AI Models &amp; Labs 2026-11-24</title>
+      <link>https://dboeter.github.io/daily-diff/#2026-11-24/ai-models</link>
+      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-11-24/ai-models</guid>
+      <pubDate>Tue, 24 Nov 2026 00:00:00 +0000</pubDate>
+      <description>AI Models &amp;amp; Labs 2026-11-24 ⬛ Overview · 🟪 AI Agents · 🟦 AI Models &amp;amp; Labs · 🟨 Data Engineering Lab posts: 1 | New models: 0 | Spotted: 5 | Generated: 2026-11-24 09:41 UTC Highlights In a reported study, a Qwen 32B model can detect prior concept injections and name the injected concept even while its sampled answers deny them, with a logit lens showing clear internal detection. An author&amp;#39;s test of seven OpenAI models across 172 OSWorld tasks found that adding accessibility trees an...</description>
+      <content:encoded><![CDATA[<h1>AI Models &amp; Labs 2026-11-24</h1>
+<p><a href="https://dboeter.github.io/daily-diff/#2026-11-24">⬛ Overview</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-24/ai-agents">🟪 AI Agents</a> · <strong>🟦 AI Models &amp; Labs</strong> · <a href="https://dboeter.github.io/daily-diff/#2026-11-24/ai-data">🟨 Data Engineering</a></p>
+<blockquote>
+<p>Lab posts: 1 | New models: 0 | Spotted: 5 | Generated: 2026-11-24 09:41 UTC</p>
+</blockquote>
+<hr>
+<h2>Highlights</h2>
+<ul>
+<li>In a reported study, a Qwen 32B model can detect prior concept injections and name the injected concept even while its sampled answers deny them, with a logit lens showing clear internal detection.</li>
+<li>An author&#39;s test of seven OpenAI models across 172 OSWorld tasks found that adding accessibility trees and click-by-ID more than doubled weaker models&#39; scores, while doing little for the strongest.</li>
+<li>Anthropic&#39;s Economics team reports, from 66 interviews with 58 enterprise customers, that AI mostly adds value by raising output rather than cutting costs, and saw very few cases of domestic layoffs driven by AI automation.</li>
+</ul>
+<hr>
+<h2>Lab announcements</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Post</th>
+<th align="left">Lab</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-11-23</td>
+<td align="left"><a href="https://www.anthropic.com/research/working-with-ai">Working with AI</a></td>
+<td align="left">Anthropic</td>
+<td align="left">Anthropic&#39;s Economics team published a research post based on 66 interviews with 58 enterprise customers, examining how businesses adopt AI, the bottlenecks they face, and how they reorganize human expertise around increasingly capable models. It reports that AI mostly adds value by increasing output rather than cutting costs, and that they saw very few examples of domestic layoffs driven by AI automation.</td>
+</tr>
+</tbody></table>
+<hr>
+<p>Nothing new from OpenRouter&#39;s new listings or OpenRouter&#39;s stealth models today.</p>
+<hr>
+<h2>Spotted</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Story</th>
+<th align="left">Source</th>
+<th align="left">Discussion</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a href="https://z.ai/blog/glm-5.4">GLM-5.4: Toward generalized coding with our first loop transformer</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50609685">1121 points, 366 comments</a></td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left"><a href="https://arxiv.org/abs/2602.20031">Latent Introspection: LLMs Can Detect Prior Concept Injections</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50620328">58 points, 4 comments</a></td>
+<td align="left">The authors report that a Qwen 32B model can detect prior concept injections and identify the injected concept, even though sampled responses deny them, and that logit lens analysis reveals clear detection.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://www.greptile.com/blog/trex-computer-use">How should an LLM see a computer?</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50615520">51 points, 23 comments</a></td>
+<td align="left">The author tested seven OpenAI models on 172 OSWorld tasks using screenshots, accessibility trees, and click-by-ID, finding that tree and ID clicks increased weaker models’ scores by more than a factor of two while making little difference for the strongest.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://cacm.acm.org/blogcacm/what-happened-in-fall-2026-ai-and-p-vs-np">What Happened in Fall 2026: AI and P vs. NP</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50603219">33 points, 5 comments</a></td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left"><a href="https://morethanamachine.com/posts/slinky-escalator-benchmark/">A Slinky on an Escalator Is a Weirdly Good Test of LLM Intelligence</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50597156">31 points, 8 comments</a></td>
+<td align="left">The page says fifteen models from Anthropic, OpenAI, and Google attempted the same prompt: a rainbow slinky walking down an up escalator with real physics.</td>
+</tr>
+</tbody></table>
+<hr>
+<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
+]]></content:encoded>
+    </item>
     <item>
       <title>AI Models &amp; Labs 2026-11-23</title>
       <link>https://dboeter.github.io/daily-diff/#2026-11-23/ai-models</link>
@@ -3434,74 +3518,6 @@
 <td align="left">Hacker News</td>
 <td align="left"><a href="https://news.ycombinator.com/item?id=50231249">8 points, 0 comments</a></td>
 <td align="left">From Apple&#39;s repeatedly delayed Siri AI to OpenAI&#39;s messy &quot;super app&quot; launch, here&#39;s a look at the AI projects that shut down or missed expectations.</td>
-</tr>
-</tbody></table>
-<hr>
-<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
-]]></content:encoded>
-    </item>
-    <item>
-      <title>AI Models &amp; Labs 2026-10-25</title>
-      <link>https://dboeter.github.io/daily-diff/#2026-10-25/ai-models</link>
-      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-10-25/ai-models</guid>
-      <pubDate>Sun, 25 Oct 2026 00:00:00 +0000</pubDate>
-      <description>AI Models &amp;amp; Labs 2026-10-25 ⬛ Overview · 🟪 AI Agents · 🟦 AI Models &amp;amp; Labs · 🟨 Data Engineering Lab posts: 0 | New models: 0 | Spotted: 4 | Generated: 2026-10-25 01:00 UTC Highlights Dream Labs releases Dream-1, a World Action Model that controls unseen robots and performs unseen tasks at $3/hour Study identifies psycholinguistic features making AI-generated text harder for humans to process, including complex syntax and low-frequency n-grams EPFL researchers develop implantable neural...</description>
-      <content:encoded><![CDATA[<h1>AI Models &amp; Labs 2026-10-25</h1>
-<p><a href="https://dboeter.github.io/daily-diff/#2026-10-25">⬛ Overview</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-25/ai-agents">🟪 AI Agents</a> · <strong>🟦 AI Models &amp; Labs</strong> · <a href="https://dboeter.github.io/daily-diff/#2026-10-25/ai-data">🟨 Data Engineering</a></p>
-<blockquote>
-<p>Lab posts: 0 | New models: 0 | Spotted: 4 | Generated: 2026-10-25 01:00 UTC</p>
-</blockquote>
-<hr>
-<h2>Highlights</h2>
-<ul>
-<li>Dream Labs releases Dream-1, a World Action Model that controls unseen robots and performs unseen tasks at $3/hour</li>
-<li>Study identifies psycholinguistic features making AI-generated text harder for humans to process, including complex syntax and low-frequency n-grams</li>
-<li>EPFL researchers develop implantable neural chip tracking real-time communication across brain regions to identify cognitive and emotional states</li>
-<li>Community launches OAI-Math-Revised hub to improve clarity and citations in OpenAI&#39;s mathematical write-ups</li>
-</ul>
-<hr>
-<h2>Lab announcements</h2>
-<p>No new posts today.</p>
-<hr>
-<h2>New on OpenRouter</h2>
-<p>No new models listed today.</p>
-<hr>
-<h2>🕵️ Stealth Models on OpenRouter</h2>
-<p>No stealth models listed on OpenRouter today.</p>
-<hr>
-<h2>Spotted</h2>
-<table>
-<thead>
-<tr>
-<th align="left">Story</th>
-<th align="left">Source</th>
-<th align="left">Discussion</th>
-<th align="left">Summary</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left"><a href="https://dreamlabs.ai/research/dream-1/">Dream-1</a></td>
-<td align="left">Hacker News</td>
-<td align="left"><a href="https://news.ycombinator.com/item?id=50223785">153 points, 72 comments</a></td>
-<td align="left">Today, we&#39;re releasing Dream-1, a World Action Model that controls robots it has never seen, performs tasks it was never shown, and runs from $3/hour.</td>
-</tr>
-<tr>
-<td align="left"><a href="https://arxiv.org/abs/2610.29162">Why is AI generated language so hard to understand?</a></td>
-<td align="left">Hacker News</td>
-<td align="left"><a href="https://news.ycombinator.com/item?id=50223647">150 points, 146 comments</a></td>
-<td align="left">There is a widespread sense that AI-generated text has recently become harder to understand. In this study, we investigate a set of psycholinguistic features that are known to correlate with human processing difficulty (e.g., object relative clauses, long syntactic dependencies, low-frequency n-gram…</td>
-</tr>
-<tr>
-<td align="left"><a href="https://actu.epfl.ch/news/neural-chip-decodes-interactions-between-brain-r-2/">Neural chip decodes interactions between brain regions</a></td>
-<td align="left">Hacker News</td>
-<td align="left"><a href="https://news.ycombinator.com/item?id=50222525">87 points, 31 comments</a></td>
-<td align="left">EPFL researchers have developed an implantable neural chip that tracks communication across brain regions, identifying cognitive and emotional states in real time.</td>
-</tr>
-<tr>
-<td align="left"><a href="https://terrytao.wordpress.com/2026/10/24/oai-math-revised-a-community-hub-for-revising-openais-math-write-ups/">Oai-math-revised: a community hub for revising OpenAI&#39;s math write-ups</a></td>
-<td align="left">Hacker News</td>
-<td align="left"><a href="https://news.ycombinator.com/item?id=50222283">33 points, 23 comments</a></td>
-<td align="left">This is a guest post by Abhinav Nellore, Johannes Schmitt, Soledad Villar, and Rachel Ward. OpenAI’s math write-ups can be difficult to understand and can have incomplete citations.</td>
 </tr>
 </tbody></table>
 <hr>
