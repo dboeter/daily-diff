@@ -1,0 +1,14 @@
+{
+  "ai-agents": [
+    "Claude Code v2.1.331 adds Code Mode support in terminal sessions on Amazon Bedrock, Google Cloud's Agent Platform, Microsoft Foundry and Claude Platform on AWS.",
+    "OpenAI Codex rust-v0.172.0 fixes codex exec resume to restore saved sandbox permissions, the working directory and workspace roots unless explicitly overridden."
+  ],
+  "ai-models": [
+    "In a reported study, a Qwen 32B model can detect prior concept injections and name the injected concept even while its sampled answers deny them, with a logit lens showing clear internal detection.",
+    "An author's test of seven OpenAI models across 172 OSWorld tasks found that adding accessibility trees and click-by-ID more than doubled weaker models' scores, while doing little for the strongest."
+  ],
+  "ai-data": [
+    "− Azure Databricks users of GPT-5 nano should migrate to GPT-6 Luna (recommended replacement) by December 11, 2026",
+    "Azure Databricks workspaces with the compliance security profile enabled will use ai_forecast version 2 by default starting January 2027"
+  ]
+}

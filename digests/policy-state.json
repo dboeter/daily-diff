@@ -1,7 +1,5 @@
 {
   "reported": {
-    "https://www.digitaleoverheid.nl/?p=142049": "2026-10-24",
-    "000001a1-6a7c-d679-a5a5-6affc6490000": "2026-10-24",
     "tk:2026Z23028": "2026-10-27",
     "https://www.binnenlandsbestuur.nl/digitaal/meer-ondersteuning-nodig-bij-invulling-algoritmeregister": "2026-10-27",
     "https://cset.georgetown.edu/?p=25690": "2026-10-27",
@@ -86,6 +84,7 @@
     }
   },
   "zeroSince": {
-    "Have your say": "2026-11-12"
+    "Have your say": "2026-11-12",
+    "Autoriteit Persoonsgegevens": "2026-11-24"
   }
 }

@@ -6,6 +6,7 @@
     "574158": "2026-11-13",
     "574163": "2026-11-18",
     "574168": "2026-11-18",
+    "574535": "2026-11-24",
     "574541": "2026-11-03",
     "574587": "2026-11-20",
     "575069": "2026-11-18",
@@ -71,17 +72,6 @@
     "581140": "2026-11-18",
     "581170": "2026-11-18",
     "581180": "2026-11-18",
-    "files api 3.0 for unity catalog volumes is now in beta|2026-10-23": "2026-10-24",
-    "google analytics aggregated connector is available in beta|2026-10-23": "2026-10-24",
-    "serverless job environments from pyproject.toml (beta)|2026-10-22": "2026-10-24",
-    "shared serverless for asset bundles (beta)|2026-10-22": "2026-10-24",
-    "genie one enhancements|2026-10-22": "2026-10-24",
-    "dashboard enhancements|2026-10-22": "2026-10-24",
-    "october 23, 2026: snowpark container services gen_arm_g1 and gen_x64_g1 instances on google cloud (general availability)|2026-10-23": "2026-10-24",
-    "october 22, 2026: custom runtime images for ml jobs (general availability)|2026-10-22": "2026-10-24",
-    "oct 22, 2026: skill and plugin sharing in coco (general availability)|2026-10-22": "2026-10-24",
-    "oct 23, 2026: retrieve cortex search (public preview)|2026-10-23": "2026-10-24",
-    "oct 23, 2026: responses api for the cortex rest api (preview)|2026-10-23": "2026-10-24",
     "release:databricks/dbt-databricks@v1.12.8": "2026-10-25",
     "october 23, 2026: coding agent mcp tool|2026-10-23": "2026-10-26",
     "oct 26, 2026: custom error messages for feature policy rules|2026-10-26": "2026-10-26",
@@ -530,7 +520,24 @@
     "release:open-metadata/OpenMetadata@2.0.9-release": "2026-11-21",
     "post:duckdb.org/2026/11/20/announcing-duckdb-201.html": "2026-11-21",
     "post:medium.com/snowflake/build-a-real-time-kinesis-to-snowflake-iceberg-pipeline-with-snowpipe-streaming-high-performance-dd44dc9b7ce5": "2026-11-21",
-    "release:delta-io/delta-rs@python-v1.7.0": "2026-11-23"
+    "release:delta-io/delta-rs@python-v1.7.0": "2026-11-23",
+    "gpt-5 nano will be retired on december 11, 2026|2026-11-17": "2026-11-24",
+    "ai_forecast version 2 will soon be available by default for workspaces with the compliance security profile enabled|2026-11-23": "2026-11-24",
+    "data classification no longer rescans recreated tables or scans short-lived temporary tables|2026-11-17": "2026-11-24",
+    "oauth authentication for webhook notification destinations is generally available|2026-11-20": "2026-11-24",
+    "new variant manipulation functions|2026-11-19": "2026-11-24",
+    "search sharepoint content with genie search (beta)|2026-11-23": "2026-11-24",
+    "genie one enhancements|2026-11-19": "2026-11-24",
+    "databricks runtime 19: november 23, 2026|2026-11-23": "2026-11-24",
+    "dashboard enhancements|2026-11-19": "2026-11-24",
+    "version 1.1 of the tabfm model is now available and is the default model used by the ai.predict and ai.evaluate functions (preview)|2026-11-23": "2026-11-24",
+    "https://community.fabric.microsoft.com/t5/Fabric-Updates-Blog/Fabric-on-demand-billing-and-Zero-provisioned-F0-Capacity/ba-p/5377585": "2026-11-24",
+    "https://community.fabric.microsoft.com/t5/Fabric-Updates-Blog/On-demand-billing-for-Fabric-Data-Warehouse-Preview/ba-p/5376329": "2026-11-24",
+    "the reservation_override_mode and disable_on_demand_billing reservation and billing controls (ga)|2026-11-23": "2026-11-24",
+    "https://community.fabric.microsoft.com/t5/Fabric-Updates-Blog/Scalar-User-defined-functions-UDFs-in-Microsoft-Fabric-Data/ba-p/5399753": "2026-11-24",
+    "you can now use the built-in embeddinggemma-2 model in the ai.embed function|2026-11-23": "2026-11-24",
+    "impact analysis in unity catalog lineage (beta)|2026-11-23": "2026-11-24",
+    "release:databricks/terraform-provider-databricks@v1.145.0": "2026-11-24"
   },
   "stages": {
     "snowflake-bcr:2026_08": "2026-10-16 Introduced in the 10.37 release (October 8-16, 2026) as Disabled by Default; account admins can enable for testing."
@@ -577,6 +584,13 @@
       "link": "https://learn.microsoft.com/azure/databricks/release-notes/whats-coming#upcoming-breaking-change-array_contains-with-a-constant-empty-array-will-return-null-for-a-null-value",
       "source": "Azure Databricks",
       "summary": "Use `size(arr) > 0 AND array_contains(arr, value)` to keep prior results: starting on or after January 15, 2027, with ANSI mode enabled in Databricks Runtime 19 and above, `array_contains(arr, value)` returns NULL instead of false when arr is a constant empty array and value is NULL. `map_contains_key(map, key)` with a constant empty map changes the same way, so `NOT array_contains(arr, value)` no longer matches rows where value is NULL."
+    },
+    "https://learn.microsoft.com/azure/databricks/release-notes/product/2026/november#gpt-5-nano-will-be-retired-on-december-11-2026": {
+      "date": "2026-12-11",
+      "title": "GPT-5 nano will be retired on December 11, 2026",
+      "link": "https://learn.microsoft.com/azure/databricks/release-notes/product/2026/november#gpt-5-nano-will-be-retired-on-december-11-2026",
+      "source": "Azure Databricks",
+      "summary": "Migrate to GPT-6 Luna (the recommended replacement) before December 11, 2026: GPT-5 nano is retired on that date and API calls to it are not redirected afterward."
     }
   }
 }

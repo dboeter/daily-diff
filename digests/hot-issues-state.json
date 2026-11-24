@@ -63,7 +63,8 @@
     "issue:openai/codex#62212": "2026-11-19",
     "issue:can1357/oh-my-pi#18937": "2026-11-19",
     "issue:anthropics/claude-code#92276": "2026-11-20",
-    "issue:openai/codex#62650": "2026-11-20"
+    "issue:openai/codex#62650": "2026-11-20",
+    "issue:anthropics/claude-code#111275": "2026-11-24"
   },
   "stages": {}
 }

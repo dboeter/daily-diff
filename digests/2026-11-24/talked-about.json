@@ -1,0 +1,46 @@
+[
+  {
+    "id": "hn:50620102",
+    "source": "hn",
+    "title": "VP ≠ VNP over Every Field",
+    "url": "https://github.com/anthropics/formal-math/tree/main/vp-vnp",
+    "discussionUrl": "https://news.ycombinator.com/item?id=50620102",
+    "points": 328,
+    "comments": 290,
+    "topic": "other",
+    "counts": "328 points, 290 comments"
+  },
+  {
+    "id": "hn:50598961",
+    "source": "hn",
+    "title": "AI is becoming a disaster for the climate",
+    "url": "https://www.bloodinthemachine.com/p/ai-is-becoming-a-disaster-for-the",
+    "discussionUrl": "https://news.ycombinator.com/item?id=50598961",
+    "points": 134,
+    "comments": 64,
+    "topic": "other",
+    "counts": "134 points, 64 comments"
+  },
+  {
+    "id": "hn:50602153",
+    "source": "hn",
+    "title": "Harvard CS 2881R AI Safety",
+    "url": "https://boazbk.github.io/mltheoryseminar/",
+    "discussionUrl": "https://news.ycombinator.com/item?id=50602153",
+    "points": 79,
+    "comments": 8,
+    "topic": "other",
+    "counts": "79 points, 8 comments"
+  },
+  {
+    "id": "devto:5032798",
+    "source": "devto",
+    "title": "Proofreader vs. Rewriter vs. Prompt API: Test the Task, Not the Demo",
+    "url": "https://dev.to/gde/proofreader-vs-rewriter-vs-prompt-api-test-the-task-not-the-demo-pi9",
+    "discussionUrl": "https://dev.to/gde/proofreader-vs-rewriter-vs-prompt-api-test-the-task-not-the-demo-pi9",
+    "points": 32,
+    "comments": 17,
+    "topic": "agents",
+    "counts": "32 reactions, 17 comments"
+  }
+]
