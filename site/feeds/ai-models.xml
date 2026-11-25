@@ -13,7 +13,127 @@
       <height>144</height>
     </image>
     <atom:link href="https://dboeter.github.io/daily-diff/feeds/ai-models.xml" rel="self" type="application/rss+xml"/>
-    <lastBuildDate>Tue, 24 Nov 2026 09:45:01 +0000</lastBuildDate>
+    <lastBuildDate>Wed, 25 Nov 2026 08:19:39 +0000</lastBuildDate>
+    <item>
+      <title>AI Models &amp; Labs 2026-11-25</title>
+      <link>https://dboeter.github.io/daily-diff/#2026-11-25/ai-models</link>
+      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-11-25/ai-models</guid>
+      <pubDate>Wed, 25 Nov 2026 00:00:00 +0000</pubDate>
+      <description>AI Models &amp;amp; Labs 2026-11-25 ⬛ Overview · 🟪 AI Agents · 🟦 AI Models &amp;amp; Labs · 🟧 AI Policy · 🟨 Data Engineering Lab posts: 1 | New models: 3 | Spotted: 6 | Generated: 2026-11-25 08:14 UTC Highlights Xiaomi lists MiMo-V2.6-Flash-MOPD on OpenRouter, a mixture-of-experts model with 309B total and 15B active parameters, a 1M-token context window, and native multimodal input. Upstage&amp;#39;s Solar Pro 4 Contributor on OpenRouter is the Solar Pro 4 model at a lower rate, with the condition that...</description>
+      <content:encoded><![CDATA[<h1>AI Models &amp; Labs 2026-11-25</h1>
+<p><a href="https://dboeter.github.io/daily-diff/#2026-11-25">⬛ Overview</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-25/ai-agents">🟪 AI Agents</a> · <strong>🟦 AI Models &amp; Labs</strong> · <a href="https://dboeter.github.io/daily-diff/#2026-11-25/ai-policy">🟧 AI Policy</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-25/ai-data">🟨 Data Engineering</a></p>
+<blockquote>
+<p>Lab posts: 1 | New models: 3 | Spotted: 6 | Generated: 2026-11-25 08:14 UTC</p>
+</blockquote>
+<hr>
+<h2>Highlights</h2>
+<ul>
+<li>Xiaomi lists MiMo-V2.6-Flash-MOPD on OpenRouter, a mixture-of-experts model with 309B total and 15B active parameters, a 1M-token context window, and native multimodal input.</li>
+<li>Upstage&#39;s Solar Pro 4 Contributor on OpenRouter is the Solar Pro 4 model at a lower rate, with the condition that Upstage may use interaction data to improve its models.</li>
+<li>Upstage lists Solar Mini 4.5, a preview model, on OpenRouter — a compact, proprietary mixture-of-experts model with 35B total and 3B active parameters and a 524K-token context.</li>
+</ul>
+<hr>
+<h2>Lab announcements</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Post</th>
+<th align="left">Lab</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-11-25</td>
+<td align="left"><a href="https://openai.com/index/gpt-6-models-demonstrate-intrinsic-protein-design-capabilities/">Gpt 6 Models Demonstrate Intrinsic Protein Design Capabilities</a></td>
+<td align="left">OpenAI</td>
+<td align="left">—</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>New on OpenRouter</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Listed</th>
+<th align="left">Model</th>
+<th align="left">Context</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-11-24</td>
+<td align="left"><a href="https://openrouter.ai/upstage/solar-mini-4-5">Upstage: Solar Mini 4.5 (Preview)</a> <code>upstage/solar-mini-4-5</code></td>
+<td align="left">524K</td>
+<td align="left">Solar Mini 4.5 is a compact language model built on a proprietary mixture-of-experts architecture with 35B total and 3B active parameters.</td>
+</tr>
+<tr>
+<td align="left">2026-11-24</td>
+<td align="left"><a href="https://openrouter.ai/upstage/solar-pro-4-contributor">Upstage: Solar Pro 4 Contributor</a> <code>upstage/solar-pro-4-contributor</code></td>
+<td align="left">524K</td>
+<td align="left">Solar Pro 4 Contributor is the same Solar Pro 4 model offered at a lower rate in exchange for allowing Upstage to use interaction data to improve its models.</td>
+</tr>
+<tr>
+<td align="left">2026-11-23</td>
+<td align="left"><a href="https://openrouter.ai/xiaomi/mimo-v2.6-flash-mopd">Xiaomi: MiMo-V2.6-Flash-MOPD</a> <code>xiaomi/mimo-v2.6-flash-mopd</code></td>
+<td align="left">1M</td>
+<td align="left">MiMo-V2.6-Flash-MOPD is a Mixture-of-Experts model with 309B total and 15B active parameters, a 1M-token context window, and native multimodal input.</td>
+</tr>
+</tbody></table>
+<hr>
+<p>Nothing new from OpenRouter&#39;s stealth models today.</p>
+<hr>
+<h2>Spotted</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Story</th>
+<th align="left">Source</th>
+<th align="left">Discussion</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a href="https://github.com/openai/math/blob/main/preprints/The-matrix-multiplication-exponent-is-nine-fourths-November-24-2026/paper.pdf">Matrix Multiplication is Θ(n^2.25) [pdf]</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50637220">539 points, 270 comments</a></td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left"><a href="https://www.bloomberg.com/news/articles/2026-11-24/anthropic-breaks-below-83-ipo-price-in-premarket-trading">Anthropic breaks below $83 IPO price</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50627836">385 points, 758 comments</a></td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50630809">Ask HN: Anthropic is accusing my company of distilling. How can I prove I&#39;m not?</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50630809">258 points, 193 comments</a></td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td align="left"><a href="https://greydanus.github.io/2026/11/12/pengpt/">PenGPT: A Generative Transformer for Handwriting and Sketches</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50637056">211 points, 38 comments</a></td>
+<td align="left">The author describes PenGPT as a small transformer that writes and sketches from text and says the work was 80% data, 15% speed and 5% architecture, making it their first project following the Bitter Lesson.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://www.comentr.com/technology/01M88DWQ0R4NCMYR17AFEWRG1F">Gemini refused to give me the lyrics to Twinkle Twinkle Little Star</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50638320">157 points, 99 comments</a></td>
+<td align="left">The author reports that Gemini twice began outputting the lyrics to Twinkle Twinkle Little Star, then stopped, retracted them and produced the message shown in the post.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://github.com/openai/math/tree/main/preprints/VP-and-VNP-are-different-November-23-2026">OpenAI reveals they solved VP ≠ VNP before Anthropic</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50632756">89 points, 92 comments</a></td>
+<td align="left">—</td>
+</tr>
+</tbody></table>
+<hr>
+<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
+]]></content:encoded>
+    </item>
     <item>
       <title>AI Models &amp; Labs 2026-11-24</title>
       <link>https://dboeter.github.io/daily-diff/#2026-11-24/ai-models</link>
@@ -3443,81 +3563,6 @@
 <td align="left">Hacker News</td>
 <td align="left"><a href="https://news.ycombinator.com/item?id=50243343">15 points, 2 comments</a></td>
 <td align="left">—</td>
-</tr>
-</tbody></table>
-<hr>
-<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
-]]></content:encoded>
-    </item>
-    <item>
-      <title>AI Models &amp; Labs 2026-10-26</title>
-      <link>https://dboeter.github.io/daily-diff/#2026-10-26/ai-models</link>
-      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-10-26/ai-models</guid>
-      <pubDate>Mon, 26 Oct 2026 00:00:00 +0000</pubDate>
-      <description>AI Models &amp;amp; Labs 2026-10-26 ⬛ Overview · 🟪 AI Agents · 🟦 AI Models &amp;amp; Labs · 🟨 Data Engineering · 🟫 Trends Lab posts: 0 | New models: 0 | Spotted: 5 | Generated: 2026-10-26 04:31 UTC Highlights OpenAI and Anthropic cut LLM prices by up to 80% in recent months, reshaping token economics Cerebras deploys trillion-parameter models on WSE-3T wafers, achieving 1,000–2,000+ tokens per second A decade-old CNN outperforms frontier LLMs including GPT-6 Astra and Claude Fable 5.1 in skin cancer...</description>
-      <content:encoded><![CDATA[<h1>AI Models &amp; Labs 2026-10-26</h1>
-<p><a href="https://dboeter.github.io/daily-diff/#2026-10-26">⬛ Overview</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-26/ai-agents">🟪 AI Agents</a> · <strong>🟦 AI Models &amp; Labs</strong> · <a href="https://dboeter.github.io/daily-diff/#2026-10-26/ai-data">🟨 Data Engineering</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-26/ai-trends">🟫 Trends</a></p>
-<blockquote>
-<p>Lab posts: 0 | New models: 0 | Spotted: 5 | Generated: 2026-10-26 04:31 UTC</p>
-</blockquote>
-<hr>
-<h2>Highlights</h2>
-<ul>
-<li>OpenAI and Anthropic cut LLM prices by up to 80% in recent months, reshaping token economics</li>
-<li>Cerebras deploys trillion-parameter models on WSE-3T wafers, achieving 1,000–2,000+ tokens per second</li>
-<li>A decade-old CNN outperforms frontier LLMs including GPT-6 Astra and Claude Fable 5.1 in skin cancer diagnosis</li>
-<li>Study finds Grok recommends Republican candidates while OpenAI models favor Democrats, with &gt;90% disagreement across 500 races</li>
-<li>TechCrunch catalogs major AI project failures including delayed Siri AI and OpenAI&#39;s &quot;super app&quot; launch</li>
-</ul>
-<hr>
-<h2>Lab announcements</h2>
-<p>No new posts today.</p>
-<hr>
-<h2>New on OpenRouter</h2>
-<p>No new models listed today.</p>
-<hr>
-<h2>🕵️ Stealth Models on OpenRouter</h2>
-<p>No stealth models listed on OpenRouter today.</p>
-<hr>
-<h2>Spotted</h2>
-<table>
-<thead>
-<tr>
-<th align="left">Story</th>
-<th align="left">Source</th>
-<th align="left">Discussion</th>
-<th align="left">Summary</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left"><a href="https://lynchlab.net/llm-skin-cancer">A 10-year-old CNN outperforms frontier LLMs for skin cancer diagnosis</a></td>
-<td align="left">Hacker News</td>
-<td align="left"><a href="https://news.ycombinator.com/item?id=50233779">491 points, 222 comments</a></td>
-<td align="left">I am a dermatologist. I tested the ability of GPT-6 Astra and Claude Fable 5.1 to diagnosis skin cancer and found that they were less accurate than I expected.</td>
-</tr>
-<tr>
-<td align="left"><a href="https://www.cerebras.ai/blog/how-we-deploy-trillion-parameter-frontier-models-on-cerebras">Cerebras Deploys Trillion-Parameter AI Models</a></td>
-<td align="left">Hacker News</td>
-<td align="left"><a href="https://news.ycombinator.com/item?id=50227356">354 points, 131 comments</a></td>
-<td align="left">Learn how Cerebras maps trillion-parameter frontier models across WSE-3T wafers to deliver scalable inference at 1,000–2,000+ tokens per second.</td>
-</tr>
-<tr>
-<td align="left"><a href="https://minimaxir.com/2026/10/cheap-llms/">OpenAI and Anthropic cut their LLM prices by up to 80% within a few months. Why?</a></td>
-<td align="left">Hacker News</td>
-<td align="left"><a href="https://news.ycombinator.com/item?id=50236102">213 points, 239 comments</a></td>
-<td align="left">What is “the true cost of a token”?</td>
-</tr>
-<tr>
-<td align="left"><a href="https://techcrunch.com/2026/10/24/forced-to-pick-groks-ai-model-chooses-republicans-openais-picks-democrats/">Forced to pick, Grok&#39;s AI model chooses Republicans. OpenAI&#39;s picks Democrats</a></td>
-<td align="left">Hacker News</td>
-<td align="left"><a href="https://news.ycombinator.com/item?id=50227174">9 points, 1 comments</a></td>
-<td align="left">A new study found Grok&#39;s AI overwhelmingly recommends Republican candidates while OpenAI&#39;s GPT favors Democrats, with the two AI models disagreeing in more than 90% of nearly 500 election races.</td>
-</tr>
-<tr>
-<td align="left"><a href="https://techcrunch.com/2026/10/24/the-ai-graveyard-a-running-list-of-projects-and-startups-that-didnt-make-it/">The AI graveyard: a running list of projects and startups that didn&#39;t make it</a></td>
-<td align="left">Hacker News</td>
-<td align="left"><a href="https://news.ycombinator.com/item?id=50231249">8 points, 0 comments</a></td>
-<td align="left">From Apple&#39;s repeatedly delayed Siri AI to OpenAI&#39;s messy &quot;super app&quot; launch, here&#39;s a look at the AI projects that shut down or missed expectations.</td>
 </tr>
 </tbody></table>
 <hr>

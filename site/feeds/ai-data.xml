@@ -13,7 +13,265 @@
       <height>144</height>
     </image>
     <atom:link href="https://dboeter.github.io/daily-diff/feeds/ai-data.xml" rel="self" type="application/rss+xml"/>
-    <lastBuildDate>Tue, 24 Nov 2026 09:45:01 +0000</lastBuildDate>
+    <lastBuildDate>Wed, 25 Nov 2026 08:19:39 +0000</lastBuildDate>
+    <item>
+      <title>Data Engineering 2026-11-25</title>
+      <link>https://dboeter.github.io/daily-diff/#2026-11-25/ai-data</link>
+      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-11-25/ai-data</guid>
+      <pubDate>Wed, 25 Nov 2026 00:00:00 +0000</pubDate>
+      <description>Data Engineering 2026-11-25 ⬛ Overview · 🟪 AI Agents · 🟦 AI Models &amp;amp; Labs · 🟧 AI Policy · 🟨 Data Engineering Vendor items: 12 | Projects: 26 | Active today: 6 | Stable releases: 5 | Prereleases skipped: 3 | Spotted: 2 | Generated: 2026-11-25 08:14 UTC Highlights Snowflake Terraform users managing preview snowflake_table, snowflake_tables data source, or snowflake_failover_group resources face breaking changes in provider v2.24.0; a migration guide covers the required updates. OpenMetadat...</description>
+      <content:encoded><![CDATA[<h1>Data Engineering 2026-11-25</h1>
+<p><a href="https://dboeter.github.io/daily-diff/#2026-11-25">⬛ Overview</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-25/ai-agents">🟪 AI Agents</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-25/ai-models">🟦 AI Models &amp; Labs</a> · <a href="https://dboeter.github.io/daily-diff/#2026-11-25/ai-policy">🟧 AI Policy</a> · <strong>🟨 Data Engineering</strong></p>
+<blockquote>
+<p>Vendor items: 12 | Projects: 26 | Active today: 6 | Stable releases: 5 | Prereleases skipped: 3 | Spotted: 2 | Generated: 2026-11-25 08:14 UTC</p>
+</blockquote>
+<hr>
+<h2>Highlights</h2>
+<ul>
+<li>Snowflake Terraform users managing preview <code>snowflake_table</code>, <code>snowflake_tables</code> data source, or <code>snowflake_failover_group</code> resources face breaking changes in provider v2.24.0; a migration guide covers the required updates.</li>
+<li>OpenMetadata users get a major release (2.1.0) adding data quality failure thresholds, dimension-based test grouping, grouped incident management, workflow conditions on data product assets and column changes, service-level tag inheritance, impersonation policy conditions, entity lifecycle stages, domain styling, and glossary settings.</li>
+<li>Snowflake Native App providers can now run Streamlit apps on Snowpark Container Services compute pools instead of virtual warehouses, now generally available.</li>
+</ul>
+<hr>
+<h2>Action required</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Item</th>
+<th align="left">Platform</th>
+<th align="left">What to do</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-11-30</td>
+<td align="left"><a href="https://learn.microsoft.com/azure/databricks/release-notes/whats-coming#upcoming-end-of-life-for-the-genie-one-mcp-beta-endpoint">Upcoming end of life for the Genie One MCP Beta endpoint</a></td>
+<td align="left">Azure Databricks</td>
+<td align="left">The Genie One MCP Beta endpoint at <code>https://&lt;workspace-hostname&gt;/api/2.0/mcp/genie</code> reaches end of life on November 30, 2026, after which requests fail; migrate all workloads to the <code>system.ai.genie_one_mcp</code> MCP in Unity Gateway.</td>
+</tr>
+<tr>
+<td align="left">2026-12-11</td>
+<td align="left"><a href="https://learn.microsoft.com/azure/databricks/release-notes/product/2026/november#gpt-5-and-gpt-5-mini-will-be-retired-on-december-11-2026">GPT-5 and GPT-5 mini will be retired on December 11, 2026</a></td>
+<td align="left">Azure Databricks</td>
+<td align="left">Recommended: migrate GPT-5 to OpenAI GPT-6.1 Sol and GPT-5 mini to OpenAI GPT-6.1 Terra by December 11, 2026, when both models are retired.</td>
+</tr>
+<tr>
+<td align="left">2026-12-11</td>
+<td align="left"><a href="https://learn.microsoft.com/azure/databricks/release-notes/product/2026/november#gpt-5-nano-will-be-retired-on-december-11-2026">GPT-5 nano will be retired on December 11, 2026</a></td>
+<td align="left">Azure Databricks</td>
+<td align="left">Migrate to GPT-6 Luna (the recommended replacement) before December 11, 2026: GPT-5 nano is retired on that date and API calls to it are not redirected afterward.</td>
+</tr>
+<tr>
+<td align="left">2027-01-15</td>
+<td align="left"><a href="https://learn.microsoft.com/azure/databricks/release-notes/whats-coming#upcoming-breaking-change-array_contains-with-a-constant-empty-array-will-return-null-for-a-null-value">Upcoming breaking change: array_contains with a constant empty array will return NULL for a NULL value</a></td>
+<td align="left">Azure Databricks</td>
+<td align="left">Use <code>size(arr) &gt; 0 AND array_contains(arr, value)</code> to keep prior results: starting on or after January 15, 2027, with ANSI mode enabled in Databricks Runtime 19 and above, <code>array_contains(arr, value)</code> returns NULL instead of false when arr is a constant empty array and value is NULL. <code>map_contains_key(map, key)</code> with a constant empty map changes the same way, so <code>NOT array_contains(arr, value)</code> no longer matches rows where value is NULL.</td>
+</tr>
+<tr>
+<td align="left">2027-01-31</td>
+<td align="left"><a href="https://docs.cloud.google.com/bigquery/docs/release-notes#November_06_2026">Starting January 31, 2027, the BigQuery Data Transfer Service for Shopify connector will no longer support the following fields</a></td>
+<td align="left">BigQuery</td>
+<td align="left">Starting January 31, 2027, the BigQuery Data Transfer Service for Shopify connector will drop support for the <code>legacyMode</code> field in the DeliveryProfile dataset schema and the <code>permitSkuSharing</code> field in the FulfillmentService dataset schema.</td>
+</tr>
+<tr>
+<td align="left">2027-02-04</td>
+<td align="left"><a href="https://learn.microsoft.com/azure/databricks/release-notes/product/2026/november#zhipu-ai-glm-52-is-scheduled-for-retirement">Zhipu AI GLM 5.2 is scheduled for retirement</a></td>
+<td align="left">Azure Databricks</td>
+<td align="left">Zhipu AI GLM 5.2 is deprecated and will be retired on February 4, 2027, requiring migration to GLM 5.3 per the Legacy, deprecated, and retired models guidance.</td>
+</tr>
+<tr>
+<td align="left">2027-08-19</td>
+<td align="left"><a href="https://learn.microsoft.com/azure/databricks/release-notes/whats-coming#all-unity-catalog-managed-tables-will-be-upgraded-to-catalog-commits">All Unity Catalog managed tables will be upgraded to catalog commits</a></td>
+<td align="left">Azure Databricks</td>
+<td align="left">After Databricks Runtime 15.4 LTS end of support on August 19, 2027, all Unity Catalog managed tables will be automatically upgraded to <code>catalog commits</code>, making Unity Catalog the system of coordination and enabling multi-statement transactions, external engine writes, and consistent governance; clients must plan for this breaking change before the 2027 deadline.</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>Databricks</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Item</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-11-24</td>
+<td align="left"><a href="https://learn.microsoft.com/azure/databricks/release-notes/product/2026/november#genie-migrate-conversion-to-lakeflow-pipelines-is-generally-available">Genie Migrate conversion to Lakeflow pipelines is generally available</a></td>
+<td align="left">Enables T-SQL script migration from SQL Server and Synapse to Lakeflow pipelines via the <code>Spark Declarative Pipelines</code> target framework, requiring a workspace admin to enable <code>Migration Projects Experimental Features</code> in the Previews page.</td>
+</tr>
+<tr>
+<td align="left">2026-11-24</td>
+<td align="left"><a href="https://learn.microsoft.com/azure/databricks/release-notes/product/2026/november#new-configuration-options-for-classic-instance-pools">New configuration options for classic instance pools</a></td>
+<td align="left">Adds spot instance support with fallback for classic instance pools and allows modifying existing pool availability and maximum spot price settings.</td>
+</tr>
+<tr>
+<td align="left">2026-11-24</td>
+<td align="left"><a href="https://learn.microsoft.com/azure/databricks/release-notes/lakewatch#lakewatch-streaming-detection-rules-experimental">Lakewatch streaming detection rules (Experimental)</a></td>
+<td align="left">Introduces experimental streaming detection rules that evaluate each new row on arrival for low-latency signature and IOC detections with managed compute.</td>
+</tr>
+<tr>
+<td align="left">2026-11-24</td>
+<td align="left"><a href="https://learn.microsoft.com/azure/databricks/release-notes/lakebase#migrate-a-postgres-database-to-lakebase-beta">Migrate a Postgres database to Lakebase (Beta)</a></td>
+<td align="left">Enables one-time PostgreSQL database migration to Lakebase with compatibility assessment and schema/data copy to a chosen branch via the Lakebase App or Postgres API and SDKs.</td>
+</tr>
+<tr>
+<td align="left">2026-11-23</td>
+<td align="left"><a href="https://learn.microsoft.com/azure/databricks/release-notes/product/2026/november#outbound-ip-addresses-for-serverless-compute-are-generally-available">Outbound IP addresses for serverless compute are generally available</a></td>
+<td align="left">Publishes serverless compute outbound IP addresses in <code>ip-ranges.json</code> for firewall allowlisting, requiring automated updates as addresses change.</td>
+</tr>
+</tbody></table>
+<h3>Databricks CLI</h3>
+<ul>
+<li><strong>Release:</strong> <a href="https://github.com/databricks/cli/releases/tag/v1.28.0">v1.28.0</a> adds retries for transient errors in <code>fs</code> commands (HTTP 503/500) and fixes a 10-second Ctrl-C delay when stopping <code>databricks aitools install</code>, <code>update</code>, or <code>uninstall</code>. It also improves automatic AI tools installation: no longer prompts in containers, keeps newer skills, waits before retrying failed installs, and makes <code>aitools uninstall --skills</code> fail when no skill matches.</li>
+</ul>
+<p><strong>Quiet today:</strong> <a href="https://github.com/delta-io/delta">Delta Lake</a>, <a href="https://github.com/delta-io/delta-rs">delta-rs</a>, <a href="https://github.com/unitycatalog/unitycatalog">Unity Catalog</a>, <a href="https://github.com/mlflow/mlflow">MLflow</a>, <a href="https://github.com/databricks/dbt-databricks">dbt-databricks</a>, <a href="https://github.com/databricks/terraform-provider-databricks">Terraform provider for Databricks</a></p>
+<hr>
+<h2>Snowflake</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Item</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-11-23</td>
+<td align="left"><a href="https://docs.snowflake.com/en/release-notes/2026/other/2026-11-23-multiple-tag-based-row-access-policies">Support for multiple tag-based row access policies (Preview)</a></td>
+<td align="left">Allows applying multiple tag-based row access policies to a single table or view, combined with <code>AND</code> by default or <code>OR</code> when <code>PERMISSIVE</code> is specified on the tag.</td>
+</tr>
+<tr>
+<td align="left">2026-11-20</td>
+<td align="left"><a href="https://docs.snowflake.com/en/release-notes/2026/other/2026-11-20-streamlit-container-runtime-native-apps-ga">Container runtime for Streamlit apps in Snowflake Native Apps (General availability)</a></td>
+<td align="left">Allows Streamlit apps in Snowflake Native Apps to run as Snowpark Container Services on a consumer-account compute pool instead of a virtual warehouse.</td>
+</tr>
+<tr>
+<td align="left">2026-11-20</td>
+<td align="left"><a href="https://docs.snowflake.com/en/release-notes/2026/other/2026-11-20-insert-overwrite-deleting-where">Simplify selective data replacement with DELETING WHERE in SQL and Dynamic Tables with custom incrementalization</a></td>
+<td align="left">Enables replacing row groups or data ranges in a single SQL statement using <code>DELETING WHERE</code> in DML and Dynamic Tables with custom incrementalization.</td>
+</tr>
+<tr>
+<td align="left">2026-11-20</td>
+<td align="left"><a href="https://docs.snowflake.com/en/release-notes/2026/other/2026-11-20-stream-replication-unsupported-source-objects">Failover group refreshes continue when a stream has an unsupported source object</a></td>
+<td align="left">Failover group refreshes now succeed even when a stream has an unsupported source object, replicating the problematic stream as unreadable in the secondary account.</td>
+</tr>
+<tr>
+<td align="left">2026-11-20</td>
+<td align="left">🤖 <a href="https://docs.snowflake.com/en/release-notes/2026/other/2026-11-20-semantic-view-autopilot-connected-bi-import-preview">Semantic View Autopilot import from Horizon Catalog connectors (Preview)</a></td>
+<td align="left">Enables Semantic View Autopilot to create semantic views directly from Horizon Catalog connector models without file export or upload.</td>
+</tr>
+</tbody></table>
+<h3>Terraform provider for Snowflake</h3>
+<ul>
+<li><strong>Release:</strong> <a href="https://github.com/snowflakedb/terraform-provider-snowflake/releases/tag/v2.24.0">v2.24.0</a> reworks the preview <code>snowflake_table</code> resource and <code>snowflake_tables</code> data source (using fully qualified name as resource ID, replacing several attributes, adding new options) and the preview <code>snowflake_failover_group</code> resource (moving replicas to new <code>snowflake_failover_group_secondary</code> resource), and adds the preview <code>snowflake_backup_set</code> resource and data source; a migration guide covers the breaking changes.</li>
+</ul>
+<p><strong>Quiet today:</strong> <a href="https://github.com/snowflakedb/snowpark-python">Snowpark Python</a>, <a href="https://github.com/snowflakedb/snowflake-connector-python">Snowflake Connector for Python</a>, <a href="https://github.com/apache/polaris">Apache Polaris</a></p>
+<hr>
+<h2>Azure / Fabric &amp; GCP</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Item</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-11-24</td>
+<td align="left">🤖 <a href="https://docs.cloud.google.com/bigquery/docs/release-notes#November_24_2026">The built-in text embedding model embeddinggemma-300m in the AI.EMBED and AI.SIMILARITY functions (GA)</a></td>
+<td align="left">Makes the <code>embeddinggemma-300m</code> text embedding model generally available for use in <code>AI.EMBED</code> and <code>AI.SIMILARITY</code> functions.</td>
+</tr>
+<tr>
+<td align="left">2026-11-24</td>
+<td align="left"><a href="https://docs.cloud.google.com/bigquery/docs/release-notes#November_24_2026">BigQuery Migration Service supports translating Databricks SQL and Apache Spark SQL 3.x and 4.x into GoogleSQL and extracting schema metadata from Databricks in Preview</a></td>
+<td align="left">Adds preview support for translating Databricks SQL and Apache Spark SQL 3.x and 4.x to <code>GoogleSQL</code> and extracting schema metadata from Databricks.</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>Open-source stack</h2>
+<h3>Prefect</h3>
+<ul>
+<li><strong>Release:</strong> <a href="https://github.com/PrefectHQ/prefect/releases/tag/3.9.5">3.9.5</a> fixes concurrent requests invalidating each other&#39;s CSRF tokens and keeps mixed day-and-time <code>IntervalSchedule</code> refills aligned with the original series across daylight saving time changes.</li>
+</ul>
+<h3>dlt</h3>
+<ul>
+<li><strong>News:</strong> According to dltHub, <a href="https://dlthub.com/blog/dlthub-pay-as-you-go">dltHub is now pay-as-you-go: $10 per runtime hour</a>, with no contract or minimum spend and the option to move to an Annual Commitment once you have the proof.</li>
+</ul>
+<h3>Polars</h3>
+<ul>
+<li><strong>Release:</strong> <a href="https://github.com/pola-rs/polars/releases/tag/py-2.2.0">py-2.2.0</a> adds out-of-core joins and Iceberg table writes and maintenance from SQL.</li>
+</ul>
+<h3>OpenMetadata</h3>
+<ul>
+<li><strong>Release:</strong> <a href="https://github.com/open-metadata/OpenMetadata/releases/tag/2.0.10-release">2.0.10-release</a> fixes connection secrets being stored in plain text by encrypting them, and adds dbt Cloud multi-job ingestion.</li>
+</ul>
+<p><strong>Quiet today:</strong> <a href="https://github.com/dbt-labs/dbt">dbt Core</a>, <a href="https://github.com/SQLMesh/sqlmesh">SQLMesh</a>, <a href="https://github.com/apache/airflow">Apache Airflow</a>, <a href="https://github.com/dagster-io/dagster">Dagster</a>, <a href="https://github.com/apache/iceberg">Apache Iceberg</a>, <a href="https://github.com/apache/iceberg-python">PyIceberg</a>, <a href="https://github.com/duckdb/duckdb">DuckDB</a>, <a href="https://github.com/trinodb/trino">Trino</a>, <a href="https://github.com/great-expectations/great_expectations">Great Expectations</a>, <a href="https://github.com/sodadata/soda-core">Soda Core</a>, <a href="https://github.com/OpenLineage/OpenLineage">OpenLineage</a></p>
+<hr>
+<h2>Releases this week</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Project</th>
+<th align="left">Version</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-11-20</td>
+<td align="left"><a href="https://github.com/open-metadata/OpenMetadata">OpenMetadata</a></td>
+<td align="left"><a href="https://github.com/open-metadata/OpenMetadata/releases/tag/2.1.0-release">2.1.0-release</a></td>
+<td align="left">Adds data quality failure thresholds, dimension-based test grouping, multi-status filtering, enhanced run history with duration and error details, grouped incident management, workflow conditions on data product assets and column changes, service-level tag inheritance, impersonation policy conditions, entity lifecycle stages, domain styling, and glossary settings.</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>News &amp; discussion</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Date</th>
+<th align="left">Post</th>
+<th align="left">Source</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2026-11-24</td>
+<td align="left"><a href="https://medium.com/snowflake/evaluating-ai-systems-in-production-on-snowflake-6fdac4f33988">Evaluating AI Systems in Production on Snowflake</a></td>
+<td align="left">Snowflake on Medium</td>
+<td align="left">The author presents a four-stage evaluation framework using dbt and Snowflake Cortex to detect silent AI pipeline failures like prompt regression and hallucination, illustrated by a case where a single prompt tweak caused cancellation tickets to be misrouted to billing for weeks unnoticed.</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>Spotted</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Story</th>
+<th align="left">Source</th>
+<th align="left">Discussion</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a href="https://masondata.ai/">Show HN: Mason – A lightweight Postgres read-replica, built on columnar storage</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50630294">94 points, 18 comments</a></td>
+<td align="left">Masondata says Mason is a lightweight drop-in replacement for a Postgres read replica, built on columnar storage, and claims it uses the same SQL and gives the same answers while being extremely fast for analytical queries.</td>
+</tr>
+<tr>
+<td align="left"><a href="https://gnomon.bitsinfra.com/">Gnomon: Git for Postgres Data</a></td>
+<td align="left">Hacker News</td>
+<td align="left"><a href="https://news.ycombinator.com/item?id=50611613">40 points, 6 comments</a></td>
+<td align="left">The project describes Gnomon as Git for Postgres data built for agents, offering branches, history, merges and undo inside PostgreSQL.</td>
+</tr>
+</tbody></table>
+<hr>
+<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
+]]></content:encoded>
+    </item>
     <item>
       <title>Data Engineering 2026-11-24</title>
       <link>https://dboeter.github.io/daily-diff/#2026-11-24/ai-data</link>
@@ -5161,63 +5419,6 @@
 <li>AI-assisted SQL optimization: Databricks (GA, Genie Code via Optimize button in Lakeflow Observability for serverless, SQL Warehouses, Lakeflow Pipelines) and BigQuery (GA, Conversational Analytics with conversation logging to BigQuery tables).</li>
 <li>Warehouse query observability: Databricks (GA, Lakeflow Performance Observability with job-level query metrics and data volume insights) and Microsoft Fabric (Preview, Workspace monitoring integration aggregating completed warehouse query events into a WarehouseExecutions KQL table).</li>
 </ul>
-<hr>
-<p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
-]]></content:encoded>
-    </item>
-    <item>
-      <title>Data Engineering 2026-10-26</title>
-      <link>https://dboeter.github.io/daily-diff/#2026-10-26/ai-data</link>
-      <guid isPermaLink="true">https://dboeter.github.io/daily-diff/#2026-10-26/ai-data</guid>
-      <pubDate>Mon, 26 Oct 2026 00:00:00 +0000</pubDate>
-      <description>Data Engineering 2026-10-26 ⬛ Overview · 🟪 AI Agents · 🟦 AI Models &amp;amp; Labs · 🟨 Data Engineering · 🟫 Trends Generated: 2026-10-26 04:31 UTC | Vendor items: 2 | Projects: 17 | Active today: 1 | Stable releases: 1 | Prereleases (not covered): 0 Highlights − Polars py-2.1.0 disallows mixed string and numeric arithmetic in eager mode; data engineers using Polars in any client environment (Databricks, Snowflake, Azure Fabric, BigQuery) must test and migrate affected pipelines. Snowflake Coding ...</description>
-      <content:encoded><![CDATA[<h1>Data Engineering 2026-10-26</h1>
-<p><a href="https://dboeter.github.io/daily-diff/#2026-10-26">⬛ Overview</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-26/ai-agents">🟪 AI Agents</a> · <a href="https://dboeter.github.io/daily-diff/#2026-10-26/ai-models">🟦 AI Models &amp; Labs</a> · <strong>🟨 Data Engineering</strong> · <a href="https://dboeter.github.io/daily-diff/#2026-10-26/ai-trends">🟫 Trends</a></p>
-<blockquote>
-<p>Generated: 2026-10-26 04:31 UTC | Vendor items: 2 | Projects: 17 | Active today: 1 | Stable releases: 1 | Prereleases (not covered): 0</p>
-</blockquote>
-<hr>
-<h2>Highlights</h2>
-<ul>
-<li>− Polars py-2.1.0 disallows mixed string and numeric arithmetic in eager mode; data engineers using Polars in any client environment (Databricks, Snowflake, Azure Fabric, BigQuery) must test and migrate affected pipelines.</li>
-<li>Snowflake Coding agent MCP tool (GA 2026-10-23) enables MCP servers to expose a coding agent without a stored agent object; Snowflake clients using MCP for AI-assisted development should evaluate integration.</li>
-<li>Snowflake Custom error messages for feature policy rules (GA 2026-10-26) allows custom error messages when statements are blocked; Snowflake administrators with feature policies should update rules to include user-friendly messages.</li>
-</ul>
-<hr>
-<h2>Databricks</h2>
-<p><strong>Quiet today:</strong> <a href="https://github.com/delta-io/delta">Delta Lake</a>, <a href="https://github.com/unitycatalog/unitycatalog">Unity Catalog</a>, <a href="https://github.com/mlflow/mlflow">MLflow</a>, <a href="https://github.com/databricks/cli">Databricks CLI</a>, <a href="https://github.com/databricks/dbt-databricks">dbt-databricks</a></p>
-<hr>
-<h2>Snowflake</h2>
-<table>
-<thead>
-<tr>
-<th align="left">Date</th>
-<th align="left">Source</th>
-<th align="left">Item</th>
-<th align="left">Summary</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left">2026-10-23</td>
-<td align="left">Snowflake</td>
-<td align="left">🤖 <a href="https://docs.snowflake.com/en/release-notes/2026/other/2026-10-23-mcp-coding-agent">October 23, 2026: Coding agent MCP tool</a></td>
-<td align="left">Enables Snowflake-managed MCP servers to expose a coding agent without a stored agent object by adding a CODINGAGENT tool type to the MCP server specification, which holds agent configuration and sends the user message on each call.</td>
-</tr>
-<tr>
-<td align="left">2026-10-26</td>
-<td align="left">Snowflake</td>
-<td align="left"><a href="https://docs.snowflake.com/en/release-notes/2026/other/2026-10-26-feature-policy-rule-error-messages">Oct 26, 2026: Custom error messages for feature policy rules</a></td>
-<td align="left">Allows feature policy rules to include a custom error message that is returned to users when a statement is blocked, explaining why and what is allowed instead.</td>
-</tr>
-</tbody></table>
-<p><strong>Quiet today:</strong> <a href="https://github.com/snowflakedb/snowpark-python">Snowpark Python</a>, <a href="https://github.com/snowflakedb/snowflake-connector-python">Snowflake Connector for Python</a>, <a href="https://github.com/apache/polaris">Apache Polaris</a></p>
-<hr>
-<h2>Open-source stack</h2>
-<h3>Polars</h3>
-<ul>
-<li><strong>Release</strong>: <a href="https://github.com/pola-rs/polars/releases/tag/py-2.1.0">py-2.1.0</a> introduces a breaking change disallowing mixed string and numeric arithmetic in eager mode, plus performance improvements including better memory management during sort spills, file readers that wait for spills under memory pressure, and simplified boolean expression optimization.</li>
-</ul>
-<p><strong>Quiet today:</strong> <a href="https://github.com/dbt-labs/dbt">dbt Core</a>, <a href="https://github.com/SQLMesh/sqlmesh">SQLMesh</a>, <a href="https://github.com/apache/airflow">Apache Airflow</a>, <a href="https://github.com/dagster-io/dagster">Dagster</a>, <a href="https://github.com/dlt-hub/dlt">dlt</a>, <a href="https://github.com/apache/iceberg">Apache Iceberg</a>, <a href="https://github.com/duckdb/duckdb">DuckDB</a>, <a href="https://github.com/trinodb/trino">Trino</a></p>
 <hr>
 <p><em>This digest is auto-generated by <a href="https://github.com/dboeter/daily-diff">Daily Diff</a>.</em></p>
 ]]></content:encoded>
