@@ -42,7 +42,10 @@
     "google/gemini-4-neon:batch": "2026-11-19",
     "mistralai/pixtral-large-2502": "2026-11-20",
     "thinkingmachines/inkling-2-mini": "2026-11-21",
-    "radixark/daisyrose-27b": "2026-11-21"
+    "radixark/daisyrose-27b": "2026-11-21",
+    "upstage/solar-mini-4-5": "2026-11-25",
+    "upstage/solar-pro-4-contributor": "2026-11-25",
+    "xiaomi/mimo-v2.6-flash-mopd": "2026-11-25"
   },
   "stages": {}
 }

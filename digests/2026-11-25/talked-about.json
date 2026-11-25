@@ -1,0 +1,57 @@
+[
+  {
+    "id": "hn:50627340",
+    "source": "hn",
+    "title": "LLM agents work for their parent companies, not for you",
+    "url": "https://michaelharley.net/posts/2026/11/01/llm-agents-work-for-their-parent-companies-not-for-you/",
+    "discussionUrl": "https://news.ycombinator.com/item?id=50627340",
+    "points": 964,
+    "comments": 399,
+    "topic": "agents",
+    "counts": "964 points, 399 comments"
+  },
+  {
+    "id": "hn:50630309",
+    "source": "hn",
+    "title": "Tidal bans AI-generated music",
+    "url": "https://variety.com/2026/music/news/tidal-bans-ai-generated-music-1236956924/",
+    "discussionUrl": "https://news.ycombinator.com/item?id=50630309",
+    "points": 324,
+    "comments": 312,
+    "topic": "other",
+    "counts": "324 points, 312 comments"
+  },
+  {
+    "id": "hn:50631210",
+    "source": "hn",
+    "title": "Anthropic Staff Openly Talk About ‘Taking Over the World’, Claims Max Tegmark",
+    "url": "https://novaramedia.com/2026/11/24/anthropic-staff-openly-talk-about-taking-over-the-world-claims-top-mit-physicist/",
+    "discussionUrl": "https://news.ycombinator.com/item?id=50631210",
+    "points": 214,
+    "comments": 114,
+    "topic": "models",
+    "counts": "214 points, 114 comments"
+  },
+  {
+    "id": "lobsters:vciex6",
+    "source": "lobsters",
+    "title": "9/UX: a Macintosh-inspired desktop for 9front",
+    "url": "https://progrium.github.io/9ux/",
+    "discussionUrl": "https://lobste.rs/s/vciex6/9_ux_macintosh_inspired_desktop_for",
+    "points": 12,
+    "comments": 3,
+    "topic": "other",
+    "counts": "12 points, 3 comments"
+  },
+  {
+    "id": "devto:5103474",
+    "source": "devto",
+    "title": "Why Your AI Release Notes Hallucinate: The \"Why vs What\" Problem in Git History",
+    "url": "https://dev.to/necoz/why-your-ai-release-notes-hallucinate-the-why-vs-what-problem-in-git-history-5ch0",
+    "discussionUrl": "https://dev.to/necoz/why-your-ai-release-notes-hallucinate-the-why-vs-what-problem-in-git-history-5ch0",
+    "points": 42,
+    "comments": 14,
+    "topic": "other",
+    "counts": "42 reactions, 14 comments"
+  }
+]

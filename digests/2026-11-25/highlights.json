@@ -1,0 +1,17 @@
+{
+  "ai-agents": [
+    "Claude Code v2.1.332 fixes a regression where claude auth login falsely reported \"Login successful\" on failure; it now exits with code 1 and states what to check.",
+    "OpenShell v0.1.10 changes the Kubernetes Helm default: gateway-mediated sandbox service routing is disabled unless gatewayConfig.\"openshell.gateway\".enable_gateway_service_routing: true is set."
+  ],
+  "ai-models": [
+    "Xiaomi lists MiMo-V2.6-Flash-MOPD on OpenRouter, a mixture-of-experts model with 309B total and 15B active parameters, a 1M-token context window, and native multimodal input.",
+    "Upstage's Solar Pro 4 Contributor on OpenRouter is the Solar Pro 4 model at a lower rate, with the condition that Upstage may use interaction data to improve its models."
+  ],
+  "ai-policy": [
+    "New York has enacted bill S 9408, which prohibits chatbot toys."
+  ],
+  "ai-data": [
+    "Snowflake Terraform users managing preview snowflake_table, snowflake_tables data source, or snowflake_failover_group resources face breaking changes in provider v2.24.0; a migration guide covers the required updates.",
+    "OpenMetadata users get a major release (2.1.0) adding data quality failure thresholds, dimension-based test grouping, grouped incident management, workflow conditions on data product assets and column changes, service-level tag inheritance, impersonation policy conditions, entity lifecycle stages, domain styling, and glossary settings."
+  ]
+}
