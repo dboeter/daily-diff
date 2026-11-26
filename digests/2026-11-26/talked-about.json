@@ -1,0 +1,57 @@
+[
+  {
+    "id": "hn:50644909",
+    "source": "hn",
+    "title": "New York bans AI toys, including those using internet to talk to children",
+    "url": "https://www.theguardian.com/us-news/2026/nov/25/new-york-bans-ai-toys",
+    "discussionUrl": "https://news.ycombinator.com/item?id=50644909",
+    "points": 53,
+    "comments": 11,
+    "topic": "policy",
+    "counts": "53 points, 11 comments"
+  },
+  {
+    "id": "hn:50643065",
+    "source": "hn",
+    "title": "Rumors swirling that labs might have cracked Factoring in P",
+    "url": "https://www.reddit.com/r/singularity/comments/1y59ef1/rumor_that_openai_or_anthropic_found_a_way_to/",
+    "discussionUrl": "https://news.ycombinator.com/item?id=50643065",
+    "points": 486,
+    "comments": 356,
+    "topic": "research",
+    "counts": "486 points, 356 comments"
+  },
+  {
+    "id": "hn:50648050",
+    "source": "hn",
+    "title": "Much shorter version of GRH Lean verification from Anthropic",
+    "url": "https://github.com/lsernau/grh-lean",
+    "discussionUrl": "https://news.ycombinator.com/item?id=50648050",
+    "points": 426,
+    "comments": 217,
+    "topic": "other",
+    "counts": "426 points, 217 comments"
+  },
+  {
+    "id": "hn:50647673",
+    "source": "hn",
+    "title": "The New York Times warns photographers not to update Photoshop over AI features",
+    "url": "https://www.theverge.com/ai-artificial-intelligence/1041227/the-new-york-times-warns-photographers-not-to-update-photoshop-over-ai-features",
+    "discussionUrl": "https://news.ycombinator.com/item?id=50647673",
+    "points": 337,
+    "comments": 288,
+    "topic": "other",
+    "counts": "337 points, 288 comments"
+  },
+  {
+    "id": "devto:5112821",
+    "source": "devto",
+    "title": "Lazy Senior Dev Mode Made My App Smaller. Was It Better?",
+    "url": "https://dev.to/necoz/lazy-senior-dev-mode-made-my-app-smaller-was-it-better-90i",
+    "discussionUrl": "https://dev.to/necoz/lazy-senior-dev-mode-made-my-app-smaller-was-it-better-90i",
+    "points": 68,
+    "comments": 13,
+    "topic": "agents",
+    "counts": "68 reactions, 13 comments"
+  }
+]

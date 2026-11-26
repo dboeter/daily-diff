@@ -1,0 +1,16 @@
+{
+  "ai-agents": [
+    "− Pi v1.6.1 removes SettingsManager.getShowCacheMissNotices() and setShowCacheMissNotices(), replacing the single showCacheMissNotices setting with per-notice settings.",
+    "− Oh My Pi v19.2.0–v19.2.1 removes ctx.ui.setEditorComponent and getEditorComponent in favor of the ctx.ui.composer hooks."
+  ],
+  "ai-models": [
+    "OpenAI says it corrected a launch billing error, so most users' GPT-6.2 Astra work now uses more plan allowance and hits limits 40% faster, while Sol hits limits 25% faster than last week."
+  ],
+  "ai-policy": [
+    "A motion by Dassen on conditions for stimulating physical AI appears in the Tweede Kamer. The Tweede Kamer item is a motion."
+  ],
+  "ai-data": [
+    "− BigQuery users of the Storage API v1beta1 face its shutdown on August 31, 2027, after which calls fail with a NOT_FOUND error; the note says to migrate to the v1 API and update connectors and client libraries to versions defaulting to v1 by then.",
+    "− Holders of legacy OpenSharing open recipient tokens issued before February 25, 2026 (expiring after February 25, 2027 or with no expiration) now auto-expire on February 25, 2027; Databricks recommends rotating them before then."
+  ]
+}

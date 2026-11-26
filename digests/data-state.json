@@ -72,9 +72,6 @@
     "581140": "2026-11-18",
     "581170": "2026-11-18",
     "581180": "2026-11-18",
-    "october 23, 2026: coding agent mcp tool|2026-10-23": "2026-10-26",
-    "oct 26, 2026: custom error messages for feature policy rules|2026-10-26": "2026-10-26",
-    "release:pola-rs/polars@py-2.1.0": "2026-10-26",
     "improved lakeflow performance observability will soon be available by default for workspaces with the compliance security profile enabled|2026-10-26": "2026-10-27",
     "improved lakeflow performance observability is now generally available|2026-10-26": "2026-10-27",
     "quickbooks connector is available in beta|2026-10-26": "2026-10-27",
@@ -557,7 +554,21 @@
     "release:open-metadata/OpenMetadata@2.1.0-release": "2026-11-25",
     "post:medium.com/snowflake/evaluating-ai-systems-in-production-on-snowflake-6fdac4f33988": "2026-11-25",
     "post:pola.rs/posts/polars-2-2": "2026-11-25",
-    "post:dlthub.com/blog/dlthub-pay-as-you-go": "2026-11-25"
+    "post:dlthub.com/blog/dlthub-pay-as-you-go": "2026-11-25",
+    "latest automatic expiration date for legacy opensharing open recipient tokens moved to february 25, 2027|2026-11-24": "2026-11-26",
+    "artifact registry is now generally available|2026-11-23": "2026-11-26",
+    "recipient-specific urls for opensharing open recipients|2026-11-24": "2026-11-26",
+    "directory-based access for opensharing secureconnect (public preview)|2026-11-24": "2026-11-26",
+    "nov 25, 2026: snowflake native apps support for fedramp on azure for apps with containers (general availability)|2026-11-25": "2026-11-26",
+    "the bigquery storage api v1beta1 is deprecated and will be shut down on august 31, 2027|2026-11-25": "2026-11-26",
+    "version 1.1 of the tabfm model is now available as the default model for the ai.predict and ai.evaluate functions (preview)|2026-11-23": "2026-11-26",
+    "the following table-valued functions are now generally available (ga) in the query editor and as part of conversational analytics to help you analyze your data (ga)|2026-11-24": "2026-11-26",
+    "you can use cross-cloud connections to query data in aws, azure, and salesforce data 360 from all bigquery regions with more feature availability than standard connections that use bigquery omni (ga)|2026-11-25": "2026-11-26",
+    "release:sodadata/soda-core@v4.32.0": "2026-11-26",
+    "post:medium.com/snowflake/lessons-from-getting-an-spcs-native-app-onto-the-snowflake-marketplace-6b1d1426d70c": "2026-11-26",
+    "post:medium.com/snowflake/from-scanned-homeowner-tax-records-to-a-governed-ai-agent-entirely-in-sql-8aa4b8fee8f0": "2026-11-26",
+    "post:duckdb.org/2026/11/25/star-trek-queries-duckdb.html": "2026-11-26",
+    "post:dlthub.com/blog/dlthub-on-snowpark-container-services": "2026-11-26"
   },
   "stages": {
     "snowflake-bcr:2026_08": "2026-10-16 Introduced in the 10.37 release (October 8-16, 2026) as Disabled by Default; account admins can enable for testing."
@@ -611,6 +622,20 @@
       "link": "https://learn.microsoft.com/azure/databricks/release-notes/product/2026/november#gpt-5-nano-will-be-retired-on-december-11-2026",
       "source": "Azure Databricks",
       "summary": "Migrate to GPT-6 Luna (the recommended replacement) before December 11, 2026: GPT-5 nano is retired on that date and API calls to it are not redirected afterward."
+    },
+    "https://learn.microsoft.com/azure/databricks/release-notes/product/2026/november#latest-automatic-expiration-date-for-legacy-opensharing-open-recipient-tokens-moved-to-february-25-2027": {
+      "date": "2027-02-25",
+      "title": "Latest automatic expiration date for legacy OpenSharing open recipient tokens moved to February 25, 2027",
+      "link": "https://learn.microsoft.com/azure/databricks/release-notes/product/2026/november#latest-automatic-expiration-date-for-legacy-opensharing-open-recipient-tokens-moved-to-february-25-2027",
+      "source": "Azure Databricks",
+      "summary": "Recommended: rotate these tokens before February 25, 2027: OpenSharing open recipient tokens issued before February 25, 2026, with expiration dates after February 25, 2027, or with no expiration now auto-expire on February 25, 2027 (previously December 8, 2026), and rotated tokens use the new recipient-specific URL format."
+    },
+    "November_25_2026#Deprecated: The BigQuery Storage API v1beta1 is deprecated and will be shut down on August 31, 2027.": {
+      "date": "2027-08-31",
+      "title": "The BigQuery Storage API v1beta1 is deprecated and will be shut down on August 31, 2027",
+      "link": "https://docs.cloud.google.com/bigquery/docs/release-notes#November_25_2026",
+      "source": "BigQuery",
+      "summary": "Migrate workloads from `v1beta1` to `v1` by August 31, 2027: after that date calls to the `v1beta1` endpoint fail with a `NOT_FOUND` error, so update connectors and client libraries to versions that default to the `v1` API."
     }
   }
 }

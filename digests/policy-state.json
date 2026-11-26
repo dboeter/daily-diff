@@ -62,7 +62,8 @@
     "000001a1-fafa-d4f2-aded-fafb338a0000": "2026-11-22",
     "https://www.politico.eu/?post_type=pro&p=9367200": "2026-11-22",
     "17728 at https://digital-strategy.ec.europa.eu": "2026-11-23",
-    "openstates:ocd-bill/381803b6-432a-4a22-a01a-bcdf8414f485": "2026-11-25"
+    "openstates:ocd-bill/381803b6-432a-4a22-a01a-bcdf8414f485": "2026-11-25",
+    "tk:2026Z26262": "2026-11-26"
   },
   "stages": {
     "celex:32026D2274": "2026-10-12 Decision adopted",
@@ -86,6 +87,7 @@
     }
   },
   "zeroSince": {
-    "Have your say": "2026-11-12"
+    "Have your say": "2026-11-12",
+    "Open States": "2026-11-26"
   }
 }
