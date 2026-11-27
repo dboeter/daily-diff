@@ -24,7 +24,7 @@ export interface Story {
   discussionUrl: string; // HN item page, Lobste.rs comments, the Dev.to article
   points: number; // HN points, Lobste.rs score, Dev.to positive reactions
   comments: number;
-  description?: string; // HN page description, Lobste.rs text or page description, Dev.to description
+  description?: string; // HN page description or text post's text, Lobste.rs text or page description, Dev.to description
   published: string; // ISO
   /** Present only when Jev flagged it as a security event (`judgeSecurityStories`); confirmed: the claim is backed. */
   security?: { confirmed: boolean };

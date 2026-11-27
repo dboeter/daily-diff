@@ -175,4 +175,23 @@ describe("fetchHnData descriptions", () => {
     const { stories } = await fetchHnData();
     expect(stories.map((s) => s.description)).toEqual(["Sparse features generalize.", undefined]);
   });
+
+  // 2026-11-25: "Ask HN: Anthropic is accusing my company of distilling" (258 points) showed "—",
+  // though its post says what happened, as Lobste.rs's submitter text does.
+  it("gives a text post its own text, as plain text", async () => {
+    vi.spyOn(globalThis, "fetch").mockImplementation(async (input) => {
+      const url = String(input);
+      if (url.endsWith("/topstories.json")) return jsonResponse([3]);
+      return jsonResponse({
+        id: 3,
+        type: "story",
+        title: "Ask HN: Anthropic is accusing my company of distilling AI",
+        score: 258,
+        text: "Basically the title.<p>We do not train our own models &amp; never did.",
+      });
+    });
+
+    const { stories } = await fetchHnData();
+    expect(stories[0]!.description).toBe("Basically the title. We do not train our own models & never did.");
+  });
 });
