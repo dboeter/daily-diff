@@ -516,8 +516,9 @@ async function main(): Promise<void> {
       .map((p) => p.url),
   );
   const unmatched = pool.spotted;
-  // The models page and the candidates read what the summaries call sees.
-  const shownLabs = labPostsWithStoryText(labsResults, pool.lab);
+  // The models page and the candidates read what the summaries call sees. Every story, not only
+  // the fresh ones: the link may have been on HN the day before the sitemap listed it.
+  const shownLabs = labPostsWithStoryText(labsResults, [...stories, ...carried]);
   const spottedVerdicts = loadSpottedVerdicts();
   const routing = await routeStories(unmatched, {
     apiKey: process.env["TYPESAFE_API_KEY"],

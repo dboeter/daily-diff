@@ -255,7 +255,7 @@ export async function fetchHnData(isShown: (story: HnStory) => boolean = () => f
     const described = await Promise.all(stories.map(withDescription));
     console.log(
       `  [hn] ${stories.length} AI and data stories, ${unshown} not shown before (scanned ${topIds.length} topstories), ` +
-        `${described.filter((s) => s.description).length} with a page description`,
+        `${described.filter((s) => s.description).length} with a description`,
     );
     return { stories: described, fetchSuccess: stories.length > 0 };
   } catch (err) {

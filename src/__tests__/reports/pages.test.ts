@@ -675,9 +675,9 @@ describe("labPostsWithStoryText", () => {
     content,
     site: "openai",
   });
-  const story = (url: string, description?: string): Story => ({
-    id: `hn:${url.length}`,
-    source: "hn",
+  const story = (url: string, description?: string, source: Story["source"] = "hn"): Story => ({
+    id: `${source}:${url.length}`,
+    source,
     title: "Perplexity and intelligence",
     url,
     discussionUrl: "https://news.ycombinator.com/item?id=1",
@@ -713,6 +713,14 @@ describe("labPostsWithStoryText", () => {
       ],
     );
     expect(result!.newItems.map((p) => p.content)).toEqual(["The post's own text.", ""]);
+  });
+
+  it("takes no Lobste.rs description, which opens with the submitter's words", () => {
+    const url = "https://openai.com/index/b/";
+    const [result] = labPostsWithStoryText(labs([post(url, "")]), [
+      story(url, "Feels like a rebrand, pricing unclear.", "lobsters"),
+    ]);
+    expect(result!.newItems[0]!.content).toBe("");
   });
 });
 

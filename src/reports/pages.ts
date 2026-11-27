@@ -582,13 +582,15 @@ export function labPosts(labs: LabsFetchResult[]): LabPost[] {
 
 /**
  * The labs' new posts, a post without page text (OpenAI's pages answer 403 on CI) given the
- * description of a community story with its link, the first that has one: the linked page's own
- * meta description, or a Lobste.rs submitter's text. A post with page text keeps it.
+ * description of a Hacker News story with its link: the linked page's own meta description. Not a
+ * Lobste.rs story's, which opens with the submitter's words, and the summaries prompt reads it as
+ * the lab's page text. A post with page text keeps it.
  */
 export function labPostsWithStoryText(labs: LabsFetchResult[], stories: Story[]): LabsFetchResult[] {
   const described = new Map<string, string>();
   for (const s of stories) {
-    if (s.description && !described.has(linkKey(s.url))) described.set(linkKey(s.url), s.description);
+    if (s.source === "hn" && s.description && !described.has(linkKey(s.url)))
+      described.set(linkKey(s.url), s.description);
   }
   return labs.map((r) => ({
     ...r,
@@ -606,7 +608,8 @@ export function labPostsWithStoryText(labs: LabsFetchResult[], stories: Story[])
  * Two LLM calls: the posts' and models' row summaries, then Highlights over the
  * rendered sections. A failed summaries call shows the descriptions, a failed
  * Highlights call the failure notice. A post without page text (after
- * `labPostsWithStoryText`) shows "—" and makes no Highlight (`dropNoHighlightRows`). Null when there is no new post, new
+ * `labPostsWithStoryText`) shows "—" and makes no Highlight
+ * (`dropNoHighlightRows`). Null when there is no new post, new
  * model, 🆕 stealth model or Spotted row. The labs state is saved either way, the
  * models state only once the page is built.
  */
