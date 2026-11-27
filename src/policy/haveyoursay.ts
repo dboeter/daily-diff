@@ -116,17 +116,28 @@ export function parseInitiatives(json: unknown, now: Date, aiTitleOnly = false):
   return items;
 }
 
-/** Both searches; one failing is logged and skipped, both failing throws. */
+/**
+ * Both searches; one failing is logged and skipped, both failing throws. Every
+ * initiative with a status the parser reads counts as listed: most days none is
+ * AI and recent, and that is a quiet portal, not a broken source (`nextZeroSince`).
+ * One the parser cannot read is not counted, so a changed API still reads as quiet.
+ */
 export async function fetchHaveYourSay(ctx: PolicySourceContext): Promise<PolicyItem[]> {
   const byId = new Map<string, PolicyItem>();
+  const listedIds = new Set<number>();
   let lastError: unknown = null;
   let answered = 0;
   for (const search of SEARCHES) {
     try {
       const res = await fetchOk(`${SEARCH_URL}?language=EN&size=100&${search.params}`);
-      for (const item of parseInitiatives(await res.json(), ctx.now, search.aiTitleOnly)) {
+      const json: unknown = await res.json();
+      for (const item of parseInitiatives(json, ctx.now, search.aiTitleOnly)) {
         byId.set(item.id, item);
       }
+      // parseInitiatives has checked the shape.
+      for (const i of (json as { initiativeResultDtoPage: { content: Initiative[] } }).initiativeResultDtoPage
+        .content)
+        if (currentStatus(i.currentStatuses ?? [])) listedIds.add(i.id);
       answered++;
     } catch (err) {
       console.error(`  [policy] Have your say (${search.params}) failed: ${err}`);
@@ -134,5 +145,6 @@ export async function fetchHaveYourSay(ctx: PolicySourceContext): Promise<Policy
     }
   }
   if (answered === 0) throw lastError;
+  ctx.listed?.(listedIds.size);
   return [...byId.values()];
 }
