@@ -132,7 +132,7 @@ import type { CommunityFeed } from "../core/config.ts";
 import { saveItemsFile, type AskJev } from "../core/jev.ts";
 import { commitWrites, planWrites } from "../core/new-items.ts";
 import type { DataSectionKey } from "../core/config.ts";
-import { linkKey, type SpottedSection, type StoryRow } from "../spotted/pool.ts";
+import { linkKey, type SpottedSection, type Story, type StoryRow } from "../spotted/pool.ts";
 
 /** A finished report: main() writes its file and opens its issue (title and label from REPORTS). */
 export interface SavedReport {
@@ -581,14 +581,35 @@ export function labPosts(labs: LabsFetchResult[]): LabPost[] {
 }
 
 /**
+ * The labs' new posts, a post without page text (OpenAI's pages answer 403 on CI) given the
+ * description of a Hacker News story with its link: the linked page's own meta description. Not a
+ * Lobste.rs story's, which opens with the submitter's words, and the summaries prompt reads it as
+ * the lab's page text. A post with page text keeps it.
+ */
+export function labPostsWithStoryText(labs: LabsFetchResult[], stories: Story[]): LabsFetchResult[] {
+  const described = new Map<string, string>();
+  for (const s of stories) {
+    if (s.source === "hn" && s.description && !described.has(linkKey(s.url)))
+      described.set(linkKey(s.url), s.description);
+  }
+  return labs.map((r) => ({
+    ...r,
+    newItems: r.newItems.map((p) =>
+      p.content.trim() ? p : { ...p, content: described.get(linkKey(p.url)) ?? p.content },
+    ),
+  }));
+}
+
+/**
  * The models page: Highlights, Lab announcements (the sitemaps' new posts,
  * newest first, at most LAB_POSTS_MAX; a lab on its first crawl gets one line
  * with its count instead), New on OpenRouter (models listed in the last 2 days
  * that no earlier page listed), the stealth table (always shown) and Spotted.
  * Two LLM calls: the posts' and models' row summaries, then Highlights over the
  * rendered sections. A failed summaries call shows the descriptions, a failed
- * Highlights call the failure notice. A post without page text shows "—" and
- * makes no Highlight (`dropNoHighlightRows`). Null when there is no new post, new
+ * Highlights call the failure notice. A post without page text (after
+ * `labPostsWithStoryText`) shows "—" and makes no Highlight
+ * (`dropNoHighlightRows`). Null when there is no new post, new
  * model, 🆕 stealth model or Spotted row. The labs state is saved either way, the
  * models state only once the page is built.
  */

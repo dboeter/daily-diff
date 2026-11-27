@@ -69,6 +69,7 @@ import {
   buildAgentsReport,
   hasDataNews,
   labPosts,
+  labPostsWithStoryText,
   LAB_POSTS_MAX,
   MODELS_STATE_FILE,
   type SavedReport,
@@ -515,6 +516,9 @@ async function main(): Promise<void> {
       .map((p) => p.url),
   );
   const unmatched = pool.spotted;
+  // The models page and the candidates read what the summaries call sees. Every story, not only
+  // the fresh ones: the link may have been on HN the day before the sitemap listed it.
+  const shownLabs = labPostsWithStoryText(labsResults, [...stories, ...carried]);
   const spottedVerdicts = loadSpottedVerdicts();
   const routing = await routeStories(unmatched, {
     apiKey: process.env["TYPESAFE_API_KEY"],
@@ -612,7 +616,7 @@ async function main(): Promise<void> {
       dateStr,
     ),
     buildModelsPage(
-      labsResults,
+      shownLabs,
       labsState,
       modelCatalog,
       { rows: spottedOf("models"), summaries: spottedSummaryMap },
@@ -781,7 +785,7 @@ async function main(): Promise<void> {
     data: dataFetches.flat(),
     // Yesterday's stories the cap alone cut are in today's Spotted pool too.
     stories: [...stories, ...carried],
-    labs: labsResults,
+    labs: shownLabs,
     catalog: modelCatalog,
     // Read after buildModelsPage saved it, so today's rows count as new.
     modelsState: loadReportedState(MODELS_STATE_FILE),

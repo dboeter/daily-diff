@@ -12,6 +12,7 @@ import {
   hasDataNews,
   type TrendsInput,
   LAB_POSTS_MAX,
+  labPostsWithStoryText,
   type DataSection,
   type CommunityInput,
 } from "../../reports/pages.ts";
@@ -29,7 +30,7 @@ import type { AskJev } from "../../core/jev.ts";
 import { selectVendorItems } from "../../data/relevance.ts";
 import { type DataState, fetchVendorData } from "../../data/vendors.ts";
 import { numberRows } from "../../reports/summarized-table.ts";
-import type { SpottedRow } from "../../spotted/pool.ts";
+import type { SpottedRow, Story } from "../../spotted/pool.ts";
 import { selectSkillsItems } from "../../trending/skills.ts";
 
 const NO_SPOTTED = { rows: [], summaries: new Map<number, string>() };
@@ -661,6 +662,65 @@ describe("buildAgentsReport", () => {
     expect(prompt).not.toContain('"Codex"');
     expect(report.content).not.toContain("- Goldman Sachs is pulling");
     expect(report.content).toContain("- Codex shipped v1.");
+  });
+});
+
+// 2026-11-23 and 11-25: OpenAI's posts (403 on CI) showed "—" while their Hacker News copy had
+// the page's own description ("How perplexity measures progress in AI models…").
+describe("labPostsWithStoryText", () => {
+  const post = (url: string, content: string): LabPost => ({
+    url,
+    title: "Perplexity And Intelligence",
+    lastmod: "2026-11-22",
+    content,
+    site: "openai",
+  });
+  const story = (url: string, description?: string, source: Story["source"] = "hn"): Story => ({
+    id: `${source}:${url.length}`,
+    source,
+    title: "Perplexity and intelligence",
+    url,
+    discussionUrl: "https://news.ycombinator.com/item?id=1",
+    points: 40,
+    comments: 10,
+    published: "2026-11-22T18:00:00Z",
+    ...(description ? { description } : {}),
+  });
+  const labs = (items: LabPost[]): LabsFetchResult[] => [
+    { site: "openai", isFirstRun: false, newItems: items, totalDiscovered: 900, fetchSuccess: true },
+  ];
+
+  it("gives a post without page text the description of a story with the same link", () => {
+    const [result] = labPostsWithStoryText(
+      labs([post("https://openai.com/index/perplexity-and-intelligence/", "")]),
+      [
+        story("https://openai.com/index/perplexity-and-intelligence"),
+        story("https://openai.com/index/perplexity-and-intelligence", "How perplexity measures progress."),
+      ],
+    );
+    expect(result!.newItems[0]!.content).toBe("How perplexity measures progress.");
+  });
+
+  it("keeps a post's own page text, and leaves a post with no described story empty", () => {
+    const [result] = labPostsWithStoryText(
+      labs([
+        post("https://openai.com/index/a/", "The post's own text."),
+        post("https://openai.com/index/b/", ""),
+      ]),
+      [
+        story("https://openai.com/index/a/", "A story's text."),
+        story("https://openai.com/index/c/", "Other."),
+      ],
+    );
+    expect(result!.newItems.map((p) => p.content)).toEqual(["The post's own text.", ""]);
+  });
+
+  it("takes no Lobste.rs description, which opens with the submitter's words", () => {
+    const url = "https://openai.com/index/b/";
+    const [result] = labPostsWithStoryText(labs([post(url, "")]), [
+      story(url, "Feels like a rebrand, pricing unclear.", "lobsters"),
+    ]);
+    expect(result!.newItems[0]!.content).toBe("");
   });
 });
 

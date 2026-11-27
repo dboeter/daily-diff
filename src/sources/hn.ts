@@ -17,7 +17,7 @@ export interface HnStory {
   points: number;
   comments: number;
   createdAt: string;
-  /** The linked page's og:description or meta description; absent for a text post or a failed fetch. */
+  /** The linked page's og:description or meta description, or a text post's own text; absent when neither. */
   description?: string;
 }
 
@@ -50,6 +50,8 @@ interface HnFirebaseItem {
   time?: number;
   title?: string;
   url?: string;
+  /** A text post's body (Ask HN), as HTML. */
+  text?: string;
   score?: number;
   descendants?: number;
 }
@@ -116,6 +118,8 @@ function isAiOrDataRelated(item: HnFirebaseItem): boolean {
 function toHnStory(item: HnFirebaseItem): HnStory {
   const id = String(item.id);
   const hnUrl = `https://news.ycombinator.com/item?id=${id}`;
+  // A text post links no page: its own text is its description, as a Lobste.rs submitter's is.
+  const description = item.url ? "" : plainText(item.text ?? "");
 
   return {
     id,
@@ -125,6 +129,7 @@ function toHnStory(item: HnFirebaseItem): HnStory {
     points: item.score ?? 0,
     comments: item.descendants ?? 0,
     createdAt: item.time ? new Date(item.time * 1000).toISOString() : new Date(0).toISOString(),
+    ...(description ? { description } : {}),
   };
 }
 
@@ -250,7 +255,7 @@ export async function fetchHnData(isShown: (story: HnStory) => boolean = () => f
     const described = await Promise.all(stories.map(withDescription));
     console.log(
       `  [hn] ${stories.length} AI and data stories, ${unshown} not shown before (scanned ${topIds.length} topstories), ` +
-        `${described.filter((s) => s.description).length} with a page description`,
+        `${described.filter((s) => s.description).length} with a description`,
     );
     return { stories: described, fetchSuccess: stories.length > 0 };
   } catch (err) {
