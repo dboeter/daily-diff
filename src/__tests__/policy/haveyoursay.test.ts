@@ -119,18 +119,32 @@ describe("fetchHaveYourSay", () => {
     expect(items.map((i) => i.id).sort()).toEqual(["hys:14628", "hys:19292", "hys:19293"]);
   });
 
-  it("reports every initiative the searches returned as listed, so a day with none kept is not quiet", async () => {
+  it("reports the initiatives it could read as listed, so a day with none kept is not quiet", async () => {
     // 2026-11-27: both searches answered (20 and 39 initiatives), none AI and recent, and the
     // source warned "no item fetched since 2026-11-12; check whether the source is broken".
-    const old = {
-      initiativeResultDtoPage: {
-        content: [
-          { id: 1, shortTitle: "White Paper on Artificial Intelligence", currentStatuses: [] },
-          { id: 2, shortTitle: "Digital Fairness Act", currentStatuses: [] },
-        ],
+    const closed = (start: string) => [
+      {
+        frontEndStage: "ADOPTION_WORKFLOW",
+        receivingFeedbackStatus: "CLOSED",
+        feedbackStartDate: `${start} 10:00:00`,
+        feedbackEndDate: "2026/12/31 23:59:59",
       },
-    };
-    vi.spyOn(globalThis, "fetch").mockImplementation(async () => new Response(JSON.stringify(old)));
+    ];
+    const page = (content: object[]) => ({ initiativeResultDtoPage: { content } });
+    const first = page([
+      { id: 1, shortTitle: "White Paper on Artificial Intelligence", currentStatuses: closed("2020/02/20") },
+      { id: 2, shortTitle: "Liability rules for AI", currentStatuses: closed("2022/10/03") },
+    ]);
+    const second = page([
+      { id: 2, shortTitle: "Liability rules for AI", currentStatuses: closed("2022/10/03") },
+      { id: 3, shortTitle: "Digital Fairness Act", currentStatuses: closed("2026/01/05") },
+      // A stage the parser does not know: a changed API must still read as quiet.
+      { id: 4, shortTitle: "AI Act guidance", currentStatuses: [{ frontEndStage: "NEW_STAGE" }] },
+    ]);
+    let call = 0;
+    vi.spyOn(globalThis, "fetch").mockImplementation(
+      async () => new Response(JSON.stringify(++call === 1 ? first : second)),
+    );
     const listed = vi.fn();
     const items = await fetchHaveYourSay({
       config: {} as PolicyConfig,
@@ -140,8 +154,8 @@ describe("fetchHaveYourSay", () => {
       listed,
     });
     expect(items).toEqual([]);
-    // Both searches return the same two initiatives: counted once.
-    expect(listed).toHaveBeenCalledWith(2);
+    // 1, 2 and 3, the one both searches return counted once; 4 has no status the parser reads.
+    expect(listed).toHaveBeenCalledWith(3);
   });
 
   it("throws when both searches fail", async () => {

@@ -118,8 +118,9 @@ export function parseInitiatives(json: unknown, now: Date, aiTitleOnly = false):
 
 /**
  * Both searches; one failing is logged and skipped, both failing throws. Every
- * initiative they return counts as listed: most days none is AI and recent, and
- * that is a quiet portal, not a broken source (`nextZeroSince`).
+ * initiative with a status the parser reads counts as listed: most days none is
+ * AI and recent, and that is a quiet portal, not a broken source (`nextZeroSince`).
+ * One the parser cannot read is not counted, so a changed API still reads as quiet.
  */
 export async function fetchHaveYourSay(ctx: PolicySourceContext): Promise<PolicyItem[]> {
   const byId = new Map<string, PolicyItem>();
@@ -136,7 +137,7 @@ export async function fetchHaveYourSay(ctx: PolicySourceContext): Promise<Policy
       // parseInitiatives has checked the shape.
       for (const i of (json as { initiativeResultDtoPage: { content: Initiative[] } }).initiativeResultDtoPage
         .content)
-        listedIds.add(i.id);
+        if (currentStatus(i.currentStatuses ?? [])) listedIds.add(i.id);
       answered++;
     } catch (err) {
       console.error(`  [policy] Have your say (${search.params}) failed: ${err}`);
