@@ -119,6 +119,31 @@ describe("fetchHaveYourSay", () => {
     expect(items.map((i) => i.id).sort()).toEqual(["hys:14628", "hys:19292", "hys:19293"]);
   });
 
+  it("reports every initiative the searches returned as listed, so a day with none kept is not quiet", async () => {
+    // 2026-11-27: both searches answered (20 and 39 initiatives), none AI and recent, and the
+    // source warned "no item fetched since 2026-11-12; check whether the source is broken".
+    const old = {
+      initiativeResultDtoPage: {
+        content: [
+          { id: 1, shortTitle: "White Paper on Artificial Intelligence", currentStatuses: [] },
+          { id: 2, shortTitle: "Digital Fairness Act", currentStatuses: [] },
+        ],
+      },
+    };
+    vi.spyOn(globalThis, "fetch").mockImplementation(async () => new Response(JSON.stringify(old)));
+    const listed = vi.fn();
+    const items = await fetchHaveYourSay({
+      config: {} as PolicyConfig,
+      now: NOW,
+      dateStr: "2026-10-14",
+      state: null,
+      listed,
+    });
+    expect(items).toEqual([]);
+    // Both searches return the same two initiatives: counted once.
+    expect(listed).toHaveBeenCalledWith(2);
+  });
+
   it("throws when both searches fail", async () => {
     vi.spyOn(globalThis, "fetch").mockResolvedValue(new Response("", { status: 500 }));
     vi.spyOn(console, "error").mockImplementation(() => {});
