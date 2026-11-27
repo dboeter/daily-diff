@@ -1,0 +1,57 @@
+[
+  {
+    "id": "hn:50660180",
+    "source": "hn",
+    "title": "AI made self-hosting fun again",
+    "url": "https://janlukas.blog/posts/ai-self-hosting",
+    "discussionUrl": "https://news.ycombinator.com/item?id=50660180",
+    "points": 597,
+    "comments": 308,
+    "topic": "other",
+    "counts": "597 points, 308 comments"
+  },
+  {
+    "id": "hn:50657307",
+    "source": "hn",
+    "title": "Tracking Diseases Cured by AI",
+    "url": "https://diseasescuredbyai.com/",
+    "discussionUrl": "https://news.ycombinator.com/item?id=50657307",
+    "points": 309,
+    "comments": 189,
+    "topic": "other",
+    "counts": "309 points, 189 comments"
+  },
+  {
+    "id": "hn:50624446",
+    "source": "hn",
+    "title": "Porting Rockbox to an undocumented $9 Aliexpress 'YP3' MP3 Player with LLMs",
+    "url": "https://jayd.ml/2026/11/14/rockbox-on-yp3.html",
+    "discussionUrl": "https://news.ycombinator.com/item?id=50624446",
+    "points": 280,
+    "comments": 104,
+    "topic": "other",
+    "counts": "280 points, 104 comments"
+  },
+  {
+    "id": "lobsters:byfdgn",
+    "source": "lobsters",
+    "title": "The need for a formally verifiable mainstream programming language",
+    "url": "https://blainehansen.me/post/mainstream-verifiable-language/",
+    "discussionUrl": "https://lobste.rs/s/byfdgn/need_for_formally_verifiable_mainstream",
+    "points": 10,
+    "comments": 8,
+    "topic": "other",
+    "counts": "10 points, 8 comments"
+  },
+  {
+    "id": "devto:5120802",
+    "source": "devto",
+    "title": "I Built AI Test Automation. Today, I Went Back to Manual Testing.",
+    "url": "https://dev.to/thethirdcup/i-built-ai-test-automation-today-i-went-back-to-manual-testing-mlh",
+    "discussionUrl": "https://dev.to/thethirdcup/i-built-ai-test-automation-today-i-went-back-to-manual-testing-mlh",
+    "points": 92,
+    "comments": 86,
+    "topic": "other",
+    "counts": "92 reactions, 86 comments"
+  }
+]

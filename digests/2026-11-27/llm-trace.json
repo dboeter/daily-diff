@@ -1,0 +1,13 @@
+{
+"attempted": 7,
+"failed": 0,
+"calls": [
+{"label":"spotted-summaries","outcome":"ok","chars":1782},
+{"label":"agents","outcome":"ok","chars":1024},
+{"label":"models-summaries","outcome":"ok","chars":162},
+{"label":"models-highlights","outcome":"ok","chars":448},
+{"label":"agents-highlights","outcome":"ok","chars":655},
+{"label":"data-vendor-summaries","outcome":"ok","chars":1483},
+{"label":"data-highlights","outcome":"ok","chars":302}
+]
+}

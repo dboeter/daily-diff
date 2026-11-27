@@ -1,8 +1,5 @@
 {
   "reported": {
-    "tk:2026Z23028": "2026-10-27",
-    "https://www.binnenlandsbestuur.nl/digitaal/meer-ondersteuning-nodig-bij-invulling-algoritmeregister": "2026-10-27",
-    "https://cset.georgetown.edu/?p=25690": "2026-10-27",
     "https://digital-strategy.ec.europa.eu/news-redirect/961661": "2026-10-28",
     "openstates:ocd-bill/3c3597c7-6bf8-4c5d-9362-b146492ce0d7": "2026-10-29",
     "https://www.binnenlandsbestuur.nl/digitaal/handreiking-moet-gemeenten-helpen-met-ai-toepassingen": "2026-10-29",
@@ -87,7 +84,6 @@
     }
   },
   "zeroSince": {
-    "Have your say": "2026-11-12",
-    "Open States": "2026-11-26"
+    "Have your say": "2026-11-12"
   }
 }

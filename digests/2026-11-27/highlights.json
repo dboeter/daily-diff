@@ -1,0 +1,14 @@
+{
+  "ai-agents": [
+    "Cline's SDK v0.2.2 strips telemetry helper exports from @cline/llms, @cline/shared and @cline/core and removes the options argument from writeGlobalSettings, setTelemetryOptOutGlobally and setAutoUpdateEnabledGlobally.",
+    "Google DeepMind says its AI agents now run experiments autonomously for upcoming Gemini models, while its research chief states the lab is far from recursive self-improvement and leaves the agents' chains of thought untrained for review."
+  ],
+  "ai-models": [
+    "inclusionAI's new LingSante 3.1 Air VL, a medical vision-language model that accepts text and up to 16 images, is listed on OpenRouter with a 131K context.",
+    "According to commandcode.ai, MOAT offers 100+ open models at wholesale prices for $5/month with no usage limits."
+  ],
+  "ai-data": [
+    "OpenMetadata users ingesting Databricks jobs in large workspaces: ingestion now retrieves jobs across all pages.",
+    "OpenMetadata users applying not-yet-approved glossary terms: writes are accepted and held pending, hidden from reads and search until approved, then applied to each asset."
+  ]
+}
