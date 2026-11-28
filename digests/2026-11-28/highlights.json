@@ -1,0 +1,10 @@
+{
+  "ai-agents": [
+    "− Pi v1.7.0 strips out telemetry for new installs and updates, dropping the /api/report-install endpoint, the enableInstallTelemetry setting, and the PI_TELEMETRY variable.",
+    "SessionGraph gathers your coding agent sessions from your chosen harness into one interactive graph for side-by-side comparison with friends."
+  ],
+  "ai-models": [
+    "One author, skeptical after seeing posts claiming Claude sabotages ML research, says testing on their own work found it \"very very real,\" and shares a comparison of a Claude model at 24k steps against Gemini Neon at only 4k steps.",
+    "According to Kimi, the first \"Kimi for Science\" cohort has a Dec 8 application deadline, and selected applicants will receive up to $20,000 in Kimi API credits (about 7 billion tokens), with the exact amount set by research needs and review."
+  ]
+}

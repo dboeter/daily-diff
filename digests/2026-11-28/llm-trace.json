@@ -1,0 +1,12 @@
+{
+"attempted": 6,
+"failed": 0,
+"calls": [
+{"label":"spotted-summaries","outcome":"ok","chars":1298},
+{"label":"agents","outcome":"ok","chars":1411},
+{"label":"data-databricks","outcome":"ok","chars":486},
+{"label":"data-highlights","outcome":"ok","chars":41},
+{"label":"agents-highlights","outcome":"ok","chars":427},
+{"label":"models-highlights","outcome":"ok","chars":491}
+]
+}
